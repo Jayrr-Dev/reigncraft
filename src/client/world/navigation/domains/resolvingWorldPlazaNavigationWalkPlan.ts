@@ -17,6 +17,7 @@ export type ResolvingWorldPlazaNavigationWalkPlanParams = {
   readonly placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile;
   readonly isJumping?: boolean;
   readonly playerRadiusGrid?: number;
+  readonly maxNodeExpansions?: number;
 };
 
 export type ResolvingWorldPlazaNavigationWalkPlanResult = {
@@ -35,6 +36,7 @@ export function resolvingWorldPlazaNavigationWalkPlan({
   placedBlocksByTile,
   isJumping = false,
   playerRadiusGrid,
+  maxNodeExpansions,
 }: ResolvingWorldPlazaNavigationWalkPlanParams): ResolvingWorldPlazaNavigationWalkPlanResult {
   const directPathBlocked = checkingWorldPlazaNavigationDirectPathBlocked({
     from: start,
@@ -57,6 +59,7 @@ export function resolvingWorldPlazaNavigationWalkPlan({
     placedBlocks,
     placedBlocksByTile,
     playerRadiusGrid,
+    maxNodeExpansions,
   });
 
   if (plannedPath.status !== 'found' && plannedPath.status !== 'same_node') {

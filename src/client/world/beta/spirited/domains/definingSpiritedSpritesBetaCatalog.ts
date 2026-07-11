@@ -25,8 +25,20 @@ export const DEFINING_SPIRITED_SPRITES_BETA_FRAME_COUNT = 19;
 /** Directional idle/walk frames used for facing (no foot cycle). */
 export const DEFINING_SPIRITED_SPRITES_BETA_PREVIEW_FRAME_COUNT = 8;
 
-/** World display scale so tiny pack frames read in isometric space. */
-export const DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_SCALE = 1.125;
+/** World display scale so tiny pack frames read in isometric space.
+ * Keep this such that width/height round cleanly (avoids subpixel clip). */
+export const DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_SCALE = 1;
+
+/** Drawn sprite size in world px (integer to avoid nearest-neighbor edge clip). */
+export const DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_WIDTH_PX = Math.round(
+  DEFINING_SPIRITED_SPRITES_BETA_FRAME_WIDTH_PX *
+    DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_SCALE
+);
+
+export const DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_HEIGHT_PX = Math.round(
+  DEFINING_SPIRITED_SPRITES_BETA_FRAME_HEIGHT_PX *
+    DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_SCALE
+);
 
 /** Grid offset from the player when spawning a beta animal. */
 export const DEFINING_SPIRITED_SPRITES_BETA_SPAWN_OFFSET_GRID = 2.5;

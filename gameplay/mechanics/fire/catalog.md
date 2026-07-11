@@ -137,6 +137,17 @@ Fuel wood definitions (not flammability roll): `basic:floor:wood`, `functional:d
 | `DEFINING_WORLD_PLAZA_FIRE_GLOW_WARM_CORE_ALPHA`       | **0.62** |
 | `DEFINING_WORLD_PLAZA_FIRE_GLOW_MAX_VISIBLE_COUNT`     | **24**   |
 
+### Fire layer render tick (engine)
+
+Source: `renderingWorldPlazaFireLayer.tsx`.
+
+| Behavior       | Detail                                                                                                      |
+| -------------- | ----------------------------------------------------------------------------------------------------------- |
+| Visible cells  | Capped by `DEFINING_WORLD_PLAZA_FIRE_GLOW_MAX_VISIBLE_COUNT` via `filteringWorldPlazaFireLayerCells`        |
+| Visual pool    | `fireVisualPoolRef`: one pooled root per tile key; create on new cell, destroy when cell leaves visible set |
+| Active key set | `activeFireTileKeysRef`: cleared and refilled each `useTick` (avoids per-frame `Set` allocation)            |
+| Player impact  | **None** — same flames, glow, depth sort, and light sync as before                                          |
+
 ## Campfire ambience constants
 
 Source: `definingWorldPlazaCampfireAmbienceConstants.ts`.
@@ -230,12 +241,12 @@ Source: `usingWorldPlazaLavaAmbience.ts`.
 
 When ignite rules, range, or costs change, also check:
 
-| Surface                     | File / section                                                                         | This session                                                                                                                        |
-| --------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Controls / tutorial         | `definingPlazaTutorialConstants.ts`                                                    | **N/A** — no new inputs; scatter-only Firelands prop change                                                                         |
-| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS`       | **N/A** — ignite/spread/campfire rules unchanged                                                                                    |
-| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`, `definingPlazaBiomesGuideForagingConstants.ts` | **Updated** foraging: Firelands resources drop `stone`; vegetation drops `scorched_stumps` (matches no lava trees / volcanic rocks) |
-| Bestiary                    | —                                                                                      | **N/A**                                                                                                                             |
+| Surface                     | File / section                                                                         | This session                                                                                                 |
+| --------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Controls / tutorial         | `definingPlazaTutorialConstants.ts`                                                    | **N/A** — fire render tick now reuses a pooled active-tile `Set`; no new inputs or ignite/refuel rule change |
+| Mechanics Guide (World tab) | `definingPlazaMechanicsConstants.ts` → `DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS`       | **N/A** — ignite/spread/campfire rules unchanged                                                             |
+| Biomes Guide                | `definingPlazaBiomesGuideConstants.ts`, `definingPlazaBiomesGuideForagingConstants.ts` | **N/A** — no biome or foraging rule change this session                                                      |
+| Bestiary                    | —                                                                                      | **N/A**                                                                                                      |
 
 ## Player-facing toast copy (flint hook)
 

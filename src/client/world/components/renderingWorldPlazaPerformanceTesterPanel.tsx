@@ -192,7 +192,8 @@ export function RenderingWorldPlazaPerformanceTesterPanel(): React.JSX.Element {
               className="font-mono text-[10px] leading-snug text-slate-200"
             >
               {result.stepId} | {result.framesPerSecond.toFixed(1)} fps | p95{' '}
-              {result.framePercentile95Ms.toFixed(2)} | max{' '}
+              {result.framePercentile95Ms.toFixed(2)} | p99{' '}
+              {result.framePercentile99Ms.toFixed(2)} | max{' '}
               {result.frameMaxMs.toFixed(2)} | terrain-sync{' '}
               {result.sampleAveragesMs.terrainSync?.toFixed(2) ?? '-'}
             </p>

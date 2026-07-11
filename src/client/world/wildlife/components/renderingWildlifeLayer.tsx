@@ -35,6 +35,7 @@ import {
   computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
   computingWildlifeGroundShadowSizeScale,
 } from '@/components/world/wildlife/domains/computingWildlifeGroundShadowLayout';
+import { computingWildlifeRenderStructuralFingerprint } from '@/components/world/wildlife/domains/computingWildlifeRenderStructuralFingerprint';
 import { DEFINING_WILDLIFE_NAME_TAG_RECENT_COMBAT_REVEAL_MS } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import type { DefiningWildlifeSimulationTickConfig } from '@/components/world/wildlife/domains/definingWildlifeSimulationTickConfig';
 import {
@@ -337,111 +338,6 @@ const RenderingWildlifeInstanceSprite = memo(
   }
 );
 
-function checkingWhetherWildlifeRenderStructuralSnapshotsMatch(
-  current: readonly DefiningWildlifeInstance[],
-  next: readonly DefiningWildlifeInstance[]
-): boolean {
-  if (!next) {
-    return true;
-  }
-
-  if (current.length !== next.length) {
-    return false;
-  }
-
-  for (let index = 0; index < next.length; index += 1) {
-    const nextInstance = next[index];
-    const currentInstance = current[index];
-
-    if (!nextInstance || !currentInstance) {
-      return false;
-    }
-
-    if (currentInstance.instanceId !== nextInstance.instanceId) {
-      return false;
-    }
-
-    if (
-      currentInstance.facingDirection !== nextInstance.facingDirection ||
-      currentInstance.aiState.motionClip !== nextInstance.aiState.motionClip ||
-      currentInstance.isDead !== nextInstance.isDead
-    ) {
-      return false;
-    }
-
-    if (
-      currentInstance.healthState.currentHealth !==
-        nextInstance.healthState.currentHealth ||
-      currentInstance.staminaState.staminaRatio !==
-        nextInstance.staminaState.staminaRatio
-    ) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function checkingWhetherWildlifeRenderSnapshotsMatch(
-  current: readonly DefiningWildlifeInstance[],
-  next: readonly DefiningWildlifeInstance[]
-): boolean {
-  if (!next) {
-    return true;
-  }
-
-  if (current.length !== next.length) {
-    return false;
-  }
-
-  if (next.some((instance) => instance.isDead)) {
-    return false;
-  }
-
-  for (let index = 0; index < next.length; index += 1) {
-    const nextInstance = next[index];
-    const currentInstance = current[index];
-
-    if (!nextInstance || !currentInstance) {
-      return false;
-    }
-
-    if (currentInstance.instanceId !== nextInstance.instanceId) {
-      return false;
-    }
-
-    if (
-      currentInstance.position.x !== nextInstance.position.x ||
-      currentInstance.position.y !== nextInstance.position.y ||
-      currentInstance.position.layer !== nextInstance.position.layer
-    ) {
-      return false;
-    }
-
-    if (
-      currentInstance.facingDirection !== nextInstance.facingDirection ||
-      currentInstance.aiState.motionClip !== nextInstance.aiState.motionClip ||
-      currentInstance.aiState.isMoving !== nextInstance.aiState.isMoving ||
-      currentInstance.aiState.jumpState?.progress !==
-        nextInstance.aiState.jumpState?.progress ||
-      currentInstance.isDead !== nextInstance.isDead
-    ) {
-      return false;
-    }
-
-    if (
-      currentInstance.healthState.currentHealth !==
-        nextInstance.healthState.currentHealth ||
-      currentInstance.staminaState.staminaRatio !==
-        nextInstance.staminaState.staminaRatio
-    ) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
 export function RenderingWildlifeLayer({
   wildlifeStoreRef,
   tickConfigRef,
@@ -450,6 +346,7 @@ export function RenderingWildlifeLayer({
   const [instances, setInstances] = useState<
     readonly DefiningWildlifeInstance[]
   >([]);
+  const renderStructuralFingerprintRef = useRef('0');
   const loadedSpeciesRef = useRef<Set<string>>(new Set());
   const liveSpeciesIdsRef = useRef<ReadonlySet<string>>(new Set());
   const lastTickMsRef = useRef<number | null>(null);
@@ -854,16 +751,20 @@ export function RenderingWildlifeLayer({
       placedBlocks: placedBlocksScene?.blocks ?? [],
       placedBlocksByTile: placedBlocksScene?.blocksByTile,
       nowMs,
+      playerPosition: config.playerPositionRef.current,
+      presentationCullGridRadius:
+        performanceProfile.wildlifePresentationCullGridRadius,
     });
 
-    setInstances((current) =>
-      checkingWhetherWildlifeRenderStructuralSnapshotsMatch(
-        current,
-        nextInstances
-      )
-        ? current
-        : nextInstances
-    );
+    const nextRenderStructuralFingerprint =
+      computingWildlifeRenderStructuralFingerprint(nextInstances);
+
+    if (
+      renderStructuralFingerprintRef.current !== nextRenderStructuralFingerprint
+    ) {
+      renderStructuralFingerprintRef.current = nextRenderStructuralFingerprint;
+      setInstances(nextInstances);
+    }
   });
 
   if (instances.length === 0) {

@@ -11,7 +11,7 @@ import {
   startingWorldPlazaPerformanceTesterSuite,
   subscribingWorldPlazaPerformanceTesterStore,
 } from '@/components/world/domains/managingWorldPlazaPerformanceTesterStore';
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export type UsingWorldPlazaPerformanceTesterResult = {
   readonly snapshot: ManagingWorldPlazaPerformanceTesterStoreSnapshot;
@@ -25,13 +25,22 @@ export type UsingWorldPlazaPerformanceTesterResult = {
 
 /**
  * Subscribes to the multistep performance tester store.
+ *
+ * Uses subscribe + useState (not useSyncExternalStore) so getSnapshot never
+ * needs to be called twice per render with a fresh object.
  */
 export function usingWorldPlazaPerformanceTester(): UsingWorldPlazaPerformanceTesterResult {
-  const snapshot = useSyncExternalStore(
-    subscribingWorldPlazaPerformanceTesterStore,
-    gettingWorldPlazaPerformanceTesterStoreSnapshot,
+  const [snapshot, setSnapshot] = useState(
     gettingWorldPlazaPerformanceTesterStoreSnapshot
   );
+
+  useEffect(() => {
+    setSnapshot(gettingWorldPlazaPerformanceTesterStoreSnapshot());
+
+    return subscribingWorldPlazaPerformanceTesterStore(() => {
+      setSnapshot(gettingWorldPlazaPerformanceTesterStoreSnapshot());
+    });
+  }, []);
 
   const runningPerfTesterSuite = useCallback((): void => {
     startingWorldPlazaPerformanceTesterSuite();

@@ -85,8 +85,6 @@ export interface DefiningWorldPlazaPerformanceProfile {
   readonly behindRetentionTiles: number;
   /** Max milliseconds terrain sync may spend building per frame. */
   readonly terrainWorkBudgetMs: number;
-  /** Max milliseconds terrain sync may spend pruning per frame. */
-  readonly pruneBudgetMs: number;
   /** Max tree graphics removed per sync when culling stale entries. */
   readonly treePruneBudgetPerFrame: number;
   /** Minimum interval between lightmap RTT redraws while stationary (ms). */
@@ -95,6 +93,20 @@ export interface DefiningWorldPlazaPerformanceProfile {
   readonly wildlifeSimulationMaxStepsPerFrame: number;
   /** Run navigation replan checks every N avatar ticks. */
   readonly navigationReplanIntervalFrames: number;
+  /** A* node expansion cap for click-walk pathfinding. */
+  readonly navigationMaxNodeExpansions: number;
+  /** When false, skip procedural tree ground shadows. */
+  readonly drawsTreeShadows: boolean;
+  /** When false, skip per-frame tree shake offsets. */
+  readonly drawsTreeShake: boolean;
+  /** When false, placed-block shadows use contact-only (no blur filter). */
+  readonly drawsPlacedBlockShadowBlur: boolean;
+  /** Redraw interval for water shimmer (frames). */
+  readonly waterShimmerUpdateIntervalFrames: number;
+  /** Grid radius beyond local player where remote avatar lava/depth work is skipped. */
+  readonly remoteAvatarPresentationCullGridRadius: number;
+  /** Grid radius beyond local player where wildlife sprite sync is skipped. */
+  readonly wildlifePresentationCullGridRadius: number;
 }
 
 /** High tier profile. */
@@ -128,11 +140,17 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_HIGH: DefiningWorldPlazaPe
     forwardPrefetchTiles: 6,
     behindRetentionTiles: 4,
     terrainWorkBudgetMs: 6,
-    pruneBudgetMs: 2,
     treePruneBudgetPerFrame: 6,
     lightingRttMinIntervalMs: 0,
     wildlifeSimulationMaxStepsPerFrame: 2,
     navigationReplanIntervalFrames: 1,
+    navigationMaxNodeExpansions: 4096,
+    drawsTreeShadows: true,
+    drawsTreeShake: true,
+    drawsPlacedBlockShadowBlur: true,
+    waterShimmerUpdateIntervalFrames: 3,
+    remoteAvatarPresentationCullGridRadius: 999,
+    wildlifePresentationCullGridRadius: 999,
   };
 
 /** Medium tier profile. */
@@ -166,11 +184,17 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_MEDIUM: DefiningWorldPlaza
     forwardPrefetchTiles: 4,
     behindRetentionTiles: 3,
     terrainWorkBudgetMs: 5,
-    pruneBudgetMs: 1.5,
     treePruneBudgetPerFrame: 4,
     lightingRttMinIntervalMs: 32,
     wildlifeSimulationMaxStepsPerFrame: 2,
     navigationReplanIntervalFrames: 3,
+    navigationMaxNodeExpansions: 2048,
+    drawsTreeShadows: true,
+    drawsTreeShake: true,
+    drawsPlacedBlockShadowBlur: true,
+    waterShimmerUpdateIntervalFrames: 3,
+    remoteAvatarPresentationCullGridRadius: 48,
+    wildlifePresentationCullGridRadius: 40,
   };
 
 /** Low tier profile. */
@@ -206,11 +230,17 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_LOW: DefiningWorldPlazaPer
     forwardPrefetchTiles: 3,
     behindRetentionTiles: 2,
     terrainWorkBudgetMs: 4,
-    pruneBudgetMs: 1,
     treePruneBudgetPerFrame: 2,
     lightingRttMinIntervalMs: 64,
     wildlifeSimulationMaxStepsPerFrame: 1,
     navigationReplanIntervalFrames: 6,
+    navigationMaxNodeExpansions: 1024,
+    drawsTreeShadows: false,
+    drawsTreeShake: false,
+    drawsPlacedBlockShadowBlur: false,
+    waterShimmerUpdateIntervalFrames: 9,
+    remoteAvatarPresentationCullGridRadius: 36,
+    wildlifePresentationCullGridRadius: 32,
   };
 
 /** Profiles keyed by tier id. */

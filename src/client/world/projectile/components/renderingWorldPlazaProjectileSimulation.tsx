@@ -10,6 +10,7 @@ import { computingWorldPlazaProjectileStep } from '@/components/world/projectile
 import { resolvingWorldPlazaProjectileArchetype } from '@/components/world/projectile/domains/definingWorldPlazaProjectileArchetypeRegistry';
 import type {
   DefiningWorldPlazaPlayerProjectileDodgeState,
+  DefiningWorldPlazaProjectileInstance,
   DefiningWorldPlazaProjectileTarget,
 } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import {
@@ -57,6 +58,7 @@ export function RenderingWorldPlazaProjectileSimulation({
   rollDodgeProgressRef,
 }: RenderingWorldPlazaProjectileSimulationProps): null {
   const lastTickMsRef = useRef(0);
+  const projectileTargetsRef = useRef<DefiningWorldPlazaProjectileTarget[]>([]);
 
   useTick(() => {
     const store = projectileStoreRef.current;
@@ -78,7 +80,8 @@ export function RenderingWorldPlazaProjectileSimulation({
 
     const playerPosition = playerPositionRef.current;
     const dodgeState = localPlayerDodgeStateRef.current;
-    const targets: DefiningWorldPlazaProjectileTarget[] = [];
+    const targets = projectileTargetsRef.current;
+    targets.length = 0;
 
     if (playerPosition) {
       targets.push({
@@ -92,21 +95,74 @@ export function RenderingWorldPlazaProjectileSimulation({
     }
 
     if (extraTargetsRef?.current) {
-      targets.push(...extraTargetsRef.current);
+      for (const extraTarget of extraTargetsRef.current) {
+        targets.push(extraTarget);
+      }
     }
 
-    const stepResult = computingWorldPlazaProjectileStep({
-      instances: store.instances,
-      deltaSeconds,
-      nowMs,
-      targets,
-      collisionContext: {
-        placedBlocks: placedBlocksRef.current?.blocks ?? [],
-        playerRadiusGrid:
-          dodgeState?.collisionRadiusGrid ??
-          DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
-      },
-    });
+    const MAX_PROJECTILE_SUBSTEP_SECONDS = 1 / 60;
+    const MAX_PROJECTILE_SUBSTEPS = 4;
+    let remainingDeltaSeconds = deltaSeconds;
+    let substepCount = 0;
+    let workingInstances: readonly DefiningWorldPlazaProjectileInstance[] =
+      store.instances;
+    let combinedStepResult: ReturnType<
+      typeof computingWorldPlazaProjectileStep
+    > | null = null;
+
+    while (
+      remainingDeltaSeconds > 0 &&
+      substepCount < MAX_PROJECTILE_SUBSTEPS
+    ) {
+      const substepSeconds = Math.min(
+        remainingDeltaSeconds,
+        MAX_PROJECTILE_SUBSTEP_SECONDS
+      );
+      remainingDeltaSeconds -= substepSeconds;
+      substepCount += 1;
+
+      const stepResult = computingWorldPlazaProjectileStep({
+        instances: workingInstances,
+        deltaSeconds: substepSeconds,
+        nowMs,
+        targets,
+        collisionContext: {
+          placedBlocks: placedBlocksRef.current?.blocks ?? [],
+          playerRadiusGrid:
+            dodgeState?.collisionRadiusGrid ??
+            DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+        },
+      });
+
+      workingInstances = stepResult.instances;
+
+      if (!combinedStepResult) {
+        combinedStepResult = stepResult;
+      } else {
+        combinedStepResult = {
+          instances: stepResult.instances,
+          spawnRequests: [
+            ...combinedStepResult.spawnRequests,
+            ...stepResult.spawnRequests,
+          ],
+          hitEvents: [...combinedStepResult.hitEvents, ...stepResult.hitEvents],
+          missEvents: [
+            ...combinedStepResult.missEvents,
+            ...stepResult.missEvents,
+          ],
+          impactEvents: [
+            ...combinedStepResult.impactEvents,
+            ...stepResult.impactEvents,
+          ],
+        };
+      }
+    }
+
+    const stepResult = combinedStepResult;
+
+    if (!stepResult) {
+      return;
+    }
 
     for (const spawnRequest of stepResult.spawnRequests) {
       spawningWorldPlazaProjectile(store, spawnRequest);

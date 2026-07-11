@@ -143,6 +143,8 @@ Grass surface spreads easily; campfire block has flammability **0** (cannot spre
 
 ## Campfire ambience (audio)
 
+**Engine note (render perf, no player-visible change):** `renderingWorldPlazaFireLayer.tsx` clears and refills a reused `activeFireTileKeysRef` set each Pixi tick when reconciling the flame visual pool, instead of allocating a new `Set` every frame. Ignite, spread, fuel, and flame presentation rules are unchanged.
+
 When a **lit** campfire cell is on the player's **world layer**, a looping bonfire crackle plays with distance falloff.
 
 ```mermaid

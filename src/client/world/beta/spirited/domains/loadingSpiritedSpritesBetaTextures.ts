@@ -45,6 +45,7 @@ export function loadingSpiritedSpritesBetaTextures(
       definition.fileStem
     );
     const sheetTexture = (await Assets.load(sheetUrl)) as Texture;
+    sheetTexture.source.scaleMode = 'nearest';
     const frameCount = Math.min(
       DEFINING_SPIRITED_SPRITES_BETA_PREVIEW_FRAME_COUNT,
       DEFINING_SPIRITED_SPRITES_BETA_FRAME_COUNT,
@@ -56,17 +57,17 @@ export function loadingSpiritedSpritesBetaTextures(
 
     const frames: Texture[] = [];
     for (let frameIndex = 0; frameIndex < frameCount; frameIndex += 1) {
-      frames.push(
-        new Texture({
-          source: sheetTexture.source,
-          frame: new Rectangle(
-            frameIndex * DEFINING_SPIRITED_SPRITES_BETA_FRAME_WIDTH_PX,
-            0,
-            DEFINING_SPIRITED_SPRITES_BETA_FRAME_WIDTH_PX,
-            DEFINING_SPIRITED_SPRITES_BETA_FRAME_HEIGHT_PX
-          ),
-        })
-      );
+      const frameTexture = new Texture({
+        source: sheetTexture.source,
+        frame: new Rectangle(
+          frameIndex * DEFINING_SPIRITED_SPRITES_BETA_FRAME_WIDTH_PX,
+          0,
+          DEFINING_SPIRITED_SPRITES_BETA_FRAME_WIDTH_PX,
+          DEFINING_SPIRITED_SPRITES_BETA_FRAME_HEIGHT_PX
+        ),
+      });
+      frameTexture.source.scaleMode = 'nearest';
+      frames.push(frameTexture);
     }
 
     return { frames };

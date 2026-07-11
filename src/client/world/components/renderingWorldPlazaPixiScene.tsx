@@ -2189,11 +2189,13 @@ function RenderingWorldPlazaPixiSceneConnected({
   const wildlifeFloatingCombatTextsRef = useRef<
     DefiningWildlifeFloatingCombatText[]
   >([]);
+  const wildlifeFloatingCombatTextIdsRef = useRef<readonly string[]>([]);
   const [wildlifeFloatingCombatTexts, setWildlifeFloatingCombatTexts] =
     useState<readonly DefiningWildlifeFloatingCombatText[]>([]);
   const wildlifeSpeechBubblesRef = useRef<
     DefiningWildlifeSpeechBubbleOverlay[]
   >([]);
+  const wildlifeSpeechBubbleKeysRef = useRef<readonly string[]>([]);
   const [wildlifeSpeechBubbles, setWildlifeSpeechBubbles] = useState<
     readonly DefiningWildlifeSpeechBubbleOverlay[]
   >([]);
@@ -2214,8 +2216,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   useEffect(() => {
     if (!isLocalGameplayEnabled) {
       wildlifeFloatingCombatTextsRef.current.length = 0;
+      wildlifeFloatingCombatTextIdsRef.current = [];
       setWildlifeFloatingCombatTexts([]);
       wildlifeSpeechBubblesRef.current.length = 0;
+      wildlifeSpeechBubbleKeysRef.current = [];
       setWildlifeSpeechBubbles([]);
       wildlifeNameTagsRef.current.length = 0;
       wildlifeNameTagsMountRevisionRef.current = 0;
@@ -2228,35 +2232,36 @@ function RenderingWorldPlazaPixiSceneConnected({
 
     return subscribingWorldPlazaDomOverlayFrame(() => {
       const nextTexts = wildlifeFloatingCombatTextsRef.current;
-      setWildlifeFloatingCombatTexts((current) => {
-        if (
-          current.length === nextTexts.length &&
-          current.every(
-            (entry, index) =>
-              entry.floatText.id === nextTexts[index]?.floatText.id
-          )
-        ) {
-          return current;
-        }
+      const previousTextIds = wildlifeFloatingCombatTextIdsRef.current;
+      const didTextMountSetChange =
+        previousTextIds.length !== nextTexts.length ||
+        nextTexts.some(
+          (entry, index) => entry.floatText.id !== previousTextIds[index]
+        );
 
-        return [...nextTexts];
-      });
+      if (didTextMountSetChange) {
+        wildlifeFloatingCombatTextIdsRef.current = nextTexts.map(
+          (entry) => entry.floatText.id
+        );
+        setWildlifeFloatingCombatTexts([...nextTexts]);
+      }
 
       const nextSpeechBubbles = wildlifeSpeechBubblesRef.current;
-      setWildlifeSpeechBubbles((current) => {
-        if (
-          current.length === nextSpeechBubbles.length &&
-          current.every(
-            (entry, index) =>
-              entry.instanceId === nextSpeechBubbles[index]?.instanceId &&
-              entry.message === nextSpeechBubbles[index]?.message
-          )
-        ) {
-          return current;
-        }
+      const previousSpeechBubbleKeys = wildlifeSpeechBubbleKeysRef.current;
+      const didSpeechBubbleMountSetChange =
+        previousSpeechBubbleKeys.length !== nextSpeechBubbles.length ||
+        nextSpeechBubbles.some(
+          (entry, index) =>
+            `${entry.instanceId}:${entry.message}` !==
+            previousSpeechBubbleKeys[index]
+        );
 
-        return [...nextSpeechBubbles];
-      });
+      if (didSpeechBubbleMountSetChange) {
+        wildlifeSpeechBubbleKeysRef.current = nextSpeechBubbles.map(
+          (entry) => `${entry.instanceId}:${entry.message}`
+        );
+        setWildlifeSpeechBubbles([...nextSpeechBubbles]);
+      }
 
       const nextNameTags = wildlifeNameTagsRef.current;
       if (
@@ -4505,6 +4510,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     playerRenderPositionRegistryRef={
                       playerRenderPositionRegistryRef
                     }
+                    localPlayerPositionRef={playerPositionRef}
                   />
                   <RenderingWildlifeLayer
                     wildlifeStoreRef={wildlifeStoreRef}

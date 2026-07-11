@@ -77,17 +77,21 @@ export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_ACTIVE_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TOGGLE_BUTTON_CLASS_NAME =
   'pointer-events-auto flex min-h-7 w-full items-center justify-center rounded-md border border-white/20 bg-black/50 px-2 py-1.5 text-[10px] font-semibold text-white/90 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70' as const;
 
-/** View picker trigger (replaces tab strip). */
+/** Stack of per-section view picker bars. */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT_STACK_CLASS_NAME =
+  'flex shrink-0 flex-col gap-1' as const;
+
+/** View picker trigger (one bar per section). */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT_TRIGGER_CLASS_NAME =
-  'pointer-events-auto flex min-h-8 w-full items-center justify-between gap-2 rounded-md border border-violet-300/35 bg-violet-500/15 px-2.5 py-1.5 text-left text-[10px] font-semibold text-violet-100 transition hover:bg-violet-500/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70' as const;
+  'pointer-events-auto flex min-h-8 w-full items-center justify-between gap-2 rounded-md border border-white/15 bg-black/40 px-2.5 py-1.5 text-left text-[10px] font-semibold text-white/70 transition hover:border-white/25 hover:bg-white/10 hover:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70' as const;
+
+/** Trigger chrome when this section owns the active view. */
+export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT_TRIGGER_ACTIVE_CLASS_NAME =
+  'border-violet-300/35 bg-violet-500/15 text-violet-100 hover:bg-violet-500/25' as const;
 
 /** View picker menu shell (portaled; position set inline from trigger rect). */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT_MENU_CLASS_NAME =
   'pointer-events-auto z-[10000] max-h-56 overflow-y-auto rounded-md border border-violet-300/35 bg-black/95 p-1 shadow-lg backdrop-blur-md' as const;
-
-/** Group label inside the view picker menu. */
-export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT_GROUP_LABEL_CLASS_NAME =
-  'px-2 pb-0.5 pt-1.5 text-[8px] font-semibold uppercase tracking-[0.14em] text-white/35' as const;
 
 /** View option row in the picker menu. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT_OPTION_CLASS_NAME =
@@ -111,7 +115,7 @@ export const LABELING_WORLD_PLAZA_DEV_MODE_PANEL_CLOSE =
 /** Dev panel title. */
 export const LABELING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE = 'Dev tools' as const;
 
-/** Accessible label for the section view picker. */
+/** Accessible label prefix for a section view picker (`${prefix}: ${groupLabel}`). */
 export const LABELING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT =
   'Dev tools section' as const;
 

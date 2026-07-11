@@ -73,6 +73,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE = {
   TERRAIN_ELEVATION_CHUNK_COUNT: 'terrain-elevation-chunk-count',
   TREE_TRUNK_COUNT: 'tree-trunk-count',
   TREE_CANOPY_COUNT: 'tree-canopy-count',
+  DOM_OVERLAY_SUBSCRIBER_COUNT: 'dom-overlay-subscriber-count',
 } as const;
 
 /** Counter ids incremented on discrete events (shown per second). */
@@ -83,6 +84,8 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER = {
   FLOOR_CHUNKS_BUILT: 'floor-chunks-built',
   ELEVATION_CHUNKS_BUILT: 'elevation-chunks-built',
   JS_ERROR: 'js-error',
+  ENTITY_DEPTH_CACHE_HIT: 'entity-depth-cache-hit',
+  ENTITY_DEPTH_CACHE_MISS: 'entity-depth-cache-miss',
 } as const;
 
 /** Sample ids shown in the overlay, in display order. */

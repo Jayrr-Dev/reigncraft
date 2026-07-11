@@ -9,8 +9,8 @@ import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { computingWorldPlazaNavigationPathSmoother } from '@/components/world/navigation/domains/computingWorldPlazaNavigationPathSmoother';
-import { DEFINING_WORLD_PLAZA_NAVIGATION_COST_PROFILE_REGISTRY } from '@/components/world/navigation/domains/definingWorldPlazaNavigationCostProfiles';
 import type { DefiningWorldPlazaNavigationCostProfileId } from '@/components/world/navigation/domains/definingWorldPlazaNavigationCostProfiles';
+import { DEFINING_WORLD_PLAZA_NAVIGATION_COST_PROFILE_REGISTRY } from '@/components/world/navigation/domains/definingWorldPlazaNavigationCostProfiles';
 import { resolvingWorldPlazaNavigationGridNodeFromWorldPoint } from '@/components/world/navigation/domains/resolvingWorldPlazaNavigationGridNodeFromWorldPoint';
 import { resolvingWorldPlazaNavigationPlayerMoveCost } from '@/components/world/navigation/domains/resolvingWorldPlazaNavigationPlayerMoveCost';
 import { resolvingWorldPlazaNavigationSearchBoundsFromEndpoints } from '@/components/world/navigation/domains/resolvingWorldPlazaNavigationSearchBounds';
@@ -25,6 +25,7 @@ export type ResolvingWorldPlazaNavigationPathParams = {
   readonly placedBlocks?: readonly DefiningWorldBuildingPlacedBlock[];
   readonly placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile;
   readonly playerRadiusGrid?: number;
+  readonly maxNodeExpansions?: number;
 };
 
 export type ResolvingWorldPlazaNavigationPathResult = {
@@ -44,8 +45,10 @@ export function resolvingWorldPlazaNavigationPath({
   placedBlocks = [],
   placedBlocksByTile,
   playerRadiusGrid,
+  maxNodeExpansions,
 }: ResolvingWorldPlazaNavigationPathParams): ResolvingWorldPlazaNavigationPathResult {
-  const profile = DEFINING_WORLD_PLAZA_NAVIGATION_COST_PROFILE_REGISTRY[costProfileId];
+  const profile =
+    DEFINING_WORLD_PLAZA_NAVIGATION_COST_PROFILE_REGISTRY[costProfileId];
   const playerLayer = resolvingWorldPlazaPlayerWorldLayer(start);
   const startNode = resolvingWorldPlazaNavigationGridNodeFromWorldPoint({
     ...start,
@@ -73,6 +76,7 @@ export function resolvingWorldPlazaNavigationPath({
     movementModeId: profile.movementModeId,
     heuristicId: profile.heuristicId,
     preventCornerCutting: profile.preventCornerCutting,
+    maxNodeExpansions,
   });
 
   if (searchResult.status !== 'found' && searchResult.status !== 'same_node') {

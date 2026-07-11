@@ -8,10 +8,17 @@ import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/wor
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
-import { resolvingWorldDepthAvatarBodySortKey } from '@/components/world/depth/domains/resolvingWorldDepthAvatarBodySortKey';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { updatingWorldPlazaAvatarGroundShadowGraphics } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
+import {
+  applyingWorldPlazaCachedDisplayObjectZIndex,
+  computingWorldPlazaPlacedBlocksDepthRevision,
+  creatingWorldPlazaEntityDepthSortCache,
+  resolvingWorldPlazaCachedAvatarBodySortKey,
+  type ManagingWorldPlazaEntityDepthSortCache,
+} from '@/components/world/domains/managingWorldPlazaEntityDepthSortCache';
 import { computingWildlifeCorpseFadeAlpha } from '@/components/world/wildlife/domains/computingWildlifeCorpseFadeAlpha';
 import {
   computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
@@ -31,6 +38,9 @@ export type SyncingWildlifeInstanceImperativePresentationEntry = {
   sizeScale: number;
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection;
   jumpArcPeakPx: number;
+  depthSortCache: ManagingWorldPlazaEntityDepthSortCache;
+  bodyZIndexRef: { current: number };
+  shadowZIndexRef: { current: number };
 };
 
 export type SyncingWildlifeInstancesImperativePresentationRegistry = Map<
@@ -44,9 +54,17 @@ export type SyncingWildlifeInstancesImperativePresentationRegistry = Map<
 export function registeringWildlifeInstanceImperativePresentation(
   registry: SyncingWildlifeInstancesImperativePresentationRegistry,
   instanceId: string,
-  entry: SyncingWildlifeInstanceImperativePresentationEntry
+  entry: Omit<
+    SyncingWildlifeInstanceImperativePresentationEntry,
+    'depthSortCache' | 'bodyZIndexRef' | 'shadowZIndexRef'
+  >
 ): void {
-  registry.set(instanceId, entry);
+  registry.set(instanceId, {
+    ...entry,
+    depthSortCache: creatingWorldPlazaEntityDepthSortCache(),
+    bodyZIndexRef: { current: Number.NaN },
+    shadowZIndexRef: { current: Number.NaN },
+  });
 }
 
 /**
@@ -59,6 +77,23 @@ export function unregisteringWildlifeInstanceImperativePresentation(
   registry.delete(instanceId);
 }
 
+function checkingWildlifeInstanceWithinPresentationRing(
+  instancePosition: DefiningWorldPlazaWorldPoint,
+  playerPosition: DefiningWorldPlazaWorldPoint | null,
+  presentationCullGridRadius: number
+): boolean {
+  if (!playerPosition || presentationCullGridRadius >= 999) {
+    return true;
+  }
+
+  return (
+    Math.abs(instancePosition.x - playerPosition.x) <=
+      presentationCullGridRadius &&
+    Math.abs(instancePosition.y - playerPosition.y) <=
+      presentationCullGridRadius
+  );
+}
+
 /**
  * Updates registered wildlife sprites from live simulation instances.
  */
@@ -68,7 +103,19 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
   readonly placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
   readonly placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile;
   readonly nowMs: number;
+  readonly playerPosition?: DefiningWorldPlazaWorldPoint | null;
+  readonly presentationCullGridRadius?: number;
 }): void {
+  const placedBlocksRevision = computingWorldPlazaPlacedBlocksDepthRevision(
+    input.placedBlocks.length,
+    input.placedBlocks[input.placedBlocks.length - 1]?.blockId
+  );
+  const depthContext = {
+    placedBlocks: input.placedBlocks,
+    placedBlocksByTile: input.placedBlocksByTile,
+  };
+  const presentationCullGridRadius = input.presentationCullGridRadius ?? 999;
+
   for (const instance of input.instances) {
     const entry = input.registry.get(instance.instanceId);
 
@@ -79,6 +126,27 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
     const species = resolvingWildlifeSpeciesDefinition(entry.speciesId);
 
     if (!species) {
+      continue;
+    }
+
+    const isWithinPresentationRing =
+      checkingWildlifeInstanceWithinPresentationRing(
+        instance.position,
+        input.playerPosition ?? null,
+        presentationCullGridRadius
+      );
+    const sprite = entry.spriteRef.current;
+    const shadowGraphics = entry.shadowGraphicsRef.current;
+
+    if (!isWithinPresentationRing) {
+      if (sprite) {
+        sprite.visible = false;
+      }
+
+      if (shadowGraphics) {
+        shadowGraphics.visible = false;
+      }
+
       continue;
     }
 
@@ -103,27 +171,27 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
     const spriteAlpha = instance.isDead
       ? computingWildlifeCorpseFadeAlpha(instance.diedAtMs, input.nowMs)
       : 1;
-    const sortKey = resolvingWorldDepthAvatarBodySortKey(
+    const sortKey = resolvingWorldPlazaCachedAvatarBodySortKey(
       {
         x: instance.position.x,
         y: instance.position.y,
         layer: standingLayer,
       },
-      {
-        placedBlocks: input.placedBlocks,
-        placedBlocksByTile: input.placedBlocksByTile,
-      }
+      entry.depthSortCache,
+      depthContext,
+      placedBlocksRevision
     );
-    const sprite = entry.spriteRef.current;
 
     if (sprite) {
       sprite.position.set(screenPoint.x, anchoredScreenY - jumpLiftPx);
-      sprite.zIndex = sortKey;
+      applyingWorldPlazaCachedDisplayObjectZIndex(
+        sprite,
+        sortKey,
+        entry.bodyZIndexRef
+      );
       sprite.alpha = spriteAlpha;
       sprite.visible = !(instance.isDead && spriteAlpha <= 0);
     }
-
-    const shadowGraphics = entry.shadowGraphicsRef.current;
 
     if (shadowGraphics && !instance.isDead) {
       const spritePresentation =
@@ -142,9 +210,12 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
         );
 
       shadowGraphics.position.set(screenPoint.x, anchoredScreenY);
-      shadowGraphics.zIndex =
+      applyingWorldPlazaCachedDisplayObjectZIndex(
+        shadowGraphics,
         sortKey +
-        DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
+          DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET,
+        entry.shadowZIndexRef
+      );
       shadowGraphics.visible = true;
       updatingWorldPlazaAvatarGroundShadowGraphics(
         shadowGraphics,

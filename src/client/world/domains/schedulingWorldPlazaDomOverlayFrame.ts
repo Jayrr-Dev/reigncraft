@@ -4,8 +4,14 @@
  * @module components/world/domains/schedulingWorldPlazaDomOverlayFrame
  */
 
-import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
-import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import {
+  beginningWorldPlazaPerformanceSample,
+  settingWorldPlazaPerformanceDiagnosticsGauge,
+} from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 
 export type SchedulingWorldPlazaDomOverlayFrameCallback = (
   deltaMs: number,
@@ -19,6 +25,20 @@ let schedulingWorldPlazaDomOverlayFrameAnimationId = 0;
 let schedulingWorldPlazaDomOverlayFrameLastTimeMs = 0;
 
 function tickingWorldPlazaDomOverlayFrame(frameTimeMs: number): void {
+  if (
+    typeof document !== 'undefined' &&
+    document.visibilityState !== 'visible'
+  ) {
+    schedulingWorldPlazaDomOverlayFrameAnimationId =
+      window.requestAnimationFrame(tickingWorldPlazaDomOverlayFrame);
+    return;
+  }
+
+  settingWorldPlazaPerformanceDiagnosticsGauge(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.DOM_OVERLAY_SUBSCRIBER_COUNT,
+    SCHEDULING_WORLD_PLAZA_DOM_OVERLAY_FRAME_CALLBACKS.size
+  );
+
   const finishDomOverlaySample = beginningWorldPlazaPerformanceSample(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.DOM_OVERLAY
   );
@@ -57,6 +77,13 @@ function stoppingWorldPlazaDomOverlayFrameLoopIfIdle(): void {
 
   window.cancelAnimationFrame(schedulingWorldPlazaDomOverlayFrameAnimationId);
   schedulingWorldPlazaDomOverlayFrameAnimationId = 0;
+}
+
+/**
+ * Returns how many callbacks are subscribed to the shared DOM overlay loop.
+ */
+export function listingWorldPlazaDomOverlaySubscriberCount(): number {
+  return SCHEDULING_WORLD_PLAZA_DOM_OVERLAY_FRAME_CALLBACKS.size;
 }
 
 /**

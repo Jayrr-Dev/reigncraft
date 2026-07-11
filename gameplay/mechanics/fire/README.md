@@ -140,3 +140,4 @@ flowchart TB
 
 - Tuning numbers: [memory/game-mechanics-reference.md](../../../memory/game-mechanics-reference.md) (section 13, fire)
 - Engine wiring: [memory/game-engines-reference.md](../../../memory/game-engines-reference.md)
+- Fire layer render pool (`activeFireTileKeysRef`): documented in [catalog.md](./catalog.md) § Fire layer render tick; no player-facing rule change

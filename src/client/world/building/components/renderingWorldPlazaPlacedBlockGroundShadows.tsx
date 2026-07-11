@@ -14,6 +14,7 @@ import {
   formattingWorldBuildingPlacedBlocksTileColumnKey,
   groupingWorldBuildingPlacedBlocksByTileColumn,
 } from '@/components/world/building/domains/groupingWorldBuildingPlacedBlocksByTileColumn';
+import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
 import { computingWorldDepthSortKey } from '@/components/world/depth';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
@@ -44,12 +45,14 @@ export function RenderingWorldPlazaPlacedBlockGroundShadows({
 }: RenderingWorldPlazaPlacedBlockGroundShadowsProps): React.JSX.Element | null {
   const renderLayerFlags =
     usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags();
+  const performanceProfile = usingWorldPlazaPerformanceProfile();
   const sunState = usingWorldPlazaDayNightSunState();
   const shadowAlpha =
     DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_ALPHA *
     shadowAlphaScale *
     sunState.shadowAlphaScale;
-  const tileColumns = groupingWorldBuildingPlacedBlocksByTileColumn(placedBlocks);
+  const tileColumns =
+    groupingWorldBuildingPlacedBlocksByTileColumn(placedBlocks);
 
   if (
     !checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore(
@@ -74,15 +77,27 @@ export function RenderingWorldPlazaPlacedBlockGroundShadows({
         });
 
         return (
-          <pixiContainer key={tileColumnKey} zIndex={floorSortKey} eventMode="none">
+          <pixiContainer
+            key={tileColumnKey}
+            zIndex={floorSortKey}
+            eventMode="none"
+          >
             <pixiGraphics
               alpha={shadowAlpha}
               draw={(graphics: Graphics) => {
                 graphics.cacheAsTexture(false);
                 graphics.clear();
-                applyingWorldBuildingPlacedBlockGroundShadowFiltersOnGraphics(
-                  graphics
-                );
+
+                if (performanceProfile.drawsPlacedBlockShadowBlur) {
+                  applyingWorldBuildingPlacedBlockGroundShadowFiltersOnGraphics(
+                    graphics
+                  );
+                } else {
+                  clearingWorldBuildingPlacedBlockGroundShadowFiltersOnGraphics(
+                    graphics
+                  );
+                }
+
                 drawingWorldBuildingPlacedBlockGroundShadowCastLayerOnGraphics({
                   graphics,
                   placedBlocks: [...columnBlocks],

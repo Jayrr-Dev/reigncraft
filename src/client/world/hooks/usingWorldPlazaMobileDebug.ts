@@ -133,8 +133,13 @@ export function usingWorldPlazaMobileDebug(
     let rafId = 0;
     let statusTimeoutId = 0;
 
+    const isSamplerActive = (): boolean =>
+      checkingWorldPlazaMobileDebugIsActive() ||
+      isMobileDebugActive ||
+      isMobileDebugHudVisible;
+
     const publishingStatus = (): void => {
-      if (checkingWorldPlazaMobileDebugIsActive() || isMobileDebugActive) {
+      if (isSamplerActive()) {
         publishingWorldPlazaMobileDebugStatusLines({
           performanceProfile,
           frameStats: frameStatsRef.current,
@@ -151,14 +156,28 @@ export function usingWorldPlazaMobileDebug(
     };
 
     const tick = (nowMs: number): void => {
-      const nextFrameStats = markingWorldPlazaMobileDebugFrame(sampler, nowMs);
-      frameStatsRef.current = nextFrameStats;
-      uptimeSecRef.current = computingWorldPlazaMobileDebugUptimeSec(
-        sampler,
-        nowMs
-      );
-      setFrameStats(nextFrameStats);
-      setUptimeSec(uptimeSecRef.current);
+      if (
+        typeof document !== 'undefined' &&
+        document.visibilityState !== 'visible'
+      ) {
+        rafId = requestAnimationFrame(tick);
+        return;
+      }
+
+      if (isSamplerActive()) {
+        const nextFrameStats = markingWorldPlazaMobileDebugFrame(
+          sampler,
+          nowMs
+        );
+        frameStatsRef.current = nextFrameStats;
+        uptimeSecRef.current = computingWorldPlazaMobileDebugUptimeSec(
+          sampler,
+          nowMs
+        );
+        setFrameStats(nextFrameStats);
+        setUptimeSec(uptimeSecRef.current);
+      }
+
       rafId = requestAnimationFrame(tick);
     };
 
@@ -169,7 +188,7 @@ export function usingWorldPlazaMobileDebug(
       cancelAnimationFrame(rafId);
       window.clearTimeout(statusTimeoutId);
     };
-  }, [isMobileDebugActive, performanceProfile]);
+  }, [isMobileDebugActive, isMobileDebugHudVisible, performanceProfile]);
 
   useEffect(() => {
     updatingWorldPlazaMobileDebugConsoleApiContext({

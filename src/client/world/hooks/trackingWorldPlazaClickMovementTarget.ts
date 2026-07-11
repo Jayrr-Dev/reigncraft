@@ -6,6 +6,7 @@ import {
 } from '@/components/world/building/domains/checkingWorldBuildingClaimModeTilePopoverDoubleTap';
 import { snappingWorldBuildingTilePositionFromGridPoint } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import { clampingWorldCollisionWalkTargetToWalkableGridPoint } from '@/components/world/collision';
+import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import type { DefiningWorldPlazaClickArrowEffectState } from '@/components/world/domains/definingWorldPlazaClickArrowEffectState';
@@ -127,6 +128,7 @@ export function trackingWorldPlazaClickMovementTarget({
   isPlayerStunnedRef,
   placedBlocksRef,
 }: TrackingWorldPlazaClickMovementTargetParams): TrackingWorldPlazaClickMovementTargetResult {
+  const performanceProfile = usingWorldPlazaPerformanceProfile();
   const walkTargetRef = useRef<DefiningWorldPlazaWorldPoint | null>(null);
   const walkWaypointsRef = useRef<DefiningWorldPlazaWorldPoint[]>([]);
   const walkDestinationRef = useRef<DefiningWorldPlazaWorldPoint | null>(null);
@@ -178,6 +180,7 @@ export function trackingWorldPlazaClickMovementTarget({
         placedBlocks,
         placedBlocksByTile: placedBlocksScene?.blocksByTile,
         isJumping: isJumpingRef.current,
+        maxNodeExpansions: performanceProfile.navigationMaxNodeExpansions,
       });
 
       walkDestinationRef.current = destination;
@@ -191,7 +194,12 @@ export function trackingWorldPlazaClickMovementTarget({
         path: walkPlan.path,
       });
     },
-    [isJumpingRef, placedBlocksRef, playerPositionRef]
+    [
+      isJumpingRef,
+      performanceProfile.navigationMaxNodeExpansions,
+      placedBlocksRef,
+      playerPositionRef,
+    ]
   );
 
   const projectingClientPointToGridTarget = useCallback(

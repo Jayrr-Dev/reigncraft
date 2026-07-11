@@ -8,9 +8,8 @@
 
 import { advancingSpiritedSpritesBetaWalkTick } from '@/components/world/beta/spirited/domains/advancingSpiritedSpritesBetaWalkTick';
 import {
-  DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_SCALE,
-  DEFINING_SPIRITED_SPRITES_BETA_FRAME_HEIGHT_PX,
-  DEFINING_SPIRITED_SPRITES_BETA_FRAME_WIDTH_PX,
+  DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_HEIGHT_PX,
+  DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_WIDTH_PX,
 } from '@/components/world/beta/spirited/domains/definingSpiritedSpritesBetaCatalog';
 import { loadingSpiritedSpritesBetaTextures } from '@/components/world/beta/spirited/domains/loadingSpiritedSpritesBetaTextures';
 import {
@@ -93,16 +92,13 @@ function RenderingSpiritedSpritesBetaInstanceSprite({
       ((live.facingFrame % frames.length) + frames.length) % frames.length;
 
     sprite.texture = frames[facingFrame] ?? frames[0];
+    sprite.roundPixels = true;
     sprite.position.set(
-      screenPoint.x,
-      screenPoint.y + standingLayerOffsetPx + bobOffsetPx
+      Math.round(screenPoint.x),
+      Math.round(screenPoint.y + standingLayerOffsetPx + bobOffsetPx)
     );
-    sprite.width =
-      DEFINING_SPIRITED_SPRITES_BETA_FRAME_WIDTH_PX *
-      DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_SCALE;
-    sprite.height =
-      DEFINING_SPIRITED_SPRITES_BETA_FRAME_HEIGHT_PX *
-      DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_SCALE;
+    sprite.width = DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_WIDTH_PX;
+    sprite.height = DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_HEIGHT_PX;
     sprite.zIndex = computingWorldDepthSortKey(live.position);
   });
 
@@ -125,17 +121,12 @@ function RenderingSpiritedSpritesBetaInstanceSprite({
       ref={spriteRef}
       texture={sheet.frames[initialFrame] ?? sheet.frames[0]}
       anchor={{ x: 0.5, y: 1 }}
-      x={screenPoint.x}
-      y={screenPoint.y + standingLayerOffsetPx}
-      width={
-        DEFINING_SPIRITED_SPRITES_BETA_FRAME_WIDTH_PX *
-        DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_SCALE
-      }
-      height={
-        DEFINING_SPIRITED_SPRITES_BETA_FRAME_HEIGHT_PX *
-        DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_SCALE
-      }
+      x={Math.round(screenPoint.x)}
+      y={Math.round(screenPoint.y + standingLayerOffsetPx)}
+      width={DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_WIDTH_PX}
+      height={DEFINING_SPIRITED_SPRITES_BETA_DISPLAY_HEIGHT_PX}
       zIndex={computingWorldDepthSortKey(instance.position)}
+      roundPixels={true}
       eventMode="none"
     />
   );

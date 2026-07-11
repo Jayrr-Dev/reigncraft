@@ -20,18 +20,29 @@ import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_TAB_BODY_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsUiConstants';
 import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_CANCEL_BUTTON_LABEL,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_COPY_FAILURE_TOAST,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_COPY_REPORT_BUTTON_LABEL,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_COPY_SUCCESS_TOAST,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_RUN_SUITE_BUTTON_LABEL,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_WALK_PROMPT_BANNER,
+} from '@/components/world/domains/definingWorldPlazaPerformanceTesterConstants';
+import { formattingWorldPlazaPerformanceTesterReport } from '@/components/world/domains/formattingWorldPlazaPerformanceTesterReport';
+import {
   buildingWorldPlazaPerformanceDiagnosticsSnapshot,
   dumpingWorldPlazaPerformanceDiagnosticsToConsole,
   markingWorldPlazaPerformanceDiagnosticsFrame,
   type MeasuringWorldPlazaPerformanceDiagnosticsSnapshot,
 } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import { usingWorldPlazaPerformanceTester } from '@/components/world/hooks/usingWorldPlazaPerformanceTester';
 import { listingWildlifeSpeciesTexturesCacheIds } from '@/components/world/wildlife/domains/loadingWildlifeSpeciesTextures';
+import { showToast } from '@devvit/web/client';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 /** Shared action button classes inside the overlay. */
 const RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_ACTION_BUTTON_CLASS_NAME =
-  'rounded border border-amber-200/30 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-50 hover:bg-amber-400/20';
+  'rounded border border-amber-200/30 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-50 hover:bg-amber-400/20 disabled:cursor-not-allowed disabled:opacity-50';
 
 const RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_SECTION_LABEL_CLASS_NAME =
   'font-semibold text-amber-200' as const;
@@ -102,6 +113,11 @@ export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
   onClose,
 }: RenderingWorldPlazaPerformanceDiagnosticsOverlayProps): React.JSX.Element | null {
   const performanceProfile = usingWorldPlazaPerformanceProfile();
+  const {
+    snapshot: perfTesterSnapshot,
+    runningPerfTesterSuite,
+    cancellingPerfTesterRun,
+  } = usingWorldPlazaPerformanceTester();
   const [snapshot, setSnapshot] =
     useState<MeasuringWorldPlazaPerformanceDiagnosticsSnapshot | null>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -176,6 +192,65 @@ export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
       >
         {activeTabId === 'summary' ? (
           <div>
+            <div className="mb-2 flex flex-wrap gap-1">
+              <button
+                type="button"
+                className="rounded border border-lime-300/60 bg-lime-500/25 px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-lime-50 hover:bg-lime-500/40 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={perfTesterSnapshot.isRunning}
+                onClick={runningPerfTesterSuite}
+              >
+                {DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_RUN_SUITE_BUTTON_LABEL}
+              </button>
+              <button
+                type="button"
+                className={
+                  RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_ACTION_BUTTON_CLASS_NAME
+                }
+                disabled={!perfTesterSnapshot.isRunning}
+                onClick={cancellingPerfTesterRun}
+              >
+                {DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_CANCEL_BUTTON_LABEL}
+              </button>
+              <button
+                type="button"
+                className={
+                  RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_ACTION_BUTTON_CLASS_NAME
+                }
+                disabled={perfTesterSnapshot.results.length === 0}
+                onClick={() => {
+                  void copyingWorldPlazaTextToClipboard(
+                    formattingWorldPlazaPerformanceTesterReport(
+                      perfTesterSnapshot.results
+                    )
+                  ).then((didCopy) => {
+                    showToast(
+                      didCopy
+                        ? DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_COPY_SUCCESS_TOAST
+                        : DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_COPY_FAILURE_TOAST
+                    );
+                  });
+                }}
+              >
+                {
+                  DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_COPY_REPORT_BUTTON_LABEL
+                }
+              </button>
+            </div>
+            {perfTesterSnapshot.isPromptingWalk ? (
+              <div className="mb-2 font-semibold text-lime-200">
+                {DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_WALK_PROMPT_BANNER}
+              </div>
+            ) : null}
+            {perfTesterSnapshot.isRunning ? (
+              <div className="mb-2 text-amber-100/90">
+                suite {perfTesterSnapshot.phase}{' '}
+                {perfTesterSnapshot.currentStepIndex}/
+                {perfTesterSnapshot.totalStepCount}
+                {perfTesterSnapshot.currentStepId
+                  ? ` · ${perfTesterSnapshot.currentStepId}`
+                  : ''}
+              </div>
+            ) : null}
             <div
               className={
                 RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_SECTION_LABEL_CLASS_NAME
@@ -196,11 +271,16 @@ export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
             </div>
             <div>
               frame avg {snapshot.frameAverageMs.toFixed(1)}ms | p95{' '}
-              {snapshot.framePercentile95Ms.toFixed(1)}ms | max{' '}
+              {snapshot.framePercentile95Ms.toFixed(1)}ms | p99{' '}
+              {snapshot.framePercentile99Ms.toFixed(1)}ms | max{' '}
               {snapshot.frameMaxMs.toFixed(1)}ms
             </div>
             <div className="mb-1 text-amber-100/90">
-              slow frames {snapshot.slowFrameCount}
+              slow frames {snapshot.slowFrameCount} | very slow{' '}
+              {snapshot.verySlowFrameCount}
+              {snapshot.jsHeapUsedMb !== null
+                ? ` | heap ${snapshot.jsHeapUsedMb.toFixed(1)}mb`
+                : ''}
             </div>
 
             {snapshot.recentSpikeLines.length > 0 ? (
@@ -237,7 +317,8 @@ export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
               snapshot.samples.map((sampleStats) => (
                 <div key={sampleStats.sampleId}>
                   {sampleStats.sampleId}: avg {sampleStats.averageMs.toFixed(1)}{' '}
-                  | p95 {sampleStats.percentile95Ms.toFixed(1)} | max{' '}
+                  | p95 {sampleStats.percentile95Ms.toFixed(1)} | p99{' '}
+                  {sampleStats.percentile99Ms.toFixed(1)} | max{' '}
                   {sampleStats.maxMs.toFixed(1)} | last{' '}
                   {sampleStats.lastMs.toFixed(1)}
                   {sampleStats.spikeCount > 0
@@ -293,7 +374,64 @@ export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
       </div>
 
       <div className="mt-2 shrink-0 border-t border-amber-300/20 pt-2">
+        {perfTesterSnapshot.isPromptingWalk ? (
+          <div className="mb-1 font-semibold text-lime-200">
+            {DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_WALK_PROMPT_BANNER}
+          </div>
+        ) : null}
+        {perfTesterSnapshot.isRunning ? (
+          <div className="mb-1 text-amber-100/90">
+            suite {perfTesterSnapshot.phase}{' '}
+            {perfTesterSnapshot.currentStepIndex}/
+            {perfTesterSnapshot.totalStepCount}
+            {perfTesterSnapshot.currentStepId
+              ? ` · ${perfTesterSnapshot.currentStepId}`
+              : ''}
+          </div>
+        ) : null}
         <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className={
+              RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_ACTION_BUTTON_CLASS_NAME
+            }
+            disabled={perfTesterSnapshot.isRunning}
+            onClick={runningPerfTesterSuite}
+          >
+            {DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_RUN_SUITE_BUTTON_LABEL}
+          </button>
+          <button
+            type="button"
+            className={
+              RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_ACTION_BUTTON_CLASS_NAME
+            }
+            disabled={!perfTesterSnapshot.isRunning}
+            onClick={cancellingPerfTesterRun}
+          >
+            {DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_CANCEL_BUTTON_LABEL}
+          </button>
+          <button
+            type="button"
+            className={
+              RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_ACTION_BUTTON_CLASS_NAME
+            }
+            disabled={perfTesterSnapshot.results.length === 0}
+            onClick={() => {
+              void copyingWorldPlazaTextToClipboard(
+                formattingWorldPlazaPerformanceTesterReport(
+                  perfTesterSnapshot.results
+                )
+              ).then((didCopy) => {
+                showToast(
+                  didCopy
+                    ? DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_COPY_SUCCESS_TOAST
+                    : DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_COPY_FAILURE_TOAST
+                );
+              });
+            }}
+          >
+            {DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_COPY_REPORT_BUTTON_LABEL}
+          </button>
           <button
             type="button"
             className={
@@ -328,7 +466,7 @@ export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
           </button>
         </div>
         <div className="mt-1 text-amber-100/70">
-          Console: window.__WORLD_PLAZA_PERF__.dump()
+          Console: window.__WORLD_PLAZA_PERF__.runPerfSuite()
         </div>
       </div>
     </div>,

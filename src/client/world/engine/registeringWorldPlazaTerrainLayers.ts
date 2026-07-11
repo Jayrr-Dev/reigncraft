@@ -6,7 +6,6 @@ import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
 } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED } from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
-import { DEFINING_WORLD_PLAZA_WATER_SHIMMER_UPDATE_INTERVAL_FRAMES } from '@/components/world/domains/definingWorldPlazaWaterConstants';
 import type { InvalidatingWorldPlazaFloorChunkGraphicsTileIndex } from '@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForTileIndices';
 import { invalidatingWorldPlazaFloorChunkGraphicsForTileIndices } from '@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForTileIndices';
 import { listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex } from '@/components/world/domains/listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex';
@@ -654,6 +653,19 @@ export function registeringWorldPlazaTerrainLayers(
       sync: (context, runtimeState) => {
         const state = runtimeState as RunningWorldPlazaTreeShadowsLayerState;
 
+        if (!context.performanceProfile.drawsTreeShadows) {
+          if (state.shadowGraphicsByKey.size > 0) {
+            for (const shadowGraphics of state.shadowGraphicsByKey.values()) {
+              context.trunkLayer.removeChild(shadowGraphics);
+              shadowGraphics.destroy();
+            }
+
+            state.shadowGraphicsByKey.clear();
+          }
+
+          return { isComplete: true, needsChildSort: false };
+        }
+
         if (!context.treeBounds) {
           return { isComplete: true, needsChildSort: false };
         }
@@ -826,8 +838,8 @@ export function registeringWorldPlazaTerrainLayers(
       boundsProfile: 'none',
       renderLayerToggle: 'floor',
       invalidateOn: [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS],
-      updateEveryNFrames:
-        DEFINING_WORLD_PLAZA_WATER_SHIMMER_UPDATE_INTERVAL_FRAMES,
+      updateEveryNFramesFromProfile: (profile) =>
+        profile.waterShimmerUpdateIntervalFrames,
       createRuntimeState: (): RunningWorldPlazaWaterShimmerLayerState => ({
         graphics: null,
       }),
@@ -987,6 +999,10 @@ export function registeringWorldPlazaTerrainLayers(
       invalidateOn: [],
       createRuntimeState: (): RunningWorldPlazaTreeShakeLayerState => ({}),
       tick: (context) => {
+        if (!context.performanceProfile.drawsTreeShake) {
+          return;
+        }
+
         const trunkState =
           engineHandle.getIncrementalRuntimeState<RunningWorldPlazaTreeTrunksLayerState>(
             RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_TRUNKS

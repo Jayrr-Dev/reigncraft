@@ -43,6 +43,14 @@ export function usingWorldPlazaAdaptivePerformanceTier(
     let rafId = 0;
 
     const tick = (nowMs: number) => {
+      if (
+        typeof document !== 'undefined' &&
+        document.visibilityState !== 'visible'
+      ) {
+        rafId = requestAnimationFrame(tick);
+        return;
+      }
+
       const frameDeltaMs = nowMs - lastFrameAtMs;
       lastFrameAtMs = nowMs;
 
@@ -50,7 +58,9 @@ export function usingWorldPlazaAdaptivePerformanceTier(
         sampler,
         frameDeltaMs,
         nowMs,
-        typeof document === 'undefined' ? true : document.visibilityState === 'visible'
+        typeof document === 'undefined'
+          ? true
+          : document.visibilityState === 'visible'
       );
 
       if (nextTier) {

@@ -470,6 +470,7 @@ export function RenderingWorldPlazaFireLayer({
   const fireVisualPoolRef = useRef<
     Map<string, RenderingWorldPlazaFireVisualEntry>
   >(new Map());
+  const activeFireTileKeysRef = useRef(new Set<string>());
   const [areSpriteTexturesReady, setAreSpriteTexturesReady] = useState(false);
   const visibleFireCells = useMemo(
     () =>
@@ -544,7 +545,12 @@ export function RenderingWorldPlazaFireLayer({
       return;
     }
 
-    const activeTileKeys = new Set(cells.map(buildingWorldPlazaFireTileKey));
+    const activeTileKeys = activeFireTileKeysRef.current;
+    activeTileKeys.clear();
+
+    for (const cell of cells) {
+      activeTileKeys.add(buildingWorldPlazaFireTileKey(cell));
+    }
 
     for (const [tileKey, entry] of fireVisualPool) {
       if (!activeTileKeys.has(tileKey)) {

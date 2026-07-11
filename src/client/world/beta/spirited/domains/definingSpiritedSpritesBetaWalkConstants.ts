@@ -22,8 +22,8 @@ export const DEFINING_SPIRITED_SPRITES_BETA_WANDER_RETARGET_MAX_SEC = 4.2;
 /** Arrive distance before retargeting (grid). */
 export const DEFINING_SPIRITED_SPRITES_BETA_WANDER_ARRIVE_GRID = 0.35;
 
-/** Screen-space bob amplitude while moving (px). */
-export const DEFINING_SPIRITED_SPRITES_BETA_WALK_BOB_AMPLITUDE_PX = 1.75;
+/** Screen-space bob amplitude while moving (px, integer). */
+export const DEFINING_SPIRITED_SPRITES_BETA_WALK_BOB_AMPLITUDE_PX = 1;
 
 /** Bob cycles per second while moving. */
 export const DEFINING_SPIRITED_SPRITES_BETA_WALK_BOB_HZ = 2.4;

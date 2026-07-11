@@ -13,23 +13,47 @@ const STAR_AUDIO_PRESET_PRELOAD_BLOCK =
 const STAR_AUDIO_DEVVIT_PATCH_MARKER =
   '/* preset blob preloads skipped for Devvit iframe compatibility */';
 
+const STAR_AUDIO_ENDED_LISTENER_BLOCK =
+  /self\._endTimers\[sound\._id\] = function\(\) \{\s*self\._ended\(sound\);\s*node\.removeEventListener\("ended", self\._endTimers\[sound\._id\], false\);\s*\};/;
+
+const STAR_AUDIO_ENDED_LISTENER_PATCH_MARKER =
+  '/* retain ended listener before _ended clears timer */';
+
 /**
  * @param {string} source
  * @returns {string}
  */
 export function patchingStarAudioSourceForDevvitIframe(source) {
-  if (source.includes(STAR_AUDIO_DEVVIT_PATCH_MARKER)) {
-    return source;
+  let patchedSource = source;
+
+  if (
+    !patchedSource.includes(STAR_AUDIO_DEVVIT_PATCH_MARKER) &&
+    STAR_AUDIO_PRESET_PRELOAD_BLOCK.test(patchedSource)
+  ) {
+    patchedSource = patchedSource.replace(
+      STAR_AUDIO_PRESET_PRELOAD_BLOCK,
+      STAR_AUDIO_DEVVIT_PATCH_MARKER
+    );
   }
 
-  if (!STAR_AUDIO_PRESET_PRELOAD_BLOCK.test(source)) {
-    return source;
+  if (
+    !patchedSource.includes(STAR_AUDIO_ENDED_LISTENER_PATCH_MARKER) &&
+    STAR_AUDIO_ENDED_LISTENER_BLOCK.test(patchedSource)
+  ) {
+    patchedSource = patchedSource.replace(
+      STAR_AUDIO_ENDED_LISTENER_BLOCK,
+      `${STAR_AUDIO_ENDED_LISTENER_PATCH_MARKER}
+                self._endTimers[sound._id] = function() {
+                  var endedListener = self._endTimers[sound._id];
+                  self._ended(sound);
+                  if (typeof endedListener === "function") {
+                    node.removeEventListener("ended", endedListener, false);
+                  }
+                };`
+    );
   }
 
-  return source.replace(
-    STAR_AUDIO_PRESET_PRELOAD_BLOCK,
-    STAR_AUDIO_DEVVIT_PATCH_MARKER
-  );
+  return patchedSource;
 }
 
 /**
@@ -135,7 +159,7 @@ if (isPostinstallEntry) {
 
   if (patched) {
     console.log(
-      'Patched star-audio for Devvit iframe (skipped procedural preset blob warm-up).'
+      'Patched star-audio for Devvit iframe compatibility.'
     );
   }
 }

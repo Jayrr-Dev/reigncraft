@@ -142,6 +142,9 @@ export type DefiningWorldPlazaTerrainRedrawLayerDescriptor =
       bounds: DefiningWorldPlazaVisibleTileBounds
     ) => void;
     readonly updateEveryNFrames?: number;
+    readonly updateEveryNFramesFromProfile?: (
+      profile: DefiningWorldPlazaPerformanceProfile
+    ) => number;
     readonly tick?: (
       context: RunningWorldPlazaTerrainLayerEngineContext,
       runtimeState: unknown

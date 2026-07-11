@@ -1,6 +1,6 @@
 /**
  * Flat view registry for the plaza dev tools panel.
- * One dropdown picks a leaf view; groups replace the old tab + badge stack.
+ * One dropdown bar per group; each bar picks a leaf view in that section.
  *
  * @module components/world/domains/definingWorldPlazaDevModePanelViews
  */
@@ -45,7 +45,7 @@ export type DefiningWorldPlazaDevModePanelView = {
 export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_DEFAULT_VIEW_ID: DefiningWorldPlazaDevModePanelViewId =
   'world-status';
 
-/** Ordered leaf views shown in the section dropdown. */
+/** Ordered leaf views shown across per-section dropdown bars. */
 export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_VIEWS: readonly DefiningWorldPlazaDevModePanelView[] =
   [
     {
@@ -183,7 +183,7 @@ export type DefiningWorldPlazaDevModePanelViewGroup = {
 };
 
 /**
- * Groups leaf views for the section dropdown list.
+ * Groups leaf views for the per-section dropdown bars.
  */
 export function listingWorldPlazaDevModePanelViewGroups(): readonly DefiningWorldPlazaDevModePanelViewGroup[] {
   const groups: DefiningWorldPlazaDevModePanelViewGroup[] = [];

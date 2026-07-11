@@ -83,7 +83,7 @@ export function advancingSpiritedSpritesBetaWalkTick(
   );
   instance.bobPhaseSec += deltaSec;
 
-  return (
+  return Math.round(
     Math.sin(
       instance.bobPhaseSec *
         DEFINING_SPIRITED_SPRITES_BETA_WALK_BOB_HZ *

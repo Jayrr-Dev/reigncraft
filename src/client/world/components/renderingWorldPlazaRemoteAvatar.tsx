@@ -5,6 +5,7 @@ import { RenderingWorldPlazaGirlSampleRemoteAvatar } from '@/components/world/co
 import { resolvingWorldPlazaAvatarCharacterDefinition } from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
 import type { DefiningWorldPlazaRemotePlayer } from '@/components/world/domains/definingWorldPlazaOnlineRoom';
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { parsingWorldPlazaAvatarSkinIdForNetworkSync } from '@/components/world/domains/parsingWorldPlazaAvatarSkinIdForNetworkSync';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useRef } from 'react';
@@ -20,6 +21,7 @@ export interface RenderingWorldPlazaRemoteAvatarProps {
   playerRenderPositionRegistryRef: React.RefObject<
     Map<string, DefiningWorldPlazaPlayerRenderPosition>
   >;
+  localPlayerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
 }
 
 /**
@@ -29,6 +31,7 @@ export function RenderingWorldPlazaRemoteAvatar({
   player,
   remotePlayerRegistryRef,
   playerRenderPositionRegistryRef,
+  localPlayerPositionRef,
 }: RenderingWorldPlazaRemoteAvatarProps): React.JSX.Element | null {
   const characterDefinition = useMemo(
     () =>
@@ -71,6 +74,7 @@ export function RenderingWorldPlazaRemoteAvatar({
       initialPlayer={player}
       remotePlayerRegistryRef={remotePlayerRegistryRef}
       playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}
+      localPlayerPositionRef={localPlayerPositionRef}
       characterDefinition={characterDefinition}
     />
   );

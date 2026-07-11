@@ -1,7 +1,11 @@
 import { DEFINING_WORLD_PLAZA_WATER_SHIMMER_LAYER_Z_INDEX } from "@/components/world/domains/definingWorldPlazaWaterConstants";
 import { drawingWorldPlazaWaterShimmerOnGraphics } from "@/components/world/domains/drawingWorldPlazaWaterShimmerOnGraphics";
+import {
+  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
+  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
+} from "@/components/world/domains/definingWorldPlazaIsometricConstants";
 import type { DefiningWorldPlazaVisibleTileBounds } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
-import { Graphics } from "pixi.js";
+import { Graphics, Rectangle } from "pixi.js";
 
 /**
  * Maintains one shimmer overlay graphics child for visible water tiles.
@@ -16,6 +20,41 @@ export interface UpdatingWorldPlazaVisibleWaterShimmerGraphicsLayerInput {
   readonly animationTimeMs: number;
 }
 
+/** Conservative padding for animated streaks and ripple ellipses. */
+const SYNCING_WORLD_PLAZA_WATER_SHIMMER_BOUNDS_PADDING_PX = 96;
+
+/**
+ * Supplies explicit bounds so Pixi never scans the rebuilt ShapePath.
+ */
+function updatingWorldPlazaVisibleWaterShimmerBoundsArea(
+  graphics: Graphics,
+  bounds: DefiningWorldPlazaVisibleTileBounds,
+): void {
+  const minX =
+    (bounds.minTileX - bounds.maxTileY) *
+      DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX -
+    SYNCING_WORLD_PLAZA_WATER_SHIMMER_BOUNDS_PADDING_PX;
+  const maxX =
+    (bounds.maxTileX - bounds.minTileY) *
+      DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX +
+    SYNCING_WORLD_PLAZA_WATER_SHIMMER_BOUNDS_PADDING_PX;
+  const minY =
+    (bounds.minTileX + bounds.minTileY) *
+      DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX -
+    SYNCING_WORLD_PLAZA_WATER_SHIMMER_BOUNDS_PADDING_PX;
+  const maxY =
+    (bounds.maxTileX + bounds.maxTileY) *
+      DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX +
+    SYNCING_WORLD_PLAZA_WATER_SHIMMER_BOUNDS_PADDING_PX;
+  const boundsArea = graphics.boundsArea ?? new Rectangle();
+
+  boundsArea.x = minX;
+  boundsArea.y = minY;
+  boundsArea.width = maxX - minX;
+  boundsArea.height = maxY - minY;
+  graphics.boundsArea = boundsArea;
+}
+
 /**
  * Clears and redraws the shimmer overlay for the current visible bounds.
  *
@@ -24,6 +63,10 @@ export interface UpdatingWorldPlazaVisibleWaterShimmerGraphicsLayerInput {
 export function updatingWorldPlazaVisibleWaterShimmerGraphicsLayer(
   input: UpdatingWorldPlazaVisibleWaterShimmerGraphicsLayerInput,
 ): void {
+  updatingWorldPlazaVisibleWaterShimmerBoundsArea(
+    input.shimmerGraphics,
+    input.bounds,
+  );
   input.shimmerGraphics.clear();
   drawingWorldPlazaWaterShimmerOnGraphics(
     input.shimmerGraphics,
@@ -48,6 +91,7 @@ export function ensuringWorldPlazaVisibleWaterShimmerGraphicsLayer(
 
   const createdShimmerGraphics = new Graphics();
   createdShimmerGraphics.eventMode = "none";
+  createdShimmerGraphics.boundsArea = new Rectangle();
   createdShimmerGraphics.zIndex = DEFINING_WORLD_PLAZA_WATER_SHIMMER_LAYER_Z_INDEX;
   parentContainer.addChild(createdShimmerGraphics);
 

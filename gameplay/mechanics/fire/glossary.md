@@ -84,6 +84,7 @@ Terms for wildfire, campfires, fuel, and fire cells.
 | **Ambience volume gate**  | Effective loop volume = `computingWorldPlazaSfxEffectiveVolume` (base target � falloff � optional clip multiplier � plaza **Ambience volume** slider). Campfire target **0.42**; lava target **0.36**.                 |
 | **Ambience loop handle**  | Single star-audio `SoundHandle` per session while the player stays in range. Start via `playingWorldPlazaStarAudioSfx` (SFX group); polls call `updatingWorldPlazaStarAudioActiveSfxPlayVolume` (no per-tick restart). |
 | **Bonfire clip**          | Shared loop asset: `public/fire/sfx/campfire/bonfire.ogg` (Butterfly Looped Ambience Sounds pack). Used for campfire (`bonfire` id) and lava (`crackle` id).                                                           |
+| **Active tile key set**   | Engine-only: `activeFireTileKeysRef` in `renderingWorldPlazaFireLayer.tsx`. Cleared and refilled each Pixi tick to reconcile the flame visual pool. Not a player mechanic.                                             |
 
 ## Persistence modes
 

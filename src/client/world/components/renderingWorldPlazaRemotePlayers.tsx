@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
-import { RenderingWorldPlazaRemoteAvatar } from "@/components/world/components/renderingWorldPlazaRemoteAvatar";
-import type { DefiningWorldPlazaRemotePlayer } from "@/components/world/domains/definingWorldPlazaOnlineRoom";
-import type { DefiningWorldPlazaPlayerRenderPosition } from "@/components/world/domains/definingWorldPlazaPlayerRenderPosition";
+import { RenderingWorldPlazaRemoteAvatar } from '@/components/world/components/renderingWorldPlazaRemoteAvatar';
+import type { DefiningWorldPlazaRemotePlayer } from '@/components/world/domains/definingWorldPlazaOnlineRoom';
+import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 
 export interface RenderingWorldPlazaRemotePlayersProps {
   /** Other players in the room (excluding local user). */
@@ -15,6 +16,8 @@ export interface RenderingWorldPlazaRemotePlayersProps {
   playerRenderPositionRegistryRef: React.RefObject<
     Map<string, DefiningWorldPlazaPlayerRenderPosition>
   >;
+  /** Local player grid position for presentation culling. */
+  localPlayerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
 }
 
 /**
@@ -24,6 +27,7 @@ export function RenderingWorldPlazaRemotePlayers({
   remotePlayers,
   remotePlayerRegistryRef,
   playerRenderPositionRegistryRef,
+  localPlayerPositionRef,
 }: RenderingWorldPlazaRemotePlayersProps): React.JSX.Element | null {
   if (remotePlayers.length === 0) {
     return null;
@@ -37,6 +41,7 @@ export function RenderingWorldPlazaRemotePlayers({
           player={player}
           remotePlayerRegistryRef={remotePlayerRegistryRef}
           playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}
+          localPlayerPositionRef={localPlayerPositionRef}
         />
       ))}
     </>

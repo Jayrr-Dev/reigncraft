@@ -32,10 +32,7 @@ import {
 } from '@/components/world/character/hooks/usingWorldPlazaSelectedCharacterEngineDefinition';
 import { resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint } from '@/components/world/collision';
 import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
-import {
-  DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET,
-  resolvingWorldDepthAvatarBodySortKey,
-} from '@/components/world/depth';
+import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
 import { advancingWorldPlazaGirlSampleCombatPresentation } from '@/components/world/domains/advancingWorldPlazaGirlSampleCombatPresentation';
 import { applyingWorldPlazaGirlSampleAvatarMotionToSpriteWithFallback } from '@/components/world/domains/applyingWorldPlazaGirlSampleAvatarMotionToSpriteWithFallback';
 import { attemptingWorldPlazaPlayerFallFromLayerDrop } from '@/components/world/domains/attemptingWorldPlazaPlayerFallFromLayerDrop';
@@ -118,6 +115,12 @@ import {
   updatingWorldPlazaAvatarGroundShadowGraphics,
 } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
 import { loadingWorldPlazaGirlSampleCombatCharacterTextures } from '@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures';
+import {
+  applyingWorldPlazaCachedDisplayObjectZIndex,
+  computingWorldPlazaPlacedBlocksDepthRevision,
+  creatingWorldPlazaEntityDepthSortCache,
+  resolvingWorldPlazaCachedAvatarBodySortKey,
+} from '@/components/world/domains/managingWorldPlazaEntityDepthSortCache';
 import { checkingWorldPlazaMobileAutoJumpEnabled } from '@/components/world/domains/managingWorldPlazaMobileAutoJumpStore';
 import {
   beginningWorldPlazaPerformanceSample,
@@ -361,6 +364,11 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     );
   const navigationStuckFrameCountRef = useRef(0);
   const navigationReplanFrameCounterRef = useRef(0);
+  const avatarDepthSortCacheRef = useRef(
+    creatingWorldPlazaEntityDepthSortCache()
+  );
+  const avatarBodyZIndexRef = useRef(Number.NaN);
+  const avatarShadowZIndexRef = useRef(Number.NaN);
   const performanceProfile = usingWorldPlazaPerformanceProfile();
   const avatarShadowContainerRef = useRef<Container | null>(null);
   const avatarGroundShadowGraphicsRef = useRef<Graphics | null>(null);
@@ -1833,6 +1841,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         placedBlocksByTile: scenePlacedBlocksByTile,
         isJumping: Boolean(activeJumpState),
         playerRadiusGrid: characterEngineDerivedStats.collisionRadiusGrid,
+        maxNodeExpansions: performanceProfile.navigationMaxNodeExpansions,
       });
 
       navigationPlacedBlockSnapshotRef.current = new Set(
@@ -2096,12 +2105,19 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         groundShadowLiftPeakScreenPx
       );
 
-    const avatarBodyEntityZIndex = resolvingWorldDepthAvatarBodySortKey(
+    const placedBlocksDepthRevision =
+      computingWorldPlazaPlacedBlocksDepthRevision(
+        scenePlacedBlocks.length,
+        scenePlacedBlocks[scenePlacedBlocks.length - 1]?.blockId
+      );
+    const avatarBodyEntityZIndex = resolvingWorldPlazaCachedAvatarBodySortKey(
       playerPosition,
+      avatarDepthSortCacheRef.current,
       {
         placedBlocks: scenePlacedBlocks,
         placedBlocksByTile: scenePlacedBlocksByTile,
-      }
+      },
+      placedBlocksDepthRevision
     );
 
     // Sinking into molten lava: skip while airborne so jumps can clear pools.
@@ -2155,9 +2171,12 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     // occludes (or hides) the avatar occludes the shadow too. The shadow draws
     // just under the body via the tiny negative offset and its earlier child
     // order in the container.
-    shadowContainer.zIndex =
+    applyingWorldPlazaCachedDisplayObjectZIndex(
+      shadowContainer,
       avatarBodyEntityZIndex +
-      DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
+        DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET,
+      avatarShadowZIndexRef
+    );
     shadowContainer.visible =
       container.visible && (lavaSinkBaseOffsetPx === 0 || isLavaHeatProximate);
     if (avatarGroundShadowGraphicsRef.current) {
@@ -2170,7 +2189,11 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           activeStunEffect?.phaseSeed ?? 0
         )
       : 0;
-    container.zIndex = avatarBodyEntityZIndex;
+    applyingWorldPlazaCachedDisplayObjectZIndex(
+      container,
+      avatarBodyEntityZIndex,
+      avatarBodyZIndexRef
+    );
     sprite.visible = !isLavaSubmergedPastAvatarHeight;
     sprite.position.set(
       0,

@@ -112,6 +112,50 @@ const managingWorldPlazaPerformanceTesterState: ManagingWorldPlazaPerformanceTes
 
 const managingWorldPlazaPerformanceTesterSubscribers = new Set<() => void>();
 
+let managingWorldPlazaPerformanceTesterCachedSnapshot: ManagingWorldPlazaPerformanceTesterStoreSnapshot =
+  {
+    phase: 'idle',
+    results: [],
+    currentStepId: null,
+    currentStepIndex: 0,
+    totalStepCount: 0,
+    phaseElapsedMs: 0,
+    phaseDurationMs: 0,
+    isPromptingWalk: false,
+    isRunning: false,
+  };
+
+/**
+ * Rebuilds the cached public snapshot. Call only before notifying subscribers.
+ */
+function rebuildingWorldPlazaPerformanceTesterCachedSnapshot(): void {
+  const phaseElapsedMs =
+    managingWorldPlazaPerformanceTesterState.phase === 'idle' ||
+    managingWorldPlazaPerformanceTesterState.phase === 'done' ||
+    managingWorldPlazaPerformanceTesterState.phase === 'cancelled'
+      ? 0
+      : Math.max(
+          0,
+          performance.now() -
+            managingWorldPlazaPerformanceTesterState.phaseStartedAtMs
+        );
+
+  managingWorldPlazaPerformanceTesterCachedSnapshot = {
+    phase: managingWorldPlazaPerformanceTesterState.phase,
+    results: [...managingWorldPlazaPerformanceTesterState.results],
+    currentStepId: managingWorldPlazaPerformanceTesterState.currentStepId,
+    currentStepIndex: managingWorldPlazaPerformanceTesterState.currentStepIndex,
+    totalStepCount: managingWorldPlazaPerformanceTesterState.totalStepCount,
+    phaseElapsedMs,
+    phaseDurationMs: managingWorldPlazaPerformanceTesterState.phaseDurationMs,
+    isPromptingWalk: managingWorldPlazaPerformanceTesterState.isPromptingWalk,
+    isRunning:
+      managingWorldPlazaPerformanceTesterState.phase === 'settling' ||
+      managingWorldPlazaPerformanceTesterState.phase === 'warmup' ||
+      managingWorldPlazaPerformanceTesterState.phase === 'sampling',
+  };
+}
+
 /**
  * Captures current plaza feature toggles before a tester run mutates them.
  */
@@ -171,6 +215,8 @@ function clearingWorldPlazaPerformanceTesterTimers(): void {
  * Notifies React subscribers that runner state changed.
  */
 function notifyingWorldPlazaPerformanceTesterSubscribers(): void {
+  rebuildingWorldPlazaPerformanceTesterCachedSnapshot();
+
   for (const onStoreChange of managingWorldPlazaPerformanceTesterSubscribers) {
     onStoreChange();
   }
@@ -378,33 +424,11 @@ function startingWorldPlazaPerformanceTesterRun(
 
 /**
  * Returns the public runner snapshot for UI and console consumers.
+ *
+ * Stable reference until the next notify. Required for useSyncExternalStore.
  */
 export function gettingWorldPlazaPerformanceTesterStoreSnapshot(): ManagingWorldPlazaPerformanceTesterStoreSnapshot {
-  const phaseElapsedMs =
-    managingWorldPlazaPerformanceTesterState.phase === 'idle' ||
-    managingWorldPlazaPerformanceTesterState.phase === 'done' ||
-    managingWorldPlazaPerformanceTesterState.phase === 'cancelled'
-      ? 0
-      : Math.max(
-          0,
-          performance.now() -
-            managingWorldPlazaPerformanceTesterState.phaseStartedAtMs
-        );
-
-  return {
-    phase: managingWorldPlazaPerformanceTesterState.phase,
-    results: [...managingWorldPlazaPerformanceTesterState.results],
-    currentStepId: managingWorldPlazaPerformanceTesterState.currentStepId,
-    currentStepIndex: managingWorldPlazaPerformanceTesterState.currentStepIndex,
-    totalStepCount: managingWorldPlazaPerformanceTesterState.totalStepCount,
-    phaseElapsedMs,
-    phaseDurationMs: managingWorldPlazaPerformanceTesterState.phaseDurationMs,
-    isPromptingWalk: managingWorldPlazaPerformanceTesterState.isPromptingWalk,
-    isRunning:
-      managingWorldPlazaPerformanceTesterState.phase === 'settling' ||
-      managingWorldPlazaPerformanceTesterState.phase === 'warmup' ||
-      managingWorldPlazaPerformanceTesterState.phase === 'sampling',
-  };
+  return managingWorldPlazaPerformanceTesterCachedSnapshot;
 }
 
 /**

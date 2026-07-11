@@ -1,11 +1,6 @@
 import type { DefiningWorldPlazaPerformanceProfile } from '@/components/world/domains/definingWorldPlazaPerformanceProfileConstants';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import {
-  checkingWorldPlazaTerrainDependencyKeysChanged,
-  DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY,
-  type DefiningWorldPlazaTerrainDependencySnapshot,
-} from '@/components/world/engine/definingWorldPlazaTerrainDependencyKeys';
-import {
   checkingWorldPlazaTerrainFrameWorkBudgetExpired,
   type ManagingWorldPlazaTerrainFrameWorkBudget,
 } from '@/components/world/domains/managingWorldPlazaTerrainFrameWorkBudget';
@@ -14,6 +9,11 @@ import {
   flushingWorldPlazaTerrainParentSortRegistry,
   markingWorldPlazaTerrainParentSortDirty,
 } from '@/components/world/domains/managingWorldPlazaTerrainParentSortRegistry';
+import {
+  checkingWorldPlazaTerrainDependencyKeysChanged,
+  DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY,
+  type DefiningWorldPlazaTerrainDependencySnapshot,
+} from '@/components/world/engine/definingWorldPlazaTerrainDependencyKeys';
 import type {
   DefiningWorldPlazaTerrainIncrementalLayerDescriptor,
   DefiningWorldPlazaTerrainLayerDescriptor,
@@ -418,7 +418,9 @@ export function creatingWorldPlazaTerrainLayerEngine(
         previousSnapshot,
         descriptor.invalidateOn
       );
-    const updateInterval = descriptor.updateEveryNFrames;
+    const updateInterval =
+      descriptor.updateEveryNFramesFromProfile?.(context.performanceProfile) ??
+      descriptor.updateEveryNFrames;
     entry.frameCounter += 1;
     const shouldUpdateOnInterval =
       updateInterval !== undefined &&

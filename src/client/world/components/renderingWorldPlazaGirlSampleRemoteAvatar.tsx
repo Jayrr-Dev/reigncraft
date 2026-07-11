@@ -6,10 +6,10 @@ import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/wor
 import { computingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineDerivedStats';
 import { computingWorldPlazaCharacterEngineSpriteScale } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineSpriteScale';
 import { resolvingWorldPlazaCharacterEngineDefinitionForSkinId } from '@/components/world/character/domains/registeringWorldPlazaCharacterEngineDefinitions';
-import {
-  DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET,
-  resolvingWorldDepthAvatarBodySortKey,
-} from '@/components/world/depth';
+import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
+import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
+import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
+import { DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
 import { computingWorldPlazaGirlSampleJumpArcOffsetPx } from '@/components/world/domains/computingWorldPlazaGirlSampleJumpArcOffsetPx';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaAvatarCharacterDefinition } from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
@@ -33,12 +33,18 @@ import { type DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/wor
 import type { DefiningWorldPlazaRemotePlayer } from '@/components/world/domains/definingWorldPlazaOnlineRoom';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { DEFINING_WORLD_PLAZA_WORLD_POINT_GROUND_LAYER } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   computingWorldPlazaAvatarGroundShadowJumpHeightRatio,
   drawingWorldPlazaAvatarGroundShadowOnGraphics,
   updatingWorldPlazaAvatarGroundShadowGraphics,
 } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
+import {
+  applyingWorldPlazaCachedDisplayObjectZIndex,
+  creatingWorldPlazaEntityDepthSortCache,
+  resolvingWorldPlazaCachedAvatarBodySortKey,
+} from '@/components/world/domains/managingWorldPlazaEntityDepthSortCache';
 import { checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import {
@@ -94,6 +100,8 @@ export interface RenderingWorldPlazaGirlSampleRemoteAvatarProps {
   playerRenderPositionRegistryRef: React.RefObject<
     Map<string, DefiningWorldPlazaPlayerRenderPosition>
   >;
+  /** Local player grid position for presentation culling. */
+  localPlayerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   /** Presentation bundle for the remote player's synced avatar skin. */
   characterDefinition: DefiningWorldPlazaAvatarCharacterDefinition;
 }
@@ -106,8 +114,10 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
   initialPlayer,
   remotePlayerRegistryRef,
   playerRenderPositionRegistryRef,
+  localPlayerPositionRef,
   characterDefinition,
 }: RenderingWorldPlazaGirlSampleRemoteAvatarProps): React.JSX.Element {
+  const performanceProfile = usingWorldPlazaPerformanceProfile();
   const characterEngineDefinition =
     resolvingWorldPlazaCharacterEngineDefinitionForSkinId(
       characterDefinition.skinId
@@ -137,6 +147,11 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
   const previousMotionKindRef = useRef<DefiningWorldPlazaAvatarMotionKind>(
     DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_IDLE
   );
+  const avatarDepthSortCacheRef = useRef(
+    creatingWorldPlazaEntityDepthSortCache()
+  );
+  const avatarBodyZIndexRef = useRef(Number.NaN);
+  const avatarShadowZIndexRef = useRef(Number.NaN);
   const inactiveSinceMsRef = useRef<number | null>(null);
   const previousReadyIdleActiveRef = useRef(false);
   const lastLocomotionWasRunRef = useRef(false);
@@ -446,15 +461,35 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
         jumpArcPeakScreenPx
       );
 
-    const avatarBodyEntityZIndex = resolvingWorldDepthAvatarBodySortKey({
+    const localPlayer = localPlayerPositionRef.current;
+    const isPresentationCulled =
+      localPlayer !== null &&
+      localPlayer !== undefined &&
+      performanceProfile.remoteAvatarPresentationCullGridRadius < 999 &&
+      (Math.abs(renderGridXRef.current - localPlayer.x) >
+        performanceProfile.remoteAvatarPresentationCullGridRadius ||
+        Math.abs(renderGridYRef.current - localPlayer.y) >
+          performanceProfile.remoteAvatarPresentationCullGridRadius);
+
+    const avatarGridPoint = {
       x: renderGridXRef.current,
       y: renderGridYRef.current,
       layer: standingLayer,
-    });
+    };
+
+    const avatarBodyEntityZIndex = isPresentationCulled
+      ? computingWorldDepthSortKey(avatarGridPoint) +
+        DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS
+      : resolvingWorldPlazaCachedAvatarBodySortKey(
+          avatarGridPoint,
+          avatarDepthSortCacheRef.current,
+          {},
+          0
+        );
 
     // Remote avatars sink into molten lava too; skip while mid jump arc.
     const lavaSinkBaseOffsetPx =
-      jumpArcOffsetPx !== 0
+      isPresentationCulled || jumpArcOffsetPx !== 0
         ? 0
         : computingWorldPlazaLavaSinkOffsetPxAtGridPoint(
             renderGridXRef.current,
@@ -463,6 +498,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
             characterEngineDerivedStats.isLavaWalkable
           );
     const isLavaHeatProximate =
+      !isPresentationCulled &&
       jumpArcOffsetPx === 0 &&
       lavaSinkBaseOffsetPx === 0 &&
       checkingWorldPlazaLavaHeatProximityAtGridPoint(
@@ -481,33 +517,56 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
           computingWorldPlazaLavaSinkBobOffsetPx(performance.now())
         : 0;
 
-    updatingWorldPlazaLavaSinkCoverAnimation(
-      {
-        backGraphics: avatarLavaSinkCoverBackGraphicsRef.current,
-        frontGraphics: avatarLavaSinkCoverFrontGraphicsRef.current,
-      },
-      lavaSinkBaseOffsetPx > 0,
-      performance.now()
-    );
-    updatingWorldPlazaLavaHeatProximityGlowAnimation(
-      avatarLavaHeatProximityGlowGraphicsRef.current,
-      isLavaHeatProximate,
-      performance.now()
-    );
+    if (!isPresentationCulled) {
+      updatingWorldPlazaLavaSinkCoverAnimation(
+        {
+          backGraphics: avatarLavaSinkCoverBackGraphicsRef.current,
+          frontGraphics: avatarLavaSinkCoverFrontGraphicsRef.current,
+        },
+        lavaSinkBaseOffsetPx > 0,
+        performance.now()
+      );
+      updatingWorldPlazaLavaHeatProximityGlowAnimation(
+        avatarLavaHeatProximityGlowGraphicsRef.current,
+        isLavaHeatProximate,
+        performance.now()
+      );
+    } else {
+      updatingWorldPlazaLavaSinkCoverAnimation(
+        {
+          backGraphics: avatarLavaSinkCoverBackGraphicsRef.current,
+          frontGraphics: avatarLavaSinkCoverFrontGraphicsRef.current,
+        },
+        false,
+        performance.now()
+      );
+      updatingWorldPlazaLavaHeatProximityGlowAnimation(
+        avatarLavaHeatProximityGlowGraphicsRef.current,
+        false,
+        performance.now()
+      );
+    }
 
     shadowContainer.position.set(screenPoint.x, anchoredScreenY);
     // Sync the shadow with the sprite: share the body sort key and visibility so
     // whatever occludes (or hides) the avatar occludes the shadow in lockstep.
-    shadowContainer.zIndex =
+    applyingWorldPlazaCachedDisplayObjectZIndex(
+      shadowContainer,
       avatarBodyEntityZIndex +
-      DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET;
+        DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET,
+      avatarShadowZIndexRef
+    );
     shadowContainer.visible =
       container.visible && (lavaSinkBaseOffsetPx === 0 || isLavaHeatProximate);
     if (avatarGroundShadowGraphicsRef.current) {
       avatarGroundShadowGraphicsRef.current.visible = !isLavaHeatProximate;
     }
     container.position.set(screenPoint.x, anchoredScreenY);
-    container.zIndex = avatarBodyEntityZIndex;
+    applyingWorldPlazaCachedDisplayObjectZIndex(
+      container,
+      avatarBodyEntityZIndex,
+      avatarBodyZIndexRef
+    );
     sprite.visible = !isLavaSubmergedPastAvatarHeight;
     sprite.position.set(0, jumpArcOffsetPx + lavaSinkOffsetPx);
     updatingWorldPlazaAvatarGroundShadowGraphics(
