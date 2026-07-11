@@ -85,7 +85,7 @@ Most of the character bucket is symptoms (nausea slow, joint lock, weakness) so 
 
 ### Characters, hunger, tools
 
-Seven starter skins. They differ in HP, defense, speed, jump, hunger drain, and immunities (Husky and Penguin resist cold; Grizzly resists bleed). Skills are `minor-heal`, `swift-stride`, and `heat-ward`, assigned per skin. Study a wildlife corpse to unlock that animal as a playable skin; the long-term goal is every species in the world.
+Seven starter skins: the Girl (human playable animal) plus Husky, Golden Retriever, Grizzly, Penguin, Fox Peach, and Cat Orange. Skins differ in HP, defense, speed, jump, hunger drain, and immunities (Husky and Penguin resist cold; Grizzly resists bleed). Skills are `minor-heal`, `swift-stride`, and `heat-ward`, assigned per skin. Study a wildlife corpse to unlock that animal as a playable skin; the long-term goal is every species in the world.
 
 Five hunger tiers from well fed down to starving. They change stamina regen, run drain, walk speed, and jump cost.
 
