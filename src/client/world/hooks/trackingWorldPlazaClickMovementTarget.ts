@@ -202,6 +202,26 @@ export function trackingWorldPlazaClickMovementTarget({
     ]
   );
 
+  /**
+   * Keeps joystick-style pointer steering cheap after hold-to-run activates.
+   *
+   * The initial press still plans around obstacles. Continuous steering writes
+   * the moving camera-relative target directly, while collision handles walls.
+   */
+  const applyingHeldPointerSteerTarget = useCallback(
+    (destination: DefiningWorldPlazaWorldPoint): void => {
+      walkDestinationRef.current = destination;
+      walkTargetRef.current = destination;
+
+      if (walkWaypointsRef.current.length > 0) {
+        clearingWorldPlazaNavigationWalkWaypoints(walkWaypointsRef);
+      }
+
+      isWalkingRef.current = true;
+    },
+    []
+  );
+
   const projectingClientPointToGridTarget = useCallback(
     (clientX: number, clientY: number): DefiningWorldPlazaWorldPoint | null => {
       const viewportFrame = viewportFrameRef.current;
@@ -411,30 +431,8 @@ export function trackingWorldPlazaClickMovementTarget({
         clientX: event.clientX,
         clientY: event.clientY,
       };
-
-      const targetGrid = resolvingPlazaClickTargetFromEvent(event);
-
-      if (!targetGrid) {
-        return;
-      }
-
-      const walkableTargetGrid = resolvingWalkablePlazaClickTarget(targetGrid);
-
-      if (!walkableTargetGrid) {
-        return;
-      }
-
-      notifyingPlayerNavigateIntent();
-
-      applyingPlazaNavigationWalkPlan(walkableTargetGrid);
-      isWalkingRef.current = true;
     },
-    [
-      applyingPlazaNavigationWalkPlan,
-      notifyingPlayerNavigateIntent,
-      resolvingPlazaClickTargetFromEvent,
-      resolvingWalkablePlazaClickTarget,
-    ]
+    []
   );
 
   const handlingPlazaPointerRelease = useCallback(
@@ -450,11 +448,9 @@ export function trackingWorldPlazaClickMovementTarget({
     []
   );
 
-  // While the pointer is held, keep re-aiming the walk target at the cursor each
-  // frame. A stationary mouse fires no pointermove, so without this the avatar
-  // would walk to the initial target and stop until the pointer moved again. The
-  // camera follows the player, so a fixed cursor yields a fresh world target and
-  // the avatar keeps moving (joystick-style hold-to-walk/run).
+  // After hold-to-run activates, keep re-aiming the walk target at the cursor.
+  // A stationary pointer emits no move event, while the following camera makes
+  // its world target change. Direct ref writes avoid synchronous A* every frame.
   useEffect(() => {
     if (!isEnabled) {
       return;
@@ -465,18 +461,18 @@ export function trackingWorldPlazaClickMovementTarget({
     const refreshingHeldWalkTarget = (): void => {
       const pointerClient = lastPointerClientRef.current;
       const nowMs = performance.now();
-
-      if (
+      const isHoldToRunActive =
         isPointerHeldRef.current &&
         pointerHeldSinceMsRef.current > 0 &&
         nowMs - pointerHeldSinceMsRef.current >=
-          DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS
-      ) {
+          DEFINING_WORLD_PLAZA_RUN_STAMINA_HOLD_TO_RUN_MS;
+
+      if (isHoldToRunActive) {
         isClickRunIntentRef.current = true;
       }
 
       if (
-        isPointerHeldRef.current &&
+        isHoldToRunActive &&
         pointerClient &&
         !isWalkPausedByCollisionRef.current &&
         !isJumpingRef.current
@@ -491,9 +487,7 @@ export function trackingWorldPlazaClickMovementTarget({
             resolvingWalkablePlazaClickTarget(targetGrid);
 
           if (walkableTargetGrid) {
-            notifyingPlayerNavigateIntent();
-            applyingPlazaNavigationWalkPlan(walkableTargetGrid);
-            isWalkingRef.current = true;
+            applyingHeldPointerSteerTarget(walkableTargetGrid);
           }
         }
       }
@@ -507,10 +501,9 @@ export function trackingWorldPlazaClickMovementTarget({
       window.cancelAnimationFrame(animationFrameId);
     };
   }, [
-    applyingPlazaNavigationWalkPlan,
+    applyingHeldPointerSteerTarget,
     isEnabled,
     isJumpingRef,
-    notifyingPlayerNavigateIntent,
     projectingClientPointToGridTarget,
     resolvingWalkablePlazaClickTarget,
   ]);

@@ -40,9 +40,10 @@ Reaching a **full bar** resets fatigue to `fresh`.
 
 ## Auto jump assist
 
-| Term          | Meaning                                                                                                                                                                                                                                                |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Auto jump** | Settings toggle. While moving toward a river or stream, the avatar requests a **run jump** when a clear far-bank landing exists. Works on every viewport when enabled. Default: **on** for mobile until turned off; **off** for desktop until enabled. |
+| Term                         | Meaning                                                                                                                                                                                                                                                |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Auto jump**                | Settings toggle. While moving toward a river or stream, the avatar requests a **run jump** when a clear far-bank landing exists. Works on every viewport when enabled. Default: **on** for mobile until turned off; **off** for desktop until enabled. |
+| **Auto-jump probe interval** | Forward water scans run at most once every **100ms** while moving.                                                                                                                                                                                     |
 
 ## Regen timing
 

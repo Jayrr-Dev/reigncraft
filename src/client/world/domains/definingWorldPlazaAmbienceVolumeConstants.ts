@@ -12,7 +12,7 @@ export const DEFINING_WORLD_PLAZA_AMBIENCE_VOLUME_STORAGE_KEY =
  * Master kill switch for biome, flowing-water, campfire, and lava ambience.
  * When false, loops stay silent regardless of slider or localStorage.
  */
-export const DEFINING_WORLD_PLAZA_AMBIENCE_ENABLED = false as const;
+export const DEFINING_WORLD_PLAZA_AMBIENCE_ENABLED = true as const;
 
 /** Default ambience volume when no saved preference exists. */
 export const DEFINING_WORLD_PLAZA_AMBIENCE_VOLUME_DEFAULT = 1 as const;

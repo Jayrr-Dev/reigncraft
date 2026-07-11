@@ -31,6 +31,13 @@ export const DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_DETECT_MAX_GRID = 2.25;
 /** Minimum gap width (along the scan) before auto-jump is worth requesting. */
 export const DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_MIN_GAP_GRID = 0.35;
 
+/**
+ * Minimum delay between forward water probes while moving.
+ * At full default run speed the player covers 0.3 grid during this interval,
+ * well inside the 2.25-grid detection range.
+ */
+export const DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_PROBE_INTERVAL_MS = 100;
+
 /** Cooldown after an auto-jump attempt so edge spam does not drain stamina. */
 export const DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_COOLDOWN_MS = 450;
 

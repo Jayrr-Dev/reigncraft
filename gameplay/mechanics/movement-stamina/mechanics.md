@@ -120,7 +120,7 @@ Per-character `jumpDistanceScale` adjusts horizontal reach (Grizzly **0.9**, Fox
 
 When **Auto jump** is enabled in Settings:
 
-1. While walking or click-moving, scan forward up to **2.25** grid for procedural or placed water
+1. While walking or click-moving, scan forward up to **2.25** grid for procedural or placed water, at most once every **100ms**
 2. If a gap is found and a **run jump** landing clears past the far bank, queue a jump (same stamina/hunger gates as a manual run jump)
 3. Cooldown **450ms** between auto-jump attempts so bank edges do not spam stamina
 
@@ -219,6 +219,8 @@ At or below **0°C** effective temperature, walk and run speed scale linearly to
 | Settings gear         | Master volume + **Auto jump** + **Fahrenheit (°F)** |
 | Tutorial movement tab | Hold-to-run, jump costs, roll dodge callout         |
 | Mechanics panel       | Sprint economy numbers from constants               |
+
+Guide copy is unchanged. The **100ms** probe cadence is internal scheduling and does not alter the Auto jump control or its teaching text.
 
 ## Shared stamina core (opt-in)
 

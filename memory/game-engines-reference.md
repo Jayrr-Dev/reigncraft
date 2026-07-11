@@ -2,7 +2,7 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.3.9      |
+| **Version**      | 1.3.10     |
 | **Last updated** | 2026-07-10 |
 
 Read this when working on plaza world gameplay, combat, rendering sync, or inventory. There is **no central engine registry**; engines are folders and naming conventions scattered under `src/client/world/` and `src/client/components/inventory/`.
@@ -426,7 +426,7 @@ flowchart TD
 
 **Adaptive performance tiers:** `resolvingWorldPlazaPerformanceProfile` picks mount tier (LOW if viewport ≤767px or `(pointer: coarse)`, else MEDIUM; never HIGH). `usingWorldPlazaAdaptivePerformanceTier` always-on rAF sampler (warmup 5s, history 180 frames, upgrade p95 <17ms with zero ≥20ms frames, downgrade p95 >22ms or p99 ≥50ms sustained 2s, cooldown 10s, 500ms eval interval, resume-gap ignore) steps LOW↔MEDIUM↔HIGH one at a time. Provider: `providingWorldPlazaPerformanceProfile.tsx`. Profiles: `DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILES` (forward prefetch, terrain budgets, wildlife sim steps, nav replan interval + A\* cap, lighting RTT cadence, LOW-tier visual trims, presentation cull radii, wildlife React reconciliation cadence). Entity depth scans cached per tile via `managingWorldPlazaEntityDepthSortCache.ts`. Terrain sync reads `performanceProfileRef` each tick without remounting the engine on tier change.
 
-**Plaza smoothness program:** Directional prefetch via `computingWorldPlazaSmoothedMovementDirection` + `computingWorldPlazaDirectionalTerrainPrefetchBounds` in `renderingWorldPlazaDeclarativeTerrainSync.tsx`. Terrain work yields on `managingWorldPlazaTerrainFrameWorkBudget`; parent sorts batch through `managingWorldPlazaTerrainParentSortRegistry`. GPU disposal time-slices in `queueingWorldPlazaPixiGpuResourceDisposal.ts`. Runtime hot paths: allocation-free placed-block collision probes, avatar collision skip + nav replan throttle (`renderingWorldPlazaGirlSampleWalkAvatar.tsx`), wildlife imperative transforms plus tier-throttled and visible-pixel-quantized React structural fingerprint gating (`syncingWildlifeInstancesImperativePresentation.ts`, `computingWildlifeRenderStructuralFingerprint.ts`), mount-only DOM overlay updates, change-driven fire light publication, cached LOW-tier darkness geometry, lighting RTT min interval (`renderingWorldPlazaLightingDarknessLayer.tsx`), multiplayer HUD poll dedupe (`checkingWorldPlazaOnlineParticipantsSnapshotChanged.ts`), ResizeObserver-owned Pixi viewport resizing, and explicit animated water shimmer bounds to avoid per-frame ShapePath bounds scans.
+**Plaza smoothness program:** Directional prefetch via `computingWorldPlazaSmoothedMovementDirection` + `computingWorldPlazaDirectionalTerrainPrefetchBounds` in `renderingWorldPlazaDeclarativeTerrainSync.tsx`. Terrain work yields on `managingWorldPlazaTerrainFrameWorkBudget`; parent sorts batch through `managingWorldPlazaTerrainParentSortRegistry`. GPU disposal time-slices in `queueingWorldPlazaPixiGpuResourceDisposal.ts`. Runtime hot paths: allocation-free placed-block collision probes, avatar collision skip + nav replan throttle + 100ms mobile auto-jump probe cadence (`renderingWorldPlazaGirlSampleWalkAvatar.tsx`), direct ref writes for continuous pointer steering instead of per-frame A\* (`trackingWorldPlazaClickMovementTarget.ts`), wildlife imperative transforms plus tier-throttled and visible-pixel-quantized React structural fingerprint gating (`syncingWildlifeInstancesImperativePresentation.ts`, `computingWildlifeRenderStructuralFingerprint.ts`), mount-only DOM overlay updates, change-driven fire light publication, cached LOW-tier darkness geometry, lighting RTT min interval (`renderingWorldPlazaLightingDarknessLayer.tsx`), multiplayer HUD poll dedupe (`checkingWorldPlazaOnlineParticipantsSnapshotChanged.ts`), ResizeObserver-owned Pixi viewport resizing, and explicit animated water shimmer bounds to avoid per-frame ShapePath bounds scans.
 
 **Performance diagnostics + multistep tester:** `measuringWorldPlazaPerformanceDiagnostics.ts` instruments frame times (p95/p99, very-slow frames, JS heap when available) and keyed samples (`terrain-sync`, `terrain-parent-sort`, `terrain-prune`, `wildlife-tick`, `lighting-rtt`, `dom-overlay`, `gpu-disposal`, etc.). Enable via `?perf=1`, the in-world Perf overlay, or `window.__WORLD_PLAZA_PERF__.enable()`. Render-layer isolation uses `settingWorldPlazaPerformanceDiagnosticsRenderLayer`. The **Perf tester** in the Features debug panel (`renderingWorldPlazaPerformanceTesterPanel.tsx`, store `managingWorldPlazaPerformanceTesterStore.ts`) runs a declarative 14-step suite with settle → warmup → sample windows, optional trials (walk prompt uses 3 with median row), device/tier metadata (`capturingWorldPlazaPerformanceTesterBenchmarkMetadata.ts`), and plain-text gates via `formattingWorldPlazaPerformanceTesterReport.ts`; restores prior toggles on done/cancel. Console: `runPerfSuite()`, `runPerfStep(id)`, `cancelPerfSuite()`, `getPerfSuiteResults()`. Benchmark production builds on desktop + low-end profiles; walk targets: p95 ≤20ms (medium/high), ≤33ms (low), p99 ≤50ms.
 
@@ -504,7 +504,7 @@ flowchart TB
 | **Click hook**             | `trackingWorldPlazaClickMovementTarget.ts`                  |
 | **Avatar waypoint follow** | `renderingWorldPlazaGirlSampleWalkAvatar.tsx`               |
 
-**Pipeline:** click destination → direct-path blocked check → layered grid A\* → path smoother → waypoint queue → existing isometric step + collision eject.
+**Pipeline:** click destination → direct-path blocked check → layered grid A\* → path smoother → waypoint queue → existing isometric step + collision eject. After hold-to-run activates, continuous pointer steering updates the camera-relative destination directly instead of rerunning A\* every animation frame.
 
 **Registries:**
 
@@ -643,6 +643,7 @@ Run: `npm run test -- managingWildlifeSpatialGrid.perf` (or any `*.perf.test.ts`
 
 | Version | Date       | Note                                                                        |
 | ------- | ---------- | --------------------------------------------------------------------------- |
+| 1.3.10  | 2026-07-10 | Throttle held pointer pathing and mobile auto-jump scans                    |
 | 1.3.9   | 2026-07-10 | Stop per-frame HTTP position posts during mobile click-walk                 |
 | 1.3.8   | 2026-07-10 | Avatar assets now fail boot instead of opening an immobile invisible player |
 | 1.3.7   | 2026-07-10 | Mobile hot paths: collision probes, wildlife, fire, darkness, farmland      |

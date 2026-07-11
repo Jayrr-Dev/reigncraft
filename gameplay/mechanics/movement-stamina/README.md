@@ -2,10 +2,10 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.2.2      |
+| **Version**      | 1.2.3      |
 | **Last updated** | 2026-07-10 |
 
-Plaza **movement and stamina** is a bounded context in the **Player Locomotion** subdomain. It governs walk-to-run upgrades, sprint drain, jump and roll costs, fatigue lockouts after emptying the bar, and Girl Sample roll dodge i-frames. Shared drain/regen latch also wraps wildlife via `advancingWildlifeStaminaTick` (species identities live in [wildlife](../wildlife/)).
+Plaza **movement and stamina** is a bounded context in the **Player Locomotion** subdomain. It governs walk-to-run upgrades, pointer steering, sprint drain, jump and roll costs, mobile auto-jump probes, fatigue lockouts after emptying the bar, and Girl Sample roll dodge i-frames. Shared drain/regen latch also wraps wildlife via `advancingWildlifeStaminaTick` (species identities live in [wildlife](../wildlife/)).
 
 ## Docs in this folder
 

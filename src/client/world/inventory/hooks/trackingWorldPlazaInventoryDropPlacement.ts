@@ -365,8 +365,6 @@ export function trackingWorldPlazaInventoryDropPlacement({
       return;
     }
 
-    syncingMovePositionRef?.current?.();
-
     const distance = computingWorldPlazaDropTileChebyshevDistance(
       playerPosition.x,
       playerPosition.y,
@@ -389,7 +387,6 @@ export function trackingWorldPlazaInventoryDropPlacement({
     playerPositionRef,
     queueingWalkToDropTile,
     sendingGroundDrop,
-    syncingMovePositionRef,
   ]);
 
   const resolvingDropPreviewTileFromClientPointer = useCallback(

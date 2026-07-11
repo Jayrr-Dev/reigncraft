@@ -108,16 +108,17 @@ Per-skin overrides: [characters/catalog.md](../characters/catalog.md)
 
 ## Auto jump
 
-| Constant                                                | Value                                                                                               |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Label                                                   | **Auto jump**                                                                                       |
-| Unset default                                           | **on** mobile / **off** desktop (`DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_DEFAULT_ENABLED_ON_MOBILE`) |
-| Explicit Settings choice                                | Applies on **every** viewport                                                                       |
-| `DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_DETECT_MAX_GRID` | **2.25**                                                                                            |
-| `DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_SCAN_STEP_GRID`  | **0.25**                                                                                            |
-| `DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_MIN_GAP_GRID`    | **0.35**                                                                                            |
-| `DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_COOLDOWN_MS`     | **450**                                                                                             |
-| Storage key                                             | `world-plaza-mobile-auto-jump-enabled`                                                              |
+| Constant                                                  | Value                                                                                               |
+| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Label                                                     | **Auto jump**                                                                                       |
+| Unset default                                             | **on** mobile / **off** desktop (`DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_DEFAULT_ENABLED_ON_MOBILE`) |
+| Explicit Settings choice                                  | Applies on **every** viewport                                                                       |
+| `DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_DETECT_MAX_GRID`   | **2.25**                                                                                            |
+| `DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_SCAN_STEP_GRID`    | **0.25**                                                                                            |
+| `DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_MIN_GAP_GRID`      | **0.35**                                                                                            |
+| `DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_PROBE_INTERVAL_MS` | **100**                                                                                             |
+| `DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_COOLDOWN_MS`       | **450**                                                                                             |
+| Storage key                                               | `world-plaza-mobile-auto-jump-enabled`                                                              |
 
 File: `definingWorldPlazaMobileAutoJumpConstants.ts`
 Probe: `checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead.ts`

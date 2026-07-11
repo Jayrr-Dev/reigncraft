@@ -100,7 +100,10 @@ import {
 } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import { DEFINING_WORLD_PLAZA_ICE_SLIDE_SCREEN_RUN_SPEED_PER_SECOND } from '@/components/world/domains/definingWorldPlazaIceSlideConstants';
 import type { DefiningWorldPlazaJumpState } from '@/components/world/domains/definingWorldPlazaJumpState';
-import { DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_COOLDOWN_MS } from '@/components/world/domains/definingWorldPlazaMobileAutoJumpConstants';
+import {
+  DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_COOLDOWN_MS,
+  DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_PROBE_INTERVAL_MS,
+} from '@/components/world/domains/definingWorldPlazaMobileAutoJumpConstants';
 import type { DefiningWorldPlazaMovementDirection } from '@/components/world/domains/definingWorldPlazaMovementDirection';
 import { checkingWorldPlazaMovementDirectionIsActive } from '@/components/world/domains/definingWorldPlazaMovementDirection';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
@@ -409,6 +412,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   const previousDefensiveReactionUntilMsRef = useRef(0);
   /** Earliest time another mobile auto-jump may be requested. */
   const mobileAutoJumpUnlockAtMsRef = useRef(0);
+  /** Last forward water probe time; the scan is too costly to run every frame. */
+  const mobileAutoJumpLastProbeAtMsRef = useRef(0);
   /** When true, the next consumed jump uses run-jump distance (mobile auto-jump). */
   const mobileAutoJumpForceRunJumpRef = useRef(false);
 
@@ -693,7 +698,9 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       jumpStateRef.current = null;
       fallStateRef.current = null;
       isJumpingRef.current = false;
-      rollRequestedRef && (rollRequestedRef.current = false);
+      if (rollRequestedRef) {
+        rollRequestedRef.current = false;
+      }
 
       if (sleepStateRef?.current) {
         sleepStateRef.current = null;
@@ -989,8 +996,11 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         isMobileViewportRef?.current ?? false
       ) &&
       nowMs >= mobileAutoJumpUnlockAtMsRef.current &&
+      nowMs - mobileAutoJumpLastProbeAtMsRef.current >=
+        DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_PROBE_INTERVAL_MS &&
       (isWalkingRef.current || isKeyboardMoving)
     ) {
+      mobileAutoJumpLastProbeAtMsRef.current = nowMs;
       const autoJumpGridDirection =
         resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection(
           walkDirectionRef.current
