@@ -2,10 +2,10 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.1.1      |
+| **Version**      | 1.1.2      |
 | **Last updated** | 2026-07-10 |
 
-Plaza **multiplayer** defines Devvit HTTP polling rooms: player cap, sync payload, Redis TTL, wildlife leader election, held-item overlay fields, and what stays local.
+Plaza **multiplayer** defines Devvit HTTP polling rooms: player cap, sync payload, Redis TTL, request coalescing, wildlife leader election, held-item overlay fields, and what stays local.
 
 ## Docs in this folder
 
@@ -54,6 +54,8 @@ Touches **Wildlife** (leader sim), **Combat** (projectile spawn events), **Inven
 | Room browser        | `renderingPlazaMultiplayerRoomBrowserPanel.tsx` |
 | Server sync/players | `src/server/routes/plazaOnline.ts`              |
 | Scene integration   | `renderingWorldPlazaPixiScene.tsx`              |
+
+The sync loop posts on the shared **150 ms** interval. Actions such as teleports, jumps, rolls, and walk arrival may request an immediate sync, but only one sync POST can be in flight. Click-walk steps rely on the interval instead of posting every rendered frame.
 
 ### Infrastructure
 
