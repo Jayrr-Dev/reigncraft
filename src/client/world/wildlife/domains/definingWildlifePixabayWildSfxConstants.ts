@@ -254,4 +254,25 @@ export const DEFINING_WILDLIFE_PIXABAY_WILD_SFX_POOL_MIN_REPLAY_INTERVAL_MS: Par
   Record<DefiningWildlifePixabayWildSfxPoolId, number>
 > = {
   pixabay_tiger_roar: 5_000,
+  pixabay_hippo_grunt: 8_000,
+  pixabay_zebra_whinny: 8_000,
+  pixabay_hyena_laugh: 8_000,
+  pixabay_rhino: 8_000,
+  pixabay_prey: 8_000,
+  pixabay_crocodile: 7_000,
+};
+
+/**
+ * Hard stop for Pixabay pools that shipped as multi-call beds.
+ */
+export const DEFINING_WILDLIFE_PIXABAY_WILD_SFX_POOL_MAX_PLAYBACK_DURATION_S: Partial<
+  Record<DefiningWildlifePixabayWildSfxPoolId, number>
+> = {
+  pixabay_tiger_roar: 2.7,
+  pixabay_hippo_grunt: 2.4,
+  pixabay_zebra_whinny: 2.4,
+  pixabay_hyena_laugh: 2.4,
+  pixabay_rhino: 2.4,
+  pixabay_prey: 2.2,
+  pixabay_crocodile: 2.4,
 };

@@ -322,3 +322,21 @@ export const DEFINING_WILDLIFE_BEAST_SFX_POOL_CLIP_IDS_BY_EVENT: Record<
     hit_taken: DEFINING_WILDLIFE_BEAST_SFX_CROAKS,
   },
 };
+
+/**
+ * Minimum ms before the same instance replays a beast pool clip.
+ */
+export const DEFINING_WILDLIFE_BEAST_SFX_POOL_MIN_REPLAY_INTERVAL_MS: Partial<
+  Record<DefiningWildlifeBeastSfxPoolId, number>
+> = {
+  beast_bellow: 8_000,
+};
+
+/**
+ * Hard stop for beast pools that shipped longer than a one-shot.
+ */
+export const DEFINING_WILDLIFE_BEAST_SFX_POOL_MAX_PLAYBACK_DURATION_S: Partial<
+  Record<DefiningWildlifeBeastSfxPoolId, number>
+> = {
+  beast_bellow: 2.7,
+};

@@ -42,7 +42,12 @@ function computingWorldPlazaWildlifeHealthFloatTextIconSizePx(
 }
 
 export type RenderingWorldPlazaWildlifeHealthFloatTextsProps = {
+  /** Drives which float elements mount (float text id). */
   floatingCombatTexts: readonly DefiningWildlifeFloatingCombatText[];
+  /** Live grid positions updated each wildlife sim tick. */
+  floatingCombatTextsOutRef: React.RefObject<
+    readonly DefiningWildlifeFloatingCombatText[]
+  >;
   cameraOffsetRef: React.RefObject<DefiningWorldPlazaCameraOffset>;
   cameraWorldZoomRef: React.RefObject<number>;
 };
@@ -131,13 +136,11 @@ function renderingWildlifeFloatTextLabel(
  */
 export function RenderingWorldPlazaWildlifeHealthFloatTexts({
   floatingCombatTexts,
+  floatingCombatTextsOutRef,
   cameraOffsetRef,
   cameraWorldZoomRef,
 }: RenderingWorldPlazaWildlifeHealthFloatTextsProps): React.JSX.Element {
-  const floatingCombatTextsRef = useRef(floatingCombatTexts);
   const floatElementByIdRef = useRef<Map<string, HTMLDivElement>>(new Map());
-
-  floatingCombatTextsRef.current = floatingCombatTexts;
 
   useLayoutEffect(() => {
     if (floatingCombatTexts.length === 0) {
@@ -153,8 +156,9 @@ export function RenderingWorldPlazaWildlifeHealthFloatTexts({
 
       const cameraOffset = cameraOffsetRef.current;
       const cameraWorldZoom = cameraWorldZoomRef.current;
+      const liveFloatingCombatTexts = floatingCombatTextsOutRef.current ?? [];
 
-      for (const entry of floatingCombatTextsRef.current) {
+      for (const entry of liveFloatingCombatTexts) {
         const floatElement = floatElementByIdRef.current.get(
           entry.floatText.id
         );
@@ -174,6 +178,7 @@ export function RenderingWorldPlazaWildlifeHealthFloatTexts({
             cameraOffset,
             cameraWorldZoom,
             stackIndex: entry.floatText.stackIndex,
+            jumpArcOffsetPx: entry.jumpArcOffsetPx,
           });
 
         floatElement.style.transform =
@@ -198,7 +203,12 @@ export function RenderingWorldPlazaWildlifeHealthFloatTexts({
       isActive = false;
       unsubscribeDomOverlayFrame();
     };
-  }, [cameraOffsetRef, cameraWorldZoomRef, floatingCombatTexts.length]);
+  }, [
+    cameraOffsetRef,
+    cameraWorldZoomRef,
+    floatingCombatTexts.length,
+    floatingCombatTextsOutRef,
+  ]);
 
   if (floatingCombatTexts.length === 0) {
     return <></>;

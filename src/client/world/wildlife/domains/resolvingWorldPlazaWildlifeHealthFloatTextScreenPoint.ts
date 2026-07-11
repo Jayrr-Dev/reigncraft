@@ -16,6 +16,8 @@ export type ResolvingWorldPlazaWildlifeHealthFloatTextScreenPointParams = {
   cameraOffset: DefiningWorldPlazaCameraOffset;
   cameraWorldZoom: number;
   stackIndex: number;
+  /** Airborne visual lift while jumping (screen px). */
+  jumpArcOffsetPx?: number;
 };
 
 /**
@@ -27,6 +29,7 @@ export function resolvingWorldPlazaWildlifeHealthFloatTextScreenPoint({
   cameraOffset,
   cameraWorldZoom,
   stackIndex,
+  jumpArcOffsetPx = 0,
 }: ResolvingWorldPlazaWildlifeHealthFloatTextScreenPointParams): {
   x: number;
   y: number;
@@ -49,6 +52,7 @@ export function resolvingWorldPlazaWildlifeHealthFloatTextScreenPoint({
     y:
       viewportPoint.y +
       standingLayerOffsetPx * cameraWorldZoom -
+      jumpArcOffsetPx * cameraWorldZoom -
       barLiftPx * cameraWorldZoom -
       (DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_OFFSET_ABOVE_AVATAR_PX +
         stackIndex *

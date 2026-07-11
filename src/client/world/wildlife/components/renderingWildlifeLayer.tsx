@@ -630,6 +630,12 @@ export function RenderingWildlifeLayer({
               placedBlocksScene?.blocksByTile
             ),
             sizeScale: resolvingWildlifeInstanceSizeScale(species, instance),
+            jumpArcOffsetPx: instance.aiState.jumpState
+              ? computingWildlifeJumpArcLiftPx(
+                  species.jump.jumpArcPeakPx,
+                  instance.aiState.jumpState.progress
+                )
+              : 0,
           });
         }
       }

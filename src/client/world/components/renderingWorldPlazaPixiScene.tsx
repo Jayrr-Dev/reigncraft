@@ -4941,6 +4941,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               />
               <RenderingWorldPlazaWildlifeHealthFloatTexts
                 floatingCombatTexts={wildlifeFloatingCombatTexts}
+                floatingCombatTextsOutRef={wildlifeFloatingCombatTextsRef}
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />

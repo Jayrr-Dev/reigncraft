@@ -56,6 +56,8 @@ Falloff is quartic after the full-volume radius. Hot pools (`pig_grunt`, `pixaba
 
 **Pig/boar note:** `pig_grunt` masters were multi-grunt beds (14–32s). Shipped clips are trimmed ~2s one-shots, with an 8s per-instance replay gap and a 2.2s hard stop so a leftover long file cannot keep grunting after you walk away.
 
+**Same fix, other beds:** dog bark, sheep baa-02, chicken cluck ×4, goat bleat, donkey bray, farm wolf howl (was **184s**), farm/pixabay tiger growls, hippo grunt, zebra whinny, hyena laugh HD, rhino vocal, deer fawn bleat, crocodile growl, and `beast-bellow-05` were also multi-call beds. Trimmed to ~1.8–3.5s one-shots; matching pools get replay gaps + max playback caps in farm / Pixabay / beast constants. Re-run `scripts/trimmingLongWildlifeVocalBeds.py` if new long beds land.
+
 **Volume slider:** all wildlife SFX multiply `gettingWorldPlazaSfxVolume()` (Settings ? SFX volume).
 
 ---

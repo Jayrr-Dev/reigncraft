@@ -6,7 +6,7 @@ Every registered species, combat profile, prey rules, on-hit procs, sleep schedu
 
 **Source of truth for on-hit procs:** `src/client/world/wildlife/domains/definingWildlifeSpeciesOnHitEffectRegistry.ts`
 
-**Species vocal catalog:** [sfx-catalog.md](./sfx-catalog.md). Playback permits one active vocal per animal instance; priority comes from `definingWildlifeVocalSfxConcurrency.ts`. Shared `pig_grunt` (pig + boar) uses trimmed ~2s one-shots, **8s** replay gap, **2.2s** max playback.
+**Species vocal catalog:** [sfx-catalog.md](./sfx-catalog.md). Playback permits one active vocal per animal instance; priority comes from `definingWildlifeVocalSfxConcurrency.ts`. Multi-call beds (pig/boar, dog, sheep, chicken, goat, donkey, hippo, zebra, hyena, rhino, deer, crocodile, tiger, farm wolf howl, beast bellow-05) are trimmed to short one-shots with pool replay gaps + max playback caps.
 
 **Player-facing bestiary copy:** `src/client/components/home/domains/definingPlazaBestiaryGuideConstants.ts` (sight + studied summaries, optional Apostle flavor at **200** studies).
 
@@ -215,13 +215,13 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 
 ### `pig`: Pig
 
-| Field              | Value                           |
-| ------------------ | ------------------------------- |
-| **Temperament**    | passive                         |
-| **Diet / tier**    | herbivore, tier 1               |
-| **Aggro radius**   | 2 grid; pack share **8**        |
-| **Sleep**          | diurnal                         |
-| **Stalk eligible** | No                              |
+| Field              | Value                                                                 |
+| ------------------ | --------------------------------------------------------------------- |
+| **Temperament**    | passive                                                               |
+| **Diet / tier**    | herbivore, tier 1                                                     |
+| **Aggro radius**   | 2 grid; pack share **8**                                              |
+| **Sleep**          | diurnal                                                               |
+| **Stalk eligible** | No                                                                    |
 | **Note**           | Passive farm builder (like cow). Vocals: `pig_grunt` (~2s one-shots). |
 
 ### `camel`: Camel

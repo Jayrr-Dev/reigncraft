@@ -14,4 +14,6 @@ export type DefiningWildlifeFloatingCombatText = {
   gridY: number;
   layer: number;
   sizeScale: number;
+  /** Airborne visual lift while jumping (screen px). */
+  jumpArcOffsetPx: number;
 };

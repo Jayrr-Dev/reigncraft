@@ -346,10 +346,15 @@ export const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_POOL_MIN_REPLAY_INTERVAL_MS: Part
   Record<DefiningWildlifeFarmAnimalSfxPoolId, number>
 > = {
   /**
-   * Pig/boar share this pool. Clips were once 15–32s beds; keep a gap so one
-   * warn/idle cannot chain into another before proximity falloff matters.
+   * These pools shipped as multi-call beds. Keep a gap so one idle/warn cannot
+   * chain into another before proximity falloff matters.
    */
   pig_grunt: 8_000,
+  sheep_baa: 8_000,
+  chicken_cluck: 7_000,
+  dog_bark: 8_000,
+  donkey_bray: 8_000,
+  goat_bleat: 8_000,
   tiger_growl: 8_000,
   wolf_howl: 14_000,
 };
@@ -362,6 +367,13 @@ export const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_POOL_MAX_PLAYBACK_DURATION_S: Par
   Record<DefiningWildlifeFarmAnimalSfxPoolId, number>
 > = {
   pig_grunt: 2.2,
+  sheep_baa: 2.2,
+  chicken_cluck: 2.0,
+  dog_bark: 2.2,
+  donkey_bray: 2.4,
+  goat_bleat: 2.2,
+  tiger_growl: 2.7,
+  wolf_howl: 3.8,
 };
 
 /** Base event volume before distance falloff and the SFX slider. */
