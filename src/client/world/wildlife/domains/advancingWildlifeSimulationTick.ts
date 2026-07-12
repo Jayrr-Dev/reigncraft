@@ -442,27 +442,28 @@ function resolvingWildlifeMeleeTargetPosition(
     return null;
   }
 
-  if (intent.targetPoint) {
-    return intent.targetPoint;
+  // Prefer the live target over the think-snapshot point. Pounce lands short of
+  // that snapshot, and a stale point freezes chase in the arrival deadzone while
+  // attack mode blocks closing on a player who already moved.
+  if (intent.targetInstanceId) {
+    if (intent.targetInstanceId === playerUserId) {
+      return playerPosition ?? intent.targetPoint ?? null;
+    }
+
+    const target =
+      updatedById.get(intent.targetInstanceId) ??
+      nearbyInstances.find(
+        (entry) => entry.instanceId === intent.targetInstanceId
+      ) ??
+      instances.find((entry) => entry.instanceId === intent.targetInstanceId) ??
+      null;
+
+    if (target) {
+      return target.position;
+    }
   }
 
-  if (!intent.targetInstanceId) {
-    return null;
-  }
-
-  if (intent.targetInstanceId === playerUserId) {
-    return playerPosition;
-  }
-
-  const target =
-    updatedById.get(intent.targetInstanceId) ??
-    nearbyInstances.find(
-      (entry) => entry.instanceId === intent.targetInstanceId
-    ) ??
-    instances.find((entry) => entry.instanceId === intent.targetInstanceId) ??
-    null;
-
-  return target?.position ?? null;
+  return intent.targetPoint ?? null;
 }
 
 function resolvingWildlifeDistanceToPlayer(
@@ -1737,7 +1738,7 @@ export function advancingWildlifeSimulationTick({
           };
         }
 
-        updatedById.set(nextInstance.instanceId, {
+        nextInstance = {
           ...nextInstance,
           position: jumpPosition,
           facingDirection: resolvingWildlifeInstanceFacingDirection(
@@ -1758,11 +1759,41 @@ export function advancingWildlifeSimulationTick({
               ? nowMs
               : nextInstance.aiState.lastJumpEndedAtMs,
           },
-        });
-        continue;
+        };
+
+        // Mid-air only: landing falls through so melee / chase resume same tick.
+        if (!jumpStep.isComplete) {
+          updatedById.set(nextInstance.instanceId, nextInstance);
+          continue;
+        }
       }
 
       let intent = nextInstance.aiState.intent;
+      const liveChaseAttackTargetPoint = resolvingWildlifeMeleeTargetPosition(
+        intent,
+        playerPosition,
+        playerUserId,
+        behaviorNeighbors,
+        updatedById,
+        instances
+      );
+
+      if (
+        liveChaseAttackTargetPoint &&
+        (intent.mode === 'chase' || intent.mode === 'attack')
+      ) {
+        intent = {
+          ...intent,
+          targetPoint: liveChaseAttackTargetPoint,
+        };
+        nextInstance = {
+          ...nextInstance,
+          aiState: {
+            ...nextInstance.aiState,
+            intent,
+          },
+        };
+      }
       // Stamina drain uses pre-bluff intent so an active charge still burns stamina
       // before the abort check below.
       const preBluffDesiredDirection = resolvingDesiredDirection(

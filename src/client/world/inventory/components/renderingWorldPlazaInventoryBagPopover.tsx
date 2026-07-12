@@ -23,6 +23,7 @@ import {
 import { resolvingWorldPlazaInventoryBagContents } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagContents';
 import { resolvingWorldPlazaInventoryBagPopoverViewportLayout } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagPopoverViewportLayout';
 import { resolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailPopoverModel';
+import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
 import type * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -98,8 +99,11 @@ export function RenderingWorldPlazaInventoryBagPopover({
   }
 
   const typeDef = registry.resolvingItemType(bagItem.itemTypeId);
+  const plazaTypeDef = resolvingWorldPlazaInventoryItemTypeDefinition(
+    bagItem.itemTypeId
+  );
   const panelLabel = typeDef?.name ?? bagDefinition.label;
-  const panelIcon = typeDef?.iconifyIcon ?? bagDefinition.iconifyIcon;
+  const panelIcon = plazaTypeDef?.iconifyIcon ?? bagDefinition.iconifyIcon;
 
   return (
     <>

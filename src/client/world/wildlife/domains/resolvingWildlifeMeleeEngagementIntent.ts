@@ -16,14 +16,20 @@ export type ResolvingWildlifeMeleeEngagementIntentParams = {
 
 /**
  * Converts an in-range chase into an attack so predators swing every frame,
- * not only on behavior-tree think ticks.
+ * not only on behavior-tree think ticks. Also downgrades attack back to chase
+ * when the live target leaves melee so animals keep closing instead of
+ * swinging at air (common after a pounce lands short of a moving player).
  */
 export function resolvingWildlifeMeleeEngagementIntent({
   intent,
   position,
   targetPosition,
 }: ResolvingWildlifeMeleeEngagementIntentParams): DefiningWildlifeBehaviorIntent {
-  if (intent.mode !== 'chase' || !intent.targetInstanceId || !targetPosition) {
+  if (
+    (intent.mode !== 'chase' && intent.mode !== 'attack') ||
+    !intent.targetInstanceId ||
+    !targetPosition
+  ) {
     return intent;
   }
 
@@ -33,6 +39,14 @@ export function resolvingWildlifeMeleeEngagementIntent({
   );
 
   if (distance > DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
+    if (intent.mode === 'attack') {
+      return {
+        mode: 'chase',
+        targetInstanceId: intent.targetInstanceId,
+        targetPoint: targetPosition,
+      };
+    }
+
     return intent;
   }
 

@@ -24,12 +24,19 @@ import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_LOW_RATIO,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WIDTH_PX,
+  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_CARD_CLIP_EDGE_INSET_PX,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_CARD_GAP_ABOVE_ICONS_PX,
+  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_CARD_GAP_BELOW_ICONS_PX,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthBarConstants';
 import type { DefiningWorldPlazaEntityActiveBuffHudEntry } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
 import { computingWorldPlazaEntityBuffHudRemainingSeconds } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
 import { computingWorldPlazaEntityHealthBarSegmentCount } from '@/components/world/health/domains/listingWorldPlazaEntityHealthBarSegmentLineRatios';
 import { resolvingWorldPlazaEntityHealthBarScreenPoint } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthBarScreenPoint';
+import {
+  resolvingWorldPlazaEntityHealthBuffCardVerticalPlacement,
+  type ResolvingWorldPlazaEntityHealthBuffCardVerticalPlacement,
+} from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthBuffCardVerticalPlacement';
+import { resolvingWorldPlazaOverflowClipTopPx } from '@/components/world/health/domains/resolvingWorldPlazaOverflowClipTopPx';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import { usingWorldPlazaGameplayHudControlledPopoverDismiss } from '@/components/world/hooks/usingWorldPlazaGameplayHudPopoverOpenState';
 import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
@@ -243,7 +250,10 @@ function RenderingWorldPlazaEntityHealthBarVisual({
   isHealthTrackVisible?: boolean;
 }): React.JSX.Element {
   const [openBuffId, setOpenBuffId] = useState<string | null>(null);
+  const [buffCardPlacement, setBuffCardPlacement] =
+    useState<ResolvingWorldPlazaEntityHealthBuffCardVerticalPlacement>('above');
   const hudContainerRef = useRef<HTMLDivElement>(null);
+  const buffCardRef = useRef<HTMLDivElement>(null);
   const openBuff = activeBuffs?.find((buff) => buff.id === openBuffId) ?? null;
   const hasTimedBuff =
     activeBuffs?.some((buff) => buff.expiresAtMs !== null) ?? false;
@@ -271,6 +281,41 @@ function RenderingWorldPlazaEntityHealthBarVisual({
     closingOpenBuff
   );
 
+  useLayoutEffect(() => {
+    setBuffCardPlacement('above');
+  }, [openBuffId]);
+
+  useLayoutEffect(() => {
+    if (
+      openBuffId === null ||
+      openBuff === null ||
+      buffCardPlacement !== 'above' ||
+      buffCardRef.current === null
+    ) {
+      return;
+    }
+
+    const nextPlacement =
+      resolvingWorldPlazaEntityHealthBuffCardVerticalPlacement({
+        preferredPlacement: 'above',
+        popoverTopPx: buffCardRef.current.getBoundingClientRect().top,
+        clipTopPx: resolvingWorldPlazaOverflowClipTopPx(buffCardRef.current),
+        edgeInsetPx:
+          DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_CARD_CLIP_EDGE_INSET_PX,
+      });
+
+    if (nextPlacement !== buffCardPlacement) {
+      setBuffCardPlacement(nextPlacement);
+    }
+  }, [
+    buffCardPlacement,
+    openBuff,
+    openBuff?.description,
+    openBuff?.detailLines,
+    openBuffId,
+    openBuffPopoverFooter,
+  ]);
+
   const isFullHealth =
     entry.effectiveMaxHealth > 0 &&
     entry.currentHealth / entry.effectiveMaxHealth >= 0.999 &&
@@ -283,6 +328,37 @@ function RenderingWorldPlazaEntityHealthBarVisual({
     entry.displayName !== undefined &&
     entry.displayName.length > 0;
 
+  const openBuffCard =
+    openBuff === null ? null : (
+      <div
+        ref={buffCardRef}
+        style={
+          buffCardPlacement === 'above'
+            ? {
+                marginBottom: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_CARD_GAP_ABOVE_ICONS_PX}px`,
+              }
+            : {
+                marginTop: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_CARD_GAP_BELOW_ICONS_PX}px`,
+              }
+        }
+      >
+        <RenderingWorldPlazaGameplayHudExplanationPopover
+          title={openBuff.label}
+          subtitle={
+            openBuff.isDisease === true
+              ? (openBuff.severityLabel ?? null)
+              : null
+          }
+          description={openBuff.description}
+          detailLines={
+            openBuff.isDisease === true ? (openBuff.detailLines ?? []) : []
+          }
+          footer={openBuffPopoverFooter}
+          placement="inline"
+        />
+      </div>
+    );
+
   return (
     <div ref={hudContainerRef} className="relative pointer-events-none">
       <div
@@ -292,28 +368,7 @@ function RenderingWorldPlazaEntityHealthBarVisual({
           opacity: isFullHealth ? 0.92 : 1,
         }}
       >
-        {openBuff ? (
-          <div
-            style={{
-              marginBottom: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_CARD_GAP_ABOVE_ICONS_PX}px`,
-            }}
-          >
-            <RenderingWorldPlazaGameplayHudExplanationPopover
-              title={openBuff.label}
-              subtitle={
-                openBuff.isDisease === true
-                  ? (openBuff.severityLabel ?? null)
-                  : null
-              }
-              description={openBuff.description}
-              detailLines={
-                openBuff.isDisease === true ? (openBuff.detailLines ?? []) : []
-              }
-              footer={openBuffPopoverFooter}
-              placement="inline"
-            />
-          </div>
-        ) : null}
+        {buffCardPlacement === 'above' ? openBuffCard : null}
 
         {activeBuffs !== undefined ? (
           <RenderingWorldPlazaEntityHealthBuffIconRow
@@ -322,6 +377,8 @@ function RenderingWorldPlazaEntityHealthBarVisual({
             onOpenBuffIdChange={setOpenBuffId}
           />
         ) : null}
+
+        {buffCardPlacement === 'below' ? openBuffCard : null}
 
         {hasNameLabel ? (
           <RenderingWorldPlazaPlayerNameLabelRowWithProfilePopover

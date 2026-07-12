@@ -22,7 +22,7 @@ export function resolvingWorldPlazaPerformanceDiagnosticsMetricNuanceBadgeClassN
 ): string {
   const band =
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_INDEX_BAND;
-  let bandClassName =
+  let bandClassName: string =
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_BADGE_HEALTHY_CLASS_NAME;
 
   if (index >= band.STRAINED_MAX) {

@@ -17,6 +17,8 @@ function buildingFakeDiagnosticsSnapshot(): MeasuringWorldPlazaPerformanceDiagno
     slowFrameCount: 2,
     verySlowFrameCount: 0,
     jsHeapUsedMb: 120.5,
+    sampleAverageSumMs: 10,
+    unaccountedFrameAverageMs: 7.15,
     samples: [
       {
         sampleId:

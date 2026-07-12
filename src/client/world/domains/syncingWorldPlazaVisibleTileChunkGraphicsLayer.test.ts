@@ -1,7 +1,42 @@
+import type { CreatingWorldPlazaGrassFloorChunkDrawPassContext } from '@/components/world/domains/creatingWorldPlazaGrassFloorChunkDrawPassContext';
 import { drawingWorldPlazaGrassFloorChunkTilesOnGraphics } from '@/components/world/domains/drawingWorldPlazaGrassFloorChunkOnGraphics';
 import { syncingWorldPlazaVisibleTileChunkGraphicsLayer } from '@/components/world/domains/syncingWorldPlazaVisibleTileChunkGraphicsLayer';
 import { Container, Graphics } from 'pixi.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const { FAKE_DRAW_PASS_CONTEXT } = vi.hoisted(() => {
+  const plainsBiome = {
+    kind: 'plains' as const,
+    displayName: 'Plains',
+    temperature: 0.52,
+    altitudeFactor: 0.12,
+    tileFillColor: 0x7cba3d,
+    blockAccentColor: 0x8b6914,
+    blockHighlightColor: 0x91c848,
+    speckColor: null,
+    speckTileModulus: null,
+    flowerColors: [0xffd966, 0xff8fab, 0xffffff],
+    flowerTileModulus: 23,
+    skyBackdropClassName:
+      'bg-gradient-to-b from-sky-400 via-sky-200 to-[#7cba3d]',
+  };
+
+  const FAKE_DRAW_PASS_CONTEXT: CreatingWorldPlazaGrassFloorChunkDrawPassContext =
+    {
+      isDaytime: true,
+      drawsEnvironmentalHazardFloorTint: false,
+      checkingWaterIsFrozenAtTileIndex: () => false,
+      resolvingEnvironmentalHazardFloorTintAtTileIndex: () => null,
+      resolvingGrassFloorTileFillColorAtTileIndex: () => 0x7cba3d,
+      resolvingWaterAtTileIndex: () => null,
+      resolvingBiomeAtTileIndex: () => plainsBiome,
+      checkingLakeShoreBlockAtTileIndex: () => false,
+      checkingOceanShoreBlockAtTileIndex: () => false,
+      checkingPondShoreBlockAtTileIndex: () => false,
+    };
+
+  return { FAKE_DRAW_PASS_CONTEXT };
+});
 
 vi.mock(
   '@/components/world/domains/drawingWorldPlazaGrassFloorChunkOnGraphics',
@@ -18,7 +53,7 @@ vi.mock(
         return {
           nextTileOffset,
           isComplete: nextTileOffset >= tileCount,
-          drawPassContext: null,
+          drawPassContext: FAKE_DRAW_PASS_CONTEXT,
         };
       }
     ),
@@ -54,7 +89,7 @@ describe('syncingWorldPlazaVisibleTileChunkGraphicsLayer', () => {
         return {
           nextTileOffset,
           isComplete: nextTileOffset >= tileCount,
-          drawPassContext: null,
+          drawPassContext: FAKE_DRAW_PASS_CONTEXT,
         };
       }
     );
@@ -82,7 +117,7 @@ describe('syncingWorldPlazaVisibleTileChunkGraphicsLayer', () => {
       return {
         nextTileOffset,
         isComplete: false,
-        drawPassContext: null,
+        drawPassContext: FAKE_DRAW_PASS_CONTEXT,
       };
     });
 

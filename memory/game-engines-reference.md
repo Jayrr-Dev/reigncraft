@@ -550,42 +550,43 @@ Use these folders when the task is not covered above:
 
 ## Task → where to start
 
-| Task                                            | Start here                                                                                                                                    |
-| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Player click pathing detours around walls/water | `resolvingWorldPlazaNavigationWalkPlan.ts`, `trackingWorldPlazaClickMovementTarget.ts`                                                        |
-| Navigation stuck / replan                       | `checkingWorldPlazaNavigationPathNeedsReplan.ts`, `renderingWorldPlazaGirlSampleWalkAvatar.tsx`                                               |
-| New navigation cost profile                     | `definingWorldPlazaNavigationCostProfiles.ts`                                                                                                 |
-| Player cannot walk through X                    | Collision provider registry + `resolvingWorldCollisionBlockedPoint.ts`                                                                        |
-| Sprite draws behind wrong object                | Depth provider registry or `definingWorldDepthBiasLadder.ts`                                                                                  |
-| New ground/water/tree visual layer              | `registeringWorldPlazaTerrainLayers.ts`                                                                                                       |
-| New damage type or shield rule                  | `definingWorldPlazaEntityDamageKindRegistry.ts` + `computingWorldPlazaEntityHealthDamage.ts`                                                  |
-| Change crit/block math                          | `rollingWorldPlazaDamageEngine.ts` + tier registry                                                                                            |
-| Power-law / Pareto sample utility               | `computingWorldPlazaPowerLawSample.ts`                                                                                                        |
-| New throwable / spell                           | Projectile archetype + impact registry                                                                                                        |
-| New avatar stat or skill                        | Character engine registry + skill registry                                                                                                    |
-| New hotbar item                                 | Inventory item types + equipment capabilities + `registeringWorldPlazaTieredToolInventoryItems.ts`                                            |
-| Held-item overlay on avatar                     | `src/client/world/equipment/` + `usingWorldPlazaAvatarHeldItemOverlay.ts`                                                                     |
-| Tool swing arc / size / carry pose              | `definingWorldPlazaHeldItemSwingRegistry.ts` (per-direction keyframes) + `definingWorldPlazaHeldItemPresentationRegistry.ts` (scale, offsets) |
-| Fishing cast / catch                            | `src/client/world/fishing/` + `renderingWorldPlazaPixiScene.tsx`                                                                              |
-| Farming till / plant / harvest                  | `src/client/world/farming/` + `managingWorldPlazaLocalFarmland.ts`                                                                            |
-| Night lighting too dark/bright                  | `definingWorldPlazaLightingEngineConstants.ts` + day/night constants                                                                          |
-| New walk/run animation                          | `registeringWorldPlazaAvatarMotionAnimationClips.ts`                                                                                          |
-| Combat too fast / slow for everyone             | `definingWorldPlazaGlobalCombatAttackSpeedConstants.ts` (`DEFINING_WORLD_PLAZA_GLOBAL_ATTACK_SPEED_SCALE`; 0.5 = half speed)                  |
-| Attack-speed buffs (player / wildlife)          | `attack_speed` modifier + `quick-strikes-buff` / `bloodlust-buff` / `blinding-flurry-buff` / `relentless-tempo-buff` in buff registry         |
-| Combat dev tuning                               | Dev panel combat tab, subcategory `engine`                                                                                                    |
-| Wolf pack not stalking / wrong phase            | `definingWildlifeStalkerBehaviourMachine.ts`, `advancingWildlifeStalkAggroTick.ts`                                                            |
-| Pack flees when alpha dies                      | `applyingWildlifePackAlphaDeathScatter.ts`                                                                                                    |
-| Player spotted while wolf shadows prey          | `advancingWildlifeStalkPlayerApproachTick.ts`                                                                                                 |
-| New wildlife species                            | `definingWildlifeSpeciesRegistry.ts` + `definingWildlifeBiomeSpawnTable.ts`                                                                   |
-| Animal feet moonwalk / too fast                 | `resolvingWildlifeLocomotionAnimationSpeedScale.ts`, sheet overrides in `definingWildlifeSpriteSheetLayout.ts`                                |
-| Animal stuck at river / cliff gap               | `resolvingWildlifeTerrainGapJumpPlan` in `resolvingWildlifeJumpPlan.ts` (forward scan + landing surface layer)                                |
-| Wolf runs backwards / stuck on run clip         | `resolvingWildlifeInstanceFacingDirection.ts` (face move while locomoting); jump land clears run in `advancingWildlifeSimulationTick.ts`      |
-| Wolf stalk back-and-forth / jittery shadowing   | `resolvingWildlifeStalkEngagementIntent.ts` + `resolvingWildlifeStalkShadowWanderTargetPoint.ts` (prey-ring random walk)                      |
-| New temperament behavior                        | `definingWildlifeBehaviorTreeRegistry.ts`                                                                                                     |
-| Raw/cooked meat effects                         | `definingWildlifeMeatRegistry.ts`                                                                                                             |
-| Projectile not hitting animals                  | `extraTargetsRef` wiring in Pixi scene                                                                                                        |
-| Wildlife not syncing in multiplayer             | `electingWildlifeSimulationLeaderUserId.ts`, `plazaDevvitOnline.ts`                                                                           |
-| Player sick from eating meat                    | `definingWorldPlazaEntityDiseaseRegistry.ts`                                                                                                  |
+| Task                                            | Start here                                                                                                                                      |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Player click pathing detours around walls/water | `resolvingWorldPlazaNavigationWalkPlan.ts`, `trackingWorldPlazaClickMovementTarget.ts`                                                          |
+| Navigation stuck / replan                       | `checkingWorldPlazaNavigationPathNeedsReplan.ts`, `renderingWorldPlazaGirlSampleWalkAvatar.tsx`                                                 |
+| New navigation cost profile                     | `definingWorldPlazaNavigationCostProfiles.ts`                                                                                                   |
+| Player cannot walk through X                    | Collision provider registry + `resolvingWorldCollisionBlockedPoint.ts`                                                                          |
+| Sprite draws behind wrong object                | Depth provider registry or `definingWorldDepthBiasLadder.ts`                                                                                    |
+| New ground/water/tree visual layer              | `registeringWorldPlazaTerrainLayers.ts`                                                                                                         |
+| New damage type or shield rule                  | `definingWorldPlazaEntityDamageKindRegistry.ts` + `computingWorldPlazaEntityHealthDamage.ts`                                                    |
+| Change crit/block math                          | `rollingWorldPlazaDamageEngine.ts` + tier registry                                                                                              |
+| Power-law / Pareto sample utility               | `computingWorldPlazaPowerLawSample.ts`                                                                                                          |
+| New throwable / spell                           | Projectile archetype + impact registry                                                                                                          |
+| New avatar stat or skill                        | Character engine registry + skill registry                                                                                                      |
+| New hotbar item                                 | Inventory item types + equipment capabilities + `registeringWorldPlazaTieredToolInventoryItems.ts`                                              |
+| Held-item overlay on avatar                     | `src/client/world/equipment/` + `usingWorldPlazaAvatarHeldItemOverlay.ts`                                                                       |
+| Tool swing arc / size / carry pose              | `definingWorldPlazaHeldItemSwingRegistry.ts` (per-direction keyframes) + `definingWorldPlazaHeldItemPresentationRegistry.ts` (scale, offsets)   |
+| Fishing cast / catch                            | `src/client/world/fishing/` + `renderingWorldPlazaPixiScene.tsx`                                                                                |
+| Farming till / plant / harvest                  | `src/client/world/farming/` + `managingWorldPlazaLocalFarmland.ts`                                                                              |
+| Night lighting too dark/bright                  | `definingWorldPlazaLightingEngineConstants.ts` + day/night constants                                                                            |
+| New walk/run animation                          | `registeringWorldPlazaAvatarMotionAnimationClips.ts`                                                                                            |
+| Combat too fast / slow for everyone             | `definingWorldPlazaGlobalCombatAttackSpeedConstants.ts` (`DEFINING_WORLD_PLAZA_GLOBAL_ATTACK_SPEED_SCALE`; 0.5 = half speed)                    |
+| Attack-speed buffs (player / wildlife)          | `attack_speed` modifier + `quick-strikes-buff` / `bloodlust-buff` / `blinding-flurry-buff` / `relentless-tempo-buff` in buff registry           |
+| Combat dev tuning                               | Dev panel combat tab, subcategory `engine`                                                                                                      |
+| Wolf pack not stalking / wrong phase            | `definingWildlifeStalkerBehaviourMachine.ts`, `advancingWildlifeStalkAggroTick.ts`                                                              |
+| Pack flees when alpha dies                      | `applyingWildlifePackAlphaDeathScatter.ts`                                                                                                      |
+| Player spotted while wolf shadows prey          | `advancingWildlifeStalkPlayerApproachTick.ts`                                                                                                   |
+| New wildlife species                            | `definingWildlifeSpeciesRegistry.ts` + `definingWildlifeBiomeSpawnTable.ts`                                                                     |
+| Animal feet moonwalk / too fast                 | `resolvingWildlifeLocomotionAnimationSpeedScale.ts`, sheet overrides in `definingWildlifeSpriteSheetLayout.ts`                                  |
+| Animal stuck at river / cliff gap               | `resolvingWildlifeTerrainGapJumpPlan` in `resolvingWildlifeJumpPlan.ts` (forward scan + landing surface layer)                                  |
+| Tiger/cat freezes after pounce                  | Jump land fall-through + live chase target in `advancingWildlifeSimulationTick.ts`; attack→chase in `resolvingWildlifeMeleeEngagementIntent.ts` |
+| Wolf runs backwards / stuck on run clip         | `resolvingWildlifeInstanceFacingDirection.ts` (face move while locomoting); jump land clears run in `advancingWildlifeSimulationTick.ts`        |
+| Wolf stalk back-and-forth / jittery shadowing   | `resolvingWildlifeStalkEngagementIntent.ts` + `resolvingWildlifeStalkShadowWanderTargetPoint.ts` (prey-ring random walk)                        |
+| New temperament behavior                        | `definingWildlifeBehaviorTreeRegistry.ts`                                                                                                       |
+| Raw/cooked meat effects                         | `definingWildlifeMeatRegistry.ts`                                                                                                               |
+| Projectile not hitting animals                  | `extraTargetsRef` wiring in Pixi scene                                                                                                          |
+| Wildlife not syncing in multiplayer             | `electingWildlifeSimulationLeaderUserId.ts`, `plazaDevvitOnline.ts`                                                                             |
+| Player sick from eating meat                    | `definingWorldPlazaEntityDiseaseRegistry.ts`                                                                                                    |
 
 ---
 

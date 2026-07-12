@@ -112,9 +112,9 @@ function resolvingWorldPlazaAnimalPlayableAvatarPresentation(
 ): DefiningWildlifeSpeciesSpritePresentation {
   const wildlifeSpeciesId =
     resolvingWorldPlazaAnimalPlayableAvatarWildlifeSpeciesId(spriteFolder);
-  const override =
-    wildlifeSpeciesId &&
-    DEFINING_WILDLIFE_SPECIES_SPRITE_PRESENTATION_OVERRIDES[wildlifeSpeciesId];
+  const override = wildlifeSpeciesId
+    ? DEFINING_WILDLIFE_SPECIES_SPRITE_PRESENTATION_OVERRIDES[wildlifeSpeciesId]
+    : undefined;
 
   return {
     anchorYNormalized:

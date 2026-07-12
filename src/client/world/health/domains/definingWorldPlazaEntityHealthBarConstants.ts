@@ -39,4 +39,10 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ROW_GAP_BELOW_ICONS_PX = 2;
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ROW_RESERVED_HEIGHT_PX = 15;
 
 /** Extra margin (CSS px) under the open buff explanation card above the icon row. */
-export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_CARD_GAP_ABOVE_ICONS_PX = 8;
+export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_CARD_GAP_ABOVE_ICONS_PX = 4;
+
+/** Extra margin (CSS px) above the open buff explanation card when flipped below icons. */
+export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_CARD_GAP_BELOW_ICONS_PX = 4;
+
+/** Flip the buff card below icons when its top is within this many px of the clip edge. */
+export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_CARD_CLIP_EDGE_INSET_PX = 2;

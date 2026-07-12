@@ -10,9 +10,9 @@ import {
   buildingWorldPlazaPerformanceDiagnosticsSampleStatsById,
   resolvingWorldPlazaPerformanceDiagnosticsMetricNuanceCombinedIndex,
   resolvingWorldPlazaPerformanceDiagnosticsMetricNuanceIndex,
-  resolvingWorldPlazaPerformanceDiagnosticsMetricNuanceSampleIndex,
-  resolvingWorldPlazaPerformanceDiagnosticsMetricNuanceSampleSignalIndex,
   resolvingWorldPlazaPerformanceDiagnosticsMetricNuanceSignalIndex,
+  resolvingWorldPlazaPerformanceDiagnosticsSampleNuanceIndex,
+  resolvingWorldPlazaPerformanceDiagnosticsSampleNuanceSignalIndex,
 } from '@/components/world/domains/resolvingWorldPlazaPerformanceDiagnosticsMetricNuanceIndex';
 import { describe, expect, it } from 'vitest';
 
@@ -81,24 +81,15 @@ describe('resolvingWorldPlazaPerformanceDiagnosticsMetricNuanceIndex', () => {
     ).toBe(1);
   });
 
-  it('maps sample averageMs from healthy to critical', () => {
+  it('maps sample p95 ms from healthy to critical', () => {
     expect(
-      resolvingWorldPlazaPerformanceDiagnosticsMetricNuanceSampleSignalIndex(
+      resolvingWorldPlazaPerformanceDiagnosticsSampleNuanceSignalIndex(
         {
           sampleId: SAMPLE.TERRAIN_SYNC,
           healthyAtMs: 2,
           criticalAtMs: 18,
         },
-        {
-          sampleId: SAMPLE.TERRAIN_SYNC,
-          averageMs: 10,
-          percentile95Ms: 12,
-          percentile99Ms: 14,
-          maxMs: 16,
-          lastMs: 9,
-          measurementCount: 10,
-          spikeCount: 0,
-        }
+        10
       )
     ).toBeCloseTo(0.5);
   });
@@ -157,7 +148,7 @@ describe('resolvingWorldPlazaPerformanceDiagnosticsMetricNuanceIndex', () => {
     );
 
     const sampleIndex =
-      resolvingWorldPlazaPerformanceDiagnosticsMetricNuanceSampleIndex(
+      resolvingWorldPlazaPerformanceDiagnosticsSampleNuanceIndex(
         terrain,
         samplesById
       );
@@ -179,7 +170,7 @@ describe('resolvingWorldPlazaPerformanceDiagnosticsMetricNuanceIndex', () => {
       );
     expect(new Set(ids).size).toBe(ids.length);
     expect(ids).toContain(
-      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE.FRAME
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE.SYSTEM
     );
 
     const sampleIds = new Set(

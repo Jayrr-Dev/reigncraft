@@ -133,14 +133,14 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
     panelInline:
       'relative mb-0 max-w-[min(14rem,calc(100vw-2rem))] text-center',
     title:
-      'font-display text-[11px] font-bold uppercase tracking-[0.05em] leading-tight text-poster-teal-deep',
+      'font-display text-[9px] font-bold uppercase tracking-[0.04em] leading-none text-poster-teal-deep',
     subtitle:
-      'mt-0.5 font-body text-[8px] font-semibold uppercase tracking-[0.04em] leading-tight text-ink/65',
-    body: 'mt-0.5 font-body text-[9px] font-medium italic leading-snug text-ink-soft',
-    detailList: 'mt-1 flex flex-col gap-0.5 text-left',
-    detailLine: 'font-body text-[9px] font-medium leading-snug text-ink/80',
+      'mt-px font-body text-[7px] font-semibold uppercase tracking-[0.03em] leading-none text-ink/65',
+    body: 'mt-px font-body text-[8px] font-medium italic leading-tight text-ink-soft',
+    detailList: 'mt-0.5 flex flex-col gap-px text-left',
+    detailLine: 'font-body text-[8px] font-medium leading-tight text-ink/80',
     footer:
-      'mt-1 font-body text-[9px] font-semibold leading-tight tabular-nums text-ink/70',
+      'mt-0.5 font-body text-[8px] font-semibold leading-none tabular-nums text-ink/70',
   },
 
   /** Small count / notification badges. */

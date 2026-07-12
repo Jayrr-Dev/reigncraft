@@ -29,4 +29,37 @@ describe('resolvingWildlifeMeleeEngagementIntent', () => {
 
     expect(intent.mode).toBe('chase');
   });
+
+  it('downgrades attack to chase when the live target leaves melee range', () => {
+    const intent = resolvingWildlifeMeleeEngagementIntent({
+      intent: {
+        mode: 'attack',
+        targetInstanceId: 'player-1',
+        targetPoint: { x: 2, y: 1.5, layer: 1 },
+      },
+      position: { x: 1.5, y: 1.5, layer: 1 },
+      targetPosition: { x: 4, y: 1.5, layer: 1 },
+    });
+
+    expect(intent).toEqual({
+      mode: 'chase',
+      targetInstanceId: 'player-1',
+      targetPoint: { x: 4, y: 1.5, layer: 1 },
+    });
+  });
+
+  it('keeps attack when the live target is still in melee range', () => {
+    const intent = resolvingWildlifeMeleeEngagementIntent({
+      intent: {
+        mode: 'attack',
+        targetInstanceId: 'player-1',
+        targetPoint: { x: 2, y: 1.5, layer: 1 },
+      },
+      position: { x: 1.5, y: 1.5, layer: 1 },
+      targetPosition: { x: 2.2, y: 1.5, layer: 1 },
+    });
+
+    expect(intent.mode).toBe('attack');
+    expect(intent.targetPoint).toEqual({ x: 2.2, y: 1.5, layer: 1 });
+  });
 });
