@@ -14,6 +14,7 @@ import { RenderingWorldPlazaClaimModeCoordsPanel } from '@/components/world/buil
 import { RenderingWorldPlazaClaimModePlotList } from '@/components/world/building/components/renderingWorldPlazaClaimModePlotList';
 import { RenderingWorldPlazaClaimModeSavedCoordsList } from '@/components/world/building/components/renderingWorldPlazaClaimModeSavedCoordsList';
 import { RenderingWorldPlazaClaimModeTemporaryTilesList } from '@/components/world/building/components/renderingWorldPlazaClaimModeTemporaryTilesList';
+import { RenderingWorldPlazaEditModeSessionToggleArrows } from '@/components/world/building/components/renderingWorldPlazaEditModeSessionToggleArrows';
 import { RenderingWorldPlazaHudModeToolBoard } from '@/components/world/building/components/renderingWorldPlazaHudModeToolBoard';
 import { countingWorldBuildingOwnerTemporaryTileClaims } from '@/components/world/building/domains/countingWorldBuildingOwnerTemporaryTileClaims';
 import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
@@ -61,7 +62,7 @@ import {
   type SyntheticEvent,
 } from 'react';
 
-/** Scrollable shell for denser plots + coords popover. */
+/** Scrollable shell for denser claim-mode popovers. */
 const RENDERING_WORLD_PLAZA_EDIT_MODE_SCROLL_POPOVER_BODY_CLASS_NAME =
   'flex max-h-[min(50vh,22rem)] min-w-[14rem] flex-col gap-2 overflow-y-auto' as const;
 
@@ -89,7 +90,9 @@ export interface RenderingWorldPlazaEditModeHotbarProps {
   hoverTilePosition: DefiningWorldBuildingTilePosition | null;
   isSavingCoords: boolean;
   canSaveMoreCoords: boolean;
-  onSaveCoordsAtHoverTile: () => void;
+  isSaveCoordsPlacementActive: boolean;
+  onStartSaveCoordsPlacement: () => void;
+  onCancelSaveCoordsPlacement: () => void;
   ownerGroups: DefiningWorldBuildingPlotRegistryOwnerGroup[];
   activeViewportPlots: readonly DefiningWorldBuildingPlot[];
   localUserId: string;
@@ -144,7 +147,9 @@ function RenderingWorldPlazaEditModeFunctionPopoverBody({
   hoverTilePosition,
   isSavingCoords,
   canSaveMoreCoords,
-  onSaveCoordsAtHoverTile,
+  isSaveCoordsPlacementActive,
+  onStartSaveCoordsPlacement,
+  onCancelSaveCoordsPlacement,
   ownerGroups,
   activeViewportPlots,
   localUserId,
@@ -250,11 +255,22 @@ function RenderingWorldPlazaEditModeFunctionPopoverBody({
             onRemoveTemporaryPlotAtTile={onRemoveTemporaryPlotAtTile}
             isRemovingTemporaryPlot={isRemovingTemporaryPlot}
           />
+        </div>
+      );
+    case DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.SAVES:
+      return (
+        <div
+          className={
+            RENDERING_WORLD_PLAZA_EDIT_MODE_SCROLL_POPOVER_BODY_CLASS_NAME
+          }
+        >
           <RenderingWorldPlazaClaimModeCoordsPanel
             hoverTilePosition={hoverTilePosition}
             isSavingCoords={isSavingCoords}
             canSaveMoreCoords={canSaveMoreCoords}
-            onSaveCoordsAtHoverTile={onSaveCoordsAtHoverTile}
+            isSaveCoordsPlacementActive={isSaveCoordsPlacementActive}
+            onStartSaveCoordsPlacement={onStartSaveCoordsPlacement}
+            onCancelSaveCoordsPlacement={onCancelSaveCoordsPlacement}
           />
           <RenderingWorldPlazaClaimModeSavedCoordsList
             savedCoordsList={savedCoordsList}
@@ -334,7 +350,9 @@ export function RenderingWorldPlazaEditModeHotbar({
   hoverTilePosition,
   isSavingCoords,
   canSaveMoreCoords,
-  onSaveCoordsAtHoverTile,
+  isSaveCoordsPlacementActive,
+  onStartSaveCoordsPlacement,
+  onCancelSaveCoordsPlacement,
   ownerGroups,
   activeViewportPlots,
   localUserId,
@@ -429,6 +447,17 @@ export function RenderingWorldPlazaEditModeHotbar({
     []
   );
 
+  const togglingSessionMode = useCallback((): void => {
+    setOpenFunctionId(null);
+
+    if (isClaimModeActive) {
+      onActivateBuildMode();
+      return;
+    }
+
+    onActivateClaimMode();
+  }, [isClaimModeActive, onActivateBuildMode, onActivateClaimMode]);
+
   const renderingToolPopover = useCallback(
     (toolId: DefiningWorldPlazaEditModeFunctionId): ReactNode => {
       return (
@@ -450,7 +479,9 @@ export function RenderingWorldPlazaEditModeHotbar({
             hoverTilePosition={hoverTilePosition}
             isSavingCoords={isSavingCoords}
             canSaveMoreCoords={canSaveMoreCoords}
-            onSaveCoordsAtHoverTile={onSaveCoordsAtHoverTile}
+            isSaveCoordsPlacementActive={isSaveCoordsPlacementActive}
+            onStartSaveCoordsPlacement={onStartSaveCoordsPlacement}
+            onCancelSaveCoordsPlacement={onCancelSaveCoordsPlacement}
             ownerGroups={ownerGroups}
             activeViewportPlots={activeViewportPlots}
             localUserId={localUserId}
@@ -488,16 +519,18 @@ export function RenderingWorldPlazaEditModeHotbar({
       isRemovingTemporaryPlot,
       isRequestingFriendPlotVisit,
       isSavingCoords,
+      isSaveCoordsPlacementActive,
       localUserId,
+      onCancelSaveCoordsPlacement,
       onDeleteSavedCoords,
       onRemoveTemporaryPlotAtTile,
       onRequestingFriendPlotVisit,
-      onSaveCoordsAtHoverTile,
       onSelectBlockHeight,
       onSelectCutFootprintMask,
       onSelectCutGridAxisCellCount,
       onSelectDefinition,
       onSelectWorldLayer,
+      onStartSaveCoordsPlacement,
       onTeleportToPlotBounds,
       onTeleportingToApprovedFriendPlot,
       onToggleSavedCoordsTracking,
@@ -582,6 +615,12 @@ export function RenderingWorldPlazaEditModeHotbar({
           activeToolId={openFunctionId}
           onActivateTool={togglingFunction}
           renderingToolPopover={renderingToolPopover}
+          trailingContent={
+            <RenderingWorldPlazaEditModeSessionToggleArrows
+              activeSessionModeId={activeSessionModeId}
+              onToggleSessionMode={togglingSessionMode}
+            />
+          }
         />
       </div>
     </ProvidingWorldPlazaViewportHudScale>

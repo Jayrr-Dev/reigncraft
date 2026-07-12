@@ -37,6 +37,7 @@ import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domai
 import {
   STYLING_WORLD_PLAZA_INVENTORY_GRID_WRAPPER_CLASS_NAME,
   STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME,
+  STYLING_WORLD_PLAZA_INVENTORY_SHELL_BODY_CLASS_NAME,
   STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS,
@@ -62,6 +63,7 @@ import {
   type ReactNode,
   type SyntheticEvent,
 } from 'react';
+import { createPortal } from 'react-dom';
 
 const DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_DROP_ANIMATION: DropAnimation = {
   duration: 180,
@@ -83,6 +85,8 @@ export type RenderingWorldPlazaHudModeToolBoardProps = {
   readonly renderingToolPopover?: (
     toolId: DefiningWorldPlazaHudModeToolId
   ) => ReactNode;
+  /** Optional controls rendered beside the slot grid (e.g. mode arrows). */
+  readonly trailingContent?: ReactNode;
 };
 
 /**
@@ -93,6 +97,7 @@ export function RenderingWorldPlazaHudModeToolBoard({
   activeToolId,
   onActivateTool,
   renderingToolPopover,
+  trailingContent,
 }: RenderingWorldPlazaHudModeToolBoardProps): React.JSX.Element {
   const viewportHudScale = usingWorldPlazaViewportHudScaleContext();
   const { layout, movingTool } = usingWorldPlazaHudModeToolBoard(boardId);
@@ -208,66 +213,80 @@ export function RenderingWorldPlazaHudModeToolBoard({
       <DndContext
         sensors={sensors}
         collisionDetection={resolvingWorldPlazaHudModeToolDndCollisionDetection}
-        modifiers={[modifyingInventorySnapCenterToCursor]}
         onDragStart={handlingDragStart}
         onDragCancel={handlingDragCancel}
         onDragEnd={handlingDragEnd}
       >
         <div
-          className={STYLING_WORLD_PLAZA_INVENTORY_GRID_WRAPPER_CLASS_NAME}
-          style={viewportStyles.gridStyle}
+          className={STYLING_WORLD_PLAZA_INVENTORY_SHELL_BODY_CLASS_NAME}
+          style={viewportStyles.shellBodyStyle}
         >
-          {layout.map((slotToolId, slotIndex) => {
-            const toolDefinition =
-              slotToolId === null
-                ? null
-                : resolvingWorldPlazaHudModeToolDefinition(slotToolId);
-            const isActive = slotToolId !== null && slotToolId === activeToolId;
+          <div
+            className={STYLING_WORLD_PLAZA_INVENTORY_GRID_WRAPPER_CLASS_NAME}
+            style={viewportStyles.gridStyle}
+          >
+            {layout.map((slotToolId, slotIndex) => {
+              const toolDefinition =
+                slotToolId === null
+                  ? null
+                  : resolvingWorldPlazaHudModeToolDefinition(slotToolId);
+              const isActive =
+                slotToolId !== null && slotToolId === activeToolId;
 
-            return (
-              <RenderingWorldPlazaHudModeToolBoardSlotCell
-                key={`${boardId}-slot-${slotIndex}`}
-                boardId={boardId}
-                slotIndex={slotIndex}
-                toolDefinition={toolDefinition}
-                isActive={isActive}
-                viewportStyles={viewportStyles}
-                onActivateTool={(toolId) => {
-                  onActivateTool(toolId as DefiningWorldPlazaHudModeToolId);
-                }}
-                popover={
-                  isActive &&
-                  slotToolId !== null &&
-                  renderingToolPopover !== undefined
-                    ? renderingToolPopover(slotToolId)
-                    : null
-                }
-              />
-            );
-          })}
+              return (
+                <RenderingWorldPlazaHudModeToolBoardSlotCell
+                  key={`${boardId}-slot-${slotIndex}`}
+                  boardId={boardId}
+                  slotIndex={slotIndex}
+                  toolDefinition={toolDefinition}
+                  isActive={isActive}
+                  viewportStyles={viewportStyles}
+                  onActivateTool={(toolId) => {
+                    onActivateTool(toolId as DefiningWorldPlazaHudModeToolId);
+                  }}
+                  popover={
+                    isActive &&
+                    slotToolId !== null &&
+                    renderingToolPopover !== undefined
+                      ? renderingToolPopover(slotToolId)
+                      : null
+                  }
+                />
+              );
+            })}
+          </div>
+          {trailingContent ?? null}
         </div>
 
-        <DragOverlay
-          dropAnimation={DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_DROP_ANIMATION}
-        >
-          {draggingToolDefinition !== null ? (
-            <div
-              className={cn(
-                STYLING_WORLD_PLAZA_INVENTORY_SLOT_CLASS,
-                STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS,
-                'flex items-center justify-center'
-              )}
-              style={viewportStyles.slotStyle}
-            >
-              <Icon
-                icon={draggingToolDefinition.iconifyIcon}
-                className="shrink-0"
-                style={viewportStyles.iconStyle}
-                aria-hidden
-              />
-            </div>
-          ) : null}
-        </DragOverlay>
+        {createPortal(
+          // Portal escapes the hotbar shell: its `transform: translateZ(0)`
+          // makes it the containing block for the overlay's fixed positioning,
+          // which offsets the ghost away from the pointer.
+          <DragOverlay
+            dropAnimation={DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_DROP_ANIMATION}
+            modifiers={[modifyingInventorySnapCenterToCursor]}
+            style={{ pointerEvents: 'none' }}
+          >
+            {draggingToolDefinition !== null ? (
+              <div
+                className={cn(
+                  STYLING_WORLD_PLAZA_INVENTORY_SLOT_CLASS,
+                  STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS,
+                  'flex items-center justify-center'
+                )}
+                style={viewportStyles.slotStyle}
+              >
+                <Icon
+                  icon={draggingToolDefinition.iconifyIcon}
+                  className="shrink-0"
+                  style={viewportStyles.iconStyle}
+                  aria-hidden
+                />
+              </div>
+            ) : null}
+          </DragOverlay>,
+          document.body
+        )}
       </DndContext>
     </div>
   );

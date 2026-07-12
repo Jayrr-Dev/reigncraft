@@ -56,8 +56,15 @@ export const DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_REGISTRY = [
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLOTS,
     boardId: DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.CLAIM,
     label: 'Plots',
-    ariaLabel: 'Plots, temporary tiles, and saved coordinates',
+    ariaLabel: 'Owned plots and temporary tiles',
     iconifyIcon: 'mdi:land-plots',
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.SAVES,
+    boardId: DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.CLAIM,
+    label: 'Saves',
+    ariaLabel: 'Bookmark tile and saved coordinates',
+    iconifyIcon: 'mdi:bookmark',
   },
 ] as const satisfies readonly DefiningWorldPlazaHudModeToolDefinition[];
 

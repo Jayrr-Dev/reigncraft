@@ -862,6 +862,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   const isBlockBuildModeActiveRef = useRef(false);
   const isBuildModeActiveRef = useRef(false);
   const isClaimModeActiveRef = useRef(false);
+  const isSaveCoordsPlacementActiveRef = useRef(false);
   const isEditPaintPointerHeldRef = useRef(false);
   const editPaintActionRef =
     useRef<DefiningWorldBuildingEditPaintAction | null>(null);
@@ -969,6 +970,39 @@ function RenderingWorldPlazaPixiSceneConnected({
     togglingSavedCoordsTracking,
     clearingSavedCoordsTracking,
   } = usingWorldPlazaSavedCoordsTrackingVisibleState();
+
+  const [isSaveCoordsPlacementActive, setIsSaveCoordsPlacementActive] =
+    useState(false);
+  isSaveCoordsPlacementActiveRef.current = isSaveCoordsPlacementActive;
+
+  const startingSaveCoordsPlacement = useCallback((): void => {
+    if (!canSaveMoreCoords || isSavingCoords) {
+      return;
+    }
+
+    setIsSaveCoordsPlacementActive(true);
+  }, [canSaveMoreCoords, isSavingCoords]);
+
+  const cancellingSaveCoordsPlacement = useCallback((): void => {
+    setIsSaveCoordsPlacementActive(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isSaveCoordsPlacementActive) {
+      return;
+    }
+
+    const handlingKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') {
+        setIsSaveCoordsPlacementActive(false);
+      }
+    };
+
+    window.addEventListener('keydown', handlingKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handlingKeyDown);
+    };
+  }, [isSaveCoordsPlacementActive]);
 
   const trackedSavedCoords = useMemo(
     () =>
@@ -1198,6 +1232,12 @@ function RenderingWorldPlazaPixiSceneConnected({
   isTerrainCollisionDebugVisibleRef.current =
     isDevDebugActive && isTerrainCollisionDebugVisible;
   selectedWorldLayerRef.current = selectedWorldLayer;
+
+  useEffect(() => {
+    if (!isClaimModeActive) {
+      setIsSaveCoordsPlacementActive(false);
+    }
+  }, [isClaimModeActive]);
 
   usingWorldPlazaPlotSubscription({
     isEnabled: isBuildModeEnabled,
@@ -4145,14 +4185,6 @@ function RenderingWorldPlazaPixiSceneConnected({
       roomSnapshot.remotePlayers,
     ]);
 
-  const savingCoordsAtHoverTile = useCallback((): void => {
-    if (!hoverTilePosition) {
-      return;
-    }
-
-    savingCoordsAtTilePosition(hoverTilePosition);
-  }, [hoverTilePosition, savingCoordsAtTilePosition]);
-
   const hudToolbarEditModeHotbar = useMemo(() => {
     if (
       !buildModeUserId ||
@@ -4182,7 +4214,9 @@ function RenderingWorldPlazaPixiSceneConnected({
         hoverTilePosition={hoverTilePosition}
         isSavingCoords={isSavingCoords}
         canSaveMoreCoords={canSaveMoreCoords}
-        onSaveCoordsAtHoverTile={savingCoordsAtHoverTile}
+        isSaveCoordsPlacementActive={isSaveCoordsPlacementActive}
+        onStartSaveCoordsPlacement={startingSaveCoordsPlacement}
+        onCancelSaveCoordsPlacement={cancellingSaveCoordsPlacement}
         ownerGroups={claimModeOwnerGroups}
         activeViewportPlots={activeViewportPlots}
         localUserId={buildModeUserId}
@@ -4233,12 +4267,12 @@ function RenderingWorldPlazaPixiSceneConnected({
     isDeletingSavedCoords,
     isPresetBlockTypeSelected,
     isRemovingTemporaryPlot,
+    isSaveCoordsPlacementActive,
     isSavingCoords,
     outgoingVisitRequests,
     plotOwnerLimits,
     requestingFriendPlotVisit,
     savedCoordsList,
-    savingCoordsAtHoverTile,
     selectedBlockHeight,
     selectedCutFootprintMask,
     selectedCutGridAxisCellCount,
@@ -4249,6 +4283,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     selectingCutFootprintMask,
     selectingCutGridAxisCellCount,
     selectingWorldLayer,
+    startingSaveCoordsPlacement,
+    cancellingSaveCoordsPlacement,
     teleportingPlayerToPlotBounds,
     teleportingToApprovedFriendPlotFromClaimList,
     togglingSavedCoordsTracking,
@@ -4341,6 +4377,14 @@ function RenderingWorldPlazaPixiSceneConnected({
         ) {
           event.preventDefault();
           event.stopPropagation();
+
+          if (isSaveCoordsPlacementActiveRef.current) {
+            savingCoordsAtTilePosition(hoverTile);
+            setIsSaveCoordsPlacementActive(false);
+            hostRef.current?.focus();
+            return;
+          }
+
           const paintAction = resolvingEditPaintActionAtTile(hoverTile);
           if (paintAction) {
             isEditPaintPointerHeldRef.current = true;
@@ -4566,6 +4610,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       inventoryState,
       isSinglePlayerSession,
       isLocalGameplayEnabled,
+      savingCoordsAtTilePosition,
     ]
   );
 

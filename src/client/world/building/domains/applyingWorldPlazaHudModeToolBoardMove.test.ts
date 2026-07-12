@@ -63,6 +63,21 @@ describe('resolvingWorldPlazaHudModeToolBoardDefaults', () => {
     ]);
   });
 
+  it('left-packs claim tools and leaves empty slots', () => {
+    expect(
+      resolvingWorldPlazaHudModeToolBoardDefaults(
+        DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.CLAIM
+      )
+    ).toEqual([
+      DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLOTS,
+      DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.SAVES,
+      null,
+      null,
+      null,
+      null,
+    ]);
+  });
+
   it('returns all empty slots for craft', () => {
     expect(
       resolvingWorldPlazaHudModeToolBoardDefaults(
