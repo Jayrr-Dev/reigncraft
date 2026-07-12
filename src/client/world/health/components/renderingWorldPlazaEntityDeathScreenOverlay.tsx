@@ -4,8 +4,6 @@ import {
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_TEXT,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_OVERLAY_CLASS_NAME,
-  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_RULE_CLASS_NAME,
-  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_SHOW_DELAY_MS,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_STACK_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_WAKE_FADE_OUT_MS,
@@ -15,6 +13,7 @@ import { useEffect, useRef, useState } from 'react';
 
 export type DefiningWorldPlazaEntityDeathScreenPhase =
   | 'hidden'
+  | 'entering'
   | 'held'
   | 'waking';
 
@@ -26,7 +25,7 @@ export type RenderingWorldPlazaEntityDeathScreenOverlayProps = {
 };
 
 /**
- * Full-screen death overlay: delayed reveal, static centered title, slow wake fade.
+ * Full-screen death overlay with a Dark Souls-style title entrance and slow wake fade.
  */
 export function RenderingWorldPlazaEntityDeathScreenOverlay({
   isPlayerDead,
@@ -50,33 +49,32 @@ export function RenderingWorldPlazaEntityDeathScreenOverlay({
     if (isPlayerDead) {
       if (!wasPlayerDeadRef.current) {
         lockedDeathTitleRef.current = deathTitle;
-        wasPlayerDeadRef.current = true;
-        setPhase('hidden');
+        setPhase('entering');
       }
+
+      wasPlayerDeadRef.current = true;
       return;
     }
 
     if (wasPlayerDeadRef.current) {
       wasPlayerDeadRef.current = false;
-      setPhase((currentPhase) =>
-        currentPhase === 'hidden' ? 'hidden' : 'waking'
-      );
+      setPhase('waking');
     }
   }, [deathTitle, isPlayerDead]);
 
   useEffect(() => {
-    if (!isPlayerDead) {
+    if (phase !== 'entering') {
       return;
     }
 
-    const showTimeoutId = window.setTimeout(() => {
+    const holdTimeoutId = window.setTimeout(() => {
       setPhase('held');
-    }, DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_SHOW_DELAY_MS);
+    }, 3400);
 
     return () => {
-      window.clearTimeout(showTimeoutId);
+      window.clearTimeout(holdTimeoutId);
     };
-  }, [isPlayerDead]);
+  }, [phase]);
 
   useEffect(() => {
     if (phase !== 'waking') {
@@ -97,9 +95,16 @@ export function RenderingWorldPlazaEntityDeathScreenOverlay({
   }
 
   const overlayPhaseClassName =
-    phase === 'waking'
-      ? 'plaza-death-screen-overlay--waking'
-      : 'plaza-death-screen-overlay--held';
+    phase === 'entering'
+      ? 'plaza-death-screen-overlay--entering'
+      : phase === 'waking'
+        ? 'plaza-death-screen-overlay--waking'
+        : 'plaza-death-screen-overlay--held';
+
+  const stackPhaseClassName =
+    phase === 'entering'
+      ? 'plaza-death-screen-stack--entering'
+      : 'plaza-death-screen-stack--visible';
 
   return (
     <div
@@ -110,12 +115,8 @@ export function RenderingWorldPlazaEntityDeathScreenOverlay({
       aria-label={`${lockedDeathTitle}. ${DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_TEXT}`}
     >
       <div
-        className={DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_STACK_CLASS_NAME}
+        className={`${DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_STACK_CLASS_NAME} ${stackPhaseClassName}`}
       >
-        <div
-          className={DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_RULE_CLASS_NAME}
-          aria-hidden="true"
-        />
         <p
           ref={titleRef}
           className={DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_CLASS_NAME}
@@ -123,10 +124,6 @@ export function RenderingWorldPlazaEntityDeathScreenOverlay({
         >
           {lockedDeathTitle}
         </p>
-        <div
-          className={DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_RULE_CLASS_NAME}
-          aria-hidden="true"
-        />
         <p
           className={DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_CLASS_NAME}
         >

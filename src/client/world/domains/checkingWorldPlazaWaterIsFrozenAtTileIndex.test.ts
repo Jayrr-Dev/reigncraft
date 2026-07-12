@@ -3,23 +3,25 @@ import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ICE_BLOCK,
 } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import { creatingWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import { indexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import {
   checkingWorldPlazaWaterIsClimateFrozenAtTileIndex,
   checkingWorldPlazaWaterIsFrozenAtTileIndex,
 } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
+import {
+  clearingWorldPlazaLitCampfireHeatTilesForTest,
+  markingWorldPlazaLitCampfireHeatTileForTest,
+} from '@/components/world/fire/domains/managingWorldPlazaLitCampfireHeatTilesStore';
 import { updatingWorldPlazaEnvironmentalTemperatureSamplingContext } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
-import { buildingWorldFireDevvitTileKey } from '../../../shared/worldFireDevvit';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 function findingWorldPlazaClimateFrozenWaterTileIndexForTest(): {
   tileX: number;
   tileY: number;
 } {
-  for (let tileY = -500; tileY <= 500; tileY += 1) {
-    for (let tileX = -500; tileX <= 500; tileX += 1) {
+  for (let tileY = -2000; tileY <= 2000; tileY += 1) {
+    for (let tileX = -2000; tileX <= 2000; tileX += 1) {
       if (checkingWorldPlazaWaterIsClimateFrozenAtTileIndex(tileX, tileY)) {
         return { tileX, tileY };
       }
@@ -49,28 +51,11 @@ function findingWorldPlazaWarmClimateWaterTileIndexForTest(): {
   throw new Error('Expected at least one warm-climate water tile');
 }
 
-function markingWorldPlazaCampfireLitForTemperatureTest(
-  tileX: number,
-  tileY: number,
-  placedBlocksByTile: ReturnType<typeof indexingWorldBuildingPlacedBlocksByTile>
-): void {
-  updatingWorldPlazaEnvironmentalTemperatureSamplingContext({
-    placedBlocksByTile,
-    litCampfireTileKeys: new Set([
-      buildingWorldFireDevvitTileKey(
-        tileX,
-        tileY,
-        DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND
-      ),
-    ]),
-  });
-}
-
 describe('checkingWorldPlazaWaterIsFrozenAtTileIndex', () => {
   beforeEach(() => {
+    clearingWorldPlazaLitCampfireHeatTilesForTest();
     updatingWorldPlazaEnvironmentalTemperatureSamplingContext({
       placedBlocksByTile: new Map(),
-      litCampfireTileKeys: new Set(),
     });
   });
 
@@ -115,10 +100,9 @@ describe('checkingWorldPlazaWaterIsFrozenAtTileIndex', () => {
       }),
     ]);
 
-    markingWorldPlazaCampfireLitForTemperatureTest(
+    markingWorldPlazaLitCampfireHeatTileForTest(
       frozenWaterTile.tileX,
-      frozenWaterTile.tileY,
-      placedBlocksByTile
+      frozenWaterTile.tileY
     );
 
     expect(
@@ -147,10 +131,7 @@ describe('checkingWorldPlazaWaterIsFrozenAtTileIndex', () => {
       }),
     ]);
 
-    updatingWorldPlazaEnvironmentalTemperatureSamplingContext({
-      placedBlocksByTile,
-      litCampfireTileKeys: new Set(),
-    });
+    clearingWorldPlazaLitCampfireHeatTilesForTest();
 
     expect(
       checkingWorldPlazaWaterIsFrozenAtTileIndex(
@@ -180,11 +161,7 @@ describe('checkingWorldPlazaWaterIsFrozenAtTileIndex', () => {
       }),
     ]);
 
-    markingWorldPlazaCampfireLitForTemperatureTest(
-      campfireTileX,
-      campfireTileY,
-      placedBlocksByTile
-    );
+    markingWorldPlazaLitCampfireHeatTileForTest(campfireTileX, campfireTileY);
 
     expect(
       checkingWorldPlazaWaterIsFrozenAtTileIndex(
@@ -274,11 +251,7 @@ describe('checkingWorldPlazaWaterIsFrozenAtTileIndex', () => {
       }),
     ]);
 
-    markingWorldPlazaCampfireLitForTemperatureTest(
-      campfireTileX,
-      campfireTileY,
-      placedBlocksByTile
-    );
+    markingWorldPlazaLitCampfireHeatTileForTest(campfireTileX, campfireTileY);
 
     expect(
       checkingWorldPlazaWaterIsFrozenAtTileIndex(

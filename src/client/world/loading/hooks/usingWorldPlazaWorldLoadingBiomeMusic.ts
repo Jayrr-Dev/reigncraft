@@ -1,5 +1,6 @@
 'use client';
 
+import { buildingWorldPlazaAvatarFootstepBootPriorityStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaAvatarFootstepStarAudioManifest';
 import { buildingWorldPlazaBiomeMusicBootStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaBiomeMusicBootStarAudioManifest';
 import { computingWorldPlazaBiomeMusicEffectiveTargetVolume } from '@/components/world/domains/computingWorldPlazaBiomeMusicEffectiveTargetVolume';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
@@ -34,6 +35,9 @@ import type { StarAudio } from 'star-audio';
  * does not sit in silence while sprites and SFX warm. Scene biome music adopts
  * the same track without restarting when it mounts. If the bus already has a
  * track (title or plaza), this hook only refreshes volume and does not steal.
+ *
+ * After music is ready, warms girl (avatar) spawn-surface footsteps in the
+ * background so they overlap sprite loading and hit cache on the boot audio step.
  *
  * @module components/world/loading/hooks/usingWorldPlazaWorldLoadingBiomeMusic
  */
@@ -118,6 +122,13 @@ export function usingWorldPlazaWorldLoadingBiomeMusic(): void {
     ).then(() => {
       isPreloadReadyRef.current = true;
       startingBootBiomeMusic();
+
+      // Music first; then girl footsteps while textures still load.
+      void preloadingWorldPlazaStarAudioManifest(
+        buildingWorldPlazaAvatarFootstepBootPriorityStarAudioManifest()
+      ).catch(() => {
+        // Boot audio step / runtime footstep hook retry on mount.
+      });
     });
 
     const unsubscribeMasterVolume = subscribingWorldPlazaMasterVolume(

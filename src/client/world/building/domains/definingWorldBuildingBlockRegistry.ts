@@ -18,10 +18,7 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_COLLISION_RADIUS_GRID,
   DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK,
 } from '@/components/world/domains/definingWorldPlazaTerrainObstacleConstants';
-import {
-  DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS,
-  DEFINING_WORLD_PLAZA_TEMPERATURE_ICE_BLOCK_CELSIUS,
-} from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
+import { DEFINING_WORLD_PLAZA_TEMPERATURE_ICE_BLOCK_CELSIUS } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 
 /**
  * Static registry of lightweight building block definitions.
@@ -221,9 +218,6 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
     category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
     collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
     isInteractive: true,
-    environmentalTemperature: {
-      heatLevelCelsius: DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS,
-    },
     visualConfig: {
       label: 'Campfire',
       fillColor: 0x6c584c,

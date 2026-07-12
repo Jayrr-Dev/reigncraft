@@ -1,16 +1,17 @@
 'use client';
 
-import { computingWorldPlazaEntityDeathScreenTitleFontSizePx } from '@/components/world/health/domains/computingWorldPlazaEntityDeathScreenTitleFontSizePx';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_FIT_AVAILABLE_WIDTH_RATIO,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_FIT_LETTER_SPACING_EM,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_MAX_FONT_SIZE_PX,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_MIN_FONT_SIZE_PX,
 } from '@/components/world/health/domains/definingWorldPlazaEntityDeathScreenConstants';
+import { computingWorldPlazaEntityDeathScreenTitleFontSizePx } from '@/components/world/health/domains/computingWorldPlazaEntityDeathScreenTitleFontSizePx';
 import { useLayoutEffect, useState, type RefObject } from 'react';
 
 /**
  * Keeps the death-screen title on one line by shrinking font size to the overlay width.
+ * Measures at the widest enter letter-spacing so the zoom-in animation never wraps.
  */
 export function usingWorldPlazaEntityDeathScreenTitleFit(
   titleRef: RefObject<HTMLElement | null>,
@@ -45,15 +46,14 @@ export function usingWorldPlazaEntityDeathScreenTitleFit(
         overlayElement.clientWidth *
         DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_FIT_AVAILABLE_WIDTH_RATIO;
       const naturalWidthPx = titleElement.scrollWidth;
-      const nextFontSizePx =
-        computingWorldPlazaEntityDeathScreenTitleFontSizePx({
-          availableWidthPx,
-          naturalWidthPx,
-          maxFontSizePx:
-            DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_MAX_FONT_SIZE_PX,
-          minFontSizePx:
-            DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_MIN_FONT_SIZE_PX,
-        });
+      const nextFontSizePx = computingWorldPlazaEntityDeathScreenTitleFontSizePx({
+        availableWidthPx,
+        naturalWidthPx,
+        maxFontSizePx:
+          DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_MAX_FONT_SIZE_PX,
+        minFontSizePx:
+          DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_MIN_FONT_SIZE_PX,
+      });
 
       titleElement.style.fontSize = previousFontSize;
       titleElement.style.letterSpacing = previousLetterSpacing;

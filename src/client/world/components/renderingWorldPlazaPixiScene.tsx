@@ -225,7 +225,6 @@ import { RenderingWorldPlazaCampfireAmbience } from '@/components/world/fire/com
 import { RenderingWorldPlazaCampfireInteractionLabels } from '@/components/world/fire/components/renderingWorldPlazaCampfireInteractionLabels';
 import { RenderingWorldPlazaFireLayer } from '@/components/world/fire/components/renderingWorldPlazaFireLayer';
 import { RenderingWorldPlazaLavaAmbience } from '@/components/world/fire/components/renderingWorldPlazaLavaAmbience';
-import { buildingWorldPlazaLitCampfireTileKeysFromFireCells } from '@/components/world/fire/domains/buildingWorldPlazaLitCampfireTileKeysFromFireCells';
 import { validatingWorldPlazaCampfireCookStart } from '@/components/world/fire/domains/validatingWorldPlazaCampfireCookStart';
 import { usingWorldPlazaCampfireCookProgress } from '@/components/world/fire/hooks/usingWorldPlazaCampfireCookProgress';
 import { usingWorldPlazaCampfireInteraction } from '@/components/world/fire/hooks/usingWorldPlazaCampfireInteraction';
@@ -1374,13 +1373,6 @@ function RenderingWorldPlazaPixiSceneConnected({
   );
   const burntGrassTileKeysRef = useRef(burntGrassTileKeySet);
   burntGrassTileKeysRef.current = burntGrassTileKeySet;
-
-  const litCampfireTileKeys = useMemo(
-    () => buildingWorldPlazaLitCampfireTileKeysFromFireCells(fireCells),
-    [fireCells]
-  );
-  const litCampfireTileKeysRef = useRef(litCampfireTileKeys);
-  litCampfireTileKeysRef.current = litCampfireTileKeys;
 
   const consumingFireInventoryItem = useCallback(
     (itemTypeId: string, quantity: number): boolean => {
@@ -4615,7 +4607,6 @@ function RenderingWorldPlazaPixiSceneConnected({
               cameraWorldZoomRef={cameraWorldZoomRef}
               placedBlocksRef={placedBlocksRef}
               burntGrassTileKeysRef={burntGrassTileKeysRef}
-              litCampfireTileKeysRef={litCampfireTileKeysRef}
               choppedTreesByTileKeyRef={choppedTreesByTileKeyRef}
               pickedPebblesByTileKeyRef={pickedPebblesByTileKeyRef}
               floorLayerRef={terrainFloorLayerRef}

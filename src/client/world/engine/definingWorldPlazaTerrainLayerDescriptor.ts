@@ -79,8 +79,6 @@ export type RunningWorldPlazaTerrainLayerEngineInputRefs = {
   readonly cameraWorldZoomRef: RefObject<number>;
   readonly placedBlocksRef?: RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
   readonly burntGrassTileKeysRef?: RefObject<ReadonlySet<string>>;
-  /** Lit campfire fire-tile keys for environmental heat gating. */
-  readonly litCampfireTileKeysRef?: RefObject<ReadonlySet<string>>;
   readonly choppedTreesByTileKeyRef?: RefObject<
     ReadonlyMap<string, DefiningWorldPlazaChoppedTreeTileState>
   >;

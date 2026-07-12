@@ -1,9 +1,7 @@
 import { buildingWorldPlazaLitCampfireTileKeysFromFireCells } from '@/components/world/fire/domains/buildingWorldPlazaLitCampfireTileKeysFromFireCells';
+import { formattingWorldPlazaLitCampfireHeatTileKey } from '@/components/world/fire/domains/managingWorldPlazaLitCampfireHeatTilesStore';
 import { describe, expect, it } from 'vitest';
-import {
-  buildingWorldFireDevvitTileKey,
-  type WorldFireDevvitCell,
-} from '../../../../shared/worldFireDevvit';
+import type { WorldFireDevvitCell } from '../../../../shared/worldFireDevvit';
 
 function creatingWorldPlazaCampfireFireCellForTest(
   overrides: Partial<WorldFireDevvitCell> &
@@ -21,12 +19,14 @@ function creatingWorldPlazaCampfireFireCellForTest(
 }
 
 describe('buildingWorldPlazaLitCampfireTileKeysFromFireCells', () => {
-  it('includes campfire cells with remaining fuel', () => {
+  it('includes campfire cells with remaining fuel as 2D tile keys', () => {
     const keys = buildingWorldPlazaLitCampfireTileKeysFromFireCells([
       creatingWorldPlazaCampfireFireCellForTest({ tileX: 3, tileY: 4 }),
     ]);
 
-    expect(keys.has(buildingWorldFireDevvitTileKey(3, 4, 1))).toBe(true);
+    expect(keys.has(formattingWorldPlazaLitCampfireHeatTileKey(3, 4))).toBe(
+      true
+    );
   });
 
   it('excludes spreading fire and empty-fuel campfires', () => {

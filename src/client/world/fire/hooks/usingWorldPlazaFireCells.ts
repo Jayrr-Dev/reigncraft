@@ -1,6 +1,7 @@
 'use client';
 
 import { DEFINING_WORLD_BUILDING_PLOTS_QUERY_KEY_ROOT } from '@/components/world/building/domains/definingWorldBuildingPlotConstants';
+import { updatingWorldPlazaLitCampfireHeatTilesFromFireCells } from '@/components/world/fire/domains/managingWorldPlazaLitCampfireHeatTilesStore';
 import { listingWorldPlazaLocalFireCells } from '@/components/world/fire/domains/managingWorldPlazaLocalFireCells';
 import { fetchingWorldFireDevvitCells } from '@/components/world/fire/repositories/callingWorldFireDevvitApi';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -127,9 +128,12 @@ export function usingWorldPlazaFireCells({
 
   if (isLocalSession) {
     const localFireState = localFireCellsQuery.data;
+    const fireCells = localFireState?.cells ?? [];
+
+    updatingWorldPlazaLitCampfireHeatTilesFromFireCells(fireCells);
 
     return {
-      fireCells: localFireState?.cells ?? [],
+      fireCells,
       extinguishedCampfireTileKeys:
         localFireState?.extinguishedCampfireTileKeys ?? [],
       burntGrassTileKeys: localFireState?.burntGrassTileKeys ?? [],
@@ -137,8 +141,12 @@ export function usingWorldPlazaFireCells({
     };
   }
 
+  const fireCells = fireCellsQuery.data?.cells ?? [];
+
+  updatingWorldPlazaLitCampfireHeatTilesFromFireCells(fireCells);
+
   return {
-    fireCells: fireCellsQuery.data?.cells ?? [],
+    fireCells,
     extinguishedCampfireTileKeys:
       fireCellsQuery.data?.extinguishedCampfireTileKeys ?? [],
     burntGrassTileKeys: fireCellsQuery.data?.burntGrassTileKeys ?? [],

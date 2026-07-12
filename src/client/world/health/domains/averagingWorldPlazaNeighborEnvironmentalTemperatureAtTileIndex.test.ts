@@ -1,7 +1,10 @@
 import { DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import { creatingWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import { indexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
+import {
+  clearingWorldPlazaLitCampfireHeatTilesForTest,
+  markingWorldPlazaLitCampfireHeatTileForTest,
+} from '@/components/world/fire/domains/managingWorldPlazaLitCampfireHeatTilesStore';
 import { averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex } from '@/components/world/health/domains/averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex';
 import { updatingWorldPlazaEnvironmentalTemperatureSamplingContext } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
 import { computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex } from '@/components/world/health/domains/computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex';
@@ -11,7 +14,6 @@ import {
 } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import { resolvingWorldPlazaEnvironmentalTemperatureAtTileIndex } from '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardAtTileIndex';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildingWorldFireDevvitTileKey } from '../../../../shared/worldFireDevvit';
 
 /** Deterministic lava tile used by the mocked lava checker. */
 const AVERAGING_WORLD_PLAZA_LAVA_TILE_TEST = {
@@ -28,9 +30,9 @@ vi.mock('@/components/world/domains/checkingWorldPlazaLavaAtTileIndex', () => ({
 describe('averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    clearingWorldPlazaLitCampfireHeatTilesForTest();
     updatingWorldPlazaEnvironmentalTemperatureSamplingContext({
       placedBlocksByTile: new Map(),
-      litCampfireTileKeys: new Set(),
     });
   });
 
@@ -129,16 +131,7 @@ describe('averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex', () =>
       }),
     ]);
 
-    updatingWorldPlazaEnvironmentalTemperatureSamplingContext({
-      placedBlocksByTile,
-      litCampfireTileKeys: new Set([
-        buildingWorldFireDevvitTileKey(
-          campfireTileX,
-          campfireTileY,
-          DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND
-        ),
-      ]),
-    });
+    markingWorldPlazaLitCampfireHeatTileForTest(campfireTileX, campfireTileY);
 
     const rawCelsius =
       computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
@@ -180,10 +173,7 @@ describe('averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex', () =>
       }),
     ]);
 
-    updatingWorldPlazaEnvironmentalTemperatureSamplingContext({
-      placedBlocksByTile,
-      litCampfireTileKeys: new Set(),
-    });
+    clearingWorldPlazaLitCampfireHeatTilesForTest();
 
     const ambientCelsius =
       computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({

@@ -1,6 +1,7 @@
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { listingWorldBuildingPlacedBlocksAtTileFromIndex } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
+import { checkingWorldPlazaLitCampfireHeatAtTileIndex } from '@/components/world/fire/domains/managingWorldPlazaLitCampfireHeatTilesStore';
 import { resolvingWorldPlazaTemperatureAreaProfileAtTileIndex } from '@/components/world/health/domains/definingWorldPlazaTemperatureAreaProfiles';
 import { listingWorldPlazaBlockEnvironmentalTemperatureLevelsAtTile } from '@/components/world/health/domains/resolvingWorldPlazaBlockEnvironmentalTemperatureLevel';
 
@@ -25,6 +26,10 @@ export function checkingWorldPlazaTileHasAssignableEnvironmentalTemperatureSourc
   }
 
   if (resolvingWorldPlazaTemperatureAreaProfileAtTileIndex(tileX, tileY)) {
+    return true;
+  }
+
+  if (checkingWorldPlazaLitCampfireHeatAtTileIndex(tileX, tileY)) {
     return true;
   }
 
