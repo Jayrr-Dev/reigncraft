@@ -77,7 +77,6 @@ Species meat uses per-entry ratios in `definingWildlifeMeatRegistry.ts`. Fish an
 | Golden Retriever | `GOLDEN_RETRIEVER`   | 1.0                     | Baseline          |
 | Grizzly          | `GRIZZLY`            | 1.3                     | +30% faster drain |
 | Penguin          | `PINGUIN`            | 0.85                    | −15% slower drain |
-| Fox Peach        | `FOX_PEACH`          | 1.0                     | Baseline          |
 | Orange Cat       | `CAT_ORANGE`         | 0.9                     | −10% slower drain |
 
 **Edit file:** `registeringWorldPlazaCharacterEngineDefinitions.ts` → `stats.hungerDrainMultiplier` on each definition.

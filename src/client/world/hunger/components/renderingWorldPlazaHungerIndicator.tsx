@@ -1,22 +1,24 @@
 'use client';
 
 /**
- * Persistent hunger row shown above the plaza hotbar.
+ * Clickable hunger sphere for the plaza action bar: brown fill drains
+ * downward with a tiered drumstick sprite and a 3D bronze ring.
  *
  * @module components/world/hunger/components/renderingWorldPlazaHungerIndicator
  */
 
-import { Icon } from '@/components/ui/icon';
+import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { DefiningWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
-import {
-  type DefiningWorldPlazaHungerIconFillState,
-  listingWorldPlazaHungerIconFillStates,
-} from '@/components/world/hunger/domains/listingWorldPlazaHungerIconFillStates';
+import { LABELING_WORLD_PLAZA_ACTION_BAR_HUNGER } from '@/components/world/hunger/domains/definingWorldPlazaHungerPanelConstants';
+import { resolvingWorldPlazaHungerFillColors } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerFillColor';
 import {
   DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_EMPTY_COLOR,
-  DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_FILL_COLOR,
+  STYLING_WORLD_PLAZA_HUNGER_INDICATOR_FILL_DISC_CLASS_NAME,
+  STYLING_WORLD_PLAZA_HUNGER_INDICATOR_ORB_CLASS_NAME,
   resolvingWorldPlazaHungerIndicatorViewportStyles,
 } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerIndicatorViewportStyles';
+import { resolvingWorldPlazaHungerTierSpriteIconStyle } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerTierSpriteIconStyle';
+import { cn } from '@/lib/utils';
 import { memo, useMemo } from 'react';
 
 /** Props for {@link RenderingWorldPlazaHungerIndicator}. */
@@ -29,10 +31,13 @@ export interface RenderingWorldPlazaHungerIndicatorProps {
   isStarving: boolean;
   /** Live HUD scale from the plaza viewport frame. */
   viewportHudScale?: number;
+  /** When true, applies the action bar mobile shrink. */
+  isMobile?: boolean;
+  /** Whether the hunger status panel is open. */
+  isOpen?: boolean;
+  /** Toggles the hunger status panel. */
+  onToggle?: () => void;
 }
-
-const RENDERING_WORLD_PLAZA_HUNGER_INDICATOR_ROW_CLASS =
-  'flex w-full items-center justify-between';
 
 /** Human-readable label per tier for the accessible name. */
 const RENDERING_WORLD_PLAZA_HUNGER_INDICATOR_TIER_LABEL: Record<
@@ -46,67 +51,9 @@ const RENDERING_WORLD_PLAZA_HUNGER_INDICATOR_TIER_LABEL: Record<
   starving: 'Starving',
 };
 
-type RenderingWorldPlazaHungerFoodIconProps = {
-  fill: DefiningWorldPlazaHungerIconFillState;
-  iconSizePx: number;
-};
-
-const RenderingWorldPlazaHungerFoodIcon = memo(
-  function RenderingWorldPlazaHungerFoodIcon({
-    fill,
-    iconSizePx,
-  }: RenderingWorldPlazaHungerFoodIconProps): React.JSX.Element {
-    if (fill === 0) {
-      return (
-        <Icon
-          icon="mdi:food-drumstick"
-          aria-hidden
-          className="shrink-0"
-          style={{
-            color: DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_EMPTY_COLOR,
-          }}
-          width={iconSizePx}
-          height={iconSizePx}
-        />
-      );
-    }
-
-    return (
-      <div
-        className="relative shrink-0"
-        style={{ width: iconSizePx, height: iconSizePx }}
-      >
-        <Icon
-          icon="mdi:food-drumstick"
-          aria-hidden
-          className="absolute inset-0"
-          style={{
-            color: DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_EMPTY_COLOR,
-          }}
-          width={iconSizePx}
-          height={iconSizePx}
-        />
-        <div
-          className="absolute inset-y-0 left-0 overflow-hidden"
-          style={{ width: `${fill * 100}%` }}
-        >
-          <Icon
-            icon="mdi:food-drumstick"
-            aria-hidden
-            style={{
-              color: DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_FILL_COLOR,
-            }}
-            width={iconSizePx}
-            height={iconSizePx}
-          />
-        </div>
-      </div>
-    );
-  }
-);
-
 /**
- * Minecraft-style drumstick row aligned to the inventory hotbar width.
+ * Circular hunger orb with brown fill that drops as hunger drains.
+ * Drumstick sprite swaps by named hunger tier.
  */
 export const RenderingWorldPlazaHungerIndicator = memo(
   function RenderingWorldPlazaHungerIndicator({
@@ -114,34 +61,73 @@ export const RenderingWorldPlazaHungerIndicator = memo(
     tier,
     isStarving,
     viewportHudScale = 1,
+    isMobile = false,
+    isOpen = false,
+    onToggle,
   }: RenderingWorldPlazaHungerIndicatorProps): React.JSX.Element {
-    const iconFillStates = listingWorldPlazaHungerIconFillStates(hungerRatio);
     const viewportStyles = useMemo(
-      () => resolvingWorldPlazaHungerIndicatorViewportStyles(viewportHudScale),
-      [viewportHudScale]
+      () =>
+        resolvingWorldPlazaHungerIndicatorViewportStyles(
+          viewportHudScale,
+          isMobile
+        ),
+      [viewportHudScale, isMobile]
+    );
+    const clampedRatio = Math.min(1, Math.max(0, hungerRatio));
+    const fillColors = useMemo(
+      () => resolvingWorldPlazaHungerFillColors(clampedRatio),
+      [clampedRatio]
+    );
+    const tierSpriteStyle = useMemo(
+      () =>
+        resolvingWorldPlazaHungerTierSpriteIconStyle(
+          tier,
+          viewportStyles.iconSizePx
+        ),
+      [tier, viewportStyles.iconSizePx]
     );
     const label = RENDERING_WORLD_PLAZA_HUNGER_INDICATOR_TIER_LABEL[tier];
-    const hungerPercent = Math.round(
-      Math.min(1, Math.max(0, hungerRatio)) * 100
-    );
+    const hungerPercent = Math.round(clampedRatio * 100);
     const statusLabel = isStarving ? `${label}, starving` : label;
+    const ariaLabel = `${LABELING_WORLD_PLAZA_ACTION_BAR_HUNGER}: ${statusLabel}, ${hungerPercent}%`;
 
     return (
-      <div
-        className={RENDERING_WORLD_PLAZA_HUNGER_INDICATOR_ROW_CLASS}
-        style={viewportStyles.rowStyle}
-        role="img"
-        aria-label={`Hunger: ${statusLabel}, ${hungerPercent}%`}
-        title={`Hunger: ${statusLabel}`}
+      <button
+        type="button"
+        {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+        className={cn(
+          STYLING_WORLD_PLAZA_HUNGER_INDICATOR_ORB_CLASS_NAME,
+          isOpen && 'plaza-hunger-orb--open'
+        )}
+        style={viewportStyles.sphereStyle}
+        aria-label={ariaLabel}
+        aria-pressed={isOpen}
+        aria-expanded={isOpen}
+        title={ariaLabel}
+        onClick={onToggle}
       >
-        {iconFillStates.map((fill, iconIndex) => (
-          <RenderingWorldPlazaHungerFoodIcon
-            key={iconIndex}
-            fill={fill}
-            iconSizePx={viewportStyles.iconSizePx}
+        <span
+          className={STYLING_WORLD_PLAZA_HUNGER_INDICATOR_FILL_DISC_CLASS_NAME}
+          style={{
+            backgroundColor:
+              DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_EMPTY_COLOR,
+          }}
+          aria-hidden="true"
+        >
+          <span
+            className="absolute inset-x-0 bottom-0 transition-[height,background] duration-200 ease-out"
+            style={{
+              height: `${clampedRatio * 100}%`,
+              background: fillColors.fillBackgroundCss,
+            }}
           />
-        ))}
-      </div>
+        </span>
+        <span
+          className="relative z-10 shrink-0"
+          style={tierSpriteStyle}
+          aria-hidden
+        />
+      </button>
     );
   }
 );

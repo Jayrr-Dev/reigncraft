@@ -44,6 +44,10 @@ import {
 } from '@/components/world/domains/definingWorldPlazaViewportFullscreenConstants';
 import { resolvingWorldPlazaActionBarViewportStyles } from '@/components/world/domains/resolvingWorldPlazaActionBarViewportStyles';
 import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
+import { RenderingWorldPlazaHungerIndicator } from '@/components/world/hunger/components/renderingWorldPlazaHungerIndicator';
+import { RenderingWorldPlazaHungerPanel } from '@/components/world/hunger/components/renderingWorldPlazaHungerPanel';
+import type { DefiningWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
+import { STYLING_WORLD_PLAZA_ACTION_BAR_HUNGER_ANCHOR_CLASS_NAME } from '@/components/world/hunger/domains/definingWorldPlazaHungerPanelConstants';
 import { cn } from '@/lib/utils';
 import {
   BookOpen,
@@ -95,6 +99,12 @@ export interface RenderingWorldPlazaActionBarProps {
   isFullscreenViewport?: boolean;
   /** Inline chat controls rendered in place of build mode when chat is open. */
   inlineChatSlot?: React.ReactNode;
+  /** When set, shows the hunger sphere left of transform. */
+  hungerHud?: {
+    readonly hungerRatio: number;
+    readonly tier: DefiningWorldPlazaHungerTier;
+    readonly isStarving: boolean;
+  } | null;
 }
 
 /**
@@ -133,6 +143,7 @@ export function RenderingWorldPlazaActionBar({
   isMobile = false,
   isFullscreenViewport = false,
   inlineChatSlot = null,
+  hungerHud = null,
 }: RenderingWorldPlazaActionBarProps): React.JSX.Element | null {
   const viewportStyles = useMemo(
     () =>
@@ -146,6 +157,7 @@ export function RenderingWorldPlazaActionBar({
 
   const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();
   const [isTransformPanelOpen, setIsTransformPanelOpen] = useState(false);
+  const [isHungerPanelOpen, setIsHungerPanelOpen] = useState(false);
   const [isSoundMixerOpen, setIsSoundMixerOpen] = useState(false);
   const [isCodexMenuOpen, setIsCodexMenuOpen] = useState(false);
   const [isExitHomeConfirmOpen, setIsExitHomeConfirmOpen] = useState(false);
@@ -156,6 +168,7 @@ export function RenderingWorldPlazaActionBar({
     }
 
     setIsTransformPanelOpen(false);
+    setIsHungerPanelOpen(false);
     setIsSoundMixerOpen(false);
     setIsCodexMenuOpen(false);
   }, [isChatOpen]);
@@ -372,6 +385,7 @@ export function RenderingWorldPlazaActionBar({
                   aria-pressed={isTransformPanelOpen}
                   aria-expanded={isTransformPanelOpen}
                   onClick={() => {
+                    setIsHungerPanelOpen(false);
                     setIsTransformPanelOpen((wasOpen) => !wasOpen);
                   }}
                   className={stylingWorldPlazaActionBarButton(
@@ -395,6 +409,45 @@ export function RenderingWorldPlazaActionBar({
                   />
                 ) : null}
               </div>
+
+              {hungerHud ? (
+                <>
+                  <span
+                    className={
+                      DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME
+                    }
+                    style={viewportStyles.dividerStyle}
+                    aria-hidden="true"
+                  />
+                  <div
+                    className={
+                      STYLING_WORLD_PLAZA_ACTION_BAR_HUNGER_ANCHOR_CLASS_NAME
+                    }
+                  >
+                    <RenderingWorldPlazaHungerIndicator
+                      hungerRatio={hungerHud.hungerRatio}
+                      tier={hungerHud.tier}
+                      isStarving={hungerHud.isStarving}
+                      viewportHudScale={viewportHudScale}
+                      isMobile={isMobile}
+                      isOpen={isHungerPanelOpen}
+                      onToggle={() => {
+                        setIsTransformPanelOpen(false);
+                        setIsSoundMixerOpen(false);
+                        setIsCodexMenuOpen(false);
+                        setIsHungerPanelOpen((wasOpen) => !wasOpen);
+                      }}
+                    />
+                    {isHungerPanelOpen ? (
+                      <RenderingWorldPlazaHungerPanel
+                        hungerRatio={hungerHud.hungerRatio}
+                        tier={hungerHud.tier}
+                        isStarving={hungerHud.isStarving}
+                      />
+                    ) : null}
+                  </div>
+                </>
+              ) : null}
 
               {isFullscreenSupported ? (
                 <>

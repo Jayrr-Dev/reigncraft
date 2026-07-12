@@ -22,17 +22,13 @@ export const STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_TOOLS_STATUS_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_SLOT_ANCHOR_CLASS_NAME =
   'relative shrink-0' as const;
 
-/** Column wrapping the mode switch, inventory-shaped toolbar, and plot metric. */
+/** Column wrapping the mode switch and inventory-shaped toolbar. */
 export const STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_STACK_CLASS_NAME =
   'pointer-events-none flex flex-col items-center gap-1' as const;
 
 /** Header block above the build toolbar (Build / Claim mode switch only). */
 export const STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_HEADER_CLASS_NAME =
   'pointer-events-auto flex flex-col items-center gap-1' as const;
-
-/** Footer under the build toolbar for plot / tile capacity. */
-export const STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_FOOTER_CLASS_NAME =
-  'pointer-events-none flex flex-col items-center' as const;
 
 /** Row of Build / Claim session mode buttons above the hotbar slots. */
 export const STYLING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_SWITCHER_CLASS_NAME =
@@ -57,15 +53,15 @@ export const STYLING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ICON_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_OUTLINE_TITLE_CLASS_NAME =
   'select-none text-center font-display text-[12px] font-bold uppercase leading-none tracking-[0.16em] text-white [-webkit-text-stroke:0.85px_rgba(0,0,0,0.95)] [paint-order:stroke_fill] [text-shadow:0_1px_0_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)]' as const;
 
-/** Compact plot capacity readout under the edit toolbar. */
+/** Compact plot capacity readout under the top action bar. */
 export const STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_OUTLINE_METRIC_CLASS_NAME =
-  'select-none text-center font-body text-[10px] font-semibold tabular-nums leading-none text-white [-webkit-text-stroke:0.75px_rgba(0,0,0,0.95)] [paint-order:stroke_fill] [text-shadow:0_1px_0_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)]' as const;
+  'select-none text-center font-body text-[13px] font-semibold tabular-nums leading-none text-white [-webkit-text-stroke:0.85px_rgba(0,0,0,0.95)] [paint-order:stroke_fill] [text-shadow:0_1px_0_rgba(0,0,0,0.55),0_0_6px_rgba(0,0,0,0.35)]' as const;
 
 /** Build mode toolbar title above the icon slots. */
 export const LABELING_WORLD_PLAZA_BUILD_MODE_HOTBAR_TITLE = 'Build' as const;
 
 /**
- * Formats plot + tile capacity shown under the edit toolbar.
+ * Formats plot + tile capacity shown under the top action bar in edit mode.
  *
  * @param ownedPlotCount - Current owned plot count.
  * @param maxOwnedPlotCount - Per-user plot cap.

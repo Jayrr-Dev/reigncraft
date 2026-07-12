@@ -195,6 +195,8 @@ export interface UsingWorldPlazaPlayerHealthResult {
   localTemperatureCelsiusRef: React.RefObject<number | null>;
   healthSyncSnapshotRef: React.RefObject<DefiningWorldPlazaEntityHealthSyncSnapshot>;
   hudSnapshot: UsingWorldPlazaPlayerHealthHudSnapshot;
+  /** Forces the HUD to re-read healthStateRef (e.g. after save hydrate). */
+  syncingHealthHudFromStateRef: React.RefObject<() => void>;
   takeDamageRef: React.RefObject<
     (amount: number, kind?: DefiningWorldPlazaEntityDamageKind) => void
   >;
@@ -776,6 +778,11 @@ export function usingWorldPlazaPlayerHealth({
     },
     [healthSyncSnapshotRef, isRollingRef]
   );
+
+  const syncingHealthHudFromStateRef = useRef<() => void>(() => undefined);
+  syncingHealthHudFromStateRef.current = () => {
+    pushingHudSnapshot(performance.now());
+  };
 
   useEffect(() => {
     return subscribingWorldPlazaTemperatureDisplayUnit(() => {
@@ -1583,6 +1590,7 @@ export function usingWorldPlazaPlayerHealth({
     healthSyncSnapshotRef,
     applyStarvationDamageRef,
     hudSnapshot,
+    syncingHealthHudFromStateRef,
     takeDamageRef,
     enqueueMissFloatRef,
     healRef,

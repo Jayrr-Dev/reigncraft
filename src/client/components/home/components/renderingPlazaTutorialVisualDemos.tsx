@@ -27,11 +27,11 @@ import {
   DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_TRACK_BUTTON_ACTIVE_CLASS_NAME,
   DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_TRACK_BUTTON_LABEL,
 } from '@/components/world/domains/definingWorldPlazaSavedCoordsListUiConstants';
-import { DEFINING_WORLD_PLAZA_HUNGER_ICON_COUNT } from '@/components/world/hunger/domains/listingWorldPlazaHungerIconFillStates';
 import {
   DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_EMPTY_COLOR,
   DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_FILL_COLOR,
 } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerIndicatorViewportStyles';
+import { resolvingWorldPlazaHungerTierSpriteIconStyle } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerTierSpriteIconStyle';
 import { DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import { cn } from '@/lib/utils';
 import type { CSSProperties } from 'react';
@@ -1140,31 +1140,10 @@ export function RenderingPlazaTutorialHealthDemo(): React.JSX.Element {
   );
 }
 
-const PLAZA_TUTORIAL_HUNGER_DEMO_ICON_SIZE_PX = 14;
+const PLAZA_TUTORIAL_HUNGER_DEMO_SPHERE_SIZE_PX = 40;
+const PLAZA_TUTORIAL_HUNGER_DEMO_ICON_SIZE_PX = 18;
 
-type RenderingPlazaTutorialHungerDrumstickProps = {
-  color: string;
-};
-
-function RenderingPlazaTutorialHungerDrumstick({
-  color,
-}: RenderingPlazaTutorialHungerDrumstickProps): React.JSX.Element {
-  return (
-    <Icon
-      icon="mdi:food-drumstick"
-      aria-hidden
-      className="shrink-0"
-      style={{
-        color,
-        filter: 'drop-shadow(0 1px 1px rgba(0, 0, 0, 0.65))',
-      }}
-      width={PLAZA_TUTORIAL_HUNGER_DEMO_ICON_SIZE_PX}
-      height={PLAZA_TUTORIAL_HUNGER_DEMO_ICON_SIZE_PX}
-    />
-  );
-}
-
-/** Hunger drumstick row and hotbar eat demo. */
+/** Hunger sphere orb and hotbar eat demo. */
 export function RenderingPlazaTutorialHungerDemo({
   isMobile = false,
 }: RenderingPlazaTutorialDemoProps): React.JSX.Element {
@@ -1172,30 +1151,32 @@ export function RenderingPlazaTutorialHungerDemo({
     <div className="flex flex-col items-center gap-3">
       <div className="relative w-full max-w-[15rem] rounded-md border border-poster-teal/25 bg-[linear-gradient(180deg,#1c333c_0%,#14252b_100%)] px-4 py-5 shadow-[inset_0_0_20px_rgba(0,0,0,0.35)]">
         <div className="mx-auto flex w-fit flex-col items-center gap-3">
-          <div className="relative flex gap-px">
-            <div className="flex gap-px" aria-hidden>
-              {Array.from({
-                length: DEFINING_WORLD_PLAZA_HUNGER_ICON_COUNT,
-              }).map((_, iconIndex) => (
-                <RenderingPlazaTutorialHungerDrumstick
-                  key={`empty-${iconIndex}`}
-                  color={DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_EMPTY_COLOR}
-                />
-              ))}
-            </div>
+          <div
+            className="relative flex items-center justify-center overflow-hidden rounded-full"
+            style={{
+              width: PLAZA_TUTORIAL_HUNGER_DEMO_SPHERE_SIZE_PX,
+              height: PLAZA_TUTORIAL_HUNGER_DEMO_SPHERE_SIZE_PX,
+              backgroundColor:
+                DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_EMPTY_COLOR,
+              boxShadow: 'inset 0 0 0 1.5px rgba(120, 90, 55, 0.85)',
+            }}
+            aria-hidden
+          >
             <div
-              className="plaza-tutorial-hunger-fill-mask absolute inset-y-0 left-0 flex gap-px overflow-hidden"
+              className="plaza-tutorial-hunger-fill absolute inset-x-0 bottom-0"
+              style={{
+                backgroundColor:
+                  DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_FILL_COLOR,
+              }}
+            />
+            <span
+              className="relative z-10 shrink-0"
+              style={resolvingWorldPlazaHungerTierSpriteIconStyle(
+                'well_fed',
+                PLAZA_TUTORIAL_HUNGER_DEMO_ICON_SIZE_PX
+              )}
               aria-hidden
-            >
-              {Array.from({
-                length: DEFINING_WORLD_PLAZA_HUNGER_ICON_COUNT,
-              }).map((_, iconIndex) => (
-                <RenderingPlazaTutorialHungerDrumstick
-                  key={`filled-${iconIndex}`}
-                  color={DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_FILL_COLOR}
-                />
-              ))}
-            </div>
+            />
           </div>
 
           <div

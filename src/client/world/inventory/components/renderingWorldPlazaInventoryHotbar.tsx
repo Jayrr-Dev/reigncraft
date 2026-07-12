@@ -14,12 +14,8 @@ import type {
 import { SortingInventory } from '@/components/inventory/sortingInventory';
 import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
 import { ProvidingWorldPlazaViewportHudScale } from '@/components/world/components/providingWorldPlazaViewportHudScale';
-import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles } from '@/components/world/domains/resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles';
-import { RenderingWorldPlazaHungerIndicator } from '@/components/world/hunger/components/renderingWorldPlazaHungerIndicator';
-import type { DefiningWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
-import { DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_GAP_ABOVE_HOTBAR_BASE_PX } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerIndicatorViewportStyles';
 import {
   ProvidingWorldPlazaInventoryHotbarSlotInteractions,
   RenderingWorldPlazaInventoryHotbarSlotCell,
@@ -90,12 +86,8 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
     slotIndex: number,
     enchantmentId: string
   ) => void;
-  /** When set, renders the hunger drumstick row directly above the hotbar shell. */
-  readonly hungerHud?: {
-    readonly hungerRatio: number;
-    readonly tier: DefiningWorldPlazaHungerTier;
-    readonly isStarving: boolean;
-  } | null;
+  /** When true, skips the outer bottom-center anchor (parent stack owns it). */
+  readonly isEmbeddedInHudToolbarStack?: boolean;
   /** Local player effective max HP for food heal preview in item detail. */
   readonly playerEffectiveMaxHealth?: number;
 }
@@ -234,7 +226,7 @@ export function RenderingWorldPlazaInventoryHotbar({
   onSelectHotbarSlot,
   onEatHotbarSlot,
   onUseActiveEnchantment,
-  hungerHud = null,
+  isEmbeddedInHudToolbarStack = false,
   playerEffectiveMaxHealth,
 }: RenderingWorldPlazaInventoryHotbarProps): React.JSX.Element {
   const { state, isLoading, handleDragEnd, moveItem, removeItem, updateState } =
@@ -440,14 +432,6 @@ export function RenderingWorldPlazaInventoryHotbar({
     [viewportHudScale, isMobile]
   );
 
-  const hungerGapAboveHotbarPx = useMemo(
-    () =>
-      computingWorldPlazaViewportHudScaledPx(
-        DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_GAP_ABOVE_HOTBAR_BASE_PX,
-        hotbarViewportHudScale
-      ),
-    [hotbarViewportHudScale]
-  );
   const anchorViewportStyle = useMemo(
     () =>
       resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles(
@@ -456,6 +440,43 @@ export function RenderingWorldPlazaInventoryHotbar({
       ),
     [viewportHudScale, isMobile, isFullscreen]
   );
+
+  const inventoryHotbarBody = (
+    <ProvidingWorldPlazaViewportHudScale
+      viewportHudScale={hotbarViewportHudScale}
+    >
+      <div className="pointer-events-auto flex flex-col items-center">
+        <RenderingWorldPlazaInventoryHotbarInventoryShell
+          state={state}
+          isLoading={isLoading}
+          viewportHudScale={hotbarViewportHudScale}
+          selectedSlotIndex={selectedSlotIndex}
+          onSelectHotbarSlot={onSelectHotbarSlot}
+          onEatHotbarSlot={onEatHotbarSlot}
+          onDropHotbarSlot={handlingDropHotbarSlot}
+          onUseActiveEnchantment={onUseActiveEnchantment}
+          openBagHotbarSlotIndex={openBagHotbarSlotIndex}
+          openItemDetailSlotIndex={openItemDetailSlotIndex}
+          togglingItemActionPopover={togglingItemActionPopover}
+          closingItemActionPopover={closingItemActionPopover}
+          openingBagPopover={openingBagPopover}
+          closingBagPopover={closingBagPopover}
+          onInventoryDragStart={handlingInventoryDragStart}
+          onInventoryDragEnd={handlingInventoryDragEnd}
+          resolvingDraggedItemById={resolvingDraggedItemById}
+          playerEffectiveMaxHealth={playerEffectiveMaxHealth}
+        />
+      </div>
+    </ProvidingWorldPlazaViewportHudScale>
+  );
+
+  if (isEmbeddedInHudToolbarStack) {
+    return (
+      <div aria-label={LABELING_WORLD_PLAZA_INVENTORY_HOTBAR}>
+        {inventoryHotbarBody}
+      </div>
+    );
+  }
 
   return (
     <div
@@ -466,43 +487,7 @@ export function RenderingWorldPlazaInventoryHotbar({
       style={anchorViewportStyle}
       aria-label={LABELING_WORLD_PLAZA_INVENTORY_HOTBAR}
     >
-      <ProvidingWorldPlazaViewportHudScale
-        viewportHudScale={hotbarViewportHudScale}
-      >
-        <div
-          className="pointer-events-auto flex flex-col items-center"
-          style={{ gap: hungerGapAboveHotbarPx }}
-        >
-          {hungerHud ? (
-            <RenderingWorldPlazaHungerIndicator
-              hungerRatio={hungerHud.hungerRatio}
-              tier={hungerHud.tier}
-              isStarving={hungerHud.isStarving}
-              viewportHudScale={hotbarViewportHudScale}
-            />
-          ) : null}
-          <RenderingWorldPlazaInventoryHotbarInventoryShell
-            state={state}
-            isLoading={isLoading}
-            viewportHudScale={hotbarViewportHudScale}
-            selectedSlotIndex={selectedSlotIndex}
-            onSelectHotbarSlot={onSelectHotbarSlot}
-            onEatHotbarSlot={onEatHotbarSlot}
-            onDropHotbarSlot={handlingDropHotbarSlot}
-            onUseActiveEnchantment={onUseActiveEnchantment}
-            openBagHotbarSlotIndex={openBagHotbarSlotIndex}
-            openItemDetailSlotIndex={openItemDetailSlotIndex}
-            togglingItemActionPopover={togglingItemActionPopover}
-            closingItemActionPopover={closingItemActionPopover}
-            openingBagPopover={openingBagPopover}
-            closingBagPopover={closingBagPopover}
-            onInventoryDragStart={handlingInventoryDragStart}
-            onInventoryDragEnd={handlingInventoryDragEnd}
-            resolvingDraggedItemById={resolvingDraggedItemById}
-            playerEffectiveMaxHealth={playerEffectiveMaxHealth}
-          />
-        </div>
-      </ProvidingWorldPlazaViewportHudScale>
+      {inventoryHotbarBody}
     </div>
   );
 }

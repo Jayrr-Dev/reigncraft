@@ -1643,6 +1643,58 @@ body {
   background: linear-gradient(180deg, #2c4a52 0%, #223a42 100%);
 }
 
+/* Hunger orb: beveled bronze ring matching action-bar gold chrome. */
+.plaza-hunger-orb {
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  background:
+    linear-gradient(
+      145deg,
+      #f0e0b8 0%,
+      #d4b06a 22%,
+      #a67c3d 48%,
+      #6b4220 78%,
+      #4a2e12 100%
+    );
+  box-shadow:
+    0 2px 3px rgba(20, 14, 8, 0.45),
+    0 1px 0 rgba(255, 240, 200, 0.35),
+    inset 0 1px 1px rgba(255, 248, 220, 0.55),
+    inset 0 -2px 3px rgba(40, 24, 8, 0.55);
+  transition:
+    filter 120ms ease-out,
+    box-shadow 120ms ease-out,
+    transform 120ms ease-out;
+}
+
+.plaza-hunger-orb:hover {
+  filter: brightness(1.06);
+}
+
+.plaza-hunger-orb:focus-visible {
+  outline: 2px solid var(--color-poster-gold);
+  outline-offset: 2px;
+}
+
+.plaza-hunger-orb:active {
+  transform: translateY(1px);
+  box-shadow:
+    0 1px 2px rgba(20, 14, 8, 0.4),
+    inset 0 2px 3px rgba(40, 24, 8, 0.5),
+    inset 0 1px 0 rgba(255, 248, 220, 0.25);
+}
+
+.plaza-hunger-orb--open {
+  box-shadow:
+    0 2px 3px rgba(20, 14, 8, 0.45),
+    0 0 0 2px rgba(217, 164, 65, 0.55),
+    inset 0 1px 1px rgba(255, 248, 220, 0.55),
+    inset 0 -2px 3px rgba(40, 24, 8, 0.55);
+}
+
 /* Dropdown panels opened from the action bar — compact plaza panel.
  * Position is set via Tailwind `absolute` on each popover anchor. */
 .plaza-action-bar-dropdown {
@@ -2295,16 +2347,16 @@ body {
 @keyframes plaza-tutorial-hunger-restore {
   0%,
   18% {
-    width: 32%;
+    height: 32%;
   }
   48% {
-    width: 32%;
+    height: 32%;
   }
   72% {
-    width: 78%;
+    height: 78%;
   }
   100% {
-    width: 78%;
+    height: 78%;
   }
 }
 
@@ -2572,7 +2624,7 @@ body {
   animation: plaza-tutorial-damage-pop 4s ease-in-out infinite;
 }
 
-.plaza-tutorial-hunger-fill-mask {
+.plaza-tutorial-hunger-fill {
   animation: plaza-tutorial-hunger-restore 4.2s ease-in-out infinite;
 }
 
@@ -2821,7 +2873,7 @@ body {
   .plaza-tutorial-sprint-avatar,
   .plaza-tutorial-minimap-local-dot,
   .plaza-tutorial-inventory-equipped-slot,
-  .plaza-tutorial-hunger-fill-mask,
+  .plaza-tutorial-hunger-fill,
   .plaza-tutorial-eat-slot-click,
   .plaza-tutorial-eat-slot-tap,
   .plaza-tutorial-biome-highlight-0,

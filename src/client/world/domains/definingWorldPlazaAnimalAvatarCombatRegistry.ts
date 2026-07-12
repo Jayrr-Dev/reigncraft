@@ -5,8 +5,6 @@
  * Husky-style 8x15 sheet layout: Attack1 = melee, Attack3 = roll / dodge lunge
  * (Pinguin Attack3 is the belly slide).
  *
- * Fox Peach has no Attack sheets yet, so it is omitted.
- *
  * @module components/world/domains/definingWorldPlazaAnimalAvatarCombatRegistry
  */
 

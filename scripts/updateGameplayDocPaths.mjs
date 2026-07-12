@@ -18,10 +18,6 @@ const replacements = [
     'public/creatures/sprites/playable/girl-sample/',
   ],
   ['/sprites/avatars/girl-sample', '/creatures/sprites/playable/girl-sample'],
-  [
-    'public/sprites/avatars/fox-peach/',
-    'public/creatures/sprites/playable/fox-peach/',
-  ],
   ['public/sprites/tools-8dir/', 'public/harvest/sprites/'],
   ['/sprites/tools-8dir/', '/harvest/sprites/'],
   ['public/sprites/firelands/', 'public/fire/sprites/props/'],

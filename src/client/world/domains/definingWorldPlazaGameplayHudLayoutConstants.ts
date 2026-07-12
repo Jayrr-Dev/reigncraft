@@ -96,7 +96,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
       },
     },
 
-    /** Top-center: action bar pill and inline chat slot. */
+    /** Top-center: action bar pill, inline chat slot, edit-mode plot capacity. */
     topCenter: {
       actionBar: {
         desktopAnchorClassName:
@@ -104,6 +104,12 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
         mobileAnchorClassName:
           'pointer-events-none absolute inset-x-0 top-1 z-40 flex justify-center px-2',
         anchorTopBasePx: 4,
+      },
+      /** Plot / tile capacity readout sits just under the action bar shell. */
+      editModePlotCapacityMetric: {
+        anchorClassName:
+          'pointer-events-none absolute inset-x-0 z-40 flex justify-center px-3',
+        belowActionBarGapBasePx: 6,
       },
     },
 

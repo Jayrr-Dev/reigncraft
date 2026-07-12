@@ -66,7 +66,7 @@ async function migratePlayableAvatars() {
   const playableDir = path.join(publicDir, 'creatures', 'sprites', 'playable');
   await ensureDir(playableDir);
 
-  const keepPlayable = ['girl-sample', 'fox-peach'];
+  const keepPlayable = ['girl-sample'];
   const deleteDuplicates = [
     'husky',
     'grizzly',

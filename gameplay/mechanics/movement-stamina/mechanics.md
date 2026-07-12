@@ -116,7 +116,7 @@ From the player's current standing layer:
 - Jump up to **+4** layers in one arc (`DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX`)
 - Buffs can scale reach via `jumpLayerReachMultiplier` (floored, minimum **1** layer)
 
-Per-character `jumpDistanceScale` adjusts horizontal reach (Grizzly **0.9**, Fox Peach **1.1**).
+Per-character `jumpDistanceScale` adjusts horizontal reach (Grizzly **0.9**).
 
 ## Auto jump
 

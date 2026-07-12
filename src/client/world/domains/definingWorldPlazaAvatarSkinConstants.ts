@@ -17,7 +17,6 @@ export const DEFINING_WORLD_PLAZA_AVATAR_SKIN = {
   GOLDEN_RETRIEVER: 'golden-retriever',
   GRIZZLY: 'grizzly',
   PINGUIN: 'pinguin',
-  FOX_PEACH: 'fox-peach',
   CAT_ORANGE: 'cat-orange',
 } as const;
 
@@ -40,10 +39,6 @@ const DEFINING_WORLD_PLAZA_AVATAR_SKIN_SPECIAL_OPTIONS: readonly DefiningWorldPl
     {
       skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE,
       label: 'Girl',
-    },
-    {
-      skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.FOX_PEACH,
-      label: 'Fox Peach',
     },
   ];
 

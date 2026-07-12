@@ -161,35 +161,6 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_PINGUIN: DefiningWorldPlazaCharacter
     skillIds: ['minor-heal', 'swift-stride'],
   };
 
-const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_FOX_PEACH: DefiningWorldPlazaCharacterEngineDefinition =
-  {
-    characterId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.FOX_PEACH,
-    displayName: 'Fox Peach',
-    presentation: { skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.FOX_PEACH },
-    size: { sizeScale: 0.95 },
-    locomotion: {
-      allowedMotionKinds: ['idle', 'walk', 'run', 'jump'],
-      runSpeedGridPerSecond: 3.4,
-      jumpDistanceScale: 1.1,
-    },
-    vitals: { baseMaxHealth: 900 },
-    stats: {
-      attackPower: 300,
-      attackSpeed: 1,
-      defense: 4,
-      hungerDrainMultiplier: 1,
-    },
-    scaling: {
-      level: 1,
-      healthPerLevel: 45,
-      attackPerLevel: 2,
-      defensePerLevel: 1,
-    },
-    immunities: [],
-    startingStatusEffectIds: [],
-    skillIds: ['minor-heal', 'swift-stride'],
-  };
-
 const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_CAT_ORANGE: DefiningWorldPlazaCharacterEngineDefinition =
   {
     characterId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.CAT_ORANGE,
@@ -233,8 +204,6 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_HAND_TUNED_DEFINITIONS: Record<
     DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GRIZZLY,
   [DEFINING_WORLD_PLAZA_AVATAR_SKIN.PINGUIN]:
     DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_PINGUIN,
-  [DEFINING_WORLD_PLAZA_AVATAR_SKIN.FOX_PEACH]:
-    DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_FOX_PEACH,
   [DEFINING_WORLD_PLAZA_AVATAR_SKIN.CAT_ORANGE]:
     DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_CAT_ORANGE,
 };

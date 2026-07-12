@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Unified bottom-center edit hotbar for build + claim (5 inventory-shaped slots).
+ * Unified bottom-center edit hotbar for build + claim (session-filtered tool slots).
  *
  * @module components/world/building/components/renderingWorldPlazaEditModeHotbar
  */
@@ -15,7 +15,6 @@ import { RenderingWorldPlazaClaimModeCoordsPanel } from '@/components/world/buil
 import { RenderingWorldPlazaClaimModePlotList } from '@/components/world/building/components/renderingWorldPlazaClaimModePlotList';
 import { RenderingWorldPlazaClaimModeSavedCoordsList } from '@/components/world/building/components/renderingWorldPlazaClaimModeSavedCoordsList';
 import { RenderingWorldPlazaClaimModeTemporaryTilesList } from '@/components/world/building/components/renderingWorldPlazaClaimModeTemporaryTilesList';
-import { RenderingWorldPlazaCraftingPanel } from '@/components/world/building/components/renderingWorldPlazaCraftingPanel';
 import { countingWorldBuildingOwnerTemporaryTileClaims } from '@/components/world/building/domains/countingWorldBuildingOwnerTemporaryTileClaims';
 import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import type { DefiningWorldBuildingCutGridAxisCellCount } from '@/components/world/building/domains/definingWorldBuildingCutFootprintConstants';
@@ -24,27 +23,17 @@ import type { DefiningWorldBuildingPlotBounds } from '@/components/world/buildin
 import type { DefiningWorldBuildingPlotOwnerLimits } from '@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits';
 import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import {
-  formattingWorldPlazaBuildModeHotbarPlotMetric,
   STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_POPOVER_PANEL_CLASS_NAME,
   STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_POPOVER_TITLE_CLASS_NAME,
   STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_SLOT_ANCHOR_CLASS_NAME,
-  STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_FOOTER_CLASS_NAME,
-  STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_HEADER_CLASS_NAME,
-  STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_OUTLINE_METRIC_CLASS_NAME,
   STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_STACK_CLASS_NAME,
-  STYLING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_BUTTON_ACTIVE_CLASS_NAME,
-  STYLING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_BUTTON_CLASS_NAME,
-  STYLING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ICON_CLASS_NAME,
-  STYLING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_SWITCHER_CLASS_NAME,
 } from '@/components/world/building/domains/definingWorldPlazaBuildModeFunctionHotbarConstants';
 import {
   DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID,
-  DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_REGISTRY,
   DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID,
-  DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_REGISTRY,
   LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_HOTBAR,
   LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_POPOVER_TITLE,
-  LABELING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_SWITCHER,
+  listingWorldPlazaEditModeFunctionsForSession,
   type DefiningWorldPlazaEditModeFunctionId,
 } from '@/components/world/building/domains/definingWorldPlazaEditModeFunctionRegistry';
 import type { DefiningWorldBuildingPlotRegistryOwnerGroup } from '@/components/world/building/domains/groupingWorldBuildingPlotRegistryEntriesByOwner';
@@ -89,6 +78,8 @@ const RENDERING_WORLD_PLAZA_EDIT_MODE_COMBINED_SECTION_CLASS_NAME =
 
 export interface RenderingWorldPlazaEditModeHotbarProps {
   isVisible: boolean;
+  /** When true, skips the outer bottom-center anchor (parent stack owns it). */
+  isEmbeddedInHudToolbarStack?: boolean;
   isBuildModeActive: boolean;
   isClaimModeActive: boolean;
   onActivateBuildMode: () => void;
@@ -187,6 +178,7 @@ function RenderingWorldPlazaEditModeFunctionPopoverBody({
 } & Omit<
   RenderingWorldPlazaEditModeHotbarProps,
   | 'isVisible'
+  | 'isEmbeddedInHudToolbarStack'
   | 'viewportHudScale'
   | 'isMobile'
   | 'isFullscreen'
@@ -211,8 +203,6 @@ function RenderingWorldPlazaEditModeFunctionPopoverBody({
           onSelectDefinition={onSelectDefinition}
         />
       );
-    case DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CRAFTING:
-      return <RenderingWorldPlazaCraftingPanel />;
     case DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CUT:
       return (
         <RenderingWorldPlazaBuildModeCutFootprintSelector
@@ -286,11 +276,12 @@ function RenderingWorldPlazaEditModeFunctionPopoverBody({
 }
 
 /**
- * Unified build/claim toolbar: 5 icon slots with popovers; Build title branding.
+ * Unified build/claim toolbar: session-filtered icon slots with popovers.
  */
 export function RenderingWorldPlazaEditModeHotbar({
   isVisible,
-  isBuildModeActive,
+  isEmbeddedInHudToolbarStack = false,
+  isBuildModeActive: _isBuildModeActive,
   isClaimModeActive,
   onActivateBuildMode,
   onActivateClaimMode,
@@ -336,13 +327,6 @@ export function RenderingWorldPlazaEditModeHotbar({
     useState<DefiningWorldPlazaEditModeFunctionId | null>(null);
   const hotbarRootRef = useRef<HTMLDivElement | null>(null);
 
-  const plotMetricLabel = formattingWorldPlazaBuildModeHotbarPlotMetric(
-    localOwnedPlotCount,
-    plotOwnerLimits.maxOwnedPlotCount,
-    localTileClaimCount,
-    plotOwnerLimits.maxTileClaimCount
-  );
-
   const hotbarViewportHudScale = useMemo(
     () =>
       viewportHudScale *
@@ -368,6 +352,15 @@ export function RenderingWorldPlazaEditModeHotbar({
   const closingOpenFunction = useCallback((): void => {
     setOpenFunctionId(null);
   }, []);
+
+  const activeSessionModeId = isClaimModeActive
+    ? DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.CLAIM
+    : DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD;
+
+  const visibleFunctionDefinitions = useMemo(
+    () => listingWorldPlazaEditModeFunctionsForSession(activeSessionModeId),
+    [activeSessionModeId]
+  );
 
   const togglingFunction = useCallback(
     (functionId: DefiningWorldPlazaEditModeFunctionId): void => {
@@ -411,6 +404,20 @@ export function RenderingWorldPlazaEditModeHotbar({
       return;
     }
 
+    const isOpenFunctionVisible = visibleFunctionDefinitions.some(
+      (functionDefinition) => functionDefinition.id === openFunctionId
+    );
+
+    if (!isOpenFunctionVisible) {
+      setOpenFunctionId(null);
+    }
+  }, [openFunctionId, visibleFunctionDefinitions]);
+
+  useEffect(() => {
+    if (openFunctionId === null) {
+      return;
+    }
+
     const handlingPointerDown = (event: PointerEvent): void => {
       const root = hotbarRootRef.current;
       if (!root || !(event.target instanceof Node)) {
@@ -443,6 +450,160 @@ export function RenderingWorldPlazaEditModeHotbar({
     DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.bottomCenter
       .inventoryHotbar.anchorClassName;
 
+  const hotbarBody = (
+    <ProvidingWorldPlazaViewportHudScale
+      viewportHudScale={hotbarViewportHudScale}
+    >
+      <div className={STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_STACK_CLASS_NAME}>
+        <div
+          {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+          className={cn(
+            STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME,
+            STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS
+          )}
+          style={viewportStyles.shellStyle}
+          onPointerDown={stoppingPlazaWalkPointerPropagation}
+          onClick={stoppingPlazaWalkPointerPropagation}
+        >
+          <div
+            className={STYLING_WORLD_PLAZA_INVENTORY_GRID_WRAPPER_CLASS_NAME}
+            style={viewportStyles.gridStyle}
+          >
+            {visibleFunctionDefinitions.map((functionDefinition) => {
+              const isOpen = openFunctionId === functionDefinition.id;
+
+              return (
+                <div
+                  key={functionDefinition.id}
+                  className={
+                    STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_SLOT_ANCHOR_CLASS_NAME
+                  }
+                >
+                  {isOpen ? (
+                    <div
+                      {...{
+                        [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true,
+                      }}
+                      className={
+                        STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_POPOVER_PANEL_CLASS_NAME
+                      }
+                      role="dialog"
+                      aria-label={
+                        LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_POPOVER_TITLE[
+                          functionDefinition.id
+                        ]
+                      }
+                      onPointerDown={stoppingPlazaWalkPointerPropagation}
+                      onClick={stoppingPlazaWalkPointerPropagation}
+                    >
+                      <p
+                        className={
+                          STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_POPOVER_TITLE_CLASS_NAME
+                        }
+                      >
+                        {
+                          LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_POPOVER_TITLE[
+                            functionDefinition.id
+                          ]
+                        }
+                      </p>
+                      <RenderingWorldPlazaEditModeFunctionPopoverBody
+                        functionId={functionDefinition.id}
+                        selectedDefinitionId={selectedDefinitionId}
+                        selectedWorldLayer={selectedWorldLayer}
+                        selectedBlockHeight={selectedBlockHeight}
+                        isPresetBlockTypeSelected={isPresetBlockTypeSelected}
+                        selectedCutFootprintMask={selectedCutFootprintMask}
+                        selectedCutGridAxisCellCount={
+                          selectedCutGridAxisCellCount
+                        }
+                        plotOwnerLimits={plotOwnerLimits}
+                        hoverTilePosition={hoverTilePosition}
+                        isSavingCoords={isSavingCoords}
+                        canSaveMoreCoords={canSaveMoreCoords}
+                        onSaveCoordsAtHoverTile={onSaveCoordsAtHoverTile}
+                        ownerGroups={ownerGroups}
+                        activeViewportPlots={activeViewportPlots}
+                        localUserId={localUserId}
+                        isPlotRegistryLoading={isPlotRegistryLoading}
+                        onTeleportToPlotBounds={onTeleportToPlotBounds}
+                        onRequestingFriendPlotVisit={
+                          onRequestingFriendPlotVisit
+                        }
+                        onTeleportingToApprovedFriendPlot={
+                          onTeleportingToApprovedFriendPlot
+                        }
+                        outgoingVisitRequests={outgoingVisitRequests}
+                        isRequestingFriendPlotVisit={
+                          isRequestingFriendPlotVisit
+                        }
+                        onRemoveTemporaryPlotAtTile={
+                          onRemoveTemporaryPlotAtTile
+                        }
+                        isRemovingTemporaryPlot={isRemovingTemporaryPlot}
+                        savedCoordsList={savedCoordsList}
+                        trackedSavedCoordsId={trackedSavedCoordsId}
+                        onToggleSavedCoordsTracking={
+                          onToggleSavedCoordsTracking
+                        }
+                        onDeleteSavedCoords={onDeleteSavedCoords}
+                        isDeletingSavedCoords={isDeletingSavedCoords}
+                        onSelectDefinition={onSelectDefinition}
+                        onSelectWorldLayer={onSelectWorldLayer}
+                        onSelectBlockHeight={onSelectBlockHeight}
+                        onSelectCutFootprintMask={onSelectCutFootprintMask}
+                        onSelectCutGridAxisCellCount={
+                          onSelectCutGridAxisCellCount
+                        }
+                      />
+                    </div>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+                    aria-label={functionDefinition.ariaLabel}
+                    aria-pressed={isOpen}
+                    title={functionDefinition.label}
+                    onClick={() => {
+                      togglingFunction(functionDefinition.id);
+                    }}
+                    className={cn(
+                      STYLING_WORLD_PLAZA_INVENTORY_SLOT_CLASS,
+                      STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS,
+                      isOpen &&
+                        STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS,
+                      'flex items-center justify-center'
+                    )}
+                    style={viewportStyles.slotStyle}
+                  >
+                    <Icon
+                      icon={functionDefinition.iconifyIcon}
+                      className="shrink-0"
+                      style={viewportStyles.iconStyle}
+                      aria-hidden
+                    />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </ProvidingWorldPlazaViewportHudScale>
+  );
+
+  if (isEmbeddedInHudToolbarStack) {
+    return (
+      <div
+        ref={hotbarRootRef}
+        aria-label={LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_HOTBAR}
+      >
+        {hotbarBody}
+      </div>
+    );
+  }
+
   return (
     <div
       ref={hotbarRootRef}
@@ -453,216 +614,7 @@ export function RenderingWorldPlazaEditModeHotbar({
       style={anchorViewportStyle}
       aria-label={LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_HOTBAR}
     >
-      <ProvidingWorldPlazaViewportHudScale
-        viewportHudScale={hotbarViewportHudScale}
-      >
-        <div className={STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_STACK_CLASS_NAME}>
-          <div
-            className={STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_HEADER_CLASS_NAME}
-          >
-            <div
-              className={
-                STYLING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_SWITCHER_CLASS_NAME
-              }
-              role="group"
-              aria-label={LABELING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_SWITCHER}
-              onPointerDown={stoppingPlazaWalkPointerPropagation}
-              onClick={stoppingPlazaWalkPointerPropagation}
-            >
-              {DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_REGISTRY.map(
-                (sessionMode) => {
-                  const isActive =
-                    sessionMode.id ===
-                    DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD
-                      ? isBuildModeActive
-                      : isClaimModeActive;
-
-                  return (
-                    <button
-                      key={sessionMode.id}
-                      type="button"
-                      aria-label={sessionMode.ariaLabel}
-                      aria-pressed={isActive}
-                      onClick={
-                        sessionMode.id ===
-                        DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD
-                          ? onActivateBuildMode
-                          : onActivateClaimMode
-                      }
-                      className={
-                        isActive
-                          ? STYLING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_BUTTON_ACTIVE_CLASS_NAME
-                          : STYLING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_BUTTON_CLASS_NAME
-                      }
-                    >
-                      <Icon
-                        icon={sessionMode.iconifyIcon}
-                        className={
-                          STYLING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ICON_CLASS_NAME
-                        }
-                        aria-hidden
-                      />
-                      <span>{sessionMode.label}</span>
-                    </button>
-                  );
-                }
-              )}
-            </div>
-          </div>
-
-          <div
-            {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-            className={cn(
-              STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME,
-              STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS
-            )}
-            style={viewportStyles.shellStyle}
-            onPointerDown={stoppingPlazaWalkPointerPropagation}
-            onClick={stoppingPlazaWalkPointerPropagation}
-          >
-            <div
-              className={STYLING_WORLD_PLAZA_INVENTORY_GRID_WRAPPER_CLASS_NAME}
-              style={viewportStyles.gridStyle}
-            >
-              {DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_REGISTRY.map(
-                (functionDefinition) => {
-                  const isOpen = openFunctionId === functionDefinition.id;
-
-                  return (
-                    <div
-                      key={functionDefinition.id}
-                      className={
-                        STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_SLOT_ANCHOR_CLASS_NAME
-                      }
-                    >
-                      {isOpen ? (
-                        <div
-                          {...{
-                            [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true,
-                          }}
-                          className={
-                            STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_POPOVER_PANEL_CLASS_NAME
-                          }
-                          role="dialog"
-                          aria-label={
-                            LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_POPOVER_TITLE[
-                              functionDefinition.id
-                            ]
-                          }
-                          onPointerDown={stoppingPlazaWalkPointerPropagation}
-                          onClick={stoppingPlazaWalkPointerPropagation}
-                        >
-                          <p
-                            className={
-                              STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_POPOVER_TITLE_CLASS_NAME
-                            }
-                          >
-                            {
-                              LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_POPOVER_TITLE[
-                                functionDefinition.id
-                              ]
-                            }
-                          </p>
-                          <RenderingWorldPlazaEditModeFunctionPopoverBody
-                            functionId={functionDefinition.id}
-                            selectedDefinitionId={selectedDefinitionId}
-                            selectedWorldLayer={selectedWorldLayer}
-                            selectedBlockHeight={selectedBlockHeight}
-                            isPresetBlockTypeSelected={
-                              isPresetBlockTypeSelected
-                            }
-                            selectedCutFootprintMask={selectedCutFootprintMask}
-                            selectedCutGridAxisCellCount={
-                              selectedCutGridAxisCellCount
-                            }
-                            plotOwnerLimits={plotOwnerLimits}
-                            hoverTilePosition={hoverTilePosition}
-                            isSavingCoords={isSavingCoords}
-                            canSaveMoreCoords={canSaveMoreCoords}
-                            onSaveCoordsAtHoverTile={onSaveCoordsAtHoverTile}
-                            ownerGroups={ownerGroups}
-                            activeViewportPlots={activeViewportPlots}
-                            localUserId={localUserId}
-                            isPlotRegistryLoading={isPlotRegistryLoading}
-                            onTeleportToPlotBounds={onTeleportToPlotBounds}
-                            onRequestingFriendPlotVisit={
-                              onRequestingFriendPlotVisit
-                            }
-                            onTeleportingToApprovedFriendPlot={
-                              onTeleportingToApprovedFriendPlot
-                            }
-                            outgoingVisitRequests={outgoingVisitRequests}
-                            isRequestingFriendPlotVisit={
-                              isRequestingFriendPlotVisit
-                            }
-                            onRemoveTemporaryPlotAtTile={
-                              onRemoveTemporaryPlotAtTile
-                            }
-                            isRemovingTemporaryPlot={isRemovingTemporaryPlot}
-                            savedCoordsList={savedCoordsList}
-                            trackedSavedCoordsId={trackedSavedCoordsId}
-                            onToggleSavedCoordsTracking={
-                              onToggleSavedCoordsTracking
-                            }
-                            onDeleteSavedCoords={onDeleteSavedCoords}
-                            isDeletingSavedCoords={isDeletingSavedCoords}
-                            onSelectDefinition={onSelectDefinition}
-                            onSelectWorldLayer={onSelectWorldLayer}
-                            onSelectBlockHeight={onSelectBlockHeight}
-                            onSelectCutFootprintMask={onSelectCutFootprintMask}
-                            onSelectCutGridAxisCellCount={
-                              onSelectCutGridAxisCellCount
-                            }
-                          />
-                        </div>
-                      ) : null}
-
-                      <button
-                        type="button"
-                        {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-                        aria-label={functionDefinition.ariaLabel}
-                        aria-pressed={isOpen}
-                        title={functionDefinition.label}
-                        onClick={() => {
-                          togglingFunction(functionDefinition.id);
-                        }}
-                        className={cn(
-                          STYLING_WORLD_PLAZA_INVENTORY_SLOT_CLASS,
-                          STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS,
-                          isOpen &&
-                            STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS,
-                          'flex items-center justify-center'
-                        )}
-                        style={viewportStyles.slotStyle}
-                      >
-                        <Icon
-                          icon={functionDefinition.iconifyIcon}
-                          className="shrink-0"
-                          style={viewportStyles.iconStyle}
-                          aria-hidden
-                        />
-                      </button>
-                    </div>
-                  );
-                }
-              )}
-            </div>
-          </div>
-
-          <div
-            className={STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_FOOTER_CLASS_NAME}
-          >
-            <p
-              className={
-                STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_OUTLINE_METRIC_CLASS_NAME
-              }
-              aria-hidden
-            >
-              {plotMetricLabel}
-            </p>
-          </div>
-        </div>
-      </ProvidingWorldPlazaViewportHudScale>
+      {hotbarBody}
     </div>
   );
 }

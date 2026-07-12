@@ -193,7 +193,7 @@ The plaza hook wires Redis/save-slot persistence and optional demo seed. World f
 
 **Registered characters (skin id → engine def):**
 
-`girl-sample` (default), `husky`, `golden-retriever`, `grizzly`, `pinguin`, `fox-peach`, `cat-orange`
+`girl-sample` (default), `husky`, `golden-retriever`, `grizzly`, `pinguin`, `cat-orange`
 
 **Registered skills:**
 
@@ -600,7 +600,7 @@ Use these folders when the task is not covered above:
 | Farming till / plant / harvest                  | `src/client/world/farming/` + `managingWorldPlazaLocalFarmland.ts`                                                                              |
 | Night lighting too dark/bright                  | `definingWorldPlazaLightingEngineConstants.ts` + day/night constants                                                                            |
 | New walk/run animation                          | `registeringWorldPlazaAvatarMotionAnimationClips.ts`                                                                                            |
-| Combat too fast / slow for everyone             | `definingWorldPlazaGlobalCombatAttackSpeedConstants.ts` (`DEFINING_WORLD_PLAZA_GLOBAL_ATTACK_SPEED_SCALE`; 0.5 = half speed)                    |
+| Combat too fast / slow for everyone             | `definingWorldPlazaGlobalCombatAttackSpeedConstants.ts` (`DEFINING_WORLD_PLAZA_GLOBAL_ATTACK_SPEED_SCALE`; 0.7 = 70% speed)                     |
 | Attack-speed buffs (player / wildlife)          | `attack_speed` modifier + `quick-strikes-buff` / `bloodlust-buff` / `blinding-flurry-buff` / `relentless-tempo-buff` in buff registry           |
 | Combat dev tuning                               | Dev panel combat tab, subcategory `engine`                                                                                                      |
 | Wolf pack not stalking / wrong phase            | `definingWildlifeStalkerBehaviourMachine.ts`, `advancingWildlifeStalkAggroTick.ts`                                                              |

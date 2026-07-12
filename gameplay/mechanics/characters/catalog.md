@@ -19,7 +19,6 @@ Every playable skin, skill, and exact code touchpoints.
 | `golden-retriever` | Golden Retriever | **1000** | **300** | **5**  | **1**    | **2**   | **3**   | **1**      | **1.05** | **1**    | —          | minor-heal, swift-stride |
 | `grizzly`          | Grizzly          | **1400** | **300** | **10** | **0.85** | **1.8** | **2.6** | **0.9**    | **1.25** | **1.3**  | bleed      | minor-heal, heat-ward    |
 | `pinguin`          | Penguin          | **850**  | **300** | **4**  | **1.1**  | **1.6** | **2.2** | **1**      | **0.9**  | **0.85** | cold       | minor-heal, swift-stride |
-| `fox-peach`        | Fox Peach        | **900**  | **300** | **4**  | **1**    | **2**   | **3.4** | **1.1**    | **0.95** | **1**    | —          | minor-heal, swift-stride |
 | `cat-orange`       | Orange Cat       | **880**  | **300** | **3**  | **1.15** | **2**   | **3.5** | **1**      | **0.92** | **0.9**  | —          | minor-heal, swift-stride |
 
 HP regen: all skins use default **2 HP/s** except Grizzly (**2.5 HP/s**).
@@ -46,13 +45,13 @@ HP regen: all skins use default **2 HP/s** except Grizzly (**2.5 HP/s**).
 
 **Where added**
 
-| Layer             | File                                                   | What to edit                            |
-| ----------------- | ------------------------------------------------------ | --------------------------------------- |
-| Definition        | `registeringWorldPlazaCharacterEngineDefinitions.ts`   | `GIRL_SAMPLE` block                     |
-| Skin constant     | `definingWorldPlazaAvatarSkinConstants.ts`             | `GIRL_SAMPLE` id                        |
+| Layer             | File                                                   | What to edit                                       |
+| ----------------- | ------------------------------------------------------ | -------------------------------------------------- |
+| Definition        | `registeringWorldPlazaCharacterEngineDefinitions.ts`   | `GIRL_SAMPLE` block                                |
+| Skin constant     | `definingWorldPlazaAvatarSkinConstants.ts`             | `GIRL_SAMPLE` id                                   |
 | Walk / run assets | `definingWorldPlazaGirlSampleWalkConstants.ts`         | base URL `/creatures/sprites/playable/girl-sample` |
-| Combat motion     | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` | roll/melee clips                        |
-| Fallback          | `resolvingWorldPlazaCharacterEngineDefinition`         | default when id missing                 |
+| Combat motion     | `definingWorldPlazaGirlSampleCombatMotionConstants.ts` | roll/melee clips                                   |
+| Fallback          | `resolvingWorldPlazaCharacterEngineDefinition`         | default when id missing                            |
 
 ---
 
@@ -144,28 +143,6 @@ HP regen: all skins use default **2 HP/s** except Grizzly (**2.5 HP/s**).
 | Layer      | File                                                 | What to edit    |
 | ---------- | ---------------------------------------------------- | --------------- |
 | Definition | `registeringWorldPlazaCharacterEngineDefinitions.ts` | `PINGUIN` block |
-
----
-
-## `fox-peach` — Fox Peach
-
-| Field                           | Value                                        |
-| ------------------------------- | -------------------------------------------- |
-| **Size scale**                  | **0.95**                                     |
-| **Base max HP**                 | **900**                                      |
-| **Attack power (EV) / defense** | **300** / **4**                              |
-| **Run speed**                   | **3.4** grid/s                               |
-| **Jump distance scale**         | **1.1**                                      |
-| **Hunger drain multiplier**     | **1**                                        |
-| **Immunities**                  | none                                         |
-| **Skills**                      | `minor-heal`, `swift-stride`                 |
-| **Level scaling**               | +**45** HP, +**2** atk, +**1** def per level |
-
-**Where added**
-
-| Layer      | File                                                 | What to edit      |
-| ---------- | ---------------------------------------------------- | ----------------- |
-| Definition | `registeringWorldPlazaCharacterEngineDefinitions.ts` | `FOX_PEACH` block |
 
 ---
 

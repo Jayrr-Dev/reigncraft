@@ -32,6 +32,10 @@ export type PlazaSinglePlayerSavePlayerConditions = {
   diseaseEffects: readonly PlazaSinglePlayerSavePersistedDiseaseEffect[];
   immuneSystemFactor?: number;
   diseaseImmunityIds?: readonly string[];
+  /** Live HP at last save; restores across page reload. */
+  currentHealth?: number;
+  /** Live hunger ratio (0..1) at last save; restores across page reload. */
+  hungerRatio?: number;
 };
 
 /** Full persisted payload for one single-player save slot. */

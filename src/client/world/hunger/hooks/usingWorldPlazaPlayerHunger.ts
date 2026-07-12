@@ -80,6 +80,8 @@ export interface UsingWorldPlazaPlayerHungerParams {
 export interface UsingWorldPlazaPlayerHungerResult {
   /** Throttled hunger snapshot for the HUD. */
   hungerHudSnapshot: UsingWorldPlazaPlayerHungerHudSnapshot;
+  /** Live hunger state for persistence and systems that need the raw ratio. */
+  hungerStateRef: React.RefObject<DefiningWorldPlazaHungerState>;
   /** Live hunger tier movement/stamina effects, read every frame by movement systems. */
   hungerMovementMultipliersRef: React.RefObject<ResolvingWorldPlazaHungerMovementEffects>;
   /** Spends hunger for a jump; fire-and-forget. */
@@ -88,6 +90,8 @@ export interface UsingWorldPlazaPlayerHungerResult {
   eatingFoodRef: React.RefObject<(hungerRestoreRatio: number) => boolean>;
   /** Resets hunger to full (e.g. on respawn). */
   resettingHungerRef: React.RefObject<() => void>;
+  /** Forces the HUD to re-read {@link hungerStateRef} (e.g. after save hydrate). */
+  syncingHungerHudFromStateRef: React.RefObject<() => void>;
 }
 
 /**
@@ -127,6 +131,13 @@ export function usingWorldPlazaPlayerHunger({
     () => false
   );
   const resettingHungerRef = useRef<() => void>(() => undefined);
+  const syncingHungerHudFromStateRef = useRef<() => void>(() => {
+    const hungerRatio = hungerStateRef.current.hungerRatio;
+    const tier = resolvingWorldPlazaHungerTier(hungerRatio);
+    const isStarving = hungerMovementMultipliersRef.current.isHealthDraining;
+
+    setHudState({ hungerRatio, tier, isStarving });
+  });
 
   useEffect(() => {
     if (!isEnabled) {
@@ -165,6 +176,8 @@ export function usingWorldPlazaPlayerHunger({
         return isUnchanged ? previous : { hungerRatio, tier, isStarving };
       });
     };
+
+    syncingHungerHudFromStateRef.current = pushingHudSnapshot;
 
     consumingJumpHungerRef.current = (isRunJump: boolean): void => {
       const cost = isRunJump
@@ -297,10 +310,12 @@ export function usingWorldPlazaPlayerHunger({
   return useMemo(
     () => ({
       hungerHudSnapshot: hudState,
+      hungerStateRef,
       hungerMovementMultipliersRef,
       consumingJumpHungerRef,
       eatingFoodRef,
       resettingHungerRef,
+      syncingHungerHudFromStateRef,
     }),
     [hudState]
   );

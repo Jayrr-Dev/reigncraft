@@ -71,12 +71,12 @@ Effective rates: drain **1/12.8** per second, regen **1/4.5** per second.
 
 ## Jump and layers
 
-| Term                    | Meaning                                                                                 |
-| ----------------------- | --------------------------------------------------------------------------------------- |
-| **Jump height max**     | Default **4** layers above current standing layer.                                      |
-| **Jump distance scale** | Per-character multiplier on horizontal jump reach (Grizzly **0.9**, Fox Peach **1.1**). |
-| **Walk step**           | **+1** layer delta per step.                                                            |
-| **Wall collision**      | Blocks **≥2** layers above player use wall-style horizontal collision.                  |
+| Term                    | Meaning                                                                |
+| ----------------------- | ---------------------------------------------------------------------- |
+| **Jump height max**     | Default **4** layers above current standing layer.                     |
+| **Jump distance scale** | Per-character multiplier on horizontal jump reach (Grizzly **0.9**).   |
+| **Walk step**           | **+1** layer delta per step.                                           |
+| **Wall collision**      | Blocks **≥2** layers above player use wall-style horizontal collision. |
 
 ## Roll dodge
 

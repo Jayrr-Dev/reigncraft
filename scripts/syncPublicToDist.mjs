@@ -50,7 +50,6 @@ const LEGACY_PUBLIC_MIRROR_TOP_LEVEL_NAMES = [
   'Chihuahua',
   'Cozy Tunes v1.5.3',
   'Effect and FX Pixel All Free',
-  'Fox-Peach',
   'GirlSample_Walk_256Update',
   'Golden Retriever',
   'Grizzly',

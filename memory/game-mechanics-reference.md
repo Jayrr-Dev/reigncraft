@@ -296,13 +296,13 @@ Incubation / grant fire times use **world epoch** (`Date.now()`). Fired grant ef
 
 **Playable avatars** (`registeringWorldPlazaCharacterEngineDefinitions.ts`)
 
-| Skin                   | Notable mechanics                                                         |
-| ---------------------- | ------------------------------------------------------------------------- |
-| Girl (default)         | 1000 HP, atk **300** EV, def 5; minor-heal + swift-stride                 |
-| Husky                  | Faster run (3.2), **cold immune**, +15% hunger drain                      |
-| Grizzly                | 1400 HP, atk **300** EV, def 10, slower move; **bleed immune**; heat-ward |
-| Penguin                | Smaller, **cold immune**, −15% hunger drain                               |
-| Fox Peach / Cat Orange | Faster run, lighter frames                                                |
+| Skin           | Notable mechanics                                                         |
+| -------------- | ------------------------------------------------------------------------- |
+| Girl (default) | 1000 HP, atk **300** EV, def 5; minor-heal + swift-stride                 |
+| Husky          | Faster run (3.2), **cold immune**, +15% hunger drain                      |
+| Grizzly        | 1400 HP, atk **300** EV, def 10, slower move; **bleed immune**; heat-ward |
+| Penguin        | Smaller, **cold immune**, −15% hunger drain                               |
+| Cat Orange     | Faster run, lighter frames                                                |
 
 All skins share melee EV **300** at level 1; player hits on wildlife always roll EV (never flat) and floor at **normal** on connect. Equipped sword attack EV uses `resolvingWorldPlazaEquippedAttackEv` (tier multiplicative modifiers on gold sword = **1.45×**).
 

@@ -16,7 +16,7 @@ The old rule that arrival must never be explained is Deprecated. What stays deli
 
 ## The many shapes of wanderers
 
-Wanderers do not all look human. The current roster: a girl, a husky, a golden retriever, a grizzly, a penguin, a peach fox, and an orange cat. All are people in the full sense: they talk, build, claim, and cook, unlike the true wildlife of Corpus, which never speaks.
+Wanderers do not all look human. The current roster: a girl, a husky, a golden retriever, a grizzly, a penguin, and an orange cat. All are people in the full sense: they talk, build, claim, and cook, unlike the true wildlife of Corpus, which never speaks.
 
 The in-fiction framing: souls arrive wearing different bodies, and nobody finds this strange because everyone woke up the same way. Some shapes carry their nature with them; the husky and penguin do not feel the frost, and the grizzly shrugs off bleeding and carries a ward against heat. Wanderers treat these traits as facts about a person, like being tall.
 

@@ -1,5 +1,5 @@
 /**
- * Declarative registry for the unified build/claim edit hotbar (5 slots).
+ * Declarative registry for the unified build/claim edit hotbar.
  *
  * @module components/world/building/domains/definingWorldPlazaEditModeFunctionRegistry
  */
@@ -7,7 +7,6 @@
 /** Stable ids for unified edit-mode function slots (left → right). */
 export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID = {
   MATERIALS: 'materials',
-  CRAFTING: 'crafting',
   CUT: 'cut',
   BLOCKS: 'blocks',
   PLOTS: 'plots',
@@ -16,14 +15,6 @@ export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID = {
 /** One unified edit-mode function slot id. */
 export type DefiningWorldPlazaEditModeFunctionId =
   (typeof DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID)[keyof typeof DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID];
-
-/** Display + icon metadata for one edit hotbar function. */
-export type DefiningWorldPlazaEditModeFunctionDefinition = {
-  readonly id: DefiningWorldPlazaEditModeFunctionId;
-  readonly label: string;
-  readonly ariaLabel: string;
-  readonly iconifyIcon: string;
-};
 
 /** Stable ids for Build vs Claim session mode switch above the hotbar. */
 export const DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID = {
@@ -35,37 +26,44 @@ export const DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID = {
 export type DefiningWorldPlazaEditModeSessionModeId =
   (typeof DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID)[keyof typeof DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID];
 
+/** Display + icon metadata for one edit hotbar function. */
+export type DefiningWorldPlazaEditModeFunctionDefinition = {
+  readonly id: DefiningWorldPlazaEditModeFunctionId;
+  readonly sessionModeId: DefiningWorldPlazaEditModeSessionModeId;
+  readonly label: string;
+  readonly ariaLabel: string;
+  readonly iconifyIcon: string;
+};
+
 /**
  * Ordered unified edit functions shown as inventory-shaped icon slots.
- * Order matches {@link DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY} (5).
+ * Crafting lives on the separate Craft HUD mode badge.
  */
 export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_REGISTRY = [
   {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.MATERIALS,
+    sessionModeId: DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
     label: 'Materials',
     ariaLabel: 'Materials palette',
     iconifyIcon: 'mdi:cube-outline',
   },
   {
-    id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CRAFTING,
-    label: 'Crafting',
-    ariaLabel: 'Crafting recipes',
-    iconifyIcon: 'game-icons:anvil',
-  },
-  {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CUT,
+    sessionModeId: DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
     label: 'Cut',
     ariaLabel: 'Cut footprint',
     iconifyIcon: 'mdi:view-grid-outline',
   },
   {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.BLOCKS,
+    sessionModeId: DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
     label: 'Blocks',
     ariaLabel: 'Block size and placement layer',
     iconifyIcon: 'mdi:shape-square-plus',
   },
   {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLOTS,
+    sessionModeId: DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.CLAIM,
     label: 'Plots',
     ariaLabel: 'Plots, temporary tiles, and saved coordinates',
     iconifyIcon: 'mdi:land-plots',
@@ -78,8 +76,6 @@ export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_REGISTRY = [
  */
 export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_SESSION_MODE_BY_ID = {
   [DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.MATERIALS]:
-    DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
-  [DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CRAFTING]:
     DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
   [DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CUT]:
     DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
@@ -98,7 +94,6 @@ export const LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_POPOVER_TITLE: Record<
   string
 > = {
   materials: 'Materials',
-  crafting: 'Crafting',
   cut: 'Cut',
   blocks: 'Blocks',
   plots: 'Plots & Coords',
@@ -108,30 +103,15 @@ export const LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_POPOVER_TITLE: Record<
 export const LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_HOTBAR =
   'Build tools' as const;
 
-/** Display + icon metadata for one Build/Claim session switch button. */
-export type DefiningWorldPlazaEditModeSessionModeDefinition = {
-  readonly id: DefiningWorldPlazaEditModeSessionModeId;
-  readonly label: string;
-  readonly ariaLabel: string;
-  readonly iconifyIcon: string;
-};
-
-/** Ordered Build / Claim switcher shown above the unified edit hotbar. */
-export const DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_REGISTRY = [
-  {
-    id: DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
-    label: 'Build',
-    ariaLabel: 'Build mode',
-    iconifyIcon: 'mdi:hammer',
-  },
-  {
-    id: DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.CLAIM,
-    label: 'Claim',
-    ariaLabel: 'Claim mode',
-    iconifyIcon: 'mdi:land-plots',
-  },
-] as const satisfies readonly DefiningWorldPlazaEditModeSessionModeDefinition[];
-
-/** Accessible label for the Build/Claim mode switcher row. */
-export const LABELING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_SWITCHER =
-  'Build or claim mode' as const;
+/**
+ * Returns edit hotbar function slots for the active Build or Claim session.
+ *
+ * @param sessionModeId - Active edit session mode.
+ */
+export function listingWorldPlazaEditModeFunctionsForSession(
+  sessionModeId: DefiningWorldPlazaEditModeSessionModeId
+): readonly DefiningWorldPlazaEditModeFunctionDefinition[] {
+  return DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_REGISTRY.filter(
+    (functionDefinition) => functionDefinition.sessionModeId === sessionModeId
+  );
+}

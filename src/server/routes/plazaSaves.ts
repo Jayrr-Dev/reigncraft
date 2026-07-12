@@ -180,11 +180,23 @@ function parsingPersistedPlayerConditions(
         (diseaseId): diseaseId is string => typeof diseaseId === 'string'
       )
     : undefined;
+  const currentHealth =
+    typeof candidate.currentHealth === 'number' &&
+    Number.isFinite(candidate.currentHealth)
+      ? Math.max(0, candidate.currentHealth)
+      : undefined;
+  const hungerRatio =
+    typeof candidate.hungerRatio === 'number' &&
+    Number.isFinite(candidate.hungerRatio)
+      ? Math.min(1, Math.max(0, candidate.hungerRatio))
+      : undefined;
 
   if (
     diseaseEffects.length === 0 &&
     (immuneSystemFactor ?? 0) <= 0 &&
-    (diseaseImmunityIds?.length ?? 0) === 0
+    (diseaseImmunityIds?.length ?? 0) === 0 &&
+    currentHealth === undefined &&
+    hungerRatio === undefined
   ) {
     return null;
   }
@@ -193,6 +205,8 @@ function parsingPersistedPlayerConditions(
     diseaseEffects,
     immuneSystemFactor,
     diseaseImmunityIds,
+    currentHealth,
+    hungerRatio,
   };
 }
 

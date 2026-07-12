@@ -17,25 +17,6 @@ import {
   type DefiningWorldPlazaAvatarSkinId,
 } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import {
-  DEFINING_WORLD_PLAZA_FOX_PEACH_ANCHOR_X_NORMALIZED,
-  DEFINING_WORLD_PLAZA_FOX_PEACH_ANCHOR_Y_NORMALIZED,
-  DEFINING_WORLD_PLAZA_FOX_PEACH_CHARACTER_TEXTURES_QUERY_KEY,
-  DEFINING_WORLD_PLAZA_FOX_PEACH_DEFAULT_DIRECTION,
-  DEFINING_WORLD_PLAZA_FOX_PEACH_FALL_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_FOX_PEACH_FALL_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_FOX_PEACH_FALL_SPRITE_DIRECTION,
-  DEFINING_WORLD_PLAZA_FOX_PEACH_IDLE_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_FOX_PEACH_IDLE_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_FOX_PEACH_JUMP_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_FOX_PEACH_JUMP_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_FOX_PEACH_RUN_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_FOX_PEACH_RUN_MOTION_SHEET_LAYOUT,
-  DEFINING_WORLD_PLAZA_FOX_PEACH_SPRITE_SCALE,
-  DEFINING_WORLD_PLAZA_FOX_PEACH_WALK_ANIMATION_FPS,
-  DEFINING_WORLD_PLAZA_FOX_PEACH_WALK_MOTION_SHEET_LAYOUT,
-  computingWorldPlazaFoxPeachFootOffsetBelowGridAnchorPx,
-} from '@/components/world/domains/definingWorldPlazaFoxPeachSpriteConstants';
-import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_FALL_ANIMATION_FPS,
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_FALL_MOTION_SHEET_LAYOUT,
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_FALL_SPRITE_DIRECTION,
@@ -62,7 +43,6 @@ import {
   type DefiningWorldPlazaGirlSampleMotionSheetLayout,
   type DefiningWorldPlazaGirlSampleWalkDirection,
 } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
-import { loadingWorldPlazaFoxPeachCharacterTextures } from '@/components/world/domains/loadingWorldPlazaFoxPeachCharacterTextures';
 import type { DefiningWorldPlazaGirlSampleCharacterTextures } from '@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures';
 import { loadingWorldPlazaGirlSampleCharacterTextures } from '@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures';
 import { resolvingWorldPlazaAnimalAvatarCharacterDefinitionFromRegistry } from '@/components/world/domains/resolvingWorldPlazaAnimalAvatarCharacterDefinitionFromRegistry';
@@ -125,41 +105,12 @@ const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_CHARACTER_DEFINITION: DefiningWorldPlazaA
     defaultDirection: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_WALK_DEFAULT_DIRECTION,
   };
 
-/** Fox Peach skin: per-direction walk and idle strips, 256 px frames. */
-const DEFINING_WORLD_PLAZA_FOX_PEACH_CHARACTER_DEFINITION: DefiningWorldPlazaAvatarCharacterDefinition =
-  {
-    skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.FOX_PEACH,
-    gameplayStats: { hungerDrainMultiplier: 1.0 },
-    loadTextures: loadingWorldPlazaFoxPeachCharacterTextures,
-    texturesQueryKey:
-      DEFINING_WORLD_PLAZA_FOX_PEACH_CHARACTER_TEXTURES_QUERY_KEY,
-    walkSheetLayout: DEFINING_WORLD_PLAZA_FOX_PEACH_WALK_MOTION_SHEET_LAYOUT,
-    runSheetLayout: DEFINING_WORLD_PLAZA_FOX_PEACH_RUN_MOTION_SHEET_LAYOUT,
-    jumpSheetLayout: DEFINING_WORLD_PLAZA_FOX_PEACH_JUMP_MOTION_SHEET_LAYOUT,
-    idleSheetLayout: DEFINING_WORLD_PLAZA_FOX_PEACH_IDLE_MOTION_SHEET_LAYOUT,
-    fallSheetLayout: DEFINING_WORLD_PLAZA_FOX_PEACH_FALL_MOTION_SHEET_LAYOUT,
-    walkAnimationFps: DEFINING_WORLD_PLAZA_FOX_PEACH_WALK_ANIMATION_FPS,
-    runAnimationFps: DEFINING_WORLD_PLAZA_FOX_PEACH_RUN_ANIMATION_FPS,
-    jumpAnimationFps: DEFINING_WORLD_PLAZA_FOX_PEACH_JUMP_ANIMATION_FPS,
-    idleAnimationFps: DEFINING_WORLD_PLAZA_FOX_PEACH_IDLE_ANIMATION_FPS,
-    fallAnimationFps: DEFINING_WORLD_PLAZA_FOX_PEACH_FALL_ANIMATION_FPS,
-    fallSpriteDirection: DEFINING_WORLD_PLAZA_FOX_PEACH_FALL_SPRITE_DIRECTION,
-    anchorXNormalized: DEFINING_WORLD_PLAZA_FOX_PEACH_ANCHOR_X_NORMALIZED,
-    anchorYNormalized: DEFINING_WORLD_PLAZA_FOX_PEACH_ANCHOR_Y_NORMALIZED,
-    spriteScale: DEFINING_WORLD_PLAZA_FOX_PEACH_SPRITE_SCALE,
-    footOffsetBelowGridAnchorPx:
-      computingWorldPlazaFoxPeachFootOffsetBelowGridAnchorPx(),
-    defaultDirection: DEFINING_WORLD_PLAZA_FOX_PEACH_DEFAULT_DIRECTION,
-  };
-
 /** Special-pack character definitions keyed by skin id. */
 const DEFINING_WORLD_PLAZA_SPECIAL_AVATAR_CHARACTER_DEFINITIONS: Readonly<
   Record<string, DefiningWorldPlazaAvatarCharacterDefinition>
 > = {
   [DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE]:
     DEFINING_WORLD_PLAZA_GIRL_SAMPLE_CHARACTER_DEFINITION,
-  [DEFINING_WORLD_PLAZA_AVATAR_SKIN.FOX_PEACH]:
-    DEFINING_WORLD_PLAZA_FOX_PEACH_CHARACTER_DEFINITION,
 };
 
 /**

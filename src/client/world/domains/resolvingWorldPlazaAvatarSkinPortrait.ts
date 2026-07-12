@@ -11,10 +11,6 @@ import {
   type DefiningWorldPlazaAvatarSkinId,
 } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import {
-  DEFINING_WORLD_PLAZA_FOX_PEACH_IDLE_DIRECTION_URLS,
-  DEFINING_WORLD_PLAZA_FOX_PEACH_IDLE_MOTION_SHEET_LAYOUT,
-} from '@/components/world/domains/definingWorldPlazaFoxPeachSpriteConstants';
-import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_IDLE_DIRECTION_URLS,
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_IDLE_MOTION_SHEET_LAYOUT,
 } from '@/components/world/domains/definingWorldPlazaGirlSampleIdleConstants';
@@ -71,16 +67,6 @@ export function resolvingWorldPlazaAvatarSkinPortrait(
 
     return {
       sheetUrl: DEFINING_WORLD_PLAZA_GIRL_SAMPLE_IDLE_DIRECTION_URLS.Down,
-      ...computingPortraitCrop(layout.columnCount, rowCount, 0, 0),
-    };
-  }
-
-  if (skinId === DEFINING_WORLD_PLAZA_AVATAR_SKIN.FOX_PEACH) {
-    const layout = DEFINING_WORLD_PLAZA_FOX_PEACH_IDLE_MOTION_SHEET_LAYOUT;
-    const rowCount = Math.ceil(layout.frameCount / layout.columnCount);
-
-    return {
-      sheetUrl: DEFINING_WORLD_PLAZA_FOX_PEACH_IDLE_DIRECTION_URLS.Down,
       ...computingPortraitCrop(layout.columnCount, rowCount, 0, 0),
     };
   }

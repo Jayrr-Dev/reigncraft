@@ -1,46 +1,59 @@
-import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
-import { DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
-import { computingWorldPlazaInventoryHotbarShellWidthPx } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
+import {
+  computingWorldPlazaViewportHudScaledPx,
+  stylingWorldPlazaViewportHudSquarePx,
+} from '@/components/world/domains/computingWorldPlazaViewportHudScale';
+import {
+  DEFINING_WORLD_PLAZA_ACTION_BAR_BUTTON_BASE_PX,
+  DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_BASE_PX,
+  DEFINING_WORLD_PLAZA_ACTION_BAR_MOBILE_SCALE,
+  DEFINING_WORLD_PLAZA_ACTION_BAR_SCALE,
+} from '@/components/world/domains/definingWorldPlazaActionBarConstants';
 import type { CSSProperties } from 'react';
 
-/** Base drumstick icon size in px (unscaled). */
-export const DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_ICON_BASE_PX = 12;
+/** Brown fill for the hunger sphere (full = high hunger). */
+export const DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_FILL_COLOR = '#8b5a2b';
 
-/** Gap between the hunger row and the inventory hotbar shell (px). */
-export const DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_GAP_ABOVE_HOTBAR_BASE_PX = 4;
-
-/** Cooked-meat tone for filled hunger icons (poster orange). */
-export const DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_FILL_COLOR = '#c1592f';
-
-/** Dim bone tone for empty hunger icons. */
+/** Dim empty track behind the brown fill. */
 export const DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_EMPTY_COLOR =
-  'rgba(85, 80, 63, 0.55)';
+  'rgba(55, 45, 32, 0.72)';
+
+/** CSS class for the clickable hunger orb shell. */
+export const STYLING_WORLD_PLAZA_HUNGER_INDICATOR_ORB_CLASS_NAME =
+  'plaza-hunger-orb relative flex shrink-0 items-center justify-center rounded-full' as const;
+
+/** CSS class for the clipped fill disc inside the hungering orb. */
+export const STYLING_WORLD_PLAZA_HUNGER_INDICATOR_FILL_DISC_CLASS_NAME =
+  'absolute inset-[3px] overflow-hidden rounded-full' as const;
 
 export type DefiningWorldPlazaHungerIndicatorViewportStyles = {
-  readonly rowStyle: CSSProperties;
+  readonly sphereStyle: CSSProperties;
   readonly iconSizePx: number;
 };
 
 /**
- * Viewport styles that align the hunger row with the inventory hotbar shell.
+ * Viewport styles that size the hunger sphere to match action bar buttons.
  *
  * @param viewportHudScale - Live scale from the plaza viewport frame
+ * @param isMobile - When true, applies the action bar mobile shrink
  */
 export function resolvingWorldPlazaHungerIndicatorViewportStyles(
-  viewportHudScale: number
+  viewportHudScale: number,
+  isMobile = false
 ): DefiningWorldPlazaHungerIndicatorViewportStyles {
-  const shellWidthPx =
-    computingWorldPlazaInventoryHotbarShellWidthPx(viewportHudScale);
-  const iconSizePx = computingWorldPlazaViewportHudScaledPx(
-    DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_ICON_BASE_PX,
-    viewportHudScale,
-    DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE
-  );
+  const designScale =
+    DEFINING_WORLD_PLAZA_ACTION_BAR_SCALE *
+    (isMobile ? DEFINING_WORLD_PLAZA_ACTION_BAR_MOBILE_SCALE : 1);
 
   return {
-    rowStyle: {
-      width: shellWidthPx,
-    },
-    iconSizePx,
+    sphereStyle: stylingWorldPlazaViewportHudSquarePx(
+      DEFINING_WORLD_PLAZA_ACTION_BAR_BUTTON_BASE_PX,
+      viewportHudScale,
+      designScale
+    ),
+    iconSizePx: computingWorldPlazaViewportHudScaledPx(
+      DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_BASE_PX,
+      viewportHudScale,
+      designScale
+    ),
   };
 }

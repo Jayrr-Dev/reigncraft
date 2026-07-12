@@ -11,7 +11,7 @@ public/
   creatures/              # wildlife + playable character sprites and vocals
     sprites/
       species/            # NPC species sheets (kebab-case folders)
-      playable/           # girl-sample, fox-peach only
+      playable/           # girl-sample only
     sfx/
       vocals/             # beast, farm-animal, mixkit-wild, pixabay-wild, werewolf
       voice/              # girl-sample-voice

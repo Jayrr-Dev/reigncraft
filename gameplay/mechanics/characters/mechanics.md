@@ -26,7 +26,7 @@ sequenceDiagram
 
 ## Skin selection
 
-Seven playable skins are registered. `girl-sample` is the fallback when an unknown id is requested.
+Six playable skins are registered. `girl-sample` is the fallback when an unknown id is requested.
 
 Each skin packages:
 
@@ -68,24 +68,24 @@ Player melee and projectile hits on wildlife always use EV rolls (`skipDamageRol
 
 ## Movement contribution
 
-| Skin archetype                      | Walk    | Run         | Jump scale      |
-| ----------------------------------- | ------- | ----------- | --------------- |
-| Default (Girl, Golden Retriever)    | **2**   | **3**       | **1**           |
-| Fast (Husky, Fox Peach, Cat Orange) | **2**   | **3.2–3.5** | **1** / **1.1** |
-| Slow tank (Grizzly)                 | **1.8** | **2.6**     | **0.9**         |
-| Small (Penguin)                     | **1.6** | **2.2**     | **1**           |
+| Skin archetype                   | Walk    | Run         | Jump scale |
+| -------------------------------- | ------- | ----------- | ---------- |
+| Default (Girl, Golden Retriever) | **2**   | **3**       | **1**      |
+| Fast (Husky, Cat Orange)         | **2**   | **3.2–3.5** | **1**      |
+| Slow tank (Grizzly)              | **1.8** | **2.6**     | **0.9**    |
+| Small (Penguin)                  | **1.6** | **2.2**     | **1**      |
 
 Speed feeds into [movement-stamina](../movement-stamina/) sprint and hunger/frost modifiers stack on top.
 
 ## Metabolism (hunger drain multiplier)
 
-| Multiplier | Skin                              | Effect                |
-| ---------- | --------------------------------- | --------------------- |
-| **0.85**   | Penguin                           | **−15%** hunger drain |
-| **0.9**    | Orange Cat                        | **−10%** hunger drain |
-| **1**      | Girl, Golden Retriever, Fox Peach | Normal drain          |
-| **1.15**   | Husky                             | **+15%** hunger drain |
-| **1.3**    | Grizzly                           | **+30%** hunger drain |
+| Multiplier | Skin                   | Effect                |
+| ---------- | ---------------------- | --------------------- |
+| **0.85**   | Penguin                | **−15%** hunger drain |
+| **0.9**    | Orange Cat             | **−10%** hunger drain |
+| **1**      | Girl, Golden Retriever | Normal drain          |
+| **1.15**   | Husky                  | **+15%** hunger drain |
+| **1.3**    | Grizzly                | **+30%** hunger drain |
 
 Applied by hunger tick via character-derived multiplier ([hunger](../hunger/)).
 
@@ -108,7 +108,7 @@ Three skills exist globally; each skin references a subset at spawn.
 - **120** HP flat heal (`healing` kind)
 - Cooldown **8s**
 - Icon: heart-plus
-- Available on all seven skins
+- Available on all six skins
 
 ### `swift-stride`
 
@@ -127,7 +127,7 @@ flowchart LR
   subgraph all [All skins]
     MH[minor-heal 8s CD]
   end
-  subgraph agile [Girl / dogs / fox / cat / penguin]
+  subgraph agile [Girl / dogs / cat / penguin]
     SS[swift-stride 15s CD]
   end
   subgraph bear [Grizzly]
