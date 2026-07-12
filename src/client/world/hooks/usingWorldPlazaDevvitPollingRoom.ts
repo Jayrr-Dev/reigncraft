@@ -5,7 +5,10 @@ import {
   applyingWorldPlazaRemotePlayerLiveUpdate,
   removingWorldPlazaRemotePlayerLiveUpdate,
 } from '@/components/world/domains/applyingWorldPlazaRemotePlayerLiveUpdate';
-import { checkingWorldPlazaOnlineParticipantsSnapshotChanged } from '@/components/world/domains/checkingWorldPlazaOnlineParticipantsSnapshotChanged';
+import {
+  checkingWorldPlazaOnlineParticipantsSnapshotChanged,
+  checkingWorldPlazaOnlineRoomSnapshotPatchChanged,
+} from '@/components/world/domains/checkingWorldPlazaOnlineParticipantsSnapshotChanged';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_MOTION_STATE_IDLE,
   type DefiningWorldPlazaAvatarMotionState,
@@ -178,11 +181,25 @@ export function usingWorldPlazaDevvitPollingRoom({
     (patch: Partial<DefiningWorldPlazaOnlineRoomSnapshot>): void => {
       queryClient.setQueryData<DefiningWorldPlazaOnlineRoomSnapshot>(
         [...DEFINING_WORLD_PLAZA_ONLINE_ROOM_QUERY_KEY, roomIndex],
-        (currentSnapshot) => ({
-          ...(currentSnapshot ??
-            DEFINING_WORLD_PLAZA_ONLINE_ROOM_INITIAL_SNAPSHOT),
-          ...patch,
-        })
+        (currentSnapshot) => {
+          const resolvedCurrentSnapshot =
+            currentSnapshot ??
+            DEFINING_WORLD_PLAZA_ONLINE_ROOM_INITIAL_SNAPSHOT;
+
+          if (
+            !checkingWorldPlazaOnlineRoomSnapshotPatchChanged(
+              resolvedCurrentSnapshot,
+              patch
+            )
+          ) {
+            return resolvedCurrentSnapshot;
+          }
+
+          return {
+            ...resolvedCurrentSnapshot,
+            ...patch,
+          };
+        }
       );
     },
     [queryClient, roomIndex]
@@ -324,8 +341,7 @@ export function usingWorldPlazaDevvitPollingRoom({
     const postingPlazaSync = async (): Promise<boolean> => {
       if (isPostingSync) {
         incrementingWorldPlazaPerformanceDiagnosticsCounter(
-          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER
-            .ONLINE_SYNC_SKIPPED_INFLIGHT
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.ONLINE_SYNC_SKIPPED_INFLIGHT
         );
         return false;
       }
@@ -338,8 +354,7 @@ export function usingWorldPlazaDevvitPollingRoom({
 
       isPostingSync = true;
       const finishSyncRoundTripSample = beginningWorldPlazaPerformanceSample(
-        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE
-          .ONLINE_SYNC_ROUND_TRIP
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.ONLINE_SYNC_ROUND_TRIP
       );
 
       try {
@@ -363,8 +378,7 @@ export function usingWorldPlazaDevvitPollingRoom({
 
         if (data.type === 'error') {
           incrementingWorldPlazaPerformanceDiagnosticsCounter(
-            DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER
-              .ONLINE_SYNC_FAILURE
+            DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.ONLINE_SYNC_FAILURE
           );
           updatingRoomSnapshot({
             isConnected: false,
@@ -413,16 +427,14 @@ export function usingWorldPlazaDevvitPollingRoom({
           ],
         });
         settingWorldPlazaPerformanceDiagnosticsGauge(
-          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
-            .ONLINE_PARTICIPANT_COUNT,
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.ONLINE_PARTICIPANT_COUNT,
           data.participantCount
         );
 
         return true;
       } catch {
         incrementingWorldPlazaPerformanceDiagnosticsCounter(
-          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER
-            .ONLINE_SYNC_FAILURE
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.ONLINE_SYNC_FAILURE
         );
         if (!cancelled) {
           updatingRoomSnapshot({
@@ -447,8 +459,7 @@ export function usingWorldPlazaDevvitPollingRoom({
       }
 
       const finishPollRoundTripSample = beginningWorldPlazaPerformanceSample(
-        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE
-          .ONLINE_POLL_ROUND_TRIP
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.ONLINE_POLL_ROUND_TRIP
       );
       try {
         const response = await fetch(
@@ -460,8 +471,7 @@ export function usingWorldPlazaDevvitPollingRoom({
 
         if (!response.ok) {
           incrementingWorldPlazaPerformanceDiagnosticsCounter(
-            DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER
-              .ONLINE_POLL_FAILURE
+            DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.ONLINE_POLL_FAILURE
           );
           return;
         }
@@ -472,8 +482,7 @@ export function usingWorldPlazaDevvitPollingRoom({
         if (cancelled || data.type !== 'players' || !userId) {
           if (!cancelled) {
             incrementingWorldPlazaPerformanceDiagnosticsCounter(
-              DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER
-                .ONLINE_POLL_FAILURE
+              DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.ONLINE_POLL_FAILURE
             );
           }
           return;
@@ -483,13 +492,11 @@ export function usingWorldPlazaDevvitPollingRoom({
           listingWorldPlazaRemotePlayerFromDevvitOnlineSnapshot
         );
         settingWorldPlazaPerformanceDiagnosticsGauge(
-          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
-            .ONLINE_REMOTE_PLAYER_COUNT,
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.ONLINE_REMOTE_PLAYER_COUNT,
           remotePlayers.length
         );
         settingWorldPlazaPerformanceDiagnosticsGauge(
-          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
-            .ONLINE_PARTICIPANT_COUNT,
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.ONLINE_PARTICIPANT_COUNT,
           data.participantCount
         );
 
@@ -514,8 +521,7 @@ export function usingWorldPlazaDevvitPollingRoom({
           (player) => player.userId === leaderUserId
         );
         settingWorldPlazaPerformanceDiagnosticsGauge(
-          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE
-            .ONLINE_REMOTE_WILDLIFE_SNAPSHOT_COUNT,
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.ONLINE_REMOTE_WILDLIFE_SNAPSHOT_COUNT,
           leaderPlayer &&
             leaderPlayer.userId !== userId &&
             Array.isArray(leaderPlayer.wildlifeSnapshots)
@@ -583,8 +589,7 @@ export function usingWorldPlazaDevvitPollingRoom({
         }
       } catch {
         incrementingWorldPlazaPerformanceDiagnosticsCounter(
-          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER
-            .ONLINE_POLL_FAILURE
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.ONLINE_POLL_FAILURE
         );
         // Poll failures are non-fatal; the next sync/poll will retry.
       } finally {

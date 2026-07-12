@@ -42,6 +42,23 @@ import {
 /** No-op used when diagnostics are disabled. */
 const MEASURING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_NO_OP = (): void => {};
 
+type MeasuringWorldPlazaPerformanceDiagnosticsPooledTimer = {
+  startedAtMs: number;
+  isActive: boolean;
+  finish: () => void;
+};
+
+/**
+ * Reuses timer closures after warmup. Active diagnostics start many nested
+ * samples per frame; allocating one closure per sample creates GC pauses that
+ * appear as unaccounted slow frames in the tool being used to find them.
+ */
+const MEASURING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TIMER_POOL_BY_SAMPLE_ID =
+  new Map<
+    DefiningWorldPlazaPerformanceDiagnosticsSampleId,
+    MeasuringWorldPlazaPerformanceDiagnosticsPooledTimer[]
+  >();
+
 /** Global console API attached to `window.__WORLD_PLAZA_PERF__`. */
 export const MEASURING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_CONSOLE_API_KEY =
   '__WORLD_PLAZA_PERF__' as const;
@@ -451,14 +468,44 @@ export function beginningWorldPlazaPerformanceSample(
     return MEASURING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_NO_OP;
   }
 
-  const startedAtMs = performance.now();
-
-  return () => {
-    recordingWorldPlazaPerformanceSampleDuration(
-      sampleId,
-      performance.now() - startedAtMs
+  let timerPool =
+    MEASURING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TIMER_POOL_BY_SAMPLE_ID.get(
+      sampleId
     );
-  };
+
+  if (!timerPool) {
+    timerPool = [];
+    MEASURING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TIMER_POOL_BY_SAMPLE_ID.set(
+      sampleId,
+      timerPool
+    );
+  }
+
+  let timer = timerPool.pop();
+
+  if (!timer) {
+    timer = {
+      startedAtMs: 0,
+      isActive: false,
+      finish: MEASURING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_NO_OP,
+    };
+    const pooledTimer = timer;
+    pooledTimer.finish = () => {
+      if (!pooledTimer.isActive) {
+        return;
+      }
+
+      pooledTimer.isActive = false;
+      const durationMs = performance.now() - pooledTimer.startedAtMs;
+      timerPool.push(pooledTimer);
+      recordingWorldPlazaPerformanceSampleDuration(sampleId, durationMs);
+    };
+  }
+
+  timer.startedAtMs = performance.now();
+  timer.isActive = true;
+
+  return timer.finish;
 }
 
 /**

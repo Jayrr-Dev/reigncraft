@@ -7,14 +7,14 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>devvit</title>
+    <!--
+      Reddit webview click bridge can call elementFromPoint with NaN / close over
+      native hit-testing. Classic external script (CSP-safe) must run first.
+    -->
+    <script src="./bootingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard.boot.js"></script>
   </head>
   <body class="h-full">
     <div id="root" class="h-full"></div>
-    <!--
-      Reddit webview click bridge can call elementFromPoint with NaN before
-      module code runs. Classic external script (CSP-safe) installs first.
-    -->
-    <script src="./bootingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard.boot.js"></script>
     <script type="module" src="game.tsx"></script>
   </body>
 </html>

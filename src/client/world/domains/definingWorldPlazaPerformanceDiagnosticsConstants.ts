@@ -150,6 +150,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE = {
   PLAYER_IS_STARVING: 'player-is-starving',
   AUDIO_ACTIVE_SFX_COUNT: 'audio-active-sfx-count',
   AUDIO_PRELOADED_ASSET_COUNT: 'audio-preloaded-asset-count',
+  /** Active semaphore workers only; queued manifest keys are excluded. */
   AUDIO_INFLIGHT_LOAD_COUNT: 'audio-inflight-load-count',
   AUDIO_CONSUMER_COUNT: 'audio-consumer-count',
   AUDIO_IS_LOCKED: 'audio-is-locked',

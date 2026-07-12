@@ -92,7 +92,7 @@ function recordingWorldPlazaStarAudioPerformanceGauges(force = false): void {
   );
   settingWorldPlazaPerformanceDiagnosticsGauge(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.AUDIO_INFLIGHT_LOAD_COUNT,
-    inflightWorldPlazaStarAudioManifestKeyLoads.size
+    activeWorldPlazaStarAudioPreloadCount
   );
   settingWorldPlazaPerformanceDiagnosticsGauge(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.AUDIO_CONSUMER_COUNT,

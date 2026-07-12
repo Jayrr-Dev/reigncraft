@@ -15,7 +15,7 @@ const RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_TABS: RenderingWorld
   [
     { id: 'summary', label: 'Summary' },
     { id: 'samples', label: 'Samples' },
-    { id: 'metrics', label: 'Metrics' },
+    { id: 'metrics', label: 'FPS load' },
     { id: 'flags', label: 'Flags' },
   ];
 

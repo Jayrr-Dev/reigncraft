@@ -44,3 +44,57 @@ export function checkingWorldPlazaOnlineParticipantsSnapshotChanged(
 
   return false;
 }
+
+/**
+ * Returns true when a room patch would change observable snapshot state.
+ *
+ * Participant arrays are compared by value so the 150ms position sync can
+ * return the existing snapshot instead of re-rendering the full plaza tree.
+ */
+export function checkingWorldPlazaOnlineRoomSnapshotPatchChanged(
+  currentSnapshot: DefiningWorldPlazaOnlineRoomSnapshot,
+  patch: Partial<DefiningWorldPlazaOnlineRoomSnapshot>
+): boolean {
+  if (
+    patch.remotePlayers !== undefined &&
+    patch.remotePlayers !== currentSnapshot.remotePlayers
+  ) {
+    return true;
+  }
+
+  if (
+    patch.onlineParticipants !== undefined &&
+    checkingWorldPlazaOnlineParticipantsSnapshotChanged(
+      currentSnapshot,
+      patch.participantCount ?? currentSnapshot.participantCount,
+      patch.onlineParticipants
+    )
+  ) {
+    return true;
+  }
+
+  if (
+    patch.onlineParticipants === undefined &&
+    patch.participantCount !== undefined &&
+    patch.participantCount !== currentSnapshot.participantCount
+  ) {
+    return true;
+  }
+
+  return (
+    (patch.roomIndex !== undefined &&
+      patch.roomIndex !== currentSnapshot.roomIndex) ||
+    (patch.roomChannelName !== undefined &&
+      patch.roomChannelName !== currentSnapshot.roomChannelName) ||
+    (patch.isConnected !== undefined &&
+      patch.isConnected !== currentSnapshot.isConnected) ||
+    (patch.isJoined !== undefined &&
+      patch.isJoined !== currentSnapshot.isJoined) ||
+    (patch.isReconnecting !== undefined &&
+      patch.isReconnecting !== currentSnapshot.isReconnecting) ||
+    (patch.isRoomFull !== undefined &&
+      patch.isRoomFull !== currentSnapshot.isRoomFull) ||
+    (patch.lastError !== undefined &&
+      patch.lastError !== currentSnapshot.lastError)
+  );
+}
