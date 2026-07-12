@@ -241,8 +241,9 @@ export function RenderingWorldPlazaDevModePanel(
         viewportHudScale,
         isMobile,
         isFullscreen,
+        isOpen,
       }),
-    [isFullscreen, isMobile, viewportHudScale]
+    [isFullscreen, isMobile, isOpen, viewportHudScale]
   );
   const [activeViewId, setActiveViewId] =
     useState<DefiningWorldPlazaDevModePanelViewId>(

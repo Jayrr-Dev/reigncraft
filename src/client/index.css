@@ -1471,20 +1471,46 @@ body {
     0 0 8px rgba(217, 164, 65, 0.45);
 }
 
-/* Reserved weapon/tool equipment slot — charcoal outline. */
+/* Reserved weapon/tool equipment slot — bluish socket + charcoal outline. */
 .plaza-inventory-slot--weapon-tool {
   border: 2px solid #2a2620;
+  background: linear-gradient(
+    180deg,
+    rgba(88, 128, 156, 0.78) 0%,
+    rgba(64, 104, 132, 0.7) 100%
+  );
   box-shadow:
-    inset 3px 3px 6px rgba(40, 26, 18, 0.55),
-    inset -1px -1px 2px rgba(255, 250, 230, 0.12),
+    inset 3px 3px 6px rgba(24, 40, 52, 0.55),
+    inset -1px -1px 2px rgba(210, 230, 245, 0.18),
     0 0 0 1px rgba(42, 38, 32, 0.85);
+  opacity: 1;
+}
+
+.plaza-inventory-slot--weapon-tool.plaza-inventory-slot--empty {
+  border-style: solid;
+  border-color: #2a2620;
+  background: linear-gradient(
+    180deg,
+    rgba(96, 136, 164, 0.72) 0%,
+    rgba(72, 112, 140, 0.64) 100%
+  );
+  box-shadow:
+    inset 3px 3px 6px rgba(24, 40, 52, 0.5),
+    inset -1px -1px 2px rgba(210, 230, 245, 0.16),
+    0 0 0 1px rgba(42, 38, 32, 0.85);
+  opacity: 1;
 }
 
 .plaza-inventory-slot--weapon-tool.plaza-inventory-slot--equipped {
   border-color: #2a2620;
+  background: linear-gradient(
+    180deg,
+    rgba(100, 142, 170, 0.82) 0%,
+    rgba(74, 116, 146, 0.72) 100%
+  );
   box-shadow:
-    inset 3px 3px 6px rgba(40, 26, 18, 0.55),
-    inset -1px -1px 2px rgba(255, 250, 230, 0.12),
+    inset 3px 3px 6px rgba(24, 40, 52, 0.55),
+    inset -1px -1px 2px rgba(210, 230, 245, 0.18),
     0 0 0 2px #2a2620,
     0 0 0 3px var(--color-poster-gold),
     0 0 8px rgba(217, 164, 65, 0.45);
@@ -1509,18 +1535,31 @@ body {
   }
 
   .plaza-inventory-slot,
-  .plaza-inventory-slot--empty,
-  .plaza-inventory-slot--weapon-tool {
+  .plaza-inventory-slot--empty {
     box-shadow:
       inset 2px 2px 3px rgba(40, 26, 18, 0.48),
       inset -1px -1px 1px rgba(255, 250, 230, 0.1);
   }
 
-  .plaza-inventory-slot--equipped,
-  .plaza-inventory-slot--weapon-tool.plaza-inventory-slot--equipped {
+  .plaza-inventory-slot--weapon-tool,
+  .plaza-inventory-slot--weapon-tool.plaza-inventory-slot--empty {
+    box-shadow:
+      inset 2px 2px 3px rgba(24, 40, 52, 0.48),
+      inset -1px -1px 1px rgba(210, 230, 245, 0.12),
+      0 0 0 1px rgba(42, 38, 32, 0.85);
+  }
+
+  .plaza-inventory-slot--equipped {
     box-shadow:
       inset 2px 2px 3px rgba(40, 26, 18, 0.48),
       0 0 0 2px var(--color-poster-gold);
+  }
+
+  .plaza-inventory-slot--weapon-tool.plaza-inventory-slot--equipped {
+    box-shadow:
+      inset 2px 2px 3px rgba(24, 40, 52, 0.48),
+      0 0 0 2px #2a2620,
+      0 0 0 3px var(--color-poster-gold);
   }
 }
 

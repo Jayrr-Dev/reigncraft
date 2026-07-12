@@ -6,11 +6,11 @@
 
 /** Compact top-left Perf launcher (sibling of Dev, not inside the panel). */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_BUTTON_CLASS_NAME =
-  'pointer-events-auto shrink-0 rounded-md border border-amber-800 bg-amber-700 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow transition hover:bg-amber-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300' as const;
+  'pointer-events-auto min-w-0 flex-1 rounded border border-amber-800 bg-amber-700 px-1 py-0.5 text-[8px] font-bold uppercase leading-none tracking-wide text-white shadow-sm transition hover:bg-amber-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-300' as const;
 
 /** Perf launcher when diagnostics overlay is open. */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_BUTTON_ACTIVE_CLASS_NAME =
-  'pointer-events-auto shrink-0 rounded-md border border-amber-900 bg-amber-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow transition hover:bg-amber-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300' as const;
+  'pointer-events-auto min-w-0 flex-1 rounded border border-amber-900 bg-amber-600 px-1 py-0.5 text-[8px] font-bold uppercase leading-none tracking-wide text-white shadow-sm transition hover:bg-amber-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-300' as const;
 
 /** Visible button label. */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_BUTTON_LABEL =
@@ -18,7 +18,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_BUTTON_LABEL =
 
 /** Gap between Perf label and live FPS readout on the badge. */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_FPS_CLASS_NAME =
-  'ml-1.5 font-mono font-semibold normal-case tracking-normal tabular-nums text-white' as const;
+  'ml-0.5 font-mono font-semibold normal-case tracking-normal tabular-nums text-white' as const;
 
 /** Placeholder while the badge FPS sampler has not produced a sample yet. */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_FPS_PLACEHOLDER =

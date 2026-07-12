@@ -50,6 +50,19 @@ export function computingWorldPlazaMiniMapStackOccupiedHeightPx(
 }
 
 /**
+ * Horizontal footprint of the minimap parchment card (matches stack column width).
+ */
+export function computingWorldPlazaMiniMapStackOccupiedWidthPx(
+  isMobile: boolean,
+  isFullscreen: boolean
+): number {
+  const viewportMode = isFullscreen ? 'fullscreen' : 'embedded';
+  const platform = isMobile ? 'mobile' : 'desktop';
+
+  return DEFINING_WORLD_PLAZA_MINI_MAP_CANVAS_SIZE_PX[viewportMode][platform];
+}
+
+/**
  * Left inset for top-left HUD chrome that aligns with the minimap stack.
  */
 export function computingWorldPlazaMiniMapStackLeftInsetPx(

@@ -6,6 +6,7 @@ import {
 import {
   computingWorldPlazaMiniMapStackLeftInsetPx,
   computingWorldPlazaMiniMapStackOccupiedHeightPx,
+  computingWorldPlazaMiniMapStackOccupiedWidthPx,
   computingWorldPlazaMiniMapStackTopPx,
 } from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportStyles';
 import type { CSSProperties } from 'react';
@@ -18,15 +19,19 @@ export type DefiningWorldPlazaDevModePanelViewportLayout = {
 /**
  * Resolves anchor classes and offsets for the Dev tools panel.
  * Sits below the top-left minimap card on every viewport.
+ *
+ * When the panel is collapsed, the Dev / Perf row matches minimap width.
  */
 export function resolvingWorldPlazaDevModePanelViewportLayout({
   viewportHudScale,
   isMobile = false,
   isFullscreen = false,
+  isOpen = false,
 }: {
   viewportHudScale: number;
   isMobile?: boolean;
   isFullscreen?: boolean;
+  isOpen?: boolean;
 }): DefiningWorldPlazaDevModePanelViewportLayout {
   const topPx =
     computingWorldPlazaMiniMapStackTopPx(viewportHudScale, isMobile) +
@@ -44,12 +49,20 @@ export function resolvingWorldPlazaDevModePanelViewportLayout({
     isMobile,
     isFullscreen
   );
+  const style: CSSProperties = {
+    top: `calc(${topPx}px + env(safe-area-inset-top, 0px))`,
+    left: `calc(${leftInsetPx}px + env(safe-area-inset-left, 0px))`,
+  };
+
+  if (!isOpen) {
+    style.width = computingWorldPlazaMiniMapStackOccupiedWidthPx(
+      isMobile,
+      isFullscreen
+    );
+  }
 
   return {
     anchorClassName: STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME,
-    style: {
-      top: `calc(${topPx}px + env(safe-area-inset-top, 0px))`,
-      left: `calc(${leftInsetPx}px + env(safe-area-inset-left, 0px))`,
-    },
+    style,
   };
 }

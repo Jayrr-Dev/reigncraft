@@ -161,7 +161,11 @@ export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS =
 
 /** Faded fist glyph in the reserved empty weapon/tool slot. */
 export const STYLING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON_CLASS =
-  'pointer-events-none shrink-0 text-current' as const;
+  'pointer-events-none shrink-0 text-parchment' as const;
+
+/** Centers the empty fist inside the reserved equip slot. */
+export const STYLING_WORLD_PLAZA_INVENTORY_EMPTY_WEAPON_TOOL_SLOT_CLASS =
+  'flex items-center justify-center' as const;
 
 /** Equipped slot highlight. */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS =

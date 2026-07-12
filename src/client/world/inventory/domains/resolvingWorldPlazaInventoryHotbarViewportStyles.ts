@@ -4,6 +4,7 @@ import {
 } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS,
+  DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON_SIZE_RATIO,
   DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import {
@@ -38,6 +39,7 @@ export interface DefiningWorldPlazaInventoryHotbarViewportStyles {
   readonly slotStyle: CSSProperties;
   readonly dragSurfaceStyle: CSSProperties;
   readonly iconStyle: CSSProperties;
+  readonly emptyFistIconStyle: CSSProperties;
   readonly emojiStyle: CSSProperties;
   readonly fallbackTextStyle: CSSProperties;
   readonly quantityBadgeStyle: CSSProperties;
@@ -166,6 +168,12 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
     )
   );
   const pageArrowGapPx = Math.max(1, Math.round(shellGapPx * 0.5));
+  const emptyFistIconEdgePx = Math.max(
+    1,
+    Math.round(
+      slotEdgePx * DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON_SIZE_RATIO
+    )
+  );
 
   return {
     shellStyle: {
@@ -184,6 +192,10 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
     slotStyle,
     dragSurfaceStyle: slotStyle,
     iconStyle,
+    emptyFistIconStyle: {
+      width: emptyFistIconEdgePx,
+      height: emptyFistIconEdgePx,
+    },
     emojiStyle: {
       fontSize: emojiPx,
       lineHeight: 1,

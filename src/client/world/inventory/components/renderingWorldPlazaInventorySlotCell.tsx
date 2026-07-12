@@ -40,6 +40,7 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import {
   STYLING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_EMPTY_WEAPON_TOOL_SLOT_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_ITEM_ICON_WRAPPER_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS,
@@ -249,6 +250,8 @@ export function RenderingWorldPlazaInventorySlotCell({
             isEquipped,
             isWeaponToolSlot: isReservedWeaponToolSlot,
           }),
+          isReservedWeaponToolSlot &&
+            STYLING_WORLD_PLAZA_INVENTORY_EMPTY_WEAPON_TOOL_SLOT_CLASS,
           showDropHighlight &&
             isValidDrop &&
             STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_VALID_CLASS,
@@ -271,7 +274,7 @@ export function RenderingWorldPlazaInventorySlotCell({
             icon={DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON}
             className={STYLING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON_CLASS}
             style={{
-              ...viewportStyles.iconStyle,
+              ...viewportStyles.emptyFistIconStyle,
               opacity: DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_OPACITY,
             }}
             aria-hidden

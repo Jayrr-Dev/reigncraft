@@ -85,8 +85,9 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
       },
       devModePanel: {
         // Top offset resolved from minimap occupied height (see MiniMapStack constants).
+        // Collapsed Dev / Perf row width matches minimap (see viewport layout resolver).
         anchorClassName:
-          'pointer-events-none absolute z-30 flex max-w-[min(92vw,calc(100vw-1.5rem))] select-none flex-row items-start gap-1.5',
+          'pointer-events-none absolute z-30 flex select-none flex-row items-stretch gap-0.5',
         topWithStaminaBarClassName: '',
         topWithoutStaminaBarClassName: '',
       },

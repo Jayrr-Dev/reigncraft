@@ -66,7 +66,13 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON =
   'ph:hand-fist' as const;
 
 /** Opacity for the empty fist placeholder (empty but fighting unarmed). */
-export const DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_OPACITY = 0.4 as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_OPACITY = 0.45 as const;
+
+/**
+ * Empty fist glyph size vs inventory slot edge (larger than normal item icons).
+ */
+export const DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON_SIZE_RATIO =
+  0.72 as const;
 
 /** Accessible label for the empty reserved weapon/tool slot. */
 export const LABELING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_SLOT =

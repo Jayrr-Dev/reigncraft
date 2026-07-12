@@ -29,11 +29,11 @@ export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_BELOW_MINIMAP_GAP_BASE_PX =
 
 /** Collapsed dev launcher button. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME =
-  'pointer-events-auto rounded-md border border-violet-800 bg-violet-700 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow transition hover:bg-violet-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300' as const;
+  'pointer-events-auto min-w-0 flex-1 rounded border border-violet-800 bg-violet-700 px-1 py-0.5 text-[8px] font-bold uppercase leading-none tracking-wide text-white shadow-sm transition hover:bg-violet-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-300' as const;
 
 /** Compact Home exit next to Dev / Perf when the action-bar Home is hidden. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER_BUTTON_CLASS_NAME =
-  'pointer-events-auto rounded-md border border-zinc-700 bg-zinc-800 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow transition hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400' as const;
+  'pointer-events-auto min-w-0 flex-1 rounded border border-zinc-700 bg-zinc-800 px-1 py-0.5 text-[8px] font-bold uppercase leading-none tracking-wide text-white shadow-sm transition hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400' as const;
 
 export const LABELING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER = 'Home' as const;
 
