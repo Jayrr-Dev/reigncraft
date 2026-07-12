@@ -25,7 +25,7 @@ describe('resolvingWorldPlazaHudToolbarBuildClaimToggle', () => {
     ).toBe(false);
   });
 
-  it('shows claim face while claiming, otherwise build', () => {
+  it('shows build face while building, otherwise claim', () => {
     expect(
       resolvingWorldPlazaHudToolbarBuildClaimToggleFace(
         DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM
@@ -40,7 +40,7 @@ describe('resolvingWorldPlazaHudToolbarBuildClaimToggle', () => {
       resolvingWorldPlazaHudToolbarBuildClaimToggleFace(
         DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS
       ).label
-    ).toBe('Build');
+    ).toBe('Claim');
     expect(
       resolvingWorldPlazaHudToolbarBuildClaimToggleFace(
         DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD
@@ -53,7 +53,7 @@ describe('resolvingWorldPlazaHudToolbarBuildClaimToggle', () => {
     ).toContain('sky');
   });
 
-  it('toggles build ↔ claim and enters build from other modes', () => {
+  it('toggles claim ↔ build and enters claim from other modes', () => {
     expect(
       resolvingWorldPlazaHudToolbarBuildClaimToggleNextMode(
         DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD
@@ -68,6 +68,6 @@ describe('resolvingWorldPlazaHudToolbarBuildClaimToggle', () => {
       resolvingWorldPlazaHudToolbarBuildClaimToggleNextMode(
         DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS
       )
-    ).toBe(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD);
+    ).toBe(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM);
   });
 });

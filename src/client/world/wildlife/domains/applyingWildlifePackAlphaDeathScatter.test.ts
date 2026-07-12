@@ -166,6 +166,67 @@ describe('applyingWildlifePackAlphaDeathScatter', () => {
     expect(scattered).toBe(false);
     expect(alpha.aggroState.activeTargetId).toBe('player-1');
   });
+
+  it('makes monkey survivors flee when any troop member dies', () => {
+    const store = creatingWildlifeInstanceStore();
+    const deadMonkey = {
+      ...creatingWildlifeTestInstance({
+        instanceId: 'wildlife:4:7:0',
+        speciesId: 'monkey',
+        anchorId: 'wildlife:4:7:0',
+        sizeScaleSample: -0.4,
+        spawnAnchor: { x: 4.5, y: 7.5, layer: 1 },
+        position: { x: 4.5, y: 7.5, layer: 1 },
+      }),
+      isDead: true,
+      diedAtMs: 5_000,
+    };
+    const survivorA = creatingWildlifeTestInstance({
+      instanceId: 'wildlife:4:7:1',
+      speciesId: 'monkey',
+      anchorId: 'wildlife:4:7:1',
+      sizeScaleSample: 1.2,
+      spawnAnchor: { x: 4.5, y: 7.5, layer: 1 },
+      position: { x: 5.5, y: 7.5, layer: 1 },
+    });
+    const survivorB = creatingWildlifeTestInstance({
+      instanceId: 'wildlife:4:7:2',
+      speciesId: 'monkey',
+      anchorId: 'wildlife:4:7:2',
+      sizeScaleSample: 0.2,
+      spawnAnchor: { x: 4.5, y: 7.5, layer: 1 },
+      position: { x: 6.5, y: 7.5, layer: 1 },
+    });
+
+    replacingWildlifeInstance(store, deadMonkey);
+    replacingWildlifeInstance(store, survivorA);
+    replacingWildlifeInstance(store, survivorB);
+
+    const scattered = applyingWildlifePackAlphaDeathScatter({
+      store,
+      deadInstance: deadMonkey,
+      species: DEFINING_WILDLIFE_SPECIES_REGISTRY.monkey,
+      threatPoint: { x: 10, y: 7.5, layer: 1 },
+      hazardSampling: { placedBlocks: [], isDaytime: true },
+      resolveSpecies: (speciesId) =>
+        DEFINING_WILDLIFE_SPECIES_REGISTRY[speciesId] ?? null,
+      nowMs: 5_000,
+    });
+
+    expect(scattered).toBe(true);
+
+    const survivors = listingWildlifeInstances(store).filter(
+      (instance) => !instance.isDead
+    );
+
+    expect(survivors).toHaveLength(2);
+    for (const survivor of survivors) {
+      expect(survivor.aiState.intent.mode).toBe('flee');
+      expect(survivor.packAlphaDeathScatterUntilMs).toBe(
+        5_000 + DEFINING_WILDLIFE_PACK_ALPHA_DEATH_REGROUP_DURATION_MS
+      );
+    }
+  });
 });
 
 describe('listingWildlifeSpawnPackmates', () => {

@@ -52,7 +52,7 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_NIGHT_COOLING_CELSIUS = 8;
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_LAVA_CELSIUS = 920;
 
 /** Campfire standing-tile temperature (°C). */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS = 72;
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS = 55;
 
 /** Ice block standing-tile temperature (°C). Freezes nearby surface water. */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_ICE_BLOCK_CELSIUS = -22;

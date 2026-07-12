@@ -203,7 +203,7 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 - Heat/cold tolerance buffs widen band by **+15°C** each (`heat-tolerance-buff` / `cold-tolerance-buff`)
 - Heat DoT: **0.35 HP/s per °C** above comfort; cold: **0.3 HP/s per °C** below
 - Resist/weakness multiplier: `(1 − resistance) × (1 + weakness)`; immunity → **0**
-- Local sources: lava **920°C**, campfire tile **72°C**, ice block **−22°C**, frozen water **−14°C**
+- Local sources: lava **920°C**, campfire tile **55°C**, ice block **−22°C**, frozen water **−14°C**
 - Water phase: assignable heat ≥ **0°C** thaws; assignable cold < **0°C** freezes; else climate noise ≤ **0.3** stays ice
 - Climate noise **0..1** maps to **−25°C..48°C**
 - Night cooling **−8°C**

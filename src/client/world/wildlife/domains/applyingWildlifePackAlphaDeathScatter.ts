@@ -1,5 +1,6 @@
 /**
- * Makes surviving packmates flee when their alpha is killed, then regroup.
+ * Makes surviving packmates flee when their alpha is killed (or, for species
+ * with fleePackOnAnyDeath, when any packmate dies), then regroup.
  *
  * @module components/world/wildlife/domains/applyingWildlifePackAlphaDeathScatter
  */
@@ -182,8 +183,9 @@ function checkingWildlifeDeadInstanceWasSpawnPackAlpha({
 }
 
 /**
- * If the dead instance was the pack alpha, survivors drop aggro, flee to a
- * shared regroup point, and wait before electing a replacement alpha.
+ * If the dead instance was the pack alpha (or the species flees on any packmate
+ * death), survivors drop aggro, flee to a shared regroup point, and wait before
+ * electing a replacement alpha.
  */
 export function applyingWildlifePackAlphaDeathScatter({
   store,
@@ -200,8 +202,10 @@ export function applyingWildlifePackAlphaDeathScatter({
     instances: allInstances,
     includeDead: true,
   });
+  const fleeOnAnyDeath = species.socialBehavior?.fleePackOnAnyDeath === true;
 
   if (
+    !fleeOnAnyDeath &&
     !checkingWildlifeDeadInstanceWasSpawnPackAlpha({
       deadInstance,
       packWithDead,

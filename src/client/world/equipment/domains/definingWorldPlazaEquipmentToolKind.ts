@@ -15,6 +15,8 @@ export type DefiningWorldPlazaEquipmentToolKind =
   | 'axe'
   | 'pickaxe'
   | 'build'
+  | 'craft'
+  | 'claim'
   | 'ignite'
   | 'sword'
   | 'hoe'

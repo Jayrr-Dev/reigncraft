@@ -7,8 +7,11 @@
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLAIM_TOOL,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CRAFT_TOOL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import type { DefiningWorldPlazaInventoryDemoSeedItem } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 
@@ -176,6 +179,18 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_STARTER_ITEMS: readonly DefiningWorl
     },
     {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE,
+      quantity: 1,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CRAFT_TOOL,
+      quantity: 1,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
+      quantity: 1,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLAIM_TOOL,
       quantity: 1,
     },
     {

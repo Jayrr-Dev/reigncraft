@@ -1,17 +1,18 @@
 /**
- * Local HUD toolbar mode state for Items / Craft / Build↔Claim badges.
+ * HUD toolbar mode from the equipped Craft / Build / Claim hotbar tools.
  *
  * @module components/world/hooks/usingWorldPlazaHudToolbarMode
  */
 
 import type { DefiningWorldPlazaHudToolbarModeId } from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
 import { DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID } from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
-import { useCallback, useEffect, useState } from 'react';
+import { resolvingWorldPlazaHudToolbarModeFromEquippedItemTypeId } from '@/components/world/domains/resolvingWorldPlazaHudToolbarModeFromEquippedItemTypeId';
+import { useEffect, useRef, useState } from 'react';
 
 export type UsingWorldPlazaHudToolbarModeParams = {
+  /** Item type currently in the reserved fist / weapon / tool slot. */
+  readonly equippedItemTypeId: string | null;
   readonly isEditSessionActive: boolean;
-  readonly isBlockBuildModeActive: boolean;
-  readonly isClaimModeActive: boolean;
   readonly isBuildModeEnabled: boolean;
   readonly togglingEditSession: () => void;
   readonly activatingBuildMode: () => void;
@@ -20,18 +21,15 @@ export type UsingWorldPlazaHudToolbarModeParams = {
 
 export type UsingWorldPlazaHudToolbarModeResult = {
   readonly hudToolbarMode: DefiningWorldPlazaHudToolbarModeId;
-  readonly selectingHudToolbarMode: (
-    mode: DefiningWorldPlazaHudToolbarModeId
-  ) => void;
 };
 
 /**
- * Tracks and switches bottom HUD toolbar modes.
+ * Syncs bottom HUD mode to the equipped Craft / Build / Claim tool.
+ * Drag those tools into the fist slot to open the matching panel.
  */
 export function usingWorldPlazaHudToolbarMode({
+  equippedItemTypeId,
   isEditSessionActive,
-  isBlockBuildModeActive,
-  isClaimModeActive,
   isBuildModeEnabled,
   togglingEditSession,
   activatingBuildMode,
@@ -42,64 +40,63 @@ export function usingWorldPlazaHudToolbarMode({
       DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS
     );
 
+  const isEditSessionActiveRef = useRef(isEditSessionActive);
+  const togglingEditSessionRef = useRef(togglingEditSession);
+  const activatingBuildModeRef = useRef(activatingBuildMode);
+  const activatingClaimModeRef = useRef(activatingClaimMode);
+
+  isEditSessionActiveRef.current = isEditSessionActive;
+  togglingEditSessionRef.current = togglingEditSession;
+  activatingBuildModeRef.current = activatingBuildMode;
+  activatingClaimModeRef.current = activatingClaimMode;
+
   useEffect(() => {
-    if (isClaimModeActive) {
-      setHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM);
+    const desiredMode =
+      resolvingWorldPlazaHudToolbarModeFromEquippedItemTypeId(
+        equippedItemTypeId
+      );
+
+    const exitingEditSessionIfNeeded = (): void => {
+      if (isEditSessionActiveRef.current) {
+        togglingEditSessionRef.current();
+      }
+    };
+
+    if (desiredMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CRAFT) {
+      exitingEditSessionIfNeeded();
+      setHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CRAFT);
       return;
     }
 
-    if (isBlockBuildModeActive) {
+    if (desiredMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD) {
+      if (!isBuildModeEnabled) {
+        exitingEditSessionIfNeeded();
+        setHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS);
+        return;
+      }
+
+      activatingBuildModeRef.current();
       setHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD);
       return;
     }
 
-    setHudToolbarMode((currentMode) => {
-      if (currentMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CRAFT) {
-        return currentMode;
-      }
-
-      return DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS;
-    });
-  }, [isBlockBuildModeActive, isClaimModeActive]);
-
-  const selectingHudToolbarMode = useCallback(
-    (mode: DefiningWorldPlazaHudToolbarModeId): void => {
-      if (
-        mode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS ||
-        mode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CRAFT
-      ) {
-        if (isEditSessionActive) {
-          togglingEditSession();
-        }
-
-        setHudToolbarMode(mode);
-        return;
-      }
-
+    if (desiredMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM) {
       if (!isBuildModeEnabled) {
+        exitingEditSessionIfNeeded();
+        setHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS);
         return;
       }
 
-      if (mode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD) {
-        activatingBuildMode();
-        setHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD);
-        return;
-      }
-
-      activatingClaimMode();
+      activatingClaimModeRef.current();
       setHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM);
-    },
-    [
-      activatingBuildMode,
-      activatingClaimMode,
-      isBuildModeEnabled,
-      isEditSessionActive,
-      togglingEditSession,
-    ]
-  );
+      return;
+    }
+
+    exitingEditSessionIfNeeded();
+    setHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS);
+  }, [equippedItemTypeId, isBuildModeEnabled]);
 
   return {
     hudToolbarMode,
-    selectingHudToolbarMode,
   };
 }

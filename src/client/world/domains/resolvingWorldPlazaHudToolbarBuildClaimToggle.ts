@@ -27,27 +27,27 @@ export function checkingWorldPlazaHudToolbarBuildClaimToggleActive(
 
 /**
  * Face shown on the Build↔Claim toggle for the current mode.
- * Defaults to Build when neither edit mode is active.
+ * Defaults to Claim when neither edit mode is active.
  *
  * @param activeMode - Current HUD toolbar mode
  */
 export function resolvingWorldPlazaHudToolbarBuildClaimToggleFace(
   activeMode: DefiningWorldPlazaHudToolbarModeId
 ): DefiningWorldPlazaHudToolbarBuildClaimToggleFace {
-  if (activeMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM) {
+  if (activeMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD) {
     return DEFINING_WORLD_PLAZA_HUD_TOOLBAR_BUILD_CLAIM_TOGGLE_FACES[
-      DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM
+      DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD
     ];
   }
 
   return DEFINING_WORLD_PLAZA_HUD_TOOLBAR_BUILD_CLAIM_TOGGLE_FACES[
-    DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD
+    DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM
   ];
 }
 
 /**
  * Next edit mode when the Build↔Claim toggle is clicked.
- * Build → Claim → Build. From Items/Craft, enters Build.
+ * Claim → Build → Claim. From Items/Craft, enters Claim.
  *
  * @param activeMode - Current HUD toolbar mode
  */
@@ -56,13 +56,13 @@ export function resolvingWorldPlazaHudToolbarBuildClaimToggleNextMode(
 ):
   | typeof DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD
   | typeof DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM {
-  if (activeMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD) {
-    return DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM;
-  }
-
   if (activeMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM) {
     return DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD;
   }
 
-  return DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD;
+  if (activeMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD) {
+    return DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM;
+  }
+
+  return DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM;
 }

@@ -1021,11 +1021,14 @@ export type DefiningWildlifeSpeciesDefinition = {
    * when they drift too far. Set false to opt a species out.
    * `socialHunter` defaults to false: when true, forgoes hunting until the
    * area pack has at least 3 living allies, seeking packmates while solo.
+   * `fleePackOnAnyDeath` defaults to false: when true, survivors scatter-flee
+   * whenever any packmate dies (not only the elected alpha).
    */
   socialBehavior?: {
     defendsYoung?: boolean;
     separationAnxiety?: boolean;
     socialHunter?: boolean;
+    fleePackOnAnyDeath?: boolean;
   };
   /**
    * Permanent defender damage-roll modifiers applied at spawn (e.g. turtle shell
@@ -2213,20 +2216,23 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1000,
     },
   },
-  monkey: definingWildlifeHerbivoreSpecies('monkey', 'Monkey', 'monkey', 12, {
-    diet: 'omnivore',
-    sizeScale: 0.8,
-    collisionRadiusGrid: 0.25,
-    aggroRadiusGrid: 6,
-    packShareRadiusGrid: 8,
-    hazards: { isHeatImmune: true },
-    vitals: {
-      baseMaxHealth: 20,
-      attackPower: 3,
-      defense: 0,
-      attackIntervalMs: 900,
-    },
-  }),
+  monkey: {
+    ...definingWildlifeHerbivoreSpecies('monkey', 'Monkey', 'monkey', 12, {
+      diet: 'omnivore',
+      sizeScale: 0.8,
+      collisionRadiusGrid: 0.25,
+      aggroRadiusGrid: 6,
+      packShareRadiusGrid: 8,
+      hazards: { isHeatImmune: true },
+      vitals: {
+        baseMaxHealth: 20,
+        attackPower: 3,
+        defense: 0,
+        attackIntervalMs: 900,
+      },
+    }),
+    socialBehavior: { fleePackOnAnyDeath: true },
+  },
   chimp: definingWildlifeHerbivoreSpecies('chimp', 'Chimp', 'chimp', 50, {
     diet: 'carnivore',
     temperamentId: 'retaliator',
