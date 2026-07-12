@@ -1,8 +1,7 @@
-import { computingWorldPlazaActionBarOccupiedHeightPx } from '@/components/world/domains/computingWorldPlazaActionBarOccupiedHeightPx';
 import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
-import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
 import { DEFINING_WORLD_PLAZA_MINI_MAP_CANVAS_SIZE_PX } from '@/components/world/domains/definingWorldPlazaMiniMapConstants';
-import { resolvingWorldPlazaMiniMapStackViewportLayout } from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportLayout';
+import { DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT } from '@/components/world/domains/definingWorldPlazaMiniMapStackConstants';
+import { resolvingWorldPlazaGameplayHudViewportInsets } from '@/components/world/domains/resolvingWorldPlazaGameplayHudViewportInsets';
 import type { CSSProperties } from 'react';
 
 export type ResolvingWorldPlazaMiniMapStackViewportStylesParams = {
@@ -12,22 +11,15 @@ export type ResolvingWorldPlazaMiniMapStackViewportStylesParams = {
 };
 
 /**
- * Top offset for the minimap stack, below the action bar shell.
+ * Top offset for the minimap stack — same row as the top action bar.
  */
 export function computingWorldPlazaMiniMapStackTopPx(
   viewportHudScale: number,
-  isMobile: boolean
+  _isMobile: boolean
 ): number {
-  const belowActionBarGapBasePx =
-    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.minimapStack
-      .belowActionBarGapBasePx;
-
-  return (
-    computingWorldPlazaActionBarOccupiedHeightPx(viewportHudScale, isMobile) +
-    computingWorldPlazaViewportHudScaledPx(
-      belowActionBarGapBasePx,
-      viewportHudScale
-    )
+  return computingWorldPlazaViewportHudScaledPx(
+    DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.topInsetBasePx,
+    viewportHudScale
   );
 }
 
@@ -39,18 +31,18 @@ export function computingWorldPlazaMiniMapStackOccupiedHeightPx(
   isMobile: boolean,
   isFullscreen: boolean
 ): number {
-  const minimapLayout =
-    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.minimapStack;
   const viewportMode = isFullscreen ? 'fullscreen' : 'embedded';
   const platform = isMobile ? 'mobile' : 'desktop';
   const canvasSizePx =
     DEFINING_WORLD_PLAZA_MINI_MAP_CANVAS_SIZE_PX[viewportMode][platform];
   const environmentBarPx = computingWorldPlazaViewportHudScaledPx(
-    minimapLayout.environmentBarOccupiedBasePx[platform],
+    DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.environmentBarOccupiedBasePx[
+      platform
+    ],
     viewportHudScale
   );
   const cardChromePx = computingWorldPlazaViewportHudScaledPx(
-    minimapLayout.cardVerticalChromeBasePx,
+    DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.cardVerticalChromeBasePx,
     viewportHudScale
   );
 
@@ -58,26 +50,26 @@ export function computingWorldPlazaMiniMapStackOccupiedHeightPx(
 }
 
 /**
- * Right inset for top-right HUD chrome that aligns with the minimap stack.
+ * Left inset for top-left HUD chrome that aligns with the minimap stack.
  */
-export function computingWorldPlazaMiniMapStackRightInsetPx(
+export function computingWorldPlazaMiniMapStackLeftInsetPx(
   viewportHudScale: number,
   isMobile: boolean,
   isFullscreen: boolean
 ): number {
-  const viewportLayout = resolvingWorldPlazaMiniMapStackViewportLayout(
+  const viewportInsets = resolvingWorldPlazaGameplayHudViewportInsets(
     isMobile,
     isFullscreen
   );
 
   return computingWorldPlazaViewportHudScaledPx(
-    viewportLayout.edgeInsetBasePx,
+    viewportInsets.edgeBasePx,
     viewportHudScale
   );
 }
 
 /**
- * Resolves top-right anchor offsets for the minimap stack.
+ * Resolves top-left anchor offsets for the minimap stack.
  *
  * Uses inline px values so positioning does not depend on Tailwind spacing
  * utilities being present in the production CSS bundle.
@@ -87,7 +79,7 @@ export function resolvingWorldPlazaMiniMapStackViewportStyles({
   isMobile,
   isFullscreen,
 }: ResolvingWorldPlazaMiniMapStackViewportStylesParams): CSSProperties {
-  const rightInsetPx = computingWorldPlazaMiniMapStackRightInsetPx(
+  const leftInsetPx = computingWorldPlazaMiniMapStackLeftInsetPx(
     viewportHudScale,
     isMobile,
     isFullscreen
@@ -99,6 +91,6 @@ export function resolvingWorldPlazaMiniMapStackViewportStyles({
 
   return {
     top: `calc(${topPx}px + env(safe-area-inset-top, 0px))`,
-    right: `calc(${rightInsetPx}px + env(safe-area-inset-right, 0px))`,
+    left: `calc(${leftInsetPx}px + env(safe-area-inset-left, 0px))`,
   };
 }

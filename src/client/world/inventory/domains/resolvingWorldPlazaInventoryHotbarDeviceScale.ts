@@ -1,16 +1,14 @@
 import { DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 
 /**
- * Picks the hotbar device multiplier for the current viewport class.
+ * Hotbar device multiplier for the current viewport class.
  *
- * Mobile, desktop, and fullscreen share the same authored hotbar size.
+ * Mobile, desktop, and fullscreen all use the fullscreen inventory size.
  *
- * @param isMobile - Mobile layout input from the viewport profile
+ * @param _isMobile - Kept for call-site compatibility; size no longer branches
  */
 export function resolvingWorldPlazaInventoryHotbarDeviceScale(
-  isMobile: boolean
+  _isMobile: boolean
 ): number {
-  return isMobile
-    ? DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE.mobile
-    : DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE.desktopAndFullscreen;
+  return DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE;
 }

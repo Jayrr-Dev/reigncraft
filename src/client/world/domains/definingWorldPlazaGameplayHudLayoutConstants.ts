@@ -67,32 +67,32 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
    */
   viewportInsets: {
     embedded: {
-      desktop: { edgeBasePx: 12 },
-      mobile: { edgeBasePx: 12 },
+      desktop: { edgeBasePx: 6 },
+      mobile: { edgeBasePx: 6 },
     },
     fullscreen: {
-      desktop: { edgeBasePx: 16 },
-      mobile: { edgeBasePx: 16 },
+      desktop: { edgeBasePx: 8 },
+      mobile: { edgeBasePx: 8 },
     },
   },
 
   regions: {
-    /** Top-left: Dev tools + standalone Perf launcher. */
+    /** Top-left: minimap card, then Dev tools + Perf launcher below it. */
     topLeft: {
-      devModePanel: {
-        // Top offset: desktop uses desktopTopClassName; mobile uses inline top from
-        // computingWorldPlazaActionBarOccupiedHeightPx + mobileBelowActionBarGapBasePx
-        // (action bar design scale is 1.5, so a fixed top-14 undershoots).
+      minimapStack: {
         anchorClassName:
-          'pointer-events-none absolute left-3 z-30 flex max-w-[min(92vw,calc(100vw-1.5rem))] select-none flex-row items-start gap-1.5',
-        desktopTopClassName: 'top-3',
-        mobileBelowActionBarGapBasePx: 4,
+          'pointer-events-none absolute z-20 flex flex-col items-start select-none',
+      },
+      devModePanel: {
+        // Top offset resolved from minimap occupied height (see MiniMapStack constants).
+        anchorClassName:
+          'pointer-events-none absolute z-30 flex max-w-[min(92vw,calc(100vw-1.5rem))] select-none flex-row items-start gap-1.5',
         topWithStaminaBarClassName: '',
         topWithoutStaminaBarClassName: '',
       },
       debugControlsStack: {
         anchorClassName:
-          'pointer-events-none absolute left-3 z-20 flex select-none flex-col',
+          'pointer-events-none absolute left-1.5 z-20 flex select-none flex-col',
       },
     },
 
@@ -100,50 +100,34 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
     topCenter: {
       actionBar: {
         desktopAnchorClassName:
-          'pointer-events-none absolute inset-x-0 top-1 z-40 flex justify-center px-3',
+          'pointer-events-none absolute inset-x-0 top-1 z-40 flex justify-center px-1.5',
         mobileAnchorClassName:
-          'pointer-events-none absolute inset-x-0 top-1 z-40 flex justify-center px-2',
+          'pointer-events-none absolute inset-x-0 top-1 z-40 flex justify-center px-1',
         anchorTopBasePx: 4,
       },
       /** Plot / tile capacity readout sits just under the action bar shell. */
       editModePlotCapacityMetric: {
         anchorClassName:
-          'pointer-events-none absolute inset-x-0 z-40 flex justify-center px-3',
+          'pointer-events-none absolute inset-x-0 z-40 flex justify-center px-1.5',
         belowActionBarGapBasePx: 6,
       },
     },
 
-    /** Top-right: minimap card, online room status, and local buff/debuff stack. */
+    /** Top-right: online room status and local buff/debuff stack. */
     topRight: {
-      minimapStack: {
-        anchorClassName:
-          'pointer-events-none absolute z-20 flex flex-col items-end select-none',
-        /** Gap between the action bar shell and the minimap card. */
-        belowActionBarGapBasePx: 6,
-        /** Parchment card vertical padding (p-0.5 top + bottom). */
-        cardVerticalChromeBasePx: 4,
-        /** Environment bar row height before viewport HUD scale. */
-        environmentBarOccupiedBasePx: {
-          desktop: 16,
-          mobile: 12,
-        },
-        /** Gap before room status or status effects below the minimap card. */
-        belowMinimapGapBasePx: 6,
-      },
       roomStatusHud: {
         anchorClassName:
-          'pointer-events-none absolute hidden flex-col gap-1 md:flex',
+          'pointer-events-none absolute right-1.5 top-3 hidden flex-col gap-1 md:flex',
       },
       statusEffectStack: {
         desktopAnchorClassName:
-          'pointer-events-none absolute z-20 flex select-none flex-col items-end gap-1',
+          'pointer-events-none absolute right-1.5 z-20 flex select-none flex-col items-end gap-1',
         mobileAnchorClassName:
-          'pointer-events-none absolute z-20 flex select-none flex-col items-end gap-0.5',
-        /**
-         * Conservative room-status block height for stacking status badges
-         * below the online room HUD on md+ viewports.
-         */
-        belowRoomHudEstimatedOccupiedBasePx: 88,
+          'pointer-events-none absolute right-1 z-20 flex select-none flex-col items-end gap-0.5',
+        desktopTopClassName: 'top-3',
+        mobileTopClassName: 'top-2',
+        topWithRoomHudClassName: 'top-3 md:top-28',
+        mobileBelowActionBarGapBasePx: 4,
         /** Popover opens below the badge, right edge flush with the stack. */
         explanationPopover: {
           placement: 'below',
@@ -157,7 +141,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
       inventoryHotbar: {
         /** Bottom inset is applied via inline styles (safe-area + viewport scale). */
         anchorClassName:
-          'pointer-events-none absolute inset-x-0 z-50 flex justify-center px-3',
+          'pointer-events-none absolute inset-x-0 z-50 flex justify-center px-1.5',
         edgeInsetBasePx: 12,
         /**
          * On mobile the hotbar reserves space for the bottom-right jump button
@@ -166,14 +150,14 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
         mobileFlankClearance: {
           /** Breathing room between the hotbar and the jump button. */
           gapBasePx: 8,
-          /** Right inset of the jump button anchor (0.75rem). */
-          jumpButtonEdgeInsetPx: 12,
+          /** Right inset of the jump button anchor. */
+          jumpButtonEdgeInsetPx: 6,
         },
       },
       editModeHotbar: {
         /** Bottom inset is applied via inline styles (safe-area + viewport scale). */
         anchorClassName:
-          'pointer-events-none absolute inset-x-0 z-40 flex justify-center px-3',
+          'pointer-events-none absolute inset-x-0 z-40 flex justify-center px-1.5',
         edgeInsetBasePx: 12,
       },
       gameplayHudToast: {
@@ -267,9 +251,9 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_INVENTORY_HOTBAR_ANCHOR_CLASS_NAM
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.bottomCenter.inventoryHotbar
     .anchorClassName;
 
-/** Top-right minimap stack anchor (re-exported by minimap stack constants). */
+/** Top-left minimap stack anchor (re-exported by minimap stack constants). */
 export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_MINI_MAP_STACK_ANCHOR_CLASS_NAME =
-  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.minimapStack
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topLeft.minimapStack
     .anchorClassName;
 
 /** Top-right room status HUD anchor (position only; shell from style constants). */

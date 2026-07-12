@@ -1,9 +1,13 @@
-import { computingWorldPlazaActionBarOccupiedHeightPx } from '@/components/world/domains/computingWorldPlazaActionBarOccupiedHeightPx';
+import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
 import {
-  DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_MOBILE_BELOW_ACTION_BAR_GAP_BASE_PX,
+  DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_BELOW_MINIMAP_GAP_BASE_PX,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME,
-  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_DESKTOP_TOP_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
+import {
+  computingWorldPlazaMiniMapStackLeftInsetPx,
+  computingWorldPlazaMiniMapStackOccupiedHeightPx,
+  computingWorldPlazaMiniMapStackTopPx,
+} from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportStyles';
 import type { CSSProperties } from 'react';
 
 export type DefiningWorldPlazaDevModePanelViewportLayout = {
@@ -12,29 +16,40 @@ export type DefiningWorldPlazaDevModePanelViewportLayout = {
 };
 
 /**
- * Resolves anchor classes and top offset for the dev tools panel.
- * On mobile, clears the top-center action bar (same math as status-effect stack).
+ * Resolves anchor classes and offsets for the Dev tools panel.
+ * Sits below the top-left minimap card on every viewport.
  */
 export function resolvingWorldPlazaDevModePanelViewportLayout({
   viewportHudScale,
   isMobile = false,
+  isFullscreen = false,
 }: {
   viewportHudScale: number;
   isMobile?: boolean;
+  isFullscreen?: boolean;
 }): DefiningWorldPlazaDevModePanelViewportLayout {
-  if (isMobile) {
-    return {
-      anchorClassName: STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME,
-      style: {
-        top:
-          computingWorldPlazaActionBarOccupiedHeightPx(viewportHudScale, true) +
-          DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_MOBILE_BELOW_ACTION_BAR_GAP_BASE_PX,
-      },
-    };
-  }
+  const topPx =
+    computingWorldPlazaMiniMapStackTopPx(viewportHudScale, isMobile) +
+    computingWorldPlazaMiniMapStackOccupiedHeightPx(
+      viewportHudScale,
+      isMobile,
+      isFullscreen
+    ) +
+    computingWorldPlazaViewportHudScaledPx(
+      DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_BELOW_MINIMAP_GAP_BASE_PX,
+      viewportHudScale
+    );
+  const leftInsetPx = computingWorldPlazaMiniMapStackLeftInsetPx(
+    viewportHudScale,
+    isMobile,
+    isFullscreen
+  );
 
   return {
-    anchorClassName: `${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME} ${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_DESKTOP_TOP_CLASS_NAME}`,
-    style: {},
+    anchorClassName: STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME,
+    style: {
+      top: `calc(${topPx}px + env(safe-area-inset-top, 0px))`,
+      left: `calc(${leftInsetPx}px + env(safe-area-inset-left, 0px))`,
+    },
   };
 }

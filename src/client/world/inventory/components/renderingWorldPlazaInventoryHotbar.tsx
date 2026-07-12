@@ -71,7 +71,7 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
   readonly onlineUsername?: string | null;
   /** Live HUD scale from the plaza viewport frame. */
   readonly viewportHudScale?: number;
-  /** Mobile layout input; desktop/fullscreen render the hotbar larger. */
+  /** Mobile layout input (flank clearance); hotbar size matches fullscreen. */
   readonly isMobile?: boolean;
   /** True while the plaza host is in native fullscreen (mobile flank sizing). */
   readonly isFullscreen?: boolean;

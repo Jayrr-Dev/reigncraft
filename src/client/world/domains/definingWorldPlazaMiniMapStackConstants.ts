@@ -1,5 +1,5 @@
 /**
- * Declarative layout for the top-right unified minimap card (environment bar + map).
+ * Declarative layout for the top-left unified minimap card (environment bar + map).
  *
  * @module components/world/domains/definingWorldPlazaMiniMapStackConstants
  */
@@ -14,7 +14,7 @@ import {
 /** Where the minimap + time/temperature bar sit for one screen size combo. */
 export type DefiningWorldPlazaMiniMapStackViewportLayout = {
   /**
-   * Distance from the right and top screen edges when nothing else pushes
+   * Distance from the left and top screen edges when nothing else pushes
    * the stack down. Increase to move the stack away from the corner; decrease
    * to tuck it closer.
    */
@@ -34,7 +34,7 @@ export type DefiningWorldPlazaMiniMapStackViewportLayout = {
 export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
   /**
    * CSS classes for the outer wrapper that positions the unified minimap card
-   * in the top-right HUD corner.
+   * in the top-left HUD corner.
    */
   anchorClassName:
     DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_MINI_MAP_STACK_ANCHOR_CLASS_NAME,
@@ -42,10 +42,10 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
    * Column that hosts the parchment minimap card plus an absolute toast stack
    * anchored just below the card.
    */
-  columnClassName: 'relative flex flex-col items-end',
+  columnClassName: 'relative flex flex-col items-start',
   /** Absolute host for Sonner so empty toasts do not push the minimap. */
   toastHostClassName:
-    'pointer-events-none absolute top-full right-0 z-30 mt-1.5 flex w-full flex-col items-stretch overflow-visible',
+    'pointer-events-none absolute top-full left-0 z-30 mt-1.5 flex w-full flex-col items-stretch overflow-visible',
   /**
    * Shared parchment card chrome for the time/temperature bar and minimap.
    * Matches the aged-paper poster panels used on the home screen menus.
@@ -63,17 +63,28 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
   environmentBarValueMobileClassName:
     DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography
       .environmentBarValueMobile,
+  /** Top inset — matches the action bar row (`anchorTopBasePx`). */
+  topInsetBasePx: 4,
+  /** Parchment card vertical padding (p-0.5 top + bottom). */
+  cardVerticalChromeBasePx: 4,
+  /** Environment bar row height before viewport HUD scale. */
+  environmentBarOccupiedBasePx: {
+    desktop: 16,
+    mobile: 12,
+  },
+  /** Gap before Dev tools / other chrome below the minimap card. */
+  belowMinimapGapBasePx: 6,
   viewportLayouts: {
     /** Normal (non-fullscreen) game view. */
     embedded: {
-      /** Wide screens — stack sits in the top-right corner. */
+      /** Wide screens — stack sits in the top-left corner. */
       desktop: {
-        edgeInsetBasePx: 12,
+        edgeInsetBasePx: 6,
         environmentBarValueTextBasePx: 11,
       },
-      /** Phone-sized screens — same corner, below the action bar. */
+      /** Phone-sized screens — same top-left corner as the action bar row. */
       mobile: {
-        edgeInsetBasePx: 12,
+        edgeInsetBasePx: 6,
         environmentBarValueTextBasePx: 9,
       },
     },
@@ -81,12 +92,12 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
     fullscreen: {
       /** Wide screens — slightly larger corner inset than embedded. */
       desktop: {
-        edgeInsetBasePx: 16,
+        edgeInsetBasePx: 8,
         environmentBarValueTextBasePx: 12,
       },
-      /** Phone-sized fullscreen — same top-right anchor. */
+      /** Phone-sized fullscreen — same top-left anchor. */
       mobile: {
-        edgeInsetBasePx: 16,
+        edgeInsetBasePx: 8,
         environmentBarValueTextBasePx: 9,
       },
     },
@@ -101,6 +112,10 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
   environmentBarMobileClassName: string;
   environmentBarValueClassName: string;
   environmentBarValueMobileClassName: string;
+  topInsetBasePx: number;
+  cardVerticalChromeBasePx: number;
+  environmentBarOccupiedBasePx: Record<'desktop' | 'mobile', number>;
+  belowMinimapGapBasePx: number;
   viewportLayouts: Record<
     'embedded' | 'fullscreen',
     Record<'desktop' | 'mobile', DefiningWorldPlazaMiniMapStackViewportLayout>

@@ -36,7 +36,6 @@ export interface RenderingWorldPlazaEntityStatusEffectStackProps {
   hasOnlineRoomHud?: boolean;
   /** Live HUD scale from the plaza viewport frame. */
   viewportHudScale?: number;
-  isFullscreen?: boolean;
 }
 
 /**
@@ -46,7 +45,6 @@ export function RenderingWorldPlazaEntityStatusEffectStack({
   statusEffectHudRows,
   hasOnlineRoomHud = false,
   viewportHudScale = 1,
-  isFullscreen = false,
 }: RenderingWorldPlazaEntityStatusEffectStackProps): React.JSX.Element {
   const isMobile = useIsMobile();
   const viewportLayout = useMemo(
@@ -55,9 +53,8 @@ export function RenderingWorldPlazaEntityStatusEffectStack({
         viewportHudScale,
         hasOnlineRoomHud,
         isMobile,
-        isFullscreen,
       }),
-    [hasOnlineRoomHud, isFullscreen, isMobile, viewportHudScale]
+    [hasOnlineRoomHud, isMobile, viewportHudScale]
   );
   const hasTimedRows = statusEffectHudRows.some(
     (row) => row.displayMode === 'time' || row.displayMode === 'timed_damage'

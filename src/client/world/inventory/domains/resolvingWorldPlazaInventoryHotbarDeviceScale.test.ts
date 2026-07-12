@@ -3,12 +3,12 @@ import { resolvingWorldPlazaInventoryHotbarDeviceScale } from '@/components/worl
 import { describe, expect, it } from 'vitest';
 
 describe('resolvingWorldPlazaInventoryHotbarDeviceScale', () => {
-  it('uses the same scale on mobile and desktop', () => {
+  it('uses the fullscreen scale on mobile and desktop', () => {
     expect(resolvingWorldPlazaInventoryHotbarDeviceScale(true)).toBe(
-      DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE.mobile
+      DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE
     );
     expect(resolvingWorldPlazaInventoryHotbarDeviceScale(false)).toBe(
-      DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE.desktopAndFullscreen
+      DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE
     );
     expect(resolvingWorldPlazaInventoryHotbarDeviceScale(true)).toBe(
       resolvingWorldPlazaInventoryHotbarDeviceScale(false)

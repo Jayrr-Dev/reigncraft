@@ -9,11 +9,11 @@
 
 /** Vertical gap between stacked debug toggle buttons. */
 export const DEFINING_WORLD_PLAZA_DEBUG_CONTROLS_STACK_GAP_CLASS_NAME =
-  "gap-1.5" as const;
+  'gap-1.5' as const;
 
 /** Left-side anchor for the stacked debug controls. */
 export const DEFINING_WORLD_PLAZA_DEBUG_CONTROLS_STACK_ANCHOR_CLASS_NAME =
-  "pointer-events-none absolute left-3 z-20 flex select-none flex-col" as const;
+  'pointer-events-none absolute left-1.5 z-20 flex select-none flex-col' as const;
 
 /**
  * Resolves the top offset for the debug control stack below layer labels.
@@ -23,11 +23,11 @@ export const DEFINING_WORLD_PLAZA_DEBUG_CONTROLS_STACK_ANCHOR_CLASS_NAME =
  */
 export function resolvingWorldPlazaDebugControlsStackAnchorTopClassName(
   hasStaminaBar: boolean,
-  isBuildModeActive: boolean,
+  isBuildModeActive: boolean
 ): string {
   if (hasStaminaBar) {
-    return isBuildModeActive ? "top-[8.5rem]" : "top-[6.75rem]";
+    return isBuildModeActive ? 'top-[8.5rem]' : 'top-[6.75rem]';
   }
 
-  return isBuildModeActive ? "top-[6rem]" : "top-[4.5rem]";
+  return isBuildModeActive ? 'top-[6rem]' : 'top-[4.5rem]';
 }

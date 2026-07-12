@@ -73,6 +73,8 @@ export interface RenderingWorldPlazaDevModePanelProps {
   viewportHudScale?: number;
   /** True on narrow plaza viewports (action bar covers the left edge). */
   isMobile?: boolean;
+  /** True while the plaza host is in native fullscreen. */
+  isFullscreen?: boolean;
   /** True when build mode adds a second layer debug line. */
   isBuildModeActive: boolean;
   /** Live local player position in grid space. */
@@ -211,6 +213,7 @@ export function RenderingWorldPlazaDevModePanel(
     onClose,
     viewportHudScale = 1,
     isMobile = false,
+    isFullscreen = false,
     isBlockBuildModeActive,
     playerPositionRef,
     playerHeightWorldLayers,
@@ -237,8 +240,9 @@ export function RenderingWorldPlazaDevModePanel(
       resolvingWorldPlazaDevModePanelViewportLayout({
         viewportHudScale,
         isMobile,
+        isFullscreen,
       }),
-    [isMobile, viewportHudScale]
+    [isFullscreen, isMobile, viewportHudScale]
   );
   const [activeViewId, setActiveViewId] =
     useState<DefiningWorldPlazaDevModePanelViewId>(

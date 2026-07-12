@@ -5131,7 +5131,6 @@ function RenderingWorldPlazaPixiSceneConnected({
               statusEffectHudRows={playerHealthHudSnapshot.statusEffectHudRows}
               hasOnlineRoomHud={isOnlineRoomEnabled}
               viewportHudScale={viewportHudScale}
-              isFullscreen={hudIsFullscreen}
             />
           ) : null}
           {isHudStatusEnabled && isLocalGameplayEnabled && hudIsMobile ? (
@@ -5152,6 +5151,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               hasStaminaBar={false}
               viewportHudScale={viewportHudScale}
               isMobile={hudIsMobile}
+              isFullscreen={hudIsFullscreen}
               isBuildModeActive={isBuildModeActive}
               playerPositionRef={playerPositionRef}
               playerHeightWorldLayers={
@@ -5647,8 +5647,6 @@ function RenderingWorldPlazaPixiSceneConnected({
               localUserId={onlineUserId}
               maxPlayers={onlineMaxPlayers}
               isHidden={false}
-              viewportHudScale={viewportHudScale}
-              isFullscreen={hudIsFullscreen}
             />
           ) : null}
           {isSinglePlayerSession ? (

@@ -2,6 +2,7 @@ import {
   computingWorldPlazaViewportHudScaledPx,
   stylingWorldPlazaViewportHudSquarePx,
 } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
+import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
 import {
   DEFINING_WORLD_PLAZA_MOBILE_JUMP_BUTTON_BASE_PX,
   DEFINING_WORLD_PLAZA_MOBILE_JUMP_BUTTON_ICON_BASE_PX,
@@ -51,11 +52,14 @@ export function resolvingWorldPlazaMobileJumpButtonViewportStyles(
     viewportHudScale,
     DEFINING_WORLD_PLAZA_MOBILE_JUMP_BUTTON_SCALE
   );
+  const edgeInsetPx =
+    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.bottomCenter
+      .inventoryHotbar.mobileFlankClearance.jumpButtonEdgeInsetPx;
 
   return {
     anchorStyle: {
-      right: 'calc(0.75rem + env(safe-area-inset-right, 0px))',
-      bottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))',
+      right: `calc(${edgeInsetPx}px + env(safe-area-inset-right, 0px))`,
+      bottom: `calc(${edgeInsetPx}px + env(safe-area-inset-bottom, 0px))`,
     },
     buttonStyle: {
       width: buttonEdgePx,

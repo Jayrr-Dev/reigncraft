@@ -40,7 +40,7 @@ export interface RenderingWorldPlazaMiniMapStackProps {
 }
 
 /**
- * Top-right minimap inside a unified time/temperature + map card.
+ * Top-left minimap inside a unified time/temperature + map card.
  */
 export function RenderingWorldPlazaMiniMapStack({
   playerPositionRef,
@@ -108,7 +108,7 @@ export function RenderingWorldPlazaMiniMapStack({
           <RenderingReigncraftToaster
             toasterId={DEFINING_REIGNCRAFT_TOASTER_ID.plaza}
             variant="gameplay"
-            position="top-right"
+            position="top-left"
             offset={0}
             mobileOffset={0}
             toastWidthPx={toastWidthPx}

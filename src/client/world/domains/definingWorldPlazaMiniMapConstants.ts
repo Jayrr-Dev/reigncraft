@@ -16,12 +16,12 @@ import { DEFINING_WORLD_PLAZA_HUD_CANVAS_BORDER_COLOR } from '@/components/world
  */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_CANVAS_SIZE_PX = {
   embedded: {
-    desktop: 120,
-    mobile: 72,
+    desktop: 102,
+    mobile: 61,
   },
   fullscreen: {
-    desktop: 200,
-    mobile: 96,
+    desktop: 170,
+    mobile: 82,
   },
 } as const;
 
@@ -32,7 +32,7 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_EMBEDDED_CANVAS_SIZE_PX =
 /**
  * Half-width of the visible tile window around the player on desktop.
  *
- * Zoomed in from 22 to 20 so each tile reads larger on the 132px desktop canvas
+ * Zoomed in from 22 to 20 so each tile reads larger on the desktop canvas
  * and minimap rebuilds cost less.
  */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_VIEW_RADIUS_TILES = 20;
@@ -41,7 +41,7 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_VIEW_RADIUS_TILES = 20;
  * Half-width of the visible tile window on mobile (more zoomed out).
  *
  * Scaled down with desktop so mobile keeps a similar zoom level vs the smaller
- * 72px canvas while still trimming rebuild tile count.
+ * canvas while still trimming rebuild tile count.
  */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_MOBILE_VIEW_RADIUS_TILES = 38;
 

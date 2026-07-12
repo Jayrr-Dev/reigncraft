@@ -178,7 +178,7 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
           id: 'read-minimap',
           title: 'Mini Map',
           description:
-            'The map in the top-right shows nearby terrain, biome, and coordinates. You are the yellow dot, other players are blue, and your claimed land is highlighted in orange.',
+            'The map in the top-left shows nearby terrain, biome, and coordinates. You are the yellow dot, other players are blue, and your claimed land is highlighted in orange.',
           icon: 'mdi:compass',
         },
         {
@@ -347,7 +347,7 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_MOBILE: PlazaTutorialTabDefinition[] =
           id: 'read-minimap',
           title: 'Mini Map',
           description:
-            'The map in the top-right shows nearby terrain, biome, and coordinates. You are the yellow dot, other players are blue, and your claimed land is highlighted in orange.',
+            'The map in the top-left shows nearby terrain, biome, and coordinates. You are the yellow dot, other players are blue, and your claimed land is highlighted in orange.',
           icon: 'mdi:compass',
         },
         {

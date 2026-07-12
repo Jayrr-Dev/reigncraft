@@ -5,15 +5,15 @@ import {
 
 /**
  * Optional multiplier applied to all inventory base px values (not CSS transform).
- * 5/6 keeps tiles at ~2/3 of the prior 1.25 scale.
+ * Matches the fullscreen-era hotbar size (mobile/desktop use the same).
  */
-export const DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE = 5 / 6;
+export const DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE = 1.25 as const;
 
-/** Hotbar multiplier shared across mobile, desktop, and fullscreen. */
-export const DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE = {
-  mobile: 1.2,
-  desktopAndFullscreen: 1.2,
-} as const;
+/**
+ * Extra hotbar multiplier. One value for mobile, desktop, and fullscreen so
+ * every Devvit UI simulator profile matches fullscreen inventory size.
+ */
+export const DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE = 1.2 as const;
 
 /** Base slot edge length in px (doubled from compact size-5 baseline). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_BASE_PX = 40 as const;

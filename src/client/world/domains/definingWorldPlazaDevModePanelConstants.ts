@@ -5,6 +5,7 @@
  */
 
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
+import { DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT } from '@/components/world/domains/definingWorldPlazaMiniMapStackConstants';
 
 /**
  * Master switch for the in-world Dev tools launcher and panel.
@@ -22,15 +23,9 @@ export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topLeft.devModePanel
     .anchorClassName;
 
-/** Desktop top inset when the action bar does not cover the left edge. */
-export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_DESKTOP_TOP_CLASS_NAME =
-  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topLeft.devModePanel
-    .desktopTopClassName;
-
-/** Gap between the action bar shell and the mobile dev panel. */
-export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_MOBILE_BELOW_ACTION_BAR_GAP_BASE_PX =
-  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topLeft.devModePanel
-    .mobileBelowActionBarGapBasePx;
+/** Gap between the minimap card and the Dev tools row. */
+export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_BELOW_MINIMAP_GAP_BASE_PX =
+  DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.belowMinimapGapBasePx;
 
 /** Collapsed dev launcher button. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME =

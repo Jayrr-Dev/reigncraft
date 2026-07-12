@@ -2,7 +2,7 @@ import { resolvingWorldPlazaMiniMapStackViewportStyles } from '@/components/worl
 import { describe, expect, it } from 'vitest';
 
 describe('resolvingWorldPlazaMiniMapStackViewportStyles', () => {
-  it('anchors desktop stacks to the top-right edge inset below the action bar', () => {
+  it('anchors desktop stacks to the top-left edge on the action bar row', () => {
     expect(
       resolvingWorldPlazaMiniMapStackViewportStyles({
         viewportHudScale: 1,
@@ -10,12 +10,12 @@ describe('resolvingWorldPlazaMiniMapStackViewportStyles', () => {
         isFullscreen: false,
       })
     ).toEqual({
-      top: 'calc(64px + env(safe-area-inset-top, 0px))',
-      right: 'calc(12px + env(safe-area-inset-right, 0px))',
+      top: 'calc(4px + env(safe-area-inset-top, 0px))',
+      left: 'calc(6px + env(safe-area-inset-left, 0px))',
     });
   });
 
-  it('anchors mobile stacks below the action bar on the top-right edge', () => {
+  it('anchors mobile stacks to the top-left edge on the action bar row', () => {
     expect(
       resolvingWorldPlazaMiniMapStackViewportStyles({
         viewportHudScale: 1,
@@ -23,8 +23,8 @@ describe('resolvingWorldPlazaMiniMapStackViewportStyles', () => {
         isFullscreen: false,
       })
     ).toEqual({
-      top: 'calc(64px + env(safe-area-inset-top, 0px))',
-      right: 'calc(12px + env(safe-area-inset-right, 0px))',
+      top: 'calc(4px + env(safe-area-inset-top, 0px))',
+      left: 'calc(6px + env(safe-area-inset-left, 0px))',
     });
   });
 });
