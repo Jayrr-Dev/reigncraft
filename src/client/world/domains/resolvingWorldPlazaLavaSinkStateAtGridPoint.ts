@@ -210,7 +210,8 @@ export function computingWorldPlazaLavaSinkOffsetPxAtGridPoint(
  * keeps animating.
  */
 export function checkingWorldPlazaLavaSinkHidesAvatarBodyAtBaseOffsetPx(
-  lavaSinkBaseOffsetPx: number
+  lavaSinkBaseOffsetPx: number,
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_LAVA_SINK_HIDE_AVATAR_BODY_AFTER_WORLD_LAYERS
 ): boolean {
   if (lavaSinkBaseOffsetPx <= 0) {
     return false;
@@ -218,7 +219,7 @@ export function checkingWorldPlazaLavaSinkHidesAvatarBodyAtBaseOffsetPx(
 
   return (
     lavaSinkBaseOffsetPx >
-    DEFINING_WORLD_PLAZA_LAVA_SINK_HIDE_AVATAR_BODY_AFTER_WORLD_LAYERS *
+    Math.max(0.1, playerHeightWorldLayers) *
       DEFINING_WORLD_BUILDING_WORLD_LAYER_HEIGHT_PX
   );
 }

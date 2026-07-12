@@ -6,6 +6,11 @@
  */
 
 import type { ComputingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
+import {
+  DEFINING_WORLD_PLAZA_CHARACTER_HEIGHT_ATTRIBUTE_ICON,
+  LABELING_WORLD_PLAZA_CHARACTER_HEIGHT_ATTRIBUTE,
+} from '@/components/world/character/domains/definingWorldPlazaCharacterHeightDisplayConstants';
+import { resolvingWorldPlazaCharacterHeightDisplayText } from '@/components/world/character/domains/resolvingWorldPlazaCharacterHeightDisplayText';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import { DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
@@ -185,6 +190,14 @@ export function resolvingWorldPlazaProfilePanelSections(input: {
       label: 'Speed',
       iconName: 'mdi:run-fast',
       valueText: `${derivedStats.walkSpeedGridPerSecond.toFixed(1)} / ${derivedStats.runSpeedGridPerSecond.toFixed(1)}`,
+    },
+    {
+      id: 'height',
+      label: LABELING_WORLD_PLAZA_CHARACTER_HEIGHT_ATTRIBUTE,
+      iconName: DEFINING_WORLD_PLAZA_CHARACTER_HEIGHT_ATTRIBUTE_ICON,
+      valueText: resolvingWorldPlazaCharacterHeightDisplayText(
+        derivedStats.heightWorldLayers
+      ),
     },
   ];
 

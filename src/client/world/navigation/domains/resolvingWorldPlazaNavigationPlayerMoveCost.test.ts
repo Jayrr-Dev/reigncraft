@@ -1,4 +1,7 @@
-import { DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import {
+  DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_WOOD,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE,
+} from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import { creatingWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { creatingWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import { checkingWorldPlazaNavigationGridNodeWalkableForPlayer } from '@/components/world/navigation/domains/checkingWorldPlazaNavigationGridNodeWalkableForPlayer';
@@ -15,6 +18,19 @@ function creatingNavigationTestWallBlock(tileX: number, tileY: number) {
     tilePosition: creatingWorldBuildingTilePosition(tileX, tileY),
     worldLayer: 4,
     blockHeight: 4,
+    ownerId: 'owner-test',
+    placedAt: '2026-01-01T00:00:00.000Z',
+  });
+}
+
+function creatingNavigationTestRoofBlock(tileX: number, tileY: number) {
+  return creatingWorldBuildingPlacedBlock({
+    blockId: `roof-${tileX}-${tileY}`,
+    plotId: 'plot-test',
+    definitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_WOOD,
+    tilePosition: creatingWorldBuildingTilePosition(tileX, tileY),
+    worldLayer: 4,
+    blockHeight: 1,
     ownerId: 'owner-test',
     placedAt: '2026-01-01T00:00:00.000Z',
   });
@@ -64,6 +80,27 @@ describe('resolvingWorldPlazaNavigationPlayerMoveCost', () => {
 
     expect(result.status).toBe('found');
     expect(result.path.some((node) => node.x === 5 && node.y === 5)).toBe(false);
+  });
+
+  it('plans through a roof only when character height fits', () => {
+    const roofBlock = creatingNavigationTestRoofBlock(5, 5);
+
+    expect(
+      checkingWorldPlazaNavigationGridNodeWalkableForPlayer({
+        node: { x: 5, y: 5, layer: 1 },
+        playerLayer: 1,
+        placedBlocks: [roofBlock],
+        playerHeightWorldLayers: 4,
+      })
+    ).toBe(false);
+    expect(
+      checkingWorldPlazaNavigationGridNodeWalkableForPlayer({
+        node: { x: 5, y: 5, layer: 1 },
+        playerLayer: 1,
+        placedBlocks: [roofBlock],
+        playerHeightWorldLayers: 3.6,
+      })
+    ).toBe(true);
   });
 
   it('returns null for moves outside search bounds', () => {

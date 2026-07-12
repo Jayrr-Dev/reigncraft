@@ -1,5 +1,6 @@
 'use client';
 
+import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import { DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import { DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX } from '@/components/world/building/domains/definingWorldBuildingBuildModeConstants';
 import {
@@ -27,6 +28,7 @@ export interface RenderingWorldPlazaBlockPlacementPreviewProps {
   previewBlockHeightRef: React.RefObject<number>;
   previewCutFootprintMaskRef: React.RefObject<number>;
   previewCutGridAxisCellCountRef: React.RefObject<DefiningWorldBuildingCutGridAxisCellCount>;
+  previewDefinitionIdRef: React.RefObject<DefiningWorldBuildingBlockDefinitionId | null>;
 }
 
 /**
@@ -40,6 +42,7 @@ export function RenderingWorldPlazaBlockPlacementPreview({
   previewBlockHeightRef,
   previewCutFootprintMaskRef,
   previewCutGridAxisCellCountRef,
+  previewDefinitionIdRef,
 }: RenderingWorldPlazaBlockPlacementPreviewProps): React.JSX.Element | null {
   const previewGraphicsRef = useRef<Graphics | null>(null);
   const applicationContext = useApplication();
@@ -108,7 +111,8 @@ export function RenderingWorldPlazaBlockPlacementPreview({
       previewWorldLayer,
       previewBlockHeight,
       previewCutFootprintMask,
-      previewCutGridAxisCellCount
+      previewCutGridAxisCellCount,
+      previewDefinitionIdRef.current
     );
   }, 'tick:block-placement-preview');
 

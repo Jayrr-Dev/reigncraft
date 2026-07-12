@@ -12,6 +12,7 @@ describe('computingWorldPlazaCharacterEngineDerivedStats', () => {
 
     expect(derived.effectiveMaxHealth).toBe(1400);
     expect(derived.sizeScale).toBe(1.25);
+    expect(derived.heightWorldLayers).toBe(5);
     expect(derived.collisionRadiusGrid).toBeCloseTo(0.3125);
     expect(derived.hungerDrainMultiplier).toBe(1.3);
   });
@@ -29,5 +30,17 @@ describe('computingWorldPlazaCharacterEngineDerivedStats', () => {
     expect(derived.effectiveMaxHealth).toBe(1400 + 80 * 4);
     expect(derived.attackPower).toBe(300 + 3 * 4);
     expect(derived.defense).toBe(10 + 2 * 4);
+  });
+
+  it('allows an explicit collision height override', () => {
+    const girl = resolvingWorldPlazaCharacterEngineDefinition(
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+    );
+    const derived = computingWorldPlazaCharacterEngineDerivedStats({
+      ...girl,
+      size: { ...girl.size, heightWorldLayers: 3.5 },
+    });
+
+    expect(derived.heightWorldLayers).toBe(3.5);
   });
 });

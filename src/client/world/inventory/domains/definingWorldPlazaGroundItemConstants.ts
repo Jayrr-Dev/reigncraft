@@ -22,9 +22,10 @@ export const DEFINING_WORLD_PLAZA_GROUND_ITEM_AUTO_PICKUP_RETRY_INTERVAL_MS =
 /**
  * Bottom viewport band (px, before HUD scale) where ground markers hide so
  * they do not stack over the inventory hotbar while the camera moves.
+ * Sized for the two-row hotbar (main + one storage page) plus arrows.
  */
 export const DEFINING_WORLD_PLAZA_GROUND_ITEM_BOTTOM_HUD_OCCLUSION_INSET_BASE_PX =
-  148 as const;
+  200 as const;
 
 /** Base icon size in px before viewport HUD scaling. */
 export const DEFINING_WORLD_PLAZA_GROUND_ITEM_ICON_BASE_PX = 36 as const;

@@ -24,6 +24,7 @@ export interface ApplyingWorldPlazaPlayerTeleportToWorldPointInput {
   isJumpingRef: RefObject<boolean>;
   localAvatarMotionStateRef: RefObject<DefiningWorldPlazaAvatarMotionState>;
   syncingMovePositionRef: RefObject<(() => void) | null>;
+  playerHeightWorldLayers?: number;
 }
 
 /**
@@ -52,6 +53,7 @@ export function applyingWorldPlazaPlayerTeleportToWorldPoint(
       {
         placedBlocks: [...input.placedBlocks],
         playerLayer: destinationLayer,
+        playerHeightWorldLayers: input.playerHeightWorldLayers,
       }
     );
   // Collision ejection returns grid x/y only; snap layer to the walkable surface

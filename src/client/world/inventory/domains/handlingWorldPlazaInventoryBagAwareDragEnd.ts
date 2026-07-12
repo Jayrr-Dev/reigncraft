@@ -8,6 +8,7 @@ import {
 } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryBagTransfer';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import { checkingWorldPlazaInventoryMoveRespectsWeaponToolSlot } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryMoveRespectsWeaponToolSlot';
+import { checkingWorldPlazaInventoryOverIdIsStoragePageArrow } from '@/components/world/inventory/domains/definingWorldPlazaInventoryPageArrowDndIds';
 import { notifyingWorldPlazaInventoryItemMoved } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemMoved';
 import { checkingWorldPlazaInventoryBagHasContents } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagContents';
 import { resolvingWorldPlazaInventoryDropLocationFromOverId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropLocationFromOverId';
@@ -64,6 +65,14 @@ export function handlingWorldPlazaInventoryBagAwareDragEnd(
   }
 
   const overId = event.over ? String(event.over.id) : null;
+
+  if (
+    overId !== null &&
+    checkingWorldPlazaInventoryOverIdIsStoragePageArrow(overId)
+  ) {
+    return { kind: 'handled' };
+  }
+
   const toLocation =
     overId !== null
       ? resolvingWorldPlazaInventoryDropLocationFromOverId(

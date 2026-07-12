@@ -35,6 +35,77 @@ function creatingElevatedSlab(
 }
 
 describe('walk under elevated slab', () => {
+  it('uses character height to determine roof clearance', () => {
+    expect(
+      checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock(1, 5, 1, 4)
+    ).toBe(false);
+    expect(
+      checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock(1, 4, 1, 4)
+    ).toBe(true);
+    expect(
+      checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock(1, 4, 1, 3.6)
+    ).toBe(false);
+    expect(
+      checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock(1, 5, 1, 5)
+    ).toBe(true);
+  });
+
+  it('blocks or allows the same roof based on character height', () => {
+    const roof = creatingElevatedSlab(
+      DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_WOOD,
+      4
+    );
+
+    expect(
+      checkingWorldBuildingGridPointBlockedByPlacedBlocks(
+        { x: 10, y: 10, layer: 1 },
+        [roof],
+        true,
+        false,
+        1,
+        4
+      )
+    ).toBe(true);
+    expect(
+      checkingWorldBuildingGridPointBlockedByPlacedBlocks(
+        { x: 10, y: 10, layer: 1 },
+        [roof],
+        true,
+        false,
+        1,
+        3.6
+      )
+    ).toBe(false);
+  });
+
+  it('uses character height when validating jump landing headroom', () => {
+    const roof = creatingElevatedSlab(
+      DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_WOOD,
+      4
+    );
+
+    expect(
+      checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex(
+        10,
+        10,
+        [roof],
+        1,
+        2,
+        4
+      )
+    ).toBe(true);
+    expect(
+      checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex(
+        10,
+        10,
+        [roof],
+        1,
+        2,
+        3.6
+      )
+    ).toBe(false);
+  });
+
   it('does not vertically overlap a L7 H1 slab from ground', () => {
     expect(
       checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock(1, 7, 1)

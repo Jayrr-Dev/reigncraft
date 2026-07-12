@@ -33,6 +33,7 @@ import {
   countingWorldBuildingOwnerOwnedPlotCount,
   countingWorldBuildingOwnerPlotTileClaims,
 } from '@/components/world/building/domains/countingWorldBuildingOwnerPlotClaims';
+import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import { DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK,
@@ -823,6 +824,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     useRef<DefiningWorldBuildingCutGridAxisCellCount>(
       DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT
     );
+  const previewDefinitionIdRef =
+    useRef<DefiningWorldBuildingBlockDefinitionId | null>(null);
   const hoveredRemovableBlockRef =
     useRef<DefiningWorldBuildingPlacedBlock | null>(null);
   const isBuildTilePopoverOpenRef = useRef(false);
@@ -1185,6 +1188,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   previewBlockHeightRef.current = previewBlockHeight;
   previewCutFootprintMaskRef.current = previewCutFootprintMask;
   previewCutGridAxisCellCountRef.current = previewCutGridAxisCellCount;
+  previewDefinitionIdRef.current = selectedDefinitionId;
   hoveredRemovableBlockRef.current = hoveredRemovableBlock;
   isBuildTilePopoverOpenRef.current = isBuildTilePopoverOpen;
   isEditSessionActiveRef.current = isEditSessionActive;
@@ -1199,6 +1203,13 @@ function RenderingWorldPlazaPixiSceneConnected({
     isEnabled: isBuildModeEnabled,
     refetchingPlots,
   });
+
+  const selectedCharacterEngineDefinition =
+    usingWorldPlazaSelectedCharacterEngineDefinition();
+  const selectedCharacterEngineDerivedStats =
+    computingWorldPlazaCharacterEngineDerivedStats(
+      selectedCharacterEngineDefinition
+    );
 
   const { jumpRequestedRef } = trackingWorldPlazaJumpInput({
     isEnabled: isLocalGameplayEnabled,
@@ -1250,6 +1261,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     isPlayerAsleepRef,
     isPlayerStunnedRef,
     placedBlocksRef,
+    playerRadiusGrid: selectedCharacterEngineDerivedStats.collisionRadiusGrid,
+    playerHeightWorldLayers:
+      selectedCharacterEngineDerivedStats.heightWorldLayers,
   });
 
   const { roomSnapshot, remotePlayerRegistryRef, syncingMovePositionRef } =
@@ -2216,12 +2230,6 @@ function RenderingWorldPlazaPixiSceneConnected({
   );
   const selectedAvatarCharacterDefinition =
     usingWorldPlazaSelectedAvatarCharacterDefinition();
-  const selectedCharacterEngineDefinition =
-    usingWorldPlazaSelectedCharacterEngineDefinition();
-  const selectedCharacterEngineDerivedStats =
-    computingWorldPlazaCharacterEngineDerivedStats(
-      selectedCharacterEngineDefinition
-    );
 
   const {
     hudSnapshot: playerHealthHudSnapshot,
@@ -3577,6 +3585,8 @@ function RenderingWorldPlazaPixiSceneConnected({
           isJumpingRef,
           localAvatarMotionStateRef,
           syncingMovePositionRef,
+          playerHeightWorldLayers:
+            selectedCharacterEngineDerivedStats.heightWorldLayers,
         });
         clearingWalkTarget();
       });
@@ -3587,6 +3597,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       isWalkingRef,
       localAvatarMotionStateRef,
       playerPositionRef,
+      selectedCharacterEngineDerivedStats.heightWorldLayers,
       syncingMovePositionRef,
       teleportingWithScreenFade,
       walkTargetRef,
@@ -3618,6 +3629,8 @@ function RenderingWorldPlazaPixiSceneConnected({
           isJumpingRef,
           localAvatarMotionStateRef,
           syncingMovePositionRef,
+          playerHeightWorldLayers:
+            selectedCharacterEngineDerivedStats.heightWorldLayers,
         });
         clearingWalkTarget();
       });
@@ -3628,6 +3641,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       isWalkingRef,
       localAvatarMotionStateRef,
       playerPositionRef,
+      selectedCharacterEngineDerivedStats.heightWorldLayers,
       showingGameplayHudToast,
       syncingMovePositionRef,
       teleportingWithScreenFade,
@@ -3654,6 +3668,8 @@ function RenderingWorldPlazaPixiSceneConnected({
           isJumpingRef,
           localAvatarMotionStateRef,
           syncingMovePositionRef,
+          playerHeightWorldLayers:
+            selectedCharacterEngineDerivedStats.heightWorldLayers,
         });
         clearingWalkTarget();
       });
@@ -5000,6 +5016,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     previewCutGridAxisCellCountRef={
                       previewCutGridAxisCellCountRef
                     }
+                    previewDefinitionIdRef={previewDefinitionIdRef}
                   />
                   <RenderingWorldPlazaBlockRemovalHoverHighlight
                     isVisible={
@@ -5499,12 +5516,10 @@ function RenderingWorldPlazaPixiSceneConnected({
                 <RenderingWorldPlazaActionBar
                   isVisible
                   isSocialEnabled={isPlazaSocialEnabled}
-                  isEditEnabled
                   isFullscreenSupported={isFullscreenSupported}
                   isChatOpen={chatSnapshot.isChatOpen}
                   isFriendsOpen={isFriendsPanelOpen}
                   pendingFriendRequestCount={pendingFriendRequestCount}
-                  isEditModeActive={isBlockBuildModeActive || isClaimModeActive}
                   isFullscreen={isFullscreen}
                   isFullscreenViewport={hudIsFullscreen}
                   viewportHudScale={viewportHudScale}
@@ -5515,7 +5530,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                   isProfileOpen={isProfilePanelOpen}
                   onToggleProfile={togglingProfilePanel}
                   onSelectCodexSection={selectingCodexSectionFromActionBar}
-                  onToggleEditMode={togglingEditSession}
                   onToggleFullscreen={() => {
                     void togglingViewportFullscreen({
                       shouldLockLandscapeOrientation: isMobile,
@@ -5639,11 +5653,9 @@ function RenderingWorldPlazaPixiSceneConnected({
                 <RenderingWorldPlazaActionBar
                   isVisible
                   isSocialEnabled={false}
-                  isEditEnabled={isBuildModeEnabled}
                   isFullscreenSupported={isFullscreenSupported}
                   isChatOpen={false}
                   isFriendsOpen={false}
-                  isEditModeActive={isBlockBuildModeActive || isClaimModeActive}
                   isFullscreen={isFullscreen}
                   isFullscreenViewport={hudIsFullscreen}
                   viewportHudScale={viewportHudScale}
@@ -5654,7 +5666,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                   isProfileOpen={isProfilePanelOpen}
                   onToggleProfile={togglingProfilePanel}
                   onSelectCodexSection={selectingCodexSectionFromActionBar}
-                  onToggleEditMode={togglingEditSession}
                   onToggleFullscreen={() => {
                     void togglingViewportFullscreen({
                       shouldLockLandscapeOrientation: isMobile,

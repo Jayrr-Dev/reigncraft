@@ -5,6 +5,7 @@ import {
   listingWorldBuildingPlacedBlocksNearTileIndex,
   resolvingWorldBuildingPlacedBlockCollisionPushOut,
 } from '@/components/world/building/domains/resolvingWorldBuildingCollision';
+import { DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { pushingWorldCollisionPointOutsideCircularCollider } from '@/components/world/collision/domains/computingWorldCollisionShapeGeometry';
 import type { DefiningWorldCollisionContext } from '@/components/world/collision/domains/definingWorldCollisionContext';
@@ -453,6 +454,7 @@ function resolvingWorldCollisionTerrainElevationColumnCollisionContextFromOption
  * @param isJumping - True while a jump animation is active.
  * @param placedBlocks - Player-placed blocks near the avatar.
  * @param playerLayer - Current player standing layer.
+ * @param playerHeightWorldLayers - Vertical body height used for clearance.
  * @param terrainColumnCollisionContext - Ledge lip relief context.
  * @param includePlacedBlocks - When false, skips placed-block tile checks.
  */
@@ -462,6 +464,7 @@ function checkingWorldPlazaGridPointStandsOnWalkingBlockedTile(
   isJumping: boolean,
   placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
   playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(gridPoint),
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
   terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext,
   includePlacedBlocks = true
 ): boolean {
@@ -489,7 +492,8 @@ function checkingWorldPlazaGridPointStandsOnWalkingBlockedTile(
       placedBlocks,
       applyBlockCollision,
       isJumping,
-      playerLayer
+      playerLayer,
+      playerHeightWorldLayers
     )
   ) {
     return true;
@@ -501,7 +505,8 @@ function checkingWorldPlazaGridPointStandsOnWalkingBlockedTile(
       standingTile.tileY,
       playerLayer,
       applyBlockCollision,
-      terrainColumnCollisionContext
+      terrainColumnCollisionContext,
+      playerHeightWorldLayers
     )
   ) {
     return true;
@@ -545,6 +550,7 @@ const RESOLVING_WORLD_PLAZA_PLAYER_CIRCLE_OVERLAP_SCAN_RING = 1;
  * @param placedBlocks - Player-placed blocks near the avatar.
  * @param playerLayer - Current player standing layer.
  * @param playerRadiusGrid - Player footprint radius in grid tiles.
+ * @param playerHeightWorldLayers - Vertical body height used for clearance.
  * @param terrainColumnCollisionContext - Ledge lip relief context.
  */
 function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
@@ -554,6 +560,7 @@ function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
   placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
   playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(center),
   playerRadiusGrid: number = DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
   terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext
 ): boolean {
   if (playerRadiusGrid <= 0) {
@@ -563,6 +570,7 @@ function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
       isJumping,
       placedBlocks,
       playerLayer,
+      playerHeightWorldLayers,
       terrainColumnCollisionContext
     );
   }
@@ -584,7 +592,8 @@ function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
       applyBlockCollision,
       isJumping,
       playerLayer,
-      playerRadiusGrid
+      playerRadiusGrid,
+      playerHeightWorldLayers
     )
   ) {
     return true;
@@ -632,6 +641,7 @@ function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
           isJumping,
           placedBlocks,
           playerLayer,
+          playerHeightWorldLayers,
           terrainColumnCollisionContext,
           false
         )
@@ -652,13 +662,15 @@ function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
  * @param isJumping - True while a jump animation is active.
  * @param placedBlocks - Player-placed blocks near the avatar.
  * @param playerLayer - Current player standing layer.
+ * @param playerHeightWorldLayers - Vertical body height used for clearance.
  */
 function resolvingWorldPlazaNearestWalkableGridPointAroundBlockedPosition(
   blockedPosition: DefiningWorldPlazaWorldPoint,
   applyBlockCollision: boolean,
   isJumping: boolean,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
-  playerLayer: number
+  playerLayer: number,
+  playerHeightWorldLayers: number
 ): DefiningWorldPlazaWorldPoint | null {
   const originTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(blockedPosition);
@@ -703,7 +715,8 @@ function resolvingWorldPlazaNearestWalkableGridPointAroundBlockedPosition(
             applyBlockCollision,
             isJumping,
             placedBlocks,
-            playerLayer
+            playerLayer,
+            playerHeightWorldLayers
           )
         ) {
           continue;
@@ -754,6 +767,9 @@ export function resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(
   const playerLayer =
     options.playerLayer ??
     resolvingWorldPlazaPlayerWorldLayer(resolvedPosition);
+  const playerHeightWorldLayers =
+    options.playerHeightWorldLayers ??
+    DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS;
   const terrainColumnCollisionContext =
     resolvingWorldCollisionTerrainElevationColumnCollisionContextFromOptions(
       options
@@ -776,6 +792,7 @@ export function resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(
       isJumping,
       nearbyPlacedBlocks,
       playerLayer,
+      playerHeightWorldLayers,
       terrainColumnCollisionContext
     )
   ) {
@@ -785,7 +802,8 @@ export function resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(
         applyBlockCollision,
         isJumping,
         nearbyPlacedBlocks,
-        playerLayer
+        playerLayer,
+        playerHeightWorldLayers
       );
 
     if (ejectedPosition) {
@@ -808,6 +826,7 @@ export function resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(
       isJumping,
       placedBlocks: nearbyPlacedBlocks,
       playerLayer,
+      playerHeightWorldLayers,
       terrainColumnCollisionContext,
     }
   );
@@ -886,6 +905,7 @@ export function clampingWorldCollisionPointBeforeGridPointPredicate(
  * @param applyBlockCollision - Whether full block collision is active.
  * @param placedBlocks - Player-placed blocks near the avatar.
  * @param playerLayer - Current player standing layer.
+ * @param playerHeightWorldLayers - Vertical body height used for clearance.
  * @param terrainColumnCollisionContext - Ledge lip relief context.
  */
 function clampingWorldPlazaPointBeforeBlockedTile(
@@ -895,6 +915,7 @@ function clampingWorldPlazaPointBeforeBlockedTile(
   isJumping: boolean,
   placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
   playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(from),
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
   terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext
 ): DefiningWorldPlazaWorldPoint {
   return clampingWorldCollisionPointBeforeGridPointPredicate(
@@ -908,6 +929,7 @@ function clampingWorldPlazaPointBeforeBlockedTile(
         placedBlocks,
         playerLayer,
         DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+        playerHeightWorldLayers,
         terrainColumnCollisionContext
       )
   );
@@ -923,19 +945,23 @@ function clampingWorldPlazaPointBeforeBlockedTile(
  * @param to - Raw click destination in grid space.
  * @param isJumping - True while a jump animation is active.
  * @param placedBlocks - Player-placed blocks considered before terrain.
+ * @param playerHeightWorldLayers - Vertical body height used for clearance.
  */
 export function clampingWorldCollisionWalkTargetToWalkableGridPoint(
   from: DefiningWorldPlazaWorldPoint,
   to: DefiningWorldPlazaWorldPoint,
   isJumping = false,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[] = []
+  placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
 ): DefiningWorldPlazaWorldPoint {
   return clampingWorldPlazaPointBeforeBlockedTile(
     from,
     to,
     true,
     isJumping,
-    placedBlocks
+    placedBlocks,
+    resolvingWorldPlazaPlayerWorldLayer(from),
+    playerHeightWorldLayers
   );
 }
 
@@ -965,6 +991,9 @@ export function resolvingWorldCollisionBlockedWorldPoint(
     );
   const playerRadiusGrid =
     resolvingWorldCollisionBlockedWorldPointPlayerRadiusGrid(options);
+  const playerHeightWorldLayers =
+    options.playerHeightWorldLayers ??
+    DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS;
 
   const standingTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint({
     x: resolvedX,
@@ -986,7 +1015,8 @@ export function resolvingWorldCollisionBlockedWorldPoint(
       nearbyPlacedBlocks,
       applyBlockCollision,
       isJumping,
-      playerLayer
+      playerLayer,
+      playerHeightWorldLayers
     );
   resolvedX = pushedPlacedBlockPosition.x;
   resolvedY = pushedPlacedBlockPosition.y;
@@ -1101,6 +1131,7 @@ export function resolvingWorldCollisionBlockedWorldPoint(
       isJumping,
       nearbyPlacedBlocks,
       playerLayer,
+      playerHeightWorldLayers,
       terrainColumnCollisionContext
     );
 
@@ -1111,6 +1142,7 @@ export function resolvingWorldCollisionBlockedWorldPoint(
         isJumping,
         nearbyPlacedBlocks,
         playerLayer,
+        playerHeightWorldLayers,
         terrainColumnCollisionContext
       ) &&
       !checkingWorldPlazaGridPointStandsOnWalkingBlockedTile(
@@ -1119,6 +1151,7 @@ export function resolvingWorldCollisionBlockedWorldPoint(
         isJumping,
         nearbyPlacedBlocks,
         playerLayer,
+        playerHeightWorldLayers,
         terrainColumnCollisionContext
       )
     ) {

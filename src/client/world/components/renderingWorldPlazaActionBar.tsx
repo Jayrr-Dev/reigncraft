@@ -19,7 +19,6 @@ import {
   DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ACTION_BAR_MOBILE_ANCHOR_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_CLASS_NAME,
-  LABELING_WORLD_PLAZA_ACTION_BAR_BUILD,
   LABELING_WORLD_PLAZA_ACTION_BAR_CHAT,
   LABELING_WORLD_PLAZA_ACTION_BAR_FRIENDS,
   LABELING_WORLD_PLAZA_ACTION_BAR_TRANSFORM,
@@ -51,7 +50,6 @@ import { STYLING_WORLD_PLAZA_ACTION_BAR_HUNGER_ANCHOR_CLASS_NAME } from '@/compo
 import { cn } from '@/lib/utils';
 import {
   BookOpen,
-  Hammer,
   Maximize2,
   MessageCircle,
   Minimize2,
@@ -68,16 +66,12 @@ export interface RenderingWorldPlazaActionBarProps {
   isVisible: boolean;
   /** When false, hides social actions (chat, friends). */
   isSocialEnabled: boolean;
-  /** When false, disables the build action. */
-  isEditEnabled: boolean;
   /** When false, hides the fullscreen control. */
   isFullscreenSupported: boolean;
   isChatOpen: boolean;
   isFriendsOpen: boolean;
   /** Pending incoming friend requests for the notification badge. */
   pendingFriendRequestCount?: number;
-  /** True when build or claim edit session is open. */
-  isEditModeActive: boolean;
   /** True while the character profile panel is open. */
   isProfileOpen?: boolean;
   isFullscreen: boolean;
@@ -85,7 +79,6 @@ export interface RenderingWorldPlazaActionBarProps {
   onToggleFriends: () => void;
   /** Toggles the character profile panel when provided. */
   onToggleProfile?: () => void;
-  onToggleEditMode: () => void;
   onToggleFullscreen: () => void;
   /** Opens a codex section overlay when provided. */
   onSelectCodexSection?: (section: WorldPlazaCodexSectionId) => void;
@@ -124,18 +117,15 @@ function stylingWorldPlazaActionBarButton(isActive: boolean): string {
 export function RenderingWorldPlazaActionBar({
   isVisible,
   isSocialEnabled,
-  isEditEnabled,
   isFullscreenSupported,
   isChatOpen,
   isFriendsOpen,
   pendingFriendRequestCount = 0,
-  isEditModeActive,
   isProfileOpen = false,
   isFullscreen,
   onToggleChat,
   onToggleFriends,
   onToggleProfile,
-  onToggleEditMode,
   onToggleFullscreen,
   onSelectCodexSection,
   onExitToHome,
@@ -357,22 +347,6 @@ export function RenderingWorldPlazaActionBar({
                   />
                 </button>
               ) : null}
-
-              <button
-                type="button"
-                aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_BUILD}
-                aria-pressed={isEditModeActive}
-                disabled={!isEditEnabled}
-                onClick={onToggleEditMode}
-                className={stylingWorldPlazaActionBarButton(isEditModeActive)}
-                style={viewportStyles.buttonStyle}
-              >
-                <Hammer
-                  className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
-                  style={viewportStyles.iconStyle}
-                  aria-hidden="true"
-                />
-              </button>
 
               <div
                 className={

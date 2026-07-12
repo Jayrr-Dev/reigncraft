@@ -8,6 +8,7 @@
  */
 
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
   checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex,
   resolvingWorldBuildingJumpForwardGridDistanceClampedToWall,
@@ -37,6 +38,8 @@ export type CheckingWorldPlazaPlayerMobileAutoJumpWaterGapAheadParams = {
   jumpLayerReachMax: number;
   /** Multiplier on run-jump forward distance (buffs / character scale). */
   jumpDistanceMultiplier: number;
+  /** Vertical body height used for roof clearance. */
+  playerHeightWorldLayers?: number;
 };
 
 /**
@@ -68,6 +71,7 @@ export function checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead({
   jumpStartLayer,
   jumpLayerReachMax,
   jumpDistanceMultiplier,
+  playerHeightWorldLayers = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
 }: CheckingWorldPlazaPlayerMobileAutoJumpWaterGapAheadParams): boolean {
   const directionLength = Math.hypot(gridDirection.x, gridDirection.y);
 
@@ -159,7 +163,8 @@ export function checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead({
       placedBlocks,
       jumpStartLayer,
       fullDistanceLandingSurfaceLayer,
-      jumpLayerReachMax
+      jumpLayerReachMax,
+      playerHeightWorldLayers
     );
   const resolvedJumpLanding = resolvingWorldPlazaJumpLandingGridPointAlongPath(
     playerPosition,
@@ -167,7 +172,8 @@ export function checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead({
     forwardGridDistance,
     placedBlocks,
     jumpStartLayer,
-    jumpLayerReachMax
+    jumpLayerReachMax,
+    playerHeightWorldLayers
   );
 
   if (!resolvedJumpLanding) {

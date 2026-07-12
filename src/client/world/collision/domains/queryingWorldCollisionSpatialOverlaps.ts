@@ -84,6 +84,7 @@ export function checkingWorldCollisionBlockedAtPoint(
         playerRadiusGrid:
           context.playerRadiusGrid ??
           DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+        playerHeightWorldLayers: context.playerHeightWorldLayers,
         terrainColumnCollisionContext: context.terrainColumnCollisionContext,
       }) !== null
     );

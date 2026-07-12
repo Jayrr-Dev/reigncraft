@@ -1,4 +1,5 @@
 import { checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock } from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
+import { DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
   DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND,
 } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
@@ -133,6 +134,7 @@ export function checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex(
   playerLayer: number,
   applyBlockCollision: boolean,
   collisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext,
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
 ): boolean {
   if (
     checkingWorldPlazaColumnRockFootprintTileIsWalkableGroundForPlayerLayer(
@@ -180,6 +182,7 @@ export function checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex(
       playerLayer,
       terrainSurfaceLayer,
       blockHeightLayers,
+      playerHeightWorldLayers,
     ),
     cliffLipRelief:
       collisionContext !== undefined &&

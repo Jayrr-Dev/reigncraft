@@ -8,6 +8,7 @@
 
 import type { RenderingInventorySlotCellProps } from '@/components/inventory/renderingInventorySlotCell';
 import { RenderingWorldPlazaInventorySlotCell } from '@/components/world/inventory/components/renderingWorldPlazaInventorySlotCell';
+import { checkingWorldPlazaInventorySlotIsMainHotbar } from '@/components/world/inventory/domains/checkingWorldPlazaInventorySlotIsMainHotbar';
 import {
   createContext,
   memo,
@@ -94,11 +95,15 @@ export const RenderingWorldPlazaInventoryHotbarSlotCell = memo(
       playerEffectiveMaxHealth,
     } = usingWorldPlazaInventoryHotbarSlotInteractions();
 
+    const isMainHotbarSlot = checkingWorldPlazaInventorySlotIsMainHotbar(
+      props.slotIndex
+    );
+
     return (
       <RenderingWorldPlazaInventorySlotCell
         {...props}
-        isEquipped={props.slotIndex === selectedSlotIndex}
-        onEquipSlot={onSelectHotbarSlot}
+        isEquipped={isMainHotbarSlot && props.slotIndex === selectedSlotIndex}
+        onEquipSlot={isMainHotbarSlot ? onSelectHotbarSlot : undefined}
         onOpenItemDetailPopover={togglingItemActionPopover}
         isItemDetailPopoverOpen={openItemDetailSlotIndex === props.slotIndex}
         onCloseItemDetailPopover={closingItemActionPopover}

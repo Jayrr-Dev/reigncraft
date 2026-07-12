@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { checkingWorldCollisionBlockedAtPoint } from '@/components/world/collision';
 import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
@@ -19,6 +20,7 @@ export type CheckingWorldPlazaNavigationGridNodeWalkableForPlayerParams = {
   readonly placedBlocks?: readonly DefiningWorldBuildingPlacedBlock[];
   readonly placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile;
   readonly playerRadiusGrid?: number;
+  readonly playerHeightWorldLayers?: number;
 };
 
 /**
@@ -30,6 +32,7 @@ export function checkingWorldPlazaNavigationGridNodeWalkableForPlayer({
   placedBlocks = [],
   placedBlocksByTile,
   playerRadiusGrid = DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+  playerHeightWorldLayers = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
 }: CheckingWorldPlazaNavigationGridNodeWalkableForPlayerParams): boolean {
   if (checkingWorldPlazaLavaAtTileIndex(node.x, node.y)) {
     return false;
@@ -52,5 +55,6 @@ export function checkingWorldPlazaNavigationGridNodeWalkableForPlayer({
     placedBlocksByTile,
     playerLayer,
     playerRadiusGrid,
+    playerHeightWorldLayers,
   });
 }

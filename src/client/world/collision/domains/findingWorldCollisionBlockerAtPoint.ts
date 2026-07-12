@@ -1,4 +1,5 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
   checkingWorldBuildingGridPointBlockedByPlacedBlocks,
   checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders,
@@ -59,6 +60,8 @@ export interface FindingWorldPlazaBlockedWorldPointBlockerAtGridPointOptions {
   playerLayer?: number;
   /** Player footprint radius in grid tiles. */
   playerRadiusGrid?: number;
+  /** Player vertical body height in world layers. */
+  playerHeightWorldLayers?: number;
   /** Ledge lip relief context. */
   terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext;
 }
@@ -121,7 +124,9 @@ function findingWorldPlazaTileGridBlockerAtGridPoint(
       placedBlocks,
       options.applyBlockCollision,
       options.isJumping,
-      playerLayer
+      playerLayer,
+      options.playerHeightWorldLayers ??
+        DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
     )
   ) {
     return {
@@ -144,7 +149,9 @@ function findingWorldPlazaTileGridBlockerAtGridPoint(
       standingTile.tileY,
       playerLayer,
       options.applyBlockCollision,
-      options.terrainColumnCollisionContext
+      options.terrainColumnCollisionContext,
+      options.playerHeightWorldLayers ??
+        DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
     )
   ) {
     return {
@@ -392,7 +399,9 @@ export function findingWorldCollisionBlockerAtPoint(
       options.applyBlockCollision,
       options.isJumping,
       playerLayer,
-      playerRadiusGrid
+      playerRadiusGrid,
+      options.playerHeightWorldLayers ??
+        DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
     )
   ) {
     const standingTile =

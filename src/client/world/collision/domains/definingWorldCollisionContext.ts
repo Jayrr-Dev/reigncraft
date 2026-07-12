@@ -20,5 +20,6 @@ export type DefiningWorldCollisionContext = {
   readonly playerCenter?: DefiningWorldPlazaWorldPoint;
   readonly movementDelta?: DefiningWorldPlazaWorldPoint;
   readonly playerRadiusGrid?: number;
+  readonly playerHeightWorldLayers?: number;
   readonly terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext;
 };

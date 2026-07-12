@@ -3,12 +3,15 @@ import {
   STYLING_WORLD_PLAZA_GAMEPLAY_HUD_LIGHT_THEME_SCOPE_CLASS,
 } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 
-/** Optional multiplier applied to all inventory base px values (not CSS transform). */
-export const DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE = 1.25 as const;
+/**
+ * Optional multiplier applied to all inventory base px values (not CSS transform).
+ * 5/6 keeps tiles at ~2/3 of the prior 1.25 scale.
+ */
+export const DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE = 5 / 6;
 
-/** Extra hotbar multiplier per device class; mobile keeps the compact size. */
+/** Hotbar multiplier shared across mobile, desktop, and fullscreen. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE = {
-  mobile: 1,
+  mobile: 1.2,
   desktopAndFullscreen: 1.2,
 } as const;
 
@@ -107,9 +110,35 @@ export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_INVALID_CLASS =
 export const STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME =
   `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventoryHotbarShell} pointer-events-auto flex touch-manipulation overscroll-none items-center overflow-visible` as const;
 
-/** Hotbar grid row — touch-manipulation so slot taps synthesize click reliably. */
+/** Hotbar grid — two visible rows (main + storage page); touch-manipulation for taps. */
 export const STYLING_WORLD_PLAZA_INVENTORY_GRID_WRAPPER_CLASS_NAME =
-  'flex touch-manipulation overscroll-none items-center gap-1' as const;
+  'grid touch-manipulation overscroll-none' as const;
+
+/** Stacks the slot grid beside the storage page arrows. */
+export const STYLING_WORLD_PLAZA_INVENTORY_SHELL_BODY_CLASS_NAME =
+  'flex touch-manipulation items-stretch gap-1' as const;
+
+/** Vertical stack of solid parchment page arrows. */
+export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_STACK_CLASS_NAME =
+  'flex shrink-0 flex-col justify-between gap-1' as const;
+
+/** Solid wood-framed parchment arrow control (matches inventory slot chrome). */
+export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_CLASS_NAME =
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventorySlot} flex shrink-0 touch-manipulation items-center justify-center text-poster-orange-deep transition-[filter,box-shadow] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:brightness-100` as const;
+
+/** Drag-hover highlight on a page arrow drop target. */
+export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_DRAG_OVER_CLASS_NAME =
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.slot.dropValid} brightness-110` as const;
+
+/** Bold arrow glyph inside the page buttons. */
+export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_ICON_CLASS_NAME =
+  'shrink-0' as const;
+
+/** Iconify ids for inventory storage page arrows. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_ICONS = {
+  up: 'mdi:arrow-up-bold',
+  down: 'mdi:arrow-down-bold',
+} as const;
 
 /** Gap between inventory slots in the grid row (gap via viewport styles). */
 export const STYLING_WORLD_PLAZA_INVENTORY_GRID_GAP_CLASS = '' as const;

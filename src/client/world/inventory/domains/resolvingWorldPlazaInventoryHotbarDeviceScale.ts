@@ -3,8 +3,7 @@ import { DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE } from '@/components
 /**
  * Picks the hotbar device multiplier for the current viewport class.
  *
- * Desktop and fullscreen render the hotbar larger; mobile keeps the
- * compact authored size.
+ * Mobile, desktop, and fullscreen share the same authored hotbar size.
  *
  * @param isMobile - Mobile layout input from the viewport profile
  */

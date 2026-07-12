@@ -120,6 +120,7 @@ import mdiHeartFlash from '@iconify-icons/mdi/heart-flash';
 import mdiHeartOutline from '@iconify-icons/mdi/heart-outline';
 import mdiHeartPlus from '@iconify-icons/mdi/heart-plus';
 import mdiHome from '@iconify-icons/mdi/home';
+import mdiHumanMaleHeight from '@iconify-icons/mdi/human-male-height';
 import mdiImageFilterHdr from '@iconify-icons/mdi/image-filter-hdr';
 import mdiInformationOutline from '@iconify-icons/mdi/information-outline';
 import mdiLandPlots from '@iconify-icons/mdi/land-plots';
@@ -312,6 +313,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:heart-outline': mdiHeartOutline,
   'mdi:heart-plus': mdiHeartPlus,
   'mdi:home': mdiHome,
+  'mdi:human-male-height': mdiHumanMaleHeight,
   'mdi:image-filter-hdr': mdiImageFilterHdr,
   'mdi:information-outline': mdiInformationOutline,
   'mdi:land-plots': mdiLandPlots,

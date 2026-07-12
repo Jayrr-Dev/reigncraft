@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  DEFINING_WORLD_BUILDING_CLAIM_MODE_OWNER_GROUP_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_SAVE_BUTTON_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_SECTION_LABEL_CLASS_NAME,
 } from '@/components/world/building/domains/definingWorldBuildingClaimModeConstants';
@@ -9,6 +10,7 @@ import { STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_TOOLS_STATUS_CLASS_NAME } from 
 import { LABELING_WORLD_PLAZA_CLAIM_MODE_COORDS_HOVER_HINT } from '@/components/world/building/domains/definingWorldPlazaClaimModeFunctionRegistry';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { LABELING_WORLD_PLAZA_SAVED_COORDS_SAVE_AT_CAPACITY_BUTTON } from '@/components/world/domains/definingWorldPlazaSavedCoordsListUiConstants';
+import { cn } from '@/lib/utils';
 
 /** Save coords button label. */
 const RENDERING_WORLD_PLAZA_CLAIM_MODE_COORDS_SAVE_LABEL =
@@ -33,7 +35,12 @@ export function RenderingWorldPlazaClaimModeCoordsPanel({
   const canSaveCoordsAtHoverTile = hoverTilePosition !== null;
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div
+      className={cn(
+        DEFINING_WORLD_BUILDING_CLAIM_MODE_OWNER_GROUP_CLASS_NAME,
+        'flex flex-col gap-1.5'
+      )}
+    >
       <p
         className={DEFINING_WORLD_BUILDING_CLAIM_MODE_SECTION_LABEL_CLASS_NAME}
       >

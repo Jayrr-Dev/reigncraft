@@ -26,6 +26,7 @@ export type ResolvingWorldPlazaNavigationPlayerMoveCostParams = {
   readonly placedBlocks?: readonly DefiningWorldBuildingPlacedBlock[];
   readonly placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile;
   readonly playerRadiusGrid?: number;
+  readonly playerHeightWorldLayers?: number;
 };
 
 function resolvingWorldPlazaNavigationPlayerEdgeMoveCost(
@@ -53,6 +54,7 @@ export function resolvingWorldPlazaNavigationPlayerMoveCost({
   placedBlocks = [],
   placedBlocksByTile,
   playerRadiusGrid,
+  playerHeightWorldLayers,
 }: ResolvingWorldPlazaNavigationPlayerMoveCostParams): DefiningNavigationMoveCostResolver {
   return (from, to) => {
     if ((from.layer ?? playerLayer) !== (to.layer ?? playerLayer)) {
@@ -75,6 +77,7 @@ export function resolvingWorldPlazaNavigationPlayerMoveCost({
       placedBlocks,
       placedBlocksByTile,
       playerRadiusGrid,
+      playerHeightWorldLayers,
     });
 
     return isWalkable ? edgeCost : null;

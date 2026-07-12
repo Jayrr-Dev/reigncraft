@@ -25,6 +25,7 @@ export type ResolvingWorldPlazaNavigationPathParams = {
   readonly placedBlocks?: readonly DefiningWorldBuildingPlacedBlock[];
   readonly placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile;
   readonly playerRadiusGrid?: number;
+  readonly playerHeightWorldLayers?: number;
   readonly maxNodeExpansions?: number;
 };
 
@@ -45,6 +46,7 @@ export function resolvingWorldPlazaNavigationPath({
   placedBlocks = [],
   placedBlocksByTile,
   playerRadiusGrid,
+  playerHeightWorldLayers,
   maxNodeExpansions,
 }: ResolvingWorldPlazaNavigationPathParams): ResolvingWorldPlazaNavigationPathResult {
   const profile =
@@ -68,6 +70,7 @@ export function resolvingWorldPlazaNavigationPath({
     placedBlocks,
     placedBlocksByTile,
     playerRadiusGrid,
+    playerHeightWorldLayers,
   });
   const searchResult = computingNavigationAStarPath({
     start: startNode,

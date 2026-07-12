@@ -2,7 +2,10 @@ import {
   computingWorldPlazaViewportHudScaledPx,
   stylingWorldPlazaViewportHudSquarePx,
 } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
-import { DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS,
+  DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE,
   DEFINING_WORLD_PLAZA_INVENTORY_LOADING_TEXT_BASE_PX,
@@ -21,6 +24,7 @@ import type { CSSProperties } from 'react';
 /** Viewport-resolved inline styles for the plaza inventory hotbar. */
 export interface DefiningWorldPlazaInventoryHotbarViewportStyles {
   readonly shellStyle: CSSProperties;
+  readonly shellBodyStyle: CSSProperties;
   readonly gridStyle: CSSProperties;
   readonly slotStyle: CSSProperties;
   readonly dragSurfaceStyle: CSSProperties;
@@ -30,10 +34,13 @@ export interface DefiningWorldPlazaInventoryHotbarViewportStyles {
   readonly quantityBadgeStyle: CSSProperties;
   readonly loadingShellStyle: CSSProperties;
   readonly loadingTextStyle: CSSProperties;
+  readonly pageArrowStackStyle: CSSProperties;
+  readonly pageArrowButtonStyle: CSSProperties;
+  readonly pageArrowIconStyle: CSSProperties;
 }
 
 /**
- * Total shell width of the inventory hotbar in CSS pixels.
+ * Total shell width of the inventory hotbar in CSS pixels (slots + arrows).
  *
  * @param viewportHudScale - Live scale from the plaza viewport frame
  */
@@ -56,11 +63,12 @@ export function computingWorldPlazaInventoryHotbarShellWidthPx(
     DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE
   );
 
-  return (
-    paddingPx * 2 +
-    slotPx * DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY +
-    gapPx * (DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY - 1)
-  );
+  const gridWidthPx =
+    slotPx * DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS +
+    gapPx * (DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS - 1);
+  const arrowColumnWidthPx = slotPx;
+
+  return paddingPx * 2 + gridWidthPx + gapPx + arrowColumnWidthPx;
 }
 
 /**
@@ -121,14 +129,30 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
     viewportHudScale,
     DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE
   );
+  const slotEdgePx =
+    typeof slotStyle.width === 'number'
+      ? slotStyle.width
+      : computingWorldPlazaViewportHudScaledPx(
+          DEFINING_WORLD_PLAZA_INVENTORY_SLOT_BASE_PX,
+          viewportHudScale,
+          DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE
+        );
+  const gridHeightPx =
+    slotEdgePx * DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT +
+    shellGapPx * (DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT - 1);
 
   return {
     shellStyle: {
       gap: shellGapPx,
       padding: shellPaddingPx,
     },
+    shellBodyStyle: {
+      gap: shellGapPx,
+    },
     gridStyle: {
       gap: shellGapPx,
+      gridTemplateColumns: `repeat(${DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS}, ${slotEdgePx}px)`,
+      gridTemplateRows: `repeat(${DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT}, ${slotEdgePx}px)`,
     },
     slotStyle,
     dragSurfaceStyle: slotStyle,
@@ -148,10 +172,18 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
       fontSize: quantityBadgeTextPx,
     },
     loadingShellStyle: {
-      height: slotStyle.height,
+      height: gridHeightPx,
+      minWidth:
+        computingWorldPlazaInventoryHotbarShellWidthPx(viewportHudScale),
     },
     loadingTextStyle: {
       fontSize: loadingTextPx,
     },
+    pageArrowStackStyle: {
+      gap: shellGapPx,
+      height: gridHeightPx,
+    },
+    pageArrowButtonStyle: slotStyle,
+    pageArrowIconStyle: iconStyle,
   };
 }

@@ -48,18 +48,18 @@ export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_REGISTRY = [
     iconifyIcon: 'mdi:cube-outline',
   },
   {
-    id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CUT,
-    sessionModeId: DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
-    label: 'Cut',
-    ariaLabel: 'Cut footprint',
-    iconifyIcon: 'mdi:view-grid-outline',
-  },
-  {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.BLOCKS,
     sessionModeId: DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
     label: 'Blocks',
     ariaLabel: 'Block size and placement layer',
     iconifyIcon: 'mdi:shape-square-plus',
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CUT,
+    sessionModeId: DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
+    label: 'Cut',
+    ariaLabel: 'Cut footprint',
+    iconifyIcon: 'mdi:view-grid-outline',
   },
   {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLOTS,

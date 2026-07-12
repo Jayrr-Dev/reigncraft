@@ -34,6 +34,7 @@ import {
   useSensors,
   type DragEndEvent,
   type DragMoveEvent,
+  type DragOverEvent,
   type DragStartEvent,
   type DropAnimation,
 } from '@dnd-kit/core';
@@ -64,6 +65,7 @@ export interface SortingInventoryProps {
   /** Optional drag lifecycle hooks for world placement overlays. */
   readonly onDragStart?: (event: DragStartEvent) => void;
   readonly onDragMove?: (event: DragMoveEvent) => void;
+  readonly onDragOver?: (event: DragOverEvent) => void;
   readonly onDragPointerMove?: (clientX: number, clientY: number) => void;
   readonly onDragCancel?: () => void;
   /** Optional wrapper class name. */
@@ -79,6 +81,20 @@ export interface SortingInventoryProps {
     itemId: string,
     state: DefiningInventoryState
   ) => DefiningInventoryItem | null;
+  /**
+   * Optional subset of slot indices to render (e.g. main hotbar + one storage page).
+   * Defaults to every slot in state order.
+   */
+  readonly visibleSlotIndices?: readonly number[];
+  /**
+   * Optional content rendered beside the grid inside DndContext
+   * (e.g. storage page arrows that must be droppable).
+   */
+  readonly trailingContent?: React.ReactNode;
+  /** Optional flex/grid wrapper around the slot grid + trailing content. */
+  readonly layoutClassName?: string;
+  /** Optional inline styles for {@link layoutClassName}. */
+  readonly layoutStyle?: React.CSSProperties;
 }
 
 /**
@@ -90,6 +106,7 @@ export function SortingInventory({
   onDragEnd,
   onDragStart,
   onDragMove,
+  onDragOver,
   onDragPointerMove,
   onDragCancel,
   className,
@@ -97,6 +114,10 @@ export function SortingInventory({
   SlotCellComponent,
   DragOverlayItemComponent = RenderingInventoryDragOverlayItem,
   resolvingDraggedItemById,
+  visibleSlotIndices,
+  trailingContent,
+  layoutClassName,
+  layoutStyle,
 }: SortingInventoryProps): React.JSX.Element {
   const [activeItem, setActiveItem] = useState<DefiningInventoryItem | null>(
     null
@@ -152,6 +173,13 @@ export function SortingInventory({
     [onDragMove]
   );
 
+  const handlingDragOver = useCallback(
+    (event: DragOverEvent): void => {
+      onDragOver?.(event);
+    },
+    [onDragOver]
+  );
+
   const handlingDragEnd = useCallback(
     (event: DragEndEvent): void => {
       unlockingInventoryDragPageScroll();
@@ -191,6 +219,28 @@ export function SortingInventory({
     };
   }, [activeItem]);
 
+  const inventoryGrid = (
+    <RenderingInventoryGrid
+      state={state}
+      registry={registry}
+      activeDragItemId={activeItem?.id ?? null}
+      className={className}
+      style={gridStyle}
+      SlotCellComponent={SlotCellComponent}
+      visibleSlotIndices={visibleSlotIndices}
+    />
+  );
+
+  const inventoryBody =
+    layoutClassName || trailingContent ? (
+      <div className={layoutClassName} style={layoutStyle}>
+        {inventoryGrid}
+        {trailingContent}
+      </div>
+    ) : (
+      inventoryGrid
+    );
+
   return (
     <DndContext
       sensors={sensors}
@@ -198,17 +248,11 @@ export function SortingInventory({
       autoScroll={false}
       onDragStart={handlingDragStart}
       onDragMove={handlingDragMove}
+      onDragOver={handlingDragOver}
       onDragEnd={handlingDragEnd}
       onDragCancel={handlingDragCancel}
     >
-      <RenderingInventoryGrid
-        state={state}
-        registry={registry}
-        activeDragItemId={activeItem?.id ?? null}
-        className={className}
-        style={gridStyle}
-        SlotCellComponent={SlotCellComponent}
-      />
+      {inventoryBody}
       <DragOverlay
         dropAnimation={DEFINING_INVENTORY_DROP_ANIMATION}
         modifiers={[modifyingInventorySnapCenterToCursor]}

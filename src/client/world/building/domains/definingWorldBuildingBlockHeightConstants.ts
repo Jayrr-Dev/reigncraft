@@ -8,15 +8,8 @@
  * @module components/world/building/domains/definingWorldBuildingBlockHeightConstants
  */
 
-/** Vertical extent of the player avatar in world layers (visual / lava hide). */
+/** Baseline player body height for clearance, visuals, and lava hiding. */
 export const DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS = 4;
-
-/**
- * Feet-only vertical band for walk/push collision against placed blocks and
- * terrain columns. Elevated roofs (bottom above the standing layer) stay
- * walkable underneath so players can build ceilings.
- */
-export const DEFINING_WORLD_PLAZA_PLAYER_WALK_COLLISION_HEIGHT_WORLD_LAYERS = 1;
 
 /** Flat passable tile height (no extrusion, no collision). */
 export const DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_TILE = 0;

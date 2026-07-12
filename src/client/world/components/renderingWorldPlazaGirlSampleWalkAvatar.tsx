@@ -412,6 +412,9 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   const previousReadyIdleActiveRef = useRef(false);
   const lastLocomotionWasRunRef = useRef(false);
   const lastFrameMovementDeltaRef = useRef({ x: 0, y: 0 });
+  const previousCollisionHeightWorldLayersRef = useRef(
+    characterEngineDerivedStats.heightWorldLayers
+  );
   const confusionPhaseRadiansRef = useRef(0);
   /** Live grid velocity for ice run momentum and post-stop slide. */
   const iceSlideVelocityRef = useRef<DefiningWorldPlazaIceSlideVelocity>({
@@ -1176,7 +1179,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           scenePlacedBlocks,
           rollStartLayer,
           rollLandingSurfaceLayer,
-          jumpLayerReachMax
+          jumpLayerReachMax,
+          characterEngineDerivedStats.heightWorldLayers
         );
 
       const didConsumeRollStamina =
@@ -1274,6 +1278,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           jumpStartLayer: autoJumpStartLayer,
           jumpLayerReachMax,
           jumpDistanceMultiplier: movementMultipliers.jumpDistanceMultiplier,
+          playerHeightWorldLayers:
+            characterEngineDerivedStats.heightWorldLayers,
         })
       ) {
         incrementingWorldPlazaPerformanceDiagnosticsCounter(
@@ -1363,7 +1369,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           placedBlocks,
           jumpStartLayer,
           fullDistanceLandingSurfaceLayer,
-          jumpLayerReachMax
+          jumpLayerReachMax,
+          characterEngineDerivedStats.heightWorldLayers
         );
       const resolvedJumpLanding =
         resolvingWorldPlazaJumpLandingGridPointAlongPath(
@@ -1372,7 +1379,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           forwardGridDistance,
           placedBlocks,
           jumpStartLayer,
-          jumpLayerReachMax
+          jumpLayerReachMax,
+          characterEngineDerivedStats.heightWorldLayers
         );
 
       if (!isJumpStartOnWater && resolvedJumpLanding) {
@@ -2012,11 +2020,17 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       frameMovementDeltaX,
       frameMovementDeltaY
     );
+    const didCollisionHeightChange =
+      previousCollisionHeightWorldLayersRef.current !==
+      characterEngineDerivedStats.heightWorldLayers;
+    previousCollisionHeightWorldLayersRef.current =
+      characterEngineDerivedStats.heightWorldLayers;
     const shouldRunAvatarCollision =
       attemptedMoveDistance >
         DEFINING_WORLD_PLAZA_AVATAR_WALK_BLOCKED_GRID_EPSILON ||
       Boolean(activeJumpState) ||
-      isRollAnimatingForMovement;
+      isRollAnimatingForMovement ||
+      didCollisionHeightChange;
 
     if (shouldRunAvatarCollision) {
       const finishAvatarCollisionSample = beginningWorldPlazaPerformanceSample(
@@ -2049,6 +2063,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
             },
             movementDelta: collisionMovementDelta,
             playerRadiusGrid: characterEngineDerivedStats.collisionRadiusGrid,
+            playerHeightWorldLayers:
+              characterEngineDerivedStats.heightWorldLayers,
           }
         );
 
@@ -2134,6 +2150,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         placedBlocksByTile: scenePlacedBlocksByTile,
         isJumping: Boolean(activeJumpState),
         playerRadiusGrid: characterEngineDerivedStats.collisionRadiusGrid,
+        playerHeightWorldLayers:
+          characterEngineDerivedStats.heightWorldLayers,
         maxNodeExpansions: performanceProfile.navigationMaxNodeExpansions,
       });
       settingWorldPlazaPerformanceDiagnosticsGauge(
@@ -2466,7 +2484,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       );
     const isLavaSubmergedPastAvatarHeight =
       checkingWorldPlazaLavaSinkHidesAvatarBodyAtBaseOffsetPx(
-        lavaSinkBaseOffsetPx
+        lavaSinkBaseOffsetPx,
+        characterEngineDerivedStats.heightWorldLayers
       );
     // Gentle bob so treading lava reads as floating; the cover layers stay
     // pinned at the surface while only the body bobs.

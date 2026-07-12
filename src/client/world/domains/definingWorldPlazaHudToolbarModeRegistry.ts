@@ -50,24 +50,24 @@ export const DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_REGISTRY = [
     requiresEditEnabled: false,
   },
   {
-    id: DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD,
-    label: 'Build',
-    ariaLabel: 'Build mode',
-    iconifyIcon: 'mdi:hammer',
-    requiresEditEnabled: true,
-  },
-  {
     id: DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM,
     label: 'Claim',
     ariaLabel: 'Claim mode',
     iconifyIcon: 'mdi:land-plots',
     requiresEditEnabled: true,
   },
+  {
+    id: DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD,
+    label: 'Build',
+    ariaLabel: 'Build mode',
+    iconifyIcon: 'mdi:hammer',
+    requiresEditEnabled: true,
+  },
 ] as const satisfies readonly DefiningWorldPlazaHudToolbarModeDefinition[];
 
 /** Accessible label for the HUD toolbar mode badge row. */
 export const LABELING_WORLD_PLAZA_HUD_TOOLBAR_MODE_SWITCHER =
-  'Inventory, craft, build, or claim' as const;
+  'Inventory, craft, claim, or build' as const;
 
 /** Row layout for HUD toolbar mode badges above the bottom hotbar. */
 export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_SWITCHER_CLASS_NAME =

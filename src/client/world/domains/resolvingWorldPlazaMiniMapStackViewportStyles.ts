@@ -1,6 +1,8 @@
 import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
 import type { DefiningWorldPlazaMiniMapStackInventoryHotbarClearanceLayout } from '@/components/world/domains/definingWorldPlazaMiniMapStackConstants';
 import { resolvingWorldPlazaMiniMapStackViewportLayout } from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportLayout';
+import { DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_SHELL_GAP_BASE_PX } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import type { CSSProperties } from 'react';
 
 export type ResolvingWorldPlazaMiniMapStackViewportStylesParams = {
@@ -30,8 +32,17 @@ export function computingWorldPlazaInventoryHotbarOccupiedHeightPx(
     viewportHudScale,
     inventoryHotbarClearance.scale
   );
+  const gapPx = computingWorldPlazaViewportHudScaledPx(
+    DEFINING_WORLD_PLAZA_INVENTORY_SHELL_GAP_BASE_PX,
+    viewportHudScale,
+    inventoryHotbarClearance.scale
+  );
 
-  return slotPx + shellPaddingPx * 2;
+  const gridHeightPx =
+    slotPx * DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT +
+    gapPx * Math.max(0, DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT - 1);
+
+  return gridHeightPx + shellPaddingPx * 2;
 }
 
 /**

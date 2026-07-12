@@ -27,6 +27,8 @@ export interface RecordingWorldPlazaTerrainCollisionBlockerHitWhenMovementReduce
   placedBlocks?: DefiningWorldBuildingPlacedBlock[];
   /** Current player standing layer. */
   playerLayer?: number;
+  /** Player vertical body height in world layers. */
+  playerHeightWorldLayers?: number;
   /** Ledge lip relief context. */
   terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext;
 }

@@ -859,6 +859,11 @@ export function usingWorldPlazaPlayerHealth({
       isJumpingRef,
       localAvatarMotionStateRef,
       syncingMovePositionRef: syncingMovePositionRef ?? { current: null },
+      playerHeightWorldLayers: characterEngineDefinition
+        ? computingWorldPlazaCharacterEngineDerivedStats(
+            characterEngineDefinition
+          ).heightWorldLayers
+        : undefined,
     });
 
     let revivedState = revivingWorldPlazaEntityHealthToFull(

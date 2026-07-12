@@ -1,7 +1,9 @@
 import { checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock } from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
+import { DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import { DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_WATER_STREAM } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import {
   DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE,
+  DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_NONE,
   type DefiningWorldBuildingCollisionShape,
 } from '@/components/world/building/domains/definingWorldBuildingCollisionShape';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
@@ -16,6 +18,7 @@ import {
   type IndexingWorldBuildingPlacedBlocksByTile,
 } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import {
+  checkingWorldBuildingPlayerCircleOverlapsPlacedBlockCutColliders,
   checkingWorldBuildingPlacedBlockCutColliderBlocksPlayerCircle,
   pushingWorldBuildingPlayerCircleOutsidePlacedBlockCutColliders,
 } from '@/components/world/building/domains/resolvingWorldBuildingCutFootprintCollision';
@@ -45,6 +48,39 @@ import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/co
 
 /** Below this grid distance the push direction is treated as degenerate. */
 const RESOLVING_WORLD_BUILDING_COLLISION_MIN_PUSH_DISTANCE = 1e-4;
+
+/**
+ * Passable floor tops still have physical underside volume when elevated.
+ * They block only when they intersect the body as a ceiling, not when they are
+ * a reachable step or the support under the player's feet.
+ */
+function checkingWorldBuildingPassableBlockOverheadVolumeBlocksPlayer(
+  block: DefiningWorldBuildingPlacedBlock,
+  collisionShape: DefiningWorldBuildingCollisionShape,
+  applyBlockCollision: boolean,
+  playerLayer: number,
+  playerHeightWorldLayers: number
+): boolean {
+  if (
+    !applyBlockCollision ||
+    collisionShape.kind !== DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_NONE ||
+    checkingWorldBuildingPlacedBlockIsWalkableStep(block, playerLayer)
+  ) {
+    return false;
+  }
+
+  const blockLayer = resolvingWorldBuildingPlacedBlockWorldLayer(block);
+
+  return (
+    blockLayer > playerLayer &&
+    checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock(
+      playerLayer,
+      blockLayer,
+      resolvingWorldBuildingPlacedBlockBlockHeight(block),
+      playerHeightWorldLayers
+    )
+  );
+}
 
 /**
  * Returns placed blocks whose tile anchor lies within the search window.
@@ -86,6 +122,7 @@ export function listingWorldBuildingPlacedBlocksNearTileIndex(
  * @param applyBlockCollision - Whether full block collision is active.
  * @param isJumping - True while a jump animation is active.
  * @param playerLayer - Current player standing layer.
+ * @param playerHeightWorldLayers - Vertical body height used for clearance.
  */
 function checkingWorldBuildingPlacedBlockColliderBlocksPlayer(
   block: DefiningWorldBuildingPlacedBlock,
@@ -93,6 +130,7 @@ function checkingWorldBuildingPlacedBlockColliderBlocksPlayer(
   applyBlockCollision: boolean,
   isJumping: boolean,
   playerLayer: number,
+  playerHeightWorldLayers: number,
   blockIsOnPlayerStandingTile: boolean
 ): boolean {
   const blockLayer = resolvingWorldBuildingPlacedBlockWorldLayer(block);
@@ -106,7 +144,8 @@ function checkingWorldBuildingPlacedBlockColliderBlocksPlayer(
     !checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock(
       playerLayer,
       blockLayer,
-      blockHeight
+      blockHeight,
+      playerHeightWorldLayers
     )
   ) {
     return false;
@@ -214,6 +253,7 @@ function pushingWorldBuildingPointOutsidePlacedBlockCircle(
  * @param isJumping - True while a jump animation is active.
  * @param playerLayer - Current player standing layer.
  * @param playerRadiusGrid - Player footprint radius in grid tiles.
+ * @param playerHeightWorldLayers - Vertical body height used for clearance.
  */
 export function checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders(
   center: DefiningWorldPlazaWorldPoint,
@@ -221,7 +261,8 @@ export function checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders(
   applyBlockCollision: boolean,
   isJumping: boolean,
   playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(center),
-  playerRadiusGrid: number = DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID
+  playerRadiusGrid: number = DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
 ): boolean {
   const centerTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint(center);
   const nearbyBlocks = listingWorldBuildingPlacedBlocksNearTileIndex(
@@ -237,6 +278,23 @@ export function checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders(
 
     if (!collisionShape) {
       continue;
+    }
+
+    if (
+      checkingWorldBuildingPassableBlockOverheadVolumeBlocksPlayer(
+        block,
+        collisionShape,
+        applyBlockCollision,
+        playerLayer,
+        playerHeightWorldLayers
+      ) &&
+      checkingWorldBuildingPlayerCircleOverlapsPlacedBlockCutColliders(
+        center,
+        playerRadiusGrid,
+        block
+      )
+    ) {
+      return true;
     }
 
     if (
@@ -259,6 +317,7 @@ export function checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders(
             applyBlockCollision,
             isJumping,
             playerLayer,
+            playerHeightWorldLayers,
             blockIsOnPlayerStandingTile
           )
       )
@@ -277,13 +336,15 @@ export function checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders(
  * @param placedBlocks - Blocks near the avatar.
  * @param applyBlockCollision - Whether full block collision is active.
  * @param isJumping - True while a jump animation is active.
+ * @param playerHeightWorldLayers - Vertical body height used for clearance.
  */
 export function checkingWorldBuildingGridPointBlockedByPlacedBlocks(
   gridPoint: DefiningWorldPlazaWorldPoint,
   placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
   applyBlockCollision: boolean,
   isJumping: boolean,
-  playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(gridPoint)
+  playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(gridPoint),
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
 ): boolean {
   const standingTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(gridPoint);
@@ -314,6 +375,20 @@ export function checkingWorldBuildingGridPointBlockedByPlacedBlocks(
     }
 
     if (
+      checkingWorldBuildingPassableBlockOverheadVolumeBlocksPlayer(
+        block,
+        collisionShape,
+        applyBlockCollision,
+        playerLayer,
+        playerHeightWorldLayers
+      ) &&
+      block.tilePosition.tileX === standingTile.tileX &&
+      block.tilePosition.tileY === standingTile.tileY
+    ) {
+      return true;
+    }
+
+    if (
       collisionShape.kind ===
       DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE
     ) {
@@ -333,6 +408,7 @@ export function checkingWorldBuildingGridPointBlockedByPlacedBlocks(
             applyBlockCollision,
             isJumping,
             playerLayer,
+            playerHeightWorldLayers,
             blockIsOnPlayerStandingTile
           )
       )
@@ -351,13 +427,15 @@ export function checkingWorldBuildingGridPointBlockedByPlacedBlocks(
  * @param placedBlocks - Blocks near the avatar.
  * @param applyBlockCollision - Whether full block collision is active.
  * @param isJumping - True while a jump animation is active.
+ * @param playerHeightWorldLayers - Vertical body height used for clearance.
  */
 export function resolvingWorldBuildingPlacedBlockCollisionPushOut(
   desired: DefiningWorldPlazaWorldPoint,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   applyBlockCollision: boolean,
   isJumping: boolean,
-  playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(desired)
+  playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(desired),
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
 ): DefiningWorldPlazaWorldPoint {
   let resolvedX = desired.x;
   let resolvedY = desired.y;
@@ -377,12 +455,34 @@ export function resolvingWorldBuildingPlacedBlockCollisionPushOut(
       block.tilePosition.tileY === standingTile.tileY;
 
     if (
+      checkingWorldBuildingPassableBlockOverheadVolumeBlocksPlayer(
+        block,
+        collisionShape,
+        applyBlockCollision,
+        playerLayer,
+        playerHeightWorldLayers
+      )
+    ) {
+      const pushedPosition =
+        pushingWorldBuildingPlayerCircleOutsidePlacedBlockCutColliders(
+          { x: resolvedX, y: resolvedY },
+          DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
+          block,
+          DEFINING_WORLD_PLAZA_PLAYER_BLOCK_EJECT_TILE_EDGE_EXIT_EPSILON
+        );
+      resolvedX = pushedPosition.x;
+      resolvedY = pushedPosition.y;
+      continue;
+    }
+
+    if (
       !checkingWorldBuildingPlacedBlockColliderBlocksPlayer(
         block,
         collisionShape,
         applyBlockCollision,
         isJumping,
         playerLayer,
+        playerHeightWorldLayers,
         blockIsOnPlayerStandingTile
       )
     ) {
@@ -453,7 +553,8 @@ export function checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex(
   tileY: number,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   fromLayer: number,
-  jumpLayerReachMax?: number
+  jumpLayerReachMax?: number,
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
 ): boolean {
   if (
     checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex(
@@ -474,12 +575,24 @@ export function checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex(
       jumpLayerReachMax
     );
 
-  // Landing on a reachable support (ground under a floating roof, or a jumpable
-  // platform top) is allowed. Unreachable continuous towers stay blocked.
-  return !checkingWorldBuildingCanJumpLandOnSurfaceLayer(
-    fromLayer,
+  if (
+    !checkingWorldBuildingCanJumpLandOnSurfaceLayer(
+      fromLayer,
+      landableSurfaceLayer,
+      jumpLayerReachMax
+    )
+  ) {
+    return true;
+  }
+
+  // Reachable support still needs enough headroom for this character.
+  return checkingWorldBuildingGridPointBlockedByPlacedBlocks(
+    { x: tileX, y: tileY, layer: landableSurfaceLayer },
+    placedBlocks,
+    true,
+    false,
     landableSurfaceLayer,
-    jumpLayerReachMax
+    playerHeightWorldLayers
   );
 }
 
@@ -515,7 +628,8 @@ export function resolvingWorldBuildingJumpForwardGridDistanceClampedToWall(
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   fromLayer: number,
   landingSurfaceLayer: number,
-  jumpLayerReachMax?: number
+  jumpLayerReachMax?: number,
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
 ): number {
   if (
     landingSurfaceLayer > fromLayer &&
@@ -575,7 +689,8 @@ export function resolvingWorldBuildingJumpForwardGridDistanceClampedToWall(
         placedBlocks,
         true,
         false,
-        fromLayer
+        fromLayer,
+        playerHeightWorldLayers
       )
     ) {
       return lastClearDistance;

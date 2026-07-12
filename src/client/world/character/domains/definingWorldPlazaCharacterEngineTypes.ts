@@ -29,6 +29,8 @@ export type DefiningWorldPlazaCharacterEngineDefinition = {
   readonly size: {
     /** 1 = normal. Multiplies sprite scale, ground shadow, lava cover, collision. */
     readonly sizeScale: number;
+    /** Defaults to base player world-layer height × sizeScale when omitted. */
+    readonly heightWorldLayers?: number;
     /** Defaults to base player radius × sizeScale when omitted. */
     readonly collisionRadiusGrid?: number;
   };
@@ -68,6 +70,7 @@ export type ComputingWorldPlazaCharacterEngineDerivedStats = {
   readonly attackSpeed: number;
   readonly defense: number;
   readonly sizeScale: number;
+  readonly heightWorldLayers: number;
   readonly collisionRadiusGrid: number;
   readonly walkSpeedGridPerSecond: number;
   readonly runSpeedGridPerSecond: number;

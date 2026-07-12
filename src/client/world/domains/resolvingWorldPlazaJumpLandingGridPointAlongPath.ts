@@ -1,4 +1,5 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
   checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex,
   checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex,
@@ -194,7 +195,8 @@ function checkingWorldPlazaGridPointBlocksJumpLandingAtGridPoint(
   gridPoint: DefiningWorldPlazaWorldPoint,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   fromLayer: number,
-  jumpLayerReachMax?: number
+  jumpLayerReachMax?: number,
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
 ): boolean {
   const standingTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(gridPoint);
@@ -209,7 +211,8 @@ function checkingWorldPlazaGridPointBlocksJumpLandingAtGridPoint(
       standingTile.tileY,
       placedBlocks,
       fromLayer,
-      jumpLayerReachMax
+      jumpLayerReachMax,
+      playerHeightWorldLayers
     )
   );
 }
@@ -225,7 +228,8 @@ function checkingWorldPlazaGridPointBlocksJumpLandingExceptWaterAtGridPoint(
   gridPoint: DefiningWorldPlazaWorldPoint,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   fromLayer: number,
-  jumpLayerReachMax?: number
+  jumpLayerReachMax?: number,
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
 ): boolean {
   if (
     checkingWorldPlazaGridPointOccupiesJumpLandingWaterAtGridPoint(
@@ -247,7 +251,8 @@ function checkingWorldPlazaGridPointBlocksJumpLandingExceptWaterAtGridPoint(
     standingTile.tileY,
     placedBlocks,
     fromLayer,
-    jumpLayerReachMax
+    jumpLayerReachMax,
+    playerHeightWorldLayers
   );
 }
 
@@ -311,7 +316,8 @@ function findingWorldPlazaJumpLandingFarBankCandidateAlongPath(
   maxForwardGridDistance: number,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   fromLayer: number,
-  jumpLayerReachMax?: number
+  jumpLayerReachMax?: number,
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
 ): ResolvingWorldPlazaJumpLandingFarBankCandidate | null {
   const startTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(startGridPoint);
@@ -437,7 +443,8 @@ export function resolvingWorldPlazaJumpLandingGridPointAlongPath(
   maxForwardGridDistance: number,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   fromLayer: number,
-  jumpLayerReachMax?: number
+  jumpLayerReachMax?: number,
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
 ): ResolvingWorldPlazaJumpLandingGridPointAlongPathResult | null {
   const intendedLandingGridPoint: DefiningWorldPlazaWorldPoint = {
     x: startGridPoint.x + gridDirection.x * maxForwardGridDistance,
@@ -449,7 +456,8 @@ export function resolvingWorldPlazaJumpLandingGridPointAlongPath(
       intendedLandingGridPoint,
       placedBlocks,
       fromLayer,
-      jumpLayerReachMax
+      jumpLayerReachMax,
+      playerHeightWorldLayers
     )
   ) {
     return buildingWorldPlazaJumpLandingGridPointAlongPathResult(
@@ -478,7 +486,8 @@ export function resolvingWorldPlazaJumpLandingGridPointAlongPath(
       maxForwardGridDistance,
       placedBlocks,
       fromLayer,
-      jumpLayerReachMax
+      jumpLayerReachMax,
+      playerHeightWorldLayers
     );
 
   if (farBankCandidate) {

@@ -2,6 +2,7 @@ import { checkingWorldBuildingPlacedBlockIsPassableTileSurfaceOverlay } from '@/
 import { computingWorldBuildingBlockSideFillColor } from '@/components/world/building/domains/computingWorldBuildingBlockSideFillColor';
 import { resolvingWorldBuildingPlacedBlockExtrusionRenderParams } from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
 import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
+import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import { clampingWorldBuildingBlockHeight } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
@@ -15,12 +16,13 @@ import {
   normalizingWorldBuildingCutFootprintMask,
   type DefiningWorldBuildingCutGridAxisCellCount,
 } from '@/components/world/building/domains/definingWorldBuildingCutFootprintConstants';
-import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
+  creatingWorldBuildingPlacedBlock,
   resolvingWorldBuildingPlacedBlockBlockHeight,
   resolvingWorldBuildingPlacedBlockCutFootprintMask,
   resolvingWorldBuildingPlacedBlockCutGridAxisCellCount,
   resolvingWorldBuildingPlacedBlockWorldLayer,
+  type DefiningWorldBuildingPlacedBlock,
 } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_MIN_COLUMN_SPAN_LAYERS } from '@/components/world/building/domains/definingWorldBuildingPlacedBlockGroundShadowConstants';
 import {
@@ -397,8 +399,185 @@ export function drawingWorldBuildingPlacedBlocksOnGraphics(
   }
 }
 
+/** Preview valid wash color (placement allowed). */
+const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALID_FILL_COLOR = 0x66ff66;
+
+/** Preview invalid wash color (placement blocked). */
+const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_INVALID_FILL_COLOR = 0xff3366;
+
+/** Material ghost fill alpha for flat tiles. */
+const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_FLAT_FILL_ALPHA = 0.72;
+
+/** Material ghost stroke alpha for flat tiles. */
+const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_FLAT_STROKE_ALPHA = 0.9;
+
+/** Material ghost side alpha for extruded columns. */
+const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_SIDE_FILL_ALPHA = 0.7;
+
+/** Material ghost top fill alpha for extruded columns. */
+const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_TOP_FILL_ALPHA = 0.78;
+
+/** Material ghost top stroke alpha for extruded columns. */
+const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_TOP_STROKE_ALPHA = 0.9;
+
+/** Validity wash alpha drawn over the material ghost. */
+const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_WASH_ALPHA = 0.22;
+
+/** Validity outline alpha drawn over the material ghost. */
+const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_STROKE_ALPHA = 0.95;
+
+/** Synthetic ids for the ephemeral placement-preview block entity. */
+const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_SYNTHETIC_ID =
+  'placement-preview' as const;
+
+type DrawingWorldBuildingPlacementPreviewGeometryParams = {
+  readonly graphics: Graphics;
+  readonly tileX: number;
+  readonly tileY: number;
+  readonly worldLayer: number;
+  readonly blockHeightLayers: number;
+  readonly cutFootprintMask: number;
+  readonly cutGridAxisCellCount: DefiningWorldBuildingCutGridAxisCellCount;
+  readonly topFillColor: number;
+  readonly strokeColor: number;
+  readonly sideFillColor: number;
+  readonly topFillAlpha: number;
+  readonly sideFillAlpha: number;
+  readonly topStrokeAlpha: number;
+  readonly drawGroundShadow: boolean;
+};
+
 /**
- * Draws a hover preview column for build mode placement.
+ * Draws placement preview geometry (flat tile, cut footprint, or extrusion).
+ */
+function drawingWorldBuildingPlacementPreviewGeometryOnGraphics(
+  params: DrawingWorldBuildingPlacementPreviewGeometryParams
+): void {
+  const isCutFootprint = !checkingWorldBuildingCutFootprintIsFull(
+    params.cutFootprintMask,
+    params.cutGridAxisCellCount
+  );
+  const usesFlatTile =
+    params.blockHeightLayers === 0 ||
+    (params.worldLayer === DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND &&
+      params.blockHeightLayers <= 1);
+
+  if (isCutFootprint) {
+    if (usesFlatTile) {
+      drawingWorldBuildingCutFootprintFlatTilesOnGraphics({
+        graphics: params.graphics,
+        tileX: params.tileX,
+        tileY: params.tileY,
+        worldLayer: params.worldLayer,
+        cutFootprintMask: params.cutFootprintMask,
+        cutGridAxisCellCount: params.cutGridAxisCellCount,
+        topFillColor: params.topFillColor,
+        strokeColor: params.strokeColor,
+        topFillAlpha: params.topFillAlpha,
+        topStrokeAlpha: params.topStrokeAlpha,
+      });
+      return;
+    }
+
+    drawingWorldBuildingCutFootprintExtrusionColumnsOnGraphics({
+      graphics: params.graphics,
+      tileX: params.tileX,
+      tileY: params.tileY,
+      worldLayer: params.worldLayer,
+      blockHeightLayers: params.blockHeightLayers,
+      cutFootprintMask: params.cutFootprintMask,
+      cutGridAxisCellCount: params.cutGridAxisCellCount,
+      topFillColor: params.topFillColor,
+      strokeColor: params.strokeColor,
+      sideFillColor: params.sideFillColor,
+      sideFillAlpha: params.sideFillAlpha,
+      topFillAlpha: params.topFillAlpha,
+      topStrokeAlpha: params.topStrokeAlpha,
+    });
+    return;
+  }
+
+  if (usesFlatTile) {
+    drawingWorldBuildingFlatWorldLayerTileOnGraphics({
+      graphics: params.graphics,
+      tileX: params.tileX,
+      tileY: params.tileY,
+      worldLayer: params.worldLayer,
+      fillColor: params.topFillColor,
+      strokeColor: params.strokeColor,
+      fillAlpha: params.topFillAlpha,
+      strokeAlpha: params.topStrokeAlpha,
+    });
+    return;
+  }
+
+  if (
+    params.drawGroundShadow &&
+    params.blockHeightLayers >=
+      DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_MIN_COLUMN_SPAN_LAYERS
+  ) {
+    drawingWorldBuildingIsometricTileColumnGroundShadowOnGraphics({
+      graphics: params.graphics,
+      tileX: params.tileX,
+      tileY: params.tileY,
+      columnSpanLayers: params.blockHeightLayers,
+    });
+  }
+
+  drawingWorldBuildingIsometricTileColumnExtrusionSpanOnGraphics({
+    graphics: params.graphics,
+    tileX: params.tileX,
+    tileY: params.tileY,
+    worldLayer: params.worldLayer,
+    blockHeightLayers: params.blockHeightLayers,
+    topFillColor: params.topFillColor,
+    strokeColor: params.strokeColor,
+    sideFillColor: params.sideFillColor,
+    sideFillAlpha: params.sideFillAlpha,
+    topFillAlpha: params.topFillAlpha,
+    topStrokeAlpha: params.topStrokeAlpha,
+  });
+}
+
+/**
+ * Draws a flat circle / marker sprite ghost for non-column preview blocks.
+ */
+function drawingWorldBuildingPlacementPreviewFlatSpriteOnGraphics(
+  graphics: Graphics,
+  tileX: number,
+  tileY: number,
+  worldLayer: number,
+  fillColor: number,
+  strokeColor: number,
+  radiusPx: number,
+  fillAlpha: number,
+  strokeAlpha: number
+): void {
+  const center = convertingWorldPlazaGridPointToIsometricScreenPoint({
+    x: tileX,
+    y: tileY,
+  });
+  const centerY =
+    center.y + computingWorldBuildingWorldLayerScreenOffsetPx(worldLayer);
+
+  graphics
+    .circle(center.x, centerY, radiusPx)
+    .fill({
+      color: fillColor,
+      alpha: fillAlpha,
+    })
+    .stroke({
+      color: strokeColor,
+      width: 1.5,
+      alpha: strokeAlpha,
+    });
+}
+
+/**
+ * Draws a hover preview for build mode placement using the selected material.
+ *
+ * Renders a translucent ghost of the block (colors + procedural textures), then
+ * a light green/red wash so valid vs blocked tiles stay obvious.
  *
  * @param graphics - Target graphics instance.
  * @param tileX - Preview tile column.
@@ -406,28 +585,10 @@ export function drawingWorldBuildingPlacedBlocksOnGraphics(
  * @param isValid - Whether placement is allowed at the preview tile.
  * @param worldLayer - Target world layer (L).
  * @param blockHeightLayers - Downward extrusion height (H).
+ * @param cutFootprintMask - Optional top-cut footprint mask.
+ * @param cutGridAxisCellCount - Cut grid axis size for the footprint mask.
+ * @param definitionId - Selected palette block definition id.
  */
-/** Preview valid fill color for flat ground tiles. */
-const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALID_FILL_COLOR = 0x66ff66;
-
-/** Preview invalid fill color for flat ground tiles. */
-const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_INVALID_FILL_COLOR = 0xff3366;
-
-/** Preview fill alpha for flat ground tiles. */
-const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_FLAT_FILL_ALPHA = 0.3;
-
-/** Preview stroke alpha for flat ground tiles. */
-const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_FLAT_STROKE_ALPHA = 0.85;
-
-/** Preview stroke alpha for extruded block previews. */
-const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_COLUMN_TOP_STROKE_ALPHA = 0.85;
-
-/** Preview side alpha for extruded block previews. */
-const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_COLUMN_SIDE_FILL_ALPHA = 0.85;
-
-/** Preview top alpha for extruded block previews. */
-const DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_COLUMN_TOP_FILL_ALPHA = 0.8;
-
 export function drawingWorldBuildingPlacementPreviewOnGraphics(
   graphics: Graphics,
   tileX: number,
@@ -436,9 +597,10 @@ export function drawingWorldBuildingPlacementPreviewOnGraphics(
   worldLayer: number = DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT,
   blockHeightLayers = 1,
   cutFootprintMask: number = DEFINING_WORLD_BUILDING_CUT_FOOTPRINT_FULL_MASK,
-  cutGridAxisCellCount: DefiningWorldBuildingCutGridAxisCellCount = DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT
+  cutGridAxisCellCount: DefiningWorldBuildingCutGridAxisCellCount = DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT,
+  definitionId: DefiningWorldBuildingBlockDefinitionId | null = null
 ): void {
-  const previewFillColor = isValid
+  const validityTintColor = isValid
     ? DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALID_FILL_COLOR
     : DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_INVALID_FILL_COLOR;
   const clampedBlockHeightLayers = clampingWorldBuildingBlockHeight(
@@ -449,52 +611,168 @@ export function drawingWorldBuildingPlacementPreviewOnGraphics(
     cutFootprintMask,
     cutGridAxisCellCount
   );
-  const isCutFootprintPreview = !checkingWorldBuildingCutFootprintIsFull(
+  const definition = definitionId
+    ? resolvingWorldBuildingBlockDefinition(definitionId)
+    : null;
+
+  if (!definition) {
+    drawingWorldBuildingPlacementPreviewGeometryOnGraphics({
+      graphics,
+      tileX,
+      tileY,
+      worldLayer,
+      blockHeightLayers: clampedBlockHeightLayers,
+      cutFootprintMask: normalizedCutFootprintMask,
+      cutGridAxisCellCount,
+      topFillColor: validityTintColor,
+      strokeColor: validityTintColor,
+      sideFillColor:
+        computingWorldBuildingBlockSideFillColor(validityTintColor),
+      topFillAlpha:
+        DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_FLAT_FILL_ALPHA,
+      sideFillAlpha:
+        DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_SIDE_FILL_ALPHA,
+      topStrokeAlpha:
+        DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_STROKE_ALPHA,
+      drawGroundShadow: true,
+    });
+    drawingWorldBuildingPlacementGuideToFloorOnGraphics({
+      graphics,
+      tileX,
+      tileY,
+      worldLayer,
+    });
+    return;
+  }
+
+  const previewBlock = creatingWorldBuildingPlacedBlock({
+    blockId: DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_SYNTHETIC_ID,
+    plotId: DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_SYNTHETIC_ID,
+    definitionId: definition.id,
+    tilePosition: { tileX, tileY },
+    worldLayer,
+    blockHeight: clampedBlockHeightLayers,
+    cutFootprintMask: normalizedCutFootprintMask,
+    cutGridAxisCellCount,
+    ownerId: DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_SYNTHETIC_ID,
+    placedAt: '1970-01-01T00:00:00.000Z',
+  });
+  const visualColors = resolvingWorldBuildingPlacedBlockVisualColors(
+    previewBlock,
+    definition
+  );
+  const materialSideFillColor = computingWorldBuildingBlockSideFillColor(
+    visualColors.fillColor
+  );
+  const isCutFootprint = !checkingWorldBuildingCutFootprintIsFull(
     normalizedCutFootprintMask,
     cutGridAxisCellCount
   );
-  const usesFlatPreview =
-    clampedBlockHeightLayers === 0 ||
-    (worldLayer === DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND &&
-      clampedBlockHeightLayers <= 1);
+  const usesFlatTileRendering =
+    checkingWorldBuildingPlacedBlockUsesFlatTileRendering(
+      definition,
+      worldLayer,
+      clampedBlockHeightLayers
+    );
+  const usesTileColumnExtrusion =
+    checkingWorldBuildingBlockUsesTileColumnExtrusion(definition);
+  const extrusionRenderParams = usesTileColumnExtrusion
+    ? resolvingWorldBuildingPlacedBlockExtrusionRenderParams(previewBlock)
+    : null;
 
-  if (isCutFootprintPreview) {
-    if (usesFlatPreview) {
-      drawingWorldBuildingCutFootprintFlatTilesOnGraphics({
-        graphics,
-        tileX,
-        tileY,
-        worldLayer,
-        cutFootprintMask: normalizedCutFootprintMask,
-        cutGridAxisCellCount,
-        topFillColor: previewFillColor,
-        strokeColor: previewFillColor,
-        topFillAlpha: DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_FLAT_FILL_ALPHA,
-        topStrokeAlpha:
-          DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_FLAT_STROKE_ALPHA,
-      });
-    } else {
-      drawingWorldBuildingCutFootprintExtrusionColumnsOnGraphics({
-        graphics,
-        tileX,
-        tileY,
-        worldLayer,
-        blockHeightLayers: clampedBlockHeightLayers,
-        cutFootprintMask: normalizedCutFootprintMask,
-        cutGridAxisCellCount,
-        topFillColor: previewFillColor,
-        strokeColor: previewFillColor,
-        sideFillColor:
-          computingWorldBuildingBlockSideFillColor(previewFillColor),
-        sideFillAlpha:
-          DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_COLUMN_SIDE_FILL_ALPHA,
-        topFillAlpha:
-          DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_COLUMN_TOP_FILL_ALPHA,
-        topStrokeAlpha:
-          DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_COLUMN_TOP_STROKE_ALPHA,
-      });
-    }
+  if (usesFlatTileRendering) {
+    drawingWorldBuildingPlacementPreviewGeometryOnGraphics({
+      graphics,
+      tileX,
+      tileY,
+      worldLayer,
+      blockHeightLayers: clampedBlockHeightLayers,
+      cutFootprintMask: normalizedCutFootprintMask,
+      cutGridAxisCellCount,
+      topFillColor: visualColors.fillColor,
+      strokeColor: visualColors.strokeColor,
+      sideFillColor: materialSideFillColor,
+      topFillAlpha:
+        DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_FLAT_FILL_ALPHA,
+      sideFillAlpha:
+        DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_SIDE_FILL_ALPHA,
+      topStrokeAlpha:
+        DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_FLAT_STROKE_ALPHA,
+      drawGroundShadow: false,
+    });
+    drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics(
+      graphics,
+      previewBlock,
+      definition,
+      isCutFootprint
+        ? {
+            cutFootprintMask: normalizedCutFootprintMask,
+            cutGridAxisCellCount,
+          }
+        : undefined
+    );
+  } else if (usesTileColumnExtrusion && extrusionRenderParams) {
+    drawingWorldBuildingPlacementPreviewGeometryOnGraphics({
+      graphics,
+      tileX,
+      tileY,
+      worldLayer: extrusionRenderParams.topWorldLayer,
+      blockHeightLayers: extrusionRenderParams.blockHeightLayers,
+      cutFootprintMask: normalizedCutFootprintMask,
+      cutGridAxisCellCount,
+      topFillColor: visualColors.fillColor,
+      strokeColor: visualColors.strokeColor,
+      sideFillColor: materialSideFillColor,
+      topFillAlpha:
+        DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_TOP_FILL_ALPHA,
+      sideFillAlpha:
+        DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_SIDE_FILL_ALPHA,
+      topStrokeAlpha:
+        DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_TOP_STROKE_ALPHA,
+      drawGroundShadow: true,
+    });
+    drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics(
+      graphics,
+      previewBlock,
+      definition,
+      isCutFootprint
+        ? {
+            cutFootprintMask: normalizedCutFootprintMask,
+            cutGridAxisCellCount,
+          }
+        : undefined
+    );
+  } else if (checkingWorldBuildingBlockUsesFlatPlacedBlockSprite(definition)) {
+    const radiusGrid =
+      definition.collisionShape.kind ===
+      DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE
+        ? (definition.collisionShape.radiusGrid ?? 0.35)
+        : 0.2;
+    const radiusPx =
+      radiusGrid * DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
 
+    drawingWorldBuildingPlacementPreviewFlatSpriteOnGraphics(
+      graphics,
+      tileX,
+      tileY,
+      worldLayer,
+      visualColors.fillColor,
+      visualColors.strokeColor,
+      radiusPx,
+      DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_FLAT_FILL_ALPHA,
+      DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_FLAT_STROKE_ALPHA
+    );
+    drawingWorldBuildingPlacementPreviewFlatSpriteOnGraphics(
+      graphics,
+      tileX,
+      tileY,
+      worldLayer,
+      validityTintColor,
+      validityTintColor,
+      radiusPx,
+      DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_WASH_ALPHA,
+      DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_STROKE_ALPHA
+    );
     drawingWorldBuildingPlacementGuideToFloorOnGraphics({
       graphics,
       tileX,
@@ -502,79 +780,60 @@ export function drawingWorldBuildingPlacementPreviewOnGraphics(
       worldLayer,
     });
     return;
-  }
-
-  if (clampedBlockHeightLayers === 0) {
-    drawingWorldBuildingFlatWorldLayerTileOnGraphics({
+  } else {
+    drawingWorldBuildingPlacementPreviewGeometryOnGraphics({
       graphics,
       tileX,
       tileY,
       worldLayer,
-      fillColor: previewFillColor,
-      strokeColor: previewFillColor,
-      fillAlpha: DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_FLAT_FILL_ALPHA,
-      strokeAlpha: DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_FLAT_STROKE_ALPHA,
-    });
-    drawingWorldBuildingPlacementGuideToFloorOnGraphics({
-      graphics,
-      tileX,
-      tileY,
-      worldLayer,
-    });
-    return;
-  }
-
-  if (
-    worldLayer === DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND &&
-    clampedBlockHeightLayers <= 1
-  ) {
-    drawingWorldBuildingFlatWorldLayerTileOnGraphics({
-      graphics,
-      tileX,
-      tileY,
-      worldLayer,
-      fillColor: previewFillColor,
-      strokeColor: previewFillColor,
-      fillAlpha: DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_FLAT_FILL_ALPHA,
-      strokeAlpha: DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_FLAT_STROKE_ALPHA,
-    });
-    return;
-  }
-
-  if (
-    clampedBlockHeightLayers >=
-    DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_MIN_COLUMN_SPAN_LAYERS
-  ) {
-    drawingWorldBuildingIsometricTileColumnGroundShadowOnGraphics({
-      graphics,
-      tileX,
-      tileY,
-      columnSpanLayers: clampedBlockHeightLayers,
+      blockHeightLayers: clampedBlockHeightLayers,
+      cutFootprintMask: normalizedCutFootprintMask,
+      cutGridAxisCellCount,
+      topFillColor: visualColors.fillColor,
+      strokeColor: visualColors.strokeColor,
+      sideFillColor: materialSideFillColor,
+      topFillAlpha:
+        DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_FLAT_FILL_ALPHA,
+      sideFillAlpha:
+        DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_SIDE_FILL_ALPHA,
+      topStrokeAlpha:
+        DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_MATERIAL_FLAT_STROKE_ALPHA,
+      drawGroundShadow: true,
     });
   }
 
-  drawingWorldBuildingIsometricTileColumnExtrusionSpanOnGraphics({
+  const washWorldLayer =
+    !usesFlatTileRendering && extrusionRenderParams
+      ? extrusionRenderParams.topWorldLayer
+      : worldLayer;
+  const washBlockHeight =
+    !usesFlatTileRendering && extrusionRenderParams
+      ? extrusionRenderParams.blockHeightLayers
+      : clampedBlockHeightLayers;
+
+  drawingWorldBuildingPlacementPreviewGeometryOnGraphics({
     graphics,
     tileX,
     tileY,
-    worldLayer,
-    blockHeightLayers: clampedBlockHeightLayers,
-    topFillColor: previewFillColor,
-    strokeColor: previewFillColor,
-    sideFillColor: computingWorldBuildingBlockSideFillColor(previewFillColor),
-    sideFillAlpha:
-      DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_COLUMN_SIDE_FILL_ALPHA,
-    topFillAlpha:
-      DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_COLUMN_TOP_FILL_ALPHA,
+    worldLayer: washWorldLayer,
+    blockHeightLayers: washBlockHeight,
+    cutFootprintMask: normalizedCutFootprintMask,
+    cutGridAxisCellCount,
+    topFillColor: validityTintColor,
+    strokeColor: validityTintColor,
+    sideFillColor: computingWorldBuildingBlockSideFillColor(validityTintColor),
+    topFillAlpha: DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_WASH_ALPHA,
+    sideFillAlpha: DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_WASH_ALPHA,
     topStrokeAlpha:
-      DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_COLUMN_TOP_STROKE_ALPHA,
+      DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_STROKE_ALPHA,
+    drawGroundShadow: false,
   });
 
   drawingWorldBuildingPlacementGuideToFloorOnGraphics({
     graphics,
     tileX,
     tileY,
-    worldLayer,
+    worldLayer: washWorldLayer,
   });
 }
 

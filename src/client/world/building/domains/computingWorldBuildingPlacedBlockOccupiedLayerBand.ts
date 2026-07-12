@@ -3,7 +3,7 @@ import {
   clampingWorldBuildingBlockHeight,
   DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_METADATA_KEY,
   DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_TILE,
-  DEFINING_WORLD_PLAZA_PLAYER_WALK_COLLISION_HEIGHT_WORLD_LAYERS,
+  DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
   type DefiningWorldBuildingWorldLayerBand,
 } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
@@ -185,22 +185,21 @@ export function resolvingWorldBuildingPlacedBlockExtrusionRenderParams(
 }
 
 /**
- * Returns the inclusive world-layer band used for walk collision at one foot
- * layer. Intentionally feet-only so roofs above the standing tile do not block.
+ * Returns the inclusive world-layer band occupied by a standing player.
  *
  * @param feetWorldLayer - Layer the player is standing on.
+ * @param playerHeightWorldLayers - Vertical body height used for clearance.
  */
 export function computingWorldBuildingPlayerOccupiedLayerBand(
-  feetWorldLayer: number
+  feetWorldLayer: number,
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
 ): DefiningWorldBuildingWorldLayerBand {
   const feetLayer = clampingWorldBuildingWorldLayer(feetWorldLayer);
+  const heightWorldLayers = Math.max(0.1, playerHeightWorldLayers);
 
   return {
     bottomLayer: feetLayer,
-    topLayer:
-      feetLayer +
-      DEFINING_WORLD_PLAZA_PLAYER_WALK_COLLISION_HEIGHT_WORLD_LAYERS -
-      1,
+    topLayer: feetLayer + heightWorldLayers - 1,
   };
 }
 
@@ -227,18 +226,23 @@ export function checkingWorldBuildingWorldLayerBandsOverlap(
  * @param feetWorldLayer - Player standing layer.
  * @param blockTopWorldLayer - Block top anchor layer (L).
  * @param blockHeightLayers - Block extrusion height (H).
+ * @param playerHeightWorldLayers - Vertical body height used for clearance.
  */
 export function checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock(
   feetWorldLayer: number,
   blockTopWorldLayer: number,
-  blockHeightLayers: number
+  blockHeightLayers: number,
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
 ): boolean {
   if (checkingWorldBuildingPlacedBlockIsPassableTile(blockHeightLayers)) {
     return false;
   }
 
   return checkingWorldBuildingWorldLayerBandsOverlap(
-    computingWorldBuildingPlayerOccupiedLayerBand(feetWorldLayer),
+    computingWorldBuildingPlayerOccupiedLayerBand(
+      feetWorldLayer,
+      playerHeightWorldLayers
+    ),
     computingWorldBuildingPlacedBlockOccupiedLayerBand(
       blockTopWorldLayer,
       blockHeightLayers

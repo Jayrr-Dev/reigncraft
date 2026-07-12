@@ -8,6 +8,7 @@ import type {
   ComputingWorldPlazaCharacterEngineDerivedStats,
   DefiningWorldPlazaCharacterEngineDefinition,
 } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
+import { DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_GRID_RUN_SPEED_PER_SECOND,
   DEFINING_WORLD_PLAZA_ISOMETRIC_GRID_WALK_SPEED_PER_SECOND,
@@ -58,6 +59,9 @@ export function computingWorldPlazaCharacterEngineDerivedStats(
         level
       ),
     sizeScale,
+    heightWorldLayers:
+      size.heightWorldLayers ??
+      DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS * sizeScale,
     collisionRadiusGrid:
       size.collisionRadiusGrid ??
       DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID * sizeScale,

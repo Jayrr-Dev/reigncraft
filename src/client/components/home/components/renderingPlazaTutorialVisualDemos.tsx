@@ -32,7 +32,7 @@ import {
   DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_FILL_COLOR,
 } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerIndicatorViewportStyles';
 import { resolvingWorldPlazaHungerTierSpriteIconStyle } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerTierSpriteIconStyle';
-import { DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_MAIN_HOTBAR_SLOT_COUNT } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import { cn } from '@/lib/utils';
 import type { CSSProperties } from 'react';
 
@@ -1463,8 +1463,8 @@ export function RenderingPlazaTutorialInventoryDemo({
 
       <p className="text-center text-xs font-medium text-ink-soft">
         {isMobile
-          ? `Tap a slot to see item actions. Choose Drop, then tap the ground to place items from your ${DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY} hotbar slots.`
-          : `Click a slot to see item actions. Choose Drop, then click the ground to place items from your ${DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY} hotbar slots.`}
+          ? `Tap a slot to see item actions. Choose Drop, then tap the ground to place items from your ${DEFINING_WORLD_PLAZA_INVENTORY_MAIN_HOTBAR_SLOT_COUNT} hotbar slots.`
+          : `Click a slot to see item actions. Choose Drop, then click the ground to place items from your ${DEFINING_WORLD_PLAZA_INVENTORY_MAIN_HOTBAR_SLOT_COUNT} hotbar slots.`}
       </p>
     </div>
   );

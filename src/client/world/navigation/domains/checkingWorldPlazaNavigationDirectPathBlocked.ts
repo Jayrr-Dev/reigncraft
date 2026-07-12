@@ -14,6 +14,7 @@ export type CheckingWorldPlazaNavigationDirectPathBlockedParams = {
   readonly to: DefiningWorldPlazaWorldPoint;
   readonly placedBlocks?: readonly DefiningWorldBuildingPlacedBlock[];
   readonly isJumping?: boolean;
+  readonly playerHeightWorldLayers?: number;
 };
 
 /**
@@ -24,12 +25,14 @@ export function checkingWorldPlazaNavigationDirectPathBlocked({
   to,
   placedBlocks = [],
   isJumping = false,
+  playerHeightWorldLayers,
 }: CheckingWorldPlazaNavigationDirectPathBlockedParams): boolean {
   const clampedTarget = clampingWorldCollisionWalkTargetToWalkableGridPoint(
     from,
     to,
     isJumping,
-    [...placedBlocks]
+    [...placedBlocks],
+    playerHeightWorldLayers
   );
 
   return (

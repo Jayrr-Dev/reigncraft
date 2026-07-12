@@ -69,6 +69,10 @@ export interface TrackingWorldPlazaClickMovementTargetParams {
   isPlayerStunnedRef?: React.RefObject<boolean>;
   /** Player-placed blocks used for navigation path planning. */
   placedBlocksRef?: React.RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
+  /** Player footprint radius used by navigation probes. */
+  playerRadiusGrid: number;
+  /** Player vertical body height used for roof clearance. */
+  playerHeightWorldLayers: number;
 }
 
 export interface TrackingWorldPlazaClickMovementTargetResult {
@@ -138,6 +142,8 @@ export function trackingWorldPlazaClickMovementTarget({
   isPlayerAsleepRef,
   isPlayerStunnedRef,
   placedBlocksRef,
+  playerRadiusGrid,
+  playerHeightWorldLayers,
 }: TrackingWorldPlazaClickMovementTargetParams): TrackingWorldPlazaClickMovementTargetResult {
   const performanceProfile = usingWorldPlazaPerformanceProfile();
   const walkTargetRef = useRef<DefiningWorldPlazaWorldPoint | null>(null);
@@ -197,6 +203,8 @@ export function trackingWorldPlazaClickMovementTarget({
         placedBlocks,
         placedBlocksByTile: placedBlocksScene?.blocksByTile,
         isJumping: isJumpingRef.current,
+        playerRadiusGrid,
+        playerHeightWorldLayers,
         maxNodeExpansions: performanceProfile.navigationMaxNodeExpansions,
       });
       settingWorldPlazaPerformanceDiagnosticsGauge(
@@ -229,6 +237,8 @@ export function trackingWorldPlazaClickMovementTarget({
       isJumpingRef,
       performanceProfile.navigationMaxNodeExpansions,
       placedBlocksRef,
+      playerHeightWorldLayers,
+      playerRadiusGrid,
       playerPositionRef,
     ]
   );
@@ -297,10 +307,18 @@ export function trackingWorldPlazaClickMovementTarget({
 
       return clampingWorldCollisionWalkTargetToWalkableGridPoint(
         playerPosition,
-        targetGrid
+        targetGrid,
+        isJumpingRef.current,
+        [...(placedBlocksRef?.current.blocks ?? [])],
+        playerHeightWorldLayers
       );
     },
-    [playerPositionRef]
+    [
+      isJumpingRef,
+      placedBlocksRef,
+      playerHeightWorldLayers,
+      playerPositionRef,
+    ]
   );
 
   const resolvingPlazaClickTargetFromEvent = useCallback(

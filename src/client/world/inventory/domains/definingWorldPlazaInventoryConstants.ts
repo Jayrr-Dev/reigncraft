@@ -12,8 +12,40 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import type { DefiningWorldPlazaInventoryDemoSeedItem } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 
-/** Number of hotbar slots. */
-export const DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY = 5 as const;
+/** Columns per inventory row (main hotbar and each storage page). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS = 5 as const;
+
+/** Always-visible main hotbar row count. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_MAIN_ROW_COUNT = 1 as const;
+
+/** Extra storage rows behind the page arrows (paged {@link DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS} at a time). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_ROW_COUNT = 2 as const;
+
+/** Visible rows in the hotbar chrome (main + one storage page). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT = 2 as const;
+
+/** Slots shown per storage page (one row). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_PAGE_SIZE =
+  DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS;
+
+/** Main hotbar slot count (row 1; always visible; equippable). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_MAIN_HOTBAR_SLOT_COUNT =
+  DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS *
+  DEFINING_WORLD_PLAZA_INVENTORY_MAIN_ROW_COUNT;
+
+/** Total inventory slots: main row + storage rows. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY =
+  DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS *
+  (DEFINING_WORLD_PLAZA_INVENTORY_MAIN_ROW_COUNT +
+    DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_ROW_COUNT);
+
+/** First slot index of storage (row 2+). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_SLOT_START =
+  DEFINING_WORLD_PLAZA_INVENTORY_MAIN_HOTBAR_SLOT_COUNT;
+
+/** Number of storage pages (one page per storage row). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_PAGE_COUNT =
+  DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_ROW_COUNT;
 
 /**
  * Far-left hotbar slot reserved for weapons and tools only.
@@ -67,6 +99,28 @@ export const STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME =
 /** Accessible label for the inventory hotbar. */
 export const LABELING_WORLD_PLAZA_INVENTORY_HOTBAR =
   'Inventory hotbar' as const;
+
+/** Accessible label for paging storage up (toward earlier storage rows). */
+export const LABELING_WORLD_PLAZA_INVENTORY_PAGE_UP =
+  'Previous storage row' as const;
+
+/** Accessible label for paging storage down (toward later storage rows). */
+export const LABELING_WORLD_PLAZA_INVENTORY_PAGE_DOWN =
+  'Next storage row' as const;
+
+/**
+ * Delay before drag-hover on a page arrow changes the storage page (ms).
+ * Avoids accidental flips while brushing past the arrows.
+ */
+export const DEFINING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_DRAG_HOVER_DELAY_MS =
+  280 as const;
+
+/**
+ * Repeat interval while still hovering a page arrow during drag (ms).
+ * Useful if more than two storage pages are added later.
+ */
+export const DEFINING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_DRAG_HOVER_REPEAT_MS =
+  420 as const;
 
 /** Data attribute on hotbar slot surfaces that open item or bag popovers. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_DATA_ATTRIBUTE =
