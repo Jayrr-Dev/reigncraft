@@ -20,9 +20,9 @@ import {
   DEFINING_WORLD_PLAZA_WATER_RIVER_WIDTH_NOISE_FREQUENCY,
   DEFINING_WORLD_PLAZA_WATER_RIVER_WIDTH_NOISE_OCTAVES,
   DEFINING_WORLD_PLAZA_WATER_RIVER_WIDTH_NOISE_SEED,
-} from "@/components/world/domains/definingWorldPlazaWaterConstants";
-import { samplingWorldPlazaFractalNoise } from "@/components/world/domains/generatingWorldPlazaValueNoise";
-import { mappingWorldPlazaWaterUnitFloatToRange } from "@/components/world/domains/mixingWorldPlazaWaterRgbColors";
+} from '@/components/world/domains/definingWorldPlazaWaterConstants';
+import { samplingWorldPlazaFractalNoise } from '@/components/world/domains/generatingWorldPlazaValueNoise';
+import { mappingWorldPlazaWaterUnitFloatToRange } from '@/components/world/domains/mixingWorldPlazaWaterRgbColors';
 
 /**
  * River channel placement from layered noise fields.
@@ -44,6 +44,26 @@ const CHECKING_WORLD_PLAZA_RIVER_CHANNEL_CARDINAL_NEIGHBOR_STEPS: ReadonlyArray<
   { deltaX: 0, deltaY: -1 },
 ];
 
+/** Hard cap on memoized tile columns before the whole cache is reset. */
+const CHECKING_WORLD_PLAZA_RIVER_CHANNEL_PASSES_NOISE_CACHE_MAX_COLUMNS = 4000;
+
+/**
+ * Memoized river channel noise results in a nested column→row map. Connectivity
+ * checks re-query neighbors many times per frame, so caching turns repeated
+ * gradient and fractal-noise sampling into cheap lookups.
+ */
+const checkingWorldPlazaRiverChannelPassesNoiseCacheByColumn = new Map<
+  number,
+  Map<number, boolean>
+>();
+
+/**
+ * Clears the river channel noise memoization cache after generation rule changes.
+ */
+export function invalidatingWorldPlazaRiverChannelPassesNoiseCache(): void {
+  checkingWorldPlazaRiverChannelPassesNoiseCacheByColumn.clear();
+}
+
 /**
  * Samples the coarse mask that decides which regions are allowed to host rivers.
  *
@@ -52,17 +72,16 @@ const CHECKING_WORLD_PLAZA_RIVER_CHANNEL_CARDINAL_NEIGHBOR_STEPS: ReadonlyArray<
  */
 export function samplingWorldPlazaWaterRiverRegionMaskNoiseAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   return samplingWorldPlazaFractalNoise(
     tileX,
     tileY,
     DEFINING_WORLD_PLAZA_WATER_RIVER_REGION_MASK_NOISE_SEED,
     {
-      frequency:
-        DEFINING_WORLD_PLAZA_WATER_RIVER_REGION_MASK_NOISE_FREQUENCY,
+      frequency: DEFINING_WORLD_PLAZA_WATER_RIVER_REGION_MASK_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_WATER_RIVER_REGION_MASK_NOISE_OCTAVES,
-    },
+    }
   );
 }
 
@@ -74,7 +93,7 @@ export function samplingWorldPlazaWaterRiverRegionMaskNoiseAtTile(
  */
 export function samplingWorldPlazaWaterRiverPrimaryChannelNoiseAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   return samplingWorldPlazaFractalNoise(
     tileX,
@@ -83,7 +102,7 @@ export function samplingWorldPlazaWaterRiverPrimaryChannelNoiseAtTile(
     {
       frequency: DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_NOISE_OCTAVES,
-    },
+    }
   );
 }
 
@@ -95,7 +114,7 @@ export function samplingWorldPlazaWaterRiverPrimaryChannelNoiseAtTile(
  */
 export function samplingWorldPlazaWaterRiverBranchChannelNoiseAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   return samplingWorldPlazaFractalNoise(
     tileX,
@@ -104,9 +123,8 @@ export function samplingWorldPlazaWaterRiverBranchChannelNoiseAtTile(
     {
       frequency:
         DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_NOISE_FREQUENCY,
-      octaves:
-        DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_NOISE_OCTAVES,
-    },
+      octaves: DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_NOISE_OCTAVES,
+    }
   );
 }
 
@@ -118,7 +136,7 @@ export function samplingWorldPlazaWaterRiverBranchChannelNoiseAtTile(
  */
 export function samplingWorldPlazaWaterRiverChannelNoiseAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   return samplingWorldPlazaWaterRiverPrimaryChannelNoiseAtTile(tileX, tileY);
 }
@@ -131,7 +149,7 @@ export function samplingWorldPlazaWaterRiverChannelNoiseAtTile(
  */
 function samplingWorldPlazaWaterRiverWidthNoiseAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   return samplingWorldPlazaFractalNoise(
     tileX,
@@ -140,7 +158,7 @@ function samplingWorldPlazaWaterRiverWidthNoiseAtTile(
     {
       frequency: DEFINING_WORLD_PLAZA_WATER_RIVER_WIDTH_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_WATER_RIVER_WIDTH_NOISE_OCTAVES,
-    },
+    }
   );
 }
 
@@ -155,23 +173,23 @@ function samplingWorldPlazaWaterRiverWidthNoiseAtTile(
  */
 function samplingWorldPlazaWaterRiverPrimaryChannelGradientMagnitudeAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   const east = samplingWorldPlazaWaterRiverPrimaryChannelNoiseAtTile(
     tileX + 1,
-    tileY,
+    tileY
   );
   const west = samplingWorldPlazaWaterRiverPrimaryChannelNoiseAtTile(
     tileX - 1,
-    tileY,
+    tileY
   );
   const south = samplingWorldPlazaWaterRiverPrimaryChannelNoiseAtTile(
     tileX,
-    tileY + 1,
+    tileY + 1
   );
   const north = samplingWorldPlazaWaterRiverPrimaryChannelNoiseAtTile(
     tileX,
-    tileY - 1,
+    tileY - 1
   );
 
   return Math.hypot((east - west) / 2, (south - north) / 2);
@@ -185,23 +203,23 @@ function samplingWorldPlazaWaterRiverPrimaryChannelGradientMagnitudeAtTile(
  */
 function samplingWorldPlazaWaterRiverBranchChannelGradientMagnitudeAtTile(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   const east = samplingWorldPlazaWaterRiverBranchChannelNoiseAtTile(
     tileX + 1,
-    tileY,
+    tileY
   );
   const west = samplingWorldPlazaWaterRiverBranchChannelNoiseAtTile(
     tileX - 1,
-    tileY,
+    tileY
   );
   const south = samplingWorldPlazaWaterRiverBranchChannelNoiseAtTile(
     tileX,
-    tileY + 1,
+    tileY + 1
   );
   const north = samplingWorldPlazaWaterRiverBranchChannelNoiseAtTile(
     tileX,
-    tileY - 1,
+    tileY - 1
   );
 
   return Math.hypot((east - west) / 2, (south - north) / 2);
@@ -215,17 +233,17 @@ function samplingWorldPlazaWaterRiverBranchChannelGradientMagnitudeAtTile(
  */
 function resolvingWorldPlazaRiverPrimaryChannelHalfWidthTilesAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   const widthMultiplier = mappingWorldPlazaWaterUnitFloatToRange(
     samplingWorldPlazaWaterRiverWidthNoiseAtTile(tileX, tileY),
     DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_BAND_MIN_MULTIPLIER,
-    DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_BAND_MAX_MULTIPLIER,
+    DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_BAND_MAX_MULTIPLIER
   );
 
   return Math.min(
     DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_HALF_WIDTH_TILES * widthMultiplier,
-    DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_MAX_HALF_WIDTH_TILES,
+    DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_MAX_HALF_WIDTH_TILES
   );
 }
 
@@ -237,18 +255,18 @@ function resolvingWorldPlazaRiverPrimaryChannelHalfWidthTilesAtTileIndex(
  */
 function resolvingWorldPlazaRiverBranchChannelHalfWidthTilesAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   const widthMultiplier = mappingWorldPlazaWaterUnitFloatToRange(
     samplingWorldPlazaWaterRiverWidthNoiseAtTile(tileX, tileY),
     DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_BAND_MIN_MULTIPLIER,
-    DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_BAND_MAX_MULTIPLIER,
+    DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_BAND_MAX_MULTIPLIER
   );
 
   return Math.min(
     DEFINING_WORLD_PLAZA_WATER_RIVER_BRANCH_CHANNEL_HALF_WIDTH_TILES *
       widthMultiplier,
-    DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_MAX_HALF_WIDTH_TILES,
+    DEFINING_WORLD_PLAZA_WATER_RIVER_CHANNEL_MAX_HALF_WIDTH_TILES
   );
 }
 
@@ -264,7 +282,7 @@ function resolvingWorldPlazaRiverBranchChannelHalfWidthTilesAtTileIndex(
  */
 function resolvingWorldPlazaRiverChannelCenterlineDistanceTiles(
   noiseValue: number,
-  gradientMagnitude: number,
+  gradientMagnitude: number
 ): number {
   return (
     Math.abs(noiseValue - 0.5) /
@@ -274,16 +292,14 @@ function resolvingWorldPlazaRiverChannelCenterlineDistanceTiles(
 }
 
 /**
- * Returns true when primary or branch channel noise places a river channel here.
- *
- * Ignores the region mask and connectivity gate. Useful for neighbor checks.
+ * Computes whether primary or branch channel noise places a river channel here.
  *
  * @param tileX - Tile column index.
  * @param tileY - Tile row index.
  */
-export function checkingWorldPlazaRiverChannelPassesNoiseAtTileIndex(
+function computingWorldPlazaRiverChannelPassesNoiseAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): boolean {
   if (
     samplingWorldPlazaWaterRiverRegionMaskNoiseAtTile(tileX, tileY) <
@@ -297,15 +313,15 @@ export function checkingWorldPlazaRiverChannelPassesNoiseAtTileIndex(
       samplingWorldPlazaWaterRiverPrimaryChannelNoiseAtTile(tileX, tileY),
       samplingWorldPlazaWaterRiverPrimaryChannelGradientMagnitudeAtTile(
         tileX,
-        tileY,
-      ),
+        tileY
+      )
     );
 
   if (
     primaryCenterlineDistanceTiles <=
     resolvingWorldPlazaRiverPrimaryChannelHalfWidthTilesAtTileIndex(
       tileX,
-      tileY,
+      tileY
     )
   ) {
     return true;
@@ -316,17 +332,59 @@ export function checkingWorldPlazaRiverChannelPassesNoiseAtTileIndex(
       samplingWorldPlazaWaterRiverBranchChannelNoiseAtTile(tileX, tileY),
       samplingWorldPlazaWaterRiverBranchChannelGradientMagnitudeAtTile(
         tileX,
-        tileY,
-      ),
+        tileY
+      )
     );
 
   return (
     branchCenterlineDistanceTiles <=
-    resolvingWorldPlazaRiverBranchChannelHalfWidthTilesAtTileIndex(
-      tileX,
-      tileY,
-    )
+    resolvingWorldPlazaRiverBranchChannelHalfWidthTilesAtTileIndex(tileX, tileY)
   );
+}
+
+/**
+ * Returns true when primary or branch channel noise places a river channel here.
+ *
+ * Ignores the region mask and connectivity gate. Useful for neighbor checks.
+ *
+ * @param tileX - Tile column index.
+ * @param tileY - Tile row index.
+ */
+export function checkingWorldPlazaRiverChannelPassesNoiseAtTileIndex(
+  tileX: number,
+  tileY: number
+): boolean {
+  let columnCache =
+    checkingWorldPlazaRiverChannelPassesNoiseCacheByColumn.get(tileX);
+
+  if (columnCache) {
+    const cached = columnCache.get(tileY);
+
+    if (cached !== undefined) {
+      return cached;
+    }
+  } else {
+    if (
+      checkingWorldPlazaRiverChannelPassesNoiseCacheByColumn.size >=
+      CHECKING_WORLD_PLAZA_RIVER_CHANNEL_PASSES_NOISE_CACHE_MAX_COLUMNS
+    ) {
+      checkingWorldPlazaRiverChannelPassesNoiseCacheByColumn.clear();
+    }
+
+    columnCache = new Map();
+    checkingWorldPlazaRiverChannelPassesNoiseCacheByColumn.set(
+      tileX,
+      columnCache
+    );
+  }
+
+  const passesNoise = computingWorldPlazaRiverChannelPassesNoiseAtTileIndex(
+    tileX,
+    tileY
+  );
+  columnCache.set(tileY, passesNoise);
+
+  return passesNoise;
 }
 
 /**
@@ -337,13 +395,13 @@ export function checkingWorldPlazaRiverChannelPassesNoiseAtTileIndex(
  */
 function checkingWorldPlazaRiverChannelHasConnectedNeighborAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): boolean {
   for (const neighborStep of CHECKING_WORLD_PLAZA_RIVER_CHANNEL_CARDINAL_NEIGHBOR_STEPS) {
     if (
       checkingWorldPlazaRiverChannelPassesNoiseAtTileIndex(
         tileX + neighborStep.deltaX,
-        tileY + neighborStep.deltaY,
+        tileY + neighborStep.deltaY
       )
     ) {
       return true;
@@ -364,7 +422,7 @@ function checkingWorldPlazaRiverChannelHasConnectedNeighborAtTileIndex(
  */
 export function checkingWorldPlazaRiverChannelPlacesRiverAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): boolean {
   if (!checkingWorldPlazaRiverChannelPassesNoiseAtTileIndex(tileX, tileY)) {
     return false;
@@ -372,6 +430,6 @@ export function checkingWorldPlazaRiverChannelPlacesRiverAtTileIndex(
 
   return checkingWorldPlazaRiverChannelHasConnectedNeighborAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
 }

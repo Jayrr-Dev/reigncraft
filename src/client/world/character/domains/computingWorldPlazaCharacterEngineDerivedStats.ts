@@ -14,6 +14,7 @@ import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
 } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
 import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
+import { resolvingWorldPlazaScaledAttackSpeed } from '@/components/world/domains/resolvingWorldPlazaGlobalAttackSpeedScale';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_REGEN_PER_SECOND } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 
 function computingWorldPlazaCharacterEngineLevelBonus(
@@ -47,7 +48,9 @@ export function computingWorldPlazaCharacterEngineDerivedStats(
         scaling.attackPerLevel,
         level
       ),
-    attackSpeed: Math.max(0.25, stats.attackSpeed),
+    attackSpeed: resolvingWorldPlazaScaledAttackSpeed(
+      Math.max(0.25, stats.attackSpeed)
+    ),
     defense:
       stats.defense +
       computingWorldPlazaCharacterEngineLevelBonus(

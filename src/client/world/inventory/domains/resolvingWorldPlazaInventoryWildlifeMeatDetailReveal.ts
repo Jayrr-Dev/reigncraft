@@ -10,6 +10,7 @@ import {
   resolvingWorldPlazaEntityDiseaseDescriptor,
   type DefiningWorldPlazaEntityDiseaseId,
 } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
+import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import type {
   DefiningWorldPlazaInventoryItemDetailBadge,
   DefiningWorldPlazaInventoryItemDetailInfoRow,
@@ -18,16 +19,15 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER,
   type DefiningWorldPlazaInventoryWildlifeMeatDetailReveal,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryWildlifeMeatDetailRevealConstants';
-import { resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription';
+import { resolvingWorldPlazaInventoryFoodHealAmount } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealAmount';
 import type { DefiningWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
+import { resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription';
 
 function formattingChancePercent(chance: number): string {
   return `${Math.round(chance * 100)}%`;
 }
 
-function resolvingDiseaseLabel(
-  diseaseId: string | undefined
-): string | null {
+function resolvingDiseaseLabel(diseaseId: string | undefined): string | null {
   if (!diseaseId) {
     return null;
   }
@@ -88,6 +88,8 @@ export function resolvingWorldPlazaInventoryWildlifeMeatDetailContent(
   options: {
     readonly studyCount: number;
     readonly fallbackName: string;
+    readonly foodItemMetadata?: Readonly<Record<string, unknown>>;
+    readonly effectiveMaxHealth?: number;
   }
 ): ResolvingWorldPlazaInventoryWildlifeMeatDetailContent {
   const reveal = resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(
@@ -96,13 +98,15 @@ export function resolvingWorldPlazaInventoryWildlifeMeatDetailContent(
   const badges: DefiningWorldPlazaInventoryItemDetailBadge[] = [];
   const infoRows: DefiningWorldPlazaInventoryItemDetailInfoRow[] = [];
 
-  const description = resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription({
-    itemTypeId: food.itemTypeId,
-    wildlifeSpeciesId: food.wildlifeSpeciesId,
-    meatKind: food.meatKind,
-    descriptionTier: reveal.descriptionTier,
-    fallbackName: options.fallbackName,
-  });
+  const description = resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription(
+    {
+      itemTypeId: food.itemTypeId,
+      wildlifeSpeciesId: food.wildlifeSpeciesId,
+      meatKind: food.meatKind,
+      descriptionTier: reveal.descriptionTier,
+      fallbackName: options.fallbackName,
+    }
+  );
 
   if (reveal.showHungerRestore) {
     const hungerPercent = Math.round(food.hungerRestoreRatio * 100);
@@ -117,6 +121,41 @@ export function resolvingWorldPlazaInventoryWildlifeMeatDetailContent(
       value: `${hungerPercent}%`,
       tone: 'food',
     });
+
+    const healthHealAmount = resolvingWorldPlazaInventoryFoodHealAmount({
+      healthHeal: food.healthHeal,
+      effectiveMaxHealth:
+        options.effectiveMaxHealth ??
+        DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX,
+      foodItemMetadata: options.foodItemMetadata,
+    });
+
+    if (healthHealAmount > 0) {
+      const usesPlayerMax = options.effectiveMaxHealth !== undefined;
+      const healLabel = usesPlayerMax
+        ? `Heals ${healthHealAmount} HP`
+        : `Heals ~${healthHealAmount} HP`;
+      const healValue =
+        food.meatKind === 'raw'
+          ? usesPlayerMax
+            ? `${healthHealAmount} HP (raw, half)`
+            : `~${healthHealAmount} HP (raw, half)`
+          : usesPlayerMax
+            ? `${healthHealAmount} HP`
+            : `~${healthHealAmount} HP`;
+
+      badges.push({
+        id: 'food-heal',
+        label: healLabel,
+        variant: 'food',
+      });
+      infoRows.push({
+        id: 'health-restore',
+        label: 'Health restore',
+        value: healValue,
+        tone: 'positive',
+      });
+    }
   }
 
   if (reveal.showPreparationHint) {

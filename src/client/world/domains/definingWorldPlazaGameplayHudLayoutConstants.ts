@@ -145,6 +145,19 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
         anchorClassName:
           'pointer-events-none absolute inset-x-0 z-50 flex justify-center px-3',
         edgeInsetBasePx: 12,
+        /**
+         * On mobile the hotbar centers between the bottom-left minimap card
+         * and the bottom-right jump button instead of the full screen width,
+         * so it never overlaps either corner control.
+         */
+        mobileFlankClearance: {
+          /** Parchment card chrome around the minimap canvas (borders + padding). */
+          minimapCardChromeBasePx: 10,
+          /** Breathing room between the hotbar and each flanking control. */
+          gapBasePx: 8,
+          /** Right inset of the jump button anchor (0.75rem). */
+          jumpButtonEdgeInsetPx: 12,
+        },
       },
       editModeHotbar: {
         /** Bottom inset is applied via inline styles (safe-area + viewport scale). */

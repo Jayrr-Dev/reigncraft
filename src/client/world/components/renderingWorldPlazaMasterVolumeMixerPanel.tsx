@@ -6,7 +6,6 @@
  * @module components/world/components/renderingWorldPlazaMasterVolumeMixerPanel
  */
 
-import { copyingWorldPlazaMobileDebugReportFromLiveContext } from '@/components/world/domains/copyingWorldPlazaMobileDebugReport';
 import {
   LABELING_WORLD_PLAZA_AMBIENCE_VOLUME_SLIDER,
   STYLING_WORLD_PLAZA_AMBIENCE_VOLUME_MIXER_SLIDER_CLASS_NAME,
@@ -15,9 +14,11 @@ import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domai
 import {
   LABELING_WORLD_PLAZA_MASTER_VOLUME_MIXER,
   LABELING_WORLD_PLAZA_MASTER_VOLUME_SLIDER,
+  LABELING_WORLD_PLAZA_SETTINGS_EXIT_HOME,
   STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_LABEL_CLASS_NAME,
   STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_PANEL_CLASS_NAME,
   STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_SLIDER_CLASS_NAME,
+  STYLING_WORLD_PLAZA_SETTINGS_EXIT_HOME_BUTTON_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaMasterVolumeConstants';
 import {
   LABELING_WORLD_PLAZA_MINIMAP_TOGGLE,
@@ -29,10 +30,6 @@ import {
   STYLING_WORLD_PLAZA_MOBILE_AUTO_JUMP_CHECKBOX_CLASS_NAME,
   STYLING_WORLD_PLAZA_MOBILE_AUTO_JUMP_TOGGLE_ROW_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaMobileAutoJumpConstants';
-import {
-  LABELING_WORLD_PLAZA_MOBILE_DEBUG_COPY_REPORT,
-  STYLING_WORLD_PLAZA_MOBILE_DEBUG_SETTINGS_BUTTON_CLASS_NAME,
-} from '@/components/world/domains/definingWorldPlazaMobileDebugConstants';
 import {
   LABELING_WORLD_PLAZA_SFX_VOLUME_SLIDER,
   STYLING_WORLD_PLAZA_SFX_VOLUME_MIXER_SLIDER_CLASS_NAME,
@@ -52,6 +49,8 @@ import { usingWorldPlazaGroundItemAutoPickupEnabled } from '@/components/world/i
 export type RenderingWorldPlazaMasterVolumeMixerPanelProps = {
   /** When false, renders nothing. */
   isOpen: boolean;
+  /** Opens the exit-to-home confirm flow when provided. */
+  onRequestExitToHome?: () => void;
 };
 
 /**
@@ -59,6 +58,7 @@ export type RenderingWorldPlazaMasterVolumeMixerPanelProps = {
  */
 export function RenderingWorldPlazaMasterVolumeMixerPanel({
   isOpen,
+  onRequestExitToHome,
 }: RenderingWorldPlazaMasterVolumeMixerPanelProps): React.JSX.Element | null {
   const { masterVolume, settingMasterVolume } = usingWorldPlazaMasterVolume();
   const { ambienceVolume, settingAmbienceVolume } =
@@ -88,6 +88,15 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
       role="group"
       aria-label={LABELING_WORLD_PLAZA_MASTER_VOLUME_MIXER}
     >
+      {onRequestExitToHome ? (
+        <button
+          type="button"
+          className={STYLING_WORLD_PLAZA_SETTINGS_EXIT_HOME_BUTTON_CLASS_NAME}
+          onClick={onRequestExitToHome}
+        >
+          {LABELING_WORLD_PLAZA_SETTINGS_EXIT_HOME}
+        </button>
+      ) : null}
       <label
         className={STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_LABEL_CLASS_NAME}
         htmlFor="world-plaza-master-volume"
@@ -234,15 +243,6 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
           {LABELING_WORLD_PLAZA_TEMPERATURE_DISPLAY_FAHRENHEIT_TOGGLE}
         </span>
       </label>
-      <button
-        type="button"
-        className={STYLING_WORLD_PLAZA_MOBILE_DEBUG_SETTINGS_BUTTON_CLASS_NAME}
-        onClick={() => {
-          void copyingWorldPlazaMobileDebugReportFromLiveContext();
-        }}
-      >
-        {LABELING_WORLD_PLAZA_MOBILE_DEBUG_COPY_REPORT}
-      </button>
     </div>
   );
 }

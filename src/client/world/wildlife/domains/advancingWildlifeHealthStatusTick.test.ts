@@ -1,7 +1,8 @@
 import { applyingWorldPlazaEntityHealthBleedStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthBleedStack';
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
-import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import { advancingWildlifeHealthStatusTick } from '@/components/world/wildlife/domains/advancingWildlifeHealthStatusTick';
+import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
+import { creatingWildlifeTestInstance } from '@/components/world/wildlife/domains/creatingWildlifeTestFixtures';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { describe, expect, it } from 'vitest';
@@ -55,9 +56,9 @@ function buildingInstance(): DefiningWildlifeInstance {
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
-    hasPlayerSleepBumpContact: false,
-    docileFollowUntilMs: null,
-    docileLastReactAtMs: null,
+      hasPlayerSleepBumpContact: false,
+      docileFollowUntilMs: null,
+      docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [],
@@ -108,5 +109,40 @@ describe('advancingWildlifeHealthStatusTick', () => {
     ).toBeLessThan(20);
     expect(nextInstance.floatingTexts.length).toBeGreaterThan(0);
     expect(nextInstance.floatingTexts[0]?.damageKind).toBe('bleeding');
+  });
+
+  it('clears DoT and keeps full health for immortal species', () => {
+    const fairy = DEFINING_WILDLIFE_SPECIES_REGISTRY.fairy;
+    const instance = creatingWildlifeTestInstance({
+      instanceId: 'wildlife:fairy:status',
+      speciesId: fairy.speciesId,
+      healthState: {
+        ...creatingWorldPlazaEntityHealthInitialState(),
+        baseMaxHealth: fairy.vitals.baseMaxHealth,
+        currentHealth: Math.floor(fairy.vitals.baseMaxHealth / 2),
+      },
+    });
+    const bleedState = applyingWorldPlazaEntityHealthBleedStack(
+      instance.healthState,
+      'bleeding',
+      20,
+      0
+    );
+
+    const nextInstance = advancingWildlifeHealthStatusTick({
+      instance: {
+        ...instance,
+        healthState: bleedState,
+      },
+      deltaMs: 1_000,
+      nowMs: 1_000,
+    });
+
+    expect(nextInstance.healthState.currentHealth).toBe(
+      fairy.vitals.baseMaxHealth
+    );
+    expect(nextInstance.healthState.bleedEffects).toEqual([]);
+    expect(nextInstance.isDead).toBe(false);
+    expect(nextInstance.floatingTexts).toHaveLength(0);
   });
 });

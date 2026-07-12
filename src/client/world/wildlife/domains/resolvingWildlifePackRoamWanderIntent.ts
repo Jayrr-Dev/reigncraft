@@ -8,6 +8,7 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import type { DefiningWildlifeBehaviorIntent } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { listingWildlifeSpawnPackmates } from '@/components/world/wildlife/domains/listingWildlifeSpawnPackmates';
+import { resolvingWildlifeHerdLandmarkWanderIntent } from '@/components/world/wildlife/domains/resolvingWildlifeHerdLandmarkWanderIntent';
 import { resolvingWildlifePackRoamFollowDistances } from '@/components/world/wildlife/domains/resolvingWildlifePackRoamFollowDistances';
 import { resolvingWildlifeSpawnPackAlphaInstance } from '@/components/world/wildlife/domains/resolvingWildlifeSpawnPackAlphaInstance';
 import { resolvingWildlifeSpawnPackRoamAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeSpawnPackRoamAnchor';
@@ -80,7 +81,8 @@ export function resolvingWildlifePackRoamWanderIntent(
   blackboard: DefiningWildlifeBehaviorBlackboard
 ): DefiningWildlifeBehaviorIntent {
   if (blackboard.species.temperamentId !== 'stalker') {
-    return resolvingWildlifeWanderIntent(blackboard);
+    // Passive / skittish herds rest then travel to water, trees, or pasture.
+    return resolvingWildlifeHerdLandmarkWanderIntent(blackboard);
   }
 
   if (blackboard.instance.aggroState.activeTargetId) {

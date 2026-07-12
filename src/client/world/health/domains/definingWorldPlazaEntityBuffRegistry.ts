@@ -111,7 +111,8 @@ export type DefiningWorldPlazaEntityBuffEffect =
         | 'stamina_drain'
         | 'stamina_regen'
         | 'stamina_jump_cost'
-        | 'stamina_max';
+        | 'stamina_max'
+        | 'attack_speed';
       multiplier: number;
       companionModifiers?: readonly {
         modifierKind:
@@ -123,7 +124,8 @@ export type DefiningWorldPlazaEntityBuffEffect =
           | 'stamina_drain'
           | 'stamina_regen'
           | 'stamina_jump_cost'
-          | 'stamina_max';
+          | 'stamina_max'
+          | 'attack_speed';
         multiplier: number;
       }[];
     }
@@ -356,6 +358,76 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
         kind: 'damage_roll_modifiers',
         side: 'attacker',
         modifiers: [{ kind: 'expected', value: 1.2 }],
+      },
+    },
+    {
+      id: 'quick-strikes-buff',
+      label: 'Quick Strikes',
+      description: '+25% attack speed for 1 minute',
+      polarity: 'buff',
+      category: 'combat',
+      durationKind: 'timed',
+      durationMs: 60_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'attack_speed',
+        multiplier: 1.25,
+      },
+    },
+    {
+      id: 'bloodlust-buff',
+      label: 'Bloodlust',
+      description: '+50% attack speed for 30 seconds',
+      polarity: 'buff',
+      category: 'combat',
+      durationKind: 'timed',
+      durationMs: 30_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'attack_speed',
+        multiplier: 1.5,
+      },
+    },
+    {
+      id: 'blinding-flurry-buff',
+      label: 'Blinding Flurry',
+      description: '+100% attack speed for 12 seconds',
+      polarity: 'buff',
+      category: 'combat',
+      durationKind: 'timed',
+      durationMs: 12_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'attack_speed',
+        multiplier: 2,
+      },
+    },
+    {
+      id: 'relentless-tempo-buff',
+      label: 'Relentless Tempo',
+      description: '+35% attack speed until cleared',
+      polarity: 'buff',
+      category: 'combat',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'attack_speed',
+        multiplier: 1.35,
+      },
+    },
+    {
+      id: 'slow-hands-debuff',
+      label: 'Slow Hands',
+      description: '-30% attack speed until cleared',
+      polarity: 'debuff',
+      category: 'combat',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'attack_speed',
+        multiplier: 0.7,
       },
     },
     {
@@ -940,9 +1012,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
         kind: 'movement_modifier',
         modifierKind: 'speed',
         multiplier: 0.85,
-        companionModifiers: [
-          { modifierKind: 'stamina_max', multiplier: 0.8 },
-        ],
+        companionModifiers: [{ modifierKind: 'stamina_max', multiplier: 0.8 }],
       },
     },
     {
@@ -1106,7 +1176,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       durationMs: null,
       effect: {
         kind: 'heat_tolerance',
-        amountCelsius: DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_TOLERANCE_BONUS_CELSIUS,
+        amountCelsius:
+          DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_TOLERANCE_BONUS_CELSIUS,
       },
     },
     {
@@ -1119,7 +1190,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       durationMs: null,
       effect: {
         kind: 'cold_tolerance',
-        amountCelsius: DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_TOLERANCE_BONUS_CELSIUS,
+        amountCelsius:
+          DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_TOLERANCE_BONUS_CELSIUS,
       },
     },
     {

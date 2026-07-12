@@ -1,4 +1,11 @@
-import type { DefiningWorldPlazaVisibleTileBounds } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
+import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
+import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import {
+  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
+  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
+} from '@/components/world/domains/definingWorldPlazaIsometricConstants';
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import {
   DEFINING_WORLD_PLAZA_WATER_FLOW_PERIOD_MS,
   DEFINING_WORLD_PLAZA_WATER_FLOW_STREAK_ALPHA,
@@ -12,25 +19,19 @@ import {
   DEFINING_WORLD_PLAZA_WATER_SHIMMER_PERIOD_MS,
   DEFINING_WORLD_PLAZA_WATER_SHIMMER_RADIUS_X_PX,
   DEFINING_WORLD_PLAZA_WATER_SHIMMER_RADIUS_Y_PX,
-} from "@/components/world/domains/definingWorldPlazaWaterConstants";
+} from '@/components/world/domains/definingWorldPlazaWaterConstants';
 import {
   DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
   DEFINING_WORLD_PLAZA_WATER_KIND_POND,
   DEFINING_WORLD_PLAZA_WATER_KIND_RIVER,
   DEFINING_WORLD_PLAZA_WATER_KIND_SWAMP_POND,
-} from "@/components/world/domains/definingWorldPlazaWaterKind";
-import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from "@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex";
-import { drawingWorldPlazaLakeWaterRipplesAndShineOnGraphics } from "@/components/world/domains/drawingWorldPlazaLakeWaterRipplesAndShineOnGraphics";
-import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
-import {
-  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
-  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
-} from "@/components/world/domains/definingWorldPlazaIsometricConstants";
-import { mappingWorldPlazaWaterUnitFloatToRange } from "@/components/world/domains/mixingWorldPlazaWaterRgbColors";
-import { resolvingWorldPlazaWaterAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex";
-import { resolvingWorldPlazaWaterFlowAxisAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaWaterFlowAxisAtTileIndex";
-import { seedingWorldPlazaGrassTileDecorationFromTileIndex } from "@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex";
-import type { Graphics } from "pixi.js";
+} from '@/components/world/domains/definingWorldPlazaWaterKind';
+import { drawingWorldPlazaLakeWaterRipplesAndShineOnGraphics } from '@/components/world/domains/drawingWorldPlazaLakeWaterRipplesAndShineOnGraphics';
+import { mappingWorldPlazaWaterUnitFloatToRange } from '@/components/world/domains/mixingWorldPlazaWaterRgbColors';
+import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
+import { resolvingWorldPlazaWaterFlowAxisAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterFlowAxisAtTileIndex';
+import { seedingWorldPlazaGrassTileDecorationFromTileIndex } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
+import type { Graphics } from 'pixi.js';
 
 /**
  * Draws animated shimmer for rivers and streams, plus still lake ripples and shine.
@@ -76,12 +77,13 @@ function drawingWorldPlazaWaterFlowStreaksOnGraphics(
   centerY: number,
   tileSeed: number,
   animationTimeMs: number,
-  flowPeriodMs: number,
+  flowPeriodMs: number
 ): void {
   const flowAxis = resolvingWorldPlazaWaterFlowAxisAtTileIndex(tileX, tileY);
   const perpendicularX = -flowAxis.dirY;
   const perpendicularY = flowAxis.dirX;
-  const halfStreakLengthPx = DEFINING_WORLD_PLAZA_WATER_FLOW_STREAK_LENGTH_PX / 2;
+  const halfStreakLengthPx =
+    DEFINING_WORLD_PLAZA_WATER_FLOW_STREAK_LENGTH_PX / 2;
 
   for (
     let streakIndex = 0;
@@ -92,20 +94,25 @@ function drawingWorldPlazaWaterFlowStreaksOnGraphics(
       streakIndex / DEFINING_WORLD_PLAZA_WATER_FLOW_STREAK_COUNT;
     const phase =
       (animationTimeMs / flowPeriodMs + tileSeed + streakPhaseOffset) % 1;
-    const travelOffsetPx = (phase - 0.5) * DRAWING_WORLD_PLAZA_WATER_FLOW_TRAVEL_PX;
+    const travelOffsetPx =
+      (phase - 0.5) * DRAWING_WORLD_PLAZA_WATER_FLOW_TRAVEL_PX;
     const lateralOffsetPx =
       (seedingWorldPlazaGrassTileDecorationFromTileIndex(
         tileX,
         tileY,
-        311 + streakIndex,
+        311 + streakIndex
       ) -
         0.5) *
       DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX *
       0.6;
     const streakCenterX =
-      centerX + flowAxis.dirX * travelOffsetPx + perpendicularX * lateralOffsetPx;
+      centerX +
+      flowAxis.dirX * travelOffsetPx +
+      perpendicularX * lateralOffsetPx;
     const streakCenterY =
-      centerY + flowAxis.dirY * travelOffsetPx + perpendicularY * lateralOffsetPx;
+      centerY +
+      flowAxis.dirY * travelOffsetPx +
+      perpendicularY * lateralOffsetPx;
     const fadeAlpha =
       Math.sin(phase * Math.PI) * DEFINING_WORLD_PLAZA_WATER_FLOW_STREAK_ALPHA;
 
@@ -116,17 +123,17 @@ function drawingWorldPlazaWaterFlowStreaksOnGraphics(
     graphics
       .moveTo(
         streakCenterX - flowAxis.dirX * halfStreakLengthPx,
-        streakCenterY - flowAxis.dirY * halfStreakLengthPx,
+        streakCenterY - flowAxis.dirY * halfStreakLengthPx
       )
       .lineTo(
         streakCenterX + flowAxis.dirX * halfStreakLengthPx,
-        streakCenterY + flowAxis.dirY * halfStreakLengthPx,
+        streakCenterY + flowAxis.dirY * halfStreakLengthPx
       )
       .stroke({
         width: DEFINING_WORLD_PLAZA_WATER_FLOW_STREAK_WIDTH_PX,
         color: DEFINING_WORLD_PLAZA_WATER_FLOW_STREAK_COLOR,
         alpha: fadeAlpha,
-        cap: "round",
+        cap: 'round',
       });
   }
 }
@@ -141,19 +148,16 @@ function drawingWorldPlazaWaterFlowStreaksOnGraphics(
 export function drawingWorldPlazaWaterShimmerOnGraphics(
   graphics: Graphics,
   bounds: DefiningWorldPlazaVisibleTileBounds,
-  animationTimeMs: number,
+  animationTimeMs: number
 ): void {
   const halfWidth = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
   const halfHeight = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX;
   const minDepthSum = bounds.minTileX + bounds.minTileY;
   const maxDepthSum = bounds.maxTileX + bounds.maxTileY;
+  const isDaytime = computingWorldPlazaDayNightSunState().isDaytime;
 
   for (let depthSum = minDepthSum; depthSum <= maxDepthSum; depthSum += 1) {
-    for (
-      let tileX = bounds.minTileX;
-      tileX <= bounds.maxTileX;
-      tileX += 1
-    ) {
+    for (let tileX = bounds.minTileX; tileX <= bounds.maxTileX; tileX += 1) {
       const tileY = depthSum - tileX;
 
       if (tileY < bounds.minTileY || tileY > bounds.maxTileY) {
@@ -166,19 +170,21 @@ export function drawingWorldPlazaWaterShimmerOnGraphics(
         continue;
       }
 
-      if (checkingWorldPlazaWaterIsFrozenAtTileIndex(tileX, tileY)) {
+      if (
+        checkingWorldPlazaWaterIsFrozenAtTileIndex(tileX, tileY, { isDaytime })
+      ) {
         continue;
       }
 
       const shimmerSeed = seedingWorldPlazaGrassTileDecorationFromTileIndex(
         tileX,
         tileY,
-        701,
+        701
       );
       const secondarySeed = seedingWorldPlazaGrassTileDecorationFromTileIndex(
         tileX,
         tileY,
-        907,
+        907
       );
       const center = convertingWorldPlazaGridPointToIsometricScreenPoint({
         x: tileX,
@@ -193,7 +199,7 @@ export function drawingWorldPlazaWaterShimmerOnGraphics(
           graphics,
           tileX,
           tileY,
-          animationTimeMs,
+          animationTimeMs
         );
         continue;
       }
@@ -202,14 +208,16 @@ export function drawingWorldPlazaWaterShimmerOnGraphics(
         continue;
       }
 
-      const flowStreakTileSeed = seedingWorldPlazaGrassTileDecorationFromTileIndex(
-        tileX,
-        tileY,
-        DRAWING_WORLD_PLAZA_WATER_FLOW_STREAK_TILE_SEED_SALT,
-      );
+      const flowStreakTileSeed =
+        seedingWorldPlazaGrassTileDecorationFromTileIndex(
+          tileX,
+          tileY,
+          DRAWING_WORLD_PLAZA_WATER_FLOW_STREAK_TILE_SEED_SALT
+        );
 
       if (
-        flowStreakTileSeed >= DRAWING_WORLD_PLAZA_WATER_FLOW_STREAK_TILE_THRESHOLD
+        flowStreakTileSeed >=
+        DRAWING_WORLD_PLAZA_WATER_FLOW_STREAK_TILE_THRESHOLD
       ) {
         const flowPeriodMs =
           waterTile.kind === DEFINING_WORLD_PLAZA_WATER_KIND_RIVER
@@ -224,22 +232,25 @@ export function drawingWorldPlazaWaterShimmerOnGraphics(
           center.y,
           shimmerSeed,
           animationTimeMs,
-          flowPeriodMs,
+          flowPeriodMs
         );
       }
 
-      if (shimmerSeed <= DRAWING_WORLD_PLAZA_WATER_FLOW_SHIMMER_TILE_THRESHOLD) {
+      if (
+        shimmerSeed <= DRAWING_WORLD_PLAZA_WATER_FLOW_SHIMMER_TILE_THRESHOLD
+      ) {
         continue;
       }
       const phase =
-        ((animationTimeMs + shimmerSeed * DEFINING_WORLD_PLAZA_WATER_SHIMMER_PERIOD_MS) %
+        ((animationTimeMs +
+          shimmerSeed * DEFINING_WORLD_PLAZA_WATER_SHIMMER_PERIOD_MS) %
           DEFINING_WORLD_PLAZA_WATER_SHIMMER_PERIOD_MS) /
         DEFINING_WORLD_PLAZA_WATER_SHIMMER_PERIOD_MS;
       const wave = Math.sin(phase * Math.PI * 2);
       const shimmerAlpha = mappingWorldPlazaWaterUnitFloatToRange(
         0.5 + wave * 0.5,
         DRAWING_WORLD_PLAZA_WATER_SHIMMER_ALPHA_MIN,
-        DEFINING_WORLD_PLAZA_WATER_SHIMMER_ALPHA_MAX,
+        DEFINING_WORLD_PLAZA_WATER_SHIMMER_ALPHA_MAX
       );
       const driftX =
         Math.sin((phase + secondarySeed) * Math.PI * 2) * halfWidth * 0.12;
@@ -251,7 +262,7 @@ export function drawingWorldPlazaWaterShimmerOnGraphics(
           center.x + driftX + halfWidth * 0.08,
           center.y - halfHeight * 0.12 + driftY,
           DEFINING_WORLD_PLAZA_WATER_SHIMMER_RADIUS_X_PX,
-          DEFINING_WORLD_PLAZA_WATER_SHIMMER_RADIUS_Y_PX,
+          DEFINING_WORLD_PLAZA_WATER_SHIMMER_RADIUS_Y_PX
         )
         .fill({
           color: DEFINING_WORLD_PLAZA_WATER_HIGHLIGHT_COLOR,

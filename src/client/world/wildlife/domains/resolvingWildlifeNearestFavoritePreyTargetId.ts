@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/resolvingWildlifeNearestFavoritePreyTargetId
  */
 
+import { checkingWildlifeInstanceHasProvokedWildlifeAggro } from '@/components/world/wildlife/domains/checkingWildlifeInstanceHasProvokedWildlifeAggro';
 import { checkingWildlifeSpeciesIsFavoritePrey } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsFavoritePrey';
 import { DEFINING_WILDLIFE_FAVORITE_PREY_SIGHT_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeFavoritePreyConstants';
 import { checkingWildlifePredatorMayHuntPrey } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
@@ -18,6 +19,8 @@ export type ResolvingWildlifeNearestFavoritePreyTargetIdParams = {
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null;
   sightRadiusGrid?: number;
+  /** Defaults to 0 in tests that do not exercise Unnoticed provoke windows. */
+  nowMs?: number;
 };
 
 /** Returns the nearest live favorite prey id within sight, if any. */
@@ -27,6 +30,7 @@ export function resolvingWildlifeNearestFavoritePreyTargetId({
   nearbyInstances,
   resolveSpecies,
   sightRadiusGrid = DEFINING_WILDLIFE_FAVORITE_PREY_SIGHT_RADIUS_GRID,
+  nowMs = 0,
 }: ResolvingWildlifeNearestFavoritePreyTargetIdParams): string | null {
   if (!species.favoritePreySpeciesIds?.length) {
     return null;
@@ -51,7 +55,11 @@ export function resolvingWildlifeNearestFavoritePreyTargetId({
       !checkingWildlifePredatorMayHuntPrey(
         species,
         preySpecies,
-        hungerDriveLevel
+        hungerDriveLevel,
+        {
+          preyHasProvokedWildlifeAggro:
+            checkingWildlifeInstanceHasProvokedWildlifeAggro(neighbor, nowMs),
+        }
       )
     ) {
       continue;

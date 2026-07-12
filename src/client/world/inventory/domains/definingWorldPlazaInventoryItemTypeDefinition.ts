@@ -8,6 +8,11 @@ import type { DefiningWorldPlazaInventoryStackQuantityDisplayBehavior } from '@/
 /** Hunger restoration applied when a food item is eaten. */
 export type DefiningWorldPlazaInventoryItemFoodBehavior = {
   readonly hungerRestoreRatio: number;
+  /** Flat HP + percent of eater max HP restored when eaten (before kill size). */
+  readonly healthHeal: {
+    readonly baseFlat: number;
+    readonly percentOfMax: number;
+  };
   readonly meatKind?: 'raw' | 'cooked';
   readonly wildlifeSpeciesId?: string;
   readonly rawPoisonFlatEv?: number;

@@ -32,6 +32,6 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_ARIA_LABEL =
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_CLASS_NAME =
   'pointer-events-auto fixed left-4 top-20 z-[9999] flex max-h-[calc(100vh-5rem)] max-w-[min(94vw,28rem)] flex-col rounded-md border border-amber-300/40 bg-black/90 p-2.5 font-mono text-[10px] leading-relaxed text-amber-50 shadow-lg backdrop-blur-sm' as const;
 
-/** Scrollable tab body inside the perf overlay. */
+/** Scrollable tab body inside the perf overlay (wheel scroll, no bar). */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_TAB_BODY_CLASS_NAME =
-  'min-h-0 flex-1 overflow-y-auto' as const;
+  'scrollbar-none min-h-0 flex-1 overflow-y-auto' as const;

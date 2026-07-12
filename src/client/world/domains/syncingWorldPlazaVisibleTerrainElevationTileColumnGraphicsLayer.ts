@@ -1,17 +1,23 @@
+import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
+import { checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex';
 import { checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import {
+  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_MAX_VISIBLE_DEFAULT,
+  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_PRUNE_BUDGET_PER_CALL,
+  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_RETENTION_MARGIN_TILES,
+} from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import { buildingWorldPlazaVisibleTileBoundsCacheKey } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import {
   drawingWorldPlazaTerrainElevationColumnOnGraphics,
   type DrawingWorldPlazaTerrainElevationColumnDrawOptions,
 } from '@/components/world/domains/drawingWorldPlazaTerrainElevationColumnOnGraphics';
-import {
-  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_PRUNE_BUDGET_PER_CALL,
-  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_RETENTION_MARGIN_TILES,
-} from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
 import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domains/formattingWorldPlazaTileIndexCacheKey';
 import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
+import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
+import { resolvingWorldPlazaTerrainCachePruneBudget } from '@/components/world/domains/resolvingWorldPlazaTerrainCachePruneBudget';
 import { resolvingWorldPlazaTerrainElevationColumnRenderEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex';
 import type { Container } from 'pixi.js';
 import { Graphics } from 'pixi.js';
@@ -39,7 +45,13 @@ export interface SyncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer
   readonly drawOptions?: DrawingWorldPlazaTerrainElevationColumnDrawOptions;
   readonly centerTileX: number;
   readonly centerTileY: number;
+  /**
+   * Max nearest-player columns kept attached. Dense hills exceed this inside
+   * the isometric window; farther raised tiles stay undrawn until closer.
+   */
+  readonly maxVisibleElevationColumns?: number;
   readonly maxColumnBuildsPerCall?: number;
+  readonly maxColumnPrunesPerCall?: number;
   readonly shouldSortChildrenImmediately?: boolean;
 }
 
@@ -53,14 +65,18 @@ export interface SyncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer
 /** Bounds key for the last full raised-tile listing pass. */
 let syncingWorldPlazaVisibleTerrainElevationLastBoundsKey = '';
 
-/** Sorted raised tiles still waiting for graphics within the current bounds. */
+/** Player tile used when the pending nearest-N list was last rebuilt. */
+let syncingWorldPlazaVisibleTerrainElevationLastCenterTileX = Number.NaN;
+let syncingWorldPlazaVisibleTerrainElevationLastCenterTileY = Number.NaN;
+
+/** Sorted raised tiles still waiting for graphics within the current nearest-N. */
 let syncingWorldPlazaVisibleTerrainElevationPendingCandidates: SyncingWorldPlazaVisibleTerrainElevationTileColumnCandidate[] =
   [];
 
-/** Raised tile keys still required within the current bounds. */
+/** Raised tile keys currently attached (nearest-N). */
 let syncingWorldPlazaVisibleTerrainElevationNeededKeys = new Set<string>();
 
-/** Bounds expanded by the retention margin; built columns inside survive. */
+/** Bounds expanded by the retention margin; nearest-N edge hysteresis. */
 let syncingWorldPlazaVisibleTerrainElevationRetentionBounds: DefiningWorldPlazaVisibleTileBounds | null =
   null;
 
@@ -69,6 +85,8 @@ let syncingWorldPlazaVisibleTerrainElevationRetentionBounds: DefiningWorldPlazaV
  */
 export function invalidatingWorldPlazaVisibleTerrainElevationTileColumnSyncState(): void {
   syncingWorldPlazaVisibleTerrainElevationLastBoundsKey = '';
+  syncingWorldPlazaVisibleTerrainElevationLastCenterTileX = Number.NaN;
+  syncingWorldPlazaVisibleTerrainElevationLastCenterTileY = Number.NaN;
   syncingWorldPlazaVisibleTerrainElevationPendingCandidates = [];
   syncingWorldPlazaVisibleTerrainElevationNeededKeys = new Set<string>();
   syncingWorldPlazaVisibleTerrainElevationRetentionBounds = null;
@@ -94,7 +112,11 @@ function checkingWorldPlazaElevationColumnKeyWithinBounds(
 }
 
 /**
- * Lists every raised tile inside the visible bounds.
+ * Lists raised tiles inside the visible bounds that need block columns.
+ *
+ * Only cliff-edge tiles (and raised lava caps) become entity-layer columns.
+ * Plateau interiors render as flat lifted diamonds in the batched floor
+ * chunks, so they never spend a per-tile Graphics or depth sort slot here.
  *
  * @param bounds - Visible tile bounds.
  */
@@ -124,6 +146,16 @@ function listingWorldPlazaVisibleTerrainElevationRaisedTileCandidatesInBounds(
         continue;
       }
 
+      if (
+        !checkingWorldPlazaLavaAtTileIndex(tileX, tileY) &&
+        !checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex(
+          tileX,
+          tileY
+        )
+      ) {
+        continue;
+      }
+
       candidates.push({ tileX, tileY });
     }
   }
@@ -132,28 +164,23 @@ function listingWorldPlazaVisibleTerrainElevationRaisedTileCandidatesInBounds(
 }
 
 /**
- * Rebuilds the pending raised-tile queue when the visible bounds window shifts.
+ * Rebuilds the nearest-N pending queue when the visible window or player tile shifts.
  *
  * @param bounds - Visible tile bounds.
  * @param centerTileX - Player tile column index.
  * @param centerTileY - Player tile row index.
+ * @param maxVisibleElevationColumns - Nearest-player attach cap.
  */
 function refreshingWorldPlazaVisibleTerrainElevationPendingCandidatesForBounds(
   bounds: DefiningWorldPlazaVisibleTileBounds,
   centerTileX: number,
-  centerTileY: number
+  centerTileY: number,
+  maxVisibleElevationColumns: number
 ): void {
   const raisedTileCandidates =
     listingWorldPlazaVisibleTerrainElevationRaisedTileCandidatesInBounds(
       bounds
     );
-  const neededKeys = new Set<string>();
-
-  for (const candidate of raisedTileCandidates) {
-    neededKeys.add(
-      formattingWorldPlazaTileIndexCacheKey(candidate.tileX, candidate.tileY)
-    );
-  }
 
   raisedTileCandidates.sort((candidateA, candidateB) => {
     const distanceA =
@@ -166,8 +193,20 @@ function refreshingWorldPlazaVisibleTerrainElevationPendingCandidatesForBounds(
     return distanceA - distanceB;
   });
 
+  const attachedCandidates = raisedTileCandidates.slice(
+    0,
+    maxVisibleElevationColumns
+  );
+  const neededKeys = new Set<string>();
+
+  for (const candidate of attachedCandidates) {
+    neededKeys.add(
+      formattingWorldPlazaTileIndexCacheKey(candidate.tileX, candidate.tileY)
+    );
+  }
+
   syncingWorldPlazaVisibleTerrainElevationPendingCandidates =
-    raisedTileCandidates;
+    attachedCandidates;
   syncingWorldPlazaVisibleTerrainElevationNeededKeys = neededKeys;
   syncingWorldPlazaVisibleTerrainElevationRetentionBounds = {
     minTileX:
@@ -189,8 +228,9 @@ function refreshingWorldPlazaVisibleTerrainElevationPendingCandidatesForBounds(
  * Adds or removes per-tile terrain columns as the visible window shifts.
  *
  * Columns live on the avatar entity layer so they depth-sort against players.
- * A bounds-scoped pending queue avoids rescanning every visible tile each frame
- * while columns are still building incrementally.
+ * Only the nearest {@link SyncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayerInput.maxVisibleElevationColumns}
+ * raised tiles stay attached; denser hills beyond that cap stay undrawn until
+ * the player walks closer (same pattern as `maxVisibleTrees`).
  *
  * @param input - Parent container, bounds, cache, and build budget.
  */
@@ -202,16 +242,37 @@ export function syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer(
     input.maxColumnBuildsPerCall ??
       SYNCING_WORLD_PLAZA_VISIBLE_TERRAIN_ELEVATION_TILE_COLUMN_DEFAULT_BUILD_BUDGET
   );
+  const basePruneBudget =
+    input.maxColumnPrunesPerCall ??
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_PRUNE_BUDGET_PER_CALL;
+  const maxVisibleElevationColumns = Math.max(
+    0,
+    Math.floor(
+      input.maxVisibleElevationColumns ??
+        DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_MAX_VISIBLE_DEFAULT
+    )
+  );
   const shouldSortChildrenImmediately =
     input.shouldSortChildrenImmediately ?? false;
   const boundsKey = buildingWorldPlazaVisibleTileBoundsCacheKey(input.bounds);
+  const centerTileChanged =
+    input.centerTileX !==
+      syncingWorldPlazaVisibleTerrainElevationLastCenterTileX ||
+    input.centerTileY !==
+      syncingWorldPlazaVisibleTerrainElevationLastCenterTileY;
 
-  if (boundsKey !== syncingWorldPlazaVisibleTerrainElevationLastBoundsKey) {
+  if (
+    boundsKey !== syncingWorldPlazaVisibleTerrainElevationLastBoundsKey ||
+    centerTileChanged
+  ) {
     syncingWorldPlazaVisibleTerrainElevationLastBoundsKey = boundsKey;
+    syncingWorldPlazaVisibleTerrainElevationLastCenterTileX = input.centerTileX;
+    syncingWorldPlazaVisibleTerrainElevationLastCenterTileY = input.centerTileY;
     refreshingWorldPlazaVisibleTerrainElevationPendingCandidatesForBounds(
       input.bounds,
       input.centerTileX,
-      input.centerTileY
+      input.centerTileY,
+      maxVisibleElevationColumns
     );
   }
 
@@ -231,8 +292,99 @@ export function syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer(
     missingTileCandidates.push(candidate);
   }
 
-  const columnsToBuild = missingTileCandidates.slice(0, buildBudget);
+  const retentionBounds =
+    syncingWorldPlazaVisibleTerrainElevationRetentionBounds;
+  const softRetainLimit =
+    maxVisibleElevationColumns +
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_PRUNE_BUDGET_PER_CALL;
+
+  let staleKeyCount = 0;
+
+  for (const cacheKey of input.columnGraphicsByKey.keys()) {
+    if (syncingWorldPlazaVisibleTerrainElevationNeededKeys.has(cacheKey)) {
+      continue;
+    }
+
+    // Soft-retain only columns that were previously nearest-N and still sit
+    // inside the hysteresis ring. Never retain unbounded raised tiles from
+    // outside the attach cap — that is what blew Map.size past 1000.
+    if (
+      retentionBounds &&
+      checkingWorldPlazaElevationColumnKeyWithinBounds(
+        cacheKey,
+        retentionBounds
+      ) &&
+      input.columnGraphicsByKey.size <= softRetainLimit
+    ) {
+      continue;
+    }
+
+    staleKeyCount += 1;
+  }
+
+  const { pruneBudget, shouldDeferBuilds } =
+    resolvingWorldPlazaTerrainCachePruneBudget({
+      basePruneBudget,
+      staleCount: staleKeyCount,
+      neededCount: syncingWorldPlazaVisibleTerrainElevationNeededKeys.size,
+    });
+
+  let prunedCount = 0;
   let didMutateChildren = false;
+  const finishTerrainPruneSample =
+    staleKeyCount > 0
+      ? beginningWorldPlazaPerformanceSample(
+          DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.TERRAIN_PRUNE
+        )
+      : null;
+
+  for (const [cacheKey, columnGraphics] of input.columnGraphicsByKey) {
+    if (syncingWorldPlazaVisibleTerrainElevationNeededKeys.has(cacheKey)) {
+      if (columnGraphics.parent !== input.parentContainer) {
+        input.parentContainer.addChild(columnGraphics);
+        didMutateChildren = true;
+      }
+
+      continue;
+    }
+
+    if (
+      retentionBounds &&
+      checkingWorldPlazaElevationColumnKeyWithinBounds(
+        cacheKey,
+        retentionBounds
+      ) &&
+      input.columnGraphicsByKey.size - prunedCount <= softRetainLimit
+    ) {
+      // Keep Graphics for reuse, but detach so trunk-layer sort skips them.
+      if (columnGraphics.parent === input.parentContainer) {
+        input.parentContainer.removeChild(columnGraphics);
+        didMutateChildren = true;
+      }
+
+      continue;
+    }
+
+    if (prunedCount >= pruneBudget) {
+      break;
+    }
+
+    if (columnGraphics.parent === input.parentContainer) {
+      input.parentContainer.removeChild(columnGraphics);
+    }
+
+    columnGraphics.destroy();
+    input.columnGraphicsByKey.delete(cacheKey);
+    prunedCount += 1;
+    didMutateChildren = true;
+  }
+
+  finishTerrainPruneSample?.();
+
+  const columnsToBuild =
+    shouldDeferBuilds || maxVisibleElevationColumns === 0
+      ? []
+      : missingTileCandidates.slice(0, buildBudget);
 
   for (const candidate of columnsToBuild) {
     const cacheKey = formattingWorldPlazaTileIndexCacheKey(
@@ -258,44 +410,6 @@ export function syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer(
     didMutateChildren = true;
   }
 
-  // Retention hysteresis: keep built columns inside the margin ring so bounds
-  // wobble from directional prefetch does not destroy-and-rebuild them. Prunes
-  // beyond the ring are budgeted per call to spread destroy/GC cost.
-  const retentionBounds =
-    syncingWorldPlazaVisibleTerrainElevationRetentionBounds;
-  let prunedCount = 0;
-  let hasDeferredPrunes = false;
-
-  for (const [cacheKey, columnGraphics] of input.columnGraphicsByKey) {
-    if (syncingWorldPlazaVisibleTerrainElevationNeededKeys.has(cacheKey)) {
-      continue;
-    }
-
-    if (
-      retentionBounds &&
-      checkingWorldPlazaElevationColumnKeyWithinBounds(
-        cacheKey,
-        retentionBounds
-      )
-    ) {
-      continue;
-    }
-
-    if (
-      prunedCount >=
-      DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_PRUNE_BUDGET_PER_CALL
-    ) {
-      hasDeferredPrunes = true;
-      break;
-    }
-
-    input.parentContainer.removeChild(columnGraphics);
-    columnGraphics.destroy();
-    input.columnGraphicsByKey.delete(cacheKey);
-    prunedCount += 1;
-    didMutateChildren = true;
-  }
-
   if (
     didMutateChildren &&
     shouldSortChildrenImmediately &&
@@ -307,7 +421,7 @@ export function syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer(
   return {
     isComplete:
       missingTileCandidates.length <= columnsToBuild.length &&
-      !hasDeferredPrunes,
+      prunedCount >= staleKeyCount,
     columnsBuilt: columnsToBuild.length,
     needsChildSort:
       didMutateChildren &&

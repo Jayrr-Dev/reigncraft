@@ -7,9 +7,9 @@ import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inven
 import type { DefiningWildlifeMeatDropKillContext } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { resolvingWildlifeAggroDeerMeatDropMetadata } from '@/components/world/wildlife/domains/resolvingWildlifeAggroDeerMeatDropMetadata';
 import { resolvingWildlifeMeatDropQuantity } from '@/components/world/wildlife/domains/resolvingWildlifeLargeSizeFrameMeatDropQuantity';
 import { resolvingWildlifeMeatDropRawItemTypeId } from '@/components/world/wildlife/domains/resolvingWildlifeMeatCatalogEntryForInstance';
+import { resolvingWildlifeMeatDropMetadata } from '@/components/world/wildlife/domains/resolvingWildlifeMeatDropMetadata';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 import {
   WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH,
@@ -60,7 +60,7 @@ export async function droppingWildlifeMeatGroundItem({
   }
 
   const playerUserId = redditUserId ?? localPersistenceOwnerId;
-  const meatMetadata = resolvingWildlifeAggroDeerMeatDropMetadata({
+  const meatMetadata = resolvingWildlifeMeatDropMetadata({
     instance,
     species,
     killerTargetId: killContext?.killerTargetId,
@@ -86,7 +86,7 @@ export async function droppingWildlifeMeatGroundItem({
     slotIndex: DEFINING_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX,
     playerX: playerPosition.x,
     playerY: playerPosition.y,
-    ...(meatMetadata ? { metadata: meatMetadata } : {}),
+    metadata: meatMetadata,
   };
 
   try {
@@ -118,7 +118,7 @@ export async function droppingWildlifeMeatGroundItem({
       gridY: tileY,
       layer,
       spawnedAt: Date.now(),
-      ...(meatMetadata ? { metadata: meatMetadata } : {}),
+      metadata: meatMetadata,
     };
 
     insertingWorldPlazaGroundItemOptimistically(

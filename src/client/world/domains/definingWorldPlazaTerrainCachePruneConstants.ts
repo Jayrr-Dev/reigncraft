@@ -24,8 +24,19 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_CACHE_PRUNE_BURST_MAX = 48;
 /**
  * When stale exceeds this many entries, skip new builds this call so prune
  * can catch up before more Graphics are added.
+ *
+ * Floor chunks pass `shouldDeferBuildsOnStaleBacklog: false` so running into
+ * new tiles cannot open see-through holes while trailing stale is pruned.
  */
 export const DEFINING_WORLD_PLAZA_TERRAIN_CACHE_PRUNE_DEFER_BUILDS_STALE_COUNT = 16;
+
+/**
+ * Extra tile ring kept around the floor visible bounds before a built chunk
+ * is destroyed. Prevents snap/directional bounds wobble from destroy/rebuild
+ * thrash that leaves diamond holes while running.
+ */
+export const DEFINING_WORLD_PLAZA_FLOOR_CHUNK_RETENTION_MARGIN_TILES =
+  16 as const;
 
 /**
  * Relative backlog: stale / needed above this ratio also triggers burst prune

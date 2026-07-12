@@ -151,6 +151,15 @@ export const DEFINING_WORLD_PLAZA_WATER_RIVER_FLOW_PERIOD_MS = 1400;
 /** Streaks animated per flowing tile; one keeps rivers and streams calm and cheap. */
 export const DEFINING_WORLD_PLAZA_WATER_FLOW_STREAK_COUNT = 1;
 
+/**
+ * Extra tile rings past the on-screen viewport that still animate shimmer.
+ *
+ * Shimmer redraws every few frames, so it clamps to what the player can see
+ * instead of the much larger floor prefetch bounds. A small pad hides the
+ * redraw interval lag at screen edges while walking.
+ */
+export const DEFINING_WORLD_PLAZA_WATER_SHIMMER_VIEWPORT_PADDING_TILES = 3;
+
 /** Uniform translucent surface tint drawn as one merged fill over the bed. */
 export const DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_COLOR = 0x2b8cb3;
 
@@ -190,6 +199,31 @@ export const DEFINING_WORLD_PLAZA_WATER_LAKE_SHORE_FOAM_ALPHA = 0.64;
 
 /** Stroke width of lake shore foam lines (pixels). */
 export const DEFINING_WORLD_PLAZA_WATER_LAKE_SHORE_FOAM_LINE_WIDTH_PX = 2.8;
+
+/**
+ * How far along each land diamond edge the outer-corner tip cover reaches
+ * from the tip vertex toward the adjacent vertices (0..1).
+ *
+ * Staircase river banks leave a grass diamond tip pointing into the water;
+ * foam outlines that tip and it reads as a hole. Covering the tip with water
+ * surface tint seals those corners.
+ */
+export const DEFINING_WORLD_PLAZA_WATER_SHORE_OUTER_CORNER_TIP_COVER_EDGE_FRACTION = 0.42;
+
+/**
+ * Minimum surface alpha for outer-corner tip covers.
+ *
+ * Tip covers sit on grass floor, not a water bed, so the normal translucent
+ * surface alpha lets green show through as cyan holes. Boost opacity enough
+ * to match neighboring water.
+ */
+export const DEFINING_WORLD_PLAZA_WATER_SHORE_OUTER_CORNER_TIP_COVER_MIN_ALPHA = 0.9;
+
+/**
+ * Extra pixels added to each water diamond half-extent when filling the
+ * surface overlay so adjacent water tiles overlap and hide sub-pixel seams.
+ */
+export const DEFINING_WORLD_PLAZA_WATER_SURFACE_DIAMOND_BLEED_PX = 0.75;
 
 /** Shimmer ellipse horizontal radius (pixels). */
 export const DEFINING_WORLD_PLAZA_WATER_SHIMMER_RADIUS_X_PX = 9;

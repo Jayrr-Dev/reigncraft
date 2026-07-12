@@ -297,7 +297,9 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
           symmetricFloorBounds,
           movementDirection,
           performanceProfile.forwardPrefetchTiles,
-          performanceProfile.behindRetentionTiles
+          // Never trim floor behind the player: trailing-edge void is visible
+          // under camera dead-zone and snap drift. Forward expand only.
+          0
         )
       : null;
     const elevationBounds = symmetricElevationBounds

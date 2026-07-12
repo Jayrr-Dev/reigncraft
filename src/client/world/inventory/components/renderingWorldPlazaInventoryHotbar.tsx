@@ -12,6 +12,7 @@ import type {
   DefiningInventoryState,
 } from '@/components/inventory/domains/definingInventoryItem';
 import { SortingInventory } from '@/components/inventory/sortingInventory';
+import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
 import { ProvidingWorldPlazaViewportHudScale } from '@/components/world/components/providingWorldPlazaViewportHudScale';
 import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
@@ -50,7 +51,6 @@ import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/w
 import type { TrackingWorldPlazaInventoryDropPlacementResult } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
 import { cn } from '@/lib/utils';
-import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type * as React from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -72,6 +72,8 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
   readonly viewportHudScale?: number;
   /** Mobile layout input; desktop/fullscreen render the hotbar larger. */
   readonly isMobile?: boolean;
+  /** True while the plaza host is in native fullscreen (mobile flank sizing). */
+  readonly isFullscreen?: boolean;
   /** Optional click-to-ground placement controller from the plaza scene. */
   readonly inventoryDropPlacement?: Pick<
     TrackingWorldPlazaInventoryDropPlacementResult,
@@ -94,6 +96,8 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
     readonly tier: DefiningWorldPlazaHungerTier;
     readonly isStarving: boolean;
   } | null;
+  /** Local player effective max HP for food heal preview in item detail. */
+  readonly playerEffectiveMaxHealth?: number;
 }
 
 type RenderingWorldPlazaInventoryHotbarInventoryShellProps = {
@@ -120,6 +124,7 @@ type RenderingWorldPlazaInventoryHotbarInventoryShellProps = {
     itemId: string,
     inventoryState: DefiningInventoryState
   ) => DefiningInventoryItem | null;
+  readonly playerEffectiveMaxHealth?: number;
 };
 
 /**
@@ -144,6 +149,7 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
     onInventoryDragStart,
     onInventoryDragEnd,
     resolvingDraggedItemById,
+    playerEffectiveMaxHealth,
   }: RenderingWorldPlazaInventoryHotbarInventoryShellProps): React.JSX.Element {
     const viewportStyles = useMemo(
       () => resolvingWorldPlazaInventoryHotbarViewportStyles(viewportHudScale),
@@ -163,6 +169,7 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
         closingItemActionPopover,
         openingBagPopover,
         closingBagPopover,
+        playerEffectiveMaxHealth,
       });
 
     return (
@@ -221,12 +228,14 @@ export function RenderingWorldPlazaInventoryHotbar({
   onlineUsername = null,
   viewportHudScale = 1,
   isMobile = false,
+  isFullscreen = false,
   inventoryDropPlacement,
   selectedSlotIndex = null,
   onSelectHotbarSlot,
   onEatHotbarSlot,
   onUseActiveEnchantment,
   hungerHud = null,
+  playerEffectiveMaxHealth,
 }: RenderingWorldPlazaInventoryHotbarProps): React.JSX.Element {
   const { state, isLoading, handleDragEnd, moveItem, removeItem, updateState } =
     usingWorldPlazaInventory({
@@ -426,7 +435,8 @@ export function RenderingWorldPlazaInventoryHotbar({
 
   const hotbarViewportHudScale = useMemo(
     () =>
-      viewportHudScale * resolvingWorldPlazaInventoryHotbarDeviceScale(isMobile),
+      viewportHudScale *
+      resolvingWorldPlazaInventoryHotbarDeviceScale(isMobile),
     [viewportHudScale, isMobile]
   );
 
@@ -441,9 +451,10 @@ export function RenderingWorldPlazaInventoryHotbar({
   const anchorViewportStyle = useMemo(
     () =>
       resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles(
-        viewportHudScale
+        viewportHudScale,
+        isMobile ? { isFullscreen } : undefined
       ),
-    [viewportHudScale]
+    [viewportHudScale, isMobile, isFullscreen]
   );
 
   return (
@@ -488,6 +499,7 @@ export function RenderingWorldPlazaInventoryHotbar({
             onInventoryDragStart={handlingInventoryDragStart}
             onInventoryDragEnd={handlingInventoryDragEnd}
             resolvingDraggedItemById={resolvingDraggedItemById}
+            playerEffectiveMaxHealth={playerEffectiveMaxHealth}
           />
         </div>
       </ProvidingWorldPlazaViewportHudScale>

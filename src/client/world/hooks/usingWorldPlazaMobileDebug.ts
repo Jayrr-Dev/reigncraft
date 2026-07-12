@@ -47,7 +47,7 @@ function publishingWorldPlazaMobileDebugStatusLines(params: {
 
   settingWorldPlazaClientDebugStatus(
     'mobile-debug-tier',
-    `tier ${performanceProfile.tier} · trees ${performanceProfile.maxVisibleTrees}`
+    `tier ${performanceProfile.tier} · trees ${performanceProfile.maxVisibleTrees} · elev ${performanceProfile.maxVisibleElevationColumns}`
   );
 
   if (frameStats) {

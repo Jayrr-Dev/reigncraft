@@ -60,6 +60,13 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_LAVA_TILE_NOISE_THRESHOLD = 0.82
 /** Health HUD push interval for React state (ms). */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_PUSH_INTERVAL_MS = 100;
 
+/**
+ * Health simulation cadence. Health, temperature, and status effects use
+ * elapsed time, so running them faster than the HUD cadence adds frame cost
+ * without improving visible responsiveness.
+ */
+export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_TICK_INTERVAL_MS = 100;
+
 /** Minimum health-ratio delta worth a HUD re-render. */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_EPSILON = 0.005;
 

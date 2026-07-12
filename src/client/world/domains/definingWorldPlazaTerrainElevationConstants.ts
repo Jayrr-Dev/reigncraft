@@ -328,14 +328,13 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SCULPT_OBSTACLE_THRESHOLD_AL
   0.2 as const;
 
 /**
- * Extra tile ring kept around the visible bounds before a built column is
- * destroyed.
+ * Extra tile ring kept around the visible nearest-N set before a built column
+ * is destroyed.
  *
  * Directional prefetch wobbles the bounds window by several tiles as the
- * smoothed movement direction changes, so without this hysteresis columns get
- * destroyed and rebuilt (61+/s measured) while simply walking, feeding GC and
- * spiking terrain-sync. Retained columns are culled off-screen; the only cost
- * is their share of the trunk-layer child sort, so keep this modest.
+ * smoothed movement direction changes. Combined with the profile
+ * `maxVisibleElevationColumns` cap, this small hysteresis avoids destroy/rebuild
+ * thrash at the sliding edge of the nearest-N set while walking.
  */
 export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_RETENTION_MARGIN_TILES =
   8 as const;
@@ -343,6 +342,13 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_RETENTION_MARGIN_TILE
 /** Max stale elevation columns destroyed per sync call (spreads GC load). */
 export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_PRUNE_BUDGET_PER_CALL =
   24 as const;
+
+/**
+ * Default nearest-player elevation column cap when a profile omits one.
+ * Dense hills can expose 1000+ raised tiles in the isometric window.
+ */
+export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_MAX_VISIBLE_DEFAULT =
+  320 as const;
 
 /** Side fill color for dirt strata on hills. */
 export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_HILL_SIDE_FILL_COLOR =

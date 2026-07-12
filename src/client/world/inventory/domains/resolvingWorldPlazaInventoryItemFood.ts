@@ -1,9 +1,11 @@
+import type { DefiningWorldPlazaInventoryFoodHealDeclaration } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFoodHealConstants';
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
 
-/** Food metadata describing how much hunger one unit restores when eaten. */
+/** Food metadata describing hunger and health restore when eaten. */
 export type DefiningWorldPlazaInventoryFoodDefinition = {
   readonly itemTypeId: string;
   readonly hungerRestoreRatio: number;
+  readonly healthHeal: DefiningWorldPlazaInventoryFoodHealDeclaration;
   readonly meatKind?: 'raw' | 'cooked';
   readonly wildlifeSpeciesId?: string;
   readonly rawPoisonFlatEv?: number;
@@ -35,6 +37,7 @@ export function resolvingWorldPlazaInventoryFoodDefinition(
   return {
     itemTypeId: definition.typeId,
     hungerRestoreRatio: definition.food.hungerRestoreRatio,
+    healthHeal: definition.food.healthHeal,
     meatKind: definition.food.meatKind,
     wildlifeSpeciesId: definition.food.wildlifeSpeciesId,
     rawPoisonFlatEv: definition.food.rawPoisonFlatEv,

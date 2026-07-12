@@ -38,3 +38,10 @@ export const STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_LABEL_CLASS_NAME =
 /** Master volume range input styling. */
 export const STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_SLIDER_CLASS_NAME =
   'h-1.5 w-full cursor-pointer appearance-none rounded-full bg-poster-teal/20 accent-poster-gold' as const;
+
+/** Settings row label for return-to-home. */
+export const LABELING_WORLD_PLAZA_SETTINGS_EXIT_HOME = 'Home' as const;
+
+/** Settings mixer top row: simple full-width exit-to-home control. */
+export const STYLING_WORLD_PLAZA_SETTINGS_EXIT_HOME_BUTTON_CLASS_NAME =
+  'mb-1 w-full rounded border border-ink/25 bg-parchment px-2 py-2 text-center text-sm font-bold text-ink' as const;

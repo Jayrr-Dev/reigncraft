@@ -18,7 +18,6 @@ import {
   type DefiningWorldPlazaAvatarMotionState,
 } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
   initializingWorldPlazaSfxVolumeStoreFromStorage,
   subscribingWorldPlazaSfxVolume,
@@ -67,6 +66,10 @@ export function usingWorldPlazaAvatarFootsteps(
     DefiningWorldPlazaAvatarMotionState['motionKind'] | null
   >(null);
   const lastSurfaceKindRef =
+    useRef<DefiningWorldPlazaAvatarFootstepSurfaceKind | null>(null);
+  const lastResolvedSurfaceTileXRef = useRef(Number.NaN);
+  const lastResolvedSurfaceTileYRef = useRef(Number.NaN);
+  const lastResolvedSurfaceKindRef =
     useRef<DefiningWorldPlazaAvatarFootstepSurfaceKind | null>(null);
   const pendingJumpLandingStartedAtMsRef = useRef<number>(0);
   const lastHandledJumpStartedAtMsRef = useRef<number>(0);
@@ -125,6 +128,34 @@ export function usingWorldPlazaAvatarFootsteps(
       lastSurfaceKindRef.current = null;
     };
 
+    const resolvingCachedAvatarFootstepSurface =
+      (): DefiningWorldPlazaAvatarFootstepSurfaceKind => {
+        const playerPosition = playerPositionRef.current;
+
+        if (!playerPosition) {
+          return resolvingWorldPlazaAvatarFootstepSurfaceAtWorldPoint(null);
+        }
+
+        const tileX = Math.floor(playerPosition.x);
+        const tileY = Math.floor(playerPosition.y);
+        const cachedSurface = lastResolvedSurfaceKindRef.current;
+
+        if (
+          cachedSurface &&
+          tileX === lastResolvedSurfaceTileXRef.current &&
+          tileY === lastResolvedSurfaceTileYRef.current
+        ) {
+          return cachedSurface;
+        }
+
+        const surfaceKind =
+          resolvingWorldPlazaAvatarFootstepSurfaceAtWorldPoint(playerPosition);
+        lastResolvedSurfaceTileXRef.current = tileX;
+        lastResolvedSurfaceTileYRef.current = tileY;
+        lastResolvedSurfaceKindRef.current = surfaceKind;
+        return surfaceKind;
+      };
+
     const playingJumpLandingIfNeeded = (
       motionState: DefiningWorldPlazaAvatarMotionState
     ): void => {
@@ -156,9 +187,7 @@ export function usingWorldPlazaAvatarFootsteps(
       lastHandledJumpStartedAtMsRef.current = pendingJumpStartedAtMs;
       pendingJumpLandingStartedAtMsRef.current = 0;
 
-      const surfaceKind = resolvingWorldPlazaAvatarFootstepSurfaceAtWorldPoint(
-        playerPositionRef.current
-      );
+      const surfaceKind = resolvingCachedAvatarFootstepSurface();
       const landingClipEntry =
         resolvingWorldPlazaAvatarJumpLandingClipEntry(surfaceKind);
       const landingClipId =
@@ -177,31 +206,29 @@ export function usingWorldPlazaAvatarFootsteps(
       );
     };
 
-    const preloadingFootstepsForSurfaces = (
-      surfaceKinds: readonly DefiningWorldPlazaAvatarFootstepSurfaceKind[]
+    const preloadingFootstepsForSurface = (
+      surfaceKind: DefiningWorldPlazaAvatarFootstepSurfaceKind
     ): void => {
-      const surfaceKey = [...surfaceKinds].sort().join('|');
-
       if (
-        surfaceKey === preloadedSurfaceKeyRef.current &&
+        surfaceKind === preloadedSurfaceKeyRef.current &&
         isPreloadReadyRef.current
       ) {
         return;
       }
 
-      if (surfaceKey === preloadedSurfaceKeyRef.current) {
+      if (surfaceKind === preloadedSurfaceKeyRef.current) {
         return;
       }
 
-      preloadedSurfaceKeyRef.current = surfaceKey;
+      preloadedSurfaceKeyRef.current = surfaceKind;
       preloadGenerationRef.current += 1;
       const preloadGeneration = preloadGenerationRef.current;
       isPreloadReadyRef.current = false;
 
       void preloadingWorldPlazaStarAudioManifest(
-        buildingWorldPlazaAvatarFootstepStarAudioManifestForSurfaces(
-          surfaceKinds
-        )
+        buildingWorldPlazaAvatarFootstepStarAudioManifestForSurfaces([
+          surfaceKind,
+        ])
       )
         .then(() => {
           if (preloadGeneration !== preloadGenerationRef.current) {
@@ -220,10 +247,6 @@ export function usingWorldPlazaAvatarFootsteps(
     };
 
     const syncingAvatarFootsteps = (): void => {
-      if (checkingWorldPlazaDevQaLoadEnabled()) {
-        return;
-      }
-
       if (!checkingWorldPlazaGirlSampleAvatarSkinActive()) {
         return;
       }
@@ -250,11 +273,9 @@ export function usingWorldPlazaAvatarFootsteps(
         return;
       }
 
-      const surfaceKind = resolvingWorldPlazaAvatarFootstepSurfaceAtWorldPoint(
-        playerPositionRef.current
-      );
+      const surfaceKind = resolvingCachedAvatarFootstepSurface();
 
-      preloadingFootstepsForSurfaces([surfaceKind]);
+      preloadingFootstepsForSurface(surfaceKind);
 
       if (
         previousMotionKind !== motionKind ||
@@ -335,11 +356,7 @@ export function usingWorldPlazaAvatarFootsteps(
     };
 
     applyingMasterSfxVolume();
-    preloadingFootstepsForSurfaces([
-      resolvingWorldPlazaAvatarFootstepSurfaceAtWorldPoint(
-        playerPositionRef.current
-      ),
-    ]);
+    preloadingFootstepsForSurface(resolvingCachedAvatarFootstepSurface());
 
     const unsubscribeSfxVolume = subscribingWorldPlazaSfxVolume(
       handlingSfxVolumeChange
@@ -372,6 +389,9 @@ export function usingWorldPlazaAvatarFootsteps(
       preloadGenerationRef.current = 0;
       pendingJumpLandingStartedAtMsRef.current = 0;
       lastHandledJumpStartedAtMsRef.current = 0;
+      lastResolvedSurfaceTileXRef.current = Number.NaN;
+      lastResolvedSurfaceTileYRef.current = Number.NaN;
+      lastResolvedSurfaceKindRef.current = null;
       resettingFootstepLoop();
     };
   }, [localAvatarMotionStateRef, playerPositionRef]);

@@ -1,21 +1,24 @@
+import { checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex } from '@/components/world/domains/checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex';
 import { checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex';
 import { checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex';
 import { checkingWorldPlazaTileIsRockyBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsRockyBiomeAtTileIndex';
 import { checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex';
 import { checkingWorldPlazaTreeBlocksGridTile } from '@/components/world/domains/checkingWorldPlazaTreeBlocksGridTile';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import {
-  DEFINING_WORLD_PLAZA_STONE_JITTER_X_PX,
-  DEFINING_WORLD_PLAZA_STONE_JITTER_Y_PX,
+  DEFINING_WORLD_PLAZA_STONE_PLACEMENT_HASH_X,
+  DEFINING_WORLD_PLAZA_STONE_PLACEMENT_HASH_Y,
   DEFINING_WORLD_PLAZA_STONE_SEED_SALT_JITTER_X,
   DEFINING_WORLD_PLAZA_STONE_SEED_SALT_JITTER_Y,
   DEFINING_WORLD_PLAZA_STONE_SEED_SALT_PALETTE,
   DEFINING_WORLD_PLAZA_STONE_SEED_SALT_SIZE,
   DEFINING_WORLD_PLAZA_STONE_SIZE_TIERS,
+  DEFINING_WORLD_PLAZA_STONE_TILE_MODULUS,
+  DEFINING_WORLD_PLAZA_STONE_TILE_REMAINDER,
 } from '@/components/world/domains/definingWorldPlazaStoneDecorationConstants';
 import { DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_SIZE_TIER_INDEX } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
-import { checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled } from '@/components/world/domains/managingWorldPlazaProceduralTreesAndRocksFeatureStore';
-import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
+import { checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled } from '@/components/world/domains/managingWorldPlazaProceduralTreesAndRocksFeatureStore';
 import { resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex';
 import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
 import { checkingWorldPlazaOceanShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaOceanShoreDepthAtTileIndex';
@@ -25,12 +28,10 @@ import {
   resolvingWorldPlazaRockyBiomeStonePaletteAtTileIndex,
   resolvingWorldPlazaRockyBiomeStoneSizeTierIndex,
 } from '@/components/world/domains/resolvingWorldPlazaRockyBiomeTerrainRockPlacement';
+import { resolvingWorldPlazaStoneDecorationJitterOffsetPx } from '@/components/world/domains/resolvingWorldPlazaStoneDecorationJitterOffsetPx';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { samplingWorldPlazaVegetationStoneNoiseAtTile } from '@/components/world/domains/samplingWorldPlazaVegetationDensityAtTile';
-import {
-  mappingWorldPlazaGrassSeededUnitToFloatRange,
-  seedingWorldPlazaGrassTileDecorationFromTileIndex,
-} from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
+import { seedingWorldPlazaGrassTileDecorationFromTileIndex } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
 import { applyingWorldPlazaRockMineStateToColumnRockMetadata } from '@/components/world/harvest/domains/applyingWorldPlazaRockMineStateToColumnRockMetadata';
 import { readingWorldPlazaRuntimeMinedRockState } from '@/components/world/harvest/domains/registeringWorldPlazaMinedRocksVisualLayerLookup';
 import { checkingWorldPlazaRuntimePebbleIsPicked } from '@/components/world/harvest/domains/registeringWorldPlazaPickedPebblesLookup';
@@ -247,9 +248,7 @@ function computingWorldPlazaStoneDecorationAtTileIndex(
     return null;
   }
 
-  if (
-    checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex(tileX, tileY)
-  ) {
+  if (checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex(tileX, tileY)) {
     const columnRockMetadata =
       resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex(tileX, tileY);
 
@@ -292,13 +291,28 @@ function computingWorldPlazaStoneDecorationAtTileIndex(
     return null;
   }
 
+  const pebbleTileHash = Math.abs(
+    tileX * DEFINING_WORLD_PLAZA_STONE_PLACEMENT_HASH_X +
+      tileY * DEFINING_WORLD_PLAZA_STONE_PLACEMENT_HASH_Y
+  );
+
+  if (
+    pebbleTileHash % DEFINING_WORLD_PLAZA_STONE_TILE_MODULUS !==
+    DEFINING_WORLD_PLAZA_STONE_TILE_REMAINDER
+  ) {
+    return null;
+  }
+
   const isRockyBiome = checkingWorldPlazaTileIsRockyBiomeAtTileIndex(
     tileX,
     tileY
   );
   const stoneNoise = samplingWorldPlazaVegetationStoneNoiseAtTile(tileX, tileY);
-  const stoneNoiseMin =
-    resolvingWorldPlazaRockyBiomePebbleStoneNoiseMinAtTile(isRockyBiome);
+  const stoneNoiseMin = resolvingWorldPlazaRockyBiomePebbleStoneNoiseMinAtTile(
+    isRockyBiome,
+    tileX,
+    tileY
+  );
 
   if (stoneNoise < stoneNoiseMin) {
     return null;
@@ -336,23 +350,19 @@ function computingWorldPlazaStoneDecorationAtTileIndex(
     isRockyBiome
   );
 
-  const offsetX = mappingWorldPlazaGrassSeededUnitToFloatRange(
+  const { offsetX, offsetY } = resolvingWorldPlazaStoneDecorationJitterOffsetPx(
     seedingWorldPlazaGrassTileDecorationFromTileIndex(
       tileX,
       tileY,
       DEFINING_WORLD_PLAZA_STONE_SEED_SALT_JITTER_X
     ),
-    -DEFINING_WORLD_PLAZA_STONE_JITTER_X_PX,
-    DEFINING_WORLD_PLAZA_STONE_JITTER_X_PX
-  );
-  const offsetY = mappingWorldPlazaGrassSeededUnitToFloatRange(
     seedingWorldPlazaGrassTileDecorationFromTileIndex(
       tileX,
       tileY,
       DEFINING_WORLD_PLAZA_STONE_SEED_SALT_JITTER_Y
     ),
-    -DEFINING_WORLD_PLAZA_STONE_JITTER_Y_PX,
-    DEFINING_WORLD_PLAZA_STONE_JITTER_Y_PX
+    sizeTier.bodyHalfWidthPx,
+    sizeTier.bodyHalfHeightPx
   );
 
   return {

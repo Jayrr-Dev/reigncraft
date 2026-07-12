@@ -82,6 +82,13 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
         'Large cats still ask for Attack? before a hit. Aggression demotes one step per player strike.',
     },
     {
+      speciesId: 'fairy',
+      icon: 'ph:sparkle',
+      summary: 'Night spark that trails wanderers, then slips away at dawn.',
+      studiedSummary:
+        'Fairies float as a gold mote with a warm night light. They follow close after dark, ignore other beasts, and shrug off wounds that end anything else. Strike one and it leaves. Sunrise sends them packing either way. No corpse to study, so sightings are most of what wanderers ever learn.',
+    },
+    {
       speciesId: 'deer',
       icon: 'mdi:pine-tree',
       summary: 'Skittish browser that bolts at the first wrong step.',

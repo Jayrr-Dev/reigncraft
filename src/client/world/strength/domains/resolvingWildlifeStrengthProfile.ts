@@ -8,6 +8,7 @@
  * @module components/world/strength/domains/resolvingWildlifeStrengthProfile
  */
 
+import { resolvingWorldPlazaScaledAttackIntervalMs } from '@/components/world/domains/resolvingWorldPlazaGlobalAttackSpeedScale';
 import {
   computingWorldPlazaStrengthIndexScore,
   type ComputingWorldPlazaStrengthIndexResult,
@@ -51,7 +52,11 @@ function buildingWildlifeStrengthProfile(
     healthRegenPerSecond: 0,
     defense: species.vitals.defense,
     attackPower: species.vitals.attackPower,
-    attacksPerSecond: 1000 / species.vitals.attackIntervalMs,
+    attacksPerSecond:
+      1000 /
+      resolvingWorldPlazaScaledAttackIntervalMs(
+        species.vitals.attackIntervalMs
+      ),
     walkSpeedGridPerSecond: species.vitals.walkSpeedGridPerSecond,
     runSpeedGridPerSecond: species.vitals.runSpeedGridPerSecond,
     modifiers,

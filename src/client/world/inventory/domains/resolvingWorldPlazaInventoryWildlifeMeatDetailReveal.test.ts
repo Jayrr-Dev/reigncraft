@@ -46,7 +46,8 @@ describe('resolvingWorldPlazaInventoryWildlifeMeatDetailReveal', () => {
       resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(100).showDiseaseName
     ).toBe(true);
     expect(
-      resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(100).showDiseaseChance
+      resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(100)
+        .showDiseaseChance
     ).toBe(false);
   });
 
@@ -86,9 +87,7 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel wildlife meat', () 
 
     expect(model?.description).toBe('Thick slabs from a tusked boar.');
     expect(model?.description.toLowerCase()).not.toContain('trichinellosis');
-    expect(model?.infoRows.some((row) => row.id === 'raw-disease')).toBe(
-      false
-    );
+    expect(model?.infoRows.some((row) => row.id === 'raw-disease')).toBe(false);
     expect(model?.infoRows.some((row) => row.id === 'hunger-restore')).toBe(
       false
     );
@@ -109,9 +108,7 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel wildlife meat', () 
     expect(
       model?.infoRows.find((row) => row.id === 'hunger-restore')?.value
     ).toBe('28%');
-    expect(model?.infoRows.some((row) => row.id === 'raw-disease')).toBe(
-      false
-    );
+    expect(model?.infoRows.some((row) => row.id === 'raw-disease')).toBe(false);
   });
 
   it('shows full flavor at 50 studies', () => {
@@ -132,15 +129,18 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel wildlife meat', () 
       {
         isEquipped: false,
         studyCountsBySpeciesId: { boar: 10 },
+        playerEffectiveMaxHealth: 1400,
       }
     );
 
     expect(
       model?.infoRows.find((row) => row.id === 'hunger-restore')?.value
     ).toBe('28%');
-    expect(model?.infoRows.some((row) => row.id === 'raw-disease')).toBe(
-      false
-    );
+    expect(
+      model?.infoRows.find((row) => row.id === 'health-restore')?.value
+    ).toMatch(/^\d+ HP \(raw, half\)$/);
+    expect(model?.badges.some((badge) => badge.id === 'food-heal')).toBe(true);
+    expect(model?.infoRows.some((row) => row.id === 'raw-disease')).toBe(false);
   });
 
   it('shows disease name without chance at 100 studies', () => {

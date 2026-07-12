@@ -16,6 +16,10 @@ export const DEFINING_WORLD_PLAZA_ANIMATION_CLIP_FIRE_FLAME_PREFIX =
 export const DEFINING_WORLD_PLAZA_ANIMATION_CLIP_FIRE_SMOKE_PREFIX =
   'fire-smoke-';
 
+/** One-shot Buff1 pillar when the local player switches avatar skins. */
+export const DEFINING_WORLD_PLAZA_ANIMATION_CLIP_AVATAR_CHARACTER_SWITCH_EFFECT =
+  'avatar-character-switch-effect';
+
 /** Avatar locomotion and GirlSample combat clip suffixes registered per skin. */
 export type DefiningWorldPlazaAvatarMotionClipSuffix =
   | 'walk'

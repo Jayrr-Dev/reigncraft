@@ -5,6 +5,7 @@
  */
 
 import { checkingPlazaBestiaryStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
+import { resolvingWorldPlazaScaledAttackIntervalMs } from '@/components/world/domains/resolvingWorldPlazaGlobalAttackSpeedScale';
 import { resolvingWorldPlazaEntityBleedSeverityDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import { resolvingWorldPlazaEntityBuffDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 import { resolvingWorldPlazaEntityDiseaseDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
@@ -158,7 +159,9 @@ export function resolvingPlazaBestiaryGuideCombatStats(
     maxHealth: speciesDefinition.vitals.baseMaxHealth,
     attackPower: speciesDefinition.vitals.attackPower,
     defense: speciesDefinition.vitals.defense,
-    attackIntervalMs: speciesDefinition.vitals.attackIntervalMs,
+    attackIntervalMs: resolvingWorldPlazaScaledAttackIntervalMs(
+      speciesDefinition.vitals.attackIntervalMs
+    ),
     walkSpeedGridPerSecond: speciesDefinition.vitals.walkSpeedGridPerSecond,
     runSpeedGridPerSecond: speciesDefinition.vitals.runSpeedGridPerSecond,
   };

@@ -1,6 +1,7 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningFilmcowFootstepSurfaceKind } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
 import { resolvingFilmcowFootstepSurfaceAtWorldPoint } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepSurfaceAtWorldPoint';
+import { checkingWildlifeInstancePlaysFootsteps } from '@/components/world/wildlife/domains/checkingWildlifeInstancePlaysFootsteps';
 import { DEFINING_WILDLIFE_FOOTSTEP_MAX_AUDIBLE_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeFootstepSfxConstants';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
@@ -23,7 +24,7 @@ function computingWildlifeFootstepDistanceGrid(
  */
 export function resolvingFilmcowFootstepSurfaceKindsForWildlifePlayback(
   listenerPoint: DefiningWorldPlazaWorldPoint | null,
-  instances: readonly DefiningWildlifeInstance[]
+  instances: Iterable<DefiningWildlifeInstance>
 ): DefiningFilmcowFootstepSurfaceKind[] {
   const surfaceKinds = new Set<DefiningFilmcowFootstepSurfaceKind>();
 
@@ -34,7 +35,7 @@ export function resolvingFilmcowFootstepSurfaceKindsForWildlifePlayback(
   }
 
   for (const instance of instances) {
-    if (instance.isDead) {
+    if (!checkingWildlifeInstancePlaysFootsteps(instance)) {
       continue;
     }
 

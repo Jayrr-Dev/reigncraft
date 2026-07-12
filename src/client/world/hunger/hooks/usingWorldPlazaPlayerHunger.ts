@@ -27,6 +27,7 @@ import {
   DEFINING_WORLD_PLAZA_HUNGER_JUMP_COST_RATIO,
   DEFINING_WORLD_PLAZA_HUNGER_MAX_FRAME_DELTA_SECONDS,
   DEFINING_WORLD_PLAZA_HUNGER_RUN_JUMP_COST_RATIO,
+  DEFINING_WORLD_PLAZA_HUNGER_TICK_INTERVAL_MS,
   resolvingWorldPlazaHungerTier,
   type DefiningWorldPlazaHungerTier,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
@@ -253,6 +254,14 @@ export function usingWorldPlazaPlayerHunger({
 
     const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
       (_deltaMs, frameTimeMs) => {
+        if (
+          lastFrameMsRef.current !== null &&
+          frameTimeMs - lastFrameMsRef.current <
+            DEFINING_WORLD_PLAZA_HUNGER_TICK_INTERVAL_MS
+        ) {
+          return;
+        }
+
         const finishHungerTickSample = beginningWorldPlazaPerformanceSample(
           DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.PLAYER_HUNGER_TICK
         );

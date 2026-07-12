@@ -1,20 +1,19 @@
 /**
- * Debug knobs for skipping star-audio preload during boot and runtime.
+ * Debug knobs for skipping *boot* star-audio preload.
  *
  * Use when isolating frame drops from audio decode / HTTP cache warming:
  * - URL: `?skipAudioPreload=1`
  * - Env: `NEXT_PUBLIC_WORLD_PLAZA_SKIP_AUDIO_PRELOAD=true` in `.env.local`
  * - Console: `window.__WORLD_PLAZA_PERF__.skipAudioPreload(true)`
  *
- * Playback still works; clips load on first play. Only eager preload is skipped.
+ * Boot warm only. Runtime plaza hooks still preload; play refuses cold keys.
  *
  * @module components/world/domains/definingWorldPlazaStarAudioPreloadDebugConstants
  */
 
-/** Starts with audio preload skipped when set in `.env.local`. */
+/** Starts with boot audio preload skipped when set in `.env.local`. */
 export const DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_DEBUG_ENV_SKIP =
-  // TEMP A/B: force skip so HMR applies without Vite restart. Revert after test.
-  true || import.meta.env.NEXT_PUBLIC_WORLD_PLAZA_SKIP_AUDIO_PRELOAD === 'true';
+  import.meta.env.NEXT_PUBLIC_WORLD_PLAZA_SKIP_AUDIO_PRELOAD === 'true';
 
 /** URL query flag that skips eager star-audio preload on load. */
 export const DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_DEBUG_URL_QUERY_KEY =

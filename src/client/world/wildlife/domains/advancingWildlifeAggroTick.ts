@@ -9,8 +9,10 @@ import { advancingWildlifeStalkAggroTick } from '@/components/world/wildlife/dom
 import { advancingWildlifeStalkerBehaviour } from '@/components/world/wildlife/domains/advancingWildlifeStalkerBehaviour';
 import { applyingWildlifeFavoritePreyPlayerRevengeAggro } from '@/components/world/wildlife/domains/applyingWildlifeFavoritePreyPlayerRevengeAggro';
 import { applyingWildlifeFavoritePreyThreatBoost } from '@/components/world/wildlife/domains/applyingWildlifeFavoritePreyThreatBoost';
+import { checkingWildlifeInstanceHasProvokedWildlifeAggro } from '@/components/world/wildlife/domains/checkingWildlifeInstanceHasProvokedWildlifeAggro';
 import { checkingWildlifeIsMotivatedToHunt } from '@/components/world/wildlife/domains/checkingWildlifeIsMotivatedToHunt';
 import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight';
+import { checkingWildlifePlayerOccludedByColumnRock } from '@/components/world/wildlife/domains/checkingWildlifePlayerOccludedByColumnRock';
 import { checkingWildlifePlayerRevengeAggroIsActive } from '@/components/world/wildlife/domains/checkingWildlifePlayerRevengeAggroIsActive';
 import { checkingWildlifePointIsInsideTerritoryAnchor } from '@/components/world/wildlife/domains/checkingWildlifePointIsInsideTerritoryAnchor';
 import { checkingWildlifeShareSpawnPack } from '@/components/world/wildlife/domains/checkingWildlifeShareSpawnPack';
@@ -25,6 +27,10 @@ import {
   DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD,
   DEFINING_WILDLIFE_PROXIMITY_THREAT_PER_SECOND,
 } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
+import {
+  DEFINING_WILDLIFE_BOULDER_COVER_CHASE_BREAK_DISTANCE_GRID,
+  DEFINING_WILDLIFE_BOULDER_COVER_DETECTION_THREAT_MULTIPLIER,
+} from '@/components/world/wildlife/domains/definingWildlifeBoulderCoverConstants';
 import { DEFINING_WILDLIFE_FAVORITE_PREY_SIGHT_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeFavoritePreyConstants';
 import { checkingWildlifePredatorMayHuntPrey } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
 import {
@@ -191,6 +197,7 @@ export function advancingWildlifeAggroTick({
         species,
         nearbyInstances,
         resolveSpecies: resolvingWildlifeSpeciesDefinition,
+        nowMs,
       })
     : null;
   const shouldResetStalkStateForFavoritePrey =
@@ -216,6 +223,7 @@ export function advancingWildlifeAggroTick({
           playerPosition,
           playerUserId,
           resolveSpecies: resolvingWildlifeSpeciesDefinition,
+          nowMs,
         })
       : [];
 
@@ -270,15 +278,21 @@ export function advancingWildlifeAggroTick({
     const aggressionProfile = resolvingWildlifeAggressionLevelProfile(
       instance.aggressionLevel
     );
+    const distanceToPlayer = Math.hypot(
+      instance.position.x - playerPosition.x,
+      instance.position.y - playerPosition.y
+    );
+    const playerOccludedByBoulder = checkingWildlifePlayerOccludedByColumnRock(
+      instance.position,
+      playerPosition
+    );
+    const boulderCoverDetectionMultiplier = playerOccludedByBoulder
+      ? DEFINING_WILDLIFE_BOULDER_COVER_DETECTION_THREAT_MULTIPLIER
+      : 1;
 
     if (aggressionProfile.proximityThreatMode !== 'none') {
-      const distance = Math.hypot(
-        instance.position.x - playerPosition.x,
-        instance.position.y - playerPosition.y
-      );
-
       if (
-        distance <=
+        distanceToPlayer <=
         resolvingWildlifeInstancePlayerAggroRadiusGrid(species, instance)
       ) {
         const shouldBuildProximityThreat =
@@ -306,6 +320,7 @@ export function advancingWildlifeAggroTick({
             DEFINING_WILDLIFE_PROXIMITY_THREAT_PER_SECOND *
               starvingMultiplier *
               aggressionProfile.proximityThreatMultiplier *
+              boulderCoverDetectionMultiplier *
               deltaSeconds,
             nowMs
           );
@@ -323,11 +338,6 @@ export function advancingWildlifeAggroTick({
       instance.aggressionLevel !== 'tame' &&
       (instance.aggroState.activeTargetId === null || !stalkLockedPreyTargetId)
     ) {
-      const distanceToPlayer = Math.hypot(
-        instance.position.x - playerPosition.x,
-        instance.position.y - playerPosition.y
-      );
-
       if (
         checkingWildlifePointIsInsideTerritoryAnchor(
           playerPosition,
@@ -344,9 +354,26 @@ export function advancingWildlifeAggroTick({
         threats = updatingThreatEntry(
           threats,
           playerUserId,
-          territoryThreatPerSecond * deltaSeconds,
+          territoryThreatPerSecond *
+            boulderCoverDetectionMultiplier *
+            deltaSeconds,
           nowMs
         );
+      }
+    }
+
+    if (
+      playerOccludedByBoulder &&
+      distanceToPlayer >=
+        DEFINING_WILDLIFE_BOULDER_COVER_CHASE_BREAK_DISTANCE_GRID &&
+      (instance.aggroState.activeTargetId === playerUserId ||
+        stalkLockedPreyTargetId === playerUserId ||
+        threats.some((entry) => entry.targetId === playerUserId))
+    ) {
+      threats = threats.filter((entry) => entry.targetId !== playerUserId);
+
+      if (stalkLockedPreyTargetId === playerUserId) {
+        stalkLockedPreyTargetId = null;
       }
     }
   }
@@ -418,7 +445,11 @@ export function advancingWildlifeAggroTick({
       !checkingWildlifePredatorMayHuntPrey(
         species,
         preySpecies,
-        hungerDriveLevel
+        hungerDriveLevel,
+        {
+          preyHasProvokedWildlifeAggro:
+            checkingWildlifeInstanceHasProvokedWildlifeAggro(neighbor, nowMs),
+        }
       )
     ) {
       continue;
@@ -510,6 +541,25 @@ export function advancingWildlifeAggroTick({
         entry.targetId === stalkLockedPreyTargetId ||
         territorialIntruderIds.has(entry.targetId)
     );
+  }
+
+  // Followers inherit the alpha lock before proximity threat can build. Seed
+  // enough threat so activeTarget flips this think; otherwise they fall through
+  // to seek-pack / wander while only the alpha engages.
+  if (packJoinPreyTargetId) {
+    const lockThreat =
+      threats.find((entry) => entry.targetId === packJoinPreyTargetId)
+        ?.threat ?? 0;
+    const threatDeficit = DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD - lockThreat;
+
+    if (threatDeficit > 0) {
+      threats = updatingThreatEntry(
+        threats,
+        packJoinPreyTargetId,
+        threatDeficit,
+        nowMs
+      );
+    }
   }
 
   const activeTargetId = resolvingWildlifeStalkLockedActiveTargetId({

@@ -157,6 +157,27 @@ function resolvingWorldPlazaColumnRockBaseDiamondInflatedByPlayerRadius(
 }
 
 /**
+ * Returns true when a grid point lies inside the boulder base diamond.
+ *
+ * @param diamond - Boulder base diamond.
+ * @param gridX - Grid point X.
+ * @param gridY - Grid point Y.
+ */
+export function checkingWorldPlazaColumnRockBaseDiamondContainsGridPoint(
+  diamond: DefiningWorldPlazaColumnRockBaseDiamond,
+  gridX: number,
+  gridY: number
+): boolean {
+  return (
+    resolvingWorldPlazaColumnRockBaseDiamondMembershipValue(
+      diamond,
+      gridX,
+      gridY
+    ) <= 1
+  );
+}
+
+/**
  * Returns true when a player footprint overlaps the boulder base diamond.
  *
  * @param diamond - Boulder base diamond.
@@ -176,12 +197,10 @@ export function checkingWorldPlazaColumnRockBaseDiamondContainsPlayerFootprint(
       playerRadiusGrid
     );
 
-  return (
-    resolvingWorldPlazaColumnRockBaseDiamondMembershipValue(
-      contactDiamond,
-      gridX,
-      gridY
-    ) <= 1
+  return checkingWorldPlazaColumnRockBaseDiamondContainsGridPoint(
+    contactDiamond,
+    gridX,
+    gridY
   );
 }
 

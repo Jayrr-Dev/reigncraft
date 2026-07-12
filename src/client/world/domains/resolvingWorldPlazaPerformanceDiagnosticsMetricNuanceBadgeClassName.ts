@@ -1,0 +1,44 @@
+/**
+ * Picks Metrics nuance badge classes from a 0..1 group index.
+ *
+ * @module components/world/domains/resolvingWorldPlazaPerformanceDiagnosticsMetricNuanceBadgeClassName
+ */
+
+import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_BADGE_CRITICAL_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_BADGE_HEALTHY_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_BADGE_SELECTED_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_BADGE_STRAINED_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_BADGE_WATCH_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_INDEX_BAND,
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsMetricNuanceBadgeConstants';
+
+/**
+ * Resolves Tailwind class string for a nuance badge (optional selected ring).
+ */
+export function resolvingWorldPlazaPerformanceDiagnosticsMetricNuanceBadgeClassName(
+  index: number,
+  isSelected: boolean
+): string {
+  const band =
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_INDEX_BAND;
+  let bandClassName =
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_BADGE_HEALTHY_CLASS_NAME;
+
+  if (index >= band.STRAINED_MAX) {
+    bandClassName =
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_BADGE_CRITICAL_CLASS_NAME;
+  } else if (index >= band.WATCH_MAX) {
+    bandClassName =
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_BADGE_STRAINED_CLASS_NAME;
+  } else if (index >= band.HEALTHY_MAX) {
+    bandClassName =
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_BADGE_WATCH_CLASS_NAME;
+  }
+
+  if (!isSelected) {
+    return bandClassName;
+  }
+
+  return `${bandClassName} ${DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_BADGE_SELECTED_CLASS_NAME}`;
+}

@@ -6,9 +6,11 @@
 
 import type { DefiningWorldPlazaEntityHealthDamageRollModifierKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { DEFINING_WILDLIFE_DIFFICULTY_LEVERS } from '@/components/world/wildlife/domains/definingWildlifeDifficultyLevers';
+import { DEFINING_WILDLIFE_FAIRY_ALWAYS_FOLLOW_MAX_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeFairyConstants';
 import { resolvingWildlifeMeatCatalogEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import type { DefiningWildlifeSpeciesNameTagConfig } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import { DEFINING_WILDLIFE_OMEGA_WOLF_NAME_TAG_COLOR } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
+import type { DefiningWildlifePassiveTraitId } from '@/components/world/wildlife/domains/definingWildlifePassiveTraitRegistry';
 import {
   DEFINING_WILDLIFE_TURTLE_SHELL_DAMAGE_ROLL_MODIFIER_ID,
   DEFINING_WILDLIFE_TURTLE_SHELL_INCOMING_BLOCK_BIAS,
@@ -168,6 +170,7 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   'cat-black': { drainMultiplier: 1.4, regenMultiplier: 1.25 },
   'cat-white': { drainMultiplier: 1.4, regenMultiplier: 1.25 },
   'cat-large': { drainMultiplier: 1.3, regenMultiplier: 1.2 },
+  fairy: { drainMultiplier: 0.5, regenMultiplier: 1.5 },
 
   // Prey — deer burst hard; zebras gallop long but recover slowly.
   // Fleet grazers must recover most of the bar before sprinting again,
@@ -779,6 +782,12 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
       jumpCooldownMs: 2200,
     },
   },
+  // Companion orb — floaty trail speed; immortal stamina still ramps run-time.
+  fairy: {
+    walkSpeedGridPerSecond: 2.4,
+    runSpeedGridPerSecond: 4.2,
+    jump: definingWildlifeGroundedJumpConfig(),
+  },
 };
 
 /** Shared no-jump profile for heavy grounded species. */
@@ -846,6 +855,9 @@ export type DefiningWildlifeSpeciesLootConfig = {
   quantity: number;
 };
 
+/** How the species is drawn in the Pixi wildlife layer. */
+export type DefiningWildlifeSpeciesPresentationKind = 'sprite' | 'glowOrb';
+
 /** Full declarative species definition. */
 export type DefiningWildlifeSpeciesDefinition = {
   speciesId: DefiningWildlifeSpeciesId;
@@ -853,6 +865,28 @@ export type DefiningWildlifeSpeciesDefinition = {
   /** Optional name-tag parts: `[namePrefix] name [nameSuffix]` per size tier. */
   nameTag?: DefiningWildlifeSpeciesNameTagConfig;
   spriteFolder: string;
+  /**
+   * Render pipeline. Default `sprite` loads motion sheets. `glowOrb` draws a
+   * procedural circle and skips texture loading.
+   */
+  presentationKind?: DefiningWildlifeSpeciesPresentationKind;
+  /**
+   * When true, the docile follow-player branch stays active without a timed
+   * follow window. Used by companion species like the fairy. Pair with
+   * `alwaysFollowMaxDistanceGrid` to drop the chase when the player outruns it.
+   */
+  alwaysFollowsPlayer?: boolean;
+  /**
+   * Optional leash for `alwaysFollowsPlayer`. Beyond this grid distance the
+   * companion stops following until the player comes back inside. Omit for
+   * infinite range.
+   */
+  alwaysFollowMaxDistanceGrid?: number;
+  /**
+   * Opt-in reusable passives from `DEFINING_WILDLIFE_PASSIVE_TRAIT_REGISTRY`
+   * (e.g. `adrenaline-rush`, `never-triggers-wildlife-aggro`).
+   */
+  passiveTraitIds?: readonly DefiningWildlifePassiveTraitId[];
   /** Render scale multiplier; sheets are already relatively sized per species. */
   sizeScale: number;
   /** Optional per-species shift on the size bell curve. */
@@ -915,11 +949,6 @@ export type DefiningWildlifeSpeciesDefinition = {
    * block bias). Stacks with obese frame modifiers when both apply.
    */
   passiveDamageRollModifiers?: readonly DefiningWildlifeSpeciesPassiveDamageRollModifier[];
-  /**
-   * Adrenaline Rush: restore stamina to full when this species first enters flee.
-   * Tune restore ratio in `definingWildlifeSpeciesPassiveTraitConstants.ts`.
-   */
-  adrenalineRush?: boolean;
   loot: DefiningWildlifeSpeciesLootConfig;
 };
 
@@ -1261,7 +1290,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     socialBehavior: { socialHunter: true },
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('grey-wolf'),
-    adrenalineRush: true,
+    passiveTraitIds: ['adrenaline-rush'],
     hazards: {
       treatsSwampWaterAsSafe: false,
       treatsLavaAsLethal: true,
@@ -1309,7 +1338,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     socialBehavior: { socialHunter: true },
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('omega-wolf'),
-    adrenalineRush: true,
+    passiveTraitIds: ['adrenaline-rush'],
     hazards: {
       treatsSwampWaterAsSafe: false,
       treatsLavaAsLethal: true,
@@ -1453,7 +1482,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   },
 
   // --- Savanna roster ---
-  antilope: definingWildlifeHerbivoreSpecies('antilope', 'Antilope', 'antilope',
+  antilope: definingWildlifeHerbivoreSpecies(
+    'antilope',
+    'Antilope',
+    'antilope',
     55,
     {
       sizeScale: 0.9,
@@ -1478,7 +1510,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1200,
     },
   }),
-  giraffe: definingWildlifeHerbivoreSpecies('giraffe', 'Giraffe', 'giraffe',
+  giraffe: definingWildlifeHerbivoreSpecies(
+    'giraffe',
+    'Giraffe',
+    'giraffe',
     900,
     {
       temperamentId: 'retaliator',
@@ -1494,7 +1529,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  ostrich: definingWildlifeHerbivoreSpecies('ostrich', 'Ostrich', 'ostrich',
+  ostrich: definingWildlifeHerbivoreSpecies(
+    'ostrich',
+    'Ostrich',
+    'ostrich',
     110,
     {
       aggressionSpawn: {
@@ -1513,7 +1551,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  elephant: definingWildlifeHerbivoreSpecies('elephant', 'Elephant', 'elephant',
+  elephant: definingWildlifeHerbivoreSpecies(
+    'elephant',
+    'Elephant',
+    'elephant',
     5000,
     {
       temperamentId: 'retaliator',
@@ -1531,7 +1572,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  'elephant-female': definingWildlifeHerbivoreSpecies('elephant-female', 'Elephant Matriarch', 'elephant-female',
+  'elephant-female': definingWildlifeHerbivoreSpecies(
+    'elephant-female',
+    'Elephant Matriarch',
+    'elephant-female',
     3500,
     {
       temperamentId: 'retaliator',
@@ -1565,7 +1609,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1700,
     },
   }),
-  'rhino-female': definingWildlifeHerbivoreSpecies('rhino-female', 'Rhino Cow', 'rhino-female',
+  'rhino-female': definingWildlifeHerbivoreSpecies(
+    'rhino-female',
+    'Rhino Cow',
+    'rhino-female',
     1600,
     {
       temperamentId: 'retaliator',
@@ -1672,7 +1719,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1200,
     },
   }),
-  'brown-horse': definingWildlifeHerbivoreSpecies('brown-horse', 'Brown Horse', 'brown-horse',
+  'brown-horse': definingWildlifeHerbivoreSpecies(
+    'brown-horse',
+    'Brown Horse',
+    'brown-horse',
     450,
     {
       sizeScale: 1.1,
@@ -1686,7 +1736,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  'work-horse': definingWildlifeHerbivoreSpecies('work-horse', 'Work Horse', 'work-horse',
+  'work-horse': definingWildlifeHerbivoreSpecies(
+    'work-horse',
+    'Work Horse',
+    'work-horse',
     700,
     {
       sizeScale: 1.15,
@@ -1701,7 +1754,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  'arabian-horse': definingWildlifeHerbivoreSpecies('arabian-horse', 'Arabian Horse', 'arabian-horse',
+  'arabian-horse': definingWildlifeHerbivoreSpecies(
+    'arabian-horse',
+    'Arabian Horse',
+    'arabian-horse',
     400,
     {
       sizeScale: 1.08,
@@ -1744,7 +1800,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1700,
     },
   }),
-  'water-buffalo': definingWildlifeHerbivoreSpecies('water-buffalo', 'Water Buffalo', 'water-buffalo',
+  'water-buffalo': definingWildlifeHerbivoreSpecies(
+    'water-buffalo',
+    'Water Buffalo',
+    'water-buffalo',
     700,
     {
       temperamentId: 'retaliator',
@@ -1786,7 +1845,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     ],
   },
-  tortoise: definingWildlifeHerbivoreSpecies('tortoise', 'Tortoise', 'toirtois',
+  tortoise: definingWildlifeHerbivoreSpecies(
+    'tortoise',
+    'Tortoise',
+    'toirtois',
     100,
     {
       temperamentId: 'passive',
@@ -1835,7 +1897,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1500,
     },
   },
-  mammoth: definingWildlifeHerbivoreSpecies('mammoth', 'Mammoth', 'mammoth',
+  mammoth: definingWildlifeHerbivoreSpecies(
+    'mammoth',
+    'Mammoth',
+    'mammoth',
     6000,
     {
       temperamentId: 'retaliator',
@@ -2008,7 +2073,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     },
   }),
   chimp: definingWildlifeHerbivoreSpecies('chimp', 'Chimp', 'chimp', 50, {
-    diet: 'omnivore',
+    diet: 'carnivore',
     temperamentId: 'retaliator',
     trophicTier: 2,
     sizeScale: 0.95,
@@ -2024,7 +2089,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1000,
     },
   }),
-  'shepherd-dog': definingWildlifeHerbivoreSpecies('shepherd-dog', 'Shepherd Dog', 'shepherd-dog',
+  'shepherd-dog': definingWildlifeHerbivoreSpecies(
+    'shepherd-dog',
+    'Shepherd Dog',
+    'shepherd-dog',
     25,
     {
       temperamentId: 'docile',
@@ -2043,7 +2111,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  'cat-black': definingWildlifeHerbivoreSpecies('cat-black', 'Black Cat', 'cat-black',
+  'cat-black': definingWildlifeHerbivoreSpecies(
+    'cat-black',
+    'Black Cat',
+    'cat-black',
     4,
     {
       temperamentId: 'docile',
@@ -2062,7 +2133,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  'cat-white': definingWildlifeHerbivoreSpecies('cat-white', 'White Cat', 'cat-white',
+  'cat-white': definingWildlifeHerbivoreSpecies(
+    'cat-white',
+    'White Cat',
+    'cat-white',
     4,
     {
       temperamentId: 'docile',
@@ -2081,7 +2155,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
-  'cat-large': definingWildlifeHerbivoreSpecies('cat-large', 'Large Cat', 'cat-large',
+  'cat-large': definingWildlifeHerbivoreSpecies(
+    'cat-large',
+    'Large Cat',
+    'cat-large',
     8,
     {
       temperamentId: 'docile',
@@ -2100,6 +2177,47 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
+  fairy: {
+    speciesId: 'fairy',
+    displayName: 'Fairy',
+    spriteFolder: 'fairy',
+    presentationKind: 'glowOrb',
+    alwaysFollowsPlayer: true,
+    alwaysFollowMaxDistanceGrid:
+      DEFINING_WILDLIFE_FAIRY_ALWAYS_FOLLOW_MAX_DISTANCE_GRID,
+    passiveTraitIds: ['never-triggers-wildlife-aggro', 'immortal'],
+    neverSleeps: true,
+    sizeScale: 1,
+    collisionRadiusGrid: 0.08,
+    diet: 'herbivore',
+    trophicTier: 1,
+    massKg: 0.1,
+    temperamentId: 'docile',
+    activityPattern: 'cathemeral',
+    aggressionSpawn: { bellCurveMeanShift: -2 },
+    socialBehavior: {
+      defendsYoung: false,
+      separationAnxiety: false,
+    },
+    aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 0 },
+    hunger: {
+      ...DEFINING_WILDLIFE_DEFAULT_HUNGER,
+      drainPerSecond: 0,
+    },
+    stamina: resolvingWildlifeSpeciesStaminaConfig('fairy'),
+    hazards: {
+      treatsSwampWaterAsSafe: true,
+      treatsLavaAsLethal: true,
+      isHeatImmune: true,
+      isColdImmune: true,
+    },
+    vitals: {
+      baseMaxHealth: 8,
+      attackPower: 2,
+      defense: 0,
+      attackIntervalMs: 1_200,
+    },
+  },
 };
 
 /** Starter roster covering every AI archetype. */

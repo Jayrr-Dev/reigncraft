@@ -34,6 +34,18 @@ export const DEFINING_WILDLIFE_DEV_SPECIES_SPAWN_PLACEMENT_SALT = 0x51c3;
 /** Species catalog columns in the wildlife spawner grid. */
 export const DEFINING_WILDLIFE_DEV_SPAWN_SPECIES_GRID_COLUMN_COUNT = 3 as const;
 
+/** Dense wrap shell for biome filter chips. */
+export const STYLING_WILDLIFE_DEV_SPAWN_BIOME_CHIP_ROW_CLASS_NAME =
+  'flex flex-wrap gap-0.5' as const;
+
+/** Compact biome filter chip (tighter than shared panel chips). */
+export const STYLING_WILDLIFE_DEV_SPAWN_BIOME_CHIP_CLASS_NAME =
+  'rounded border border-white/15 bg-black/40 px-1.5 py-0.5 text-[8px] font-semibold uppercase leading-none tracking-wide text-white/55 transition hover:border-white/25 hover:text-white/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-300/70' as const;
+
+/** Selected biome filter chip. */
+export const STYLING_WILDLIFE_DEV_SPAWN_BIOME_CHIP_ACTIVE_CLASS_NAME =
+  'border-violet-300/45 bg-violet-500/20 text-violet-100' as const;
+
 /** Compact spawn button chrome for the species grid. */
 export const STYLING_WILDLIFE_DEV_SPAWN_SPECIES_BUTTON_CLASS_NAME =
   'pointer-events-auto flex min-h-7 min-w-0 items-center truncate rounded-md border border-white/20 bg-black/50 px-1.5 py-1 text-left text-[9px] font-medium leading-tight text-white/90 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70' as const;

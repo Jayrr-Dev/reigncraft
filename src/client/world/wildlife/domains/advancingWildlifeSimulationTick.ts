@@ -6,6 +6,7 @@
 
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
@@ -13,10 +14,13 @@ import {
   loggingWorldPlazaClientError,
 } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
+import { resolvingWorldPlazaScaledAttackIntervalMs } from '@/components/world/domains/resolvingWorldPlazaGlobalAttackSpeedScale';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
+import { resolvingWorldPlazaEntityHealthAttackSpeedMultiplier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthAttackSpeedMultiplier';
 import { resolvingWorldPlazaProjectileArchetype } from '@/components/world/projectile/domains/definingWorldPlazaProjectileArchetypeRegistry';
 import {
   advancingWildlifeAggroTick,
@@ -39,6 +43,7 @@ import { advancingWildlifeEnvironmentalDamageTick } from '@/components/world/wil
 import { advancingWildlifeHealthStatusTick } from '@/components/world/wildlife/domains/advancingWildlifeHealthStatusTick';
 import { advancingWildlifeHungerTick } from '@/components/world/wildlife/domains/advancingWildlifeHungerTick';
 import { advancingWildlifeHunterKillFeedingTick } from '@/components/world/wildlife/domains/advancingWildlifeHunterKillFeedingTick';
+import { advancingWildlifeNightOnlyWanderAwayDuringDaytime } from '@/components/world/wildlife/domains/advancingWildlifeNightOnlyWanderAwayDuringDaytime';
 import { advancingWildlifePendingRespawns } from '@/components/world/wildlife/domains/advancingWildlifePendingRespawns';
 import { advancingWildlifeSleepTick } from '@/components/world/wildlife/domains/advancingWildlifeSleepTick';
 import { advancingWildlifeStalkPlayerApproachTick } from '@/components/world/wildlife/domains/advancingWildlifeStalkPlayerApproachTick';
@@ -55,6 +60,7 @@ import {
   clearingWildlifeDocileExpiredFollowTimer,
 } from '@/components/world/wildlife/domains/applyingWildlifeDocileApproachReactOutcome';
 import { applyingWildlifeDocilePlayerHitBehaviorResponse } from '@/components/world/wildlife/domains/applyingWildlifeDocilePlayerHitBehaviorResponse';
+import { applyingWildlifeFairyBetrayalDeparture } from '@/components/world/wildlife/domains/applyingWildlifeFairyBetrayalDeparture';
 import {
   applyingWildlifeGroundFoodBite,
   clearingWildlifePendingGroundFoodBite,
@@ -67,6 +73,7 @@ import { applyingWildlifeSpawnPackAlphaLocks } from '@/components/world/wildlife
 import { applyingWildlifeSpeechTickWithSpeciesSfx } from '@/components/world/wildlife/domains/applyingWildlifeSpeechTickWithSpeciesSfx';
 import { applyingWildlifeStalkPackDamageResponse } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackDamageResponse';
 import { applyingWildlifeStalkEventToInstance } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackEvent';
+import { applyingWildlifeUnnoticedProvokeOnWildlifeHit } from '@/components/world/wildlife/domains/applyingWildlifeUnnoticedProvokeOnWildlifeHit';
 import {
   applyingWildlifeWolfHowlPackAttraction,
   type ApplyingWildlifeWolfHowlEvent,
@@ -81,10 +88,13 @@ import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domai
 import { checkingWildlifeHerbivoreHasHerdFleeTemperament } from '@/components/world/wildlife/domains/checkingWildlifeHerbivoreHasHerdFleeTemperament';
 import { checkingWildlifeInstanceIsDefendYoungVictim } from '@/components/world/wildlife/domains/checkingWildlifeInstanceIsDefendYoungVictim';
 import { checkingWildlifeIsFeedingOnKill } from '@/components/world/wildlife/domains/checkingWildlifeIsFeedingOnKill';
+import { checkingWildlifeIsNightCyclePhase } from '@/components/world/wildlife/domains/checkingWildlifeIsNightCyclePhase';
 import { checkingWildlifeMayMeleeWildlifeTarget } from '@/components/world/wildlife/domains/checkingWildlifeMayMeleeWildlifeTarget';
 import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
 import { checkingWildlifeProximityPreyInterrupt } from '@/components/world/wildlife/domains/checkingWildlifeProximityPreyInterrupt';
 import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile';
+import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
+import { checkingWildlifeSpeciesWandersAwayAtDaybreak } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesWandersAwayAtDaybreak';
 import { checkingWildlifeStalkPhaseIsFleeing } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
 import { checkingWildlifeStalkerShadowingAtDamage } from '@/components/world/wildlife/domains/checkingWildlifeStalkerShadowingAtDamage';
 import { computingWildlifeAcceleratedRunSpeed } from '@/components/world/wildlife/domains/computingWildlifeAcceleratedRunSpeed';
@@ -149,6 +159,7 @@ import { notifyingWildlifeOmegaWolfSfxEvent } from '@/components/world/wildlife/
 import { notifyingWildlifeSpeciesSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeSpeciesSfxEvent';
 import { notifyingWildlifeSpeciesSfxOnIntentTransition } from '@/components/world/wildlife/domains/notifyingWildlifeSpeciesSfxFromSimulation';
 import { resolvingWildlifeBehaviorNeighborQueryRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeBehaviorNeighborQueryRadiusGrid';
+import { resolvingWildlifeFairyDaybreakWanderAwayIntent } from '@/components/world/wildlife/domains/resolvingWildlifeFairyDaybreakWanderAwayIntent';
 import {
   resolvingWildlifeInstanceCollisionRadiusGrid,
   resolvingWildlifeInstanceMaxStaminaRatio,
@@ -607,11 +618,17 @@ function checkingWildlifeAttackReady(
   nowMs: number
 ): boolean {
   const lastAttackAtMs = attacker.aiState.lastAttackAtMs;
+  const attackSpeedMultiplier =
+    resolvingWorldPlazaEntityHealthAttackSpeedMultiplier(
+      attacker.healthState,
+      nowMs
+    );
+  const attackIntervalMs =
+    resolvingWorldPlazaScaledAttackIntervalMs(
+      attackerSpecies.vitals.attackIntervalMs
+    ) / attackSpeedMultiplier;
 
-  return (
-    lastAttackAtMs === null ||
-    nowMs - lastAttackAtMs >= attackerSpecies.vitals.attackIntervalMs
-  );
+  return lastAttackAtMs === null || nowMs - lastAttackAtMs >= attackIntervalMs;
 }
 
 /**
@@ -770,6 +787,13 @@ function applyingWildlifeMeleeAttack(
               nowMs
             )
           : damagedTarget;
+
+      // Unnoticed companions stay ignored until they land a wildlife hit.
+      attacker = applyingWildlifeUnnoticedProvokeOnWildlifeHit(
+        attacker,
+        attackerSpecies,
+        nowMs
+      );
 
       if (
         appliedHealthDamage > 0 &&
@@ -1108,6 +1132,12 @@ export function advancingWildlifeSimulationTick({
     store,
     hazardSampling.isDaytime
   );
+  advancingWildlifeNightOnlyWanderAwayDuringDaytime(
+    store,
+    hazardSampling.isDaytime,
+    center,
+    nowMs
+  );
   advancingWildlifeCorpseLifecycle(store, center, nowMs);
   advancingWildlifePendingRespawns({
     store,
@@ -1175,8 +1205,11 @@ export function advancingWildlifeSimulationTick({
   const finishAiSample = beginningWorldPlazaPerformanceSample(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WILDLIFE_AI
   );
+  const isWildlifeAiEnabled = checkingWorldPlazaGenerationFeatureEnabled(
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_AI
+  );
 
-  if (playerPosition && playerUserId) {
+  if (isWildlifeAiEnabled && playerPosition && playerUserId) {
     advancingWildlifeStalkPlayerApproachTick({
       store,
       playerPosition,
@@ -1358,6 +1391,7 @@ export function advancingWildlifeSimulationTick({
           species,
           nearbyInstances: proximityNeighbors,
           resolveSpecies,
+          nowMs,
         });
 
       const wantsToThink =
@@ -1374,6 +1408,7 @@ export function advancingWildlifeSimulationTick({
       // Per-step think budget: deferred instances keep steering on their
       // current intent and retry next step (lastThinkAtMs stays stale).
       const shouldThink =
+        isWildlifeAiEnabled &&
         wantsToThink &&
         (hasProximityPreyInterrupt ||
           thinkCountThisStep < DEFINING_WILDLIFE_AI_THINK_BUDGET_PER_STEP);
@@ -1494,6 +1529,7 @@ export function advancingWildlifeSimulationTick({
           playerStaminaRatio,
           playerStaminaIsDepleted,
           playerStillDurationMs,
+          isNightCyclePhase: checkingWildlifeIsNightCyclePhase(cyclePhase),
           resolveSpecies,
         };
         const selectedPreyInstanceId = computingWildlifeSelectedPreyInstanceId(
@@ -1539,6 +1575,20 @@ export function advancingWildlifeSimulationTick({
         });
 
         resolvedIntent = howlSummonResolution.intent;
+
+        if (
+          checkingWildlifeSpeciesWandersAwayAtDaybreak(species.speciesId) &&
+          (hazardSampling.isDaytime ||
+            nextInstance.softDepartureStartedAtMs != null)
+        ) {
+          resolvedIntent = resolvingWildlifeFairyDaybreakWanderAwayIntent({
+            position: nextInstance.position,
+            playerPosition,
+            species,
+            hazardSampling,
+          });
+        }
+
         const isGrazing = resolvedIntent.mode === 'graze';
 
         // Leash return resets aggro so the animal does not re-chase the same
@@ -1731,14 +1781,30 @@ export function advancingWildlifeSimulationTick({
           intent.mode === 'attack' ||
           (intent.mode === 'stalk' && intent.pace === 'run')) &&
         preBluffTryingToMove;
-      const staminaResult = advancingWildlifeStaminaTick(
-        nextInstance.staminaState,
-        wantsToRunForStamina,
-        deltaSeconds,
-        resolvingWildlifeInstanceStaminaConfig(species, nextInstance),
-        resolvingWildlifeSpeciesExhaustedExitRatio(species.speciesId),
-        resolvingWildlifeInstanceMaxStaminaRatio(nextInstance, species)
-      );
+      const staminaResult = checkingWildlifeSpeciesIsImmortal(species)
+        ? {
+            state: {
+              staminaRatio: resolvingWildlifeInstanceMaxStaminaRatio(
+                nextInstance,
+                species
+              ),
+              isExhausted: false,
+              // Keep run-time for acceleration ramps; immortal only skips drain.
+              runningForSeconds: wantsToRunForStamina
+                ? nextInstance.staminaState.runningForSeconds +
+                  Math.max(0, deltaSeconds)
+                : 0,
+            },
+            isRunning: wantsToRunForStamina,
+          }
+        : advancingWildlifeStaminaTick(
+            nextInstance.staminaState,
+            wantsToRunForStamina,
+            deltaSeconds,
+            resolvingWildlifeInstanceStaminaConfig(species, nextInstance),
+            resolvingWildlifeSpeciesExhaustedExitRatio(species.speciesId),
+            resolvingWildlifeInstanceMaxStaminaRatio(nextInstance, species)
+          );
 
       nextInstance = {
         ...nextInstance,
@@ -2299,6 +2365,21 @@ export function applyingWildlifeInstanceDamage(
   let behaviorResponseInstance = damageAppliedInstance;
 
   if (
+    !died &&
+    meatDropContext &&
+    checkingWildlifeSpeciesWandersAwayAtDaybreak(species.speciesId)
+  ) {
+    behaviorResponseInstance = applyingWildlifeFairyBetrayalDeparture({
+      instance: damageAppliedInstance,
+      species,
+      threatPoint: meatDropContext.playerPosition,
+      hazardSampling: {
+        placedBlocks: [],
+        isDaytime: true,
+      },
+      nowMs,
+    });
+  } else if (
     appliedHealthDamage > 0 &&
     !died &&
     meatDropContext &&

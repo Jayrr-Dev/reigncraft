@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/applyingWildlifeAdrenalineRushOnFleeEntry
  */
 
+import { checkingWildlifeSpeciesHasPassiveTrait } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesHasPassiveTrait';
 import { DEFINING_WILDLIFE_ADRENALINE_RUSH_STAMINA_RESTORE_RATIO } from '@/components/world/wildlife/domains/definingWildlifeSpeciesPassiveTraitConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
@@ -20,8 +21,8 @@ export type ApplyingWildlifeAdrenalineRushOnFleeEntryParams = {
 };
 
 /**
- * When a species with `adrenalineRush` transitions into flee, restores stamina
- * to the configured fraction of its max bar and clears exhaustion.
+ * When a species with the `adrenaline-rush` passive transitions into flee,
+ * restores stamina to the configured fraction of its max bar and clears exhaustion.
  */
 export function applyingWildlifeAdrenalineRushOnFleeEntry({
   instance,
@@ -29,7 +30,7 @@ export function applyingWildlifeAdrenalineRushOnFleeEntry({
   previousIntentMode,
   nextIntentMode,
 }: ApplyingWildlifeAdrenalineRushOnFleeEntryParams): DefiningWildlifeInstance {
-  if (!species.adrenalineRush) {
+  if (!checkingWildlifeSpeciesHasPassiveTrait(species, 'adrenaline-rush')) {
     return instance;
   }
 

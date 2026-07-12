@@ -96,6 +96,8 @@ export type RenderingWorldPlazaInventorySlotCellProps =
     readonly onOpenBagPopover?: (slotIndex: number) => void;
     readonly isBagPopoverOpen?: boolean;
     readonly onCloseBagPopover?: () => void;
+    /** Local player effective max HP for food heal preview. */
+    readonly playerEffectiveMaxHealth?: number;
   };
 
 /** Props for {@link RenderingWorldPlazaInventoryItemIcon}. */
@@ -208,6 +210,7 @@ export function RenderingWorldPlazaInventorySlotCell({
   onOpenBagPopover,
   isBagPopoverOpen = false,
   onCloseBagPopover,
+  playerEffectiveMaxHealth,
 }: RenderingWorldPlazaInventorySlotCellProps): React.JSX.Element {
   const viewportStyles = usingWorldPlazaInventoryHotbarViewportStylesResolved();
   const { active } = useDndContext();
@@ -299,6 +302,7 @@ export function RenderingWorldPlazaInventorySlotCell({
       onOpenBagPopover={onOpenBagPopover}
       isBagPopoverOpen={isBagPopoverOpen}
       onCloseBagPopover={onCloseBagPopover}
+      playerEffectiveMaxHealth={playerEffectiveMaxHealth}
       slotIndex={slotIndex}
     />
   );
@@ -328,6 +332,7 @@ type InventoryPlazaSlotItemProps = {
   readonly onOpenBagPopover?: (slotIndex: number) => void;
   readonly isBagPopoverOpen?: boolean;
   readonly onCloseBagPopover?: () => void;
+  readonly playerEffectiveMaxHealth?: number;
   readonly slotIndex: number;
 };
 
@@ -350,6 +355,7 @@ function InventoryPlazaSlotItem({
   onOpenBagPopover,
   isBagPopoverOpen = false,
   onCloseBagPopover,
+  playerEffectiveMaxHealth,
   slotIndex,
 }: InventoryPlazaSlotItemProps): React.JSX.Element {
   const isReservedWeaponToolSlot =
@@ -388,8 +394,9 @@ function InventoryPlazaSlotItem({
       resolvingWorldPlazaInventoryItemDetailPopoverModel(item, {
         isEquipped,
         studyCountsBySpeciesId,
+        playerEffectiveMaxHealth,
       }),
-    [isEquipped, item, studyCountsBySpeciesId]
+    [isEquipped, item, playerEffectiveMaxHealth, studyCountsBySpeciesId]
   );
 
   const clearingDeferredSingleClick = useCallback((): void => {
@@ -749,6 +756,7 @@ function InventoryPlazaSlotItem({
           registry={registry}
           isOpen={isBagPopoverOpen}
           isEquipped={isEquipped}
+          playerEffectiveMaxHealth={playerEffectiveMaxHealth}
           onClose={() => {
             onCloseBagPopover?.();
           }}

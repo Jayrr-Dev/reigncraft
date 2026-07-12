@@ -311,6 +311,54 @@ describe('advancingWildlifeAggroTick', () => {
     expect(nextAggro.activeTargetId).toBe(deer.instanceId);
     expect(nextAggro.threats[0]?.threat ?? 0).toBeGreaterThanOrEqual(1.5);
   });
+
+  it('lets pack followers lock the alpha prey on the same think (no self in nearby)', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'];
+    const alpha = buildingTestWildlifeInstance({
+      instanceId: 'wildlife:4:7:1',
+      speciesId: 'grey-wolf',
+      sizeScaleSample: 1.4,
+      packAlphaInstanceId: 'wildlife:4:7:1',
+      position: { x: 4, y: 7, layer: 1 },
+      aggroState: {
+        threats: [{ targetId: 'player-1', threat: 3, lastUpdatedAtMs: 1 }],
+        activeTargetId: 'player-1',
+        lastDamagedAtMs: null,
+        stalkLockedPreyTargetId: 'player-1',
+        stalkingPreySinceMs: 1_000,
+        stalkPhase: 'shadowing',
+      },
+    });
+    const follower = buildingTestWildlifeInstance({
+      instanceId: 'wildlife:4:7:0',
+      speciesId: 'grey-wolf',
+      sizeScaleSample: -0.4,
+      packAlphaInstanceId: 'wildlife:4:7:1',
+      position: { x: 5, y: 7, layer: 1 },
+    });
+    const third = buildingTestWildlifeInstance({
+      instanceId: 'wildlife:4:7:2',
+      speciesId: 'grey-wolf',
+      sizeScaleSample: 0,
+      packAlphaInstanceId: 'wildlife:4:7:1',
+      position: { x: 6, y: 7, layer: 1 },
+    });
+
+    const nextAggro = advancingWildlifeAggroTick({
+      instance: follower,
+      species,
+      // Matches simulation: neighbors exclude the acting instance.
+      nearbyInstances: [alpha, third],
+      playerPosition: { x: 8, y: 7, layer: 1 },
+      playerUserId: 'player-1',
+      deltaSeconds: 0.2,
+      nowMs: 2_000,
+    });
+
+    expect(nextAggro.stalkLockedPreyTargetId).toBe('player-1');
+    expect(nextAggro.activeTargetId).toBe('player-1');
+    expect(nextAggro.threats[0]?.threat ?? 0).toBeGreaterThanOrEqual(1.5);
+  });
 });
 
 describe('applyingWildlifeDamageThreat', () => {

@@ -1,7 +1,7 @@
 /**
  * Module-level store for the plaza minimap visibility preference.
  *
- * Unset preference: off on mobile viewports, on for desktop.
+ * Unset preference: on for mobile and desktop (tier may still gate the default).
  * Explicit true/false: applies on every viewport when the tier allows it.
  *
  * @module components/world/domains/managingWorldPlazaMinimapPreferenceStore

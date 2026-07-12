@@ -93,6 +93,8 @@ export type SyncingWorldPlazaVisibleLavaOverlayLayerState = {
   readonly crustGraphics: Graphics;
   /** Single reusable sprite that covers every ground-level lava tile. */
   groundSpriteEntry: SyncingWorldPlazaVisibleLavaOverlayRegionSpriteEntry | null;
+  /** Fingerprint of last drawable + light tile set; skip rebuild when unchanged. */
+  lastOverlaySyncKey: string;
 };
 
 /**
@@ -139,6 +141,7 @@ export function ensuringWorldPlazaVisibleLavaOverlayLayer(
     maskGraphics,
     crustGraphics,
     groundSpriteEntry: null,
+    lastOverlaySyncKey: '',
   };
 }
 
@@ -429,24 +432,26 @@ export function updatingWorldPlazaVisibleLavaOverlayLayer(
 ): void {
   const staticTexture = peekingWorldPlazaLavaStaticTileTexture();
 
-  state.maskGraphics.clear();
-  state.crustGraphics.clear();
-
   if (!staticTexture) {
+    state.maskGraphics.clear();
+    state.crustGraphics.clear();
     clearingWorldPlazaVisibleLavaOverlayGroundSprite(state);
     publishingWorldPlazaLavaPoolLightSources([]);
+    state.lastOverlaySyncKey = '';
     return;
   }
 
   const lavaTiles: SyncingWorldPlazaLavaTileIndex[] = [];
   const lightTiles: SyncingWorldPlazaLavaTileIndex[] = [];
   const groundCenters: { x: number; y: number }[] = [];
+  let overlaySyncKeyParts = '';
 
   for (const { tileX, tileY } of listingWorldPlazaTileIndicesInBounds(bounds)) {
     // Elevated lava renders inside the terrain column graphics; it only
     // contributes to the pool glow lights here.
     if (checkingWorldPlazaLavaOverlayTileIsElevated(tileX, tileY)) {
       lightTiles.push({ tileX, tileY });
+      overlaySyncKeyParts += `e${tileX},${tileY};`;
       continue;
     }
 
@@ -456,13 +461,25 @@ export function updatingWorldPlazaVisibleLavaOverlayLayer(
 
     lavaTiles.push({ tileX, tileY });
     lightTiles.push({ tileX, tileY });
+    overlaySyncKeyParts += `g${tileX},${tileY};`;
+    groundCenters.push(
+      convertingWorldPlazaGridPointToIsometricScreenPoint({
+        x: tileX,
+        y: tileY,
+      })
+    );
+  }
 
-    const center = convertingWorldPlazaGridPointToIsometricScreenPoint({
-      x: tileX,
-      y: tileY,
-    });
-    groundCenters.push(center);
+  // Same visible lava set as last rebuild: keep mask, crust, sprite, and lights.
+  if (overlaySyncKeyParts === state.lastOverlaySyncKey) {
+    return;
+  }
 
+  state.lastOverlaySyncKey = overlaySyncKeyParts;
+  state.maskGraphics.clear();
+  state.crustGraphics.clear();
+
+  for (const center of groundCenters) {
     state.maskGraphics.poly(
       listingWorldPlazaIsometricTileDiamondMaskPolygonAtCenter(
         center.x,

@@ -22,6 +22,8 @@ import {
   beginningWorldPlazaPerformanceSample,
   incrementingWorldPlazaPerformanceDiagnosticsCounter,
 } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import { refreshingWorldPlazaFloorChunkGraphicsForTileIndices } from '@/components/world/domains/refreshingWorldPlazaFloorChunkGraphicsForTileIndices';
+import { resolvingWorldPlazaWaterShimmerViewportTileBounds } from '@/components/world/domains/resolvingWorldPlazaWaterShimmerViewportTileBounds';
 import { syncingWorldPlazaVisibleFirelandsDecorationLayer } from '@/components/world/domains/syncingWorldPlazaVisibleFirelandsDecorationLayer';
 import {
   advancingWorldPlazaVisibleLavaOverlayAnimation,
@@ -92,6 +94,7 @@ type RunningWorldPlazaFloorChunksLayerState = {
   >;
   lastBurntGrassCacheKey: string;
   lastPickedPebblesCacheKey: string;
+  lastPickedPebblesTileKeys: Set<string>;
 };
 
 type RunningWorldPlazaElevationColumnsLayerState = {
@@ -254,21 +257,30 @@ export function registeringWorldPlazaTerrainLayers(
           );
         state.pendingFloorInvalidationAnchors = [];
 
-        const droppedFloorChunkCount =
-          invalidatingWorldPlazaFloorChunkGraphicsForTileIndices({
-            parentContainer: context.floorLayer,
-            bounds: context.floorBounds,
-            chunkSizeTiles: context.performanceProfile.floorChunkSizeTiles,
-            chunkGraphicsByKey: floorState.chunkGraphicsByKey,
-            pendingChunkBuilds: floorState.pendingChunkBuilds,
-            tileIndices: floorInvalidationTileIndices,
-          });
-
-        if (droppedFloorChunkCount > 0) {
-          engineHandle.markIncrementalLayerIncomplete(
-            RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.FLOOR_CHUNKS
-          );
-        }
+        // Redraw in place so rock footprints get lifted biome caps without
+        // opening empty diamond holes while floor chunks rebuild.
+        refreshingWorldPlazaFloorChunkGraphicsForTileIndices({
+          parentContainer: context.floorLayer,
+          chunkSizeTiles: context.performanceProfile.floorChunkSizeTiles,
+          chunkGraphicsByKey: floorState.chunkGraphicsByKey,
+          pendingChunkBuilds: floorState.pendingChunkBuilds,
+          tileIndices: floorInvalidationTileIndices,
+          drawOptions: {
+            drawsGrassDecorations:
+              context.performanceProfile.drawsGrassDecorations &&
+              checkingWorldPlazaGenerationFeatureEnabled(
+                DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES
+              ),
+            drawsStoneDecorations:
+              context.performanceProfile.drawsStoneDecorations &&
+              checkingWorldPlazaGenerationFeatureEnabled(
+                DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STONE_DECORATIONS
+              ),
+            drawsEnvironmentalHazardFloorTint:
+              context.performanceProfile.drawsEnvironmentalHazardFloorTint,
+            burntGrassTileKeys: context.burntGrassTileKeys,
+          },
+        });
       },
       resetRuntimeState: (context, runtimeState) => {
         const state = runtimeState as RunningWorldPlazaRockColumnsLayerState;
@@ -392,6 +404,7 @@ export function registeringWorldPlazaTerrainLayers(
         pendingChunkBuilds: new Map(),
         lastBurntGrassCacheKey: '',
         lastPickedPebblesCacheKey: '',
+        lastPickedPebblesTileKeys: new Set(),
       }),
       sync: (context, runtimeState) => {
         const state = runtimeState as RunningWorldPlazaFloorChunksLayerState;
@@ -399,6 +412,22 @@ export function registeringWorldPlazaTerrainLayers(
         if (!context.floorBounds) {
           return { isComplete: true, needsChildSort: false };
         }
+
+        const floorDrawOptions = {
+          drawsGrassDecorations:
+            context.performanceProfile.drawsGrassDecorations &&
+            checkingWorldPlazaGenerationFeatureEnabled(
+              DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES
+            ),
+          drawsStoneDecorations:
+            context.performanceProfile.drawsStoneDecorations &&
+            checkingWorldPlazaGenerationFeatureEnabled(
+              DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STONE_DECORATIONS
+            ),
+          drawsEnvironmentalHazardFloorTint:
+            context.performanceProfile.drawsEnvironmentalHazardFloorTint,
+          burntGrassTileKeys: context.burntGrassTileKeys,
+        };
 
         const burntGrassCacheKey = buildingWorldPlazaBurntGrassTileKeysCacheKey(
           context.burntGrassTileKeys
@@ -442,10 +471,13 @@ export function registeringWorldPlazaTerrainLayers(
           pickedPebblesCacheKey !== state.lastPickedPebblesCacheKey &&
           context.pickedPebblesByTileKey.size > 0
         ) {
-          state.lastPickedPebblesCacheKey = pickedPebblesCacheKey;
-          const pickedPebbleTileIndices = Array.from(
+          const newlyPickedPebbleTileIndices = Array.from(
             context.pickedPebblesByTileKey.keys()
           ).flatMap((tileKey) => {
+            if (state.lastPickedPebblesTileKeys.has(tileKey)) {
+              return [];
+            }
+
             const [rawTileX, rawTileY] = tileKey.split(',');
             const tileX = Number(rawTileX);
             const tileY = Number(rawTileY);
@@ -455,18 +487,26 @@ export function registeringWorldPlazaTerrainLayers(
               : [];
           });
 
-          if (pickedPebbleTileIndices.length > 0) {
-            invalidatingWorldPlazaFloorChunkGraphicsForTileIndices({
+          state.lastPickedPebblesCacheKey = pickedPebblesCacheKey;
+          state.lastPickedPebblesTileKeys = new Set(
+            context.pickedPebblesByTileKey.keys()
+          );
+
+          if (newlyPickedPebbleTileIndices.length > 0) {
+            refreshingWorldPlazaFloorChunkGraphicsForTileIndices({
               parentContainer: context.floorLayer,
-              bounds: context.floorBounds,
               chunkSizeTiles: context.performanceProfile.floorChunkSizeTiles,
               chunkGraphicsByKey: state.chunkGraphicsByKey,
               pendingChunkBuilds: state.pendingChunkBuilds,
-              tileIndices: pickedPebbleTileIndices,
+              tileIndices: newlyPickedPebbleTileIndices,
+              drawOptions: floorDrawOptions,
             });
           }
         } else if (pickedPebblesCacheKey !== state.lastPickedPebblesCacheKey) {
           state.lastPickedPebblesCacheKey = pickedPebblesCacheKey;
+          state.lastPickedPebblesTileKeys = new Set(
+            context.pickedPebblesByTileKey.keys()
+          );
         }
 
         const finishFloorSyncSample = beginningWorldPlazaPerformanceSample(
@@ -479,27 +519,14 @@ export function registeringWorldPlazaTerrainLayers(
           chunkGraphicsByKey: state.chunkGraphicsByKey,
           pendingChunkBuilds: state.pendingChunkBuilds,
           terrainFrameWorkBudget: context.terrainFrameWorkBudget,
-          drawOptions: {
-            drawsGrassDecorations:
-              context.performanceProfile.drawsGrassDecorations &&
-              checkingWorldPlazaGenerationFeatureEnabled(
-                DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES
-              ),
-            drawsStoneDecorations:
-              context.performanceProfile.drawsStoneDecorations &&
-              checkingWorldPlazaGenerationFeatureEnabled(
-                DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STONE_DECORATIONS
-              ),
-            drawsEnvironmentalHazardFloorTint:
-              context.performanceProfile.drawsEnvironmentalHazardFloorTint,
-            burntGrassTileKeys: context.burntGrassTileKeys,
-          },
+          drawOptions: floorDrawOptions,
           centerTileX: Math.round(context.playerPosition.x),
           centerTileY: Math.round(context.playerPosition.y),
           maxChunkBuildsPerCall:
             context.performanceProfile.floorChunkBuildBudgetPerFrame,
           maxChunkPrunesPerCall:
             context.performanceProfile.floorChunkPruneBudgetPerFrame,
+          shouldDeferBuildsOnStaleBacklog: false,
           shouldSortChildrenImmediately: false,
         });
         finishFloorSyncSample();
@@ -534,6 +561,7 @@ export function registeringWorldPlazaTerrainLayers(
         state.pendingChunkBuilds.clear();
         state.lastBurntGrassCacheKey = '';
         state.lastPickedPebblesCacheKey = '';
+        state.lastPickedPebblesTileKeys.clear();
       },
       destroyRuntimeState: (context, runtimeState) => {
         const state = runtimeState as RunningWorldPlazaFloorChunksLayerState;
@@ -552,6 +580,7 @@ export function registeringWorldPlazaTerrainLayers(
         state.pendingChunkBuilds.clear();
         state.lastBurntGrassCacheKey = '';
         state.lastPickedPebblesCacheKey = '';
+        state.lastPickedPebblesTileKeys.clear();
       },
     },
     {
@@ -602,6 +631,8 @@ export function registeringWorldPlazaTerrainLayers(
             },
             centerTileX: Math.round(context.playerPosition.x),
             centerTileY: Math.round(context.playerPosition.y),
+            maxVisibleElevationColumns:
+              context.performanceProfile.maxVisibleElevationColumns,
             maxColumnBuildsPerCall:
               context.performanceProfile
                 .terrainElevationChunkBuildBudgetPerFrame *
@@ -964,7 +995,14 @@ export function registeringWorldPlazaTerrainLayers(
 
         updatingWorldPlazaVisibleWaterShimmerGraphicsLayer({
           shimmerGraphics: state.graphics,
-          bounds,
+          bounds: resolvingWorldPlazaWaterShimmerViewportTileBounds({
+            playerGridX: context.playerPosition.x,
+            playerGridY: context.playerPosition.y,
+            viewportWidthPx: context.viewportWidth,
+            viewportHeightPx: context.viewportHeight,
+            worldZoom: context.worldZoom,
+            floorBounds: bounds,
+          }),
           animationTimeMs: context.animationTimeMs,
         });
       },
@@ -1035,6 +1073,7 @@ export function registeringWorldPlazaTerrainLayers(
           clearingWorldPlazaVisibleLavaOverlayGroundSprite(state.overlayState);
           state.overlayState.maskGraphics.clear();
           state.overlayState.crustGraphics.clear();
+          state.overlayState.lastOverlaySyncKey = '';
         }
 
         clearingWorldPlazaLavaPoolLightSources();
@@ -1172,9 +1211,17 @@ export function listingWorldPlazaTerrainLayerDiagnosticsCounts(
         RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_CANOPIES
       );
 
+    let terrainElevationColumnCount = 0;
+
+    for (const elevationGraphics of elevationState.columnGraphicsByKey.values()) {
+      if (elevationGraphics.parent) {
+        terrainElevationColumnCount += 1;
+      }
+    }
+
     return {
       floorChunkCount: floorState.chunkGraphicsByKey.size,
-      terrainElevationColumnCount: elevationState.columnGraphicsByKey.size,
+      terrainElevationColumnCount,
       treeTrunkCount: trunkState.trunkGraphicsByKey.size,
       treeCanopyCount: canopyState.canopyEntriesByKey.size,
     };

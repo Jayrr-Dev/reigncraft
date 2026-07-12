@@ -9,6 +9,8 @@ import {
   pruningWorldPlazaEntityHealthFloatTexts,
 } from '@/components/world/health/domains/managingWorldPlazaEntityHealthFloatTexts';
 import { tickingWorldPlazaEntityHealthState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
+import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { notifyingWildlifeVocalSfxOnDeath } from '@/components/world/wildlife/domains/notifyingWildlifeVocalSfxOnDeath';
 
@@ -29,6 +31,24 @@ export function advancingWildlifeHealthStatusTick({
   if (instance.isDead) {
     return {
       ...instance,
+      floatingTexts: pruningWorldPlazaEntityHealthFloatTexts(
+        instance.floatingTexts,
+        nowMs
+      ),
+    };
+  }
+
+  const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
+
+  if (species && checkingWildlifeSpeciesIsImmortal(species)) {
+    return {
+      ...instance,
+      healthState: {
+        ...instance.healthState,
+        currentHealth: instance.healthState.baseMaxHealth,
+        bleedEffects: [],
+        poisonEffects: [],
+      },
       floatingTexts: pruningWorldPlazaEntityHealthFloatTexts(
         instance.floatingTexts,
         nowMs

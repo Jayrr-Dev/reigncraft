@@ -14,6 +14,8 @@ import {
   pruningWorldPlazaEntityHealthFloatTexts,
 } from '@/components/world/health/domains/managingWorldPlazaEntityHealthFloatTexts';
 import { mappingWorldPlazaDamageOutcomeTierToFloatTextKind } from '@/components/world/health/domains/mappingWorldPlazaDamageOutcomeTierToFloatTextKind';
+import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
+import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type ApplyingWildlifeInstanceHealthDamageWithFloatFeedbackParams = {
@@ -44,6 +46,18 @@ export function applyingWildlifeInstanceHealthDamageWithFloatFeedback({
   motionClipOnHit = 'takeDamage',
   onAppliedDamage,
 }: ApplyingWildlifeInstanceHealthDamageWithFloatFeedbackParams): DefiningWildlifeInstance {
+  const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
+
+  if (species && checkingWildlifeSpeciesIsImmortal(species)) {
+    return {
+      ...instance,
+      floatingTexts: pruningWorldPlazaEntityHealthFloatTexts(
+        instance.floatingTexts,
+        nowMs
+      ),
+    };
+  }
+
   const prunedFloats = pruningWorldPlazaEntityHealthFloatTexts(
     instance.floatingTexts,
     nowMs

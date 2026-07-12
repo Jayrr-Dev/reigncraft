@@ -1,0 +1,73 @@
+---
+description: Auto-register and categorize Perf Flags for new plaza world features
+globs: src/client/world/**/*
+alwaysApply: false
+---
+
+# Generation feature flags (Perf Flags)
+
+When shipping a **new player-visible or perf-bisectable plaza system**, register a toggle in the same change. Do not leave ungated systems that Features / Dev QA cannot isolate.
+
+## Canonical files
+
+| Piece                         | File                                                                                          |
+| ----------------------------- | --------------------------------------------------------------------------------------------- |
+| Ids, groups, labels, defaults | `definingWorldPlazaGenerationFeatureRegistry.ts`                                              |
+| Runtime gate                  | `checkingWorldPlazaGenerationFeatureEnabled` in `managingWorldPlazaGenerationFeatureStore.ts` |
+| Badge priority (optional)     | `definingWorldPlazaPerformanceDiagnosticsFlagBadgeConstants.ts`                               |
+| Blank slate                   | Dev QA builds from registry; new ids default **off** there                                    |
+
+## Checklist (every new flag)
+
+1. Add `SCREAMING_SNAKE` key + kebab-case string id to `DEFINING_WORLD_PLAZA_GENERATION_FEATURE`.
+2. Add registry row: `featureId`, `groupId`, short `label`, one-line `description` (what Off does).
+3. Add default `true` in `DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS`.
+4. Gate hot path with `checkingWorldPlazaGenerationFeatureEnabled(...)`.
+5. If wildlife presentation nuance (no terrain cache), add id to the early-return list in `invalidatingWorldPlazaGenerationFeatureCachesDeferred`.
+6. Optionally prepend id in `DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRIORITY_ORDER`.
+
+## Group picker (`groupId`)
+
+| Group      | Use for                                            |
+| ---------- | -------------------------------------------------- |
+| `world`    | Biome / elevation / shape of the map               |
+| `terrain`  | Trees, rocks, floor bake, stone decor              |
+| `water`    | Ocean, lakes, rivers, streams, ponds               |
+| `hazards`  | Lava and similar damage fields                     |
+| `entities` | Wildlife spawn/sim/render and wildlife sub-toggles |
+| `hud`      | DOM overlays, minimap, bars, status chrome         |
+| `systems`  | Audio, projectiles, lighting, fire, combat FX      |
+
+Prefer a **child flag** under an existing parent when Off only strips a slice (e.g. wildlife speech under `entities`, not a new group).
+
+## When to add a flag
+
+**Yes:** new terrain layer, entity system, HUD chrome, audio bus, lighting/fire, hazard, wildlife presentation cost, anything Dev QA blank slate should kill.
+
+**No:** pure helpers, tests, renames, tiny constants, copy-only edits, internals already fully covered by a parent flag.
+
+## Gate patterns
+
+```typescript
+// ✅ Early-return / skip work
+if (!checkingWorldPlazaGenerationFeatureEnabled(
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE.MY_FEATURE
+)) {
+  return;
+}
+
+// ✅ Terrain layer descriptor
+requiresAnyGenerationFeature: [
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE.MY_FEATURE,
+],
+```
+
+```typescript
+// ❌ Hardcoded true/false or a second ad-hoc localStorage key
+```
+
+## Naming
+
+- Id string: kebab-case (`wildlife-fairy-glow`)
+- Const key: matching SCREAMING_SNAKE
+- Label: short UI title; description: player/dev-facing Off behavior

@@ -70,6 +70,12 @@ const DEFINING_WILDLIFE_SPECIES_ACCELERATION: Partial<
     momentumBonusMultiplier: 0.1,
     momentumRampSeconds: 3,
   },
+  // Floating companion — slow graceful wind-up, gentle sustained glide.
+  fairy: {
+    burstRampSeconds: 1.4,
+    momentumBonusMultiplier: 0.08,
+    momentumRampSeconds: 3,
+  },
 };
 
 export function resolvingWildlifeSpeciesAccelerationConfig(

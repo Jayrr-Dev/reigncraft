@@ -95,11 +95,14 @@ export const DEFINING_WORLD_PLAZA_HUNGER_STARVING_SPEED_MULTIPLIER = 0.8;
 /** Hunger HUD push interval for React state (ms), mirrors stamina HUD cadence. */
 export const DEFINING_WORLD_PLAZA_HUNGER_HUD_PUSH_INTERVAL_MS = 200;
 
+/** Hunger simulation cadence; drain and starvation are elapsed-time based. */
+export const DEFINING_WORLD_PLAZA_HUNGER_TICK_INTERVAL_MS = 100;
+
 /** Smallest hunger-ratio change worth a HUD re-render. */
 export const DEFINING_WORLD_PLAZA_HUNGER_HUD_EPSILON = 0.005;
 
 /** Largest frame delta applied to hunger to survive tab stalls (seconds). */
-export const DEFINING_WORLD_PLAZA_HUNGER_MAX_FRAME_DELTA_SECONDS = 0.05;
+export const DEFINING_WORLD_PLAZA_HUNGER_MAX_FRAME_DELTA_SECONDS = 0.125;
 
 /** Hunger ratio restored by eating berries. */
 export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES = 0.15;

@@ -1,4 +1,7 @@
-import { buildingWorldPlazaAvatarFootstepBootPriorityStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaAvatarFootstepStarAudioManifest';
+import {
+  buildingWorldPlazaAvatarFootstepBootPriorityStarAudioManifest,
+  buildingWorldPlazaAvatarFootstepDeferredStarAudioManifest,
+} from '@/components/world/domains/buildingWorldPlazaAvatarFootstepStarAudioManifest';
 import { buildingWorldPlazaAvatarMeleeStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaAvatarMeleeStarAudioManifest';
 import { buildingWorldPlazaBiomeAmbienceStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaBiomeAmbienceStarAudioManifest';
 import { buildingWorldPlazaBiomeMusicBootStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaBiomeMusicBootStarAudioManifest';
@@ -42,11 +45,16 @@ const DEFINING_WORLD_PLAZA_WORLD_BOOT_STAR_AUDIO_MOBILE_PRIORITY_MANIFEST_BUILDE
 
 const DEFINING_WORLD_PLAZA_WORLD_BOOT_STAR_AUDIO_MOBILE_DEFERRED_MANIFEST_BUILDERS: readonly DefiningWorldPlazaWorldBootStarAudioManifestBuilder[] =
   [
+    buildingWorldPlazaAvatarFootstepDeferredStarAudioManifest,
     buildingWorldPlazaBiomeAmbienceStarAudioManifest,
     buildingWorldPlazaGirlSampleVoiceStarAudioManifest,
     buildingWorldPlazaAvatarMeleeStarAudioManifest,
     buildingWildlifeBootSpeciesStarAudioManifest,
   ];
+
+/** Non-spawn avatar surfaces warm after desktop boot without blocking it. */
+const DEFINING_WORLD_PLAZA_WORLD_BOOT_STAR_AUDIO_DESKTOP_DEFERRED_MANIFEST_BUILDERS: readonly DefiningWorldPlazaWorldBootStarAudioManifestBuilder[] =
+  [buildingWorldPlazaAvatarFootstepDeferredStarAudioManifest];
 
 /**
  * Immediate gameplay feedback warmed before the loading bar completes.
@@ -63,7 +71,7 @@ export const DEFINING_WORLD_PLAZA_WORLD_BOOT_STAR_AUDIO_PRIORITY_MANIFEST_BUILDE
  * mobile moves non-essential slices here).
  */
 export const DEFINING_WORLD_PLAZA_WORLD_BOOT_STAR_AUDIO_DEFERRED_MANIFEST_BUILDERS: readonly DefiningWorldPlazaWorldBootStarAudioManifestBuilder[] =
-  [];
+  DEFINING_WORLD_PLAZA_WORLD_BOOT_STAR_AUDIO_DESKTOP_DEFERRED_MANIFEST_BUILDERS;
 
 /**
  * Priority slices that block the loading bar for the current viewport.

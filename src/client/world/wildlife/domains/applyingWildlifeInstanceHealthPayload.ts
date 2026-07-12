@@ -10,6 +10,8 @@ import { pruningWorldPlazaEntityHealthFloatTexts } from '@/components/world/heal
 import type { DefiningWorldPlazaProjectilePayloadConfig } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import { applyingWildlifeInstanceHealthDamageWithFloatFeedback } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthDamageWithFloatFeedback';
 import type { ApplyingWildlifeInstancePhysicalDamageWakeContext } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
+import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
+import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { notifyingWildlifeVocalSfxOnDeath } from '@/components/world/wildlife/domains/notifyingWildlifeVocalSfxOnDeath';
 import { resolvingWildlifePlayerOutgoingPhysicalDamageOptions } from '@/components/world/wildlife/domains/resolvingWildlifePlayerOutgoingPhysicalDamageOptions';
@@ -32,6 +34,20 @@ export function applyingWildlifeInstanceHealthPayload({
   nowMs,
   wakeContext = null,
 }: ApplyingWildlifeInstanceHealthPayloadParams): DefiningWildlifeInstance {
+  const immortalSpecies =
+    wakeContext?.species ??
+    resolvingWildlifeSpeciesDefinition(instance.speciesId);
+
+  if (immortalSpecies && checkingWildlifeSpeciesIsImmortal(immortalSpecies)) {
+    return {
+      ...instance,
+      floatingTexts: pruningWorldPlazaEntityHealthFloatTexts(
+        instance.floatingTexts,
+        nowMs
+      ),
+    };
+  }
+
   const sleepAmbushOptions =
     resolvingWildlifeSleepAmbushHealthDamageOptions(instance);
   const wasSleeping = sleepAmbushOptions !== null;

@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWildlifeInstanceHasProvokedWildlifeAggro } from '@/components/world/wildlife/domains/checkingWildlifeInstanceHasProvokedWildlifeAggro';
 import { checkingWildlifeIsMotivatedToHunt } from '@/components/world/wildlife/domains/checkingWildlifeIsMotivatedToHunt';
 import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight';
 import { checkingWildlifeSpeciesIsFavoritePrey } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsFavoritePrey';
@@ -29,6 +30,8 @@ export type ListingWildlifeStalkerPreyTargetCandidatesParams = {
   resolveSpecies: (
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null;
+  /** Defaults to 0 in tests that do not exercise Unnoticed provoke windows. */
+  nowMs?: number;
 };
 
 /** Returns every prey target currently in scent or proximity range for stalking. */
@@ -39,6 +42,7 @@ export function listingWildlifeStalkerPreyTargetCandidates({
   playerPosition,
   playerUserId,
   resolveSpecies,
+  nowMs = 0,
 }: ListingWildlifeStalkerPreyTargetCandidatesParams): DefiningWildlifeStalkPreyPickCandidate[] {
   const candidates: DefiningWildlifeStalkPreyPickCandidate[] = [];
   const proximityAttackRadiusGrid =
@@ -88,7 +92,11 @@ export function listingWildlifeStalkerPreyTargetCandidates({
       !checkingWildlifePredatorMayHuntPrey(
         species,
         preySpecies,
-        hungerDriveLevel
+        hungerDriveLevel,
+        {
+          preyHasProvokedWildlifeAggro:
+            checkingWildlifeInstanceHasProvokedWildlifeAggro(neighbor, nowMs),
+        }
       )
     ) {
       continue;

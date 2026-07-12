@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
+import { resolvingWorldPlazaInventoryFoodHealDeclaration } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealDeclaration';
 import { resolvingWildlifeMeatInventoryIcons } from '@/components/world/wildlife/domains/definingWildlifeMeatInventoryIconConstants';
 import { resolvingWildlifeMeatInventorySpriteSheetIcon } from '@/components/world/wildlife/domains/definingWildlifeMeatInventorySpriteSheetConstants';
 import type { DefiningWildlifeMeatCatalogEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
@@ -39,6 +40,10 @@ function registeringWorldPlazaWildlifeMeatInventoryItemDefinitions(
       isStackable: true,
       food: {
         hungerRestoreRatio: entry.rawHungerRestoreRatio,
+        healthHeal: resolvingWorldPlazaInventoryFoodHealDeclaration({
+          hungerRestoreRatio: entry.rawHungerRestoreRatio,
+          meatKind: 'raw',
+        }),
         meatKind: 'raw',
         wildlifeSpeciesId: entry.speciesId,
         rawDiseaseId: entry.rawDiseaseId,
@@ -59,6 +64,10 @@ function registeringWorldPlazaWildlifeMeatInventoryItemDefinitions(
       isStackable: true,
       food: {
         hungerRestoreRatio: entry.cookedHungerRestoreRatio,
+        healthHeal: resolvingWorldPlazaInventoryFoodHealDeclaration({
+          hungerRestoreRatio: entry.cookedHungerRestoreRatio,
+          meatKind: 'cooked',
+        }),
         meatKind: 'cooked',
         wildlifeSpeciesId: entry.speciesId,
         cookedWellFedBuffId: entry.cookedWellFedBuffId,

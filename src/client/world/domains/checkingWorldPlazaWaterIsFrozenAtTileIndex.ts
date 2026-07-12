@@ -18,6 +18,54 @@ export type CheckingWorldPlazaWaterIsFrozenAtTileIndexOptions = {
   placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile;
 };
 
+/** Hard cap on memoized tile columns before the whole cache is reset. */
+const CHECKING_WORLD_PLAZA_WATER_FROZEN_CACHE_MAX_COLUMNS = 4000;
+
+/**
+ * Memoized frozen-state results for the ambient sampling context, split by
+ * daytime flag. Each uncached check scans a 5x5 neighbor ring for assignable
+ * temperature sources (lava, zones, blocks), and the water surface, shimmer,
+ * floor bake, minimap, and navigation paths re-check the same tiles many times
+ * per frame, so caching collapses those ring scans into cheap lookups.
+ *
+ * The cache epoch is the terrain thaw-visual key (sun bucket + placed
+ * temperature blocks + debug override revision), so campfire placement and
+ * day/night transitions clear it.
+ */
+const checkingWorldPlazaWaterFrozenCacheByDaytime: readonly [
+  Map<number, Map<number, boolean>>,
+  Map<number, Map<number, boolean>>,
+] = [new Map(), new Map()];
+
+let checkingWorldPlazaWaterFrozenCacheEpoch = '';
+
+/**
+ * Clears the frozen-state memoization cache.
+ */
+export function invalidatingWorldPlazaWaterFrozenStateAtTileIndexCache(): void {
+  checkingWorldPlazaWaterFrozenCacheByDaytime[0].clear();
+  checkingWorldPlazaWaterFrozenCacheByDaytime[1].clear();
+}
+
+/**
+ * Rolls the frozen-state cache epoch; clears memoized results when it changes.
+ *
+ * Called from the terrain dependency snapshot with the thaw-visual key so the
+ * cache tracks placed temperature blocks and day/night transitions.
+ *
+ * @param epoch - Opaque key that changes whenever freeze inputs change.
+ */
+export function settingWorldPlazaWaterFrozenStateCacheEpoch(
+  epoch: string
+): void {
+  if (epoch === checkingWorldPlazaWaterFrozenCacheEpoch) {
+    return;
+  }
+
+  checkingWorldPlazaWaterFrozenCacheEpoch = epoch;
+  invalidatingWorldPlazaWaterFrozenStateAtTileIndexCache();
+}
+
 /**
  * Returns true when procedural climate alone would freeze surface water.
  */
@@ -63,6 +111,54 @@ export function checkingWorldPlazaWaterIsFrozenAtTileIndex(
   const placedBlocksByTile =
     options.placedBlocksByTile ?? samplingContext.placedBlocksByTile;
 
+  // Only the ambient sampling context is memoized; explicit block indexes
+  // (avatar ice checks, tests) bypass the cache.
+  const isAmbientContext = options.placedBlocksByTile === undefined;
+  const cacheByColumn =
+    checkingWorldPlazaWaterFrozenCacheByDaytime[isDaytime ? 1 : 0];
+  let columnCache: Map<number, boolean> | undefined;
+
+  if (isAmbientContext) {
+    columnCache = cacheByColumn.get(tileX);
+
+    if (columnCache) {
+      const cached = columnCache.get(tileY);
+
+      if (cached !== undefined) {
+        return cached;
+      }
+    } else {
+      if (
+        cacheByColumn.size >= CHECKING_WORLD_PLAZA_WATER_FROZEN_CACHE_MAX_COLUMNS
+      ) {
+        cacheByColumn.clear();
+      }
+
+      columnCache = new Map();
+      cacheByColumn.set(tileX, columnCache);
+    }
+  }
+
+  const isFrozen = computingWorldPlazaWaterIsFrozenAtTileIndex(
+    tileX,
+    tileY,
+    isDaytime,
+    placedBlocksByTile
+  );
+  columnCache?.set(tileY, isFrozen);
+
+  return isFrozen;
+}
+
+/**
+ * Computes the frozen state for one water tile without memoization.
+ */
+function computingWorldPlazaWaterIsFrozenAtTileIndex(
+  tileX: number,
+  tileY: number,
+  isDaytime: boolean,
+  placedBlocksByTile: IndexingWorldBuildingPlacedBlocksByTile | undefined
+): boolean {
   const phaseTemperature = resolvingWorldPlazaWaterPhaseTemperatureAtTileIndex({
     tileX,
     tileY,

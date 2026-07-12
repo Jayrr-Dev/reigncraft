@@ -6,9 +6,11 @@
  * @module components/world/inventory/components/renderingWorldPlazaInventoryDropItemOverlay
  */
 
-import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
+import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
+import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
+import { STYLING_WORLD_PLAZA_GROUND_ITEM_GLYPH_OUTLINE_CLASS_NAME } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_DROP_PREVIEW_ICON_BASE_PX,
   DEFINING_WORLD_PLAZA_INVENTORY_DROP_PREVIEW_ICON_BOB_AMPLITUDE_PX,
@@ -16,9 +18,8 @@ import {
   STYLING_WORLD_PLAZA_INVENTORY_DROP_ICON_GLYPH_CLASS_NAME,
   STYLING_WORLD_PLAZA_INVENTORY_DROP_ICON_ROOT_CLASS_NAME,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDropConstants';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import type { DefiningWorldPlazaInventoryDropPreviewTile } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDropPlacement';
-import { STYLING_WORLD_PLAZA_GROUND_ITEM_GLYPH_OUTLINE_CLASS_NAME } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { resolvingWorldPlazaInventoryDropMarkerScreenPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropMarkerScreenPoint';
 import { cn } from '@/lib/utils';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -71,14 +72,11 @@ export function RenderingWorldPlazaInventoryDropItemOverlay({
   );
 
   useLayoutEffect(() => {
-    let animationFrameId = 0;
-    let isActive = true;
+    let lastTransform: string =
+      RENDERING_WORLD_PLAZA_INVENTORY_DROP_ITEM_HIDDEN_TRANSFORM;
+    let lastOpacity = '';
 
-    const updatingDropItemMarker = (): void => {
-      if (!isActive) {
-        return;
-      }
-
+    return subscribingWorldPlazaDomOverlayFrame((_deltaMs, frameTimeMs) => {
       const nextItemTypeId = dropPlacementItemTypeIdRef.current;
 
       if (lastItemTypeIdRef.current !== nextItemTypeId) {
@@ -90,14 +88,18 @@ export function RenderingWorldPlazaInventoryDropItemOverlay({
       const markerTile = dropMarkerTileRef.current;
 
       if (!markerRoot) {
-        animationFrameId = window.requestAnimationFrame(updatingDropItemMarker);
         return;
       }
 
       if (!markerTile || !nextItemTypeId) {
-        markerRoot.style.transform =
-          RENDERING_WORLD_PLAZA_INVENTORY_DROP_ITEM_HIDDEN_TRANSFORM;
-        animationFrameId = window.requestAnimationFrame(updatingDropItemMarker);
+        if (
+          lastTransform !==
+          RENDERING_WORLD_PLAZA_INVENTORY_DROP_ITEM_HIDDEN_TRANSFORM
+        ) {
+          lastTransform =
+            RENDERING_WORLD_PLAZA_INVENTORY_DROP_ITEM_HIDDEN_TRANSFORM;
+          markerRoot.style.transform = lastTransform;
+        }
         return;
       }
 
@@ -105,12 +107,11 @@ export function RenderingWorldPlazaInventoryDropItemOverlay({
       const cameraWorldZoom = cameraWorldZoomRef.current ?? 1;
 
       if (!cameraOffset) {
-        animationFrameId = window.requestAnimationFrame(updatingDropItemMarker);
         return;
       }
 
       const bobPhase =
-        (Date.now() %
+        (frameTimeMs %
           DEFINING_WORLD_PLAZA_INVENTORY_DROP_PREVIEW_ICON_BOB_PERIOD_MS) /
         DEFINING_WORLD_PLAZA_INVENTORY_DROP_PREVIEW_ICON_BOB_PERIOD_MS;
       const bobOffsetPx =
@@ -126,17 +127,18 @@ export function RenderingWorldPlazaInventoryDropItemOverlay({
         bobOffsetPx
       );
 
-      markerRoot.style.transform = `translate(${screenPoint.x}px, ${screenPoint.y}px) translate(-50%, -50%)`;
-      markerRoot.style.opacity = markerTile.isValid ? '1' : '0.45';
-      animationFrameId = window.requestAnimationFrame(updatingDropItemMarker);
-    };
+      const nextTransform = `translate(${Math.round(screenPoint.x)}px, ${Math.round(screenPoint.y)}px) translate(-50%, -50%)`;
+      const nextOpacity = markerTile.isValid ? '1' : '0.45';
 
-    animationFrameId = window.requestAnimationFrame(updatingDropItemMarker);
-
-    return () => {
-      isActive = false;
-      window.cancelAnimationFrame(animationFrameId);
-    };
+      if (lastTransform !== nextTransform) {
+        lastTransform = nextTransform;
+        markerRoot.style.transform = nextTransform;
+      }
+      if (lastOpacity !== nextOpacity) {
+        lastOpacity = nextOpacity;
+        markerRoot.style.opacity = nextOpacity;
+      }
+    });
   }, [
     cameraOffsetRef,
     cameraWorldZoomRef,

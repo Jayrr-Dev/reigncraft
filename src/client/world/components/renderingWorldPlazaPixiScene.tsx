@@ -165,6 +165,7 @@ import type {
 import type { UsingWorldPlazaOnlineRoomChatResult } from '@/components/world/domains/definingWorldPlazaOnlineRoomChatBindings';
 import { DEFINING_WORLD_PLAZA_PLAYER_COMBAT_LOCK_HOVER_CURSOR } from '@/components/world/domains/definingWorldPlazaPlayerCombatLockConstants';
 import type { DefiningWorldPlazaPlayerCombatLockState } from '@/components/world/domains/definingWorldPlazaPlayerCombatLockTypes';
+import { DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_ENABLED } from '@/components/world/domains/definingWorldPlazaPlayerNightLightConstants';
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import type { DefiningWorldPlazaPresenceDisconnectReason } from '@/components/world/domains/definingWorldPlazaPresenceDisconnectConstants';
 import { DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
@@ -269,6 +270,7 @@ import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/
 import type { DefiningWorldPlazaEntityHealthSyncSnapshot } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { DEFINING_WORLD_PLAZA_ENTITY_SOULBREAK_DEV_HEALTH_PERCENT_EV } from '@/components/world/health/domains/definingWorldPlazaEntitySoulbreakConstants';
 import { formattingWorldPlazaEntityDeathScreenTitle } from '@/components/world/health/domains/formattingWorldPlazaEntityDeathScreenTitle';
+import { resolvingWorldPlazaEntityHealthAttackSpeedMultiplier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthAttackSpeedMultiplier';
 import { usingWorldPlazaPersistingPlayerConditions } from '@/components/world/health/hooks/usingWorldPlazaPersistingPlayerConditions';
 import { usingWorldPlazaPlayerHealth } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import { trackingWorldPlazaArrowKeyInput } from '@/components/world/hooks/trackingWorldPlazaArrowKeyInput';
@@ -880,6 +882,18 @@ function RenderingWorldPlazaPixiSceneConnected({
     usingWorldPlazaGenerationFeaturesState();
   const isWildlifeGenerationEnabled =
     generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE];
+  const isWildlifeSpeechBubblesEnabled =
+    generationFeatureFlags[
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_SPEECH_BUBBLES
+    ];
+  const isWildlifeDamageNumbersEnabled =
+    generationFeatureFlags[
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_DAMAGE_NUMBERS
+    ];
+  const isWildlifeNameTagsEnabled =
+    generationFeatureFlags[
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_NAME_TAGS
+    ];
   const isHudMinimapEnabled =
     generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_MINIMAP];
   const isHudActionBarEnabled =
@@ -894,6 +908,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     ];
   const isHudStatusEnabled =
     generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_STATUS];
+  const isHudHealthEnabled =
+    generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_HEALTH];
+  const isHudStaminaEnabled =
+    generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_STAMINA];
   const isHudWorldAnchorsEnabled =
     generationFeatureFlags[
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_WORLD_ANCHORS
@@ -2876,7 +2894,11 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
 
       const meleeTiming = computingWorldPlazaGirlSampleMeleePresentationTiming(
-        selectedCharacterEngineDerivedStats.attackSpeed
+        selectedCharacterEngineDerivedStats.attackSpeed *
+          resolvingWorldPlazaEntityHealthAttackSpeedMultiplier(
+            healthStateRef.current,
+            nowMs
+          )
       );
 
       clearingWalkTarget();
@@ -2909,6 +2931,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     [
       clearingWalkTarget,
       equipment.selectedSlotIndex,
+      healthStateRef,
       inventoryState,
       localAvatarMotionStateRef,
       playerPositionRef,
@@ -4416,10 +4439,14 @@ function RenderingWorldPlazaPixiSceneConnected({
         onContextMenu={preventingPlazaViewportContextMenu}
       >
         {isDevQaBlankSlate ? null : (
+          <RenderingWorldPlazaBiomeBackdrop
+            playerPositionRef={playerPositionRef}
+          />
+        )}
+        {generationFeatureFlags[
+          DEFINING_WORLD_PLAZA_GENERATION_FEATURE.AUDIO_SFX
+        ] ? (
           <>
-            <RenderingWorldPlazaBiomeBackdrop
-              playerPositionRef={playerPositionRef}
-            />
             <RenderingWorldPlazaBiomeMusic
               playerPositionRef={playerPositionRef}
             />
@@ -4456,7 +4483,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               playerPositionRef={playerPositionRef}
             />
           </>
-        )}
+        ) : null}
         <div className={DEFINING_WORLD_PLAZA_PIXI_STAGE_LAYER_CLASS_NAME}>
           <Application
             preference="webgl"
@@ -4498,18 +4525,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                     revision={farmlandRevision}
                   />
                 ) : null}
-                <RenderingWorldPlazaPlayerNightLightGroundGlow
-                  floorLayerRef={terrainFloorLayerRef}
-                  playerPositionRef={playerPositionRef}
-                  placedBlocksRef={placedBlocksRef}
-                />
-                <RenderingWorldPlazaLightSourcesGroundGlow
-                  floorLayerRef={terrainFloorLayerRef}
-                />
-                <RenderingWorldPlazaLightingDarknessLayer
-                  worldAnchorLayerRef={terrainFloorLayerRef}
-                  playerPositionRef={playerPositionRef}
-                />
                 <RenderingWorldPlazaFireLayer
                   entityLayerRef={terrainTrunkLayerRef}
                   fireCells={fireCells}
@@ -4517,6 +4532,26 @@ function RenderingWorldPlazaPixiSceneConnected({
                 />
               </>
             )}
+            {/*
+              Night lighting stays mounted even in Dev QA blank slate. Blank
+              slate used to unmount this stack, so CSS day/night tint still
+              darkened the world while torch/fairy/campfire holes never ran —
+              fairies looked like dots with no light pool.
+            */}
+            {DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_ENABLED ? (
+              <RenderingWorldPlazaPlayerNightLightGroundGlow
+                floorLayerRef={terrainFloorLayerRef}
+                playerPositionRef={playerPositionRef}
+                placedBlocksRef={placedBlocksRef}
+              />
+            ) : null}
+            <RenderingWorldPlazaLightSourcesGroundGlow
+              floorLayerRef={terrainFloorLayerRef}
+            />
+            <RenderingWorldPlazaLightingDarknessLayer
+              worldAnchorLayerRef={terrainFloorLayerRef}
+              playerPositionRef={playerPositionRef}
+            />
             <MeasuringWorldPlazaPixiRenderDiagnostics />
             <RenderingWorldPlazaCameraRig
               playerPositionRef={playerPositionRef}
@@ -4912,9 +4947,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               }
               onlineUserId={onlineUserId}
               onTeleportToBiome={teleportingPlayerToBiome}
-              onExitToHome={
-                !isHudActionBarEnabled ? onExitToHome : undefined
-              }
+              onExitToHome={!isHudActionBarEnabled ? onExitToHome : undefined}
             />
           ) : !isHudActionBarEnabled && onExitToHome ? (
             <button
@@ -4948,40 +4981,46 @@ function RenderingWorldPlazaPixiSceneConnected({
               />
             </>
           ) : null}
+          {(isHudHealthEnabled || isHudStaminaEnabled) &&
+          isLocalGameplayEnabled ? (
+            <RenderingWorldPlazaEntityHealthBars
+              healthBarEntries={playerHealthBarEntries}
+              localUserId={localHealthEntityUserId}
+              localHudSnapshot={playerHealthHudSnapshot}
+              localStaminaHud={
+                isHudStaminaEnabled
+                  ? {
+                      staminaRatio,
+                      isRunning: isRunningHud,
+                      isDepleted: isStaminaDepleted,
+                    }
+                  : null
+              }
+              isHealthTrackVisible={isHudHealthEnabled}
+              playerPositionRef={playerPositionRef}
+              remotePlayerRegistryRef={remotePlayerRegistryRef}
+              playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}
+              remotePlayers={roomSnapshot.remotePlayers}
+              cameraOffsetRef={cameraOffsetRef}
+              cameraWorldZoomRef={cameraWorldZoomRef}
+            />
+          ) : null}
+          {isHudHealthEnabled && isLocalGameplayEnabled ? (
+            <RenderingWorldPlazaEntityHealthFloatTexts
+              localUserId={localHealthEntityUserId}
+              anchorGridX={playerPositionRef.current.x}
+              anchorGridY={playerPositionRef.current.y}
+              floatingTexts={playerHealthHudSnapshot.floatingTexts}
+              playerPositionRef={playerPositionRef}
+              remotePlayerRegistryRef={remotePlayerRegistryRef}
+              playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}
+              remotePlayers={roomSnapshot.remotePlayers}
+              cameraOffsetRef={cameraOffsetRef}
+              cameraWorldZoomRef={cameraWorldZoomRef}
+            />
+          ) : null}
           {isHudWorldAnchorsEnabled && isLocalGameplayEnabled ? (
             <>
-              <RenderingWorldPlazaEntityHealthBars
-                healthBarEntries={playerHealthBarEntries}
-                localUserId={localHealthEntityUserId}
-                localHudSnapshot={playerHealthHudSnapshot}
-                localStaminaHud={{
-                  staminaRatio,
-                  isRunning: isRunningHud,
-                  isDepleted: isStaminaDepleted,
-                }}
-                playerPositionRef={playerPositionRef}
-                remotePlayerRegistryRef={remotePlayerRegistryRef}
-                playerRenderPositionRegistryRef={
-                  playerRenderPositionRegistryRef
-                }
-                remotePlayers={roomSnapshot.remotePlayers}
-                cameraOffsetRef={cameraOffsetRef}
-                cameraWorldZoomRef={cameraWorldZoomRef}
-              />
-              <RenderingWorldPlazaEntityHealthFloatTexts
-                localUserId={localHealthEntityUserId}
-                anchorGridX={playerPositionRef.current.x}
-                anchorGridY={playerPositionRef.current.y}
-                floatingTexts={playerHealthHudSnapshot.floatingTexts}
-                playerPositionRef={playerPositionRef}
-                remotePlayerRegistryRef={remotePlayerRegistryRef}
-                playerRenderPositionRegistryRef={
-                  playerRenderPositionRegistryRef
-                }
-                remotePlayers={roomSnapshot.remotePlayers}
-                cameraOffsetRef={cameraOffsetRef}
-                cameraWorldZoomRef={cameraWorldZoomRef}
-              />
               <RenderingWorldPlazaInventoryFoodEatOverlay
                 localUserId={localHealthEntityUserId}
                 overlaySnapshot={foodEatOverlaySnapshot}
@@ -5021,24 +5060,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                   playerRenderPositionRegistryRef
                 }
                 remotePlayers={roomSnapshot.remotePlayers}
-                cameraOffsetRef={cameraOffsetRef}
-                cameraWorldZoomRef={cameraWorldZoomRef}
-              />
-              <RenderingWorldPlazaWildlifeNameTags
-                nameTags={wildlifeNameTags}
-                nameTagsOutRef={wildlifeNameTagsRef}
-                cameraOffsetRef={cameraOffsetRef}
-                cameraWorldZoomRef={cameraWorldZoomRef}
-              />
-              <RenderingWorldPlazaWildlifeHealthFloatTexts
-                floatingCombatTexts={wildlifeFloatingCombatTexts}
-                floatingCombatTextsOutRef={wildlifeFloatingCombatTextsRef}
-                cameraOffsetRef={cameraOffsetRef}
-                cameraWorldZoomRef={cameraWorldZoomRef}
-              />
-              <RenderingWorldPlazaWildlifeSpeechBubbles
-                speechBubbles={wildlifeSpeechBubbles}
-                speechBubblesOutRef={wildlifeSpeechBubblesRef}
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />
@@ -5131,6 +5152,34 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraWorldZoomRef={cameraWorldZoomRef}
                 onStudyCorpse={handlingWildlifeCorpseStudyInteraction}
               />
+            </>
+          ) : null}
+          {isWildlifeGenerationEnabled && isLocalGameplayEnabled ? (
+            <>
+              {isWildlifeNameTagsEnabled ? (
+                <RenderingWorldPlazaWildlifeNameTags
+                  nameTags={wildlifeNameTags}
+                  nameTagsOutRef={wildlifeNameTagsRef}
+                  cameraOffsetRef={cameraOffsetRef}
+                  cameraWorldZoomRef={cameraWorldZoomRef}
+                />
+              ) : null}
+              {isWildlifeDamageNumbersEnabled ? (
+                <RenderingWorldPlazaWildlifeHealthFloatTexts
+                  floatingCombatTexts={wildlifeFloatingCombatTexts}
+                  floatingCombatTextsOutRef={wildlifeFloatingCombatTextsRef}
+                  cameraOffsetRef={cameraOffsetRef}
+                  cameraWorldZoomRef={cameraWorldZoomRef}
+                />
+              ) : null}
+              {isWildlifeSpeechBubblesEnabled ? (
+                <RenderingWorldPlazaWildlifeSpeechBubbles
+                  speechBubbles={wildlifeSpeechBubbles}
+                  speechBubblesOutRef={wildlifeSpeechBubblesRef}
+                  cameraOffsetRef={cameraOffsetRef}
+                  cameraWorldZoomRef={cameraWorldZoomRef}
+                />
+              ) : null}
             </>
           ) : null}
           {isHudWorldAnchorsEnabled && onlineUserId ? (
@@ -5230,12 +5279,16 @@ function RenderingWorldPlazaPixiSceneConnected({
                     onlineUserId={onlineUserId}
                     viewportHudScale={viewportHudScale}
                     isMobile={hudIsMobile}
+                    isFullscreen={hudIsFullscreen}
                     inventoryDropPlacement={inventoryDropPlacement}
                     selectedSlotIndex={equipment.selectedSlotIndex}
                     onSelectHotbarSlot={equipment.selectingHotbarSlot}
                     onEatHotbarSlot={handlingEatHotbarSlot}
                     onUseActiveEnchantment={handlingUseActiveEnchantment}
                     hungerHud={hungerHudSnapshot}
+                    playerEffectiveMaxHealth={
+                      playerHealthHudSnapshot.effectiveMaxHealth
+                    }
                   />
                   <RenderingWorldPlazaGroundItems
                     onlineUserId={onlineUserId}
@@ -5401,12 +5454,16 @@ function RenderingWorldPlazaPixiSceneConnected({
                     saveSlotIndex={singlePlayerSaveSlotIndex}
                     viewportHudScale={viewportHudScale}
                     isMobile={hudIsMobile}
+                    isFullscreen={hudIsFullscreen}
                     inventoryDropPlacement={inventoryDropPlacement}
                     selectedSlotIndex={equipment.selectedSlotIndex}
                     onSelectHotbarSlot={equipment.selectingHotbarSlot}
                     onEatHotbarSlot={handlingEatHotbarSlot}
                     onUseActiveEnchantment={handlingUseActiveEnchantment}
                     hungerHud={hungerHudSnapshot}
+                    playerEffectiveMaxHealth={
+                      playerHealthHudSnapshot.effectiveMaxHealth
+                    }
                   />
                   <RenderingWorldPlazaGroundItems
                     localPersistenceOwnerId={localPersistenceOwnerId}

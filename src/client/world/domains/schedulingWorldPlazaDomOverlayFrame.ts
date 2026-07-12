@@ -9,7 +9,10 @@ import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
 } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
-import { invokingWorldPlazaLoopBodySafely } from '@/components/world/domains/loggingWorldPlazaClientErrors';
+import {
+  formattingWorldPlazaClientCapturedError,
+  loggingWorldPlazaClientError,
+} from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import {
@@ -78,9 +81,13 @@ function tickingWorldPlazaDomOverlayFrame(frameTimeMs: number): void {
   schedulingWorldPlazaDomOverlayFrameLastTimeMs = frameTimeMs;
 
   for (const callback of SCHEDULING_WORLD_PLAZA_DOM_OVERLAY_FRAME_CALLBACKS) {
-    invokingWorldPlazaLoopBodySafely('dom-overlay', () => {
+    try {
       callback(deltaMs, frameTimeMs);
-    });
+    } catch (error) {
+      loggingWorldPlazaClientError(
+        `[dom-overlay] ${formattingWorldPlazaClientCapturedError(error)}`
+      );
+    }
   }
 
   finishDomOverlaySample();

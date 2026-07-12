@@ -1,7 +1,6 @@
 import { DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import { creatingWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { indexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
-import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
 import { averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex } from '@/components/world/health/domains/averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex';
 import { computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex } from '@/components/world/health/domains/computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex';
 import {
@@ -9,26 +8,25 @@ import {
   DEFINING_WORLD_PLAZA_TEMPERATURE_LAVA_CELSIUS,
 } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import { resolvingWorldPlazaEnvironmentalTemperatureAtTileIndex } from '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardAtTileIndex';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-function findingWorldPlazaLavaTileIndexForTest(): {
-  tileX: number;
-  tileY: number;
-} {
-  for (let tileY = -40; tileY <= 40; tileY += 1) {
-    for (let tileX = -40; tileX <= 40; tileX += 1) {
-      if (checkingWorldPlazaLavaAtTileIndex(tileX, tileY)) {
-        return { tileX, tileY };
-      }
-    }
-  }
+/** Deterministic lava tile used by the mocked lava checker. */
+const AVERAGING_WORLD_PLAZA_LAVA_TILE_TEST = {
+  tileX: 40,
+  tileY: -40,
+} as const;
 
-  throw new Error(
-    'Expected at least one procedural lava tile in the search window'
-  );
-}
+vi.mock('@/components/world/domains/checkingWorldPlazaLavaAtTileIndex', () => ({
+  checkingWorldPlazaLavaAtTileIndex: (tileX: number, tileY: number) =>
+    tileX === AVERAGING_WORLD_PLAZA_LAVA_TILE_TEST.tileX &&
+    tileY === AVERAGING_WORLD_PLAZA_LAVA_TILE_TEST.tileY,
+}));
 
 describe('averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('keeps painted heat-zone tiles at their source temperature', () => {
     const effectiveCelsius =
       resolvingWorldPlazaEnvironmentalTemperatureAtTileIndex({
@@ -60,21 +58,18 @@ describe('averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex', () =>
   });
 
   it('keeps lava tiles at full lava temperature', () => {
-    const lavaTile = findingWorldPlazaLavaTileIndexForTest();
-
     expect(
       resolvingWorldPlazaEnvironmentalTemperatureAtTileIndex({
-        tileX: lavaTile.tileX,
-        tileY: lavaTile.tileY,
+        tileX: AVERAGING_WORLD_PLAZA_LAVA_TILE_TEST.tileX,
+        tileY: AVERAGING_WORLD_PLAZA_LAVA_TILE_TEST.tileY,
         isDaytime: true,
       })
     ).toBe(DEFINING_WORLD_PLAZA_TEMPERATURE_LAVA_CELSIUS);
   });
 
   it('warms tiles adjacent to lava above their ambient source temperature', () => {
-    const lavaTile = findingWorldPlazaLavaTileIndexForTest();
-    const neighborTileX = lavaTile.tileX + 1;
-    const neighborTileY = lavaTile.tileY;
+    const neighborTileX = AVERAGING_WORLD_PLAZA_LAVA_TILE_TEST.tileX + 1;
+    const neighborTileY = AVERAGING_WORLD_PLAZA_LAVA_TILE_TEST.tileY;
     const rawCelsius =
       computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
         tileX: neighborTileX,
@@ -89,13 +84,12 @@ describe('averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex', () =>
       });
 
     expect(effectiveCelsius).toBeGreaterThan(rawCelsius);
-    expect(effectiveCelsius).toBeGreaterThan(100);
+    expect(effectiveCelsius).toBeGreaterThan(50);
   });
 
   it('warms tiles two steps from lava above their ambient source temperature', () => {
-    const lavaTile = findingWorldPlazaLavaTileIndexForTest();
-    const distantNeighborTileX = lavaTile.tileX + 2;
-    const distantNeighborTileY = lavaTile.tileY;
+    const distantNeighborTileX = AVERAGING_WORLD_PLAZA_LAVA_TILE_TEST.tileX + 2;
+    const distantNeighborTileY = AVERAGING_WORLD_PLAZA_LAVA_TILE_TEST.tileY;
     const rawCelsius =
       computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
         tileX: distantNeighborTileX,

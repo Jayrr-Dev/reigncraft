@@ -15,11 +15,11 @@ import { checkingWildlifePointWithinRadiusGrid } from '@/components/world/wildli
 import { DEFINING_WILDLIFE_NAME_TAG_VISIBLE_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife/domains/definingWildlifeNameTagTypes';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import { resolvingWildlifeSpriteSheetFrameHeightPx } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetFrameHeightByFolder';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeInstanceSizeScale } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { resolvingWildlifeInstanceNameTagLabel } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceNameTagLabel';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
+import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
 
 export type UpdatingWildlifeNameTagLabelCacheEntry = {
   displayLabel: string;
@@ -126,9 +126,10 @@ export function updatingWildlifeNameTagsOverlayRef({
     );
     const layer = resolvingWorldPlazaPlayerWorldLayer(instance.position);
     const sizeScale = resolvingWildlifeInstanceSizeScale(species, instance);
-    const frameHeightPx = resolvingWildlifeSpriteSheetFrameHeightPx(
-      species.spriteFolder
-    );
+    // Presentation override wins so procedural bodies (fairy orb) can declare
+    // their own tag lift height instead of the sheet-folder fallback.
+    const frameHeightPx =
+      resolvingWildlifeSpeciesSpritePresentation(species).frameHeightPx;
     const jumpArcOffsetPx = instance.aiState.jumpState
       ? computingWildlifeJumpArcLiftPx(
           species.jump.jumpArcPeakPx,

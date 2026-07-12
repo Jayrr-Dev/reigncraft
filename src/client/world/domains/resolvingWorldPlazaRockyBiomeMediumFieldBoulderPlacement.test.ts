@@ -6,9 +6,11 @@ import { resolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement } from '@/comp
 import { describe, expect, it } from 'vitest';
 
 describe('resolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement', () => {
-  it('returns a 1-tile / 4-layer medium boulder for rocky anchors below large tier', () => {
+  it('returns a 1-tile / 3-layer medium boulder for rocky anchors below large tier', () => {
     const placement = resolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement(
       true,
+      0,
+      1,
       0
     );
 
@@ -16,15 +18,44 @@ describe('resolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement', () => {
       sizeTierIndex: DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_SIZE_TIER_INDEX,
       footprintTileWidth: 1,
       footprintTileHeight: 1,
-      surfaceWorldLayer: 4,
+      surfaceWorldLayer: 3,
     });
   });
 
-  it('leaves rocky large-tier mega-boulders on seeded footprint and height', () => {
+  it('rolls a 4-layer field boulder from a high height unit', () => {
+    const placement = resolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement(
+      true,
+      0,
+      1,
+      0.75
+    );
+
+    expect(placement?.surfaceWorldLayer).toBe(4);
+  });
+
+  it('demotes many large-tier rocky anchors into 1-tile field boulders', () => {
+    const placement = resolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement(
+      true,
+      DEFINING_WORLD_PLAZA_TERRAIN_LARGE_ROCK_SIZE_TIER_INDEX,
+      0.5,
+      0.25
+    );
+
+    expect(placement).toEqual({
+      sizeTierIndex: DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_SIZE_TIER_INDEX,
+      footprintTileWidth: 1,
+      footprintTileHeight: 1,
+      surfaceWorldLayer: 3,
+    });
+  });
+
+  it('leaves some large-tier rocky anchors as mega-boulders', () => {
     expect(
       resolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement(
         true,
-        DEFINING_WORLD_PLAZA_TERRAIN_LARGE_ROCK_SIZE_TIER_INDEX
+        DEFINING_WORLD_PLAZA_TERRAIN_LARGE_ROCK_SIZE_TIER_INDEX,
+        0.9,
+        0
       )
     ).toBeNull();
   });
@@ -33,7 +64,9 @@ describe('resolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement', () => {
     expect(
       resolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement(
         false,
-        DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_SIZE_TIER_INDEX
+        DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_SIZE_TIER_INDEX,
+        0,
+        0
       )
     ).toBeNull();
   });

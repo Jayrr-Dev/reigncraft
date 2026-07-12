@@ -16,10 +16,18 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE = {
   HUD_HOTBAR: 'hud-hotbar',
   HUD_DAY_NIGHT: 'hud-day-night',
   HUD_STATUS: 'hud-status',
+  HUD_HEALTH: 'hud-health',
+  HUD_STAMINA: 'hud-stamina',
   HUD_WORLD_ANCHORS: 'hud-world-anchors',
   AUDIO_SFX: 'audio-sfx',
   PROJECTILES: 'projectiles',
   WILDLIFE: 'wildlife',
+  WILDLIFE_AI: 'wildlife-ai',
+  WILDLIFE_BOULDER_COVER: 'wildlife-boulder-cover',
+  WILDLIFE_FAIRY_GLOW: 'wildlife-fairy-glow',
+  WILDLIFE_SPEECH_BUBBLES: 'wildlife-speech-bubbles',
+  WILDLIFE_DAMAGE_NUMBERS: 'wildlife-damage-numbers',
+  WILDLIFE_NAME_TAGS: 'wildlife-name-tags',
   TREES: 'trees',
   COLUMN_ROCKS: 'column-rocks',
   STONE_DECORATIONS: 'stone-decorations',
@@ -73,6 +81,8 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_HUD_IDS = [
   DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_HOTBAR,
   DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_DAY_NIGHT,
   DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_STATUS,
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_HEALTH,
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_STAMINA,
   DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_WORLD_ANCHORS,
 ] as const satisfies readonly DefiningWorldPlazaGenerationFeatureId[];
 
@@ -115,7 +125,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_ACTION_BAR,
       groupId: 'hud',
       label: 'Action bar',
-      description: 'Top utility bar (home, settings, chat, map, craft).',
+      description: 'Top utility bar (settings, chat, map, craft).',
     },
     {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_HOTBAR,
@@ -137,11 +147,24 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
         'Status-effect stack, world notifications, mobile roll button.',
     },
     {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_HEALTH,
+      groupId: 'hud',
+      label: 'Health bars',
+      description:
+        'World-anchored health bars and damage float texts above avatars.',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_STAMINA,
+      groupId: 'hud',
+      label: 'Stamina bar',
+      description: 'Run stamina track under the local player health bar.',
+    },
+    {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_WORLD_ANCHORS,
       groupId: 'hud',
       label: 'World HUD anchors',
       description:
-        'Health bars, float texts, name tags, chat bubbles, interaction labels.',
+        'Name tags, chat bubbles, eat overlay, stun/sleep markers, interaction labels.',
     },
     {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.AUDIO_SFX,
@@ -161,6 +184,47 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
       groupId: 'entities',
       label: 'Wildlife',
       description: 'Spawn, simulate, sync, and render animals.',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_AI,
+      groupId: 'entities',
+      label: 'Wildlife AI',
+      description:
+        'Think / intent updates (aggro, flee, stalk). Off freezes decisions.',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_BOULDER_COVER,
+      groupId: 'entities',
+      label: 'Wildlife boulder cover',
+      description:
+        'Hiding behind mega-boulders reduces detection and can break chase when far.',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_FAIRY_GLOW,
+      groupId: 'entities',
+      label: 'Fairy glow',
+      description:
+        'Glow-orb fairy bodies and their night light sources. Off hides orbs and fairy lights.',
+    },
+    {
+      featureId:
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_SPEECH_BUBBLES,
+      groupId: 'entities',
+      label: 'Wildlife speech',
+      description: 'Animal text bubbles above sprites.',
+    },
+    {
+      featureId:
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_DAMAGE_NUMBERS,
+      groupId: 'entities',
+      label: 'Wildlife damage nums',
+      description: 'Floating combat numbers on wildlife hits.',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_NAME_TAGS,
+      groupId: 'entities',
+      label: 'Wildlife name tags',
+      description: 'Species / name labels above animals.',
     },
     {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES,
@@ -236,10 +300,18 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS: Readonly<
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_HOTBAR]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_DAY_NIGHT]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_STATUS]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_HEALTH]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_STAMINA]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_WORLD_ANCHORS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.AUDIO_SFX]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PROJECTILES]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_AI]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_BOULDER_COVER]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_FAIRY_GLOW]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_SPEECH_BUBBLES]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_DAMAGE_NUMBERS]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_NAME_TAGS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.COLUMN_ROCKS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STONE_DECORATIONS]: true,

@@ -1,4 +1,5 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { settingWorldPlazaWaterFrozenStateCacheEpoch } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
@@ -60,6 +61,11 @@ export function computingWorldPlazaTerrainDependencySnapshot(
 ): DefiningWorldPlazaTerrainDependencySnapshot {
   const sunState = computingWorldPlazaDayNightSunState();
   const thawVisualSyncKey = `${sunState.bucketIndex}|${buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey(input.scenePlacedBlocks)}|${gettingWorldPlazaTemperatureDebugOverrideRevision()}`;
+
+  // Keep the memoized frozen-water lookups in step with freeze/thaw inputs so
+  // hot draw paths (water surface, shimmer, floor bake) reuse ring scans.
+  settingWorldPlazaWaterFrozenStateCacheEpoch(thawVisualSyncKey);
+
   const playerTileKey = formattingWorldPlazaTileIndexCacheKey(
     Math.floor(input.playerPosition.x),
     Math.floor(input.playerPosition.y)

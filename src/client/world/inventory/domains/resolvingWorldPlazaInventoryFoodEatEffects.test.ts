@@ -1,6 +1,7 @@
 import { checkingWorldPlazaEntityBuffIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityBuffIsActive';
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { resolvingWorldPlazaInventoryFoodEatEffects } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects';
+import { resolvingWorldPlazaInventoryFoodHealDeclaration } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealDeclaration';
 import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import { describe, expect, it } from 'vitest';
 
@@ -14,11 +15,21 @@ describe('resolvingWorldPlazaInventoryFoodEatEffects', () => {
     throw new Error('Expected boar meat catalog entry');
   }
 
+  const rawBoarHeal = resolvingWorldPlazaInventoryFoodHealDeclaration({
+    hungerRestoreRatio: boarEntry.rawHungerRestoreRatio,
+    meatKind: 'raw',
+  });
+  const cookedBoarHeal = resolvingWorldPlazaInventoryFoodHealDeclaration({
+    hungerRestoreRatio: boarEntry.cookedHungerRestoreRatio,
+    meatKind: 'cooked',
+  });
+
   it('rolls raw disease for wildlife meat', () => {
     const result = resolvingWorldPlazaInventoryFoodEatEffects({
       foodDefinition: {
         itemTypeId: boarEntry.rawItemTypeId,
         hungerRestoreRatio: boarEntry.rawHungerRestoreRatio,
+        healthHeal: rawBoarHeal,
         meatKind: 'raw',
         rawDiseaseId: boarEntry.rawDiseaseId,
         rawDiseaseChance: boarEntry.rawDiseaseChance,
@@ -35,11 +46,55 @@ describe('resolvingWorldPlazaInventoryFoodEatEffects', () => {
     );
   });
 
+  it('heals health from cooked meat and half as much from raw', () => {
+    const damaged = {
+      ...creatingWorldPlazaEntityHealthInitialState(),
+      currentHealth: 400,
+    };
+
+    const cooked = resolvingWorldPlazaInventoryFoodEatEffects({
+      foodDefinition: {
+        itemTypeId: boarEntry.cookedItemTypeId,
+        hungerRestoreRatio: boarEntry.cookedHungerRestoreRatio,
+        healthHeal: cookedBoarHeal,
+        meatKind: 'cooked',
+        cookedWellFedBuffId: boarEntry.cookedWellFedBuffId,
+        cookedWellFedChance: boarEntry.cookedWellFedChance,
+      },
+      healthState: damaged,
+      nowMs,
+      sicknessRoll: 1,
+      wellFedRoll: 1,
+    });
+
+    const raw = resolvingWorldPlazaInventoryFoodEatEffects({
+      foodDefinition: {
+        itemTypeId: boarEntry.rawItemTypeId,
+        hungerRestoreRatio: boarEntry.rawHungerRestoreRatio,
+        healthHeal: rawBoarHeal,
+        meatKind: 'raw',
+        rawDiseaseId: boarEntry.rawDiseaseId,
+        rawDiseaseChance: 0,
+      },
+      healthState: damaged,
+      nowMs,
+      sicknessRoll: 1,
+    });
+
+    expect(cooked.healthHealAmount).toBeGreaterThan(0);
+    expect(cooked.nextHealthState.currentHealth).toBe(
+      damaged.currentHealth + cooked.healthHealAmount
+    );
+    expect(raw.healthHealAmount).toBeGreaterThan(0);
+    expect(raw.healthHealAmount).toBeLessThan(cooked.healthHealAmount);
+  });
+
   it('rolls cooked well-fed buff without disease', () => {
     const result = resolvingWorldPlazaInventoryFoodEatEffects({
       foodDefinition: {
         itemTypeId: boarEntry.cookedItemTypeId,
         hungerRestoreRatio: boarEntry.cookedHungerRestoreRatio,
+        healthHeal: cookedBoarHeal,
         meatKind: 'cooked',
         cookedWellFedBuffId: boarEntry.cookedWellFedBuffId,
         cookedWellFedChance: boarEntry.cookedWellFedChance,
@@ -68,6 +123,7 @@ describe('resolvingWorldPlazaInventoryFoodEatEffects', () => {
       foodDefinition: {
         itemTypeId: boarEntry.cookedItemTypeId,
         hungerRestoreRatio: boarEntry.cookedHungerRestoreRatio,
+        healthHeal: cookedBoarHeal,
         meatKind: 'cooked',
         cookedWellFedBuffId: boarEntry.cookedWellFedBuffId,
         cookedWellFedChance: boarEntry.cookedWellFedChance,
@@ -97,6 +153,10 @@ describe('resolvingWorldPlazaInventoryFoodEatEffects', () => {
       foodDefinition: {
         itemTypeId: deerEntry.cookedItemTypeId,
         hungerRestoreRatio: deerEntry.cookedHungerRestoreRatio,
+        healthHeal: resolvingWorldPlazaInventoryFoodHealDeclaration({
+          hungerRestoreRatio: deerEntry.cookedHungerRestoreRatio,
+          meatKind: 'cooked',
+        }),
         meatKind: 'cooked',
         cookedWellFedBuffId: deerEntry.cookedWellFedBuffId,
         cookedWellFedChance: deerEntry.cookedWellFedChance,
@@ -119,6 +179,10 @@ describe('resolvingWorldPlazaInventoryFoodEatEffects', () => {
       foodDefinition: {
         itemTypeId: 'generic-raw-meat',
         hungerRestoreRatio: 0.2,
+        healthHeal: resolvingWorldPlazaInventoryFoodHealDeclaration({
+          hungerRestoreRatio: 0.2,
+          meatKind: 'raw',
+        }),
         meatKind: 'raw',
         rawPoisonFlatEv: 10,
         rawPoisonDurationMs: 60_000,

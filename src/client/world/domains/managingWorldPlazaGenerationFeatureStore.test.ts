@@ -7,6 +7,7 @@ import {
   checkingWorldPlazaGenerationFeatureEnabled,
   clearingWorldPlazaGenerationFeatureSessionOverride,
   gettingWorldPlazaGenerationFeatureRevision,
+  mergingWorldPlazaGenerationFeatureSessionOverrideMissingKeys,
   resettingWorldPlazaGenerationFeatureStoreForTests,
   settingWorldPlazaGenerationFeatureEnabled,
   subscribingWorldPlazaGenerationFeatures,
@@ -73,7 +74,7 @@ describe('managingWorldPlazaGenerationFeatureStore', () => {
       checkingWorldPlazaGenerationFeatureEnabled(
         DEFINING_WORLD_PLAZA_GENERATION_FEATURE.AUDIO_SFX
       )
-    ).toBe(false);
+    ).toBe(true);
     expect(
       checkingWorldPlazaGenerationFeatureEnabled(
         DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PROJECTILES
@@ -100,6 +101,16 @@ describe('managingWorldPlazaGenerationFeatureStore', () => {
         DEFINING_WORLD_PLAZA_GENERATION_FEATURE.RIVERS
       )
     ).toBe(false);
+
+    mergingWorldPlazaGenerationFeatureSessionOverrideMissingKeys(
+      DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_BLANK_SLATE
+    );
+
+    expect(
+      checkingWorldPlazaGenerationFeatureEnabled(
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES
+      )
+    ).toBe(true);
 
     clearingWorldPlazaGenerationFeatureSessionOverride();
 

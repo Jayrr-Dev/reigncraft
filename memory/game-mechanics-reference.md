@@ -256,6 +256,7 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 - Berries **15%**, apple **25%**, cooked meat **60%** (generic constants)
 - Species meat values in meat catalog
+- Eat also heals HP from stamped food `healthHeal` (**flat + % of your effective max**), × kill size tier; raw stamps already include × **0.5** (`definingWorldPlazaInventoryFoodHealConstants.ts`)
 - Eat channel **1–10 s** by food/species (`definingWorldPlazaInventoryFoodEatDurationRegistry.ts`); damage, walk, jump, or roll cancels (`checkingWorldPlazaInventoryFoodEatShouldContinue.ts`)
 - Ground pickup channel **0.5–10 s** by item weight (`resolvingWorldPlazaGroundItemPickupDurationMs.ts`); leave range cancels
 
@@ -284,6 +285,7 @@ Incubation / grant fire times use **world epoch** (`Date.now()`). Fired grant ef
 - Raw: roll species `rawDiseaseChance`; fallback generic poison/sickness
 - Cooked: roll `cookedWellFedBuffId` + residual prion chance where defined
 - Food sickness / active disease: hunger restore × **0.5**
+- **HP heal**: each food stamps declarative `healthHeal.baseFlat` + `healthHeal.percentOfMax` at registration (`resolvingWorldPlazaInventoryFoodHealDeclaration.ts`); eat multiplies by kill `sizeTier` / large frame. Inspect UI uses the player’s effective max HP.
 - Disease HUD badge tap shows severity + active/upcoming stages
 
 ---
@@ -380,9 +382,10 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 - Player bump on sleeper: **33%** wake once per contact; woken animals flee or attack via sleep-wake startle
 - Deep sleep health effect (`canWakeFromDamage: false`) blocks hit/bump/nearby wake until timer ends
 
-**Pack / herd reactions** (`definingWildlifePackConstants.ts`, `definingWildlifeDefendYoungConstants.ts`)
+**Pack / herd reactions** (`definingWildlifePackConstants.ts`, `definingWildlifeDefendYoungConstants.ts`, `definingWildlifeHerdLandmarkTravelConstants.ts`)
 
 - Passive/skittish herd panic flee **10** grid on ally hit
+- Calm landmark travel: ~**55%** of paired **6s** wander buckets rest then walk to water shore / tree shade / pasture (scan **12** grid); spawn-pack alpha leads, followers trail
 - Defend young: baby (σ **−2**) hurt → same-species adults (σ **≥0**) attack attacker within pack share radius (default **8**); threat share × **2.5**
 - Separation anxiety: young (σ **≤ −1**) run to larger same-species ally when > **4** grid (stop ≤ **2**, search **14**)
 - Name tags: size σ prefix pools in `definingWildlifeNameTagConstants.ts` (+1σ only Mama / Dada / Daddy / Mommy); pack alpha forces **Alpha**

@@ -6,19 +6,24 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
+import { checkingWildlifeShouldCompleteBluffReturn } from '@/components/world/wildlife/domains/advancingWildlifeBluffCharge';
 import { checkingWildlifeAggressiveHerbivoreMayFight } from '@/components/world/wildlife/domains/checkingWildlifeAggressiveHerbivoreMayFight';
+import { checkingWildlifeAlwaysFollowPlayerWithinRange } from '@/components/world/wildlife/domains/checkingWildlifeAlwaysFollowPlayerWithinRange';
 import { checkingWildlifeDocileFollowIsActive } from '@/components/world/wildlife/domains/checkingWildlifeDocileFollowIsActive';
 import { checkingWildlifeHasSeekPack } from '@/components/world/wildlife/domains/checkingWildlifeHasSeekPack';
 import { checkingWildlifeHasSeparationAnxiety } from '@/components/world/wildlife/domains/checkingWildlifeHasSeparationAnxiety';
+import { checkingWildlifeInstanceHasProvokedWildlifeAggro } from '@/components/world/wildlife/domains/checkingWildlifeInstanceHasProvokedWildlifeAggro';
 import { checkingWildlifeInstanceIsDefendingYoung } from '@/components/world/wildlife/domains/checkingWildlifeInstanceMayDefendYoung';
 import {
   checkingWildlifeIsMotivatedToForageGroundFood,
   checkingWildlifeIsMotivatedToHunt,
 } from '@/components/world/wildlife/domains/checkingWildlifeIsMotivatedToHunt';
 import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight';
+import { checkingWildlifePlayerOccludedByColumnRock } from '@/components/world/wildlife/domains/checkingWildlifePlayerOccludedByColumnRock';
 import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
 import { checkingWildlifeShouldDocileApproachReact } from '@/components/world/wildlife/domains/checkingWildlifeShouldDocileApproachReact';
 import { checkingWildlifeSocialHunterMayHunt } from '@/components/world/wildlife/domains/checkingWildlifeSocialHunterMayHunt';
+import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
 import { checkingWildlifeStalkPackmateMayAttackPrey } from '@/components/world/wildlife/domains/checkingWildlifeStalkPackmateMayAttackPrey';
 import {
   checkingWildlifeStalkPhaseIsAttacking,
@@ -29,7 +34,6 @@ import {
   checkingWildlifeStalkPhaseIsSurrounding,
   checkingWildlifeStalkPhaseKillWindowOpen,
 } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
-import { checkingWildlifeShouldCompleteBluffReturn } from '@/components/world/wildlife/domains/advancingWildlifeBluffCharge';
 import { checkingWildlifeShouldTerritoryWarn } from '@/components/world/wildlife/domains/checkingWildlifeTerritoryIntrusion';
 import {
   DEFINING_WILDLIFE_FLEE_ENTRY_RADIUS_MULTIPLIER,
@@ -71,6 +75,12 @@ export type DefiningWildlifeBehaviorBlackboard = {
   playerStaminaRatio: number | null;
   playerStaminaIsDepleted: boolean;
   playerStillDurationMs: number;
+  /**
+   * True during the shared night window (sunset → sunrise). Always-follow
+   * companions only trail while this is true. Defaults to night when omitted
+   * (unit-test blackboards).
+   */
+  isNightCyclePhase?: boolean;
   resolveSpecies: (
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null;
@@ -111,7 +121,14 @@ function resolvingNearestHuntablePreyWithinRadius(
         preySpecies,
         blackboard.instance.hungerState.driveLevel === 'starving'
           ? 'starving'
-          : 'hungry'
+          : 'hungry',
+        {
+          preyHasProvokedWildlifeAggro:
+            checkingWildlifeInstanceHasProvokedWildlifeAggro(
+              candidate,
+              blackboard.nowMs
+            ),
+        }
       )
     ) {
       continue;
@@ -193,6 +210,15 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
       return false;
     }
 
+    if (
+      checkingWildlifePlayerOccludedByColumnRock(
+        blackboard.instance.position,
+        blackboard.playerPosition
+      )
+    ) {
+      return false;
+    }
+
     return (
       resolvingDistanceGrid(
         blackboard.instance.position,
@@ -227,6 +253,10 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
   hasEdibleGroundFoodNearby: (blackboard) =>
     blackboard.selectedGroundFoodItemId !== null,
   isHealthBelowFleeThreshold: (blackboard) => {
+    if (checkingWildlifeSpeciesIsImmortal(blackboard.species)) {
+      return false;
+    }
+
     const healthRatio =
       blackboard.instance.healthState.currentHealth /
       Math.max(1, blackboard.instance.healthState.baseMaxHealth);
@@ -306,8 +336,25 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     checkingWildlifeInstanceIsDefendingYoung(blackboard.instance),
   hasSeparationAnxiety: checkingWildlifeHasSeparationAnxiety,
   hasSeekPack: checkingWildlifeHasSeekPack,
-  isDocileFollowingPlayer: (blackboard) =>
-    checkingWildlifeDocileFollowIsActive(blackboard.instance, blackboard.nowMs),
+  isDocileFollowingPlayer: (blackboard) => {
+    if (
+      checkingWildlifeAlwaysFollowPlayerWithinRange(
+        blackboard.species,
+        blackboard.instance.position,
+        blackboard.playerPosition
+      )
+    ) {
+      return (
+        blackboard.isNightCyclePhase !== false &&
+        blackboard.instance.softDepartureStartedAtMs == null
+      );
+    }
+
+    return checkingWildlifeDocileFollowIsActive(
+      blackboard.instance,
+      blackboard.nowMs
+    );
+  },
   shouldDocileApproachReact: checkingWildlifeShouldDocileApproachReact,
   isNearWater: (blackboard) => {
     const tileX = Math.floor(blackboard.instance.position.x);

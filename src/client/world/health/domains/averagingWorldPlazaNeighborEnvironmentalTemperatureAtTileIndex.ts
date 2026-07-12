@@ -9,26 +9,31 @@ import { DEFINING_WORLD_PLAZA_TEMPERATURE_NEIGHBOR_AVERAGING_RING } from '@/comp
  *
  * Tiles that directly host lava, campfires, or painted heat/cold zones keep
  * their source temperature so hot blocks stay lethal while surrounding grass
- * warms from nearby sources.
+ * warms from nearby sources (including procedural lava). Neighbor averaging
+ * always runs for non-source tiles so floor heat tints can red-shift by temp.
  */
 export function averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex(
   params: ComputingWorldPlazaRawEnvironmentalTemperatureAtTileIndexParams
 ): number {
+  // Prefer the scene placed-block index when the caller did not pass one, so
+  // campfire/ice heat still participates in source detection and blends.
+  const placedBlocksByTile =
+    params.placedBlocksByTile ??
+    readingWorldPlazaEnvironmentalTemperatureSamplingContext()
+      .placedBlocksByTile;
+  const samplingParams = {
+    ...params,
+    placedBlocksByTile,
+  };
+
   if (
     checkingWorldPlazaTileHasAssignableEnvironmentalTemperatureSourceAtTileIndex(
-      params
+      samplingParams
     )
   ) {
-    return computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex(params);
-  }
-
-  if (params.placedBlocksByTile === undefined) {
-    const samplingContext =
-      readingWorldPlazaEnvironmentalTemperatureSamplingContext();
-
-    if (!samplingContext.hasEnvironmentalHeatSources) {
-      return computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex(params);
-    }
+    return computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex(
+      samplingParams
+    );
   }
 
   const ring = DEFINING_WORLD_PLAZA_TEMPERATURE_NEIGHBOR_AVERAGING_RING;
@@ -39,7 +44,7 @@ export function averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex(
     for (let offsetTileX = -ring; offsetTileX <= ring; offsetTileX += 1) {
       temperatureSumCelsius +=
         computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
-          ...params,
+          ...samplingParams,
           tileX: params.tileX + offsetTileX,
           tileY: params.tileY + offsetTileY,
         });

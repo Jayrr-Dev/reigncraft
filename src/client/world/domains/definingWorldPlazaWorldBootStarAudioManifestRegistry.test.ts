@@ -29,7 +29,7 @@ describe('resolvingWorldPlazaWorldBootStarAudioPriorityManifestBuilders', () => 
     ).toHaveLength(6);
     expect(
       resolvingWorldPlazaWorldBootStarAudioDeferredManifestBuilders()
-    ).toHaveLength(0);
+    ).toHaveLength(1);
   });
 
   it('slims mobile priority to music + footsteps and defers the rest', () => {
@@ -42,6 +42,6 @@ describe('resolvingWorldPlazaWorldBootStarAudioPriorityManifestBuilders', () => 
     ).toHaveLength(2);
     expect(
       resolvingWorldPlazaWorldBootStarAudioDeferredManifestBuilders()
-    ).toHaveLength(4);
+    ).toHaveLength(5);
   });
 });

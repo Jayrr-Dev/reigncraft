@@ -27,6 +27,16 @@ export function checkingWildlifePackAlphaHasCommittedPreyAttack({
     return true;
   }
 
+  // Attack phase means the alpha already committed; followers must not wait for
+  // a chase targetPoint that still points at a flank slot mid-repath.
+  if (
+    alpha.aggroState.stalkPhase === 'attacking' &&
+    (alpha.aggroState.activeTargetId === preyTargetId ||
+      alpha.aggroState.stalkLockedPreyTargetId === preyTargetId)
+  ) {
+    return true;
+  }
+
   const intent = alpha.aiState.intent;
 
   if (intent.mode === 'attack' && intent.targetInstanceId === preyTargetId) {

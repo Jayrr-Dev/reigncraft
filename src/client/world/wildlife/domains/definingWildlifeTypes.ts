@@ -283,6 +283,11 @@ export type DefiningWildlifeAggroState = {
    * Cleared when the active threat target drops; used so passive adults fight.
    */
   defendingYoungUntilMs?: number | null;
+  /**
+   * Unnoticed animals that land a hit on wildlife stay "provoked" until this
+   * timestamp so predators may hunt them despite the trait.
+   */
+  provokedWildlifeAggroUntilMs?: number | null;
   /** Explicit stalk hunt phase for stalker temperament. */
   stalkPhase?: DefiningWildlifeStalkPhase;
   /** Timestamp when the current stalkPhase began. */
@@ -367,6 +372,16 @@ export type DefiningWildlifeInstance = {
   hasDroppedLoot: boolean;
   /** True after the local player finishes a Study channel on this corpse. */
   hasBeenStudied: boolean;
+  /**
+   * Soft-despawn clock for fairy daybreak / betrayal departure. Null while
+   * still a normal companion.
+   */
+  softDepartureStartedAtMs?: number | null;
+  /**
+   * Why soft departure started. Daybreak stamps clear if night returns;
+   * betrayal keeps fleeing until despawn.
+   */
+  softDepartureReason?: 'daybreak' | 'betrayal' | null;
 };
 
 /** Dead anchor waiting to respawn once the player leaves the kill site. */

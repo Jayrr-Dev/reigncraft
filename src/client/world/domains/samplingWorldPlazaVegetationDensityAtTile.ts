@@ -1,4 +1,8 @@
 import { definingWorldPlazaBiomeWorldNoiseFrequency } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
+import {
+  DEFINING_WORLD_PLAZA_STONE_RARITY_WORLD_COLUMN_NOISE_MIN,
+  DEFINING_WORLD_PLAZA_STONE_RARITY_WORLD_PEBBLE_NOISE_MIN,
+} from '@/components/world/domains/definingWorldPlazaStoneRarityConstants';
 import { samplingWorldPlazaFractalNoise } from '@/components/world/domains/generatingWorldPlazaValueNoise';
 
 /**
@@ -42,11 +46,18 @@ export const DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_OCTAVES = 3;
 export const DEFINING_WORLD_PLAZA_VEGETATION_TREE_DETAIL_NOISE_MIN = 0.62;
 
 /**
- * Minimum stone noise for a pebble/boulder outside the rocky biome.
- * Higher bar = fewer floor pebbles across meadows and forests. Rocky biome
- * still uses its own pebble / column overrides.
+ * Minimum stone noise for a column boulder outside the rocky biome.
+ * @see DEFINING_WORLD_PLAZA_STONE_RARITY_WORLD_COLUMN_NOISE_MIN
  */
-export const DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_MIN = 0.72;
+export const DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_MIN =
+  DEFINING_WORLD_PLAZA_STONE_RARITY_WORLD_COLUMN_NOISE_MIN;
+
+/**
+ * Minimum stone noise for a floor pebble outside the rocky biome.
+ * @see DEFINING_WORLD_PLAZA_STONE_RARITY_WORLD_PEBBLE_NOISE_MIN
+ */
+export const DEFINING_WORLD_PLAZA_VEGETATION_PEBBLE_STONE_NOISE_MIN =
+  DEFINING_WORLD_PLAZA_STONE_RARITY_WORLD_PEBBLE_NOISE_MIN;
 
 /** Spacing cell size in tiles (one candidate per cell). */
 export const DEFINING_WORLD_PLAZA_VEGETATION_TREE_SPACING_CELL_TILES = 3;

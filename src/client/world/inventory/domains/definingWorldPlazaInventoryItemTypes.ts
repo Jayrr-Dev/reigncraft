@@ -10,7 +10,6 @@ import {
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_WHEAT,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SOULCORE_SPHERE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
-import { DEFINING_WORLD_PLAZA_WOOD_AXE_INVENTORY_ICON_URL } from '@/components/world/inventory/domains/definingWorldPlazaToolInventoryIconConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
   DEFINING_WORLD_PLAZA_INVENTORY_BUILD_TOOL_MAX_DURABILITY,
@@ -43,9 +42,11 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { DEFINING_WORLD_PLAZA_WOOD_AXE_INVENTORY_ICON_URL } from '@/components/world/inventory/domains/definingWorldPlazaToolInventoryIconConstants';
 import { registeringWorldPlazaInventoryBagItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryBagItemDefinitions';
 import { registeringWorldPlazaTieredToolInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaTieredToolInventoryItems';
 import { registeringWorldPlazaWildlifeMeatInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems';
+import { resolvingWorldPlazaInventoryFoodHealDeclaration } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealDeclaration';
 import {
   DEFINING_WORLD_PLAZA_SOULCORE_ITEM_NAME,
   DEFINING_WORLD_PLAZA_SOULCORE_STACK_QUANTITY_DISPLAY,
@@ -158,6 +159,9 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       isStackable: true,
       food: {
         hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
+        healthHeal: resolvingWorldPlazaInventoryFoodHealDeclaration({
+          hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
+        }),
       },
     },
     {
@@ -170,6 +174,9 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       isStackable: true,
       food: {
         hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE,
+        healthHeal: resolvingWorldPlazaInventoryFoodHealDeclaration({
+          hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE,
+        }),
       },
     },
     ...registeringWorldPlazaWildlifeMeatInventoryItems(),
@@ -193,6 +200,9 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       isStackable: true,
       food: {
         hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_WHEAT,
+        healthHeal: resolvingWorldPlazaInventoryFoodHealDeclaration({
+          hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_WHEAT,
+        }),
       },
     },
     {
@@ -205,6 +215,10 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       isStackable: true,
       food: {
         hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_FISH,
+        healthHeal: resolvingWorldPlazaInventoryFoodHealDeclaration({
+          hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_FISH,
+          meatKind: 'raw',
+        }),
         meatKind: 'raw',
         rawSicknessChance: 0.08,
       },

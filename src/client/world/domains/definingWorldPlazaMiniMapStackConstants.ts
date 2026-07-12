@@ -96,8 +96,8 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
         environmentBarValueTextBasePx: 11,
       },
       /**
-       * Phone-sized screens — minimap bottom aligns with the inventory hotbar bottom
-       * (both use a 12px bottom inset; see inventory hotbar bottom-3).
+       * Phone-sized screens — minimap stays in the bottom-left corner; the
+       * inventory hotbar shifts right around it (see bottom-center resolver).
        */
       mobile: {
         edgeInsetBasePx: 12,
@@ -113,7 +113,7 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
         inventoryHotbarClearance: null,
         environmentBarValueTextBasePx: 12,
       },
-      /** Phone-sized fullscreen — same corner inset; no hotbar lift. */
+      /** Phone-sized fullscreen — same corner; hotbar shifts right around it. */
       mobile: {
         edgeInsetBasePx: 16,
         inventoryHotbarClearance: null,

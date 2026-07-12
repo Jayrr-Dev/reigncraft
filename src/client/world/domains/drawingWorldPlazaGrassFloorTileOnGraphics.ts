@@ -1,9 +1,12 @@
+import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
+import { checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex';
 import {
   checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex,
   checkingWorldPlazaTileHasColumnRockAtTileIndex,
 } from '@/components/world/domains/checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex';
 import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
+import { computingWorldPlazaTerrainElevationScreenOffsetPxAtTileIndex } from '@/components/world/domains/computingWorldPlazaTerrainElevationScreenOffsetPxAtTileIndex';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { CreatingWorldPlazaGrassFloorChunkDrawPassContext } from '@/components/world/domains/creatingWorldPlazaGrassFloorChunkDrawPassContext';
 import {
@@ -62,19 +65,32 @@ export function drawingWorldPlazaGrassFloorTileOnGraphics(
     tileX,
     tileY
   );
-
-  // Raised tiles get their walkable surface from the elevation column top.
-  // Mega-boulder footprints skip that column, so keep a biome floor diamond here.
-  if (
+  const hasRaisedSurface =
     DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED &&
-    checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex(
-      tileX,
-      tileY
-    ) &&
-    !hasColumnRockFootprint
-  ) {
+    checkingWorldPlazaTerrainElevationHasRaisedSurfaceAtTileIndex(tileX, tileY);
+
+  // Cliff-edge raised tiles (and raised lava) render as entity-layer block
+  // columns so side faces and molten caps depth-sort against avatars. Column
+  // rock footprints skip those columns, so they still need a lifted floor
+  // diamond here — otherwise the rock sits in a ground-level pit.
+  const usesElevationColumn =
+    hasRaisedSurface &&
+    !hasColumnRockFootprint &&
+    (checkingWorldPlazaLavaAtTileIndex(tileX, tileY) ||
+      checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex(
+        tileX,
+        tileY
+      ));
+
+  if (usesElevationColumn) {
     return;
   }
+
+  // Interior raised tiles (and rock footprints on raised terrain) draw a flat
+  // cap diamond lifted to their surface layer inside the batched floor chunk.
+  const surfaceLiftY = hasRaisedSurface
+    ? computingWorldPlazaTerrainElevationScreenOffsetPxAtTileIndex(tileX, tileY)
+    : 0;
 
   // Column rocks render on the entity layer above the floor grass diamond.
   if (
@@ -106,10 +122,14 @@ export function drawingWorldPlazaGrassFloorTileOnGraphics(
     tileY,
     drawOptions.burntGrassTileKeys
   );
-  const center = convertingWorldPlazaGridPointToIsometricScreenPoint({
+  const groundCenter = convertingWorldPlazaGridPointToIsometricScreenPoint({
     x: tileX,
     y: tileY,
   });
+  const center = {
+    x: groundCenter.x,
+    y: groundCenter.y + surfaceLiftY,
+  };
 
   graphics
     .poly([

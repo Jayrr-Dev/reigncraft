@@ -10,6 +10,7 @@ import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domai
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { RenderingWorldPlazaGroundItemProgressRing } from '@/components/world/inventory/components/renderingWorldPlazaGroundItemProgressRing';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
@@ -67,6 +68,10 @@ type RenderingWorldPlazaGroundItemPickupBlockedReason = 'range' | 'full';
 
 /** How long a blocked-pickup hint stays visible (ms). */
 const RENDERING_WORLD_PLAZA_GROUND_ITEM_BLOCKED_HINT_MS = 900 as const;
+
+/** Ground-item gameplay checks do not need display-frame cadence. */
+const RENDERING_WORLD_PLAZA_GROUND_ITEM_GAMEPLAY_UPDATE_INTERVAL_MS =
+  100 as const;
 
 /** Off-screen default before the first animation frame positions a marker. */
 const RENDERING_WORLD_PLAZA_GROUND_ITEM_HIDDEN_TRANSFORM =
@@ -479,17 +484,22 @@ export function RenderingWorldPlazaGroundItems({
       return;
     }
 
-    let animationFrameId = 0;
+    let lastGameplayUpdateAtMs = 0;
+    const transformByItemId = new Map<string, string>();
+    const visibilityByItemId = new Map<string, string>();
 
-    const updatingGroundItemPositions = (): void => {
+    return subscribingWorldPlazaDomOverlayFrame((_deltaMs, frameTimeMs) => {
       const cameraOffset = cameraOffsetRef.current;
       const cameraWorldZoom = cameraWorldZoomRef.current;
       const playerPosition = playerPositionRef.current;
       const viewportHeightPx = window.innerHeight;
+      const shouldUpdateGameplay =
+        frameTimeMs - lastGameplayUpdateAtMs >=
+        RENDERING_WORLD_PLAZA_GROUND_ITEM_GAMEPLAY_UPDATE_INTERVAL_MS;
       // Wildlife sim stamps `lastAttackAtMs` with wall clock (`Date.now()`), so
       // the eat-ring progress reader must use the same clock (not performance.now).
-      const now = Date.now();
-      const nextEatingIds = new Set<string>();
+      const now = shouldUpdateGameplay ? Date.now() : 0;
+      const nextEatingIds = shouldUpdateGameplay ? new Set<string>() : null;
       const wildlifeStore = wildlifeStoreRef?.current ?? null;
 
       for (const groundItem of itemsRef.current) {
@@ -501,9 +511,8 @@ export function RenderingWorldPlazaGroundItems({
             cameraOffset,
             cameraWorldZoom
           );
-
-          markerElement.style.transform = `translate(${screenPoint.x}px, ${screenPoint.y}px) translate(-50%, -100%)`;
-          markerElement.style.visibility =
+          const nextTransform = `translate(${Math.round(screenPoint.x)}px, ${Math.round(screenPoint.y)}px) translate(-50%, -100%)`;
+          const nextVisibility =
             checkingWorldPlazaGroundItemMarkerOccludedByBottomHud(
               screenPoint.y,
               viewportHeightPx,
@@ -511,6 +520,19 @@ export function RenderingWorldPlazaGroundItems({
             )
               ? 'hidden'
               : 'visible';
+
+          if (transformByItemId.get(groundItem.id) !== nextTransform) {
+            transformByItemId.set(groundItem.id, nextTransform);
+            markerElement.style.transform = nextTransform;
+          }
+          if (visibilityByItemId.get(groundItem.id) !== nextVisibility) {
+            visibilityByItemId.set(groundItem.id, nextVisibility);
+            markerElement.style.visibility = nextVisibility;
+          }
+        }
+
+        if (!shouldUpdateGameplay || !nextEatingIds) {
+          continue;
         }
 
         const eatProgress = resolvingWildlifeGroundFoodEatProgressByItemId(
@@ -586,29 +608,20 @@ export function RenderingWorldPlazaGroundItems({
         attemptingGroundItemPickup(groundItem, { showBlockedHints: true });
       }
 
-      setWildlifeEatingGroundItemIds((current) => {
-        if (
-          current.size === nextEatingIds.size &&
-          [...nextEatingIds].every((id) => current.has(id))
-        ) {
-          return current;
-        }
+      if (nextEatingIds) {
+        lastGameplayUpdateAtMs = frameTimeMs;
+        setWildlifeEatingGroundItemIds((current) => {
+          if (
+            current.size === nextEatingIds.size &&
+            [...nextEatingIds].every((id) => current.has(id))
+          ) {
+            return current;
+          }
 
-        return nextEatingIds;
-      });
-
-      animationFrameId = window.requestAnimationFrame(
-        updatingGroundItemPositions
-      );
-    };
-
-    animationFrameId = window.requestAnimationFrame(
-      updatingGroundItemPositions
-    );
-
-    return () => {
-      window.cancelAnimationFrame(animationFrameId);
-    };
+          return nextEatingIds;
+        });
+      }
+    });
   }, [
     attemptingGroundItemPickup,
     cameraOffsetRef,

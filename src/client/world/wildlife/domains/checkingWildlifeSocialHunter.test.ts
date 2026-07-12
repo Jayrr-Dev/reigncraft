@@ -117,6 +117,19 @@ describe('checkingWildlifeSocialHunterMayHunt', () => {
     ).toBe(true);
   });
 
+  it('counts self when simulation nearby lists exclude the acting wolf', () => {
+    const alpha = buildingWolf(0, 10.5);
+    const packmatesOnly = [buildingWolf(1, 11.5), buildingWolf(2, 12.5)];
+
+    expect(
+      checkingWildlifeSocialHunterMayHunt({
+        instance: alpha,
+        species: DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'],
+        nearbyInstances: packmatesOnly,
+      })
+    ).toBe(true);
+  });
+
   it('counts omega and grey wolves as one pack', () => {
     const omega = buildingWolf(0, 10.5, 'omega-wolf');
     const pack = [omega, buildingWolf(1, 11.5), buildingWolf(2, 12.5)];
@@ -159,6 +172,23 @@ describe('checkingWildlifeHasSeekPack', () => {
       aiState: creatingWildlifeTestAiState(),
     };
     const blackboard = buildingBlackboard(hunting, [hunting, ally]);
+
+    expect(checkingWildlifeHasSeekPack(blackboard)).toBe(false);
+  });
+
+  it('does not seek while inheriting a pack stalk lock without active target yet', () => {
+    const solo = buildingWolf(0, 10.5);
+    const ally = buildingWolf(1, 20.5);
+    const joining = {
+      ...solo,
+      aggroState: {
+        ...solo.aggroState,
+        activeTargetId: null,
+        stalkLockedPreyTargetId: 'player:1',
+      },
+      aiState: creatingWildlifeTestAiState(),
+    };
+    const blackboard = buildingBlackboard(joining, [joining, ally]);
 
     expect(checkingWildlifeHasSeekPack(blackboard)).toBe(false);
   });

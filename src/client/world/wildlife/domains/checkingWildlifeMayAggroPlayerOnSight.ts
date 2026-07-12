@@ -4,13 +4,15 @@
  * @module components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight
  */
 
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
+import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeAggressionLevel,
   DefiningWildlifeHungerDriveLevel,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
-import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 
 /**
  * Returns true when this animal may open combat on sight (ambush, predator rush).
@@ -21,6 +23,14 @@ export function checkingWildlifeMayAggroPlayerOnSight(
   hungerDriveLevel: DefiningWildlifeHungerDriveLevel
 ): boolean {
   if (checkingWorldPlazaDevQaLoadEnabled()) {
+    return false;
+  }
+
+  if (
+    !checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_AI
+    )
+  ) {
     return false;
   }
 

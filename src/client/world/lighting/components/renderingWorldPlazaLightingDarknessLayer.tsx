@@ -5,6 +5,7 @@ import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/dom
 import { computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint } from '@/components/world/domains/computingWorldPlazaPlayerNightLightFootAnchorFromGridPoint';
 import { computingWorldPlazaPlayerNightLightStateFromSunState } from '@/components/world/domains/computingWorldPlazaPlayerNightLightStrengthFromSunState';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import { DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_ENABLED } from '@/components/world/domains/definingWorldPlazaPlayerNightLightConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { queueingWorldPlazaPixiGpuResourceDisposal } from '@/components/world/domains/queueingWorldPlazaPixiGpuResourceDisposal';
@@ -370,7 +371,7 @@ export function RenderingWorldPlazaLightingDarknessLayer({
       readonly brightness: number;
     }[] = [];
 
-    if (playerPosition) {
+    if (DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_ENABLED && playerPosition) {
       lightEntries.push({
         id: RENDERING_WORLD_PLAZA_LIGHTING_PLAYER_LIGHT_ID,
         gridPoint: playerPosition,

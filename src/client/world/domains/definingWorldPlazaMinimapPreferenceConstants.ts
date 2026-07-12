@@ -9,11 +9,11 @@ export const DEFINING_WORLD_PLAZA_MINIMAP_PREFERENCE_STORAGE_KEY =
   'world-plaza-minimap-enabled' as const;
 
 /**
- * When no saved preference exists, minimap stays off on mobile viewports.
- * Desktop keeps it on unless the active performance tier disables it.
+ * When no saved preference exists, minimap stays on for mobile and desktop
+ * unless the active performance tier disables it.
  */
 export const DEFINING_WORLD_PLAZA_MINIMAP_DEFAULT_ENABLED_ON_MOBILE =
-  false as const;
+  true as const;
 
 /** Desktop default when the player has not chosen yet. */
 export const DEFINING_WORLD_PLAZA_MINIMAP_DEFAULT_ENABLED_ON_DESKTOP =

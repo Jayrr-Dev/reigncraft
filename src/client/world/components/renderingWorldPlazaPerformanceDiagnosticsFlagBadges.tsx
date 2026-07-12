@@ -2,6 +2,7 @@
 
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE,
   DEFINING_WORLD_PLAZA_GENERATION_FEATURE_GROUP_LABELS,
   DEFINING_WORLD_PLAZA_GENERATION_FEATURE_GROUP_ORDER,
   DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY,
@@ -95,6 +96,16 @@ export function RenderingWorldPlazaPerformanceDiagnosticsFlagBadges(): React.JSX
 
   const settingAllFeaturesEnabled = (isEnabled: boolean): void => {
     for (const definition of DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY) {
+      // Keep Audio SFX on during "All off" so perf bisects stay audible and
+      // localStorage does not trap the mixer silent after profiling.
+      if (
+        !isEnabled &&
+        definition.featureId ===
+          DEFINING_WORLD_PLAZA_GENERATION_FEATURE.AUDIO_SFX
+      ) {
+        settingFeatureEnabled(definition.featureId, true);
+        continue;
+      }
       settingFeatureEnabled(definition.featureId, isEnabled);
     }
   };

@@ -54,8 +54,14 @@ export function resolvingWorldPlazaVisibleIsometricTileBounds(
     worldLocalViewportHeightPx /
       DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX
   );
+  // Snap shifts the bounds center up to snapTiles/2 away from the live player.
+  // Without compensating, that side of the screen loses cover and shows the
+  // jagged chunk edge against the void (especially tall mobile viewports).
+  const snapCenterDriftTiles = Math.floor(snapTiles / 2);
   const gridRadius =
-    Math.ceil((horizontalTiles + verticalTiles) / 2) + paddingTiles;
+    Math.ceil((horizontalTiles + verticalTiles) / 2) +
+    Math.max(0, paddingTiles) +
+    snapCenterDriftTiles;
 
   return {
     minTileX: Math.floor(boundsCenterX) - gridRadius,

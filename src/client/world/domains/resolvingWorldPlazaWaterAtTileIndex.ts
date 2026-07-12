@@ -198,11 +198,11 @@ function checkingWorldPlazaStreamChannelPlacesStreamAtTile(
 }
 
 /**
- * Returns true when noise would place surface water, ignoring biome climate.
+ * Returns true when the memoized water resolver would place surface water here.
  *
- * Terrain elevation flattens beds under water. It uses this climate-free check
- * to avoid import cycles and to carve flat ground under every potential water
- * body regardless of how hot or humid the biome is.
+ * Terrain elevation flattens beds under water. It shares the water resolver cache
+ * so elevation, floor, and surface scans do not repeat river and lake placement
+ * work on the same tile.
  *
  * @param tileX - Tile column index.
  * @param tileY - Tile row index.
@@ -211,7 +211,7 @@ export function checkingWorldPlazaSurfaceWaterNoiseWouldPlaceWaterAtTileIndex(
   tileX: number,
   tileY: number
 ): boolean {
-  return computingWorldPlazaWaterAtTileIndex(tileX, tileY) !== null;
+  return resolvingWorldPlazaWaterAtTileIndex(tileX, tileY) !== null;
 }
 
 /**

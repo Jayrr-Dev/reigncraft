@@ -1,13 +1,16 @@
 import { checkingWorldPlazaColumnRockFootprintOverlapsTreeAtAnchorTileIndex } from '@/components/world/domains/checkingWorldPlazaColumnRockFootprintOverlapsTreeAtAnchorTileIndex';
-import { checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex';
+import { checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex } from '@/components/world/domains/checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex';
 import { checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex';
 import { checkingWorldPlazaTileIsRockyBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsRockyBiomeAtTileIndex';
 import { checkingWorldPlazaTreeBlocksGridTile } from '@/components/world/domains/checkingWorldPlazaTreeBlocksGridTile';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
+import { DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_OVERRIDE_SEED_SALT } from '@/components/world/domains/definingWorldPlazaRockyBiomeConstants';
 import {
   DEFINING_WORLD_PLAZA_STONE_SEED_SALT_PALETTE,
   DEFINING_WORLD_PLAZA_STONE_SEED_SALT_SIZE,
   DEFINING_WORLD_PLAZA_STONE_SIZE_TIERS,
 } from '@/components/world/domains/definingWorldPlazaStoneDecorationConstants';
+import { DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_COLUMN_CLUSTERS_ONLY } from '@/components/world/domains/definingWorldPlazaStoneRarityConstants';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_FOOTPRINT_TILE_SPAN,
   DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_SIZE_TIER_INDEX,
@@ -18,10 +21,10 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_ROCK_SHAPE_VARIANT_COUNT,
   resolvingWorldPlazaTerrainRockColumnSurfaceWorldLayerFromSeeds,
 } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
-import { checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled } from '@/components/world/domains/managingWorldPlazaProceduralTreesAndRocksFeatureStore';
-import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
+import { checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled } from '@/components/world/domains/managingWorldPlazaProceduralTreesAndRocksFeatureStore';
 import { resolvingWorldPlazaRockyBiomeCentralityAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaRockyBiomeCentralityAtTileIndex';
+import { resolvingWorldPlazaRockyBiomeStoneClusterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaRockyBiomeStoneClusterAtTileIndex';
 import {
   resolvingWorldPlazaRockyBiomeColumnHeightUnit,
   resolvingWorldPlazaRockyBiomeFootprintTileSpanFromSeed,
@@ -143,7 +146,7 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
   }
 
   if (
-    !checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex(
+    !checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex(
       anchorTileX,
       anchorTileY
     )
@@ -161,6 +164,23 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     anchorTileX,
     anchorTileY
   );
+  const rockyCluster = isRockyBiome
+    ? resolvingWorldPlazaRockyBiomeStoneClusterAtTileIndex(
+        anchorTileX,
+        anchorTileY
+      )
+    : null;
+
+  // Clusters-only mode skips every rocky tile that is not a budgeted 1–3 slot.
+  // When false (boulder garden), mega 6×6 anchors still spawn on open flats and
+  // cluster slots only add denser clumps on top.
+  if (
+    rockyCluster &&
+    DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_COLUMN_CLUSTERS_ONLY &&
+    !rockyCluster.isClusterMemberSlot
+  ) {
+    return null;
+  }
 
   if (checkingWorldPlazaTreeBlocksGridTile(anchorTileX, anchorTileY)) {
     return null;
@@ -174,8 +194,11 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     anchorTileX,
     anchorTileY
   );
-  const stoneNoiseMin =
-    resolvingWorldPlazaRockyBiomeStoneNoiseMinAtTile(isRockyBiome);
+  const stoneNoiseMin = resolvingWorldPlazaRockyBiomeStoneNoiseMinAtTile(
+    isRockyBiome,
+    anchorTileX,
+    anchorTileY
+  );
 
   if (stoneNoise < stoneNoiseMin) {
     return null;
@@ -206,10 +229,25 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     return null;
   }
 
+  const mediumFieldOverrideUnit =
+    seedingWorldPlazaGrassTileDecorationFromTileIndex(
+      anchorTileX,
+      anchorTileY,
+      DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_OVERRIDE_SEED_SALT
+    );
+  const mediumFieldHeightUnit =
+    seedingWorldPlazaGrassTileDecorationFromTileIndex(
+      anchorTileX,
+      anchorTileY,
+      DEFINING_WORLD_PLAZA_TERRAIN_ROCK_SEED_SALT_HEIGHT
+    );
   const mediumFieldBoulderPlacement =
     resolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement(
       isRockyBiome,
-      tierIndex
+      tierIndex,
+      mediumFieldOverrideUnit,
+      mediumFieldHeightUnit,
+      rockyCluster?.isClusterMemberSlot === true
     );
 
   if (mediumFieldBoulderPlacement) {

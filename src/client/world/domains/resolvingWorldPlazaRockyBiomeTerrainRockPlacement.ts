@@ -3,11 +3,15 @@ import {
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_FOOTPRINT_CENTRALITY_BIAS,
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_HEIGHT_CENTRALITY_BIAS,
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_FOOTPRINT_TILE_SPAN,
-  DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_SURFACE_WORLD_LAYER,
-  DEFINING_WORLD_PLAZA_ROCKY_BIOME_PEBBLE_STONE_NOISE_MIN,
+  DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_SURFACE_WORLD_LAYER_MAX,
+  DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_SURFACE_WORLD_LAYER_MIN,
+  DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_LARGE_TIER_OVERRIDE_UNIT_MAX,
+  DEFINING_WORLD_PLAZA_ROCKY_BIOME_PEBBLE_STONE_NOISE_MIN_CLUSTER,
+  DEFINING_WORLD_PLAZA_ROCKY_BIOME_PEBBLE_STONE_NOISE_MIN_SOLITARY,
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_SIZE_TIER_BASE_BIAS,
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_SIZE_TIER_CENTRALITY_BIAS,
-  DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_NOISE_MIN,
+  DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_NOISE_MIN_CLUSTER,
+  DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_NOISE_MIN_SOLITARY,
   DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_PALETTES,
 } from '@/components/world/domains/definingWorldPlazaRockyBiomeConstants';
 import type { DefiningWorldPlazaStonePalette } from '@/components/world/domains/definingWorldPlazaStoneDecorationConstants';
@@ -20,7 +24,11 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_SIZE_TIER_INDEX,
 } from '@/components/world/domains/definingWorldPlazaTerrainObstacleConstants';
 import { resolvingWorldPlazaTerrainRockColumnFootprintTileSpanFromSeed } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
-import { DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_MIN } from '@/components/world/domains/samplingWorldPlazaVegetationDensityAtTile';
+import { resolvingWorldPlazaRockyBiomeStoneClusterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaRockyBiomeStoneClusterAtTileIndex';
+import {
+  DEFINING_WORLD_PLAZA_VEGETATION_PEBBLE_STONE_NOISE_MIN,
+  DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_MIN,
+} from '@/components/world/domains/samplingWorldPlazaVegetationDensityAtTile';
 
 /** Compact medium boulder placement for rocky pebble fields. */
 export type ResolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement = {
@@ -56,38 +64,60 @@ function mappingWorldPlazaStoneSizeTierIndexFromUnit(sizeUnit: number): number {
 /**
  * Returns the minimum stone scatter noise required for column rocks.
  *
+ * Rocky tiles use a low boulder-garden bar on open flats, with the same (or
+ * slightly lower) bar inside rare 1-3 denser clumps.
+ *
  * @param isRockyBiome - Whether the tile sits in the rocky biome.
+ * @param tileX - Tile column index.
+ * @param tileY - Tile row index.
  */
 export function resolvingWorldPlazaRockyBiomeStoneNoiseMinAtTile(
-  isRockyBiome: boolean
+  isRockyBiome: boolean,
+  tileX: number,
+  tileY: number
 ): number {
-  return isRockyBiome
-    ? DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_NOISE_MIN
-    : DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_MIN;
+  if (!isRockyBiome) {
+    return DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_MIN;
+  }
+
+  const cluster = resolvingWorldPlazaRockyBiomeStoneClusterAtTileIndex(
+    tileX,
+    tileY
+  );
+
+  return cluster.isActive
+    ? DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_NOISE_MIN_CLUSTER
+    : DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_NOISE_MIN_SOLITARY;
 }
 
 /**
  * Returns the minimum stone scatter noise required for floor pebbles.
  *
- * Rocky biome uses a higher bar than column rocks so pebbles stay sparse
- * between mega-boulders.
- *
  * @param isRockyBiome - Whether the tile sits in the rocky biome.
+ * @param tileX - Tile column index.
+ * @param tileY - Tile row index.
  */
 export function resolvingWorldPlazaRockyBiomePebbleStoneNoiseMinAtTile(
-  isRockyBiome: boolean
+  isRockyBiome: boolean,
+  tileX: number,
+  tileY: number
 ): number {
-  return isRockyBiome
-    ? DEFINING_WORLD_PLAZA_ROCKY_BIOME_PEBBLE_STONE_NOISE_MIN
-    : DEFINING_WORLD_PLAZA_VEGETATION_STONE_NOISE_MIN;
+  if (!isRockyBiome) {
+    return DEFINING_WORLD_PLAZA_VEGETATION_PEBBLE_STONE_NOISE_MIN;
+  }
+
+  const cluster = resolvingWorldPlazaRockyBiomeStoneClusterAtTileIndex(
+    tileX,
+    tileY
+  );
+
+  return cluster.isActive
+    ? DEFINING_WORLD_PLAZA_ROCKY_BIOME_PEBBLE_STONE_NOISE_MIN_CLUSTER
+    : DEFINING_WORLD_PLAZA_ROCKY_BIOME_PEBBLE_STONE_NOISE_MIN_SOLITARY;
 }
 
 /**
  * Returns a size tier index biased upward by rocky-biome centrality.
- *
- * A flat base bias keeps the whole field rockier than ordinary scatter, while
- * the centrality term pushes center tiles toward the largest mega-boulder tier
- * and leaves the rim with smaller, varied rocks for a natural size gradient.
  *
  * @param sizeUnit - Seeded value in [0, 1).
  * @param isRockyBiome - Whether the anchor sits in the rocky biome.
@@ -181,24 +211,47 @@ export function resolvingWorldPlazaRockyBiomeStonePaletteAtTileIndex(
 
 /**
  * Returns compact medium boulder placement when a rocky pebble-field anchor
- * should mix a jumpable 1-tile / 4-layer rock among floor pebbles.
+ * should mix a jumpable 1-tile / 3-4-layer rock among floor pebbles.
  *
- * Large-tier anchors keep seeded mega footprints and heights. Below large,
- * rocky spacing anchors promote to the fixed medium field boulder.
+ * Cluster member slots always promote to compact field boulders. Below-large
+ * tiers always promote. Large-tier anchors demote when the override unit stays
+ * under the share max.
  *
  * @param isRockyBiome - Whether the anchor sits in the rocky biome.
  * @param sizeTierIndex - Seeded size tier after rocky bias.
+ * @param largeTierOverrideUnit - Seeded unit in [0, 1) for large-tier demotion.
+ * @param heightUnit - Seeded unit in [0, 1) picking surface layer 3 or 4.
+ * @param forceCompactField - True for cluster group members (always 1-tile).
  */
 export function resolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement(
   isRockyBiome: boolean,
-  sizeTierIndex: number
+  sizeTierIndex: number,
+  largeTierOverrideUnit: number = 1,
+  heightUnit: number = 0,
+  forceCompactField: boolean = false
 ): ResolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement | null {
-  if (
-    !isRockyBiome ||
-    sizeTierIndex >= DEFINING_WORLD_PLAZA_TERRAIN_LARGE_ROCK_SIZE_TIER_INDEX
-  ) {
+  if (!isRockyBiome) {
     return null;
   }
+
+  const isBelowLarge =
+    sizeTierIndex < DEFINING_WORLD_PLAZA_TERRAIN_LARGE_ROCK_SIZE_TIER_INDEX;
+  const overridesLargeTier =
+    !isBelowLarge &&
+    largeTierOverrideUnit <
+      DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_LARGE_TIER_OVERRIDE_UNIT_MAX;
+
+  if (!forceCompactField && !isBelowLarge && !overridesLargeTier) {
+    return null;
+  }
+
+  const surfaceLayerSpan =
+    DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_SURFACE_WORLD_LAYER_MAX -
+    DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_SURFACE_WORLD_LAYER_MIN +
+    1;
+  const surfaceWorldLayer =
+    DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_SURFACE_WORLD_LAYER_MIN +
+    Math.floor(heightUnit * surfaceLayerSpan);
 
   return {
     sizeTierIndex: DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_SIZE_TIER_INDEX,
@@ -206,7 +259,6 @@ export function resolvingWorldPlazaRockyBiomeMediumFieldBoulderPlacement(
       DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_FOOTPRINT_TILE_SPAN,
     footprintTileHeight:
       DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_FOOTPRINT_TILE_SPAN,
-    surfaceWorldLayer:
-      DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_SURFACE_WORLD_LAYER,
+    surfaceWorldLayer,
   };
 }

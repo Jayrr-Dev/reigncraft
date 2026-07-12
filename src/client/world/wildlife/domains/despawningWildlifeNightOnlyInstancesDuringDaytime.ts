@@ -5,11 +5,14 @@
  */
 
 import { checkingWildlifeSpeciesIsNightOnlySpawn } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsNightOnlySpawn';
+import { checkingWildlifeSpeciesWandersAwayAtDaybreak } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesWandersAwayAtDaybreak';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 
 /**
  * Night-only elites (e.g. Omega Wolf) must not linger after sunrise.
  * Clears live instances and known anchors so the next night can hydrate again.
+ * Companions that wander away at daybreak are skipped here; see
+ * `advancingWildlifeNightOnlyWanderAwayDuringDaytime`.
  */
 export function despawningWildlifeNightOnlyInstancesDuringDaytime(
   store: ManagingWildlifeInstanceStore,
@@ -21,6 +24,10 @@ export function despawningWildlifeNightOnlyInstancesDuringDaytime(
 
   for (const [instanceId, instance] of store.instances) {
     if (!checkingWildlifeSpeciesIsNightOnlySpawn(instance.speciesId)) {
+      continue;
+    }
+
+    if (checkingWildlifeSpeciesWandersAwayAtDaybreak(instance.speciesId)) {
       continue;
     }
 

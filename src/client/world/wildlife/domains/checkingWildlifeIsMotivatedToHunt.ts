@@ -23,14 +23,15 @@ export function checkingWildlifeIsMotivatedToHunt(
   return driveLevel === 'hungry' || driveLevel === 'starving';
 }
 
-/** Returns true when the species should seek edible food on the ground. */
+/**
+ * Returns true when the species should seek edible food on the ground.
+ *
+ * Ground stacks are cleaned up opportunistically even when sated: diet still
+ * gates which items are edible via `checkingWildlifeSpeciesMayEatGroundFood`.
+ */
 export function checkingWildlifeIsMotivatedToForageGroundFood(
-  species: DefiningWildlifeSpeciesDefinition,
-  driveLevel: DefiningWildlifeHungerDriveLevel
+  _species: DefiningWildlifeSpeciesDefinition,
+  _driveLevel: DefiningWildlifeHungerDriveLevel
 ): boolean {
-  if (species.diet === 'herbivore') {
-    return false;
-  }
-
-  return driveLevel !== 'sated';
+  return true;
 }

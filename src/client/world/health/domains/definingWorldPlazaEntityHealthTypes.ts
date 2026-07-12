@@ -119,7 +119,7 @@ export type DefiningWorldPlazaEntityHealthOutgoingHealAmplifierModifier = {
   expiresAtMs: number | null;
 };
 
-/** Movement stat adjusted by timed or toggle buffs. */
+/** Movement / combat cadence stats adjusted by timed or toggle buffs. */
 export type DefiningWorldPlazaEntityHealthMovementModifierKind =
   | 'speed'
   | 'walk_speed'
@@ -129,9 +129,10 @@ export type DefiningWorldPlazaEntityHealthMovementModifierKind =
   | 'stamina_drain'
   | 'stamina_regen'
   | 'stamina_jump_cost'
-  | 'stamina_max';
+  | 'stamina_max'
+  | 'attack_speed';
 
-/** Multiplier applied to walk/run speed or jump reach/height. */
+/** Multiplier applied to walk/run speed, jump reach/height, or attack cadence. */
 export type DefiningWorldPlazaEntityHealthMovementModifier = {
   id: string;
   kind: DefiningWorldPlazaEntityHealthMovementModifierKind;

@@ -51,6 +51,14 @@ export interface DefiningWorldPlazaPerformanceProfile {
    * many column objects exist (and must be sorted) at once.
    */
   readonly terrainElevationPrefetchTiles: number;
+  /**
+   * Max attached elevation columns nearest the player.
+   *
+   * Dense hills can expose 1000+ raised tiles inside the isometric window;
+   * each is a sorted trunk-layer child. Cap keeps sort/draw cost bounded and
+   * matches the tree `maxVisibleTrees` pattern.
+   */
+  readonly maxVisibleElevationColumns: number;
   /** Max new floor chunks built per frame; spreads load to avoid hitches. */
   readonly floorChunkBuildBudgetPerFrame: number;
   /** Max stale floor chunks destroyed per frame when bounds shift. */
@@ -73,7 +81,7 @@ export interface DefiningWorldPlazaPerformanceProfile {
   readonly minimapTerrainSnapTiles: number;
   /** Optional override for minimap visible tile radius. */
   readonly minimapViewRadiusTiles?: number;
-  /** When false, the minimap canvas is hidden unless the player enables it in Settings. */
+  /** When false, the minimap canvas stays hidden until the player enables it in Settings. */
   readonly isMinimapEnabled: boolean;
   /** When false, night darkness uses a flat overlay instead of per-frame lightmap RTT. */
   readonly lightingUsesLightmapRtt: boolean;
@@ -117,14 +125,15 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_HIGH: DefiningWorldPlazaPe
     tier: DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_HIGH,
     renderResolutionMax: 2,
     antialias: true,
-    viewportPaddingTiles: 2,
+    viewportPaddingTiles: 3,
     treePrefetchTiles: 16,
     maxVisibleTrees: 220,
     treeBuildBudgetPerFrame: 6,
     floorChunkSizeTiles: 8,
-    floorChunkPrefetchTiles: 20,
+    floorChunkPrefetchTiles: 24,
     terrainElevationPrefetchTiles: 4,
-    floorChunkBuildBudgetPerFrame: 2,
+    maxVisibleElevationColumns: 320,
+    floorChunkBuildBudgetPerFrame: 4,
     floorChunkPruneBudgetPerFrame: 12,
     terrainElevationChunkBuildBudgetPerFrame: 2,
     drawsTerrainElevationDecorations: true,
@@ -141,7 +150,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_HIGH: DefiningWorldPlazaPe
     lightingLightmapResolutionScale: 0.5,
     forwardPrefetchTiles: 6,
     behindRetentionTiles: 4,
-    terrainWorkBudgetMs: 6,
+    terrainWorkBudgetMs: 8,
     treePruneBudgetPerFrame: 12,
     lightingRttMinIntervalMs: 0,
     wildlifeSimulationMaxStepsPerFrame: 2,
@@ -150,7 +159,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_HIGH: DefiningWorldPlazaPe
     drawsTreeShadows: true,
     drawsTreeShake: true,
     drawsPlacedBlockShadowBlur: true,
-    waterShimmerUpdateIntervalFrames: 3,
+    waterShimmerUpdateIntervalFrames: 5,
     remoteAvatarPresentationCullGridRadius: 999,
     wildlifePresentationCullGridRadius: 999,
     wildlifePresentationReconcileIntervalMs: 0,
@@ -162,18 +171,19 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_MEDIUM: DefiningWorldPlaza
     tier: DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_MEDIUM,
     renderResolutionMax: 1.5,
     antialias: false,
-    viewportPaddingTiles: 1,
+    viewportPaddingTiles: 2,
     treePrefetchTiles: 12,
     maxVisibleTrees: 120,
     treeBuildBudgetPerFrame: 4,
     floorChunkSizeTiles: 8,
-    floorChunkPrefetchTiles: 18,
+    floorChunkPrefetchTiles: 22,
     terrainElevationPrefetchTiles: 3,
-    floorChunkBuildBudgetPerFrame: 2,
-    floorChunkPruneBudgetPerFrame: 8,
+    maxVisibleElevationColumns: 240,
+    floorChunkBuildBudgetPerFrame: 3,
+    floorChunkPruneBudgetPerFrame: 10,
     terrainElevationChunkBuildBudgetPerFrame: 1,
     drawsTerrainElevationDecorations: false,
-    drawsEnvironmentalHazardFloorTint: false,
+    drawsEnvironmentalHazardFloorTint: true,
     visibleBoundsSnapTiles: 12,
     drawsGrassDecorations: true,
     drawsStoneDecorations: true,
@@ -186,7 +196,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_MEDIUM: DefiningWorldPlaza
     lightingLightmapResolutionScale: 0.5,
     forwardPrefetchTiles: 4,
     behindRetentionTiles: 3,
-    terrainWorkBudgetMs: 5,
+    terrainWorkBudgetMs: 7,
     treePruneBudgetPerFrame: 8,
     lightingRttMinIntervalMs: 32,
     wildlifeSimulationMaxStepsPerFrame: 2,
@@ -195,7 +205,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_MEDIUM: DefiningWorldPlaza
     drawsTreeShadows: true,
     drawsTreeShake: true,
     drawsPlacedBlockShadowBlur: true,
-    waterShimmerUpdateIntervalFrames: 3,
+    waterShimmerUpdateIntervalFrames: 5,
     remoteAvatarPresentationCullGridRadius: 48,
     wildlifePresentationCullGridRadius: 40,
     wildlifePresentationReconcileIntervalMs: 50,
@@ -207,18 +217,19 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_LOW: DefiningWorldPlazaPer
     tier: DEFINING_WORLD_PLAZA_PERFORMANCE_TIER_LOW,
     renderResolutionMax: 1,
     antialias: false,
-    viewportPaddingTiles: 0,
+    viewportPaddingTiles: 2,
     treePrefetchTiles: 10,
     maxVisibleTrees: 60,
     treeBuildBudgetPerFrame: 2,
     floorChunkSizeTiles: 8,
-    floorChunkPrefetchTiles: 10,
+    floorChunkPrefetchTiles: 18,
     terrainElevationPrefetchTiles: 2,
-    floorChunkBuildBudgetPerFrame: 1,
-    floorChunkPruneBudgetPerFrame: 6,
+    maxVisibleElevationColumns: 160,
+    floorChunkBuildBudgetPerFrame: 2,
+    floorChunkPruneBudgetPerFrame: 8,
     terrainElevationChunkBuildBudgetPerFrame: 1,
     drawsTerrainElevationDecorations: false,
-    drawsEnvironmentalHazardFloorTint: false,
+    drawsEnvironmentalHazardFloorTint: true,
     // Match medium/high so low tier does not cross bounds more often (worse hitch rate).
     visibleBoundsSnapTiles: 12,
     drawsGrassDecorations: false,
@@ -228,12 +239,12 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_LOW: DefiningWorldPlazaPer
     minimapLocomotionUpdateIntervalFrames: 3,
     minimapTerrainSnapTiles: 4,
     minimapViewRadiusTiles: 16,
-    isMinimapEnabled: false,
-    lightingUsesLightmapRtt: false,
+    isMinimapEnabled: true,
+    lightingUsesLightmapRtt: true,
     lightingLightmapResolutionScale: 0.35,
     forwardPrefetchTiles: 3,
     behindRetentionTiles: 2,
-    terrainWorkBudgetMs: 4,
+    terrainWorkBudgetMs: 6,
     treePruneBudgetPerFrame: 6,
     lightingRttMinIntervalMs: 64,
     wildlifeSimulationMaxStepsPerFrame: 1,

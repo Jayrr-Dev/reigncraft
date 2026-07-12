@@ -36,7 +36,18 @@ const managingWorldPlazaGenerationFeatureSubscribers = new Set<() => void>();
 function invalidatingWorldPlazaGenerationFeatureCachesDeferred(
   featureId: DefiningWorldPlazaGenerationFeatureId
 ): void {
-  if (featureId === DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE) {
+  if (
+    featureId === DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE ||
+    featureId === DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_AI ||
+    featureId ===
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_BOULDER_COVER ||
+    featureId === DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_FAIRY_GLOW ||
+    featureId ===
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_SPEECH_BUBBLES ||
+    featureId ===
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_DAMAGE_NUMBERS ||
+    featureId === DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_NAME_TAGS
+  ) {
     return;
   }
 
@@ -94,6 +105,10 @@ function readingWorldPlazaGenerationFeatureFlagsFromStorage(): Record<
   } catch {
     return flags;
   }
+
+  // Recover from prior "All off" / blank-slate sessions that persisted mute.
+  // Mid-session Flags toggle still works; reload restores audible defaults.
+  flags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.AUDIO_SFX] = true;
 
   return flags;
 }
@@ -201,7 +216,9 @@ export function mergingWorldPlazaGenerationFeatureSessionOverrideMissingKeys(
   };
 
   for (const definition of DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY) {
-    if (Object.prototype.hasOwnProperty.call(nextOverride, definition.featureId)) {
+    if (
+      Object.prototype.hasOwnProperty.call(nextOverride, definition.featureId)
+    ) {
       continue;
     }
 

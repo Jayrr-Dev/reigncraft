@@ -19,6 +19,7 @@ import {
   type ComputingWorldPlazaPlayerStillnessSample,
 } from '@/components/world/domains/computingWorldPlazaPlayerStillDurationMs';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
@@ -30,6 +31,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { updatingWorldPlazaAvatarGroundShadowGraphics } from '@/components/world/domains/drawingWorldPlazaAvatarGroundShadowOnGraphics';
 import { invokingWorldPlazaLoopBodySafely } from '@/components/world/domains/loggingWorldPlazaClientErrors';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import {
   beginningWorldPlazaPerformanceSample,
   incrementingWorldPlazaPerformanceDiagnosticsCounter,
@@ -37,10 +39,16 @@ import {
 import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
 import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import {
+  clearingWorldPlazaLightSourcesForOwner,
+  syncingWorldPlazaLightSourcesForOwner,
+} from '@/components/world/lighting/domains/managingWorldPlazaLightSourceStore';
+import {
   advancingWildlifeSimulationTick,
   applyingWildlifeInstanceDamage,
 } from '@/components/world/wildlife/domains/advancingWildlifeSimulationTick';
 import { advancingWildlifeSpeciesTextureEviction } from '@/components/world/wildlife/domains/advancingWildlifeSpeciesTextureEviction';
+import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
+import { checkingWildlifeSpeciesUsesGlowOrbPresentation } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesUsesGlowOrbPresentation';
 import { computingWildlifeCorpseFadeAlpha } from '@/components/world/wildlife/domains/computingWildlifeCorpseFadeAlpha';
 import {
   computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
@@ -50,6 +58,10 @@ import {
   computingWildlifeRenderStructuralFingerprint,
   quantizingWildlifeRenderVitalsRatio,
 } from '@/components/world/wildlife/domains/computingWildlifeRenderStructuralFingerprint';
+import {
+  DEFINING_WILDLIFE_FAIRY_HOVER_LIFT_PX,
+  DEFINING_WILDLIFE_FAIRY_LIGHT_OWNER_KEY,
+} from '@/components/world/wildlife/domains/definingWildlifeFairyConstants';
 import { DEFINING_WILDLIFE_NAME_TAG_RECENT_COMBAT_REVEAL_MS } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import type { DefiningWildlifeSimulationTickConfig } from '@/components/world/wildlife/domains/definingWildlifeSimulationTickConfig';
 import {
@@ -57,7 +69,6 @@ import {
   DEFINING_WILDLIFE_SIMULATION_TICK_MS,
 } from '@/components/world/wildlife/domains/definingWildlifeSimulationTimestepConstants';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import { resolvingWildlifeSpriteSheetFrameHeightPx } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetFrameHeightByFolder';
 import type { DefiningWildlifeMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
 import { DEFINING_WILDLIFE_TEXTURE_EVICTION_CHECK_INTERVAL_MS } from '@/components/world/wildlife/domains/definingWildlifeTextureEvictionConstants';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -65,6 +76,7 @@ import {
   DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX,
   DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET,
 } from '@/components/world/wildlife/domains/definingWildlifeVitalsBarConstants';
+import { drawingWildlifeFairyGlowOrbOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeFairyGlowOrbOnGraphics';
 import { electingWildlifeSimulationLeaderUserId } from '@/components/world/wildlife/domains/electingWildlifeSimulationLeaderUserId';
 import { loadingWildlifeSpeciesTextures } from '@/components/world/wildlife/domains/loadingWildlifeSpeciesTextures';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
@@ -75,6 +87,7 @@ import {
   ensuringWildlifeAnimationClipsRegistered,
   formattingWildlifeAnimationClipId,
 } from '@/components/world/wildlife/domains/registeringWildlifeAnimationClips';
+import { resolvingWildlifeFairyLightSources } from '@/components/world/wildlife/domains/resolvingWildlifeFairyLightSources';
 import {
   resolvingWildlifeInstanceCollisionRadiusGrid,
   resolvingWildlifeInstanceSizeScale,
@@ -221,8 +234,12 @@ const RenderingWildlifeInstanceSprite = memo(
   }: RenderingWildlifeInstanceSpriteProps): React.JSX.Element | null {
     const species = resolvingWildlifeSpeciesDefinition(speciesId);
     const wildlifeSpriteRef = useRef<Sprite | null>(null);
+    const wildlifeOrbGraphicsRef = useRef<Graphics | null>(null);
     const wildlifeShadowGraphicsRef = useRef<Graphics | null>(null);
     const wildlifeVitalsGraphicsRef = useRef<Graphics | null>(null);
+    const usesGlowOrb =
+      species !== null &&
+      checkingWildlifeSpeciesUsesGlowOrbPresentation(species);
 
     useEffect(() => {
       const registry = imperativePresentationRegistryRef.current;
@@ -233,6 +250,7 @@ const RenderingWildlifeInstanceSprite = memo(
 
       registeringWildlifeInstanceImperativePresentation(registry, instanceId, {
         spriteRef: wildlifeSpriteRef,
+        orbGraphicsRef: wildlifeOrbGraphicsRef,
         shadowGraphicsRef: wildlifeShadowGraphicsRef,
         vitalsGraphicsRef: wildlifeVitalsGraphicsRef,
         speciesId,
@@ -281,7 +299,9 @@ const RenderingWildlifeInstanceSprite = memo(
       }
     );
     const showsVitalsBars =
-      !isDead && (healthRatio < 0.999 || staminaRatio < 0.999);
+      !isDead &&
+      !checkingWildlifeSpeciesIsImmortal(species) &&
+      (healthRatio < 0.999 || staminaRatio < 0.999);
     const spritePresentation =
       resolvingWildlifeSpeciesSpritePresentation(species);
     const shadowSizeScale = computingWildlifeGroundShadowSizeScale(
@@ -302,7 +322,7 @@ const RenderingWildlifeInstanceSprite = memo(
 
     return (
       <>
-        {!isDead ? (
+        {!isDead && !usesGlowOrb ? (
           <pixiGraphics
             ref={wildlifeShadowGraphicsRef}
             eventMode="none"
@@ -321,21 +341,45 @@ const RenderingWildlifeInstanceSprite = memo(
             }}
           />
         ) : null}
-        <RenderingWorldPlazaDeclarativeAnimatedSprite
-          externalSpriteRef={wildlifeSpriteRef}
-          playback={{
-            clipId,
-            variantKey: facingDirection,
-            playing: playsLocomotionClip ? isMoving : true,
-            speedScale: playsLocomotionClip ? locomotionAnimationSpeedScale : 1,
-          }}
-          tickMode="shared"
-          position={{ x: screenPoint.x, y: anchoredScreenY - jumpLiftPx }}
-          anchor={{ x: 0.5, y: spritePresentation.anchorYNormalized }}
-          scale={sizeScale}
-          zIndex={sortKey}
-          alpha={spriteAlpha}
-        />
+        {usesGlowOrb ? (
+          <pixiGraphics
+            ref={wildlifeOrbGraphicsRef}
+            eventMode="none"
+            x={screenPoint.x}
+            y={
+              anchoredScreenY -
+              jumpLiftPx -
+              (isDead ? 0 : DEFINING_WILDLIFE_FAIRY_HOVER_LIFT_PX)
+            }
+            zIndex={sortKey}
+            alpha={spriteAlpha}
+            draw={(graphics: Graphics) => {
+              drawingWildlifeFairyGlowOrbOnGraphics(graphics, {
+                nowMs: performance.now(),
+                alphaScale: spriteAlpha,
+                isDead,
+              });
+            }}
+          />
+        ) : (
+          <RenderingWorldPlazaDeclarativeAnimatedSprite
+            externalSpriteRef={wildlifeSpriteRef}
+            playback={{
+              clipId,
+              variantKey: facingDirection,
+              playing: playsLocomotionClip ? isMoving : true,
+              speedScale: playsLocomotionClip
+                ? locomotionAnimationSpeedScale
+                : 1,
+            }}
+            tickMode="shared"
+            position={{ x: screenPoint.x, y: anchoredScreenY - jumpLiftPx }}
+            anchor={{ x: 0.5, y: spritePresentation.anchorYNormalized }}
+            scale={sizeScale}
+            zIndex={sortKey}
+            alpha={spriteAlpha}
+          />
+        )}
         {showsVitalsBars ? (
           <pixiGraphics
             ref={wildlifeVitalsGraphicsRef}
@@ -386,6 +430,14 @@ export function RenderingWildlifeLayer({
   );
   const wildlifeImperativePresentationRegistryRef =
     useRef<SyncingWildlifeInstancesImperativePresentationRegistry>(new Map());
+
+  useEffect(() => {
+    return () => {
+      clearingWorldPlazaLightSourcesForOwner(
+        DEFINING_WILDLIFE_FAIRY_LIGHT_OWNER_KEY
+      );
+    };
+  }, []);
 
   usingWorldPlazaSafeTick((ticker) => {
     const config = tickConfigRef.current;
@@ -639,25 +691,84 @@ export function RenderingWildlifeLayer({
     if (config.wildlifeFloatingCombatTextsOutRef?.current) {
       config.wildlifeFloatingCombatTextsOutRef.current.length = 0;
 
-      for (const instance of nextInstances) {
-        if (instance.floatingTexts.length === 0) {
-          continue;
+      if (
+        checkingWorldPlazaGenerationFeatureEnabled(
+          DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_DAMAGE_NUMBERS
+        )
+      ) {
+        for (const instance of nextInstances) {
+          if (instance.floatingTexts.length === 0) {
+            continue;
+          }
+
+          const species = resolvingWildlifeSpeciesDefinition(
+            instance.speciesId
+          );
+
+          if (!species) {
+            continue;
+          }
+
+          for (const floatText of instance.floatingTexts) {
+            config.wildlifeFloatingCombatTextsOutRef.current.push({
+              instanceId: instance.instanceId,
+              floatText,
+              gridX: instance.position.x,
+              gridY: instance.position.y,
+              layer: resolvingWorldPlazaPlayerWorldLayer(instance.position),
+              sizeScale: resolvingWildlifeInstanceSizeScale(species, instance),
+              jumpArcOffsetPx: instance.aiState.jumpState
+                ? computingWildlifeJumpArcLiftPx(
+                    species.jump.jumpArcPeakPx,
+                    instance.aiState.jumpState.progress
+                  )
+                : 0,
+            });
+          }
         }
+      }
+    }
 
-        const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
+    if (config.wildlifeSpeechBubblesOutRef?.current) {
+      config.wildlifeSpeechBubblesOutRef.current.length = 0;
 
-        if (!species) {
-          continue;
-        }
+      if (
+        checkingWorldPlazaGenerationFeatureEnabled(
+          DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_SPEECH_BUBBLES
+        )
+      ) {
+        for (const instance of nextInstances) {
+          const activeBubble = instance.speechState?.activeBubble;
 
-        for (const floatText of instance.floatingTexts) {
-          config.wildlifeFloatingCombatTextsOutRef.current.push({
+          if (!activeBubble || activeBubble.expiresAtMs <= nowMs) {
+            continue;
+          }
+
+          const species = resolvingWildlifeSpeciesDefinition(
+            instance.speciesId
+          );
+
+          if (!species) {
+            continue;
+          }
+
+          const speechAnchorPoint =
+            (checkingWildlifeSpeciesUsesGlowOrbPresentation(species) &&
+              wildlifeImperativePresentationRegistryRef.current.get(
+                instance.instanceId
+              )?.smoothedOrbPointRef.current) ||
+            instance.position;
+
+          config.wildlifeSpeechBubblesOutRef.current.push({
             instanceId: instance.instanceId,
-            floatText,
-            gridX: instance.position.x,
-            gridY: instance.position.y,
+            message: activeBubble.message,
+            presentation: activeBubble.presentation,
+            gridX: speechAnchorPoint.x,
+            gridY: speechAnchorPoint.y,
             layer: resolvingWorldPlazaPlayerWorldLayer(instance.position),
             sizeScale: resolvingWildlifeInstanceSizeScale(species, instance),
+            frameHeightPx:
+              resolvingWildlifeSpeciesSpritePresentation(species).frameHeightPx,
             jumpArcOffsetPx: instance.aiState.jumpState
               ? computingWildlifeJumpArcLiftPx(
                   species.jump.jumpArcPeakPx,
@@ -669,81 +780,89 @@ export function RenderingWildlifeLayer({
       }
     }
 
-    if (config.wildlifeSpeechBubblesOutRef?.current) {
-      config.wildlifeSpeechBubblesOutRef.current.length = 0;
-
-      for (const instance of nextInstances) {
-        const activeBubble = instance.speechState?.activeBubble;
-
-        if (!activeBubble || activeBubble.expiresAtMs <= nowMs) {
-          continue;
-        }
-
-        const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
-
-        if (!species) {
-          continue;
-        }
-
-        config.wildlifeSpeechBubblesOutRef.current.push({
-          instanceId: instance.instanceId,
-          message: activeBubble.message,
-          presentation: activeBubble.presentation,
-          gridX: instance.position.x,
-          gridY: instance.position.y,
-          layer: resolvingWorldPlazaPlayerWorldLayer(instance.position),
-          sizeScale: resolvingWildlifeInstanceSizeScale(species, instance),
-          frameHeightPx: resolvingWildlifeSpriteSheetFrameHeightPx(
-            species.spriteFolder
-          ),
-          jumpArcOffsetPx: instance.aiState.jumpState
-            ? computingWildlifeJumpArcLiftPx(
-                species.jump.jumpArcPeakPx,
-                instance.aiState.jumpState.progress
-              )
-            : 0,
-        });
-      }
-    }
-
     if (config.wildlifeNameTagsOutRef?.current) {
-      const wildlifeDamagedPlayerAtMsByInstanceId =
-        config.wildlifeDamagedPlayerAtMsByInstanceIdRef?.current;
+      if (
+        !checkingWorldPlazaGenerationFeatureEnabled(
+          DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_NAME_TAGS
+        )
+      ) {
+        config.wildlifeNameTagsOutRef.current.length = 0;
+        if (config.wildlifeNameTagsMountRevisionRef) {
+          config.wildlifeNameTagsMountRevisionRef.current += 1;
+        }
+      } else {
+        const wildlifeDamagedPlayerAtMsByInstanceId =
+          config.wildlifeDamagedPlayerAtMsByInstanceIdRef?.current;
 
-      if (wildlifeDamagedPlayerAtMsByInstanceId) {
-        for (const [
-          instanceId,
-          damagedAtMs,
-        ] of wildlifeDamagedPlayerAtMsByInstanceId) {
-          if (
-            nowMs - damagedAtMs >
-            DEFINING_WILDLIFE_NAME_TAG_RECENT_COMBAT_REVEAL_MS
-          ) {
-            wildlifeDamagedPlayerAtMsByInstanceId.delete(instanceId);
+        if (wildlifeDamagedPlayerAtMsByInstanceId) {
+          for (const [
+            instanceId,
+            damagedAtMs,
+          ] of wildlifeDamagedPlayerAtMsByInstanceId) {
+            if (
+              nowMs - damagedAtMs >
+              DEFINING_WILDLIFE_NAME_TAG_RECENT_COMBAT_REVEAL_MS
+            ) {
+              wildlifeDamagedPlayerAtMsByInstanceId.delete(instanceId);
+            }
           }
         }
-      }
 
-      const nameTagUpdate = updatingWildlifeNameTagsOverlayRef({
-        outRef: config.wildlifeNameTagsOutRef.current,
-        instances: nextInstances,
-        playerPosition,
-        playerFacingDirection:
-          config.localAvatarMotionStateRef?.current.facingDirection ?? 'Down',
-        playerUserId: config.localUserId,
-        nowMs,
-        hoveredInstanceId: config.wildlifeHoveredInstanceIdRef?.current ?? null,
-        wildlifeDamagedPlayerAtMsByInstanceId:
-          wildlifeDamagedPlayerAtMsByInstanceId ?? new Map(),
-        labelCache: wildlifeNameTagLabelCacheRef.current,
-        resolveSpecies: resolvingWildlifeSpeciesDefinition,
-      });
+        // Glow-orb bodies (fairy) ease toward the sim point on screen; anchor
+        // their name tags to the same smoothed point so tags never trail the orb.
+        const nameTagInstances = nextInstances.map((instance) => {
+          const species = resolvingWildlifeSpeciesDefinition(
+            instance.speciesId
+          );
 
-      if (
-        nameTagUpdate.didMountSetChange &&
-        config.wildlifeNameTagsMountRevisionRef
-      ) {
-        config.wildlifeNameTagsMountRevisionRef.current += 1;
+          if (
+            !species ||
+            !checkingWildlifeSpeciesUsesGlowOrbPresentation(species)
+          ) {
+            return instance;
+          }
+
+          const smoothedPoint =
+            wildlifeImperativePresentationRegistryRef.current.get(
+              instance.instanceId
+            )?.smoothedOrbPointRef.current;
+
+          if (!smoothedPoint) {
+            return instance;
+          }
+
+          return {
+            ...instance,
+            position: {
+              ...instance.position,
+              x: smoothedPoint.x,
+              y: smoothedPoint.y,
+            },
+          };
+        });
+
+        const nameTagUpdate = updatingWildlifeNameTagsOverlayRef({
+          outRef: config.wildlifeNameTagsOutRef.current,
+          instances: nameTagInstances,
+          playerPosition,
+          playerFacingDirection:
+            config.localAvatarMotionStateRef?.current.facingDirection ?? 'Down',
+          playerUserId: config.localUserId,
+          nowMs,
+          hoveredInstanceId:
+            config.wildlifeHoveredInstanceIdRef?.current ?? null,
+          wildlifeDamagedPlayerAtMsByInstanceId:
+            wildlifeDamagedPlayerAtMsByInstanceId ?? new Map(),
+          labelCache: wildlifeNameTagLabelCacheRef.current,
+          resolveSpecies: resolvingWildlifeSpeciesDefinition,
+        });
+
+        if (
+          nameTagUpdate.didMountSetChange &&
+          config.wildlifeNameTagsMountRevisionRef
+        ) {
+          config.wildlifeNameTagsMountRevisionRef.current += 1;
+        }
       }
     }
 
@@ -792,7 +911,11 @@ export function RenderingWildlifeLayer({
     for (const instance of nextInstances) {
       const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
 
-      if (!species || loadedSpeciesRef.current.has(species.speciesId)) {
+      if (
+        !species ||
+        checkingWildlifeSpeciesUsesGlowOrbPresentation(species) ||
+        loadedSpeciesRef.current.has(species.speciesId)
+      ) {
         continue;
       }
 
@@ -810,6 +933,21 @@ export function RenderingWildlifeLayer({
         // Allow a later tick to retry after a transient CDN / sheet failure.
         loadedSpeciesRef.current.delete(species.speciesId);
       });
+    }
+
+    if (
+      checkingWorldPlazaGenerationFeatureEnabled(
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_FAIRY_GLOW
+      )
+    ) {
+      syncingWorldPlazaLightSourcesForOwner(
+        DEFINING_WILDLIFE_FAIRY_LIGHT_OWNER_KEY,
+        resolvingWildlifeFairyLightSources(nextInstances)
+      );
+    } else {
+      clearingWorldPlazaLightSourcesForOwner(
+        DEFINING_WILDLIFE_FAIRY_LIGHT_OWNER_KEY
+      );
     }
 
     const finishWildlifeRenderSyncSample = beginningWorldPlazaPerformanceSample(

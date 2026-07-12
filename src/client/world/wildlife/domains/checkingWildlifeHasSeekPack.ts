@@ -33,6 +33,12 @@ export function checkingWildlifeHasSeekPack(
     return false;
   }
 
+  // Pack-join lock means this wolf is already pulled into a hunt; do not run
+  // off seeking a third body while threat / active target catch up.
+  if (blackboard.instance.aggroState.stalkLockedPreyTargetId) {
+    return false;
+  }
+
   if (
     checkingWildlifeSocialHunterMayHunt({
       instance: blackboard.instance,

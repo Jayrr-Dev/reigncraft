@@ -32,6 +32,8 @@ export type WorldPlazaInventoryHotbarSlotInteractions = {
   readonly closingItemActionPopover: () => void;
   readonly openingBagPopover: (slotIndex: number) => void;
   readonly closingBagPopover: () => void;
+  /** Local player effective max HP for food heal preview in item detail. */
+  readonly playerEffectiveMaxHealth?: number;
 };
 
 const WorldPlazaInventoryHotbarSlotInteractionsContext =
@@ -89,6 +91,7 @@ export const RenderingWorldPlazaInventoryHotbarSlotCell = memo(
       closingItemActionPopover,
       openingBagPopover,
       closingBagPopover,
+      playerEffectiveMaxHealth,
     } = usingWorldPlazaInventoryHotbarSlotInteractions();
 
     return (
@@ -105,6 +108,7 @@ export const RenderingWorldPlazaInventoryHotbarSlotCell = memo(
         onOpenBagPopover={openingBagPopover}
         isBagPopoverOpen={openBagHotbarSlotIndex === props.slotIndex}
         onCloseBagPopover={closingBagPopover}
+        playerEffectiveMaxHealth={playerEffectiveMaxHealth}
       />
     );
   }
@@ -126,6 +130,7 @@ export function usingWorldPlazaInventoryHotbarSlotInteractionsValue(
       input.openBagHotbarSlotIndex,
       input.openItemDetailSlotIndex,
       input.openingBagPopover,
+      input.playerEffectiveMaxHealth,
       input.selectedSlotIndex,
       input.togglingItemActionPopover,
     ]

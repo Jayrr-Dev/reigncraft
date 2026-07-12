@@ -7,7 +7,6 @@
  * @module components/world/domains/managingWorldPlazaStarAudio
  */
 
-import { checkingWorldPlazaStarAudioPreloadIsDisabled } from '@/components/world/domains/checkingWorldPlazaStarAudioPreloadIsDisabled';
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
@@ -38,6 +37,9 @@ import {
 let managingWorldPlazaStarAudioInstance: StarAudio | null = null;
 let managingWorldPlazaStarAudioAcquireCount = 0;
 let managingWorldPlazaStarAudioPageUnloadHookRegistered = false;
+let managingWorldPlazaStarAudioLastSfxGroupVolume = Number.NaN;
+let managingWorldPlazaStarAudioNextGaugeRecordAtMs = 0;
+const MANAGING_WORLD_PLAZA_STAR_AUDIO_GAUGE_RECORD_INTERVAL_MS = 250;
 const preloadedWorldPlazaStarAudioManifestKeys = new Set<string>();
 /** In-flight per-key loads so home + boot + loading music share one Howl. */
 const inflightWorldPlazaStarAudioManifestKeyLoads = new Map<
@@ -49,8 +51,12 @@ const warmingWorldPlazaStarAudioAssetFetchesByUrl = new Map<
   string,
   Promise<void>
 >();
+/** Global Howler decode semaphore shared by every concurrent hook preload. */
+let activeWorldPlazaStarAudioPreloadCount = 0;
+const pendingWorldPlazaStarAudioPreloadStarters: (() => void)[] = [];
 
 type ManagingWorldPlazaStarAudioActiveSfxPlay = {
+  id: string;
   handle: SoundHandle;
   volume: number;
 };
@@ -62,10 +68,19 @@ type ManagingWorldPlazaStarAudioActiveSfxPlay = {
 const managingWorldPlazaStarAudioActiveSfxPlays: ManagingWorldPlazaStarAudioActiveSfxPlay[] =
   [];
 
-function recordingWorldPlazaStarAudioPerformanceGauges(): void {
+function recordingWorldPlazaStarAudioPerformanceGauges(force = false): void {
   if (!checkingWorldPlazaPerformanceDiagnosticsIsEnabled()) {
     return;
   }
+
+  const nowMs = performance.now();
+
+  if (!force && nowMs < managingWorldPlazaStarAudioNextGaugeRecordAtMs) {
+    return;
+  }
+
+  managingWorldPlazaStarAudioNextGaugeRecordAtMs =
+    nowMs + MANAGING_WORLD_PLAZA_STAR_AUDIO_GAUGE_RECORD_INTERVAL_MS;
 
   settingWorldPlazaPerformanceDiagnosticsGauge(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.AUDIO_ACTIVE_SFX_COUNT,
@@ -98,6 +113,24 @@ function pruningWorldPlazaStarAudioInactiveSfxPlays(): void {
     if (!managingWorldPlazaStarAudioActiveSfxPlays[index]?.handle.playing) {
       managingWorldPlazaStarAudioActiveSfxPlays.splice(index, 1);
     }
+  }
+}
+
+/**
+ * Restores prior instances of one clip after `starAudio.play(id)` changes the
+ * shared Howl volume for that id. Other clip ids are unaffected and must not
+ * be touched on this hot path.
+ */
+function reassertingWorldPlazaStarAudioActiveSfxVolumesForId(
+  id: string,
+  newestHandle: SoundHandle
+): void {
+  for (const activePlay of managingWorldPlazaStarAudioActiveSfxPlays) {
+    if (activePlay.id !== id || activePlay.handle === newestHandle) {
+      continue;
+    }
+
+    activePlay.handle.setVolume(activePlay.volume);
   }
 }
 
@@ -195,11 +228,13 @@ export function playingWorldPlazaStarAudioSfx(
     return null;
   }
 
+  pruningWorldPlazaStarAudioInactiveSfxPlays();
   managingWorldPlazaStarAudioActiveSfxPlays.push({
+    id,
     handle,
     volume: options.volume,
   });
-  reassertingWorldPlazaStarAudioActiveSfxVolumes();
+  reassertingWorldPlazaStarAudioActiveSfxVolumesForId(id, handle);
 
   // star-audio's play() ignores `duration`; stop the instance ourselves so long
   // source files (or shared Howl assets) cannot keep emitting past the cap.
@@ -253,8 +288,15 @@ export function updatingWorldPlazaStarAudioActiveSfxPlayVolume(
  * Sets the shared SFX group gain, then restores tracked per-instance volumes.
  */
 export function settingWorldPlazaStarAudioSfxGroupVolume(volume: number): void {
+  const clampedVolume = Math.max(0, Math.min(1, volume));
+
+  if (managingWorldPlazaStarAudioLastSfxGroupVolume === clampedVolume) {
+    return;
+  }
+
   const starAudio = ensuringWorldPlazaStarAudioInstance();
-  starAudio.setSfxVolume(volume);
+  starAudio.setSfxVolume(clampedVolume);
+  managingWorldPlazaStarAudioLastSfxGroupVolume = clampedVolume;
   reassertingWorldPlazaStarAudioActiveSfxVolumes();
 }
 
@@ -262,13 +304,17 @@ function destroyingWorldPlazaStarAudioInstance(): void {
   managingWorldPlazaStarAudioInstance?.destroy();
   managingWorldPlazaStarAudioInstance = null;
   managingWorldPlazaStarAudioAcquireCount = 0;
+  managingWorldPlazaStarAudioLastSfxGroupVolume = Number.NaN;
+  managingWorldPlazaStarAudioNextGaugeRecordAtMs = 0;
   preloadedWorldPlazaStarAudioManifestKeys.clear();
   inflightWorldPlazaStarAudioManifestKeyLoads.clear();
   warmingWorldPlazaStarAudioAssetFetchesByUrl.clear();
+  activeWorldPlazaStarAudioPreloadCount = 0;
+  pendingWorldPlazaStarAudioPreloadStarters.length = 0;
   activeWorldPlazaStarAudioWarmFetchCount = 0;
   pendingWorldPlazaStarAudioWarmFetchStarters.length = 0;
   managingWorldPlazaStarAudioActiveSfxPlays.length = 0;
-  recordingWorldPlazaStarAudioPerformanceGauges();
+  recordingWorldPlazaStarAudioPerformanceGauges(true);
 }
 
 /**
@@ -450,6 +496,34 @@ function resolvingWorldPlazaStarAudioPreloadConcurrency(): number {
   return DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_CONCURRENCY_DESKTOP;
 }
 
+async function acquiringWorldPlazaStarAudioPreloadSlot(): Promise<void> {
+  if (
+    activeWorldPlazaStarAudioPreloadCount <
+    resolvingWorldPlazaStarAudioPreloadConcurrency()
+  ) {
+    activeWorldPlazaStarAudioPreloadCount += 1;
+    return;
+  }
+
+  await new Promise<void>((resolve) => {
+    pendingWorldPlazaStarAudioPreloadStarters.push(resolve);
+  });
+}
+
+function releasingWorldPlazaStarAudioPreloadSlot(): void {
+  const startNextPreload = pendingWorldPlazaStarAudioPreloadStarters.shift();
+
+  if (startNextPreload) {
+    startNextPreload();
+    return;
+  }
+
+  activeWorldPlazaStarAudioPreloadCount = Math.max(
+    0,
+    activeWorldPlazaStarAudioPreloadCount - 1
+  );
+}
+
 /**
  * Loads one manifest key, sharing any in-flight promise for the same id.
  */
@@ -481,6 +555,8 @@ function preloadingWorldPlazaStarAudioManifestKey(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.AUDIO_PRELOAD_REQUEST
   );
   const loadPromise = (async () => {
+    await acquiringWorldPlazaStarAudioPreloadSlot();
+
     try {
       await awaitingWorldPlazaStarAudioAssetWarmFetches(manifestEntry);
       const starAudio = ensuringWorldPlazaStarAudioInstance();
@@ -492,6 +568,7 @@ function preloadingWorldPlazaStarAudioManifestKey(
       );
       // Runtime hooks retry when their components mount.
     } finally {
+      releasingWorldPlazaStarAudioPreloadSlot();
       inflightWorldPlazaStarAudioManifestKeyLoads.delete(manifestKey);
       recordingWorldPlazaStarAudioPerformanceGauges();
       finishSample();
@@ -562,23 +639,9 @@ export function releasingWorldPlazaStarAudio(): void {
 export async function preloadingWorldPlazaStarAudioManifest(
   manifest: Manifest
 ): Promise<void> {
-  // Debug skip: `?skipAudioPreload=1`, env, or `__WORLD_PLAZA_PERF__.skipAudioPreload(true)`.
-  // Clips still load on first play; only eager warm/decode is skipped.
-  if (checkingWorldPlazaStarAudioPreloadIsDisabled()) {
-    if (
-      typeof window !== 'undefined' &&
-      !(window as Window & { __worldPlazaStarAudioPreloadSkipLogged?: boolean })
-        .__worldPlazaStarAudioPreloadSkipLogged
-    ) {
-      (
-        window as Window & { __worldPlazaStarAudioPreloadSkipLogged?: boolean }
-      ).__worldPlazaStarAudioPreloadSkipLogged = true;
-      console.info(
-        '[world-plaza-audio] eager preload SKIPPED (debug). Clips load on first play only.'
-      );
-    }
-    return;
-  }
+  // Boot-only skip lives in `preloadingWorldPlazaWorldBootStarAudio`. This
+  // runtime path must still warm keys — play() refuses cold ids, so a global
+  // skip here left music/SFX permanently silent after `?skipAudioPreload=1`.
 
   // Include in-flight keys so concurrent callers (home title + boot + loading
   // music) await the shared Howl instead of spawning a second one.

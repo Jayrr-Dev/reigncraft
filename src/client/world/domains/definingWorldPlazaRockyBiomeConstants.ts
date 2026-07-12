@@ -1,7 +1,19 @@
 import type { DefiningWorldPlazaStonePalette } from '@/components/world/domains/definingWorldPlazaStoneDecorationConstants';
+import {
+  DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_CLUSTER_CELL_TILES,
+  DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_CLUSTER_NOISE_FREQUENCY,
+  DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_CLUSTER_NOISE_MIN,
+  DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_COLUMN_CLUSTER_NOISE_MIN,
+  DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_COLUMN_SOLITARY_NOISE_MIN,
+  DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_PEBBLE_CLUSTER_NOISE_MIN,
+  DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_PEBBLE_SOLITARY_NOISE_MIN,
+} from '@/components/world/domains/definingWorldPlazaStoneRarityConstants';
 
 /**
  * Procedural terrain tuning for the rocky biome.
+ *
+ * Stone rarity numbers live in {@link definingWorldPlazaStoneRarityConstants}
+ * and are re-exported here for rocky-specific call sites.
  *
  * @module components/world/domains/definingWorldPlazaRockyBiomeConstants
  */
@@ -9,29 +21,82 @@ import type { DefiningWorldPlazaStonePalette } from '@/components/world/domains/
 /** Stable biome kind id for the rocky biome. */
 export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_KIND = 'rocky' as const;
 
-/**
- * Low stone-noise bar for column mega-boulders so the rocky field still reads
- * as a boulder garden. Floor pebbles use the sparser pebble min below.
- */
-export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_NOISE_MIN = 0.4;
+/** @see DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_COLUMN_CLUSTER_NOISE_MIN */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_NOISE_MIN_CLUSTER =
+  DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_COLUMN_CLUSTER_NOISE_MIN;
+
+/** @see DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_COLUMN_SOLITARY_NOISE_MIN */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_NOISE_MIN_SOLITARY =
+  DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_COLUMN_SOLITARY_NOISE_MIN;
+
+/** @see DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_PEBBLE_CLUSTER_NOISE_MIN */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_PEBBLE_STONE_NOISE_MIN_CLUSTER =
+  DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_PEBBLE_CLUSTER_NOISE_MIN;
+
+/** @see DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_PEBBLE_SOLITARY_NOISE_MIN */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_PEBBLE_STONE_NOISE_MIN_SOLITARY =
+  DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_PEBBLE_SOLITARY_NOISE_MIN;
+
+/** Seed for the rare rocky stone-cluster patch field. */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_CLUSTER_NOISE_SEED = 7349;
+
+/** @see DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_CLUSTER_NOISE_FREQUENCY */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_CLUSTER_NOISE_FREQUENCY =
+  DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_CLUSTER_NOISE_FREQUENCY;
+
+/** Octave count for rocky stone clusters. */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_CLUSTER_NOISE_OCTAVES = 2;
+
+/** @see DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_CLUSTER_NOISE_MIN */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_CLUSTER_NOISE_MIN =
+  DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_CLUSTER_NOISE_MIN;
+
+/** @see DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_CLUSTER_CELL_TILES */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_CLUSTER_CELL_TILES =
+  DEFINING_WORLD_PLAZA_STONE_RARITY_ROCKY_CLUSTER_CELL_TILES;
 
 /**
- * Floor-pebble noise bar in rocky biome. Higher than the column-rock bar so
- * pebbles stay sparse between mega-boulders instead of carpeting every tile.
+ * Spacing between cluster member anchors. Tighter than mega spacing so a
+ * 1-3 group reads as a small clump, not a scattered field.
  */
-export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_PEBBLE_STONE_NOISE_MIN = 0.78;
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_CLUSTER_SPACING_TILES = 3;
+
+/** Fewest column rocks allowed in an active cluster group. */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_CLUSTER_ROCK_COUNT_MIN = 1;
+
+/** Most column rocks allowed in an active cluster group. */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_CLUSTER_ROCK_COUNT_MAX = 3;
+
+/** Seed salt picking how many rocks (1-3) an active cluster gets. */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_CLUSTER_COUNT_SEED_SALT = 811;
+
+/** Seed salt ranking which cluster spacing slots fill the budget. */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_STONE_CLUSTER_SLOT_SEED_SALT = 823;
 
 /**
  * Footprint tile span for rocky pebble-field medium boulders (jumpable rocks
- * mixed among floor pebbles; large-tier anchors still roll mega footprints).
+ * mixed among floor pebbles; some large-tier anchors still roll mega footprints).
  */
 export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_FOOTPRINT_TILE_SPAN = 1;
 
 /**
- * Absolute surface world layer for rocky pebble-field medium boulders.
- * Matches the medium jump-over height (ground layer 1 through layer 4).
+ * Share of large-tier rocky anchors that still become 1-tile field boulders
+ * instead of mega footprints. Higher = more jumpable 1-block rocks in the field.
  */
-export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_SURFACE_WORLD_LAYER = 4;
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_LARGE_TIER_OVERRIDE_UNIT_MAX = 0.72;
+
+/**
+ * Lowest absolute surface world layer for rocky 1-tile field boulders (3-layer).
+ */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_SURFACE_WORLD_LAYER_MIN = 3;
+
+/**
+ * Highest absolute surface world layer for rocky 1-tile field boulders (4-layer).
+ */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_SURFACE_WORLD_LAYER_MAX = 4;
+
+/** Seed salt choosing whether a large-tier rocky anchor demotes to a field boulder. */
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_OVERRIDE_SEED_SALT = 503;
 
 /**
  * Flat upward size bias applied everywhere in the rocky biome so even rim rocks
@@ -40,10 +105,10 @@ export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_BOULDER_SURFACE_WORLD
 export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_SIZE_TIER_BASE_BIAS = 0.1;
 
 /**
- * Extra size bias scaled by centrality so center tiles reliably reach the
- * largest mega-boulder tier while the rim keeps smaller, varied rocks.
+ * Extra size bias scaled by centrality so center tiles still reach mega tier
+ * often, without wiping out the compact 1-tile field boulders.
  */
-export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_SIZE_TIER_CENTRALITY_BIAS = 0.55;
+export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_SIZE_TIER_CENTRALITY_BIAS = 0.38;
 
 /** Flat upward footprint bias applied everywhere in the rocky biome. */
 export const DEFINING_WORLD_PLAZA_ROCKY_BIOME_FOOTPRINT_BASE_BIAS = 0.05;

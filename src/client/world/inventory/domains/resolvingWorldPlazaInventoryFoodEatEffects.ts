@@ -4,10 +4,15 @@ import {
   checkingWorldPlazaEntityDiseaseIsSymptomatic,
 } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
 import { resolvingWorldPlazaEntityDiseaseContractionChance } from '@/components/world/health/domains/checkingWorldPlazaEntityImmuneSystem';
+import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
-import { addingWorldPlazaEntityHealthDamageOverTime } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import {
+  addingWorldPlazaEntityHealthDamageOverTime,
+  healingWorldPlazaEntityHealthWithAmplifiers,
+} from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
+import { resolvingWorldPlazaInventoryFoodHealAmount } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealAmount';
 import type { DefiningWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import { resolvingWildlifeAggroDeerMeatCookedResidualDiseaseChance } from '@/components/world/wildlife/domains/resolvingWildlifeAggroDeerMeatCookedResidualDiseaseChance';
@@ -17,6 +22,7 @@ export const DEFINING_WORLD_PLAZA_FOOD_SICKNESS_DEBUFF_ID =
 
 export type ResolvingWorldPlazaInventoryFoodEatEffectsResult = {
   readonly effectiveHungerRestoreRatio: number;
+  readonly healthHealAmount: number;
   readonly nextHealthState: DefiningWorldPlazaEntityHealthState;
   readonly didRollSickness: boolean;
   readonly didRollDisease: boolean;
@@ -228,8 +234,26 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
       DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER
     : foodDefinition.hungerRestoreRatio;
 
+  const healthHealAmount = resolvingWorldPlazaInventoryFoodHealAmount({
+    healthHeal: foodDefinition.healthHeal,
+    effectiveMaxHealth: computingWorldPlazaEntityHealthEffectiveMax(
+      nextHealthState,
+      nowMs
+    ),
+    foodItemMetadata,
+  });
+
+  if (healthHealAmount > 0) {
+    nextHealthState = healingWorldPlazaEntityHealthWithAmplifiers({
+      receiverState: nextHealthState,
+      baseHealAmount: healthHealAmount,
+      nowMs,
+    }).state;
+  }
+
   return {
     effectiveHungerRestoreRatio,
+    healthHealAmount,
     nextHealthState,
     didRollSickness: isSick,
     didRollDisease,

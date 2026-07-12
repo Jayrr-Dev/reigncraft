@@ -1,9 +1,11 @@
 /**
  * Session-scoped store for the single-player "This a dev load" QA world.
  *
- * When enabled: flat plains blank slate, all generation features off (session
- * override), frozen wildlife AI / no aggro if animals are spawned manually.
- * Re-enable layers via Features debug controls while profiling.
+ * When enabled: flat plains blank slate, generation features off (session
+ * override; audio stays on), frozen wildlife AI / no aggro if animals are
+ * spawned manually. Night lighting stays mounted so torch/fairy lights still
+ * punch holes when Features re-enables animals. Re-enable layers via Features
+ * debug controls while profiling.
  *
  * @module components/world/domains/managingWorldPlazaDevQaLoadStore
  */
@@ -31,11 +33,11 @@ const managingWorldPlazaDevQaLoadSubscribers = new Set<() => void>();
  * Clears procedural terrain caches without creating a module load cycle.
  */
 function invalidatingWorldPlazaProceduralGenerationCachesDeferred(): void {
-  void import(
-    '@/components/world/domains/invalidatingWorldPlazaProceduralGenerationCaches'
-  ).then((invalidatingModule) => {
-    invalidatingModule.invalidatingWorldPlazaProceduralGenerationCaches();
-  });
+  void import('@/components/world/domains/invalidatingWorldPlazaProceduralGenerationCaches').then(
+    (invalidatingModule) => {
+      invalidatingModule.invalidatingWorldPlazaProceduralGenerationCaches();
+    }
+  );
 }
 
 function notifyingWorldPlazaDevQaLoadSubscribers(): void {

@@ -24,20 +24,19 @@ import {
 import { resolvingFilmcowFootstepSurfaceAtWorldPoint } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepSurfaceAtWorldPoint';
 import { resolvingFilmcowFootstepSurfaceKindsForWildlifePlayback } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepSurfaceKindsForWildlifePlayback';
 import { checkingWildlifeInstancePlaysFootsteps } from '@/components/world/wildlife/domains/checkingWildlifeInstancePlaysFootsteps';
-import { computingWildlifeFootstepEffectiveVolume } from '@/components/world/wildlife/domains/computingWildlifeFootstepEffectiveVolume';
+import { computingWildlifeFootstepEffectiveVolumeAtDistance } from '@/components/world/wildlife/domains/computingWildlifeFootstepEffectiveVolume';
 import { computingWildlifeFootstepIntervalMs } from '@/components/world/wildlife/domains/computingWildlifeFootstepIntervalMs';
 import {
+  DEFINING_WILDLIFE_FOOTSTEP_MAX_AUDIBLE_DISTANCE_GRID,
   DEFINING_WILDLIFE_FOOTSTEP_MAX_STEPS_PER_TICK,
   DEFINING_WILDLIFE_FOOTSTEP_MIN_MOVEMENT_SPEED_GRID_PER_SECOND,
   DEFINING_WILDLIFE_FOOTSTEP_POLL_INTERVAL_MS,
   DEFINING_WILDLIFE_FOOTSTEP_SFX_ENABLED,
+  DEFINING_WILDLIFE_FOOTSTEP_SURFACE_REFRESH_INTERVAL_MS,
 } from '@/components/world/wildlife/domains/definingWildlifeFootstepSfxConstants';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import {
-  listingWildlifeInstances,
-  type ManagingWildlifeInstanceStore,
-} from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { type ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { resolvingWildlifeFootstepSizeTierFromVisualSizeMultiplier } from '@/components/world/wildlife/domains/resolvingWildlifeFootstepSizeTier';
 import { resolvingWildlifeFootstepStarAudioId } from '@/components/world/wildlife/domains/resolvingWildlifeFootstepStarAudioId';
 import {
@@ -65,20 +64,6 @@ type DefiningWildlifeFootstepCandidate = {
   motionClip: 'walk' | 'run';
 };
 
-function computingWildlifeFootstepDistanceGrid(
-  listenerPoint: DefiningWorldPlazaWorldPoint | null,
-  sourcePoint: DefiningWorldPlazaWorldPoint
-): number {
-  if (!listenerPoint) {
-    return 0;
-  }
-
-  return Math.hypot(
-    listenerPoint.x - sourcePoint.x,
-    listenerPoint.y - sourcePoint.y
-  );
-}
-
 /**
  * Plays FilmCow footstep one-shots for nearby moving wildlife instances.
  *
@@ -92,6 +77,7 @@ export function usingWildlifeFootsteps(
   const isPreloadReadyRef = useRef(false);
   const preloadedSurfaceKeyRef = useRef('');
   const preloadGenerationRef = useRef(0);
+  const nextSurfaceRefreshAtMsRef = useRef(0);
   const loopStateByInstanceIdRef = useRef<
     Map<string, DefiningWildlifeFootstepLoopState>
   >(new Map());
@@ -157,10 +143,10 @@ export function usingWildlifeFootsteps(
     };
 
     const pruningStaleFootstepLoops = (
-      liveInstanceIds: ReadonlySet<string>
+      store: ManagingWildlifeInstanceStore
     ): void => {
       for (const [instanceId, loopState] of loopStateByInstanceIdRef.current) {
-        if (!liveInstanceIds.has(instanceId)) {
+        if (!store.instances.has(instanceId)) {
           stoppingFootstepHandle(loopState.activeHandle);
           loopStateByInstanceIdRef.current.delete(instanceId);
         }
@@ -213,6 +199,21 @@ export function usingWildlifeFootsteps(
         return null;
       }
 
+      if (!listenerPoint) {
+        return null;
+      }
+
+      const distanceX = listenerPoint.x - instance.position.x;
+      const distanceY = listenerPoint.y - instance.position.y;
+      const distanceSquared = distanceX * distanceX + distanceY * distanceY;
+      const maxAudibleDistanceSquared =
+        DEFINING_WILDLIFE_FOOTSTEP_MAX_AUDIBLE_DISTANCE_GRID *
+        DEFINING_WILDLIFE_FOOTSTEP_MAX_AUDIBLE_DISTANCE_GRID;
+
+      if (distanceSquared >= maxAudibleDistanceSquared) {
+        return null;
+      }
+
       const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
 
       if (!species) {
@@ -256,10 +257,10 @@ export function usingWildlifeFootsteps(
         return null;
       }
 
-      const volume = computingWildlifeFootstepEffectiveVolume(
+      const distanceGrid = Math.sqrt(distanceSquared);
+      const volume = computingWildlifeFootstepEffectiveVolumeAtDistance(
         sizeTier,
-        instance.position,
-        listenerPoint
+        distanceGrid
       );
 
       if (volume <= 0) {
@@ -276,10 +277,7 @@ export function usingWildlifeFootsteps(
 
       return {
         instance,
-        distanceGrid: computingWildlifeFootstepDistanceGrid(
-          listenerPoint,
-          instance.position
-        ),
+        distanceGrid,
         volume,
         intervalMs,
         sizeTier,
@@ -295,22 +293,21 @@ export function usingWildlifeFootsteps(
         return;
       }
 
-      const instances = listingWildlifeInstances(store);
-      const surfaceKinds =
-        resolvingFilmcowFootstepSurfaceKindsForWildlifePlayback(
-          listenerPoint,
-          instances
-        );
-
-      preloadingWildlifeFootstepsForSurfaces(surfaceKinds);
-
-      const liveInstanceIds = new Set<string>();
       const nowMs = performance.now();
       const candidates: DefiningWildlifeFootstepCandidate[] = [];
 
-      for (const instance of instances) {
-        liveInstanceIds.add(instance.instanceId);
+      if (nowMs >= nextSurfaceRefreshAtMsRef.current) {
+        const surfaceKinds =
+          resolvingFilmcowFootstepSurfaceKindsForWildlifePlayback(
+            listenerPoint,
+            store.instances.values()
+          );
+        preloadingWildlifeFootstepsForSurfaces(surfaceKinds);
+        nextSurfaceRefreshAtMsRef.current =
+          nowMs + DEFINING_WILDLIFE_FOOTSTEP_SURFACE_REFRESH_INTERVAL_MS;
+      }
 
+      for (const instance of store.instances.values()) {
         const candidate = resolvingWildlifeFootstepCandidate(
           instance,
           listenerPoint,
@@ -377,7 +374,7 @@ export function usingWildlifeFootsteps(
         stepsPlayedThisTick += 1;
       }
 
-      pruningStaleFootstepLoops(liveInstanceIds);
+      pruningStaleFootstepLoops(store);
     };
 
     const unlockingAndRetryingFootsteps = (): void => {
@@ -423,6 +420,7 @@ export function usingWildlifeFootsteps(
       isPreloadReadyRef.current = false;
       preloadedSurfaceKeyRef.current = '';
       preloadGenerationRef.current = 0;
+      nextSurfaceRefreshAtMsRef.current = 0;
     };
   }, [playerPositionRef, wildlifeStoreRef]);
 }

@@ -10,6 +10,7 @@
  */
 
 import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
+import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import {
   computingWorldPlazaTimedInteractionProgressRingLayout,
   computingWorldPlazaTimedInteractionProgressRingStrokeDashoffset,
@@ -72,33 +73,30 @@ export const RenderingWorldPlazaGroundItemProgressRing = memo(
       if (progressCircle) {
         progressCircle.style.strokeDasharray = `${ringCircumferencePx}`;
       }
+      if (svgElement) {
+        svgElement.style.opacity = isVisible ? '1' : '0';
+      }
 
-      let animationFrameId = 0;
+      if (!isVisible) {
+        return;
+      }
 
-      const updatingRing = (): void => {
+      let lastStrokeDashoffset = '';
+
+      return subscribingWorldPlazaDomOverlayFrame(() => {
         const progressRatio = progressRatioRef.current ?? 0;
         const strokeDashoffset =
           computingWorldPlazaTimedInteractionProgressRingStrokeDashoffset(
             ringCircumferencePx,
             progressRatio
           );
+        const nextStrokeDashoffset = `${strokeDashoffset}`;
 
-        if (progressCircle) {
-          progressCircle.style.strokeDashoffset = `${strokeDashoffset}`;
+        if (progressCircle && lastStrokeDashoffset !== nextStrokeDashoffset) {
+          lastStrokeDashoffset = nextStrokeDashoffset;
+          progressCircle.style.strokeDashoffset = nextStrokeDashoffset;
         }
-
-        if (svgElement) {
-          svgElement.style.opacity = isVisible ? '1' : '0';
-        }
-
-        animationFrameId = window.requestAnimationFrame(updatingRing);
-      };
-
-      animationFrameId = window.requestAnimationFrame(updatingRing);
-
-      return () => {
-        window.cancelAnimationFrame(animationFrameId);
-      };
+      });
     }, [isVisible, progressRatioRef, ringLayout.ringCircumferencePx]);
 
     return (

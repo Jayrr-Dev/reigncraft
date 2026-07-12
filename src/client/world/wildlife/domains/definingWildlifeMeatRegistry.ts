@@ -787,6 +787,21 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       cookedWellFedBuffId: 'well-fed-vigor-buff',
       cookedWellFedChance: 0.34,
     },
+    {
+      speciesId: 'fairy',
+      rawItemTypeId: 'world-plaza-raw-fairy-dust',
+      cookedItemTypeId: 'world-plaza-cooked-fairy-dust',
+      rawDisplayName: 'Raw Fairy Dust',
+      cookedDisplayName: 'Cooked Fairy Dust',
+      rawHungerRestoreRatio: 0.04,
+      cookedHungerRestoreRatio: 0.1,
+      lootQuantity: 1,
+      cookDurationMs: 1_500,
+      rawDiseaseId: 'salmonellosis',
+      rawDiseaseChance: 0.15,
+      cookedWellFedBuffId: 'well-fed-comfort-buff',
+      cookedWellFedChance: 0.55,
+    },
   ];
 
 const DEFINING_WILDLIFE_MEAT_BY_SPECIES = Object.fromEntries(

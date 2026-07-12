@@ -8,6 +8,7 @@
  */
 
 import {
+  DEFINING_WORLD_PLAZA_GENERATION_FEATURE,
   DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY,
   type DefiningWorldPlazaGenerationFeatureId,
 } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
@@ -23,15 +24,19 @@ export const LABELING_WORLD_PLAZA_DEV_QA_LOAD_SUBTITLE =
 export const DEFINING_WORLD_PLAZA_DEV_QA_LOAD_OWNER_ID = 'single-player:dev-qa';
 
 /**
- * Session override applied when Dev QA load starts: every generation layer off.
+ * Session override applied when Dev QA load starts: generation layers off,
+ * audio left on so footsteps / mixer stay usable while profiling.
  *
- * Features debug controls can turn layers back on without writing localStorage.
+ * Features debug controls can flip layers without writing localStorage.
  */
 export const DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_BLANK_SLATE: Readonly<
   Record<DefiningWorldPlazaGenerationFeatureId, boolean>
-> = Object.fromEntries(
-  DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY.map((definition) => [
-    definition.featureId,
-    false,
-  ])
-) as Record<DefiningWorldPlazaGenerationFeatureId, boolean>;
+> = {
+  ...(Object.fromEntries(
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY.map((definition) => [
+      definition.featureId,
+      false,
+    ])
+  ) as Record<DefiningWorldPlazaGenerationFeatureId, boolean>),
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.AUDIO_SFX]: true,
+};

@@ -5,6 +5,7 @@ import {
   type DefiningPlazaBestiaryGuideEntry,
 } from '@/components/home/domains/definingPlazaBestiaryGuideConstants';
 import type { PlazaBestiaryStudyTierId } from '@/components/home/domains/definingPlazaBestiaryStudyTier';
+import { LABELING_PLAZA_BIOMES_UNDISCOVERED_NAME } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
 import {
   resolvingPlazaBestiaryGuideCombatStats,
   resolvingPlazaBestiaryGuideEcologyStats,
@@ -19,7 +20,6 @@ import {
   checkingPlazaBestiaryStudyTierUnlocked,
   resolvingPlazaBestiaryStudyTierId,
 } from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
-import { LABELING_PLAZA_BIOMES_UNDISCOVERED_NAME } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
 import { DEFINING_WORLD_PLAZA_BIOME_CATALOG } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -67,6 +67,7 @@ function formattingPlazaBestiaryTemperamentLabel(
 
   const labels: Record<string, string> = {
     passive: 'Passive',
+    docile: 'Docile',
     skittish: 'Skittish',
     retaliator: 'Retaliator',
     stalker: 'Stalker',

@@ -1,4 +1,5 @@
 import type { CreatingWorldPlazaGrassFloorChunkDrawPassContext } from '@/components/world/domains/creatingWorldPlazaGrassFloorChunkDrawPassContext';
+import { DEFINING_WORLD_PLAZA_FLOOR_CHUNK_RETENTION_MARGIN_TILES } from '@/components/world/domains/definingWorldPlazaTerrainCachePruneConstants';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import {
   drawingWorldPlazaGrassFloorChunkOnGraphics,
@@ -35,7 +36,7 @@ const SYNCING_WORLD_PLAZA_VISIBLE_TILE_CHUNK_DEFAULT_PRUNE_BUDGET = 6;
 const SYNCING_WORLD_PLAZA_VISIBLE_TILE_CHUNK_BUDGET_CHECK_TILE_STRIDE = 4;
 
 /** Minimum tiles drawn per call so a saturated budget still makes progress. */
-const SYNCING_WORLD_PLAZA_VISIBLE_TILE_CHUNK_MIN_TILES_PER_CALL = 8;
+const SYNCING_WORLD_PLAZA_VISIBLE_TILE_CHUNK_MIN_TILES_PER_CALL = 16;
 
 /** In-progress floor chunk bake resumed across frames. */
 export type SyncingWorldPlazaVisibleTileChunkPendingBuild = {
@@ -63,6 +64,11 @@ export interface SyncingWorldPlazaVisibleTileChunkGraphicsLayerInput {
   /** When false, caller runs sortChildren once after all mutations this tick. */
   readonly shouldSortChildrenImmediately?: boolean;
   /**
+   * When false, keep baking needed chunks even if trailing stale backlog is
+   * high. Floor uses false so run-in holes cannot open while prune catches up.
+   */
+  readonly shouldDeferBuildsOnStaleBacklog?: boolean;
+  /**
    * Partial chunk bakes resumed across frames. Keys match
    * {@link formattingWorldPlazaTileChunkCacheKey}.
    */
@@ -84,6 +90,28 @@ export interface SyncingWorldPlazaVisibleTileChunkGraphicsLayerResult {
   readonly chunksPruned: number;
   /** True when z-order must be refreshed on the parent container. */
   readonly needsChildSort: boolean;
+}
+
+/**
+ * True when a chunk origin's tile footprint still overlaps retention bounds.
+ */
+function checkingWorldPlazaFloorChunkKeyOverlapsBounds(
+  cacheKey: string,
+  chunkSizeTiles: number,
+  bounds: DefiningWorldPlazaVisibleTileBounds
+): boolean {
+  const separatorIndex = cacheKey.indexOf(':');
+  const chunkOriginTileX = Number(cacheKey.slice(0, separatorIndex));
+  const chunkOriginTileY = Number(cacheKey.slice(separatorIndex + 1));
+  const chunkMaxTileX = chunkOriginTileX + chunkSizeTiles - 1;
+  const chunkMaxTileY = chunkOriginTileY + chunkSizeTiles - 1;
+
+  return (
+    chunkMaxTileX >= bounds.minTileX &&
+    chunkOriginTileX <= bounds.maxTileX &&
+    chunkMaxTileY >= bounds.minTileY &&
+    chunkOriginTileY <= bounds.maxTileY
+  );
 }
 
 /**
@@ -166,11 +194,27 @@ export function syncingWorldPlazaVisibleTileChunkGraphicsLayer(
   );
   const shouldSortChildrenImmediately =
     input.shouldSortChildrenImmediately ?? false;
+  const shouldDeferBuildsOnStaleBacklog =
+    input.shouldDeferBuildsOnStaleBacklog ?? true;
   const pendingChunkBuilds = input.pendingChunkBuilds;
   const chunkOrigins = listingWorldPlazaTileChunkOriginsInBounds(
     input.bounds,
     input.chunkSizeTiles
   );
+  const retentionBounds: DefiningWorldPlazaVisibleTileBounds = {
+    minTileX:
+      input.bounds.minTileX -
+      DEFINING_WORLD_PLAZA_FLOOR_CHUNK_RETENTION_MARGIN_TILES,
+    maxTileX:
+      input.bounds.maxTileX +
+      DEFINING_WORLD_PLAZA_FLOOR_CHUNK_RETENTION_MARGIN_TILES,
+    minTileY:
+      input.bounds.minTileY -
+      DEFINING_WORLD_PLAZA_FLOOR_CHUNK_RETENTION_MARGIN_TILES,
+    maxTileY:
+      input.bounds.maxTileY +
+      DEFINING_WORLD_PLAZA_FLOOR_CHUNK_RETENTION_MARGIN_TILES,
+  };
   const neededKeys = new Set<string>();
   const missingChunkOrigins: typeof chunkOrigins = [];
 
@@ -205,25 +249,51 @@ export function syncingWorldPlazaVisibleTileChunkGraphicsLayer(
   const staleChunkKeys: string[] = [];
 
   for (const cacheKey of input.chunkGraphicsByKey.keys()) {
-    if (!neededKeys.has(cacheKey)) {
-      staleChunkKeys.push(cacheKey);
+    if (neededKeys.has(cacheKey)) {
+      continue;
     }
+
+    if (
+      checkingWorldPlazaFloorChunkKeyOverlapsBounds(
+        cacheKey,
+        input.chunkSizeTiles,
+        retentionBounds
+      )
+    ) {
+      continue;
+    }
+
+    staleChunkKeys.push(cacheKey);
   }
 
   if (pendingChunkBuilds) {
     for (const cacheKey of pendingChunkBuilds.keys()) {
-      if (!neededKeys.has(cacheKey)) {
-        staleChunkKeys.push(cacheKey);
+      if (neededKeys.has(cacheKey)) {
+        continue;
       }
+
+      if (
+        checkingWorldPlazaFloorChunkKeyOverlapsBounds(
+          cacheKey,
+          input.chunkSizeTiles,
+          retentionBounds
+        )
+      ) {
+        continue;
+      }
+
+      staleChunkKeys.push(cacheKey);
     }
   }
 
-  const { pruneBudget, shouldDeferBuilds } =
+  const { pruneBudget, shouldDeferBuilds: shouldDeferBuildsFromBacklog } =
     resolvingWorldPlazaTerrainCachePruneBudget({
       basePruneBudget,
       staleCount: staleChunkKeys.length,
       neededCount: neededKeys.size,
     });
+  const shouldDeferBuilds =
+    shouldDeferBuildsOnStaleBacklog && shouldDeferBuildsFromBacklog;
   const chunksToPrune = staleChunkKeys.slice(0, pruneBudget);
   let didMutateChildren = false;
   let chunksBuilt = 0;
@@ -346,6 +416,9 @@ export function syncingWorldPlazaVisibleTileChunkGraphicsLayer(
         chunkOriginTileX,
         chunkOriginTileY
       );
+      // Progressive bake: show tiles as they fill instead of hiding the whole
+      // chunk until complete (invisible pending = diamond see-through holes).
+      chunkGraphics.visible = true;
       input.parentContainer.addChild(chunkGraphics);
       didMutateChildren = true;
 
@@ -362,8 +435,6 @@ export function syncingWorldPlazaVisibleTileChunkGraphicsLayer(
         chunksStartedOrResumed += 1;
         continue;
       }
-
-      chunkGraphics.visible = false;
 
       const pendingBuild: SyncingWorldPlazaVisibleTileChunkPendingBuild = {
         graphics: chunkGraphics,

@@ -2,7 +2,7 @@
  * Mobile playtest debugging: URL flag, HUD styling, and copy labels.
  *
  * Enable the live HUD with `?debug=1` or `window.__WORLD_PLAZA_DEBUG__.enable()`.
- * Copy a full report any time from Settings → Copy debug report.
+ * Copy a full report from the debug HUD.
  *
  * @module components/world/domains/definingWorldPlazaMobileDebugConstants
  */

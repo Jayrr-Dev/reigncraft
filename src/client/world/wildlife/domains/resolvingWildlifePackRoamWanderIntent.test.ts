@@ -3,8 +3,8 @@ import {
   creatingWildlifeTestInstance,
 } from '@/components/world/wildlife/domains/creatingWildlifeTestFixtures';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
-import { DEFINING_WILDLIFE_GREY_WOLF_TERRITORY_CONFIG } from '@/components/world/wildlife/domains/definingWildlifeTerritoryConstants';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { DEFINING_WILDLIFE_GREY_WOLF_TERRITORY_CONFIG } from '@/components/world/wildlife/domains/definingWildlifeTerritoryConstants';
 import { resolvingWildlifePackRoamWanderIntent } from '@/components/world/wildlife/domains/resolvingWildlifePackRoamWanderIntent';
 import { resolvingWildlifeSpawnPackRoamFormation } from '@/components/world/wildlife/domains/resolvingWildlifeSpawnPackRoamFormation';
 import { describe, expect, it } from 'vitest';
@@ -142,16 +142,19 @@ describe('resolvingWildlifePackRoamWanderIntent', () => {
     }
   });
 
-  it('falls back to solo wander for non-stalker species', () => {
+  it('routes non-stalker herbivores into herd landmark wander', () => {
     const deer = creatingWildlifeTestInstance({
       speciesId: 'deer',
       anchorId: 'wildlife:2:2:0',
       instanceId: 'wildlife:2:2:0',
+      spawnAnchor: { x: 2.5, y: 2.5, layer: 1 },
+      position: { x: 2.5, y: 2.5, layer: 1 },
     });
 
-    const intent = resolvingWildlifePackRoamWanderIntent(
-      buildingWolfBlackboard(deer)
-    );
+    const intent = resolvingWildlifePackRoamWanderIntent({
+      ...buildingWolfBlackboard(deer),
+      species: DEFINING_WILDLIFE_SPECIES_REGISTRY.deer,
+    });
 
     expect(intent.mode === 'wander' || intent.mode === 'idle').toBe(true);
   });

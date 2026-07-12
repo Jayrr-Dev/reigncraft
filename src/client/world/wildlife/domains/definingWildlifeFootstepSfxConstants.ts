@@ -8,7 +8,14 @@
 export const DEFINING_WILDLIFE_FOOTSTEP_SFX_ENABLED = true;
 
 /** How often wildlife footstep SFX scans moving instances (ms). */
-export const DEFINING_WILDLIFE_FOOTSTEP_POLL_INTERVAL_MS = 80;
+export const DEFINING_WILDLIFE_FOOTSTEP_POLL_INTERVAL_MS = 120;
+
+/**
+ * Nearby biome surfaces change far less often than footstep cadence.
+ * Refresh preload selection separately so every audio poll does not rescan all
+ * wildlife and run procedural biome resolution.
+ */
+export const DEFINING_WILDLIFE_FOOTSTEP_SURFACE_REFRESH_INTERVAL_MS = 1_000;
 
 /** Grid distance where wildlife footstep SFX play at full event volume. */
 export const DEFINING_WILDLIFE_FOOTSTEP_FULL_VOLUME_DISTANCE_GRID = 3;
@@ -35,7 +42,7 @@ export const DEFINING_WILDLIFE_FOOTSTEP_INTERVAL_VISUAL_SIZE_EXPONENT = 0.38;
 export const DEFINING_WILDLIFE_FOOTSTEP_REFERENCE_WALK_SPEED_GRID_PER_SECOND = 1.5;
 
 /** Cap simultaneous wildlife footstep one-shots per poll tick. */
-export const DEFINING_WILDLIFE_FOOTSTEP_MAX_STEPS_PER_TICK = 4;
+export const DEFINING_WILDLIFE_FOOTSTEP_MAX_STEPS_PER_TICK = 2;
 
 /** Minimum interval between two steps from the same instance (ms). */
 export const DEFINING_WILDLIFE_FOOTSTEP_MIN_INSTANCE_INTERVAL_MS = 220;

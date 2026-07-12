@@ -8,8 +8,6 @@
 
 import {
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME,
-  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_ACTIVE_CLASS_NAME,
-  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
@@ -17,6 +15,9 @@ import {
   DEFINING_WILDLIFE_DEV_AGGRESSIVE_CHICKEN_SINGLE_SPAWN_COUNT,
   DEFINING_WILDLIFE_DEV_AGGRESSIVE_CHICKEN_SWARM_SPAWN_COUNT,
   DEFINING_WILDLIFE_DEV_SPAWN_SPECIES_GRID_COLUMN_COUNT,
+  STYLING_WILDLIFE_DEV_SPAWN_BIOME_CHIP_ACTIVE_CLASS_NAME,
+  STYLING_WILDLIFE_DEV_SPAWN_BIOME_CHIP_CLASS_NAME,
+  STYLING_WILDLIFE_DEV_SPAWN_BIOME_CHIP_ROW_CLASS_NAME,
   STYLING_WILDLIFE_DEV_SPAWN_SPECIES_BUTTON_CLASS_NAME,
   STYLING_WILDLIFE_DEV_SPAWN_SPECIES_GRID_SHELL_CLASS_NAME,
 } from '@/components/world/wildlife/domains/definingWildlifeDevSpawnConstants';
@@ -33,12 +34,6 @@ import { useMemo, useState } from 'react';
 
 const RENDERING_WORLD_PLAZA_DEV_WILDLIFE_BUTTON_CLASS_NAME =
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME;
-
-const RENDERING_WORLD_PLAZA_DEV_WILDLIFE_CHIP_CLASS_NAME =
-  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_CLASS_NAME;
-
-const RENDERING_WORLD_PLAZA_DEV_WILDLIFE_CHIP_ACTIVE_CLASS_NAME =
-  STYLING_WORLD_PLAZA_DEV_MODE_PANEL_CHIP_ACTIVE_CLASS_NAME;
 
 const RENDERING_WORLD_PLAZA_DEV_WILDLIFE_AGGRESSION_OPTIONS: readonly {
   id: DefiningWildlifeAggressionLevel;
@@ -129,11 +124,11 @@ export function RenderingWorldPlazaDevWildlifeSpawnerControls({
         />
       </label>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-0.5">
         <span className="text-[9px] font-semibold uppercase tracking-wide text-white/50">
           Biome
         </span>
-        <div className="flex flex-wrap gap-1">
+        <div className={STYLING_WILDLIFE_DEV_SPAWN_BIOME_CHIP_ROW_CLASS_NAME}>
           {biomeFilters.map((filter) => {
             const isActive = filter.id === biomeFilterId;
 
@@ -141,9 +136,9 @@ export function RenderingWorldPlazaDevWildlifeSpawnerControls({
               <button
                 key={filter.id}
                 type="button"
-                className={`${RENDERING_WORLD_PLAZA_DEV_WILDLIFE_CHIP_CLASS_NAME} ${
+                className={`${STYLING_WILDLIFE_DEV_SPAWN_BIOME_CHIP_CLASS_NAME} ${
                   isActive
-                    ? RENDERING_WORLD_PLAZA_DEV_WILDLIFE_CHIP_ACTIVE_CLASS_NAME
+                    ? STYLING_WILDLIFE_DEV_SPAWN_BIOME_CHIP_ACTIVE_CLASS_NAME
                     : ''
                 }`}
                 onClick={() => setBiomeFilterId(filter.id)}

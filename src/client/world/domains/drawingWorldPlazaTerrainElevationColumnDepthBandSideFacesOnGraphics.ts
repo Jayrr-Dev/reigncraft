@@ -1,12 +1,12 @@
-import { computingWorldBuildingWorldLayerScreenOffsetPx } from "@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx";
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
-import { adjustingWorldPlazaRgbColorBrightness } from "@/components/world/domains/blendingWorldPlazaRgbColors";
-import { computingWorldPlazaIsometricColumnSideFaceFillColorsFromBaseSideFillColor } from "@/components/world/domains/computingWorldPlazaIsometricColumnSideFaceFillColorsFromBaseSideFillColor";
-import { computingWorldPlazaTerrainElevationSideFillBrightnessAdjustmentFromNormalizedElevation } from "@/components/world/domains/computingWorldPlazaTerrainElevationSideFillBrightnessAdjustmentFromNormalizedElevation";
+import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import { adjustingWorldPlazaRgbColorBrightness } from '@/components/world/domains/blendingWorldPlazaRgbColors';
+import { computingWorldPlazaIsometricColumnSideFaceFillColorsFromBaseSideFillColor } from '@/components/world/domains/computingWorldPlazaIsometricColumnSideFaceFillColorsFromBaseSideFillColor';
+import { computingWorldPlazaTerrainElevationSideFillBrightnessAdjustmentFromNormalizedElevation } from '@/components/world/domains/computingWorldPlazaTerrainElevationSideFillBrightnessAdjustmentFromNormalizedElevation';
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
-} from "@/components/world/domains/definingWorldPlazaIsometricConstants";
+} from '@/components/world/domains/definingWorldPlazaIsometricConstants';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_SIDE_FILL_ALPHA,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MAX_LAYER,
@@ -15,8 +15,8 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SIDE_FILL_COLUMN_DEPTH_BLEND_WEIGHT,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SIDE_FILL_DEPTH_BAND_LAYER_SPAN,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SIDE_FILL_DEPTH_BAND_MAX_COUNT,
-} from "@/components/world/domains/definingWorldPlazaTerrainElevationConstants";
-import type { Graphics } from "pixi.js";
+} from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
+import type { Graphics } from 'pixi.js';
 
 /**
  * Draws terrain column side faces with a vertical brightness gradient.
@@ -31,17 +31,21 @@ export interface DrawingWorldPlazaTerrainElevationColumnDepthBandSideFacesParams
   readonly groundCenterY: number;
   readonly surfaceLayer: number;
   readonly baseSideFillColor: number;
+  /** Surface under the visible left face (`tileY + 1`). */
+  readonly leftFaceNeighborSurfaceLayer: number;
+  /** Surface under the visible right face (`tileX + 1`). */
+  readonly rightFaceNeighborSurfaceLayer: number;
 }
 
 /**
- * Resolves the screen Y center for the top of a world layer column segment.
+ * Resolves the screen Y center for a terrain surface layer.
  *
  * @param groundCenterY - Ground tile center Y in screen space.
  * @param worldLayer - One-based world layer.
  */
-function resolvingWorldPlazaTerrainElevationColumnTopCenterY(
+function resolvingWorldPlazaTerrainElevationSurfaceCenterY(
   groundCenterY: number,
-  worldLayer: number,
+  worldLayer: number
 ): number {
   if (worldLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND) {
     return groundCenterY;
@@ -52,28 +56,10 @@ function resolvingWorldPlazaTerrainElevationColumnTopCenterY(
   );
 }
 
-/**
- * Resolves the screen Y center for the bottom of a world layer column segment.
- *
- * @param groundCenterY - Ground tile center Y in screen space.
- * @param worldLayer - One-based world layer.
- */
-function resolvingWorldPlazaTerrainElevationColumnBottomCenterY(
-  groundCenterY: number,
-  worldLayer: number,
-): number {
-  if (worldLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND) {
-    return groundCenterY;
-  }
-
-  return resolvingWorldPlazaTerrainElevationColumnTopCenterY(
-    groundCenterY,
-    worldLayer - 1,
-  );
-}
+type DrawingWorldPlazaTerrainElevationVisibleSideFaceKind = 'left' | 'right';
 
 /**
- * Draws one isometric side-face pair for a vertical band on a terrain column.
+ * Draws one visible isometric side face for a vertical terrain band.
  *
  * @param graphics - Pixi graphics instance.
  * @param centerX - Tile center X in screen space.
@@ -87,12 +73,13 @@ function drawingWorldPlazaTerrainElevationColumnSideFaceBandOnGraphics(
   topCenterY: number,
   bottomCenterY: number,
   sideFillColor: number,
+  faceKind: DrawingWorldPlazaTerrainElevationVisibleSideFaceKind
 ): void {
   const halfWidth = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
   const halfHeight = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX;
   const { leftSideFillColor, rightSideFillColor } =
     computingWorldPlazaIsometricColumnSideFaceFillColorsFromBaseSideFillColor(
-      sideFillColor,
+      sideFillColor
     );
 
   const westTopX = centerX - halfWidth;
@@ -108,21 +95,24 @@ function drawingWorldPlazaTerrainElevationColumnSideFaceBandOnGraphics(
   const eastBottomX = centerX + halfWidth;
   const eastBottomY = bottomCenterY;
 
-  graphics
-    .poly([
-      westTopX,
-      westTopY,
-      southTopX,
-      southTopY,
-      southBottomX,
-      southBottomY,
-      westBottomX,
-      westBottomY,
-    ])
-    .fill({
-      color: leftSideFillColor,
-      alpha: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_SIDE_FILL_ALPHA,
-    });
+  if (faceKind === 'left') {
+    graphics
+      .poly([
+        westTopX,
+        westTopY,
+        southTopX,
+        southTopY,
+        southBottomX,
+        southBottomY,
+        westBottomX,
+        westBottomY,
+      ])
+      .fill({
+        color: leftSideFillColor,
+        alpha: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_SIDE_FILL_ALPHA,
+      });
+    return;
+  }
 
   graphics
     .poly([
@@ -149,7 +139,7 @@ function drawingWorldPlazaTerrainElevationColumnSideFaceBandOnGraphics(
  */
 function resolvingWorldPlazaTerrainElevationColumnSideFillBrightnessAdjustment(
   surfaceLayer: number,
-  bandMidLayer: number,
+  bandMidLayer: number
 ): number {
   const elevationLayerSpan =
     DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MAX_LAYER -
@@ -161,7 +151,7 @@ function resolvingWorldPlazaTerrainElevationColumnSideFillBrightnessAdjustment(
         elevationLayerSpan;
   const columnLayerSpan = Math.max(
     1,
-    surfaceLayer - DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MIN_LAYER,
+    surfaceLayer - DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MIN_LAYER
   );
   const columnNormalizedElevation =
     (bandMidLayer - DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MIN_LAYER) /
@@ -173,7 +163,7 @@ function resolvingWorldPlazaTerrainElevationColumnSideFillBrightnessAdjustment(
       DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SIDE_FILL_ABSOLUTE_ELEVATION_BLEND_WEIGHT;
 
   return computingWorldPlazaTerrainElevationSideFillBrightnessAdjustmentFromNormalizedElevation(
-    blendedNormalizedElevation,
+    blendedNormalizedElevation
   );
 }
 
@@ -183,7 +173,7 @@ function resolvingWorldPlazaTerrainElevationColumnSideFillBrightnessAdjustment(
  * @param params - Tile center, surface layer, and base side color.
  */
 export function drawingWorldPlazaTerrainElevationColumnDepthBandSideFacesOnGraphics(
-  params: DrawingWorldPlazaTerrainElevationColumnDepthBandSideFacesParams,
+  params: DrawingWorldPlazaTerrainElevationColumnDepthBandSideFacesParams
 ): void {
   const { graphics, centerX, groundCenterY, surfaceLayer, baseSideFillColor } =
     params;
@@ -192,61 +182,81 @@ export function drawingWorldPlazaTerrainElevationColumnDepthBandSideFacesOnGraph
     return;
   }
 
-  const bandCount = Math.min(
-    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SIDE_FILL_DEPTH_BAND_MAX_COUNT,
-    Math.max(
-      1,
-      Math.ceil(
-        surfaceLayer /
-          DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SIDE_FILL_DEPTH_BAND_LAYER_SPAN,
-      ),
-    ),
-  );
+  const visibleFaces = [
+    {
+      faceKind: 'left',
+      neighborSurfaceLayer: params.leftFaceNeighborSurfaceLayer,
+    },
+    {
+      faceKind: 'right',
+      neighborSurfaceLayer: params.rightFaceNeighborSurfaceLayer,
+    },
+  ] as const;
 
-  for (let bandIndex = 0; bandIndex < bandCount; bandIndex += 1) {
-    const bandBottomLayer =
-      DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MIN_LAYER +
-      Math.floor((bandIndex * (surfaceLayer - 1)) / bandCount);
-    let bandTopLayer =
-      DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MIN_LAYER +
-      Math.floor(((bandIndex + 1) * (surfaceLayer - 1)) / bandCount);
+  for (const visibleFace of visibleFaces) {
+    const faceBottomLayer = Math.max(
+      DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MIN_LAYER,
+      visibleFace.neighborSurfaceLayer
+    );
+    const exposedLayerSpan = surfaceLayer - faceBottomLayer;
 
-    if (bandIndex === bandCount - 1) {
-      bandTopLayer = surfaceLayer;
-    }
-
-    if (bandTopLayer <= bandBottomLayer) {
+    if (exposedLayerSpan <= 0) {
       continue;
     }
 
-    const bandMidLayer = (bandBottomLayer + bandTopLayer) / 2;
-    const brightnessAdjustment =
-      resolvingWorldPlazaTerrainElevationColumnSideFillBrightnessAdjustment(
-        surfaceLayer,
-        bandMidLayer,
-      );
-    const bandSideFillColor = adjustingWorldPlazaRgbColorBrightness(
-      baseSideFillColor,
-      brightnessAdjustment,
+    const bandCount = Math.min(
+      DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SIDE_FILL_DEPTH_BAND_MAX_COUNT,
+      Math.max(
+        1,
+        Math.ceil(
+          exposedLayerSpan /
+            DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SIDE_FILL_DEPTH_BAND_LAYER_SPAN
+        )
+      )
     );
-    const bandTopCenterY = resolvingWorldPlazaTerrainElevationColumnTopCenterY(
-      groundCenterY,
-      bandTopLayer,
-    );
-    const bandBottomCenterY =
-      bandBottomLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND
-        ? groundCenterY
-        : resolvingWorldPlazaTerrainElevationColumnBottomCenterY(
-            groundCenterY,
-            bandBottomLayer,
-          );
 
-    drawingWorldPlazaTerrainElevationColumnSideFaceBandOnGraphics(
-      graphics,
-      centerX,
-      bandTopCenterY,
-      bandBottomCenterY,
-      bandSideFillColor,
-    );
+    for (let bandIndex = 0; bandIndex < bandCount; bandIndex += 1) {
+      const bandBottomLayer =
+        faceBottomLayer +
+        Math.floor((bandIndex * exposedLayerSpan) / bandCount);
+      const bandTopLayer =
+        bandIndex === bandCount - 1
+          ? surfaceLayer
+          : faceBottomLayer +
+            Math.floor(((bandIndex + 1) * exposedLayerSpan) / bandCount);
+
+      if (bandTopLayer <= bandBottomLayer) {
+        continue;
+      }
+
+      const bandMidLayer = (bandBottomLayer + bandTopLayer) / 2;
+      const brightnessAdjustment =
+        resolvingWorldPlazaTerrainElevationColumnSideFillBrightnessAdjustment(
+          surfaceLayer,
+          bandMidLayer
+        );
+      const bandSideFillColor = adjustingWorldPlazaRgbColorBrightness(
+        baseSideFillColor,
+        brightnessAdjustment
+      );
+      const bandTopCenterY = resolvingWorldPlazaTerrainElevationSurfaceCenterY(
+        groundCenterY,
+        bandTopLayer
+      );
+      const bandBottomCenterY =
+        resolvingWorldPlazaTerrainElevationSurfaceCenterY(
+          groundCenterY,
+          bandBottomLayer
+        );
+
+      drawingWorldPlazaTerrainElevationColumnSideFaceBandOnGraphics(
+        graphics,
+        centerX,
+        bandTopCenterY,
+        bandBottomCenterY,
+        bandSideFillColor,
+        visibleFace.faceKind
+      );
+    }
   }
 }

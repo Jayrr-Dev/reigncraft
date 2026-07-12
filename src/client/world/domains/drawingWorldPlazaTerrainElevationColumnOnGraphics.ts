@@ -132,6 +132,16 @@ export function drawingWorldPlazaTerrainElevationColumnOnGraphics(
       groundCenterY: center.y,
       surfaceLayer,
       baseSideFillColor: terrainSideFillColor,
+      leftFaceNeighborSurfaceLayer:
+        resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
+          tileX,
+          tileY + 1
+        ),
+      rightFaceNeighborSurfaceLayer:
+        resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
+          tileX + 1,
+          tileY
+        ),
     });
 
     drawingWorldBuildingIsometricTileColumnExtrusionSpanOnGraphics({
@@ -188,6 +198,16 @@ export function drawingWorldPlazaTerrainElevationColumnOnGraphics(
     groundCenterY: center.y,
     surfaceLayer,
     baseSideFillColor: colors.sideFillColor,
+    leftFaceNeighborSurfaceLayer:
+      resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
+        tileX,
+        tileY + 1
+      ),
+    rightFaceNeighborSurfaceLayer:
+      resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
+        tileX + 1,
+        tileY
+      ),
   });
 
   drawingWorldBuildingIsometricTileColumnExtrusionSpanOnGraphics({

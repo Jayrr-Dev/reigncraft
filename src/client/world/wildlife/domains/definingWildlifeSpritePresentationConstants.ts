@@ -8,8 +8,9 @@
  * @module components/world/wildlife/domains/definingWildlifeSpritePresentationConstants
  */
 
-import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { DEFINING_WILDLIFE_FAIRY_PRESENTATION_FRAME_HEIGHT_PX } from '@/components/world/wildlife/domains/definingWildlifeFairyConstants';
 import { DEFINING_WILDLIFE_SPRITE_SHEET_DEFAULT_FRAME_HEIGHT_PX } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetFrameHeightByFolder';
+import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type DefiningWildlifeSpeciesSpritePresentation = {
   anchorYNormalized: number;
@@ -18,9 +19,8 @@ export type DefiningWildlifeSpeciesSpritePresentation = {
 };
 
 /** Partial override; omitted fields fall back to the shared quadruped defaults. */
-export type DefiningWildlifeSpeciesSpritePresentationOverride = Partial<
-  DefiningWildlifeSpeciesSpritePresentation
->;
+export type DefiningWildlifeSpeciesSpritePresentationOverride =
+  Partial<DefiningWildlifeSpeciesSpritePresentation>;
 
 /** Default anchor/foot layout; frame height is filled from the sheet map. */
 export const DEFINING_WILDLIFE_DEFAULT_SPRITE_PRESENTATION: DefiningWildlifeSpeciesSpritePresentation =
@@ -75,5 +75,10 @@ export const DEFINING_WILDLIFE_SPECIES_SPRITE_PRESENTATION_OVERRIDES: Partial<
   giraffe: {
     anchorYNormalized: 0.68,
     footYNormalized: 0.68,
+  },
+  fairy: {
+    anchorYNormalized: 0.5,
+    footYNormalized: 0.5,
+    frameHeightPx: DEFINING_WILDLIFE_FAIRY_PRESENTATION_FRAME_HEIGHT_PX,
   },
 };

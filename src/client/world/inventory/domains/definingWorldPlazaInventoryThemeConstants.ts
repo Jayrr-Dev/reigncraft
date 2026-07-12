@@ -79,6 +79,10 @@ export const STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS =
 export const STYLING_WORLD_PLAZA_INVENTORY_BAG_POPOVER_LABEL_CLASS =
   `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventoryBagPopoverLabel} mb-1.5 text-center font-body text-[10px] font-semibold leading-none` as const;
 
+/** Compact Iconify glyph beside the bag popover title. */
+export const STYLING_WORLD_PLAZA_INVENTORY_BAG_POPOVER_LABEL_ICON_CLASS =
+  'size-3 shrink-0' as const;
+
 /** Loading copy on the hotbar shell (size via viewport styles). */
 export const STYLING_WORLD_PLAZA_INVENTORY_LOADING_TEXT_CLASS =
   `font-medium italic ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.textInkSoft}` as const;

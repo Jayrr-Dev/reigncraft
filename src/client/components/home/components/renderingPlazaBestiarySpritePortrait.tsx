@@ -18,7 +18,8 @@ export type RenderingPlazaBestiarySpritePortraitProps = {
 };
 
 /**
- * One front-facing idle frame cropped from the species sprite sheet.
+ * One front-facing idle frame cropped from the species sprite sheet, or a
+ * gold glow orb for procedural companions without sheets.
  * Locked entries render it as a dark silhouette; sighted entries show it fully.
  */
 export function RenderingPlazaBestiarySpritePortrait({
@@ -34,6 +35,41 @@ export function RenderingPlazaBestiarySpritePortrait({
 
   if (!portrait) {
     return null;
+  }
+
+  if (portrait.kind === 'glowOrb') {
+    const isSilhouette = variant === 'silhouette';
+
+    return (
+      <span
+        className={`pointer-events-none relative block ${className}`.trim()}
+        aria-hidden
+        style={{
+          transform: `scale(${zoom})`,
+          filter: isSilhouette
+            ? DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER
+            : 'drop-shadow(0 2px 3px rgba(0,0,0,0.45))',
+        }}
+      >
+        <span
+          className="absolute left-1/2 top-1/2 size-[70%] -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{
+            background: isSilhouette
+              ? 'radial-gradient(circle, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.35) 55%, transparent 75%)'
+              : `radial-gradient(circle, ${portrait.auraColorCss}cc 0%, ${portrait.auraColorCss}66 40%, transparent 72%)`,
+          }}
+        />
+        <span
+          className="absolute left-1/2 top-1/2 size-[22%] -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{
+            backgroundColor: isSilhouette ? '#000000' : portrait.coreColorCss,
+            boxShadow: isSilhouette
+              ? undefined
+              : `0 0 10px ${portrait.auraColorCss}`,
+          }}
+        />
+      </span>
+    );
   }
 
   return (

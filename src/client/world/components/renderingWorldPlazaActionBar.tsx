@@ -1,8 +1,8 @@
 'use client';
 
 /**
- * Top-centered plaza action bar for chat, friends, claim, build, character
- * transform, and fullscreen.
+ * Top-centered plaza action bar for settings, chat, friends, claim, build,
+ * character transform, and fullscreen.
  *
  * @module components/world/components/renderingWorldPlazaActionBar
  */
@@ -22,7 +22,6 @@ import {
   LABELING_WORLD_PLAZA_ACTION_BAR_CHAT,
   LABELING_WORLD_PLAZA_ACTION_BAR_CLAIM,
   LABELING_WORLD_PLAZA_ACTION_BAR_FRIENDS,
-  LABELING_WORLD_PLAZA_ACTION_BAR_HOME,
   LABELING_WORLD_PLAZA_ACTION_BAR_TRANSFORM,
   STYLING_WORLD_PLAZA_ACTION_BAR_FRIENDS_NOTIFICATION_BADGE,
   STYLING_WORLD_PLAZA_ACTION_BAR_LIGHT_THEME_SCOPE_CLASS,
@@ -54,7 +53,6 @@ import { cn } from '@/lib/utils';
 import {
   BookOpen,
   Hammer,
-  Home,
   MapPinned,
   Maximize2,
   MessageCircle,
@@ -191,23 +189,6 @@ export function RenderingWorldPlazaActionBar({
         >
           {!isChatOpen ? (
             <>
-              {onExitToHome ? (
-                <button
-                  type="button"
-                  aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_HOME}
-                  onClick={() => {
-                    setIsExitHomeConfirmOpen(true);
-                  }}
-                  className={stylingWorldPlazaActionBarButton(false)}
-                  style={viewportStyles.buttonStyle}
-                >
-                  <Home
-                    className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
-                    style={viewportStyles.iconStyle}
-                    aria-hidden="true"
-                  />
-                </button>
-              ) : null}
               <div
                 className={
                   STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME
@@ -232,6 +213,14 @@ export function RenderingWorldPlazaActionBar({
                 </button>
                 <RenderingWorldPlazaMasterVolumeMixerPanel
                   isOpen={isSoundMixerOpen}
+                  onRequestExitToHome={
+                    onExitToHome
+                      ? () => {
+                          setIsSoundMixerOpen(false);
+                          setIsExitHomeConfirmOpen(true);
+                        }
+                      : undefined
+                  }
                 />
               </div>
               {onSelectCodexSection ? (

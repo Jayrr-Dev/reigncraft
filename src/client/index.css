@@ -1424,6 +1424,8 @@ body {
  * Paint tokens: definingWorldPlazaGameplayHudStyleConstants.ts → cssShell.inventoryHotbarShell */
 .plaza-inventory-hotbar-shell {
   position: relative;
+  transform: translateZ(0);
+  backface-visibility: hidden;
   background:
     radial-gradient(
       ellipse at 30% 20%,
@@ -1504,6 +1506,32 @@ body {
     0 0 0 2px #2a2620,
     0 0 0 3px var(--color-poster-gold),
     0 0 8px rgba(217, 164, 65, 0.45);
+}
+
+/* Mobile WebViews repaint blur-heavy DOM shadows over the moving WebGL canvas.
+ * Keep the same depth cues with cheaper, tighter shadows. */
+@media (max-width: 767px), (pointer: coarse) {
+  .plaza-inventory-hotbar-shell {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 250, 230, 0.55),
+      0 3px 0 rgba(61, 42, 31, 0.55),
+      0 5px 8px rgba(20, 28, 26, 0.28);
+  }
+
+  .plaza-inventory-slot,
+  .plaza-inventory-slot--empty,
+  .plaza-inventory-slot--weapon-tool {
+    box-shadow:
+      inset 2px 2px 3px rgba(40, 26, 18, 0.48),
+      inset -1px -1px 1px rgba(255, 250, 230, 0.1);
+  }
+
+  .plaza-inventory-slot--equipped,
+  .plaza-inventory-slot--weapon-tool.plaza-inventory-slot--equipped {
+    box-shadow:
+      inset 2px 2px 3px rgba(40, 26, 18, 0.48),
+      0 0 0 2px var(--color-poster-gold);
+  }
 }
 
 /* Bag popover title — legible on teal glass panels.

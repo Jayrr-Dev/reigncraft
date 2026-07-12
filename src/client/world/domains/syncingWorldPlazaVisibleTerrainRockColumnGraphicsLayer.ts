@@ -1,4 +1,4 @@
-import { checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex';
+import { checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex } from '@/components/world/domains/checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_DEFAULT_BUILD_BUDGET,
   checkingWorldPlazaStoneDecorationUsesColumnRockRendering,
@@ -56,12 +56,7 @@ function listingWorldPlazaVisibleTerrainRockColumnCandidatesInBounds(
 
   for (let tileY = bounds.minTileY; tileY <= bounds.maxTileY; tileY += 1) {
     for (let tileX = bounds.minTileX; tileX <= bounds.maxTileX; tileX += 1) {
-      if (
-        !checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex(
-          tileX,
-          tileY
-        )
-      ) {
+      if (!checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex(tileX, tileY)) {
         continue;
       }
 

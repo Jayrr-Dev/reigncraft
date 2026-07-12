@@ -59,14 +59,22 @@ export const DEFINING_WORLD_PLAZA_STONE_TILE_REMAINDER = 0;
 /**
  * Horizontal placement jitter inside the tile (pixels, +/-).
  * Wide enough to wander across a 64px iso diamond without hugging center.
+ * Effective range shrinks by body half-width + edge padding at resolve time.
  */
 export const DEFINING_WORLD_PLAZA_STONE_JITTER_X_PX = 20;
 
 /**
  * Vertical placement jitter inside the tile (pixels, +/-).
  * Matches the flatter 32px iso diamond height with a small edge inset.
+ * Effective range shrinks by body half-height + edge padding at resolve time.
  */
 export const DEFINING_WORLD_PLAZA_STONE_JITTER_Y_PX = 10;
+
+/**
+ * Extra inset (px) kept between the stone body edge and the jitter max.
+ * Kept small so pebbles still wander; body half-extent already clears the worst clip.
+ */
+export const DEFINING_WORLD_PLAZA_STONE_JITTER_EDGE_PADDING_PX = 0;
 
 /** Ground shadow fill color. */
 export const DEFINING_WORLD_PLAZA_STONE_SHADOW_COLOR = 0x21261f;

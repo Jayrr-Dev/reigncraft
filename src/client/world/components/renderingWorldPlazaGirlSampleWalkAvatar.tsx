@@ -32,6 +32,7 @@ import {
 } from '@/components/world/character/hooks/usingWorldPlazaSelectedCharacterEngineDefinition';
 import { resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint } from '@/components/world/collision';
 import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
+import { RenderingWorldPlazaAvatarCharacterSwitchEffect } from '@/components/world/components/renderingWorldPlazaAvatarCharacterSwitchEffect';
 import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
 import { advancingWorldPlazaGirlSampleCombatPresentation } from '@/components/world/domains/advancingWorldPlazaGirlSampleCombatPresentation';
 import { applyingWorldPlazaGirlSampleAvatarMotionToSpriteWithFallback } from '@/components/world/domains/applyingWorldPlazaGirlSampleAvatarMotionToSpriteWithFallback';
@@ -674,10 +675,15 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         characterDefinition.anchorXNormalized,
         characterDefinition.anchorYNormalized
       );
-      sprite.scale.set(effectiveSpriteScale);
+      // Only apply the selected skin scale once that skin's textures are ready.
+      // Otherwise a high scale (dogs/cats) lands on leftover large-frame art
+      // from girl/fox and the avatar looks giant until the query resolves.
+      if (characterTextures) {
+        sprite.scale.set(effectiveSpriteScale);
+      }
       sprite.eventMode = 'none';
     },
-    [characterDefinition, effectiveSpriteScale]
+    [characterDefinition, characterTextures, effectiveSpriteScale]
   );
 
   useEffect(() => {
@@ -2298,6 +2304,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       combatSpritePresentation.anchorXNormalized,
       combatSpritePresentation.anchorYNormalized
     );
+    sprite.scale.set(effectiveSpriteScale);
 
     applyingWorldPlazaGirlSampleAvatarMotionToSpriteWithFallback({
       sprite,
@@ -2546,6 +2553,14 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           eventMode="none"
         />
         <pixiSprite ref={attachingAvatarSprite} />
+        <RenderingWorldPlazaAvatarCharacterSwitchEffect
+          skinId={characterDefinition.skinId}
+          footOffsetBelowGridAnchorPx={
+            resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx(
+              characterDefinition
+            ) * characterEngineDerivedStats.sizeScale
+          }
+        />
         <pixiSprite
           ref={(sprite) => {
             avatarHeldItemSpriteRef.current = sprite;

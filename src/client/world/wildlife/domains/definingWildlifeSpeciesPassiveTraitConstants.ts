@@ -1,9 +1,13 @@
 /**
- * Permanent species passives (spawn health modifiers and behavior traits).
+ * Permanent species passives (spawn health modifiers and behavior trait knobs).
+ *
+ * Opt-in trait ids live in `definingWildlifePassiveTraitRegistry.ts`. Tunables
+ * that those traits consume (restore ratios, shell bias, etc.) stay here.
  *
  * @module components/world/wildlife/domains/definingWildlifeSpeciesPassiveTraitConstants
  */
 
+import { DEFINING_WILDLIFE_PASSIVE_TRAIT_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifePassiveTraitRegistry';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 /** Turtle shell: defender roll skew toward blocked (same units as tower-shield). */
@@ -26,7 +30,23 @@ export const DEFINING_WILDLIFE_TURTLE_OBESE_SIZE_AND_HEALTH_BOOST_MULTIPLIER = 1
 export const DEFINING_WILDLIFE_ADRENALINE_RUSH_STAMINA_RESTORE_RATIO = 1;
 
 /** Catalog / bestiary label for the flee-stamina restore passive. */
-export const DEFINING_WILDLIFE_ADRENALINE_RUSH_TRAIT_NAME = 'Adrenaline Rush';
+export const DEFINING_WILDLIFE_ADRENALINE_RUSH_TRAIT_NAME =
+  DEFINING_WILDLIFE_PASSIVE_TRAIT_REGISTRY['adrenaline-rush'].displayName;
+
+/** Catalog / bestiary label for wildlife that never draw predator aggro. */
+export const DEFINING_WILDLIFE_NEVER_TRIGGERS_WILDLIFE_AGGRO_TRAIT_NAME =
+  DEFINING_WILDLIFE_PASSIVE_TRAIT_REGISTRY['never-triggers-wildlife-aggro']
+    .displayName;
+
+/** Catalog / bestiary label for undying wildlife. */
+export const DEFINING_WILDLIFE_IMMORTAL_TRAIT_NAME =
+  DEFINING_WILDLIFE_PASSIVE_TRAIT_REGISTRY.immortal.displayName;
+
+/**
+ * After an Unnoticed animal lands a hit on wildlife, predators may hunt it
+ * until this many ms later.
+ */
+export const DEFINING_WILDLIFE_UNNOTICED_PROVOKE_DURATION_MS = 45_000;
 
 /** True when this species uses the oversized obese-turtle presentation. */
 export function checkingWildlifeSpeciesHasObeseTurtleBoost(

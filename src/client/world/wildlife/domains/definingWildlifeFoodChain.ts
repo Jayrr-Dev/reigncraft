@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/definingWildlifeFoodChain
  */
 
+import { checkingWildlifeSpeciesNeverTriggersWildlifeAggro } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesNeverTriggersWildlifeAggro';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeAggressionLevel,
@@ -19,12 +20,26 @@ export const DEFINING_WILDLIFE_SCAVENGER_MAX_PREY_MASS_RATIO = 1.4;
 
 /**
  * Returns true when predator may hunt prey based on trophic tier and mass.
+ *
+ * Unnoticed prey are skipped for opportunistic hunting unless they recently
+ * attacked wildlife (`preyHasProvokedWildlifeAggro`). Damage-based threat on
+ * the victim still applies regardless of this check.
  */
 export function checkingWildlifePredatorMayHuntPrey(
   predator: DefiningWildlifeSpeciesDefinition,
   prey: DefiningWildlifeSpeciesDefinition,
-  hungerDriveLevel: 'hungry' | 'starving' = 'hungry'
+  hungerDriveLevel: 'hungry' | 'starving' = 'hungry',
+  options?: {
+    preyHasProvokedWildlifeAggro?: boolean;
+  }
 ): boolean {
+  if (
+    checkingWildlifeSpeciesNeverTriggersWildlifeAggro(prey) &&
+    !options?.preyHasProvokedWildlifeAggro
+  ) {
+    return false;
+  }
+
   if (predator.preyDenySpeciesIds?.includes(prey.speciesId)) {
     return false;
   }

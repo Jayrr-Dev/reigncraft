@@ -1,5 +1,6 @@
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
 import { resolvingWorldPlazaEquipmentAttackEvModifier } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
+import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import { computingWorldPlazaInventoryItemResolvedCost } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemResolvedCost';
 import { DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_DEFAULT_BREAK_CHANCE_AT_ZERO } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDurabilityConstants';
@@ -13,6 +14,7 @@ import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_RARITY_LABELS } from '@/components/
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_SPECIAL_TAG_LABELS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemSpecialTagConstants';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import { formattingWorldPlazaInventoryItemDurabilityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemDurabilityLabel';
+import { resolvingWorldPlazaInventoryFoodHealAmount } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealAmount';
 import { resolvingWorldPlazaInventoryItemDescription } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDescription';
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
 import {
@@ -62,6 +64,8 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModelOptions = {
   readonly studyCountsBySpeciesId?: Readonly<
     Partial<Record<DefiningWildlifeSpeciesId, number>>
   >;
+  /** Local player effective max HP for food heal preview. */
+  readonly playerEffectiveMaxHealth?: number;
 };
 
 function resolvingWorldPlazaInventoryItemRarityBadgeVariant(
@@ -91,12 +95,14 @@ function listingWorldPlazaInventoryItemDetailBadges(
   options: {
     readonly isEquipped: boolean;
     readonly includeFoodHungerBadge?: boolean;
+    readonly playerEffectiveMaxHealth?: number;
   }
 ): DefiningWorldPlazaInventoryItemDetailBadge[] {
   const badges: DefiningWorldPlazaInventoryItemDetailBadge[] = [
     {
       id: 'rarity',
-      label: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_RARITY_LABELS[definition.rarity],
+      label:
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_RARITY_LABELS[definition.rarity],
       variant: resolvingWorldPlazaInventoryItemRarityBadgeVariant(
         definition.rarity
       ),
@@ -140,6 +146,25 @@ function listingWorldPlazaInventoryItemDetailBadges(
       label: `Restores ${Math.round(definition.food.hungerRestoreRatio * 100)}% hunger`,
       variant: 'food',
     });
+
+    const healthHealAmount = resolvingWorldPlazaInventoryFoodHealAmount({
+      healthHeal: definition.food.healthHeal,
+      effectiveMaxHealth:
+        options.playerEffectiveMaxHealth ??
+        DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX,
+      foodItemMetadata: item.metadata,
+    });
+
+    if (healthHealAmount > 0) {
+      badges.push({
+        id: 'food-heal',
+        label:
+          options.playerEffectiveMaxHealth !== undefined
+            ? `Heals ${healthHealAmount} HP`
+            : `Heals ~${healthHealAmount} HP`,
+        variant: 'food',
+      });
+    }
   }
 
   if (definition.equipment) {
@@ -353,6 +378,8 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       ? resolvingWorldPlazaInventoryWildlifeMeatDetailContent(foodDefinition, {
           studyCount: wildlifeStudyCount,
           fallbackName: definition.name,
+          foodItemMetadata: item.metadata,
+          effectiveMaxHealth: options.playerEffectiveMaxHealth,
         })
       : null;
   const includeGenericMeta =
@@ -396,6 +423,7 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     {
       isEquipped: options.isEquipped,
       includeFoodHungerBadge: !isWildlifeMeat,
+      playerEffectiveMaxHealth: options.playerEffectiveMaxHealth,
     }
   );
   const genericInfoRows = listingWorldPlazaInventoryItemDetailInfoRows(

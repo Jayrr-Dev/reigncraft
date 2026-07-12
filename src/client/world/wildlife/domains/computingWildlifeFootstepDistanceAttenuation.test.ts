@@ -1,5 +1,9 @@
 import { computingWildlifeFootstepDistanceAttenuation } from '@/components/world/wildlife/domains/computingWildlifeFootstepDistanceAttenuation';
 import {
+  computingWildlifeFootstepEffectiveVolume,
+  computingWildlifeFootstepEffectiveVolumeAtDistance,
+} from '@/components/world/wildlife/domains/computingWildlifeFootstepEffectiveVolume';
+import {
   DEFINING_WILDLIFE_FOOTSTEP_FULL_VOLUME_DISTANCE_GRID,
   DEFINING_WILDLIFE_FOOTSTEP_MAX_AUDIBLE_DISTANCE_GRID,
 } from '@/components/world/wildlife/domains/definingWildlifeFootstepSfxConstants';
@@ -27,5 +31,20 @@ describe('computingWildlifeFootstepDistanceAttenuation', () => {
         y: 0,
       })
     ).toBe(0);
+  });
+
+  it('matches point-based volume when distance is already known', () => {
+    const sourcePoint = { x: 6, y: 8 };
+    const distanceGrid = 10;
+
+    expect(
+      computingWildlifeFootstepEffectiveVolumeAtDistance('medium', distanceGrid)
+    ).toBe(
+      computingWildlifeFootstepEffectiveVolume(
+        'medium',
+        sourcePoint,
+        listenerPoint
+      )
+    );
   });
 });

@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/checkingWildlifeProximityPreyInterrupt
  */
 
+import { checkingWildlifeInstanceHasProvokedWildlifeAggro } from '@/components/world/wildlife/domains/checkingWildlifeInstanceHasProvokedWildlifeAggro';
 import { checkingWildlifeSocialHunterMayHunt } from '@/components/world/wildlife/domains/checkingWildlifeSocialHunterMayHunt';
 import { checkingWildlifeSpeciesIsFavoritePrey } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsFavoritePrey';
 import { DEFINING_WILDLIFE_FAVORITE_PREY_SIGHT_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeFavoritePreyConstants';
@@ -19,6 +20,8 @@ export type CheckingWildlifeProximityPreyInterruptParams = {
   resolveSpecies: (
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null;
+  /** Defaults to 0 in tests that do not exercise Unnoticed provoke windows. */
+  nowMs?: number;
 };
 
 /**
@@ -30,6 +33,7 @@ export function checkingWildlifeProximityPreyInterrupt({
   species,
   nearbyInstances,
   resolveSpecies,
+  nowMs = 0,
 }: CheckingWildlifeProximityPreyInterruptParams): boolean {
   if (species.diet === 'herbivore') {
     return false;
@@ -62,7 +66,11 @@ export function checkingWildlifeProximityPreyInterrupt({
       !checkingWildlifePredatorMayHuntPrey(
         species,
         preySpecies,
-        hungerDriveLevel
+        hungerDriveLevel,
+        {
+          preyHasProvokedWildlifeAggro:
+            checkingWildlifeInstanceHasProvokedWildlifeAggro(candidate, nowMs),
+        }
       )
     ) {
       continue;

@@ -54,6 +54,12 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
       { speciesId: 'cat-black', weight: 1, packSizeRange: [1, 2] },
       { speciesId: 'cat-white', weight: 1, packSizeRange: [1, 2] },
       { speciesId: 'cat-large', weight: 1, packSizeRange: [1, 1] },
+      {
+        speciesId: 'fairy',
+        weight: 0.25,
+        packSizeRange: [1, 1],
+        nightOnly: true,
+      },
     ],
   },
   forest: {
@@ -87,6 +93,12 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
       { speciesId: 'cat-white', weight: 2, packSizeRange: [1, 2] },
       { speciesId: 'cat-black', weight: 1, packSizeRange: [1, 2] },
       { speciesId: 'shepherd-dog', weight: 1, packSizeRange: [1, 1] },
+      {
+        speciesId: 'fairy',
+        weight: 0.4,
+        packSizeRange: [1, 1],
+        nightOnly: true,
+      },
     ],
   },
   snowy_plains: {

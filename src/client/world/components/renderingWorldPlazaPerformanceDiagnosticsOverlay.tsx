@@ -4,10 +4,14 @@ import { showingReigncraftToastSuccess } from '@/components/ui/domains/showingRe
 import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
 import { RenderingWorldPlazaDevPanelCloseButton } from '@/components/world/components/renderingWorldPlazaDevPanelCloseButton';
 import { RenderingWorldPlazaPerformanceDiagnosticsFlagBadges } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsFlagBadges';
+import { RenderingWorldPlazaPerformanceDiagnosticsMetricNuanceBadges } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsMetricNuanceBadges';
+import { RenderingWorldPlazaPerformanceDiagnosticsNuanceCriticalSnapshots } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsNuanceCriticalSnapshots';
 import {
   RenderingWorldPlazaPerformanceDiagnosticsOverlayTabs,
   type RenderingWorldPlazaPerformanceDiagnosticsOverlayTabId,
 } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsOverlayTabs';
+import { RenderingWorldPlazaPerformanceDiagnosticsSampleNuanceBadges } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsSampleNuanceBadges';
+import { RenderingWorldPlazaPerformanceDiagnosticsSummaryNuanceBadges } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsSummaryNuanceBadges';
 import { copyingWorldPlazaTextToClipboard } from '@/components/world/domains/copyingWorldPlazaTextToClipboard';
 import { LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_CLOSE } from '@/components/world/domains/definingWorldPlazaDevPanelCloseButtonConstants';
 import { LABELING_WORLD_PLAZA_MOBILE_DEBUG_COPY_SUCCESS } from '@/components/world/domains/definingWorldPlazaMobileDebugConstants';
@@ -15,6 +19,11 @@ import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_REFRESH_MS,
 } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import {
+  LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_NUANCE_CRITICAL_SNAPSHOT_COPY_FAILURE,
+  LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_NUANCE_CRITICAL_SNAPSHOT_COPY_LATEST,
+  LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_NUANCE_CRITICAL_SNAPSHOT_COPY_SUCCESS,
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsNuanceCriticalSnapshotConstants';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_CLASS_NAME,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_TAB_BODY_CLASS_NAME,
@@ -29,6 +38,11 @@ import {
 } from '@/components/world/domains/definingWorldPlazaPerformanceTesterConstants';
 import { formattingWorldPlazaPerformanceTesterReport } from '@/components/world/domains/formattingWorldPlazaPerformanceTesterReport';
 import {
+  listingWorldPlazaPerformanceDiagnosticsNuanceCriticalSnapshots,
+  recordingWorldPlazaPerformanceDiagnosticsNuanceCriticalSnapshots,
+  subscribingWorldPlazaPerformanceDiagnosticsNuanceCriticalSnapshots,
+} from '@/components/world/domains/managingWorldPlazaPerformanceDiagnosticsNuanceCriticalSnapshotStore';
+import {
   buildingWorldPlazaPerformanceDiagnosticsSnapshot,
   dumpingWorldPlazaPerformanceDiagnosticsToConsole,
   markingWorldPlazaPerformanceDiagnosticsFrame,
@@ -37,7 +51,7 @@ import {
 import { usingWorldPlazaPerformanceTester } from '@/components/world/hooks/usingWorldPlazaPerformanceTester';
 import { listingWildlifeSpeciesTexturesCacheIds } from '@/components/world/wildlife/domains/loadingWildlifeSpeciesTextures';
 import { showToast } from '@devvit/web/client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 
 /** Shared action button classes inside the overlay. */
@@ -176,6 +190,12 @@ export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
   const [isMounted, setIsMounted] = useState(false);
   const [activeTabId, setActiveTabId] =
     useState<RenderingWorldPlazaPerformanceDiagnosticsOverlayTabId>('summary');
+  const criticalCaptures = useSyncExternalStore(
+    subscribingWorldPlazaPerformanceDiagnosticsNuanceCriticalSnapshots,
+    listingWorldPlazaPerformanceDiagnosticsNuanceCriticalSnapshots,
+    () => []
+  );
+  const latestCriticalCapture = criticalCaptures[0] ?? null;
 
   useEffect(() => {
     setIsMounted(true);
@@ -191,7 +211,11 @@ export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
     let refreshTimeoutId = 0;
 
     const refreshingSnapshot = (): void => {
-      setSnapshot(buildingWorldPlazaPerformanceDiagnosticsSnapshot());
+      const nextSnapshot = buildingWorldPlazaPerformanceDiagnosticsSnapshot();
+      recordingWorldPlazaPerformanceDiagnosticsNuanceCriticalSnapshots(
+        nextSnapshot
+      );
+      setSnapshot(nextSnapshot);
       refreshTimeoutId = window.setTimeout(
         refreshingSnapshot,
         DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_REFRESH_MS
@@ -357,68 +381,25 @@ export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
             ) : (
               <div className="text-amber-100/80">No recent spikes.</div>
             )}
+
+            <RenderingWorldPlazaPerformanceDiagnosticsSummaryNuanceBadges
+              snapshot={snapshot}
+            />
+            <RenderingWorldPlazaPerformanceDiagnosticsNuanceCriticalSnapshots />
           </div>
         ) : null}
 
         {activeTabId === 'samples' ? (
-          <div>
-            {snapshot.samples.length === 0 ? (
-              <div className="text-amber-100/80">
-                Move around to collect timings.
-              </div>
-            ) : (
-              snapshot.samples.map((sampleStats) => (
-                <div key={sampleStats.sampleId}>
-                  {sampleStats.sampleId}: avg {sampleStats.averageMs.toFixed(1)}{' '}
-                  | p95 {sampleStats.percentile95Ms.toFixed(1)} | p99{' '}
-                  {sampleStats.percentile99Ms.toFixed(1)} | max{' '}
-                  {sampleStats.maxMs.toFixed(1)} | last{' '}
-                  {sampleStats.lastMs.toFixed(1)}
-                  {sampleStats.spikeCount > 0
-                    ? ` | spikes ${sampleStats.spikeCount}`
-                    : ''}
-                </div>
-              ))
-            )}
-          </div>
+          <RenderingWorldPlazaPerformanceDiagnosticsSampleNuanceBadges
+            samples={snapshot.samples}
+          />
         ) : null}
 
         {activeTabId === 'metrics' ? (
-          <div>
-            <div
-              className={
-                RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_SECTION_LABEL_CLASS_NAME
-              }
-            >
-              Gauges
-            </div>
-            {Object.keys(snapshot.gauges).length === 0 ? (
-              <div className="mb-2 text-amber-100/80">none yet</div>
-            ) : (
-              Object.entries(snapshot.gauges).map(([gaugeId, gaugeValue]) => (
-                <div key={gaugeId}>
-                  {gaugeId}: {gaugeValue}
-                </div>
-              ))
-            )}
-
-            <div
-              className={`mt-2 ${RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_SECTION_LABEL_CLASS_NAME}`}
-            >
-              Events / sec
-            </div>
-            {Object.keys(snapshot.countersPerSecond).length === 0 ? (
-              <div className="text-amber-100/80">none yet</div>
-            ) : (
-              Object.entries(snapshot.countersPerSecond).map(
-                ([counterId, counterRate]) => (
-                  <div key={counterId}>
-                    {counterId}: {counterRate.toFixed(2)}
-                  </div>
-                )
-              )
-            )}
-          </div>
+          <RenderingWorldPlazaPerformanceDiagnosticsMetricNuanceBadges
+            gauges={snapshot.gauges}
+            countersPerSecond={snapshot.countersPerSecond}
+          />
         ) : null}
 
         {activeTabId === 'flags' ? (
@@ -484,6 +465,31 @@ export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
             }}
           >
             {DEFINING_WORLD_PLAZA_PERFORMANCE_TESTER_COPY_REPORT_BUTTON_LABEL}
+          </button>
+          <button
+            type="button"
+            className={
+              RENDERING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_ACTION_BUTTON_CLASS_NAME
+            }
+            disabled={criticalCaptures.length === 0 || !latestCriticalCapture}
+            onClick={() => {
+              if (!latestCriticalCapture) {
+                return;
+              }
+              void copyingWorldPlazaTextToClipboard(
+                latestCriticalCapture.text
+              ).then((didCopy) => {
+                showToast(
+                  didCopy
+                    ? LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_NUANCE_CRITICAL_SNAPSHOT_COPY_SUCCESS
+                    : LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_NUANCE_CRITICAL_SNAPSHOT_COPY_FAILURE
+                );
+              });
+            }}
+          >
+            {
+              LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_NUANCE_CRITICAL_SNAPSHOT_COPY_LATEST
+            }
           </button>
           <button
             type="button"

@@ -4,8 +4,8 @@ import { applyingWorldPlazaPlayerTeleportToWorldPoint } from '@/components/world
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import { checkingWorldPlazaGirlSampleRollDodgePreventsPhysicalStagger } from '@/components/world/domains/checkingWorldPlazaGirlSampleRollDodgePreventsPhysicalStagger';
 import type { DefiningWorldPlazaAvatarMotionState } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
-import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { notifyingWorldPlazaGirlSampleVoiceSfxEvent } from '@/components/world/domains/notifyingWorldPlazaGirlSampleVoiceSfxEvent';
 import { resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry';
@@ -41,6 +41,7 @@ import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_EPSILON,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_PUSH_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_RESPAWN_INVINCIBILITY_MS,
+  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_TICK_INTERVAL_MS,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_ROLL_PRESETS } from '@/components/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_ENVIRONMENTAL_TEMPERATURE_TICK_INTERVAL_MS } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextConstants';
@@ -1543,6 +1544,14 @@ export function usingWorldPlazaPlayerHealth({
 
     const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
       (_deltaMs, frameTimeMs) => {
+        if (
+          lastTickMsRef.current !== null &&
+          frameTimeMs - lastTickMsRef.current <
+            DEFINING_WORLD_PLAZA_ENTITY_HEALTH_TICK_INTERVAL_MS
+        ) {
+          return;
+        }
+
         const finishHealthTickSample = beginningWorldPlazaPerformanceSample(
           DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.PLAYER_HEALTH_TICK
         );

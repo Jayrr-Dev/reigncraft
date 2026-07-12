@@ -4,6 +4,12 @@
  * @module components/world/domains/definingWorldPlazaPlayerNightLightConstants
  */
 
+/**
+ * When false, the local player casts no personal night light (no darkness hole,
+ * no warm floor glow). World lights (fairies, fires, lava) still work.
+ */
+export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_ENABLED = false;
+
 /** Lit radius around the player in unscaled isometric world-local pixels. */
 export const DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_RADIUS_WORLD_LOCAL_PX = 34;
 

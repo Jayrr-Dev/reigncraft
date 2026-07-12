@@ -7,19 +7,39 @@ describe('resolvingPlazaBestiarySpritePortrait', () => {
   it('crops the front-facing idle frame for a standard species', () => {
     const portrait = resolvingPlazaBestiarySpritePortrait('deer');
 
-    expect(portrait?.sheetUrl).toBe(
+    expect(portrait?.kind).toBe('spriteSheet');
+    if (portrait?.kind !== 'spriteSheet') {
+      return;
+    }
+
+    expect(portrait.sheetUrl).toBe(
       '/creatures/sprites/species/deer/Idle_Shadowless.webp'
     );
-    expect(portrait?.backgroundSizeCss).toBe('1500% 800%');
-    expect(portrait?.backgroundPositionCss).toMatch(/^0% 28\.57/);
+    expect(portrait.backgroundSizeCss).toBe('1500% 800%');
+    expect(portrait.backgroundPositionCss).toMatch(/^0% 28\.57/);
   });
 
   it('uses the bespoke hyena idle sheet override', () => {
     const portrait = resolvingPlazaBestiarySpritePortrait('hyena');
 
-    expect(portrait?.sheetUrl).toBe(
+    expect(portrait?.kind).toBe('spriteSheet');
+    if (portrait?.kind !== 'spriteSheet') {
+      return;
+    }
+
+    expect(portrait.sheetUrl).toBe(
       '/creatures/sprites/species/hayena/Hyena idle_Shadowless.webp'
     );
+  });
+
+  it('uses a glow-orb portrait for the fairy companion', () => {
+    const portrait = resolvingPlazaBestiarySpritePortrait('fairy');
+
+    expect(portrait).toEqual({
+      kind: 'glowOrb',
+      coreColorCss: '#fff1a8',
+      auraColorCss: '#ffd24a',
+    });
   });
 
   it('resolves a portrait for every bestiary entry', () => {

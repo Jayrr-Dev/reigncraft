@@ -9,6 +9,7 @@ import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/buildi
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import {
   resolvingWorldPlazaPlayerWorldLayer,
@@ -26,23 +27,35 @@ import {
   resolvingWorldPlazaCachedAvatarBodySortKey,
   type ManagingWorldPlazaEntityDepthSortCache,
 } from '@/components/world/domains/managingWorldPlazaEntityDepthSortCache';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
+import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
+import { checkingWildlifeSpeciesUsesGlowOrbPresentation } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesUsesGlowOrbPresentation';
 import { computingWildlifeCorpseFadeAlpha } from '@/components/world/wildlife/domains/computingWildlifeCorpseFadeAlpha';
 import {
   computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
   computingWildlifeGroundShadowSizeScale,
 } from '@/components/world/wildlife/domains/computingWildlifeGroundShadowLayout';
+import {
+  DEFINING_WILDLIFE_FAIRY_HOVER_LIFT_PX,
+  DEFINING_WILDLIFE_FAIRY_POSITION_SMOOTHING_MAX_STEP_MS,
+  DEFINING_WILDLIFE_FAIRY_POSITION_SMOOTHING_MAX_TRAIL_DISTANCE_GRID,
+  DEFINING_WILDLIFE_FAIRY_POSITION_SMOOTHING_TAU_MS,
+} from '@/components/world/wildlife/domains/definingWildlifeFairyConstants';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
   DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX,
   DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET,
 } from '@/components/world/wildlife/domains/definingWildlifeVitalsBarConstants';
+import { drawingWildlifeFairyGlowOrbOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeFairyGlowOrbOnGraphics';
+import { resolvingWildlifeFairyHoverOffsetPx } from '@/components/world/wildlife/domains/resolvingWildlifeFairyHoverOffsetPx';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
 import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
 import type { Graphics, Sprite } from 'pixi.js';
 
 export type SyncingWildlifeInstanceImperativePresentationEntry = {
   spriteRef: { current: Sprite | null };
+  orbGraphicsRef: { current: Graphics | null };
   shadowGraphicsRef: { current: Graphics | null };
   vitalsGraphicsRef: { current: Graphics | null };
   speciesId: string;
@@ -53,7 +66,68 @@ export type SyncingWildlifeInstanceImperativePresentationEntry = {
   bodyZIndexRef: { current: number };
   shadowZIndexRef: { current: number };
   vitalsZIndexRef: { current: number };
+  /** Eased grid point for glow-orb bodies (null until first frame). */
+  smoothedOrbPointRef: { current: { x: number; y: number } | null };
+  /** Timestamp of the last smoothing step, for frame-rate independent easing. */
+  smoothedOrbAtMsRef: { current: number };
 };
+
+/**
+ * Advances the grid-space ease toward the sim position for glow-orb bodies.
+ * The orb, its vitals bar, and its name tag all read this shared point so
+ * nothing lags behind the body.
+ */
+function advancingWildlifeGlowOrbSmoothedGridPoint(
+  entry: SyncingWildlifeInstanceImperativePresentationEntry,
+  targetPoint: DefiningWorldPlazaWorldPoint,
+  isDead: boolean,
+  nowMs: number
+): { x: number; y: number } {
+  // Cap the step so frame hitches ease back instead of collapsing into a jump.
+  const smoothingDeltaMs = Math.min(
+    DEFINING_WILDLIFE_FAIRY_POSITION_SMOOTHING_MAX_STEP_MS,
+    Math.max(0, nowMs - entry.smoothedOrbAtMsRef.current)
+  );
+  entry.smoothedOrbAtMsRef.current = nowMs;
+
+  const smoothedPoint = entry.smoothedOrbPointRef.current;
+
+  // First frame (or corpse) seeds the ease point. Never hard-teleport after that —
+  // the soft trail cap below keeps the orb from drifting unboundedly.
+  if (!smoothedPoint || isDead) {
+    const seeded = { x: targetPoint.x, y: targetPoint.y };
+    entry.smoothedOrbPointRef.current = seeded;
+    return seeded;
+  }
+
+  const easeFactor =
+    1 -
+    Math.exp(
+      -smoothingDeltaMs / DEFINING_WILDLIFE_FAIRY_POSITION_SMOOTHING_TAU_MS
+    );
+  smoothedPoint.x += (targetPoint.x - smoothedPoint.x) * easeFactor;
+  smoothedPoint.y += (targetPoint.y - smoothedPoint.y) * easeFactor;
+
+  // Soft trail cap: fast chases drag the orb along at a fixed max distance
+  // instead of letting the gap grow forever.
+  const trailX = targetPoint.x - smoothedPoint.x;
+  const trailY = targetPoint.y - smoothedPoint.y;
+  const trailDistance = Math.hypot(trailX, trailY);
+
+  if (
+    trailDistance >
+    DEFINING_WILDLIFE_FAIRY_POSITION_SMOOTHING_MAX_TRAIL_DISTANCE_GRID
+  ) {
+    const pullRatio =
+      (trailDistance -
+        DEFINING_WILDLIFE_FAIRY_POSITION_SMOOTHING_MAX_TRAIL_DISTANCE_GRID) /
+      trailDistance;
+    smoothedPoint.x += trailX * pullRatio;
+    smoothedPoint.y += trailY * pullRatio;
+  }
+
+  return smoothedPoint;
+}
 
 export type SyncingWildlifeInstancesImperativePresentationRegistry = Map<
   string,
@@ -68,7 +142,12 @@ export function registeringWildlifeInstanceImperativePresentation(
   instanceId: string,
   entry: Omit<
     SyncingWildlifeInstanceImperativePresentationEntry,
-    'depthSortCache' | 'bodyZIndexRef' | 'shadowZIndexRef' | 'vitalsZIndexRef'
+    | 'depthSortCache'
+    | 'bodyZIndexRef'
+    | 'shadowZIndexRef'
+    | 'vitalsZIndexRef'
+    | 'smoothedOrbPointRef'
+    | 'smoothedOrbAtMsRef'
   >
 ): void {
   registry.set(instanceId, {
@@ -77,6 +156,8 @@ export function registeringWildlifeInstanceImperativePresentation(
     bodyZIndexRef: { current: Number.NaN },
     shadowZIndexRef: { current: Number.NaN },
     vitalsZIndexRef: { current: Number.NaN },
+    smoothedOrbPointRef: { current: null },
+    smoothedOrbAtMsRef: { current: 0 },
   });
 }
 
@@ -150,12 +231,17 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
           presentationCullGridRadius
         );
       const sprite = entry.spriteRef.current;
+      const orbGraphics = entry.orbGraphicsRef.current;
       const shadowGraphics = entry.shadowGraphicsRef.current;
       const vitalsGraphics = entry.vitalsGraphicsRef.current;
 
       if (!isWithinPresentationRing) {
         if (sprite) {
           sprite.visible = false;
+        }
+
+        if (orbGraphics) {
+          orbGraphics.visible = false;
         }
 
         if (shadowGraphics) {
@@ -174,9 +260,21 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
       const standingLayer = resolvingWorldPlazaPlayerWorldLayer(
         instance.position
       );
+      const usesGlowOrb =
+        checkingWildlifeSpeciesUsesGlowOrbPresentation(species);
+      // Glow-orb bodies ease toward the sim point in grid space; every anchored
+      // element (orb, vitals bar, name tag) shares the same smoothed point.
+      const presentationGridPoint = usesGlowOrb
+        ? advancingWildlifeGlowOrbSmoothedGridPoint(
+            entry,
+            instance.position,
+            instance.isDead,
+            input.nowMs
+          )
+        : instance.position;
       const screenPoint = convertingWorldPlazaGridPointToIsometricScreenPoint({
-        x: instance.position.x,
-        y: instance.position.y,
+        x: presentationGridPoint.x,
+        y: presentationGridPoint.y,
       });
       const standingLayerOffsetPx =
         computingWorldBuildingWorldLayerScreenOffsetPx(standingLayer);
@@ -212,38 +310,74 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
         sprite.visible = !(instance.isDead && spriteAlpha <= 0);
       }
 
-      if (shadowGraphics && !instance.isDead) {
-        const spritePresentation =
-          resolvingWildlifeSpeciesSpritePresentation(species);
-        const shadowSizeScale = computingWildlifeGroundShadowSizeScale(
-          entry.sizeScale,
-          entry.speciesId
+      if (orbGraphics) {
+        const areFairyGlowEnabled = checkingWorldPlazaGenerationFeatureEnabled(
+          DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_FAIRY_GLOW
         );
-        const shadowFootOffsetPx =
-          computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx(
-            entry.sizeScale,
-            spritePresentation.frameHeightPx,
-            spritePresentation.footYNormalized,
-            spritePresentation.anchorYNormalized,
-            entry.speciesId
+
+        if (!areFairyGlowEnabled || !usesGlowOrb) {
+          orbGraphics.visible = false;
+        } else {
+          const hoverOffset = resolvingWildlifeFairyHoverOffsetPx(
+            instance.instanceId,
+            input.nowMs,
+            instance.isDead
           );
 
-        shadowGraphics.position.set(screenPoint.x, anchoredScreenY);
-        applyingWorldPlazaCachedDisplayObjectZIndex(
-          shadowGraphics,
-          sortKey +
-            DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET,
-          entry.shadowZIndexRef
-        );
-        shadowGraphics.visible = true;
-        updatingWorldPlazaAvatarGroundShadowGraphics(
-          shadowGraphics,
-          -jumpLiftPx,
-          entry.jumpArcPeakPx,
-          entry.facingDirection,
-          shadowFootOffsetPx,
-          shadowSizeScale
-        );
+          orbGraphics.position.set(
+            screenPoint.x + hoverOffset.x,
+            anchoredScreenY - jumpLiftPx + hoverOffset.y
+          );
+          applyingWorldPlazaCachedDisplayObjectZIndex(
+            orbGraphics,
+            sortKey,
+            entry.bodyZIndexRef
+          );
+          orbGraphics.visible = !(instance.isDead && spriteAlpha <= 0);
+          drawingWildlifeFairyGlowOrbOnGraphics(orbGraphics, {
+            nowMs: input.nowMs,
+            alphaScale: spriteAlpha,
+            isDead: instance.isDead,
+          });
+        }
+      }
+
+      if (shadowGraphics && !instance.isDead) {
+        if (usesGlowOrb) {
+          shadowGraphics.visible = false;
+        } else {
+          const spritePresentation =
+            resolvingWildlifeSpeciesSpritePresentation(species);
+          const shadowSizeScale = computingWildlifeGroundShadowSizeScale(
+            entry.sizeScale,
+            entry.speciesId
+          );
+          const shadowFootOffsetPx =
+            computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx(
+              entry.sizeScale,
+              spritePresentation.frameHeightPx,
+              spritePresentation.footYNormalized,
+              spritePresentation.anchorYNormalized,
+              entry.speciesId
+            );
+
+          shadowGraphics.position.set(screenPoint.x, anchoredScreenY);
+          applyingWorldPlazaCachedDisplayObjectZIndex(
+            shadowGraphics,
+            sortKey +
+              DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET,
+            entry.shadowZIndexRef
+          );
+          shadowGraphics.visible = true;
+          updatingWorldPlazaAvatarGroundShadowGraphics(
+            shadowGraphics,
+            -jumpLiftPx,
+            entry.jumpArcPeakPx,
+            entry.facingDirection,
+            shadowFootOffsetPx,
+            shadowSizeScale
+          );
+        }
       } else if (shadowGraphics) {
         shadowGraphics.visible = false;
       }
@@ -256,6 +390,7 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
             : 0;
         const showsVitalsBars =
           !instance.isDead &&
+          !checkingWildlifeSpeciesIsImmortal(species) &&
           (healthRatio < 0.999 || instance.staminaState.staminaRatio < 0.999);
 
         if (showsVitalsBars) {
@@ -263,6 +398,9 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
             screenPoint.x,
             anchoredScreenY -
               jumpLiftPx -
+              (usesGlowOrb && !instance.isDead
+                ? DEFINING_WILDLIFE_FAIRY_HOVER_LIFT_PX
+                : 0) -
               DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX * entry.sizeScale
           );
           applyingWorldPlazaCachedDisplayObjectZIndex(
