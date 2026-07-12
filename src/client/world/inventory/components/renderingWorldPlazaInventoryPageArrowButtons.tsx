@@ -19,6 +19,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_ICONS,
   STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_CLASS_NAME,
   STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_DRAG_OVER_CLASS_NAME,
+  STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_FACE_CLASS_NAME,
   STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_ICON_CLASS_NAME,
   STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_STACK_CLASS_NAME,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
@@ -61,13 +62,8 @@ function RenderingWorldPlazaInventoryPageArrowButton({
     <button
       ref={setNodeRef}
       type="button"
-      className={cn(
-        STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_CLASS_NAME,
-        isOver &&
-          enabled &&
-          STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_DRAG_OVER_CLASS_NAME
-      )}
-      style={viewportStyles.pageArrowButtonStyle}
+      className={STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_CLASS_NAME}
+      style={viewportStyles.pageArrowHitStyle}
       aria-label={ariaLabel}
       disabled={!enabled}
       onClick={() => {
@@ -78,12 +74,23 @@ function RenderingWorldPlazaInventoryPageArrowButton({
         onActivate();
       }}
     >
-      <Icon
-        icon={icon}
-        className={STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_ICON_CLASS_NAME}
-        style={viewportStyles.pageArrowIconStyle}
+      <span
+        className={cn(
+          STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_FACE_CLASS_NAME,
+          isOver &&
+            enabled &&
+            STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_DRAG_OVER_CLASS_NAME
+        )}
+        style={viewportStyles.pageArrowButtonStyle}
         aria-hidden
-      />
+      >
+        <Icon
+          icon={icon}
+          className={STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_ICON_CLASS_NAME}
+          style={viewportStyles.pageArrowIconStyle}
+          aria-hidden
+        />
+      </span>
     </button>
   );
 }

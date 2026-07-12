@@ -87,6 +87,11 @@ export interface SortingInventoryProps {
    */
   readonly visibleSlotIndices?: readonly number[];
   /**
+   * Off-page slots that must stay mounted (visually hidden) so an active drag
+   * source is not destroyed when the storage page changes mid-drag.
+   */
+  readonly retainedSlotIndices?: readonly number[];
+  /**
    * Optional content rendered beside the grid inside DndContext
    * (e.g. storage page arrows that must be droppable).
    */
@@ -115,6 +120,7 @@ export function SortingInventory({
   DragOverlayItemComponent = RenderingInventoryDragOverlayItem,
   resolvingDraggedItemById,
   visibleSlotIndices,
+  retainedSlotIndices,
   trailingContent,
   layoutClassName,
   layoutStyle,
@@ -228,6 +234,7 @@ export function SortingInventory({
       style={gridStyle}
       SlotCellComponent={SlotCellComponent}
       visibleSlotIndices={visibleSlotIndices}
+      retainedSlotIndices={retainedSlotIndices}
     />
   );
 

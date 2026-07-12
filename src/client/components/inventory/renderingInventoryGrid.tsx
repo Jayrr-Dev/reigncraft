@@ -29,6 +29,11 @@ export interface RenderingInventoryGridProps {
    * Defaults to every slot in state order.
    */
   readonly visibleSlotIndices?: readonly number[];
+  /**
+   * Off-page slots kept mounted (hidden) so mid-drag page changes do not
+   * destroy the active drag source.
+   */
+  readonly retainedSlotIndices?: readonly number[];
 }
 
 /**
@@ -43,36 +48,64 @@ export function RenderingInventoryGrid({
   style,
   SlotCellComponent = RenderingInventorySlotCell,
   visibleSlotIndices,
+  retainedSlotIndices = [],
 }: RenderingInventoryGridProps): React.JSX.Element {
   const slotIndices =
     visibleSlotIndices ?? state.slots.map((_, slotIndex) => slotIndex);
+  const hiddenRetainedSlotIndices = retainedSlotIndices.filter(
+    (slotIndex) =>
+      slotIndex >= 0 &&
+      slotIndex < state.slots.length &&
+      !slotIndices.includes(slotIndex)
+  );
 
   return (
-    <div
-      className={cn(STYLING_INVENTORY_GRID_WRAPPER, className)}
-      style={style}
-      role="list"
-      aria-label="Inventory slots"
-    >
-      {slotIndices.map((slotIndex) => {
-        if (slotIndex < 0 || slotIndex >= state.slots.length) {
-          return null;
-        }
+    <>
+      <div
+        className={cn(STYLING_INVENTORY_GRID_WRAPPER, className)}
+        style={style}
+        role="list"
+        aria-label="Inventory slots"
+      >
+        {slotIndices.map((slotIndex) => {
+          if (slotIndex < 0 || slotIndex >= state.slots.length) {
+            return null;
+          }
 
-        const item = state.slots[slotIndex] ?? null;
+          const item = state.slots[slotIndex] ?? null;
 
-        return (
-          <SlotCellComponent
-            key={slotIndex}
-            slotIndex={slotIndex}
-            item={item}
-            registry={registry}
-            activeDragItemId={activeDragItemId}
-            isDropTarget={dropTargetSlotIndex === slotIndex}
-            isValidDrop
-          />
-        );
-      })}
-    </div>
+          return (
+            <SlotCellComponent
+              key={slotIndex}
+              slotIndex={slotIndex}
+              item={item}
+              registry={registry}
+              activeDragItemId={activeDragItemId}
+              isDropTarget={dropTargetSlotIndex === slotIndex}
+              isValidDrop
+            />
+          );
+        })}
+      </div>
+      {hiddenRetainedSlotIndices.length > 0 ? (
+        <div className="sr-only" aria-hidden>
+          {hiddenRetainedSlotIndices.map((slotIndex) => {
+            const item = state.slots[slotIndex] ?? null;
+
+            return (
+              <SlotCellComponent
+                key={`retained-${slotIndex}`}
+                slotIndex={slotIndex}
+                item={item}
+                registry={registry}
+                activeDragItemId={activeDragItemId}
+                isDropTarget={false}
+                isValidDrop
+              />
+            );
+          })}
+        </div>
+      ) : null}
+    </>
   );
 }

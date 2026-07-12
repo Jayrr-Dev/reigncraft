@@ -11,6 +11,7 @@ import type {
   DefiningInventoryItem,
   DefiningInventoryState,
 } from '@/components/inventory/domains/definingInventoryItem';
+import { resolvingInventoryItemSlotIndex } from '@/components/inventory/domains/reducingInventoryState';
 import { SortingInventory } from '@/components/inventory/sortingInventory';
 import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
 import { ProvidingWorldPlazaViewportHudScale } from '@/components/world/components/providingWorldPlazaViewportHudScale';
@@ -48,6 +49,7 @@ import { handlingWorldPlazaInventoryBagAwareDragEnd } from '@/components/world/i
 import { findingWorldPlazaInventoryFirstBagHotbarSlotIndex } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagContents';
 import { resolvingWorldPlazaInventoryHotbarDeviceScale } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarDeviceScale';
 import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
+import { resolvingWorldPlazaInventoryRetainedDragSlotIndices } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryRetainedDragSlotIndices';
 import { resolvingWorldPlazaInventoryVisibleSlotIndices } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStoragePage';
 import type { TrackingWorldPlazaInventoryDropPlacementResult } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
@@ -163,6 +165,19 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
       [storagePageIndex]
     );
 
+    const [draggingFromSlotIndex, setDraggingFromSlotIndex] = useState<
+      number | null
+    >(null);
+
+    const retainedSlotIndices = useMemo(
+      () =>
+        resolvingWorldPlazaInventoryRetainedDragSlotIndices(
+          storagePageIndex,
+          draggingFromSlotIndex
+        ),
+      [draggingFromSlotIndex, storagePageIndex]
+    );
+
     const { onDragOver, clearingDragHoverPaging } =
       usingWorldPlazaInventoryStoragePageDragHover({
         storagePageIndex,
@@ -170,14 +185,29 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
         onStoragePageIndexChange,
       });
 
+    const handlingInventoryDragStartWithSourcePin = useCallback(
+      (event: DragStartEvent): void => {
+        const itemId = parsingInventoryItemDraggableId(String(event.active.id));
+        const slotIndex =
+          itemId !== null
+            ? resolvingInventoryItemSlotIndex(state, itemId)
+            : null;
+        setDraggingFromSlotIndex(slotIndex);
+        onInventoryDragStart(event);
+      },
+      [onInventoryDragStart, state]
+    );
+
     const handlingInventoryDragCancel = useCallback((): void => {
       clearingDragHoverPaging();
+      setDraggingFromSlotIndex(null);
     }, [clearingDragHoverPaging]);
 
     const handlingInventoryDragEndWithPagingClear = useCallback(
       (event: DragEndEvent): void => {
         clearingDragHoverPaging();
         onInventoryDragEnd(event);
+        setDraggingFromSlotIndex(null);
       },
       [clearingDragHoverPaging, onInventoryDragEnd]
     );
@@ -228,7 +258,7 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
             <SortingInventory
               state={state}
               registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
-              onDragStart={onInventoryDragStart}
+              onDragStart={handlingInventoryDragStartWithSourcePin}
               onDragOver={onDragOver}
               onDragEnd={handlingInventoryDragEndWithPagingClear}
               onDragCancel={handlingInventoryDragCancel}
@@ -236,6 +266,7 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
               className={STYLING_WORLD_PLAZA_INVENTORY_GRID_WRAPPER_CLASS_NAME}
               gridStyle={viewportStyles.gridStyle}
               visibleSlotIndices={visibleSlotIndices}
+              retainedSlotIndices={retainedSlotIndices}
               layoutClassName={
                 STYLING_WORLD_PLAZA_INVENTORY_SHELL_BODY_CLASS_NAME
               }

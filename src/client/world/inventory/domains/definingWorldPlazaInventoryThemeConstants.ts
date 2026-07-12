@@ -126,13 +126,26 @@ export const STYLING_WORLD_PLAZA_INVENTORY_GRID_WRAPPER_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_INVENTORY_SHELL_BODY_CLASS_NAME =
   'flex touch-manipulation items-stretch gap-1' as const;
 
+/**
+ * Minimum page-arrow tap/drag target edge (px).
+ * Visual chrome stays smaller; hit area expands outward with negative margin.
+ */
+export const DEFINING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_MIN_HIT_PX = 44 as const;
+
 /** Vertical stack of compact page arrows beside the single inventory row. */
 export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_STACK_CLASS_NAME =
-  'flex shrink-0 flex-col items-center justify-center' as const;
+  'relative flex shrink-0 flex-col items-center justify-center overflow-visible' as const;
 
-/** Solid wood-framed parchment arrow control (matches inventory slot chrome). */
+/**
+ * Expanded hit wrapper for page arrows (transparent; size via viewport styles).
+ * Keeps layout footprint via negative margin while the tap box meets min hit px.
+ */
 export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_CLASS_NAME =
-  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventorySlot} flex shrink-0 touch-manipulation items-center justify-center text-poster-orange-deep transition-[filter,box-shadow] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:brightness-100` as const;
+  'group relative flex shrink-0 touch-manipulation items-center justify-center border-0 bg-transparent p-0 text-poster-orange-deep disabled:cursor-not-allowed disabled:opacity-35' as const;
+
+/** Solid wood-framed parchment face centered inside the hit wrapper. */
+export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_FACE_CLASS_NAME =
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventorySlot} pointer-events-none flex items-center justify-center transition-[filter,box-shadow] group-hover:brightness-105 group-disabled:group-hover:brightness-100` as const;
 
 /** Drag-hover highlight on a page arrow drop target. */
 export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_DRAG_OVER_CLASS_NAME =
