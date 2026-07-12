@@ -812,12 +812,7 @@ body {
 }
 
 .plaza-death-screen-overlay {
-  opacity: 0;
   background-color: #000;
-}
-
-.plaza-death-screen-overlay--entering {
-  animation: plaza-death-screen-overlay-in 1.4s ease-out forwards;
 }
 
 .plaza-death-screen-overlay--held {
@@ -826,15 +821,6 @@ body {
 
 .plaza-death-screen-overlay--waking {
   animation: plaza-death-screen-overlay-wake-out 3.2s ease-in-out forwards;
-}
-
-@keyframes plaza-death-screen-overlay-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 @keyframes plaza-death-screen-overlay-wake-out {
@@ -862,25 +848,7 @@ body {
 }
 
 .plaza-death-screen-stack {
-  opacity: 0;
-  transform: scale(0.72);
-  transform-origin: center center;
-  will-change: transform, opacity;
-}
-
-.plaza-death-screen-stack--entering {
-  animation: plaza-death-screen-stack-in 3s cubic-bezier(0.22, 1, 0.36, 1) 0.45s
-    forwards;
-}
-
-.plaza-death-screen-stack--visible {
   opacity: 1;
-  transform: scale(1);
-  filter: blur(0);
-}
-
-.plaza-death-screen-stack--visible .plaza-death-screen-title {
-  letter-spacing: 0.14em;
 }
 
 .plaza-death-screen-rule {
@@ -922,35 +890,8 @@ body {
   opacity: 0.92;
 }
 
-@keyframes plaza-death-screen-stack-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.72);
-    filter: blur(1.5px);
-  }
-  40% {
-    opacity: 0.55;
-    filter: blur(0.5px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-    filter: blur(0);
-  }
-}
-
-.plaza-death-screen-stack--entering .plaza-death-screen-title {
-  animation: plaza-death-screen-title-letter-spacing-in 3s
-    cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards;
-}
-
-@keyframes plaza-death-screen-title-letter-spacing-in {
-  0% {
-    letter-spacing: 0.28em;
-  }
-  100% {
-    letter-spacing: 0.14em;
-  }
+.plaza-death-screen-title {
+  margin: 0;
 }
 
 /* --- Drifting sky clouds (shapes only; motion via anime.js) --- */

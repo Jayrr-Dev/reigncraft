@@ -1,15 +1,18 @@
-import type { DefiningWorldBuildingPlot } from "@/components/world/building/domains/definingWorldBuildingPlot";
-import type { DefiningWorldBuildingPlotBounds } from "@/components/world/building/domains/definingWorldBuildingPlotBounds";
+import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
+import type { DefiningWorldBuildingPlotBounds } from '@/components/world/building/domains/definingWorldBuildingPlotBounds';
 
 /**
  * Contiguous tile regions derived from one-tile plot claims for claim mode lists.
+ * Contiguity is 8-connected (shared edge or corner).
  *
  * @module components/world/building/domains/groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions
  */
 
-/** One contiguous run or filled rectangle of claimed tiles. */
+/** One 8-connected claim blob (edge or corner adjacency). */
 export interface DefiningWorldBuildingPlotRegistryContiguousRegion {
+  /** Inclusive AABB covering the claimed tiles (may include empty cells). */
   bounds: DefiningWorldBuildingPlotBounds;
+  /** Actual claimed tile count in this component. */
   tileCount: number;
 }
 
@@ -19,12 +22,19 @@ interface DefiningWorldBuildingPlotRegistryTileCoordinate {
   tileY: number;
 }
 
-/** Cardinal neighbor offsets for 4-connected tile adjacency. */
+/**
+ * Edge + corner neighbor offsets for 8-connected tile adjacency.
+ * Matches claim expansion (`listingWorldBuildingClaimableTilePositionsForOwner`).
+ */
 const GROUPING_WORLD_BUILDING_PLOT_REGISTRY_TILE_NEIGHBOR_OFFSETS = [
   { tileX: 1, tileY: 0 },
   { tileX: -1, tileY: 0 },
   { tileX: 0, tileY: 1 },
   { tileX: 0, tileY: -1 },
+  { tileX: 1, tileY: 1 },
+  { tileX: 1, tileY: -1 },
+  { tileX: -1, tileY: 1 },
+  { tileX: -1, tileY: -1 },
 ] as const;
 
 /**
@@ -35,7 +45,7 @@ const GROUPING_WORLD_BUILDING_PLOT_REGISTRY_TILE_NEIGHBOR_OFFSETS = [
  */
 function formattingWorldBuildingPlotRegistryTileCoordinateKey(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): string {
   return `${tileX},${tileY}`;
 }
@@ -46,7 +56,7 @@ function formattingWorldBuildingPlotRegistryTileCoordinateKey(
  * @param plots - Claimed plot aggregates.
  */
 function listingWorldBuildingPlotRegistryTileCoordinatesFromPlots(
-  plots: readonly DefiningWorldBuildingPlot[],
+  plots: readonly DefiningWorldBuildingPlot[]
 ): DefiningWorldBuildingPlotRegistryTileCoordinate[] {
   const tileCoordinateKeys = new Set<string>();
   const tileCoordinates: DefiningWorldBuildingPlotRegistryTileCoordinate[] = [];
@@ -64,7 +74,7 @@ function listingWorldBuildingPlotRegistryTileCoordinatesFromPlots(
       ) {
         const tileKey = formattingWorldBuildingPlotRegistryTileCoordinateKey(
           tileX,
-          tileY,
+          tileY
         );
 
         if (tileCoordinateKeys.has(tileKey)) {
@@ -81,20 +91,20 @@ function listingWorldBuildingPlotRegistryTileCoordinatesFromPlots(
 }
 
 /**
- * Finds 4-connected tile components from a coordinate set.
+ * Finds 8-connected tile components from a coordinate set.
  *
  * @param tileCoordinates - All claimed tile coordinates for one owner.
  */
 function groupingWorldBuildingPlotRegistryTileCoordinatesIntoConnectedComponents(
-  tileCoordinates: readonly DefiningWorldBuildingPlotRegistryTileCoordinate[],
+  tileCoordinates: readonly DefiningWorldBuildingPlotRegistryTileCoordinate[]
 ): DefiningWorldBuildingPlotRegistryTileCoordinate[][] {
   const tileKeySet = new Set(
     tileCoordinates.map((tileCoordinate) =>
       formattingWorldBuildingPlotRegistryTileCoordinateKey(
         tileCoordinate.tileX,
-        tileCoordinate.tileY,
-      ),
-    ),
+        tileCoordinate.tileY
+      )
+    )
   );
   const visitedTileKeys = new Set<string>();
   const connectedComponents: DefiningWorldBuildingPlotRegistryTileCoordinate[][] =
@@ -103,14 +113,15 @@ function groupingWorldBuildingPlotRegistryTileCoordinatesIntoConnectedComponents
   for (const startTile of tileCoordinates) {
     const startTileKey = formattingWorldBuildingPlotRegistryTileCoordinateKey(
       startTile.tileX,
-      startTile.tileY,
+      startTile.tileY
     );
 
     if (visitedTileKeys.has(startTileKey)) {
       continue;
     }
 
-    const componentTiles: DefiningWorldBuildingPlotRegistryTileCoordinate[] = [];
+    const componentTiles: DefiningWorldBuildingPlotRegistryTileCoordinate[] =
+      [];
     const pendingTileKeys = [startTileKey];
     visitedTileKeys.add(startTileKey);
 
@@ -121,16 +132,17 @@ function groupingWorldBuildingPlotRegistryTileCoordinatesIntoConnectedComponents
         continue;
       }
 
-      const [tileXText, tileYText] = currentTileKey.split(",");
+      const [tileXText, tileYText] = currentTileKey.split(',');
       const tileX = Number(tileXText);
       const tileY = Number(tileYText);
       componentTiles.push({ tileX, tileY });
 
       for (const neighborOffset of GROUPING_WORLD_BUILDING_PLOT_REGISTRY_TILE_NEIGHBOR_OFFSETS) {
-        const neighborTileKey = formattingWorldBuildingPlotRegistryTileCoordinateKey(
-          tileX + neighborOffset.tileX,
-          tileY + neighborOffset.tileY,
-        );
+        const neighborTileKey =
+          formattingWorldBuildingPlotRegistryTileCoordinateKey(
+            tileX + neighborOffset.tileX,
+            tileY + neighborOffset.tileY
+          );
 
         if (
           !tileKeySet.has(neighborTileKey) ||
@@ -151,12 +163,12 @@ function groupingWorldBuildingPlotRegistryTileCoordinatesIntoConnectedComponents
 }
 
 /**
- * Returns filled-rectangle bounds when every tile in the box is claimed.
+ * Builds inclusive AABB bounds for one connected tile component.
  *
  * @param componentTiles - One connected tile component.
  */
-function resolvingWorldBuildingPlotRegistryFilledRectangleBoundsFromTiles(
-  componentTiles: readonly DefiningWorldBuildingPlotRegistryTileCoordinate[],
+function resolvingWorldBuildingPlotRegistryBoundsFromTiles(
+  componentTiles: readonly DefiningWorldBuildingPlotRegistryTileCoordinate[]
 ): DefiningWorldBuildingPlotBounds | null {
   if (componentTiles.length === 0) {
     return null;
@@ -174,241 +186,12 @@ function resolvingWorldBuildingPlotRegistryFilledRectangleBoundsFromTiles(
     maxTileY = Math.max(maxTileY, tileCoordinate.tileY);
   }
 
-  const boundsWidth = maxTileX - minTileX + 1;
-  const boundsHeight = maxTileY - minTileY + 1;
-
-  if (componentTiles.length !== boundsWidth * boundsHeight) {
-    return null;
-  }
-
   return {
     minTileX,
     minTileY,
     maxTileX,
     maxTileY,
   };
-}
-
-/**
- * Lists every maximal horizontal or vertical run inside a tile set.
- *
- * @param componentTiles - Connected tile component.
- * @param axis - Axis to scan for consecutive runs.
- */
-function listingWorldBuildingPlotRegistryMaximalTileRunsAlongAxis(
-  componentTiles: readonly DefiningWorldBuildingPlotRegistryTileCoordinate[],
-  axis: "horizontal" | "vertical",
-): DefiningWorldBuildingPlotBounds[] {
-  const tileRuns: DefiningWorldBuildingPlotBounds[] = [];
-
-  if (axis === "horizontal") {
-    const tileYs = [
-      ...new Set(componentTiles.map((tileCoordinate) => tileCoordinate.tileY)),
-    ].sort((leftValue, rightValue) => leftValue - rightValue);
-
-    for (const tileY of tileYs) {
-      const tileXs = componentTiles
-        .filter((tileCoordinate) => tileCoordinate.tileY === tileY)
-        .map((tileCoordinate) => tileCoordinate.tileX)
-        .sort((leftValue, rightValue) => leftValue - rightValue);
-
-      let runStart = tileXs[0];
-      let runEnd = tileXs[0];
-
-      for (let index = 1; index < tileXs.length; index += 1) {
-        const nextTileX = tileXs[index];
-
-        if (nextTileX === runEnd + 1) {
-          runEnd = nextTileX;
-          continue;
-        }
-
-        tileRuns.push({
-          minTileX: runStart,
-          maxTileX: runEnd,
-          minTileY: tileY,
-          maxTileY: tileY,
-        });
-        runStart = nextTileX;
-        runEnd = nextTileX;
-      }
-
-      tileRuns.push({
-        minTileX: runStart,
-        maxTileX: runEnd,
-        minTileY: tileY,
-        maxTileY: tileY,
-      });
-    }
-
-    return tileRuns;
-  }
-
-  const tileXs = [
-    ...new Set(componentTiles.map((tileCoordinate) => tileCoordinate.tileX)),
-  ].sort((leftValue, rightValue) => leftValue - rightValue);
-
-  for (const tileX of tileXs) {
-    const tileYs = componentTiles
-      .filter((tileCoordinate) => tileCoordinate.tileX === tileX)
-      .map((tileCoordinate) => tileCoordinate.tileY)
-      .sort((leftValue, rightValue) => leftValue - rightValue);
-
-    let runStart = tileYs[0];
-    let runEnd = tileYs[0];
-
-    for (let index = 1; index < tileYs.length; index += 1) {
-      const nextTileY = tileYs[index];
-
-      if (nextTileY === runEnd + 1) {
-        runEnd = nextTileY;
-        continue;
-      }
-
-      tileRuns.push({
-        minTileX: tileX,
-        maxTileX: tileX,
-        minTileY: runStart,
-        maxTileY: runEnd,
-      });
-      runStart = nextTileY;
-      runEnd = nextTileY;
-    }
-
-    tileRuns.push({
-      minTileX: tileX,
-      maxTileX: tileX,
-      minTileY: runStart,
-      maxTileY: runEnd,
-    });
-  }
-
-  return tileRuns;
-}
-
-/**
- * Returns the tile keys covered by inclusive bounds.
- *
- * @param bounds - Inclusive tile bounds.
- */
-function listingWorldBuildingPlotRegistryTileKeysInBounds(
-  bounds: DefiningWorldBuildingPlotBounds,
-): string[] {
-  const tileKeys: string[] = [];
-
-  for (let tileX = bounds.minTileX; tileX <= bounds.maxTileX; tileX += 1) {
-    for (let tileY = bounds.minTileY; tileY <= bounds.maxTileY; tileY += 1) {
-      tileKeys.push(
-        formattingWorldBuildingPlotRegistryTileCoordinateKey(tileX, tileY),
-      );
-    }
-  }
-
-  return tileKeys;
-}
-
-/**
- * Counts tiles in one inclusive bounds run.
- *
- * @param bounds - Inclusive tile bounds.
- */
-function countingWorldBuildingPlotRegistryTilesInBounds(
-  bounds: DefiningWorldBuildingPlotBounds,
-): number {
-  return listingWorldBuildingPlotRegistryTileKeysInBounds(bounds).length;
-}
-
-/**
- * Greedily splits an irregular component into the fewest line segments.
- *
- * @param componentTiles - Connected tile component.
- */
-function listingWorldBuildingPlotRegistryGreedyTileRunsForComponent(
-  componentTiles: readonly DefiningWorldBuildingPlotRegistryTileCoordinate[],
-): DefiningWorldBuildingPlotBounds[] {
-  const remainingTileKeys = new Set(
-    componentTiles.map((tileCoordinate) =>
-      formattingWorldBuildingPlotRegistryTileCoordinateKey(
-        tileCoordinate.tileX,
-        tileCoordinate.tileY,
-      ),
-    ),
-  );
-  const tileRuns: DefiningWorldBuildingPlotBounds[] = [];
-
-  while (remainingTileKeys.size > 0) {
-    const candidateRuns = [
-      ...listingWorldBuildingPlotRegistryMaximalTileRunsAlongAxis(
-        componentTiles.filter((tileCoordinate) =>
-          remainingTileKeys.has(
-            formattingWorldBuildingPlotRegistryTileCoordinateKey(
-              tileCoordinate.tileX,
-              tileCoordinate.tileY,
-            ),
-          ),
-        ),
-        "horizontal",
-      ),
-      ...listingWorldBuildingPlotRegistryMaximalTileRunsAlongAxis(
-        componentTiles.filter((tileCoordinate) =>
-          remainingTileKeys.has(
-            formattingWorldBuildingPlotRegistryTileCoordinateKey(
-              tileCoordinate.tileX,
-              tileCoordinate.tileY,
-            ),
-          ),
-        ),
-        "vertical",
-      ),
-    ];
-
-    let selectedRun = candidateRuns[0];
-    let selectedRunTileCount = countingWorldBuildingPlotRegistryTilesInBounds(
-      selectedRun,
-    );
-
-    for (const candidateRun of candidateRuns) {
-      const candidateRunTileCount =
-        countingWorldBuildingPlotRegistryTilesInBounds(candidateRun);
-
-      if (candidateRunTileCount > selectedRunTileCount) {
-        selectedRun = candidateRun;
-        selectedRunTileCount = candidateRunTileCount;
-      }
-    }
-
-    tileRuns.push(selectedRun);
-
-    for (const tileKey of listingWorldBuildingPlotRegistryTileKeysInBounds(
-      selectedRun,
-    )) {
-      remainingTileKeys.delete(tileKey);
-    }
-  }
-
-  return tileRuns;
-}
-
-/**
- * Chooses the most compact run layout for an irregular connected component.
- *
- * @param componentTiles - Connected tile component.
- */
-function listingWorldBuildingPlotRegistryCompactTileRunsForComponent(
-  componentTiles: readonly DefiningWorldBuildingPlotRegistryTileCoordinate[],
-): DefiningWorldBuildingPlotBounds[] {
-  const filledRectangleBounds =
-    resolvingWorldBuildingPlotRegistryFilledRectangleBoundsFromTiles(
-      componentTiles,
-    );
-
-  if (filledRectangleBounds) {
-    return [filledRectangleBounds];
-  }
-
-  return listingWorldBuildingPlotRegistryGreedyTileRunsForComponent(
-    componentTiles,
-  );
 }
 
 /**
@@ -419,7 +202,7 @@ function listingWorldBuildingPlotRegistryCompactTileRunsForComponent(
  */
 function comparingWorldBuildingPlotRegistryContiguousRegionsForDisplay(
   leftRegion: DefiningWorldBuildingPlotRegistryContiguousRegion,
-  rightRegion: DefiningWorldBuildingPlotRegistryContiguousRegion,
+  rightRegion: DefiningWorldBuildingPlotRegistryContiguousRegion
 ): number {
   if (leftRegion.bounds.minTileY !== rightRegion.bounds.minTileY) {
     return leftRegion.bounds.minTileY - rightRegion.bounds.minTileY;
@@ -439,10 +222,12 @@ function comparingWorldBuildingPlotRegistryContiguousRegionsForDisplay(
 /**
  * Groups one owner's plot claims into contiguous regions for the claim sidebar.
  *
+ * One region = one 8-connected component (edge or corner touch counts).
+ *
  * @param plots - All claimed plots for one owner.
  */
 export function groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions(
-  plots: readonly DefiningWorldBuildingPlot[],
+  plots: readonly DefiningWorldBuildingPlot[]
 ): DefiningWorldBuildingPlotRegistryContiguousRegion[] {
   const tileCoordinates =
     listingWorldBuildingPlotRegistryTileCoordinatesFromPlots(plots);
@@ -453,25 +238,27 @@ export function groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions(
 
   const connectedComponents =
     groupingWorldBuildingPlotRegistryTileCoordinatesIntoConnectedComponents(
-      tileCoordinates,
+      tileCoordinates
     );
   const contiguousRegions: DefiningWorldBuildingPlotRegistryContiguousRegion[] =
     [];
 
   for (const componentTiles of connectedComponents) {
-    const tileRuns =
-      listingWorldBuildingPlotRegistryCompactTileRunsForComponent(componentTiles);
+    const bounds =
+      resolvingWorldBuildingPlotRegistryBoundsFromTiles(componentTiles);
 
-    for (const bounds of tileRuns) {
-      contiguousRegions.push({
-        bounds,
-        tileCount: countingWorldBuildingPlotRegistryTilesInBounds(bounds),
-      });
+    if (!bounds) {
+      continue;
     }
+
+    contiguousRegions.push({
+      bounds,
+      tileCount: componentTiles.length,
+    });
   }
 
   return contiguousRegions.sort(
-    comparingWorldBuildingPlotRegistryContiguousRegionsForDisplay,
+    comparingWorldBuildingPlotRegistryContiguousRegionsForDisplay
   );
 }
 
@@ -481,7 +268,7 @@ export function groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions(
  * @param bounds - Inclusive tile bounds for one region.
  */
 export function formattingWorldBuildingPlotRegistryContiguousRegionLabel(
-  bounds: DefiningWorldBuildingPlotBounds,
+  bounds: DefiningWorldBuildingPlotBounds
 ): string {
   const { minTileX, minTileY, maxTileX, maxTileY } = bounds;
 

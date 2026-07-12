@@ -7,10 +7,10 @@
 /** Stable ids for unified edit-mode function slots (left → right). */
 export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID = {
   MATERIALS: 'materials',
+  CRAFTING: 'crafting',
   CUT: 'cut',
   BLOCKS: 'blocks',
   PLOTS: 'plots',
-  SAVED: 'saved',
 } as const;
 
 /** One unified edit-mode function slot id. */
@@ -47,6 +47,12 @@ export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_REGISTRY = [
     iconifyIcon: 'mdi:cube-outline',
   },
   {
+    id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CRAFTING,
+    label: 'Crafting',
+    ariaLabel: 'Crafting recipes',
+    iconifyIcon: 'game-icons:anvil',
+  },
+  {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CUT,
     label: 'Cut',
     ariaLabel: 'Cut footprint',
@@ -61,14 +67,8 @@ export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_REGISTRY = [
   {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLOTS,
     label: 'Plots',
-    ariaLabel: 'Plots and temporary tiles',
+    ariaLabel: 'Plots, temporary tiles, and saved coordinates',
     iconifyIcon: 'mdi:land-plots',
-  },
-  {
-    id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.SAVED,
-    label: 'Saved',
-    ariaLabel: 'Save and manage coordinates',
-    iconifyIcon: 'mdi:bookmark',
   },
 ] as const satisfies readonly DefiningWorldPlazaEditModeFunctionDefinition[];
 
@@ -79,13 +79,13 @@ export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_REGISTRY = [
 export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_SESSION_MODE_BY_ID = {
   [DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.MATERIALS]:
     DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
+  [DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CRAFTING]:
+    DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
   [DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CUT]:
     DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
   [DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.BLOCKS]:
     DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
   [DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLOTS]:
-    DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.CLAIM,
-  [DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.SAVED]:
     DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.CLAIM,
 } as const satisfies Record<
   DefiningWorldPlazaEditModeFunctionId,
@@ -98,10 +98,10 @@ export const LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_POPOVER_TITLE: Record<
   string
 > = {
   materials: 'Materials',
+  crafting: 'Crafting',
   cut: 'Cut',
   blocks: 'Blocks',
-  plots: 'Plots',
-  saved: 'Saved Coords',
+  plots: 'Plots & Coords',
 };
 
 /** Accessible label for the unified edit hotbar. */

@@ -10,7 +10,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_OVERLAY_CLASS_NAME =
 
 /** Centered stack: rule, title, rule, flavor. */
 export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_STACK_CLASS_NAME =
-  'plaza-death-screen-stack flex max-w-[min(92vw,42rem)] flex-col items-center gap-3 px-4' as const;
+  'plaza-death-screen-stack flex max-w-[min(92vw,42rem)] flex-col items-center justify-center gap-3 px-4 text-center' as const;
 
 /** Thin horizontal rule with diamond tips (Souls-style frame). */
 export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_RULE_CLASS_NAME =
@@ -18,7 +18,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_RULE_CLASS_NAME =
 
 /** Dark Souls-style death title typography (font size set by fit hook). */
 export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_CLASS_NAME =
-  'plaza-death-screen-title font-display max-w-full whitespace-nowrap font-normal uppercase tracking-[0.14em] text-[#8b2323]' as const;
+  'plaza-death-screen-title font-display max-w-full whitespace-nowrap text-center font-normal uppercase tracking-[0.14em] text-[#8b2323]' as const;
 
 /**
  * Ladder flavor under the title.
@@ -42,27 +42,24 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_MIN_FONT_SIZE_PX = 1
  */
 export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_FIT_AVAILABLE_WIDTH_RATIO = 0.92;
 
-/**
- * Widest letter-spacing used during the title enter animation.
- * Fit measures at this spacing so the zoom-in never wraps mid-animation.
- */
-export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_FIT_LETTER_SPACING_EM = 0.28;
+/** Letter-spacing used when measuring title fit (matches rendered tracking). */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_FIT_LETTER_SPACING_EM = 0.14;
 
 /** Default death title when the killing blow has no source kind. */
 export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_DEFAULT_TITLE =
   'YOU DIED' as const;
 
-/** Auto-respawn delay after death (ms). */
-export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_AUTO_RESPAWN_MS = 5000;
+/**
+ * Delay after death before the death screen appears (ms).
+ * Player corpse stays visible in-world until this elapses.
+ */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_SHOW_DELAY_MS = 3000;
 
-/** Blackout fade-in duration when death begins (ms). */
-export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_OVERLAY_FADE_IN_MS = 1400;
-
-/** Death title zoom-in duration (ms). */
-export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_ENTER_MS = 3000;
-
-/** Delay before the death title begins its zoom-in (ms). */
-export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_ENTER_DELAY_MS = 450;
+/**
+ * Auto-respawn delay after death (ms).
+ * Includes show delay so the death screen is visible for several seconds.
+ */
+export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_AUTO_RESPAWN_MS = 8000;
 
 /** Slow wake-up fade-out after respawn (ms). */
 export const DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_WAKE_FADE_OUT_MS = 3200;

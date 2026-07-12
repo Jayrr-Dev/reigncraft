@@ -71,7 +71,7 @@ export const STYLING_WORLD_PLAZA_PROFILE_PANEL_PORTRAIT_SPRITE_CLASS_NAME =
   'pointer-events-none absolute inset-0' as const;
 
 /** Zoom applied to the cropped portrait frame. */
-export const DEFINING_WORLD_PLAZA_PROFILE_PANEL_PORTRAIT_ZOOM = 1.12 as const;
+export const DEFINING_WORLD_PLAZA_PROFILE_PANEL_PORTRAIT_ZOOM = 1.55 as const;
 
 /** Player display name in the identity row. */
 export const STYLING_WORLD_PLAZA_PROFILE_PANEL_NAME_CLASS_NAME =

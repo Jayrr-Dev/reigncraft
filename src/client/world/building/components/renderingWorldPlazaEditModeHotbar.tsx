@@ -15,6 +15,7 @@ import { RenderingWorldPlazaClaimModeCoordsPanel } from '@/components/world/buil
 import { RenderingWorldPlazaClaimModePlotList } from '@/components/world/building/components/renderingWorldPlazaClaimModePlotList';
 import { RenderingWorldPlazaClaimModeSavedCoordsList } from '@/components/world/building/components/renderingWorldPlazaClaimModeSavedCoordsList';
 import { RenderingWorldPlazaClaimModeTemporaryTilesList } from '@/components/world/building/components/renderingWorldPlazaClaimModeTemporaryTilesList';
+import { RenderingWorldPlazaCraftingPanel } from '@/components/world/building/components/renderingWorldPlazaCraftingPanel';
 import { countingWorldBuildingOwnerTemporaryTileClaims } from '@/components/world/building/domains/countingWorldBuildingOwnerTemporaryTileClaims';
 import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import type { DefiningWorldBuildingCutGridAxisCellCount } from '@/components/world/building/domains/definingWorldBuildingCutFootprintConstants';
@@ -78,7 +79,7 @@ import {
   type SyntheticEvent,
 } from 'react';
 
-/** Scrollable shell for denser plot / saved popovers. */
+/** Scrollable shell for denser plots + coords popover. */
 const RENDERING_WORLD_PLAZA_EDIT_MODE_SCROLL_POPOVER_BODY_CLASS_NAME =
   'flex max-h-[min(50vh,22rem)] min-w-[14rem] flex-col gap-2 overflow-y-auto' as const;
 
@@ -210,6 +211,8 @@ function RenderingWorldPlazaEditModeFunctionPopoverBody({
           onSelectDefinition={onSelectDefinition}
         />
       );
+    case DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CRAFTING:
+      return <RenderingWorldPlazaCraftingPanel />;
     case DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CUT:
       return (
         <RenderingWorldPlazaBuildModeCutFootprintSelector
@@ -264,15 +267,6 @@ function RenderingWorldPlazaEditModeFunctionPopoverBody({
             onRemoveTemporaryPlotAtTile={onRemoveTemporaryPlotAtTile}
             isRemovingTemporaryPlot={isRemovingTemporaryPlot}
           />
-        </div>
-      );
-    case DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.SAVED:
-      return (
-        <div
-          className={
-            RENDERING_WORLD_PLAZA_EDIT_MODE_SCROLL_POPOVER_BODY_CLASS_NAME
-          }
-        >
           <RenderingWorldPlazaClaimModeCoordsPanel
             hoverTilePosition={hoverTilePosition}
             isSavingCoords={isSavingCoords}

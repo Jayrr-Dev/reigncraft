@@ -18,7 +18,7 @@ export interface DefiningWorldBuildingPlotRegistryOwnerGroup {
   ownerDisplayLabel: string;
   /** Total tile claims owned by this player. */
   tileClaimCount: number;
-  /** Logical plots (contiguous claim regions) owned by this player. */
+  /** Logical plots (8-connected claim blobs) owned by this player. */
   ownedPlotCount: number;
   plots: DefiningWorldBuildingPlot[];
   contiguousRegions: DefiningWorldBuildingPlotRegistryContiguousRegion[];

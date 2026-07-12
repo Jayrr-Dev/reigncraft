@@ -1,13 +1,13 @@
-import { checkingWorldBuildingPlotIsPermanent } from "@/components/world/building/domains/checkingWorldBuildingPlotIsTemporary";
-import type { DefiningWorldBuildingPlotOwnerLimits } from "@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits";
-import type { DefiningWorldBuildingPlot } from "@/components/world/building/domains/definingWorldBuildingPlot";
-import { groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions } from "@/components/world/building/domains/groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions";
+import { checkingWorldBuildingPlotIsPermanent } from '@/components/world/building/domains/checkingWorldBuildingPlotIsTemporary';
+import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
+import type { DefiningWorldBuildingPlotOwnerLimits } from '@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits';
+import { groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions } from '@/components/world/building/domains/groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions';
 
 /**
  * Counts owned plots and tile claims for claim-mode limits.
  *
- * A plot is one contiguous group of claimed tiles. Each tile claim is still
- * stored as its own row until a future consolidation pass.
+ * A plot is one 8-connected group of claimed tiles (edge or corner touch).
+ * Each tile claim is still stored as its own row until a future consolidation pass.
  *
  * @module components/world/building/domains/countingWorldBuildingOwnerPlotClaims
  */
@@ -18,7 +18,7 @@ import { groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions } from "@/c
  * @param maxTileClaimCount - Per-user tile claim cap.
  */
 export function formattingWorldBuildingOwnerMaxTileClaimRejectionMessage(
-  maxTileClaimCount: number,
+  maxTileClaimCount: number
 ): string {
   return `Your plot can include up to ${maxTileClaimCount} tiles. Unclaim one before claiming more.`;
 }
@@ -29,10 +29,10 @@ export function formattingWorldBuildingOwnerMaxTileClaimRejectionMessage(
  * @param maxOwnedPlotCount - Per-user plot cap.
  */
 export function formattingWorldBuildingOwnerMaxOwnedPlotRejectionMessage(
-  maxOwnedPlotCount: number,
+  maxOwnedPlotCount: number
 ): string {
   if (maxOwnedPlotCount === 1) {
-    return "You can only have one plot. Claim tiles next to your land to expand it.";
+    return 'You can only have one plot. Claim tiles next to your land to expand it.';
   }
 
   return `You can own up to ${maxOwnedPlotCount} plots. Expand an existing plot or unclaim tiles before starting another base.`;
@@ -46,12 +46,15 @@ export function formattingWorldBuildingOwnerMaxOwnedPlotRejectionMessage(
  */
 export function countingWorldBuildingOwnerPlotTileClaims(
   plots: readonly DefiningWorldBuildingPlot[],
-  ownerUserId: string,
+  ownerUserId: string
 ): number {
   const ownedPlotIds = new Set<string>();
 
   for (const plot of plots) {
-    if (plot.ownerId === ownerUserId && checkingWorldBuildingPlotIsPermanent(plot)) {
+    if (
+      plot.ownerId === ownerUserId &&
+      checkingWorldBuildingPlotIsPermanent(plot)
+    ) {
       ownedPlotIds.add(plot.plotId);
     }
   }
@@ -67,10 +70,11 @@ export function countingWorldBuildingOwnerPlotTileClaims(
  */
 export function countingWorldBuildingOwnerOwnedPlotCount(
   plots: readonly DefiningWorldBuildingPlot[],
-  ownerUserId: string,
+  ownerUserId: string
 ): number {
   const ownedPlots = plots.filter(
-    (plot) => plot.ownerId === ownerUserId && checkingWorldBuildingPlotIsPermanent(plot),
+    (plot) =>
+      plot.ownerId === ownerUserId && checkingWorldBuildingPlotIsPermanent(plot)
   );
 
   return groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions(ownedPlots)
@@ -82,7 +86,7 @@ export function countingWorldBuildingOwnerOwnedPlotCount(
  */
 export function countingWorldBuildingOwnerPlotClaims(
   plots: readonly DefiningWorldBuildingPlot[],
-  ownerUserId: string,
+  ownerUserId: string
 ): number {
   return countingWorldBuildingOwnerPlotTileClaims(plots, ownerUserId);
 }
@@ -97,7 +101,7 @@ export function countingWorldBuildingOwnerPlotClaims(
 export function checkingWorldBuildingOwnerHasReachedMaxTileClaimCount(
   plots: readonly DefiningWorldBuildingPlot[],
   ownerUserId: string,
-  plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits,
+  plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits
 ): boolean {
   return (
     countingWorldBuildingOwnerPlotTileClaims(plots, ownerUserId) >=
@@ -115,7 +119,7 @@ export function checkingWorldBuildingOwnerHasReachedMaxTileClaimCount(
 export function checkingWorldBuildingOwnerHasReachedMaxOwnedPlotCount(
   plots: readonly DefiningWorldBuildingPlot[],
   ownerUserId: string,
-  plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits,
+  plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits
 ): boolean {
   return (
     countingWorldBuildingOwnerOwnedPlotCount(plots, ownerUserId) >=
@@ -129,11 +133,11 @@ export function checkingWorldBuildingOwnerHasReachedMaxOwnedPlotCount(
 export function checkingWorldBuildingOwnerHasReachedMaxPlotClaimCount(
   plots: readonly DefiningWorldBuildingPlot[],
   ownerUserId: string,
-  plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits,
+  plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits
 ): boolean {
   return checkingWorldBuildingOwnerHasReachedMaxTileClaimCount(
     plots,
     ownerUserId,
-    plotOwnerLimits,
+    plotOwnerLimits
   );
 }
