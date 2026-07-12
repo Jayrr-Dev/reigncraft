@@ -2,10 +2,12 @@ import { invalidatingWorldPlazaLakeBasinOccupyCache } from '@/components/world/d
 import { invalidatingWorldPlazaLavaAtTileIndexCache } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
 import { invalidatingWorldPlazaRiverChannelPassesNoiseCache } from '@/components/world/domains/checkingWorldPlazaRiverChannelPlacesRiverAtTileIndex';
 import { invalidatingWorldPlazaWaterFrozenStateAtTileIndexCache } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
+import { invalidatingWorldPlazaWaterShimmerTileEntryCache } from '@/components/world/domains/drawingWorldPlazaWaterShimmerOnGraphics';
 import { invalidatingWorldPlazaBiomeCaches } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { invalidatingWorldPlazaColumnRockMetadataCache } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex';
 import { invalidatingWorldPlazaFirelandsPropCache } from '@/components/world/domains/resolvingWorldPlazaFirelandsPropAtTileIndex';
 import { invalidatingWorldPlazaLakeShoreDepthCache } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
+import { invalidatingWorldPlazaLakeWaterShallowDepthCache } from '@/components/world/domains/resolvingWorldPlazaLakeWaterDepthAtTileIndex';
 import { invalidatingWorldPlazaMiniMapTileFillColorCache } from '@/components/world/domains/resolvingWorldPlazaMiniMapTileFillColor';
 import { invalidatingWorldPlazaNamedRealmCaches } from '@/components/world/domains/resolvingWorldPlazaNamedRealmAtTileIndex';
 import { invalidatingWorldPlazaOceanShoreDepthCache } from '@/components/world/domains/resolvingWorldPlazaOceanShoreDepthAtTileIndex';
@@ -31,9 +33,11 @@ export function invalidatingWorldPlazaProceduralGenerationCaches(): void {
   invalidatingWorldPlazaNamedRealmCaches();
   invalidatingWorldPlazaFirelandsPropCache();
   invalidatingWorldPlazaWaterAtTileIndexCache();
+  invalidatingWorldPlazaWaterShimmerTileEntryCache();
   invalidatingWorldPlazaRiverChannelPassesNoiseCache();
   invalidatingWorldPlazaLakeBasinOccupyCache();
   invalidatingWorldPlazaLakeShoreDepthCache();
+  invalidatingWorldPlazaLakeWaterShallowDepthCache();
   invalidatingWorldPlazaOceanShoreDepthCache();
   invalidatingWorldPlazaPondShoreFillColorCache();
   invalidatingWorldPlazaTreeAtTileIndexCache();

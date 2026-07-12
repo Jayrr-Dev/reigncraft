@@ -1,11 +1,19 @@
-import { DEFINING_WORLD_PLAZA_WATER_SHIMMER_LAYER_Z_INDEX } from "@/components/world/domains/definingWorldPlazaWaterConstants";
-import { drawingWorldPlazaWaterShimmerOnGraphics } from "@/components/world/domains/drawingWorldPlazaWaterShimmerOnGraphics";
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
-} from "@/components/world/domains/definingWorldPlazaIsometricConstants";
-import type { DefiningWorldPlazaVisibleTileBounds } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
-import { Graphics, Rectangle } from "pixi.js";
+} from '@/components/world/domains/definingWorldPlazaIsometricConstants';
+import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
+import { DEFINING_WORLD_PLAZA_WATER_SHIMMER_LAYER_Z_INDEX } from '@/components/world/domains/definingWorldPlazaWaterConstants';
+import { drawingWorldPlazaWaterShimmerOnGraphics } from '@/components/world/domains/drawingWorldPlazaWaterShimmerOnGraphics';
+import {
+  beginningWorldPlazaPerformanceSample,
+  settingWorldPlazaPerformanceDiagnosticsGauge,
+} from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import { Graphics, Rectangle } from 'pixi.js';
 
 /**
  * Maintains one shimmer overlay graphics child for visible water tiles.
@@ -28,7 +36,7 @@ const SYNCING_WORLD_PLAZA_WATER_SHIMMER_BOUNDS_PADDING_PX = 96;
  */
 function updatingWorldPlazaVisibleWaterShimmerBoundsArea(
   graphics: Graphics,
-  bounds: DefiningWorldPlazaVisibleTileBounds,
+  bounds: DefiningWorldPlazaVisibleTileBounds
 ): void {
   const minX =
     (bounds.minTileX - bounds.maxTileY) *
@@ -61,17 +69,27 @@ function updatingWorldPlazaVisibleWaterShimmerBoundsArea(
  * @param input - Shimmer graphics instance, bounds, and animation clock.
  */
 export function updatingWorldPlazaVisibleWaterShimmerGraphicsLayer(
-  input: UpdatingWorldPlazaVisibleWaterShimmerGraphicsLayerInput,
+  input: UpdatingWorldPlazaVisibleWaterShimmerGraphicsLayerInput
 ): void {
+  const finishSample = beginningWorldPlazaPerformanceSample(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WATER_SHIMMER_REDRAW
+  );
+
   updatingWorldPlazaVisibleWaterShimmerBoundsArea(
     input.shimmerGraphics,
-    input.bounds,
+    input.bounds
   );
   input.shimmerGraphics.clear();
-  drawingWorldPlazaWaterShimmerOnGraphics(
+  const animatedTileCount = drawingWorldPlazaWaterShimmerOnGraphics(
     input.shimmerGraphics,
     input.bounds,
-    input.animationTimeMs,
+    input.animationTimeMs
+  );
+
+  finishSample();
+  settingWorldPlazaPerformanceDiagnosticsGauge(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.WATER_SHIMMER_TILE_COUNT,
+    animatedTileCount
   );
 }
 
@@ -83,16 +101,17 @@ export function updatingWorldPlazaVisibleWaterShimmerGraphicsLayer(
  */
 export function ensuringWorldPlazaVisibleWaterShimmerGraphicsLayer(
   parentContainer: { addChild: (child: Graphics) => void },
-  shimmerGraphics: Graphics | null,
+  shimmerGraphics: Graphics | null
 ): Graphics {
   if (shimmerGraphics) {
     return shimmerGraphics;
   }
 
   const createdShimmerGraphics = new Graphics();
-  createdShimmerGraphics.eventMode = "none";
+  createdShimmerGraphics.eventMode = 'none';
   createdShimmerGraphics.boundsArea = new Rectangle();
-  createdShimmerGraphics.zIndex = DEFINING_WORLD_PLAZA_WATER_SHIMMER_LAYER_Z_INDEX;
+  createdShimmerGraphics.zIndex =
+    DEFINING_WORLD_PLAZA_WATER_SHIMMER_LAYER_Z_INDEX;
   parentContainer.addChild(createdShimmerGraphics);
 
   return createdShimmerGraphics;

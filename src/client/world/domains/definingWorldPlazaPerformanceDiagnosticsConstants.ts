@@ -86,6 +86,8 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE = {
   DOM_OVERLAY: 'dom-overlay',
   GPU_DISPOSAL: 'gpu-disposal',
   PROJECTILE_TICK: 'projectile-tick',
+  WATER_SURFACE_REDRAW: 'water-surface-redraw',
+  WATER_SHIMMER_REDRAW: 'water-shimmer-redraw',
 } as const;
 
 /** Live gauge ids (point-in-time values). */
@@ -161,6 +163,8 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE = {
   ONLINE_PARTICIPANT_COUNT: 'online-participant-count',
   ONLINE_REMOTE_WILDLIFE_SNAPSHOT_COUNT:
     'online-remote-wildlife-snapshot-count',
+  WATER_VISIBLE_TILE_COUNT: 'water-visible-tile-count',
+  WATER_SHIMMER_TILE_COUNT: 'water-shimmer-tile-count',
 } as const;
 
 /** Counter ids incremented on discrete events (shown per second). */
@@ -205,6 +209,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER = {
   ONLINE_SYNC_FAILURE: 'online-sync-failure',
   ONLINE_POLL_FAILURE: 'online-poll-failure',
   ONLINE_SYNC_SKIPPED_INFLIGHT: 'online-sync-skipped-inflight',
+  WATER_SURFACE_REDRAW: 'water-surface-redraw-count',
 } as const;
 
 /** Sample ids shown in the overlay, in display order. */
@@ -252,6 +257,8 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE_DISPLAY_ORDER =
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.DOM_OVERLAY,
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.GPU_DISPOSAL,
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.PROJECTILE_TICK,
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WATER_SURFACE_REDRAW,
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WATER_SHIMMER_REDRAW,
   ] as const;
 
 /** One instrumented sample id. */

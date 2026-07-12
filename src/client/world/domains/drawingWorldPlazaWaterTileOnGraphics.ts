@@ -1,9 +1,8 @@
-import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
-} from '@/components/world/domains/definingWorldPlazaIsometricConstants';
-import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
+} from "@/components/world/domains/definingWorldPlazaIsometricConstants";
 import {
   DEFINING_WORLD_PLAZA_WATER_LAKE_SHORE_FOAM_ALPHA,
   DEFINING_WORLD_PLAZA_WATER_LAKE_SHORE_FOAM_COLOR,
@@ -11,14 +10,10 @@ import {
   DEFINING_WORLD_PLAZA_WATER_SHORE_FOAM_ALPHA,
   DEFINING_WORLD_PLAZA_WATER_SHORE_FOAM_COLOR,
   DEFINING_WORLD_PLAZA_WATER_SHORE_FOAM_LINE_WIDTH_PX,
-  DEFINING_WORLD_PLAZA_WATER_SHORE_OUTER_CORNER_TIP_COVER_EDGE_FRACTION,
-  DEFINING_WORLD_PLAZA_WATER_SHORE_OUTER_CORNER_TIP_COVER_MIN_ALPHA,
-} from '@/components/world/domains/definingWorldPlazaWaterConstants';
-import { DEFINING_WORLD_PLAZA_WATER_KIND_LAKE } from '@/components/world/domains/definingWorldPlazaWaterKind';
-import type { DefiningWorldPlazaWaterShoreDiamondVertex } from '@/components/world/domains/definingWorldPlazaWaterShoreOuterCornerTipRegistry';
-import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
-import { resolvingWorldPlazaWaterShoreOuterCornerTipsAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterShoreOuterCornerTipsAtTileIndex';
-import type { Graphics } from 'pixi.js';
+} from "@/components/world/domains/definingWorldPlazaWaterConstants";
+import { DEFINING_WORLD_PLAZA_WATER_KIND_LAKE } from "@/components/world/domains/definingWorldPlazaWaterKind";
+import { resolvingWorldPlazaWaterAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex";
+import type { Graphics } from "pixi.js";
 
 /**
  * Shore foam rendering for one water tile.
@@ -46,7 +41,7 @@ interface DrawingWorldPlazaWaterTileScreenFrame {
  */
 function buildingWorldPlazaWaterTileScreenFrame(
   tileX: number,
-  tileY: number
+  tileY: number,
 ): DrawingWorldPlazaWaterTileScreenFrame {
   const center = convertingWorldPlazaGridPointToIsometricScreenPoint({
     x: tileX,
@@ -65,8 +60,8 @@ function buildingWorldPlazaWaterTileScreenFrame(
 interface DrawingWorldPlazaWaterShoreEdge {
   readonly deltaX: number;
   readonly deltaY: number;
-  readonly fromVertex: 'top' | 'right' | 'bottom' | 'left';
-  readonly toVertex: 'top' | 'right' | 'bottom' | 'left';
+  readonly fromVertex: "top" | "right" | "bottom" | "left";
+  readonly toVertex: "top" | "right" | "bottom" | "left";
 }
 
 /**
@@ -76,20 +71,19 @@ interface DrawingWorldPlazaWaterShoreEdge {
  * axes point down-right and down-left, so each cardinal neighbor shares exactly
  * one of the four diamond edges with this tile.
  */
-const DRAWING_WORLD_PLAZA_WATER_SHORE_EDGES: readonly DrawingWorldPlazaWaterShoreEdge[] =
-  [
-    { deltaX: 0, deltaY: -1, fromVertex: 'top', toVertex: 'right' },
-    { deltaX: 1, deltaY: 0, fromVertex: 'right', toVertex: 'bottom' },
-    { deltaX: 0, deltaY: 1, fromVertex: 'bottom', toVertex: 'left' },
-    { deltaX: -1, deltaY: 0, fromVertex: 'left', toVertex: 'top' },
-  ];
+const DRAWING_WORLD_PLAZA_WATER_SHORE_EDGES: readonly DrawingWorldPlazaWaterShoreEdge[] = [
+  { deltaX: 0, deltaY: -1, fromVertex: "top", toVertex: "right" },
+  { deltaX: 1, deltaY: 0, fromVertex: "right", toVertex: "bottom" },
+  { deltaX: 0, deltaY: 1, fromVertex: "bottom", toVertex: "left" },
+  { deltaX: -1, deltaY: 0, fromVertex: "left", toVertex: "top" },
+];
 
 /** Diamond corner order for walking a closed shore outline clockwise. */
 const DRAWING_WORLD_PLAZA_WATER_DIAMOND_VERTEX_ORDER = [
-  'top',
-  'right',
-  'bottom',
-  'left',
+  "top",
+  "right",
+  "bottom",
+  "left",
 ] as const;
 
 /** Screen point for one diamond corner. */
@@ -106,32 +100,18 @@ interface DrawingWorldPlazaWaterDiamondPoint {
  */
 function resolvingWorldPlazaWaterDiamondVertex(
   frame: DrawingWorldPlazaWaterTileScreenFrame,
-  vertex: DefiningWorldPlazaWaterShoreDiamondVertex
+  vertex: (typeof DRAWING_WORLD_PLAZA_WATER_DIAMOND_VERTEX_ORDER)[number],
 ): DrawingWorldPlazaWaterDiamondPoint {
   switch (vertex) {
-    case 'top':
+    case "top":
       return { x: frame.centerX, y: frame.centerY - frame.halfHeight };
-    case 'right':
+    case "right":
       return { x: frame.centerX + frame.halfWidth, y: frame.centerY };
-    case 'bottom':
+    case "bottom":
       return { x: frame.centerX, y: frame.centerY + frame.halfHeight };
-    case 'left':
+    case "left":
       return { x: frame.centerX - frame.halfWidth, y: frame.centerY };
   }
-}
-
-/**
- * Lerps from the tip vertex toward a wing vertex for the tip cover triangle.
- */
-function resolvingWorldPlazaWaterShoreOuterCornerTipWingPoint(
-  tipPoint: DrawingWorldPlazaWaterDiamondPoint,
-  wingPoint: DrawingWorldPlazaWaterDiamondPoint,
-  edgeFraction: number
-): DrawingWorldPlazaWaterDiamondPoint {
-  return {
-    x: tipPoint.x + (wingPoint.x - tipPoint.x) * edgeFraction,
-    y: tipPoint.y + (wingPoint.y - tipPoint.y) * edgeFraction,
-  };
 }
 
 /**
@@ -146,7 +126,7 @@ function checkingWorldPlazaWaterDiamondEdgeBordersLand(
   tileX: number,
   tileY: number,
   fromVertex: (typeof DRAWING_WORLD_PLAZA_WATER_DIAMOND_VERTEX_ORDER)[number],
-  toVertex: (typeof DRAWING_WORLD_PLAZA_WATER_DIAMOND_VERTEX_ORDER)[number]
+  toVertex: (typeof DRAWING_WORLD_PLAZA_WATER_DIAMOND_VERTEX_ORDER)[number],
 ): boolean {
   for (const shoreEdge of DRAWING_WORLD_PLAZA_WATER_SHORE_EDGES) {
     if (
@@ -154,7 +134,7 @@ function checkingWorldPlazaWaterDiamondEdgeBordersLand(
       shoreEdge.toVertex === toVertex &&
       !resolvingWorldPlazaWaterAtTileIndex(
         tileX + shoreEdge.deltaX,
-        tileY + shoreEdge.deltaY
+        tileY + shoreEdge.deltaY,
       )
     ) {
       return true;
@@ -172,7 +152,7 @@ function checkingWorldPlazaWaterDiamondEdgeBordersLand(
  */
 function listingWorldPlazaWaterLandBorderingEdgeIndices(
   tileX: number,
-  tileY: number
+  tileY: number,
 ): number[] {
   const landEdgeIndices: number[] = [];
   const vertexCount = DRAWING_WORLD_PLAZA_WATER_DIAMOND_VERTEX_ORDER.length;
@@ -190,7 +170,7 @@ function listingWorldPlazaWaterLandBorderingEdgeIndices(
         tileX,
         tileY,
         fromVertex,
-        toVertex
+        toVertex,
       )
     ) {
       landEdgeIndices.push(edgeIndex);
@@ -207,7 +187,7 @@ function listingWorldPlazaWaterLandBorderingEdgeIndices(
  *   {@link listingWorldPlazaWaterLandBorderingEdgeIndices}.
  */
 function groupingWorldPlazaWaterLandBorderingEdgeRuns(
-  landEdgeIndices: readonly number[]
+  landEdgeIndices: readonly number[],
 ): Array<{ readonly startEdge: number; readonly endEdge: number }> {
   if (landEdgeIndices.length === 0) {
     return [];
@@ -243,7 +223,9 @@ function groupingWorldPlazaWaterLandBorderingEdgeRuns(
 
   for (const breakAfterIndex of breaksAfterIndex) {
     const runEndListIndex =
-      breakAfterIndex === landEdgeIndices.length - 1 ? 0 : breakAfterIndex + 1;
+      breakAfterIndex === landEdgeIndices.length - 1
+        ? 0
+        : breakAfterIndex + 1;
 
     if (runStartListIndex <= breakAfterIndex) {
       runs.push({
@@ -280,10 +262,11 @@ function strokingWorldPlazaWaterShoreFoamRunOnGraphics(
   endEdge: number,
   foamColor: number,
   foamAlpha: number,
-  foamLineWidthPx: number
+  foamLineWidthPx: number,
 ): void {
   const vertexCount = DRAWING_WORLD_PLAZA_WATER_DIAMOND_VERTEX_ORDER.length;
-  const startVertex = DRAWING_WORLD_PLAZA_WATER_DIAMOND_VERTEX_ORDER[startEdge];
+  const startVertex =
+    DRAWING_WORLD_PLAZA_WATER_DIAMOND_VERTEX_ORDER[startEdge];
   const startPoint = resolvingWorldPlazaWaterDiamondVertex(frame, startVertex);
 
   graphics.moveTo(startPoint.x, startPoint.y);
@@ -310,97 +293,9 @@ function strokingWorldPlazaWaterShoreFoamRunOnGraphics(
     color: foamColor,
     alpha: foamAlpha,
     alignment: 0.5,
-    cap: 'round',
-    join: 'round',
+    cap: "round",
+    join: "round",
   });
-}
-
-/**
- * Fills grass diamond tips that poke north into water at staircase outer corners.
- *
- * Foam alone frames those tips and they read as holes; covering them with the
- * neighboring water surface tint seals the bank before foam strokes.
- *
- * @param graphics - Pixi graphics instance.
- * @param bounds - Visible tile index range.
- * @param resolvingSurfaceAppearance - Surface tint for a water neighbor tile.
- */
-export function drawingWorldPlazaWaterShoreOuterCornerTipCoversOnGraphics(
-  graphics: Graphics,
-  bounds: DefiningWorldPlazaVisibleTileBounds,
-  resolvingSurfaceAppearance: (
-    tileX: number,
-    tileY: number
-  ) => { color: number; alpha: number } | null
-): void {
-  const edgeFraction =
-    DEFINING_WORLD_PLAZA_WATER_SHORE_OUTER_CORNER_TIP_COVER_EDGE_FRACTION;
-  const minAlpha =
-    DEFINING_WORLD_PLAZA_WATER_SHORE_OUTER_CORNER_TIP_COVER_MIN_ALPHA;
-
-  // Expand one tile so land tips just outside the water bounds still seal.
-  const minTileX = bounds.minTileX - 1;
-  const maxTileX = bounds.maxTileX + 1;
-  const minTileY = bounds.minTileY - 1;
-  const maxTileY = bounds.maxTileY + 1;
-
-  for (let tileY = minTileY; tileY <= maxTileY; tileY += 1) {
-    for (let tileX = minTileX; tileX <= maxTileX; tileX += 1) {
-      const tips = resolvingWorldPlazaWaterShoreOuterCornerTipsAtTileIndex(
-        tileX,
-        tileY
-      );
-
-      for (const cornerTip of tips) {
-        const surfaceAppearance = resolvingSurfaceAppearance(
-          cornerTip.waterTileX,
-          cornerTip.waterTileY
-        );
-
-        if (!surfaceAppearance) {
-          continue;
-        }
-
-        const frame = buildingWorldPlazaWaterTileScreenFrame(
-          cornerTip.landTileX,
-          cornerTip.landTileY
-        );
-        const tipPoint = resolvingWorldPlazaWaterDiamondVertex(
-          frame,
-          cornerTip.tip.tipVertex
-        );
-        const wingPointA = resolvingWorldPlazaWaterShoreOuterCornerTipWingPoint(
-          tipPoint,
-          resolvingWorldPlazaWaterDiamondVertex(
-            frame,
-            cornerTip.tip.wingVertexA
-          ),
-          edgeFraction
-        );
-        const wingPointB = resolvingWorldPlazaWaterShoreOuterCornerTipWingPoint(
-          tipPoint,
-          resolvingWorldPlazaWaterDiamondVertex(
-            frame,
-            cornerTip.tip.wingVertexB
-          ),
-          edgeFraction
-        );
-
-        graphics.poly([
-          tipPoint.x,
-          tipPoint.y,
-          wingPointA.x,
-          wingPointA.y,
-          wingPointB.x,
-          wingPointB.y,
-        ]);
-        graphics.fill({
-          color: surfaceAppearance.color,
-          alpha: Math.max(surfaceAppearance.alpha, minAlpha),
-        });
-      }
-    }
-  }
 }
 
 /**
@@ -416,11 +311,10 @@ export function drawingWorldPlazaWaterShoreOuterCornerTipCoversOnGraphics(
 export function drawingWorldPlazaWaterShoreDetailsOnGraphics(
   graphics: Graphics,
   tileX: number,
-  tileY: number
+  tileY: number,
 ): void {
   const waterTile = resolvingWorldPlazaWaterAtTileIndex(tileX, tileY);
-  const isLakeWaterTile =
-    waterTile?.kind === DEFINING_WORLD_PLAZA_WATER_KIND_LAKE;
+  const isLakeWaterTile = waterTile?.kind === DEFINING_WORLD_PLAZA_WATER_KIND_LAKE;
   const foamColor = isLakeWaterTile
     ? DEFINING_WORLD_PLAZA_WATER_LAKE_SHORE_FOAM_COLOR
     : DEFINING_WORLD_PLAZA_WATER_SHORE_FOAM_COLOR;
@@ -432,7 +326,7 @@ export function drawingWorldPlazaWaterShoreDetailsOnGraphics(
     : DEFINING_WORLD_PLAZA_WATER_SHORE_FOAM_LINE_WIDTH_PX;
   const frame = buildingWorldPlazaWaterTileScreenFrame(tileX, tileY);
   const landEdgeRuns = groupingWorldPlazaWaterLandBorderingEdgeRuns(
-    listingWorldPlazaWaterLandBorderingEdgeIndices(tileX, tileY)
+    listingWorldPlazaWaterLandBorderingEdgeIndices(tileX, tileY),
   );
 
   for (const landEdgeRun of landEdgeRuns) {
@@ -443,7 +337,7 @@ export function drawingWorldPlazaWaterShoreDetailsOnGraphics(
       landEdgeRun.endEdge,
       foamColor,
       foamAlpha,
-      foamLineWidthPx
+      foamLineWidthPx,
     );
   }
 }

@@ -22,6 +22,7 @@ const SAMPLE = DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE;
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE = {
   SYSTEM: 'system',
   TERRAIN: 'terrain',
+  WATER: 'water',
   WILDLIFE_POP: 'wildlife-pop',
   WILDLIFE_BEHAVIOR: 'wildlife-behavior',
   WILDLIFE_SIM: 'wildlife-sim',
@@ -186,6 +187,44 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_REGISTRY
           sampleId: SAMPLE.PIXI_RENDER,
           healthyAtMs: 4,
           criticalAtMs: 16,
+        },
+      ],
+    },
+    {
+      nuanceId:
+        DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE.WATER,
+      label: 'Water',
+      description: 'Lake/river/stream surface redraw and shimmer animation',
+      gaugeIds: [
+        GAUGE.WATER_VISIBLE_TILE_COUNT,
+        GAUGE.WATER_SHIMMER_TILE_COUNT,
+      ],
+      counterIds: [COUNTER.WATER_SURFACE_REDRAW],
+      sampleIds: [SAMPLE.WATER_SURFACE_REDRAW, SAMPLE.WATER_SHIMMER_REDRAW],
+      signals: [
+        {
+          gaugeId: GAUGE.WATER_VISIBLE_TILE_COUNT,
+          polarity: 'higher-worse',
+          healthyAt: 200,
+          criticalAt: 1600,
+        },
+        {
+          gaugeId: GAUGE.WATER_SHIMMER_TILE_COUNT,
+          polarity: 'higher-worse',
+          healthyAt: 120,
+          criticalAt: 900,
+        },
+      ],
+      sampleSignals: [
+        {
+          sampleId: SAMPLE.WATER_SURFACE_REDRAW,
+          healthyAtMs: 2,
+          criticalAtMs: 12,
+        },
+        {
+          sampleId: SAMPLE.WATER_SHIMMER_REDRAW,
+          healthyAtMs: 1,
+          criticalAtMs: 6,
         },
       ],
     },

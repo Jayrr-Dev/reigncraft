@@ -1,5 +1,6 @@
 import { resolvingWorldPlazaVisibleIsometricTileBounds } from '@/components/world/domains/resolvingWorldPlazaVisibleIsometricTileBounds';
 import { resolvingWorldPlazaWaterShimmerViewportTileBounds } from '@/components/world/domains/resolvingWorldPlazaWaterShimmerViewportTileBounds';
+import { resolvingWorldPlazaWaterViewportTileBounds } from '@/components/world/domains/resolvingWorldPlazaWaterViewportTileBounds';
 import { describe, expect, it } from 'vitest';
 
 describe('resolvingWorldPlazaWaterShimmerViewportTileBounds', () => {
@@ -76,5 +77,46 @@ describe('resolvingWorldPlazaWaterShimmerViewportTileBounds', () => {
     });
 
     expect(shimmerBounds).toEqual(floorBounds);
+  });
+
+  it('keeps surface coverage through one unsynced bounds-snap cell', () => {
+    const floorBounds = {
+      minTileX: -100,
+      maxTileX: 100,
+      minTileY: -100,
+      maxTileY: 100,
+    };
+    const snapTiles = 12;
+    const surfaceBounds = resolvingWorldPlazaWaterViewportTileBounds({
+      playerGridX: 0,
+      playerGridY: 0,
+      viewportWidthPx: 1280,
+      viewportHeightPx: 720,
+      worldZoom: 1,
+      viewportPaddingTiles: snapTiles + 3,
+      floorBounds,
+    });
+    const movedViewportBounds = resolvingWorldPlazaVisibleIsometricTileBounds(
+      snapTiles - 0.01,
+      snapTiles - 0.01,
+      1280,
+      720,
+      0,
+      1,
+      1
+    );
+
+    expect(surfaceBounds.minTileX).toBeLessThanOrEqual(
+      movedViewportBounds.minTileX
+    );
+    expect(surfaceBounds.maxTileX).toBeGreaterThanOrEqual(
+      movedViewportBounds.maxTileX
+    );
+    expect(surfaceBounds.minTileY).toBeLessThanOrEqual(
+      movedViewportBounds.minTileY
+    );
+    expect(surfaceBounds.maxTileY).toBeGreaterThanOrEqual(
+      movedViewportBounds.maxTileY
+    );
   });
 });

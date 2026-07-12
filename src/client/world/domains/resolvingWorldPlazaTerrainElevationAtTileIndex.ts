@@ -33,10 +33,14 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SPAWN_CLEARING_RADIUS_SQUARED,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_SURFACE_LAYER_MIN,
 } from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
+import {
+  DEFINING_WORLD_PLAZA_WATER_KIND_RIVER,
+  DEFINING_WORLD_PLAZA_WATER_KIND_STREAM,
+} from '@/components/world/domains/definingWorldPlazaWaterKind';
 import { samplingWorldPlazaFractalNoise } from '@/components/world/domains/generatingWorldPlazaValueNoise';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { resolvingWorldPlazaBiomeAltitudeFactorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAltitudeFactorAtTileIndex';
-import { checkingWorldPlazaSurfaceWaterNoiseWouldPlaceWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
+import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { sculptingWorldPlazaTerrainElevationSurfaceLayerForPlayAtTileIndex } from '@/components/world/domains/sculptingWorldPlazaTerrainElevationSurfaceLayerForPlayAtTileIndex';
 
 /**
@@ -72,6 +76,21 @@ const resolvingWorldPlazaTerrainElevationAtTileIndexCacheByColumn = new Map<
   number,
   Map<number, DefiningWorldPlazaTerrainElevationTile>
 >();
+
+/**
+ * Cardinal riverbank tiles flattened with flowing-water beds.
+ *
+ * A raised cap is projected north of its grid diamond. When a river cuts
+ * directly through raised terrain, those caps protrude over staircase bends
+ * and look like isolated holes in the water. One flat bank ring keeps the
+ * terrain geometry from intersecting the river surface.
+ */
+const RESOLVING_WORLD_PLAZA_TERRAIN_ELEVATION_FLOWING_WATER_BANK_OFFSETS = [
+  { deltaX: 0, deltaY: -1 },
+  { deltaX: 1, deltaY: 0 },
+  { deltaX: 0, deltaY: 1 },
+  { deltaX: -1, deltaY: 0 },
+] as const;
 
 /**
  * Clears the elevation memoization cache after terrain rule changes.
@@ -258,7 +277,7 @@ function samplingWorldPlazaTerrainElevationNormalizedHeightAtTile(
 }
 
 /**
- * Returns true when a tile should stay flat (spawn, water, or bedrock rules).
+ * Returns true when a tile should stay flat (spawn, water, or flowing bank).
  *
  * @param tileX - Tile column index.
  * @param tileY - Tile row index.
@@ -274,9 +293,22 @@ export function checkingWorldPlazaTerrainElevationIsForcedFlatAtTileIndex(
     return true;
   }
 
-  return checkingWorldPlazaSurfaceWaterNoiseWouldPlaceWaterAtTileIndex(
-    tileX,
-    tileY
+  if (resolvingWorldPlazaWaterAtTileIndex(tileX, tileY)) {
+    return true;
+  }
+
+  return RESOLVING_WORLD_PLAZA_TERRAIN_ELEVATION_FLOWING_WATER_BANK_OFFSETS.some(
+    ({ deltaX, deltaY }) => {
+      const neighboringWaterTile = resolvingWorldPlazaWaterAtTileIndex(
+        tileX + deltaX,
+        tileY + deltaY
+      );
+
+      return (
+        neighboringWaterTile?.kind === DEFINING_WORLD_PLAZA_WATER_KIND_RIVER ||
+        neighboringWaterTile?.kind === DEFINING_WORLD_PLAZA_WATER_KIND_STREAM
+      );
+    }
   );
 }
 

@@ -14,6 +14,7 @@ import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
 } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import { DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PROCEDURAL_ENABLED } from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
+import { DEFINING_WORLD_PLAZA_WATER_SURFACE_VIEWPORT_PADDING_TILES } from '@/components/world/domains/definingWorldPlazaWaterConstants';
 import type { InvalidatingWorldPlazaFloorChunkGraphicsTileIndex } from '@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForTileIndices';
 import { invalidatingWorldPlazaFloorChunkGraphicsForTileIndices } from '@/components/world/domains/invalidatingWorldPlazaFloorChunkGraphicsForTileIndices';
 import { listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex } from '@/components/world/domains/listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex';
@@ -24,6 +25,7 @@ import {
 } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { refreshingWorldPlazaFloorChunkGraphicsForTileIndices } from '@/components/world/domains/refreshingWorldPlazaFloorChunkGraphicsForTileIndices';
 import { resolvingWorldPlazaWaterShimmerViewportTileBounds } from '@/components/world/domains/resolvingWorldPlazaWaterShimmerViewportTileBounds';
+import { resolvingWorldPlazaWaterViewportTileBounds } from '@/components/world/domains/resolvingWorldPlazaWaterViewportTileBounds';
 import { syncingWorldPlazaVisibleFirelandsDecorationLayer } from '@/components/world/domains/syncingWorldPlazaVisibleFirelandsDecorationLayer';
 import {
   advancingWorldPlazaVisibleLavaOverlayAnimation,
@@ -949,7 +951,17 @@ export function registeringWorldPlazaTerrainLayers(
 
         updatingWorldPlazaVisibleWaterSurfaceGraphicsLayer({
           surfaceGraphics: state.graphics,
-          bounds,
+          bounds: resolvingWorldPlazaWaterViewportTileBounds({
+            playerGridX: context.playerPosition.x,
+            playerGridY: context.playerPosition.y,
+            viewportWidthPx: context.viewportWidth,
+            viewportHeightPx: context.viewportHeight,
+            worldZoom: context.worldZoom,
+            viewportPaddingTiles:
+              context.performanceProfile.visibleBoundsSnapTiles +
+              DEFINING_WORLD_PLAZA_WATER_SURFACE_VIEWPORT_PADDING_TILES,
+            floorBounds: bounds,
+          }),
         });
       },
       resetRuntimeState: (context, runtimeState) => {

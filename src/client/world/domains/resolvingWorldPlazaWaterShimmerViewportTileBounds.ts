@@ -1,6 +1,6 @@
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import { DEFINING_WORLD_PLAZA_WATER_SHIMMER_VIEWPORT_PADDING_TILES } from '@/components/world/domains/definingWorldPlazaWaterConstants';
-import { resolvingWorldPlazaVisibleIsometricTileBounds } from '@/components/world/domains/resolvingWorldPlazaVisibleIsometricTileBounds';
+import { resolvingWorldPlazaWaterViewportTileBounds } from '@/components/world/domains/resolvingWorldPlazaWaterViewportTileBounds';
 
 /**
  * Clamps the animated water shimmer redraw window to the on-screen viewport.
@@ -38,20 +38,9 @@ export interface ResolvingWorldPlazaWaterShimmerViewportTileBoundsInput {
 export function resolvingWorldPlazaWaterShimmerViewportTileBounds(
   input: ResolvingWorldPlazaWaterShimmerViewportTileBoundsInput
 ): DefiningWorldPlazaVisibleTileBounds {
-  const viewportBounds = resolvingWorldPlazaVisibleIsometricTileBounds(
-    input.playerGridX,
-    input.playerGridY,
-    input.viewportWidthPx,
-    input.viewportHeightPx,
-    DEFINING_WORLD_PLAZA_WATER_SHIMMER_VIEWPORT_PADDING_TILES,
-    1,
-    input.worldZoom
-  );
-
-  return {
-    minTileX: Math.max(viewportBounds.minTileX, input.floorBounds.minTileX),
-    maxTileX: Math.min(viewportBounds.maxTileX, input.floorBounds.maxTileX),
-    minTileY: Math.max(viewportBounds.minTileY, input.floorBounds.minTileY),
-    maxTileY: Math.min(viewportBounds.maxTileY, input.floorBounds.maxTileY),
-  };
+  return resolvingWorldPlazaWaterViewportTileBounds({
+    ...input,
+    viewportPaddingTiles:
+      DEFINING_WORLD_PLAZA_WATER_SHIMMER_VIEWPORT_PADDING_TILES,
+  });
 }

@@ -160,6 +160,24 @@ export const DEFINING_WORLD_PLAZA_WATER_FLOW_STREAK_COUNT = 1;
  */
 export const DEFINING_WORLD_PLAZA_WATER_SHIMMER_VIEWPORT_PADDING_TILES = 3;
 
+/**
+ * Hard cap on water tiles that animate shimmer per redraw.
+ *
+ * Wide rivers and lakes can fill the screen with 700+ water tiles; rebuilding
+ * that many Pixi stroke paths every few frames stalls the frame. Over budget,
+ * tiles are skipped at a deterministic stride so the thinning is stable and
+ * spread evenly instead of clumped at one screen edge.
+ */
+export const DEFINING_WORLD_PLAZA_WATER_SHIMMER_MAX_ANIMATED_TILES = 480;
+
+/**
+ * Extra surface rings beyond the live viewport, excluding bounds-snap travel.
+ *
+ * The surface redraw adds the active profile's snap distance so water cannot
+ * leave the covered area before the next floor-bounds update.
+ */
+export const DEFINING_WORLD_PLAZA_WATER_SURFACE_VIEWPORT_PADDING_TILES = 3;
+
 /** Uniform translucent surface tint drawn as one merged fill over the bed. */
 export const DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_COLOR = 0x2b8cb3;
 
@@ -199,31 +217,6 @@ export const DEFINING_WORLD_PLAZA_WATER_LAKE_SHORE_FOAM_ALPHA = 0.64;
 
 /** Stroke width of lake shore foam lines (pixels). */
 export const DEFINING_WORLD_PLAZA_WATER_LAKE_SHORE_FOAM_LINE_WIDTH_PX = 2.8;
-
-/**
- * How far along each land diamond edge the outer-corner tip cover reaches
- * from the tip vertex toward the adjacent vertices (0..1).
- *
- * Staircase river banks leave a grass diamond tip pointing into the water;
- * foam outlines that tip and it reads as a hole. Covering the tip with water
- * surface tint seals those corners.
- */
-export const DEFINING_WORLD_PLAZA_WATER_SHORE_OUTER_CORNER_TIP_COVER_EDGE_FRACTION = 0.42;
-
-/**
- * Minimum surface alpha for outer-corner tip covers.
- *
- * Tip covers sit on grass floor, not a water bed, so the normal translucent
- * surface alpha lets green show through as cyan holes. Boost opacity enough
- * to match neighboring water.
- */
-export const DEFINING_WORLD_PLAZA_WATER_SHORE_OUTER_CORNER_TIP_COVER_MIN_ALPHA = 0.9;
-
-/**
- * Extra pixels added to each water diamond half-extent when filling the
- * surface overlay so adjacent water tiles overlap and hide sub-pixel seams.
- */
-export const DEFINING_WORLD_PLAZA_WATER_SURFACE_DIAMOND_BLEED_PX = 0.75;
 
 /** Shimmer ellipse horizontal radius (pixels). */
 export const DEFINING_WORLD_PLAZA_WATER_SHIMMER_RADIUS_X_PX = 9;

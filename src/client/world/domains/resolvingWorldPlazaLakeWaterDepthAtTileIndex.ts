@@ -1,24 +1,24 @@
 import {
+  DEFINING_WORLD_PLAZA_WATER_LAKE_INFLOW_MOUTH_SURFACE_MAX_MIX,
   DEFINING_WORLD_PLAZA_WATER_LAKE_SHALLOW_DEPTH_MAX_BLOCKS,
   DEFINING_WORLD_PLAZA_WATER_LAKE_SHALLOW_SURFACE_LAYER_ALPHA,
   DEFINING_WORLD_PLAZA_WATER_LAKE_SHALLOW_SURFACE_LAYER_ALPHA_MIN,
-  DEFINING_WORLD_PLAZA_WATER_LAKE_INFLOW_MOUTH_SURFACE_MAX_MIX,
   DEFINING_WORLD_PLAZA_WATER_LAKE_SHORE_EDGE_SURFACE_HIGHLIGHT_COLOR,
   DEFINING_WORLD_PLAZA_WATER_LAKE_SHORE_EDGE_SURFACE_HIGHLIGHT_MIX,
-} from "@/components/world/domains/definingWorldPlazaWaterConstants";
+} from '@/components/world/domains/definingWorldPlazaWaterConstants';
 import {
   DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
   DEFINING_WORLD_PLAZA_WATER_KIND_RIVER,
   DEFINING_WORLD_PLAZA_WATER_KIND_STREAM,
-} from "@/components/world/domains/definingWorldPlazaWaterKind";
+} from '@/components/world/domains/definingWorldPlazaWaterKind';
 import {
   clampingWorldPlazaWaterUnitFloat,
   mappingWorldPlazaWaterUnitFloatToRange,
   mixingWorldPlazaWaterRgbColors,
-} from "@/components/world/domains/mixingWorldPlazaWaterRgbColors";
-import { resolvingWorldPlazaBiomeWaterPaletteAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaBiomeWaterPaletteAtTileIndex";
-import { resolvingWorldPlazaLakeInflowSourceCardinalDeltaAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaLakeInflowDirectionAtTileIndex";
-import { resolvingWorldPlazaWaterAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex";
+} from '@/components/world/domains/mixingWorldPlazaWaterRgbColors';
+import { resolvingWorldPlazaBiomeWaterPaletteAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeWaterPaletteAtTileIndex';
+import { resolvingWorldPlazaLakeInflowSourceCardinalDeltaAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeInflowDirectionAtTileIndex';
+import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 
 /**
  * Resolves shallow-water depth bands for lake tiles near the shore.
@@ -31,6 +31,22 @@ import { resolvingWorldPlazaWaterAtTileIndex } from "@/components/world/domains/
 
 /** Safety cap when searching for the nearest non-lake tile in open water. */
 const RESOLVING_WORLD_PLAZA_LAKE_WATER_SHORE_DISTANCE_SEARCH_MAX_BLOCKS = 128;
+
+/** Hard cap on memoized shallow-depth columns before the cache is reset. */
+const RESOLVING_WORLD_PLAZA_LAKE_WATER_SHALLOW_DEPTH_CACHE_MAX_COLUMNS = 4000;
+
+/** Memoized shallow depth, with null representing deep lake or ocean water. */
+const resolvingWorldPlazaLakeWaterShallowDepthCacheByColumn = new Map<
+  number,
+  Map<number, number | null>
+>();
+
+/**
+ * Clears shallow-depth memoization after procedural water rules change.
+ */
+export function invalidatingWorldPlazaLakeWaterShallowDepthCache(): void {
+  resolvingWorldPlazaLakeWaterShallowDepthCacheByColumn.clear();
+}
 
 /** Lake surface tint and opacity for one draw pass. */
 export interface ResolvingWorldPlazaLakeSurfaceAppearance {
@@ -48,7 +64,7 @@ export interface ResolvingWorldPlazaLakeSurfaceAppearance {
  */
 function checkingWorldPlazaLakeWaterTileAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): boolean {
   const waterTile = resolvingWorldPlazaWaterAtTileIndex(tileX, tileY);
 
@@ -56,37 +72,28 @@ function checkingWorldPlazaLakeWaterTileAtTileIndex(
 }
 
 /**
- * Returns Chebyshev distance from a lake tile to the nearest non-lake tile.
- *
- * @param tileX - Tile column index.
- * @param tileY - Tile row index.
+ * Finds the nearest non-lake tile within a bounded Chebyshev radius.
  */
-export function findingWorldPlazaLakeWaterShoreDistanceBlocksAtTileIndex(
+function findingWorldPlazaLakeWaterShoreDistanceWithinBlocksAtTileIndex(
   tileX: number,
   tileY: number,
+  maxDistanceBlocks: number
 ): number | null {
   if (!checkingWorldPlazaLakeWaterTileAtTileIndex(tileX, tileY)) {
     return null;
   }
 
-  for (
-    let band = 1;
-    band <= RESOLVING_WORLD_PLAZA_LAKE_WATER_SHORE_DISTANCE_SEARCH_MAX_BLOCKS;
-    band += 1
-  ) {
+  for (let band = 1; band <= maxDistanceBlocks; band += 1) {
     for (let deltaY = -band; deltaY <= band; deltaY += 1) {
       for (let deltaX = -band; deltaX <= band; deltaX += 1) {
-        const isOnRingEdge =
-          Math.max(Math.abs(deltaX), Math.abs(deltaY)) === band;
-
-        if (!isOnRingEdge) {
+        if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) !== band) {
           continue;
         }
 
         if (
           !checkingWorldPlazaLakeWaterTileAtTileIndex(
             tileX + deltaX,
-            tileY + deltaY,
+            tileY + deltaY
           )
         ) {
           return band;
@@ -99,13 +106,30 @@ export function findingWorldPlazaLakeWaterShoreDistanceBlocksAtTileIndex(
 }
 
 /**
+ * Returns Chebyshev distance from a lake tile to the nearest non-lake tile.
+ *
+ * @param tileX - Tile column index.
+ * @param tileY - Tile row index.
+ */
+export function findingWorldPlazaLakeWaterShoreDistanceBlocksAtTileIndex(
+  tileX: number,
+  tileY: number
+): number | null {
+  return findingWorldPlazaLakeWaterShoreDistanceWithinBlocksAtTileIndex(
+    tileX,
+    tileY,
+    RESOLVING_WORLD_PLAZA_LAKE_WATER_SHORE_DISTANCE_SEARCH_MAX_BLOCKS
+  );
+}
+
+/**
  * Maps a shallow band index to a [0, 1] mix toward the deep lake tone.
  *
  * @param shallowDepthBand - Shore-distance band from
  *   {@link resolvingWorldPlazaLakeWaterShallowDepthAtTileIndex}.
  */
 function resolvingWorldPlazaLakeShoreDepthMixUnitFromBand(
-  shallowDepthBand: number,
+  shallowDepthBand: number
 ): number {
   const shallowMax = DEFINING_WORLD_PLAZA_WATER_LAKE_SHALLOW_DEPTH_MAX_BLOCKS;
 
@@ -114,7 +138,7 @@ function resolvingWorldPlazaLakeShoreDepthMixUnitFromBand(
   }
 
   return clampingWorldPlazaWaterUnitFloat(
-    (shallowDepthBand - 1) / (shallowMax - 1),
+    (shallowDepthBand - 1) / (shallowMax - 1)
   );
 }
 
@@ -129,20 +153,41 @@ function resolvingWorldPlazaLakeShoreDepthMixUnitFromBand(
  */
 export function resolvingWorldPlazaLakeWaterShallowDepthAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number | null {
-  const shoreDistanceBlocks =
-    findingWorldPlazaLakeWaterShoreDistanceBlocksAtTileIndex(tileX, tileY);
+  let columnCache =
+    resolvingWorldPlazaLakeWaterShallowDepthCacheByColumn.get(tileX);
 
-  if (
-    shoreDistanceBlocks === null ||
-    shoreDistanceBlocks >
-      DEFINING_WORLD_PLAZA_WATER_LAKE_SHALLOW_DEPTH_MAX_BLOCKS
-  ) {
-    return null;
+  if (columnCache) {
+    const cachedDepth = columnCache.get(tileY);
+
+    if (cachedDepth !== undefined) {
+      return cachedDepth;
+    }
+  } else {
+    if (
+      resolvingWorldPlazaLakeWaterShallowDepthCacheByColumn.size >=
+      RESOLVING_WORLD_PLAZA_LAKE_WATER_SHALLOW_DEPTH_CACHE_MAX_COLUMNS
+    ) {
+      resolvingWorldPlazaLakeWaterShallowDepthCacheByColumn.clear();
+    }
+
+    columnCache = new Map();
+    resolvingWorldPlazaLakeWaterShallowDepthCacheByColumn.set(
+      tileX,
+      columnCache
+    );
   }
 
-  return shoreDistanceBlocks;
+  const shallowDepth =
+    findingWorldPlazaLakeWaterShoreDistanceWithinBlocksAtTileIndex(
+      tileX,
+      tileY,
+      DEFINING_WORLD_PLAZA_WATER_LAKE_SHALLOW_DEPTH_MAX_BLOCKS
+    );
+  columnCache.set(tileY, shallowDepth);
+
+  return shallowDepth;
 }
 
 /**
@@ -153,12 +198,12 @@ export function resolvingWorldPlazaLakeWaterShallowDepthAtTileIndex(
  */
 function resolvingWorldPlazaLakeBiomeWaterPaletteAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ) {
   return resolvingWorldPlazaBiomeWaterPaletteAtTileIndex(
     tileX,
     tileY,
-    DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
+    DEFINING_WORLD_PLAZA_WATER_KIND_LAKE
   );
 }
 
@@ -170,11 +215,11 @@ function resolvingWorldPlazaLakeBiomeWaterPaletteAtTileIndex(
  */
 export function resolvingWorldPlazaLakeBedFillColorAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number {
   const palette = resolvingWorldPlazaLakeBiomeWaterPaletteAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
 
   if (!palette) {
@@ -183,7 +228,7 @@ export function resolvingWorldPlazaLakeBedFillColorAtTileIndex(
 
   const shallowBand = resolvingWorldPlazaLakeWaterShallowDepthAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
 
   if (shallowBand === null) {
@@ -196,7 +241,7 @@ export function resolvingWorldPlazaLakeBedFillColorAtTileIndex(
   return mixingWorldPlazaWaterRgbColors(
     shallowBedFillColor,
     palette.bedFillColor,
-    resolvingWorldPlazaLakeShoreDepthMixUnitFromBand(shallowBand),
+    resolvingWorldPlazaLakeShoreDepthMixUnitFromBand(shallowBand)
   );
 }
 
@@ -211,7 +256,7 @@ export function resolvingWorldPlazaLakeBedFillColorAtTileIndex(
 export function resolvingWorldPlazaLakeShallowSurfaceColorFromBand(
   shallowDepthBand: number | null,
   tileX: number,
-  tileY: number,
+  tileY: number
 ): number | null {
   if (shallowDepthBand === null) {
     return null;
@@ -219,29 +264,28 @@ export function resolvingWorldPlazaLakeShallowSurfaceColorFromBand(
 
   const palette = resolvingWorldPlazaLakeBiomeWaterPaletteAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
 
   if (!palette) {
     return null;
   }
 
-  const depthMix = resolvingWorldPlazaLakeShoreDepthMixUnitFromBand(
-    shallowDepthBand,
-  );
+  const depthMix =
+    resolvingWorldPlazaLakeShoreDepthMixUnitFromBand(shallowDepthBand);
   const shallowSurfaceColor =
     palette.lakeShallowSurfaceColor ?? palette.surfaceLayerColor;
   const blendedSurfaceColor = mixingWorldPlazaWaterRgbColors(
     shallowSurfaceColor,
     palette.surfaceLayerColor,
-    depthMix,
+    depthMix
   );
 
   if (shallowDepthBand === 1) {
     return mixingWorldPlazaWaterRgbColors(
       blendedSurfaceColor,
       DEFINING_WORLD_PLAZA_WATER_LAKE_SHORE_EDGE_SURFACE_HIGHLIGHT_COLOR,
-      DEFINING_WORLD_PLAZA_WATER_LAKE_SHORE_EDGE_SURFACE_HIGHLIGHT_MIX,
+      DEFINING_WORLD_PLAZA_WATER_LAKE_SHORE_EDGE_SURFACE_HIGHLIGHT_MIX
     );
   }
 
@@ -255,16 +299,15 @@ export function resolvingWorldPlazaLakeShallowSurfaceColorFromBand(
  *   {@link resolvingWorldPlazaLakeWaterShallowDepthAtTileIndex}.
  */
 export function resolvingWorldPlazaLakeShallowSurfaceAlphaFromBand(
-  shallowDepthBand: number,
+  shallowDepthBand: number
 ): number {
-  const depthMix = resolvingWorldPlazaLakeShoreDepthMixUnitFromBand(
-    shallowDepthBand,
-  );
+  const depthMix =
+    resolvingWorldPlazaLakeShoreDepthMixUnitFromBand(shallowDepthBand);
 
   return mappingWorldPlazaWaterUnitFloatToRange(
     1 - depthMix,
     DEFINING_WORLD_PLAZA_WATER_LAKE_SHALLOW_SURFACE_LAYER_ALPHA_MIN,
-    DEFINING_WORLD_PLAZA_WATER_LAKE_SHALLOW_SURFACE_LAYER_ALPHA,
+    DEFINING_WORLD_PLAZA_WATER_LAKE_SHALLOW_SURFACE_LAYER_ALPHA
   );
 }
 
@@ -279,19 +322,19 @@ export function resolvingWorldPlazaLakeShallowSurfaceAlphaFromBand(
 function resolvingWorldPlazaLakeInflowMouthSurfaceMixAtTileIndex(
   tileX: number,
   tileY: number,
-  shallowDepthBand: number,
+  shallowDepthBand: number
 ): number {
-  if (shallowDepthBand > DEFINING_WORLD_PLAZA_WATER_LAKE_SHALLOW_DEPTH_MAX_BLOCKS) {
+  if (
+    shallowDepthBand > DEFINING_WORLD_PLAZA_WATER_LAKE_SHALLOW_DEPTH_MAX_BLOCKS
+  ) {
     return 0;
   }
 
-  const sourceDelta = resolvingWorldPlazaLakeInflowSourceCardinalDeltaAtTileIndex(
-    tileX,
-    tileY,
-  );
+  const sourceDelta =
+    resolvingWorldPlazaLakeInflowSourceCardinalDeltaAtTileIndex(tileX, tileY);
   const inflowNeighborWaterTile = resolvingWorldPlazaWaterAtTileIndex(
     tileX + sourceDelta.deltaX,
-    tileY + sourceDelta.deltaY,
+    tileY + sourceDelta.deltaY
   );
 
   if (
@@ -303,13 +346,13 @@ function resolvingWorldPlazaLakeInflowMouthSurfaceMixAtTileIndex(
 
   const shallowMax = DEFINING_WORLD_PLAZA_WATER_LAKE_SHALLOW_DEPTH_MAX_BLOCKS;
   const shoreProximityUnit = clampingWorldPlazaWaterUnitFloat(
-    1 - (shallowDepthBand - 1) / Math.max(1, shallowMax - 1),
+    1 - (shallowDepthBand - 1) / Math.max(1, shallowMax - 1)
   );
 
   return mappingWorldPlazaWaterUnitFloatToRange(
     shoreProximityUnit,
     0,
-    DEFINING_WORLD_PLAZA_WATER_LAKE_INFLOW_MOUTH_SURFACE_MAX_MIX,
+    DEFINING_WORLD_PLAZA_WATER_LAKE_INFLOW_MOUTH_SURFACE_MAX_MIX
   );
 }
 
@@ -321,11 +364,11 @@ function resolvingWorldPlazaLakeInflowMouthSurfaceMixAtTileIndex(
  */
 export function resolvingWorldPlazaLakeSurfaceAppearanceAtTileIndex(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): ResolvingWorldPlazaLakeSurfaceAppearance | null {
   const palette = resolvingWorldPlazaLakeBiomeWaterPaletteAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
 
   if (!palette) {
@@ -334,7 +377,7 @@ export function resolvingWorldPlazaLakeSurfaceAppearanceAtTileIndex(
 
   const shallowBand = resolvingWorldPlazaLakeWaterShallowDepthAtTileIndex(
     tileX,
-    tileY,
+    tileY
   );
 
   if (shallowBand === null) {
@@ -344,21 +387,23 @@ export function resolvingWorldPlazaLakeSurfaceAppearanceAtTileIndex(
     };
   }
 
-  const shallowSurfaceColor = resolvingWorldPlazaLakeShallowSurfaceColorFromBand(
-    shallowBand,
-    tileX,
-    tileY,
-  );
+  const shallowSurfaceColor =
+    resolvingWorldPlazaLakeShallowSurfaceColorFromBand(
+      shallowBand,
+      tileX,
+      tileY
+    );
 
   if (shallowSurfaceColor === null) {
     return null;
   }
 
-  const inflowMouthMix = resolvingWorldPlazaLakeInflowMouthSurfaceMixAtTileIndex(
-    tileX,
-    tileY,
-    shallowBand,
-  );
+  const inflowMouthMix =
+    resolvingWorldPlazaLakeInflowMouthSurfaceMixAtTileIndex(
+      tileX,
+      tileY,
+      shallowBand
+    );
 
   if (inflowMouthMix <= 0) {
     return {
@@ -371,7 +416,7 @@ export function resolvingWorldPlazaLakeSurfaceAppearanceAtTileIndex(
     resolvingWorldPlazaLakeInflowSourceCardinalDeltaAtTileIndex(tileX, tileY);
   const inflowNeighborWaterTile = resolvingWorldPlazaWaterAtTileIndex(
     tileX + inflowSourceDelta.deltaX,
-    tileY + inflowSourceDelta.deltaY,
+    tileY + inflowSourceDelta.deltaY
   );
   const flowingPalette =
     inflowNeighborWaterTile?.kind === DEFINING_WORLD_PLAZA_WATER_KIND_RIVER ||
@@ -379,7 +424,7 @@ export function resolvingWorldPlazaLakeSurfaceAppearanceAtTileIndex(
       ? resolvingWorldPlazaBiomeWaterPaletteAtTileIndex(
           tileX + inflowSourceDelta.deltaX,
           tileY + inflowSourceDelta.deltaY,
-          inflowNeighborWaterTile.kind,
+          inflowNeighborWaterTile.kind
         )
       : null;
 
@@ -397,7 +442,7 @@ export function resolvingWorldPlazaLakeSurfaceAppearanceAtTileIndex(
     color: mixingWorldPlazaWaterRgbColors(
       shallowSurfaceColor,
       flowingPalette.surfaceLayerColor,
-      inflowMouthMix,
+      inflowMouthMix
     ),
     alpha:
       shallowAlpha +

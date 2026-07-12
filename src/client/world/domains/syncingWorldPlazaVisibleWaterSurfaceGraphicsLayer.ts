@@ -1,7 +1,17 @@
-import { DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_Z_INDEX } from "@/components/world/domains/definingWorldPlazaWaterConstants";
-import type { DefiningWorldPlazaVisibleTileBounds } from "@/components/world/domains/definingWorldPlazaVisibleTileBounds";
-import { drawingWorldPlazaVisibleWaterOnGraphics } from "@/components/world/domains/drawingWorldPlazaVisibleWaterOnGraphics";
-import { Graphics } from "pixi.js";
+import {
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
+  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE,
+} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
+import { DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_Z_INDEX } from '@/components/world/domains/definingWorldPlazaWaterConstants';
+import { drawingWorldPlazaVisibleWaterOnGraphics } from '@/components/world/domains/drawingWorldPlazaVisibleWaterOnGraphics';
+import {
+  beginningWorldPlazaPerformanceSample,
+  incrementingWorldPlazaPerformanceDiagnosticsCounter,
+  settingWorldPlazaPerformanceDiagnosticsGauge,
+} from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import { Graphics } from 'pixi.js';
 
 /**
  * Maintains one translucent water surface overlay above the textured floor.
@@ -25,10 +35,26 @@ export interface UpdatingWorldPlazaVisibleWaterSurfaceGraphicsLayerInput {
  * @param input - Surface graphics instance and visible bounds.
  */
 export function updatingWorldPlazaVisibleWaterSurfaceGraphicsLayer(
-  input: UpdatingWorldPlazaVisibleWaterSurfaceGraphicsLayerInput,
+  input: UpdatingWorldPlazaVisibleWaterSurfaceGraphicsLayerInput
 ): void {
+  const finishSample = beginningWorldPlazaPerformanceSample(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WATER_SURFACE_REDRAW
+  );
+
   input.surfaceGraphics.clear();
-  drawingWorldPlazaVisibleWaterOnGraphics(input.surfaceGraphics, input.bounds);
+  const waterTileCount = drawingWorldPlazaVisibleWaterOnGraphics(
+    input.surfaceGraphics,
+    input.bounds
+  );
+
+  finishSample();
+  settingWorldPlazaPerformanceDiagnosticsGauge(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.WATER_VISIBLE_TILE_COUNT,
+    waterTileCount
+  );
+  incrementingWorldPlazaPerformanceDiagnosticsCounter(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.WATER_SURFACE_REDRAW
+  );
 }
 
 /**
@@ -39,14 +65,14 @@ export function updatingWorldPlazaVisibleWaterSurfaceGraphicsLayer(
  */
 export function ensuringWorldPlazaVisibleWaterSurfaceGraphicsLayer(
   parentContainer: { addChild: (child: Graphics) => void },
-  surfaceGraphics: Graphics | null,
+  surfaceGraphics: Graphics | null
 ): Graphics {
   if (surfaceGraphics) {
     return surfaceGraphics;
   }
 
   const createdSurfaceGraphics = new Graphics();
-  createdSurfaceGraphics.eventMode = "none";
+  createdSurfaceGraphics.eventMode = 'none';
   createdSurfaceGraphics.zIndex =
     DEFINING_WORLD_PLAZA_WATER_SURFACE_LAYER_Z_INDEX;
   parentContainer.addChild(createdSurfaceGraphics);

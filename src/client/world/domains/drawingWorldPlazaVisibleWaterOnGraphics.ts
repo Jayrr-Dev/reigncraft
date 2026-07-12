@@ -1,4 +1,5 @@
 import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
+import { checkingWorldPlazaWaterTileIsShoreAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterTileIsShoreAtTileIndex';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import {
@@ -6,7 +7,6 @@ import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
 } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
-import { DEFINING_WORLD_PLAZA_WATER_SURFACE_DIAMOND_BLEED_PX } from '@/components/world/domains/definingWorldPlazaWaterConstants';
 import {
   DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
   DEFINING_WORLD_PLAZA_WATER_KIND_POND,
@@ -14,10 +14,7 @@ import {
   DEFINING_WORLD_PLAZA_WATER_KIND_STREAM,
   DEFINING_WORLD_PLAZA_WATER_KIND_SWAMP_POND,
 } from '@/components/world/domains/definingWorldPlazaWaterKind';
-import {
-  drawingWorldPlazaWaterShoreDetailsOnGraphics,
-  drawingWorldPlazaWaterShoreOuterCornerTipCoversOnGraphics,
-} from '@/components/world/domains/drawingWorldPlazaWaterTileOnGraphics';
+import { drawingWorldPlazaWaterShoreDetailsOnGraphics } from '@/components/world/domains/drawingWorldPlazaWaterTileOnGraphics';
 import { resolvingWorldPlazaBiomeWaterPaletteAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeWaterPaletteAtTileIndex';
 import { resolvingWorldPlazaFlowingWaterLakeTransitionSurfaceAppearanceAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFlowingWaterLakeTransitionSurfaceAppearanceAtTileIndex';
 import { resolvingWorldPlazaFrozenWaterSurfaceAppearanceAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFrozenWaterSurfaceAppearanceAtTileIndex';
@@ -63,12 +60,8 @@ function addingWorldPlazaWaterTileDiamondPath(
     x: tileX,
     y: tileY,
   });
-  const halfWidth =
-    DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX +
-    DEFINING_WORLD_PLAZA_WATER_SURFACE_DIAMOND_BLEED_PX;
-  const halfHeight =
-    DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX +
-    DEFINING_WORLD_PLAZA_WATER_SURFACE_DIAMOND_BLEED_PX * 0.5;
+  const halfWidth = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
+  const halfHeight = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX;
 
   graphics.poly([
     center.x,
@@ -147,33 +140,6 @@ function resolvingWorldPlazaUnfrozenWaterSurfaceAppearance(
 }
 
 /**
- * Resolves surface tint for a water tile when covering land outer-corner tips.
- */
-function resolvingWorldPlazaWaterSurfaceAppearanceForShoreTipCover(
-  tileX: number,
-  tileY: number
-): { color: number; alpha: number } | null {
-  const waterTile = resolvingWorldPlazaWaterAtTileIndex(tileX, tileY);
-
-  if (!waterTile) {
-    return null;
-  }
-
-  if (checkingWorldPlazaWaterIsFrozenAtTileIndex(tileX, tileY)) {
-    return resolvingWorldPlazaFrozenWaterSurfaceAppearanceAtTileIndex(
-      tileX,
-      tileY
-    );
-  }
-
-  return resolvingWorldPlazaUnfrozenWaterSurfaceAppearance(
-    tileX,
-    tileY,
-    waterTile
-  );
-}
-
-/**
  * Appends one tile into the color/alpha batch map used for merged fills.
  */
 function appendingWorldPlazaWaterSurfaceBatchTile(
@@ -213,14 +179,16 @@ function appendingWorldPlazaWaterSurfaceBatchTile(
  *
  * @param graphics - Pixi graphics instance (caller clears before calling).
  * @param bounds - Visible tile index range.
+ * @returns Count of water tiles drawn, for the perf water tile gauge.
  */
 export function drawingWorldPlazaVisibleWaterOnGraphics(
   graphics: Graphics,
   bounds: DefiningWorldPlazaVisibleTileBounds
-): void {
+): number {
   const isDaytime = computingWorldPlazaDayNightSunState().isDaytime;
   const batchesByKey = new Map<string, DrawingWorldPlazaWaterSurfaceBatch[]>();
   const shoreTiles: Array<{ tileX: number; tileY: number }> = [];
+  let waterTileCount = 0;
 
   for (let tileY = bounds.minTileY; tileY <= bounds.maxTileY; tileY += 1) {
     for (let tileX = bounds.minTileX; tileX <= bounds.maxTileX; tileX += 1) {
@@ -229,6 +197,8 @@ export function drawingWorldPlazaVisibleWaterOnGraphics(
       if (!waterTile) {
         continue;
       }
+
+      waterTileCount += 1;
 
       const isFrozen = checkingWorldPlazaWaterIsFrozenAtTileIndex(
         tileX,
@@ -273,19 +243,15 @@ export function drawingWorldPlazaVisibleWaterOnGraphics(
         );
       }
 
-      shoreTiles.push({ tileX, tileY });
+      if (checkingWorldPlazaWaterTileIsShoreAtTileIndex(tileX, tileY)) {
+        shoreTiles.push({ tileX, tileY });
+      }
     }
   }
 
   for (const batch of batchesByKey.values()) {
     fillingWorldPlazaWaterSurfaceBatchOnGraphics(graphics, batch);
   }
-
-  drawingWorldPlazaWaterShoreOuterCornerTipCoversOnGraphics(
-    graphics,
-    bounds,
-    resolvingWorldPlazaWaterSurfaceAppearanceForShoreTipCover
-  );
 
   for (const shoreTile of shoreTiles) {
     drawingWorldPlazaWaterShoreDetailsOnGraphics(
@@ -294,4 +260,6 @@ export function drawingWorldPlazaVisibleWaterOnGraphics(
       shoreTile.tileY
     );
   }
+
+  return waterTileCount;
 }
