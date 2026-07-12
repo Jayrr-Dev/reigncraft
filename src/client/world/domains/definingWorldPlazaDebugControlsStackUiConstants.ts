@@ -13,7 +13,7 @@ export const DEFINING_WORLD_PLAZA_DEBUG_CONTROLS_STACK_GAP_CLASS_NAME =
 
 /** Left-side anchor for the stacked debug controls. */
 export const DEFINING_WORLD_PLAZA_DEBUG_CONTROLS_STACK_ANCHOR_CLASS_NAME =
-  'pointer-events-none absolute left-1.5 z-20 flex select-none flex-col' as const;
+  'pointer-events-none absolute left-1 z-20 flex select-none flex-col' as const;
 
 /**
  * Resolves the top offset for the debug control stack below layer labels.

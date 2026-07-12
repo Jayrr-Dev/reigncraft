@@ -21,6 +21,15 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import type { CSSProperties } from 'react';
 
+/**
+ * Page arrow button edge vs inventory slot edge.
+ * Two stacked buttons + gap must stay within one slot height.
+ */
+const DEFINING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_RATIO = 0.42;
+
+/** Glyph size vs arrow button edge so the triangle fills the highlight. */
+const DEFINING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_ICON_RATIO = 0.9;
+
 /** Viewport-resolved inline styles for the plaza inventory hotbar. */
 export interface DefiningWorldPlazaInventoryHotbarViewportStyles {
   readonly shellStyle: CSSProperties;
@@ -66,7 +75,10 @@ export function computingWorldPlazaInventoryHotbarShellWidthPx(
   const gridWidthPx =
     slotPx * DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS +
     gapPx * (DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS - 1);
-  const arrowColumnWidthPx = slotPx;
+  const arrowColumnWidthPx = Math.max(
+    1,
+    Math.round(slotPx * DEFINING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_RATIO)
+  );
 
   return paddingPx * 2 + gridWidthPx + gapPx + arrowColumnWidthPx;
 }
@@ -139,7 +151,21 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
         );
   const gridHeightPx =
     slotEdgePx * DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT +
-    shellGapPx * (DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT - 1);
+    shellGapPx *
+      Math.max(0, DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT - 1);
+  const pageArrowEdgePx = Math.max(
+    1,
+    Math.round(
+      slotEdgePx * DEFINING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_RATIO
+    )
+  );
+  const pageArrowIconPx = Math.max(
+    1,
+    Math.round(
+      pageArrowEdgePx * DEFINING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_ICON_RATIO
+    )
+  );
+  const pageArrowGapPx = Math.max(1, Math.round(shellGapPx * 0.5));
 
   return {
     shellStyle: {
@@ -148,6 +174,7 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
     },
     shellBodyStyle: {
       gap: shellGapPx,
+      alignItems: 'center',
     },
     gridStyle: {
       gap: shellGapPx,
@@ -180,10 +207,17 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
       fontSize: loadingTextPx,
     },
     pageArrowStackStyle: {
-      gap: shellGapPx,
+      gap: pageArrowGapPx,
       height: gridHeightPx,
+      justifyContent: 'center',
     },
-    pageArrowButtonStyle: slotStyle,
-    pageArrowIconStyle: iconStyle,
+    pageArrowButtonStyle: {
+      width: pageArrowEdgePx,
+      height: pageArrowEdgePx,
+    },
+    pageArrowIconStyle: {
+      width: pageArrowIconPx,
+      height: pageArrowIconPx,
+    },
   };
 }

@@ -29,7 +29,7 @@ import {
 } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryBagTransfer';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import {
-  DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_PAGE_COUNT,
+  DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT,
   LABELING_WORLD_PLAZA_INVENTORY_HOTBAR,
   STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
@@ -37,6 +37,7 @@ import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world
 import {
   STYLING_WORLD_PLAZA_INVENTORY_GRID_WRAPPER_CLASS_NAME,
   STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME,
+  STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_STORAGE_CLASS_NAME,
   STYLING_WORLD_PLAZA_INVENTORY_LIGHT_THEME_SCOPE_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_LOADING_SHELL_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_LOADING_TEXT_CLASS,
@@ -165,7 +166,7 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
     const { onDragOver, clearingDragHoverPaging } =
       usingWorldPlazaInventoryStoragePageDragHover({
         storagePageIndex,
-        storagePageCount: DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_PAGE_COUNT,
+        storagePageCount: DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT,
         onStoragePageIndexChange,
       });
 
@@ -205,6 +206,8 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
           {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
           className={cn(
             STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME,
+            storagePageIndex > 0 &&
+              STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_STORAGE_CLASS_NAME,
             STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS
           )}
           style={viewportStyles.shellStyle}
@@ -240,9 +243,7 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
               trailingContent={
                 <RenderingWorldPlazaInventoryPageArrowButtons
                   storagePageIndex={storagePageIndex}
-                  storagePageCount={
-                    DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_PAGE_COUNT
-                  }
+                  storagePageCount={DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT}
                   viewportStyles={viewportStyles}
                   onStoragePageIndexChange={onStoragePageIndexChange}
                 />

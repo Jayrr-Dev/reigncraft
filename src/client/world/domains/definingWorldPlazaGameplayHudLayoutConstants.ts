@@ -67,12 +67,12 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
    */
   viewportInsets: {
     embedded: {
-      desktop: { edgeBasePx: 6 },
-      mobile: { edgeBasePx: 6 },
+      desktop: { edgeBasePx: 4 },
+      mobile: { edgeBasePx: 4 },
     },
     fullscreen: {
-      desktop: { edgeBasePx: 8 },
-      mobile: { edgeBasePx: 8 },
+      desktop: { edgeBasePx: 4 },
+      mobile: { edgeBasePx: 4 },
     },
   },
 
@@ -92,7 +92,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
       },
       debugControlsStack: {
         anchorClassName:
-          'pointer-events-none absolute left-1.5 z-20 flex select-none flex-col',
+          'pointer-events-none absolute left-1 z-20 flex select-none flex-col',
       },
     },
 
@@ -100,7 +100,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
     topCenter: {
       actionBar: {
         desktopAnchorClassName:
-          'pointer-events-none absolute inset-x-0 top-1 z-40 flex justify-center px-1.5',
+          'pointer-events-none absolute inset-x-0 top-1 z-40 flex justify-center px-1',
         mobileAnchorClassName:
           'pointer-events-none absolute inset-x-0 top-1 z-40 flex justify-center px-1',
         anchorTopBasePx: 4,
@@ -108,7 +108,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
       /** Plot / tile capacity readout sits just under the action bar shell. */
       editModePlotCapacityMetric: {
         anchorClassName:
-          'pointer-events-none absolute inset-x-0 z-40 flex justify-center px-1.5',
+          'pointer-events-none absolute inset-x-0 z-40 flex justify-center px-1',
         belowActionBarGapBasePx: 6,
       },
     },
@@ -117,16 +117,16 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
     topRight: {
       roomStatusHud: {
         anchorClassName:
-          'pointer-events-none absolute right-1.5 top-3 hidden flex-col gap-1 md:flex',
+          'pointer-events-none absolute right-1 top-1 hidden flex-col gap-1 md:flex',
       },
       statusEffectStack: {
         desktopAnchorClassName:
-          'pointer-events-none absolute right-1.5 z-20 flex select-none flex-col items-end gap-1',
+          'pointer-events-none absolute right-1 z-20 flex select-none flex-col items-end gap-1',
         mobileAnchorClassName:
           'pointer-events-none absolute right-1 z-20 flex select-none flex-col items-end gap-0.5',
-        desktopTopClassName: 'top-3',
-        mobileTopClassName: 'top-2',
-        topWithRoomHudClassName: 'top-3 md:top-28',
+        desktopTopClassName: 'top-1',
+        mobileTopClassName: 'top-1',
+        topWithRoomHudClassName: 'top-1 md:top-28',
         mobileBelowActionBarGapBasePx: 4,
         /** Popover opens below the badge, right edge flush with the stack. */
         explanationPopover: {
@@ -141,7 +141,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
       inventoryHotbar: {
         /** Bottom inset is applied via inline styles (safe-area + viewport scale). */
         anchorClassName:
-          'pointer-events-none absolute inset-x-0 z-50 flex justify-center px-1.5',
+          'pointer-events-none absolute inset-x-0 z-50 flex justify-center px-1',
         edgeInsetBasePx: 12,
         /**
          * On mobile the hotbar reserves space for the bottom-right jump button
@@ -150,14 +150,14 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
         mobileFlankClearance: {
           /** Breathing room between the hotbar and the jump button. */
           gapBasePx: 8,
-          /** Right inset of the jump button anchor. */
-          jumpButtonEdgeInsetPx: 6,
+          /** Right inset of the jump button anchor — matches top y inset. */
+          jumpButtonEdgeInsetPx: 4,
         },
       },
       editModeHotbar: {
         /** Bottom inset is applied via inline styles (safe-area + viewport scale). */
         anchorClassName:
-          'pointer-events-none absolute inset-x-0 z-40 flex justify-center px-1.5',
+          'pointer-events-none absolute inset-x-0 z-40 flex justify-center px-1',
         edgeInsetBasePx: 12,
       },
       gameplayHudToast: {

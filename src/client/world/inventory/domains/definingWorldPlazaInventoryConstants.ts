@@ -21,14 +21,22 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_MAIN_ROW_COUNT = 1 as const;
 /** Extra storage rows behind the page arrows (paged {@link DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS} at a time). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_ROW_COUNT = 2 as const;
 
-/** Visible rows in the hotbar chrome (main + one storage page). */
-export const DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT = 2 as const;
+/** Visible rows in the hotbar chrome (one paged row at a time). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT = 1 as const;
+
+/**
+ * Total hotbar pages: main row first, then each storage row.
+ * Arrows flip through these one row at a time.
+ */
+export const DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT =
+  DEFINING_WORLD_PLAZA_INVENTORY_MAIN_ROW_COUNT +
+  DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_ROW_COUNT;
 
 /** Slots shown per storage page (one row). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_PAGE_SIZE =
   DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS;
 
-/** Main hotbar slot count (row 1; always visible; equippable). */
+/** Main hotbar slot count (row 1; equippable; page 0). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_MAIN_HOTBAR_SLOT_COUNT =
   DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS *
   DEFINING_WORLD_PLAZA_INVENTORY_MAIN_ROW_COUNT;
@@ -43,7 +51,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY =
 export const DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_SLOT_START =
   DEFINING_WORLD_PLAZA_INVENTORY_MAIN_HOTBAR_SLOT_COUNT;
 
-/** Number of storage pages (one page per storage row). */
+/** Number of storage-only pages (excludes the main hotbar page). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_PAGE_COUNT =
   DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_ROW_COUNT;
 
@@ -100,13 +108,13 @@ export const STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME =
 export const LABELING_WORLD_PLAZA_INVENTORY_HOTBAR =
   'Inventory hotbar' as const;
 
-/** Accessible label for paging storage up (toward earlier storage rows). */
+/** Accessible label for paging storage up (toward earlier rows). */
 export const LABELING_WORLD_PLAZA_INVENTORY_PAGE_UP =
-  'Previous storage row' as const;
+  'Previous inventory row' as const;
 
-/** Accessible label for paging storage down (toward later storage rows). */
+/** Accessible label for paging storage down (toward later rows). */
 export const LABELING_WORLD_PLAZA_INVENTORY_PAGE_DOWN =
-  'Next storage row' as const;
+  'Next inventory row' as const;
 
 /**
  * Delay before drag-hover on a page arrow changes the storage page (ms).

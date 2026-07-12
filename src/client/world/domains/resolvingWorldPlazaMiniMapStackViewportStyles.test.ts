@@ -11,7 +11,7 @@ describe('resolvingWorldPlazaMiniMapStackViewportStyles', () => {
       })
     ).toEqual({
       top: 'calc(4px + env(safe-area-inset-top, 0px))',
-      left: 'calc(6px + env(safe-area-inset-left, 0px))',
+      left: 'calc(4px + env(safe-area-inset-left, 0px))',
     });
   });
 
@@ -24,7 +24,7 @@ describe('resolvingWorldPlazaMiniMapStackViewportStyles', () => {
       })
     ).toEqual({
       top: 'calc(4px + env(safe-area-inset-top, 0px))',
-      left: 'calc(6px + env(safe-area-inset-left, 0px))',
+      left: 'calc(4px + env(safe-area-inset-left, 0px))',
     });
   });
 });

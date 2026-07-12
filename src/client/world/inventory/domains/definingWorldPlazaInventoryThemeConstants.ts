@@ -5,15 +5,19 @@ import {
 
 /**
  * Optional multiplier applied to all inventory base px values (not CSS transform).
- * Matches the fullscreen-era hotbar size (mobile/desktop use the same).
+ * Combined with device scale (mobile is larger than desktop).
  */
 export const DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE = 1.25 as const;
 
 /**
- * Extra hotbar multiplier. One value for mobile, desktop, and fullscreen so
- * every Devvit UI simulator profile matches fullscreen inventory size.
+ * Extra hotbar multiplier on desktop / fullscreen.
+ * Mobile uses {@link DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_MOBILE_DEVICE_SCALE}.
  */
 export const DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE = 1.2 as const;
+
+/** Extra hotbar multiplier on mobile (slightly larger touch targets). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_MOBILE_DEVICE_SCALE =
+  1.35 as const;
 
 /** Base slot edge length in px (doubled from compact size-5 baseline). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_BASE_PX = 40 as const;
@@ -110,6 +114,10 @@ export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_INVALID_CLASS =
 export const STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME =
   `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventoryHotbarShell} pointer-events-auto flex touch-manipulation overscroll-none items-center overflow-visible` as const;
 
+/** Darker shell for storage pages (row 2+). */
+export const STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_STORAGE_CLASS_NAME =
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventoryHotbarShellStorage;
+
 /** Hotbar grid — two visible rows (main + storage page); touch-manipulation for taps. */
 export const STYLING_WORLD_PLAZA_INVENTORY_GRID_WRAPPER_CLASS_NAME =
   'grid touch-manipulation overscroll-none' as const;
@@ -118,9 +126,9 @@ export const STYLING_WORLD_PLAZA_INVENTORY_GRID_WRAPPER_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_INVENTORY_SHELL_BODY_CLASS_NAME =
   'flex touch-manipulation items-stretch gap-1' as const;
 
-/** Vertical stack of solid parchment page arrows. */
+/** Vertical stack of compact page arrows beside the single inventory row. */
 export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_STACK_CLASS_NAME =
-  'flex shrink-0 flex-col justify-between gap-1' as const;
+  'flex shrink-0 flex-col items-center justify-center' as const;
 
 /** Solid wood-framed parchment arrow control (matches inventory slot chrome). */
 export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_CLASS_NAME =

@@ -7,6 +7,7 @@
  */
 
 import { Icon } from '@/components/ui/icon';
+import { usingWorldPlazaViewportHudScaleContext } from '@/components/world/components/providingWorldPlazaViewportHudScale';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
   DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_REGISTRY,
@@ -15,10 +16,13 @@ import {
   STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BUTTON_CLASS_NAME,
   STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_HEADER_CLASS_NAME,
   STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ICON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_LABEL_CLASS_NAME,
   STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_SWITCHER_CLASS_NAME,
   type DefiningWorldPlazaHudToolbarModeId,
 } from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
-import { useCallback, type SyntheticEvent } from 'react';
+import { resolvingWorldPlazaHudToolbarModeBadgesViewportStyles } from '@/components/world/domains/resolvingWorldPlazaHudToolbarModeBadgesViewportStyles';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useCallback, useMemo, type SyntheticEvent } from 'react';
 
 export type RenderingWorldPlazaHudToolbarModeBadgesProps = {
   readonly activeMode: DefiningWorldPlazaHudToolbarModeId;
@@ -28,13 +32,23 @@ export type RenderingWorldPlazaHudToolbarModeBadgesProps = {
 };
 
 /**
- * Renders the four bottom HUD mode badges.
+ * Renders the four bottom HUD mode badges sized to the inventory hotbar.
  */
 export function RenderingWorldPlazaHudToolbarModeBadges({
   activeMode,
   onSelectMode,
   isEditEnabled,
 }: RenderingWorldPlazaHudToolbarModeBadgesProps): React.JSX.Element {
+  const viewportHudScale = usingWorldPlazaViewportHudScaleContext();
+  const isMobile = useIsMobile();
+  const viewportStyles = useMemo(
+    () =>
+      resolvingWorldPlazaHudToolbarModeBadgesViewportStyles(
+        viewportHudScale,
+        isMobile
+      ),
+    [viewportHudScale, isMobile]
+  );
   const stoppingPlazaWalkPointerPropagation = useCallback(
     (event: SyntheticEvent<HTMLElement>): void => {
       event.stopPropagation();
@@ -43,10 +57,14 @@ export function RenderingWorldPlazaHudToolbarModeBadges({
   );
 
   return (
-    <div className={STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_HEADER_CLASS_NAME}>
+    <div
+      className={STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_HEADER_CLASS_NAME}
+      style={viewportStyles.stackStyle}
+    >
       <div
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
         className={STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_SWITCHER_CLASS_NAME}
+        style={viewportStyles.switcherStyle}
         role="group"
         aria-label={LABELING_WORLD_PLAZA_HUD_TOOLBAR_MODE_SWITCHER}
         onPointerDown={stoppingPlazaWalkPointerPropagation}
@@ -73,15 +91,24 @@ export function RenderingWorldPlazaHudToolbarModeBadges({
                     ? STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BUTTON_ACTIVE_CLASS_NAME
                     : STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BUTTON_CLASS_NAME
                 }
+                style={viewportStyles.buttonStyle}
               >
                 <Icon
                   icon={modeDefinition.iconifyIcon}
                   className={
                     STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ICON_CLASS_NAME
                   }
+                  style={viewportStyles.iconStyle}
                   aria-hidden
                 />
-                <span>{modeDefinition.label}</span>
+                <span
+                  className={
+                    STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_LABEL_CLASS_NAME
+                  }
+                  style={viewportStyles.labelStyle}
+                >
+                  {modeDefinition.label}
+                </span>
               </button>
             );
           }

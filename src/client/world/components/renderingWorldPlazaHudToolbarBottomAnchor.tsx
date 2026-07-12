@@ -80,7 +80,7 @@ export function RenderingWorldPlazaHudToolbarBottomAnchor({
             onSelectMode={onSelectMode}
             isEditEnabled={isEditEnabled}
           />
-          <div className="pointer-events-auto flex flex-col items-center">
+          <div className="pointer-events-auto flex w-full flex-col items-center">
             {children}
           </div>
         </div>

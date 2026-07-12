@@ -1,14 +1,17 @@
-import { DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE,
+  DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_MOBILE_DEVICE_SCALE,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 
 /**
  * Hotbar device multiplier for the current viewport class.
  *
- * Mobile, desktop, and fullscreen all use the fullscreen inventory size.
- *
- * @param _isMobile - Kept for call-site compatibility; size no longer branches
+ * @param isMobile - True when the plaza HUD is in the mobile layout
  */
 export function resolvingWorldPlazaInventoryHotbarDeviceScale(
-  _isMobile: boolean
+  isMobile: boolean
 ): number {
-  return DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE;
+  return isMobile
+    ? DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_MOBILE_DEVICE_SCALE
+    : DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_DEVICE_SCALE;
 }

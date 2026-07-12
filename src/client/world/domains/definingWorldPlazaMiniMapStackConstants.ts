@@ -79,25 +79,25 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
     embedded: {
       /** Wide screens — stack sits in the top-left corner. */
       desktop: {
-        edgeInsetBasePx: 6,
+        edgeInsetBasePx: 4,
         environmentBarValueTextBasePx: 11,
       },
       /** Phone-sized screens — same top-left corner as the action bar row. */
       mobile: {
-        edgeInsetBasePx: 6,
+        edgeInsetBasePx: 4,
         environmentBarValueTextBasePx: 9,
       },
     },
     /** Expanded fullscreen game view. */
     fullscreen: {
-      /** Wide screens — slightly larger corner inset than embedded. */
+      /** Wide screens — same edge inset as embedded (matches top y). */
       desktop: {
-        edgeInsetBasePx: 8,
+        edgeInsetBasePx: 4,
         environmentBarValueTextBasePx: 12,
       },
       /** Phone-sized fullscreen — same top-left anchor. */
       mobile: {
-        edgeInsetBasePx: 8,
+        edgeInsetBasePx: 4,
         environmentBarValueTextBasePx: 9,
       },
     },

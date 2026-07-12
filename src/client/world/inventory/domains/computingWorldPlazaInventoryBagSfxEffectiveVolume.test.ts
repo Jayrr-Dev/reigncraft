@@ -7,7 +7,7 @@ describe('computingWorldPlazaInventoryBagSfxEffectiveVolume', () => {
       0.58
     );
     expect(computingWorldPlazaInventoryBagSfxEffectiveVolume('drop')).toBe(
-      0.55
+      0.32
     );
     expect(computingWorldPlazaInventoryBagSfxEffectiveVolume('move')).toBe(
       0.28

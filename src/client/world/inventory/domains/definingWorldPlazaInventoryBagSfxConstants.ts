@@ -1,17 +1,13 @@
 ﻿/**
  * Inventory pickup and drop SFX for plaza world items.
  *
- * Pickup uses FilmCow Recorded (`public/inventory/sfx/filmcow-recorded/`).
- * Drop uses 400 Sounds item equip (`public/inventory/sfx/400-sounds-items/`).
+ * Pickup, drop, and slot moves all use FilmCow Recorded
+ * (`public/inventory/sfx/filmcow-recorded/`). Drop and move play quieter.
  *
  * @module components/world/inventory/domains/definingWorldPlazaInventoryBagSfxConstants
  */
 
-/** Public URL prefix for shipped 400 Sounds drop clips. */
-export const DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_DROP_ASSET_BASE_URL =
-  '/inventory/sfx/400-sounds-items' as const;
-
-/** Public URL prefix for shipped FilmCow pickup clips. */
+/** Public URL prefix for shipped FilmCow inventory bag clips. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_PICKUP_ASSET_BASE_URL =
   '/inventory/sfx/filmcow-recorded' as const;
 
@@ -22,9 +18,7 @@ export type DefiningWorldPlazaInventoryBagSfxActionId =
   | 'move';
 
 /** Stable ids for every bundled inventory clip. */
-export type DefiningWorldPlazaInventoryBagSfxClipId =
-  | 'strap_tighten'
-  | 'item_equip';
+export type DefiningWorldPlazaInventoryBagSfxClipId = 'strap_tighten';
 
 /** Maps each inventory interaction to its shipped clip id. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_CLIP_ID_BY_ACTION: Record<
@@ -32,7 +26,8 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_CLIP_ID_BY_ACTION: Record<
   DefiningWorldPlazaInventoryBagSfxClipId
 > = {
   pickup: 'strap_tighten',
-  drop: 'item_equip',
+  /** Same FilmCow strap as pickup; quieter when dropping to the ground. */
+  drop: 'strap_tighten',
   /** Same FilmCow strap as pickup; quieter for slot rearranges. */
   move: 'strap_tighten',
 };
@@ -43,7 +38,8 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_BAG_SFX_TARGET_VOLUME_BY_ACTION: Rec
   number
 > = {
   pickup: 0.58,
-  drop: 0.55,
+  /** Quieter reuse of the pickup clip when dropping items to the ground. */
+  drop: 0.32,
   /** Quieter reuse of the pickup clip when dragging items between slots. */
   move: 0.28,
 };

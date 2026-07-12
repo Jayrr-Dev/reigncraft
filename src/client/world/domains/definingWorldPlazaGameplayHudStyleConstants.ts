@@ -27,6 +27,8 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
     actionBarDropdown: 'plaza-action-bar-dropdown',
     actionBarChatInput: 'plaza-action-bar-chat-input',
     inventoryHotbarShell: 'plaza-inventory-hotbar-shell',
+    /** Storage pages use a darker shell than the main hotbar row. */
+    inventoryHotbarShellStorage: 'plaza-inventory-hotbar-shell--storage',
     inventorySlot: 'plaza-inventory-slot',
     inventorySlotEmpty: 'plaza-inventory-slot--empty',
     inventorySlotEquipped: 'plaza-inventory-slot--equipped',

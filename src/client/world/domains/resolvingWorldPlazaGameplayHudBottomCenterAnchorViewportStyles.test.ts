@@ -11,14 +11,14 @@ describe('resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles', () =>
   });
 
   it('reserves the jump button flank on embedded mobile', () => {
-    // right: 6 inset + 96 jump button + 8 gap = 110
+    // right: 4 inset + 96 jump button + 8 gap = 108
     expect(
       resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles(1, {
         isFullscreen: false,
       })
     ).toEqual({
       bottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
-      paddingRight: 110,
+      paddingRight: 108,
     });
   });
 
@@ -29,7 +29,7 @@ describe('resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles', () =>
       })
     ).toEqual({
       bottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
-      paddingRight: 110,
+      paddingRight: 108,
     });
   });
 });
