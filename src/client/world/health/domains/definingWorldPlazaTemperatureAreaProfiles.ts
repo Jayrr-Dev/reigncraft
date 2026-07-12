@@ -1,35 +1,13 @@
 import type { DefiningWorldPlazaTemperatureAreaProfile } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
 
 /**
- * Dev/demo temperature zones painted over tile rectangles.
+ * Painted temperature zones over tile rectangles.
  *
- * Add entries here to assign heat or cold to arbitrary map areas.
+ * Keep empty for normal play. Add entries only when intentionally testing
+ * heat/cold areas away from common build spots.
  */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_AREA_PROFILES: readonly DefiningWorldPlazaTemperatureAreaProfile[] =
-  [
-    {
-      id: 'demo-heat-spring',
-      label: 'Demo hot spring',
-      minTileX: 8,
-      minTileY: 8,
-      maxTileX: 10,
-      maxTileY: 10,
-      temperature: {
-        heatLevelCelsius: 58,
-      },
-    },
-    {
-      id: 'demo-cold-grotto',
-      label: 'Demo ice grotto',
-      minTileX: -12,
-      minTileY: 4,
-      maxTileX: -10,
-      maxTileY: 6,
-      temperature: {
-        coldLevelCelsius: -22,
-      },
-    },
-  ];
+  [];
 
 /**
  * Returns the area temperature profile covering a tile, if any.

@@ -10,7 +10,6 @@ import { RenderingWorldPlazaBlockPalette } from '@/components/world/building/com
 import { RenderingWorldPlazaBuildModeCutFootprintSelector } from '@/components/world/building/components/renderingWorldPlazaBuildModeCutFootprintSelector';
 import { RenderingWorldPlazaBuildModeLayerSelector } from '@/components/world/building/components/renderingWorldPlazaBuildModeLayerSelector';
 import { RenderingWorldPlazaBuildModePresetBlockTypeSelector } from '@/components/world/building/components/renderingWorldPlazaBuildModePresetBlockTypeSelector';
-import { RenderingWorldPlazaClaimModeCoordsPanel } from '@/components/world/building/components/renderingWorldPlazaClaimModeCoordsPanel';
 import { RenderingWorldPlazaClaimModePlotList } from '@/components/world/building/components/renderingWorldPlazaClaimModePlotList';
 import { RenderingWorldPlazaClaimModeSavedCoordsList } from '@/components/world/building/components/renderingWorldPlazaClaimModeSavedCoordsList';
 import { RenderingWorldPlazaClaimModeTemporaryTilesList } from '@/components/world/building/components/renderingWorldPlazaClaimModeTemporaryTilesList';
@@ -23,12 +22,9 @@ import type { DefiningWorldBuildingPlot } from '@/components/world/building/doma
 import type { DefiningWorldBuildingPlotBounds } from '@/components/world/building/domains/definingWorldBuildingPlotBounds';
 import type { DefiningWorldBuildingPlotOwnerLimits } from '@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits';
 import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
+import { STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_STACK_CLASS_NAME } from '@/components/world/building/domains/definingWorldPlazaBuildModeFunctionHotbarConstants';
 import {
-  STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_POPOVER_PANEL_CLASS_NAME,
-  STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_POPOVER_TITLE_CLASS_NAME,
-  STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_STACK_CLASS_NAME,
-} from '@/components/world/building/domains/definingWorldPlazaBuildModeFunctionHotbarConstants';
-import {
+  checkingWorldPlazaEditModeFunctionId,
   DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID,
   DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID,
   LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_HOTBAR,
@@ -38,6 +34,10 @@ import {
 } from '@/components/world/building/domains/definingWorldPlazaEditModeFunctionRegistry';
 import { DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID } from '@/components/world/building/domains/definingWorldPlazaHudModeToolBoardConstants';
 import type { DefiningWorldBuildingPlotRegistryOwnerGroup } from '@/components/world/building/domains/groupingWorldBuildingPlotRegistryEntriesByOwner';
+import {
+  resolvingWorldPlazaBuildModeFunctionPopoverPanelClassName,
+  resolvingWorldPlazaBuildModeFunctionPopoverTitleClassName,
+} from '@/components/world/building/domains/resolvingWorldPlazaBuildModeFunctionPopoverChrome';
 import {
   checkingWorldPlazaEditModeFunctionSessionIsBuild,
   resolvingWorldPlazaEditModeFunctionSessionMode,
@@ -64,7 +64,7 @@ import {
 
 /** Scrollable shell for denser claim-mode popovers. */
 const RENDERING_WORLD_PLAZA_EDIT_MODE_SCROLL_POPOVER_BODY_CLASS_NAME =
-  'flex max-h-[min(50vh,22rem)] min-w-[14rem] flex-col gap-2 overflow-y-auto' as const;
+  'flex max-h-[min(50vh,22rem)] min-w-[20rem] flex-col gap-2 overflow-y-auto' as const;
 
 /** Stacked section gap inside combined popovers. */
 const RENDERING_WORLD_PLAZA_EDIT_MODE_COMBINED_SECTION_CLASS_NAME =
@@ -87,7 +87,6 @@ export interface RenderingWorldPlazaEditModeHotbarProps {
   localOwnedPlotCount: number;
   localTileClaimCount: number;
   plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits;
-  hoverTilePosition: DefiningWorldBuildingTilePosition | null;
   isSavingCoords: boolean;
   canSaveMoreCoords: boolean;
   isSaveCoordsPlacementActive: boolean;
@@ -144,7 +143,6 @@ function RenderingWorldPlazaEditModeFunctionPopoverBody({
   selectedCutFootprintMask,
   selectedCutGridAxisCellCount,
   plotOwnerLimits,
-  hoverTilePosition,
   isSavingCoords,
   canSaveMoreCoords,
   isSaveCoordsPlacementActive,
@@ -239,6 +237,7 @@ function RenderingWorldPlazaEditModeFunctionPopoverBody({
           <RenderingWorldPlazaClaimModePlotList
             ownerGroups={ownerGroups}
             isLoading={isPlotRegistryLoading}
+            plotCardColumnCount={3}
             onTeleportToPlotBounds={onTeleportToPlotBounds}
             onRequestingFriendPlotVisit={onRequestingFriendPlotVisit}
             onTeleportingToApprovedFriendPlot={
@@ -264,20 +263,17 @@ function RenderingWorldPlazaEditModeFunctionPopoverBody({
             RENDERING_WORLD_PLAZA_EDIT_MODE_SCROLL_POPOVER_BODY_CLASS_NAME
           }
         >
-          <RenderingWorldPlazaClaimModeCoordsPanel
-            hoverTilePosition={hoverTilePosition}
-            isSavingCoords={isSavingCoords}
-            canSaveMoreCoords={canSaveMoreCoords}
-            isSaveCoordsPlacementActive={isSaveCoordsPlacementActive}
-            onStartSaveCoordsPlacement={onStartSaveCoordsPlacement}
-            onCancelSaveCoordsPlacement={onCancelSaveCoordsPlacement}
-          />
           <RenderingWorldPlazaClaimModeSavedCoordsList
             savedCoordsList={savedCoordsList}
             trackedSavedCoordsId={trackedSavedCoordsId}
             onToggleSavedCoordsTracking={onToggleSavedCoordsTracking}
             onDeleteSavedCoords={onDeleteSavedCoords}
             isDeletingSavedCoords={isDeletingSavedCoords}
+            isSavingCoords={isSavingCoords}
+            canSaveMoreCoords={canSaveMoreCoords}
+            isSaveCoordsPlacementActive={isSaveCoordsPlacementActive}
+            onStartSaveCoordsPlacement={onStartSaveCoordsPlacement}
+            onCancelSaveCoordsPlacement={onCancelSaveCoordsPlacement}
           />
         </div>
       );
@@ -307,9 +303,9 @@ function RenderingWorldPlazaEditModeFunctionPopoverPanel({
     <div
       ref={popoverRef}
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-      className={
-        STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_POPOVER_PANEL_CLASS_NAME
-      }
+      className={resolvingWorldPlazaBuildModeFunctionPopoverPanelClassName(
+        functionId
+      )}
       style={popoverShiftStyle}
       role="dialog"
       aria-label={title}
@@ -317,9 +313,9 @@ function RenderingWorldPlazaEditModeFunctionPopoverPanel({
       onClick={onClick}
     >
       <p
-        className={
-          STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_POPOVER_TITLE_CLASS_NAME
-        }
+        className={resolvingWorldPlazaBuildModeFunctionPopoverTitleClassName(
+          functionId
+        )}
       >
         {title}
       </p>
@@ -347,7 +343,6 @@ export function RenderingWorldPlazaEditModeHotbar({
   localOwnedPlotCount,
   localTileClaimCount,
   plotOwnerLimits,
-  hoverTilePosition,
   isSavingCoords,
   canSaveMoreCoords,
   isSaveCoordsPlacementActive,
@@ -476,7 +471,6 @@ export function RenderingWorldPlazaEditModeHotbar({
             selectedCutFootprintMask={selectedCutFootprintMask}
             selectedCutGridAxisCellCount={selectedCutGridAxisCellCount}
             plotOwnerLimits={plotOwnerLimits}
-            hoverTilePosition={hoverTilePosition}
             isSavingCoords={isSavingCoords}
             canSaveMoreCoords={canSaveMoreCoords}
             isSaveCoordsPlacementActive={isSaveCoordsPlacementActive}
@@ -512,7 +506,6 @@ export function RenderingWorldPlazaEditModeHotbar({
     [
       activeViewportPlots,
       canSaveMoreCoords,
-      hoverTilePosition,
       isDeletingSavedCoords,
       isPlotRegistryLoading,
       isPresetBlockTypeSelected,
@@ -613,8 +606,16 @@ export function RenderingWorldPlazaEditModeHotbar({
         <RenderingWorldPlazaHudModeToolBoard
           boardId={modeToolBoardId}
           activeToolId={openFunctionId}
-          onActivateTool={togglingFunction}
-          renderingToolPopover={renderingToolPopover}
+          onActivateTool={(toolId) => {
+            if (checkingWorldPlazaEditModeFunctionId(toolId)) {
+              togglingFunction(toolId);
+            }
+          }}
+          renderingToolPopover={(toolId) =>
+            checkingWorldPlazaEditModeFunctionId(toolId)
+              ? renderingToolPopover(toolId)
+              : null
+          }
           trailingContent={
             <RenderingWorldPlazaEditModeSessionToggleArrows
               activeSessionModeId={activeSessionModeId}

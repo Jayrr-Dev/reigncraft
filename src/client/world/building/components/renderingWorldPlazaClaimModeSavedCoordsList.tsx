@@ -1,7 +1,10 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { DEFINING_WORLD_BUILDING_CLAIM_MODE_SECTION_LABEL_CLASS_NAME } from '@/components/world/building/domains/definingWorldBuildingClaimModeConstants';
+import {
+  DEFINING_WORLD_BUILDING_CLAIM_MODE_SAVE_BUTTON_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_CLAIM_MODE_SECTION_LABEL_CLASS_NAME,
+} from '@/components/world/building/domains/definingWorldBuildingClaimModeConstants';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { DefiningWorldPlazaSavedCoords } from '@/components/world/domains/definingWorldPlazaSavedCoords';
 import {
@@ -15,7 +18,11 @@ import {
   DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_TRACK_BUTTON_ACTIVE_CLASS_NAME,
   DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_TRACK_BUTTON_CLASS_NAME,
   DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_TRACK_BUTTON_LABEL,
+  LABELING_WORLD_PLAZA_SAVED_COORDS_CANCEL_PLACEMENT,
   LABELING_WORLD_PLAZA_SAVED_COORDS_LIST_DELETE_BUTTON,
+  LABELING_WORLD_PLAZA_SAVED_COORDS_SAVE_AT_CAPACITY_BUTTON,
+  LABELING_WORLD_PLAZA_SAVED_COORDS_SAVE_BUTTON,
+  LABELING_WORLD_PLAZA_SAVED_COORDS_SAVING_BUTTON,
 } from '@/components/world/domains/definingWorldPlazaSavedCoordsListUiConstants';
 import { formattingWorldPlazaSavedCoordsLabel } from '@/components/world/domains/formattingWorldPlazaSavedCoordsLabel';
 import { cn } from '@/lib/utils';
@@ -27,6 +34,11 @@ export type RenderingWorldPlazaClaimModeSavedCoordsListProps = {
   readonly onToggleSavedCoordsTracking: (savedCoordsId: string) => void;
   readonly onDeleteSavedCoords: (savedCoordsId: string) => void;
   readonly isDeletingSavedCoords?: boolean;
+  readonly isSavingCoords?: boolean;
+  readonly canSaveMoreCoords?: boolean;
+  readonly isSaveCoordsPlacementActive?: boolean;
+  readonly onStartSaveCoordsPlacement?: () => void;
+  readonly onCancelSaveCoordsPlacement?: () => void;
 };
 
 /**
@@ -38,16 +50,58 @@ export function RenderingWorldPlazaClaimModeSavedCoordsList({
   onToggleSavedCoordsTracking,
   onDeleteSavedCoords,
   isDeletingSavedCoords = false,
+  isSavingCoords = false,
+  canSaveMoreCoords = false,
+  isSaveCoordsPlacementActive = false,
+  onStartSaveCoordsPlacement,
+  onCancelSaveCoordsPlacement,
 }: RenderingWorldPlazaClaimModeSavedCoordsListProps): React.JSX.Element {
   const savedCoordsCount = savedCoordsList.length;
+  const showSaveCoordsButton =
+    onStartSaveCoordsPlacement !== undefined &&
+    onCancelSaveCoordsPlacement !== undefined;
 
   return (
     <div className="flex flex-col gap-1.5">
-      <p className={DEFINING_WORLD_BUILDING_CLAIM_MODE_SECTION_LABEL_CLASS_NAME}>
-        {DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_SECTION_LABEL} ({savedCoordsCount})
+      <p
+        className={DEFINING_WORLD_BUILDING_CLAIM_MODE_SECTION_LABEL_CLASS_NAME}
+      >
+        {DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_SECTION_LABEL} (
+        {savedCoordsCount})
       </p>
+      {showSaveCoordsButton ? (
+        <button
+          type="button"
+          {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+          disabled={
+            isSavingCoords ||
+            (!isSaveCoordsPlacementActive && !canSaveMoreCoords)
+          }
+          onClick={() => {
+            if (isSaveCoordsPlacementActive) {
+              onCancelSaveCoordsPlacement();
+              return;
+            }
+
+            onStartSaveCoordsPlacement();
+          }}
+          className={DEFINING_WORLD_BUILDING_CLAIM_MODE_SAVE_BUTTON_CLASS_NAME}
+        >
+          {isSavingCoords
+            ? LABELING_WORLD_PLAZA_SAVED_COORDS_SAVING_BUTTON
+            : isSaveCoordsPlacementActive
+              ? LABELING_WORLD_PLAZA_SAVED_COORDS_CANCEL_PLACEMENT
+              : !canSaveMoreCoords
+                ? LABELING_WORLD_PLAZA_SAVED_COORDS_SAVE_AT_CAPACITY_BUTTON
+                : LABELING_WORLD_PLAZA_SAVED_COORDS_SAVE_BUTTON}
+        </button>
+      ) : null}
       {!savedCoordsCount ? (
-        <p className={DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_EMPTY_TEXT_CLASS_NAME}>
+        <p
+          className={
+            DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_EMPTY_TEXT_CLASS_NAME
+          }
+        >
           {DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_EMPTY_MESSAGE}
         </p>
       ) : (
@@ -61,8 +115,20 @@ export function RenderingWorldPlazaClaimModeSavedCoordsList({
             return (
               <div
                 key={savedCoords.savedCoordsId}
-                className={DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_ROW_CLASS_NAME}
+                className={
+                  DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_ROW_CLASS_NAME
+                }
               >
+                <Badge
+                  variant="outline"
+                  title={savedCoordsLabel}
+                  className={cn(
+                    DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_BADGE_CLASS_NAME,
+                    'flex-1'
+                  )}
+                >
+                  {savedCoordsLabel}
+                </Badge>
                 <button
                   type="button"
                   {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
@@ -83,16 +149,6 @@ export function RenderingWorldPlazaClaimModeSavedCoordsList({
                     aria-hidden
                   />
                 </button>
-                <Badge
-                  variant="outline"
-                  title={savedCoordsLabel}
-                  className={cn(
-                    DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_BADGE_CLASS_NAME,
-                    'flex-1'
-                  )}
-                >
-                  {savedCoordsLabel}
-                </Badge>
                 <button
                   type="button"
                   {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}

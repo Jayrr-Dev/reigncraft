@@ -6,6 +6,10 @@
 
 import { DEFINING_REIGNCRAFT_BADGE_SEMANTIC_PRESETS } from '@/components/ui/domains/definingReigncraftBadgeConstants';
 import { resolvingReigncraftTextBadgeShellClassName } from '@/components/ui/domains/resolvingReigncraftBadgeClassNames';
+import {
+  STYLING_WORLD_PLAZA_GAMEPLAY_HUD_LIGHT_THEME_SCOPE_CLASS,
+  STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_CLASS,
+} from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 
 /** Claim mode sidebar width (Tailwind class). */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_SIDEBAR_WIDTH_CLASS_NAME =
@@ -93,19 +97,23 @@ export const DEFINING_WORLD_BUILDING_CLAIM_MODE_CAPACITY_BADGE_AT_MAX_VALUE_CLAS
 
 /** Claim mode plot list scroll container classes. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_LIST_CLASS_NAME =
-  'flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto pr-0.5' as const;
+  `${STYLING_WORLD_PLAZA_GAMEPLAY_HUD_LIGHT_THEME_SCOPE_CLASS} flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto pr-0.5` as const;
 
 /** Claim mode owner group card classes. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_OWNER_GROUP_CLASS_NAME =
-  'rounded border border-white/10 bg-white/[0.03] p-1.5' as const;
+  'rounded-sm border border-poster-wood/45 bg-parchment-dark/30 p-1 shadow-[inset_0_1px_2px_rgba(20,28,26,0.15)]' as const;
+
+/** Claim mode local owner group — no outer card chrome. */
+export const DEFINING_WORLD_BUILDING_CLAIM_MODE_LOCAL_OWNER_GROUP_CLASS_NAME =
+  'min-w-0' as const;
 
 /** Claim mode owner group title classes. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_OWNER_GROUP_TITLE_CLASS_NAME =
-  'truncate text-[10px] font-semibold text-white/90' as const;
+  'truncate font-body text-[9px] font-semibold text-ink' as const;
 
 /** Claim mode local owner group title classes. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_LOCAL_OWNER_GROUP_TITLE_CLASS_NAME =
-  'truncate text-[10px] font-semibold text-[#f4d35e]' as const;
+  'truncate font-display text-[9px] font-bold uppercase tracking-[0.08em] text-poster-orange-deep' as const;
 
 /** Claim mode plot badge grid (three-column wrapping flex). */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_BADGE_GRID_CLASS_NAME =
@@ -115,41 +123,53 @@ export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_BADGE_GRID_CLASS_NAME =
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_BADGE_CLASS_NAME =
   'h-5 min-w-0 flex-[1_1_calc((100%-0.5rem)/2)] max-w-full shrink-0 justify-center truncate rounded-sm px-0.5 text-[9px] font-medium tabular-nums' as const;
 
-/** Claim mode plot card grid (two cards per row). */
-export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_GRID_CLASS_NAME =
-  'mt-1 grid grid-cols-2 gap-1.5' as const;
+/** Claim mode plot card grid (three cards per row). */
+export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_GRID_THREE_COLUMN_CLASS_NAME =
+  'mt-1 grid grid-cols-3 gap-1' as const;
+
+/** Claim mode plot card grid (two cards per row for narrow sidebars). */
+export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_GRID_TWO_COLUMN_CLASS_NAME =
+  'mt-1 grid grid-cols-2 gap-1' as const;
 
 /** Claim mode plot card shell classes. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_CLASS_NAME =
-  'flex min-w-0 flex-col gap-1 rounded-md border border-white/12 bg-white/[0.04] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]' as const;
+  'flex min-w-0 flex-col items-center gap-0.5 rounded-sm border border-poster-wood/55 bg-[linear-gradient(165deg,#f5ebd4_0%,#e8d8b8_100%)] p-1 text-center shadow-[inset_0_0_0_1px_rgba(255,250,230,0.55),0_2px_0_0_rgba(61,42,31,0.45)]' as const;
 
 /** Claim mode local player plot card accent classes. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_LOCAL_PLOT_CARD_CLASS_NAME =
-  'border-[#f97316]/45 bg-[#f97316]/10' as const;
-
-/** Claim mode plot card header row classes. */
-export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_HEADER_CLASS_NAME =
-  'flex min-w-0 items-center gap-1' as const;
+  'border-poster-orange/75 ring-1 ring-poster-orange/25' as const;
 
 /** Claim mode plot card biome icon frame classes. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_ICON_FRAME_CLASS_NAME =
-  'flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border border-white/15 bg-black/30' as const;
+  'flex h-6 w-6 shrink-0 items-center justify-center' as const;
 
 /** Claim mode plot card biome name classes. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_BIOME_NAME_CLASS_NAME =
-  'truncate text-[9px] font-semibold leading-tight text-white/85' as const;
+  'w-full truncate text-[9px] font-bold uppercase tracking-[0.04em] leading-tight text-ink' as const;
 
 /** Claim mode plot card coordinate line classes. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_COORDS_CLASS_NAME =
-  'truncate text-[8px] leading-tight tabular-nums text-white/55' as const;
+  'w-full truncate text-[9px] leading-tight tabular-nums text-ink' as const;
 
 /** Claim mode plot card full-width action button base classes. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_ACTION_BUTTON_CLASS_NAME =
-  'mt-auto flex h-5 w-full items-center justify-center gap-1 rounded-sm border border-sky-300/40 bg-sky-400/10 px-1 text-[8px] font-semibold text-sky-100 transition hover:bg-sky-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70' as const;
+  'mt-auto flex h-5 w-full items-center justify-center gap-0.5 rounded-sm border border-poster-gold/55 bg-[linear-gradient(180deg,#c1592f_0%,#a2481f_100%)] px-0.5 text-[8px] font-bold uppercase tracking-[0.04em] text-parchment shadow-[0_1px_0_0_#6d2c12] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/70' as const;
 
 /** Claim mode plot card visit-request button classes. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_VISIT_BUTTON_CLASS_NAME =
-  'mt-auto flex h-5 w-full items-center justify-center gap-1 rounded-sm border border-violet-300/40 bg-violet-400/10 px-1 text-[8px] font-semibold text-violet-100 transition hover:bg-violet-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70 disabled:cursor-not-allowed disabled:border-white/15 disabled:bg-white/5 disabled:text-white/35' as const;
+  'mt-auto flex h-5 w-full items-center justify-center rounded-sm border border-poster-teal/45 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] px-0.5 text-[8px] font-bold uppercase tracking-[0.04em] text-parchment shadow-[0_1px_0_0_rgba(20,28,26,0.5)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/70 disabled:cursor-not-allowed disabled:border-poster-wood/25 disabled:bg-parchment-dark/40 disabled:text-ink-soft/50 disabled:shadow-none' as const;
+
+/** Claim mode plot list empty/loading text classes. */
+export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_LIST_STATUS_TEXT_CLASS_NAME =
+  'text-[9px] text-ink-soft' as const;
+
+/** Wider parchment popover shell for the plots tool (fits three cards per row). */
+export const STYLING_WORLD_PLAZA_CLAIM_MODE_PLOT_POPOVER_PANEL_CLASS_NAME =
+  `${STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_CLASS} ${STYLING_WORLD_PLAZA_GAMEPLAY_HUD_LIGHT_THEME_SCOPE_CLASS} pointer-events-auto absolute bottom-full left-1/2 z-50 mb-2 w-max min-w-[22rem] max-w-[min(100vw-1.5rem,34rem)] p-1.5` as const;
+
+/** Plots popover title on parchment chrome. */
+export const STYLING_WORLD_PLAZA_CLAIM_MODE_PLOT_POPOVER_TITLE_CLASS_NAME =
+  'mb-1 text-center font-display text-[10px] font-bold uppercase tracking-[0.14em] text-poster-teal-deep' as const;
 
 /** Claim mode plot teleport button classes. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_TELEPORT_BUTTON_CLASS_NAME =

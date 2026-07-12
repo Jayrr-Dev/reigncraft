@@ -206,6 +206,7 @@ export function RenderingWorldPlazaClaimModePanel({
         <RenderingWorldPlazaClaimModePlotList
           ownerGroups={ownerGroups}
           isLoading={isPlotRegistryLoading}
+          plotCardColumnCount={2}
           onTeleportToPlotBounds={onTeleportToPlotBounds}
           onRequestingFriendPlotVisit={onRequestingFriendPlotVisit}
           onTeleportingToApprovedFriendPlot={onTeleportingToApprovedFriendPlot}

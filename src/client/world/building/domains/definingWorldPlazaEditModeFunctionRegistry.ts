@@ -123,6 +123,21 @@ export const LABELING_WORLD_PLAZA_EDIT_MODE_SESSION_TOGGLE = {
 } as const satisfies Record<DefiningWorldPlazaEditModeSessionModeId, string>;
 
 /**
+ * Checks whether a mode-board tool id is an edit-mode function id.
+ *
+ * @param toolId - Any HUD mode-board tool id
+ */
+export function checkingWorldPlazaEditModeFunctionId(
+  toolId: string
+): toolId is DefiningWorldPlazaEditModeFunctionId {
+  const functionIds: readonly string[] = Object.values(
+    DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID
+  );
+
+  return functionIds.includes(toolId);
+}
+
+/**
  * Returns edit hotbar function slots for the active Build or Claim session.
  *
  * @param sessionModeId - Active edit session mode.

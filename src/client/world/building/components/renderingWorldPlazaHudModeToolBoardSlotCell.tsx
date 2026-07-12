@@ -6,7 +6,7 @@
  * @module components/world/building/components/renderingWorldPlazaHudModeToolBoardSlotCell
  */
 
-import { Icon } from '@/components/ui/icon';
+import { RenderingWorldPlazaHudModeToolGlyph } from '@/components/world/building/components/renderingWorldPlazaHudModeToolGlyph';
 import { STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_SLOT_ANCHOR_CLASS_NAME } from '@/components/world/building/domains/definingWorldPlazaBuildModeFunctionHotbarConstants';
 import type { DefiningWorldPlazaHudModeToolBoardId } from '@/components/world/building/domains/definingWorldPlazaHudModeToolBoardConstants';
 import {
@@ -177,11 +177,9 @@ function RenderingWorldPlazaHudModeToolBoardFilledSlot({
         )}
         style={dragSurfaceStyle}
       >
-        <Icon
-          icon={toolDefinition.iconifyIcon}
-          className="shrink-0"
-          style={viewportStyles.iconStyle}
-          aria-hidden
+        <RenderingWorldPlazaHudModeToolGlyph
+          toolDefinition={toolDefinition}
+          iconStyle={viewportStyles.iconStyle}
         />
       </button>
     </div>

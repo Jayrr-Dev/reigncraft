@@ -342,6 +342,7 @@ import {
   selectingWorldPlazaWildlifeCorpseForClickAction,
 } from '@/components/world/interaction/domains/managingWorldPlazaInteractableBlockClickSelection';
 import { trackingWorldPlazaInteractableBlockPointerInteraction } from '@/components/world/interaction/hooks/trackingWorldPlazaInteractableBlockPointerInteraction';
+import { usingWorldPlazaProximityInteractableBlockSelection } from '@/components/world/interaction/hooks/usingWorldPlazaProximityInteractableBlockSelection';
 import { RenderingWorldPlazaGroundItems } from '@/components/world/inventory/components/renderingWorldPlazaGroundItems';
 import { RenderingWorldPlazaInventoryBagSfx } from '@/components/world/inventory/components/renderingWorldPlazaInventoryBagSfx';
 import { RenderingWorldPlazaInventoryDropItemOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropItemOverlay';
@@ -2012,6 +2013,16 @@ function RenderingWorldPlazaPixiSceneConnected({
       slot.itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED &&
       slot.quantity > 0
   );
+  const hasEquippedFishrodRef = useRef(hasEquippedFishrod);
+  const hasEquippedHoeRef = useRef(hasEquippedHoe);
+  const hasEquippedScytheRef = useRef(hasEquippedScythe);
+  const hasSeedsInInventoryRef = useRef(hasSeedsInInventory);
+  const proximityPlacedBlocksRef = useRef(activeScenePlacedBlocks);
+  hasEquippedFishrodRef.current = hasEquippedFishrod;
+  hasEquippedHoeRef.current = hasEquippedHoe;
+  hasEquippedScytheRef.current = hasEquippedScythe;
+  hasSeedsInInventoryRef.current = hasSeedsInInventory;
+  proximityPlacedBlocksRef.current = activeScenePlacedBlocks;
 
   const applyingInventoryStateUpdate = useCallback(
     (nextState: DefiningInventoryState): void => {
@@ -2554,6 +2565,22 @@ function RenderingWorldPlazaPixiSceneConnected({
     wildlifeSnapshotsOutRef,
     wildlifeStoreRef,
   ]);
+
+  usingWorldPlazaProximityInteractableBlockSelection({
+    enabled: isLocalGameplayEnabled,
+    playerPositionRef,
+    selectedInteractableBlockKeysRef,
+    placedBlocksRef: proximityPlacedBlocksRef,
+    choppedTreeStateByTileKeyRef: choppedTreesByTileKeyRef,
+    minedRockStateByTileKeyRef: minedRocksByTileKeyRef,
+    pickedPebbleStateByTileKeyRef: pickedPebblesByTileKeyRef,
+    farmlandByTileKeyRef,
+    wildlifeStoreRef,
+    hasEquippedFishrodRef,
+    hasEquippedHoeRef,
+    hasEquippedScytheRef,
+    hasSeedsInInventoryRef,
+  });
 
   const spiritedSpritesBetaStoreRef = useRef(
     creatingSpiritedSpritesBetaSpawnStore()
@@ -4211,7 +4238,6 @@ function RenderingWorldPlazaPixiSceneConnected({
         localOwnedPlotCount={claimModeLocalOwnedPlotCount}
         localTileClaimCount={claimModeLocalTileClaimCount}
         plotOwnerLimits={plotOwnerLimits}
-        hoverTilePosition={hoverTilePosition}
         isSavingCoords={isSavingCoords}
         canSaveMoreCoords={canSaveMoreCoords}
         isSaveCoordsPlacementActive={isSaveCoordsPlacementActive}

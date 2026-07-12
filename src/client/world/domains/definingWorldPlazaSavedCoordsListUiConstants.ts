@@ -54,3 +54,15 @@ export const DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_EMPTY_MESSAGE =
 /** Save action label when all coordinate slots are full. */
 export const LABELING_WORLD_PLAZA_SAVED_COORDS_SAVE_AT_CAPACITY_BUTTON =
   'Max saved (3)' as const;
+
+/** Save coords button label before placement is armed. */
+export const LABELING_WORLD_PLAZA_SAVED_COORDS_SAVE_BUTTON =
+  'Save Coords' as const;
+
+/** Save coords button label while placement is armed. */
+export const LABELING_WORLD_PLAZA_SAVED_COORDS_CANCEL_PLACEMENT =
+  'Cancel' as const;
+
+/** Save coords button label while persisting. */
+export const LABELING_WORLD_PLAZA_SAVED_COORDS_SAVING_BUTTON =
+  'Saving...' as const;

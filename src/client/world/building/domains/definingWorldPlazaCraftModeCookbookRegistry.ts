@@ -1,0 +1,109 @@
+/**
+ * Declarative registry for Craft-mode cookbooks (toolbar slots + book dialog).
+ *
+ * @module components/world/building/domains/definingWorldPlazaCraftModeCookbookRegistry
+ */
+
+import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
+
+/** Stable ids for craft-mode cookbook slots. */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID = {
+  SURVIVAL: 'cookbook-survival',
+  BLACKSMITH: 'cookbook-blacksmith',
+  HEALER: 'cookbook-healer',
+} as const;
+
+/** One craft-mode cookbook id. */
+export type DefiningWorldPlazaCraftModeCookbookId =
+  (typeof DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID)[keyof typeof DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID];
+
+/** Cookbook icon sprite sheet (3 columns x 1 row of 32px cells). */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_SPRITE_SHEET_URL =
+  '/inventory/sprites/inventory-cookbook-sprites.webp' as const;
+
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_SPRITE_SHEET_COLUMN_COUNT = 3;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_SPRITE_SHEET_ROW_COUNT = 1;
+
+/** Display + dialog metadata for one cookbook. */
+export type DefiningWorldPlazaCraftModeCookbookDefinition = {
+  readonly id: DefiningWorldPlazaCraftModeCookbookId;
+  readonly title: string;
+  readonly subtitle: string;
+  readonly ariaLabel: string;
+  /** Column in the cookbook sprite sheet (row is always 0). */
+  readonly spriteColumnIndex: number;
+  /** Iconify emblem shown on the dialog header chip. */
+  readonly emblemIconifyIcon: string;
+  /** Blank leaves shown until recipes ship. */
+  readonly blankPageCount: number;
+};
+
+/**
+ * Cookbooks in toolbar order (left to right on the Craft board).
+ */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_REGISTRY = [
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.SURVIVAL,
+    title: 'Survival Cookbook',
+    subtitle: 'Field rations, foraged fare, and campfire staples.',
+    ariaLabel: 'Open the Survival Cookbook',
+    spriteColumnIndex: 0,
+    emblemIconifyIcon: 'mdi:campfire',
+    blankPageCount: 4,
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.BLACKSMITH,
+    title: "Blacksmith's Cookbook",
+    subtitle: 'Forge-side recipes tempered in soot and steel.',
+    ariaLabel: "Open the Blacksmith's Cookbook",
+    spriteColumnIndex: 1,
+    emblemIconifyIcon: 'mdi:anvil',
+    blankPageCount: 4,
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.HEALER,
+    title: "Healer's Cookbook",
+    subtitle: 'Restorative broths, poultices, and tonics.',
+    ariaLabel: "Open the Healer's Cookbook",
+    spriteColumnIndex: 2,
+    emblemIconifyIcon: 'mdi:mortar-pestle-plus',
+    blankPageCount: 4,
+  },
+] as const satisfies readonly DefiningWorldPlazaCraftModeCookbookDefinition[];
+
+/** Copy shown on blank leaves until recipes ship. */
+export const LABELING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_BLANK_PAGE =
+  'This page is still blank. Recipes will be written here soon.' as const;
+
+/**
+ * Resolves one cookbook definition by id, or null when unknown.
+ *
+ * @param cookbookId - Cookbook id
+ */
+export function resolvingWorldPlazaCraftModeCookbookDefinition(
+  cookbookId: string
+): DefiningWorldPlazaCraftModeCookbookDefinition | null {
+  return (
+    DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_REGISTRY.find(
+      (cookbookDefinition) => cookbookDefinition.id === cookbookId
+    ) ?? null
+  );
+}
+
+/**
+ * Resolves the 32px sprite-sheet cell for one cookbook.
+ *
+ * @param cookbookDefinition - Cookbook definition
+ */
+export function resolvingWorldPlazaCraftModeCookbookSpriteSheetIcon(
+  cookbookDefinition: DefiningWorldPlazaCraftModeCookbookDefinition
+): DefiningWorldPlazaInventorySpriteSheetIcon {
+  return {
+    spriteSheetUrl: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_SPRITE_SHEET_URL,
+    columnCount:
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_SPRITE_SHEET_COLUMN_COUNT,
+    rowCount: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_SPRITE_SHEET_ROW_COUNT,
+    columnIndex: cookbookDefinition.spriteColumnIndex,
+    rowIndex: 0,
+  };
+}

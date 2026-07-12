@@ -2,6 +2,7 @@
 
 import { Icon } from '@/components/ui/icon';
 import {
+  DEFINING_WORLD_BUILDING_CLAIM_MODE_LOCAL_OWNER_GROUP_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_LOCAL_OWNER_GROUP_TITLE_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_LOCAL_PLOT_CARD_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_OWNER_GROUP_CLASS_NAME,
@@ -10,11 +11,12 @@ import {
   DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_BIOME_NAME_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_COORDS_CLASS_NAME,
-  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_GRID_CLASS_NAME,
-  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_HEADER_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_GRID_THREE_COLUMN_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_GRID_TWO_COLUMN_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_ICON_FRAME_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_VISIT_BUTTON_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_LIST_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_LIST_STATUS_TEXT_CLASS_NAME,
 } from '@/components/world/building/domains/definingWorldBuildingClaimModeConstants';
 import { resolvingWorldBuildingPlotBiomeIconDefinition } from '@/components/world/building/domains/definingWorldBuildingPlotBiomeIconRegistry';
 import type { DefiningWorldBuildingPlotBounds } from '@/components/world/building/domains/definingWorldBuildingPlotBounds';
@@ -52,9 +54,15 @@ const RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_TELEPORT_ICON =
 /** Local owner row title. */
 const RENDERING_WORLD_PLAZA_CLAIM_MODE_LOCAL_OWNER_GROUP_TITLE = 'You' as const;
 
+/** Plot card column layout for the hotbar popover. */
+const RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_CARD_COLUMN_COUNT_DEFAULT =
+  3 as const;
+
 export interface RenderingWorldPlazaClaimModePlotListProps {
   ownerGroups: DefiningWorldBuildingPlotRegistryOwnerGroup[];
   isLoading: boolean;
+  /** Cards per row. Popover uses 3; narrow claim sidebar uses 2. */
+  plotCardColumnCount?: 2 | 3;
   onTeleportToPlotBounds?: (bounds: DefiningWorldBuildingPlotBounds) => void;
   onRequestingFriendPlotVisit?: (
     hostUserId: string,
@@ -114,6 +122,7 @@ function formattingWorldPlazaClaimModeOwnerGroupTitle(
 export function RenderingWorldPlazaClaimModePlotList({
   ownerGroups,
   isLoading,
+  plotCardColumnCount = RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_CARD_COLUMN_COUNT_DEFAULT,
   onTeleportToPlotBounds,
   onRequestingFriendPlotVisit,
   onTeleportingToApprovedFriendPlot,
@@ -128,7 +137,11 @@ export function RenderingWorldPlazaClaimModePlotList({
 
   if (isLoading) {
     return (
-      <p className="text-[9px] text-white/55">
+      <p
+        className={
+          DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_LIST_STATUS_TEXT_CLASS_NAME
+        }
+      >
         {RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_LIST_LOADING_MESSAGE}
       </p>
     );
@@ -136,18 +149,31 @@ export function RenderingWorldPlazaClaimModePlotList({
 
   if (ownerGroups.length === 0) {
     return (
-      <p className="text-[9px] text-white/55">
+      <p
+        className={
+          DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_LIST_STATUS_TEXT_CLASS_NAME
+        }
+      >
         {RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_LIST_EMPTY_MESSAGE}
       </p>
     );
   }
+
+  const plotCardGridClassName =
+    plotCardColumnCount === 2
+      ? DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_GRID_TWO_COLUMN_CLASS_NAME
+      : DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_GRID_THREE_COLUMN_CLASS_NAME;
 
   return (
     <div className={DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_LIST_CLASS_NAME}>
       {ownerGroups.map((ownerGroup) => (
         <div
           key={ownerGroup.ownerUserId}
-          className={DEFINING_WORLD_BUILDING_CLAIM_MODE_OWNER_GROUP_CLASS_NAME}
+          className={
+            ownerGroup.isLocalPlayer
+              ? DEFINING_WORLD_BUILDING_CLAIM_MODE_LOCAL_OWNER_GROUP_CLASS_NAME
+              : DEFINING_WORLD_BUILDING_CLAIM_MODE_OWNER_GROUP_CLASS_NAME
+          }
         >
           <p
             className={
@@ -158,11 +184,7 @@ export function RenderingWorldPlazaClaimModePlotList({
           >
             {formattingWorldPlazaClaimModeOwnerGroupTitle(ownerGroup)}
           </p>
-          <div
-            className={
-              DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_GRID_CLASS_NAME
-            }
-          >
+          <div className={plotCardGridClassName}>
             {ownerGroup.contiguousRegions.map((contiguousRegion) => {
               const regionLabel =
                 formattingWorldBuildingPlotRegistryContiguousRegionLabel(
@@ -198,34 +220,28 @@ export function RenderingWorldPlazaClaimModePlotList({
                       : null
                   )}
                 >
-                  <div
+                  <span
+                    aria-hidden
                     className={
-                      DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_HEADER_CLASS_NAME
+                      DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_ICON_FRAME_CLASS_NAME
                     }
                   >
-                    <span
-                      aria-hidden
-                      className={
-                        DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_ICON_FRAME_CLASS_NAME
-                      }
-                    >
-                      <Icon
-                        icon={biomeIconDefinition.iconifyIcon}
-                        className={cn(
-                          'h-3.5 w-3.5',
-                          biomeIconDefinition.iconClassName
-                        )}
-                      />
-                    </span>
-                    <span
-                      title={`${plotBiome.displayName} plot`}
-                      className={
-                        DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_BIOME_NAME_CLASS_NAME
-                      }
-                    >
-                      {plotBiome.displayName}
-                    </span>
-                  </div>
+                    <Icon
+                      icon={biomeIconDefinition.iconifyIcon}
+                      className={cn(
+                        'h-4 w-4',
+                        biomeIconDefinition.iconClassName
+                      )}
+                    />
+                  </span>
+                  <p
+                    title={`${plotBiome.displayName} plot`}
+                    className={
+                      DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_BIOME_NAME_CLASS_NAME
+                    }
+                  >
+                    {plotBiome.displayName}
+                  </p>
                   <p
                     title={regionLabel}
                     className={
@@ -250,7 +266,7 @@ export function RenderingWorldPlazaClaimModePlotList({
                         icon={
                           RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_TELEPORT_ICON
                         }
-                        className="h-2.5 w-2.5 shrink-0"
+                        className="h-2 w-2 shrink-0"
                         aria-hidden
                       />
                       {RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_TELEPORT_LABEL}
@@ -313,7 +329,7 @@ export function RenderingWorldPlazaClaimModePlotList({
                         icon={
                           RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_TELEPORT_ICON
                         }
-                        className="h-2.5 w-2.5 shrink-0"
+                        className="h-2 w-2 shrink-0"
                         aria-hidden
                       />
                       {RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_TELEPORT_LABEL}

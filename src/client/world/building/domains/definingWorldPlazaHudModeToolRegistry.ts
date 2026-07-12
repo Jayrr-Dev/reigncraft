@@ -5,6 +5,11 @@
  */
 
 import {
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_REGISTRY,
+  resolvingWorldPlazaCraftModeCookbookSpriteSheetIcon,
+  type DefiningWorldPlazaCraftModeCookbookId,
+} from '@/components/world/building/domains/definingWorldPlazaCraftModeCookbookRegistry';
+import {
   DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID,
   type DefiningWorldPlazaEditModeFunctionId,
 } from '@/components/world/building/domains/definingWorldPlazaEditModeFunctionRegistry';
@@ -12,10 +17,12 @@ import {
   DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID,
   type DefiningWorldPlazaHudModeToolBoardId,
 } from '@/components/world/building/domains/definingWorldPlazaHudModeToolBoardConstants';
+import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 
-/** Stable tool ids (reuse edit-mode function ids for Build/Claim). */
+/** Stable tool ids (edit-mode functions for Build/Claim, cookbooks for Craft). */
 export type DefiningWorldPlazaHudModeToolId =
-  DefiningWorldPlazaEditModeFunctionId;
+  | DefiningWorldPlazaEditModeFunctionId
+  | DefiningWorldPlazaCraftModeCookbookId;
 
 /** Display metadata for one mode-board tool. */
 export type DefiningWorldPlazaHudModeToolDefinition = {
@@ -24,13 +31,29 @@ export type DefiningWorldPlazaHudModeToolDefinition = {
   readonly label: string;
   readonly ariaLabel: string;
   readonly iconifyIcon: string;
+  /** Optional pixel-art glyph; takes precedence over iconifyIcon in slots. */
+  readonly spriteSheetIcon?: DefiningWorldPlazaInventorySpriteSheetIcon;
 };
+
+/** Craft-board cookbook tools derived from the cookbook registry. */
+const DEFINING_WORLD_PLAZA_HUD_MODE_COOKBOOK_TOOLS =
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_REGISTRY.map(
+    (cookbookDefinition) => ({
+      id: cookbookDefinition.id,
+      boardId: DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.CRAFT,
+      label: cookbookDefinition.title,
+      ariaLabel: cookbookDefinition.ariaLabel,
+      iconifyIcon: cookbookDefinition.emblemIconifyIcon,
+      spriteSheetIcon:
+        resolvingWorldPlazaCraftModeCookbookSpriteSheetIcon(cookbookDefinition),
+    })
+  ) satisfies readonly DefiningWorldPlazaHudModeToolDefinition[];
 
 /**
  * Tools seeded onto each mode board (left → right into empty slots).
- * Craft stays empty until recipes ship.
  */
 export const DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_REGISTRY = [
+  ...DEFINING_WORLD_PLAZA_HUD_MODE_COOKBOOK_TOOLS,
   {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.MATERIALS,
     boardId: DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.BUILD,
@@ -66,7 +89,7 @@ export const DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_REGISTRY = [
     ariaLabel: 'Bookmark tile and saved coordinates',
     iconifyIcon: 'mdi:bookmark',
   },
-] as const satisfies readonly DefiningWorldPlazaHudModeToolDefinition[];
+] satisfies readonly DefiningWorldPlazaHudModeToolDefinition[];
 
 /**
  * Lists tools that belong on one mode board (registry order).

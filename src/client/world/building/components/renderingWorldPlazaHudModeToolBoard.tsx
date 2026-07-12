@@ -16,8 +16,8 @@ import {
   unlockingInventoryDragPageScroll,
 } from '@/components/inventory/domains/lockingInventoryDragPageScroll';
 import { modifyingInventorySnapCenterToCursor } from '@/components/inventory/domains/modifyingInventoryDragOverlay';
-import { Icon } from '@/components/ui/icon';
 import { RenderingWorldPlazaHudModeToolBoardSlotCell } from '@/components/world/building/components/renderingWorldPlazaHudModeToolBoardSlotCell';
+import { RenderingWorldPlazaHudModeToolGlyph } from '@/components/world/building/components/renderingWorldPlazaHudModeToolGlyph';
 import {
   LABELING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD,
   type DefiningWorldPlazaHudModeToolBoardId,
@@ -276,11 +276,9 @@ export function RenderingWorldPlazaHudModeToolBoard({
                 )}
                 style={viewportStyles.slotStyle}
               >
-                <Icon
-                  icon={draggingToolDefinition.iconifyIcon}
-                  className="shrink-0"
-                  style={viewportStyles.iconStyle}
-                  aria-hidden
+                <RenderingWorldPlazaHudModeToolGlyph
+                  toolDefinition={draggingToolDefinition}
+                  iconStyle={viewportStyles.iconStyle}
                 />
               </div>
             ) : null}
