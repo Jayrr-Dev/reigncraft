@@ -41,6 +41,16 @@ describe('resolvingWorldPlazaHudToolbarBuildClaimToggle', () => {
         DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS
       ).label
     ).toBe('Build');
+    expect(
+      resolvingWorldPlazaHudToolbarBuildClaimToggleFace(
+        DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD
+      ).activeButtonClassName
+    ).toContain('amber');
+    expect(
+      resolvingWorldPlazaHudToolbarBuildClaimToggleFace(
+        DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM
+      ).activeButtonClassName
+    ).toContain('sky');
   });
 
   it('toggles build ↔ claim and enters build from other modes', () => {

@@ -46,6 +46,7 @@ import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domai
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
 import type { DefiningWorldPlazaSavedCoords } from '@/components/world/domains/definingWorldPlazaSavedCoords';
 import { resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles } from '@/components/world/domains/resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles';
+import { usingWorldPlazaAnchoredPopoverViewportShiftX } from '@/components/world/hooks/usingWorldPlazaAnchoredPopoverViewportShiftX';
 import {
   STYLING_WORLD_PLAZA_INVENTORY_GRID_WRAPPER_CLASS_NAME,
   STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME,
@@ -65,6 +66,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ReactNode,
   type SyntheticEvent,
 } from 'react';
 
@@ -276,6 +278,50 @@ function RenderingWorldPlazaEditModeFunctionPopoverBody({
 }
 
 /**
+ * Slot-anchored edit-mode function popover with viewport collision shift.
+ */
+function RenderingWorldPlazaEditModeFunctionPopoverPanel({
+  functionId,
+  title,
+  onPointerDown,
+  onClick,
+  children,
+}: {
+  readonly functionId: DefiningWorldPlazaEditModeFunctionId;
+  readonly title: string;
+  readonly onPointerDown: (event: SyntheticEvent<HTMLElement>) => void;
+  readonly onClick: (event: SyntheticEvent<HTMLElement>) => void;
+  readonly children: ReactNode;
+}): React.JSX.Element {
+  const { popoverRef, popoverShiftStyle } =
+    usingWorldPlazaAnchoredPopoverViewportShiftX(functionId);
+
+  return (
+    <div
+      ref={popoverRef}
+      {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+      className={
+        STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_POPOVER_PANEL_CLASS_NAME
+      }
+      style={popoverShiftStyle}
+      role="dialog"
+      aria-label={title}
+      onPointerDown={onPointerDown}
+      onClick={onClick}
+    >
+      <p
+        className={
+          STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_POPOVER_TITLE_CLASS_NAME
+        }
+      >
+        {title}
+      </p>
+      {children}
+    </div>
+  );
+}
+
+/**
  * Unified build/claim toolbar: session-filtered icon slots with popovers.
  */
 export function RenderingWorldPlazaEditModeHotbar({
@@ -480,15 +526,9 @@ export function RenderingWorldPlazaEditModeHotbar({
                   }
                 >
                   {isOpen ? (
-                    <div
-                      {...{
-                        [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true,
-                      }}
-                      className={
-                        STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_POPOVER_PANEL_CLASS_NAME
-                      }
-                      role="dialog"
-                      aria-label={
+                    <RenderingWorldPlazaEditModeFunctionPopoverPanel
+                      functionId={functionDefinition.id}
+                      title={
                         LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_POPOVER_TITLE[
                           functionDefinition.id
                         ]
@@ -496,17 +536,6 @@ export function RenderingWorldPlazaEditModeHotbar({
                       onPointerDown={stoppingPlazaWalkPointerPropagation}
                       onClick={stoppingPlazaWalkPointerPropagation}
                     >
-                      <p
-                        className={
-                          STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_POPOVER_TITLE_CLASS_NAME
-                        }
-                      >
-                        {
-                          LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_POPOVER_TITLE[
-                            functionDefinition.id
-                          ]
-                        }
-                      </p>
                       <RenderingWorldPlazaEditModeFunctionPopoverBody
                         functionId={functionDefinition.id}
                         selectedDefinitionId={selectedDefinitionId}
@@ -556,7 +585,7 @@ export function RenderingWorldPlazaEditModeHotbar({
                           onSelectCutGridAxisCellCount
                         }
                       />
-                    </div>
+                    </RenderingWorldPlazaEditModeFunctionPopoverPanel>
                   ) : null}
 
                   <button
