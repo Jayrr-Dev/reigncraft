@@ -1,10 +1,10 @@
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 import {
   DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_CLIP_CATALOG,
   type DefiningWorldPlazaBiomeAmbienceClipId,
 } from '@/components/world/domains/definingWorldPlazaBiomeAmbienceConstants';
 import { resolvingWorldPlazaBiomeAmbienceStarAudioId } from '@/components/world/domains/resolvingWorldPlazaBiomeAmbienceStarAudioId';
 import { resolvingWorldPlazaBiomeAmbienceUrl } from '@/components/world/domains/resolvingWorldPlazaBiomeAmbienceUrl';
-import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Builds a manifest for an explicit ambience clip set.
@@ -17,7 +17,7 @@ export function buildingWorldPlazaBiomeAmbienceStarAudioManifestForClipIds(
   for (const clipId of clipIds) {
     manifest[resolvingWorldPlazaBiomeAmbienceStarAudioId(clipId)] = {
       src: resolvingWorldPlazaBiomeAmbienceUrl(clipId),
-      group: 'sfx',
+      group: 'ambience',
       stream: true,
     };
   }

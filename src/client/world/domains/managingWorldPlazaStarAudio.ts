@@ -7,14 +7,14 @@
  * @module components/world/domains/managingWorldPlazaStarAudio
  */
 
-import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
-import { creatingWorldPlazaHowlerAudioEngine } from '@/components/world/audio/engine/managingWorldPlazaHowlerAudioEngine';
-import type { ManagingWorldPlazaHowlerAudioEngine } from '@/components/world/audio/engine/managingWorldPlazaHowlerAudioEngine';
 import type {
   Manifest,
   SoundHandle,
   StarAudio,
 } from '@/components/world/audio/definingWorldPlazaAudioTypes';
+import type { ManagingWorldPlazaHowlerAudioEngine } from '@/components/world/audio/engine/managingWorldPlazaHowlerAudioEngine';
+import { creatingWorldPlazaHowlerAudioEngine } from '@/components/world/audio/engine/managingWorldPlazaHowlerAudioEngine';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
@@ -42,6 +42,8 @@ let managingWorldPlazaStarAudioLastSfxGroupVolume = Number.NaN;
 let managingWorldPlazaStarAudioNextGaugeRecordAtMs = 0;
 const MANAGING_WORLD_PLAZA_STAR_AUDIO_GAUGE_RECORD_INTERVAL_MS = 250;
 const preloadedWorldPlazaStarAudioManifestKeys = new Set<string>();
+/** Legacy hook preloads stay pinned until pagehide or explicit scope migration. */
+const retainedWorldPlazaLegacyAudioManifestKeys = new Set<string>();
 /** In-flight per-key loads so home + boot + loading music share one Howl. */
 const inflightWorldPlazaStarAudioManifestKeyLoads = new Map<
   string,
@@ -88,7 +90,7 @@ function recordingWorldPlazaStarAudioPerformanceGauges(force = false): void {
   );
   settingWorldPlazaPerformanceDiagnosticsGauge(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.AUDIO_PRELOADED_ASSET_COUNT,
-    preloadedWorldPlazaStarAudioManifestKeys.size
+    managingWorldPlazaStarAudioInstance?.gettingLoadedAssetCount() ?? 0
   );
   settingWorldPlazaPerformanceDiagnosticsGauge(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.AUDIO_INFLIGHT_LOAD_COUNT,
@@ -159,6 +161,7 @@ export function reassertingWorldPlazaStarAudioActiveSfxVolumes(): void {
 
 export type PlayingWorldPlazaStarAudioSfxOptions = {
   volume: number;
+  bus?: 'sfx' | 'ambience';
   rate?: number;
   duration?: number;
   loop?: boolean;
@@ -172,7 +175,13 @@ export type PlayingWorldPlazaStarAudioSfxOptions = {
 export function checkingWorldPlazaStarAudioManifestKeyIsPreloaded(
   manifestKey: string
 ): boolean {
-  return preloadedWorldPlazaStarAudioManifestKeys.has(manifestKey);
+  return (
+    preloadedWorldPlazaStarAudioManifestKeys.has(manifestKey) &&
+    (managingWorldPlazaStarAudioInstance?.checkingManifestKeyIsLoaded(
+      manifestKey
+    ) ??
+      false)
+  );
 }
 
 /**
@@ -210,7 +219,7 @@ export function playingWorldPlazaStarAudioSfx(
 
   const starAudio = ensuringWorldPlazaStarAudioInstance();
   const handle = starAudio.play(id, {
-    group: 'sfx',
+    group: options.bus ?? 'sfx',
     volume: options.volume,
     ...(options.rate !== undefined ? { rate: options.rate } : {}),
     ...(options.loop !== undefined ? { loop: options.loop } : {}),
@@ -303,6 +312,7 @@ function destroyingWorldPlazaStarAudioInstance(): void {
   managingWorldPlazaStarAudioLastSfxGroupVolume = Number.NaN;
   managingWorldPlazaStarAudioNextGaugeRecordAtMs = 0;
   preloadedWorldPlazaStarAudioManifestKeys.clear();
+  retainedWorldPlazaLegacyAudioManifestKeys.clear();
   inflightWorldPlazaStarAudioManifestKeyLoads.clear();
   warmingWorldPlazaStarAudioAssetFetchesByUrl.clear();
   activeWorldPlazaStarAudioPreloadCount = 0;
@@ -543,12 +553,14 @@ function preloadingWorldPlazaStarAudioManifestKey(
   manifestKey: string,
   manifestEntry: Manifest[string]
 ): Promise<void> {
-  if (preloadedWorldPlazaStarAudioManifestKeys.has(manifestKey)) {
+  if (checkingWorldPlazaStarAudioManifestKeyIsPreloaded(manifestKey)) {
     incrementingWorldPlazaPerformanceDiagnosticsCounter(
       DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.AUDIO_PRELOAD_CACHE_HIT
     );
     return Promise.resolve();
   }
+
+  preloadedWorldPlazaStarAudioManifestKeys.delete(manifestKey);
 
   const inflightLoad =
     inflightWorldPlazaStarAudioManifestKeyLoads.get(manifestKey);
@@ -617,7 +629,7 @@ function ensuringWorldPlazaStarAudioInstance(): ManagingWorldPlazaHowlerAudioEng
   return managingWorldPlazaStarAudioInstance;
 }
 
-/** Returns the shared plaza star-audio instance, creating it when needed. */
+/** Returns the shared plaza audio engine, creating it when needed. */
 export function acquiringWorldPlazaStarAudio(): StarAudio {
   managingWorldPlazaStarAudioAcquireCount += 1;
   const starAudio = ensuringWorldPlazaStarAudioInstance();
@@ -626,7 +638,7 @@ export function acquiringWorldPlazaStarAudio(): StarAudio {
 }
 
 /**
- * Releases one plaza star-audio consumer.
+ * Releases one plaza audio consumer.
  *
  * The shared instance stays alive for the page session so React StrictMode
  * remounts cannot tear down Howls still shared by another hook.
@@ -647,8 +659,26 @@ export function releasingWorldPlazaStarAudio(): void {
  * track). Mobile caps parallel key decode so the HTML5 Audio pool cannot stall
  * with neither `onload` nor `onloaderror`.
  */
-export async function preloadingWorldPlazaStarAudioManifest(
-  manifest: Manifest
+function retainingWorldPlazaLegacyAudioManifestKeys(manifest: Manifest): void {
+  const keysToRetain = Object.keys(manifest).filter(
+    (manifestKey) =>
+      preloadedWorldPlazaStarAudioManifestKeys.has(manifestKey) &&
+      !retainedWorldPlazaLegacyAudioManifestKeys.has(manifestKey)
+  );
+
+  if (keysToRetain.length === 0) {
+    return;
+  }
+
+  ensuringWorldPlazaStarAudioInstance().retainingManifestKeys(keysToRetain);
+  keysToRetain.forEach((manifestKey) =>
+    retainedWorldPlazaLegacyAudioManifestKeys.add(manifestKey)
+  );
+}
+
+async function preloadingWorldPlazaAudioManifestInternal(
+  manifest: Manifest,
+  retainForLegacyCaller: boolean
 ): Promise<void> {
   // Boot-only skip lives in `preloadingWorldPlazaWorldBootStarAudio`. This
   // runtime path must still warm keys — play() refuses cold ids, so a global
@@ -658,11 +688,14 @@ export async function preloadingWorldPlazaStarAudioManifest(
   // music) await the shared Howl instead of spawning a second one.
   const pendingEntries = Object.entries(manifest).filter(
     ([manifestKey]) =>
-      !preloadedWorldPlazaStarAudioManifestKeys.has(manifestKey) ||
+      !checkingWorldPlazaStarAudioManifestKeyIsPreloaded(manifestKey) ||
       inflightWorldPlazaStarAudioManifestKeyLoads.has(manifestKey)
   );
 
   if (pendingEntries.length === 0) {
+    if (retainForLegacyCaller) {
+      retainingWorldPlazaLegacyAudioManifestKeys(manifest);
+    }
     return;
   }
 
@@ -700,6 +733,20 @@ export async function preloadingWorldPlazaStarAudioManifest(
   await Promise.all(
     Array.from({ length: concurrency }, () => preloadingNextManifestKeyWorker())
   );
+
+  if (retainForLegacyCaller) {
+    retainingWorldPlazaLegacyAudioManifestKeys(manifest);
+  }
+}
+
+/**
+ * Preloads and page-pins a legacy manifest. New lifecycle-aware callers should
+ * use `retainingWorldPlazaAudioManifest` and release it with their scope.
+ */
+export function preloadingWorldPlazaStarAudioManifest(
+  manifest: Manifest
+): Promise<void> {
+  return preloadingWorldPlazaAudioManifestInternal(manifest, true);
 }
 
 /**
@@ -708,7 +755,7 @@ export async function preloadingWorldPlazaStarAudioManifest(
 export async function retainingWorldPlazaAudioManifest(
   manifest: Manifest
 ): Promise<void> {
-  await preloadingWorldPlazaStarAudioManifest(manifest);
+  await preloadingWorldPlazaAudioManifestInternal(manifest, false);
   ensuringWorldPlazaStarAudioInstance().retainingManifestKeys(
     Object.keys(manifest)
   );

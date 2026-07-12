@@ -63,7 +63,7 @@ For engine wiring (hooks, Pixi ticks, registries, folder layout), see [game-engi
 - Exhaustion fade: from **20%** stamina to **0**, sprint speed lerps toward walk (`DEFINING_WORLD_PLAZA_RUN_STAMINA_EXHAUSTION_FADE_START_RATIO`).
 - Run clip fps scales with current/full run speed (`resolvingWorldPlazaRunAnimationSpeedScale`).
 - Full stamina bar drains in **12.8s** running; refills in **4.5s** resting.
-- Jump costs **6.25%** stamina standing, **8.75%** run jump; roll = **3×** jump cost (~**18.75%**).
+- Jump costs **6.25%** stamina standing, **8.75%** run jump; roll = **1.5×** standing jump cost (**9.375%**).
 - After full empty: **2s** regen delay; action spend pauses regen **600ms**.
 - Fatigue tiers (`fresh` through `collapsed`) gate re-use until bar refills to tier threshold; collapsed needs **15%** before run/jump/roll again.
 - Default jump reach: **4** layers above current standing layer.

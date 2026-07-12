@@ -8,15 +8,6 @@
  * @module components/world/audio/engine/managingWorldPlazaHowlerAudioEngine
  */
 
-import {
-  DEFINING_WORLD_PLAZA_AUDIO_ASSET_EVICTION_GRACE_MS,
-  DEFINING_WORLD_PLAZA_AUDIO_EVICTION_INTERVAL_MS,
-  DEFINING_WORLD_PLAZA_AUDIO_HOWL_POOL_SIZE,
-  DEFINING_WORLD_PLAZA_AUDIO_PERFORMANCE_PROFILE_DESKTOP,
-  DEFINING_WORLD_PLAZA_AUDIO_PERFORMANCE_PROFILE_MOBILE,
-  DEFINING_WORLD_PLAZA_AUDIO_STREAM_PATH_FRAGMENTS,
-  type DefiningWorldPlazaAudioPerformanceProfile,
-} from '@/components/world/audio/engine/definingWorldPlazaAudioEngineConstants';
 import type {
   Manifest,
   SoundHandle,
@@ -27,6 +18,15 @@ import type {
   WorldPlazaAudioManifestEntry,
   WorldPlazaAudioPlayOptions,
 } from '@/components/world/audio/definingWorldPlazaAudioTypes';
+import {
+  DEFINING_WORLD_PLAZA_AUDIO_ASSET_EVICTION_GRACE_MS,
+  DEFINING_WORLD_PLAZA_AUDIO_EVICTION_INTERVAL_MS,
+  DEFINING_WORLD_PLAZA_AUDIO_HOWL_POOL_SIZE,
+  DEFINING_WORLD_PLAZA_AUDIO_PERFORMANCE_PROFILE_DESKTOP,
+  DEFINING_WORLD_PLAZA_AUDIO_PERFORMANCE_PROFILE_MOBILE,
+  DEFINING_WORLD_PLAZA_AUDIO_STREAM_PATH_FRAGMENTS,
+  type DefiningWorldPlazaAudioPerformanceProfile,
+} from '@/components/world/audio/engine/definingWorldPlazaAudioEngineConstants';
 import { checkingWildlifeTextureEvictionMobileViewport } from '@/components/world/wildlife/domains/resolvingWildlifeTextureEvictionProfile';
 import { Howl, Howler } from 'howler';
 
@@ -114,6 +114,14 @@ function checkingWorldPlazaAudioManifestEntryStreams(
     return entry.stream;
   }
 
+  if (
+    typeof entry !== 'string' &&
+    !checkingWorldPlazaAudioManifestEntryIsSourceArray(entry) &&
+    entry.group === 'music'
+  ) {
+    return true;
+  }
+
   return sources.some((source) =>
     DEFINING_WORLD_PLAZA_AUDIO_STREAM_PATH_FRAGMENTS.some((fragment) =>
       source.includes(fragment)
@@ -125,6 +133,22 @@ function resolvingWorldPlazaAudioPerformanceProfile(): DefiningWorldPlazaAudioPe
   return checkingWildlifeTextureEvictionMobileViewport()
     ? DEFINING_WORLD_PLAZA_AUDIO_PERFORMANCE_PROFILE_MOBILE
     : DEFINING_WORLD_PLAZA_AUDIO_PERFORMANCE_PROFILE_DESKTOP;
+}
+
+async function resumingWorldPlazaHowlerContext(): Promise<boolean> {
+  if (!Howler.usingWebAudio) {
+    return true;
+  }
+
+  try {
+    if (Howler.ctx.state !== 'running') {
+      await Howler.ctx.resume();
+    }
+  } catch {
+    return false;
+  }
+
+  return Howler.ctx.state === 'running';
 }
 
 function waitingForWorldPlazaHowlLoad(howl: Howl): Promise<void> {
@@ -171,10 +195,7 @@ export function creatingWorldPlazaHowlerAudioEngine(): ManagingWorldPlazaHowlerA
   const cachedAssets = new Map<string, ManagingWorldPlazaHowlerCachedAsset>();
   const inflightLoads = new Map<string, Promise<void>>();
   const activeVoices = new Map<string, ManagingWorldPlazaHowlerActiveVoice>();
-  const eventListeners = new Map<
-    WorldPlazaAudioEngineEvent,
-    Set<() => void>
-  >();
+  const eventListeners = new Map<WorldPlazaAudioEngineEvent, Set<() => void>>();
   let engineState: WorldPlazaAudioEngineState = 'locked';
   let stateBeforeVisibilitySuspend: WorldPlazaAudioEngineState = 'locked';
   let nextVoiceSequence = 1;
@@ -200,7 +221,10 @@ export function creatingWorldPlazaHowlerAudioEngine(): ManagingWorldPlazaHowlerA
     }
 
     activeVoices.delete(engineVoiceId);
-    voice.asset.activeVoiceCount = Math.max(0, voice.asset.activeVoiceCount - 1);
+    voice.asset.activeVoiceCount = Math.max(
+      0,
+      voice.asset.activeVoiceCount - 1
+    );
     voice.asset.lastUsedAtMs = Date.now();
   };
 
@@ -217,18 +241,25 @@ export function creatingWorldPlazaHowlerAudioEngine(): ManagingWorldPlazaHowlerA
     }
   };
 
-  const freeingSfxVoiceSlot = (priority: number): boolean => {
+  const freeingVoiceSlot = (
+    group: Exclude<WorldPlazaAudioGroup, 'music'>,
+    priority: number
+  ): boolean => {
     pruningInactiveVoices();
     const profile = resolvingWorldPlazaAudioPerformanceProfile();
-    const sfxVoices = [...activeVoices.values()].filter(
-      (voice) => voice.group === 'sfx'
+    const voiceLimit =
+      group === 'ambience'
+        ? profile.maxActiveAmbienceVoices
+        : profile.maxActiveSfxVoices;
+    const groupVoices = [...activeVoices.values()].filter(
+      (voice) => voice.group === group
     );
 
-    if (sfxVoices.length < profile.maxActiveSfxVoices) {
+    if (groupVoices.length < voiceLimit) {
       return true;
     }
 
-    const stealableVoices = sfxVoices
+    const stealableVoices = groupVoices
       .filter((voice) => !voice.loop && voice.priority <= priority)
       .sort(
         (left, right) =>
@@ -395,7 +426,7 @@ export function creatingWorldPlazaHowlerAudioEngine(): ManagingWorldPlazaHowlerA
     const priority = options.priority ?? 0;
     const loop = options.loop ?? false;
 
-    if (group === 'sfx' && !freeingSfxVoiceSlot(priority)) {
+    if (group !== 'music' && !freeingVoiceSlot(group, priority)) {
       return null;
     }
 
@@ -480,7 +511,9 @@ export function creatingWorldPlazaHowlerAudioEngine(): ManagingWorldPlazaHowlerA
     }
 
     if (Howler.usingWebAudio && Howler.ctx.state === 'running') {
-      void Howler.ctx.suspend();
+      void Howler.ctx.suspend().catch(() => {
+        // Visibility state still gates engine playback if suspension fails.
+      });
     }
 
     emitting('suspended');
@@ -489,6 +522,17 @@ export function creatingWorldPlazaHowlerAudioEngine(): ManagingWorldPlazaHowlerA
       hiddenEvictionTimeoutId = null;
       evictingUnusedAssets(true);
     }, profile.hiddenEvictionDelayMs);
+  };
+
+  const resumingVoicesPausedByVisibility = (): void => {
+    for (const voice of activeVoices.values()) {
+      if (!voice.pausedByVisibility) {
+        continue;
+      }
+
+      voice.pausedByVisibility = false;
+      voice.asset.howl.play(voice.soundId);
+    }
   };
 
   const resumingFromVisibility = (): void => {
@@ -502,23 +546,14 @@ export function creatingWorldPlazaHowlerAudioEngine(): ManagingWorldPlazaHowlerA
     }
 
     const resuming = async (): Promise<void> => {
-      if (Howler.usingWebAudio && Howler.ctx.state !== 'running') {
-        await Howler.ctx.resume();
-      }
-
+      const didResumeContext = await resumingWorldPlazaHowlerContext();
       engineState =
-        stateBeforeVisibilitySuspend === 'locked' ? 'locked' : 'running';
-
-      for (const voice of activeVoices.values()) {
-        if (!voice.pausedByVisibility) {
-          continue;
-        }
-
-        voice.pausedByVisibility = false;
-        voice.asset.howl.play(voice.soundId);
-      }
+        stateBeforeVisibilitySuspend === 'locked' || !didResumeContext
+          ? 'locked'
+          : 'running';
 
       if (engineState === 'running') {
+        resumingVoicesPausedByVisibility();
         emitting('resumed');
       }
     };
@@ -572,26 +607,22 @@ export function creatingWorldPlazaHowlerAudioEngine(): ManagingWorldPlazaHowlerA
         return;
       }
 
-      if (Howler.usingWebAudio && Howler.ctx.state !== 'running') {
-        await Howler.ctx.resume();
+      if (!(await resumingWorldPlazaHowlerContext())) {
+        engineState = 'locked';
+        return;
       }
 
       engineState = 'running';
       stateBeforeVisibilitySuspend = 'running';
+      resumingVoicesPausedByVisibility();
       emitting('unlocked');
     },
-    on: (
-      event: WorldPlazaAudioEngineEvent,
-      listener: () => void
-    ): void => {
+    on: (event: WorldPlazaAudioEngineEvent, listener: () => void): void => {
       const listeners = eventListeners.get(event) ?? new Set<() => void>();
       listeners.add(listener);
       eventListeners.set(event, listeners);
     },
-    off: (
-      event: WorldPlazaAudioEngineEvent,
-      listener: () => void
-    ): void => {
+    off: (event: WorldPlazaAudioEngineEvent, listener: () => void): void => {
       eventListeners.get(event)?.delete(listener);
     },
     destroy: (): void => {
@@ -666,9 +697,8 @@ export function creatingWorldPlazaHowlerAudioEngine(): ManagingWorldPlazaHowlerA
       [...cachedAssets.values()].filter((asset) => asset.loaded).length,
     gettingActiveSfxVoiceCount: (): number => {
       pruningInactiveVoices();
-      return [...activeVoices.values()].filter(
-        (voice) => voice.group === 'sfx'
-      ).length;
+      return [...activeVoices.values()].filter((voice) => voice.group === 'sfx')
+        .length;
     },
   };
 

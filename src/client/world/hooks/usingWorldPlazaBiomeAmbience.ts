@@ -1,5 +1,9 @@
 'use client';
 
+import type {
+  SoundHandle,
+  StarAudio,
+} from '@/components/world/audio/definingWorldPlazaAudioTypes';
 import { settingWorldPlazaAudioScope } from '@/components/world/audio/engine/managingWorldPlazaAudioScopeStore';
 import { buildingWorldPlazaBiomeAmbienceStarAudioManifestForClipIds } from '@/components/world/domains/buildingWorldPlazaBiomeAmbienceStarAudioManifest';
 import { computingWorldPlazaBiomeAmbiencePlayback } from '@/components/world/domains/computingWorldPlazaBiomeAmbiencePlayback';
@@ -22,7 +26,6 @@ import { resolvingWorldPlazaBiomeAmbienceStarAudioId } from '@/components/world/
 import { resolvingWorldPlazaBiomeAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { useEffect, useRef } from 'react';
-import type { SoundHandle, StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Loops biome and flowing-water ambience beds that follow the player.
@@ -105,6 +108,7 @@ export function usingWorldPlazaBiomeAmbience(
       const handle = playingWorldPlazaStarAudioSfx(
         resolvingWorldPlazaBiomeAmbienceStarAudioId(clipId),
         {
+          bus: 'ambience',
           loop: true,
           volume,
         }

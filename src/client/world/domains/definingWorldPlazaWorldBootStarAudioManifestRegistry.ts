@@ -1,10 +1,11 @@
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 import {
   buildingWorldPlazaAvatarFootstepBootPriorityStarAudioManifest,
   buildingWorldPlazaAvatarFootstepDeferredStarAudioManifest,
 } from '@/components/world/domains/buildingWorldPlazaAvatarFootstepStarAudioManifest';
 import { buildingWorldPlazaBiomeMusicBootStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaBiomeMusicBootStarAudioManifest';
+import { buildingWorldPlazaGirlSampleVoiceStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaGirlSampleVoiceStarAudioManifest';
 import { checkingWildlifeTextureEvictionMobileViewport } from '@/components/world/wildlife/domains/resolvingWildlifeTextureEvictionProfile';
-import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /** Builds one star-audio preload manifest slice for world boot. */
 export type DefiningWorldPlazaWorldBootStarAudioManifestBuilder =
@@ -14,24 +15,27 @@ export type DefiningWorldPlazaWorldBootStarAudioManifestBuilder =
  * Immediate gameplay feedback warmed before the loading bar completes
  * on desktop / wide viewports.
  *
- * Only continuous music and immediate locomotion block entry. Biome ambience,
- * selected-avatar voice, combat, and nearby wildlife load from scene scopes.
+ * Continuous music, spawn footsteps, and girl-sample voice block entry so
+ * locomotion and avatar reactions are ready on first input. Biome ambience,
+ * combat, and nearby wildlife still load from scene scopes.
  */
 const DEFINING_WORLD_PLAZA_WORLD_BOOT_STAR_AUDIO_DESKTOP_PRIORITY_MANIFEST_BUILDERS: readonly DefiningWorldPlazaWorldBootStarAudioManifestBuilder[] =
   [
     buildingWorldPlazaBiomeMusicBootStarAudioManifest,
     buildingWorldPlazaAvatarFootstepBootPriorityStarAudioManifest,
+    buildingWorldPlazaGirlSampleVoiceStarAudioManifest,
   ];
 
 /**
- * Mobile priority: music + spawn footsteps only. Extra SFX warm in the
- * deferred background slice so HTML5 Audio pool exhaustion cannot soft-lock
- * the bar at ~79%.
+ * Mobile priority: music + spawn footsteps + girl voice. Remaining footstep
+ * surfaces warm in the deferred background slice so HTML5 Audio pool
+ * exhaustion cannot soft-lock the bar at ~79%.
  */
 const DEFINING_WORLD_PLAZA_WORLD_BOOT_STAR_AUDIO_MOBILE_PRIORITY_MANIFEST_BUILDERS: readonly DefiningWorldPlazaWorldBootStarAudioManifestBuilder[] =
   [
     buildingWorldPlazaBiomeMusicBootStarAudioManifest,
     buildingWorldPlazaAvatarFootstepBootPriorityStarAudioManifest,
+    buildingWorldPlazaGirlSampleVoiceStarAudioManifest,
   ];
 
 const DEFINING_WORLD_PLAZA_WORLD_BOOT_STAR_AUDIO_MOBILE_DEFERRED_MANIFEST_BUILDERS: readonly DefiningWorldPlazaWorldBootStarAudioManifestBuilder[] =

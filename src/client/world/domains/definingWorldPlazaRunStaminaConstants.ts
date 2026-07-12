@@ -43,7 +43,7 @@ export const DEFINING_WORLD_PLAZA_JUMP_STAMINA_COST_RATIO = 0.0625;
 export const DEFINING_WORLD_PLAZA_RUN_JUMP_STAMINA_COST_RATIO = 0.0875;
 
 /** Roll dodge stamina cost as a multiple of a standing/walk jump. */
-export const DEFINING_WORLD_PLAZA_ROLL_STAMINA_JUMP_COST_MULTIPLIER = 3;
+export const DEFINING_WORLD_PLAZA_ROLL_STAMINA_JUMP_COST_MULTIPLIER = 1.5;
 
 /** Stamina consumed by a roll dodge (ratio units). */
 export const DEFINING_WORLD_PLAZA_ROLL_STAMINA_COST_RATIO =

@@ -1,5 +1,9 @@
 'use client';
 
+import type {
+  SoundHandle,
+  StarAudio,
+} from '@/components/world/audio/definingWorldPlazaAudioTypes';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   initializingWorldPlazaAmbienceVolumeStoreFromStorage,
@@ -19,7 +23,6 @@ import { computingWorldPlazaCampfireAmbienceEffectiveVolume } from '@/components
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_POLL_INTERVAL_MS } from '@/components/world/fire/domains/definingWorldPlazaCampfireAmbienceConstants';
 import { resolvingWorldPlazaCampfireAmbienceStarAudioId } from '@/components/world/fire/domains/resolvingWorldPlazaCampfireAmbienceStarAudioId';
 import { useEffect, useRef } from 'react';
-import type { SoundHandle, StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 import type { WorldFireDevvitCell } from '../../../../shared/worldFireDevvit';
 
 const DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_CLIP_ID = 'bonfire' as const;
@@ -75,6 +78,7 @@ export function usingWorldPlazaCampfireAmbience(
             DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_CLIP_ID
           ),
           {
+            bus: 'ambience',
             loop: true,
             volume,
           }

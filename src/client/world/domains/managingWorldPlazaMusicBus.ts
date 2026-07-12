@@ -1,14 +1,16 @@
 /**
  * Exclusive plaza music bus.
  *
- * star-audio's `music.crossfadeTo` orphans prior tracks when a new crossfade
- * starts before the previous fade-out timeout fires. This bus owns BGM via
- * SoundHandles so at most one outgoing + one incoming track exist. Mid-fade
- * retargets coalesce to the latest id instead of restarting the blend.
+ * Owns BGM via SoundHandles so at most one outgoing and one incoming track
+ * exist. Mid-fade retargets coalesce instead of restarting the blend.
  *
  * @module components/world/domains/managingWorldPlazaMusicBus
  */
 
+import type {
+  SoundHandle,
+  StarAudio,
+} from '@/components/world/audio/definingWorldPlazaAudioTypes';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
@@ -19,11 +21,10 @@ import {
   incrementingWorldPlazaPerformanceDiagnosticsCounter,
   settingWorldPlazaPerformanceDiagnosticsGauge,
 } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
-import type { SoundHandle, StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 const DEFINING_WORLD_PLAZA_MUSIC_BUS_FADE_TICK_MS = 50;
 
-/** Minimal star-audio surface the music bus needs. */
+/** Minimal shared-audio surface the music bus needs. */
 export type ManagingWorldPlazaMusicBusStarAudio = Pick<StarAudio, 'play'>;
 
 export type CrossfadingWorldPlazaMusicBusToOptions = {
@@ -109,7 +110,7 @@ function applyingWorldPlazaMusicBusHandleVolume(
 }
 
 /**
- * Returns the star-audio id of the track the bus currently treats as active.
+ * Returns the audio manifest id the bus currently treats as active.
  */
 export function gettingWorldPlazaMusicBusActiveStarAudioId(): string | null {
   return managingWorldPlazaMusicBusState.activeStarAudioId;
@@ -118,8 +119,7 @@ export function gettingWorldPlazaMusicBusActiveStarAudioId(): string | null {
 /**
  * Updates the bus target volume and applies it to the active handle only.
  *
- * Avoids star-audio `setMusicVolume`, which stomps every music Howl (including
- * tracks mid fade-out) back to full group gain.
+ * Applies target volume by sound id so a fading track keeps independent gain.
  */
 export function settingWorldPlazaMusicBusTargetVolume(volume: number): void {
   managingWorldPlazaMusicBusState.targetVolume = Math.max(

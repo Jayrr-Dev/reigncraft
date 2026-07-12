@@ -19,27 +19,27 @@ describe('resolvingWorldPlazaWorldBootStarAudioPriorityManifestBuilders', () => 
     );
   });
 
-  it('keeps desktop boot critical to music and footsteps', () => {
+  it('keeps desktop boot critical to music, footsteps, and girl voice', () => {
     vi.mocked(checkingWildlifeTextureEvictionMobileViewport).mockReturnValue(
       false
     );
 
     expect(
       resolvingWorldPlazaWorldBootStarAudioPriorityManifestBuilders()
-    ).toHaveLength(2);
+    ).toHaveLength(3);
     expect(
       resolvingWorldPlazaWorldBootStarAudioDeferredManifestBuilders()
     ).toHaveLength(1);
   });
 
-  it('keeps mobile critical to music and footsteps', () => {
+  it('keeps mobile critical to music, footsteps, and girl voice', () => {
     vi.mocked(checkingWildlifeTextureEvictionMobileViewport).mockReturnValue(
       true
     );
 
     expect(
       resolvingWorldPlazaWorldBootStarAudioPriorityManifestBuilders()
-    ).toHaveLength(2);
+    ).toHaveLength(3);
     expect(
       resolvingWorldPlazaWorldBootStarAudioDeferredManifestBuilders()
     ).toHaveLength(1);

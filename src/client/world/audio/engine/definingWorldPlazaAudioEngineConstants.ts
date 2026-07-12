@@ -6,6 +6,7 @@
 
 export type DefiningWorldPlazaAudioPerformanceProfile = {
   readonly maxActiveSfxVoices: number;
+  readonly maxActiveAmbienceVoices: number;
   readonly maxResidentBufferedAssets: number;
   readonly maxResidentMusicAssets: number;
   readonly hiddenEvictionDelayMs: number;
@@ -14,6 +15,7 @@ export type DefiningWorldPlazaAudioPerformanceProfile = {
 export const DEFINING_WORLD_PLAZA_AUDIO_PERFORMANCE_PROFILE_MOBILE: DefiningWorldPlazaAudioPerformanceProfile =
   {
     maxActiveSfxVoices: 20,
+    maxActiveAmbienceVoices: 6,
     maxResidentBufferedAssets: 40,
     maxResidentMusicAssets: 2,
     hiddenEvictionDelayMs: 30_000,
@@ -22,6 +24,7 @@ export const DEFINING_WORLD_PLAZA_AUDIO_PERFORMANCE_PROFILE_MOBILE: DefiningWorl
 export const DEFINING_WORLD_PLAZA_AUDIO_PERFORMANCE_PROFILE_DESKTOP: DefiningWorldPlazaAudioPerformanceProfile =
   {
     maxActiveSfxVoices: 40,
+    maxActiveAmbienceVoices: 10,
     maxResidentBufferedAssets: 120,
     maxResidentMusicAssets: 2,
     hiddenEvictionDelayMs: 30_000,

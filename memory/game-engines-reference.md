@@ -18,7 +18,7 @@ Player-facing numbers and behavior rules: [game-mechanics-reference.md](./game-m
 | Avatar boot texture gate                   | `preloadingWorldPlazaBootAvatarTextures.ts`                          |
 | Import alias                               | `@/components/world/...`, `@/components/inventory/...`               |
 | Wildlife public API                        | `@/components/world/wildlife` → `src/client/world/wildlife/index.ts` |
-| Howler audio engine                        | `src/client/world/audio/engine/`                                    |
+| Howler audio engine                        | `src/client/world/audio/engine/`                                     |
 | Exclusive BGM bus (no overlapping tracks)  | `managingWorldPlazaMusicBus.ts` (home / loading / biome hooks)       |
 | Declarative style rules                    | `.cursor/rules/declarative-code.mdc`                                 |
 
@@ -48,20 +48,20 @@ In this codebase, **engine** means a self-contained subsystem with declarative c
 
 **Purpose:** One page-session Howler engine for bounded download/decode, per-instance voices, streaming music/ambience, cache eviction, visibility suspension, and exclusive BGM.
 
-| Piece | Path |
-| ----- | ---- |
-| Compatibility facade | `src/client/world/domains/managingWorldPlazaStarAudio.ts` |
-| Howler engine | `src/client/world/audio/engine/managingWorldPlazaHowlerAudioEngine.ts` |
-| Local contracts | `src/client/world/audio/definingWorldPlazaAudioTypes.ts` |
-| Runtime budgets | `src/client/world/audio/engine/definingWorldPlazaAudioEngineConstants.ts` |
-| Ref-counted scopes | `src/client/world/audio/engine/managingWorldPlazaAudioScopeStore.ts` |
-| App audio statechart | `src/client/world/audio/lifecycle/definingWorldPlazaAudioLifecycleMachine.ts` |
-| Session audio gate | `src/client/world/audio/lifecycle/managingWorldPlazaSessionAudioLoadingStore.ts` |
-| Exclusive BGM | `src/client/world/domains/managingWorldPlazaMusicBus.ts` |
+| Piece                | Path                                                                             |
+| -------------------- | -------------------------------------------------------------------------------- |
+| Compatibility facade | `src/client/world/domains/managingWorldPlazaStarAudio.ts`                        |
+| Howler engine        | `src/client/world/audio/engine/managingWorldPlazaHowlerAudioEngine.ts`           |
+| Local contracts      | `src/client/world/audio/definingWorldPlazaAudioTypes.ts`                         |
+| Runtime budgets      | `src/client/world/audio/engine/definingWorldPlazaAudioEngineConstants.ts`        |
+| Ref-counted scopes   | `src/client/world/audio/engine/managingWorldPlazaAudioScopeStore.ts`             |
+| App audio statechart | `src/client/world/audio/lifecycle/definingWorldPlazaAudioLifecycleMachine.ts`    |
+| Session audio gate   | `src/client/world/audio/lifecycle/managingWorldPlazaSessionAudioLoadingStore.ts` |
+| Exclusive BGM        | `src/client/world/domains/managingWorldPlazaMusicBus.ts`                         |
 
-**Lifecycle:** Home loads title/UI only. Session start begins critical music + spawn footsteps beside world code/texture loading. Current biome music and ambience use replaceable scopes. Wildlife vocals load from species currently present in the simulation store instead of loading the full catalog. Exit-to-home releases every `world:` scope. Hidden tabs suspend voices and force unused-asset eviction after 30 seconds; `pagehide` destroys all Howls.
+**Lifecycle:** Home loads title/UI only. Session start begins critical music + spawn footsteps + girl-sample voice beside world code/texture loading. Current biome music and ambience use replaceable scopes. Wildlife vocals load from species currently present in the simulation store instead of loading the full catalog. Exit-to-home releases every `world:` scope. Hidden tabs suspend voices and force unused-asset eviction after 30 seconds; `pagehide` destroys all Howls.
 
-**Budgets:** Warm fetch concurrency mobile/desktop **3/10**; Howler load concurrency **2/3**. Active SFX voices **20/40**. Buffered resident keys **40/120**. Music streams max **2**. Voice stealing chooses lowest priority, then quietest, then oldest non-loop voice.
+**Budgets:** Warm fetch concurrency mobile/desktop **3/10**; Howler load concurrency **2/3**. Active SFX voices **20/40** and ambience voices **6/10**. Buffered resident keys **40/120**. Music streams max **2**. Voice stealing chooses lowest priority, then quietest, then oldest non-loop voice.
 
 **Playback rule:** Domain code supplies semantic ids and effective volume. Engine owns `Howl` and always changes volume by Howler `soundId`; never set per-play gain through Howl-wide volume. Music and long ambience use HTML5 streaming; short SFX use Web Audio.
 

@@ -6,7 +6,7 @@
  * @module components/world/audio/definingWorldPlazaAudioTypes
  */
 
-export type WorldPlazaAudioGroup = 'music' | 'sfx';
+export type WorldPlazaAudioGroup = 'music' | 'ambience' | 'sfx';
 
 export type WorldPlazaAudioManifestObjectEntry = {
   readonly src?: string | readonly string[];
@@ -22,15 +22,9 @@ export type WorldPlazaAudioManifestEntry =
 
 export type Manifest = Record<string, WorldPlazaAudioManifestEntry>;
 
-export type WorldPlazaAudioEngineState =
-  | 'locked'
-  | 'running'
-  | 'suspended';
+export type WorldPlazaAudioEngineState = 'locked' | 'running' | 'suspended';
 
-export type WorldPlazaAudioEngineEvent =
-  | 'unlocked'
-  | 'suspended'
-  | 'resumed';
+export type WorldPlazaAudioEngineEvent = 'unlocked' | 'suspended' | 'resumed';
 
 export type WorldPlazaAudioPlayOptions = {
   readonly group?: WorldPlazaAudioGroup;
@@ -57,13 +51,7 @@ export type StarAudio = {
   preload: (manifest: Manifest) => Promise<void>;
   setSfxVolume: (volume: number) => void;
   unlock: () => Promise<void>;
-  on: (
-    event: WorldPlazaAudioEngineEvent,
-    listener: () => void
-  ) => void;
-  off: (
-    event: WorldPlazaAudioEngineEvent,
-    listener: () => void
-  ) => void;
+  on: (event: WorldPlazaAudioEngineEvent, listener: () => void) => void;
+  off: (event: WorldPlazaAudioEngineEvent, listener: () => void) => void;
   destroy: () => void;
 };

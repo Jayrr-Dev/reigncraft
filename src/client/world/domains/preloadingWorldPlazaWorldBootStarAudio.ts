@@ -77,11 +77,11 @@ async function preloadingWorldPlazaStarAudioManifestBuilders(
 }
 
 /**
- * Warms plaza sounds through star-audio during world boot.
+ * Warms critical plaza sounds through the shared Howler engine during boot.
  *
  * Priority slices block the loading bar (with a per-slice timeout so a hung
  * Howler load cannot soft-lock mobile at ~79%). Deferred slices continue in
- * the background so footsteps and music stay first.
+ * the background so music, footsteps, and girl voice stay first.
  */
 export async function preloadingWorldPlazaWorldBootStarAudio(
   reportProgress: PreloadingWorldPlazaWorldBootStarAudioProgressReporter
