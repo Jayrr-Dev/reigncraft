@@ -33,7 +33,6 @@ import {
   writingWorldPlazaInventoryKingpinTestSeedVersion,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryKingpinTestSeed';
 import { movingWorldPlazaInventoryItemToSlot } from '@/components/world/inventory/domains/movingWorldPlazaInventoryItemToSlot';
-import { ensuringWorldPlazaInventoryHudModeTools } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryHudModeTools';
 import { normalizingWorldPlazaInventoryWeaponToolSlot } from '@/components/world/inventory/domains/normalizingWorldPlazaInventoryWeaponToolSlot';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { notifyingWorldPlazaInventoryItemMoved } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemMoved';
@@ -295,9 +294,8 @@ export function usingWorldPlazaInventory(
 
     if (!hasNormalizedWeaponToolSlotRef.current) {
       hasNormalizedWeaponToolSlotRef.current = true;
-      const normalizedState = ensuringWorldPlazaInventoryHudModeTools(
-        normalizingWorldPlazaInventoryWeaponToolSlot(state)
-      );
+      const normalizedState =
+        normalizingWorldPlazaInventoryWeaponToolSlot(state);
 
       if (normalizedState !== state) {
         setState(normalizedState);

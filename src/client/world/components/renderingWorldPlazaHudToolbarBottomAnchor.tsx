@@ -1,14 +1,18 @@
 'use client';
 
 /**
- * Shared bottom-center anchor for mode panels stacked above the inventory hotbar.
+ * Shared bottom-center anchor for HUD toolbar mode badges and hotbar bodies.
  *
  * @module components/world/components/renderingWorldPlazaHudToolbarBottomAnchor
  */
 
 import { ProvidingWorldPlazaViewportHudScale } from '@/components/world/components/providingWorldPlazaViewportHudScale';
+import { RenderingWorldPlazaHudToolbarModeBadges } from '@/components/world/components/renderingWorldPlazaHudToolbarModeBadges';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
-import { STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_STACK_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
+import {
+  STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_STACK_CLASS_NAME,
+  type DefiningWorldPlazaHudToolbarModeId,
+} from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
 import { resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles } from '@/components/world/domains/resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles';
 import { STYLING_WORLD_PLAZA_INVENTORY_LIGHT_THEME_SCOPE_CLASS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { resolvingWorldPlazaInventoryHotbarDeviceScale } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarDeviceScale';
@@ -17,23 +21,26 @@ import { cn } from '@/lib/utils';
 import { useMemo, type ReactNode } from 'react';
 
 export type RenderingWorldPlazaHudToolbarBottomAnchorProps = {
+  readonly activeMode: DefiningWorldPlazaHudToolbarModeId;
+  readonly onSelectMode: (mode: DefiningWorldPlazaHudToolbarModeId) => void;
+  readonly isEditEnabled: boolean;
   readonly viewportHudScale?: number;
   readonly isMobile?: boolean;
   readonly isFullscreen?: boolean;
-  /** Optional Craft / Build / Claim panel above the always-visible hotbar. */
-  readonly modeBody?: ReactNode;
   readonly children: ReactNode;
 };
 
 /**
- * Bottom-center stack: optional mode body above the inventory hotbar.
- * Stack width locks to the inventory hotbar shell.
+ * Bottom-center stack: mode badges above the active toolbar body.
+ * Stack width locks to the inventory hotbar shell so every mode body matches.
  */
 export function RenderingWorldPlazaHudToolbarBottomAnchor({
+  activeMode,
+  onSelectMode,
+  isEditEnabled,
   viewportHudScale = 1,
   isMobile = false,
   isFullscreen = false,
-  modeBody = null,
   children,
 }: RenderingWorldPlazaHudToolbarBottomAnchorProps): React.JSX.Element {
   const hotbarViewportHudScale = useMemo(
@@ -80,11 +87,11 @@ export function RenderingWorldPlazaHudToolbarBottomAnchor({
           className={STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_STACK_CLASS_NAME}
           style={bottomStackStyle}
         >
-          {modeBody ? (
-            <div className="pointer-events-auto flex w-full flex-col items-stretch">
-              {modeBody}
-            </div>
-          ) : null}
+          <RenderingWorldPlazaHudToolbarModeBadges
+            activeMode={activeMode}
+            onSelectMode={onSelectMode}
+            isEditEnabled={isEditEnabled}
+          />
           <div className="pointer-events-auto flex w-full flex-col items-stretch">
             {children}
           </div>

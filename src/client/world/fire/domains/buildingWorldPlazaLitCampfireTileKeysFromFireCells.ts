@@ -13,7 +13,11 @@ export function buildingWorldPlazaLitCampfireTileKeysFromFireCells(
   const litCampfireTileKeys = new Set<string>();
 
   for (const cell of fireCells) {
-    if (cell.kind !== 'campfire' || cell.fuelRemainingMs <= 0) {
+    if (
+      cell.kind !== 'campfire' ||
+      !Number.isFinite(cell.fuelRemainingMs) ||
+      cell.fuelRemainingMs <= 0
+    ) {
       continue;
     }
 

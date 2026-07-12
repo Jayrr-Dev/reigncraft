@@ -20,17 +20,9 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT =
   'world-plaza-flint' as const;
 
-/** Build tool item type id (equip to open build mode). */
+/** Build tool item type id. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL =
   'world-plaza-tool' as const;
-
-/** Craft tool item type id (equip to open craft mode). */
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CRAFT_TOOL =
-  'world-plaza-craft-tool' as const;
-
-/** Claim tool item type id (equip to open claim mode). */
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLAIM_TOOL =
-  'world-plaza-claim-tool' as const;
 
 /** Wood axe item type id. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE =

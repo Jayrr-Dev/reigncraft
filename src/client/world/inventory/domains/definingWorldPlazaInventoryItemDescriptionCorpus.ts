@@ -13,8 +13,6 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLAIM_TOOL,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CRAFT_TOOL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SOULCORE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
@@ -41,15 +39,7 @@ const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DESCRIPTION_STATIC_ENTRIES: readonly D
   [
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
-      description: 'Equip in the fist slot to build',
-    },
-    {
-      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CRAFT_TOOL,
-      description: 'Equip in the fist slot to craft',
-    },
-    {
-      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLAIM_TOOL,
-      description: 'Equip in the fist slot to claim land',
+      description: 'Building tool',
     },
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,

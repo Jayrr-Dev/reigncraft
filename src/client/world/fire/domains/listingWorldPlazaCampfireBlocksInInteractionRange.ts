@@ -28,6 +28,7 @@ function findingWorldPlazaCampfireFireCellAtBlock(
     fireCells.find(
       (cell) =>
         cell.kind === 'campfire' &&
+        cell.fuelRemainingMs > 0 &&
         cell.tileX === block.tilePosition.tileX &&
         cell.tileY === block.tilePosition.tileY &&
         cell.worldLayer === worldLayer

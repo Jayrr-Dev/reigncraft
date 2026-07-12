@@ -51,8 +51,14 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_NIGHT_COOLING_CELSIUS = 8;
 /** Lava tile local temperature (°C). */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_LAVA_CELSIUS = 920;
 
-/** Campfire standing-tile temperature (°C). */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS = 55;
+/**
+ * Campfire standing-tile temperature (°C).
+ *
+ * Kept at comfort high so a lit pit warms cold biomes via neighbor averaging
+ * without dealing standing heat DoT. Unlit pits emit no heat (lit fire cells only).
+ */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS =
+  DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS;
 
 /** Ice block standing-tile temperature (°C). Freezes nearby surface water. */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_ICE_BLOCK_CELSIUS = -22;

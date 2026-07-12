@@ -228,7 +228,9 @@ function filteringWorldPlazaFireLayerCells(
   fireCells: readonly WorldFireDevvitCell[]
 ): readonly WorldFireDevvitCell[] {
   return fireCells.filter(
-    (cell) => cell.kind === 'spreading' || cell.kind === 'campfire'
+    (cell) =>
+      cell.kind === 'spreading' ||
+      (cell.kind === 'campfire' && cell.fuelRemainingMs > 0)
   );
 }
 

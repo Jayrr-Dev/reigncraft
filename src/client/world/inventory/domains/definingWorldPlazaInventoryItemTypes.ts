@@ -24,8 +24,6 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLAIM_TOOL,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CRAFT_TOOL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EXPEDITION_BAG,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISH,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_WOOD,
@@ -59,8 +57,6 @@ export {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLAIM_TOOL,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CRAFT_TOOL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EXPEDITION_BAG,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PACK,
@@ -112,11 +108,11 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     },
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
-      name: 'Build',
+      name: 'Build Tool',
       rarity: 'common',
       iconifyIcon: 'mdi:hammer',
       maxStack: 1,
-      isDroppable: false,
+      isDroppable: true,
       isStackable: false,
       equipment: {
         toolKinds: ['build'],
@@ -130,32 +126,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
         DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_STEADY_GRIP,
         DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_BLUEPRINT_FLASH,
       ],
-    },
-    {
-      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CRAFT_TOOL,
-      name: 'Craft',
-      rarity: 'common',
-      iconifyIcon: 'game-icons:anvil',
-      maxStack: 1,
-      isDroppable: false,
-      isStackable: false,
-      equipment: {
-        toolKinds: ['craft'],
-        harvestSpeedMultiplier: 1,
-      },
-    },
-    {
-      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLAIM_TOOL,
-      name: 'Claim',
-      rarity: 'common',
-      iconifyIcon: 'mdi:land-plots',
-      maxStack: 1,
-      isDroppable: false,
-      isStackable: false,
-      equipment: {
-        toolKinds: ['claim'],
-        harvestSpeedMultiplier: 1,
-      },
     },
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
@@ -296,15 +266,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS: readonly DefiningWo
       quantity: 2,
     },
     {
-      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CRAFT_TOOL,
-      quantity: 1,
-    },
-    {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
-      quantity: 1,
-    },
-    {
-      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLAIM_TOOL,
       quantity: 1,
     },
     {

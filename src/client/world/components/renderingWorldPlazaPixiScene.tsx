@@ -1070,6 +1070,17 @@ function RenderingWorldPlazaPixiSceneConnected({
     refetchingPlots,
   });
 
+  const { hudToolbarMode, selectingHudToolbarMode } =
+    usingWorldPlazaHudToolbarMode({
+      isEditSessionActive,
+      isBlockBuildModeActive,
+      isClaimModeActive,
+      isBuildModeEnabled,
+      togglingEditSession,
+      activatingBuildMode,
+      activatingClaimMode,
+    });
+
   const isProjectileEngineEnabled =
     isPlazaProjectileSessionActive &&
     isLocalGameplayEnabled &&
@@ -1272,16 +1283,6 @@ function RenderingWorldPlazaPixiSceneConnected({
   });
 
   const equipment = usingWorldPlazaEquipment({ inventoryState });
-  const equippedItemTypeId =
-    inventoryState.slots[equipment.selectedSlotIndex]?.itemTypeId ?? null;
-  const { hudToolbarMode } = usingWorldPlazaHudToolbarMode({
-    equippedItemTypeId,
-    isEditSessionActive,
-    isBuildModeEnabled,
-    togglingEditSession,
-    activatingBuildMode,
-    activatingClaimMode,
-  });
   const equippedHeldItemPresentationRef =
     useRef<DefiningWorldPlazaHeldItemPresentation | null>(null);
 
@@ -4283,14 +4284,6 @@ function RenderingWorldPlazaPixiSceneConnected({
     viewportHudScale,
   ]);
 
-  const hudToolbarModeBody = useMemo(() => {
-    if (hudToolbarMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CRAFT) {
-      return <RenderingWorldPlazaHudToolbarCraftModePanel />;
-    }
-
-    return hudToolbarEditModeHotbar;
-  }, [hudToolbarEditModeHotbar, hudToolbarMode]);
-
   const handlingPlazaHostPointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>): void => {
       if (isChatOpenRef.current) {
@@ -5566,26 +5559,36 @@ function RenderingWorldPlazaPixiSceneConnected({
                 <>
                   {hudToolbarEditModePlotCapacityMetric}
                   <RenderingWorldPlazaHudToolbarBottomAnchor
+                    activeMode={hudToolbarMode}
+                    onSelectMode={selectingHudToolbarMode}
+                    isEditEnabled={isBuildModeEnabled}
                     viewportHudScale={viewportHudScale}
                     isMobile={hudIsMobile}
                     isFullscreen={hudIsFullscreen}
-                    modeBody={hudToolbarModeBody}
                   >
-                    <RenderingWorldPlazaInventoryHotbar
-                      onlineUserId={onlineUserId}
-                      viewportHudScale={viewportHudScale}
-                      isMobile={hudIsMobile}
-                      isFullscreen={hudIsFullscreen}
-                      isEmbeddedInHudToolbarStack
-                      inventoryDropPlacement={inventoryDropPlacement}
-                      selectedSlotIndex={equipment.selectedSlotIndex}
-                      onSelectHotbarSlot={equipment.selectingHotbarSlot}
-                      onEatHotbarSlot={handlingEatHotbarSlot}
-                      onUseActiveEnchantment={handlingUseActiveEnchantment}
-                      playerEffectiveMaxHealth={
-                        playerHealthHudSnapshot.effectiveMaxHealth
-                      }
-                    />
+                    {hudToolbarMode ===
+                    DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS ? (
+                      <RenderingWorldPlazaInventoryHotbar
+                        onlineUserId={onlineUserId}
+                        viewportHudScale={viewportHudScale}
+                        isMobile={hudIsMobile}
+                        isFullscreen={hudIsFullscreen}
+                        isEmbeddedInHudToolbarStack
+                        inventoryDropPlacement={inventoryDropPlacement}
+                        selectedSlotIndex={equipment.selectedSlotIndex}
+                        onSelectHotbarSlot={equipment.selectingHotbarSlot}
+                        onEatHotbarSlot={handlingEatHotbarSlot}
+                        onUseActiveEnchantment={handlingUseActiveEnchantment}
+                        playerEffectiveMaxHealth={
+                          playerHealthHudSnapshot.effectiveMaxHealth
+                        }
+                      />
+                    ) : null}
+                    {hudToolbarMode ===
+                    DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CRAFT ? (
+                      <RenderingWorldPlazaHudToolbarCraftModePanel />
+                    ) : null}
+                    {hudToolbarEditModeHotbar}
                   </RenderingWorldPlazaHudToolbarBottomAnchor>
                   <RenderingWorldPlazaGroundItems
                     onlineUserId={onlineUserId}
@@ -5677,28 +5680,38 @@ function RenderingWorldPlazaPixiSceneConnected({
                 <>
                   {hudToolbarEditModePlotCapacityMetric}
                   <RenderingWorldPlazaHudToolbarBottomAnchor
+                    activeMode={hudToolbarMode}
+                    onSelectMode={selectingHudToolbarMode}
+                    isEditEnabled={isBuildModeEnabled}
                     viewportHudScale={viewportHudScale}
                     isMobile={hudIsMobile}
                     isFullscreen={hudIsFullscreen}
-                    modeBody={hudToolbarModeBody}
                   >
-                    <RenderingWorldPlazaInventoryHotbar
-                      localPersistenceOwnerId={localPersistenceOwnerId}
-                      redditUserId={redditUserId}
-                      saveSlotIndex={singlePlayerSaveSlotIndex}
-                      viewportHudScale={viewportHudScale}
-                      isMobile={hudIsMobile}
-                      isFullscreen={hudIsFullscreen}
-                      isEmbeddedInHudToolbarStack
-                      inventoryDropPlacement={inventoryDropPlacement}
-                      selectedSlotIndex={equipment.selectedSlotIndex}
-                      onSelectHotbarSlot={equipment.selectingHotbarSlot}
-                      onEatHotbarSlot={handlingEatHotbarSlot}
-                      onUseActiveEnchantment={handlingUseActiveEnchantment}
-                      playerEffectiveMaxHealth={
-                        playerHealthHudSnapshot.effectiveMaxHealth
-                      }
-                    />
+                    {hudToolbarMode ===
+                    DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS ? (
+                      <RenderingWorldPlazaInventoryHotbar
+                        localPersistenceOwnerId={localPersistenceOwnerId}
+                        redditUserId={redditUserId}
+                        saveSlotIndex={singlePlayerSaveSlotIndex}
+                        viewportHudScale={viewportHudScale}
+                        isMobile={hudIsMobile}
+                        isFullscreen={hudIsFullscreen}
+                        isEmbeddedInHudToolbarStack
+                        inventoryDropPlacement={inventoryDropPlacement}
+                        selectedSlotIndex={equipment.selectedSlotIndex}
+                        onSelectHotbarSlot={equipment.selectingHotbarSlot}
+                        onEatHotbarSlot={handlingEatHotbarSlot}
+                        onUseActiveEnchantment={handlingUseActiveEnchantment}
+                        playerEffectiveMaxHealth={
+                          playerHealthHudSnapshot.effectiveMaxHealth
+                        }
+                      />
+                    ) : null}
+                    {hudToolbarMode ===
+                    DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CRAFT ? (
+                      <RenderingWorldPlazaHudToolbarCraftModePanel />
+                    ) : null}
+                    {hudToolbarEditModeHotbar}
                   </RenderingWorldPlazaHudToolbarBottomAnchor>
                   <RenderingWorldPlazaGroundItems
                     localPersistenceOwnerId={localPersistenceOwnerId}
