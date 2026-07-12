@@ -5,7 +5,7 @@
  */
 
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
+import { findingWildlifeGroundFoodItemById } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodWorldPoint';
 
 function clearingWildlifeHunterKillFeeding(
@@ -39,15 +39,18 @@ export function advancingWildlifeHunterKillFeedingTick(
     return clearingWildlifeHunterKillFeeding(instance);
   }
 
-  const groundItem = listingWildlifeGroundFoodItems(nowMs).find(
-    (entry) => entry.id === groundItemId
-  );
+  const groundItem = findingWildlifeGroundFoodItemById(groundItemId, nowMs);
 
   if (!groundItem || groundItem.quantity <= 0) {
     return clearingWildlifeHunterKillFeeding(instance);
   }
 
   const targetPoint = resolvingWildlifeGroundFoodWorldPoint(groundItem);
+  const pendingBite = instance.aiState.pendingGroundFoodBite;
+  const remappedPendingBite =
+    pendingBite && pendingBite.groundItemId !== groundItem.id
+      ? { ...pendingBite, groundItemId: groundItem.id }
+      : pendingBite;
 
   return {
     ...instance,
@@ -58,9 +61,11 @@ export function advancingWildlifeHunterKillFeedingTick(
     },
     aiState: {
       ...instance.aiState,
+      feedingOnKillGroundItemId: groundItem.id,
+      pendingGroundFoodBite: remappedPendingBite,
       intent: {
         mode: 'forageEat',
-        targetGroundItemId: groundItemId,
+        targetGroundItemId: groundItem.id,
         targetPoint,
       },
       chargeWindupStartedAtMs: null,

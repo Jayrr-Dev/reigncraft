@@ -1303,6 +1303,18 @@ export function advancingWildlifeSimulationTick({
 
       const isSleeping = nextInstance.aiState.isSleeping;
 
+      const hasHunterKillFeedingLock =
+        nextInstance.aiState.feedingOnKillUntilMs !== null ||
+        nextInstance.aiState.feedingOnKillGroundItemId !== null;
+
+      // Advance (or clear on expiry / missing meat) before reading the live lock.
+      if (hasHunterKillFeedingLock) {
+        nextInstance = advancingWildlifeHunterKillFeedingTick(
+          nextInstance,
+          nowMs
+        );
+      }
+
       const isFeedingOnKill = checkingWildlifeIsFeedingOnKill(
         nextInstance,
         nowMs
@@ -1361,13 +1373,6 @@ export function advancingWildlifeSimulationTick({
           previousIntentMode,
           nextIntentMode: fleeIntent.mode,
         });
-      }
-
-      if (isFeedingOnKill) {
-        nextInstance = advancingWildlifeHunterKillFeedingTick(
-          nextInstance,
-          nowMs
-        );
       }
 
       const proximityNeighbors =

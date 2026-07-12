@@ -19,7 +19,7 @@ import type {
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
   consumingWildlifeGroundFoodBridgeUnit,
-  listingWildlifeGroundFoodItems,
+  findingWildlifeGroundFoodItemById,
 } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { refillingWildlifeHungerAfterGroundFood } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundFood';
 import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodWorldPoint';
@@ -72,14 +72,13 @@ export function applyingWildlifeGroundFoodBite(
   groundItemId: string,
   nowMs: number
 ): DefiningWildlifeInstance {
-  const groundItem = listingWildlifeGroundFoodItems(nowMs).find(
-    (entry) => entry.id === groundItemId
-  );
+  const groundItem = findingWildlifeGroundFoodItemById(groundItemId, nowMs);
 
   if (!groundItem || groundItem.quantity <= 0) {
     return clearingWildlifePendingGroundFoodBite(instance);
   }
 
+  const canonicalGroundItemId = groundItem.id;
   const targetPoint = resolvingWildlifeGroundFoodWorldPoint(groundItem);
   const distance = Math.hypot(
     instance.position.x - targetPoint.x,
@@ -91,22 +90,29 @@ export function applyingWildlifeGroundFoodBite(
   }
 
   const pendingBite = instance.aiState.pendingGroundFoodBite;
+  const pendingMatchesStack =
+    pendingBite !== null &&
+    (pendingBite.groundItemId === canonicalGroundItemId ||
+      pendingBite.groundItemId === groundItemId);
 
   // Start (or restart on stack switch) the chew timer for one unit.
-  if (pendingBite === null || pendingBite.groundItemId !== groundItemId) {
+  if (!pendingMatchesStack || pendingBite === null) {
     return applyingWildlifeIdleChewStance(instance, {
-      groundItemId,
+      groundItemId: canonicalGroundItemId,
       startedAtMs: nowMs,
       readyAtMs: nowMs + rollingWildlifeGroundFoodBiteDelayMs(),
     });
   }
 
   if (nowMs < pendingBite.readyAtMs) {
-    return applyingWildlifeIdleChewStance(instance, pendingBite);
+    return applyingWildlifeIdleChewStance(instance, {
+      ...pendingBite,
+      groundItemId: canonicalGroundItemId,
+    });
   }
 
   const consumed = consumingWildlifeGroundFoodBridgeUnit(
-    groundItemId,
+    canonicalGroundItemId,
     instance.position
   );
 

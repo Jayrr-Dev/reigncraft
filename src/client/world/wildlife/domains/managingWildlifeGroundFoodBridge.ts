@@ -20,6 +20,8 @@ export type ManagingWildlifeGroundFoodBridge = {
 let managingWildlifeGroundFoodBridge: ManagingWildlifeGroundFoodBridge | null =
   null;
 let wildlifeEphemeralGroundFoodItems: DefiningWorldPlazaGroundItem[] = [];
+/** Previous ephemeral ids → canonical ids after persist remaps. */
+let wildlifeEphemeralGroundFoodIdAliases = new Map<string, string>();
 
 function resolvingDistanceGrid(
   a: DefiningWorldPlazaWorldPoint,
@@ -38,12 +40,34 @@ function resolvingEphemeralGroundFoodWorldPoint(
   };
 }
 
+/**
+ * Follows persist remaps so hunters still find meat after the stack id changes.
+ */
+export function resolvingWildlifeGroundFoodCanonicalItemId(
+  groundItemId: string
+): string {
+  let current = groundItemId;
+  const seen = new Set<string>();
+
+  while (wildlifeEphemeralGroundFoodIdAliases.has(current)) {
+    if (seen.has(current)) {
+      break;
+    }
+
+    seen.add(current);
+    current = wildlifeEphemeralGroundFoodIdAliases.get(current) ?? current;
+  }
+
+  return current;
+}
+
 function consumingWildlifeEphemeralGroundFoodUnit(
   groundItemId: string,
   consumerPosition: DefiningWorldPlazaWorldPoint
 ): boolean {
+  const canonicalId = resolvingWildlifeGroundFoodCanonicalItemId(groundItemId);
   const itemIndex = wildlifeEphemeralGroundFoodItems.findIndex(
-    (entry) => entry.id === groundItemId
+    (entry) => entry.id === canonicalId
   );
 
   if (itemIndex < 0) {
@@ -67,7 +91,7 @@ function consumingWildlifeEphemeralGroundFoodUnit(
 
   if (item.quantity <= 1) {
     wildlifeEphemeralGroundFoodItems = wildlifeEphemeralGroundFoodItems.filter(
-      (entry) => entry.id !== groundItemId
+      (entry) => entry.id !== canonicalId
     );
   } else {
     wildlifeEphemeralGroundFoodItems = wildlifeEphemeralGroundFoodItems.map(
@@ -89,6 +113,7 @@ export function registeringWildlifeGroundFoodBridge(
 /** Clears ephemeral kill-meat stacks (tests / sim teardown). */
 export function clearingWildlifeEphemeralGroundFoodItems(): void {
   wildlifeEphemeralGroundFoodItems = [];
+  wildlifeEphemeralGroundFoodIdAliases = new Map();
 }
 
 /** Adds a corpse-meat stack visible to wildlife AI before React state catches up. */
@@ -108,6 +133,10 @@ export function replacingWildlifeEphemeralGroundFoodItemId(
   previousGroundItemId: string,
   nextGroundItemId: string
 ): void {
+  if (previousGroundItemId === nextGroundItemId) {
+    return;
+  }
+
   const existing = wildlifeEphemeralGroundFoodItems.find(
     (entry) => entry.id === previousGroundItemId
   );
@@ -122,6 +151,10 @@ export function replacingWildlifeEphemeralGroundFoodItemId(
     ),
     { ...existing, id: nextGroundItemId },
   ];
+  wildlifeEphemeralGroundFoodIdAliases.set(
+    previousGroundItemId,
+    nextGroundItemId
+  );
 }
 
 /** Lists ground items visible to the wildlife simulation this frame. */
@@ -143,11 +176,27 @@ export function listingWildlifeGroundFoodItems(
   return [...persistedItems, ...ephemeralOnly];
 }
 
+/** Looks up a ground stack by id, following ephemeral → persisted remaps. */
+export function findingWildlifeGroundFoodItemById(
+  groundItemId: string,
+  nowMs: number = Date.now()
+): DefiningWorldPlazaGroundItem | null {
+  const canonicalId = resolvingWildlifeGroundFoodCanonicalItemId(groundItemId);
+
+  return (
+    listingWildlifeGroundFoodItems(nowMs).find(
+      (entry) => entry.id === canonicalId
+    ) ?? null
+  );
+}
+
 function checkingWildlifeGroundFoodItemIsPersisted(
   groundItemId: string
 ): boolean {
+  const canonicalId = resolvingWildlifeGroundFoodCanonicalItemId(groundItemId);
+
   return (managingWildlifeGroundFoodBridge?.listGroundItems() ?? []).some(
-    (entry) => entry.id === groundItemId
+    (entry) => entry.id === canonicalId
   );
 }
 
@@ -156,23 +205,25 @@ export function consumingWildlifeGroundFoodBridgeUnit(
   groundItemId: string,
   consumerPosition: DefiningWorldPlazaWorldPoint
 ): boolean {
-  if (!checkingWildlifeGroundFoodItemIsPersisted(groundItemId)) {
+  const canonicalId = resolvingWildlifeGroundFoodCanonicalItemId(groundItemId);
+
+  if (!checkingWildlifeGroundFoodItemIsPersisted(canonicalId)) {
     return consumingWildlifeEphemeralGroundFoodUnit(
-      groundItemId,
+      canonicalId,
       consumerPosition
     );
   }
 
   const consumed =
     managingWildlifeGroundFoodBridge?.consumeGroundFoodUnit(
-      groundItemId,
+      canonicalId,
       consumerPosition
     ) ?? false;
 
   // Keep ephemeral mirror in sync so listingWildlifeGroundFoodItems does not
   // resurrect a unit already taken from the persisted stack this tick.
   if (consumed) {
-    consumingWildlifeEphemeralGroundFoodUnit(groundItemId, consumerPosition);
+    consumingWildlifeEphemeralGroundFoodUnit(canonicalId, consumerPosition);
   }
 
   return consumed;

@@ -6,6 +6,7 @@ import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domai
 import {
   enqueueingWildlifeEphemeralGroundFoodItem,
   listingWildlifeGroundFoodItems,
+  replacingWildlifeEphemeralGroundFoodItemId,
 } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { describe, expect, it } from 'vitest';
 
@@ -121,5 +122,31 @@ describe('advancingWildlifeHunterKillFeedingTick', () => {
     expect(next.aiState.intent.mode).toBe('idle');
     expect(next.aiState.feedingOnKillUntilMs).toBeNull();
     expect(next.aiState.feedingOnKillGroundItemId).toBeNull();
+  });
+
+  it('keeps feeding after the kill-meat id remaps to a persisted id', () => {
+    const nowMs = 2_000;
+    enqueueingWildlifeEphemeralGroundFoodItem({
+      id: 'meat-1',
+      itemTypeId: 'world-plaza-raw-deer-meat',
+      quantity: 1,
+      gridX: 2,
+      gridY: 2,
+      layer: 1,
+      spawnedAt: nowMs,
+    });
+    replacingWildlifeEphemeralGroundFoodItemId('meat-1', 'meat-persisted');
+
+    const next = advancingWildlifeHunterKillFeedingTick(
+      buildingFeedingWolf(nowMs),
+      nowMs + 1_000
+    );
+
+    expect(next.aiState.intent.mode).toBe('forageEat');
+    expect(next.aiState.feedingOnKillGroundItemId).toBe('meat-persisted');
+    expect(next.aiState.intent).toMatchObject({
+      mode: 'forageEat',
+      targetGroundItemId: 'meat-persisted',
+    });
   });
 });

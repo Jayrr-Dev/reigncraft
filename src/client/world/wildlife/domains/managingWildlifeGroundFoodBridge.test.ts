@@ -1,8 +1,11 @@
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
 import {
+  clearingWildlifeEphemeralGroundFoodItems,
   consumingWildlifeGroundFoodBridgeUnit,
   enqueueingWildlifeEphemeralGroundFoodItem,
+  findingWildlifeGroundFoodItemById,
   registeringWildlifeGroundFoodBridge,
+  replacingWildlifeEphemeralGroundFoodItemId,
 } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -23,6 +26,7 @@ const persistedMeat: DefiningWorldPlazaGroundItem = {
 
 afterEach(() => {
   registeringWildlifeGroundFoodBridge(null);
+  clearingWildlifeEphemeralGroundFoodItems();
 });
 
 describe('consumingWildlifeGroundFoodBridgeUnit', () => {
@@ -97,5 +101,36 @@ describe('consumingWildlifeGroundFoodBridgeUnit', () => {
         layer: 1,
       })
     ).toBe(false);
+  });
+
+  it('still finds and consumes meat after an ephemeral id remap', () => {
+    enqueueingWildlifeEphemeralGroundFoodItem(ephemeralMeat);
+    replacingWildlifeEphemeralGroundFoodItemId(
+      'meat-ephemeral',
+      'meat-persisted'
+    );
+
+    expect(findingWildlifeGroundFoodItemById('meat-ephemeral', 1_000)?.id).toBe(
+      'meat-persisted'
+    );
+
+    const consumePersisted = vi.fn(() => true);
+    registeringWildlifeGroundFoodBridge({
+      listGroundItems: () => [persistedMeat],
+      consumeGroundFoodUnit: consumePersisted,
+    });
+
+    expect(
+      consumingWildlifeGroundFoodBridgeUnit('meat-ephemeral', {
+        x: 2.4,
+        y: 2.5,
+        layer: 1,
+      })
+    ).toBe(true);
+    expect(consumePersisted).toHaveBeenCalledWith('meat-persisted', {
+      x: 2.4,
+      y: 2.5,
+      layer: 1,
+    });
   });
 });

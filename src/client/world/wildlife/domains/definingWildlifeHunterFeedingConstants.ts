@@ -4,8 +4,11 @@
  * @module components/world/wildlife/domains/definingWildlifeHunterFeedingConstants
  */
 
-/** How long a predator stays locked on a kill-meat meal (ms). */
-export const DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS = 10_000;
+/**
+ * How long a predator stays locked on a kill-meat meal (ms).
+ * Must exceed max ground-food chew delay so at least one bite can finish.
+ */
+export const DEFINING_WILDLIFE_HUNTER_KILL_FEEDING_DURATION_MS = 20_000;
 
 /**
  * Chance the hunter locks onto the kill meal instead of hunting again.
