@@ -11,6 +11,7 @@ import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/
 import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
+import { sendingWorldPlazaAudioLifecycleEvent } from '@/components/world/audio/lifecycle/managingWorldPlazaAudioLifecycleStore';
 import { RenderingSpiritedSpritesBetaLayer } from '@/components/world/beta/spirited/components/renderingSpiritedSpritesBetaLayer';
 import type { DefiningSpiritedSpritesBetaAnimalId } from '@/components/world/beta/spirited/domains/definingSpiritedSpritesBetaCatalog';
 import {
@@ -3398,6 +3399,19 @@ function RenderingWorldPlazaPixiSceneConnected({
   });
 
   const isPlayerDead = playerHealthHudSnapshot.isDead;
+  const wasPlayerDeadForAudioRef = useRef(isPlayerDead);
+
+  useEffect(() => {
+    if (wasPlayerDeadForAudioRef.current === isPlayerDead) {
+      return;
+    }
+
+    wasPlayerDeadForAudioRef.current = isPlayerDead;
+    sendingWorldPlazaAudioLifecycleEvent(
+      isPlayerDead ? 'PLAYER_DIED' : 'PLAYER_RESPAWNED'
+    );
+  }, [isPlayerDead]);
+
   isPlayerDeadRef.current = isPlayerDead;
   const isPlayerAsleep = checkingWorldPlazaEntityPlayerSleepIsActive(
     healthStateRef.current,

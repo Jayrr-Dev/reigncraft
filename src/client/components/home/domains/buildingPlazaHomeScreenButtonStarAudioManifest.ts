@@ -4,7 +4,7 @@ import {
 } from '@/components/home/domains/definingPlazaHomeScreenButtonSfxConstants';
 import { resolvingPlazaHomeScreenButtonSfxStarAudioId } from '@/components/home/domains/resolvingPlazaHomeScreenButtonSfxStarAudioId';
 import { resolvingPlazaHomeScreenButtonSfxUrl } from '@/components/home/domains/resolvingPlazaHomeScreenButtonSfxUrl';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Builds the star-audio preload manifest for home screen button click clips.

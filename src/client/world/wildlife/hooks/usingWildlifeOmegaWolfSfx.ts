@@ -40,7 +40,7 @@ import {
 import { resolvingWildlifeOmegaWolfSfxStarAudioId } from '@/components/world/wildlife/domains/resolvingWildlifeOmegaWolfSfxStarAudioId';
 import { resolvingWildlifeVocalSfxConcurrencyAction } from '@/components/world/wildlife/domains/resolvingWildlifeVocalSfxConcurrencyAction';
 import { useEffect, useRef } from 'react';
-import type { SoundHandle, StarAudio } from 'star-audio';
+import type { SoundHandle, StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 type DefiningWildlifeOmegaWolfSfxRotationEventKind = Extract<
   NotifyingWildlifeOmegaWolfSfxEventPayload['eventKind'],

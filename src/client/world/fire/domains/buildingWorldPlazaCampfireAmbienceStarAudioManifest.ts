@@ -4,7 +4,7 @@ import {
 } from '@/components/world/fire/domains/definingWorldPlazaCampfireAmbienceConstants';
 import { resolvingWorldPlazaCampfireAmbienceSfxUrl } from '@/components/world/fire/domains/resolvingWorldPlazaCampfireAmbienceSfxUrl';
 import { resolvingWorldPlazaCampfireAmbienceStarAudioId } from '@/components/world/fire/domains/resolvingWorldPlazaCampfireAmbienceStarAudioId';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Builds the star-audio preload manifest for lit campfire ambience loops.

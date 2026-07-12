@@ -85,16 +85,4 @@ export const DEFINING_WORLD_PLAZA_WORLD_LOADING_STEP_REGISTRY: readonly Defining
         await preloadingWorldPlazaFireSpriteTextures();
       },
     },
-    {
-      stepId: 'audio',
-      weight: 3,
-      load: async (reportProgress) => {
-        // Blocks the loading bar through spawn-biome music first, then
-        // footsteps, ambience, avatar feedback, and boot-biome wildlife vocals.
-        const { preloadingWorldPlazaWorldBootStarAudio } =
-          await import('@/components/world/domains/preloadingWorldPlazaWorldBootStarAudio');
-
-        await preloadingWorldPlazaWorldBootStarAudio(reportProgress);
-      },
-    },
   ];

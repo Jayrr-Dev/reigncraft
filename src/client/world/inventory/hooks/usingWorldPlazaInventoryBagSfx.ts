@@ -21,7 +21,7 @@ import {
 } from '@/components/world/inventory/domains/playingWorldPlazaInventoryBagSfx';
 import { resolvingWorldPlazaInventoryBagSfxStarAudioId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagSfxStarAudioId';
 import { useEffect, useRef } from 'react';
-import type { StarAudio } from 'star-audio';
+import type { StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Preloads inventory pickup/drop/move clips and wires grant, rearrange, and drop playback.

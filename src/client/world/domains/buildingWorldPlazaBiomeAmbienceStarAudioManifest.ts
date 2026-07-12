@@ -4,22 +4,32 @@ import {
 } from '@/components/world/domains/definingWorldPlazaBiomeAmbienceConstants';
 import { resolvingWorldPlazaBiomeAmbienceStarAudioId } from '@/components/world/domains/resolvingWorldPlazaBiomeAmbienceStarAudioId';
 import { resolvingWorldPlazaBiomeAmbienceUrl } from '@/components/world/domains/resolvingWorldPlazaBiomeAmbienceUrl';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
- * Builds the star-audio preload manifest for every shipped ambience loop.
+ * Builds a manifest for an explicit ambience clip set.
  */
-export function buildingWorldPlazaBiomeAmbienceStarAudioManifest(): Manifest {
+export function buildingWorldPlazaBiomeAmbienceStarAudioManifestForClipIds(
+  clipIds: readonly DefiningWorldPlazaBiomeAmbienceClipId[]
+): Manifest {
   const manifest: Manifest = {};
 
-  for (const clipId of Object.keys(
-    DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_CLIP_CATALOG
-  ) as DefiningWorldPlazaBiomeAmbienceClipId[]) {
+  for (const clipId of clipIds) {
     manifest[resolvingWorldPlazaBiomeAmbienceStarAudioId(clipId)] = {
       src: resolvingWorldPlazaBiomeAmbienceUrl(clipId),
       group: 'sfx',
+      stream: true,
     };
   }
 
   return manifest;
+}
+
+/** Builds the legacy full ambience manifest for tests and broad tooling. */
+export function buildingWorldPlazaBiomeAmbienceStarAudioManifest(): Manifest {
+  return buildingWorldPlazaBiomeAmbienceStarAudioManifestForClipIds(
+    Object.keys(
+      DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_CLIP_CATALOG
+    ) as DefiningWorldPlazaBiomeAmbienceClipId[]
+  );
 }

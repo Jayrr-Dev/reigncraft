@@ -5,7 +5,7 @@ import {
   DEFINING_FILMCOW_FOOTSTEP_BOOT_PRIORITY_SURFACE_KINDS,
   type DefiningFilmcowFootstepSurfaceKind,
 } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 const DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SURFACE_KINDS = Object.keys(
   DEFINING_WORLD_PLAZA_AVATAR_FOOTSTEP_SURFACE_DEFINITIONS

@@ -12,7 +12,7 @@ import {
 } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
 import { resolvingFilmcowFootstepClipEntryId } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepClipEntries';
 import { resolvingFilmcowFootstepWildlifeClipIdsForSurfaces } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepWildlifeClipIdsForSurfaces';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Wildlife walk/run pools plus landing clips for animal-avatar jump land.

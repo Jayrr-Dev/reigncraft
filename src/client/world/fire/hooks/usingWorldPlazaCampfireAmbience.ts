@@ -19,7 +19,7 @@ import { computingWorldPlazaCampfireAmbienceEffectiveVolume } from '@/components
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_POLL_INTERVAL_MS } from '@/components/world/fire/domains/definingWorldPlazaCampfireAmbienceConstants';
 import { resolvingWorldPlazaCampfireAmbienceStarAudioId } from '@/components/world/fire/domains/resolvingWorldPlazaCampfireAmbienceStarAudioId';
 import { useEffect, useRef } from 'react';
-import type { SoundHandle, StarAudio } from 'star-audio';
+import type { SoundHandle, StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 import type { WorldFireDevvitCell } from '../../../../shared/worldFireDevvit';
 
 const DEFINING_WORLD_PLAZA_CAMPFIRE_AMBIENCE_CLIP_ID = 'bonfire' as const;

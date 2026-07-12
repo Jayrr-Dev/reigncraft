@@ -17,7 +17,7 @@ import { computingWildlifeStudySfxEffectiveVolume } from '@/components/world/wil
 import { registeringWildlifeStudySfxPlayback } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
 import { resolvingWildlifeStudySfxStarAudioId } from '@/components/world/wildlife/domains/resolvingWildlifeStudySfxStarAudioId';
 import { useEffect, useRef } from 'react';
-import type { StarAudio } from 'star-audio';
+import type { StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Preloads corpse Study completion clips and wires playback.

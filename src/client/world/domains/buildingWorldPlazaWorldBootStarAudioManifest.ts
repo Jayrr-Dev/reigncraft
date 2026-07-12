@@ -1,5 +1,5 @@
 import { resolvingWorldPlazaWorldBootStarAudioManifestBuilders } from '@/components/world/domains/definingWorldPlazaWorldBootStarAudioManifestRegistry';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Builds the merged star-audio preload manifest for every shipped plaza sound

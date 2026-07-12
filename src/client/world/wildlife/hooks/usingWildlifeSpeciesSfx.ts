@@ -1,18 +1,17 @@
 'use client';
 
+import { settingWorldPlazaAudioScope } from '@/components/world/audio/engine/managingWorldPlazaAudioScopeStore';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { initializingWorldPlazaSfxVolumeStoreFromStorage } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
 import {
   acquiringWorldPlazaStarAudio,
   playingWorldPlazaStarAudioSfx,
-  preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
   settingWorldPlazaStarAudioSfxGroupVolume,
   updatingWorldPlazaStarAudioActiveSfxPlayVolume,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
-import { buildingWildlifeBootSpeciesStarAudioManifest } from '@/components/world/wildlife/domains/buildingWildlifeBootSpeciesStarAudioManifest';
-import { buildingWildlifeFarmAnimalStarAudioManifest } from '@/components/world/wildlife/domains/buildingWildlifeFarmAnimalStarAudioManifest';
+import { buildingWildlifeSpeciesSfxStarAudioManifestFromClipIds } from '@/components/world/wildlife/domains/buildingWildlifeFarmAnimalStarAudioManifest';
 import { checkingWildlifeSpeciesSfxReplayAllowed } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesSfxReplayAllowed';
 import { computingWildlifeSpeciesSfxEffectiveVolume } from '@/components/world/wildlife/domains/computingWildlifeSpeciesSfxEffectiveVolume';
 import { DEFINING_WILDLIFE_SPECIES_SFX_SPATIAL_POLL_INTERVAL_MS } from '@/components/world/wildlife/domains/definingWildlifeFarmAnimalSfxConstants';
@@ -48,12 +47,15 @@ import {
   resolvingWildlifeSpeciesSfxClipId,
   resolvingWildlifeSpeciesSfxClipPoolLength,
   resolvingWildlifeSpeciesSfxPoolIdForEvent,
+  listingWildlifeSpeciesSfxClipIdsForSpeciesIds,
 } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSfxClipId';
 import { resolvingWildlifeSpeciesSfxPoolMaxPlaybackDurationS } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSfxPoolMaxPlaybackDurationS';
 import { resolvingWildlifeSpeciesSfxStarAudioId } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSfxStarAudioId';
 import { resolvingWildlifeVocalSfxConcurrencyAction } from '@/components/world/wildlife/domains/resolvingWildlifeVocalSfxConcurrencyAction';
 import { useEffect, useRef } from 'react';
-import type { SoundHandle, StarAudio } from 'star-audio';
+import type { SoundHandle, StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
+
+const DEFINING_WILDLIFE_SPECIES_SFX_SCOPE_SYNC_INTERVAL_MS = 500;
 
 type ManagingWildlifeSpeciesSfxActivePlay = {
   handle: SoundHandle;
@@ -79,6 +81,8 @@ export function usingWildlifeSpeciesSfx(
 ): void {
   const starAudioRef = useRef<StarAudio | null>(null);
   const isPreloadReadyRef = useRef(false);
+  const preloadedSpeciesKeyRef = useRef('');
+  const preloadGenerationRef = useRef(0);
   const activePlaysRef = useRef<ManagingWildlifeSpeciesSfxActivePlay[]>([]);
 
   useEffect(() => {
@@ -344,19 +348,46 @@ export function usingWildlifeSpeciesSfx(
       syncingActiveSpeciesSfxVolumes();
     };
 
-    applyingMasterSfxVolume();
-    void preloadingWorldPlazaStarAudioManifest(
-      buildingWildlifeBootSpeciesStarAudioManifest()
-    )
-      .then(() => {
+    const syncingProximateSpeciesAudioScope = (): void => {
+      const speciesIds = [
+        ...new Set(
+          [...(wildlifeStoreRef.current?.instances.values() ?? [])]
+            .filter((instance) => !instance.isDead)
+            .map((instance) => instance.speciesId)
+        ),
+      ].sort();
+      const speciesKey = speciesIds.join('|');
+
+      if (speciesKey === preloadedSpeciesKeyRef.current) {
+        return;
+      }
+
+      preloadedSpeciesKeyRef.current = speciesKey;
+      preloadGenerationRef.current += 1;
+      const preloadGeneration = preloadGenerationRef.current;
+      isPreloadReadyRef.current = false;
+
+      if (speciesIds.length === 0) {
+        void settingWorldPlazaAudioScope('world:wildlife-proximate', null);
+        return;
+      }
+
+      const clipIds =
+        listingWildlifeSpeciesSfxClipIdsForSpeciesIds(speciesIds);
+      void settingWorldPlazaAudioScope(
+        'world:wildlife-proximate',
+        buildingWildlifeSpeciesSfxStarAudioManifestFromClipIds(clipIds)
+      ).then(() => {
+        if (preloadGeneration !== preloadGenerationRef.current) {
+          return;
+        }
+
         isPreloadReadyRef.current = true;
-      })
-      .catch(() => {
-        isPreloadReadyRef.current = false;
       });
-    void preloadingWorldPlazaStarAudioManifest(
-      buildingWildlifeFarmAnimalStarAudioManifest()
-    );
+    };
+
+    applyingMasterSfxVolume();
+    syncingProximateSpeciesAudioScope();
 
     const unregisterUserGestureUnlock =
       registeringWorldPlazaBiomeMusicUserGestureUnlock(
@@ -373,9 +404,14 @@ export function usingWildlifeSpeciesSfx(
       syncingActiveSpeciesSfxVolumes,
       DEFINING_WILDLIFE_SPECIES_SFX_SPATIAL_POLL_INTERVAL_MS
     );
+    const scopeSyncIntervalId = window.setInterval(
+      syncingProximateSpeciesAudioScope,
+      DEFINING_WILDLIFE_SPECIES_SFX_SCOPE_SYNC_INTERVAL_MS
+    );
 
     return () => {
       window.clearInterval(spatialPollIntervalId);
+      window.clearInterval(scopeSyncIntervalId);
       unregisterEventListener();
       unregisterSilenceListener();
       unregisterUserGestureUnlock();
@@ -385,9 +421,12 @@ export function usingWildlifeSpeciesSfx(
       }
 
       activePlaysRef.current = [];
+      void settingWorldPlazaAudioScope('world:wildlife-proximate', null);
       releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       isPreloadReadyRef.current = false;
+      preloadedSpeciesKeyRef.current = '';
+      preloadGenerationRef.current = 0;
       resettingWildlifeSpeciesSfxRotationIndices();
       resettingWildlifeSpeciesSfxPlaybackTimestamps();
     };

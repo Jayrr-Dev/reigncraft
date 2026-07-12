@@ -4,7 +4,7 @@ import {
 } from '@/components/world/fire/domains/definingWorldPlazaLavaAmbienceConstants';
 import { resolvingWorldPlazaLavaAmbienceSfxUrl } from '@/components/world/fire/domains/resolvingWorldPlazaLavaAmbienceSfxUrl';
 import { resolvingWorldPlazaLavaAmbienceStarAudioId } from '@/components/world/fire/domains/resolvingWorldPlazaLavaAmbienceStarAudioId';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Builds the star-audio preload manifest for lava proximity ambience loops.

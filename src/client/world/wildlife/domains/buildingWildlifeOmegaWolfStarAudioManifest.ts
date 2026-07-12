@@ -4,7 +4,7 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfSfxConstants';
 import { resolvingWildlifeOmegaWolfSfxStarAudioId } from '@/components/world/wildlife/domains/resolvingWildlifeOmegaWolfSfxStarAudioId';
 import { resolvingWildlifeOmegaWolfSfxUrl } from '@/components/world/wildlife/domains/resolvingWildlifeOmegaWolfSfxUrl';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Builds the star-audio preload manifest for every shipped Omega Wolf clip.

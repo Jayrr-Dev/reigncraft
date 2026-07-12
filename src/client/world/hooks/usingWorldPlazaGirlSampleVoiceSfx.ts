@@ -31,7 +31,7 @@ import {
 import { resolvingWorldPlazaGirlSampleVoiceSfxStarAudioId } from '@/components/world/domains/resolvingWorldPlazaGirlSampleVoiceSfxStarAudioId';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { useEffect, useRef } from 'react';
-import type { StarAudio } from 'star-audio';
+import type { StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Preloads girl voice clips and plays them for girl-sample avatar events.

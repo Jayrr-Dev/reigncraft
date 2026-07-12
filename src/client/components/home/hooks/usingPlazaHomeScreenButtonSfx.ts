@@ -22,7 +22,7 @@ import {
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { useLayoutEffect, useRef } from 'react';
-import type { StarAudio } from 'star-audio';
+import type { StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Preloads home screen button clips and wires chest-close click playback.

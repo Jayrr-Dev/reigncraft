@@ -1,5 +1,6 @@
 'use client';
 
+import { settingWorldPlazaAudioScope } from '@/components/world/audio/engine/managingWorldPlazaAudioScopeStore';
 import { buildingWorldPlazaBiomeMusicStarAudioManifestForTuneIds } from '@/components/world/domains/buildingWorldPlazaBiomeMusicStarAudioManifest';
 import { computingWorldPlazaBiomeMusicEffectiveTargetVolume } from '@/components/world/domains/computingWorldPlazaBiomeMusicEffectiveTargetVolume';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
@@ -23,7 +24,6 @@ import {
 } from '@/components/world/domains/managingWorldPlazaMusicBus';
 import {
   acquiringWorldPlazaStarAudio,
-  preloadingWorldPlazaStarAudioManifest,
   releasingWorldPlazaStarAudio,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { resolvingWorldPlazaBiomeAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint';
@@ -32,7 +32,7 @@ import { resolvingWorldPlazaBiomeMusicTuneId } from '@/components/world/domains/
 import { resolvingWorldPlazaBiomeMusicTuneIdsForBiomeKind } from '@/components/world/domains/resolvingWorldPlazaBiomeMusicTuneIdsForBiomeKind';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { useEffect, useRef } from 'react';
-import type { StarAudio } from 'star-audio';
+import type { StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Loops Cozy Tunes background music that follows the player's current biome.
@@ -178,7 +178,8 @@ export function usingWorldPlazaBiomeMusic(
       const preloadGeneration = preloadGenerationRef.current;
       isPreloadReadyRef.current = false;
 
-      void preloadingWorldPlazaStarAudioManifest(
+      void settingWorldPlazaAudioScope(
+        'world:biome-music',
         buildingWorldPlazaBiomeMusicStarAudioManifestForTuneIds(tuneIds)
       )
         .then(() => {
@@ -296,6 +297,7 @@ export function usingWorldPlazaBiomeMusic(
       window.clearInterval(intervalId);
       starAudio.off('unlocked', handlingStarAudioUnlocked);
       starAudio.off('resumed', handlingStarAudioResumed);
+      void settingWorldPlazaAudioScope('world:biome-music', null);
       releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       desiredTuneIdRef.current = null;

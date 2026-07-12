@@ -19,20 +19,20 @@ describe('resolvingWorldPlazaWorldBootStarAudioPriorityManifestBuilders', () => 
     );
   });
 
-  it('keeps the full desktop priority set off mobile', () => {
+  it('keeps desktop boot critical to music and footsteps', () => {
     vi.mocked(checkingWildlifeTextureEvictionMobileViewport).mockReturnValue(
       false
     );
 
     expect(
       resolvingWorldPlazaWorldBootStarAudioPriorityManifestBuilders()
-    ).toHaveLength(6);
+    ).toHaveLength(2);
     expect(
       resolvingWorldPlazaWorldBootStarAudioDeferredManifestBuilders()
     ).toHaveLength(1);
   });
 
-  it('slims mobile priority to music + footsteps and defers the rest', () => {
+  it('keeps mobile critical to music and footsteps', () => {
     vi.mocked(checkingWildlifeTextureEvictionMobileViewport).mockReturnValue(
       true
     );
@@ -42,6 +42,6 @@ describe('resolvingWorldPlazaWorldBootStarAudioPriorityManifestBuilders', () => 
     ).toHaveLength(2);
     expect(
       resolvingWorldPlazaWorldBootStarAudioDeferredManifestBuilders()
-    ).toHaveLength(5);
+    ).toHaveLength(1);
   });
 });

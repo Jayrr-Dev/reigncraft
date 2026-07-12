@@ -11,7 +11,7 @@ import {
   stoppingWorldPlazaMusicBus,
   type ManagingWorldPlazaMusicBusStarAudio,
 } from '@/components/world/domains/managingWorldPlazaMusicBus';
-import type { SoundHandle } from 'star-audio';
+import type { SoundHandle } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 function creatingMockSoundHandle(id: string): SoundHandle {
   let playing = true;

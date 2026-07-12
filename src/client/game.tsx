@@ -12,6 +12,12 @@ import { usingPlazaSinglePlayerSaveHydration } from '@/components/home/hooks/usi
 import { DEFINING_REIGNCRAFT_TOASTER_ID } from '@/components/ui/domains/definingReigncraftToastConstants';
 import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
 import { RenderingReigncraftToaster } from '@/components/ui/sonner';
+import { sendingWorldPlazaAudioLifecycleEvent } from '@/components/world/audio/lifecycle/managingWorldPlazaAudioLifecycleStore';
+import {
+  resettingWorldPlazaSessionAudioLoading,
+  startingWorldPlazaSessionAudioLoading,
+} from '@/components/world/audio/lifecycle/managingWorldPlazaSessionAudioLoadingStore';
+import { usingWorldPlazaSessionAudioLoading } from '@/components/world/audio/lifecycle/usingWorldPlazaSessionAudioLoading';
 import { recordingWorldPlazaClientError } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import {
   checkingWorldPlazaDevQaLoadEnabled,
@@ -76,9 +82,38 @@ function PlazaWorldBootGate({
   children: ReactNode;
 }): ReactNode {
   const worldLoading = usingWorldPlazaWorldLoadingProgress();
+  const sessionAudioLoading = usingWorldPlazaSessionAudioLoading();
   const isSpawnTerrainReady = usingWorldPlazaSpawnTerrainReady();
   const isAssetBootDone =
-    worldLoading.status === 'complete' && !isHydratingSave;
+    worldLoading.status === 'complete' &&
+    sessionAudioLoading.status === 'complete' &&
+    !isHydratingSave;
+  const percentLoaded = Math.round(
+    worldLoading.percentLoaded * 0.8 +
+      sessionAudioLoading.percentLoaded * 0.2
+  );
+  const errorMessage =
+    worldLoading.errorMessage ?? sessionAudioLoading.errorMessage;
+
+  useEffect(() => {
+    if (
+      worldLoading.status === 'error' ||
+      sessionAudioLoading.status === 'error'
+    ) {
+      sendingWorldPlazaAudioLifecycleEvent('BOOT_FAILED');
+      return;
+    }
+
+    if (isAssetBootDone) {
+      sendingWorldPlazaAudioLifecycleEvent('ASSETS_READY');
+    }
+  }, [isAssetBootDone, sessionAudioLoading.status, worldLoading.status]);
+
+  useEffect(() => {
+    if (isSpawnTerrainReady) {
+      sendingWorldPlazaAudioLifecycleEvent('SPAWN_READY');
+    }
+  }, [isSpawnTerrainReady]);
 
   useEffect(() => {
     if (!isAssetBootDone || isSpawnTerrainReady) {
@@ -99,8 +134,8 @@ function PlazaWorldBootGate({
       <>
         <RenderingWorldPlazaWorldLoadingBiomeMusic />
         <RenderingWorldPlazaWorldLoadingScreen
-          percentLoaded={worldLoading.percentLoaded}
-          errorMessage={worldLoading.errorMessage}
+          percentLoaded={percentLoaded}
+          errorMessage={errorMessage}
         />
       </>
     );
@@ -114,7 +149,7 @@ function PlazaWorldBootGate({
           <RenderingWorldPlazaWorldLoadingBiomeMusic />
           <RenderingWorldPlazaWorldLoadingScreen
             percentLoaded={100}
-            errorMessage={null}
+            errorMessage={errorMessage}
           />
         </div>
       )}
@@ -295,6 +330,8 @@ export const App = () => {
       disablingWorldPlazaDevQaLoad();
     }
 
+    sendingWorldPlazaAudioLifecycleEvent('SESSION_STARTED');
+    void startingWorldPlazaSessionAudioLoading();
     setGameSession(session);
   };
 
@@ -320,6 +357,8 @@ export const App = () => {
 
   const handlingExitToHome = (): void => {
     disablingWorldPlazaDevQaLoad();
+    sendingWorldPlazaAudioLifecycleEvent('EXIT_HOME');
+    resettingWorldPlazaSessionAudioLoading();
     setGameSession(null);
   };
 

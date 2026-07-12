@@ -2,7 +2,7 @@ import { buildingWorldPlazaBiomeMusicStarAudioManifestForTuneIds } from '@/compo
 import type { DefiningWorldPlazaCozyTuneId } from '@/components/world/domains/definingWorldPlazaBiomeMusicConstants';
 import { resolvingWorldPlazaBiomeMusicTuneIdsForBiomeKind } from '@/components/world/domains/resolvingWorldPlazaBiomeMusicTuneIdsForBiomeKind';
 import { DEFINING_WILDLIFE_BOOT_PRELOAD_BIOME_KINDS } from '@/components/world/wildlife/domains/definingWildlifeBootTexturePreloadConstants';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Builds the boot-priority Cozy Tunes manifest for spawn biomes.

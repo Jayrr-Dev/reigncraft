@@ -4,7 +4,7 @@ import {
 } from '@/components/world/equipment/domains/definingWorldPlazaEquipmentSfxConstants';
 import { resolvingWorldPlazaEquipmentSfxStarAudioId } from '@/components/world/equipment/domains/resolvingWorldPlazaEquipmentSfxStarAudioId';
 import { resolvingWorldPlazaEquipmentSfxUrl } from '@/components/world/equipment/domains/resolvingWorldPlazaEquipmentSfxUrl';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Builds the star-audio preload manifest for every shipped equipment hit clip.

@@ -11,7 +11,7 @@ import { DEFINING_WILDLIFE_PIXABAY_WILD_SFX_CLIP_CATALOG } from '@/components/wo
 import type { DefiningWildlifeSpeciesSfxClipId } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSfxClipTypes';
 import { resolvingWildlifeSpeciesSfxStarAudioId } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSfxStarAudioId';
 import { resolvingWildlifeSpeciesSfxUrl } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSfxUrl';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 function registeringWildlifeSpeciesSfxClipInManifest(
   manifest: Manifest,

@@ -6,7 +6,7 @@ import {
 import { resolvingFilmcowFootstepClipIdsForSurfaces } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepClipIdsForSurfaces';
 import { resolvingFilmcowFootstepSfxStarAudioId } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepSfxStarAudioId';
 import { resolvingFilmcowFootstepSfxUrl } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepSfxUrl';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 function buildingFilmcowFootstepStarAudioManifestForClipIds(
   clipIds: readonly DefiningFilmcowFootstepClipId[]

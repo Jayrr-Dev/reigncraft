@@ -4,7 +4,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaGirlSampleVoiceSfxConstants';
 import { resolvingWorldPlazaGirlSampleVoiceSfxStarAudioId } from '@/components/world/domains/resolvingWorldPlazaGirlSampleVoiceSfxStarAudioId';
 import { resolvingWorldPlazaGirlSampleVoiceSfxUrl } from '@/components/world/domains/resolvingWorldPlazaGirlSampleVoiceSfxUrl';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Builds the star-audio preload manifest for every shipped girl voice clip.

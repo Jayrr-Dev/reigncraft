@@ -19,7 +19,7 @@ import {
   incrementingWorldPlazaPerformanceDiagnosticsCounter,
   settingWorldPlazaPerformanceDiagnosticsGauge,
 } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
-import type { SoundHandle, StarAudio } from 'star-audio';
+import type { SoundHandle, StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 const DEFINING_WORLD_PLAZA_MUSIC_BUS_FADE_TICK_MS = 50;
 

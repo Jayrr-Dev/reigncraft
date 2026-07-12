@@ -4,7 +4,7 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryBagSfxConstants';
 import { resolvingWorldPlazaInventoryBagSfxStarAudioId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagSfxStarAudioId';
 import { resolvingWorldPlazaInventoryBagSfxUrl } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagSfxUrl';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Builds the star-audio preload manifest for inventory pickup/drop clips.

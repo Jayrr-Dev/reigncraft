@@ -1,13 +1,20 @@
 /**
- * Shared star-audio instance for every plaza SFX and music hook.
+ * Shared Howler audio engine for every plaza SFX and music hook.
  *
- * One Howler pool keeps Chrome from exhausting WebMediaPlayers in the
- * Devvit iframe. Manifest keys preload once and are reused by every hook.
+ * This compatibility facade preserves existing hook APIs while the engine
+ * owns Howl caching, loading, voices, visibility, and eviction.
  *
  * @module components/world/domains/managingWorldPlazaStarAudio
  */
 
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
+import { creatingWorldPlazaHowlerAudioEngine } from '@/components/world/audio/engine/managingWorldPlazaHowlerAudioEngine';
+import type { ManagingWorldPlazaHowlerAudioEngine } from '@/components/world/audio/engine/managingWorldPlazaHowlerAudioEngine';
+import type {
+  Manifest,
+  SoundHandle,
+  StarAudio,
+} from '@/components/world/audio/definingWorldPlazaAudioTypes';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE,
@@ -27,14 +34,8 @@ import {
   settingWorldPlazaPerformanceDiagnosticsGauge,
 } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { checkingWildlifeTextureEvictionMobileViewport } from '@/components/world/wildlife/domains/resolvingWildlifeTextureEvictionProfile';
-import {
-  createStarAudio,
-  type Manifest,
-  type SoundHandle,
-  type StarAudio,
-} from 'star-audio';
-
-let managingWorldPlazaStarAudioInstance: StarAudio | null = null;
+let managingWorldPlazaStarAudioInstance: ManagingWorldPlazaHowlerAudioEngine | null =
+  null;
 let managingWorldPlazaStarAudioAcquireCount = 0;
 let managingWorldPlazaStarAudioPageUnloadHookRegistered = false;
 let managingWorldPlazaStarAudioLastSfxGroupVolume = Number.NaN;
@@ -62,8 +63,7 @@ type ManagingWorldPlazaStarAudioActiveSfxPlay = {
 };
 
 /**
- * Active one-shots that need per-instance volume restored after star-audio
- * stomps Howler group volume on each `play()` / `setSfxVolume()`.
+ * Active one-shots tracked for spatial gain updates and diagnostics.
  */
 const managingWorldPlazaStarAudioActiveSfxPlays: ManagingWorldPlazaStarAudioActiveSfxPlay[] =
   [];
@@ -117,9 +117,8 @@ function pruningWorldPlazaStarAudioInactiveSfxPlays(): void {
 }
 
 /**
- * Restores prior instances of one clip after `starAudio.play(id)` changes the
- * shared Howl volume for that id. Other clip ids are unaffected and must not
- * be touched on this hot path.
+ * Compatibility reassertion. Direct Howler playback already uses sound ids,
+ * but callers may still request a full active-volume synchronization.
  */
 function reassertingWorldPlazaStarAudioActiveSfxVolumesForId(
   id: string,
@@ -179,10 +178,8 @@ export function checkingWorldPlazaStarAudioManifestKeyIsPreloaded(
 /**
  * Plays an SFX clip with stable per-instance volume.
  *
- * star-audio calls `howl.volume(v)` (no sound id) before `play()`, and Howler
- * applies that to every active instance of the clip. Without reassertion, a
- * nearby animal vocal can make a distant one of the same clip jump to full
- * volume mid-playback.
+ * Direct Howler playback applies volume by sound id, so simultaneous instances
+ * of the same clip retain independent spatial gain.
  */
 export function playingWorldPlazaStarAudioSfx(
   id: string,
@@ -236,8 +233,7 @@ export function playingWorldPlazaStarAudioSfx(
   });
   reassertingWorldPlazaStarAudioActiveSfxVolumesForId(id, handle);
 
-  // star-audio's play() ignores `duration`; stop the instance ourselves so long
-  // source files (or shared Howl assets) cannot keep emitting past the cap.
+  // Duration remains a facade feature; stop long source files at the cap.
   if (
     options.duration !== undefined &&
     options.duration > 0 &&
@@ -612,12 +608,9 @@ function registeringWorldPlazaStarAudioPageUnloadHook(): void {
   window.addEventListener('pagehide', destroyingWorldPlazaStarAudioInstance);
 }
 
-function ensuringWorldPlazaStarAudioInstance(): StarAudio {
+function ensuringWorldPlazaStarAudioInstance(): ManagingWorldPlazaHowlerAudioEngine {
   if (!managingWorldPlazaStarAudioInstance) {
-    managingWorldPlazaStarAudioInstance = createStarAudio({
-      unlockWith: 'auto',
-      suspendOnHidden: true,
-    });
+    managingWorldPlazaStarAudioInstance = creatingWorldPlazaHowlerAudioEngine();
     registeringWorldPlazaStarAudioPageUnloadHook();
   }
 
@@ -635,10 +628,8 @@ export function acquiringWorldPlazaStarAudio(): StarAudio {
 /**
  * Releases one plaza star-audio consumer.
  *
- * The shared instance stays alive for the page session. star-audio warms 17
- * procedural presets as blob URLs on init; destroying during React StrictMode
- * remounts revokes those URLs while Howler is still loading them, which spams
- * `ERR_FILE_NOT_FOUND` in the Devvit iframe. Teardown runs on `pagehide`.
+ * The shared instance stays alive for the page session so React StrictMode
+ * remounts cannot tear down Howls still shared by another hook.
  */
 export function releasingWorldPlazaStarAudio(): void {
   managingWorldPlazaStarAudioAcquireCount = Math.max(
@@ -709,4 +700,63 @@ export async function preloadingWorldPlazaStarAudioManifest(
   await Promise.all(
     Array.from({ length: concurrency }, () => preloadingNextManifestKeyWorker())
   );
+}
+
+/**
+ * Retains every manifest key for a lifecycle scope after ensuring it is loaded.
+ */
+export async function retainingWorldPlazaAudioManifest(
+  manifest: Manifest
+): Promise<void> {
+  await preloadingWorldPlazaStarAudioManifest(manifest);
+  ensuringWorldPlazaStarAudioInstance().retainingManifestKeys(
+    Object.keys(manifest)
+  );
+}
+
+/**
+ * Releases lifecycle ownership. Active voices still protect their assets.
+ */
+export function releasingWorldPlazaAudioManifest(manifest: Manifest): void {
+  ensuringWorldPlazaStarAudioInstance().releasingManifestKeys(
+    Object.keys(manifest)
+  );
+}
+
+/**
+ * Unloads unreferenced, inactive manifest keys immediately.
+ */
+export function unloadingWorldPlazaAudioManifestKeys(
+  manifestKeys: readonly string[]
+): void {
+  ensuringWorldPlazaStarAudioInstance().unloadingManifestKeys(manifestKeys);
+
+  for (const manifestKey of manifestKeys) {
+    if (
+      !ensuringWorldPlazaStarAudioInstance().checkingManifestKeyIsLoaded(
+        manifestKey
+      )
+    ) {
+      preloadedWorldPlazaStarAudioManifestKeys.delete(manifestKey);
+    }
+  }
+
+  recordingWorldPlazaStarAudioPerformanceGauges(true);
+}
+
+/** Runs budget-based LRU eviction for unreferenced assets. */
+export function evictingWorldPlazaUnusedAudioAssets(force = false): void {
+  ensuringWorldPlazaStarAudioInstance().evictingUnusedAssets(force);
+
+  for (const manifestKey of preloadedWorldPlazaStarAudioManifestKeys) {
+    if (
+      !ensuringWorldPlazaStarAudioInstance().checkingManifestKeyIsLoaded(
+        manifestKey
+      )
+    ) {
+      preloadedWorldPlazaStarAudioManifestKeys.delete(manifestKey);
+    }
+  }
+
+  recordingWorldPlazaStarAudioPerformanceGauges(true);
 }

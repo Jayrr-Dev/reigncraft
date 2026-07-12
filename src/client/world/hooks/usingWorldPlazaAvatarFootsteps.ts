@@ -66,7 +66,7 @@ import {
   resolvingFilmcowFootstepWildlifePlaybackRate,
 } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepPlayback';
 import { useEffect, useRef } from 'react';
-import type { SoundHandle, StarAudio } from 'star-audio';
+import type { SoundHandle, StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Loops FilmCow / Nox footstep one-shots while walking or running.

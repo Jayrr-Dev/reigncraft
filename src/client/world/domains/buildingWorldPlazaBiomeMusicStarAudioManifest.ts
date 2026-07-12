@@ -4,7 +4,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaBiomeMusicConstants';
 import { resolvingWorldPlazaBiomeMusicStarAudioId } from '@/components/world/domains/resolvingWorldPlazaBiomeMusicStarAudioId';
 import { resolvingWorldPlazaBiomeMusicUrl } from '@/components/world/domains/resolvingWorldPlazaBiomeMusicUrl';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 function buildingWorldPlazaBiomeMusicStarAudioManifestEntry(
   tuneId: DefiningWorldPlazaCozyTuneId

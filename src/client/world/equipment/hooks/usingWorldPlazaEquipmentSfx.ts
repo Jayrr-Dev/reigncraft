@@ -26,7 +26,7 @@ import {
 import { resolvingWorldPlazaEquipmentSfxClipIdForMilestone } from '@/components/world/equipment/domains/resolvingWorldPlazaEquipmentSfxClipIdForMilestone';
 import { resolvingWorldPlazaEquipmentSfxStarAudioId } from '@/components/world/equipment/domains/resolvingWorldPlazaEquipmentSfxStarAudioId';
 import { useEffect, useRef } from 'react';
-import type { StarAudio } from 'star-audio';
+import type { StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Preloads FilmCow equipment hit clips and wires harvest milestone playback.

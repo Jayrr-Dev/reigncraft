@@ -4,7 +4,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaAvatarMeleeSfxConstants';
 import { resolvingWorldPlazaAvatarMeleeSfxUrl } from '@/components/world/domains/resolvingWorldPlazaAvatarMeleeSfxUrl';
 import { resolvingWorldPlazaAvatarMeleeStarAudioId } from '@/components/world/domains/resolvingWorldPlazaAvatarMeleeStarAudioId';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Builds the star-audio preload manifest for every shipped avatar melee clip.

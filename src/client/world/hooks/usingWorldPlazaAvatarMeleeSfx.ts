@@ -41,7 +41,7 @@ import {
 } from '@/components/world/domains/resolvingWorldPlazaAvatarMeleeSwingSfxClipId';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { useEffect, useRef } from 'react';
-import type { StarAudio } from 'star-audio';
+import type { StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Preloads avatar melee clips and wires swing / crit-fatal playback bridges.

@@ -4,7 +4,7 @@ import {
 } from '@/components/home/domains/definingPlazaBookSfxConstants';
 import { resolvingPlazaBookSfxStarAudioId } from '@/components/home/domains/resolvingPlazaBookSfxStarAudioId';
 import { resolvingPlazaBookSfxUrl } from '@/components/home/domains/resolvingPlazaBookSfxUrl';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Builds the star-audio preload manifest for tutorial and lore book clips.

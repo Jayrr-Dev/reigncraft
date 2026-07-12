@@ -9,7 +9,7 @@ import { resolvingWorldPlazaAnimalPlayableAvatarSpeciesSfxSpeciesId } from '@/co
 import { buildingWildlifeSpeciesSfxStarAudioManifestFromClipIds } from '@/components/world/wildlife/domains/buildingWildlifeFarmAnimalStarAudioManifest';
 import { buildingWildlifeOmegaWolfStarAudioManifest } from '@/components/world/wildlife/domains/buildingWildlifeOmegaWolfStarAudioManifest';
 import { listingWildlifeSpeciesSfxClipIdsForSpecies } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSfxClipId';
-import type { Manifest } from 'star-audio';
+import type { Manifest } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Vocal clips for the selected animal playable skin, or an empty manifest.

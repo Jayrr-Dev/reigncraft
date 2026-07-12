@@ -26,7 +26,7 @@ import { resolvingWorldPlazaBiomeMusicTuneId } from '@/components/world/domains/
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { DEFINING_WILDLIFE_BOOT_PRELOAD_BIOME_KINDS } from '@/components/world/wildlife/domains/definingWildlifeBootTexturePreloadConstants';
 import { useEffect, useRef } from 'react';
-import type { StarAudio } from 'star-audio';
+import type { StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Starts spawn-biome music during the world loading screen.

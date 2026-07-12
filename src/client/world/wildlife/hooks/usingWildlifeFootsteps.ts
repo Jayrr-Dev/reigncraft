@@ -45,7 +45,7 @@ import {
 } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { resolvingWildlifeSizeScaleMultiplierFromSample } from '@/components/world/wildlife/domains/resolvingWildlifeSizeScaleMultiplierFromSample';
 import { useEffect, useRef } from 'react';
-import type { SoundHandle, StarAudio } from 'star-audio';
+import type { SoundHandle, StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 type DefiningWildlifeFootstepLoopState = {
   nextFootstepAtMs: number;

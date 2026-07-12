@@ -19,7 +19,7 @@ import { computingWorldPlazaLavaAmbienceEffectiveVolume } from '@/components/wor
 import { DEFINING_WORLD_PLAZA_LAVA_AMBIENCE_POLL_INTERVAL_MS } from '@/components/world/fire/domains/definingWorldPlazaLavaAmbienceConstants';
 import { resolvingWorldPlazaLavaAmbienceStarAudioId } from '@/components/world/fire/domains/resolvingWorldPlazaLavaAmbienceStarAudioId';
 import { useEffect, useRef } from 'react';
-import type { SoundHandle, StarAudio } from 'star-audio';
+import type { SoundHandle, StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 const DEFINING_WORLD_PLAZA_LAVA_AMBIENCE_CLIP_ID = 'crackle' as const;
 
