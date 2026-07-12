@@ -47,6 +47,10 @@ import {
   type DefiningWorldPlazaEditModeFunctionId,
 } from '@/components/world/building/domains/definingWorldPlazaEditModeFunctionRegistry';
 import type { DefiningWorldBuildingPlotRegistryOwnerGroup } from '@/components/world/building/domains/groupingWorldBuildingPlotRegistryEntriesByOwner';
+import {
+  checkingWorldPlazaEditModeFunctionSessionIsBuild,
+  resolvingWorldPlazaEditModeFunctionSessionMode,
+} from '@/components/world/building/domains/resolvingWorldPlazaEditModeFunctionSessionMode';
 import { ProvidingWorldPlazaViewportHudScale } from '@/components/world/components/providingWorldPlazaViewportHudScale';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
@@ -373,11 +377,26 @@ export function RenderingWorldPlazaEditModeHotbar({
 
   const togglingFunction = useCallback(
     (functionId: DefiningWorldPlazaEditModeFunctionId): void => {
-      setOpenFunctionId((current) =>
-        current === functionId ? null : functionId
-      );
+      const nextOpenFunctionId =
+        openFunctionId === functionId ? null : functionId;
+
+      setOpenFunctionId(nextOpenFunctionId);
+
+      if (nextOpenFunctionId === null) {
+        return;
+      }
+
+      const sessionModeId =
+        resolvingWorldPlazaEditModeFunctionSessionMode(nextOpenFunctionId);
+
+      if (checkingWorldPlazaEditModeFunctionSessionIsBuild(sessionModeId)) {
+        onActivateBuildMode();
+        return;
+      }
+
+      onActivateClaimMode();
     },
-    []
+    [onActivateBuildMode, onActivateClaimMode, openFunctionId]
   );
 
   const stoppingPlazaWalkPointerPropagation = useCallback(

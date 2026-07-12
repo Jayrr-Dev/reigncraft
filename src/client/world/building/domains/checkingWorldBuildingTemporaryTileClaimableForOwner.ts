@@ -1,17 +1,18 @@
 import {
   CHECKING_WORLD_BUILDING_TILE_OTHER_OWNER_CLAIM_BUFFER_REJECTION_MESSAGE,
   checkingWorldBuildingTilePositionWithinOtherOwnerClaimBuffer,
-} from "@/components/world/building/domains/checkingWorldBuildingTilePositionWithinOtherOwnerClaimBuffer";
+} from '@/components/world/building/domains/checkingWorldBuildingTilePositionWithinOtherOwnerClaimBuffer';
 import {
   checkingWorldBuildingOwnerHasReachedMaxTemporaryTileClaimCount,
   formattingWorldBuildingOwnerMaxTemporaryTileClaimRejectionMessage,
-} from "@/components/world/building/domains/countingWorldBuildingOwnerTemporaryTileClaims";
+} from '@/components/world/building/domains/countingWorldBuildingOwnerTemporaryTileClaims';
 import {
   findingWorldBuildingPlotContainingTilePosition,
   type DefiningWorldBuildingPlot,
-} from "@/components/world/building/domains/definingWorldBuildingPlot";
-import type { DefiningWorldBuildingPlotOwnerLimits } from "@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits";
-import type { DefiningWorldBuildingTilePosition } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
+} from '@/components/world/building/domains/definingWorldBuildingPlot';
+import type { DefiningWorldBuildingPlotOwnerLimits } from '@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits';
+import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
+import { DEFINING_WORLD_TEMPORARY_PLOT_FEATURE_ENABLED } from '@/components/world/building/domains/definingWorldTemporaryPlotFeatureFlag';
 
 /**
  * Validates whether an unowned tile can receive a temporary build claim.
@@ -31,11 +32,15 @@ export function checkingWorldBuildingTemporaryTileClaimableForOwner(
   activeViewportPlots: readonly DefiningWorldBuildingPlot[],
   tilePosition: DefiningWorldBuildingTilePosition,
   ownerUserId: string,
-  plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits,
+  plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits
 ): boolean {
+  if (!DEFINING_WORLD_TEMPORARY_PLOT_FEATURE_ENABLED) {
+    return false;
+  }
+
   const existingPlot = findingWorldBuildingPlotContainingTilePosition(
     activeViewportPlots,
-    tilePosition,
+    tilePosition
   );
 
   if (existingPlot) {
@@ -46,7 +51,7 @@ export function checkingWorldBuildingTemporaryTileClaimableForOwner(
     checkingWorldBuildingTilePositionWithinOtherOwnerClaimBuffer(
       activeViewportPlots,
       tilePosition,
-      ownerUserId,
+      ownerUserId
     )
   ) {
     return false;
@@ -56,7 +61,7 @@ export function checkingWorldBuildingTemporaryTileClaimableForOwner(
     checkingWorldBuildingOwnerHasReachedMaxTemporaryTileClaimCount(
       activeViewportPlots,
       ownerUserId,
-      plotOwnerLimits,
+      plotOwnerLimits
     )
   ) {
     return false;
@@ -77,26 +82,26 @@ export function resolvingWorldBuildingTemporaryTileClaimRejectionMessage(
   activeViewportPlots: readonly DefiningWorldBuildingPlot[],
   tilePosition: DefiningWorldBuildingTilePosition,
   ownerUserId: string,
-  plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits,
+  plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits
 ): string {
   const existingPlot = findingWorldBuildingPlotContainingTilePosition(
     activeViewportPlots,
-    tilePosition,
+    tilePosition
   );
 
   if (existingPlot) {
     if (existingPlot.ownerId === ownerUserId) {
-      return "You already own this tile.";
+      return 'You already own this tile.';
     }
 
-    return "That tile is already claimed.";
+    return 'That tile is already claimed.';
   }
 
   if (
     checkingWorldBuildingTilePositionWithinOtherOwnerClaimBuffer(
       activeViewportPlots,
       tilePosition,
-      ownerUserId,
+      ownerUserId
     )
   ) {
     return CHECKING_WORLD_BUILDING_TILE_OTHER_OWNER_CLAIM_BUFFER_REJECTION_MESSAGE;
@@ -106,13 +111,13 @@ export function resolvingWorldBuildingTemporaryTileClaimRejectionMessage(
     checkingWorldBuildingOwnerHasReachedMaxTemporaryTileClaimCount(
       activeViewportPlots,
       ownerUserId,
-      plotOwnerLimits,
+      plotOwnerLimits
     )
   ) {
     return formattingWorldBuildingOwnerMaxTemporaryTileClaimRejectionMessage(
-      plotOwnerLimits.maxTemporaryTileCount,
+      plotOwnerLimits.maxTemporaryTileCount
     );
   }
 
-  return "That tile cannot be claimed.";
+  return 'That tile cannot be claimed.';
 }

@@ -1,5 +1,12 @@
+/**
+ * Feature flag for the temporary plot ("Temp Claim") system.
+ * Off: no new temporary claims client- or server-side; players get extra
+ * permanent plots instead (see max owned plot count below).
+ */
+export const WORLD_BUILDING_DEVVIT_TEMPORARY_PLOT_FEATURE_ENABLED = false;
+
 /** Default per-user plot limits when no profile row exists. */
-export const WORLD_BUILDING_DEVVIT_DEFAULT_MAX_OWNED_PLOT_COUNT = 1;
+export const WORLD_BUILDING_DEVVIT_DEFAULT_MAX_OWNED_PLOT_COUNT = 3;
 export const WORLD_BUILDING_DEVVIT_DEFAULT_MAX_TILE_CLAIM_COUNT = 64;
 export const WORLD_BUILDING_DEVVIT_DEFAULT_MAX_TEMPORARY_TILE_COUNT = 5;
 
@@ -9,7 +16,8 @@ export const WORLD_BUILDING_DEVVIT_OTHER_OWNER_MIN_CLAIM_DISTANCE_TILES = 3;
 /** Maximum plots returned by the registry query. */
 export const WORLD_BUILDING_DEVVIT_REGISTRY_MAX_PLOT_COUNT = 512;
 
-export const WORLD_BUILDING_DEVVIT_API_BASE_PATH = '/api/world-building' as const;
+export const WORLD_BUILDING_DEVVIT_API_BASE_PATH =
+  '/api/world-building' as const;
 
 export const WORLD_BUILDING_DEVVIT_PLOTS_REGISTRY_API_PATH =
   `${WORLD_BUILDING_DEVVIT_API_BASE_PATH}/plots/registry` as const;

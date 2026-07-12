@@ -37,6 +37,7 @@ import {
   LABELING_WORLD_PLAZA_ACTION_BAR_SETTINGS,
   STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaMasterVolumeConstants';
+import { LABELING_WORLD_PLAZA_ACTION_BAR_PROFILE } from '@/components/world/domains/definingWorldPlazaProfilePanelConstants';
 import {
   DEFINING_WORLD_PLAZA_VIEWPORT_FULLSCREEN_ENTER_LABEL,
   DEFINING_WORLD_PLAZA_VIEWPORT_FULLSCREEN_EXIT_LABEL,
@@ -52,6 +53,7 @@ import {
   Minimize2,
   Settings,
   Shell,
+  UserRound,
   Users,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -72,9 +74,13 @@ export interface RenderingWorldPlazaActionBarProps {
   pendingFriendRequestCount?: number;
   /** True when build or claim edit session is open. */
   isEditModeActive: boolean;
+  /** True while the character profile panel is open. */
+  isProfileOpen?: boolean;
   isFullscreen: boolean;
   onToggleChat: () => void;
   onToggleFriends: () => void;
+  /** Toggles the character profile panel when provided. */
+  onToggleProfile?: () => void;
   onToggleEditMode: () => void;
   onToggleFullscreen: () => void;
   /** Opens a codex section overlay when provided. */
@@ -114,9 +120,11 @@ export function RenderingWorldPlazaActionBar({
   isFriendsOpen,
   pendingFriendRequestCount = 0,
   isEditModeActive,
+  isProfileOpen = false,
   isFullscreen,
   onToggleChat,
   onToggleFriends,
+  onToggleProfile,
   onToggleEditMode,
   onToggleFullscreen,
   onSelectCodexSection,
@@ -318,6 +326,23 @@ export function RenderingWorldPlazaActionBar({
                     aria-hidden="true"
                   />
                 </>
+              ) : null}
+
+              {onToggleProfile ? (
+                <button
+                  type="button"
+                  aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_PROFILE}
+                  aria-pressed={isProfileOpen}
+                  onClick={onToggleProfile}
+                  className={stylingWorldPlazaActionBarButton(isProfileOpen)}
+                  style={viewportStyles.buttonStyle}
+                >
+                  <UserRound
+                    className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
+                    style={viewportStyles.iconStyle}
+                    aria-hidden="true"
+                  />
+                </button>
               ) : null}
 
               <button

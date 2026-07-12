@@ -3,7 +3,6 @@
 import { RenderingWorldPlazaClaimModePlotList } from '@/components/world/building/components/renderingWorldPlazaClaimModePlotList';
 import { RenderingWorldPlazaClaimModeSavedCoordsList } from '@/components/world/building/components/renderingWorldPlazaClaimModeSavedCoordsList';
 import { RenderingWorldPlazaClaimModeTemporaryTilesList } from '@/components/world/building/components/renderingWorldPlazaClaimModeTemporaryTilesList';
-import { RenderingWorldPlazaSidebarPanelHeader } from '@/components/world/components/renderingWorldPlazaSidebarPanelHeader';
 import { countingWorldBuildingOwnerTemporaryTileClaims } from '@/components/world/building/domains/countingWorldBuildingOwnerTemporaryTileClaims';
 import {
   DEFINING_WORLD_BUILDING_CLAIM_MODE_ERROR_TEXT_CLASS_NAME,
@@ -16,15 +15,17 @@ import {
   DEFINING_WORLD_BUILDING_CLAIM_MODE_SIDEBAR_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_SIDEBAR_WIDTH_CLASS_NAME,
 } from '@/components/world/building/domains/definingWorldBuildingClaimModeConstants';
-import type { DefiningWorldBuildingPlotRegistryOwnerGroup } from '@/components/world/building/domains/groupingWorldBuildingPlotRegistryEntriesByOwner';
-import { DEFINING_WORLD_BUILDING_CLAIM_MODE_TOGGLE_KEY } from '@/components/world/building/domains/definingWorldBuildingPlotConstants';
 import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
 import type { DefiningWorldBuildingPlotBounds } from '@/components/world/building/domains/definingWorldBuildingPlotBounds';
+import { DEFINING_WORLD_BUILDING_CLAIM_MODE_TOGGLE_KEY } from '@/components/world/building/domains/definingWorldBuildingPlotConstants';
 import type { DefiningWorldBuildingPlotOwnerLimits } from '@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits';
 import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
+import { DEFINING_WORLD_TEMPORARY_PLOT_FEATURE_ENABLED } from '@/components/world/building/domains/definingWorldTemporaryPlotFeatureFlag';
+import type { DefiningWorldBuildingPlotRegistryOwnerGroup } from '@/components/world/building/domains/groupingWorldBuildingPlotRegistryEntriesByOwner';
+import { RenderingWorldPlazaSidebarPanelHeader } from '@/components/world/components/renderingWorldPlazaSidebarPanelHeader';
+import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { DefiningWorldPlazaSavedCoords } from '@/components/world/domains/definingWorldPlazaSavedCoords';
 import type { WorldPlotVisitRequestOutgoingListMember } from '@/components/world/plotVisit/domains/definingWorldPlotVisitRequest';
-import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 
 /** Claim mode sidebar header copy. */
 const RENDERING_WORLD_PLAZA_CLAIM_MODE_SIDEBAR_TITLE = 'Claim' as const;
@@ -122,45 +123,81 @@ export function RenderingWorldPlazaClaimModePanel({
         <RenderingWorldPlazaSidebarPanelHeader
           panelTitle={RENDERING_WORLD_PLAZA_CLAIM_MODE_SIDEBAR_TITLE}
           shortcutKey={DEFINING_WORLD_BUILDING_CLAIM_MODE_TOGGLE_KEY}
-          titleClassName={RENDERING_WORLD_PLAZA_CLAIM_MODE_SIDEBAR_HEADER_CLASS_NAME}
+          titleClassName={
+            RENDERING_WORLD_PLAZA_CLAIM_MODE_SIDEBAR_HEADER_CLASS_NAME
+          }
           onExit={onToggleClaimMode}
           exitAriaLabel="Exit claim mode"
         />
 
         <div className="flex flex-col gap-1">
-          <div className={RENDERING_WORLD_PLAZA_CLAIM_MODE_LEGEND_ROW_CLASS_NAME}>
+          <div
+            className={RENDERING_WORLD_PLAZA_CLAIM_MODE_LEGEND_ROW_CLASS_NAME}
+          >
             <span
               aria-hidden
-              className={DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_OWNED_SWATCH_CLASS_NAME}
+              className={
+                DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_OWNED_SWATCH_CLASS_NAME
+              }
             />
-            <span className={DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_LABEL_CLASS_NAME}>
+            <span
+              className={
+                DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_LABEL_CLASS_NAME
+              }
+            >
               Your plot
             </span>
           </div>
-          <div className={RENDERING_WORLD_PLAZA_CLAIM_MODE_LEGEND_ROW_CLASS_NAME}>
+          <div
+            className={RENDERING_WORLD_PLAZA_CLAIM_MODE_LEGEND_ROW_CLASS_NAME}
+          >
             <span
               aria-hidden
-              className={DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_CLAIMABLE_SWATCH_CLASS_NAME}
+              className={
+                DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_CLAIMABLE_SWATCH_CLASS_NAME
+              }
             />
-            <span className={DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_LABEL_CLASS_NAME}>
+            <span
+              className={
+                DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_LABEL_CLASS_NAME
+              }
+            >
               Can claim
             </span>
           </div>
-          <div className={RENDERING_WORLD_PLAZA_CLAIM_MODE_LEGEND_ROW_CLASS_NAME}>
+          {DEFINING_WORLD_TEMPORARY_PLOT_FEATURE_ENABLED ? (
+            <div
+              className={RENDERING_WORLD_PLAZA_CLAIM_MODE_LEGEND_ROW_CLASS_NAME}
+            >
+              <span
+                aria-hidden
+                className={
+                  DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_TEMPORARY_SWATCH_CLASS_NAME
+                }
+              />
+              <span
+                className={
+                  DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_LABEL_CLASS_NAME
+                }
+              >
+                Temporary tiles
+              </span>
+            </div>
+          ) : null}
+          <div
+            className={RENDERING_WORLD_PLAZA_CLAIM_MODE_LEGEND_ROW_CLASS_NAME}
+          >
             <span
               aria-hidden
-              className={DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_TEMPORARY_SWATCH_CLASS_NAME}
+              className={
+                DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_OTHER_SWATCH_CLASS_NAME
+              }
             />
-            <span className={DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_LABEL_CLASS_NAME}>
-              Temporary tiles
-            </span>
-          </div>
-          <div className={RENDERING_WORLD_PLAZA_CLAIM_MODE_LEGEND_ROW_CLASS_NAME}>
             <span
-              aria-hidden
-              className={DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_OTHER_SWATCH_CLASS_NAME}
-            />
-            <span className={DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_LABEL_CLASS_NAME}>
+              className={
+                DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_LABEL_CLASS_NAME
+              }
+            >
               Friends&apos; plots
             </span>
           </div>
@@ -194,12 +231,16 @@ export function RenderingWorldPlazaClaimModePanel({
         />
 
         {claimErrorMessage ? (
-          <p className={DEFINING_WORLD_BUILDING_CLAIM_MODE_ERROR_TEXT_CLASS_NAME}>
+          <p
+            className={DEFINING_WORLD_BUILDING_CLAIM_MODE_ERROR_TEXT_CLASS_NAME}
+          >
             {claimErrorMessage}
           </p>
         ) : null}
         {plotRegistryErrorMessage ? (
-          <p className={DEFINING_WORLD_BUILDING_CLAIM_MODE_ERROR_TEXT_CLASS_NAME}>
+          <p
+            className={DEFINING_WORLD_BUILDING_CLAIM_MODE_ERROR_TEXT_CLASS_NAME}
+          >
             {plotRegistryErrorMessage}
           </p>
         ) : null}

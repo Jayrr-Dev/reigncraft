@@ -1,9 +1,11 @@
-"use client";
+'use client';
 
-import { RenderingWorldPlazaClaimModeTemporaryTileCapacityBadge } from "@/components/world/building/components/renderingWorldPlazaClaimModeTemporaryTileCapacityBadge";
-import type { DefiningWorldBuildingPlot } from "@/components/world/building/domains/definingWorldBuildingPlot";
-import type { DefiningWorldBuildingPlotOwnerLimits } from "@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits";
-import type { DefiningWorldBuildingTilePosition } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
+import { Badge } from '@/components/ui/badge';
+import { RenderingWorldPlazaClaimModeTemporaryTileCapacityBadge } from '@/components/world/building/components/renderingWorldPlazaClaimModeTemporaryTileCapacityBadge';
+import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
+import type { DefiningWorldBuildingPlotOwnerLimits } from '@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits';
+import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
+import { DEFINING_WORLD_TEMPORARY_PLOT_FEATURE_ENABLED } from '@/components/world/building/domains/definingWorldTemporaryPlotFeatureFlag';
 import {
   DEFINING_WORLD_TEMPORARY_PLOT_LIST_BADGE_CLASS_NAME,
   DEFINING_WORLD_TEMPORARY_PLOT_LIST_DELETE_BUTTON_CLASS_NAME,
@@ -12,13 +14,12 @@ import {
   DEFINING_WORLD_TEMPORARY_PLOT_LIST_EMPTY_TEXT_CLASS_NAME,
   DEFINING_WORLD_TEMPORARY_PLOT_LIST_ROW_CLASS_NAME,
   LABELING_WORLD_TEMPORARY_PLOT_LIST_DELETE_BUTTON,
-} from "@/components/world/building/domains/definingWorldTemporaryPlotUiConstants";
-import { formattingWorldBuildingPlotRegistryContiguousRegionLabel } from "@/components/world/building/domains/groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions";
-import { listingWorldBuildingTemporaryPlotsForOwner } from "@/components/world/building/domains/listingWorldBuildingTemporaryPlotsForOwner";
-import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
+} from '@/components/world/building/domains/definingWorldTemporaryPlotUiConstants';
+import { formattingWorldBuildingPlotRegistryContiguousRegionLabel } from '@/components/world/building/domains/groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions';
+import { listingWorldBuildingTemporaryPlotsForOwner } from '@/components/world/building/domains/listingWorldBuildingTemporaryPlotsForOwner';
+import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { cn } from '@/lib/utils';
+import { X } from 'lucide-react';
 
 export interface RenderingWorldPlazaClaimModeTemporaryTilesListProps {
   activeViewportPlots: readonly DefiningWorldBuildingPlot[];
@@ -26,7 +27,7 @@ export interface RenderingWorldPlazaClaimModeTemporaryTilesListProps {
   temporaryTileClaimCount: number;
   plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits;
   onRemoveTemporaryPlotAtTile: (
-    tilePosition: DefiningWorldBuildingTilePosition,
+    tilePosition: DefiningWorldBuildingTilePosition
   ) => void;
   isRemovingTemporaryPlot?: boolean;
 }
@@ -41,11 +42,19 @@ export function RenderingWorldPlazaClaimModeTemporaryTilesList({
   plotOwnerLimits,
   onRemoveTemporaryPlotAtTile,
   isRemovingTemporaryPlot = false,
-}: RenderingWorldPlazaClaimModeTemporaryTilesListProps): React.JSX.Element {
+}: RenderingWorldPlazaClaimModeTemporaryTilesListProps): React.JSX.Element | null {
   const temporaryPlots = listingWorldBuildingTemporaryPlotsForOwner(
     activeViewportPlots,
-    localUserId,
+    localUserId
   );
+
+  // Flag off: only show when leftover temporary tiles still need removal.
+  if (
+    !DEFINING_WORLD_TEMPORARY_PLOT_FEATURE_ENABLED &&
+    !temporaryPlots.length
+  ) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -64,9 +73,10 @@ export function RenderingWorldPlazaClaimModeTemporaryTilesList({
               tileX: temporaryPlot.bounds.minTileX,
               tileY: temporaryPlot.bounds.minTileY,
             };
-            const regionLabel = formattingWorldBuildingPlotRegistryContiguousRegionLabel(
-              temporaryPlot.bounds,
-            );
+            const regionLabel =
+              formattingWorldBuildingPlotRegistryContiguousRegionLabel(
+                temporaryPlot.bounds
+              );
 
             return (
               <div
@@ -82,10 +92,14 @@ export function RenderingWorldPlazaClaimModeTemporaryTilesList({
                   onClick={() => {
                     onRemoveTemporaryPlotAtTile(tilePosition);
                   }}
-                  className={DEFINING_WORLD_TEMPORARY_PLOT_LIST_DELETE_BUTTON_CLASS_NAME}
+                  className={
+                    DEFINING_WORLD_TEMPORARY_PLOT_LIST_DELETE_BUTTON_CLASS_NAME
+                  }
                 >
                   <X
-                    className={DEFINING_WORLD_TEMPORARY_PLOT_LIST_DELETE_ICON_CLASS_NAME}
+                    className={
+                      DEFINING_WORLD_TEMPORARY_PLOT_LIST_DELETE_ICON_CLASS_NAME
+                    }
                     aria-hidden
                   />
                 </button>
@@ -94,7 +108,7 @@ export function RenderingWorldPlazaClaimModeTemporaryTilesList({
                   title={regionLabel}
                   className={cn(
                     DEFINING_WORLD_TEMPORARY_PLOT_LIST_BADGE_CLASS_NAME,
-                    "flex-1",
+                    'flex-1'
                   )}
                 >
                   {regionLabel}

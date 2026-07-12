@@ -79,6 +79,7 @@ import {
 } from '@/components/world/building/domains/definingWorldBuildingPresetBlockTypes';
 import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import { DEFINING_WORLD_PLAZA_EDIT_MODE_AUTO_SAVE_DEBOUNCE_MS } from '@/components/world/building/domains/definingWorldPlazaEditModeHotbarConstants';
+import { DEFINING_WORLD_TEMPORARY_PLOT_FEATURE_ENABLED } from '@/components/world/building/domains/definingWorldTemporaryPlotFeatureFlag';
 import { checkingWorldBuildingBlockUsesTileColumnExtrusion } from '@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnExtrusionOnGraphics';
 import {
   decrementingWorldBuildingWorldLayer,
@@ -868,6 +869,10 @@ export function usingWorldPlazaBuildMode({
   }, [removingBlockAtTile, selectedTilePosition]);
 
   const claimingTemporaryPlotAtSelectedTile = useCallback((): void => {
+    if (!DEFINING_WORLD_TEMPORARY_PLOT_FEATURE_ENABLED) {
+      return;
+    }
+
     if (!onlineUserId || !buildDraft || !selectedTilePosition) {
       return;
     }
@@ -1055,7 +1060,7 @@ export function usingWorldPlazaBuildMode({
       }
 
       setBuildErrorMessage(
-        isNormalClaimable
+        isNormalClaimable || !DEFINING_WORLD_TEMPORARY_PLOT_FEATURE_ENABLED
           ? resolvingWorldBuildingTileClaimRejectionMessage(
               activeViewportPlots,
               tilePosition,

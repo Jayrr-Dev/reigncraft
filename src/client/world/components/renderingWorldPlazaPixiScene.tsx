@@ -100,6 +100,7 @@ import { RenderingWorldPlazaPlayerNameLabels } from '@/components/world/componen
 import { RenderingWorldPlazaPlayerNightLightGroundGlow } from '@/components/world/components/renderingWorldPlazaPlayerNightLightGroundGlow';
 import { RenderingWorldPlazaPlayerTeleportFadeOverlay } from '@/components/world/components/renderingWorldPlazaPlayerTeleportFadeOverlay';
 import { RenderingWorldPlazaPresenceReconnectOverlay } from '@/components/world/components/renderingWorldPlazaPresenceReconnectOverlay';
+import { RenderingWorldPlazaProfilePanel } from '@/components/world/components/renderingWorldPlazaProfilePanel';
 import { RenderingWorldPlazaRemotePlayers } from '@/components/world/components/renderingWorldPlazaRemotePlayers';
 import { RenderingWorldPlazaRoomChatBubbles } from '@/components/world/components/renderingWorldPlazaRoomChatBubbles';
 import { RenderingWorldPlazaRoomChatPanel } from '@/components/world/components/renderingWorldPlazaRoomChatPanel';
@@ -300,6 +301,7 @@ import { usingWorldPlazaMobileLandscapeViewport } from '@/components/world/hooks
 import { usingWorldPlazaPerformanceDiagnosticsVisibleState } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsVisibleState';
 import { usingWorldPlazaPersistingPlayerLastPosition } from '@/components/world/hooks/usingWorldPlazaPersistingPlayerLastPosition';
 import { usingWorldPlazaPlayerTeleportScreenFade } from '@/components/world/hooks/usingWorldPlazaPlayerTeleportScreenFade';
+import { usingWorldPlazaProfilePanelVisibleState } from '@/components/world/hooks/usingWorldPlazaProfilePanelVisibleState';
 import { usingWorldPlazaRecordingBestiarySightings } from '@/components/world/hooks/usingWorldPlazaRecordingBestiarySightings';
 import { usingWorldPlazaRecordingDiscoveredNamedRealms } from '@/components/world/hooks/usingWorldPlazaRecordingDiscoveredNamedRealms';
 import { usingWorldPlazaRecordingExploredBiomes } from '@/components/world/hooks/usingWorldPlazaRecordingExploredBiomes';
@@ -3635,6 +3637,9 @@ function RenderingWorldPlazaPixiSceneConnected({
   const { isFriendsPanelOpen, closingFriendsPanel, togglingFriendsPanel } =
     usingWorldPlazaFriendsPanelVisibleState();
 
+  const { isProfilePanelOpen, closingProfilePanel, togglingProfilePanel } =
+    usingWorldPlazaProfilePanelVisibleState();
+
   const { activeCodexSection, openingCodexSection, closingCodexSection } =
     usingWorldPlazaCodexPanelVisibleState();
 
@@ -5321,6 +5326,8 @@ function RenderingWorldPlazaPixiSceneConnected({
                   onExitToHome={onExitToHome}
                   onToggleChat={togglingChatFromActionBar}
                   onToggleFriends={togglingFriendsFromActionBar}
+                  isProfileOpen={isProfilePanelOpen}
+                  onToggleProfile={togglingProfilePanel}
                   onSelectCodexSection={selectingCodexSectionFromActionBar}
                   onToggleEditMode={togglingEditSession}
                   onToggleFullscreen={() => {
@@ -5493,6 +5500,8 @@ function RenderingWorldPlazaPixiSceneConnected({
                   onExitToHome={onExitToHome}
                   onToggleChat={() => undefined}
                   onToggleFriends={() => undefined}
+                  isProfileOpen={isProfilePanelOpen}
+                  onToggleProfile={togglingProfilePanel}
                   onSelectCodexSection={selectingCodexSectionFromActionBar}
                   onToggleEditMode={togglingEditSession}
                   onToggleFullscreen={() => {
@@ -5547,6 +5556,20 @@ function RenderingWorldPlazaPixiSceneConnected({
               ) : null}
             </>
           ) : null}
+          <RenderingWorldPlazaProfilePanel
+            isOpen={isProfilePanelOpen}
+            onClose={closingProfilePanel}
+            displayName={onlineDisplayName}
+            characterDisplayName={selectedCharacterEngineDefinition.displayName}
+            healthHudSnapshot={playerHealthHudSnapshot}
+            hungerHudSnapshot={hungerHudSnapshot}
+            staminaHud={{
+              staminaRatio,
+              isRunning: isRunningHud,
+              isDepleted: isStaminaDepleted,
+            }}
+            derivedStats={selectedCharacterEngineDerivedStats}
+          />
         </RenderingWorldPlazaGameplayHud>
       </div>
       <RenderingUserProfileFriendRequestPlazaModal
