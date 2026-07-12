@@ -1,78 +1,83 @@
+import { computingWorldPlazaActionBarOccupiedHeightPx } from '@/components/world/domains/computingWorldPlazaActionBarOccupiedHeightPx';
 import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
-import type { DefiningWorldPlazaMiniMapStackInventoryHotbarClearanceLayout } from '@/components/world/domains/definingWorldPlazaMiniMapStackConstants';
+import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
+import { DEFINING_WORLD_PLAZA_MINI_MAP_CANVAS_SIZE_PX } from '@/components/world/domains/definingWorldPlazaMiniMapConstants';
 import { resolvingWorldPlazaMiniMapStackViewportLayout } from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportLayout';
-import { DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
-import { DEFINING_WORLD_PLAZA_INVENTORY_SHELL_GAP_BASE_PX } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import type { CSSProperties } from 'react';
 
 export type ResolvingWorldPlazaMiniMapStackViewportStylesParams = {
   viewportHudScale: number;
   isMobile: boolean;
   isFullscreen: boolean;
-  isInventoryHotbarVisible: boolean;
 };
 
 /**
- * Occupied height of the inventory hotbar shell in CSS pixels.
- *
- * @param viewportHudScale - Live scale from the plaza viewport frame
- * @param inventoryHotbarClearance - Mobile clearance layout from the stack profile
+ * Top offset for the minimap stack, below the action bar shell.
  */
-export function computingWorldPlazaInventoryHotbarOccupiedHeightPx(
+export function computingWorldPlazaMiniMapStackTopPx(
   viewportHudScale: number,
-  inventoryHotbarClearance: DefiningWorldPlazaMiniMapStackInventoryHotbarClearanceLayout
+  isMobile: boolean
 ): number {
-  const slotPx = computingWorldPlazaViewportHudScaledPx(
-    inventoryHotbarClearance.slotBasePx,
-    viewportHudScale,
-    inventoryHotbarClearance.scale
-  );
-  const shellPaddingPx = computingWorldPlazaViewportHudScaledPx(
-    inventoryHotbarClearance.shellPaddingBasePx,
-    viewportHudScale,
-    inventoryHotbarClearance.scale
-  );
-  const gapPx = computingWorldPlazaViewportHudScaledPx(
-    DEFINING_WORLD_PLAZA_INVENTORY_SHELL_GAP_BASE_PX,
-    viewportHudScale,
-    inventoryHotbarClearance.scale
-  );
+  const belowActionBarGapBasePx =
+    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.minimapStack
+      .belowActionBarGapBasePx;
 
-  const gridHeightPx =
-    slotPx * DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT +
-    gapPx * Math.max(0, DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT - 1);
-
-  return gridHeightPx + shellPaddingPx * 2;
-}
-
-/**
- * Bottom inset that clears the centered inventory hotbar on mobile.
- *
- * @param viewportHudScale - Live scale from the plaza viewport frame
- * @param inventoryHotbarClearance - Mobile clearance layout from the stack profile
- */
-export function computingWorldPlazaMiniMapStackMobileHotbarClearanceBottomPx(
-  viewportHudScale: number,
-  inventoryHotbarClearance: DefiningWorldPlazaMiniMapStackInventoryHotbarClearanceLayout
-): number {
   return (
+    computingWorldPlazaActionBarOccupiedHeightPx(viewportHudScale, isMobile) +
     computingWorldPlazaViewportHudScaledPx(
-      inventoryHotbarClearance.bottomInsetBasePx,
-      viewportHudScale
-    ) +
-    computingWorldPlazaInventoryHotbarOccupiedHeightPx(
-      viewportHudScale,
-      inventoryHotbarClearance
-    ) +
-    computingWorldPlazaViewportHudScaledPx(
-      inventoryHotbarClearance.stackGapBasePx,
+      belowActionBarGapBasePx,
       viewportHudScale
     )
   );
 }
 
 /**
- * Resolves bottom-left anchor offsets for the minimap stack.
+ * Vertical footprint of the minimap parchment card (environment bar + map).
+ */
+export function computingWorldPlazaMiniMapStackOccupiedHeightPx(
+  viewportHudScale: number,
+  isMobile: boolean,
+  isFullscreen: boolean
+): number {
+  const minimapLayout =
+    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.minimapStack;
+  const viewportMode = isFullscreen ? 'fullscreen' : 'embedded';
+  const platform = isMobile ? 'mobile' : 'desktop';
+  const canvasSizePx =
+    DEFINING_WORLD_PLAZA_MINI_MAP_CANVAS_SIZE_PX[viewportMode][platform];
+  const environmentBarPx = computingWorldPlazaViewportHudScaledPx(
+    minimapLayout.environmentBarOccupiedBasePx[platform],
+    viewportHudScale
+  );
+  const cardChromePx = computingWorldPlazaViewportHudScaledPx(
+    minimapLayout.cardVerticalChromeBasePx,
+    viewportHudScale
+  );
+
+  return environmentBarPx + cardChromePx + canvasSizePx;
+}
+
+/**
+ * Right inset for top-right HUD chrome that aligns with the minimap stack.
+ */
+export function computingWorldPlazaMiniMapStackRightInsetPx(
+  viewportHudScale: number,
+  isMobile: boolean,
+  isFullscreen: boolean
+): number {
+  const viewportLayout = resolvingWorldPlazaMiniMapStackViewportLayout(
+    isMobile,
+    isFullscreen
+  );
+
+  return computingWorldPlazaViewportHudScaledPx(
+    viewportLayout.edgeInsetBasePx,
+    viewportHudScale
+  );
+}
+
+/**
+ * Resolves top-right anchor offsets for the minimap stack.
  *
  * Uses inline px values so positioning does not depend on Tailwind spacing
  * utilities being present in the production CSS bundle.
@@ -81,27 +86,19 @@ export function resolvingWorldPlazaMiniMapStackViewportStyles({
   viewportHudScale,
   isMobile,
   isFullscreen,
-  isInventoryHotbarVisible,
 }: ResolvingWorldPlazaMiniMapStackViewportStylesParams): CSSProperties {
-  const viewportLayout = resolvingWorldPlazaMiniMapStackViewportLayout(
+  const rightInsetPx = computingWorldPlazaMiniMapStackRightInsetPx(
+    viewportHudScale,
     isMobile,
     isFullscreen
   );
-  const edgeInsetPx = computingWorldPlazaViewportHudScaledPx(
-    viewportLayout.edgeInsetBasePx,
-    viewportHudScale
+  const topPx = computingWorldPlazaMiniMapStackTopPx(
+    viewportHudScale,
+    isMobile
   );
-  const inventoryHotbarClearance = viewportLayout.inventoryHotbarClearance;
-  const bottomPx =
-    inventoryHotbarClearance && isInventoryHotbarVisible
-      ? computingWorldPlazaMiniMapStackMobileHotbarClearanceBottomPx(
-          viewportHudScale,
-          inventoryHotbarClearance
-        )
-      : edgeInsetPx;
 
   return {
-    left: `calc(${edgeInsetPx}px + env(safe-area-inset-left, 0px))`,
-    bottom: `calc(${bottomPx}px + env(safe-area-inset-bottom, 0px))`,
+    top: `calc(${topPx}px + env(safe-area-inset-top, 0px))`,
+    right: `calc(${rightInsetPx}px + env(safe-area-inset-right, 0px))`,
   };
 }

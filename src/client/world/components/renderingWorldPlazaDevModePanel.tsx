@@ -77,6 +77,8 @@ export interface RenderingWorldPlazaDevModePanelProps {
   isBuildModeActive: boolean;
   /** Live local player position in grid space. */
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
+  /** Current character body height in world layers. */
+  playerHeightWorldLayers: number;
   /** True while block build mode is active. */
   isBlockBuildModeActive: boolean;
   /** Sidebar placement layer when build mode is active. */
@@ -211,6 +213,7 @@ export function RenderingWorldPlazaDevModePanel(
     isMobile = false,
     isBlockBuildModeActive,
     playerPositionRef,
+    playerHeightWorldLayers,
     selectedWorldLayer,
     previewWorldLayer,
     hasBuildPreviewTile,
@@ -306,6 +309,7 @@ export function RenderingWorldPlazaDevModePanel(
                     <RenderingWorldPlazaPlayerWorldLayerDebugLabel
                       layout="embedded"
                       playerPositionRef={playerPositionRef}
+                      playerHeightWorldLayers={playerHeightWorldLayers}
                       isBuildModeActive={isBlockBuildModeActive}
                       selectedWorldLayer={selectedWorldLayer}
                       previewWorldLayer={previewWorldLayer}

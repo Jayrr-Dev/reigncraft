@@ -21,6 +21,8 @@ import { useEffect, useState } from 'react';
 export interface RenderingWorldPlazaPlayerWorldLayerDebugLabelProps {
   /** Live local player position in grid space. */
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
+  /** Current character body height in world layers. */
+  playerHeightWorldLayers?: number;
   /** True while block build mode is active. */
   isBuildModeActive: boolean;
   /** Sidebar placement layer when build mode is active. */
@@ -44,6 +46,7 @@ export interface RenderingWorldPlazaPlayerWorldLayerDebugLabelProps {
  */
 export function RenderingWorldPlazaPlayerWorldLayerDebugLabel({
   playerPositionRef,
+  playerHeightWorldLayers = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
   isBuildModeActive,
   selectedWorldLayer,
   previewWorldLayer,
@@ -55,7 +58,7 @@ export function RenderingWorldPlazaPlayerWorldLayerDebugLabel({
 }: RenderingWorldPlazaPlayerWorldLayerDebugLabelProps): React.JSX.Element {
   const [playerWorldLayer, setPlayerWorldLayer] = useState<number>(1);
   const playerTopWorldLayer =
-    playerWorldLayer + DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS - 1;
+    playerWorldLayer + playerHeightWorldLayers - 1;
   const displayWorldLayer = hasBuildPreviewTile
     ? previewWorldLayer
     : selectedWorldLayer;

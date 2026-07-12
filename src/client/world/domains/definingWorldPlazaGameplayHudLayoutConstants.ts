@@ -113,34 +113,42 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
       },
     },
 
-    /** Top-right: online room status and local buff/debuff stack. */
+    /** Top-right: minimap card, online room status, and local buff/debuff stack. */
     topRight: {
+      minimapStack: {
+        anchorClassName:
+          'pointer-events-none absolute z-20 flex flex-col items-end select-none',
+        /** Gap between the action bar shell and the minimap card. */
+        belowActionBarGapBasePx: 6,
+        /** Parchment card vertical padding (p-0.5 top + bottom). */
+        cardVerticalChromeBasePx: 4,
+        /** Environment bar row height before viewport HUD scale. */
+        environmentBarOccupiedBasePx: {
+          desktop: 16,
+          mobile: 12,
+        },
+        /** Gap before room status or status effects below the minimap card. */
+        belowMinimapGapBasePx: 6,
+      },
       roomStatusHud: {
         anchorClassName:
-          'pointer-events-none absolute right-3 top-3 hidden flex-col gap-1 md:flex',
+          'pointer-events-none absolute hidden flex-col gap-1 md:flex',
       },
       statusEffectStack: {
         desktopAnchorClassName:
-          'pointer-events-none absolute right-3 z-20 flex select-none flex-col items-end gap-1',
+          'pointer-events-none absolute z-20 flex select-none flex-col items-end gap-1',
         mobileAnchorClassName:
-          'pointer-events-none absolute right-2 z-20 flex select-none flex-col items-end gap-0.5',
-        desktopTopClassName: 'top-3',
-        mobileTopClassName: 'top-2',
-        topWithRoomHudClassName: 'top-3 md:top-28',
-        mobileBelowActionBarGapBasePx: 4,
+          'pointer-events-none absolute z-20 flex select-none flex-col items-end gap-0.5',
+        /**
+         * Conservative room-status block height for stacking status badges
+         * below the online room HUD on md+ viewports.
+         */
+        belowRoomHudEstimatedOccupiedBasePx: 88,
         /** Popover opens below the badge, right edge flush with the stack. */
         explanationPopover: {
           placement: 'below',
           anchor: 'end',
         } as const,
-      },
-    },
-
-    /** Bottom-left: unified minimap + environment bar card. */
-    bottomLeft: {
-      minimapStack: {
-        anchorClassName:
-          'pointer-events-none absolute z-20 flex flex-col items-start select-none',
       },
     },
 
@@ -152,14 +160,11 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
           'pointer-events-none absolute inset-x-0 z-50 flex justify-center px-3',
         edgeInsetBasePx: 12,
         /**
-         * On mobile the hotbar centers between the bottom-left minimap card
-         * and the bottom-right jump button instead of the full screen width,
-         * so it never overlaps either corner control.
+         * On mobile the hotbar reserves space for the bottom-right jump button
+         * so the centered strip never overlaps that corner control.
          */
         mobileFlankClearance: {
-          /** Parchment card chrome around the minimap canvas (borders + padding). */
-          minimapCardChromeBasePx: 10,
-          /** Breathing room between the hotbar and each flanking control. */
+          /** Breathing room between the hotbar and the jump button. */
           gapBasePx: 8,
           /** Right inset of the jump button anchor (0.75rem). */
           jumpButtonEdgeInsetPx: 12,
@@ -262,9 +267,9 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_INVENTORY_HOTBAR_ANCHOR_CLASS_NAM
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.bottomCenter.inventoryHotbar
     .anchorClassName;
 
-/** Bottom-left minimap stack anchor (re-exported by minimap stack constants). */
+/** Top-right minimap stack anchor (re-exported by minimap stack constants). */
 export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_MINI_MAP_STACK_ANCHOR_CLASS_NAME =
-  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.bottomLeft.minimapStack
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.minimapStack
     .anchorClassName;
 
 /** Top-right room status HUD anchor (position only; shell from style constants). */

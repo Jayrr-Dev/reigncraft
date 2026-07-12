@@ -37,12 +37,10 @@ export interface RenderingWorldPlazaMiniMapStackProps {
   isTemperatureVisible: boolean;
   /** Live HUD scale from the plaza viewport frame. */
   viewportHudScale?: number;
-  /** When true, lifts the stack above the bottom-center inventory hotbar. */
-  isInventoryHotbarVisible?: boolean;
 }
 
 /**
- * Bottom-left minimap inside a unified time/temperature + map card.
+ * Top-right minimap inside a unified time/temperature + map card.
  */
 export function RenderingWorldPlazaMiniMapStack({
   playerPositionRef,
@@ -56,7 +54,6 @@ export function RenderingWorldPlazaMiniMapStack({
   temperatureDisplayUnit,
   isTemperatureVisible,
   viewportHudScale = 1,
-  isInventoryHotbarVisible = false,
 }: RenderingWorldPlazaMiniMapStackProps): React.JSX.Element | null {
   const performanceProfile = usingWorldPlazaPerformanceProfile();
   const { isMinimapPreferenceEnabled } = usingWorldPlazaMinimapEnabled();
@@ -78,9 +75,8 @@ export function RenderingWorldPlazaMiniMapStack({
         viewportHudScale,
         isMobile,
         isFullscreen,
-        isInventoryHotbarVisible,
       }),
-    [viewportHudScale, isMobile, isFullscreen, isInventoryHotbarVisible]
+    [viewportHudScale, isMobile, isFullscreen]
   );
   const isMinimapVisible = resolvingWorldPlazaMinimapVisible({
     isMinimapPreferenceEnabled,
@@ -112,7 +108,7 @@ export function RenderingWorldPlazaMiniMapStack({
           <RenderingReigncraftToaster
             toasterId={DEFINING_REIGNCRAFT_TOASTER_ID.plaza}
             variant="gameplay"
-            position="bottom-left"
+            position="top-right"
             offset={0}
             mobileOffset={0}
             toastWidthPx={toastWidthPx}

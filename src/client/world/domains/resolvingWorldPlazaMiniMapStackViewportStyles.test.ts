@@ -2,31 +2,29 @@ import { resolvingWorldPlazaMiniMapStackViewportStyles } from '@/components/worl
 import { describe, expect, it } from 'vitest';
 
 describe('resolvingWorldPlazaMiniMapStackViewportStyles', () => {
-  it('anchors desktop stacks to the bottom-left edge inset', () => {
+  it('anchors desktop stacks to the top-right edge inset below the action bar', () => {
     expect(
       resolvingWorldPlazaMiniMapStackViewportStyles({
         viewportHudScale: 1,
         isMobile: false,
         isFullscreen: false,
-        isInventoryHotbarVisible: true,
       })
     ).toEqual({
-      left: 'calc(12px + env(safe-area-inset-left, 0px))',
-      bottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
+      top: 'calc(64px + env(safe-area-inset-top, 0px))',
+      right: 'calc(12px + env(safe-area-inset-right, 0px))',
     });
   });
 
-  it('aligns mobile stacks with the inventory hotbar bottom inset', () => {
+  it('anchors mobile stacks below the action bar on the top-right edge', () => {
     expect(
       resolvingWorldPlazaMiniMapStackViewportStyles({
         viewportHudScale: 1,
         isMobile: true,
         isFullscreen: false,
-        isInventoryHotbarVisible: true,
       })
     ).toEqual({
-      left: 'calc(12px + env(safe-area-inset-left, 0px))',
-      bottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
+      top: 'calc(64px + env(safe-area-inset-top, 0px))',
+      right: 'calc(12px + env(safe-area-inset-right, 0px))',
     });
   });
 });

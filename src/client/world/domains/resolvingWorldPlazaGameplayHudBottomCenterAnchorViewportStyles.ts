@@ -1,50 +1,13 @@
 import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
-import { DEFINING_WORLD_PLAZA_MINI_MAP_CANVAS_SIZE_PX } from '@/components/world/domains/definingWorldPlazaMiniMapConstants';
-import { resolvingWorldPlazaMiniMapStackViewportLayout } from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportLayout';
 import { resolvingWorldPlazaMobileJumpButtonViewportStyles } from '@/components/world/domains/resolvingWorldPlazaMobileJumpButtonViewportStyles';
 import type { CSSProperties } from 'react';
 
-/** Mobile context that shifts the bottom-center anchor between corner controls. */
+/** Mobile context that shifts the bottom-center anchor away from the jump button. */
 export type ResolvingWorldPlazaGameplayHudBottomCenterMobileFlanks = {
   /** True while the plaza host is in native fullscreen. */
   isFullscreen: boolean;
 };
-
-/**
- * Horizontal footprint of the bottom-left minimap card on mobile, from the
- * screen edge to the card's right edge plus breathing room.
- *
- * @param viewportHudScale - Live scale from the plaza viewport frame
- * @param isFullscreen - True while the plaza host is in native fullscreen
- */
-export function computingWorldPlazaGameplayHudBottomCenterMinimapReservedPx(
-  viewportHudScale: number,
-  isFullscreen: boolean
-): number {
-  const flankClearance =
-    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.bottomCenter
-      .inventoryHotbar.mobileFlankClearance;
-  const stackLayout = resolvingWorldPlazaMiniMapStackViewportLayout(
-    true,
-    isFullscreen
-  );
-  const edgeInsetPx = computingWorldPlazaViewportHudScaledPx(
-    stackLayout.edgeInsetBasePx,
-    viewportHudScale
-  );
-  const canvasSizePx =
-    DEFINING_WORLD_PLAZA_MINI_MAP_CANVAS_SIZE_PX[
-      isFullscreen ? 'fullscreen' : 'embedded'
-    ].mobile;
-
-  return (
-    edgeInsetPx +
-    canvasSizePx +
-    flankClearance.minimapCardChromeBasePx +
-    flankClearance.gapBasePx
-  );
-}
 
 /**
  * Horizontal footprint of the bottom-right mobile jump button, from the screen
@@ -80,8 +43,7 @@ export function computingWorldPlazaGameplayHudBottomCenterJumpReservedPx(
  * areas inside Reddit iframes.
  *
  * When `mobileFlanks` is provided (phone-sized viewports), the anchor also
- * receives asymmetric horizontal padding so the centered content lands between
- * the bottom-left minimap card and the bottom-right jump button.
+ * receives right padding so the centered content clears the jump button.
  */
 export function resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles(
   viewportHudScale: number,
@@ -102,10 +64,6 @@ export function resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles(
 
   return {
     ...bottomStyle,
-    paddingLeft: computingWorldPlazaGameplayHudBottomCenterMinimapReservedPx(
-      viewportHudScale,
-      mobileFlanks.isFullscreen
-    ),
     paddingRight:
       computingWorldPlazaGameplayHudBottomCenterJumpReservedPx(
         viewportHudScale

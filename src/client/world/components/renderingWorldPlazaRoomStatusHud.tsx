@@ -7,6 +7,9 @@ import {
   DEFINING_WORLD_PLAZA_ONLINE_ROOM_MAX_PLAYERS,
   type DefiningWorldPlazaOnlineRoomSnapshot,
 } from '@/components/world/domains/definingWorldPlazaOnlineRoom';
+import { resolvingWorldPlazaRoomStatusHudViewportStyles } from '@/components/world/domains/resolvingWorldPlazaRoomStatusHudViewportStyles';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useMemo } from 'react';
 
 /** Label suffix for the signed-in user in the online list. */
 const RENDERING_WORLD_PLAZA_ROOM_STATUS_HUD_LOCAL_PLAYER_SUFFIX =
@@ -23,6 +26,9 @@ export interface RenderingWorldPlazaRoomStatusHudProps {
   maxPlayers?: number;
   /** Hides the HUD when build mode sidebar is open. */
   isHidden?: boolean;
+  /** Live HUD scale from the plaza viewport frame. */
+  viewportHudScale?: number;
+  isFullscreen?: boolean;
 }
 
 /**
@@ -33,7 +39,20 @@ export function RenderingWorldPlazaRoomStatusHud({
   localUserId,
   maxPlayers = DEFINING_WORLD_PLAZA_ONLINE_ROOM_MAX_PLAYERS,
   isHidden = false,
+  viewportHudScale = 1,
+  isFullscreen = false,
 }: RenderingWorldPlazaRoomStatusHudProps): React.JSX.Element | null {
+  const isMobile = useIsMobile();
+  const anchorStyle = useMemo(
+    () =>
+      resolvingWorldPlazaRoomStatusHudViewportStyles({
+        viewportHudScale,
+        isMobile,
+        isFullscreen,
+      }),
+    [viewportHudScale, isMobile, isFullscreen]
+  );
+
   if (isHidden) {
     return null;
   }
@@ -75,6 +94,7 @@ export function RenderingWorldPlazaRoomStatusHud({
   return (
     <div
       className={`${STYLING_WORLD_PLAZA_ROOM_STATUS_HUD_ANCHOR_CLASS_NAME} ${STYLING_WORLD_PLAZA_ROOM_STATUS_HUD_SHELL_CLASS_NAME}`}
+      style={anchorStyle}
     >
       {connectionLabel ? (
         <p className="font-medium">{connectionLabel}</p>
