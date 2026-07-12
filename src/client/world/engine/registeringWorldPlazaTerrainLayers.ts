@@ -1020,6 +1020,8 @@ export function registeringWorldPlazaTerrainLayers(
           viewportWidthPx: context.viewportWidth,
           viewportHeightPx: context.viewportHeight,
           worldZoom: context.worldZoom,
+          maxAnimatedTileCount:
+            context.performanceProfile.waterShimmerMaxAnimatedTiles,
         });
       },
       resetRuntimeState: (context, runtimeState) => {

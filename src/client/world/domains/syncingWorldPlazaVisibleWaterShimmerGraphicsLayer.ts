@@ -31,6 +31,7 @@ export interface UpdatingWorldPlazaVisibleWaterShimmerGraphicsLayerInput {
   readonly viewportWidthPx: number;
   readonly viewportHeightPx: number;
   readonly worldZoom: number;
+  readonly maxAnimatedTileCount: number;
 }
 
 /** Conservative padding for animated streaks and ripple ellipses. */
@@ -85,22 +86,28 @@ export function updatingWorldPlazaVisibleWaterShimmerGraphicsLayer(
     input.bounds
   );
   input.shimmerGraphics.clear();
-  const animatedTileCount = drawingWorldPlazaWaterShimmerOnGraphics(
-    input.shimmerGraphics,
-    input.bounds,
-    input.animationTimeMs,
-    {
-      cameraOffset: input.cameraOffset,
-      widthPx: input.viewportWidthPx,
-      heightPx: input.viewportHeightPx,
-      worldZoom: input.worldZoom,
-    }
-  );
+  const { animatedRiverTileCount, animatedTileCount } =
+    drawingWorldPlazaWaterShimmerOnGraphics(
+      input.shimmerGraphics,
+      input.bounds,
+      input.animationTimeMs,
+      {
+        cameraOffset: input.cameraOffset,
+        widthPx: input.viewportWidthPx,
+        heightPx: input.viewportHeightPx,
+        worldZoom: input.worldZoom,
+      },
+      input.maxAnimatedTileCount
+    );
 
   finishSample();
   settingWorldPlazaPerformanceDiagnosticsGauge(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.WATER_SHIMMER_TILE_COUNT,
     animatedTileCount
+  );
+  settingWorldPlazaPerformanceDiagnosticsGauge(
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE.RIVER_SHIMMER_TILE_COUNT,
+    animatedRiverTileCount
   );
 }
 

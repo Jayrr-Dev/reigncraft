@@ -502,9 +502,13 @@ export const DEFINING_WORLD_PLAZA_WATER_LAKE_BASIN_NOISE_MIN = 0.58;
  */
 export const DEFINING_WORLD_PLAZA_WATER_LAKE_FLOWING_WATER_BASIN_EXCLUSION_NOISE_MIN = 0.535;
 
-/** Chebyshev radius when searching for a lake body to gate flowing water. */
-export const DEFINING_WORLD_PLAZA_WATER_LAKE_FLOWING_WATER_EXCLUSION_RADIUS_BLOCKS =
-  scalingWorldPlazaBiomeWorldFeatureSpanTiles(24);
+/**
+ * Chebyshev radius when searching for a lake body to gate flowing water.
+ *
+ * Keep this absolute like river and stream channels. Scaling 24 by the biome
+ * world factor made each candidate inspect 37,249 tiles instead of 2,401.
+ */
+export const DEFINING_WORLD_PLAZA_WATER_LAKE_FLOWING_WATER_EXCLUSION_RADIUS_BLOCKS = 24;
 
 /** Stride for lake cluster anchors used to pick a single inflow side. */
 export const DEFINING_WORLD_PLAZA_WATER_LAKE_INFLOW_CLUSTER_STRIDE_BLOCKS =

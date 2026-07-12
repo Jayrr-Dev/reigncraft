@@ -60,11 +60,28 @@ describe('resolvingWorldPlazaWaterSurfaceTileDrawMetadataAtTileIndex', () => {
   });
 
   it('reuses complete surface metadata for repeated tile redraws', () => {
-    const first =
-      resolvingWorldPlazaWaterSurfaceTileDrawMetadataAtTileIndex(4, 7, true);
-    const second =
-      resolvingWorldPlazaWaterSurfaceTileDrawMetadataAtTileIndex(4, 7, true);
+    const first = resolvingWorldPlazaWaterSurfaceTileDrawMetadataAtTileIndex(
+      4,
+      7,
+      true
+    );
+    const second = resolvingWorldPlazaWaterSurfaceTileDrawMetadataAtTileIndex(
+      4,
+      7,
+      true
+    );
 
+    expect(first).toEqual({
+      tileX: 4,
+      tileY: 7,
+      isRiver: true,
+      surfaceAppearance: {
+        batchKey: '1193046-0.5',
+        color: 0x123456,
+        alpha: 0.5,
+      },
+      drawsShoreDetails: true,
+    });
     expect(second).toBe(first);
     expect(waterMock).toHaveBeenCalledTimes(1);
     expect(frozenMock).toHaveBeenCalledTimes(1);

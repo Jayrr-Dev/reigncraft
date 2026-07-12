@@ -41,6 +41,23 @@ const CHECKING_WORLD_PLAZA_STREAM_CHANNEL_CARDINAL_NEIGHBOR_STEPS: ReadonlyArray
   { deltaX: 0, deltaY: -1 },
 ];
 
+/** Hard cap on memoized tile columns before the cache resets. */
+const CHECKING_WORLD_PLAZA_STREAM_CHANNEL_PASSES_NOISE_CACHE_MAX_COLUMNS = 4000;
+
+/**
+ * Stream connectivity repeatedly probes the same neighboring channel samples.
+ * Cache the expensive gradient and fractal-noise result per tile.
+ */
+const checkingWorldPlazaStreamChannelPassesNoiseCacheByColumn = new Map<
+  number,
+  Map<number, boolean>
+>();
+
+/** Clears stream channel memoization after generation feature changes. */
+export function invalidatingWorldPlazaStreamChannelPassesNoiseCache(): void {
+  checkingWorldPlazaStreamChannelPassesNoiseCacheByColumn.clear();
+}
+
 /**
  * Samples the coarse mask that decides which regions are allowed to host streams.
  *
@@ -228,7 +245,7 @@ function checkingWorldPlazaStreamChannelRibbonHitsAtTileIndex(
  * @param tileX - Tile column index.
  * @param tileY - Tile row index.
  */
-export function checkingWorldPlazaStreamChannelPassesNoiseAtTileIndex(
+function computingWorldPlazaStreamChannelPassesNoiseAtTileIndex(
   tileX: number,
   tileY: number,
 ): boolean {
@@ -256,6 +273,48 @@ export function checkingWorldPlazaStreamChannelPassesNoiseAtTileIndex(
       DEFINING_WORLD_PLAZA_WATER_STREAM_CONNECTOR_CHANNEL_HALF_WIDTH_TILES,
     )
   );
+}
+
+/**
+ * Returns the memoized primary, branch, or connector channel result.
+ *
+ * Neighbor, bridge, and minimum-run checks revisit these tiles heavily.
+ */
+export function checkingWorldPlazaStreamChannelPassesNoiseAtTileIndex(
+  tileX: number,
+  tileY: number,
+): boolean {
+  let columnCache =
+    checkingWorldPlazaStreamChannelPassesNoiseCacheByColumn.get(tileX);
+
+  if (columnCache) {
+    const cached = columnCache.get(tileY);
+
+    if (cached !== undefined) {
+      return cached;
+    }
+  } else {
+    if (
+      checkingWorldPlazaStreamChannelPassesNoiseCacheByColumn.size >=
+      CHECKING_WORLD_PLAZA_STREAM_CHANNEL_PASSES_NOISE_CACHE_MAX_COLUMNS
+    ) {
+      checkingWorldPlazaStreamChannelPassesNoiseCacheByColumn.clear();
+    }
+
+    columnCache = new Map();
+    checkingWorldPlazaStreamChannelPassesNoiseCacheByColumn.set(
+      tileX,
+      columnCache,
+    );
+  }
+
+  const passesNoise = computingWorldPlazaStreamChannelPassesNoiseAtTileIndex(
+    tileX,
+    tileY,
+  );
+  columnCache.set(tileY, passesNoise);
+
+  return passesNoise;
 }
 
 /**

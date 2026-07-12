@@ -1,6 +1,7 @@
 import { invalidatingWorldPlazaLakeBasinOccupyCache } from '@/components/world/domains/checkingWorldPlazaLakeBasinOccupiesTileAtTileIndex';
 import { invalidatingWorldPlazaLavaAtTileIndexCache } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
 import { invalidatingWorldPlazaRiverChannelPassesNoiseCache } from '@/components/world/domains/checkingWorldPlazaRiverChannelPlacesRiverAtTileIndex';
+import { invalidatingWorldPlazaStreamChannelPassesNoiseCache } from '@/components/world/domains/checkingWorldPlazaStreamChannelPlacesStreamAtTileIndex';
 import { invalidatingWorldPlazaWaterFrozenStateAtTileIndexCache } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
 import { invalidatingWorldPlazaWaterShimmerTileEntryCache } from '@/components/world/domains/drawingWorldPlazaWaterShimmerOnGraphics';
 import { invalidatingWorldPlazaBiomeCaches } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
@@ -37,6 +38,7 @@ export function invalidatingWorldPlazaProceduralGenerationCaches(): void {
   invalidatingWorldPlazaWaterShimmerTileEntryCache();
   invalidatingWorldPlazaWaterSurfaceTileDrawMetadataCache();
   invalidatingWorldPlazaRiverChannelPassesNoiseCache();
+  invalidatingWorldPlazaStreamChannelPassesNoiseCache();
   invalidatingWorldPlazaLakeBasinOccupyCache();
   invalidatingWorldPlazaLakeShoreDepthCache();
   invalidatingWorldPlazaLakeWaterShallowDepthCache();

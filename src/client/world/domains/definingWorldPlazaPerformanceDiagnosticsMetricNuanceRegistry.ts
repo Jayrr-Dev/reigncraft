@@ -198,6 +198,8 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_REGISTRY
       gaugeIds: [
         GAUGE.WATER_VISIBLE_TILE_COUNT,
         GAUGE.WATER_SHIMMER_TILE_COUNT,
+        GAUGE.RIVER_VISIBLE_TILE_COUNT,
+        GAUGE.RIVER_SHIMMER_TILE_COUNT,
       ],
       counterIds: [COUNTER.WATER_SURFACE_REDRAW],
       sampleIds: [SAMPLE.WATER_SURFACE_REDRAW, SAMPLE.WATER_SHIMMER_REDRAW],
@@ -213,6 +215,18 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_METRIC_NUANCE_REGISTRY
           polarity: 'higher-worse',
           healthyAt: 120,
           criticalAt: 900,
+        },
+        {
+          gaugeId: GAUGE.RIVER_VISIBLE_TILE_COUNT,
+          polarity: 'higher-worse',
+          healthyAt: 120,
+          criticalAt: 1200,
+        },
+        {
+          gaugeId: GAUGE.RIVER_SHIMMER_TILE_COUNT,
+          polarity: 'higher-worse',
+          healthyAt: 80,
+          criticalAt: 600,
         },
       ],
       sampleSignals: [

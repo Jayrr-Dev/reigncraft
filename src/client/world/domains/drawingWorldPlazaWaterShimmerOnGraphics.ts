@@ -69,6 +69,7 @@ const DRAWING_WORLD_PLAZA_WATER_FLOW_STREAK_TILE_SEED_SALT = 523;
 type DrawingWorldPlazaWaterShimmerTileEntry = {
   readonly tileX: number;
   readonly tileY: number;
+  readonly isRiver: boolean;
   readonly centerX: number;
   readonly centerY: number;
   /** True for lake/pond tiles that use ripple-and-shine animation. */
@@ -253,6 +254,7 @@ function collectingWorldPlazaWaterShimmerTileEntries(
       entries.push({
         tileX,
         tileY,
+        isRiver: waterTile.kind === DEFINING_WORLD_PLAZA_WATER_KIND_RIVER,
         centerX: center.x,
         centerY: center.y,
         isStillWater,
@@ -278,6 +280,12 @@ function collectingWorldPlazaWaterShimmerTileEntries(
   return entries;
 }
 
+/** Animated water workload counts published to performance diagnostics. */
+export type DrawingWorldPlazaWaterShimmerStats = {
+  readonly animatedTileCount: number;
+  readonly animatedRiverTileCount: number;
+};
+
 /**
  * Redraws the shimmer overlay for animated water tiles inside the bounds.
  *
@@ -290,14 +298,16 @@ function collectingWorldPlazaWaterShimmerTileEntries(
  * @param bounds - Visible tile index range.
  * @param animationTimeMs - Monotonic animation clock in milliseconds.
  * @param viewport - Live camera viewport used for exact screen culling.
- * @returns Count of animated water tiles, for the perf shimmer tile gauge.
+ * @param maxAnimatedTileCount - Tier-specific geometry rebuild budget.
+ * @returns Total and river-only animated tile counts.
  */
 export function drawingWorldPlazaWaterShimmerOnGraphics(
   graphics: Graphics,
   bounds: DefiningWorldPlazaVisibleTileBounds,
   animationTimeMs: number,
-  viewport: CheckingWorldPlazaWaterShimmerTileVisibleViewport
-): number {
+  viewport: CheckingWorldPlazaWaterShimmerTileVisibleViewport,
+  maxAnimatedTileCount: number = DEFINING_WORLD_PLAZA_WATER_SHIMMER_MAX_ANIMATED_TILES
+): DrawingWorldPlazaWaterShimmerStats {
   const boundsKey = buildingWorldPlazaVisibleTileBoundsCacheKey(bounds);
 
   if (drawingWorldPlazaWaterShimmerTileEntryCache.boundsKey !== boundsKey) {
@@ -321,17 +331,19 @@ export function drawingWorldPlazaWaterShimmerOnGraphics(
     }
   }
 
+  const boundedMaxAnimatedTileCount = Math.max(
+    1,
+    Math.floor(maxAnimatedTileCount)
+  );
   const entryStride =
-    visibleEntryCount > DEFINING_WORLD_PLAZA_WATER_SHIMMER_MAX_ANIMATED_TILES
-      ? Math.ceil(
-          visibleEntryCount /
-            DEFINING_WORLD_PLAZA_WATER_SHIMMER_MAX_ANIMATED_TILES
-        )
+    visibleEntryCount > boundedMaxAnimatedTileCount
+      ? Math.ceil(visibleEntryCount / boundedMaxAnimatedTileCount)
       : 1;
   const halfWidth = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
   const halfHeight = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX;
   const isDaytime = computingWorldPlazaDayNightSunState().isDaytime;
   let animatedTileCount = 0;
+  let animatedRiverTileCount = 0;
   let visibleEntryIndex = 0;
 
   for (const entry of entries) {
@@ -361,6 +373,7 @@ export function drawingWorldPlazaWaterShimmerOnGraphics(
     }
 
     animatedTileCount += 1;
+    animatedRiverTileCount += entry.isRiver ? 1 : 0;
 
     if (entry.isStillWater) {
       drawingWorldPlazaLakeWaterRipplesAndShineOnGraphics(
@@ -413,5 +426,5 @@ export function drawingWorldPlazaWaterShimmerOnGraphics(
       });
   }
 
-  return animatedTileCount;
+  return { animatedTileCount, animatedRiverTileCount };
 }

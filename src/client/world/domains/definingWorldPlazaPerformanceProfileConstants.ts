@@ -111,6 +111,8 @@ export interface DefiningWorldPlazaPerformanceProfile {
   readonly drawsPlacedBlockShadowBlur: boolean;
   /** Redraw interval for water shimmer (frames). */
   readonly waterShimmerUpdateIntervalFrames: number;
+  /** Max visible water tiles that rebuild animated shimmer geometry per redraw. */
+  readonly waterShimmerMaxAnimatedTiles: number;
   /** Grid radius beyond local player where remote avatar lava/depth work is skipped. */
   readonly remoteAvatarPresentationCullGridRadius: number;
   /** Grid radius beyond local player where wildlife sprite sync is skipped. */
@@ -160,6 +162,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_HIGH: DefiningWorldPlazaPe
     drawsTreeShake: true,
     drawsPlacedBlockShadowBlur: true,
     waterShimmerUpdateIntervalFrames: 5,
+    waterShimmerMaxAnimatedTiles: 240,
     remoteAvatarPresentationCullGridRadius: 999,
     wildlifePresentationCullGridRadius: 999,
     wildlifePresentationReconcileIntervalMs: 0,
@@ -206,6 +209,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_MEDIUM: DefiningWorldPlaza
     drawsTreeShake: true,
     drawsPlacedBlockShadowBlur: true,
     waterShimmerUpdateIntervalFrames: 5,
+    waterShimmerMaxAnimatedTiles: 160,
     remoteAvatarPresentationCullGridRadius: 48,
     wildlifePresentationCullGridRadius: 40,
     wildlifePresentationReconcileIntervalMs: 50,
@@ -254,6 +258,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_LOW: DefiningWorldPlazaPer
     drawsTreeShake: false,
     drawsPlacedBlockShadowBlur: false,
     waterShimmerUpdateIntervalFrames: 9,
+    waterShimmerMaxAnimatedTiles: 96,
     remoteAvatarPresentationCullGridRadius: 36,
     wildlifePresentationCullGridRadius: 32,
     wildlifePresentationReconcileIntervalMs: 100,

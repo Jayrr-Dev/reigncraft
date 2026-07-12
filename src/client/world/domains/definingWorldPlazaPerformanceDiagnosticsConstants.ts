@@ -165,6 +165,8 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_GAUGE = {
     'online-remote-wildlife-snapshot-count',
   WATER_VISIBLE_TILE_COUNT: 'water-visible-tile-count',
   WATER_SHIMMER_TILE_COUNT: 'water-shimmer-tile-count',
+  RIVER_VISIBLE_TILE_COUNT: 'river-visible-tile-count',
+  RIVER_SHIMMER_TILE_COUNT: 'river-shimmer-tile-count',
 } as const;
 
 /** Counter ids incremented on discrete events (shown per second). */

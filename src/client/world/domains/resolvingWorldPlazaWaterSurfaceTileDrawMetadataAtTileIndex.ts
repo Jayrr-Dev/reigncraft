@@ -20,6 +20,7 @@ import {
 export type ResolvingWorldPlazaWaterSurfaceTileDrawMetadata = {
   readonly tileX: number;
   readonly tileY: number;
+  readonly isRiver: boolean;
   readonly surfaceAppearance: {
     readonly batchKey: string;
     readonly color: number;
@@ -32,8 +33,7 @@ export type ResolvingWorldPlazaWaterSurfaceTileDrawMetadata = {
 type ResolvingWorldPlazaWaterSurfaceTileDrawMetadataCacheValue =
   ResolvingWorldPlazaWaterSurfaceTileDrawMetadata | null;
 
-const RESOLVING_WORLD_PLAZA_WATER_SURFACE_TILE_DRAW_METADATA_CACHE_MAX_COLUMNS =
-  4000;
+const RESOLVING_WORLD_PLAZA_WATER_SURFACE_TILE_DRAW_METADATA_CACHE_MAX_COLUMNS = 4000;
 
 /** Day and night use separate entries because frozen state can differ. */
 const resolvingWorldPlazaWaterSurfaceTileDrawMetadataCacheByDaytime: readonly [
@@ -121,6 +121,7 @@ function computingWorldPlazaWaterSurfaceTileDrawMetadataAtTileIndex(
   return {
     tileX,
     tileY,
+    isRiver: waterTile.kind === DEFINING_WORLD_PLAZA_WATER_KIND_RIVER,
     surfaceAppearance: appearance
       ? {
           batchKey: `${appearance.color}-${appearance.alpha}`,
@@ -129,8 +130,7 @@ function computingWorldPlazaWaterSurfaceTileDrawMetadataAtTileIndex(
         }
       : null,
     drawsShoreDetails:
-      !isFrozen &&
-      checkingWorldPlazaWaterTileIsShoreAtTileIndex(tileX, tileY),
+      !isFrozen && checkingWorldPlazaWaterTileIsShoreAtTileIndex(tileX, tileY),
   };
 }
 
@@ -166,12 +166,11 @@ export function resolvingWorldPlazaWaterSurfaceTileDrawMetadataAtTileIndex(
     cacheByColumn.set(tileX, columnCache);
   }
 
-  const metadata =
-    computingWorldPlazaWaterSurfaceTileDrawMetadataAtTileIndex(
-      tileX,
-      tileY,
-      isDaytime
-    );
+  const metadata = computingWorldPlazaWaterSurfaceTileDrawMetadataAtTileIndex(
+    tileX,
+    tileY,
+    isDaytime
+  );
   columnCache.set(tileY, metadata);
 
   return metadata;

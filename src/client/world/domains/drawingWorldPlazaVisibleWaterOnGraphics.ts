@@ -27,6 +27,12 @@ import type { Graphics } from 'pixi.js';
 type DrawingWorldPlazaWaterSurfaceBatch =
   ResolvingWorldPlazaWaterSurfaceTileDrawMetadata[];
 
+/** Surface workload counts published to performance diagnostics. */
+export type DrawingWorldPlazaVisibleWaterStats = {
+  readonly waterTileCount: number;
+  readonly riverTileCount: number;
+};
+
 /**
  * Adds one tile's diamond outline to the current graphics path.
  *
@@ -113,16 +119,17 @@ function appendingWorldPlazaWaterSurfaceBatchTile(
  *
  * @param graphics - Pixi graphics instance (caller clears before calling).
  * @param bounds - Visible tile index range.
- * @returns Count of water tiles drawn, for the perf water tile gauge.
+ * @returns Total and river-only tile counts for performance diagnostics.
  */
 export function drawingWorldPlazaVisibleWaterOnGraphics(
   graphics: Graphics,
   bounds: DefiningWorldPlazaVisibleTileBounds
-): number {
+): DrawingWorldPlazaVisibleWaterStats {
   const isDaytime = computingWorldPlazaDayNightSunState().isDaytime;
   const batchesByKey = new Map<string, DrawingWorldPlazaWaterSurfaceBatch>();
   const shoreTiles: ResolvingWorldPlazaWaterSurfaceTileDrawMetadata[] = [];
   let waterTileCount = 0;
+  let riverTileCount = 0;
 
   for (let tileY = bounds.minTileY; tileY <= bounds.maxTileY; tileY += 1) {
     for (let tileX = bounds.minTileX; tileX <= bounds.maxTileX; tileX += 1) {
@@ -138,6 +145,7 @@ export function drawingWorldPlazaVisibleWaterOnGraphics(
       }
 
       waterTileCount += 1;
+      riverTileCount += metadata.isRiver ? 1 : 0;
       appendingWorldPlazaWaterSurfaceBatchTile(batchesByKey, metadata);
 
       if (metadata.drawsShoreDetails) {
@@ -158,5 +166,5 @@ export function drawingWorldPlazaVisibleWaterOnGraphics(
     );
   }
 
-  return waterTileCount;
+  return { waterTileCount, riverTileCount };
 }

@@ -55,17 +55,34 @@ describe('drawingWorldPlazaWaterShimmerOnGraphics', () => {
   it('caps animated tiles at the shimmer budget on dense water', () => {
     mockingRiverEverywhere();
 
-    const animatedTileCount = drawingWorldPlazaWaterShimmerOnGraphics(
-      new Graphics(),
-      { minTileX: 0, maxTileX: 59, minTileY: 0, maxTileY: 59 },
-      1000,
-      TEST_VIEWPORT
-    );
+    const { animatedRiverTileCount, animatedTileCount } =
+      drawingWorldPlazaWaterShimmerOnGraphics(
+        new Graphics(),
+        { minTileX: 0, maxTileX: 59, minTileY: 0, maxTileY: 59 },
+        1000,
+        TEST_VIEWPORT
+      );
 
     expect(animatedTileCount).toBeGreaterThan(0);
+    expect(animatedRiverTileCount).toBe(animatedTileCount);
     expect(animatedTileCount).toBeLessThanOrEqual(
       DEFINING_WORLD_PLAZA_WATER_SHIMMER_MAX_ANIMATED_TILES
     );
+  });
+
+  it('honors a smaller performance-tier shimmer budget', () => {
+    mockingRiverEverywhere();
+
+    const stats = drawingWorldPlazaWaterShimmerOnGraphics(
+      new Graphics(),
+      { minTileX: 0, maxTileX: 59, minTileY: 0, maxTileY: 59 },
+      1000,
+      TEST_VIEWPORT,
+      40
+    );
+
+    expect(stats.animatedTileCount).toBeGreaterThan(0);
+    expect(stats.animatedTileCount).toBeLessThanOrEqual(40);
   });
 
   it('reuses the cached tile scan for repeated redraws of the same bounds', () => {
@@ -86,7 +103,7 @@ describe('drawingWorldPlazaWaterShimmerOnGraphics', () => {
       TEST_VIEWPORT
     );
 
-    expect(secondCount).toBe(firstCount);
+    expect(secondCount).toEqual(firstCount);
     expect(resolvingWaterMock.mock.calls.length).toBe(
       resolveCallsAfterFirstDraw
     );
@@ -103,7 +120,7 @@ describe('drawingWorldPlazaWaterShimmerOnGraphics', () => {
       TEST_VIEWPORT
     );
 
-    expect(initialCount).toBeGreaterThan(0);
+    expect(initialCount.animatedTileCount).toBeGreaterThan(0);
 
     invalidatingWorldPlazaWaterShimmerTileEntryCache();
     resolvingWaterMock.mockImplementation(() => null);
@@ -115,13 +132,16 @@ describe('drawingWorldPlazaWaterShimmerOnGraphics', () => {
       TEST_VIEWPORT
     );
 
-    expect(countAfterWaterRemoved).toBe(0);
+    expect(countAfterWaterRemoved).toEqual({
+      animatedTileCount: 0,
+      animatedRiverTileCount: 0,
+    });
   });
 
   it('does not animate cached water tiles outside the live camera screen', () => {
     mockingRiverEverywhere();
 
-    const animatedTileCount = drawingWorldPlazaWaterShimmerOnGraphics(
+    const stats = drawingWorldPlazaWaterShimmerOnGraphics(
       new Graphics(),
       { minTileX: 0, maxTileX: 9, minTileY: 0, maxTileY: 9 },
       1000,
@@ -133,6 +153,9 @@ describe('drawingWorldPlazaWaterShimmerOnGraphics', () => {
       }
     );
 
-    expect(animatedTileCount).toBe(0);
+    expect(stats).toEqual({
+      animatedTileCount: 0,
+      animatedRiverTileCount: 0,
+    });
   });
 });
