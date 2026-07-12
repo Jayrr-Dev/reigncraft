@@ -8,7 +8,7 @@ import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/doma
 
 /** Outer popover panel anchored above a build function slot. */
 export const STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_POPOVER_PANEL_CLASS_NAME =
-  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.surface.glassPanel} ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.scope.lightTheme} pointer-events-auto absolute bottom-full left-1/2 z-50 mb-2 w-max min-w-[11rem] max-w-[min(100vw-1.5rem,18rem)] -translate-x-1/2 rounded-md p-2 shadow-lg` as const;
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.surface.glassPanel} ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.scope.lightTheme} pointer-events-auto absolute bottom-full left-1/2 z-50 mb-2 w-max min-w-[11rem] max-w-[min(100vw-1.5rem,18rem)] rounded-md p-2 shadow-lg` as const;
 
 /** Title row inside a build function popover. */
 export const STYLING_WORLD_PLAZA_BUILD_MODE_FUNCTION_POPOVER_TITLE_CLASS_NAME =

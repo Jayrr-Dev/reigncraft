@@ -16,6 +16,7 @@ import {
 import { resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles } from '@/components/world/domains/resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles';
 import { STYLING_WORLD_PLAZA_INVENTORY_LIGHT_THEME_SCOPE_CLASS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { resolvingWorldPlazaInventoryHotbarDeviceScale } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarDeviceScale';
+import { computingWorldPlazaInventoryHotbarShellWidthPx } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
 import { cn } from '@/lib/utils';
 import { useMemo, type ReactNode } from 'react';
 
@@ -31,6 +32,7 @@ export type RenderingWorldPlazaHudToolbarBottomAnchorProps = {
 
 /**
  * Bottom-center stack: mode badges above the active toolbar body.
+ * Stack width locks to the inventory hotbar shell so every mode body matches.
  */
 export function RenderingWorldPlazaHudToolbarBottomAnchor({
   activeMode,
@@ -57,6 +59,15 @@ export function RenderingWorldPlazaHudToolbarBottomAnchor({
     [viewportHudScale, isMobile, isFullscreen]
   );
 
+  const bottomStackStyle = useMemo(
+    () => ({
+      width: computingWorldPlazaInventoryHotbarShellWidthPx(
+        hotbarViewportHudScale
+      ),
+    }),
+    [hotbarViewportHudScale]
+  );
+
   const anchorClassName =
     DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.bottomCenter
       .inventoryHotbar.anchorClassName;
@@ -74,13 +85,14 @@ export function RenderingWorldPlazaHudToolbarBottomAnchor({
       >
         <div
           className={STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_STACK_CLASS_NAME}
+          style={bottomStackStyle}
         >
           <RenderingWorldPlazaHudToolbarModeBadges
             activeMode={activeMode}
             onSelectMode={onSelectMode}
             isEditEnabled={isEditEnabled}
           />
-          <div className="pointer-events-auto flex w-full flex-col items-center">
+          <div className="pointer-events-auto flex w-full flex-col items-stretch">
             {children}
           </div>
         </div>

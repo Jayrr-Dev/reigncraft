@@ -1,23 +1,27 @@
 import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
-import { DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_LAYOUT } from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
+import {
+  DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_LAYOUT,
+  DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_REGISTRY,
+  DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_MAX_LABEL_LENGTH,
+} from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
 import { DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
-import { computingWorldPlazaInventoryHotbarShellWidthPx } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
 import type { CSSProperties } from 'react';
 
 export type DefiningWorldPlazaHudToolbarModeBadgesViewportStyles = {
   readonly stackStyle: CSSProperties;
   readonly switcherStyle: CSSProperties;
   readonly buttonStyle: CSSProperties;
+  readonly contentStyle: CSSProperties;
+  readonly iconSlotStyle: CSSProperties;
   readonly iconStyle: CSSProperties;
   readonly labelStyle: CSSProperties;
 };
 
 /**
- * Resolves badge strip size to match the inventory hotbar shell.
+ * Resolves badge chrome for the HUD toolbar mode strip.
  *
- * Width locks to the inventory shell. Chrome (padding, font, icon) uses the
- * same hotbar design scale so badges shrink/grow with inventory slots.
- * Mobile uses a smaller label so CRAFT / CLAIM fit without truncation.
+ * Parent stack owns shell width. Mode tabs share that width equally, with a
+ * shared icon+label content footprint so every tab matches ITEMS.
  */
 export function resolvingWorldPlazaHudToolbarModeBadgesViewportStyles(
   viewportHudScale: number,
@@ -25,8 +29,7 @@ export function resolvingWorldPlazaHudToolbarModeBadgesViewportStyles(
 ): DefiningWorldPlazaHudToolbarModeBadgesViewportStyles {
   const designScale = DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE;
   const layout = DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_LAYOUT;
-  const shellWidthPx =
-    computingWorldPlazaInventoryHotbarShellWidthPx(viewportHudScale);
+  const modeCount = DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_REGISTRY.length;
   const paddingYPx = computingWorldPlazaViewportHudScaledPx(
     layout.paddingYBasePx,
     viewportHudScale,
@@ -63,17 +66,24 @@ export function resolvingWorldPlazaHudToolbarModeBadgesViewportStyles(
 
   return {
     stackStyle: {
-      width: shellWidthPx,
+      width: '100%',
     },
     switcherStyle: {
       gap: buttonGapPx,
+      gridTemplateColumns: `repeat(${modeCount}, minmax(0, 1fr))`,
     },
     buttonStyle: {
-      gap: iconLabelGapPx,
       paddingTop: paddingYPx,
       paddingBottom: paddingYPx,
       paddingLeft: paddingXPx,
       paddingRight: paddingXPx,
+    },
+    contentStyle: {
+      gap: iconLabelGapPx,
+    },
+    iconSlotStyle: {
+      width: iconPx,
+      height: iconPx,
     },
     iconStyle: {
       width: iconPx,
@@ -82,6 +92,7 @@ export function resolvingWorldPlazaHudToolbarModeBadgesViewportStyles(
     labelStyle: {
       fontSize: labelTextPx,
       letterSpacing: `${labelTrackingEm}em`,
+      width: `${DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_MAX_LABEL_LENGTH}ch`,
     },
   };
 }

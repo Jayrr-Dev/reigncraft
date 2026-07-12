@@ -13,7 +13,7 @@ import type { DefiningWorldBuildingBuildModeTilePopoverMode } from "@/components
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
 import {
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
-  computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
+  applyingWorldPlazaCameraZoomedDomOverlayPositionWithViewportShift,
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle,
 } from "@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform";
 import type { DefiningWorldPlazaCameraOffset } from "@/components/world/domains/definingWorldPlazaCameraOffset";
@@ -114,11 +114,12 @@ export function RenderingWorldPlazaBuildModeTilePopover({
           DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT,
       );
 
-      wrapperElement.style.transform =
-        computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
-          viewportPoint.x,
-          viewportPoint.y,
-        );
+      applyingWorldPlazaCameraZoomedDomOverlayPositionWithViewportShift(
+        wrapperElement,
+        shellElement,
+        viewportPoint.x,
+        viewportPoint.y,
+      );
       applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
         shellElement,
         cameraWorldZoom,

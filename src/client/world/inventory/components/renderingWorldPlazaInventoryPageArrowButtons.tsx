@@ -96,7 +96,7 @@ function RenderingWorldPlazaInventoryPageArrowButton({
 }
 
 /**
- * Right-side up/down arrows that page storage rows five slots at a time.
+ * Right-side up/down arrows that page storage rows six slots at a time.
  * Droppable during item drag so hover can flip storage pages.
  */
 export function RenderingWorldPlazaInventoryPageArrowButtons({

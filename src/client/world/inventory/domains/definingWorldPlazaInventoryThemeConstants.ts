@@ -31,6 +31,12 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_SHELL_GAP_BASE_PX = 4 as const;
 /** Base hotbar shell padding in px. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_SHELL_PADDING_BASE_PX = 4 as const;
 
+/**
+ * Hotbar shell border width in px.
+ * Keep in sync with `.plaza-inventory-hotbar-shell` in `index.css`.
+ */
+export const DEFINING_WORLD_PLAZA_INVENTORY_SHELL_BORDER_PX = 2 as const;
+
 /** Base quantity badge height in px. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_BASE_HEIGHT_PX =
   12 as const;

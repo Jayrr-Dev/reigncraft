@@ -15,7 +15,7 @@ import { LABELING_WORLD_TEMPORARY_PLOT_CLAIM_TILE_POPOVER_BUTTON } from "@/compo
 import { DEFINING_WORLD_BUILDING_PLOT_CLAIM_WORLD_LAYER } from "@/components/world/building/domains/definingWorldBuildingPlotClaimConstants";
 import {
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
-  computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
+  applyingWorldPlazaCameraZoomedDomOverlayPositionWithViewportShift,
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle,
 } from "@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform";
 import type { DefiningWorldPlazaCameraOffset } from "@/components/world/domains/definingWorldPlazaCameraOffset";
@@ -121,11 +121,12 @@ export function RenderingWorldPlazaClaimModeTilePopover({
         DEFINING_WORLD_BUILDING_PLOT_CLAIM_WORLD_LAYER,
       );
 
-      wrapperElement.style.transform =
-        computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
-          viewportPoint.x,
-          viewportPoint.y,
-        );
+      applyingWorldPlazaCameraZoomedDomOverlayPositionWithViewportShift(
+        wrapperElement,
+        shellElement,
+        viewportPoint.x,
+        viewportPoint.y,
+      );
       applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
         shellElement,
         cameraWorldZoom,

@@ -2,6 +2,7 @@
 
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { usingWorldPlazaAnchoredPopoverViewportShiftX } from '@/components/world/hooks/usingWorldPlazaAnchoredPopoverViewportShiftX';
 import { RenderingWorldPlazaInventoryItemInfoDialog } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemInfoDialog';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_ICONIFY_ICON,
@@ -37,6 +38,8 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
   const actionTowerClassNames =
     resolvingWorldPlazaInventoryItemActionTowerClassNames();
+  const { popoverRef, popoverShiftStyle } =
+    usingWorldPlazaAnchoredPopoverViewportShiftX(model.name);
 
   const openingInfoDialog = useCallback((): void => {
     setIsInfoDialogOpen(true);
@@ -56,8 +59,10 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
   return (
     <>
       <div
+        ref={popoverRef}
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
         className={actionTowerClassNames.shell}
+        style={popoverShiftStyle}
         role="menu"
         aria-label={`${model.name} actions`}
         onPointerDown={stoppingPlazaWalkPointerPropagation}
@@ -73,7 +78,9 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
           >
             <span className={actionTowerClassNames.infoName}>{model.name}</span>
             <Icon
-              icon={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_ICONIFY_ICON}
+              icon={
+                DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_ICONIFY_ICON
+              }
               className="size-3.5 shrink-0"
               aria-hidden
             />

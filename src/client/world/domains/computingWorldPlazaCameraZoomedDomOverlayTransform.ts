@@ -2,6 +2,8 @@ import {
   DEFINING_WORLD_PLAZA_CAMERA_VISIBLE_TILE_BOUNDS_REFERENCE_ZOOM,
   DEFINING_WORLD_PLAZA_CAMERA_ZOOM,
 } from '@/components/world/domains/definingWorldPlazaCameraConstants';
+import { computingWorldPlazaAnchoredPopoverViewportShiftX } from '@/components/world/domains/computingWorldPlazaAnchoredPopoverViewportShiftX';
+import { DEFINING_WORLD_PLAZA_ANCHORED_POPOVER_VIEWPORT_EDGE_INSET_PX } from '@/components/world/domains/definingWorldPlazaAnchoredPopoverViewportConstants';
 
 /** CSS transform-origin for plaza avatar DOM overlays (bottom-center anchor). */
 export const COMPUTING_WORLD_PLAZA_CAMERA_ZOOMED_DOM_OVERLAY_TRANSFORM_ORIGIN =
@@ -15,12 +17,52 @@ export const COMPUTING_WORLD_PLAZA_CAMERA_ZOOMED_DOM_OVERLAY_TRANSFORM_ORIGIN =
  *
  * @param viewportX - Horizontal viewport position (pixels).
  * @param viewportY - Vertical viewport position (pixels).
+ * @param shiftXPx - Extra horizontal shift after centering (viewport collision).
  */
 export function computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
   viewportX: number,
-  viewportY: number
+  viewportY: number,
+  shiftXPx: number = 0
 ): string {
-  return `translate3d(${Math.round(viewportX)}px, ${Math.round(viewportY)}px, 0) translate(-50%, -100%)`;
+  return `translate3d(${Math.round(viewportX + shiftXPx)}px, ${Math.round(viewportY)}px, 0) translate(-50%, -100%)`;
+}
+
+/**
+ * Pins a world-anchored overlay, then shifts it horizontally so the shell stays
+ * inside the viewport (same collision idea as slot-anchored popovers).
+ */
+export function applyingWorldPlazaCameraZoomedDomOverlayPositionWithViewportShift(
+  wrapperElement: HTMLElement,
+  shellElement: HTMLElement,
+  viewportX: number,
+  viewportY: number,
+  edgeInsetPx: number = DEFINING_WORLD_PLAZA_ANCHORED_POPOVER_VIEWPORT_EDGE_INSET_PX
+): void {
+  wrapperElement.style.transform =
+    computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
+      viewportX,
+      viewportY
+    );
+
+  const shellRect = shellElement.getBoundingClientRect();
+  const shiftXPx = computingWorldPlazaAnchoredPopoverViewportShiftX({
+    popoverLeftPx: shellRect.left,
+    popoverRightPx: shellRect.right,
+    clipLeftPx: 0,
+    clipRightPx: window.innerWidth,
+    edgeInsetPx,
+  });
+
+  if (shiftXPx === 0) {
+    return;
+  }
+
+  wrapperElement.style.transform =
+    computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
+      viewportX,
+      viewportY,
+      shiftXPx
+    );
 }
 
 /**

@@ -42,7 +42,7 @@ export function RenderingWorldPlazaHudToolbarCraftModePanel(): React.JSX.Element
       className={cn(
         STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME,
         STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS,
-        'min-w-[min(100vw-1.5rem,18rem)] px-3 py-2'
+        'w-full px-3 py-2'
       )}
       style={viewportStyles.shellStyle}
       aria-label={LABELING_WORLD_PLAZA_HUD_TOOLBAR_CRAFT_MODE_PANEL}

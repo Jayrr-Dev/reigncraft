@@ -13,7 +13,7 @@ import {
 import type { DefiningWorldPlazaInventoryDemoSeedItem } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 
 /** Columns per inventory row (main hotbar and each storage page). */
-export const DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS = 5 as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS = 6 as const;
 
 /** Always-visible main hotbar row count. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_MAIN_ROW_COUNT = 1 as const;

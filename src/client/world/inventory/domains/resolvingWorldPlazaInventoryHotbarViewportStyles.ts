@@ -14,6 +14,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_BASE_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_PADDING_X_BASE_PX,
   DEFINING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_TEXT_BASE_PX,
+  DEFINING_WORLD_PLAZA_INVENTORY_SHELL_BORDER_PX,
   DEFINING_WORLD_PLAZA_INVENTORY_SHELL_GAP_BASE_PX,
   DEFINING_WORLD_PLAZA_INVENTORY_SHELL_PADDING_BASE_PX,
   DEFINING_WORLD_PLAZA_INVENTORY_SLOT_BASE_PX,
@@ -55,7 +56,9 @@ export interface DefiningWorldPlazaInventoryHotbarViewportStyles {
 }
 
 /**
- * Total shell width of the inventory hotbar in CSS pixels (slots + arrows).
+ * Total border-box shell width of the inventory hotbar in CSS pixels.
+ * Includes slots, page arrows, padding, and the wood border so mode tabs /
+ * craft / build shells can lock to the same measured footprint.
  *
  * @param viewportHudScale - Live scale from the plaza viewport frame
  */
@@ -86,7 +89,13 @@ export function computingWorldPlazaInventoryHotbarShellWidthPx(
     Math.round(slotPx * DEFINING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_RATIO)
   );
 
-  return paddingPx * 2 + gridWidthPx + gapPx + arrowColumnWidthPx;
+  return (
+    paddingPx * 2 +
+    gridWidthPx +
+    gapPx +
+    arrowColumnWidthPx +
+    DEFINING_WORLD_PLAZA_INVENTORY_SHELL_BORDER_PX * 2
+  );
 }
 
 /**
@@ -187,9 +196,13 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
       slotEdgePx * DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON_SIZE_RATIO
     )
   );
+  const shellWidthPx =
+    computingWorldPlazaInventoryHotbarShellWidthPx(viewportHudScale);
 
   return {
     shellStyle: {
+      width: shellWidthPx,
+      boxSizing: 'border-box',
       gap: shellGapPx,
       padding: shellPaddingPx,
     },
@@ -225,8 +238,7 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
     },
     loadingShellStyle: {
       height: gridHeightPx,
-      minWidth:
-        computingWorldPlazaInventoryHotbarShellWidthPx(viewportHudScale),
+      minWidth: shellWidthPx,
     },
     loadingTextStyle: {
       fontSize: loadingTextPx,

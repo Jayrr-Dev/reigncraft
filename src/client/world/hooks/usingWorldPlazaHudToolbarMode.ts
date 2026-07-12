@@ -1,5 +1,5 @@
 /**
- * Local HUD toolbar mode state for Items / Craft / Build / Claim badges.
+ * Local HUD toolbar mode state for Items / Craft / Build↔Claim badges.
  *
  * @module components/world/hooks/usingWorldPlazaHudToolbarMode
  */

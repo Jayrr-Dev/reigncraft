@@ -167,7 +167,7 @@ Legacy shims under `src/client/world/domains/` re-export collision APIs during m
 
 The plaza hook wires Redis/save-slot persistence and optional demo seed. World features (equipment, consumables) read `DefiningInventoryState` from this hook.
 
-**Layout:** capacity **15** (`DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY`). Row 1 (slots 0–4) is the always-visible main hotbar (equippable). Rows 2–3 are storage (10 slots), shown one page of 5 at a time via solid up/down arrows on the right (`resolvingWorldPlazaInventoryStoragePage.ts`, `renderingWorldPlazaInventoryPageArrowButtons.tsx`).
+**Layout:** capacity **18** (`DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY`). Row 1 (slots 0–5) is the always-visible main hotbar (equippable). Rows 2–3 are storage (12 slots), shown one page of 6 at a time via solid up/down arrows on the right (`resolvingWorldPlazaInventoryStoragePage.ts`, `renderingWorldPlazaInventoryPageArrowButtons.tsx`).
 
 **Extend (new item):**
 

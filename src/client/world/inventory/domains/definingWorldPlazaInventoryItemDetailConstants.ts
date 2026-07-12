@@ -56,7 +56,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_MIN_TOUCH_ROW_PX =
  * so rows stay tappable and the menu does not shrink to hotbar slot width.
  */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_SHELL_CLASS_NAME =
-  'pointer-events-auto absolute bottom-full left-1/2 z-[60] mb-3 w-[min(10.5rem,calc(100vw-2rem))] min-w-0 -translate-x-1/2 flex flex-col items-stretch touch-manipulation select-none' as const;
+  'pointer-events-auto absolute bottom-full left-1/2 z-[60] mb-3 w-[min(10.5rem,calc(100vw-2rem))] min-w-0 flex flex-col items-stretch touch-manipulation select-none' as const;
 
 /** Vertical menu panel (parchment poster chrome). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_PANEL_CLASS_NAME =

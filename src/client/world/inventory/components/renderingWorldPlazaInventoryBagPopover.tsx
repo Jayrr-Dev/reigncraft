@@ -12,6 +12,7 @@ import { Icon } from '@/components/ui/icon';
 import { usingWorldPlazaViewportHudScaleContext } from '@/components/world/components/providingWorldPlazaViewportHudScale';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
+import { usingWorldPlazaAnchoredPopoverViewportShiftX } from '@/components/world/hooks/usingWorldPlazaAnchoredPopoverViewportShiftX';
 import { RenderingWorldPlazaInventoryBagSlotCell } from '@/components/world/inventory/components/renderingWorldPlazaInventoryBagSlotCell';
 import { RenderingWorldPlazaInventoryItemInfoDialog } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemInfoDialog';
 import { DEFINING_WORLD_PLAZA_INVENTORY_BAG_DEFINITION_BY_TYPE_ID } from '@/components/world/inventory/domains/definingWorldPlazaInventoryBagConstants';
@@ -27,7 +28,7 @@ import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/wor
 import type * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-const RENDERING_WORLD_PLAZA_INVENTORY_BAG_POPOVER_PANEL_CLASS_NAME = `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.surface.glassPanel} ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.scope.lightTheme} pointer-events-auto absolute bottom-full left-1/2 z-50 mb-2 w-max max-w-none -translate-x-1/2 rounded-md shadow-lg`;
+const RENDERING_WORLD_PLAZA_INVENTORY_BAG_POPOVER_PANEL_CLASS_NAME = `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.surface.glassPanel} ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.scope.lightTheme} pointer-events-auto absolute bottom-full left-1/2 z-50 mb-2 w-max max-w-none rounded-md shadow-lg`;
 
 const RENDERING_WORLD_PLAZA_INVENTORY_BAG_POPOVER_INFO_BUTTON_CLASS_NAME = `${STYLING_WORLD_PLAZA_INVENTORY_BAG_POPOVER_LABEL_CLASS} mx-auto flex w-full cursor-pointer items-center justify-center gap-1 border-0 bg-transparent p-0 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/70`;
 
@@ -79,6 +80,11 @@ export function RenderingWorldPlazaInventoryBagPopover({
       bagDefinition.rows
     );
   }, [bagDefinition, viewportHudScale]);
+  const bagPopoverRemountKey = isOpen
+    ? `${bagItem.itemTypeId}:${bagDefinition?.columns ?? 0}x${bagDefinition?.rows ?? 0}:${viewportHudScale}`
+    : null;
+  const { popoverRef, popoverShiftStyle } =
+    usingWorldPlazaAnchoredPopoverViewportShiftX(bagPopoverRemountKey);
 
   const openingInfoDialog = useCallback((): void => {
     setIsInfoDialogOpen(true);
@@ -108,9 +114,10 @@ export function RenderingWorldPlazaInventoryBagPopover({
   return (
     <>
       <div
+        ref={popoverRef}
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
         className={RENDERING_WORLD_PLAZA_INVENTORY_BAG_POPOVER_PANEL_CLASS_NAME}
-        style={viewportLayout.panelStyle}
+        style={{ ...viewportLayout.panelStyle, ...popoverShiftStyle }}
         role="dialog"
         aria-label={`${panelLabel} storage`}
         onPointerDown={(event) => {
