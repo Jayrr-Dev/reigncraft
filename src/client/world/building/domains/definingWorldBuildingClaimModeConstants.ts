@@ -115,6 +115,42 @@ export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_BADGE_GRID_CLASS_NAME =
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_BADGE_CLASS_NAME =
   'h-5 min-w-0 flex-[1_1_calc((100%-0.5rem)/2)] max-w-full shrink-0 justify-center truncate rounded-sm px-0.5 text-[9px] font-medium tabular-nums' as const;
 
+/** Claim mode plot card grid (two cards per row). */
+export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_GRID_CLASS_NAME =
+  'mt-1 grid grid-cols-2 gap-1.5' as const;
+
+/** Claim mode plot card shell classes. */
+export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_CLASS_NAME =
+  'flex min-w-0 flex-col gap-1 rounded-md border border-white/12 bg-white/[0.04] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]' as const;
+
+/** Claim mode local player plot card accent classes. */
+export const DEFINING_WORLD_BUILDING_CLAIM_MODE_LOCAL_PLOT_CARD_CLASS_NAME =
+  'border-[#f97316]/45 bg-[#f97316]/10' as const;
+
+/** Claim mode plot card header row classes. */
+export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_HEADER_CLASS_NAME =
+  'flex min-w-0 items-center gap-1' as const;
+
+/** Claim mode plot card biome icon frame classes. */
+export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_ICON_FRAME_CLASS_NAME =
+  'flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border border-white/15 bg-black/30' as const;
+
+/** Claim mode plot card biome name classes. */
+export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_BIOME_NAME_CLASS_NAME =
+  'truncate text-[9px] font-semibold leading-tight text-white/85' as const;
+
+/** Claim mode plot card coordinate line classes. */
+export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_COORDS_CLASS_NAME =
+  'truncate text-[8px] leading-tight tabular-nums text-white/55' as const;
+
+/** Claim mode plot card full-width action button base classes. */
+export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_ACTION_BUTTON_CLASS_NAME =
+  'mt-auto flex h-5 w-full items-center justify-center gap-1 rounded-sm border border-sky-300/40 bg-sky-400/10 px-1 text-[8px] font-semibold text-sky-100 transition hover:bg-sky-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70' as const;
+
+/** Claim mode plot card visit-request button classes. */
+export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_VISIT_BUTTON_CLASS_NAME =
+  'mt-auto flex h-5 w-full items-center justify-center gap-1 rounded-sm border border-violet-300/40 bg-violet-400/10 px-1 text-[8px] font-semibold text-violet-100 transition hover:bg-violet-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70 disabled:cursor-not-allowed disabled:border-white/15 disabled:bg-white/5 disabled:text-white/35' as const;
+
 /** Claim mode plot teleport button classes. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_TELEPORT_BUTTON_CLASS_NAME =
   'h-5 shrink-0 rounded-sm border border-sky-300/40 bg-sky-400/10 px-1 text-[8px] font-semibold text-sky-100 transition hover:bg-sky-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70' as const;

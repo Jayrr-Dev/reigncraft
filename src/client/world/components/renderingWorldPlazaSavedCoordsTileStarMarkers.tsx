@@ -13,7 +13,10 @@ import {
   DEFINING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_WRAPPER_CLASS_NAME,
   STYLING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_TRACKED_ICON_CLASS_NAME,
 } from "@/components/world/domains/definingWorldPlazaSavedCoordsTileStarMarkerUiConstants";
-import { resolvingWorldPlazaSavedCoordsTileStarMarkerScreenPoint } from "@/components/world/domains/resolvingWorldPlazaSavedCoordsTileStarMarkerScreenPoint";
+import {
+  resolvingWorldPlazaSavedCoordsTileStarMarkerScreenPoint,
+  type ResolvingWorldPlazaSavedCoordsTileStarMarkerTilePoint,
+} from "@/components/world/domains/resolvingWorldPlazaSavedCoordsTileStarMarkerScreenPoint";
 import { Star as StarIcon } from "lucide-react";
 import { useLayoutEffect, useRef } from "react";
 
@@ -33,6 +36,10 @@ const RENDERING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_FLOAT_STYLE = {
 export interface RenderingWorldPlazaSavedCoordsTileStarMarkersProps {
   /** Saved coordinate currently tracked by the direction arrow. */
   trackedSavedCoords: DefiningWorldPlazaSavedCoords | null;
+  /** True while Save Coords placement is armed and the player is picking a tile. */
+  isSaveCoordsPlacementActive?: boolean;
+  /** Hovered tile during Save Coords placement; updated by the pointer handlers. */
+  placementHoverTileRef?: React.RefObject<ResolvingWorldPlazaSavedCoordsTileStarMarkerTilePoint | null>;
   /** Updated each frame by the camera rig. */
   cameraOffsetRef: React.RefObject<DefiningWorldPlazaCameraOffset>;
   /** Effective world-container zoom. */
@@ -40,44 +47,53 @@ export interface RenderingWorldPlazaSavedCoordsTileStarMarkersProps {
 }
 
 /**
- * Floating star icon above the actively tracked saved plaza coordinate tile.
+ * Floating yellow star icons above the tracked saved tile and, while Save
+ * Coords placement is armed, above the hovered tile indicator.
  */
 export function RenderingWorldPlazaSavedCoordsTileStarMarkers({
   trackedSavedCoords,
+  isSaveCoordsPlacementActive = false,
+  placementHoverTileRef,
   cameraOffsetRef,
   cameraWorldZoomRef,
 }: RenderingWorldPlazaSavedCoordsTileStarMarkersProps): React.JSX.Element | null {
   const trackedSavedCoordsRef = useRef(trackedSavedCoords);
   const markerWrapperRef = useRef<HTMLDivElement | null>(null);
   const markerInnerRef = useRef<HTMLDivElement | null>(null);
+  const placementWrapperRef = useRef<HTMLDivElement | null>(null);
+  const placementInnerRef = useRef<HTMLDivElement | null>(null);
 
   trackedSavedCoordsRef.current = trackedSavedCoords;
 
+  const hasAnyMarker = trackedSavedCoords !== null || isSaveCoordsPlacementActive;
+
   useLayoutEffect(() => {
-    if (!trackedSavedCoords) {
+    if (!hasAnyMarker) {
       return;
     }
 
     let animationFrameId = 0;
     let isActive = true;
 
-    const updatingMarkerPosition = (): void => {
-      if (!isActive || !trackedSavedCoordsRef.current) {
+    const positioningMarkerElements = (
+      wrapperElement: HTMLDivElement | null,
+      innerElement: HTMLDivElement | null,
+      tilePoint: ResolvingWorldPlazaSavedCoordsTileStarMarkerTilePoint | null,
+      cameraOffset: DefiningWorldPlazaCameraOffset,
+      cameraWorldZoom: number,
+    ): void => {
+      if (!wrapperElement) {
         return;
       }
 
-      const wrapperElement = markerWrapperRef.current;
-      const innerElement = markerInnerRef.current;
-      const cameraOffset = cameraOffsetRef.current;
-      const cameraWorldZoom = cameraWorldZoomRef.current ?? 1;
-
-      if (!wrapperElement || !cameraOffset) {
-        animationFrameId = window.requestAnimationFrame(updatingMarkerPosition);
+      if (!tilePoint) {
+        wrapperElement.style.transform =
+          RENDERING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_HIDDEN_TRANSFORM;
         return;
       }
 
       const screenPoint = resolvingWorldPlazaSavedCoordsTileStarMarkerScreenPoint(
-        trackedSavedCoordsRef.current,
+        tilePoint,
         cameraOffset,
         cameraWorldZoom,
       );
@@ -91,46 +107,98 @@ export function RenderingWorldPlazaSavedCoordsTileStarMarkers({
         innerElement,
         cameraWorldZoom,
       );
-
-      animationFrameId = window.requestAnimationFrame(updatingMarkerPosition);
     };
 
-    animationFrameId = window.requestAnimationFrame(updatingMarkerPosition);
+    const updatingMarkerPositions = (): void => {
+      if (!isActive) {
+        return;
+      }
+
+      const cameraOffset = cameraOffsetRef.current;
+      const cameraWorldZoom = cameraWorldZoomRef.current ?? 1;
+
+      if (cameraOffset) {
+        positioningMarkerElements(
+          markerWrapperRef.current,
+          markerInnerRef.current,
+          trackedSavedCoordsRef.current,
+          cameraOffset,
+          cameraWorldZoom,
+        );
+        positioningMarkerElements(
+          placementWrapperRef.current,
+          placementInnerRef.current,
+          placementHoverTileRef?.current ?? null,
+          cameraOffset,
+          cameraWorldZoom,
+        );
+      }
+
+      animationFrameId = window.requestAnimationFrame(updatingMarkerPositions);
+    };
+
+    animationFrameId = window.requestAnimationFrame(updatingMarkerPositions);
 
     return () => {
       isActive = false;
       window.cancelAnimationFrame(animationFrameId);
     };
-  }, [cameraOffsetRef, cameraWorldZoomRef, trackedSavedCoords]);
+  }, [cameraOffsetRef, cameraWorldZoomRef, hasAnyMarker, placementHoverTileRef]);
 
-  if (!trackedSavedCoords) {
+  if (!hasAnyMarker) {
     return null;
   }
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-visible">
-      <div
-        ref={markerWrapperRef}
-        aria-hidden
-        className={DEFINING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_WRAPPER_CLASS_NAME}
-        style={{
-          transform:
-            RENDERING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_HIDDEN_TRANSFORM,
-        }}
-      >
+      {trackedSavedCoords ? (
         <div
-          ref={markerInnerRef}
-          className={DEFINING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_INNER_CLASS_NAME}
-          style={RENDERING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_FLOAT_STYLE}
+          ref={markerWrapperRef}
+          aria-hidden
+          className={DEFINING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_WRAPPER_CLASS_NAME}
+          style={{
+            transform:
+              RENDERING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_HIDDEN_TRANSFORM,
+          }}
         >
-          <StarIcon
-            className={
-              STYLING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_TRACKED_ICON_CLASS_NAME
-            }
-            aria-hidden
-          />
+          <div
+            ref={markerInnerRef}
+            className={DEFINING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_INNER_CLASS_NAME}
+            style={RENDERING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_FLOAT_STYLE}
+          >
+            <StarIcon
+              className={
+                STYLING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_TRACKED_ICON_CLASS_NAME
+              }
+              aria-hidden
+            />
+          </div>
         </div>
-      </div>
+      ) : null}
+      {isSaveCoordsPlacementActive ? (
+        <div
+          ref={placementWrapperRef}
+          aria-hidden
+          className={DEFINING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_WRAPPER_CLASS_NAME}
+          style={{
+            transform:
+              RENDERING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_HIDDEN_TRANSFORM,
+          }}
+        >
+          <div
+            ref={placementInnerRef}
+            className={DEFINING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_INNER_CLASS_NAME}
+            style={RENDERING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_FLOAT_STYLE}
+          >
+            <StarIcon
+              className={
+                STYLING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_TRACKED_ICON_CLASS_NAME
+              }
+              aria-hidden
+            />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

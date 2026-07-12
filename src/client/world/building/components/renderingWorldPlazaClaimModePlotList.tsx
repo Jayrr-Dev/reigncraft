@@ -1,21 +1,26 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
+import { Icon } from '@/components/ui/icon';
 import {
   DEFINING_WORLD_BUILDING_CLAIM_MODE_LOCAL_OWNER_GROUP_TITLE_CLASS_NAME,
-  DEFINING_WORLD_BUILDING_CLAIM_MODE_LOCAL_PLOT_BADGE_CLASS_NAME,
-  DEFINING_WORLD_BUILDING_CLAIM_MODE_OTHER_PLOT_BADGE_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_CLAIM_MODE_LOCAL_PLOT_CARD_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_OWNER_GROUP_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_OWNER_GROUP_TITLE_CLASS_NAME,
-  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_BADGE_CLASS_NAME,
-  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_BADGE_GRID_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_ACTION_BUTTON_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_BIOME_NAME_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_COORDS_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_GRID_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_HEADER_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_ICON_FRAME_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_VISIT_BUTTON_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_LIST_CLASS_NAME,
-  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_TELEPORT_BUTTON_CLASS_NAME,
-  DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_VISIT_BUTTON_CLASS_NAME,
 } from '@/components/world/building/domains/definingWorldBuildingClaimModeConstants';
+import { resolvingWorldBuildingPlotBiomeIconDefinition } from '@/components/world/building/domains/definingWorldBuildingPlotBiomeIconRegistry';
 import type { DefiningWorldBuildingPlotBounds } from '@/components/world/building/domains/definingWorldBuildingPlotBounds';
 import { type DefiningWorldBuildingPlotRegistryOwnerGroup } from '@/components/world/building/domains/groupingWorldBuildingPlotRegistryEntriesByOwner';
 import { formattingWorldBuildingPlotRegistryContiguousRegionLabel } from '@/components/world/building/domains/groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions';
+import { resolvingWorldBuildingPlotBoundsBiome } from '@/components/world/building/domains/resolvingWorldBuildingPlotBoundsBiome';
 import {
   LABELING_WORLD_PLOT_VISIT_CLAIM_LIST_PENDING_BUTTON,
   LABELING_WORLD_PLOT_VISIT_CLAIM_LIST_VISIT_BUTTON,
@@ -36,13 +41,13 @@ const RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_LIST_EMPTY_MESSAGE =
 const RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_LIST_LOADING_MESSAGE =
   'Loading plots...' as const;
 
-/** Teleport action label for local plot rows. */
+/** Teleport action label for local plot cards. */
 const RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_TELEPORT_LABEL =
-  'Teleport to Plot' as const;
+  'Teleport' as const;
 
-/** Plot row layout classes. */
-const RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_ROW_CLASS_NAME =
-  'flex min-w-0 items-center gap-1' as const;
+/** Teleport action icon. */
+const RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_TELEPORT_ICON =
+  'mdi:crosshairs-gps' as const;
 
 /** Local owner row title. */
 const RENDERING_WORLD_PLAZA_CLAIM_MODE_LOCAL_OWNER_GROUP_TITLE = 'You' as const;
@@ -64,7 +69,7 @@ export interface RenderingWorldPlazaClaimModePlotListProps {
   isRequestingFriendPlotVisit?: boolean;
 }
 
-/** Builds a stable React key for one contiguous region badge. */
+/** Builds a stable React key for one contiguous region card. */
 function formattingWorldPlazaClaimModeContiguousRegionKey(
   ownerUserId: string,
   bounds: DefiningWorldBuildingPlotBounds
@@ -101,7 +106,10 @@ function formattingWorldPlazaClaimModeOwnerGroupTitle(
 }
 
 /**
- * Scrollable list of player plots grouped by owner for claim mode.
+ * Scrollable grid of plot cards grouped by owner for claim mode.
+ *
+ * Each card shows the plot's biome icon + name, its coordinates, and a
+ * full-width action button (teleport / visit) along the bottom edge.
  */
 export function RenderingWorldPlazaClaimModePlotList({
   ownerGroups,
@@ -152,7 +160,7 @@ export function RenderingWorldPlazaClaimModePlotList({
           </p>
           <div
             className={
-              DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_BADGE_GRID_CLASS_NAME
+              DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_GRID_CLASS_NAME
             }
           >
             {ownerGroup.contiguousRegions.map((contiguousRegion) => {
@@ -160,6 +168,11 @@ export function RenderingWorldPlazaClaimModePlotList({
                 formattingWorldBuildingPlotRegistryContiguousRegionLabel(
                   contiguousRegion.bounds
                 );
+              const plotBiome = resolvingWorldBuildingPlotBoundsBiome(
+                contiguousRegion.bounds
+              );
+              const biomeIconDefinition =
+                resolvingWorldBuildingPlotBiomeIconDefinition(plotBiome.kind);
               const canTeleportToOwnPlot =
                 ownerGroup.isLocalPlayer &&
                 onTeleportToPlotBounds !== undefined;
@@ -178,21 +191,49 @@ export function RenderingWorldPlazaClaimModePlotList({
                     ownerGroup.ownerUserId,
                     contiguousRegion.bounds
                   )}
-                  className={RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_ROW_CLASS_NAME}
+                  className={cn(
+                    DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_CLASS_NAME,
+                    ownerGroup.isLocalPlayer
+                      ? DEFINING_WORLD_BUILDING_CLAIM_MODE_LOCAL_PLOT_CARD_CLASS_NAME
+                      : null
+                  )}
                 >
-                  <Badge
-                    variant="outline"
+                  <div
+                    className={
+                      DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_HEADER_CLASS_NAME
+                    }
+                  >
+                    <span
+                      aria-hidden
+                      className={
+                        DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_ICON_FRAME_CLASS_NAME
+                      }
+                    >
+                      <Icon
+                        icon={biomeIconDefinition.iconifyIcon}
+                        className={cn(
+                          'h-3.5 w-3.5',
+                          biomeIconDefinition.iconClassName
+                        )}
+                      />
+                    </span>
+                    <span
+                      title={`${plotBiome.displayName} plot`}
+                      className={
+                        DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_BIOME_NAME_CLASS_NAME
+                      }
+                    >
+                      {plotBiome.displayName}
+                    </span>
+                  </div>
+                  <p
                     title={regionLabel}
-                    className={cn(
-                      DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_BADGE_CLASS_NAME,
-                      'flex-1',
-                      ownerGroup.isLocalPlayer
-                        ? DEFINING_WORLD_BUILDING_CLAIM_MODE_LOCAL_PLOT_BADGE_CLASS_NAME
-                        : DEFINING_WORLD_BUILDING_CLAIM_MODE_OTHER_PLOT_BADGE_CLASS_NAME
-                    )}
+                    className={
+                      DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_COORDS_CLASS_NAME
+                    }
                   >
                     {regionLabel}
-                  </Badge>
+                  </p>
                   {canTeleportToOwnPlot ? (
                     <button
                       type="button"
@@ -202,9 +243,16 @@ export function RenderingWorldPlazaClaimModePlotList({
                         onTeleportToPlotBounds(contiguousRegion.bounds);
                       }}
                       className={
-                        DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_TELEPORT_BUTTON_CLASS_NAME
+                        DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_ACTION_BUTTON_CLASS_NAME
                       }
                     >
+                      <Icon
+                        icon={
+                          RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_TELEPORT_ICON
+                        }
+                        className="h-2.5 w-2.5 shrink-0"
+                        aria-hidden
+                      />
                       {RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_TELEPORT_LABEL}
                     </button>
                   ) : null}
@@ -225,7 +273,7 @@ export function RenderingWorldPlazaClaimModePlotList({
                         );
                       }}
                       className={
-                        DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_VISIT_BUTTON_CLASS_NAME
+                        DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_VISIT_BUTTON_CLASS_NAME
                       }
                     >
                       {LABELING_WORLD_PLOT_VISIT_CLAIM_LIST_VISIT_BUTTON}
@@ -238,7 +286,7 @@ export function RenderingWorldPlazaClaimModePlotList({
                       aria-label={`Visit request pending for ${regionLabel}`}
                       title={`Visit request pending for ${regionLabel}`}
                       className={
-                        DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_VISIT_BUTTON_CLASS_NAME
+                        DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_VISIT_BUTTON_CLASS_NAME
                       }
                     >
                       {LABELING_WORLD_PLOT_VISIT_CLAIM_LIST_PENDING_BUTTON}
@@ -258,9 +306,16 @@ export function RenderingWorldPlazaClaimModePlotList({
                         );
                       }}
                       className={
-                        DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_TELEPORT_BUTTON_CLASS_NAME
+                        DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_CARD_ACTION_BUTTON_CLASS_NAME
                       }
                     >
+                      <Icon
+                        icon={
+                          RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_TELEPORT_ICON
+                        }
+                        className="h-2.5 w-2.5 shrink-0"
+                        aria-hidden
+                      />
                       {RENDERING_WORLD_PLAZA_CLAIM_MODE_PLOT_TELEPORT_LABEL}
                     </button>
                   ) : null}

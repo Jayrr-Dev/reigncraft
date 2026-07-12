@@ -5298,6 +5298,8 @@ function RenderingWorldPlazaPixiSceneConnected({
               />
               <RenderingWorldPlazaSavedCoordsTileStarMarkers
                 trackedSavedCoords={trackedSavedCoords}
+                isSaveCoordsPlacementActive={isSaveCoordsPlacementActive}
+                placementHoverTileRef={hoverTilePositionRef}
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
               />

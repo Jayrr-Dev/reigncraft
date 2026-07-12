@@ -25,4 +25,4 @@ export const DEFINING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_FLOAT_DURATION =
 
 /** Lucide star classes for the tracked saved coordinate tile marker. */
 export const STYLING_WORLD_PLAZA_SAVED_COORDS_TILE_STAR_MARKER_TRACKED_ICON_CLASS_NAME =
-  "size-3.5 shrink-0 fill-[#fff3bf] text-[#fff3bf] drop-shadow-[0_0_6px_rgba(244,211,94,0.75)]" as const;
+  "size-3.5 shrink-0 fill-[#facc15] text-[#facc15] drop-shadow-[0_0_6px_rgba(250,204,21,0.85)]" as const;

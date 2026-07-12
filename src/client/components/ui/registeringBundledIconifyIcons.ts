@@ -86,6 +86,7 @@ import mdiBookCheckOutline from '@iconify-icons/mdi/book-check-outline';
 import mdiBookOpenPageVariant from '@iconify-icons/mdi/book-open-page-variant';
 import mdiBookOutline from '@iconify-icons/mdi/book-outline';
 import mdiBookmark from '@iconify-icons/mdi/bookmark';
+import mdiCactus from '@iconify-icons/mdi/cactus';
 import mdiCheckBold from '@iconify-icons/mdi/check-bold';
 import mdiChevronDown from '@iconify-icons/mdi/chevron-down';
 import mdiChevronLeft from '@iconify-icons/mdi/chevron-left';
@@ -129,6 +130,7 @@ import mdiLock from '@iconify-icons/mdi/lock';
 import mdiMagnify from '@iconify-icons/mdi/magnify';
 import mdiMapLegend from '@iconify-icons/mdi/map-legend';
 import mdiMapMarkerPlus from '@iconify-icons/mdi/map-marker-plus';
+import mdiPalmTree from '@iconify-icons/mdi/palm-tree';
 import mdiPaw from '@iconify-icons/mdi/paw';
 import mdiPenguin from '@iconify-icons/mdi/penguin';
 import mdiPineTree from '@iconify-icons/mdi/pine-tree';
@@ -280,6 +282,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:book-open-page-variant': mdiBookOpenPageVariant,
   'mdi:book-outline': mdiBookOutline,
   'mdi:bookmark': mdiBookmark,
+  'mdi:cactus': mdiCactus,
   'mdi:check-bold': mdiCheckBold,
   'mdi:chevron-down': mdiChevronDown,
   'mdi:chevron-left': mdiChevronLeft,
@@ -323,6 +326,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:magnify': mdiMagnify,
   'mdi:map-legend': mdiMapLegend,
   'mdi:map-marker-plus': mdiMapMarkerPlus,
+  'mdi:palm-tree': mdiPalmTree,
   'mdi:paw': mdiPaw,
   'mdi:penguin': mdiPenguin,
   'mdi:pine-tree': mdiPineTree,
