@@ -1,8 +1,8 @@
 'use client';
 
 import {
+  applyingWorldPlazaCameraZoomedDomOverlayPositionToElement,
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
-  computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
@@ -108,11 +108,11 @@ export function RenderingWorldPlazaRoomChatBubbles({
           cameraWorldZoom,
         });
 
-        bubbleElement.style.transform =
-          computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
-            screenPoint.x,
-            screenPoint.y
-          );
+        applyingWorldPlazaCameraZoomedDomOverlayPositionToElement(
+          bubbleElement,
+          screenPoint.x,
+          screenPoint.y
+        );
         applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
           bubbleElement.firstElementChild as HTMLElement | null,
           cameraWorldZoom

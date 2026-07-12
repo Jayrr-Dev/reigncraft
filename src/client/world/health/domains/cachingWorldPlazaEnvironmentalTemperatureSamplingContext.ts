@@ -10,12 +10,18 @@ import { resolvingWorldPlazaBlockEnvironmentalTemperatureLevel } from '@/compone
 
 export type CachingWorldPlazaEnvironmentalTemperatureSamplingContext = {
   placedBlocksByTile: IndexingWorldBuildingPlacedBlocksByTile;
+  /**
+   * Fire-tile keys (`tileX,tileY,worldLayer`) for campfires that are lit.
+   * Campfire blocks only radiate heat while their key is present.
+   */
+  litCampfireTileKeys: ReadonlySet<string>;
   hasEnvironmentalHeatSources: boolean;
 };
 
 const CACHING_WORLD_PLAZA_ENVIRONMENTAL_TEMPERATURE_SAMPLING_CONTEXT_EMPTY: CachingWorldPlazaEnvironmentalTemperatureSamplingContext =
   {
     placedBlocksByTile: new Map(),
+    litCampfireTileKeys: new Set(),
     hasEnvironmentalHeatSources: false,
   };
 
@@ -40,16 +46,25 @@ let cachedSamplingContext: CachingWorldPlazaEnvironmentalTemperatureSamplingCont
   CACHING_WORLD_PLAZA_ENVIRONMENTAL_TEMPERATURE_SAMPLING_CONTEXT_EMPTY;
 
 /**
- * Updates the placed-block index used when sampling tile temperature.
+ * Updates the placed-block index and lit campfire set used when sampling tile
+ * temperature.
  */
 export function updatingWorldPlazaEnvironmentalTemperatureSamplingContext({
   placedBlocksByTile,
-}: Pick<
-  CachingWorldPlazaEnvironmentalTemperatureSamplingContext,
-  'placedBlocksByTile'
->): void {
+  litCampfireTileKeys = cachedSamplingContext.litCampfireTileKeys,
+}: {
+  placedBlocksByTile: IndexingWorldBuildingPlacedBlocksByTile;
+  litCampfireTileKeys?: ReadonlySet<string>;
+}): void {
+  // Publish lit keys before the heat-source scan so campfire gating sees them.
   cachedSamplingContext = {
     placedBlocksByTile,
+    litCampfireTileKeys,
+    hasEnvironmentalHeatSources: false,
+  };
+  cachedSamplingContext = {
+    placedBlocksByTile,
+    litCampfireTileKeys,
     hasEnvironmentalHeatSources:
       checkingWorldPlazaPlacedBlocksByTileHasEnvironmentalHeatSources(
         placedBlocksByTile
@@ -66,6 +81,9 @@ export function readingWorldPlazaEnvironmentalTemperatureSamplingContext(): Cach
 
 /**
  * Builds a stable cache key for placed blocks that emit environmental heat.
+ *
+ * Lit campfires are included only while their fire cell is active; lighting or
+ * extinguishing changes this key so thaw visuals refresh.
  */
 export function buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey(
   blocks: readonly DefiningWorldBuildingPlacedBlock[]

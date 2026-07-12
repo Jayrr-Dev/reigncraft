@@ -20,7 +20,7 @@ export function computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
   viewportX: number,
   viewportY: number
 ): string {
-  return `translate(${viewportX}px, ${viewportY}px) translate(-50%, -100%)`;
+  return `translate3d(${Math.round(viewportX)}px, ${Math.round(viewportY)}px, 0) translate(-50%, -100%)`;
 }
 
 /**

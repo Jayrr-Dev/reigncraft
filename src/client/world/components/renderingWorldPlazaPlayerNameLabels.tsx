@@ -3,8 +3,8 @@
 import type { CommunityMemberProfileStatusKind } from '@/components/community/domains/definingCommunityMemberProfileStatus';
 import { RenderingWorldPlazaPlayerNameLabelRowWithProfilePopover } from '@/components/world/components/renderingWorldPlazaPlayerNameLabelRowWithProfilePopover';
 import {
+  applyingWorldPlazaCameraZoomedDomOverlayPositionToElement,
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
-  computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
@@ -117,11 +117,11 @@ export function RenderingWorldPlazaPlayerNameLabels({
           cameraWorldZoom,
         });
 
-        labelElement.style.transform =
-          computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
-            screenPoint.x,
-            screenPoint.y
-          );
+        applyingWorldPlazaCameraZoomedDomOverlayPositionToElement(
+          labelElement,
+          screenPoint.x,
+          screenPoint.y
+        );
         applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
           labelElement.firstElementChild
             ?.firstElementChild as HTMLElement | null,

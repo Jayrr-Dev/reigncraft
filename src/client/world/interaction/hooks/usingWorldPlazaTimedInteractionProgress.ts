@@ -99,6 +99,7 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
     clearingAvatarToolAction();
     setSnapshot((current) => ({
       ...current,
+      isActive: false,
       isCancelling: true,
       milestonePulse: null,
     }));
@@ -187,6 +188,10 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
   );
 
   useEffect(() => {
+    if (!snapshot.isActive) {
+      return;
+    }
+
     const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
       () => {
         const activeInteraction = activeInteractionRef.current;
@@ -256,14 +261,20 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
 
     return () => {
       unsubscribeDomOverlayFrame();
-      clearingCancelFadeTimer();
     };
   }, [
     beginningCancelFade,
     clearingAvatarToolAction,
-    clearingCancelFadeTimer,
     firingMilestone,
+    snapshot.isActive,
   ]);
+
+  useEffect(
+    () => () => {
+      clearingCancelFadeTimer();
+    },
+    [clearingCancelFadeTimer]
+  );
 
   return {
     snapshot,

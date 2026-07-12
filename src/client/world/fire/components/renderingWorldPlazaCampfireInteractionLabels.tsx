@@ -3,8 +3,8 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { resolvingWorldBuildingPlacedBlockWorldLayer } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
+  applyingWorldPlazaCameraZoomedDomOverlayPositionToElement,
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
-  computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
@@ -91,11 +91,13 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
   const [selectedCampfires, setSelectedCampfires] = useState<
     readonly ListingWorldPlazaCampfireBlocksInInteractionRangeEntry[]
   >([]);
+  const selectedCampfiresRef = useRef(selectedCampfires);
 
   const placedBlocksRef = useRef(placedBlocks);
   const fireCellsRef = useRef(fireCells);
   const onCampfireActionRef = useRef(onCampfireAction);
 
+  selectedCampfiresRef.current = selectedCampfires;
   placedBlocksRef.current = placedBlocks;
   fireCellsRef.current = fireCells;
   onCampfireActionRef.current = onCampfireAction;
@@ -108,6 +110,14 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
         return;
       }
 
+      if (selectedInteractableBlockKeysRef.current.size === 0) {
+        if (selectedCampfiresRef.current.length > 0) {
+          selectedCampfiresRef.current = [];
+          setSelectedCampfires([]);
+        }
+        return;
+      }
+
       const nextSelectedCampfires =
         listingWorldPlazaCampfireBlocksInInteractionRange(
           placedBlocksRef.current,
@@ -116,25 +126,24 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
           inventorySlotsRef.current ?? []
         );
 
-      setSelectedCampfires((currentEntries) => {
-        if (
-          currentEntries.length === nextSelectedCampfires.length &&
-          currentEntries.every((entry, index) => {
-            const nextEntry = nextSelectedCampfires[index];
+      const currentEntries = selectedCampfiresRef.current;
+      const didSelectionChange =
+        currentEntries.length !== nextSelectedCampfires.length ||
+        !currentEntries.every((entry, index) => {
+          const nextEntry = nextSelectedCampfires[index];
 
-            return (
-              nextEntry !== undefined &&
-              entry.block.blockId === nextEntry.block.blockId &&
-              formattingCampfireActionsKey(entry.actions) ===
-                formattingCampfireActionsKey(nextEntry.actions)
-            );
-          })
-        ) {
-          return currentEntries;
-        }
+          return (
+            nextEntry !== undefined &&
+            entry.block.blockId === nextEntry.block.blockId &&
+            formattingCampfireActionsKey(entry.actions) ===
+              formattingCampfireActionsKey(nextEntry.actions)
+          );
+        });
 
-        return nextSelectedCampfires;
-      });
+      if (didSelectionChange) {
+        selectedCampfiresRef.current = nextSelectedCampfires;
+        setSelectedCampfires(nextSelectedCampfires);
+      }
 
       const cameraOffset = cameraOffsetRef.current;
       const cameraWorldZoom = cameraWorldZoomRef.current ?? 1;
@@ -160,11 +169,11 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
             cameraWorldZoom
           );
 
-        labelElement.style.transform =
-          computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
-            screenPoint.x,
-            screenPoint.y
-          );
+        applyingWorldPlazaCameraZoomedDomOverlayPositionToElement(
+          labelElement,
+          screenPoint.x,
+          screenPoint.y
+        );
         applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
           rowElement ?? labelElement,
           cameraWorldZoom

@@ -201,7 +201,10 @@ import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/doma
 import { resolvingWorldPlazaPlayerCombatLockTick } from '@/components/world/domains/resolvingWorldPlazaPlayerCombatLockTick';
 import { resolvingWorldPlazaSavedCoordsById } from '@/components/world/domains/resolvingWorldPlazaSavedCoordsListFromStorage';
 import { resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport } from '@/components/world/domains/resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport';
-import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import {
+  checkingWorldPlazaDomOverlayFrameShouldUpdate,
+  subscribingWorldPlazaDomOverlayFrame,
+} from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { settlingWorldPlazaMeleeSwingDamage } from '@/components/world/domains/settlingWorldPlazaMeleeSwingDamage';
 import { RenderingWorldPlazaEquipmentSfx } from '@/components/world/equipment/components/renderingWorldPlazaEquipmentSfx';
 import type { DefiningWorldPlazaHeldItemPresentation } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemPresentationRegistry';
@@ -222,6 +225,7 @@ import { RenderingWorldPlazaCampfireAmbience } from '@/components/world/fire/com
 import { RenderingWorldPlazaCampfireInteractionLabels } from '@/components/world/fire/components/renderingWorldPlazaCampfireInteractionLabels';
 import { RenderingWorldPlazaFireLayer } from '@/components/world/fire/components/renderingWorldPlazaFireLayer';
 import { RenderingWorldPlazaLavaAmbience } from '@/components/world/fire/components/renderingWorldPlazaLavaAmbience';
+import { buildingWorldPlazaLitCampfireTileKeysFromFireCells } from '@/components/world/fire/domains/buildingWorldPlazaLitCampfireTileKeysFromFireCells';
 import { validatingWorldPlazaCampfireCookStart } from '@/components/world/fire/domains/validatingWorldPlazaCampfireCookStart';
 import { usingWorldPlazaCampfireCookProgress } from '@/components/world/fire/hooks/usingWorldPlazaCampfireCookProgress';
 import { usingWorldPlazaCampfireInteraction } from '@/components/world/fire/hooks/usingWorldPlazaCampfireInteraction';
@@ -1371,6 +1375,13 @@ function RenderingWorldPlazaPixiSceneConnected({
   const burntGrassTileKeysRef = useRef(burntGrassTileKeySet);
   burntGrassTileKeysRef.current = burntGrassTileKeySet;
 
+  const litCampfireTileKeys = useMemo(
+    () => buildingWorldPlazaLitCampfireTileKeysFromFireCells(fireCells),
+    [fireCells]
+  );
+  const litCampfireTileKeysRef = useRef(litCampfireTileKeys);
+  litCampfireTileKeysRef.current = litCampfireTileKeys;
+
   const consumingFireInventoryItem = useCallback(
     (itemTypeId: string, quantity: number): boolean => {
       let didConsume = false;
@@ -2300,7 +2311,21 @@ function RenderingWorldPlazaPixiSceneConnected({
       return;
     }
 
-    return subscribingWorldPlazaDomOverlayFrame(() => {
+    let lastBridgeUpdateAtMs = 0;
+
+    return subscribingWorldPlazaDomOverlayFrame((deltaMs, frameTimeMs) => {
+      if (
+        !checkingWorldPlazaDomOverlayFrameShouldUpdate(
+          deltaMs,
+          lastBridgeUpdateAtMs,
+          frameTimeMs,
+          false
+        )
+      ) {
+        return;
+      }
+
+      lastBridgeUpdateAtMs = frameTimeMs;
       const nextTexts = wildlifeFloatingCombatTextsRef.current;
       const previousTextIds = wildlifeFloatingCombatTextIdsRef.current;
       const didTextMountSetChange =
@@ -4590,6 +4615,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               cameraWorldZoomRef={cameraWorldZoomRef}
               placedBlocksRef={placedBlocksRef}
               burntGrassTileKeysRef={burntGrassTileKeysRef}
+              litCampfireTileKeysRef={litCampfireTileKeysRef}
               choppedTreesByTileKeyRef={choppedTreesByTileKeyRef}
               pickedPebblesByTileKeyRef={pickedPebblesByTileKeyRef}
               floorLayerRef={terrainFloorLayerRef}

@@ -1,8 +1,8 @@
 'use client';
 
 import {
+  applyingWorldPlazaCameraZoomedDomOverlayPositionToElement,
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
-  computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
@@ -81,7 +81,9 @@ export function RenderingWorldPlazaFarmingInteractionLabels({
   const [selectedEntries, setSelectedEntries] = useState<
     readonly ListingWorldPlazaFarmlandTilesInInteractionRangeEntry[]
   >([]);
+  const selectedEntriesRef = useRef(selectedEntries);
   const onFarmingActionRef = useRef(onFarmingAction);
+  selectedEntriesRef.current = selectedEntries;
   onFarmingActionRef.current = onFarmingAction;
 
   useLayoutEffect(() => {
@@ -94,6 +96,15 @@ export function RenderingWorldPlazaFarmingInteractionLabels({
 
       const playerPosition = playerPositionRef.current;
       const selectedKeys = selectedInteractableBlockKeysRef.current;
+
+      if (selectedKeys.size === 0) {
+        if (selectedEntriesRef.current.length > 0) {
+          selectedEntriesRef.current = [];
+          setSelectedEntries([]);
+        }
+        return;
+      }
+
       const nextSelectedEntries = playerPosition
         ? listingWorldPlazaFarmlandTilesInInteractionRange({
             playerPosition,
@@ -112,25 +123,24 @@ export function RenderingWorldPlazaFarmingInteractionLabels({
           )
         : [];
 
-      setSelectedEntries((currentEntries) => {
-        if (
-          currentEntries.length === nextSelectedEntries.length &&
-          currentEntries.every((entry, index) => {
-            const nextEntry = nextSelectedEntries[index];
+      const currentEntries = selectedEntriesRef.current;
+      const didSelectionChange =
+        currentEntries.length !== nextSelectedEntries.length ||
+        !currentEntries.every((entry, index) => {
+          const nextEntry = nextSelectedEntries[index];
 
-            return (
-              nextEntry !== undefined &&
-              entry.tileX === nextEntry.tileX &&
-              entry.tileY === nextEntry.tileY &&
-              entry.interactionKind === nextEntry.interactionKind
-            );
-          })
-        ) {
-          return currentEntries;
-        }
+          return (
+            nextEntry !== undefined &&
+            entry.tileX === nextEntry.tileX &&
+            entry.tileY === nextEntry.tileY &&
+            entry.interactionKind === nextEntry.interactionKind
+          );
+        });
 
-        return nextSelectedEntries;
-      });
+      if (didSelectionChange) {
+        selectedEntriesRef.current = nextSelectedEntries;
+        setSelectedEntries(nextSelectedEntries);
+      }
 
       const cameraOffset = cameraOffsetRef.current;
       const cameraWorldZoom = cameraWorldZoomRef.current ?? 1;
@@ -160,11 +170,11 @@ export function RenderingWorldPlazaFarmingInteractionLabels({
             cameraWorldZoom
           );
 
-        labelElement.style.transform =
-          computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
-            screenPoint.x,
-            screenPoint.y
-          );
+        applyingWorldPlazaCameraZoomedDomOverlayPositionToElement(
+          labelElement,
+          screenPoint.x,
+          screenPoint.y
+        );
         applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
           rowElement,
           cameraWorldZoom

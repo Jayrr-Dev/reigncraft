@@ -1,8 +1,8 @@
 'use client';
 
 import {
+  applyingWorldPlazaCameraZoomedDomOverlayPositionToElement,
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
-  computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
@@ -65,9 +65,11 @@ export function RenderingWorldPlazaPebbleInteractionLabels({
   const [selectedPebbles, setSelectedPebbles] = useState<
     readonly ListingWorldPlazaPebblesInInteractionRangeEntry[]
   >([]);
+  const selectedPebblesRef = useRef(selectedPebbles);
 
   const onPickPebbleRef = useRef(onPickPebble);
 
+  selectedPebblesRef.current = selectedPebbles;
   onPickPebbleRef.current = onPickPebble;
 
   useLayoutEffect(() => {
@@ -78,29 +80,36 @@ export function RenderingWorldPlazaPebbleInteractionLabels({
         return;
       }
 
+      if (selectedInteractableBlockKeysRef.current.size === 0) {
+        if (selectedPebblesRef.current.length > 0) {
+          selectedPebblesRef.current = [];
+          setSelectedPebbles([]);
+        }
+        return;
+      }
+
       const nextSelectedPebbles = listingWorldPlazaPebblesInInteractionRange(
         selectedInteractableBlockKeysRef.current,
         pickedPebbleStateByTileKeyRef.current
       );
 
-      setSelectedPebbles((currentEntries) => {
-        if (
-          currentEntries.length === nextSelectedPebbles.length &&
-          currentEntries.every((entry, index) => {
-            const nextEntry = nextSelectedPebbles[index];
+      const currentEntries = selectedPebblesRef.current;
+      const didSelectionChange =
+        currentEntries.length !== nextSelectedPebbles.length ||
+        !currentEntries.every((entry, index) => {
+          const nextEntry = nextSelectedPebbles[index];
 
-            return (
-              nextEntry !== undefined &&
-              entry.tileX === nextEntry.tileX &&
-              entry.tileY === nextEntry.tileY
-            );
-          })
-        ) {
-          return currentEntries;
-        }
+          return (
+            nextEntry !== undefined &&
+            entry.tileX === nextEntry.tileX &&
+            entry.tileY === nextEntry.tileY
+          );
+        });
 
-        return nextSelectedPebbles;
-      });
+      if (didSelectionChange) {
+        selectedPebblesRef.current = nextSelectedPebbles;
+        setSelectedPebbles(nextSelectedPebbles);
+      }
 
       const cameraOffset = cameraOffsetRef.current;
       const cameraWorldZoom = cameraWorldZoomRef.current ?? 1;
@@ -110,7 +119,8 @@ export function RenderingWorldPlazaPebbleInteractionLabels({
       }
 
       for (const entry of nextSelectedPebbles) {
-        const tileKey = formattingWorldPlazaPebbleInteractionLabelTileKey(entry);
+        const tileKey =
+          formattingWorldPlazaPebbleInteractionLabelTileKey(entry);
         const labelElement = labelElementByTileKeyRef.current.get(tileKey);
         const rowElement = rowElementByTileKeyRef.current.get(tileKey);
 
@@ -118,19 +128,20 @@ export function RenderingWorldPlazaPebbleInteractionLabels({
           continue;
         }
 
-        const screenPoint = resolvingWorldPlazaPebbleInteractionLabelScreenPoint(
-          entry.tileX,
-          entry.tileY,
-          entry.decoration,
-          cameraOffset,
-          cameraWorldZoom
-        );
-
-        labelElement.style.transform =
-          computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
-            screenPoint.x,
-            screenPoint.y
+        const screenPoint =
+          resolvingWorldPlazaPebbleInteractionLabelScreenPoint(
+            entry.tileX,
+            entry.tileY,
+            entry.decoration,
+            cameraOffset,
+            cameraWorldZoom
           );
+
+        applyingWorldPlazaCameraZoomedDomOverlayPositionToElement(
+          labelElement,
+          screenPoint.x,
+          screenPoint.y
+        );
         applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
           rowElement,
           cameraWorldZoom
@@ -162,7 +173,8 @@ export function RenderingWorldPlazaPebbleInteractionLabels({
   return (
     <div className="pointer-events-none absolute inset-0 overflow-visible">
       {selectedPebbles.map((entry) => {
-        const tileKey = formattingWorldPlazaPebbleInteractionLabelTileKey(entry);
+        const tileKey =
+          formattingWorldPlazaPebbleInteractionLabelTileKey(entry);
 
         return (
           <div

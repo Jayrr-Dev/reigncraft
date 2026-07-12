@@ -1,8 +1,8 @@
 'use client';
 
 import {
+  applyingWorldPlazaCameraZoomedDomOverlayPositionToElement,
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
-  computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
@@ -65,9 +65,11 @@ export function RenderingWorldPlazaRockInteractionLabels({
   const [selectedRocks, setSelectedRocks] = useState<
     readonly ListingWorldPlazaRocksInInteractionRangeEntry[]
   >([]);
+  const selectedRocksRef = useRef(selectedRocks);
 
   const onMineRockRef = useRef(onMineRock);
 
+  selectedRocksRef.current = selectedRocks;
   onMineRockRef.current = onMineRock;
 
   useLayoutEffect(() => {
@@ -78,29 +80,36 @@ export function RenderingWorldPlazaRockInteractionLabels({
         return;
       }
 
+      if (selectedInteractableBlockKeysRef.current.size === 0) {
+        if (selectedRocksRef.current.length > 0) {
+          selectedRocksRef.current = [];
+          setSelectedRocks([]);
+        }
+        return;
+      }
+
       const nextSelectedRocks = listingWorldPlazaRocksInInteractionRange(
         selectedInteractableBlockKeysRef.current,
         minedRockStateByTileKeyRef.current
       );
 
-      setSelectedRocks((currentEntries) => {
-        if (
-          currentEntries.length === nextSelectedRocks.length &&
-          currentEntries.every((entry, index) => {
-            const nextEntry = nextSelectedRocks[index];
+      const currentEntries = selectedRocksRef.current;
+      const didSelectionChange =
+        currentEntries.length !== nextSelectedRocks.length ||
+        !currentEntries.every((entry, index) => {
+          const nextEntry = nextSelectedRocks[index];
 
-            return (
-              nextEntry !== undefined &&
-              entry.tileX === nextEntry.tileX &&
-              entry.tileY === nextEntry.tileY
-            );
-          })
-        ) {
-          return currentEntries;
-        }
+          return (
+            nextEntry !== undefined &&
+            entry.tileX === nextEntry.tileX &&
+            entry.tileY === nextEntry.tileY
+          );
+        });
 
-        return nextSelectedRocks;
-      });
+      if (didSelectionChange) {
+        selectedRocksRef.current = nextSelectedRocks;
+        setSelectedRocks(nextSelectedRocks);
+      }
 
       const cameraOffset = cameraOffsetRef.current;
       const cameraWorldZoom = cameraWorldZoomRef.current ?? 1;
@@ -124,11 +133,11 @@ export function RenderingWorldPlazaRockInteractionLabels({
           cameraWorldZoom
         );
 
-        labelElement.style.transform =
-          computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
-            screenPoint.x,
-            screenPoint.y
-          );
+        applyingWorldPlazaCameraZoomedDomOverlayPositionToElement(
+          labelElement,
+          screenPoint.x,
+          screenPoint.y
+        );
         applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
           rowElement,
           cameraWorldZoom

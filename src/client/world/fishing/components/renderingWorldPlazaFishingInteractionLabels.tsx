@@ -1,8 +1,8 @@
 'use client';
 
 import {
+  applyingWorldPlazaCameraZoomedDomOverlayPositionToElement,
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
-  computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
@@ -54,7 +54,9 @@ export function RenderingWorldPlazaFishingInteractionLabels({
   const [selectedTiles, setSelectedTiles] = useState<
     readonly ListingWorldPlazaFishingTilesInInteractionRangeEntry[]
   >([]);
+  const selectedTilesRef = useRef(selectedTiles);
   const onFishRef = useRef(onFish);
+  selectedTilesRef.current = selectedTiles;
   onFishRef.current = onFish;
 
   useLayoutEffect(() => {
@@ -67,6 +69,15 @@ export function RenderingWorldPlazaFishingInteractionLabels({
 
       const playerPosition = playerPositionRef.current;
       const selectedKeys = selectedInteractableBlockKeysRef.current;
+
+      if (selectedKeys.size === 0) {
+        if (selectedTilesRef.current.length > 0) {
+          selectedTilesRef.current = [];
+          setSelectedTiles([]);
+        }
+        return;
+      }
+
       const nextSelectedTiles = playerPosition
         ? listingWorldPlazaFishingTilesInInteractionRange(
             playerPosition
@@ -80,24 +91,23 @@ export function RenderingWorldPlazaFishingInteractionLabels({
           )
         : [];
 
-      setSelectedTiles((currentEntries) => {
-        if (
-          currentEntries.length === nextSelectedTiles.length &&
-          currentEntries.every((entry, index) => {
-            const nextEntry = nextSelectedTiles[index];
+      const currentEntries = selectedTilesRef.current;
+      const didSelectionChange =
+        currentEntries.length !== nextSelectedTiles.length ||
+        !currentEntries.every((entry, index) => {
+          const nextEntry = nextSelectedTiles[index];
 
-            return (
-              nextEntry !== undefined &&
-              entry.tileX === nextEntry.tileX &&
-              entry.tileY === nextEntry.tileY
-            );
-          })
-        ) {
-          return currentEntries;
-        }
+          return (
+            nextEntry !== undefined &&
+            entry.tileX === nextEntry.tileX &&
+            entry.tileY === nextEntry.tileY
+          );
+        });
 
-        return nextSelectedTiles;
-      });
+      if (didSelectionChange) {
+        selectedTilesRef.current = nextSelectedTiles;
+        setSelectedTiles(nextSelectedTiles);
+      }
 
       const cameraOffset = cameraOffsetRef.current;
       const cameraWorldZoom = cameraWorldZoomRef.current ?? 1;
@@ -126,11 +136,11 @@ export function RenderingWorldPlazaFishingInteractionLabels({
             cameraWorldZoom
           );
 
-        labelElement.style.transform =
-          computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
-            screenPoint.x,
-            screenPoint.y
-          );
+        applyingWorldPlazaCameraZoomedDomOverlayPositionToElement(
+          labelElement,
+          screenPoint.x,
+          screenPoint.y
+        );
         applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
           rowElement,
           cameraWorldZoom

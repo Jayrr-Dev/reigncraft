@@ -1,7 +1,9 @@
 import { DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import { creatingWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import { indexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex } from '@/components/world/health/domains/averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex';
+import { updatingWorldPlazaEnvironmentalTemperatureSamplingContext } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
 import { computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex } from '@/components/world/health/domains/computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex';
 import {
   DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS,
@@ -9,6 +11,7 @@ import {
 } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import { resolvingWorldPlazaEnvironmentalTemperatureAtTileIndex } from '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardAtTileIndex';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { buildingWorldFireDevvitTileKey } from '../../../../shared/worldFireDevvit';
 
 /** Deterministic lava tile used by the mocked lava checker. */
 const AVERAGING_WORLD_PLAZA_LAVA_TILE_TEST = {
@@ -25,6 +28,10 @@ vi.mock('@/components/world/domains/checkingWorldPlazaLavaAtTileIndex', () => ({
 describe('averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    updatingWorldPlazaEnvironmentalTemperatureSamplingContext({
+      placedBlocksByTile: new Map(),
+      litCampfireTileKeys: new Set(),
+    });
   });
 
   it('keeps painted heat-zone tiles at their source temperature', () => {
@@ -106,7 +113,7 @@ describe('averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex', () =>
     expect(effectiveCelsius).toBeGreaterThan(rawCelsius);
   });
 
-  it('warms tiles adjacent to campfires', () => {
+  it('warms tiles adjacent to lit campfires', () => {
     const campfireTileX = 20;
     const campfireTileY = 20;
     const neighborTileX = campfireTileX + 1;
@@ -121,6 +128,18 @@ describe('averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex', () =>
         placedAt: '2026-01-01T00:00:00.000Z',
       }),
     ]);
+
+    updatingWorldPlazaEnvironmentalTemperatureSamplingContext({
+      placedBlocksByTile,
+      litCampfireTileKeys: new Set([
+        buildingWorldFireDevvitTileKey(
+          campfireTileX,
+          campfireTileY,
+          DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND
+        ),
+      ]),
+    });
+
     const rawCelsius =
       computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
         tileX: neighborTileX,
@@ -145,5 +164,44 @@ describe('averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex', () =>
       })
     ).toBe(DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS);
     expect(effectiveCelsius).toBeGreaterThan(rawCelsius);
+  });
+
+  it('does not radiate heat from unlit campfires', () => {
+    const campfireTileX = 21;
+    const campfireTileY = 21;
+    const placedBlocksByTile = indexingWorldBuildingPlacedBlocksByTile([
+      creatingWorldBuildingPlacedBlock({
+        blockId: 'campfire-unlit-test',
+        plotId: 'plot-test',
+        definitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
+        tilePosition: { tileX: campfireTileX, tileY: campfireTileY },
+        ownerId: 'player-test',
+        placedAt: '2026-01-01T00:00:00.000Z',
+      }),
+    ]);
+
+    updatingWorldPlazaEnvironmentalTemperatureSamplingContext({
+      placedBlocksByTile,
+      litCampfireTileKeys: new Set(),
+    });
+
+    const ambientCelsius =
+      computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
+        tileX: campfireTileX,
+        tileY: campfireTileY,
+        isDaytime: true,
+      });
+    const campfireTileCelsius =
+      computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
+        tileX: campfireTileX,
+        tileY: campfireTileY,
+        isDaytime: true,
+        placedBlocksByTile,
+      });
+
+    expect(campfireTileCelsius).toBe(ambientCelsius);
+    expect(campfireTileCelsius).not.toBe(
+      DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS
+    );
   });
 });

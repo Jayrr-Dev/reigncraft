@@ -5,8 +5,8 @@ import { RenderingWorldPlazaGameplayHudExplanationPopover } from '@/components/w
 import { RenderingWorldPlazaPlayerNameLabelRowWithProfilePopover } from '@/components/world/components/renderingWorldPlazaPlayerNameLabelRowWithProfilePopover';
 import { RenderingWorldPlazaStaminaBarTrack } from '@/components/world/components/renderingWorldPlazaStaminaBar';
 import {
+  applyingWorldPlazaCameraZoomedDomOverlayPositionToElement,
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
-  computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
@@ -409,11 +409,11 @@ export function RenderingWorldPlazaEntityHealthBars({
           cameraWorldZoom,
         });
 
-        barElement.style.transform =
-          computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
-            screenPoint.x,
-            screenPoint.y
-          );
+        applyingWorldPlazaCameraZoomedDomOverlayPositionToElement(
+          barElement,
+          screenPoint.x,
+          screenPoint.y
+        );
         applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
           barElement.firstElementChild?.firstElementChild as HTMLElement | null,
           cameraWorldZoom

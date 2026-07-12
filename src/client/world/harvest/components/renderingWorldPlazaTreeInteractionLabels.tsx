@@ -2,8 +2,8 @@
 
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
+  applyingWorldPlazaCameraZoomedDomOverlayPositionToElement,
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
-  computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
@@ -68,10 +68,12 @@ export function RenderingWorldPlazaTreeInteractionLabels({
   const [selectedTrees, setSelectedTrees] = useState<
     readonly ListingWorldPlazaTreesInInteractionRangeEntry[]
   >([]);
+  const selectedTreesRef = useRef(selectedTrees);
 
   const placedBlocksRef = useRef(placedBlocks);
   const onChopTreeRef = useRef(onChopTree);
 
+  selectedTreesRef.current = selectedTrees;
   placedBlocksRef.current = placedBlocks;
   onChopTreeRef.current = onChopTree;
 
@@ -83,30 +85,37 @@ export function RenderingWorldPlazaTreeInteractionLabels({
         return;
       }
 
+      if (selectedInteractableBlockKeysRef.current.size === 0) {
+        if (selectedTreesRef.current.length > 0) {
+          selectedTreesRef.current = [];
+          setSelectedTrees([]);
+        }
+        return;
+      }
+
       const nextSelectedTrees = listingWorldPlazaTreesInInteractionRange(
         placedBlocksRef.current,
         selectedInteractableBlockKeysRef.current,
         choppedTreeStateByTileKeyRef.current
       );
 
-      setSelectedTrees((currentEntries) => {
-        if (
-          currentEntries.length === nextSelectedTrees.length &&
-          currentEntries.every((entry, index) => {
-            const nextEntry = nextSelectedTrees[index];
+      const currentEntries = selectedTreesRef.current;
+      const didSelectionChange =
+        currentEntries.length !== nextSelectedTrees.length ||
+        !currentEntries.every((entry, index) => {
+          const nextEntry = nextSelectedTrees[index];
 
-            return (
-              nextEntry !== undefined &&
-              entry.tileX === nextEntry.tileX &&
-              entry.tileY === nextEntry.tileY
-            );
-          })
-        ) {
-          return currentEntries;
-        }
+          return (
+            nextEntry !== undefined &&
+            entry.tileX === nextEntry.tileX &&
+            entry.tileY === nextEntry.tileY
+          );
+        });
 
-        return nextSelectedTrees;
-      });
+      if (didSelectionChange) {
+        selectedTreesRef.current = nextSelectedTrees;
+        setSelectedTrees(nextSelectedTrees);
+      }
 
       const cameraOffset = cameraOffsetRef.current;
       const cameraWorldZoom = cameraWorldZoomRef.current ?? 1;
@@ -130,11 +139,11 @@ export function RenderingWorldPlazaTreeInteractionLabels({
           cameraWorldZoom
         );
 
-        labelElement.style.transform =
-          computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
-            screenPoint.x,
-            screenPoint.y
-          );
+        applyingWorldPlazaCameraZoomedDomOverlayPositionToElement(
+          labelElement,
+          screenPoint.x,
+          screenPoint.y
+        );
         applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
           rowElement,
           cameraWorldZoom

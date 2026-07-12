@@ -109,6 +109,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
   cameraWorldZoomRef,
   placedBlocksRef,
   burntGrassTileKeysRef,
+  litCampfireTileKeysRef,
   choppedTreesByTileKeyRef,
   pickedPebblesByTileKeyRef,
   floorLayerRef,
@@ -205,14 +206,19 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     const pickedPebblesByTileKey =
       pickedPebblesByTileKeyRef?.current ?? new Map();
     const burntGrassTileKeys = burntGrassTileKeysRef?.current;
+    const litCampfireTileKeys =
+      litCampfireTileKeysRef?.current ?? new Set<string>();
     const placedTreeBlocksKey =
       buildingWorldPlazaPlacedTreeBlocksCacheKey(scenePlacedBlocks);
     const sunState = computingWorldPlazaDayNightSunState();
-    const thawVisualSyncKey = `${sunState.bucketIndex}|${buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey(scenePlacedBlocks)}`;
 
+    // Publish lit campfires before the thaw key so campfire heat gating is current.
     updatingWorldPlazaEnvironmentalTemperatureSamplingContext({
       placedBlocksByTile: placedBlocksRef?.current?.blocksByTile ?? new Map(),
+      litCampfireTileKeys,
     });
+
+    const thawVisualSyncKey = `${sunState.bucketIndex}|${buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey(scenePlacedBlocks)}`;
 
     if (thawVisualSyncKey !== lastThawVisualSyncKeyRef.current) {
       lastThawVisualSyncKeyRef.current = thawVisualSyncKey;

@@ -3,13 +3,16 @@ import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ICE_BLOCK,
 } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import { creatingWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import { indexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import {
   checkingWorldPlazaWaterIsClimateFrozenAtTileIndex,
   checkingWorldPlazaWaterIsFrozenAtTileIndex,
 } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
-import { describe, expect, it } from 'vitest';
+import { updatingWorldPlazaEnvironmentalTemperatureSamplingContext } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
+import { buildingWorldFireDevvitTileKey } from '../../../shared/worldFireDevvit';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 function findingWorldPlazaClimateFrozenWaterTileIndexForTest(): {
   tileX: number;
@@ -46,7 +49,31 @@ function findingWorldPlazaWarmClimateWaterTileIndexForTest(): {
   throw new Error('Expected at least one warm-climate water tile');
 }
 
+function markingWorldPlazaCampfireLitForTemperatureTest(
+  tileX: number,
+  tileY: number,
+  placedBlocksByTile: ReturnType<typeof indexingWorldBuildingPlacedBlocksByTile>
+): void {
+  updatingWorldPlazaEnvironmentalTemperatureSamplingContext({
+    placedBlocksByTile,
+    litCampfireTileKeys: new Set([
+      buildingWorldFireDevvitTileKey(
+        tileX,
+        tileY,
+        DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND
+      ),
+    ]),
+  });
+}
+
 describe('checkingWorldPlazaWaterIsFrozenAtTileIndex', () => {
+  beforeEach(() => {
+    updatingWorldPlazaEnvironmentalTemperatureSamplingContext({
+      placedBlocksByTile: new Map(),
+      litCampfireTileKeys: new Set(),
+    });
+  });
+
   it('keeps warm-climate water liquid without cold sources', () => {
     const warmWaterTile = findingWorldPlazaWarmClimateWaterTileIndexForTest();
 
@@ -71,7 +98,7 @@ describe('checkingWorldPlazaWaterIsFrozenAtTileIndex', () => {
     ).toBe(true);
   });
 
-  it('thaws climate-frozen water when a campfire stands on the tile', () => {
+  it('thaws climate-frozen water when a lit campfire stands on the tile', () => {
     const frozenWaterTile =
       findingWorldPlazaClimateFrozenWaterTileIndexForTest();
     const placedBlocksByTile = indexingWorldBuildingPlacedBlocksByTile([
@@ -88,6 +115,12 @@ describe('checkingWorldPlazaWaterIsFrozenAtTileIndex', () => {
       }),
     ]);
 
+    markingWorldPlazaCampfireLitForTemperatureTest(
+      frozenWaterTile.tileX,
+      frozenWaterTile.tileY,
+      placedBlocksByTile
+    );
+
     expect(
       checkingWorldPlazaWaterIsFrozenAtTileIndex(
         frozenWaterTile.tileX,
@@ -97,22 +130,61 @@ describe('checkingWorldPlazaWaterIsFrozenAtTileIndex', () => {
     ).toBe(false);
   });
 
-  it('thaws climate-frozen water beside a campfire', () => {
+  it('keeps climate-frozen water solid beside an unlit campfire', () => {
     const frozenWaterTile =
       findingWorldPlazaClimateFrozenWaterTileIndexForTest();
+    const placedBlocksByTile = indexingWorldBuildingPlacedBlocksByTile([
+      creatingWorldBuildingPlacedBlock({
+        blockId: 'campfire-unlit-thaw-test',
+        plotId: 'plot-unlit-thaw-test',
+        definitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
+        tilePosition: {
+          tileX: frozenWaterTile.tileX + 1,
+          tileY: frozenWaterTile.tileY,
+        },
+        ownerId: 'player-unlit-thaw-test',
+        placedAt: '2026-01-01T00:00:00.000Z',
+      }),
+    ]);
+
+    updatingWorldPlazaEnvironmentalTemperatureSamplingContext({
+      placedBlocksByTile,
+      litCampfireTileKeys: new Set(),
+    });
+
+    expect(
+      checkingWorldPlazaWaterIsFrozenAtTileIndex(
+        frozenWaterTile.tileX,
+        frozenWaterTile.tileY,
+        { isDaytime: true, placedBlocksByTile }
+      )
+    ).toBe(true);
+  });
+
+  it('thaws climate-frozen water beside a lit campfire', () => {
+    const frozenWaterTile =
+      findingWorldPlazaClimateFrozenWaterTileIndexForTest();
+    const campfireTileX = frozenWaterTile.tileX + 1;
+    const campfireTileY = frozenWaterTile.tileY;
     const placedBlocksByTile = indexingWorldBuildingPlacedBlocksByTile([
       creatingWorldBuildingPlacedBlock({
         blockId: 'campfire-thaw-neighbor-test',
         plotId: 'plot-thaw-neighbor-test',
         definitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
         tilePosition: {
-          tileX: frozenWaterTile.tileX + 1,
-          tileY: frozenWaterTile.tileY,
+          tileX: campfireTileX,
+          tileY: campfireTileY,
         },
         ownerId: 'player-thaw-neighbor-test',
         placedAt: '2026-01-01T00:00:00.000Z',
       }),
     ]);
+
+    markingWorldPlazaCampfireLitForTemperatureTest(
+      campfireTileX,
+      campfireTileY,
+      placedBlocksByTile
+    );
 
     expect(
       checkingWorldPlazaWaterIsFrozenAtTileIndex(
@@ -173,8 +245,10 @@ describe('checkingWorldPlazaWaterIsFrozenAtTileIndex', () => {
     ).toBe(true);
   });
 
-  it('lets campfire heat win over ice when both sit in the ring', () => {
+  it('lets lit campfire heat win over ice when both sit in the ring', () => {
     const warmWaterTile = findingWorldPlazaWarmClimateWaterTileIndexForTest();
+    const campfireTileX = warmWaterTile.tileX + 1;
+    const campfireTileY = warmWaterTile.tileY;
     const placedBlocksByTile = indexingWorldBuildingPlacedBlocksByTile([
       creatingWorldBuildingPlacedBlock({
         blockId: 'ice-vs-fire-ice',
@@ -192,13 +266,19 @@ describe('checkingWorldPlazaWaterIsFrozenAtTileIndex', () => {
         plotId: 'plot-ice-vs-fire',
         definitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
         tilePosition: {
-          tileX: warmWaterTile.tileX + 1,
-          tileY: warmWaterTile.tileY,
+          tileX: campfireTileX,
+          tileY: campfireTileY,
         },
         ownerId: 'player-ice-vs-fire',
         placedAt: '2026-01-01T00:00:00.000Z',
       }),
     ]);
+
+    markingWorldPlazaCampfireLitForTemperatureTest(
+      campfireTileX,
+      campfireTileY,
+      placedBlocksByTile
+    );
 
     expect(
       checkingWorldPlazaWaterIsFrozenAtTileIndex(
