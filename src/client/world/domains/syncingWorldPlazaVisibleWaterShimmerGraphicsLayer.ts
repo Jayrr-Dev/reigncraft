@@ -1,3 +1,4 @@
+import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
@@ -26,6 +27,10 @@ export interface UpdatingWorldPlazaVisibleWaterShimmerGraphicsLayerInput {
   readonly shimmerGraphics: Graphics;
   readonly bounds: DefiningWorldPlazaVisibleTileBounds;
   readonly animationTimeMs: number;
+  readonly cameraOffset: DefiningWorldPlazaCameraOffset;
+  readonly viewportWidthPx: number;
+  readonly viewportHeightPx: number;
+  readonly worldZoom: number;
 }
 
 /** Conservative padding for animated streaks and ripple ellipses. */
@@ -83,7 +88,13 @@ export function updatingWorldPlazaVisibleWaterShimmerGraphicsLayer(
   const animatedTileCount = drawingWorldPlazaWaterShimmerOnGraphics(
     input.shimmerGraphics,
     input.bounds,
-    input.animationTimeMs
+    input.animationTimeMs,
+    {
+      cameraOffset: input.cameraOffset,
+      widthPx: input.viewportWidthPx,
+      heightPx: input.viewportHeightPx,
+      worldZoom: input.worldZoom,
+    }
   );
 
   finishSample();

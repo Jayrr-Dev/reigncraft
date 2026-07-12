@@ -4508,6 +4508,7 @@ function RenderingWorldPlazaPixiSceneConnected({
             ) : null}
             <RenderingWorldPlazaDeclarativeTerrainSync
               playerPositionRef={playerPositionRef}
+              cameraOffsetRef={cameraOffsetRef}
               cameraWorldZoomRef={cameraWorldZoomRef}
               placedBlocksRef={placedBlocksRef}
               burntGrassTileKeysRef={burntGrassTileKeysRef}

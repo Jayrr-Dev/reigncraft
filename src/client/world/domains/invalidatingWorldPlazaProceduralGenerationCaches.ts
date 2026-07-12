@@ -16,6 +16,7 @@ import { invalidatingWorldPlazaStoneDecorationCache } from '@/components/world/d
 import { invalidatingWorldPlazaTerrainElevationAtTileIndexCache } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 import { invalidatingWorldPlazaTreeAtTileIndexCache } from '@/components/world/domains/resolvingWorldPlazaTreeAtTileIndex';
 import { invalidatingWorldPlazaWaterAtTileIndexCache } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
+import { invalidatingWorldPlazaWaterSurfaceTileDrawMetadataCache } from '@/components/world/domains/resolvingWorldPlazaWaterSurfaceTileDrawMetadataAtTileIndex';
 
 /**
  * Clears procedural terrain memoization after generation rule changes.
@@ -34,6 +35,7 @@ export function invalidatingWorldPlazaProceduralGenerationCaches(): void {
   invalidatingWorldPlazaFirelandsPropCache();
   invalidatingWorldPlazaWaterAtTileIndexCache();
   invalidatingWorldPlazaWaterShimmerTileEntryCache();
+  invalidatingWorldPlazaWaterSurfaceTileDrawMetadataCache();
   invalidatingWorldPlazaRiverChannelPassesNoiseCache();
   invalidatingWorldPlazaLakeBasinOccupyCache();
   invalidatingWorldPlazaLakeShoreDepthCache();

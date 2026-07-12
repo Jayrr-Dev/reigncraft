@@ -66,6 +66,7 @@ describe('creatingWorldPlazaTerrainLayerEngine', () => {
     return {
       performanceProfile: DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_HIGH,
       playerPosition: { x: 4, y: 4 },
+      cameraOffset: { x: 400, y: 300 },
       viewportWidth: 800,
       viewportHeight: 600,
       worldZoom: 1,

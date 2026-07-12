@@ -1,5 +1,6 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { DefiningWorldPlazaPlacedBlocksSceneRef } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
+import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import type { DefiningWorldPlazaGenerationFeatureId } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import type { DefiningWorldPlazaPerformanceDiagnosticsRenderLayerId } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
 import type { DefiningWorldPlazaPerformanceProfile } from '@/components/world/domains/definingWorldPlazaPerformanceProfileConstants';
@@ -35,6 +36,7 @@ export type DefiningWorldPlazaTerrainBoundsProfileId =
 export type RunningWorldPlazaTerrainLayerEngineContext = {
   readonly performanceProfile: DefiningWorldPlazaPerformanceProfile;
   readonly playerPosition: DefiningWorldPlazaWorldPoint;
+  readonly cameraOffset: DefiningWorldPlazaCameraOffset;
   readonly viewportWidth: number;
   readonly viewportHeight: number;
   readonly worldZoom: number;
@@ -73,6 +75,7 @@ export type RunningWorldPlazaTerrainLayerEngineContext = {
 /** Input refs the React shell resolves into a tick context. */
 export type RunningWorldPlazaTerrainLayerEngineInputRefs = {
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
+  readonly cameraOffsetRef: RefObject<DefiningWorldPlazaCameraOffset>;
   readonly cameraWorldZoomRef: RefObject<number>;
   readonly placedBlocksRef?: RefObject<DefiningWorldPlazaPlacedBlocksSceneRef>;
   readonly burntGrassTileKeysRef?: RefObject<ReadonlySet<string>>;

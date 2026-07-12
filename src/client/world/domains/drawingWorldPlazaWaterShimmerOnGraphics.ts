@@ -1,4 +1,8 @@
 import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
+import {
+  checkingWorldPlazaWaterShimmerTileVisibleInViewport,
+  type CheckingWorldPlazaWaterShimmerTileVisibleViewport,
+} from '@/components/world/domains/checkingWorldPlazaWaterShimmerTileVisibleInViewport';
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import {
@@ -285,12 +289,14 @@ function collectingWorldPlazaWaterShimmerTileEntries(
  * @param graphics - Dedicated shimmer graphics instance (caller clears first).
  * @param bounds - Visible tile index range.
  * @param animationTimeMs - Monotonic animation clock in milliseconds.
+ * @param viewport - Live camera viewport used for exact screen culling.
  * @returns Count of animated water tiles, for the perf shimmer tile gauge.
  */
 export function drawingWorldPlazaWaterShimmerOnGraphics(
   graphics: Graphics,
   bounds: DefiningWorldPlazaVisibleTileBounds,
-  animationTimeMs: number
+  animationTimeMs: number,
+  viewport: CheckingWorldPlazaWaterShimmerTileVisibleViewport
 ): number {
   const boundsKey = buildingWorldPlazaVisibleTileBoundsCacheKey(bounds);
 
@@ -301,23 +307,50 @@ export function drawingWorldPlazaWaterShimmerOnGraphics(
   }
 
   const entries = drawingWorldPlazaWaterShimmerTileEntryCache.entries;
+  let visibleEntryCount = 0;
+
+  for (const entry of entries) {
+    if (
+      checkingWorldPlazaWaterShimmerTileVisibleInViewport(
+        entry.centerX,
+        entry.centerY,
+        viewport
+      )
+    ) {
+      visibleEntryCount += 1;
+    }
+  }
+
   const entryStride =
-    entries.length > DEFINING_WORLD_PLAZA_WATER_SHIMMER_MAX_ANIMATED_TILES
+    visibleEntryCount > DEFINING_WORLD_PLAZA_WATER_SHIMMER_MAX_ANIMATED_TILES
       ? Math.ceil(
-          entries.length / DEFINING_WORLD_PLAZA_WATER_SHIMMER_MAX_ANIMATED_TILES
+          visibleEntryCount /
+            DEFINING_WORLD_PLAZA_WATER_SHIMMER_MAX_ANIMATED_TILES
         )
       : 1;
   const halfWidth = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
   const halfHeight = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX;
   const isDaytime = computingWorldPlazaDayNightSunState().isDaytime;
   let animatedTileCount = 0;
+  let visibleEntryIndex = 0;
 
-  for (
-    let entryIndex = 0;
-    entryIndex < entries.length;
-    entryIndex += entryStride
-  ) {
-    const entry = entries[entryIndex];
+  for (const entry of entries) {
+    if (
+      !checkingWorldPlazaWaterShimmerTileVisibleInViewport(
+        entry.centerX,
+        entry.centerY,
+        viewport
+      )
+    ) {
+      continue;
+    }
+
+    const shouldAnimateEntry = visibleEntryIndex % entryStride === 0;
+    visibleEntryIndex += 1;
+
+    if (!shouldAnimateEntry) {
+      continue;
+    }
 
     if (
       checkingWorldPlazaWaterIsFrozenAtTileIndex(entry.tileX, entry.tileY, {

@@ -1016,6 +1016,10 @@ export function registeringWorldPlazaTerrainLayers(
             floorBounds: bounds,
           }),
           animationTimeMs: context.animationTimeMs,
+          cameraOffset: context.cameraOffset,
+          viewportWidthPx: context.viewportWidth,
+          viewportHeightPx: context.viewportHeight,
+          worldZoom: context.worldZoom,
         });
       },
       resetRuntimeState: (context, runtimeState) => {

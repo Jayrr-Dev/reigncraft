@@ -28,6 +28,7 @@ import {
 import { invalidatingWorldPlazaMiniMapTileFillColorCache } from '@/components/world/domains/resolvingWorldPlazaMiniMapTileFillColor';
 import { resolvingWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { resolvingWorldPlazaVisibleIsometricTileBounds } from '@/components/world/domains/resolvingWorldPlazaVisibleIsometricTileBounds';
+import { invalidatingWorldPlazaWaterSurfaceTileDrawMetadataCache } from '@/components/world/domains/resolvingWorldPlazaWaterSurfaceTileDrawMetadataAtTileIndex';
 import { buildingWorldPlazaPlacedTreeBlocksCacheKey } from '@/components/world/engine/buildingWorldPlazaTerrainLayerCacheKeys';
 import {
   buildingWorldPlazaTerrainFloorBoundsCacheKey,
@@ -104,6 +105,7 @@ function ensuringWorldPlazaTerrainLayerEngine(
  */
 export function RenderingWorldPlazaDeclarativeTerrainSync({
   playerPositionRef,
+  cameraOffsetRef,
   cameraWorldZoomRef,
   placedBlocksRef,
   burntGrassTileKeysRef,
@@ -165,6 +167,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     const trunkLayer = trunkLayerRef.current;
     const canopyLayer = canopyLayerRef.current;
     const playerPosition = playerPositionRef.current;
+    const cameraOffset = cameraOffsetRef.current;
     const viewportSize =
       resolvingWorldPlazaPixiViewportSize(applicationContext);
     const worldZoom =
@@ -214,6 +217,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     if (thawVisualSyncKey !== lastThawVisualSyncKeyRef.current) {
       lastThawVisualSyncKeyRef.current = thawVisualSyncKey;
       invalidatingWorldPlazaMiniMapTileFillColorCache();
+      invalidatingWorldPlazaWaterSurfaceTileDrawMetadataCache();
     }
 
     if (
@@ -394,6 +398,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     const engineContext = {
       performanceProfile,
       playerPosition,
+      cameraOffset,
       viewportWidth: viewportSize.width,
       viewportHeight: viewportSize.height,
       worldZoom,
@@ -467,6 +472,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
   }, [
     applicationContext,
     burntGrassTileKeysRef,
+    cameraOffsetRef,
     cameraWorldZoomRef,
     canopyLayerRef,
     choppedTreesByTileKeyRef,
@@ -522,6 +528,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     terrainEngine.resetAll({
       performanceProfile: performanceProfileRef.current,
       playerPosition,
+      cameraOffset: cameraOffsetRef.current,
       viewportWidth: 0,
       viewportHeight: 0,
       worldZoom: DEFINING_WORLD_PLAZA_CAMERA_ZOOM,
@@ -550,6 +557,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     lastThawVisualSyncKeyRef.current = '';
   }, [
     burntGrassTileKeysRef,
+    cameraOffsetRef,
     canopyLayerRef,
     choppedTreesByTileKeyRef,
     floorLayerRef,
@@ -580,6 +588,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       terrainEngine.destroy({
         performanceProfile: performanceProfileRef.current,
         playerPosition: { x: 0, y: 0 },
+        cameraOffset: cameraOffsetRef.current,
         viewportWidth: 0,
         viewportHeight: 0,
         worldZoom: DEFINING_WORLD_PLAZA_CAMERA_ZOOM,
@@ -605,7 +614,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       });
       terrainEngineRef.current = null;
     };
-  }, [canopyLayerRef, floorLayerRef, trunkLayerRef]);
+  }, [cameraOffsetRef, canopyLayerRef, floorLayerRef, trunkLayerRef]);
 
   usingWorldPlazaSafeTick(() => {
     syncingDeclarativeTerrainLayers();
