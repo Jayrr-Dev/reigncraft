@@ -3,13 +3,13 @@ import {
   checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex,
   checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex,
 } from '@/components/world/building/domains/resolvingWorldBuildingCollision';
+import { resolvingWorldBuildingJumpLandableSurfaceLayerAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
 import { clampingWorldCollisionPointBeforeGridPointPredicate } from '@/components/world/collision';
 import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaIsometricTileEntryEdgeGridPointAtIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricTileEntryEdgeGridPointAtIndex';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import { checkingWorldPlazaPlayerCircleOverlapsTileSquare } from '@/components/world/domains/resolvingWorldPlazaPlayerCircleTileSquareCollision';
-import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import {
   checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex,
   checkingWorldPlazaTerrainOccupiesWaterAtTileIndex,
@@ -263,7 +263,9 @@ function buildingWorldPlazaJumpLandingGridPointAlongPathResult(
   startGridPoint: DefiningWorldPlazaWorldPoint,
   landingGridPoint: DefiningWorldPlazaWorldPoint,
   gridDirection: DefiningWorldPlazaWorldPoint,
-  placedBlocks: DefiningWorldBuildingPlacedBlock[]
+  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+  fromLayer: number,
+  jumpLayerReachMax?: number
 ): ResolvingWorldPlazaJumpLandingGridPointAlongPathResult {
   const clearedLandingGridPoint =
     nudgingWorldPlazaJumpLandingGridPointClearOfWaterCircleOverlap(
@@ -277,11 +279,14 @@ function buildingWorldPlazaJumpLandingGridPointAlongPathResult(
 
   return {
     landingGridPoint: clearedLandingGridPoint,
-    landingSurfaceLayer: resolvingWorldPlazaSurfaceLayerAtTileIndex(
-      landingTile.tileX,
-      landingTile.tileY,
-      placedBlocks
-    ),
+    landingSurfaceLayer:
+      resolvingWorldBuildingJumpLandableSurfaceLayerAtTileIndex(
+        landingTile.tileX,
+        landingTile.tileY,
+        placedBlocks,
+        fromLayer,
+        jumpLayerReachMax
+      ),
     forwardGridDistance:
       computingWorldPlazaJumpForwardGridDistanceToLandingPoint(
         startGridPoint,
@@ -397,11 +402,14 @@ function findingWorldPlazaJumpLandingFarBankCandidateAlongPath(
       bestFarBankCandidate = {
         forwardGridDistance,
         landingGridPoint,
-        landingSurfaceLayer: resolvingWorldPlazaSurfaceLayerAtTileIndex(
-          sampleTile.tileX,
-          sampleTile.tileY,
-          placedBlocks
-        ),
+        landingSurfaceLayer:
+          resolvingWorldBuildingJumpLandableSurfaceLayerAtTileIndex(
+            sampleTile.tileX,
+            sampleTile.tileY,
+            placedBlocks,
+            fromLayer,
+            jumpLayerReachMax
+          ),
       };
     }
   }
@@ -448,7 +456,9 @@ export function resolvingWorldPlazaJumpLandingGridPointAlongPath(
       startGridPoint,
       intendedLandingGridPoint,
       gridDirection,
-      placedBlocks
+      placedBlocks,
+      fromLayer,
+      jumpLayerReachMax
     );
   }
 
@@ -507,6 +517,8 @@ export function resolvingWorldPlazaJumpLandingGridPointAlongPath(
     startGridPoint,
     nearBankLandingGridPoint,
     gridDirection,
-    placedBlocks
+    placedBlocks,
+    fromLayer,
+    jumpLayerReachMax
   );
 }

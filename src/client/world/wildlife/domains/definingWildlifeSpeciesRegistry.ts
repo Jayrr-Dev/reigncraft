@@ -164,11 +164,16 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
 > = {
   // Livestock — heavy or flock animals with short panic gallops only.
   cow: { drainMultiplier: 1.2, regenMultiplier: 0.88 },
+  'cow-brown': { drainMultiplier: 1.2, regenMultiplier: 0.88 },
   sheep: { drainMultiplier: 1.05, regenMultiplier: 0.95 },
   chicken: { drainMultiplier: 1.5, regenMultiplier: 1.4 },
+  pinguin: { drainMultiplier: 1.35, regenMultiplier: 1.3 },
   'shepherd-dog': { drainMultiplier: 0.85, regenMultiplier: 1.15 },
+  husky: { drainMultiplier: 0.75, regenMultiplier: 1.25 },
+  'golden-retriever': { drainMultiplier: 0.85, regenMultiplier: 1.15 },
   'cat-black': { drainMultiplier: 1.4, regenMultiplier: 1.25 },
   'cat-white': { drainMultiplier: 1.4, regenMultiplier: 1.25 },
+  'cat-orange': { drainMultiplier: 1.4, regenMultiplier: 1.25 },
   'cat-large': { drainMultiplier: 1.3, regenMultiplier: 1.2 },
   fairy: { drainMultiplier: 0.5, regenMultiplier: 1.5 },
 
@@ -191,6 +196,12 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   // Omnivores — boars wind up then charge; bears sprint fast but overheat quickly.
   boar: { drainMultiplier: 1.25, regenMultiplier: 0.95 },
   'brown-bear': { drainMultiplier: 1.55, regenMultiplier: 0.88 },
+  grizzly: {
+    drainMultiplier: 1.35,
+    regenMultiplier: 0.9,
+    exhaustedRecoveryRatio: 0.75,
+    maxStaminaRatio: 1.6,
+  },
 
   // Carnivores — wolves are pack endurance runners; cats and crocs are ambush sprinters.
   'grey-wolf': {
@@ -311,6 +322,18 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
       jumpCooldownMs: 0,
     },
   },
+  'cow-brown': {
+    walkSpeedGridPerSecond: 1,
+    runSpeedGridPerSecond: 2.4,
+    jump: {
+      canJump: false,
+      canPounce: false,
+      maxJumpDistanceGrid: 0,
+      jumpSpeedGridPerSecond: 0,
+      jumpArcPeakPx: 0,
+      jumpCooldownMs: 0,
+    },
+  },
   sheep: {
     walkSpeedGridPerSecond: 1.5,
     runSpeedGridPerSecond: 2.9,
@@ -347,6 +370,30 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
       jumpCooldownMs: 3000,
     },
   },
+  husky: {
+    walkSpeedGridPerSecond: 1.7,
+    runSpeedGridPerSecond: 3.5,
+    jump: {
+      canJump: true,
+      canPounce: false,
+      maxJumpDistanceGrid: 2.2,
+      jumpSpeedGridPerSecond: 4.2,
+      jumpArcPeakPx: 16,
+      jumpCooldownMs: 2800,
+    },
+  },
+  'golden-retriever': {
+    walkSpeedGridPerSecond: 1.6,
+    runSpeedGridPerSecond: 3.3,
+    jump: {
+      canJump: true,
+      canPounce: false,
+      maxJumpDistanceGrid: 2,
+      jumpSpeedGridPerSecond: 4,
+      jumpArcPeakPx: 16,
+      jumpCooldownMs: 3000,
+    },
+  },
   'cat-black': {
     walkSpeedGridPerSecond: 1.2,
     runSpeedGridPerSecond: 2.8,
@@ -360,6 +407,18 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     },
   },
   'cat-white': {
+    walkSpeedGridPerSecond: 1.2,
+    runSpeedGridPerSecond: 2.8,
+    jump: {
+      canJump: true,
+      canPounce: false,
+      maxJumpDistanceGrid: 2.5,
+      jumpSpeedGridPerSecond: 5,
+      jumpArcPeakPx: 22,
+      jumpCooldownMs: 2200,
+    },
+  },
+  'cat-orange': {
     walkSpeedGridPerSecond: 1.2,
     runSpeedGridPerSecond: 2.8,
     jump: {
@@ -433,6 +492,18 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
       jumpSpeedGridPerSecond: 3.5,
       jumpArcPeakPx: 10,
       jumpCooldownMs: 4500,
+    },
+  },
+  grizzly: {
+    walkSpeedGridPerSecond: 1.35,
+    runSpeedGridPerSecond: 4.8,
+    jump: {
+      canJump: true,
+      canPounce: true,
+      maxJumpDistanceGrid: 2.2,
+      jumpSpeedGridPerSecond: 3.7,
+      jumpArcPeakPx: 12,
+      jumpCooldownMs: 4200,
     },
   },
 
@@ -666,7 +737,19 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: definingWildlifeGroundedJumpConfig(),
   },
 
-  // Cold country — polar bears pounce like browns; mammoths flatten instead.
+  // Cold country — pinguins waddle then slide-sprint; polar bears pounce.
+  pinguin: {
+    walkSpeedGridPerSecond: 0.85,
+    runSpeedGridPerSecond: 2.4,
+    jump: {
+      canJump: true,
+      canPounce: false,
+      maxJumpDistanceGrid: 1.2,
+      jumpSpeedGridPerSecond: 3.8,
+      jumpArcPeakPx: 18,
+      jumpCooldownMs: 2800,
+    },
+  },
   'polar-bear': {
     walkSpeedGridPerSecond: 1.3,
     runSpeedGridPerSecond: 3.7,
@@ -1151,6 +1234,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   DefiningWildlifeSpeciesRegistryEntry
 > = {
   cow: definingWildlifePassiveFarmSpecies('cow', 'Cow', 'cow', 450),
+  'cow-brown': definingWildlifePassiveFarmSpecies(
+    'cow-brown',
+    'Brown Cow',
+    'cow-brown',
+    460
+  ),
   sheep: definingWildlifePassiveFarmSpecies('sheep', 'Sheep', 'sheep', 60),
   chicken: {
     ...definingWildlifePassiveFarmSpecies('chicken', 'Chicken', 'chicken', 3),
@@ -1284,7 +1373,15 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       packShareRadiusGrid: 10,
     },
     territory: DEFINING_WILDLIFE_GREY_WOLF_TERRITORY_CONFIG,
-    preyAllowSpeciesIds: ['deer', 'zebra', 'cow', 'sheep', 'chicken', 'boar'],
+    preyAllowSpeciesIds: [
+      'deer',
+      'zebra',
+      'cow',
+      'sheep',
+      'chicken',
+      'boar',
+      'pinguin',
+    ],
     preyDenySpeciesIds: ['grey-wolf'],
     favoritePreySpeciesIds: ['sheep'],
     socialBehavior: { socialHunter: true },
@@ -1332,7 +1429,15 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       packShareRadiusGrid: 12,
     },
     territory: DEFINING_WILDLIFE_GREY_WOLF_TERRITORY_CONFIG,
-    preyAllowSpeciesIds: ['deer', 'zebra', 'cow', 'sheep', 'chicken', 'boar'],
+    preyAllowSpeciesIds: [
+      'deer',
+      'zebra',
+      'cow',
+      'sheep',
+      'chicken',
+      'boar',
+      'pinguin',
+    ],
     preyDenySpeciesIds: ['omega-wolf', 'grey-wolf'],
     favoritePreySpeciesIds: ['sheep'],
     socialBehavior: { socialHunter: true },
@@ -1379,6 +1484,35 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackPower: 22,
       defense: 8,
       attackIntervalMs: 1600,
+    },
+  },
+  grizzly: {
+    speciesId: 'grizzly',
+    displayName: 'Grizzly',
+    spriteFolder: 'grizzly',
+    sizeScale: 1.4,
+    collisionRadiusGrid: 0.52,
+    diet: 'omnivore',
+    trophicTier: 3,
+    massKg: 350,
+    temperamentId: 'retaliator',
+    activityPattern: 'cathemeral',
+    aggressionSpawn: { bellCurveMeanShift: 0.35 },
+    aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 7 },
+    territory: DEFINING_WILDLIFE_BROWN_BEAR_TERRITORY_CONFIG,
+    hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
+    stamina: resolvingWildlifeSpeciesStaminaConfig('grizzly'),
+    hazards: {
+      treatsSwampWaterAsSafe: false,
+      treatsLavaAsLethal: true,
+      isHeatImmune: false,
+      isColdImmune: true,
+    },
+    vitals: {
+      baseMaxHealth: 280,
+      attackPower: 52,
+      defense: 9,
+      attackIntervalMs: 1500,
     },
   },
   lion: {
@@ -1867,6 +2001,27 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   ),
 
   // --- Cold country ---
+  pinguin: definingWildlifeHerbivoreSpecies(
+    'pinguin',
+    'Pinguin',
+    'pinguin',
+    18,
+    {
+      temperamentId: 'skittish',
+      activityPattern: 'diurnal',
+      sizeScale: 0.92,
+      collisionRadiusGrid: 0.26,
+      aggroRadiusGrid: 5,
+      aggressionSpawn: { bellCurveMeanShift: -0.4 },
+      hazards: { isColdImmune: true },
+      vitals: {
+        baseMaxHealth: 22,
+        attackPower: 3,
+        defense: 1,
+        attackIntervalMs: 1100,
+      },
+    }
+  ),
   'polar-bear': {
     speciesId: 'polar-bear',
     displayName: 'Polar Bear',
@@ -1881,7 +2036,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     aggressionSpawn: { bellCurveMeanShift: 0.3 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 7 },
     territory: DEFINING_WILDLIFE_BROWN_BEAR_TERRITORY_CONFIG,
-    preyAllowSpeciesIds: ['deer', 'stag', 'sheep', 'boar'],
+    preyAllowSpeciesIds: ['deer', 'stag', 'sheep', 'boar', 'pinguin'],
     hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.0035 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('polar-bear'),
     hazards: {
@@ -2111,6 +2266,45 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
+  husky: definingWildlifeHerbivoreSpecies('husky', 'Husky', 'husky', 28, {
+    temperamentId: 'docile',
+    diet: 'omnivore',
+    activityPattern: 'diurnal',
+    sizeScale: 0.95,
+    collisionRadiusGrid: 0.3,
+    aggressionSpawn: { bellCurveMeanShift: -0.3 },
+    aggroRadiusGrid: 4,
+    packShareRadiusGrid: 7,
+    hazards: { isColdImmune: true },
+    vitals: {
+      baseMaxHealth: 38,
+      attackPower: 5,
+      defense: 1,
+      attackIntervalMs: 1050,
+    },
+  }),
+  'golden-retriever': definingWildlifeHerbivoreSpecies(
+    'golden-retriever',
+    'Golden Retriever',
+    'golden-retriever',
+    30,
+    {
+      temperamentId: 'docile',
+      diet: 'omnivore',
+      activityPattern: 'diurnal',
+      sizeScale: 0.98,
+      collisionRadiusGrid: 0.32,
+      aggressionSpawn: { bellCurveMeanShift: -0.4 },
+      aggroRadiusGrid: 4,
+      packShareRadiusGrid: 6,
+      vitals: {
+        baseMaxHealth: 36,
+        attackPower: 4,
+        defense: 1,
+        attackIntervalMs: 1100,
+      },
+    }
+  ),
   'cat-black': definingWildlifeHerbivoreSpecies(
     'cat-black',
     'Black Cat',
@@ -2142,6 +2336,28 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       temperamentId: 'docile',
       diet: 'omnivore',
       activityPattern: 'crepuscular',
+      sizeScale: 0.7,
+      collisionRadiusGrid: 0.2,
+      aggressionSpawn: { bellCurveMeanShift: -0.35 },
+      aggroRadiusGrid: 3,
+      packShareRadiusGrid: 4,
+      vitals: {
+        baseMaxHealth: 12,
+        attackPower: 2,
+        defense: 0,
+        attackIntervalMs: 900,
+      },
+    }
+  ),
+  'cat-orange': definingWildlifeHerbivoreSpecies(
+    'cat-orange',
+    'Orange Cat',
+    'cat-orange',
+    4,
+    {
+      temperamentId: 'docile',
+      diet: 'omnivore',
+      activityPattern: 'diurnal',
       sizeScale: 0.7,
       collisionRadiusGrid: 0.2,
       aggressionSpawn: { bellCurveMeanShift: -0.35 },

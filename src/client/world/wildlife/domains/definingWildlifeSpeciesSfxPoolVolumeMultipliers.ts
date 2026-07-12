@@ -26,5 +26,6 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_POOL_VOLUME_MULTIPLIER_BY_POOL_ID: Pa
   tiger_growl: 0.75,
   mixkit_lion_roar: 0.78,
   bear_growl: 0.8,
+  beast_growl: 0.85,
   wolf_howl: 0.72,
 };

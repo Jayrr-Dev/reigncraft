@@ -139,12 +139,11 @@ const DEFINING_WILDLIFE_PIXABAY_WILD_SFX_PREY_FLEE = [
   'pixabay_deer_snort_01',
   'pixabay_deer_grunt_01',
   'pixabay_deer_fawn_bleat_01',
-  'pixabay_stag_call_01',
 ] as const satisfies readonly DefiningWildlifePixabayWildSfxClipId[];
 
+/** Prefer shorter laughs (~1.8–2.2s). Dropped laugh_02 (~2.5s). */
 const DEFINING_WILDLIFE_PIXABAY_WILD_SFX_HYENA_LAUGHS = [
   'pixabay_hyena_laugh_01',
-  'pixabay_hyena_laugh_02',
   'pixabay_hyena_laugh_hd_01',
 ] as const satisfies readonly DefiningWildlifePixabayWildSfxClipId[];
 
@@ -176,14 +175,15 @@ const DEFINING_WILDLIFE_PIXABAY_WILD_SFX_ZEBRA_WHINNIES = [
   'pixabay_zebra_whinny_01',
 ] as const satisfies readonly DefiningWildlifePixabayWildSfxClipId[];
 
+/** Prefer shorter hiss (~3.0s). Dropped hiss_02 (~3.7s). */
 const DEFINING_WILDLIFE_PIXABAY_WILD_SFX_REPTILE_HISSES = [
   'pixabay_reptile_hiss_01',
-  'pixabay_reptile_hiss_02',
 ] as const satisfies readonly DefiningWildlifePixabayWildSfxClipId[];
 
+/** Prefer loud short roar (~1.9s) first for combat. */
 const DEFINING_WILDLIFE_PIXABAY_WILD_SFX_TIGER_ROARS = [
-  'pixabay_tiger_growl_01',
   'pixabay_tiger_roar_loud_01',
+  'pixabay_tiger_growl_01',
   'pixabay_tiger_roar_light_01',
 ] as const satisfies readonly DefiningWildlifePixabayWildSfxClipId[];
 
@@ -195,7 +195,6 @@ const DEFINING_WILDLIFE_PIXABAY_WILD_SFX_TIGER_STALK_ROARS = [
 const DEFINING_WILDLIFE_PIXABAY_WILD_SFX_TIGER_LOUD_ROARS = [
   'pixabay_tiger_roar_loud_01',
   'pixabay_tiger_growl_01',
-  'pixabay_tiger_roar_light_01',
 ] as const satisfies readonly DefiningWildlifePixabayWildSfxClipId[];
 
 /** Default clip rotation per Pixabay pool and event kind. */
@@ -260,6 +259,7 @@ export const DEFINING_WILDLIFE_PIXABAY_WILD_SFX_POOL_MIN_REPLAY_INTERVAL_MS: Par
   pixabay_rhino: 8_000,
   pixabay_prey: 8_000,
   pixabay_crocodile: 7_000,
+  pixabay_reptile_hiss: 7_000,
 };
 
 /**
@@ -268,11 +268,12 @@ export const DEFINING_WILDLIFE_PIXABAY_WILD_SFX_POOL_MIN_REPLAY_INTERVAL_MS: Par
 export const DEFINING_WILDLIFE_PIXABAY_WILD_SFX_POOL_MAX_PLAYBACK_DURATION_S: Partial<
   Record<DefiningWildlifePixabayWildSfxPoolId, number>
 > = {
-  pixabay_tiger_roar: 2.7,
-  pixabay_hippo_grunt: 2.4,
-  pixabay_zebra_whinny: 2.4,
-  pixabay_hyena_laugh: 2.4,
-  pixabay_rhino: 2.4,
+  pixabay_tiger_roar: 1.55,
+  pixabay_hippo_grunt: 2.2,
+  pixabay_zebra_whinny: 2.2,
+  pixabay_hyena_laugh: 1.55,
+  pixabay_rhino: 2.2,
   pixabay_prey: 2.2,
-  pixabay_crocodile: 2.4,
+  pixabay_crocodile: 2.2,
+  pixabay_reptile_hiss: 1.55,
 };

@@ -10,6 +10,7 @@ import { usingWorldPlazaPerformanceProfile } from '@/components/world/components
 import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
 import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
 import { DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
+import { computingWorldPlazaAvatarGroundShadowSizeScale } from '@/components/world/domains/computingWorldPlazaAvatarGroundShadowSizeScale';
 import { computingWorldPlazaGirlSampleJumpArcOffsetPx } from '@/components/world/domains/computingWorldPlazaGirlSampleJumpArcOffsetPx';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { DefiningWorldPlazaAvatarCharacterDefinition } from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
@@ -128,6 +129,11 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
     characterDefinition,
     characterEngineDefinition
   );
+  const avatarGroundShadowSizeScale =
+    computingWorldPlazaAvatarGroundShadowSizeScale(
+      characterDefinition,
+      characterEngineDerivedStats.sizeScale
+    );
   const avatarShadowContainerRef = useRef<Container | null>(null);
   const avatarGroundShadowGraphicsRef = useRef<Graphics | null>(null);
   const avatarLavaHeatProximityGlowGraphicsRef = useRef<Graphics | null>(null);
@@ -177,11 +183,15 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
         facingDirectionRef.current,
         resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx(
           characterDefinition
-        ),
-        characterEngineDerivedStats.sizeScale
+        ) * characterEngineDerivedStats.sizeScale,
+        avatarGroundShadowSizeScale
       );
     },
-    [characterDefinition, characterEngineDerivedStats.sizeScale]
+    [
+      avatarGroundShadowSizeScale,
+      characterDefinition,
+      characterEngineDerivedStats.sizeScale,
+    ]
   );
 
   const drawingAvatarLavaHeatProximityGlow = useCallback(
@@ -574,8 +584,10 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
       jumpArcOffsetPx,
       jumpArcPeakScreenPx,
       facingDirectionRef.current,
-      resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx(characterDefinition),
-      characterEngineDerivedStats.sizeScale
+      resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx(
+        characterDefinition
+      ) * characterEngineDerivedStats.sizeScale,
+      avatarGroundShadowSizeScale
     );
 
     const renderPosition = playerRenderPositionRef.current;

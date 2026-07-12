@@ -5,6 +5,7 @@ import { computingWorldPlazaBiomeMusicEffectiveTargetVolume } from '@/components
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import {
   DEFINING_WORLD_PLAZA_BIOME_MUSIC_CROSSFADE_MS,
+  DEFINING_WORLD_PLAZA_BIOME_MUSIC_DAY_NIGHT_STICKY_POLL_COUNT,
   DEFINING_WORLD_PLAZA_BIOME_MUSIC_POLL_INTERVAL_MS,
   type DefiningWorldPlazaCozyTuneId,
 } from '@/components/world/domains/definingWorldPlazaBiomeMusicConstants';
@@ -43,6 +44,8 @@ export function usingWorldPlazaBiomeMusic(
 ): void {
   const starAudioRef = useRef<StarAudio | null>(null);
   const desiredTuneIdRef = useRef<DefiningWorldPlazaCozyTuneId | null>(null);
+  const stickyIsDaytimeRef = useRef<boolean | null>(null);
+  const stickyDaytimePollCountRef = useRef(0);
   const isPreloadReadyRef = useRef(false);
   const preloadedTuneKeyRef = useRef('');
   const preloadGenerationRef = useRef(0);
@@ -59,6 +62,32 @@ export function usingWorldPlazaBiomeMusic(
       );
     };
 
+    const resolvingStickyIsDaytime = (isDaytime: boolean): boolean => {
+      if (stickyIsDaytimeRef.current === null) {
+        stickyIsDaytimeRef.current = isDaytime;
+        stickyDaytimePollCountRef.current = 0;
+        return isDaytime;
+      }
+
+      if (stickyIsDaytimeRef.current === isDaytime) {
+        stickyDaytimePollCountRef.current = 0;
+        return isDaytime;
+      }
+
+      stickyDaytimePollCountRef.current += 1;
+
+      if (
+        stickyDaytimePollCountRef.current <
+        DEFINING_WORLD_PLAZA_BIOME_MUSIC_DAY_NIGHT_STICKY_POLL_COUNT
+      ) {
+        return stickyIsDaytimeRef.current;
+      }
+
+      stickyIsDaytimeRef.current = isDaytime;
+      stickyDaytimePollCountRef.current = 0;
+      return isDaytime;
+    };
+
     const resolvingCurrentBiomeTuneId =
       (): DefiningWorldPlazaCozyTuneId | null => {
         const playerPosition = playerPositionRef.current;
@@ -69,8 +98,9 @@ export function usingWorldPlazaBiomeMusic(
 
         const biome = resolvingWorldPlazaBiomeAtWorldPoint(playerPosition);
         const { isDaytime } = computingWorldPlazaDayNightSunState();
+        const stickyIsDaytime = resolvingStickyIsDaytime(isDaytime);
 
-        return resolvingWorldPlazaBiomeMusicTuneId(biome.kind, isDaytime);
+        return resolvingWorldPlazaBiomeMusicTuneId(biome.kind, stickyIsDaytime);
       };
 
     const crossfadingToDesiredTune = (): void => {
@@ -269,6 +299,8 @@ export function usingWorldPlazaBiomeMusic(
       releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       desiredTuneIdRef.current = null;
+      stickyIsDaytimeRef.current = null;
+      stickyDaytimePollCountRef.current = 0;
       isPreloadReadyRef.current = false;
       preloadedTuneKeyRef.current = '';
       preloadGenerationRef.current = 0;

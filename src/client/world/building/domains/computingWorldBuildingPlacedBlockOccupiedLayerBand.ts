@@ -1,22 +1,20 @@
-import type { DefiningWorldBuildingPlacedBlock } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
+import {
+  checkingWorldBuildingPlacedBlockIsPassableTile,
+  clampingWorldBuildingBlockHeight,
+  DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_METADATA_KEY,
+  DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_TILE,
+  DEFINING_WORLD_PLAZA_PLAYER_WALK_COLLISION_HEIGHT_WORLD_LAYERS,
+  type DefiningWorldBuildingWorldLayerBand,
+} from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
   resolvingWorldBuildingPlacedBlockBlockHeight,
   resolvingWorldBuildingPlacedBlockWorldLayer,
-} from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
-import {
-  clampingWorldBuildingBlockHeight,
-  checkingWorldBuildingPlacedBlockIsPassableTile,
-  DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_TILE,
-  type DefiningWorldBuildingWorldLayerBand,
-  DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
-} from "@/components/world/building/domains/definingWorldBuildingBlockHeightConstants";
-import {
-  DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_METADATA_KEY,
-} from "@/components/world/building/domains/definingWorldBuildingBlockHeightConstants";
+} from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
   clampingWorldBuildingWorldLayer,
   DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND,
-} from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
+} from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 
 /**
  * Layer bands for placed blocks and the player avatar.
@@ -32,12 +30,12 @@ import {
  */
 export function computingWorldBuildingPlacedBlockOccupiedLayerBand(
   topWorldLayer: number,
-  blockHeightLayers: number,
+  blockHeightLayers: number
 ): DefiningWorldBuildingWorldLayerBand {
   const topLayer = clampingWorldBuildingWorldLayer(topWorldLayer);
   const blockHeight = clampingWorldBuildingBlockHeight(
     blockHeightLayers,
-    topLayer,
+    topLayer
   );
 
   if (checkingWorldBuildingPlacedBlockIsPassableTile(blockHeight)) {
@@ -65,7 +63,7 @@ export function computingWorldBuildingPlacedBlockOccupiedLayerBand(
  */
 export function checkingWorldBuildingBlockPlacementExtrusionFitsTopLayer(
   topWorldLayer: number,
-  blockHeightLayers: number,
+  blockHeightLayers: number
 ): boolean {
   if (checkingWorldBuildingPlacedBlockIsPassableTile(blockHeightLayers)) {
     return true;
@@ -84,7 +82,7 @@ export function checkingWorldBuildingBlockPlacementExtrusionFitsTopLayer(
 
   const occupiedBand = computingWorldBuildingPlacedBlockOccupiedLayerBand(
     topLayer,
-    requestedHeight,
+    requestedHeight
   );
 
   return occupiedBand.bottomLayer >= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND;
@@ -98,11 +96,11 @@ export function checkingWorldBuildingBlockPlacementExtrusionFitsTopLayer(
  */
 export function resolvingWorldBuildingPlacedBlockExtrusionBottomLayer(
   topWorldLayer: number,
-  blockHeightLayers: number,
+  blockHeightLayers: number
 ): number {
   return computingWorldBuildingPlacedBlockOccupiedLayerBand(
     topWorldLayer,
-    blockHeightLayers,
+    blockHeightLayers
   ).bottomLayer;
 }
 
@@ -116,12 +114,13 @@ export function resolvingWorldBuildingPlacedBlockExtrusionBottomLayer(
  * @param block - Placed block entity.
  */
 export function resolvingWorldBuildingPlacedBlockTopWorldLayer(
-  block: DefiningWorldBuildingPlacedBlock,
+  block: DefiningWorldBuildingPlacedBlock
 ): number {
   const topWorldLayer = resolvingWorldBuildingPlacedBlockWorldLayer(block);
-  const metadataBlockHeight = block.metadata[DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_METADATA_KEY];
+  const metadataBlockHeight =
+    block.metadata[DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_METADATA_KEY];
   const requestedBlockHeight =
-    typeof metadataBlockHeight === "number"
+    typeof metadataBlockHeight === 'number'
       ? Math.floor(metadataBlockHeight)
       : block.blockHeight;
 
@@ -129,18 +128,15 @@ export function resolvingWorldBuildingPlacedBlockTopWorldLayer(
     return topWorldLayer;
   }
 
-  if (
-    requestedBlockHeight > 1 &&
-    requestedBlockHeight > topWorldLayer
-  ) {
+  if (requestedBlockHeight > 1 && requestedBlockHeight > topWorldLayer) {
     return clampingWorldBuildingWorldLayer(
-      topWorldLayer + requestedBlockHeight - 1,
+      topWorldLayer + requestedBlockHeight - 1
     );
   }
 
   return computingWorldBuildingPlacedBlockOccupiedLayerBand(
     topWorldLayer,
-    requestedBlockHeight,
+    requestedBlockHeight
   ).topLayer;
 }
 
@@ -156,12 +152,13 @@ export interface ResolvingWorldBuildingPlacedBlockExtrusionRenderParams {
  * @param block - Placed block entity.
  */
 export function resolvingWorldBuildingPlacedBlockExtrusionRenderParams(
-  block: DefiningWorldBuildingPlacedBlock,
+  block: DefiningWorldBuildingPlacedBlock
 ): ResolvingWorldBuildingPlacedBlockExtrusionRenderParams {
   const anchorWorldLayer = resolvingWorldBuildingPlacedBlockWorldLayer(block);
-  const metadataBlockHeight = block.metadata[DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_METADATA_KEY];
+  const metadataBlockHeight =
+    block.metadata[DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_METADATA_KEY];
   const requestedBlockHeight =
-    typeof metadataBlockHeight === "number"
+    typeof metadataBlockHeight === 'number'
       ? Math.floor(metadataBlockHeight)
       : block.blockHeight;
 
@@ -172,13 +169,10 @@ export function resolvingWorldBuildingPlacedBlockExtrusionRenderParams(
     };
   }
 
-  if (
-    requestedBlockHeight > 1 &&
-    requestedBlockHeight > anchorWorldLayer
-  ) {
+  if (requestedBlockHeight > 1 && requestedBlockHeight > anchorWorldLayer) {
     return {
       topWorldLayer: clampingWorldBuildingWorldLayer(
-        anchorWorldLayer + requestedBlockHeight - 1,
+        anchorWorldLayer + requestedBlockHeight - 1
       ),
       blockHeightLayers: requestedBlockHeight,
     };
@@ -191,18 +185,22 @@ export function resolvingWorldBuildingPlacedBlockExtrusionRenderParams(
 }
 
 /**
- * Returns the inclusive world-layer band occupied by the player at one foot layer.
+ * Returns the inclusive world-layer band used for walk collision at one foot
+ * layer. Intentionally feet-only so roofs above the standing tile do not block.
  *
  * @param feetWorldLayer - Layer the player is standing on.
  */
 export function computingWorldBuildingPlayerOccupiedLayerBand(
-  feetWorldLayer: number,
+  feetWorldLayer: number
 ): DefiningWorldBuildingWorldLayerBand {
   const feetLayer = clampingWorldBuildingWorldLayer(feetWorldLayer);
 
   return {
     bottomLayer: feetLayer,
-    topLayer: feetLayer + DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS - 1,
+    topLayer:
+      feetLayer +
+      DEFINING_WORLD_PLAZA_PLAYER_WALK_COLLISION_HEIGHT_WORLD_LAYERS -
+      1,
   };
 }
 
@@ -214,7 +212,7 @@ export function computingWorldBuildingPlayerOccupiedLayerBand(
  */
 export function checkingWorldBuildingWorldLayerBandsOverlap(
   leftBand: DefiningWorldBuildingWorldLayerBand,
-  rightBand: DefiningWorldBuildingWorldLayerBand,
+  rightBand: DefiningWorldBuildingWorldLayerBand
 ): boolean {
   return (
     leftBand.bottomLayer <= rightBand.topLayer &&
@@ -233,7 +231,7 @@ export function checkingWorldBuildingWorldLayerBandsOverlap(
 export function checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock(
   feetWorldLayer: number,
   blockTopWorldLayer: number,
-  blockHeightLayers: number,
+  blockHeightLayers: number
 ): boolean {
   if (checkingWorldBuildingPlacedBlockIsPassableTile(blockHeightLayers)) {
     return false;
@@ -243,7 +241,7 @@ export function checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock(
     computingWorldBuildingPlayerOccupiedLayerBand(feetWorldLayer),
     computingWorldBuildingPlacedBlockOccupiedLayerBand(
       blockTopWorldLayer,
-      blockHeightLayers,
-    ),
+      blockHeightLayers
+    )
   );
 }

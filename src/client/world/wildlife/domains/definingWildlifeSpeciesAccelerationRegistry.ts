@@ -76,6 +76,12 @@ const DEFINING_WILDLIFE_SPECIES_ACCELERATION: Partial<
     momentumBonusMultiplier: 0.08,
     momentumRampSeconds: 3,
   },
+  // Grizzly — heavy wind-up, then outruns most prey once rolling.
+  grizzly: {
+    burstRampSeconds: 2.2,
+    momentumBonusMultiplier: 0.2,
+    momentumRampSeconds: 7,
+  },
 };
 
 export function resolvingWildlifeSpeciesAccelerationConfig(

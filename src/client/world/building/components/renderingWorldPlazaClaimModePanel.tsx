@@ -1,7 +1,10 @@
-"use client";
+'use client';
 
-import { RenderingWorldPlazaClaimModePlotList } from "@/components/world/building/components/renderingWorldPlazaClaimModePlotList";
-import { RenderingWorldPlazaSidebarPanelHeader } from "@/components/world/components/renderingWorldPlazaSidebarPanelHeader";
+import { RenderingWorldPlazaClaimModePlotList } from '@/components/world/building/components/renderingWorldPlazaClaimModePlotList';
+import { RenderingWorldPlazaClaimModeSavedCoordsList } from '@/components/world/building/components/renderingWorldPlazaClaimModeSavedCoordsList';
+import { RenderingWorldPlazaClaimModeTemporaryTilesList } from '@/components/world/building/components/renderingWorldPlazaClaimModeTemporaryTilesList';
+import { RenderingWorldPlazaSidebarPanelHeader } from '@/components/world/components/renderingWorldPlazaSidebarPanelHeader';
+import { countingWorldBuildingOwnerTemporaryTileClaims } from '@/components/world/building/domains/countingWorldBuildingOwnerTemporaryTileClaims';
 import {
   DEFINING_WORLD_BUILDING_CLAIM_MODE_ERROR_TEXT_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_CLAIMABLE_SWATCH_CLASS_NAME,
@@ -12,29 +15,27 @@ import {
   DEFINING_WORLD_BUILDING_CLAIM_MODE_SIDEBAR_ANCHOR_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_SIDEBAR_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CLAIM_MODE_SIDEBAR_WIDTH_CLASS_NAME,
-} from "@/components/world/building/domains/definingWorldBuildingClaimModeConstants";
-import type { DefiningWorldBuildingPlotRegistryOwnerGroup } from "@/components/world/building/domains/groupingWorldBuildingPlotRegistryEntriesByOwner";
-import {
-  DEFINING_WORLD_BUILDING_CLAIM_MODE_TOGGLE_KEY,
-} from "@/components/world/building/domains/definingWorldBuildingPlotConstants";
-import type { DefiningWorldBuildingPlot } from "@/components/world/building/domains/definingWorldBuildingPlot";
-import type { DefiningWorldBuildingPlotBounds } from "@/components/world/building/domains/definingWorldBuildingPlotBounds";
-import type { DefiningWorldBuildingPlotOwnerLimits } from "@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits";
-import type { DefiningWorldBuildingTilePosition } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
-import type { DefiningWorldPlazaSavedCoords } from "@/components/world/domains/definingWorldPlazaSavedCoords";
-import type { WorldPlotVisitRequestOutgoingListMember } from "@/components/world/plotVisit/domains/definingWorldPlotVisitRequest";
-import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
+} from '@/components/world/building/domains/definingWorldBuildingClaimModeConstants';
+import type { DefiningWorldBuildingPlotRegistryOwnerGroup } from '@/components/world/building/domains/groupingWorldBuildingPlotRegistryEntriesByOwner';
+import { DEFINING_WORLD_BUILDING_CLAIM_MODE_TOGGLE_KEY } from '@/components/world/building/domains/definingWorldBuildingPlotConstants';
+import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
+import type { DefiningWorldBuildingPlotBounds } from '@/components/world/building/domains/definingWorldBuildingPlotBounds';
+import type { DefiningWorldBuildingPlotOwnerLimits } from '@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits';
+import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
+import type { DefiningWorldPlazaSavedCoords } from '@/components/world/domains/definingWorldPlazaSavedCoords';
+import type { WorldPlotVisitRequestOutgoingListMember } from '@/components/world/plotVisit/domains/definingWorldPlotVisitRequest';
+import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 
 /** Claim mode sidebar header copy. */
-const RENDERING_WORLD_PLAZA_CLAIM_MODE_SIDEBAR_TITLE = "Claim" as const;
+const RENDERING_WORLD_PLAZA_CLAIM_MODE_SIDEBAR_TITLE = 'Claim' as const;
 
 /** Claim mode sidebar header classes. */
 const RENDERING_WORLD_PLAZA_CLAIM_MODE_SIDEBAR_HEADER_CLASS_NAME =
-  "text-[10px] font-semibold uppercase tracking-wide text-sky-100" as const;
+  'text-[10px] font-semibold uppercase tracking-wide text-sky-100' as const;
 
 /** Claim mode legend row classes. */
 const RENDERING_WORLD_PLAZA_CLAIM_MODE_LEGEND_ROW_CLASS_NAME =
-  "flex items-center gap-1.5" as const;
+  'flex items-center gap-1.5' as const;
 
 export interface RenderingWorldPlazaClaimModePanelProps {
   isClaimModeActive: boolean;
@@ -55,16 +56,16 @@ export interface RenderingWorldPlazaClaimModePanelProps {
   onRequestingFriendPlotVisit?: (
     hostUserId: string,
     hostDisplayName: string,
-    bounds: DefiningWorldBuildingPlotBounds,
+    bounds: DefiningWorldBuildingPlotBounds
   ) => void;
   onTeleportingToApprovedFriendPlot?: (
     bounds: DefiningWorldBuildingPlotBounds,
-    requestId: string,
+    requestId: string
   ) => void;
   outgoingVisitRequests?: readonly WorldPlotVisitRequestOutgoingListMember[];
   isRequestingFriendPlotVisit?: boolean;
   onRemoveTemporaryPlotAtTile: (
-    tilePosition: DefiningWorldBuildingTilePosition,
+    tilePosition: DefiningWorldBuildingTilePosition
   ) => void;
   isRemovingTemporaryPlot?: boolean;
   savedCoordsList: readonly DefiningWorldPlazaSavedCoords[];
@@ -79,19 +80,14 @@ export interface RenderingWorldPlazaClaimModePanelProps {
  */
 export function RenderingWorldPlazaClaimModePanel({
   isClaimModeActive,
-  hasUnsavedClaimChanges,
-  isSavingClaimDraft,
   claimErrorMessage,
   ownerGroups,
   activeViewportPlots,
   localUserId,
-  localOwnedPlotCount,
-  localTileClaimCount,
   plotOwnerLimits,
   isPlotRegistryLoading,
   plotRegistryErrorMessage,
   onToggleClaimMode,
-  onSaveClaimDraft,
   onTeleportToPlotBounds,
   onRequestingFriendPlotVisit,
   onTeleportingToApprovedFriendPlot,
@@ -108,6 +104,12 @@ export function RenderingWorldPlazaClaimModePanel({
   if (!isClaimModeActive) {
     return null;
   }
+
+  const localTemporaryTileClaimCount =
+    countingWorldBuildingOwnerTemporaryTileClaims(
+      activeViewportPlots,
+      localUserId
+    );
 
   return (
     <div
@@ -166,19 +168,24 @@ export function RenderingWorldPlazaClaimModePanel({
 
         <RenderingWorldPlazaClaimModePlotList
           ownerGroups={ownerGroups}
-          activeViewportPlots={activeViewportPlots}
-          localUserId={localUserId}
-          localOwnedPlotCount={localOwnedPlotCount}
-          localTileClaimCount={localTileClaimCount}
-          plotOwnerLimits={plotOwnerLimits}
           isLoading={isPlotRegistryLoading}
           onTeleportToPlotBounds={onTeleportToPlotBounds}
           onRequestingFriendPlotVisit={onRequestingFriendPlotVisit}
           onTeleportingToApprovedFriendPlot={onTeleportingToApprovedFriendPlot}
           outgoingVisitRequests={outgoingVisitRequests}
           isRequestingFriendPlotVisit={isRequestingFriendPlotVisit}
+        />
+
+        <RenderingWorldPlazaClaimModeTemporaryTilesList
+          activeViewportPlots={activeViewportPlots}
+          localUserId={localUserId}
+          temporaryTileClaimCount={localTemporaryTileClaimCount}
+          plotOwnerLimits={plotOwnerLimits}
           onRemoveTemporaryPlotAtTile={onRemoveTemporaryPlotAtTile}
           isRemovingTemporaryPlot={isRemovingTemporaryPlot}
+        />
+
+        <RenderingWorldPlazaClaimModeSavedCoordsList
           savedCoordsList={savedCoordsList}
           trackedSavedCoordsId={trackedSavedCoordsId}
           onToggleSavedCoordsTracking={onToggleSavedCoordsTracking}

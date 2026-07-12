@@ -77,6 +77,8 @@ export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_VOICE_CLIP_CATALOG: Record<
 /** Local avatar events that can trigger girl voice lines. */
 export type DefiningWorldPlazaGirlSampleVoiceSfxEventKind =
   | 'attack_swing'
+  | 'jump_takeoff'
+  | 'roll_dodge'
   | 'hit_taken'
   | 'pain';
 
@@ -92,6 +94,14 @@ export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_VOICE_ATTACK_SFX_CLIP_IDS = [
   'attack_v1_08',
   'attack_v1_09',
 ] as const satisfies readonly DefiningWorldPlazaGirlSampleVoiceClipId[];
+
+/** Effort grunts when a jump starts (reuse attack pool). */
+export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_VOICE_JUMP_SFX_CLIP_IDS =
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_VOICE_ATTACK_SFX_CLIP_IDS;
+
+/** Effort grunts when a roll dodge starts (reuse attack pool). */
+export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_VOICE_ROLL_SFX_CLIP_IDS =
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_VOICE_ATTACK_SFX_CLIP_IDS;
 
 /** Rotating light hit reactions. */
 export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_VOICE_HIT_SHORT_SFX_CLIP_IDS = [
@@ -121,6 +131,12 @@ export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_VOICE_PAIN_DAMAGE_OUTCOME_TIERS =
 
 /** Attack grunt volume before master volume is applied. */
 export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_VOICE_ATTACK_SFX_TARGET_VOLUME = 0.52;
+
+/** Jump effort grunt volume before master volume is applied. */
+export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_VOICE_JUMP_SFX_TARGET_VOLUME = 0.48;
+
+/** Roll effort grunt volume before master volume is applied. */
+export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_VOICE_ROLL_SFX_TARGET_VOLUME = 0.5;
 
 /** Light hit reaction volume before master volume is applied. */
 export const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_VOICE_HIT_SFX_TARGET_VOLUME = 0.58;

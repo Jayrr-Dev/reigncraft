@@ -22,8 +22,12 @@ export const DEFINING_WORLD_PLAZA_WORLD_BOOT_STAR_AUDIO_MANIFEST_TIMEOUT_MS = 8_
  */
 export const DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_CONCURRENCY_MOBILE = 2;
 
-/** Desktop / wide-viewport parallel key decode cap during preload. */
-export const DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_CONCURRENCY_DESKTOP = 8;
+/**
+ * Desktop / wide-viewport parallel key decode cap during preload.
+ * Keep low enough that Howler decode + GC do not stall plaza frames while
+ * deferred boot slices and runtime hooks still warm assets after spawn.
+ */
+export const DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_CONCURRENCY_DESKTOP = 3;
 
 /**
  * How many HTTP-cache warm fetches run at once on mobile viewports.

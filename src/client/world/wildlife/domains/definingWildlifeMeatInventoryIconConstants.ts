@@ -36,6 +36,14 @@ export const DEFINING_WILDLIFE_MEAT_INVENTORY_ICONS_BY_RAW_ITEM_TYPE_ID: Record<
     rawIconifyIcon: 'fluent-emoji:wolf',
     cookedIconifyIcon: 'fluent-emoji:meat-on-bone',
   },
+  'world-plaza-raw-husky-meat': {
+    rawIconifyIcon: 'fluent-emoji:dog',
+    cookedIconifyIcon: 'fluent-emoji:meat-on-bone',
+  },
+  'world-plaza-raw-golden-retriever-meat': {
+    rawIconifyIcon: 'fluent-emoji:dog-face',
+    cookedIconifyIcon: 'fluent-emoji:meat-on-bone',
+  },
   'world-plaza-raw-cat-black-meat': {
     rawIconifyIcon: 'fluent-emoji:leopard',
     cookedIconifyIcon: 'fluent-emoji:meat-on-bone',
@@ -48,6 +56,10 @@ export const DEFINING_WILDLIFE_MEAT_INVENTORY_ICONS_BY_RAW_ITEM_TYPE_ID: Record<
     rawIconifyIcon: 'fluent-emoji:leopard',
     cookedIconifyIcon: 'fluent-emoji:meat-on-bone',
   },
+  'world-plaza-raw-cat-orange-meat': {
+    rawIconifyIcon: 'fluent-emoji:cat',
+    cookedIconifyIcon: 'fluent-emoji:meat-on-bone',
+  },
   'world-plaza-raw-deer-meat': {
     rawIconifyIcon: 'fluent-emoji:deer',
     cookedIconifyIcon: 'fluent-emoji:oden',
@@ -57,6 +69,10 @@ export const DEFINING_WILDLIFE_MEAT_INVENTORY_ICONS_BY_RAW_ITEM_TYPE_ID: Record<
     cookedIconifyIcon: 'fluent-emoji:bacon',
   },
   'world-plaza-raw-beef': {
+    rawIconifyIcon: 'fluent-emoji:cow-face',
+    cookedIconifyIcon: 'fluent-emoji:cut-of-meat',
+  },
+  'world-plaza-raw-brown-beef': {
     rawIconifyIcon: 'fluent-emoji:cow-face',
     cookedIconifyIcon: 'fluent-emoji:cut-of-meat',
   },
@@ -77,6 +93,10 @@ export const DEFINING_WILDLIFE_MEAT_INVENTORY_ICONS_BY_RAW_ITEM_TYPE_ID: Record<
     cookedIconifyIcon: 'fluent-emoji:bowl-with-spoon',
   },
   'world-plaza-raw-bear-meat': {
+    rawIconifyIcon: 'fluent-emoji:bear',
+    cookedIconifyIcon: 'fluent-emoji:pot-of-food',
+  },
+  'world-plaza-raw-grizzly-meat': {
     rawIconifyIcon: 'fluent-emoji:bear',
     cookedIconifyIcon: 'fluent-emoji:pot-of-food',
   },
@@ -191,6 +211,14 @@ export const DEFINING_WILDLIFE_MEAT_INVENTORY_ICONS_BY_RAW_ITEM_TYPE_ID: Record<
   'world-plaza-raw-yak-meat': {
     rawIconifyIcon: 'fluent-emoji:bison',
     cookedIconifyIcon: 'fluent-emoji:pot-of-food',
+  },
+  'world-plaza-raw-pinguin-meat': {
+    rawIconifyIcon: 'fluent-emoji:penguin',
+    cookedIconifyIcon: 'fluent-emoji:poultry-leg',
+  },
+  'world-plaza-raw-fairy-dust': {
+    rawIconifyIcon: 'fluent-emoji:sparkles',
+    cookedIconifyIcon: 'fluent-emoji:glowing-star',
   },
   'world-plaza-raw-tiger-meat': {
     rawIconifyIcon: 'fluent-emoji:tiger',

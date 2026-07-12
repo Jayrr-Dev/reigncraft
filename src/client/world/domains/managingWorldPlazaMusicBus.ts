@@ -3,8 +3,8 @@
  *
  * star-audio's `music.crossfadeTo` orphans prior tracks when a new crossfade
  * starts before the previous fade-out timeout fires. This bus owns BGM via
- * SoundHandles so at most one outgoing + one incoming track exist, and a newer
- * switch hard-stops any prior fade-out.
+ * SoundHandles so at most one outgoing + one incoming track exist. Mid-fade
+ * retargets coalesce to the latest id instead of restarting the blend.
  *
  * @module components/world/domains/managingWorldPlazaMusicBus
  */
@@ -26,12 +26,25 @@ const DEFINING_WORLD_PLAZA_MUSIC_BUS_FADE_TICK_MS = 50;
 /** Minimal star-audio surface the music bus needs. */
 export type ManagingWorldPlazaMusicBusStarAudio = Pick<StarAudio, 'play'>;
 
+export type CrossfadingWorldPlazaMusicBusToOptions = {
+  durationSec: number;
+  loop?: boolean;
+};
+
+type ManagingWorldPlazaMusicBusPendingCrossfade = {
+  starAudio: ManagingWorldPlazaMusicBusStarAudio;
+  starAudioId: string;
+  options: CrossfadingWorldPlazaMusicBusToOptions;
+};
+
 type ManagingWorldPlazaMusicBusState = {
   activeStarAudioId: string | null;
   activeHandle: SoundHandle | null;
   fadingHandle: SoundHandle | null;
   targetVolume: number;
   fadeIntervalId: ReturnType<typeof setInterval> | null;
+  /** Latest requested track while a crossfade is already running. */
+  pendingCrossfade: ManagingWorldPlazaMusicBusPendingCrossfade | null;
 };
 
 const managingWorldPlazaMusicBusState: ManagingWorldPlazaMusicBusState = {
@@ -40,6 +53,7 @@ const managingWorldPlazaMusicBusState: ManagingWorldPlazaMusicBusState = {
   fadingHandle: null,
   targetVolume: 0,
   fadeIntervalId: null,
+  pendingCrossfade: null,
 };
 
 function recordingWorldPlazaMusicBusPerformanceGauges(): void {
@@ -119,13 +133,31 @@ export function settingWorldPlazaMusicBusTargetVolume(volume: number): void {
   recordingWorldPlazaMusicBusPerformanceGauges();
 }
 
-export type CrossfadingWorldPlazaMusicBusToOptions = {
-  durationSec: number;
-  loop?: boolean;
-};
+function clearingWorldPlazaMusicBusPendingCrossfade(): void {
+  managingWorldPlazaMusicBusState.pendingCrossfade = null;
+}
+
+function applyingWorldPlazaMusicBusPendingCrossfade(): void {
+  const pending = managingWorldPlazaMusicBusState.pendingCrossfade;
+
+  if (!pending) {
+    return;
+  }
+
+  clearingWorldPlazaMusicBusPendingCrossfade();
+  crossfadingWorldPlazaMusicBusTo(
+    pending.starAudio,
+    pending.starAudioId,
+    pending.options
+  );
+}
 
 /**
- * Crossfades to one music manifest id, hard-stopping any prior fade-out first.
+ * Crossfades to one music manifest id.
+ *
+ * Mid-fade retargets (day/night scrub, rapid biome edges) coalesce to the
+ * latest id instead of hard-stopping the outgoing fade. That stops two music
+ * Howls fighting while Howler also keeps decoding boot preloads.
  */
 export function crossfadingWorldPlazaMusicBusTo(
   starAudio: ManagingWorldPlazaMusicBusStarAudio,
@@ -140,6 +172,7 @@ export function crossfadingWorldPlazaMusicBusTo(
     managingWorldPlazaMusicBusState.activeStarAudioId === starAudioId &&
     managingWorldPlazaMusicBusState.activeHandle?.playing
   ) {
+    clearingWorldPlazaMusicBusPendingCrossfade();
     applyingWorldPlazaMusicBusHandleVolume(
       managingWorldPlazaMusicBusState.activeHandle,
       targetVolume
@@ -148,7 +181,22 @@ export function crossfadingWorldPlazaMusicBusTo(
     return;
   }
 
-  clearingWorldPlazaMusicBusFadeInterval();
+  // Already fading toward something else: keep the current blend intact and
+  // remember only the newest desired track for after this fade finishes.
+  if (managingWorldPlazaMusicBusState.fadeIntervalId !== null) {
+    managingWorldPlazaMusicBusState.pendingCrossfade = {
+      starAudio,
+      starAudioId,
+      options: {
+        durationSec,
+        loop,
+      },
+    };
+    recordingWorldPlazaMusicBusPerformanceGauges();
+    return;
+  }
+
+  clearingWorldPlazaMusicBusPendingCrossfade();
   stoppingWorldPlazaMusicBusHandle(
     managingWorldPlazaMusicBusState.fadingHandle
   );
@@ -195,6 +243,7 @@ export function crossfadingWorldPlazaMusicBusTo(
     managingWorldPlazaMusicBusState.fadingHandle = null;
     nextHandle.setVolume(targetVolume);
     recordingWorldPlazaMusicBusPerformanceGauges();
+    applyingWorldPlazaMusicBusPendingCrossfade();
     return;
   }
 
@@ -232,6 +281,7 @@ export function crossfadingWorldPlazaMusicBusTo(
 
       applyingWorldPlazaMusicBusHandleVolume(nextHandle, targetVolume);
       recordingWorldPlazaMusicBusPerformanceGauges();
+      applyingWorldPlazaMusicBusPendingCrossfade();
     },
     DEFINING_WORLD_PLAZA_MUSIC_BUS_FADE_TICK_MS
   );
@@ -242,6 +292,7 @@ export function crossfadingWorldPlazaMusicBusTo(
  * Fades out and clears the active music track.
  */
 export function stoppingWorldPlazaMusicBus(fadeSec = 0): void {
+  clearingWorldPlazaMusicBusPendingCrossfade();
   clearingWorldPlazaMusicBusFadeInterval();
   stoppingWorldPlazaMusicBusHandle(
     managingWorldPlazaMusicBusState.fadingHandle

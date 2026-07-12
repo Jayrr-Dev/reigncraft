@@ -31,13 +31,22 @@ export type DefiningWildlifeBiomeSpawnConfig = {
   entries: readonly DefiningWildlifeBiomeSpawnEntry[];
 };
 
+/** Shared pinguin pack: noisy flocks on ice, coast, and cold water. */
+const DEFINING_WILDLIFE_PINGUIN_PACK_SPAWN_ENTRY: DefiningWildlifeBiomeSpawnEntry =
+  {
+    speciesId: 'pinguin',
+    weight: 5,
+    packSizeRange: [4, 8],
+  };
+
 export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
   Record<DefiningWorldPlazaBiomeKind, DefiningWildlifeBiomeSpawnConfig>
 > = {
   plains: {
     densityThreshold: 0.62,
     entries: [
-      { speciesId: 'cow', weight: 6, packSizeRange: [2, 4] },
+      { speciesId: 'cow', weight: 5, packSizeRange: [2, 4] },
+      { speciesId: 'cow-brown', weight: 4, packSizeRange: [2, 4] },
       { speciesId: 'sheep', weight: 5, packSizeRange: [3, 6] },
       { speciesId: 'chicken', weight: 4, packSizeRange: [2, 5] },
       { speciesId: 'pig', weight: 4, packSizeRange: [2, 4] },
@@ -51,8 +60,10 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
       { speciesId: 'donkey', weight: 1, packSizeRange: [1, 2] },
       { speciesId: 'bull', weight: 1, packSizeRange: [1, 1] },
       { speciesId: 'shepherd-dog', weight: 2, packSizeRange: [1, 2] },
+      { speciesId: 'golden-retriever', weight: 2, packSizeRange: [1, 3] },
       { speciesId: 'cat-black', weight: 1, packSizeRange: [1, 2] },
       { speciesId: 'cat-white', weight: 1, packSizeRange: [1, 2] },
+      { speciesId: 'cat-orange', weight: 1, packSizeRange: [1, 2] },
       { speciesId: 'cat-large', weight: 1, packSizeRange: [1, 1] },
       {
         speciesId: 'fairy',
@@ -71,9 +82,11 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
       { speciesId: 'grey-wolf', weight: 2, packSizeRange: [2, 4] },
       { speciesId: 'brown-horse', weight: 1, packSizeRange: [1, 3] },
       { speciesId: 'brown-bear', weight: 1, packSizeRange: [1, 1] },
+      { speciesId: 'grizzly', weight: 1, packSizeRange: [1, 1] },
       { speciesId: 'shepherd-dog', weight: 1, packSizeRange: [1, 2] },
       { speciesId: 'cat-black', weight: 1, packSizeRange: [1, 2] },
       { speciesId: 'cat-white', weight: 1, packSizeRange: [1, 1] },
+      { speciesId: 'cat-orange', weight: 1, packSizeRange: [1, 2] },
       { speciesId: 'cat-large', weight: 1, packSizeRange: [1, 1] },
       {
         speciesId: 'omega-wolf',
@@ -92,7 +105,9 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
       { speciesId: 'stag', weight: 2, packSizeRange: [1, 2] },
       { speciesId: 'cat-white', weight: 2, packSizeRange: [1, 2] },
       { speciesId: 'cat-black', weight: 1, packSizeRange: [1, 2] },
+      { speciesId: 'cat-orange', weight: 2, packSizeRange: [1, 2] },
       { speciesId: 'shepherd-dog', weight: 1, packSizeRange: [1, 1] },
+      { speciesId: 'golden-retriever', weight: 2, packSizeRange: [1, 2] },
       {
         speciesId: 'fairy',
         weight: 0.4,
@@ -105,9 +120,12 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
     densityThreshold: 0.62,
     entries: [
       { speciesId: 'deer', weight: 4, packSizeRange: [1, 3] },
+      DEFINING_WILDLIFE_PINGUIN_PACK_SPAWN_ENTRY,
+      { speciesId: 'husky', weight: 3, packSizeRange: [2, 5] },
       { speciesId: 'grey-wolf', weight: 3, packSizeRange: [2, 5] },
       { speciesId: 'yak', weight: 2, packSizeRange: [1, 3] },
       { speciesId: 'polar-bear', weight: 1, packSizeRange: [1, 1] },
+      { speciesId: 'grizzly', weight: 1, packSizeRange: [1, 1] },
       { speciesId: 'mammoth', weight: 1, packSizeRange: [1, 2] },
       { speciesId: 'brown-bear', weight: 1, packSizeRange: [1, 1] },
       {
@@ -150,10 +168,15 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
   beach: {
     densityThreshold: 0.68,
     entries: [
+      DEFINING_WILDLIFE_PINGUIN_PACK_SPAWN_ENTRY,
       { speciesId: 'turtle', weight: 3, packSizeRange: [1, 3] },
       { speciesId: 'tortoise', weight: 2, packSizeRange: [1, 2] },
       { speciesId: 'crocodile', weight: 1, packSizeRange: [1, 1] },
     ],
+  },
+  ocean: {
+    densityThreshold: 0.72,
+    entries: [DEFINING_WILDLIFE_PINGUIN_PACK_SPAWN_ENTRY],
   },
   rocky: {
     densityThreshold: 0.64,
@@ -162,8 +185,10 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
       { speciesId: 'deer', weight: 3, packSizeRange: [1, 2] },
       { speciesId: 'llama', weight: 2, packSizeRange: [2, 4] },
       { speciesId: 'alpaca', weight: 2, packSizeRange: [2, 4] },
+      { speciesId: 'husky', weight: 2, packSizeRange: [2, 4] },
       { speciesId: 'grey-wolf', weight: 2, packSizeRange: [1, 3] },
       { speciesId: 'yak', weight: 1, packSizeRange: [1, 2] },
+      { speciesId: 'grizzly', weight: 1, packSizeRange: [1, 1] },
       {
         speciesId: 'omega-wolf',
         weight: 0.18,

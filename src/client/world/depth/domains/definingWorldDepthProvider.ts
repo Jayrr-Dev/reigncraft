@@ -58,7 +58,7 @@ export type DefiningWorldDepthProvider = {
   readonly participatesInStandingBump: boolean;
   /** When true, standing bump only applies when surface layer is above ground. */
   readonly standingBumpRequiresRaisedSurface: boolean;
-  /** When true, provider can cap avatar z-index when in front and taller. */
+  /** When true, provider can cap avatar z-index when in front/overhead and taller. */
   readonly participatesInFrontOcclusion: boolean;
   /** When true, provider can occlude avatar ground shadows in the footprint. */
   readonly participatesInShadowOcclusion: boolean;

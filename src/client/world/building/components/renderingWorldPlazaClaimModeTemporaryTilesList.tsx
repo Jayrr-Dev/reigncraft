@@ -48,7 +48,7 @@ export function RenderingWorldPlazaClaimModeTemporaryTilesList({
   );
 
   return (
-    <div className="flex flex-col gap-1.5 border-t border-white/10 pt-2">
+    <div className="flex flex-col gap-1.5">
       <RenderingWorldPlazaClaimModeTemporaryTileCapacityBadge
         temporaryTileClaimCount={temporaryTileClaimCount}
         plotOwnerLimits={plotOwnerLimits}

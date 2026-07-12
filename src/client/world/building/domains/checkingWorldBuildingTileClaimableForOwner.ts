@@ -1,21 +1,21 @@
-import type { DefiningWorldBuildingPlotBounds } from "@/components/world/building/domains/definingWorldBuildingPlotBounds";
-import type { DefiningWorldBuildingPlotOwnerLimits } from "@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits";
-import {
-  formattingWorldBuildingOwnerMaxOwnedPlotRejectionMessage,
-  formattingWorldBuildingOwnerMaxTileClaimRejectionMessage,
-  checkingWorldBuildingOwnerHasReachedMaxOwnedPlotCount,
-  checkingWorldBuildingOwnerHasReachedMaxTileClaimCount,
-} from "@/components/world/building/domains/countingWorldBuildingOwnerPlotClaims";
+import { checkingWorldBuildingPlotIsPermanent } from '@/components/world/building/domains/checkingWorldBuildingPlotIsTemporary';
 import {
   CHECKING_WORLD_BUILDING_TILE_OTHER_OWNER_CLAIM_BUFFER_REJECTION_MESSAGE,
   checkingWorldBuildingTilePositionWithinOtherOwnerClaimBuffer,
-} from "@/components/world/building/domains/checkingWorldBuildingTilePositionWithinOtherOwnerClaimBuffer";
-import { checkingWorldBuildingPlotIsPermanent } from "@/components/world/building/domains/checkingWorldBuildingPlotIsTemporary";
+} from '@/components/world/building/domains/checkingWorldBuildingTilePositionWithinOtherOwnerClaimBuffer';
+import {
+  checkingWorldBuildingOwnerHasReachedMaxOwnedPlotCount,
+  checkingWorldBuildingOwnerHasReachedMaxTileClaimCount,
+  formattingWorldBuildingOwnerMaxOwnedPlotRejectionMessage,
+  formattingWorldBuildingOwnerMaxTileClaimRejectionMessage,
+} from '@/components/world/building/domains/countingWorldBuildingOwnerPlotClaims';
 import {
   findingWorldBuildingPlotContainingTilePosition,
   type DefiningWorldBuildingPlot,
-} from "@/components/world/building/domains/definingWorldBuildingPlot";
-import type { DefiningWorldBuildingTilePosition } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
+} from '@/components/world/building/domains/definingWorldBuildingPlot';
+import type { DefiningWorldBuildingPlotBounds } from '@/components/world/building/domains/definingWorldBuildingPlotBounds';
+import type { DefiningWorldBuildingPlotOwnerLimits } from '@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits';
+import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 
 /**
  * Validates whether an unowned tile can be claimed by a player.
@@ -24,21 +24,22 @@ import type { DefiningWorldBuildingTilePosition } from "@/components/world/build
  */
 
 /**
- * Returns true when a tile is orthogonally adjacent to a plot bounds edge tile.
+ * Returns true when a tile is orthogonally or diagonally adjacent to a plot
+ * bounds edge tile (8-connected neighborhood).
  *
  * @param bounds - Owned plot rectangle.
  * @param position - Candidate claim tile.
  */
 export function checkingWorldBuildingTilePositionAdjacentToPlotBounds(
   bounds: DefiningWorldBuildingPlotBounds,
-  position: DefiningWorldBuildingTilePosition,
+  position: DefiningWorldBuildingTilePosition
 ): boolean {
   for (let tileY = bounds.minTileY; tileY <= bounds.maxTileY; tileY += 1) {
     for (let tileX = bounds.minTileX; tileX <= bounds.maxTileX; tileX += 1) {
       const deltaX = Math.abs(position.tileX - tileX);
       const deltaY = Math.abs(position.tileY - tileY);
 
-      if ((deltaX === 1 && deltaY === 0) || (deltaX === 0 && deltaY === 1)) {
+      if (deltaX <= 1 && deltaY <= 1 && !(deltaX === 0 && deltaY === 0)) {
         return true;
       }
     }
@@ -59,11 +60,11 @@ export function checkingWorldBuildingTileClaimableForOwner(
   activeViewportPlots: readonly DefiningWorldBuildingPlot[],
   tilePosition: DefiningWorldBuildingTilePosition,
   ownerUserId: string,
-  plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits,
+  plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits
 ): boolean {
   const existingPlot = findingWorldBuildingPlotContainingTilePosition(
     activeViewportPlots,
-    tilePosition,
+    tilePosition
   );
 
   if (existingPlot) {
@@ -74,7 +75,7 @@ export function checkingWorldBuildingTileClaimableForOwner(
     checkingWorldBuildingTilePositionWithinOtherOwnerClaimBuffer(
       activeViewportPlots,
       tilePosition,
-      ownerUserId,
+      ownerUserId
     )
   ) {
     return false;
@@ -84,7 +85,7 @@ export function checkingWorldBuildingTileClaimableForOwner(
     checkingWorldBuildingOwnerHasReachedMaxTileClaimCount(
       activeViewportPlots,
       ownerUserId,
-      plotOwnerLimits,
+      plotOwnerLimits
     )
   ) {
     return false;
@@ -92,7 +93,7 @@ export function checkingWorldBuildingTileClaimableForOwner(
 
   const ownedPlots = activeViewportPlots.filter(
     (plot) =>
-      plot.ownerId === ownerUserId && checkingWorldBuildingPlotIsPermanent(plot),
+      plot.ownerId === ownerUserId && checkingWorldBuildingPlotIsPermanent(plot)
   );
 
   if (ownedPlots.length === 0) {
@@ -102,8 +103,8 @@ export function checkingWorldBuildingTileClaimableForOwner(
   const isAdjacentToOwnedPlot = ownedPlots.some((plot) =>
     checkingWorldBuildingTilePositionAdjacentToPlotBounds(
       plot.bounds,
-      tilePosition,
-    ),
+      tilePosition
+    )
   );
 
   if (isAdjacentToOwnedPlot) {
@@ -113,7 +114,7 @@ export function checkingWorldBuildingTileClaimableForOwner(
   return !checkingWorldBuildingOwnerHasReachedMaxOwnedPlotCount(
     activeViewportPlots,
     ownerUserId,
-    plotOwnerLimits,
+    plotOwnerLimits
   );
 }
 
@@ -129,26 +130,26 @@ export function resolvingWorldBuildingTileClaimRejectionMessage(
   activeViewportPlots: readonly DefiningWorldBuildingPlot[],
   tilePosition: DefiningWorldBuildingTilePosition,
   ownerUserId: string,
-  plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits,
+  plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits
 ): string {
   const existingPlot = findingWorldBuildingPlotContainingTilePosition(
     activeViewportPlots,
-    tilePosition,
+    tilePosition
   );
 
   if (existingPlot) {
     if (existingPlot.ownerId === ownerUserId) {
-      return "You already own this tile.";
+      return 'You already own this tile.';
     }
 
-    return "That tile is already claimed.";
+    return 'That tile is already claimed.';
   }
 
   if (
     checkingWorldBuildingTilePositionWithinOtherOwnerClaimBuffer(
       activeViewportPlots,
       tilePosition,
-      ownerUserId,
+      ownerUserId
     )
   ) {
     return CHECKING_WORLD_BUILDING_TILE_OTHER_OWNER_CLAIM_BUFFER_REJECTION_MESSAGE;
@@ -158,28 +159,28 @@ export function resolvingWorldBuildingTileClaimRejectionMessage(
     checkingWorldBuildingOwnerHasReachedMaxTileClaimCount(
       activeViewportPlots,
       ownerUserId,
-      plotOwnerLimits,
+      plotOwnerLimits
     )
   ) {
     return formattingWorldBuildingOwnerMaxTileClaimRejectionMessage(
-      plotOwnerLimits.maxTileClaimCount,
+      plotOwnerLimits.maxTileClaimCount
     );
   }
 
   const ownedPlots = activeViewportPlots.filter(
     (plot) =>
-      plot.ownerId === ownerUserId && checkingWorldBuildingPlotIsPermanent(plot),
+      plot.ownerId === ownerUserId && checkingWorldBuildingPlotIsPermanent(plot)
   );
 
   if (ownedPlots.length === 0) {
-    return "That tile cannot be claimed.";
+    return 'That tile cannot be claimed.';
   }
 
   const isAdjacentToOwnedPlot = ownedPlots.some((plot) =>
     checkingWorldBuildingTilePositionAdjacentToPlotBounds(
       plot.bounds,
-      tilePosition,
-    ),
+      tilePosition
+    )
   );
 
   if (!isAdjacentToOwnedPlot) {
@@ -187,16 +188,16 @@ export function resolvingWorldBuildingTileClaimRejectionMessage(
       checkingWorldBuildingOwnerHasReachedMaxOwnedPlotCount(
         activeViewportPlots,
         ownerUserId,
-        plotOwnerLimits,
+        plotOwnerLimits
       )
     ) {
       return formattingWorldBuildingOwnerMaxOwnedPlotRejectionMessage(
-        plotOwnerLimits.maxOwnedPlotCount,
+        plotOwnerLimits.maxOwnedPlotCount
       );
     }
 
-    return "Claim tiles next to land you already own.";
+    return 'Claim tiles next to land you already own.';
   }
 
-  return "That tile cannot be claimed.";
+  return 'That tile cannot be claimed.';
 }

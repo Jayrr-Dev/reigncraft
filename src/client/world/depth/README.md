@@ -13,11 +13,11 @@ Unified isometric depth sorting for the plaza world. Import from `@/components/w
 
 `resolvingWorldDepthAvatarBodySortKey` applies three rules in one provider footprint scan:
 
-| Rule | When |
-|------|------|
-| **Standing bump** | Column surface ≤ your standing layer → you sort above it |
-| **Front occluder cap** | Column in front (`footX+footY > youX+youY`), taller, silhouette reaches feet → you sort behind it |
-| **Hard floor raise** | After cap, coplanar caps at your feet stay under your legs when possible |
+| Rule                   | When                                                                                                                                                  |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Standing bump**      | Column surface ≤ your standing layer → you sort above it                                                                                              |
+| **Front occluder cap** | Column in front (`footX+footY > youX+youY`) or taller overhead on your standing tile, silhouette reaches feet → you sort behind it (walk-under roofs) |
+| **Hard floor raise**   | After cap, coplanar caps at your feet stay under your legs when possible                                                                              |
 
 Shadows use `resolvingWorldDepthAvatarShadowSortKey` with the same provider registry for occluder scans.
 
@@ -40,13 +40,13 @@ No need to edit avatar body/shadow resolvers directly — the registry drives oc
 
 ## Module map
 
-| File | Role |
-|------|------|
-| `computingWorldDepthSortKey.ts` | Base grid → z-index |
-| `definingWorldDepthBiasLadder.ts` | All depth biases |
-| `definingWorldDepthProviderRegistry.ts` | Declarative object providers |
-| `resolvingWorldDepthSurfaceLayerAtTile.ts` | Unified walkable surface |
-| `resolvingWorldDepthAvatarBodySortKey.ts` | Avatar body z-index |
-| `resolvingWorldDepthAvatarShadowSortKey.ts` | Avatar shadow z-index |
+| File                                        | Role                         |
+| ------------------------------------------- | ---------------------------- |
+| `computingWorldDepthSortKey.ts`             | Base grid → z-index          |
+| `definingWorldDepthBiasLadder.ts`           | All depth biases             |
+| `definingWorldDepthProviderRegistry.ts`     | Declarative object providers |
+| `resolvingWorldDepthSurfaceLayerAtTile.ts`  | Unified walkable surface     |
+| `resolvingWorldDepthAvatarBodySortKey.ts`   | Avatar body z-index          |
+| `resolvingWorldDepthAvatarShadowSortKey.ts` | Avatar shadow z-index        |
 
 Legacy shims under `domains/` re-export the depth API for gradual migration.

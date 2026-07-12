@@ -101,10 +101,16 @@ const DEFINING_WILDLIFE_MIXKIT_WILD_SFX_LION_ROARS = [
   'mixkit_lion_growl_01',
 ] as const satisfies readonly DefiningWildlifeMixkitWildSfxClipId[];
 
+/** Shortest lion punch bark (~1.3s). */
+const DEFINING_WILDLIFE_MIXKIT_WILD_SFX_LION_ATTACK = [
+  'mixkit_lion_roar_01',
+] as const satisfies readonly DefiningWildlifeMixkitWildSfxClipId[];
+
 const DEFINING_WILDLIFE_MIXKIT_WILD_SFX_LION_PURRS = [
   'mixkit_lion_purr_01',
 ] as const satisfies readonly DefiningWildlifeMixkitWildSfxClipId[];
 
+/** Prefer shorter screeches (~1.9s) for combat; grunts for hit/warn. */
 const DEFINING_WILDLIFE_MIXKIT_WILD_SFX_MONKEY_SCREECHES = [
   'mixkit_monkey_screech_01',
   'mixkit_monkey_screech_02',
@@ -115,6 +121,10 @@ const DEFINING_WILDLIFE_MIXKIT_WILD_SFX_MONKEY_GRUNTS = [
   'mixkit_monkey_chest_01',
 ] as const satisfies readonly DefiningWildlifeMixkitWildSfxClipId[];
 
+/**
+ * Mixkit wolf howls are 6–8s beds. Keep all three for variety; hard-stop caps
+ * them to a one-shot bark when used for punch/combat.
+ */
 const DEFINING_WILDLIFE_MIXKIT_WILD_SFX_WOLF_HOWLS = [
   'mixkit_wolf_howl_01',
   'mixkit_wolf_howl_02',
@@ -138,7 +148,7 @@ export const DEFINING_WILDLIFE_MIXKIT_WILD_SFX_POOL_CLIP_IDS_BY_EVENT: Record<
 > = {
   mixkit_lion_roar: {
     warn: DEFINING_WILDLIFE_MIXKIT_WILD_SFX_LION_ROARS,
-    attack: DEFINING_WILDLIFE_MIXKIT_WILD_SFX_LION_ROARS,
+    attack: DEFINING_WILDLIFE_MIXKIT_WILD_SFX_LION_ATTACK,
     chase_call: DEFINING_WILDLIFE_MIXKIT_WILD_SFX_LION_ROARS,
     hit_taken: DEFINING_WILDLIFE_MIXKIT_WILD_SFX_LION_ROARS,
     stalk: DEFINING_WILDLIFE_MIXKIT_WILD_SFX_LION_PURRS,
@@ -161,4 +171,28 @@ export const DEFINING_WILDLIFE_MIXKIT_WILD_SFX_POOL_CLIP_IDS_BY_EVENT: Record<
     flee_start: DEFINING_WILDLIFE_MIXKIT_WILD_SFX_BIRD_SCREECHES,
     hit_taken: DEFINING_WILDLIFE_MIXKIT_WILD_SFX_BIRD_SCREECHES,
   },
+};
+
+/**
+ * Minimum ms before the same instance replays a Mixkit pool clip.
+ */
+export const DEFINING_WILDLIFE_MIXKIT_WILD_SFX_POOL_MIN_REPLAY_INTERVAL_MS: Partial<
+  Record<DefiningWildlifeMixkitWildSfxPoolId, number>
+> = {
+  mixkit_lion_roar: 5_000,
+  mixkit_monkey: 7_000,
+  mixkit_wolf_howl: 14_000,
+  mixkit_bird_screech: 7_000,
+};
+
+/**
+ * Hard stop for Mixkit pools that shipped as long beds (wolf howls 6–8s).
+ */
+export const DEFINING_WILDLIFE_MIXKIT_WILD_SFX_POOL_MAX_PLAYBACK_DURATION_S: Partial<
+  Record<DefiningWildlifeMixkitWildSfxPoolId, number>
+> = {
+  mixkit_lion_roar: 1.55,
+  mixkit_monkey: 1.55,
+  mixkit_wolf_howl: 1.55,
+  mixkit_bird_screech: 1.55,
 };

@@ -1,6 +1,7 @@
 import type { DefiningWorldPlazaAvatarMotionClipSuffix } from '@/components/world/animation/domains/formattingWorldPlazaAnimationClipIds';
 import type { DefiningWorldPlazaAvatarCharacterDefinition } from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
 import { resolvingWorldPlazaAvatarMotionSheetLayoutForClipSuffix } from '@/components/world/domains/definingWorldPlazaAvatarCharacterDefinition';
+import { resolvingWorldPlazaAnimalAvatarCombatDefinition } from '@/components/world/domains/definingWorldPlazaAnimalAvatarCombatRegistry';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_ANIMATION_FPS,
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_MOTION_SHEET_LAYOUT,
@@ -62,12 +63,26 @@ const DEFINING_WORLD_PLAZA_GIRL_SAMPLE_COMBAT_CLIP_PRESENTATION_BY_SUFFIX: Recor
 };
 
 /**
- * Resolves sheet layout and fps for locomotion or GirlSample combat clips.
+ * Resolves sheet layout and fps for locomotion or combat clips.
  */
 export function resolvingWorldPlazaAvatarClipPresentation(
   characterDefinition: DefiningWorldPlazaAvatarCharacterDefinition,
   clipSuffix: DefiningWorldPlazaAvatarMotionClipSuffix
 ): ResolvingWorldPlazaAvatarCombatClipPresentation {
+  const animalCombatDefinition = resolvingWorldPlazaAnimalAvatarCombatDefinition(
+    characterDefinition.skinId
+  );
+
+  if (animalCombatDefinition && (clipSuffix === 'roll' || clipSuffix === 'melee')) {
+    return {
+      sheetLayout: animalCombatDefinition.sheetLayout,
+      animationFps:
+        clipSuffix === 'roll'
+          ? animalCombatDefinition.roll.animationFps
+          : animalCombatDefinition.melee.animationFps,
+    };
+  }
+
   const combatPresentation =
     DEFINING_WORLD_PLAZA_GIRL_SAMPLE_COMBAT_CLIP_PRESENTATION_BY_SUFFIX[
       clipSuffix as keyof typeof DEFINING_WORLD_PLAZA_GIRL_SAMPLE_COMBAT_CLIP_PRESENTATION_BY_SUFFIX

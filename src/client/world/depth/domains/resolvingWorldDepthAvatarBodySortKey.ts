@@ -1,4 +1,11 @@
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import {
+  checkingWorldDepthColumnFootIsInFrontOfAvatarFoot,
+  checkingWorldDepthColumnFootIsOnAvatarStandingTile,
+  checkingWorldDepthColumnIsAtOrBelowAvatarStandingLayer,
+  checkingWorldDepthColumnIsRaisedAtOrBelowAvatarStandingLayer,
+  checkingWorldDepthColumnIsTallerThanAvatarStandingLayer,
+  checkingWorldDepthColumnSilhouetteReachesAvatarFootOnScreen,
+} from '@/components/world/depth/domains/checkingWorldDepthColumnSilhouetteReachesAvatarFootOnScreen';
 import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
 import {
   DEFINING_WORLD_DEPTH_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN,
@@ -8,13 +15,6 @@ import {
 } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
 import type { DefiningWorldDepthProviderContext } from '@/components/world/depth/domains/definingWorldDepthProvider';
 import { DEFINING_WORLD_DEPTH_AVATAR_OCCLUSION_PROVIDERS } from '@/components/world/depth/domains/definingWorldDepthProviderRegistry';
-import {
-  checkingWorldDepthColumnFootIsInFrontOfAvatarFoot,
-  checkingWorldDepthColumnIsAtOrBelowAvatarStandingLayer,
-  checkingWorldDepthColumnIsRaisedAtOrBelowAvatarStandingLayer,
-  checkingWorldDepthColumnIsTallerThanAvatarStandingLayer,
-  checkingWorldDepthColumnSilhouetteReachesAvatarFootOnScreen,
-} from '@/components/world/depth/domains/checkingWorldDepthColumnSilhouetteReachesAvatarFootOnScreen';
 import { checkingWorldPlazaTileHasColumnRockAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileFloorIsOccludedByColumnRockAtTileIndex';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
@@ -55,13 +55,16 @@ function scanningWorldDepthAvatarBodyFootprint(
   let maxHardFloorSortKey = Number.NEGATIVE_INFINITY;
 
   for (
-    let tileOffsetY = -DEFINING_WORLD_DEPTH_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS;
+    let tileOffsetY =
+      -DEFINING_WORLD_DEPTH_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS;
     tileOffsetY <= DEFINING_WORLD_DEPTH_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS;
     tileOffsetY += 1
   ) {
     for (
-      let tileOffsetX = -DEFINING_WORLD_DEPTH_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS;
-      tileOffsetX <= DEFINING_WORLD_DEPTH_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS;
+      let tileOffsetX =
+        -DEFINING_WORLD_DEPTH_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS;
+      tileOffsetX <=
+      DEFINING_WORLD_DEPTH_AVATAR_BODY_SORT_FOOTPRINT_TILE_RADIUS;
       tileOffsetX += 1
     ) {
       const tileX = centerTileX + tileOffsetX;
@@ -115,6 +118,12 @@ function scanningWorldDepthAvatarBodyFootprint(
             depthSortFoot.x,
             depthSortFoot.y
           );
+          const isOverheadOnStandingTile =
+            checkingWorldDepthColumnFootIsOnAvatarStandingTile(
+              gridPoint,
+              depthSortFoot.x,
+              depthSortFoot.y
+            );
           const silhouetteOk =
             !provider.requiresSilhouetteReachForFrontOcclusion ||
             checkingWorldDepthColumnSilhouetteReachesAvatarFootOnScreen(
@@ -125,10 +134,16 @@ function scanningWorldDepthAvatarBodyFootprint(
               surfaceLayer
             );
 
-          if (isTaller && isInFront && silhouetteOk) {
+          if (
+            isTaller &&
+            (isInFront || isOverheadOnStandingTile) &&
+            silhouetteOk
+          ) {
             minFrontOccluderCap = Math.min(
               minFrontOccluderCap,
-              computingWorldDepthAvatarBodyStandingZIndexCapBehindOccluder(sortKey)
+              computingWorldDepthAvatarBodyStandingZIndexCapBehindOccluder(
+                sortKey
+              )
             );
           }
         }
@@ -185,10 +200,13 @@ export function resolvingWorldDepthAvatarBodySortKey(
 
   let standingBodySortKey = Math.max(
     footSortKey,
-    scan.maxStandingBumpSortKey + DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS
+    scan.maxStandingBumpSortKey +
+      DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS
   );
 
-  if (checkingWorldPlazaTileHasColumnRockAtTileIndex(centerTileX, centerTileY)) {
+  if (
+    checkingWorldPlazaTileHasColumnRockAtTileIndex(centerTileX, centerTileY)
+  ) {
     const rockSurfaceLayer =
       resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex(
         centerTileX,
@@ -208,13 +226,17 @@ export function resolvingWorldDepthAvatarBodySortKey(
 
       standingBodySortKey = Math.max(
         standingBodySortKey,
-        rockSortKey + DEFINING_WORLD_DEPTH_TERRAIN_ROCK_COLUMN_AVATAR_STANDING_DEPTH_BIAS
+        rockSortKey +
+          DEFINING_WORLD_DEPTH_TERRAIN_ROCK_COLUMN_AVATAR_STANDING_DEPTH_BIAS
       );
     }
   }
 
   if (scan.minFrontOccluderCap !== Number.POSITIVE_INFINITY) {
-    standingBodySortKey = Math.min(standingBodySortKey, scan.minFrontOccluderCap);
+    standingBodySortKey = Math.min(
+      standingBodySortKey,
+      scan.minFrontOccluderCap
+    );
 
     if (Number.isFinite(scan.maxHardFloorSortKey)) {
       const occluderHardCeilingSortKey =

@@ -11,25 +11,34 @@ export type ComputingWorldPlazaGirlSampleMeleePresentationTiming = {
   readonly durationMs: number;
 };
 
+export type ComputingWorldPlazaGirlSampleMeleePresentationTimingOptions = {
+  readonly frameCount?: number;
+  readonly baselineAnimationFps?: number;
+};
+
 /**
- * Derives GirlSample melee strip fps and one-shot duration from attack speed.
+ * Derives melee strip fps and one-shot duration from attack speed.
  *
  * Attack speed 1 plays the baseline strip length. Higher values finish faster.
+ * Optional frameCount / baselineAnimationFps override GirlSample defaults so
+ * animal skins (15-frame sheets) keep correct timing.
  */
 export function computingWorldPlazaGirlSampleMeleePresentationTiming(
-  attackSpeed: number
+  attackSpeed: number,
+  options: ComputingWorldPlazaGirlSampleMeleePresentationTimingOptions = {}
 ): ComputingWorldPlazaGirlSampleMeleePresentationTiming {
+  const frameCount =
+    options.frameCount ??
+    DEFINING_WORLD_PLAZA_GIRL_SAMPLE_MELEE_MOTION_SHEET_LAYOUT.frameCount;
+  const baselineAnimationFps =
+    options.baselineAnimationFps ??
+    DEFINING_WORLD_PLAZA_GIRL_SAMPLE_MELEE_ANIMATION_FPS;
   const normalizedAttackSpeed = Math.max(
     COMPUTING_WORLD_PLAZA_GIRL_SAMPLE_MELEE_ATTACK_SPEED_MIN,
     attackSpeed
   );
-  const animationFps =
-    DEFINING_WORLD_PLAZA_GIRL_SAMPLE_MELEE_ANIMATION_FPS *
-    normalizedAttackSpeed;
-  const durationMs =
-    (DEFINING_WORLD_PLAZA_GIRL_SAMPLE_MELEE_MOTION_SHEET_LAYOUT.frameCount /
-      animationFps) *
-    1000;
+  const animationFps = baselineAnimationFps * normalizedAttackSpeed;
+  const durationMs = (frameCount / animationFps) * 1000;
 
   return {
     animationFps,

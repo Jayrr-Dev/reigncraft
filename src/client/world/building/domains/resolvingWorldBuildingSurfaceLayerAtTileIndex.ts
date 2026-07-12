@@ -1,4 +1,7 @@
-import { resolvingWorldBuildingPlacedBlockTopWorldLayer } from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
+import {
+  computingWorldBuildingPlacedBlockOccupiedLayerBand,
+  resolvingWorldBuildingPlacedBlockTopWorldLayer,
+} from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
 import { checkingWorldBuildingPlacedBlockIsPassableTile } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import { resolvingWorldBuildingBlockDefinition } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import { DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_NONE } from '@/components/world/building/domains/definingWorldBuildingCollisionShape';
@@ -9,6 +12,7 @@ import {
 } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
   DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND,
+  DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX,
   DEFINING_WORLD_BUILDING_WORLD_LAYER_WALK_STEP_LAYER_DELTA,
   checkingWorldBuildingWorldLayerActsAsWallForPlayer,
   checkingWorldBuildingWorldLayerIsOneWalkStepAbovePlayer,
@@ -302,4 +306,197 @@ export function checkingWorldBuildingPlacedBlockIsWalkableStep(
     blockLayer - playerLayer <=
     DEFINING_WORLD_BUILDING_WORLD_LAYER_WALK_STEP_LAYER_DELTA
   );
+}
+
+/**
+ * Returns true when every world layer from ground through {@link surfaceLayer}
+ * is filled by placed-block extrusion on the tile (solid climbable column).
+ *
+ * @param tileX - Tile column index.
+ * @param tileY - Tile row index.
+ * @param surfaceLayer - Highest layer that must be solid.
+ * @param placedBlocks - Blocks near the tile.
+ */
+export function checkingWorldBuildingTileHasSolidExtrusionColumnThroughLayer(
+  tileX: number,
+  tileY: number,
+  surfaceLayer: number,
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
+): boolean {
+  if (surfaceLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND) {
+    return false;
+  }
+
+  const blocksAtTile = listingWorldBuildingPlacedBlocksAtTileIndex(
+    tileX,
+    tileY,
+    placedBlocks,
+    placedBlocksByTile
+  );
+
+  if (blocksAtTile.length === 0) {
+    return false;
+  }
+
+  for (
+    let worldLayer = DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND;
+    worldLayer <= surfaceLayer;
+    worldLayer += 1
+  ) {
+    const layerIsFilled = blocksAtTile.some((block) => {
+      const blockHeight = resolvingWorldBuildingPlacedBlockBlockHeight(block);
+
+      if (checkingWorldBuildingPlacedBlockIsPassableTile(blockHeight)) {
+        return false;
+      }
+
+      const occupiedBand = computingWorldBuildingPlacedBlockOccupiedLayerBand(
+        resolvingWorldBuildingPlacedBlockWorldLayer(block),
+        blockHeight
+      );
+
+      return (
+        worldLayer >= occupiedBand.bottomLayer &&
+        worldLayer <= occupiedBand.topLayer
+      );
+    });
+
+    if (!layerIsFilled) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Returns the surface layer a jump should land on for a tile.
+ *
+ * Uses the highest top when it is within jump reach. When the max top is an
+ * unreachable floating roof (air under the column), returns the highest
+ * landable support within jump reach (usually ground) so players can pass under
+ * ceilings.
+ *
+ * @param tileX - Tile column index.
+ * @param tileY - Tile row index.
+ * @param placedBlocks - Blocks near the tile.
+ * @param fromLayer - Player layer at takeoff.
+ * @param jumpLayerReachMax - Optional jump reach override.
+ */
+export function resolvingWorldBuildingJumpLandableSurfaceLayerAtTileIndex(
+  tileX: number,
+  tileY: number,
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
+  fromLayer: number,
+  jumpLayerReachMax?: number,
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
+): number {
+  const maxSurfaceLayer = resolvingWorldBuildingSurfaceLayerAtTileIndex(
+    tileX,
+    tileY,
+    placedBlocks,
+    placedBlocksByTile
+  );
+
+  if (
+    checkingWorldBuildingCanJumpLandOnSurfaceLayer(
+      fromLayer,
+      maxSurfaceLayer,
+      jumpLayerReachMax
+    )
+  ) {
+    return maxSurfaceLayer;
+  }
+
+  if (
+    checkingWorldBuildingTileHasSolidExtrusionColumnThroughLayer(
+      tileX,
+      tileY,
+      maxSurfaceLayer,
+      placedBlocks,
+      placedBlocksByTile
+    )
+  ) {
+    return maxSurfaceLayer;
+  }
+
+  const jumpReachTop =
+    fromLayer +
+    (jumpLayerReachMax ?? DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX);
+  let landableLayer = DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND;
+  const blocksAtTile = listingWorldBuildingPlacedBlocksAtTileIndex(
+    tileX,
+    tileY,
+    placedBlocks,
+    placedBlocksByTile
+  );
+
+  for (const block of blocksAtTile) {
+    const blockTopLayer = resolvingWorldBuildingPlacedBlockTopWorldLayer(block);
+
+    if (
+      blockTopLayer > landableLayer &&
+      blockTopLayer <= jumpReachTop &&
+      checkingWorldBuildingCanJumpLandOnSurfaceLayer(
+        fromLayer,
+        blockTopLayer,
+        jumpLayerReachMax
+      )
+    ) {
+      landableLayer = blockTopLayer;
+    }
+  }
+
+  return landableLayer;
+}
+
+/**
+ * Returns the highest placed-block surface that forms a solid column from
+ * ground (walkable stack / cliff), ignoring floating roofs with air beneath.
+ *
+ * @param tileX - Tile column index.
+ * @param tileY - Tile row index.
+ * @param placedBlocks - Blocks near the tile.
+ */
+export function resolvingWorldBuildingStandableWalkSurfaceLayerAtTileIndex(
+  tileX: number,
+  tileY: number,
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
+  placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
+): number {
+  const maxSurfaceLayer = resolvingWorldBuildingSurfaceLayerAtTileIndex(
+    tileX,
+    tileY,
+    placedBlocks,
+    placedBlocksByTile
+  );
+
+  if (maxSurfaceLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND) {
+    return DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND;
+  }
+
+  let standableLayer = DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND;
+
+  for (
+    let worldLayer = DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND;
+    worldLayer <= maxSurfaceLayer;
+    worldLayer += 1
+  ) {
+    if (
+      !checkingWorldBuildingTileHasSolidExtrusionColumnThroughLayer(
+        tileX,
+        tileY,
+        worldLayer,
+        placedBlocks,
+        placedBlocksByTile
+      )
+    ) {
+      break;
+    }
+
+    standableLayer = worldLayer;
+  }
+
+  return standableLayer;
 }

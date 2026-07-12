@@ -11,6 +11,8 @@ const managingWorldPlazaGirlSampleVoiceSfxRotationIndices: Record<
   number
 > = {
   attack_swing: 0,
+  jump_takeoff: 0,
+  roll_dodge: 0,
   hit_taken: 0,
   pain: 0,
 };
@@ -41,6 +43,8 @@ export function advancingWorldPlazaGirlSampleVoiceSfxRotationIndex(
 /** Resets every rotation counter (used on hook teardown). */
 export function resettingWorldPlazaGirlSampleVoiceSfxRotationIndices(): void {
   managingWorldPlazaGirlSampleVoiceSfxRotationIndices.attack_swing = 0;
+  managingWorldPlazaGirlSampleVoiceSfxRotationIndices.jump_takeoff = 0;
+  managingWorldPlazaGirlSampleVoiceSfxRotationIndices.roll_dodge = 0;
   managingWorldPlazaGirlSampleVoiceSfxRotationIndices.hit_taken = 0;
   managingWorldPlazaGirlSampleVoiceSfxRotationIndices.pain = 0;
 }

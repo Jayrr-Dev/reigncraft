@@ -13,9 +13,9 @@ describe('resolvingWildlifeSpeciesSfxClipId', () => {
       'idle_ambient'
     );
 
-    expect(poolLength).toBe(6);
+    expect(poolLength).toBe(2);
     expect(resolvingWildlifeSpeciesSfxClipId('cow', 'idle_ambient', 0)).toBe(
-      'cow_moo_01'
+      'cow_moo_02'
     );
     expect(
       resolvingWildlifeSpeciesSfxClipId('cow', 'idle_ambient', poolLength)
@@ -50,7 +50,7 @@ describe('resolvingWildlifeSpeciesSfxClipId', () => {
     );
     expect(
       resolvingWildlifeSpeciesSfxClipPoolLength('deer', 'flee_start')
-    ).toBe(4);
+    ).toBe(3);
   });
 
   it('resolves hyena howl from the pixabay laugh pool', () => {
@@ -67,7 +67,7 @@ describe('resolvingWildlifeSpeciesSfxClipId', () => {
 
   it('rotates tiger attack clips across the pixabay tiger roar pool', () => {
     expect(resolvingWildlifeSpeciesSfxClipPoolLength('tiger', 'attack')).toBe(
-      3
+      2
     );
     expect(resolvingWildlifeSpeciesSfxClipId('tiger', 'attack', 0)).toBe(
       'pixabay_tiger_roar_loud_01'

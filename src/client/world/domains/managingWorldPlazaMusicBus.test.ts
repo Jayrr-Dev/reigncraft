@@ -87,11 +87,13 @@ describe('managingWorldPlazaMusicBus', () => {
     ]);
   });
 
-  it('hard-stops a prior fade-out when a newer track starts', () => {
+  it('coalesces mid-fade retargets instead of restarting the blend', () => {
     vi.useFakeTimers();
 
+    const playedIds: string[] = [];
     const handles: SoundHandle[] = [];
     const starAudio = creatingMockStarAudio((id) => {
+      playedIds.push(id);
       const handle = creatingMockSoundHandle(id);
       handles.push(handle);
       return handle;
@@ -108,17 +110,41 @@ describe('managingWorldPlazaMusicBus', () => {
 
     expect(handles[0]?.playing).toBe(true);
     expect(handles[1]?.playing).toBe(true);
+    expect(playedIds).toEqual([
+      'biome-music.sheep',
+      'biome-music.golden_gleam',
+    ]);
 
+    // Day/night scrub mid-fade: keep current blend, remember latest target.
     crossfadingWorldPlazaMusicBusTo(starAudio, 'biome-music.forgotten_biomes', {
       durationSec: 1,
       loop: true,
     });
+    crossfadingWorldPlazaMusicBusTo(starAudio, 'biome-music.whispering_woods', {
+      durationSec: 1,
+      loop: true,
+    });
+
+    expect(playedIds).toEqual([
+      'biome-music.sheep',
+      'biome-music.golden_gleam',
+    ]);
+    expect(gettingWorldPlazaMusicBusActiveStarAudioId()).toBe(
+      'biome-music.golden_gleam'
+    );
+    expect(handles[0]?.playing).toBe(true);
+    expect(handles[1]?.playing).toBe(true);
+
+    vi.advanceTimersByTime(1000);
 
     expect(handles[0]?.playing).toBe(false);
-    expect(handles[1]?.playing).toBe(true);
-    expect(handles[2]?.playing).toBe(true);
+    expect(playedIds).toEqual([
+      'biome-music.sheep',
+      'biome-music.golden_gleam',
+      'biome-music.whispering_woods',
+    ]);
     expect(gettingWorldPlazaMusicBusActiveStarAudioId()).toBe(
-      'biome-music.forgotten_biomes'
+      'biome-music.whispering_woods'
     );
 
     vi.useRealTimers();

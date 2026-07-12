@@ -155,6 +155,13 @@ export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_NIGHT_OVERRIDES: Partial<
 /** How often biome music checks the player's current biome (ms). */
 export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_POLL_INTERVAL_MS = 750;
 
+/**
+ * Sticky polls before day/night music may flip.
+ * Stops forest/jungle night overrides from thrashing when the clock scrubber
+ * or sunset boundary wobbles across the daytime edge.
+ */
+export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_DAY_NIGHT_STICKY_POLL_COUNT = 2;
+
 /** Target loop volume once playback is unlocked. */
 export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_TARGET_VOLUME = 0.38;
 

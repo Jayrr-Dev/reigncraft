@@ -8,8 +8,15 @@
  * @module components/world/building/domains/definingWorldBuildingBlockHeightConstants
  */
 
-/** Vertical extent of the player avatar in world layers. */
+/** Vertical extent of the player avatar in world layers (visual / lava hide). */
 export const DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS = 4;
+
+/**
+ * Feet-only vertical band for walk/push collision against placed blocks and
+ * terrain columns. Elevated roofs (bottom above the standing layer) stay
+ * walkable underneath so players can build ceilings.
+ */
+export const DEFINING_WORLD_PLAZA_PLAYER_WALK_COLLISION_HEIGHT_WORLD_LAYERS = 1;
 
 /** Flat passable tile height (no extrusion, no collision). */
 export const DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_TILE = 0;
@@ -32,7 +39,7 @@ export const DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_MAX = 32;
 
 /** Metadata key persisted on placed blocks for extrusion height. */
 export const DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_METADATA_KEY =
-  "blockHeight" as const;
+  'blockHeight' as const;
 
 /** Closed layer band occupied in world layer space. */
 export interface DefiningWorldBuildingWorldLayerBand {
@@ -52,7 +59,7 @@ export interface DefiningWorldBuildingWorldLayerBand {
  * @param blockHeight - Raw or resolved block height from build mode state.
  */
 export function checkingWorldBuildingBlockHeightIsTowerRelative(
-  blockHeight: number,
+  blockHeight: number
 ): boolean {
   return blockHeight === DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_TOWER_RELATIVE;
 }
@@ -65,7 +72,7 @@ export function checkingWorldBuildingBlockHeightIsTowerRelative(
  */
 export function resolvingWorldBuildingEffectiveBlockHeight(
   blockHeight: number,
-  topWorldLayer: number,
+  topWorldLayer: number
 ): number {
   if (checkingWorldBuildingBlockHeightIsTowerRelative(blockHeight)) {
     return clampingWorldBuildingBlockHeight(topWorldLayer, topWorldLayer);
@@ -76,7 +83,7 @@ export function resolvingWorldBuildingEffectiveBlockHeight(
 
 export function clampingWorldBuildingBlockHeight(
   candidateBlockHeight: number,
-  topWorldLayer?: number,
+  topWorldLayer?: number
 ): number {
   if (checkingWorldBuildingBlockHeightIsTowerRelative(candidateBlockHeight)) {
     if (topWorldLayer === undefined) {
@@ -90,8 +97,8 @@ export function clampingWorldBuildingBlockHeight(
     DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_MAX,
     Math.max(
       DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_MIN,
-      Math.floor(candidateBlockHeight),
-    ),
+      Math.floor(candidateBlockHeight)
+    )
   );
 
   if (topWorldLayer === undefined) {
@@ -111,7 +118,7 @@ export function clampingWorldBuildingBlockHeight(
  * @param blockHeightLayers - Block extrusion height (H).
  */
 export function checkingWorldBuildingPlacedBlockIsPassableTile(
-  blockHeightLayers: number,
+  blockHeightLayers: number
 ): boolean {
   return (
     clampingWorldBuildingBlockHeight(blockHeightLayers) ===
@@ -125,7 +132,7 @@ export function checkingWorldBuildingPlacedBlockIsPassableTile(
  * @param blockHeightLayers - Block extrusion height (H).
  */
 export function checkingWorldBuildingPlacedBlockBlockHeightBlocksPlayer(
-  blockHeightLayers: number,
+  blockHeightLayers: number
 ): boolean {
   return !checkingWorldBuildingPlacedBlockIsPassableTile(blockHeightLayers);
 }

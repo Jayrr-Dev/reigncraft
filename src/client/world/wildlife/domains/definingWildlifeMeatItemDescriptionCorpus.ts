@@ -30,6 +30,20 @@ export const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_ENTRIES: readonly DefiningW
         'Tough but filling. Safe after the fire; may grant a short comfort buff.',
     },
     {
+      speciesId: 'husky',
+      rawDescription:
+        'Cold-country dog meat with a thick winter coat still clinging. Raw husky risks feline gut: nausea and gut poison.',
+      cookedDescription:
+        'Dense and warming. Safe cooked; may grant a short comfort buff.',
+    },
+    {
+      speciesId: 'golden-retriever',
+      rawDescription:
+        'Friendly dog, unfriendly meal. Raw retriever meat risks feline gut: nausea and gut poison.',
+      cookedDescription:
+        'Mild and filling. Safe after the fire; may grant a short comfort buff.',
+    },
+    {
       speciesId: 'cat-black',
       rawDescription:
         'A small black cat, still warm. Raw cat meat risks feline gut: house-cat parasites, nausea, then poison.',
@@ -51,6 +65,13 @@ export const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_ENTRIES: readonly DefiningW
         'A bit more meat on the bone. Safe cooked; may grant a short comfort buff.',
     },
     {
+      speciesId: 'cat-orange',
+      rawDescription:
+        'An orange plaza cat, still warm. Raw cat meat risks feline gut: house-cat parasites, nausea, then poison.',
+      cookedDescription:
+        'Thin strips, barely a meal. Safe cooked; may grant a short comfort buff.',
+    },
+    {
       speciesId: 'deer',
       rawDescription:
         'Lean haunch from a deer that bolted too slow. Raw venison can cause chronic wasting: confusion and a long, creeping sickness.',
@@ -68,6 +89,13 @@ export const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_ENTRIES: readonly DefiningW
       speciesId: 'cow',
       rawDescription:
         'A solid cut from plaza cattle. Raw beef risks mad cow disease: confusion and delayed neural damage.',
+      cookedDescription:
+        'Seared until the juices run clear. May grant prime strength; prion sickness is rare but possible.',
+    },
+    {
+      speciesId: 'cow-brown',
+      rawDescription:
+        'Brown-coat cattle meat from the open plains. Raw beef risks mad cow disease: confusion and delayed neural damage.',
       cookedDescription:
         'Seared until the juices run clear. May grant prime strength; prion sickness is rare but possible.',
     },
@@ -105,6 +133,13 @@ export const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_ENTRIES: readonly DefiningW
         'A heavy haul from a brown bear. Raw bear risks bear worm: weakness, then delayed bleeding as it worsens.',
       cookedDescription:
         'Rich and filling. Safe when cooked; may swell your max health for a hearty stretch.',
+    },
+    {
+      speciesId: 'grizzly',
+      rawDescription:
+        'Meaner bear, meaner parasites. Raw grizzly risks bear worm: weakness, then delayed bleeding.',
+      cookedDescription:
+        'Dense and greasy. Safe when cooked; may swell your max health for a hearty stretch.',
     },
     {
       speciesId: 'lion',
@@ -275,6 +310,13 @@ export const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_ENTRIES: readonly DefiningW
         'Slow food from a slow animal. Safe; may harden you slightly against hits.',
     },
     {
+      speciesId: 'pinguin',
+      rawDescription:
+        'Dense dark meat under a coat of fat. Raw pinguin risks salmonellosis: nausea, poison, and half hunger while sick.',
+      cookedDescription:
+        'Rich and a little oily, like poultry that lived on ice. Safe; may grant a short comfort buff.',
+    },
+    {
       speciesId: 'polar-bear',
       rawDescription:
         'Pale fat over dark meat. Raw polar bear almost always carries bear worm: weakness, then delayed bleeding.',
@@ -350,6 +392,13 @@ export const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_ENTRIES: readonly DefiningW
         'Taken from something uncomfortably strong. Raw chimp risks primate fever: fever poison and scrambled footing.',
       cookedDescription:
         'Filling, and best not thought about too hard. Safe; may amplify healing from other sources.',
+    },
+    {
+      speciesId: 'fairy',
+      rawDescription:
+        'A pinch of cold glitter that used to float. Raw fairy dust rarely sickens, but the stomach still argues.',
+      cookedDescription:
+        'Warm sparkles that barely fill you. Safe; often grants a short comfort buff.',
     },
   ];
 

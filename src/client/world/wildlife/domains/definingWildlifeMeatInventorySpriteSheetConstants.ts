@@ -10,6 +10,8 @@ type DefiningWildlifeMeatInventorySpriteSheetGroup = {
   readonly rawItemTypeIds: readonly string[];
   readonly rawSpriteSheetUrl: string;
   readonly cookedSpriteSheetUrl: string;
+  readonly columnCount: number;
+  readonly rowCount: number;
 };
 
 export const DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_COLUMN_COUNT = 4;
@@ -22,6 +24,8 @@ const DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_GROUPS: readonly DefiningWil
         '/creatures/sprites/loot/small-animal-raw-meat-sprites.webp',
       cookedSpriteSheetUrl:
         '/creatures/sprites/loot/small-animal-cooked-meat-sprites.webp',
+      columnCount: DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_COLUMN_COUNT,
+      rowCount: DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_ROW_COUNT,
       rawItemTypeIds: [
         'world-plaza-raw-chicken-meat',
         'world-plaza-raw-cat-black-meat',
@@ -42,6 +46,8 @@ const DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_GROUPS: readonly DefiningWil
         '/creatures/sprites/loot/medium-animal-raw-meat-sprites.webp',
       cookedSpriteSheetUrl:
         '/creatures/sprites/loot/medium-animal-cooked-meat-sprites.webp',
+      columnCount: DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_COLUMN_COUNT,
+      rowCount: DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_ROW_COUNT,
       rawItemTypeIds: [
         'world-plaza-raw-deer-meat',
         'world-plaza-raw-stag-venison',
@@ -62,6 +68,8 @@ const DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_GROUPS: readonly DefiningWil
         '/creatures/sprites/loot/large-animal-raw-meat-sprites.webp',
       cookedSpriteSheetUrl:
         '/creatures/sprites/loot/large-animal-cooked-meat-sprites.webp',
+      columnCount: DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_COLUMN_COUNT,
+      rowCount: DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_ROW_COUNT,
       rawItemTypeIds: [
         'world-plaza-raw-horse-meat',
         'world-plaza-raw-work-horse-meat',
@@ -82,6 +90,8 @@ const DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_GROUPS: readonly DefiningWil
         '/creatures/sprites/loot/massive-animal-raw-meat-sprites.webp',
       cookedSpriteSheetUrl:
         '/creatures/sprites/loot/massive-animal-cooked-meat-sprites.webp',
+      columnCount: DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_COLUMN_COUNT,
+      rowCount: DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_ROW_COUNT,
       rawItemTypeIds: [
         'world-plaza-raw-lioness-meat',
         'world-plaza-raw-giraffe-meat',
@@ -95,6 +105,23 @@ const DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_GROUPS: readonly DefiningWil
         'world-plaza-raw-polar-bear-meat',
         'world-plaza-raw-tiger-meat',
         'world-plaza-raw-crocodile-meat',
+      ],
+    },
+    {
+      rawSpriteSheetUrl:
+        '/creatures/sprites/loot/special-animal-raw-meat-sprites.webp',
+      cookedSpriteSheetUrl:
+        '/creatures/sprites/loot/special-animal-cooked-meat-sprites.webp',
+      columnCount: 4,
+      rowCount: 2,
+      rawItemTypeIds: [
+        'world-plaza-raw-pinguin-meat',
+        'world-plaza-raw-fairy-dust',
+        'world-plaza-raw-husky-meat',
+        'world-plaza-raw-golden-retriever-meat',
+        'world-plaza-raw-brown-beef',
+        'world-plaza-raw-cat-orange-meat',
+        'world-plaza-raw-grizzly-meat',
       ],
     },
   ];
@@ -119,14 +146,10 @@ export function resolvingWildlifeMeatInventorySpriteSheetIcon(
         meatKind === 'raw'
           ? group.rawSpriteSheetUrl
           : group.cookedSpriteSheetUrl,
-      columnCount: DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_COLUMN_COUNT,
-      rowCount: DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_ROW_COUNT,
-      columnIndex:
-        spriteIndex %
-        DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_COLUMN_COUNT,
-      rowIndex: Math.floor(
-        spriteIndex / DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_COLUMN_COUNT
-      ),
+      columnCount: group.columnCount,
+      rowCount: group.rowCount,
+      columnIndex: spriteIndex % group.columnCount,
+      rowIndex: Math.floor(spriteIndex / group.columnCount),
     };
   }
 

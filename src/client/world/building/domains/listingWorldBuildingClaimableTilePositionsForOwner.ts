@@ -1,27 +1,32 @@
-import { checkingWorldBuildingTileClaimableForOwner } from "@/components/world/building/domains/checkingWorldBuildingTileClaimableForOwner";
-import type { DefiningWorldBuildingPlotOwnerLimits } from "@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits";
+import { checkingWorldBuildingTileClaimableForOwner } from '@/components/world/building/domains/checkingWorldBuildingTileClaimableForOwner';
 import {
   findingWorldBuildingPlotContainingTilePosition,
   type DefiningWorldBuildingPlot,
-} from "@/components/world/building/domains/definingWorldBuildingPlot";
+} from '@/components/world/building/domains/definingWorldBuildingPlot';
+import type { DefiningWorldBuildingPlotOwnerLimits } from '@/components/world/building/domains/definingWorldBuildingPlotOwnerLimits';
 import {
   creatingWorldBuildingTilePosition,
   formattingWorldBuildingTilePositionKey,
   type DefiningWorldBuildingTilePosition,
-} from "@/components/world/building/domains/definingWorldBuildingTilePosition";
+} from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 
 /**
- * Orthogonal grid offsets used when expanding claimable tiles from owned plots.
+ * Grid offsets used when expanding claimable tiles from owned plots
+ * (8-connected: edges + corners).
  *
  * @module components/world/building/domains/listingWorldBuildingClaimableTilePositionsForOwner
  */
 
 /** Neighbor offsets checked around each owned plot tile. */
-const LISTING_WORLD_BUILDING_CLAIMABLE_TILE_ORTHOGONAL_OFFSETS = [
+const LISTING_WORLD_BUILDING_CLAIMABLE_TILE_NEIGHBOR_OFFSETS = [
   { tileX: 1, tileY: 0 },
   { tileX: -1, tileY: 0 },
   { tileX: 0, tileY: 1 },
   { tileX: 0, tileY: -1 },
+  { tileX: 1, tileY: 1 },
+  { tileX: 1, tileY: -1 },
+  { tileX: -1, tileY: 1 },
+  { tileX: -1, tileY: -1 },
 ] as const;
 
 /**
@@ -34,10 +39,10 @@ const LISTING_WORLD_BUILDING_CLAIMABLE_TILE_ORTHOGONAL_OFFSETS = [
 export function listingWorldBuildingClaimableTilePositionsForOwner(
   viewportPlots: readonly DefiningWorldBuildingPlot[],
   ownerUserId: string,
-  plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits,
+  plotOwnerLimits: DefiningWorldBuildingPlotOwnerLimits
 ): DefiningWorldBuildingTilePosition[] {
   const ownedPlots = viewportPlots.filter(
-    (plot) => plot.ownerId === ownerUserId,
+    (plot) => plot.ownerId === ownerUserId
   );
 
   if (ownedPlots.length === 0) {
@@ -58,23 +63,24 @@ export function listingWorldBuildingClaimableTilePositionsForOwner(
         tileX <= plot.bounds.maxTileX;
         tileX += 1
       ) {
-        for (const offset of LISTING_WORLD_BUILDING_CLAIMABLE_TILE_ORTHOGONAL_OFFSETS) {
+        for (const offset of LISTING_WORLD_BUILDING_CLAIMABLE_TILE_NEIGHBOR_OFFSETS) {
           const candidateTilePosition = creatingWorldBuildingTilePosition(
             tileX + offset.tileX,
-            tileY + offset.tileY,
+            tileY + offset.tileY
           );
 
           if (
             findingWorldBuildingPlotContainingTilePosition(
               viewportPlots,
-              candidateTilePosition,
+              candidateTilePosition
             ) !== null
           ) {
             continue;
           }
 
-          const candidateTileKey =
-            formattingWorldBuildingTilePositionKey(candidateTilePosition);
+          const candidateTileKey = formattingWorldBuildingTilePositionKey(
+            candidateTilePosition
+          );
 
           if (claimableTileKeys.has(candidateTileKey)) {
             continue;
@@ -85,7 +91,7 @@ export function listingWorldBuildingClaimableTilePositionsForOwner(
               viewportPlots,
               candidateTilePosition,
               ownerUserId,
-              plotOwnerLimits,
+              plotOwnerLimits
             )
           ) {
             continue;

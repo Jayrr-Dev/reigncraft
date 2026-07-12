@@ -1,7 +1,16 @@
 'use client';
 
+import { buildingWorldPlazaAnimalAvatarFootstepStarAudioManifestForSurfaces } from '@/components/world/domains/buildingWorldPlazaAnimalAvatarFootstepStarAudioManifest';
 import { buildingWorldPlazaAvatarFootstepStarAudioManifestForSurfaces } from '@/components/world/domains/buildingWorldPlazaAvatarFootstepStarAudioManifest';
+import { checkingWorldPlazaAvatarSkinPlaysFootsteps } from '@/components/world/domains/checkingWorldPlazaAvatarSkinPlaysFootsteps';
 import { checkingWorldPlazaGirlSampleAvatarSkinActive } from '@/components/world/domains/checkingWorldPlazaGirlSampleAvatarSkinActive';
+import {
+  computingWorldPlazaAnimalAvatarFootstepEffectiveTargetVolume,
+  computingWorldPlazaAnimalAvatarJumpLandingEffectiveTargetVolume,
+  resolvingWorldPlazaAnimalAvatarFootstepVolumeMultiplier,
+  resolvingWorldPlazaAnimalAvatarJumpLandingClipId,
+} from '@/components/world/domains/computingWorldPlazaAnimalAvatarFootstepEffectiveTargetVolume';
+import { computingWorldPlazaAnimalAvatarFootstepIntervalMs } from '@/components/world/domains/computingWorldPlazaAnimalAvatarFootstepIntervalMs';
 import {
   computingWorldPlazaAvatarFootstepEffectiveTargetVolume,
   computingWorldPlazaAvatarJumpLandingEffectiveTargetVolume,
@@ -19,6 +28,10 @@ import {
 } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
+  gettingWorldPlazaSelectedAvatarSkinId,
+  subscribingWorldPlazaSelectedAvatarSkin,
+} from '@/components/world/domains/managingWorldPlazaAvatarSkinSelectionStore';
+import {
   initializingWorldPlazaSfxVolumeStoreFromStorage,
   subscribingWorldPlazaSfxVolume,
 } from '@/components/world/domains/managingWorldPlazaSfxVolumeStore';
@@ -29,6 +42,7 @@ import {
   releasingWorldPlazaStarAudio,
   settingWorldPlazaStarAudioSfxGroupVolume,
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
+import { resolvingWorldPlazaAnimalPlayableAvatarFootstepSizeTier } from '@/components/world/domains/resolvingWorldPlazaAnimalPlayableAvatarFootstepSizeTier';
 import {
   checkingWorldPlazaAvatarMotionKindPlaysFootsteps,
   computingWorldPlazaAvatarFootstepIntervalMs,
@@ -41,14 +55,22 @@ import {
 } from '@/components/world/domains/resolvingWorldPlazaAvatarFootstepPlayback';
 import { resolvingWorldPlazaAvatarFootstepStarAudioId } from '@/components/world/domains/resolvingWorldPlazaAvatarFootstepStarAudioId';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
+import {
+  DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_PLAYBACK_RATE,
+  type DefiningFilmcowFootstepWildlifeSizeTier,
+} from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
 import { resolvingFilmcowFootstepClipEntryId } from '@/components/world/footsteps/domains/resolvingFilmcowFootstepClipEntries';
+import {
+  resolvingFilmcowFootstepPlaybackDurationS,
+  resolvingFilmcowFootstepWildlifeNextClipId,
+  resolvingFilmcowFootstepWildlifePlaybackRate,
+} from '@/components/world/footsteps/domains/resolvingFilmcowFootstepPlayback';
 import { useEffect, useRef } from 'react';
 import type { SoundHandle, StarAudio } from 'star-audio';
 
 /**
- * Loops FilmCow footstep one-shots for the girl-sample skin while walking
- * or running, switching surface by biome and playing a landing clip when jumps
- * finish.
+ * Loops FilmCow / Nox footstep one-shots while walking or running.
+ * Girl-sample uses avatar clip pools; playable animals use wildlife pools.
  *
  * @module components/world/hooks/usingWorldPlazaAvatarFootsteps
  */
@@ -85,11 +107,18 @@ export function usingWorldPlazaAvatarFootsteps(
       settingWorldPlazaStarAudioSfxGroupVolume(1);
     };
 
+    const resolvingAnimalFootstepSizeTier =
+      (): DefiningFilmcowFootstepWildlifeSizeTier =>
+        resolvingWorldPlazaAnimalPlayableAvatarFootstepSizeTier(
+          gettingWorldPlazaSelectedAvatarSkinId()
+        );
+
     const playingClip = (
       clipId: DefiningWorldPlazaAvatarFootstepClipId,
       volume: number,
       motionKind: DefiningWorldPlazaAvatarMotionKind,
-      rate = 1
+      rate = 1,
+      playbackDurationS?: number
     ): void => {
       if (!isPreloadReadyRef.current) {
         return;
@@ -106,7 +135,8 @@ export function usingWorldPlazaAvatarFootsteps(
       activeFootstepHandleRef.current?.stop();
       activeFootstepHandleRef.current = null;
 
-      const playbackDurationS =
+      const durationS =
+        playbackDurationS ??
         resolvingWorldPlazaAvatarFootstepPlaybackDurationS(motionKind);
 
       const handle = playingWorldPlazaStarAudioSfx(
@@ -114,7 +144,7 @@ export function usingWorldPlazaAvatarFootsteps(
         {
           volume,
           rate,
-          ...(playbackDurationS ? { duration: playbackDurationS } : {}),
+          ...(durationS ? { duration: durationS } : {}),
         }
       );
 
@@ -157,12 +187,9 @@ export function usingWorldPlazaAvatarFootsteps(
       };
 
     const playingJumpLandingIfNeeded = (
-      motionState: DefiningWorldPlazaAvatarMotionState
+      motionState: DefiningWorldPlazaAvatarMotionState,
+      usesAnimalWildlifePools: boolean
     ): void => {
-      if (!checkingWorldPlazaGirlSampleAvatarSkinActive()) {
-        return;
-      }
-
       if (
         motionState.motionKind ===
           DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_JUMP &&
@@ -188,6 +215,29 @@ export function usingWorldPlazaAvatarFootsteps(
       pendingJumpLandingStartedAtMsRef.current = 0;
 
       const surfaceKind = resolvingCachedAvatarFootstepSurface();
+
+      if (usesAnimalWildlifePools) {
+        const sizeTier = resolvingAnimalFootstepSizeTier();
+        const landingClipId =
+          resolvingWorldPlazaAnimalAvatarJumpLandingClipId(surfaceKind);
+
+        playingClip(
+          landingClipId,
+          computingWorldPlazaAnimalAvatarJumpLandingEffectiveTargetVolume(
+            resolvingWorldPlazaAnimalAvatarFootstepVolumeMultiplier(
+              surfaceKind,
+              'landing',
+              landingClipId,
+              sizeTier
+            )
+          ),
+          motionState.motionKind,
+          DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_PLAYBACK_RATE[sizeTier],
+          resolvingFilmcowFootstepPlaybackDurationS('walk')
+        );
+        return;
+      }
+
       const landingClipEntry =
         resolvingWorldPlazaAvatarJumpLandingClipEntry(surfaceKind);
       const landingClipId =
@@ -207,29 +257,36 @@ export function usingWorldPlazaAvatarFootsteps(
     };
 
     const preloadingFootstepsForSurface = (
-      surfaceKind: DefiningWorldPlazaAvatarFootstepSurfaceKind
+      surfaceKind: DefiningWorldPlazaAvatarFootstepSurfaceKind,
+      usesAnimalWildlifePools: boolean
     ): void => {
+      const preloadKey = `${usesAnimalWildlifePools ? 'animal' : 'girl'}:${surfaceKind}`;
+
       if (
-        surfaceKind === preloadedSurfaceKeyRef.current &&
+        preloadKey === preloadedSurfaceKeyRef.current &&
         isPreloadReadyRef.current
       ) {
         return;
       }
 
-      if (surfaceKind === preloadedSurfaceKeyRef.current) {
+      if (preloadKey === preloadedSurfaceKeyRef.current) {
         return;
       }
 
-      preloadedSurfaceKeyRef.current = surfaceKind;
+      preloadedSurfaceKeyRef.current = preloadKey;
       preloadGenerationRef.current += 1;
       const preloadGeneration = preloadGenerationRef.current;
       isPreloadReadyRef.current = false;
 
-      void preloadingWorldPlazaStarAudioManifest(
-        buildingWorldPlazaAvatarFootstepStarAudioManifestForSurfaces([
-          surfaceKind,
-        ])
-      )
+      const manifest = usesAnimalWildlifePools
+        ? buildingWorldPlazaAnimalAvatarFootstepStarAudioManifestForSurfaces([
+            surfaceKind,
+          ])
+        : buildingWorldPlazaAvatarFootstepStarAudioManifestForSurfaces([
+            surfaceKind,
+          ]);
+
+      void preloadingWorldPlazaStarAudioManifest(manifest)
         .then(() => {
           if (preloadGeneration !== preloadGenerationRef.current) {
             return;
@@ -247,17 +304,19 @@ export function usingWorldPlazaAvatarFootsteps(
     };
 
     const syncingAvatarFootsteps = (): void => {
-      if (!checkingWorldPlazaGirlSampleAvatarSkinActive()) {
+      if (!checkingWorldPlazaAvatarSkinPlaysFootsteps()) {
         return;
       }
 
+      const usesAnimalWildlifePools =
+        !checkingWorldPlazaGirlSampleAvatarSkinActive();
       const motionState = localAvatarMotionStateRef.current;
 
       if (!motionState) {
         return;
       }
 
-      playingJumpLandingIfNeeded(motionState);
+      playingJumpLandingIfNeeded(motionState, usesAnimalWildlifePools);
 
       const motionKind = motionState.motionKind;
       const previousMotionKind = lastMotionKindRef.current;
@@ -275,7 +334,7 @@ export function usingWorldPlazaAvatarFootsteps(
 
       const surfaceKind = resolvingCachedAvatarFootstepSurface();
 
-      preloadingFootstepsForSurface(surfaceKind);
+      preloadingFootstepsForSurface(surfaceKind, usesAnimalWildlifePools);
 
       if (
         previousMotionKind !== motionKind ||
@@ -288,8 +347,9 @@ export function usingWorldPlazaAvatarFootsteps(
 
       lastMotionKindRef.current = motionKind;
 
-      const intervalMs =
-        computingWorldPlazaAvatarFootstepIntervalMs(motionKind);
+      const intervalMs = usesAnimalWildlifePools
+        ? computingWorldPlazaAnimalAvatarFootstepIntervalMs(motionKind)
+        : computingWorldPlazaAvatarFootstepIntervalMs(motionKind);
 
       if (!intervalMs) {
         return;
@@ -305,16 +365,51 @@ export function usingWorldPlazaAvatarFootsteps(
         return;
       }
 
+      const footstepMotionKind =
+        motionKind === DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_RUN
+          ? 'run'
+          : 'walk';
+      const volumeGroupKind = footstepMotionKind;
+
+      if (usesAnimalWildlifePools) {
+        const sizeTier = resolvingAnimalFootstepSizeTier();
+        const clipId = resolvingFilmcowFootstepWildlifeNextClipId(
+          surfaceKind,
+          footstepMotionKind,
+          clipIndexRef.current,
+          sizeTier
+        );
+        clipIndexRef.current += 1;
+
+        playingClip(
+          clipId,
+          computingWorldPlazaAnimalAvatarFootstepEffectiveTargetVolume(
+            resolvingWorldPlazaAnimalAvatarFootstepVolumeMultiplier(
+              surfaceKind,
+              volumeGroupKind,
+              clipId,
+              sizeTier
+            )
+          ),
+          motionKind,
+          resolvingFilmcowFootstepWildlifePlaybackRate(
+            surfaceKind,
+            footstepMotionKind,
+            clipId,
+            DEFINING_FILMCOW_FOOTSTEP_WILDLIFE_SIZE_TIER_PLAYBACK_RATE[sizeTier]
+          ),
+          resolvingFilmcowFootstepPlaybackDurationS(footstepMotionKind)
+        );
+        nextFootstepAtMsRef.current = nowMs + intervalMs;
+        return;
+      }
+
       const clipEntry = resolvingWorldPlazaAvatarFootstepNextClipEntry(
         surfaceKind,
         motionKind,
         clipIndexRef.current
       );
       const clipId = resolvingFilmcowFootstepClipEntryId(clipEntry);
-      const volumeGroupKind =
-        motionKind === DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_RUN
-          ? 'run'
-          : 'walk';
       clipIndexRef.current += 1;
 
       playingClip(
@@ -355,11 +450,35 @@ export function usingWorldPlazaAvatarFootsteps(
       resettingFootstepLoop();
     };
 
+    const handlingAvatarSkinChange = (): void => {
+      preloadedSurfaceKeyRef.current = '';
+      isPreloadReadyRef.current = false;
+      resettingFootstepLoop();
+
+      if (!checkingWorldPlazaAvatarSkinPlaysFootsteps()) {
+        return;
+      }
+
+      preloadingFootstepsForSurface(
+        resolvingCachedAvatarFootstepSurface(),
+        !checkingWorldPlazaGirlSampleAvatarSkinActive()
+      );
+    };
+
     applyingMasterSfxVolume();
-    preloadingFootstepsForSurface(resolvingCachedAvatarFootstepSurface());
+
+    if (checkingWorldPlazaAvatarSkinPlaysFootsteps()) {
+      preloadingFootstepsForSurface(
+        resolvingCachedAvatarFootstepSurface(),
+        !checkingWorldPlazaGirlSampleAvatarSkinActive()
+      );
+    }
 
     const unsubscribeSfxVolume = subscribingWorldPlazaSfxVolume(
       handlingSfxVolumeChange
+    );
+    const unsubscribeAvatarSkin = subscribingWorldPlazaSelectedAvatarSkin(
+      handlingAvatarSkinChange
     );
     const unregisterUserGestureUnlock =
       registeringWorldPlazaBiomeMusicUserGestureUnlock(
@@ -376,6 +495,7 @@ export function usingWorldPlazaAvatarFootsteps(
 
     return () => {
       unregisterUserGestureUnlock();
+      unsubscribeAvatarSkin();
       unsubscribeSfxVolume();
       window.clearInterval(intervalId);
       starAudio.off('unlocked', handlingStarAudioUnlocked);

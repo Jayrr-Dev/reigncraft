@@ -4,6 +4,7 @@ import { creatingWorldBuildingPlacedBlock } from '@/components/world/building/do
 import { creatingWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import { resolvingWorldBuildingClaimModePlotOverlayEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingClaimModePlotOverlayZIndex';
 import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
+import { resolvingWorldDepthAvatarBodySortKey } from '@/components/world/depth/domains/resolvingWorldDepthAvatarBodySortKey';
 import { DEFINING_WORLD_PLAZA_ISOMETRIC_ENTITY_ON_BLOCK_DEPTH_BIAS } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
 import {
   resolvingWorldPlazaAvatarBodyEntityZIndex,
@@ -11,9 +12,8 @@ import {
 } from '@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowEntityZIndex';
 import { resolvingWorldPlazaIsometricEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
-import { resolvingWorldDepthAvatarBodySortKey } from '@/components/world/depth/domains/resolvingWorldDepthAvatarBodySortKey';
-import { resolvingWorldPlazaTerrainElevationColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex';
 import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
+import { resolvingWorldPlazaTerrainElevationColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex';
 import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex';
 import { resolvingWorldPlazaTreeTrunkEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTreeTrunkEntityZIndex';
 import { describe, expect, it } from 'vitest';
@@ -139,6 +139,21 @@ describe('world depth characterization (legacy modules)', () => {
       );
 
       expect(bodyZ).toBeLessThan(wallZ);
+    });
+
+    it('tucks under a taller roof on the same tile', () => {
+      const roof = creatingWorldDepthCharacterizationWallBlock(10, 10, 6, 1);
+      const bodyZ = resolvingWorldPlazaAvatarBodyEntityZIndex(
+        { x: 10, y: 10, layer: 1 },
+        [roof]
+      );
+      const roofZ = resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
+        10,
+        10,
+        6
+      );
+
+      expect(bodyZ).toBeLessThan(roofZ);
     });
 
     it('stays in front of a wall behind on the grid', () => {

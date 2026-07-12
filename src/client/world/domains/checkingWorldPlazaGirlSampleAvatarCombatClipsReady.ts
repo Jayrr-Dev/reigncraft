@@ -3,10 +3,7 @@ import {
   type DefiningWorldPlazaAvatarMotionClipSuffix,
 } from '@/components/world/animation/domains/formattingWorldPlazaAnimationClipIds';
 import { resolvingWorldPlazaAnimationClip } from '@/components/world/animation/domains/registeringWorldPlazaAnimationClip';
-import {
-  DEFINING_WORLD_PLAZA_AVATAR_SKIN,
-  type DefiningWorldPlazaAvatarSkinId,
-} from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
+import type { DefiningWorldPlazaAvatarSkinId } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { DEFINING_WORLD_PLAZA_GIRL_SAMPLE_COMBAT_MOTION_CLIP_SUFFIXES } from '@/components/world/domains/definingWorldPlazaGirlSampleCombatMotionConstants';
 import type { DefiningWorldPlazaGirlSampleCharacterTextures } from '@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures';
 
@@ -38,16 +35,12 @@ export function checkingWorldPlazaGirlSampleAvatarCombatClipsReady(
 }
 
 /**
- * True when GirlSample roll strips loaded and the roll clip is registered.
+ * True when roll strips loaded and the roll clip is registered for this skin.
  */
 export function checkingWorldPlazaGirlSampleAvatarRollClipReady(
   skinId: DefiningWorldPlazaAvatarSkinId,
   textures: DefiningWorldPlazaGirlSampleCharacterTextures | undefined
 ): boolean {
-  if (skinId !== DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE) {
-    return false;
-  }
-
   if (!textures?.roll) {
     return false;
   }

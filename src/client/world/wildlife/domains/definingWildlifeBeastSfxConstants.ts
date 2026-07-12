@@ -197,13 +197,11 @@ const DEFINING_WILDLIFE_BEAST_SFX_SHORT_BELLOWS = [
   'beast_short_bellow_03',
 ] as const satisfies readonly DefiningWildlifeBeastSfxClipId[];
 
+/** Prefer shorter bellows (~2.5–2.8s). Dropped 01/03/06 beds up to ~4.0s. */
 const DEFINING_WILDLIFE_BEAST_SFX_BELLOWS = [
-  'beast_bellow_01',
-  'beast_bellow_02',
-  'beast_bellow_03',
-  'beast_bellow_04',
   'beast_bellow_05',
-  'beast_bellow_06',
+  'beast_bellow_04',
+  'beast_bellow_02',
 ] as const satisfies readonly DefiningWildlifeBeastSfxClipId[];
 
 const DEFINING_WILDLIFE_BEAST_SFX_GRUNTS = [
@@ -215,12 +213,10 @@ const DEFINING_WILDLIFE_BEAST_SFX_GRUNTS = [
 ] as const satisfies readonly DefiningWildlifeBeastSfxClipId[];
 
 const DEFINING_WILDLIFE_BEAST_SFX_GROWLS = [
-  'beast_growl_01',
-  'beast_growl_02',
-  'beast_growl_03',
   'beast_growl_04',
+  'beast_growl_02',
   'beast_growl_05',
-  'beast_growl_06',
+  'beast_growl_03',
 ] as const satisfies readonly DefiningWildlifeBeastSfxClipId[];
 
 const DEFINING_WILDLIFE_BEAST_SFX_SOFT_GROWLS = [
@@ -338,5 +334,15 @@ export const DEFINING_WILDLIFE_BEAST_SFX_POOL_MIN_REPLAY_INTERVAL_MS: Partial<
 export const DEFINING_WILDLIFE_BEAST_SFX_POOL_MAX_PLAYBACK_DURATION_S: Partial<
   Record<DefiningWildlifeBeastSfxPoolId, number>
 > = {
-  beast_bellow: 2.7,
+  beast_short_bellow: 1.55,
+  beast_bellow: 2.2,
+  beast_grunt: 1.55,
+  // Keep bear/beast combat vocals as short one-shots (source beds run longer).
+  beast_growl: 1.55,
+  beast_soft_growl: 1.55,
+  beast_roar: 1.55,
+  beast_snort: 1.55,
+  beast_hoot: 1.55,
+  beast_warble: 1.55,
+  beast_croak: 1.55,
 };

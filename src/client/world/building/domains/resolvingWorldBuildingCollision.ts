@@ -17,12 +17,12 @@ import {
 } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import {
   checkingWorldBuildingPlacedBlockCutColliderBlocksPlayerCircle,
-  checkingWorldBuildingPlayerCircleOverlapsPlacedBlockCutColliders,
   pushingWorldBuildingPlayerCircleOutsidePlacedBlockCutColliders,
 } from '@/components/world/building/domains/resolvingWorldBuildingCutFootprintCollision';
 import {
   checkingWorldBuildingCanJumpLandOnSurfaceLayer,
   checkingWorldBuildingPlacedBlockIsWalkableStep,
+  resolvingWorldBuildingJumpLandableSurfaceLayerAtTileIndex,
 } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
 import { checkingWorldPlazaColumnRockFootprintTileIsWalkableGroundForPlayerLayer } from '@/components/world/domains/checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex';
 import { DEFINING_WORLD_PLAZA_PLAYER_BLOCK_EJECT_TILE_EDGE_EXIT_EPSILON } from '@/components/world/domains/definingWorldPlazaPlayerBlockEjectConstants';
@@ -32,9 +32,10 @@ import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_SEARCH_TILE_RADIUS,
   DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_JUMP_OVER,
+  DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_PASSABLE,
 } from '@/components/world/domains/definingWorldPlazaTerrainObstacleConstants';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
-import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
+import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 
 /**
  * Collision resolution for player-placed building blocks.
@@ -116,10 +117,9 @@ function checkingWorldBuildingPlacedBlockColliderBlocksPlayer(
     return false;
   }
 
-  // A block whose top sits more than one jump above the player is an
-  // unjumpable wall: it stays solid for the entire run and jump arc, not just
-  // at takeoff and landing. This keeps tall stacks (e.g. surface 5+ layers
-  // above the player) from being cleared mid-jump.
+  // Tall columns that still intersect the walk band stay solid for the whole
+  // run/jump arc (unjumpable walls). Floating roofs with air under the feet
+  // already returned false above via the vertical-band check.
   if (
     blockLayer - playerLayer >
     DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX
@@ -148,14 +148,20 @@ function checkingWorldBuildingCollisionShapeBlocksMovement(
 ): boolean {
   if (
     collisionShape.obstacleKind ===
+    DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_PASSABLE
+  ) {
+    return false;
+  }
+
+  if (
+    collisionShape.obstacleKind ===
     DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_JUMP_OVER
   ) {
     return !isJumping;
   }
 
-  // Any block tall enough to vertically overlap the player (already checked by
-  // the caller) acts as a solid obstacle, including passable floors that are
-  // not single-layer stair steps. The player must jump to mount them.
+  // Solid tile/circle colliders that vertically overlap the player (already
+  // checked by the caller) block movement. Mount taller tops with a jump.
   return applyBlockCollision;
 }
 
@@ -314,20 +320,6 @@ export function checkingWorldBuildingGridPointBlockedByPlacedBlocks(
       continue;
     }
 
-    const blockLayer = resolvingWorldBuildingPlacedBlockWorldLayer(block);
-
-    if (
-      blockLayer - playerLayer >
-        DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX &&
-      checkingWorldBuildingPlayerCircleOverlapsPlacedBlockCutColliders(
-        gridPoint,
-        0,
-        block
-      )
-    ) {
-      return true;
-    }
-
     if (
       checkingWorldBuildingPlacedBlockCutColliderBlocksPlayerCircle(
         gridPoint,
@@ -463,12 +455,6 @@ export function checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex(
   fromLayer: number,
   jumpLayerReachMax?: number
 ): boolean {
-  const landingSurfaceLayer = resolvingWorldPlazaSurfaceLayerAtTileIndex(
-    tileX,
-    tileY,
-    placedBlocks
-  );
-
   if (
     checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex(
       tileX,
@@ -479,12 +465,20 @@ export function checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex(
     return true;
   }
 
-  // Landing on the surface (top) of a stack is always allowed as long as the
-  // height is reachable. The surface block supports the player rather than
-  // blocking them; horizontal wall collision is handled during movement.
+  const landableSurfaceLayer =
+    resolvingWorldBuildingJumpLandableSurfaceLayerAtTileIndex(
+      tileX,
+      tileY,
+      placedBlocks,
+      fromLayer,
+      jumpLayerReachMax
+    );
+
+  // Landing on a reachable support (ground under a floating roof, or a jumpable
+  // platform top) is allowed. Unreachable continuous towers stay blocked.
   return !checkingWorldBuildingCanJumpLandOnSurfaceLayer(
     fromLayer,
-    landingSurfaceLayer,
+    landableSurfaceLayer,
     jumpLayerReachMax
   );
 }
@@ -504,7 +498,8 @@ const RESOLVING_WORLD_BUILDING_JUMP_PATH_SAMPLE_COUNT = 16;
  * against the wall rather than clipping through it.
  *
  * Upward jumps to a reachable platform skip clamping so a long jump can arc
- * over tall columns between two elevated surfaces.
+ * over tall columns between two elevated surfaces. Floating roofs do not clamp:
+ * only solid columns that vertically overlap the walk band count as walls.
  *
  * @param startGridPoint - Takeoff position in grid space.
  * @param gridDirection - Unit grid direction of the jump.
@@ -561,15 +556,27 @@ export function resolvingWorldBuildingJumpForwardGridDistanceClampedToWall(
       continue;
     }
 
-    const sampleSurfaceLayer = resolvingWorldPlazaSurfaceLayerAtTileIndex(
-      sampleTile.tileX,
-      sampleTile.tileY,
-      placedBlocks
-    );
+    const terrainSurfaceLayer =
+      resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
+        sampleTile.tileX,
+        sampleTile.tileY
+      );
 
     if (
-      sampleSurfaceLayer - fromLayer >
+      terrainSurfaceLayer - fromLayer >
       (jumpLayerReachMax ?? DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX)
+    ) {
+      return lastClearDistance;
+    }
+
+    if (
+      checkingWorldBuildingGridPointBlockedByPlacedBlocks(
+        sampleGridPoint,
+        placedBlocks,
+        true,
+        false,
+        fromLayer
+      )
     ) {
       return lastClearDistance;
     }

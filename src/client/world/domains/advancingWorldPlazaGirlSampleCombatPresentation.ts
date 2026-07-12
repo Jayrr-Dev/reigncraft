@@ -13,10 +13,10 @@ import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_REACTION_DURATION_MS,
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DAMAGED_DURATION_MS,
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_PUSH_DURATION_MS,
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_DURATION_MS,
 } from '@/components/world/domains/definingWorldPlazaGirlSampleCombatMotionConstants';
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import { resolvingWorldPlazaAvatarClipPresentation } from '@/components/world/domains/resolvingWorldPlazaAvatarClipPresentation';
+import { resolvingWorldPlazaAvatarRollDurationMs } from '@/components/world/domains/resolvingWorldPlazaAvatarRollDurationMs';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import {
   DEFINING_WORLD_PLAZA_SLEEP_FALL_ANIMATION_FPS,
@@ -129,8 +129,11 @@ export function advancingWorldPlazaGirlSampleCombatPresentation(
 
   if (params.rollState && params.hasRollClipReady) {
     const elapsedMs = params.nowMs - params.rollState.startedAtMs;
+    const rollDurationMs = resolvingWorldPlazaAvatarRollDurationMs(
+      params.characterDefinition.skinId
+    );
 
-    if (elapsedMs < DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_DURATION_MS) {
+    if (elapsedMs < rollDurationMs) {
       const presentation = resolvingWorldPlazaAvatarClipPresentation(
         params.characterDefinition,
         'roll'
@@ -140,7 +143,7 @@ export function advancingWorldPlazaGirlSampleCombatPresentation(
         direction: params.rollState.direction,
         frameIndex: resolvingCombatClipFrameIndex(
           elapsedMs,
-          DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_DURATION_MS,
+          rollDurationMs,
           presentation.animationFps,
           presentation.sheetLayout.frameCount,
           'once'

@@ -159,13 +159,10 @@ export const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_CLIP_CATALOG: Record<
   wolf_howl_01: { id: 'wolf_howl_01', fileName: 'wolf-howl-01.ogg' },
 };
 
+/** Shortest moos only (~2.7–2.8s). Dropped 01/03/05/06 beds up to ~4.9s. */
 const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_COW_MOOS = [
-  'cow_moo_01',
   'cow_moo_02',
-  'cow_moo_03',
   'cow_moo_04',
-  'cow_moo_05',
-  'cow_moo_06',
 ] as const satisfies readonly DefiningWildlifeFarmAnimalSfxClipId[];
 
 const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_SHEEP_BAAS = [
@@ -180,10 +177,10 @@ const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_CHICKEN_CLUCKS = [
   'chicken_cluck_04',
 ] as const satisfies readonly DefiningWildlifeFarmAnimalSfxClipId[];
 
+/** Shortest crows (~2.2–2.4s). Dropped crow_02 (~2.9s). */
 const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_ROOSTER_CROWS = [
-  'rooster_crow_01',
-  'rooster_crow_02',
   'rooster_crow_03',
+  'rooster_crow_01',
   'rooster_crow_04',
 ] as const satisfies readonly DefiningWildlifeFarmAnimalSfxClipId[];
 
@@ -198,14 +195,14 @@ const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_DOG_BARKS = [
   'dog_bark_02',
 ] as const satisfies readonly DefiningWildlifeFarmAnimalSfxClipId[];
 
+/** Short meows only (~0.6–1.5s). Dropped meow_02 (~4.0s bed). */
 const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_CAT_MEOWS = [
-  'cat_meow_01',
-  'cat_meow_02',
   'cat_meow_03',
+  'cat_meow_01',
 ] as const satisfies readonly DefiningWildlifeFarmAnimalSfxClipId[];
 
+/** Prefer shorter whinny (~3.0s). Dropped whinny_01 (~4.3s bed). */
 const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_HORSE_WHINNIES = [
-  'horse_whinny_01',
   'horse_whinny_02',
 ] as const satisfies readonly DefiningWildlifeFarmAnimalSfxClipId[];
 
@@ -218,8 +215,8 @@ const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_GOAT_BLEATS = [
   'goat_bleat_01',
 ] as const satisfies readonly DefiningWildlifeFarmAnimalSfxClipId[];
 
+/** Short trumpet only (~2.3s). Dropped trumpet_01 (~5.5s bed). */
 const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_ELEPHANT_TRUMPETS = [
-  'elephant_trumpet_01',
   'elephant_trumpet_02',
 ] as const satisfies readonly DefiningWildlifeFarmAnimalSfxClipId[];
 
@@ -287,12 +284,14 @@ export const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_POOL_CLIP_IDS_BY_EVENT: Record<
     hit_taken: DEFINING_WILDLIFE_FARM_ANIMAL_SFX_DOG_BARKS,
     chase_call: DEFINING_WILDLIFE_FARM_ANIMAL_SFX_DOG_BARKS,
     howl: DEFINING_WILDLIFE_FARM_ANIMAL_SFX_DOG_BARKS,
+    attack: DEFINING_WILDLIFE_FARM_ANIMAL_SFX_DOG_BARKS,
   },
   cat_meow: {
     friendly: DEFINING_WILDLIFE_FARM_ANIMAL_SFX_CAT_MEOWS,
     flee_start: DEFINING_WILDLIFE_FARM_ANIMAL_SFX_CAT_MEOWS,
     hit_taken: DEFINING_WILDLIFE_FARM_ANIMAL_SFX_CAT_MEOWS,
     wake: DEFINING_WILDLIFE_FARM_ANIMAL_SFX_CAT_MEOWS,
+    attack: DEFINING_WILDLIFE_FARM_ANIMAL_SFX_CAT_MEOWS,
   },
   horse_whinny: {
     idle_ambient: DEFINING_WILDLIFE_FARM_ANIMAL_SFX_HORSE_WHINNIES,
@@ -349,12 +348,17 @@ export const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_POOL_MIN_REPLAY_INTERVAL_MS: Part
    * These pools shipped as multi-call beds. Keep a gap so one idle/warn cannot
    * chain into another before proximity falloff matters.
    */
+  cow_moo: 8_000,
   pig_grunt: 8_000,
   sheep_baa: 8_000,
   chicken_cluck: 7_000,
+  chicken_crow: 8_000,
   dog_bark: 8_000,
+  cat_meow: 7_000,
+  horse_whinny: 8_000,
   donkey_bray: 8_000,
   goat_bleat: 8_000,
+  elephant_trumpet: 8_000,
   tiger_growl: 8_000,
   wolf_howl: 14_000,
 };
@@ -366,14 +370,21 @@ export const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_POOL_MIN_REPLAY_INTERVAL_MS: Part
 export const DEFINING_WILDLIFE_FARM_ANIMAL_SFX_POOL_MAX_PLAYBACK_DURATION_S: Partial<
   Record<DefiningWildlifeFarmAnimalSfxPoolId, number>
 > = {
+  cow_moo: 2.2,
   pig_grunt: 2.2,
   sheep_baa: 2.2,
   chicken_cluck: 2.0,
+  chicken_crow: 2.2,
   dog_bark: 2.2,
-  donkey_bray: 2.4,
+  cat_meow: 1.55,
+  horse_whinny: 2.2,
+  donkey_bray: 2.2,
   goat_bleat: 2.2,
-  tiger_growl: 2.7,
-  wolf_howl: 3.8,
+  elephant_trumpet: 2.2,
+  tiger_growl: 1.55,
+  wolf_howl: 1.55,
+  // Legacy 4.5s beds; kept short if anything still resolves this pool.
+  bear_growl: 1.55,
 };
 
 /** Base event volume before distance falloff and the SFX slider. */

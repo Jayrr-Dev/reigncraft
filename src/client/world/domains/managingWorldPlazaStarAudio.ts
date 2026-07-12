@@ -496,6 +496,22 @@ function resolvingWorldPlazaStarAudioPreloadConcurrency(): number {
   return DEFINING_WORLD_PLAZA_STAR_AUDIO_PRELOAD_CONCURRENCY_DESKTOP;
 }
 
+/**
+ * Yields one animation frame so deferred Howler decode cannot monopolize the
+ * main thread across back-to-back preload keys.
+ */
+function yieldingWorldPlazaStarAudioPreloadToNextFrame(): Promise<void> {
+  if (typeof window === 'undefined') {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    window.requestAnimationFrame(() => {
+      resolve();
+    });
+  });
+}
+
 async function acquiringWorldPlazaStarAudioPreloadSlot(): Promise<void> {
   if (
     activeWorldPlazaStarAudioPreloadCount <
@@ -548,14 +564,16 @@ function preloadingWorldPlazaStarAudioManifestKey(
     return inflightLoad;
   }
 
-  const finishSample = beginningWorldPlazaPerformanceSample(
-    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.AUDIO_PRELOAD
-  );
   incrementingWorldPlazaPerformanceDiagnosticsCounter(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.AUDIO_PRELOAD_REQUEST
   );
   const loadPromise = (async () => {
     await acquiringWorldPlazaStarAudioPreloadSlot();
+
+    // Sample only decode work after the semaphore, not queue wait time.
+    const finishSample = beginningWorldPlazaPerformanceSample(
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.AUDIO_PRELOAD
+    );
 
     try {
       await awaitingWorldPlazaStarAudioAssetWarmFetches(manifestEntry);
@@ -572,6 +590,8 @@ function preloadingWorldPlazaStarAudioManifestKey(
       inflightWorldPlazaStarAudioManifestKeyLoads.delete(manifestKey);
       recordingWorldPlazaStarAudioPerformanceGauges();
       finishSample();
+      // Yield so plaza ticks / Pixi can run between Howler decodes.
+      await yieldingWorldPlazaStarAudioPreloadToNextFrame();
     }
   })();
 

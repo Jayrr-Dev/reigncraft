@@ -1,8 +1,15 @@
-"use client";
+'use client';
 
-import { useMemo, useState } from "react";
+import { useMemo, useState } from 'react';
 
-import type { DefiningWorldBuildingBlockDefinitionId } from "@/components/world/building/domains/definingWorldBuildingBlockDefinition";
+import { RenderingWorldBuildingBlockPaletteMaterialIcon } from '@/components/world/building/components/renderingWorldBuildingBlockPaletteMaterialIcon';
+import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
+import { resolvingWorldBuildingBlockPaletteSurfaceStyle } from '@/components/world/building/domains/definingWorldBuildingBlockPaletteSurface';
+import {
+  listingWorldBuildingPaletteBlockDefinitionsByCategory,
+  listingWorldBuildingPaletteCategories,
+  resolvingWorldBuildingBlockDefinition,
+} from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import {
   DEFINING_WORLD_BUILDING_BLOCK_SWATCH_GRID_CLASS_NAME,
   DEFINING_WORLD_BUILDING_BLOCK_SWATCH_TILE_CLASS_NAME,
@@ -12,37 +19,28 @@ import {
   DEFINING_WORLD_BUILDING_CATEGORY_TAB_ICON_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CATEGORY_TAB_ICON_SELECTED_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CATEGORY_TAB_SELECTED_CLASS_NAME,
-  DEFINING_WORLD_BUILDING_SECTION_LABEL_CLASS_NAME,
   DEFINING_WORLD_BUILDING_SELECTED_BLOCK_READOUT_CLASS_NAME,
-} from "@/components/world/building/domains/definingWorldBuildingBuildModeConstants";
-import { resolvingWorldBuildingBlockPaletteSurfaceStyle } from "@/components/world/building/domains/definingWorldBuildingBlockPaletteSurface";
-import {
-  listingWorldBuildingPaletteBlockDefinitionsByCategory,
-  listingWorldBuildingPaletteCategories,
-  resolvingWorldBuildingBlockDefinition,
-} from "@/components/world/building/domains/definingWorldBuildingBlockRegistry";
-import { RenderingWorldBuildingBlockPaletteMaterialIcon } from "@/components/world/building/components/renderingWorldBuildingBlockPaletteMaterialIcon";
-import { formattingWorldBuildingBlockSwatchColor } from "@/components/world/building/domains/formattingWorldBuildingBlockSwatchColor";
+} from '@/components/world/building/domains/definingWorldBuildingBuildModeConstants';
+import { formattingWorldBuildingBlockSwatchColor } from '@/components/world/building/domains/formattingWorldBuildingBlockSwatchColor';
 import {
   resolvingWorldBuildingBlockPaletteCategoryIcon,
   resolvingWorldBuildingBlockPaletteCategoryLabel,
-} from "@/components/world/building/domains/resolvingWorldBuildingBlockPaletteIcon";
-import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from "@/components/world/domains/definingWorldPlazaClickMovementConstants";
-
-/** Palette section title. */
-const RENDERING_WORLD_PLAZA_BLOCK_PALETTE_SECTION_LABEL = "Resource" as const;
+} from '@/components/world/building/domains/resolvingWorldBuildingBlockPaletteIcon';
+import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 
 /** Palette root classes. */
 const RENDERING_WORLD_PLAZA_BLOCK_PALETTE_ROOT_CLASS_NAME =
-  "flex min-h-0 flex-1 flex-col gap-1.5" as const;
+  'flex min-h-0 flex-1 flex-col gap-1.5' as const;
 
 /** Swatch grid scroll region classes. */
 const RENDERING_WORLD_PLAZA_BLOCK_PALETTE_SCROLL_CLASS_NAME =
-  "min-h-0 flex-1 overflow-y-auto pr-0.5" as const;
+  'min-h-0 flex-1 overflow-y-auto pr-0.5' as const;
 
 export interface RenderingWorldPlazaBlockPaletteProps {
   selectedDefinitionId: DefiningWorldBuildingBlockDefinitionId | null;
-  onSelectDefinition: (definitionId: DefiningWorldBuildingBlockDefinitionId) => void;
+  onSelectDefinition: (
+    definitionId: DefiningWorldBuildingBlockDefinitionId
+  ) => void;
 }
 
 /**
@@ -58,7 +56,7 @@ export function RenderingWorldPlazaBlockPalette({
 
   const paletteCategories = useMemo(
     () => listingWorldBuildingPaletteCategories(),
-    [],
+    []
   );
 
   const defaultCategory =
@@ -77,16 +75,12 @@ export function RenderingWorldPlazaBlockPalette({
     }
 
     return listingWorldBuildingPaletteBlockDefinitionsByCategory(
-      resolvedActiveCategory,
+      resolvedActiveCategory
     );
   }, [resolvedActiveCategory]);
 
   return (
     <div className={RENDERING_WORLD_PLAZA_BLOCK_PALETTE_ROOT_CLASS_NAME}>
-      <p className={DEFINING_WORLD_BUILDING_SECTION_LABEL_CLASS_NAME}>
-        {RENDERING_WORLD_PLAZA_BLOCK_PALETTE_SECTION_LABEL}
-      </p>
-
       {paletteCategories.length > 0 ? (
         <div className={DEFINING_WORLD_BUILDING_CATEGORY_TAB_GRID_CLASS_NAME}>
           {paletteCategories.map((category) => {
@@ -134,10 +128,10 @@ export function RenderingWorldPlazaBlockPalette({
               selectedDefinitionId !== null &&
               selectedDefinitionId === definition.id;
             const swatchFillColor = formattingWorldBuildingBlockSwatchColor(
-              definition.visualConfig.fillColor,
+              definition.visualConfig.fillColor
             );
             const swatchBorderColor = formattingWorldBuildingBlockSwatchColor(
-              definition.visualConfig.strokeColor,
+              definition.visualConfig.strokeColor
             );
             const paletteSurface = definition.visualConfig.paletteSurface;
             const swatchSurfaceStyle = paletteSurface
@@ -156,14 +150,16 @@ export function RenderingWorldPlazaBlockPalette({
                   onSelectDefinition(definition.id);
                 }}
                 style={{
-                  backgroundColor: swatchSurfaceStyle ? undefined : swatchFillColor,
+                  backgroundColor: swatchSurfaceStyle
+                    ? undefined
+                    : swatchFillColor,
                   borderColor: swatchBorderColor,
                   ...swatchSurfaceStyle,
                 }}
                 className={`${DEFINING_WORLD_BUILDING_BLOCK_SWATCH_TILE_CLASS_NAME}${
                   isSelected
                     ? ` ${DEFINING_WORLD_BUILDING_BLOCK_SWATCH_TILE_SELECTED_CLASS_NAME}`
-                    : ""
+                    : ''
                 }`}
               >
                 {paletteSurface ? null : (
@@ -178,7 +174,7 @@ export function RenderingWorldPlazaBlockPalette({
       </div>
 
       <p className={DEFINING_WORLD_BUILDING_SELECTED_BLOCK_READOUT_CLASS_NAME}>
-        {selectedDefinition?.name ?? "None"}
+        {selectedDefinition?.name ?? 'None'}
       </p>
     </div>
   );

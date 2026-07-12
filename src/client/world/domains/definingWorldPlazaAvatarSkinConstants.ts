@@ -8,20 +8,21 @@
  * @module components/world/domains/definingWorldPlazaAvatarSkinConstants
  */
 
-/** Avatar skin ids selectable for the local plaza player. */
+import { listingWorldPlazaAnimalPlayableAvatarSkinOptions } from '@/components/world/domains/definingWorldPlazaAnimalPlayableAvatarSkinRegistry';
+
+/** Named avatar skin ids kept for compatibility with hand-tuned engines. */
 export const DEFINING_WORLD_PLAZA_AVATAR_SKIN = {
-  GIRL_SAMPLE: "girl-sample",
-  HUSKY: "husky",
-  GOLDEN_RETRIEVER: "golden-retriever",
-  GRIZZLY: "grizzly",
-  PINGUIN: "pinguin",
-  FOX_PEACH: "fox-peach",
-  CAT_ORANGE: "cat-orange",
+  GIRL_SAMPLE: 'girl-sample',
+  HUSKY: 'husky',
+  GOLDEN_RETRIEVER: 'golden-retriever',
+  GRIZZLY: 'grizzly',
+  PINGUIN: 'pinguin',
+  FOX_PEACH: 'fox-peach',
+  CAT_ORANGE: 'cat-orange',
 } as const;
 
-/** One selectable avatar skin id. */
-export type DefiningWorldPlazaAvatarSkinId =
-  (typeof DEFINING_WORLD_PLAZA_AVATAR_SKIN)[keyof typeof DEFINING_WORLD_PLAZA_AVATAR_SKIN];
+/** Any registered or selectable avatar skin id (species folder or special pack). */
+export type DefiningWorldPlazaAvatarSkinId = string;
 
 /** Skin selected on first plaza mount. */
 export const DEFINING_WORLD_PLAZA_AVATAR_SKIN_DEFAULT: DefiningWorldPlazaAvatarSkinId =
@@ -33,35 +34,22 @@ export interface DefiningWorldPlazaAvatarSkinOption {
   readonly label: string;
 }
 
-/** Avatar skins shown in the Perf overlay selector, in display order. */
-export const DEFINING_WORLD_PLAZA_AVATAR_SKIN_OPTIONS: readonly DefiningWorldPlazaAvatarSkinOption[] =
+/** Special avatar packs with non-species asset layouts. */
+const DEFINING_WORLD_PLAZA_AVATAR_SKIN_SPECIAL_OPTIONS: readonly DefiningWorldPlazaAvatarSkinOption[] =
   [
     {
       skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE,
-      label: "Girl",
-    },
-    {
-      skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.HUSKY,
-      label: "Husky",
-    },
-    {
-      skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.GOLDEN_RETRIEVER,
-      label: "Golden Retriever",
-    },
-    {
-      skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.GRIZZLY,
-      label: "Grizzly",
-    },
-    {
-      skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.PINGUIN,
-      label: "Penguin",
+      label: 'Girl',
     },
     {
       skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.FOX_PEACH,
-      label: "Fox Peach",
+      label: 'Fox Peach',
     },
-    {
-      skinId: DEFINING_WORLD_PLAZA_AVATAR_SKIN.CAT_ORANGE,
-      label: "Orange Cat",
-    },
+  ];
+
+/** Avatar skins shown in the Character selector: specials first, then animals A–Z. */
+export const DEFINING_WORLD_PLAZA_AVATAR_SKIN_OPTIONS: readonly DefiningWorldPlazaAvatarSkinOption[] =
+  [
+    ...DEFINING_WORLD_PLAZA_AVATAR_SKIN_SPECIAL_OPTIONS,
+    ...listingWorldPlazaAnimalPlayableAvatarSkinOptions(),
   ];

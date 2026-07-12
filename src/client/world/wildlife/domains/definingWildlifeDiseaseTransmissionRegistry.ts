@@ -54,6 +54,18 @@ export const DEFINING_WILDLIFE_DISEASE_TRANSMISSION_REGISTRY: Partial<
     bite: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
     contact: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
   },
+  husky: {
+    diseaseId: 'feline-gut',
+    foodborne: true,
+    bite: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
+    contact: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
+  },
+  'golden-retriever': {
+    diseaseId: 'feline-gut',
+    foodborne: true,
+    bite: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
+    contact: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
+  },
   'cat-black': {
     diseaseId: 'feline-gut',
     foodborne: true,
@@ -67,6 +79,12 @@ export const DEFINING_WILDLIFE_DISEASE_TRANSMISSION_REGISTRY: Partial<
     contact: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
   },
   'cat-large': {
+    diseaseId: 'feline-gut',
+    foodborne: true,
+    bite: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
+    contact: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
+  },
+  'cat-orange': {
     diseaseId: 'feline-gut',
     foodborne: true,
     bite: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
@@ -114,6 +132,12 @@ export const DEFINING_WILDLIFE_DISEASE_TRANSMISSION_REGISTRY: Partial<
     bite: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
     contact: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
   },
+  'cow-brown': {
+    diseaseId: 'mad-cow',
+    foodborne: true,
+    bite: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
+    contact: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
+  },
   bull: {
     diseaseId: 'mad-cow',
     foodborne: true,
@@ -133,6 +157,12 @@ export const DEFINING_WILDLIFE_DISEASE_TRANSMISSION_REGISTRY: Partial<
     contact: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
   },
   chicken: {
+    diseaseId: 'salmonellosis',
+    foodborne: true,
+    bite: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
+    contact: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },
+  },
+  pinguin: {
     diseaseId: 'salmonellosis',
     foodborne: true,
     bite: { ...DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES },

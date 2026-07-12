@@ -59,6 +59,16 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_PROFILE_BY_SPECIES_ID: Record<
       'attack',
     ],
   },
+  'cow-brown': {
+    poolId: 'cow_moo',
+    sizeClass: 'farm',
+    enabledEventKinds: [
+      ...DEFINING_WILDLIFE_SPECIES_SFX_FARM_IDLE_EVENTS,
+      ...DEFINING_WILDLIFE_SPECIES_SFX_FARM_FLEE_EVENTS,
+      'warn',
+      'attack',
+    ],
+  },
   sheep: {
     poolId: 'sheep_baa',
     sizeClass: 'farm',
@@ -90,22 +100,79 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_PROFILE_BY_SPECIES_ID: Record<
   'shepherd-dog': {
     poolId: 'dog_bark',
     sizeClass: 'farm',
-    enabledEventKinds: ['friendly', 'flee_start', 'hit_taken', 'chase_call'],
+    enabledEventKinds: [
+      'friendly',
+      'flee_start',
+      'hit_taken',
+      'chase_call',
+      'attack',
+    ],
+  },
+  husky: {
+    poolId: 'dog_bark',
+    sizeClass: 'farm',
+    enabledEventKinds: [
+      'friendly',
+      'flee_start',
+      'hit_taken',
+      'chase_call',
+      'attack',
+    ],
+  },
+  'golden-retriever': {
+    poolId: 'dog_bark',
+    sizeClass: 'farm',
+    enabledEventKinds: [
+      'friendly',
+      'flee_start',
+      'hit_taken',
+      'chase_call',
+      'attack',
+    ],
   },
   'cat-black': {
     poolId: 'cat_meow',
     sizeClass: 'farm',
-    enabledEventKinds: ['friendly', 'wake', 'flee_start', 'hit_taken'],
+    enabledEventKinds: [
+      'friendly',
+      'wake',
+      'flee_start',
+      'hit_taken',
+      'attack',
+    ],
   },
   'cat-white': {
     poolId: 'cat_meow',
     sizeClass: 'farm',
-    enabledEventKinds: ['friendly', 'wake', 'flee_start', 'hit_taken'],
+    enabledEventKinds: [
+      'friendly',
+      'wake',
+      'flee_start',
+      'hit_taken',
+      'attack',
+    ],
+  },
+  'cat-orange': {
+    poolId: 'cat_meow',
+    sizeClass: 'farm',
+    enabledEventKinds: [
+      'friendly',
+      'wake',
+      'flee_start',
+      'hit_taken',
+      'attack',
+    ],
   },
   'cat-large': {
     poolId: 'cat_meow',
     sizeClass: 'farm',
-    enabledEventKinds: ['friendly', 'wake', 'flee_start', 'hit_taken'],
+    enabledEventKinds: [
+      'friendly',
+      'wake',
+      'flee_start',
+      'hit_taken',
+      'attack',
+    ],
   },
   'brown-horse': {
     poolId: 'horse_whinny',
@@ -184,15 +251,27 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_PROFILE_BY_SPECIES_ID: Record<
     sizeClass: 'predator',
     enabledEventKinds: ['howl', 'warn', 'chase_call', 'attack', 'hit_taken'],
   },
+  'omega-wolf': {
+    poolId: 'mixkit_wolf_howl',
+    sizeClass: 'predator',
+    enabledEventKinds: ['howl', 'warn', 'chase_call', 'attack', 'hit_taken'],
+  },
   'brown-bear': {
-    poolId: 'bear_growl',
+    poolId: 'beast_growl',
+    sizeClass: 'predator',
+    enabledEventKinds: [
+      ...DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_COMBAT_EVENTS,
+    ],
+  },
+  grizzly: {
+    poolId: 'beast_growl',
     sizeClass: 'predator',
     enabledEventKinds: [
       ...DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_COMBAT_EVENTS,
     ],
   },
   'polar-bear': {
-    poolId: 'bear_growl',
+    poolId: 'beast_growl',
     sizeClass: 'predator',
     enabledEventKinds: [
       ...DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_COMBAT_EVENTS,
@@ -266,6 +345,11 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_PROFILE_BY_SPECIES_ID: Record<
     sizeClass: 'farm',
     enabledEventKinds: [...DEFINING_WILDLIFE_SPECIES_SFX_SKITTISH_PREY_EVENTS],
   },
+  pinguin: {
+    poolId: 'mixkit_bird_screech',
+    sizeClass: 'farm',
+    enabledEventKinds: [...DEFINING_WILDLIFE_SPECIES_SFX_SKITTISH_PREY_EVENTS],
+  },
   ostrich: {
     poolId: 'mixkit_bird_screech',
     sizeClass: 'farm',
@@ -327,6 +411,11 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_PROFILE_BY_SPECIES_ID: Record<
     poolId: 'pixabay_reptile_hiss',
     sizeClass: 'farm',
     enabledEventKinds: ['hit_taken'],
+  },
+  fairy: {
+    poolId: 'beast_warble',
+    sizeClass: 'farm',
+    enabledEventKinds: ['idle_ambient', 'flee_start', 'hit_taken'],
   },
 };
 

@@ -6,12 +6,12 @@ import {
 
 /** Absolute time when the next roll may start after a roll began at `rollStartedAtMs`. */
 export function computingWorldPlazaGirlSampleRollChainUnlockAtMs(
-  rollStartedAtMs: number
+  rollStartedAtMs: number,
+  rollDurationMs: number = DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_DURATION_MS
 ): number {
   return (
     rollStartedAtMs +
-    DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_DURATION_MS *
-      DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_CHAIN_START_RATIO +
+    rollDurationMs * DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_CHAIN_START_RATIO +
     DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_CHAIN_EXTRA_DELAY_MS
   );
 }

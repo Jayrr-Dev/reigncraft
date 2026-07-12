@@ -45,6 +45,11 @@ export const DEFINING_WILDLIFE_SPECIES_SPRITE_PRESENTATION_OVERRIDES: Partial<
     anchorYNormalized: 0.65,
     footYNormalized: 0.65,
   },
+  // Same 64px pack as chicken; feet sit a bit lower in-frame.
+  pinguin: {
+    anchorYNormalized: 0.66,
+    footYNormalized: 0.66,
+  },
   // Megafauna sheets leave ~30–40px empty under the painted feet (128px frames).
   // Default footY 0.88 sits in that margin, so large sizeScale floats the body.
   elephant: {

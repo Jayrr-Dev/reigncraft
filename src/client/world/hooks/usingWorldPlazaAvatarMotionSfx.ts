@@ -1,10 +1,15 @@
 'use client';
 
 import { resolvingWorldPlazaSfxClipEntryVolume } from '@/components/world/audio/resolvingWorldPlazaSfxClipEntry';
+import { buildingWorldPlazaAnimalAvatarSpeciesSfxStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaAnimalAvatarSpeciesSfxStarAudioManifest';
 import { buildingWorldPlazaAvatarMotionSfxStarAudioManifest } from '@/components/world/domains/buildingWorldPlazaAvatarMotionSfxStarAudioManifest';
 import { checkingWorldPlazaGirlSampleAvatarSkinActive } from '@/components/world/domains/checkingWorldPlazaGirlSampleAvatarSkinActive';
 import { computingWorldPlazaAvatarMotionSfxEffectiveTargetVolume } from '@/components/world/domains/computingWorldPlazaAvatarMotionSfxEffectiveTargetVolume';
 import type { DefiningWorldPlazaAvatarMotionSfxEventKind } from '@/components/world/domains/definingWorldPlazaAvatarMotionSfxConstants';
+import {
+  gettingWorldPlazaSelectedAvatarSkinId,
+  subscribingWorldPlazaSelectedAvatarSkin,
+} from '@/components/world/domains/managingWorldPlazaAvatarSkinSelectionStore';
 import {
   initializingWorldPlazaSfxVolumeStoreFromStorage,
   subscribingWorldPlazaSfxVolume,
@@ -20,6 +25,9 @@ import {
   registeringWorldPlazaAvatarMotionSfxEventListener,
   type NotifyingWorldPlazaAvatarMotionSfxEventPayload,
 } from '@/components/world/domains/notifyingWorldPlazaAvatarMotionSfxEvent';
+import { notifyingWorldPlazaGirlSampleVoiceSfxEvent } from '@/components/world/domains/notifyingWorldPlazaGirlSampleVoiceSfxEvent';
+import { playingWorldPlazaAnimalAvatarSpeciesSfx } from '@/components/world/domains/playingWorldPlazaAnimalAvatarSpeciesSfx';
+import { resolvingWorldPlazaAnimalPlayableAvatarSpeciesSfxSpeciesId } from '@/components/world/domains/resolvingWorldPlazaAnimalPlayableAvatarWildlifeSpeciesId';
 import {
   resolvingWorldPlazaAvatarMotionSfxClipEntry,
   resolvingWorldPlazaAvatarMotionSfxClipId,
@@ -34,14 +42,20 @@ import { useEffect, useRef } from 'react';
 import type { StarAudio } from 'star-audio';
 
 /**
- * Preloads jump takeoff and roll dodge clips for the girl-sample avatar skin.
+ * Preloads jump/roll clips and plays girl FilmCow or animal species vocals.
  *
  * @module components/world/hooks/usingWorldPlazaAvatarMotionSfx
  */
 export function usingWorldPlazaAvatarMotionSfx(): void {
   const starAudioRef = useRef<StarAudio | null>(null);
   const isPreloadReadyRef = useRef(false);
-  const clipIndexByEventKindRef = useRef<
+  const filmcowClipIndexByEventKindRef = useRef<
+    Record<DefiningWorldPlazaAvatarMotionSfxEventKind, number>
+  >({
+    jump_takeoff: 0,
+    roll_dodge: 0,
+  });
+  const speciesVocalRotationIndexByActionRef = useRef<
     Record<DefiningWorldPlazaAvatarMotionSfxEventKind, number>
   >({
     jump_takeoff: 0,
@@ -58,18 +72,23 @@ export function usingWorldPlazaAvatarMotionSfx(): void {
       settingWorldPlazaStarAudioSfxGroupVolume(1);
     };
 
-    const playingMotionSfx = (
+    const preloadingMotionAndSpeciesSfx = (skinId: string): void => {
+      void preloadingWorldPlazaStarAudioManifest({
+        ...buildingWorldPlazaAvatarMotionSfxStarAudioManifest(),
+        ...buildingWorldPlazaAnimalAvatarSpeciesSfxStarAudioManifest(skinId),
+      })
+        .then(() => {
+          isPreloadReadyRef.current = true;
+        })
+        .catch(() => {
+          isPreloadReadyRef.current = false;
+        });
+    };
+
+    const playingFilmcowMotionSfx = (
       eventKind: DefiningWorldPlazaAvatarMotionSfxEventKind
     ): void => {
-      if (!checkingWorldPlazaGirlSampleAvatarSkinActive()) {
-        return;
-      }
-
-      if (!isPreloadReadyRef.current || starAudio.state === 'locked') {
-        return;
-      }
-
-      const clipIndex = clipIndexByEventKindRef.current[eventKind];
+      const clipIndex = filmcowClipIndexByEventKindRef.current[eventKind];
       const clipEntry = resolvingWorldPlazaAvatarMotionSfxClipEntry(
         eventKind,
         clipIndex
@@ -78,7 +97,7 @@ export function usingWorldPlazaAvatarMotionSfx(): void {
         eventKind,
         clipIndex
       );
-      clipIndexByEventKindRef.current[eventKind] = clipIndex + 1;
+      filmcowClipIndexByEventKindRef.current[eventKind] = clipIndex + 1;
 
       const volume = computingWorldPlazaAvatarMotionSfxEffectiveTargetVolume(
         eventKind,
@@ -100,6 +119,43 @@ export function usingWorldPlazaAvatarMotionSfx(): void {
       );
     };
 
+    const playingMotionSfx = (
+      eventKind: DefiningWorldPlazaAvatarMotionSfxEventKind
+    ): void => {
+      if (!isPreloadReadyRef.current || starAudio.state === 'locked') {
+        return;
+      }
+
+      const skinId = gettingWorldPlazaSelectedAvatarSkinId();
+      const speciesId =
+        resolvingWorldPlazaAnimalPlayableAvatarSpeciesSfxSpeciesId(skinId);
+
+      if (speciesId) {
+        const playback = playingWorldPlazaAnimalAvatarSpeciesSfx({
+          speciesId,
+          action: eventKind,
+          rotationIndex:
+            speciesVocalRotationIndexByActionRef.current[eventKind],
+        });
+        speciesVocalRotationIndexByActionRef.current[eventKind] =
+          playback.nextRotationIndex;
+
+        if (playback.played) {
+          return;
+        }
+      }
+
+      if (!checkingWorldPlazaGirlSampleAvatarSkinActive() && !speciesId) {
+        return;
+      }
+
+      if (checkingWorldPlazaGirlSampleAvatarSkinActive()) {
+        notifyingWorldPlazaGirlSampleVoiceSfxEvent({ eventKind });
+      }
+
+      playingFilmcowMotionSfx(eventKind);
+    };
+
     const handlingMotionSfxEvent = ({
       eventKind,
     }: NotifyingWorldPlazaAvatarMotionSfxEventPayload): void => {
@@ -112,18 +168,15 @@ export function usingWorldPlazaAvatarMotionSfx(): void {
     };
 
     applyingMasterSfxVolume();
-    void preloadingWorldPlazaStarAudioManifest(
-      buildingWorldPlazaAvatarMotionSfxStarAudioManifest()
-    )
-      .then(() => {
-        isPreloadReadyRef.current = true;
-      })
-      .catch(() => {
-        isPreloadReadyRef.current = false;
-      });
+    preloadingMotionAndSpeciesSfx(gettingWorldPlazaSelectedAvatarSkinId());
 
     const unsubscribeSfxVolume = subscribingWorldPlazaSfxVolume(
       applyingMasterSfxVolume
+    );
+    const unsubscribeAvatarSkin = subscribingWorldPlazaSelectedAvatarSkin(
+      () => {
+        preloadingMotionAndSpeciesSfx(gettingWorldPlazaSelectedAvatarSkinId());
+      }
     );
     const unregisterUserGestureUnlock =
       registeringWorldPlazaBiomeMusicUserGestureUnlock(
@@ -135,11 +188,16 @@ export function usingWorldPlazaAvatarMotionSfx(): void {
     return () => {
       unregisterMotionSfxListener();
       unregisterUserGestureUnlock();
+      unsubscribeAvatarSkin();
       unsubscribeSfxVolume();
       releasingWorldPlazaStarAudio();
       starAudioRef.current = null;
       isPreloadReadyRef.current = false;
-      clipIndexByEventKindRef.current = {
+      filmcowClipIndexByEventKindRef.current = {
+        jump_takeoff: 0,
+        roll_dodge: 0,
+      };
+      speciesVocalRotationIndexByActionRef.current = {
         jump_takeoff: 0,
         roll_dodge: 0,
       };

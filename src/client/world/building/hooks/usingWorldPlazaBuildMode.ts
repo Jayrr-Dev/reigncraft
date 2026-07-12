@@ -52,6 +52,7 @@ import {
   DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM,
   DEFINING_WORLD_BUILDING_EDIT_MODE_OFF,
   type DefiningWorldBuildingEditMode,
+  type DefiningWorldBuildingEditPaintAction,
 } from '@/components/world/building/domains/definingWorldBuildingEditMode';
 import {
   resolvingWorldBuildingPlacedBlockWorldLayer,
@@ -86,6 +87,7 @@ import {
 import { listingWorldBuildingPlacedBlocksFromPlots } from '@/components/world/building/domains/listingWorldBuildingPlacedBlocksFromPlots';
 import type { DefiningWorldBuildingBuildModeTilePopoverMode } from '@/components/world/building/domains/resolvingWorldBuildingBuildModeTilePopoverMode';
 import { resolvingWorldBuildingBuildModeTilePopoverMode } from '@/components/world/building/domains/resolvingWorldBuildingBuildModeTilePopoverMode';
+import { resolvingWorldBuildingEditPaintActionAtTile } from '@/components/world/building/domains/resolvingWorldBuildingEditPaintActionAtTile';
 import { resolvingWorldBuildingHoverPlacementWorldLayer } from '@/components/world/building/domains/resolvingWorldBuildingHoverPlacementWorldLayer';
 import { resolvingWorldBuildingMinimumWorldLayerForBlockHeight } from '@/components/world/building/domains/resolvingWorldBuildingMinimumWorldLayerForBlockHeight';
 import { resolvingWorldBuildingPlotOwnerLimits } from '@/components/world/building/domains/resolvingWorldBuildingPlotOwnerLimits';
@@ -140,6 +142,12 @@ export interface UsingWorldPlazaBuildModeResult {
   activePlacedBlocks: DefiningWorldBuildingPlacedBlock[];
   togglingBuildMode: () => void;
   togglingClaimMode: () => void;
+  togglingEditSession: () => void;
+  activatingEditMode: (
+    targetMode: Exclude<DefiningWorldBuildingEditMode, 'off'>
+  ) => void;
+  activatingBuildMode: () => void;
+  activatingClaimMode: () => void;
   cancelingBuildDraftDiscard: () => void;
   confirmingBuildDraftDiscard: () => void;
   selectingBlockDefinition: (
@@ -159,6 +167,13 @@ export interface UsingWorldPlazaBuildModeResult {
   ) => void;
   actingOnEditModeTileAtViewport: (
     tilePosition: DefiningWorldBuildingTilePosition | null
+  ) => void;
+  resolvingEditPaintActionAtTile: (
+    tilePosition: DefiningWorldBuildingTilePosition
+  ) => DefiningWorldBuildingEditPaintAction | null;
+  paintingEditModeTileAtViewport: (
+    tilePosition: DefiningWorldBuildingTilePosition,
+    paintAction: DefiningWorldBuildingEditPaintAction
   ) => void;
   removingBlockAtTile: (
     tilePosition: DefiningWorldBuildingTilePosition
@@ -290,11 +305,9 @@ export function usingWorldPlazaBuildMode({
       return ownedPlots;
     }
 
-    const draftOwnedPlots = buildDraft.workingPlots.filter(
+    return buildDraft.workingPlots.filter(
       (plot) => plot.ownerId === onlineUserId
     );
-
-    return draftOwnedPlots.length > 0 ? draftOwnedPlots : ownedPlots;
   }, [buildDraft, isEditSessionActive, onlineUserId, ownedPlots]);
 
   const hasUnsavedBuildChanges =
@@ -1145,6 +1158,42 @@ export function usingWorldPlazaBuildMode({
     switchingEditMode(DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM);
   }, [switchingEditMode]);
 
+  /** Top action bar: enter Build, or exit whichever edit mode is active. */
+  const togglingEditSession = useCallback((): void => {
+    if (editMode !== DEFINING_WORLD_BUILDING_EDIT_MODE_OFF) {
+      void flushingBuildDraftBeforeExiting();
+      return;
+    }
+
+    setEditMode(DEFINING_WORLD_BUILDING_EDIT_MODE_BUILD);
+    setBuildErrorMessage(null);
+    setSelectedTilePosition(null);
+    setIsBuildTilePopoverOpen(false);
+  }, [editMode, flushingBuildDraftBeforeExiting]);
+
+  /** Hotbar Build/Claim chips: switch modes without exiting on re-click. */
+  const activatingEditMode = useCallback(
+    (targetMode: Exclude<DefiningWorldBuildingEditMode, 'off'>): void => {
+      if (editMode === targetMode) {
+        return;
+      }
+
+      setEditMode(targetMode);
+      setBuildErrorMessage(null);
+      setSelectedTilePosition(null);
+      setIsBuildTilePopoverOpen(false);
+    },
+    [editMode]
+  );
+
+  const activatingBuildMode = useCallback((): void => {
+    activatingEditMode(DEFINING_WORLD_BUILDING_EDIT_MODE_BUILD);
+  }, [activatingEditMode]);
+
+  const activatingClaimMode = useCallback((): void => {
+    activatingEditMode(DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM);
+  }, [activatingEditMode]);
+
   const actingOnEditModeTileAtViewport = useCallback(
     (tilePosition: DefiningWorldBuildingTilePosition | null): void => {
       if (!tilePosition || !onlineUserId) {
@@ -1187,6 +1236,100 @@ export function usingWorldPlazaBuildMode({
       placingBlockAtTile,
       removingBlockAtTile,
       resolvingRemovalWorldLayerForTile,
+    ]
+  );
+
+  const resolvingEditPaintActionAtTile = useCallback(
+    (
+      tilePosition: DefiningWorldBuildingTilePosition
+    ): DefiningWorldBuildingEditPaintAction | null => {
+      if (!onlineUserId) {
+        return null;
+      }
+
+      return resolvingWorldBuildingEditPaintActionAtTile({
+        editMode,
+        tilePosition,
+        activeViewportPlots,
+        ownerUserId: onlineUserId,
+        isBuildPlacementSelectionActive,
+        canPlaceAtTile: checkingCanPlaceAtTile(tilePosition),
+        canRemoveAtTile:
+          resolvingRemovalWorldLayerForTile(tilePosition) !== null,
+      });
+    },
+    [
+      activeViewportPlots,
+      checkingCanPlaceAtTile,
+      editMode,
+      isBuildPlacementSelectionActive,
+      onlineUserId,
+      resolvingRemovalWorldLayerForTile,
+    ]
+  );
+
+  const paintingEditModeTileAtViewport = useCallback(
+    (
+      tilePosition: DefiningWorldBuildingTilePosition,
+      paintAction: DefiningWorldBuildingEditPaintAction
+    ): void => {
+      if (!onlineUserId) {
+        return;
+      }
+
+      setHoverTilePosition(tilePosition);
+      setBuildErrorMessage(null);
+
+      if (paintAction === 'claim') {
+        const existingPlot = findingWorldBuildingPlotContainingTilePosition(
+          activeViewportPlots,
+          tilePosition
+        );
+        if (existingPlot?.ownerId === onlineUserId) {
+          return;
+        }
+        claimingPlotAtTile(tilePosition);
+        return;
+      }
+
+      if (paintAction === 'unclaim') {
+        const existingPlot = findingWorldBuildingPlotContainingTilePosition(
+          activeViewportPlots,
+          tilePosition
+        );
+        if (existingPlot?.ownerId !== onlineUserId) {
+          return;
+        }
+        unclaimingPlotAtTile(tilePosition);
+        return;
+      }
+
+      if (paintAction === 'place') {
+        if (
+          isBuildPlacementSelectionActive &&
+          checkingCanPlaceAtTile(tilePosition)
+        ) {
+          placingBlockAtTile(tilePosition);
+        }
+        return;
+      }
+
+      if (paintAction === 'remove') {
+        if (resolvingRemovalWorldLayerForTile(tilePosition) !== null) {
+          removingBlockAtTile(tilePosition);
+        }
+      }
+    },
+    [
+      activeViewportPlots,
+      claimingPlotAtTile,
+      checkingCanPlaceAtTile,
+      isBuildPlacementSelectionActive,
+      onlineUserId,
+      placingBlockAtTile,
+      removingBlockAtTile,
+      resolvingRemovalWorldLayerForTile,
+      unclaimingPlotAtTile,
     ]
   );
 
@@ -1455,6 +1598,10 @@ export function usingWorldPlazaBuildMode({
     activePlacedBlocks,
     togglingBuildMode,
     togglingClaimMode,
+    togglingEditSession,
+    activatingEditMode,
+    activatingBuildMode,
+    activatingClaimMode,
     cancelingBuildDraftDiscard,
     confirmingBuildDraftDiscard,
     selectingBlockDefinition,
@@ -1465,6 +1612,8 @@ export function usingWorldPlazaBuildMode({
     updatingHoverTilePosition,
     selectingBuildModeTileAtViewport,
     actingOnEditModeTileAtViewport,
+    resolvingEditPaintActionAtTile,
+    paintingEditModeTileAtViewport,
     removingBlockAtTile,
     closingBuildModeTilePopover,
     claimingPlotAtSelectedTile,

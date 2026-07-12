@@ -95,6 +95,10 @@ export const DEFINING_WILDLIFE_SPECIES_MOTION_SHEET_FILE_NAME_OVERRIDES: Partial
     walk: ['Run_Shadowless.webp', 'Idle_Shadowless.webp'],
     run: ['Run_Shadowless.webp', 'Idle_Shadowless.webp'],
   },
+  'elite-wolf': {
+    walk: ['Run_Shadowless.webp', 'Idle_Shadowless.webp'],
+    run: ['Run_Shadowless.webp', 'Idle_Shadowless.webp'],
+  },
   // The Hayena pack ships bespoke file names instead of the shared layout.
   hyena: {
     idle: ['Hyena idle_Shadowless.webp'],

@@ -17,6 +17,8 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_DEFAULT_LOCOMOTION = {
  */
 
 import type { DefiningWorldPlazaCharacterEngineDefinition } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
+import { buildingWorldPlazaDefaultAnimalCharacterEngineDefinition } from '@/components/world/domains/buildingWorldPlazaDefaultAnimalCharacterEngineDefinition';
+import { DEFINING_WORLD_PLAZA_ANIMAL_PLAYABLE_AVATAR_SKIN_BY_ID } from '@/components/world/domains/definingWorldPlazaAnimalPlayableAvatarSkinRegistry';
 import type { DefiningWorldPlazaAvatarMotionKind } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
 import { DEFINING_WORLD_PLAZA_AVATAR_SKIN } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 
@@ -216,8 +218,8 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_CAT_ORANGE: DefiningWorldPlazaCharac
     skillIds: ['minor-heal', 'swift-stride'],
   };
 
-/** All registered character definitions keyed by character id. */
-export const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_DEFINITIONS: Record<
+/** Hand-tuned character definitions keyed by character id. */
+const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_HAND_TUNED_DEFINITIONS: Record<
   string,
   DefiningWorldPlazaCharacterEngineDefinition
 > = {
@@ -235,6 +237,26 @@ export const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_DEFINITIONS: Record<
     DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_FOX_PEACH,
   [DEFINING_WORLD_PLAZA_AVATAR_SKIN.CAT_ORANGE]:
     DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_CAT_ORANGE,
+};
+
+/**
+ * Stable engine defs for every playable animal skin.
+ * Hand-tuned rows win over the shared default factory.
+ * Must stay referentially stable: player health reseeds when this object identity changes.
+ */
+export const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_DEFINITIONS: Record<
+  string,
+  DefiningWorldPlazaCharacterEngineDefinition
+> = {
+  ...Object.fromEntries(
+    Object.values(DEFINING_WORLD_PLAZA_ANIMAL_PLAYABLE_AVATAR_SKIN_BY_ID).map(
+      (skinRow) => [
+        skinRow.skinId,
+        buildingWorldPlazaDefaultAnimalCharacterEngineDefinition(skinRow),
+      ]
+    )
+  ),
+  ...DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_HAND_TUNED_DEFINITIONS,
 };
 
 /**

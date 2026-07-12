@@ -40,6 +40,13 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
         'Willus Quill counts every hoof on Corpus soil, even the ones nobody branded.',
     },
     {
+      speciesId: 'cow-brown',
+      icon: 'mdi:grass',
+      summary: 'Brown-coat plains cattle. Same slow moo, different paint.',
+      studiedSummary:
+        'Brown cows share the plains with their spotted cousins. Wolves do not care about the coat.',
+    },
+    {
       speciesId: 'sheep',
       icon: 'mdi:grass',
       summary: "Plains grazer and the wolf packs' favorite prey.",
@@ -61,6 +68,20 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
         'Shepherd dogs skew tame. Approach rolls follow vs flee from aggression tier. Hitting one needs an Attack? confirm and makes them less friendly.',
     },
     {
+      speciesId: 'husky',
+      icon: 'mdi:paw',
+      summary: 'Cold-country pack dog. Common on snow and rocky slopes.',
+      studiedSummary:
+        'Huskies travel in packs and shrug off the cold. Friendlier than wolves, louder than sheep.',
+    },
+    {
+      speciesId: 'golden-retriever',
+      icon: 'mdi:paw',
+      summary: 'Sunny plains companion dog. Soft bark, soft heart.',
+      studiedSummary:
+        'Golden retrievers stick to open grass and flower forests. They follow more often than they flee.',
+    },
+    {
       speciesId: 'cat-black',
       icon: 'mdi:paw',
       summary: 'Night-roaming black cat. Docile until you swing.',
@@ -73,6 +94,13 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
       summary: 'Pale crepuscular cat that may follow for a while.',
       studiedSummary:
         'White cats favor flower forests and dawn light. Same docile rules as their darker cousins.',
+    },
+    {
+      speciesId: 'cat-orange',
+      icon: 'mdi:paw',
+      summary: 'Daytime orange cat. Lounges in sun, bolts when swung at.',
+      studiedSummary:
+        'Orange cats prefer open daylight on plains and forest edges. Still docile until you give them a reason.',
     },
     {
       speciesId: 'cat-large',
@@ -292,11 +320,27 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
         'Brown bears are cold-proof retaliators. A bear ignores you until you give it a reason, then remembers.',
     },
     {
+      speciesId: 'grizzly',
+      icon: 'mdi:paw',
+      summary:
+        'Heavier forest and mountain bear. Shorter fuse than brown cousins.',
+      studiedSummary:
+        'Grizzlies claim forest, snow, and rocky ground. Bigger bite, bigger temper, same cold hide.',
+    },
+    {
+      speciesId: 'pinguin',
+      icon: 'mdi:penguin',
+      summary:
+        'Cold-country waddler that flocks thick on ice, beach, and ocean.',
+      studiedSummary:
+        'Pinguins travel in packs across snowy plains, beaches, and ocean ice. Skittish, cold-proof, and a favorite snack for polar bears and wolves.',
+    },
+    {
       speciesId: 'polar-bear',
       icon: 'mdi:snowflake',
       summary: 'Frost-country predator. Less patience than its brown cousin.',
       studiedSummary:
-        'Polar bears skipped the brown bear\'s "ignores you" phase. Deer up north stay nervous for good reason.',
+        'Polar bears skipped the brown bear\'s "ignores you" phase. Deer and pinguins up north stay nervous for good reason.',
     },
     {
       speciesId: 'lion',

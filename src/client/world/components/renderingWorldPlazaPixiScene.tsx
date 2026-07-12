@@ -21,10 +21,8 @@ import { spawningSpiritedSpritesBetaNearPoint } from '@/components/world/beta/sp
 import { RenderingWorldPlazaBlockPlacementPreview } from '@/components/world/building/components/renderingWorldPlazaBlockPlacementPreview';
 import { RenderingWorldPlazaBlockRemovalHoverHighlight } from '@/components/world/building/components/renderingWorldPlazaBlockRemovalHoverHighlight';
 import { RenderingWorldPlazaBuildModeDiscardDialog } from '@/components/world/building/components/renderingWorldPlazaBuildModeDiscardDialog';
-import { RenderingWorldPlazaBuildModeHotbar } from '@/components/world/building/components/renderingWorldPlazaBuildModeHotbar';
-import { RenderingWorldPlazaClaimModeHotbar } from '@/components/world/building/components/renderingWorldPlazaClaimModeHotbar';
-import { RenderingWorldPlazaClaimModePanel } from '@/components/world/building/components/renderingWorldPlazaClaimModePanel';
 import { RenderingWorldPlazaClaimModePlotOwnershipOverlay } from '@/components/world/building/components/renderingWorldPlazaClaimModePlotOwnershipOverlay';
+import { RenderingWorldPlazaEditModeHotbar } from '@/components/world/building/components/renderingWorldPlazaEditModeHotbar';
 import { RenderingWorldPlazaPlacedBlockGroundShadows } from '@/components/world/building/components/renderingWorldPlazaPlacedBlockGroundShadows';
 import { RenderingWorldPlazaPlacedBlocks } from '@/components/world/building/components/renderingWorldPlazaPlacedBlocks';
 import { RenderingWorldPlazaPlotBoundaries } from '@/components/world/building/components/renderingWorldPlazaPlotBoundaries';
@@ -43,11 +41,15 @@ import {
   DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT,
   type DefiningWorldBuildingCutGridAxisCellCount,
 } from '@/components/world/building/domains/definingWorldBuildingCutFootprintConstants';
+import type { DefiningWorldBuildingEditPaintAction } from '@/components/world/building/domains/definingWorldBuildingEditMode';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
 import type { DefiningWorldBuildingPlotBounds } from '@/components/world/building/domains/definingWorldBuildingPlotBounds';
 import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
-import { snappingWorldBuildingTilePositionFromGridPoint } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
+import {
+  formattingWorldBuildingTilePositionKey,
+  snappingWorldBuildingTilePositionFromGridPoint,
+} from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import { mergingWorldBuildingClaimModeOverlayPlots } from '@/components/world/building/domains/mergingWorldBuildingClaimModeOverlayPlots';
 import { projectingWorldBuildingTilePositionFromViewportPointer } from '@/components/world/building/domains/projectingWorldBuildingTilePositionFromViewportPointerEvent';
@@ -191,6 +193,7 @@ import {
   projectingWorldPlazaViewportClientPointToGridPoint,
   projectingWorldPlazaViewportClientPointToViewportScreenPoint,
 } from '@/components/world/domains/projectingWorldPlazaViewportClientPointToGridPoint';
+import { resolvingWorldPlazaAvatarClipPresentation } from '@/components/world/domains/resolvingWorldPlazaAvatarClipPresentation';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import { resolvingWorldPlazaInitialPlayerSpawnWorldPoint } from '@/components/world/domains/resolvingWorldPlazaInitialPlayerSpawnWorldPoint';
 import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
@@ -845,6 +848,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   const isBlockBuildModeActiveRef = useRef(false);
   const isBuildModeActiveRef = useRef(false);
   const isClaimModeActiveRef = useRef(false);
+  const isEditPaintPointerHeldRef = useRef(false);
+  const editPaintActionRef =
+    useRef<DefiningWorldBuildingEditPaintAction | null>(null);
+  const lastEditPaintTileKeyRef = useRef<string | null>(null);
   const isTerrainCollisionDebugVisibleRef = useRef(false);
   const selectedWorldLayerRef = useRef(
     DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT
@@ -1015,6 +1022,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     activeOwnedPlots,
     togglingBuildMode,
     togglingClaimMode,
+    togglingEditSession,
+    activatingBuildMode,
+    activatingClaimMode,
     cancelingBuildDraftDiscard,
     confirmingBuildDraftDiscard,
     selectingBlockDefinition,
@@ -1024,6 +1034,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     selectingCutGridAxisCellCount,
     updatingHoverTilePosition,
     actingOnEditModeTileAtViewport,
+    resolvingEditPaintActionAtTile,
+    paintingEditModeTileAtViewport,
     removingBlockAtTile,
     closingBuildModeTilePopover,
     claimingPlotAtSelectedTile,
@@ -1065,10 +1077,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   const {
     ownerGroups: claimModeOwnerGroups,
     isLoading: isClaimModePlotRegistryLoading,
-    queryErrorMessage: claimModePlotRegistryErrorMessage,
     refetchingRegistry: refetchingClaimModePlotRegistry,
   } = usingWorldPlazaClaimModePlotRegistryQuery({
-    isEnabled: isBuildModeEnabled && isClaimModeActive,
+    isEnabled:
+      isBuildModeEnabled && (isClaimModeActive || isBlockBuildModeActive),
     localUserId: buildModeUserId,
   });
 
@@ -1078,13 +1090,18 @@ function RenderingWorldPlazaPixiSceneConnected({
     if (
       wasSavingBuildDraftRef.current &&
       !isSavingBuildDraft &&
-      isClaimModeActive
+      (isClaimModeActive || isBlockBuildModeActive)
     ) {
       void refetchingClaimModePlotRegistry();
     }
 
     wasSavingBuildDraftRef.current = isSavingBuildDraft;
-  }, [isClaimModeActive, isSavingBuildDraft, refetchingClaimModePlotRegistry]);
+  }, [
+    isBlockBuildModeActive,
+    isClaimModeActive,
+    isSavingBuildDraft,
+    refetchingClaimModePlotRegistry,
+  ]);
 
   const claimModeLocalOwnedPlotCount = useMemo(() => {
     if (!buildModeUserId) {
@@ -2893,12 +2910,20 @@ function RenderingWorldPlazaPixiSceneConnected({
         return false;
       }
 
+      const meleePresentation = resolvingWorldPlazaAvatarClipPresentation(
+        selectedAvatarCharacterDefinition,
+        'melee'
+      );
       const meleeTiming = computingWorldPlazaGirlSampleMeleePresentationTiming(
         selectedCharacterEngineDerivedStats.attackSpeed *
           resolvingWorldPlazaEntityHealthAttackSpeedMultiplier(
             healthStateRef.current,
             nowMs
-          )
+          ),
+        {
+          frameCount: meleePresentation.sheetLayout.frameCount,
+          baselineAnimationFps: meleePresentation.animationFps,
+        }
       );
 
       clearingWalkTarget();
@@ -2935,6 +2960,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       inventoryState,
       localAvatarMotionStateRef,
       playerPositionRef,
+      selectedAvatarCharacterDefinition,
       selectedCharacterEngineDerivedStats.attackPower,
       selectedCharacterEngineDerivedStats.attackSpeed,
       wildlifeStoreRef,
@@ -4107,7 +4133,17 @@ function RenderingWorldPlazaPixiSceneConnected({
         ) {
           event.preventDefault();
           event.stopPropagation();
-          actingOnEditModeTileAtViewport(hoverTile);
+          const paintAction = resolvingEditPaintActionAtTile(hoverTile);
+          if (paintAction) {
+            isEditPaintPointerHeldRef.current = true;
+            editPaintActionRef.current = paintAction;
+            lastEditPaintTileKeyRef.current =
+              formattingWorldBuildingTilePositionKey(hoverTile);
+            paintingEditModeTileAtViewport(hoverTile, paintAction);
+            event.currentTarget.setPointerCapture(event.pointerId);
+          } else {
+            actingOnEditModeTileAtViewport(hoverTile);
+          }
           hostRef.current?.focus();
           return;
         }
@@ -4120,7 +4156,17 @@ function RenderingWorldPlazaPixiSceneConnected({
         ) {
           event.preventDefault();
           event.stopPropagation();
-          actingOnEditModeTileAtViewport(hoverTile);
+          const paintAction = resolvingEditPaintActionAtTile(hoverTile);
+          if (paintAction) {
+            isEditPaintPointerHeldRef.current = true;
+            editPaintActionRef.current = paintAction;
+            lastEditPaintTileKeyRef.current =
+              formattingWorldBuildingTilePositionKey(hoverTile);
+            paintingEditModeTileAtViewport(hoverTile, paintAction);
+            event.currentTarget.setPointerCapture(event.pointerId);
+          } else {
+            actingOnEditModeTileAtViewport(hoverTile);
+          }
           hostRef.current?.focus();
           return;
         }
@@ -4298,6 +4344,8 @@ function RenderingWorldPlazaPixiSceneConnected({
       handlingToolGroundPointerSelection,
       handlingWildlifeMeleeClick,
       actingOnEditModeTileAtViewport,
+      resolvingEditPaintActionAtTile,
+      paintingEditModeTileAtViewport,
       removingBlockAtTile,
       onlineUserId,
       isTurnPointerHeldRef,
@@ -4335,7 +4383,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           event.target.closest(`[${DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE}]`)
         )
       ) {
-        updatingHoverTilePosition(
+        const hoverTile =
           projectingWorldBuildingTilePositionFromViewportPointer(
             event.clientX,
             event.clientY,
@@ -4343,8 +4391,23 @@ function RenderingWorldPlazaPixiSceneConnected({
             cameraOffsetRef.current,
             pixiViewportSizeRef.current,
             cameraWorldZoomRef.current
-          )
-        );
+          );
+        updatingHoverTilePosition(hoverTile);
+
+        if (
+          isEditPaintPointerHeldRef.current &&
+          editPaintActionRef.current &&
+          hoverTile
+        ) {
+          const tileKey = formattingWorldBuildingTilePositionKey(hoverTile);
+          if (tileKey !== lastEditPaintTileKeyRef.current) {
+            lastEditPaintTileKeyRef.current = tileKey;
+            paintingEditModeTileAtViewport(
+              hoverTile,
+              editPaintActionRef.current
+            );
+          }
+        }
       }
 
       handlingCharacterFacingPointerMove(event);
@@ -4367,6 +4430,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       handlingPlazaPointerMove,
       inventoryDropPlacement.handlingDropPlacementPointerMove,
       isTurnPointerHeldRef,
+      paintingEditModeTileAtViewport,
       updatingHoverTilePosition,
       updatingHoveredWildlifeInstanceId,
     ]
@@ -4374,6 +4438,15 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const handlingPlazaHostPointerRelease = useCallback(
     (event: React.PointerEvent<HTMLDivElement>): void => {
+      if (isEditPaintPointerHeldRef.current) {
+        isEditPaintPointerHeldRef.current = false;
+        editPaintActionRef.current = null;
+        lastEditPaintTileKeyRef.current = null;
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+      }
+
       handlingCharacterFacingPointerRelease(event);
       handlingPlazaPointerRelease(event);
     },
@@ -5240,8 +5313,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   isChatOpen={chatSnapshot.isChatOpen}
                   isFriendsOpen={isFriendsPanelOpen}
                   pendingFriendRequestCount={pendingFriendRequestCount}
-                  isClaimModeActive={isClaimModeActive}
-                  isBuildModeActive={isBlockBuildModeActive}
+                  isEditModeActive={isBlockBuildModeActive || isClaimModeActive}
                   isFullscreen={isFullscreen}
                   isFullscreenViewport={hudIsFullscreen}
                   viewportHudScale={viewportHudScale}
@@ -5250,8 +5322,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   onToggleChat={togglingChatFromActionBar}
                   onToggleFriends={togglingFriendsFromActionBar}
                   onSelectCodexSection={selectingCodexSectionFromActionBar}
-                  onToggleClaimMode={togglingClaimMode}
-                  onToggleBuildMode={togglingBuildMode}
+                  onToggleEditMode={togglingEditSession}
                   onToggleFullscreen={() => {
                     void togglingViewportFullscreen({
                       shouldLockLandscapeOrientation: isMobile,
@@ -5276,21 +5347,23 @@ function RenderingWorldPlazaPixiSceneConnected({
               ) : null}
               {isHudHotbarEnabled ? (
                 <>
-                  <RenderingWorldPlazaInventoryHotbar
-                    onlineUserId={onlineUserId}
-                    viewportHudScale={viewportHudScale}
-                    isMobile={hudIsMobile}
-                    isFullscreen={hudIsFullscreen}
-                    inventoryDropPlacement={inventoryDropPlacement}
-                    selectedSlotIndex={equipment.selectedSlotIndex}
-                    onSelectHotbarSlot={equipment.selectingHotbarSlot}
-                    onEatHotbarSlot={handlingEatHotbarSlot}
-                    onUseActiveEnchantment={handlingUseActiveEnchantment}
-                    hungerHud={hungerHudSnapshot}
-                    playerEffectiveMaxHealth={
-                      playerHealthHudSnapshot.effectiveMaxHealth
-                    }
-                  />
+                  {!isBlockBuildModeActive && !isClaimModeActive ? (
+                    <RenderingWorldPlazaInventoryHotbar
+                      onlineUserId={onlineUserId}
+                      viewportHudScale={viewportHudScale}
+                      isMobile={hudIsMobile}
+                      isFullscreen={hudIsFullscreen}
+                      inventoryDropPlacement={inventoryDropPlacement}
+                      selectedSlotIndex={equipment.selectedSlotIndex}
+                      onSelectHotbarSlot={equipment.selectingHotbarSlot}
+                      onEatHotbarSlot={handlingEatHotbarSlot}
+                      onUseActiveEnchantment={handlingUseActiveEnchantment}
+                      hungerHud={hungerHudSnapshot}
+                      playerEffectiveMaxHealth={
+                        playerHealthHudSnapshot.effectiveMaxHealth
+                      }
+                    />
+                  ) : null}
                   <RenderingWorldPlazaGroundItems
                     onlineUserId={onlineUserId}
                     playerPositionRef={playerPositionRef}
@@ -5324,72 +5397,56 @@ function RenderingWorldPlazaPixiSceneConnected({
           ) : null}
           {buildModeUserId ? (
             <>
-              <RenderingWorldPlazaClaimModePanel
-                isClaimModeActive={isClaimModeActive}
-                hasUnsavedClaimChanges={hasUnsavedBuildChanges}
-                isSavingClaimDraft={isSavingBuildDraft}
-                claimErrorMessage={buildErrorMessage}
-                ownerGroups={claimModeOwnerGroups}
-                activeViewportPlots={activeViewportPlots}
-                localUserId={buildModeUserId}
-                localOwnedPlotCount={claimModeLocalOwnedPlotCount}
-                localTileClaimCount={claimModeLocalTileClaimCount}
-                plotOwnerLimits={plotOwnerLimits}
-                isPlotRegistryLoading={isClaimModePlotRegistryLoading}
-                plotRegistryErrorMessage={claimModePlotRegistryErrorMessage}
-                onToggleClaimMode={togglingClaimMode}
-                onTeleportToPlotBounds={teleportingPlayerToPlotBounds}
-                onRequestingFriendPlotVisit={requestingFriendPlotVisit}
-                onTeleportingToApprovedFriendPlot={
-                  teleportingToApprovedFriendPlotFromClaimList
-                }
-                outgoingVisitRequests={outgoingVisitRequests}
-                isRequestingFriendPlotVisit={
-                  createPlotVisitRequestMutation.isPending
-                }
-                onRemoveTemporaryPlotAtTile={handlingRemoveTemporaryPlotAtTile}
-                isRemovingTemporaryPlot={isRemovingTemporaryPlot}
-                savedCoordsList={savedCoordsList}
-                trackedSavedCoordsId={trackedSavedCoordsId}
-                onToggleSavedCoordsTracking={togglingSavedCoordsTracking}
-                onDeleteSavedCoords={deletingSavedCoords}
-                isDeletingSavedCoords={isDeletingSavedCoords}
-                onSaveClaimDraft={() => {
-                  void savingBuildDraft().then(() =>
-                    refetchingClaimModePlotRegistry()
-                  );
-                }}
-              />
-              {isBlockBuildModeActive ? (
-                <RenderingWorldPlazaBuildModeHotbar
+              {isBlockBuildModeActive || isClaimModeActive ? (
+                <RenderingWorldPlazaEditModeHotbar
                   isVisible
+                  isBuildModeActive={isBlockBuildModeActive}
+                  isClaimModeActive={isClaimModeActive}
+                  onActivateBuildMode={activatingBuildMode}
+                  onActivateClaimMode={activatingClaimMode}
                   selectedDefinitionId={selectedDefinitionId}
                   selectedWorldLayer={selectedWorldLayer}
                   selectedBlockHeight={selectedBlockHeight}
                   isPresetBlockTypeSelected={isPresetBlockTypeSelected}
                   selectedCutFootprintMask={selectedCutFootprintMask}
                   selectedCutGridAxisCellCount={selectedCutGridAxisCellCount}
-                  buildErrorMessage={buildErrorMessage}
-                  isSavingBuildDraft={isSavingBuildDraft}
+                  localOwnedPlotCount={claimModeLocalOwnedPlotCount}
+                  localTileClaimCount={claimModeLocalTileClaimCount}
+                  plotOwnerLimits={plotOwnerLimits}
+                  hoverTilePosition={hoverTilePosition}
+                  isSavingCoords={isSavingCoords}
+                  canSaveMoreCoords={canSaveMoreCoords}
+                  onSaveCoordsAtHoverTile={savingCoordsAtHoverTile}
+                  ownerGroups={claimModeOwnerGroups}
+                  activeViewportPlots={activeViewportPlots}
+                  localUserId={buildModeUserId}
+                  isPlotRegistryLoading={isClaimModePlotRegistryLoading}
+                  onTeleportToPlotBounds={teleportingPlayerToPlotBounds}
+                  onRequestingFriendPlotVisit={requestingFriendPlotVisit}
+                  onTeleportingToApprovedFriendPlot={
+                    teleportingToApprovedFriendPlotFromClaimList
+                  }
+                  outgoingVisitRequests={outgoingVisitRequests}
+                  isRequestingFriendPlotVisit={
+                    createPlotVisitRequestMutation.isPending
+                  }
+                  onRemoveTemporaryPlotAtTile={
+                    handlingRemoveTemporaryPlotAtTile
+                  }
+                  isRemovingTemporaryPlot={isRemovingTemporaryPlot}
+                  savedCoordsList={savedCoordsList}
+                  trackedSavedCoordsId={trackedSavedCoordsId}
+                  onToggleSavedCoordsTracking={togglingSavedCoordsTracking}
+                  onDeleteSavedCoords={deletingSavedCoords}
+                  isDeletingSavedCoords={isDeletingSavedCoords}
+                  viewportHudScale={viewportHudScale}
+                  isMobile={hudIsMobile}
+                  isFullscreen={hudIsFullscreen}
                   onSelectDefinition={selectingBlockDefinition}
                   onSelectWorldLayer={selectingWorldLayer}
                   onSelectBlockHeight={selectingBlockHeight}
                   onSelectCutFootprintMask={selectingCutFootprintMask}
                   onSelectCutGridAxisCellCount={selectingCutGridAxisCellCount}
-                />
-              ) : null}
-              {isClaimModeActive ? (
-                <RenderingWorldPlazaClaimModeHotbar
-                  isVisible
-                  localOwnedPlotCount={claimModeLocalOwnedPlotCount}
-                  localTileClaimCount={claimModeLocalTileClaimCount}
-                  plotOwnerLimits={plotOwnerLimits}
-                  hoverTilePosition={hoverTilePosition}
-                  claimErrorMessage={buildErrorMessage}
-                  isSavingClaimDraft={isSavingBuildDraft}
-                  isSavingCoords={isSavingCoords}
-                  canSaveMoreCoords={canSaveMoreCoords}
-                  onSaveCoordsAtHoverTile={savingCoordsAtHoverTile}
                 />
               ) : null}
               <RenderingWorldPlazaBuildModeDiscardDialog
@@ -5428,8 +5485,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   isFullscreenSupported={isFullscreenSupported}
                   isChatOpen={false}
                   isFriendsOpen={false}
-                  isClaimModeActive={isClaimModeActive}
-                  isBuildModeActive={isBlockBuildModeActive}
+                  isEditModeActive={isBlockBuildModeActive || isClaimModeActive}
                   isFullscreen={isFullscreen}
                   isFullscreenViewport={hudIsFullscreen}
                   viewportHudScale={viewportHudScale}
@@ -5438,8 +5494,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   onToggleChat={() => undefined}
                   onToggleFriends={() => undefined}
                   onSelectCodexSection={selectingCodexSectionFromActionBar}
-                  onToggleClaimMode={togglingClaimMode}
-                  onToggleBuildMode={togglingBuildMode}
+                  onToggleEditMode={togglingEditSession}
                   onToggleFullscreen={() => {
                     void togglingViewportFullscreen({
                       shouldLockLandscapeOrientation: isMobile,
@@ -5449,23 +5504,25 @@ function RenderingWorldPlazaPixiSceneConnected({
               ) : null}
               {isHudHotbarEnabled ? (
                 <>
-                  <RenderingWorldPlazaInventoryHotbar
-                    localPersistenceOwnerId={localPersistenceOwnerId}
-                    redditUserId={redditUserId}
-                    saveSlotIndex={singlePlayerSaveSlotIndex}
-                    viewportHudScale={viewportHudScale}
-                    isMobile={hudIsMobile}
-                    isFullscreen={hudIsFullscreen}
-                    inventoryDropPlacement={inventoryDropPlacement}
-                    selectedSlotIndex={equipment.selectedSlotIndex}
-                    onSelectHotbarSlot={equipment.selectingHotbarSlot}
-                    onEatHotbarSlot={handlingEatHotbarSlot}
-                    onUseActiveEnchantment={handlingUseActiveEnchantment}
-                    hungerHud={hungerHudSnapshot}
-                    playerEffectiveMaxHealth={
-                      playerHealthHudSnapshot.effectiveMaxHealth
-                    }
-                  />
+                  {!isBlockBuildModeActive && !isClaimModeActive ? (
+                    <RenderingWorldPlazaInventoryHotbar
+                      localPersistenceOwnerId={localPersistenceOwnerId}
+                      redditUserId={redditUserId}
+                      saveSlotIndex={singlePlayerSaveSlotIndex}
+                      viewportHudScale={viewportHudScale}
+                      isMobile={hudIsMobile}
+                      isFullscreen={hudIsFullscreen}
+                      inventoryDropPlacement={inventoryDropPlacement}
+                      selectedSlotIndex={equipment.selectedSlotIndex}
+                      onSelectHotbarSlot={equipment.selectingHotbarSlot}
+                      onEatHotbarSlot={handlingEatHotbarSlot}
+                      onUseActiveEnchantment={handlingUseActiveEnchantment}
+                      hungerHud={hungerHudSnapshot}
+                      playerEffectiveMaxHealth={
+                        playerHealthHudSnapshot.effectiveMaxHealth
+                      }
+                    />
+                  ) : null}
                   <RenderingWorldPlazaGroundItems
                     localPersistenceOwnerId={localPersistenceOwnerId}
                     redditUserId={redditUserId}

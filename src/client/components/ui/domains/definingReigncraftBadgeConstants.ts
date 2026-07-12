@@ -154,7 +154,7 @@ export const DEFINING_REIGNCRAFT_BADGE_RAINBOW_PAINT_REGISTRY: Record<
 export const DEFINING_REIGNCRAFT_BADGE_SEMANTIC_PRESETS = {
   plotCapacity: { color: 'orange', shade: 'dark' },
   tileCapacity: { color: 'blue', shade: 'dark' },
-  temporaryTileCapacity: { color: 'green', shade: 'dark' },
+  temporaryTileCapacity: { color: 'violet', shade: 'dark' },
   capacityAtMax: { color: 'red', shade: 'darker' },
   localPlotCoordinate: { color: 'orange', shade: 'darker' },
   otherPlotCoordinate: { color: 'indigo', shade: 'dark' },

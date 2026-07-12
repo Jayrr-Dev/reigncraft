@@ -13,7 +13,7 @@ export type RenderingWorldPlazaAvatarFootstepsProps = {
 
 /**
  * Side-effect component that plays FilmCow footstep walk/run/land SFX for
- * the girl-sample skin.
+ * girl-sample and playable animal skins.
  */
 export function RenderingWorldPlazaAvatarFootsteps({
   playerPositionRef,

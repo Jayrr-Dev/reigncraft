@@ -12,7 +12,7 @@ describe('listingWildlifeSpeciesSfxClipIdsForSpecies', () => {
   it('includes cow idle and combat clips but not unrelated species pools', () => {
     const clipIds = listingWildlifeSpeciesSfxClipIdsForSpecies('cow');
 
-    expect(clipIds).toContain('cow_moo_01');
+    expect(clipIds).toContain('cow_moo_02');
     expect(clipIds).not.toContain('sheep_baa_01');
     expect(clipIds).not.toContain('pixabay_tiger_roar_loud_01');
   });
@@ -32,7 +32,7 @@ describe('listingWildlifeSpeciesSfxClipIdsForSpecies', () => {
     const clipIds = listingWildlifeSpeciesSfxClipIdsForSpecies('turtle');
 
     expect(clipIds).toContain('pixabay_reptile_hiss_01');
-    expect(clipIds).not.toContain('cow_moo_01');
+    expect(clipIds).not.toContain('cow_moo_02');
   });
 });
 
@@ -45,7 +45,7 @@ describe('listingWildlifeSpeciesSfxClipIdsForSpeciesIds', () => {
     ]);
 
     expect(new Set(clipIds).size).toBe(clipIds.length);
-    expect(clipIds).toContain('cow_moo_01');
+    expect(clipIds).toContain('cow_moo_02');
     expect(clipIds).toContain('sheep_baa_01');
   });
 });

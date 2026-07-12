@@ -1,8 +1,8 @@
 import {
   creatingWorldBuildingPlot,
   type DefiningWorldBuildingPlot,
-} from "@/components/world/building/domains/definingWorldBuildingPlot";
-import type { DefiningWorldBuildingTilePosition } from "@/components/world/building/domains/definingWorldBuildingTilePosition";
+} from '@/components/world/building/domains/definingWorldBuildingPlot';
+import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 
 /**
  * Local build draft state kept in memory until the player saves.
@@ -12,7 +12,7 @@ import type { DefiningWorldBuildingTilePosition } from "@/components/world/build
 
 /** Prefix for plot ids created locally before save. */
 export const DEFINING_WORLD_BUILDING_BUILD_DRAFT_PLOT_ID_PREFIX =
-  "draft-plot-" as const;
+  'draft-plot-' as const;
 
 /** In-memory edits applied during an active build session. */
 export interface DefiningWorldBuildingBuildDraftState {
@@ -28,7 +28,7 @@ export interface DefiningWorldBuildingBuildDraftState {
  * @param plot - Server plot aggregate.
  */
 export function cloningWorldBuildingPlotForBuildDraft(
-  plot: DefiningWorldBuildingPlot,
+  plot: DefiningWorldBuildingPlot
 ): DefiningWorldBuildingPlot {
   return {
     ...plot,
@@ -43,7 +43,7 @@ export function cloningWorldBuildingPlotForBuildDraft(
  * @param plotId - Plot aggregate id.
  */
 export function checkingWorldBuildingBuildDraftPlotIdIsLocal(
-  plotId: string,
+  plotId: string
 ): boolean {
   return plotId.startsWith(DEFINING_WORLD_BUILDING_BUILD_DRAFT_PLOT_ID_PREFIX);
 }
@@ -54,7 +54,7 @@ export function checkingWorldBuildingBuildDraftPlotIdIsLocal(
  * @param draft - Active build draft, if any.
  */
 export function checkingWorldBuildingBuildDraftHasUnsavedChanges(
-  draft: DefiningWorldBuildingBuildDraftState | null,
+  draft: DefiningWorldBuildingBuildDraftState | null
 ): boolean {
   if (!draft) {
     return false;
@@ -65,7 +65,7 @@ export function checkingWorldBuildingBuildDraftHasUnsavedChanges(
     draft.removedPersistedBlockIds.length > 0 ||
     draft.removedPersistedPlotIds.length > 0 ||
     draft.workingPlots.some((plot) =>
-      checkingWorldBuildingBuildDraftPlotIdIsLocal(plot.plotId),
+      checkingWorldBuildingBuildDraftPlotIdIsLocal(plot.plotId)
     )
   );
 }
@@ -78,7 +78,7 @@ export function checkingWorldBuildingBuildDraftHasUnsavedChanges(
  */
 export function checkingWorldBuildingBuildDraftHasOwnedPlot(
   draft: DefiningWorldBuildingBuildDraftState | null,
-  ownerUserId: string | null,
+  ownerUserId: string | null
 ): boolean {
   if (!ownerUserId || !draft) {
     return false;
@@ -110,7 +110,7 @@ export function creatingWorldBuildingBuildDraftTilePlot(
   tilePosition: DefiningWorldBuildingTilePosition,
   options?: {
     readonly isTemporary?: boolean;
-  },
+  }
 ): DefiningWorldBuildingPlot {
   return creatingWorldBuildingPlot({
     plotId: `${DEFINING_WORLD_BUILDING_BUILD_DRAFT_PLOT_ID_PREFIX}${crypto.randomUUID()}`,
@@ -138,7 +138,7 @@ export function creatingWorldBuildingBuildDraftTilePlot(
 export function initializingWorldBuildingBuildDraftFromServerPlots(
   viewportPlots: DefiningWorldBuildingPlot[],
   ownedPlots: DefiningWorldBuildingPlot[],
-  ownerUserId: string,
+  ownerUserId: string
 ): DefiningWorldBuildingBuildDraftState {
   const plotsById = new Map<string, DefiningWorldBuildingPlot>();
 
@@ -165,6 +165,10 @@ export function initializingWorldBuildingBuildDraftFromServerPlots(
 /**
  * Replaces owned plots in the viewport list with in-memory draft plots.
  *
+ * Local-owner plots always come from the draft during an edit session, so
+ * unclaiming the last tile (empty `workingPlots`) actually clears ownership
+ * instead of resurrecting the server viewport copy.
+ *
  * @param viewportPlots - Server plots around the player.
  * @param draft - Active build draft.
  * @param ownerUserId - Authenticated user id.
@@ -172,22 +176,16 @@ export function initializingWorldBuildingBuildDraftFromServerPlots(
 export function mergingWorldBuildingViewportPlotsWithBuildDraft(
   viewportPlots: DefiningWorldBuildingPlot[],
   draft: DefiningWorldBuildingBuildDraftState,
-  ownerUserId: string,
+  ownerUserId: string
 ): DefiningWorldBuildingPlot[] {
-  const draftPlotIds = new Set(
-    draft.workingPlots
-      .filter((plot) => plot.ownerId === ownerUserId)
-      .map((plot) => plot.plotId),
+  const otherOwnerPlots = viewportPlots.filter(
+    (plot) => plot.ownerId !== ownerUserId
+  );
+  const draftOwnedPlots = draft.workingPlots.filter(
+    (plot) => plot.ownerId === ownerUserId
   );
 
-  const otherPlots = viewportPlots.filter(
-    (plot) => plot.ownerId !== ownerUserId || !draftPlotIds.has(plot.plotId),
-  );
-
-  return [
-    ...otherPlots,
-    ...draft.workingPlots.filter((plot) => plot.ownerId === ownerUserId),
-  ];
+  return [...otherOwnerPlots, ...draftOwnedPlots];
 }
 
 /**
@@ -198,12 +196,12 @@ export function mergingWorldBuildingViewportPlotsWithBuildDraft(
  */
 export function listingWorldBuildingBuildDraftPendingLocalPlots(
   draft: DefiningWorldBuildingBuildDraftState,
-  ownerUserId: string,
+  ownerUserId: string
 ): DefiningWorldBuildingPlot[] {
   return draft.workingPlots.filter(
     (plot) =>
       plot.ownerId === ownerUserId &&
       checkingWorldBuildingBuildDraftPlotIdIsLocal(plot.plotId) &&
-      !draft.removedPersistedPlotIds.includes(plot.plotId),
+      !draft.removedPersistedPlotIds.includes(plot.plotId)
   );
 }

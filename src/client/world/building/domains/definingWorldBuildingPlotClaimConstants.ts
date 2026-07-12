@@ -1,4 +1,4 @@
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 
 /**
  * Visual tuning for plot claim tiles rendered in the world.
@@ -10,11 +10,11 @@ import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from "@/components/world/b
 export const DEFINING_WORLD_BUILDING_PLOT_CLAIM_WORLD_LAYER =
   DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND;
 
-/** Blue fill for owned temporary build tiles in claim mode. */
-export const DEFINING_WORLD_BUILDING_PLOT_TEMPORARY_CLAIM_FILL_COLOR = 0x2563eb;
+/** Purple fill for owned temporary build tiles in claim mode. */
+export const DEFINING_WORLD_BUILDING_PLOT_TEMPORARY_CLAIM_FILL_COLOR = 0x9333ea;
 
 /** Dashed border color for owned temporary build tiles in claim mode. */
-export const DEFINING_WORLD_BUILDING_PLOT_TEMPORARY_CLAIM_BORDER_COLOR = 0x1e3a8a;
+export const DEFINING_WORLD_BUILDING_PLOT_TEMPORARY_CLAIM_BORDER_COLOR = 0x581c87;
 
 /** Owned temporary plot tile fill alpha. */
 export const DEFINING_WORLD_BUILDING_PLOT_TEMPORARY_CLAIM_TOP_FILL_ALPHA = 0.55;
@@ -45,23 +45,23 @@ export const DEFINING_WORLD_BUILDING_PLOT_CLAIMABLE_PREVIEW_FILL_ALPHA = 0.42;
 
 /** Minimap CSS color for owned temporary plot tiles. */
 export const DEFINING_WORLD_BUILDING_PLOT_TEMPORARY_CLAIM_MINI_MAP_FILL_COLOR =
-  "rgba(37, 99, 235, 0.72)" as const;
+  'rgba(147, 51, 234, 0.72)' as const;
 
 /** Minimap CSS border for owned temporary plot tiles. */
 export const DEFINING_WORLD_BUILDING_PLOT_TEMPORARY_CLAIM_MINI_MAP_BORDER_COLOR =
-  "rgba(30, 58, 138, 0.9)" as const;
+  'rgba(88, 28, 135, 0.9)' as const;
 
 /** Minimap CSS color for claimable plot tiles. */
 export const DEFINING_WORLD_BUILDING_PLOT_CLAIMABLE_MINI_MAP_FILL_COLOR =
-  "rgba(56, 189, 248, 0.55)" as const;
+  'rgba(56, 189, 248, 0.55)' as const;
 
 /** Minimap CSS color for owned plot tiles. */
 export const DEFINING_WORLD_BUILDING_PLOT_CLAIM_MINI_MAP_FILL_COLOR =
-  "rgba(249, 115, 22, 0.72)" as const;
+  'rgba(249, 115, 22, 0.72)' as const;
 
 /** Minimap CSS border for owned plot tiles. */
 export const DEFINING_WORLD_BUILDING_PLOT_CLAIM_MINI_MAP_BORDER_COLOR =
-  "rgba(0, 0, 0, 0.85)" as const;
+  'rgba(0, 0, 0, 0.85)' as const;
 
 /** Blue fill for plots owned by other players in claim mode. */
 export const DEFINING_WORLD_BUILDING_PLOT_OTHER_OWNER_FILL_COLOR = 0xc084fc;
@@ -71,4 +71,4 @@ export const DEFINING_WORLD_BUILDING_PLOT_OTHER_OWNER_TOP_FILL_ALPHA = 0.28;
 
 /** Minimap CSS color for other-owner plot tiles. */
 export const DEFINING_WORLD_BUILDING_PLOT_OTHER_OWNER_MINI_MAP_FILL_COLOR =
-  "rgba(192, 132, 252, 0.55)" as const;
+  'rgba(192, 132, 252, 0.55)' as const;

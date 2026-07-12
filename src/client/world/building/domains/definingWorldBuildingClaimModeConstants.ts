@@ -153,7 +153,7 @@ export const DEFINING_WORLD_BUILDING_PLOT_OWNER_LABELS_QUERY_KEY_ROOT =
 
 /** Claim mode legend swatch for temporary local plots. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_TEMPORARY_SWATCH_CLASS_NAME =
-  'h-2.5 w-2.5 rounded-sm border border-blue-900/80 bg-blue-600/80' as const;
+  'h-2.5 w-2.5 rounded-sm border border-purple-900/80 bg-purple-600/80' as const;
 
 /** Claim mode legend swatch for local plots. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_LEGEND_OWNED_SWATCH_CLASS_NAME =

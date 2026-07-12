@@ -17,10 +17,11 @@ import {
 } from '@/components/world/footsteps/domains/definingFilmcowFootstepSfxConstants';
 
 /**
- * FilmCow footstep SFX for the girl-sample avatar skin.
+ * FilmCow footstep SFX for girl-sample and playable animal avatar skins.
  *
  * Walk, run, and jump landing use biome-mapped clips from
- * `public/movement/sfx/filmcow-footsteps/`. Other skins stay silent.
+ * `public/movement/sfx/filmcow-footsteps/` (and Nox on hard surfaces).
+ * Animals use the wildlife clip pools so they stay disjoint from girl steps.
  *
  * @module components/world/domains/definingWorldPlazaAvatarFootstepSfxConstants
  */

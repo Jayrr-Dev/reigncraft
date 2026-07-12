@@ -62,6 +62,21 @@ export function checkingWorldDepthColumnFootIsInFrontOfAvatarFoot(
 }
 
 /**
+ * Returns true when a column sits on the avatar's standing tile (same-tile roof /
+ * overhead slab occlusion).
+ */
+export function checkingWorldDepthColumnFootIsOnAvatarStandingTile(
+  gridPoint: DefiningWorldPlazaWorldPoint,
+  columnFootX: number,
+  columnFootY: number
+): boolean {
+  return (
+    Math.floor(columnFootX) === Math.floor(gridPoint.x) &&
+    Math.floor(columnFootY) === Math.floor(gridPoint.y)
+  );
+}
+
+/**
  * Returns true when a column surface is at or below the avatar standing layer
  * (standing bump — includes coplanar ground).
  */

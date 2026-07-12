@@ -24,7 +24,18 @@ export const DEFINING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_TOGGLE_ARIA_LABEL =
 
 /** Expanded skin option panel below the character toggle. */
 export const DEFINING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_PANEL_CLASS_NAME =
-  'pointer-events-auto flex w-max max-w-[10rem] flex-col gap-1 rounded-md border border-violet-300/40 bg-black/85 p-1.5 shadow-lg backdrop-blur-sm' as const;
+  'pointer-events-auto flex w-max max-w-[14rem] flex-col gap-1 rounded-md border border-violet-300/40 bg-black/85 p-1.5 shadow-lg backdrop-blur-sm' as const;
+
+/** Scrollable list region inside the skin selector panel. */
+export const DEFINING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_LIST_CLASS_NAME =
+  'flex max-h-[min(50vh,24rem)] flex-col gap-1 overflow-y-auto overscroll-contain pr-0.5' as const;
+
+/** Filter input inside the skin selector panel. */
+export const DEFINING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_FILTER_INPUT_CLASS_NAME =
+  'w-full rounded border border-white/20 bg-black/50 px-2 py-1 text-[10px] text-white/90 placeholder:text-white/40 focus:border-violet-300/60 focus:outline-none' as const;
+
+/** Minimum option count before the toggle shows the active skin name. */
+export const DEFINING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_SHOW_ACTIVE_LABEL_MIN_OPTIONS = 8;
 
 /** Base classes shared by every skin option button. */
 export const DEFINING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_OPTION_BUTTON_BASE_CLASS_NAME =
