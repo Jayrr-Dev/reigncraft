@@ -26,6 +26,8 @@ import {
 } from '@/components/world/health/domains/formattingWorldPlazaEntityHealthFloatTextLabel';
 import { mappingWorldPlazaEntityHealthFloatTextIcon } from '@/components/world/health/domains/mappingWorldPlazaEntityHealthFloatTextIcon';
 import { resolvingWorldPlazaEntityHealthFloatTextScreenPoint } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthFloatTextScreenPoint';
+import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { useLayoutEffect, useRef } from 'react';
 
 const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_HIDDEN_TRANSFORM =
@@ -182,6 +184,7 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
         const isHealFloat =
           floatText.kind === 'heal' || floatText.kind === 'heal_regen';
         const isStudyFloat = floatText.kind === 'study';
+        const isItemGainFloat = floatText.kind === 'item_gain';
         const isHealthScaleFloat = floatText.kind === 'health_scale';
         const healVisualStyle =
           isHealFloat || isHealthScaleFloat
@@ -199,10 +202,12 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
         const studyFontSizePx = isStudyFloat
           ? 18 + Math.max(0, Math.round(floatText.amount) - 1) * 3
           : null;
+        const itemGainFontSizePx = isItemGainFloat ? 18 : null;
         const resolvedFontSizePx =
           damageFontSizePx ??
           healVisualStyle?.fontSizePx ??
           studyFontSizePx ??
+          itemGainFontSizePx ??
           18;
         const iconName = mappingWorldPlazaEntityHealthFloatTextIcon(floatText);
         const amountLabel =
@@ -211,6 +216,13 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
           computingWorldPlazaEntityHealthFloatTextIconSizePx(
             resolvedFontSizePx
           );
+        const itemTypeId =
+          isItemGainFloat &&
+          floatText.itemTypeId !== null &&
+          floatText.itemTypeId !== undefined &&
+          floatText.itemTypeId.length > 0
+            ? floatText.itemTypeId
+            : null;
 
         return (
           <div
@@ -251,13 +263,32 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
                   : {}),
               }}
             >
-              <Icon
-                icon={iconName}
-                aria-hidden
-                className="shrink-0 text-current"
-                width={iconSizePx}
-                height={iconSizePx}
-              />
+              {itemTypeId !== null ? (
+                <RenderingWorldPlazaInventoryItemGlyph
+                  itemTypeId={itemTypeId}
+                  registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
+                  iconClassName="shrink-0"
+                  iconStyle={{
+                    width: iconSizePx,
+                    height: iconSizePx,
+                  }}
+                  emojiStyle={{
+                    fontSize: `${iconSizePx}px`,
+                    lineHeight: 1,
+                  }}
+                  fallbackTextStyle={{
+                    fontSize: `${Math.max(10, Math.round(iconSizePx * 0.7))}px`,
+                  }}
+                />
+              ) : (
+                <Icon
+                  icon={iconName}
+                  aria-hidden
+                  className="shrink-0 text-current"
+                  width={iconSizePx}
+                  height={iconSizePx}
+                />
+              )}
               {amountLabel !== null ? (
                 <span className="tabular-nums">{amountLabel}</span>
               ) : null}

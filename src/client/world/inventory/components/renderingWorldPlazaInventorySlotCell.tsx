@@ -40,6 +40,7 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import {
   STYLING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_EMPTY_STORAGE_SLOT_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_EMPTY_WEAPON_TOOL_SLOT_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_ITEM_ICON_WRAPPER_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_CLASS,
@@ -55,6 +56,7 @@ import {
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMPTY_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_WEAPON_TOOL_CLASS,
+  STYLING_WORLD_PLAZA_INVENTORY_STORAGE_ORDINAL_CLASS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { formattingWorldPlazaInventoryItemDurabilityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemDurabilityLabel';
 import type { DefiningWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
@@ -64,6 +66,7 @@ import { resolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
 import { resolvingWorldPlazaInventorySlotDoubleActivationAction } from '@/components/world/inventory/domains/resolvingWorldPlazaInventorySlotDoubleActivationAction';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
+import { resolvingWorldPlazaInventoryStorageSlotOrdinal } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStorageSlotOrdinal';
 import { cn } from '@/lib/utils';
 import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import type * as React from 'react';
@@ -244,6 +247,9 @@ export function RenderingWorldPlazaInventorySlotCell({
     slotIndex === DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX;
 
   if (isEmpty) {
+    const storageOrdinal =
+      resolvingWorldPlazaInventoryStorageSlotOrdinal(slotIndex);
+
     return (
       <div
         ref={setDropRef}
@@ -255,6 +261,8 @@ export function RenderingWorldPlazaInventorySlotCell({
           }),
           isReservedWeaponToolSlot &&
             STYLING_WORLD_PLAZA_INVENTORY_EMPTY_WEAPON_TOOL_SLOT_CLASS,
+          storageOrdinal !== null &&
+            STYLING_WORLD_PLAZA_INVENTORY_EMPTY_STORAGE_SLOT_CLASS,
           showDropHighlight &&
             isValidDrop &&
             STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_VALID_CLASS,
@@ -266,7 +274,9 @@ export function RenderingWorldPlazaInventorySlotCell({
         aria-label={
           isReservedWeaponToolSlot
             ? LABELING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_SLOT
-            : `Empty slot ${slotIndex + 1}`
+            : storageOrdinal !== null
+              ? `Empty storage slot ${storageOrdinal}`
+              : `Empty slot ${slotIndex + 1}`
         }
         onClick={() => {
           onEquipSlot?.(slotIndex);
@@ -282,6 +292,14 @@ export function RenderingWorldPlazaInventorySlotCell({
             }}
             aria-hidden
           />
+        ) : storageOrdinal !== null ? (
+          <span
+            className={STYLING_WORLD_PLAZA_INVENTORY_STORAGE_ORDINAL_CLASS}
+            style={viewportStyles.storageOrdinalStyle}
+            aria-hidden
+          >
+            {storageOrdinal}
+          </span>
         ) : null}
       </div>
     );

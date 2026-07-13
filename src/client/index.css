@@ -590,6 +590,16 @@ body {
     0 0 14px rgba(244, 211, 94, 0.45);
 }
 
+.plaza-combat-float-item-gain {
+  animation: plaza-combat-float 1.05s ease-out forwards;
+  paint-order: stroke fill;
+  color: #f4d35e;
+  -webkit-text-stroke: 1px rgba(20, 37, 43, 0.95);
+  text-shadow:
+    0 2px 0 rgba(20, 37, 43, 0.95),
+    0 0 12px rgba(244, 211, 94, 0.35);
+}
+
 .plaza-combat-float-heal-strong {
   animation-duration: 1.15s;
 }

@@ -20,7 +20,8 @@ export type DefiningWorldPlazaEntityHealthFloatTextKind =
   | 'shield_absorb'
   | 'blocked'
   | 'miss'
-  | 'study';
+  | 'study'
+  | 'item_gain';
 
 /** One ephemeral combat float above the local player. */
 export type DefiningWorldPlazaEntityHealthFloatText = {
@@ -28,6 +29,8 @@ export type DefiningWorldPlazaEntityHealthFloatText = {
   kind: DefiningWorldPlazaEntityHealthFloatTextKind;
   amount: number;
   damageKind: DefiningWorldPlazaEntityDamageKind | null;
+  /** Inventory item type when {@link kind} is `item_gain` (craft refunds, etc.). */
+  itemTypeId?: string | null;
   /** Outcome tier when heal/shield amounts were rolled statistically. */
   outcomeTier?: DefiningWorldPlazaDamageOutcomeTier | null;
   /** Standard-deviation distance from expected when the float came from a roll. */

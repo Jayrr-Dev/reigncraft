@@ -6,6 +6,10 @@
 
 import type { DefiningWorldPlazaHudToolbarModeId } from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
 import { DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID } from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
+import {
+  checkingWorldPlazaHudToolbarModeShouldExitEditSession,
+  resolvingWorldPlazaHudToolbarModeFromEditSession,
+} from '@/components/world/domains/resolvingWorldPlazaHudToolbarModeFromEditSession';
 import { useCallback, useEffect, useState } from 'react';
 
 export type UsingWorldPlazaHudToolbarModeParams = {
@@ -43,23 +47,13 @@ export function usingWorldPlazaHudToolbarMode({
     );
 
   useEffect(() => {
-    if (isClaimModeActive) {
-      setHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM);
-      return;
-    }
-
-    if (isBlockBuildModeActive) {
-      setHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD);
-      return;
-    }
-
-    setHudToolbarMode((currentMode) => {
-      if (currentMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CRAFT) {
-        return currentMode;
-      }
-
-      return DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS;
-    });
+    setHudToolbarMode((currentMode) =>
+      resolvingWorldPlazaHudToolbarModeFromEditSession({
+        isClaimModeActive,
+        isBlockBuildModeActive,
+        currentMode,
+      })
+    );
   }, [isBlockBuildModeActive, isClaimModeActive]);
 
   const selectingHudToolbarMode = useCallback(
@@ -68,7 +62,13 @@ export function usingWorldPlazaHudToolbarMode({
         mode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS ||
         mode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CRAFT
       ) {
-        if (isEditSessionActive) {
+        if (
+          checkingWorldPlazaHudToolbarModeShouldExitEditSession({
+            mode,
+            currentHudToolbarMode: hudToolbarMode,
+            isEditSessionActive,
+          })
+        ) {
           togglingEditSession();
         }
 
@@ -92,6 +92,7 @@ export function usingWorldPlazaHudToolbarMode({
     [
       activatingBuildMode,
       activatingClaimMode,
+      hudToolbarMode,
       isBuildModeEnabled,
       isEditSessionActive,
       togglingEditSession,

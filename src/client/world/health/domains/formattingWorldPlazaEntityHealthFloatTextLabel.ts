@@ -75,7 +75,8 @@ export function formattingWorldPlazaEntityHealthFloatTextAmount({
     kind === 'heal' ||
     kind === 'heal_regen' ||
     kind === 'shield_gain' ||
-    kind === 'study'
+    kind === 'study' ||
+    kind === 'item_gain'
   ) {
     return `+${roundedAmount}`;
   }
@@ -120,7 +121,8 @@ export function formattingWorldPlazaEntityHealthFloatTextLabel({
     kind === 'heal' ||
     kind === 'heal_regen' ||
     kind === 'shield_gain' ||
-    kind === 'study'
+    kind === 'study' ||
+    kind === 'item_gain'
   ) {
     const tierLabel =
       resolvingWorldPlazaEntityHealthBeneficialTierLabel(outcomeTier);
@@ -235,6 +237,10 @@ export function resolvingWorldPlazaEntityHealthFloatTextClassName(
 
   if (kind === 'study') {
     return 'plaza-combat-float-study text-poster-gold';
+  }
+
+  if (kind === 'item_gain') {
+    return 'plaza-combat-float-item-gain text-poster-gold';
   }
 
   const tierDamageClassName =

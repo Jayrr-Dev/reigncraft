@@ -1,5 +1,6 @@
 'use client';
 
+import { checkingWorldBuildingPlacementPreviewUsesClaimTile } from '@/components/world/building/domains/checkingWorldBuildingPlacementPreviewUsesClaimTile';
 import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import { DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import { DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX } from '@/components/world/building/domains/definingWorldBuildingBuildModeConstants';
@@ -8,13 +9,11 @@ import {
   DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT,
   type DefiningWorldBuildingCutGridAxisCellCount,
 } from '@/components/world/building/domains/definingWorldBuildingCutFootprintConstants';
-import { DEFINING_WORLD_BUILDING_PLOT_CLAIM_WORLD_LAYER } from '@/components/world/building/domains/definingWorldBuildingPlotClaimConstants';
 import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import { drawingWorldBuildingPlacementPreviewOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingPlacedBlocksOnGraphics';
 import { drawingWorldBuildingPlotClaimPreviewOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingPlotClaimTilesOnGraphics';
 import { resolvingWorldBuildingClaimModePlotOverlayEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingClaimModePlotOverlayZIndex';
-import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
 import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady';
 import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import { useApplication } from '@pixi/react';
@@ -23,6 +22,8 @@ import { useCallback, useRef } from 'react';
 
 export interface RenderingWorldPlazaBlockPlacementPreviewProps {
   isVisible: boolean;
+  /** True only in claim mode. Ground-layer build previews must not use claim tiles. */
+  isClaimModePreview: boolean;
   previewTilePositionRef: React.RefObject<DefiningWorldBuildingTilePosition | null>;
   isPreviewTileValidRef: React.RefObject<boolean>;
   previewWorldLayerRef: React.RefObject<number>;
@@ -37,6 +38,7 @@ export interface RenderingWorldPlazaBlockPlacementPreviewProps {
  */
 export function RenderingWorldPlazaBlockPlacementPreview({
   isVisible,
+  isClaimModePreview,
   previewTilePositionRef,
   isPreviewTileValidRef,
   previewWorldLayerRef,
@@ -89,7 +91,14 @@ export function RenderingWorldPlazaBlockPlacementPreview({
       previewCutGridAxisCellCountRef.current ??
       DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT;
 
-    if (previewWorldLayer === DEFINING_WORLD_BUILDING_PLOT_CLAIM_WORLD_LAYER) {
+    // Claim mode alone owns the blue claimable tile wash. Ground-layer build
+    // placement also uses layer 1, so never infer claim preview from world layer.
+    if (
+      checkingWorldBuildingPlacementPreviewUsesClaimTile({
+        isClaimModeActive: isClaimModePreview,
+        previewWorldLayer,
+      })
+    ) {
       graphics.zIndex =
         resolvingWorldBuildingClaimModePlotOverlayEntityZIndex(
           previewTilePosition
@@ -103,13 +112,9 @@ export function RenderingWorldPlazaBlockPlacementPreview({
       return;
     }
 
-    // Match placed-block depth so elevated previews clear terrain they sit on
-    // and stay behind taller cliffs (same rules as a real placement).
-    graphics.zIndex = resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
-      previewTilePosition.tileX,
-      previewTilePosition.tileY,
-      previewWorldLayer
-    );
+    // Build ghosts must remain visible above plot ownership tiles, terrain,
+    // blocks, and avatars. Claim previews retain their depth-sorted layer.
+    graphics.zIndex = DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX;
 
     drawingWorldBuildingPlacementPreviewOnGraphics(
       graphics,

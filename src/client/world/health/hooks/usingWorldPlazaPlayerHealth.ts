@@ -202,8 +202,13 @@ export interface UsingWorldPlazaPlayerHealthResult {
   >;
   /** Enqueues a gray spatial Miss float above the local player (jump dodge, etc.). */
   enqueueMissFloatRef: React.RefObject<() => void>;
-  /** Enqueues a green +amount float without changing health (craft refunds, etc.). */
-  enqueueHealAmountFloatRef: React.RefObject<(amount: number) => void>;
+  /**
+   * Enqueues a gold item-gain float (glyph + quantity) without changing health
+   * (craft refunds, etc.).
+   */
+  enqueueItemGainFloatRef: React.RefObject<
+    (itemTypeId: string, amount: number) => void
+  >;
   healRef: React.RefObject<(amount: number) => void>;
   applyFallDamageRef: React.RefObject<(layerDelta: number) => void>;
   killRef: React.RefObject<() => void>;
@@ -918,9 +923,9 @@ export function usingWorldPlazaPlayerHealth({
     (amount: number, kind?: DefiningWorldPlazaEntityDamageKind) => void
   >(() => undefined);
   const enqueueMissFloatRef = useRef<() => void>(() => undefined);
-  const enqueueHealAmountFloatRef = useRef<(amount: number) => void>(
-    () => undefined
-  );
+  const enqueueItemGainFloatRef = useRef<
+    (itemTypeId: string, amount: number) => void
+  >(() => undefined);
   const healRef = useRef<(amount: number) => void>(() => undefined);
   const applyFallDamageRef = useRef<(layerDelta: number) => void>(
     () => undefined
@@ -990,7 +995,7 @@ export function usingWorldPlazaPlayerHealth({
       environmentalTemperatureLastTickAtMsRef.current = null;
       applyStarvationDamageRef.current = () => undefined;
       enqueueMissFloatRef.current = () => undefined;
-      enqueueHealAmountFloatRef.current = () => undefined;
+      enqueueItemGainFloatRef.current = () => undefined;
       pushingHudSnapshot(performance.now());
       return;
     }
@@ -1007,13 +1012,14 @@ export function usingWorldPlazaPlayerHealth({
       pushingHudSnapshot(nowMs);
     };
 
-    enqueueHealAmountFloatRef.current = (amount) => {
+    enqueueItemGainFloatRef.current = (itemTypeId, amount) => {
       const nowMs = performance.now();
       enqueueFloatText(
         {
-          kind: 'heal',
+          kind: 'item_gain',
           amount,
           damageKind: null,
+          itemTypeId,
         },
         nowMs
       );
@@ -1617,7 +1623,7 @@ export function usingWorldPlazaPlayerHealth({
     syncingHealthHudFromStateRef,
     takeDamageRef,
     enqueueMissFloatRef,
-    enqueueHealAmountFloatRef,
+    enqueueItemGainFloatRef,
     healRef,
     applyFallDamageRef,
     killRef,

@@ -22,6 +22,8 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_SLOT_FALLBACK_TEXT_BASE_PX,
   DEFINING_WORLD_PLAZA_INVENTORY_SLOT_ICON_BASE_PX,
   DEFINING_WORLD_PLAZA_INVENTORY_SLOT_SPRITE_ICON_BASE_PX,
+  DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_ORDINAL_OPACITY,
+  DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_ORDINAL_TEXT_BASE_PX,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import type { CSSProperties } from 'react';
 
@@ -48,6 +50,8 @@ export interface DefiningWorldPlazaInventoryHotbarViewportStyles {
   readonly emojiStyle: CSSProperties;
   readonly fallbackTextStyle: CSSProperties;
   readonly quantityBadgeStyle: CSSProperties;
+  /** Centered ordinal on empty storage-page slots. */
+  readonly storageOrdinalStyle: CSSProperties;
   readonly loadingShellStyle: CSSProperties;
   readonly loadingTextStyle: CSSProperties;
   readonly pageArrowStackStyle: CSSProperties;
@@ -159,6 +163,11 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
     viewportHudScale,
     DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE
   );
+  const storageOrdinalTextPx = computingWorldPlazaViewportHudScaledPx(
+    DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_ORDINAL_TEXT_BASE_PX,
+    viewportHudScale,
+    DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE
+  );
   const loadingTextPx = computingWorldPlazaViewportHudScaledPx(
     DEFINING_WORLD_PLAZA_INVENTORY_LOADING_TEXT_BASE_PX,
     viewportHudScale,
@@ -244,6 +253,10 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
       paddingLeft: quantityBadgePaddingXPx,
       paddingRight: quantityBadgePaddingXPx,
       fontSize: quantityBadgeTextPx,
+    },
+    storageOrdinalStyle: {
+      fontSize: storageOrdinalTextPx,
+      opacity: DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_ORDINAL_OPACITY,
     },
     loadingShellStyle: {
       height: gridHeightPx,

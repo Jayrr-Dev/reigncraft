@@ -66,6 +66,14 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_EMOJI_BASE_PX = 20 as const;
 export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_FALLBACK_TEXT_BASE_PX =
   16 as const;
 
+/** Base centered storage-slot ordinal size in px (empty row 2+ cells). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_ORDINAL_TEXT_BASE_PX =
+  14 as const;
+
+/** Opacity for empty storage-slot ordinal watermark. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_ORDINAL_OPACITY =
+  0.55 as const;
+
 /**
  * Scales one inventory base px value by {@link DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE}.
  *
@@ -202,6 +210,14 @@ export const STYLING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_ICON_CLASS =
 /** Centers the empty fist inside the reserved equip slot. */
 export const STYLING_WORLD_PLAZA_INVENTORY_EMPTY_WEAPON_TOOL_SLOT_CLASS =
   'flex items-center justify-center' as const;
+
+/** Centers a storage ordinal watermark in an empty storage-page slot. */
+export const STYLING_WORLD_PLAZA_INVENTORY_EMPTY_STORAGE_SLOT_CLASS =
+  'flex items-center justify-center' as const;
+
+/** Centered 1…N label on empty storage slots (row 2+). */
+export const STYLING_WORLD_PLAZA_INVENTORY_STORAGE_ORDINAL_CLASS =
+  'pointer-events-none select-none font-display font-bold leading-none tabular-nums text-parchment' as const;
 
 /** Equipped slot highlight. */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_EQUIPPED_CLASS =

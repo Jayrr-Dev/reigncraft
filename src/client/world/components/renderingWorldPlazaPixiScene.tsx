@@ -1080,6 +1080,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   >(null);
   const pendingCraftRecipeIdRef =
     useRef<DefiningWorldPlazaCraftModeRecipeId | null>(null);
+  const [
+    pendingCraftPlacementPreviewDefinitionId,
+    setPendingCraftPlacementPreviewDefinitionId,
+  ] = useState<DefiningWorldBuildingBlockDefinitionId | null>(null);
   const craftedCommittedBlockRecipeByBlockIdRef = useRef(
     new Map<string, DefiningWorldPlazaCraftModeRecipeId>()
   );
@@ -1285,16 +1289,8 @@ function RenderingWorldPlazaPixiSceneConnected({
   previewBlockHeightRef.current = previewBlockHeight;
   previewCutFootprintMaskRef.current = previewCutFootprintMask;
   previewCutGridAxisCellCountRef.current = previewCutGridAxisCellCount;
-  const pendingCraftPreviewRecipeDefinition =
-    pendingCraftRecipeIdRef.current === null
-      ? null
-      : resolvingWorldPlazaCraftModeRecipeDefinition(
-          pendingCraftRecipeIdRef.current
-        );
   previewDefinitionIdRef.current =
-    pendingCraftPreviewRecipeDefinition?.outcome.kind === 'entity'
-      ? pendingCraftPreviewRecipeDefinition.outcome.blockDefinitionId
-      : selectedDefinitionId;
+    pendingCraftPlacementPreviewDefinitionId ?? selectedDefinitionId;
   hoveredRemovableBlockRef.current = hoveredRemovableBlock;
   isBuildTilePopoverOpenRef.current = isBuildTilePopoverOpen;
   isEditSessionActiveRef.current = isEditSessionActive;
@@ -1416,6 +1412,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         resolvingWorldPlazaCraftModeRecipeDefinition(pendingRecipeId);
 
       pendingCraftRecipeIdRef.current = null;
+      setPendingCraftPlacementPreviewDefinitionId(null);
 
       let shouldShowRefundFeedback = options.showRefundFeedback;
       let shouldShowCanceledToast = options.showCanceledToast;
@@ -1458,12 +1455,14 @@ function RenderingWorldPlazaPixiSceneConnected({
 
       if (!recipeDefinition || recipeDefinition.outcome.kind !== 'entity') {
         pendingCraftRecipeIdRef.current = null;
+        setPendingCraftPlacementPreviewDefinitionId(null);
         return;
       }
 
       const entityOutcome = recipeDefinition.outcome;
       const committedRecipeId = pendingRecipeId;
       pendingCraftRecipeIdRef.current = null;
+      setPendingCraftPlacementPreviewDefinitionId(null);
 
       updatingInventoryState((currentState) => {
         const commitResult = committingWorldPlazaCraftRecipePlaceablePlacement(
@@ -1479,7 +1478,9 @@ function RenderingWorldPlazaPixiSceneConnected({
           showingGameplayHudToast(
             LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_SUCCESS_TOAST
           );
+          // Disarm ghost selection; flush/exit silent build. Craft HUD stays via resolver.
           selectingBlockDefinition(entityOutcome.blockDefinitionId);
+          togglingEditSession();
           return commitResult.nextState;
         }
 
@@ -1489,7 +1490,12 @@ function RenderingWorldPlazaPixiSceneConnected({
         return null;
       });
     },
-    [selectingBlockDefinition, showingGameplayHudToast, updatingInventoryState]
+    [
+      selectingBlockDefinition,
+      showingGameplayHudToast,
+      togglingEditSession,
+      updatingInventoryState,
+    ]
   );
 
   useEffect(() => {
@@ -1563,21 +1569,25 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
 
       pendingCraftRecipeIdRef.current = recipeId;
+      setPendingCraftPlacementPreviewDefinitionId(
+        recipeDefinition.outcome.blockDefinitionId
+      );
       previewDefinitionIdRef.current =
         recipeDefinition.outcome.blockDefinitionId;
       setOpenCraftCookbookId(null);
-      selectingHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD);
+      // Silent build under Craft HUD: ghost + click-place without flipping to Build/Claim.
+      activatingBuildMode();
       enteringBuildPlacementForBlockDefinition(
         recipeDefinition.outcome.blockDefinitionId,
         recipeDefinition.outcome.blockHeight
       );
     },
     [
+      activatingBuildMode,
       enteringBuildPlacementForBlockDefinition,
       inventoryState,
       isBuildModeEnabled,
       isHudCraftingEnabled,
-      selectingHudToolbarMode,
       showingGameplayHudToast,
       updatingInventoryState,
     ]
@@ -1662,6 +1672,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
     if (!recipeDefinition || recipeDefinition.outcome.kind !== 'entity') {
       pendingCraftRecipeIdRef.current = null;
+      setPendingCraftPlacementPreviewDefinitionId(null);
       return;
     }
 
@@ -2640,7 +2651,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     syncingHealthHudFromStateRef,
     takeDamageRef,
     enqueueMissFloatRef,
-    enqueueHealAmountFloatRef,
+    enqueueItemGainFloatRef,
     healRef,
     applyFallDamageRef,
     killRef,
@@ -2686,11 +2697,12 @@ function RenderingWorldPlazaPixiSceneConnected({
   useEffect(() => {
     showingCraftRefundFloatsRef.current = (recipeDefinition) => {
       showingWorldPlazaCraftRecipeRefundFloatFeedback(
-        (amount) => enqueueHealAmountFloatRef.current(amount),
+        (itemTypeId, amount) =>
+          enqueueItemGainFloatRef.current(itemTypeId, amount),
         recipeDefinition
       );
     };
-  }, [enqueueHealAmountFloatRef]);
+  }, [enqueueItemGainFloatRef]);
 
   const handlingRemovedCraftedBlock = useCallback(
     (removedBlock: DefiningWorldBuildingPlacedBlock): void => {
@@ -5540,8 +5552,11 @@ function RenderingWorldPlazaPixiSceneConnected({
                   <RenderingWorldPlazaBlockPlacementPreview
                     isVisible={
                       isEditSessionActive &&
-                      (isClaimModeActive || isBuildPlacementSelectionActive)
+                      (isClaimModeActive ||
+                        isBuildPlacementSelectionActive ||
+                        pendingCraftPlacementPreviewDefinitionId !== null)
                     }
+                    isClaimModePreview={isClaimModeActive}
                     previewTilePositionRef={previewTilePositionRef}
                     isPreviewTileValidRef={isPreviewTileValidRef}
                     previewWorldLayerRef={previewWorldLayerRef}

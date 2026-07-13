@@ -23,6 +23,7 @@ export type ManagingWorldPlazaEntityHealthFloatTextEnqueueParams = {
   kind: DefiningWorldPlazaEntityHealthFloatTextKind;
   amount: number;
   damageKind?: DefiningWorldPlazaEntityDamageKind | null;
+  itemTypeId?: string | null;
   outcomeTier?: DefiningWorldPlazaDamageOutcomeTier | null;
   deviationScore?: number | null;
   nowMs: number;
@@ -67,6 +68,7 @@ export function enqueueingWorldPlazaEntityHealthFloatText({
   kind,
   amount,
   damageKind = null,
+  itemTypeId = null,
   outcomeTier = null,
   deviationScore = null,
   nowMs,
@@ -110,6 +112,7 @@ export function enqueueingWorldPlazaEntityHealthFloatText({
     kind,
     amount,
     damageKind,
+    itemTypeId: kind === 'item_gain' ? itemTypeId : null,
     outcomeTier,
     deviationScore,
     createdAtMs: nowMs,
