@@ -2,6 +2,7 @@ import {
   creatingWorldBuildingPlot,
   type DefiningWorldBuildingPlot,
 } from '@/components/world/building/domains/definingWorldBuildingPlot';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 
 /**
@@ -17,6 +18,7 @@ export const DEFINING_WORLD_BUILDING_BUILD_DRAFT_PLOT_ID_PREFIX =
 /** In-memory edits applied during an active build session. */
 export interface DefiningWorldBuildingBuildDraftState {
   readonly workingPlots: DefiningWorldBuildingPlot[];
+  readonly sessionBlocks: readonly DefiningWorldBuildingPlacedBlock[];
   readonly addedDraftBlockIds: ReadonlySet<string>;
   readonly removedPersistedBlockIds: readonly string[];
   readonly removedPersistedPlotIds: readonly string[];
@@ -93,6 +95,7 @@ export function checkingWorldBuildingBuildDraftHasOwnedPlot(
 export function creatingEmptyWorldBuildingBuildDraftState(): DefiningWorldBuildingBuildDraftState {
   return {
     workingPlots: [],
+    sessionBlocks: [],
     addedDraftBlockIds: new Set(),
     removedPersistedBlockIds: [],
     removedPersistedPlotIds: [],
@@ -156,6 +159,7 @@ export function initializingWorldBuildingBuildDraftFromServerPlots(
 
   return {
     workingPlots: Array.from(plotsById.values()),
+    sessionBlocks: [],
     addedDraftBlockIds: new Set(),
     removedPersistedBlockIds: [],
     removedPersistedPlotIds: [],

@@ -37,8 +37,23 @@ export const WORLD_BUILDING_DEVVIT_PLOTS_DELETE_API_PATH =
 export const WORLD_BUILDING_DEVVIT_BLOCKS_API_PATH =
   `${WORLD_BUILDING_DEVVIT_API_BASE_PATH}/blocks` as const;
 
+export const WORLD_BUILDING_DEVVIT_SESSION_BLOCKS_API_PATH =
+  `${WORLD_BUILDING_DEVVIT_API_BASE_PATH}/session-blocks` as const;
+
 export const WORLD_BUILDING_DEVVIT_OWNER_LIMITS_API_PATH =
   `${WORLD_BUILDING_DEVVIT_API_BASE_PATH}/owner-limits` as const;
+
+/** Plot id sentinel for session-only blocks stored outside player claims. */
+export const WORLD_BUILDING_DEVVIT_SESSION_PLOT_ID_SENTINEL = 'session' as const;
+
+/** Metadata flag marking a block row as session-scoped. */
+export const WORLD_BUILDING_DEVVIT_SESSION_BLOCK_METADATA_IS_SESSION_KEY =
+  'is_session' as const;
+
+/** Block definition ids allowed for session placement on unclaimed land. */
+export const WORLD_BUILDING_DEVVIT_SESSION_PLACEMENT_DEFINITION_IDS = [
+  'utility:campfire',
+] as const;
 
 /** Raw plot row stored in Redis and returned by API routes. */
 export type WorldBuildingDevvitPlotRow = {
@@ -110,6 +125,37 @@ export type WorldBuildingDevvitPlaceBlockResponse =
   | {
       type: 'block';
       block: WorldBuildingDevvitBlockRow;
+    }
+  | {
+      type: 'error';
+      message: string;
+    };
+
+export type WorldBuildingDevvitPlaceSessionBlockRequest = {
+  blockId: string;
+  definitionId: string;
+  tileX: number;
+  tileY: number;
+  worldLayer: number;
+  blockHeight: number;
+  placedAt: string;
+  metadata?: Record<string, string | number | boolean | null>;
+};
+
+export type WorldBuildingDevvitPlaceSessionBlockResponse =
+  | {
+      type: 'block';
+      block: WorldBuildingDevvitBlockRow;
+    }
+  | {
+      type: 'error';
+      message: string;
+    };
+
+export type WorldBuildingDevvitDeleteSessionBlocksResponse =
+  | {
+      type: 'deleted';
+      deletedBlockCount: number;
     }
   | {
       type: 'error';

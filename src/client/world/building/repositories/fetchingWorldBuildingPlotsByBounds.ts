@@ -6,6 +6,10 @@ import {
   parsingWorldBuildingPlotRow,
 } from "@/components/world/building/repositories/parsingWorldBuildingPlotRow";
 import {
+  checkingWorldBuildingDevvitBlockRowIsSession,
+  hydratingWorldBuildingSessionBlocksPlot,
+} from "@/components/world/building/domains/hydratingWorldBuildingSessionBlocksPlot";
+import {
   parsingWorldBuildingPlacedBlockRow,
   type ParsingWorldBuildingPlacedBlockRow,
 } from "@/components/world/building/repositories/parsingWorldBuildingPlacedBlockRow";
@@ -44,16 +48,25 @@ function hydratingWorldBuildingPlotsFromDevvitPayload(
   payload: Awaited<ReturnType<typeof fetchingWorldBuildingDevvitPlotsPayload>>,
 ): DefiningWorldBuildingPlot[] {
   const blocksByPlotId = new Map<string, ParsingWorldBuildingPlacedBlockRow[]>();
+  const sessionBlockRows: typeof payload.blocks = [];
 
   for (const blockRow of payload.blocks) {
+    if (checkingWorldBuildingDevvitBlockRowIsSession(blockRow)) {
+      sessionBlockRows.push(blockRow);
+      continue;
+    }
+
     const existingRows = blocksByPlotId.get(blockRow.plot_id) ?? [];
     existingRows.push(blockRow);
     blocksByPlotId.set(blockRow.plot_id, existingRows);
   }
 
-  return payload.plots.map((plotRow) =>
+  const plots = payload.plots.map((plotRow) =>
     parsingWorldBuildingPlotRow(plotRow, blocksByPlotId.get(plotRow.id) ?? []),
   );
+  const sessionPlot = hydratingWorldBuildingSessionBlocksPlot(sessionBlockRows);
+
+  return sessionPlot ? [...plots, sessionPlot] : plots;
 }
 
 /**

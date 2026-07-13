@@ -62,6 +62,7 @@ import { usingWorldPlazaBuildMode } from '@/components/world/building/hooks/usin
 import { usingWorldPlazaClaimModePlotRegistryQuery } from '@/components/world/building/hooks/usingWorldPlazaClaimModePlotRegistryQuery';
 import { usingWorldPlazaLocalhostDevEnvironment } from '@/components/world/building/hooks/usingWorldPlazaLocalhostDevEnvironment';
 import { usingWorldPlazaPlacedBlocksQuery } from '@/components/world/building/hooks/usingWorldPlazaPlacedBlocksQuery';
+import { usingWorldPlazaSessionBuildingCleanup } from '@/components/world/building/hooks/usingWorldPlazaSessionBuildingCleanup';
 import { usingWorldPlazaPlotOwnerLimitsQuery } from '@/components/world/building/hooks/usingWorldPlazaPlotOwnerLimitsQuery';
 import { usingWorldPlazaPlotSubscription } from '@/components/world/building/hooks/usingWorldPlazaPlotSubscription';
 import { usingWorldPlazaTemporaryPlotLifecycle } from '@/components/world/building/hooks/usingWorldPlazaTemporaryPlotLifecycle';
@@ -907,6 +908,11 @@ function RenderingWorldPlazaPixiSceneConnected({
       onlineUserId: buildModeUserId,
       playerPositionRef,
     });
+
+  usingWorldPlazaSessionBuildingCleanup(
+    isLocalGameplayEnabled && onlineUserId !== null,
+    onlineUserId,
+  );
 
   const isLocalhostDevEnvironment = usingWorldPlazaLocalhostDevEnvironment();
   const isDevEnvironment = usingWorldPlazaDevEnvironment();

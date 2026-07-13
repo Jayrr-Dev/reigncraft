@@ -15,3 +15,10 @@ export function buildingWorldBuildingPlotBlocksRedisKey(
 export function buildingWorldBuildingBlockIndexRedisKey(roomScope: string): string {
   return `world-building:block-index:${roomScope}`;
 }
+
+/** Redis hash of session block id to serialized block JSON for one room scope. */
+export function buildingWorldBuildingSessionBlocksRedisKey(
+  roomScope: string,
+): string {
+  return `world-building:session-blocks:${roomScope}`;
+}

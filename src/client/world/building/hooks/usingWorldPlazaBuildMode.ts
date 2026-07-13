@@ -23,9 +23,11 @@ import {
   resolvingWorldBuildingEffectiveBlockHeight,
 } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
+  checkingWorldBuildingBlockDefinitionAllowsSessionPlacementOutsideClaim,
   DEFINING_WORLD_BUILDING_DEFAULT_BLOCK_DEFINITION_ID,
   resolvingWorldBuildingBlockDefinition,
 } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import { checkingWorldBuildingSessionBlockCanPlaceAtTilePosition } from '@/components/world/building/domains/checkingWorldBuildingSessionBlockCanPlaceAtTilePosition';
 import {
   checkingWorldBuildingBuildDraftHasOwnedPlot,
   checkingWorldBuildingBuildDraftHasUnsavedChanges,
@@ -95,6 +97,7 @@ import { resolvingWorldBuildingPlotOwnerLimits } from '@/components/world/buildi
 import type { RefetchingWorldBuildingPlotsResult } from '@/components/world/building/hooks/usingWorldPlazaPlacedBlocksQuery';
 import { clearingWorldBuildingDevPlacedObjects } from '@/components/world/building/repositories/clearingWorldBuildingDevPlacedObjects';
 import { persistingWorldBuildingBuildDraft } from '@/components/world/building/repositories/persistingWorldBuildingBuildDraft';
+import { persistingWorldBuildingSessionBlock } from '@/components/world/building/repositories/persistingWorldBuildingSessionBlock';
 import { removingWorldBuildingPlotPersistence } from '@/components/world/building/repositories/persistingWorldBuildingPlacedBlock';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_SIDEBAR_PANEL_DISMISS_KEY } from '@/components/world/domains/definingWorldPlazaSidebarPanelConstants';
@@ -350,10 +353,19 @@ export function usingWorldPlazaBuildMode({
     );
   }, [buildDraft, isEditSessionActive, onlineUserId, plots]);
 
-  const activePlacedBlocks = useMemo(
-    () => listingWorldBuildingPlacedBlocksFromPlots(activeViewportPlots),
-    [activeViewportPlots]
-  );
+  const activePlacedBlocks = useMemo(() => {
+    const fromPlots = listingWorldBuildingPlacedBlocksFromPlots(activeViewportPlots);
+    const localSessionBlocks = buildDraft?.sessionBlocks ?? [];
+    const blocksById = new Map(
+      fromPlots.map((block) => [block.blockId, block] as const),
+    );
+
+    for (const block of localSessionBlocks) {
+      blocksById.set(block.blockId, block);
+    }
+
+    return Array.from(blocksById.values());
+  }, [activeViewportPlots, buildDraft?.sessionBlocks]);
 
   const activeOwnedPlots = useMemo(() => {
     if (!isEditSessionActive || !buildDraft || !onlineUserId) {
@@ -633,11 +645,6 @@ export function usingWorldPlazaBuildMode({
         activeViewportPlots,
         tilePosition
       );
-
-      if (!plot) {
-        return false;
-      }
-
       const placementWorldLayer =
         resolvingPlacementWorldLayerForTile(tilePosition);
       const placementBlockHeight = resolvingWorldBuildingEffectiveBlockHeight(
@@ -645,19 +652,39 @@ export function usingWorldPlazaBuildMode({
         selectedWorldLayer
       );
 
-      return checkingWorldBuildingPlotCanPlaceBlockAtTilePosition(
-        plot,
-        tilePosition,
-        onlineUserId,
-        placementWorldLayer,
-        placementBlockHeight,
-        effectiveSelectedCutFootprintMask
-      );
+      if (plot) {
+        return checkingWorldBuildingPlotCanPlaceBlockAtTilePosition(
+          plot,
+          tilePosition,
+          onlineUserId,
+          placementWorldLayer,
+          placementBlockHeight,
+          effectiveSelectedCutFootprintMask
+        );
+      }
+
+      if (
+        checkingWorldBuildingBlockDefinitionAllowsSessionPlacementOutsideClaim(
+          selectedDefinitionId
+        )
+      ) {
+        return checkingWorldBuildingSessionBlockCanPlaceAtTilePosition(
+          activeViewportPlots,
+          activePlacedBlocks,
+          tilePosition,
+          selectedDefinitionId,
+          placementWorldLayer,
+          placementBlockHeight,
+          effectiveSelectedCutFootprintMask
+        );
+      }
+
+      return false;
     },
     [
+      activePlacedBlocks,
       activeViewportPlots,
       effectiveSelectedCutFootprintMask,
-      effectiveSelectedCutGridAxisCellCount,
       isBuildPlacementSelectionActive,
       onlineUserId,
       resolvingPlacementWorldLayerForTile,
@@ -883,6 +910,25 @@ export function usingWorldPlazaBuildMode({
 
       assigningBuildDraft(placementResult.draft);
       setBuildErrorMessage(null);
+
+      if (placementResult.isSessionPlacement) {
+        const placedSessionBlock = placementResult.draft.sessionBlocks.find(
+          (block) => block.blockId === blockId
+        );
+
+        if (placedSessionBlock) {
+          void persistingWorldBuildingSessionBlock(placedSessionBlock).catch(
+            (error) => {
+              setBuildErrorMessage(
+                error instanceof Error
+                  ? error.message
+                  : 'Could not place temporary build.'
+              );
+            }
+          );
+        }
+      }
+
       onSuccessfulBlockPlacementRef?.current?.(tilePosition, blockId);
     },
     [

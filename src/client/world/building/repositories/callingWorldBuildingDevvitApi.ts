@@ -1,8 +1,10 @@
 import type {
   WorldBuildingDevvitClaimPlotResponse,
+  WorldBuildingDevvitDeleteSessionBlocksResponse,
   WorldBuildingDevvitErrorResponse,
   WorldBuildingDevvitOwnerLimitsResponse,
   WorldBuildingDevvitPlaceBlockResponse,
+  WorldBuildingDevvitPlaceSessionBlockResponse,
   WorldBuildingDevvitPlotsPayload,
 } from '../../../../shared/worldBuildingDevvit';
 
@@ -185,6 +187,56 @@ export async function deletingWorldBuildingDevvitPlot(path: string): Promise<voi
  */
 export async function deletingWorldBuildingDevvitBlock(path: string): Promise<void> {
   await callingWorldBuildingDevvitApi(path, { method: 'DELETE' });
+}
+
+/**
+ * Places a session block through the Devvit world-building API.
+ *
+ * @param path - Session blocks API path.
+ * @param requestBody - Session block placement payload.
+ */
+export async function placingWorldBuildingDevvitSessionBlock(
+  path: string,
+  requestBody: {
+    blockId: string;
+    definitionId: string;
+    tileX: number;
+    tileY: number;
+    worldLayer: number;
+    blockHeight: number;
+    placedAt: string;
+    metadata?: Record<string, string | number | boolean | null>;
+  },
+) {
+  const body = await callingWorldBuildingDevvitApi(path, {
+    method: 'POST',
+    body: JSON.stringify(requestBody),
+  });
+  const payload = body as Partial<WorldBuildingDevvitPlaceSessionBlockResponse>;
+
+  if (payload.type !== 'block' || !payload.block) {
+    throw new Error('Invalid session block placement response.');
+  }
+
+  return payload.block;
+}
+
+/**
+ * Deletes all session blocks owned by the signed-in user.
+ *
+ * @param path - Session blocks API path.
+ */
+export async function deletingWorldBuildingDevvitSessionBlocks(
+  path: string,
+): Promise<number> {
+  const body = await callingWorldBuildingDevvitApi(path, { method: 'DELETE' });
+  const payload = body as Partial<WorldBuildingDevvitDeleteSessionBlocksResponse>;
+
+  if (payload.type !== 'deleted') {
+    throw new Error('Invalid session block delete response.');
+  }
+
+  return payload.deletedBlockCount ?? 0;
 }
 
 export type { WorldBuildingDevvitErrorResponse };

@@ -217,6 +217,7 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
     name: 'Campfire',
     category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
     isPaletteVisible: false,
+    allowsSessionPlacementOutsideClaim: true,
     collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
     isInteractive: true,
     visualConfig: {
@@ -279,6 +280,20 @@ export function resolvingWorldBuildingBlockDefinition(
   definitionId: DefiningWorldBuildingBlockDefinitionId
 ): DefiningWorldBuildingBlockDefinition | null {
   return DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS[definitionId] ?? null;
+}
+
+/**
+ * Returns true when the block may be placed on unclaimed land as a session build.
+ *
+ * @param definitionId - Persisted block type id.
+ */
+export function checkingWorldBuildingBlockDefinitionAllowsSessionPlacementOutsideClaim(
+  definitionId: DefiningWorldBuildingBlockDefinitionId
+): boolean {
+  return (
+    resolvingWorldBuildingBlockDefinition(definitionId)
+      ?.allowsSessionPlacementOutsideClaim === true
+  );
 }
 
 /**

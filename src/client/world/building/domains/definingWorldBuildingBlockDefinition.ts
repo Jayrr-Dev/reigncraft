@@ -61,6 +61,11 @@ export interface DefiningWorldBuildingBlockDefinition {
    * for placed blocks and procedural rendering. Defaults to true when omitted.
    */
   readonly isPaletteVisible?: boolean;
+  /**
+   * When true, the block may be placed on unclaimed land as a session-only build
+   * that other players see but that is removed when the placer leaves.
+   */
+  readonly allowsSessionPlacementOutsideClaim?: boolean;
   /** Optional heat/cold level assigned to this block type (°C). */
   readonly environmentalTemperature?: DefiningWorldPlazaEnvironmentalTemperatureLevel;
 }

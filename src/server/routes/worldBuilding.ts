@@ -7,13 +7,18 @@ import {
   WORLD_BUILDING_DEVVIT_DEFAULT_MAX_TILE_CLAIM_COUNT,
   WORLD_BUILDING_DEVVIT_OTHER_OWNER_MIN_CLAIM_DISTANCE_TILES,
   WORLD_BUILDING_DEVVIT_REGISTRY_MAX_PLOT_COUNT,
+  WORLD_BUILDING_DEVVIT_SESSION_BLOCK_METADATA_IS_SESSION_KEY,
+  WORLD_BUILDING_DEVVIT_SESSION_PLOT_ID_SENTINEL,
   WORLD_BUILDING_DEVVIT_TEMPORARY_PLOT_FEATURE_ENABLED,
   type WorldBuildingDevvitBlockRow,
   type WorldBuildingDevvitClaimPlotRequest,
+  type WorldBuildingDevvitDeleteSessionBlocksResponse,
   type WorldBuildingDevvitErrorResponse,
   type WorldBuildingDevvitOwnerLimitsResponse,
   type WorldBuildingDevvitPlaceBlockRequest,
   type WorldBuildingDevvitPlaceBlockResponse,
+  type WorldBuildingDevvitPlaceSessionBlockRequest,
+  type WorldBuildingDevvitPlaceSessionBlockResponse,
   type WorldBuildingDevvitPlotRow,
   type WorldBuildingDevvitPlotsPayload,
 } from '../../shared/worldBuildingDevvit';
@@ -21,7 +26,10 @@ import {
   buildingWorldBuildingBlockIndexRedisKey,
   buildingWorldBuildingPlotBlocksRedisKey,
   buildingWorldBuildingPlotsRosterRedisKey,
+  buildingWorldBuildingSessionBlocksRedisKey,
 } from '../domains/buildingWorldBuildingDevvitRedisKeys';
+import { checkingWorldBuildingDevvitSessionPlacementDefinitionId } from '../domains/checkingWorldBuildingDevvitSessionPlacementDefinitionId';
+import { buildingPlazaDevvitOnlinePlayerRedisKey } from '../domains/buildingPlazaDevvitOnlineRedisKeys';
 import { resolvingDevvitRedditUserId } from '../domains/resolvingDevvitRedditUserId';
 import { resolvingPlazaDevvitOnlineRoomScope } from '../domains/resolvingPlazaDevvitOnlineRoomScope';
 
@@ -344,6 +352,125 @@ function parsingPlaceBlockRequest(
   };
 }
 
+function parsingPlaceSessionBlockRequest(
+  body: unknown
+): WorldBuildingDevvitPlaceSessionBlockRequest | null {
+  if (!body || typeof body !== 'object') {
+    return null;
+  }
+
+  const payload = body as Partial<WorldBuildingDevvitPlaceSessionBlockRequest>;
+
+  if (
+    typeof payload.blockId !== 'string' ||
+    typeof payload.definitionId !== 'string' ||
+    typeof payload.tileX !== 'number' ||
+    typeof payload.tileY !== 'number' ||
+    typeof payload.worldLayer !== 'number' ||
+    typeof payload.blockHeight !== 'number' ||
+    typeof payload.placedAt !== 'string'
+  ) {
+    return null;
+  }
+
+  return {
+    blockId: payload.blockId,
+    definitionId: payload.definitionId,
+    tileX: payload.tileX,
+    tileY: payload.tileY,
+    worldLayer: payload.worldLayer,
+    blockHeight: payload.blockHeight,
+    placedAt: payload.placedAt,
+    metadata:
+      payload.metadata && typeof payload.metadata === 'object'
+        ? payload.metadata
+        : undefined,
+  };
+}
+
+async function checkingPlazaDevvitPlayerIsLive(
+  roomScope: string,
+  userId: string
+): Promise<boolean> {
+  const playerKey = buildingPlazaDevvitOnlinePlayerRedisKey(roomScope, userId);
+  const exists = await redis.exists(playerKey);
+
+  return exists > 0;
+}
+
+async function listingWorldBuildingDevvitSessionBlocks(
+  roomScope: string,
+  bounds: TileBounds | null
+): Promise<WorldBuildingDevvitBlockRow[]> {
+  const sessionBlocksKey = buildingWorldBuildingSessionBlocksRedisKey(roomScope);
+  const rawBlocks = await redis.hGetAll(sessionBlocksKey);
+  const blocks: WorldBuildingDevvitBlockRow[] = [];
+  const staleBlockIds: string[] = [];
+
+  for (const [blockId, rawBlock] of Object.entries(rawBlocks)) {
+    const parsedBlock = parsingWorldBuildingDevvitBlockRow(rawBlock);
+
+    if (!parsedBlock) {
+      staleBlockIds.push(blockId);
+      continue;
+    }
+
+    const ownerIsLive = await checkingPlazaDevvitPlayerIsLive(
+      roomScope,
+      parsedBlock.owner_id
+    );
+
+    if (!ownerIsLive) {
+      staleBlockIds.push(blockId);
+      continue;
+    }
+
+    if (bounds) {
+      if (
+        parsedBlock.tile_x < bounds.minTileX ||
+        parsedBlock.tile_x > bounds.maxTileX ||
+        parsedBlock.tile_y < bounds.minTileY ||
+        parsedBlock.tile_y > bounds.maxTileY
+      ) {
+        continue;
+      }
+    }
+
+    blocks.push(parsedBlock);
+  }
+
+  if (staleBlockIds.length > 0) {
+    await redis.hDel(sessionBlocksKey, staleBlockIds);
+  }
+
+  return blocks;
+}
+
+async function deletingWorldBuildingDevvitSessionBlocksForOwner(
+  roomScope: string,
+  ownerUserId: string
+): Promise<number> {
+  const sessionBlocksKey = buildingWorldBuildingSessionBlocksRedisKey(roomScope);
+  const rawBlocks = await redis.hGetAll(sessionBlocksKey);
+  const blockIdsToDelete: string[] = [];
+
+  for (const [blockId, rawBlock] of Object.entries(rawBlocks)) {
+    const parsedBlock = parsingWorldBuildingDevvitBlockRow(rawBlock);
+
+    if (!parsedBlock || parsedBlock.owner_id !== ownerUserId) {
+      continue;
+    }
+
+    blockIdsToDelete.push(blockId);
+  }
+
+  if (blockIdsToDelete.length > 0) {
+    await redis.hDel(sessionBlocksKey, blockIdsToDelete);
+  }
+
+  return blockIdsToDelete.length;
+}
+
 export const worldBuilding = new Hono();
 
 worldBuilding.get('/owner-limits', async (c) => {
@@ -434,8 +561,17 @@ worldBuilding.get('/plots/bounds', async (c) => {
     matchingPlots.map((plot) => plot.id),
     bounds
   );
+  const sessionBlocks = await listingWorldBuildingDevvitSessionBlocks(
+    roomScope,
+    bounds
+  );
 
-  return c.json(buildingWorldBuildingDevvitPlotsPayload(matchingPlots, blocks));
+  return c.json(
+    buildingWorldBuildingDevvitPlotsPayload(matchingPlots, [
+      ...blocks,
+      ...sessionBlocks,
+    ])
+  );
 });
 
 worldBuilding.get('/plots/owned', async (c) => {
@@ -780,4 +916,111 @@ worldBuilding.delete('/blocks/:blockId', async (c) => {
   await redis.hDel(blockIndexKey, [blockId]);
 
   return c.json({ type: 'deleted', blockId });
+});
+
+worldBuilding.post('/session-blocks', async (c) => {
+  const userId = await resolvingDevvitRedditUserId();
+
+  if (!userId) {
+    return c.json<WorldBuildingDevvitPlaceSessionBlockResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to build.',
+      },
+      401
+    );
+  }
+
+  const body: unknown = await c.req.json().catch(() => null);
+  const placeRequest = parsingPlaceSessionBlockRequest(body);
+
+  if (!placeRequest) {
+    return c.json<WorldBuildingDevvitPlaceSessionBlockResponse>(
+      {
+        type: 'error',
+        message: 'Invalid session block placement request.',
+      },
+      400
+    );
+  }
+
+  if (
+    !checkingWorldBuildingDevvitSessionPlacementDefinitionId(
+      placeRequest.definitionId
+    )
+  ) {
+    return c.json<WorldBuildingDevvitPlaceSessionBlockResponse>(
+      {
+        type: 'error',
+        message: 'That block cannot be placed outside a claim.',
+      },
+      409
+    );
+  }
+
+  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const plots = await listingWorldBuildingDevvitPlots(roomScope);
+
+  if (checkingTileAlreadyClaimed(plots, placeRequest.tileX, placeRequest.tileY)) {
+    return c.json<WorldBuildingDevvitPlaceSessionBlockResponse>(
+      {
+        type: 'error',
+        message: 'That tile is already claimed.',
+      },
+      409
+    );
+  }
+
+  const sessionBlocksKey = buildingWorldBuildingSessionBlocksRedisKey(roomScope);
+  const metadata: Record<string, string | number | boolean | null> = {
+    ...(placeRequest.metadata ?? {}),
+    worldLayer: placeRequest.worldLayer,
+    blockHeight: placeRequest.blockHeight,
+    [WORLD_BUILDING_DEVVIT_SESSION_BLOCK_METADATA_IS_SESSION_KEY]: true,
+  };
+  const blockRow: WorldBuildingDevvitBlockRow = {
+    id: placeRequest.blockId,
+    plot_id: WORLD_BUILDING_DEVVIT_SESSION_PLOT_ID_SENTINEL,
+    definition_id: placeRequest.definitionId,
+    tile_x: placeRequest.tileX,
+    tile_y: placeRequest.tileY,
+    world_layer: placeRequest.worldLayer,
+    owner_id: userId,
+    metadata,
+    placed_at: placeRequest.placedAt,
+  };
+
+  await redis.hSet(sessionBlocksKey, {
+    [placeRequest.blockId]: JSON.stringify(blockRow),
+  });
+
+  return c.json<WorldBuildingDevvitPlaceSessionBlockResponse>({
+    type: 'block',
+    block: blockRow,
+  });
+});
+
+worldBuilding.delete('/session-blocks', async (c) => {
+  const userId = await resolvingDevvitRedditUserId();
+
+  if (!userId) {
+    return c.json<WorldBuildingDevvitDeleteSessionBlocksResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to edit builds.',
+      },
+      401
+    );
+  }
+
+  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const deletedBlockCount = await deletingWorldBuildingDevvitSessionBlocksForOwner(
+    roomScope,
+    userId
+  );
+
+  return c.json<WorldBuildingDevvitDeleteSessionBlocksResponse>({
+    type: 'deleted',
+    deletedBlockCount,
+  });
 });
