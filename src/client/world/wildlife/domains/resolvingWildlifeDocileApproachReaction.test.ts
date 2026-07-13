@@ -1,5 +1,5 @@
 /**
- * Unit tests for docile aggression-as-friendliness helpers and Attack? gate.
+ * Unit tests for docile aggression-as-friendliness helpers and damage gate.
  *
  * @module components/world/wildlife/domains/resolvingWildlifeDocileApproachReaction.test
  */
@@ -13,16 +13,11 @@ import {
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { gatingWildlifeDocileAttackDamage } from '@/components/world/wildlife/domains/gatingWildlifeDocileAttackDamage';
 import {
-  authorizingWildlifeDocileAttack,
-  checkingWildlifeDocileAttackIsAuthorized,
-  clearingWildlifeDocileAttackAuthorizations,
-} from '@/components/world/wildlife/domains/managingWildlifeDocileAttackAuthorizationStore';
-import {
   creatingWildlifeInstanceStore,
   replacingWildlifeInstance,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { resolvingWildlifeDocileApproachReaction } from '@/components/world/wildlife/domains/resolvingWildlifeDocileApproachReaction';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 describe('resolvingWildlifeDocileApproachReaction', () => {
   it('follows when roll is below the aggression follow chance', () => {
@@ -114,11 +109,7 @@ describe('docile species registry', () => {
 });
 
 describe('gatingWildlifeDocileAttackDamage', () => {
-  beforeEach(() => {
-    clearingWildlifeDocileAttackAuthorizations();
-  });
-
-  it('blocks unauthorized docile hits until Betray? completes', () => {
+  it('blocks all hits on living docile animals', () => {
     const store = creatingWildlifeInstanceStore();
     const instance = creatingWildlifeTestInstance({
       instanceId: 'docile-1',
@@ -129,27 +120,10 @@ describe('gatingWildlifeDocileAttackDamage', () => {
     const blocked = gatingWildlifeDocileAttackDamage({
       store,
       instanceId: 'docile-1',
-      damageAmount: 10,
       resolveSpecies: resolvingWildlifeSpeciesDefinition,
     });
 
     expect(blocked.allowed).toBe(false);
-    if (!blocked.allowed) {
-      expect(blocked.pending.instanceId).toBe('docile-1');
-      expect(blocked.pending.displayName).toBe('Shepherd Dog');
-    }
-
-    authorizingWildlifeDocileAttack('docile-1');
-    expect(checkingWildlifeDocileAttackIsAuthorized('docile-1')).toBe(true);
-
-    const allowed = gatingWildlifeDocileAttackDamage({
-      store,
-      instanceId: 'docile-1',
-      damageAmount: 10,
-      resolveSpecies: resolvingWildlifeSpeciesDefinition,
-    });
-
-    expect(allowed.allowed).toBe(true);
   });
 
   it('allows non-docile species without confirm', () => {
@@ -163,7 +137,6 @@ describe('gatingWildlifeDocileAttackDamage', () => {
     const result = gatingWildlifeDocileAttackDamage({
       store,
       instanceId: 'wolf-1',
-      damageAmount: 10,
       resolveSpecies: resolvingWildlifeSpeciesDefinition,
     });
 

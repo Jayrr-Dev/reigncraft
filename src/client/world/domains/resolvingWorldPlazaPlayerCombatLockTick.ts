@@ -25,7 +25,7 @@ export type ResolvingWorldPlazaPlayerCombatLockTickParams = {
   readonly nowMs: number;
   /** True while a melee strip is still playing. */
   readonly isMeleeBusy: boolean;
-  /** True while Betray? / Betraying.... is active (pause auto-swing). */
+  /** True while Pet / Petting.... is active (pause auto-swing). */
   readonly isDocileConfirmPending: boolean;
   /** True when a click/chase walk target is already active. */
   readonly hasActiveWalk: boolean;

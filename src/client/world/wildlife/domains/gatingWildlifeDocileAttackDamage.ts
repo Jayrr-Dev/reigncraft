@@ -1,13 +1,11 @@
 /**
- * Gates player damage on unauthorized docile wildlife until Betray? completes.
+ * Gates player damage on docile wildlife. Docile stock cannot be hurt.
  *
  * @module components/world/wildlife/domains/gatingWildlifeDocileAttackDamage
  */
 
 import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import { checkingWildlifeDocileAttackIsAuthorized } from '@/components/world/wildlife/domains/managingWildlifeDocileAttackAuthorizationStore';
-import type { ManagingWildlifeDocileAttackConfirmPending } from '@/components/world/wildlife/domains/managingWildlifeDocileAttackConfirmStore';
 import {
   gettingWildlifeInstance,
   type ManagingWildlifeInstanceStore,
@@ -16,8 +14,6 @@ import {
 export type GatingWildlifeDocileAttackDamageParams = {
   store: ManagingWildlifeInstanceStore;
   instanceId: string;
-  damageAmount: number;
-  projectileArchetypeId?: string;
   resolveSpecies: (
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null;
@@ -25,17 +21,15 @@ export type GatingWildlifeDocileAttackDamageParams = {
 
 export type GatingWildlifeDocileAttackDamageResult =
   | { allowed: true }
-  | { allowed: false; pending: ManagingWildlifeDocileAttackConfirmPending };
+  | { allowed: false };
 
 /**
- * Allows damage when the target is missing, non-docile, or already authorized.
- * Otherwise returns a pending Betray? payload (no damage yet).
+ * Allows damage when the target is missing, dead, or non-docile.
+ * Living docile animals always block player damage.
  */
 export function gatingWildlifeDocileAttackDamage({
   store,
   instanceId,
-  damageAmount,
-  projectileArchetypeId,
   resolveSpecies,
 }: GatingWildlifeDocileAttackDamageParams): GatingWildlifeDocileAttackDamageResult {
   const instance = gettingWildlifeInstance(store, instanceId);
@@ -50,17 +44,5 @@ export function gatingWildlifeDocileAttackDamage({
     return { allowed: true };
   }
 
-  if (checkingWildlifeDocileAttackIsAuthorized(instanceId)) {
-    return { allowed: true };
-  }
-
-  return {
-    allowed: false,
-    pending: {
-      instanceId,
-      displayName: species?.displayName ?? 'animal',
-      damageAmount,
-      ...(projectileArchetypeId ? { projectileArchetypeId } : {}),
-    },
-  };
+  return { allowed: false };
 }

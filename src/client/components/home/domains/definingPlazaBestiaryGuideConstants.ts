@@ -65,7 +65,7 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
       icon: 'mdi:paw',
       summary: 'Friendly herding dog. May trail you, or bolt if spooked.',
       studiedSummary:
-        'Shepherd dogs skew tame. Approach rolls follow vs flee from aggression tier. Hitting one needs an Attack? confirm and makes them less friendly.',
+        'Shepherd dogs skew tame. Approach rolls follow vs flee from aggression tier. Pet them to learn more; they cannot be attacked.',
     },
     {
       speciesId: 'husky',
@@ -84,9 +84,9 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
     {
       speciesId: 'cat-black',
       icon: 'mdi:paw',
-      summary: 'Night-roaming black cat. Docile until you swing.',
+      summary: 'Night-roaming black cat. Pet for study.',
       studiedSummary:
-        'Black cats keep to dusk and dark. Friendliness is their aggression roll; Attack? before you hurt one.',
+        'Black cats keep to dusk and dark. Friendliness is their aggression roll; pet them to study, never strike.',
     },
     {
       speciesId: 'cat-white',
@@ -98,16 +98,16 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
     {
       speciesId: 'cat-orange',
       icon: 'mdi:paw',
-      summary: 'Daytime orange cat. Lounges in sun, bolts when swung at.',
+      summary: 'Daytime orange cat. Lounges in sun; pet for study.',
       studiedSummary:
-        'Orange cats prefer open daylight on plains and forest edges. Still docile until you give them a reason.',
+        'Orange cats prefer open daylight on plains and forest edges. Still docile companions.',
     },
     {
       speciesId: 'cat-large',
       icon: 'mdi:paw',
       summary: 'A bigger house cat with the same soft temperament.',
       studiedSummary:
-        'Large cats still ask for Attack? before a hit. Aggression demotes one step per player strike.',
+        'Large cats still take a pet for study. They cannot be attacked.',
     },
     {
       speciesId: 'fairy',

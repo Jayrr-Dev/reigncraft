@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Timed Betray? windup adapter over the shared interaction progress mechanic.
+ * Timed Pet windup adapter over the shared interaction progress mechanic.
  *
  * @module components/world/wildlife/hooks/usingWildlifeDocileBetrayProgress
  */
@@ -10,9 +10,9 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
 import { usingWorldPlazaTimedInteractionProgress } from '@/components/world/interaction/hooks/usingWorldPlazaTimedInteractionProgress';
 import {
-  DEFINING_WILDLIFE_DOCILE_ATTACK_CONFIRM_BACKSTAB_ICON,
-  DEFINING_WILDLIFE_DOCILE_ATTACK_CONFIRM_BETRAY_WINDUP_MS,
-} from '@/components/world/wildlife/domains/definingWildlifeDocileAttackConfirmConstants';
+  DEFINING_WILDLIFE_DOCILE_PET_PROGRESS_ICON,
+  DEFINING_WILDLIFE_DOCILE_PET_WINDUP_MS,
+} from '@/components/world/wildlife/domains/definingWildlifeDocilePetConstants';
 import type { ManagingWildlifeDocileAttackConfirmPending } from '@/components/world/wildlife/domains/managingWildlifeDocileAttackConfirmStore';
 import {
   clearingWildlifeDocileAttackConfirmPending,
@@ -42,7 +42,7 @@ export type UsingWildlifeDocileBetrayProgressResult = {
   readonly cancellingDocileBetray: () => void;
 };
 
-function checkingWildlifeDocileBetrayStillInRange(
+function checkingWildlifeDocilePetStillInRange(
   playerPosition: DefiningWorldPlazaWorldPoint,
   targetX: number,
   targetY: number
@@ -56,7 +56,7 @@ function checkingWildlifeDocileBetrayStillInRange(
 }
 
 /**
- * Starts a Chop-style timed windup for Betray? on unauthorized docile wildlife.
+ * Starts a Chop-style timed windup for Pet on a living cat or dog.
  */
 export function usingWildlifeDocileBetrayProgress({
   playerPositionRef,
@@ -97,7 +97,7 @@ export function usingWildlifeDocileBetrayProgress({
       }
 
       if (
-        !checkingWildlifeDocileBetrayStillInRange(
+        !checkingWildlifeDocilePetStillInRange(
           playerPosition,
           instance.position.x,
           instance.position.y
@@ -108,9 +108,9 @@ export function usingWildlifeDocileBetrayProgress({
 
       return startingTimedInteraction({
         targetKey: pending.instanceId,
-        durationMs: DEFINING_WILDLIFE_DOCILE_ATTACK_CONFIRM_BETRAY_WINDUP_MS,
+        durationMs: DEFINING_WILDLIFE_DOCILE_PET_WINDUP_MS,
         context: pending,
-        progressIcon: DEFINING_WILDLIFE_DOCILE_ATTACK_CONFIRM_BACKSTAB_ICON,
+        progressIcon: DEFINING_WILDLIFE_DOCILE_PET_PROGRESS_ICON,
         checkingShouldContinue: () => {
           const currentPlayerPosition = playerPositionRef.current;
           const currentPending = readingWildlifeDocileAttackConfirmPending();
@@ -129,7 +129,7 @@ export function usingWildlifeDocileBetrayProgress({
             return false;
           }
 
-          return checkingWildlifeDocileBetrayStillInRange(
+          return checkingWildlifeDocilePetStillInRange(
             currentPlayerPosition,
             liveInstance.position.x,
             liveInstance.position.y

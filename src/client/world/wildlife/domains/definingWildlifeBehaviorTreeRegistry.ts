@@ -112,7 +112,7 @@ const DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES = [
 /**
  * Friendliest stock: graze and wander. Never opens combat on the player
  * (no aggressive-herbivore fight / territory warn). Still flees when hurt and
- * may defend young. Player melee/projectiles ask for Attack? confirmation.
+ * may defend young. Cats and dogs cannot be attacked; pet them for study.
  */
 const DEFINING_WILDLIFE_DOCILE_TREE: DefiningWildlifeBehaviorTreeDefinition = {
   temperamentId: 'docile',

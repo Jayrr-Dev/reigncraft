@@ -1,5 +1,5 @@
 /**
- * Predicate for the docile temperament (friendly stock that needs Betray?).
+ * Predicate for the docile temperament (friendly companions that cannot be hurt).
  *
  * @module components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile
  */

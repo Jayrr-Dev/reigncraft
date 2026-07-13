@@ -1,14 +1,17 @@
 /**
- * Pending Betray? selection for unauthorized docile wildlife.
+ * Pending Pet selection for living cats and dogs.
  *
  * @module components/world/wildlife/domains/managingWildlifeDocileAttackConfirmStore
  */
 
+import type { DefiningWildlifeDocilePetKind } from '@/components/world/wildlife/domains/definingWildlifeDocilePetConstants';
+import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+
 export type ManagingWildlifeDocileAttackConfirmPending = {
   instanceId: string;
+  speciesId: DefiningWildlifeSpeciesId;
   displayName: string;
-  damageAmount: number;
-  projectileArchetypeId?: string;
+  petKind: DefiningWildlifeDocilePetKind;
 };
 
 type ManagingWildlifeDocileAttackConfirmListener = (
@@ -24,12 +27,12 @@ function notifyingWildlifeDocileAttackConfirmListeners(): void {
   }
 }
 
-/** Returns the current pending Betray? selection, if any. */
+/** Returns the current pending Pet selection, if any. */
 export function readingWildlifeDocileAttackConfirmPending(): ManagingWildlifeDocileAttackConfirmPending | null {
   return pendingAttack;
 }
 
-/** Queues one Betray? selection (replaces any prior pending). */
+/** Queues one Pet selection (replaces any prior pending). */
 export function settingWildlifeDocileAttackConfirmPending(
   pending: ManagingWildlifeDocileAttackConfirmPending
 ): void {
@@ -37,7 +40,7 @@ export function settingWildlifeDocileAttackConfirmPending(
   notifyingWildlifeDocileAttackConfirmListeners();
 }
 
-/** Clears the pending Betray? selection. */
+/** Clears the pending Pet selection. */
 export function clearingWildlifeDocileAttackConfirmPending(): void {
   if (pendingAttack === null) {
     return;
@@ -47,7 +50,7 @@ export function clearingWildlifeDocileAttackConfirmPending(): void {
   notifyingWildlifeDocileAttackConfirmListeners();
 }
 
-/** Subscribes to pending Betray? changes; returns unsubscribe. */
+/** Subscribes to pending Pet changes; returns unsubscribe. */
 export function subscribingWildlifeDocileAttackConfirmPending(
   listener: ManagingWildlifeDocileAttackConfirmListener
 ): () => void {

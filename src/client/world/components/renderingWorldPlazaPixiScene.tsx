@@ -65,6 +65,7 @@ import { usingWorldPlazaLocalhostDevEnvironment } from '@/components/world/build
 import { usingWorldPlazaPlacedBlocksQuery } from '@/components/world/building/hooks/usingWorldPlazaPlacedBlocksQuery';
 import { usingWorldPlazaPlotOwnerLimitsQuery } from '@/components/world/building/hooks/usingWorldPlazaPlotOwnerLimitsQuery';
 import { usingWorldPlazaPlotSubscription } from '@/components/world/building/hooks/usingWorldPlazaPlotSubscription';
+import { usingWorldPlazaSessionBuildingCleanup } from '@/components/world/building/hooks/usingWorldPlazaSessionBuildingCleanup';
 import { usingWorldPlazaTemporaryPlotLifecycle } from '@/components/world/building/hooks/usingWorldPlazaTemporaryPlotLifecycle';
 import { computingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineDerivedStats';
 import { usingWorldPlazaCharacterEngineSkillCooldowns } from '@/components/world/character/hooks/usingWorldPlazaCharacterEngineSkillCooldowns';
@@ -431,10 +432,12 @@ import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife
 import { RenderingWorldPlazaWildlifeSpeechBubbles } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeSpeechBubbles';
 import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
 import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile';
+import { resolvingWildlifeDocilePetKind } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsPettable';
 import { clearingWildlifeAreaOnPlayerDeath } from '@/components/world/wildlife/domains/clearingWildlifeAreaOnPlayerDeath';
 import { computingWildlifeCorpseStudyPoints } from '@/components/world/wildlife/domains/computingWildlifeCorpseStudyPoints';
 import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
 import { resolvingWildlifeDiseaseTransmissionProfile } from '@/components/world/wildlife/domains/definingWildlifeDiseaseTransmissionRegistry';
+import { DEFINING_WILDLIFE_DOCILE_PET_STUDY_POINTS } from '@/components/world/wildlife/domains/definingWildlifeDocilePetConstants';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
 import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife/domains/definingWildlifeNameTagTypes';
 import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wildlife/domains/definingWildlifeSpeechBubbleTypes';
@@ -444,13 +447,10 @@ import type {
   DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { enqueueingWildlifeCorpseStudyFloatFeedback } from '@/components/world/wildlife/domains/enqueueingWildlifeCorpseStudyFloatFeedback';
+import { enqueueingWildlifeDocilePetStudyFloatFeedback } from '@/components/world/wildlife/domains/enqueueingWildlifeDocilePetStudyFloatFeedback';
 import { enqueueingWildlifeMissFloatFeedback } from '@/components/world/wildlife/domains/enqueueingWildlifeMissFloatFeedback';
 import { findingWildlifeCorpseAtGridPoint } from '@/components/world/wildlife/domains/findingWildlifeCorpseAtGridPoint';
 import type { ListingWildlifeCorpsesInStudyRangeEntry } from '@/components/world/wildlife/domains/listingWildlifeCorpsesInStudyRange';
-import {
-  checkingWildlifeDocileAttackIsAuthorized,
-  clearingWildlifeDocileAttackAuthorizations,
-} from '@/components/world/wildlife/domains/managingWildlifeDocileAttackAuthorizationStore';
 import {
   clearingWildlifeDocileAttackConfirmPending,
   readingWildlifeDocileAttackConfirmPending,
@@ -3061,23 +3061,32 @@ function RenderingWorldPlazaPixiSceneConnected({
   const {
     pending: docileAttackConfirmPending,
     cancelingPending: cancelingDocileAttackConfirm,
-    confirmingPending: confirmingDocileAttackConfirm,
   } = usingWildlifeDocileAttackConfirm();
 
   const handlingDocileBetrayComplete = useCallback(
-    (pending: Parameters<typeof confirmingDocileAttackConfirm>[0]): void => {
-      confirmingDocileAttackConfirm(
-        pending,
-        (instanceId, damageAmount, projectileArchetypeId) => {
-          applyWildlifeDamageRef.current?.(
-            instanceId,
-            damageAmount,
-            projectileArchetypeId
-          );
-        }
+    (pending: NonNullable<typeof docileAttackConfirmPending>): void => {
+      const instance = gettingWildlifeInstance(
+        wildlifeStoreRef.current,
+        pending.instanceId
       );
+
+      if (!instance || instance.isDead) {
+        return;
+      }
+
+      const studyPoints = DEFINING_WILDLIFE_DOCILE_PET_STUDY_POINTS;
+      replacingWildlifeInstance(
+        wildlifeStoreRef.current,
+        enqueueingWildlifeDocilePetStudyFloatFeedback({
+          instance,
+          studyPoints,
+          nowMs: Date.now(),
+        })
+      );
+      recordingWorldPlazaBestiarySpeciesStudied(pending.speciesId, studyPoints);
+      playingWildlifeStudySfx();
     },
-    [confirmingDocileAttackConfirm]
+    [wildlifeStoreRef]
   );
 
   const {
@@ -3109,7 +3118,6 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   useEffect(() => {
     return () => {
-      clearingWildlifeDocileAttackAuthorizations();
       clearingWildlifeDocileAttackConfirmPending();
       cancellingDocileBetray();
     };
@@ -3616,12 +3624,18 @@ function RenderingWorldPlazaPixiSceneConnected({
         clickedInstance.speciesId
       );
 
-      if (
-        checkingWildlifeSpeciesIsDocile(clickedSpecies) &&
-        !checkingWildlifeDocileAttackIsAuthorized(clickedInstance.instanceId)
-      ) {
+      if (checkingWildlifeSpeciesIsDocile(clickedSpecies)) {
         clearingCombatLock();
         cancellingDocileBetray();
+
+        const petKind = resolvingWildlifeDocilePetKind(
+          clickedInstance.speciesId
+        );
+
+        if (!petKind) {
+          clearingWildlifeDocileAttackConfirmPending();
+          return false;
+        }
 
         const reachDistance = Math.hypot(
           clickedInstance.position.x - playerPosition.x,
@@ -3644,8 +3658,9 @@ function RenderingWorldPlazaPixiSceneConnected({
         clearingWalkTarget();
         settingWildlifeDocileAttackConfirmPending({
           instanceId: clickedInstance.instanceId,
+          speciesId: clickedInstance.speciesId,
           displayName: clickedSpecies?.displayName ?? 'animal',
-          damageAmount: selectedCharacterEngineDerivedStats.attackPower,
+          petKind,
         });
         return true;
       }
@@ -3663,7 +3678,6 @@ function RenderingWorldPlazaPixiSceneConnected({
       isClickRunIntentRef,
       lockingCombatOnWildlifeInstance,
       playerPositionRef,
-      selectedCharacterEngineDerivedStats.attackPower,
       wildlifeStoreRef,
     ]
   );

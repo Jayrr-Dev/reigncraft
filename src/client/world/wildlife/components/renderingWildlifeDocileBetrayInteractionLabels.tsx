@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Outlined Betray? / Betraying.... text above a selected unauthorized docile animal.
+ * Outlined Pet the Cat / Pet the Dog / Petting.... label above a selected companion.
  *
  * @module components/world/wildlife/components/renderingWildlifeDocileBetrayInteractionLabels
  */
@@ -14,16 +14,16 @@ import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { RenderingWorldPlazaTimedInteractionLabelRow } from '@/components/world/interaction/components/renderingWorldPlazaTimedInteractionLabelRow';
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
-import {
-  LABELING_WILDLIFE_DOCILE_ATTACK_CONFIRM_BETRAYING_TITLE,
-  LABELING_WILDLIFE_DOCILE_ATTACK_CONFIRM_TITLE,
-} from '@/components/world/wildlife/domains/definingWildlifeDocileAttackConfirmConstants';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { ManagingWildlifeDocileAttackConfirmPending } from '@/components/world/wildlife/domains/managingWildlifeDocileAttackConfirmStore';
 import {
   gettingWildlifeInstance,
   type ManagingWildlifeInstanceStore,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import {
+  resolvingWildlifeDocilePetIdleLabel,
+  resolvingWildlifeDocilePettingLabel,
+} from '@/components/world/wildlife/domains/resolvingWildlifeDocilePetLabel';
 import { resolvingWildlifeInstanceSizeScale } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
 import { resolvingWorldPlazaWildlifeNameTagScreenPoint } from '@/components/world/wildlife/domains/resolvingWorldPlazaWildlifeNameTagScreenPoint';
@@ -48,7 +48,7 @@ export type RenderingWildlifeDocileBetrayInteractionLabelsProps = {
 };
 
 /**
- * Chop-style outlined Betray? label anchored above the selected docile animal.
+ * Chop-style outlined Pet label anchored above the selected companion animal.
  */
 export function RenderingWildlifeDocileBetrayInteractionLabels({
   pending,
@@ -67,12 +67,14 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
   onBetrayRef.current = onBetray;
   pendingRef.current = pending;
 
-  const isBetraying =
+  const isPetting =
     timedInteractionProgressSnapshot.isActive &&
     timedInteractionProgressSnapshot.activeTargetKey === pending?.instanceId;
-  const label = isBetraying
-    ? LABELING_WILDLIFE_DOCILE_ATTACK_CONFIRM_BETRAYING_TITLE
-    : LABELING_WILDLIFE_DOCILE_ATTACK_CONFIRM_TITLE;
+  const label = isPetting
+    ? resolvingWildlifeDocilePettingLabel()
+    : pending
+      ? resolvingWildlifeDocilePetIdleLabel(pending.petKind)
+      : resolvingWildlifeDocilePettingLabel();
 
   useLayoutEffect(() => {
     if (!pending) {
@@ -172,7 +174,7 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
           onActivate={() => {
             const currentPending = pendingRef.current;
 
-            if (!currentPending || isBetraying) {
+            if (!currentPending || isPetting) {
               return;
             }
 
