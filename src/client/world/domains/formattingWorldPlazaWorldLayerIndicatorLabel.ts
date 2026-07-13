@@ -7,12 +7,12 @@
 import { clampingWorldBuildingWorldLayer } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 
 /**
- * Returns the layer label shown above the minimap (`Layer 1`).
+ * Returns the elevation label shown above the minimap (`Elevation 1`).
  *
  * @param worldLayer - One-based standing layer index.
  */
 export function formattingWorldPlazaWorldLayerIndicatorLabel(
   worldLayer: number
 ): string {
-  return `Layer ${clampingWorldBuildingWorldLayer(worldLayer)}`;
+  return `Elevation ${clampingWorldBuildingWorldLayer(worldLayer)}`;
 }

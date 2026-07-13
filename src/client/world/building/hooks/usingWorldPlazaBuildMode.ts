@@ -6,6 +6,7 @@ import { applyingWorldBuildingBuildDraftPlotUnclaim } from '@/components/world/b
 import { applyingWorldBuildingBuildDraftStarterPlotProvision } from '@/components/world/building/domains/applyingWorldBuildingBuildDraftStarterPlotProvision';
 import { applyingWorldBuildingBuildDraftTemporaryPlotProvision } from '@/components/world/building/domains/applyingWorldBuildingBuildDraftTemporaryPlotProvision';
 import { applyingWorldBuildingBuildModeBlockHeightSelection } from '@/components/world/building/domains/applyingWorldBuildingBuildModeBlockHeightSelection';
+import { checkingWorldBuildingSessionBlockCanPlaceAtTilePosition } from '@/components/world/building/domains/checkingWorldBuildingSessionBlockCanPlaceAtTilePosition';
 import {
   checkingWorldBuildingTemporaryTileClaimableForOwner,
   resolvingWorldBuildingTemporaryTileClaimRejectionMessage,
@@ -27,7 +28,6 @@ import {
   DEFINING_WORLD_BUILDING_DEFAULT_BLOCK_DEFINITION_ID,
   resolvingWorldBuildingBlockDefinition,
 } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
-import { checkingWorldBuildingSessionBlockCanPlaceAtTilePosition } from '@/components/world/building/domains/checkingWorldBuildingSessionBlockCanPlaceAtTilePosition';
 import {
   checkingWorldBuildingBuildDraftHasOwnedPlot,
   checkingWorldBuildingBuildDraftHasUnsavedChanges,
@@ -97,8 +97,8 @@ import { resolvingWorldBuildingPlotOwnerLimits } from '@/components/world/buildi
 import type { RefetchingWorldBuildingPlotsResult } from '@/components/world/building/hooks/usingWorldPlazaPlacedBlocksQuery';
 import { clearingWorldBuildingDevPlacedObjects } from '@/components/world/building/repositories/clearingWorldBuildingDevPlacedObjects';
 import { persistingWorldBuildingBuildDraft } from '@/components/world/building/repositories/persistingWorldBuildingBuildDraft';
-import { persistingWorldBuildingSessionBlock } from '@/components/world/building/repositories/persistingWorldBuildingSessionBlock';
 import { removingWorldBuildingPlotPersistence } from '@/components/world/building/repositories/persistingWorldBuildingPlacedBlock';
+import { persistingWorldBuildingSessionBlock } from '@/components/world/building/repositories/persistingWorldBuildingSessionBlock';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_SIDEBAR_PANEL_DISMISS_KEY } from '@/components/world/domains/definingWorldPlazaSidebarPanelConstants';
 import {
@@ -217,7 +217,8 @@ export interface UsingWorldPlazaBuildModeParams {
   onSuccessfulBlockPlacementRef?: MutableRefObject<
     | ((
         tilePosition: DefiningWorldBuildingTilePosition,
-        placedBlockId: string
+        placedBlockId: string,
+        isSessionPlacement?: boolean
       ) => void)
     | null
   >;
@@ -354,10 +355,11 @@ export function usingWorldPlazaBuildMode({
   }, [buildDraft, isEditSessionActive, onlineUserId, plots]);
 
   const activePlacedBlocks = useMemo(() => {
-    const fromPlots = listingWorldBuildingPlacedBlocksFromPlots(activeViewportPlots);
+    const fromPlots =
+      listingWorldBuildingPlacedBlocksFromPlots(activeViewportPlots);
     const localSessionBlocks = buildDraft?.sessionBlocks ?? [];
     const blocksById = new Map(
-      fromPlots.map((block) => [block.blockId, block] as const),
+      fromPlots.map((block) => [block.blockId, block] as const)
     );
 
     for (const block of localSessionBlocks) {
@@ -929,7 +931,11 @@ export function usingWorldPlazaBuildMode({
         }
       }
 
-      onSuccessfulBlockPlacementRef?.current?.(tilePosition, blockId);
+      onSuccessfulBlockPlacementRef?.current?.(
+        tilePosition,
+        blockId,
+        placementResult.isSessionPlacement
+      );
     },
     [
       assigningBuildDraft,

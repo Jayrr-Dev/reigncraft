@@ -17,3 +17,7 @@ export {
 /** Plot id used for session blocks in local aggregates. */
 export const DEFINING_WORLD_BUILDING_SESSION_PLOT_ID =
   WORLD_BUILDING_DEVVIT_SESSION_PLOT_ID_SENTINEL;
+
+/** Toast after placing a session build on unclaimed land. */
+export const LABELING_WORLD_BUILDING_SESSION_PLACEMENT_SUCCESS_TOAST =
+  'Placed outside your claim. It disappears when you leave.' as const;

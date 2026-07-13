@@ -48,6 +48,7 @@ import type { DefiningWorldBuildingEditPaintAction } from '@/components/world/bu
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
 import type { DefiningWorldBuildingPlotBounds } from '@/components/world/building/domains/definingWorldBuildingPlotBounds';
+import { LABELING_WORLD_BUILDING_SESSION_PLACEMENT_SUCCESS_TOAST } from '@/components/world/building/domains/definingWorldBuildingSessionBlockConstants';
 import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import {
   formattingWorldBuildingTilePositionKey,
@@ -62,7 +63,6 @@ import { usingWorldPlazaBuildMode } from '@/components/world/building/hooks/usin
 import { usingWorldPlazaClaimModePlotRegistryQuery } from '@/components/world/building/hooks/usingWorldPlazaClaimModePlotRegistryQuery';
 import { usingWorldPlazaLocalhostDevEnvironment } from '@/components/world/building/hooks/usingWorldPlazaLocalhostDevEnvironment';
 import { usingWorldPlazaPlacedBlocksQuery } from '@/components/world/building/hooks/usingWorldPlazaPlacedBlocksQuery';
-import { usingWorldPlazaSessionBuildingCleanup } from '@/components/world/building/hooks/usingWorldPlazaSessionBuildingCleanup';
 import { usingWorldPlazaPlotOwnerLimitsQuery } from '@/components/world/building/hooks/usingWorldPlazaPlotOwnerLimitsQuery';
 import { usingWorldPlazaPlotSubscription } from '@/components/world/building/hooks/usingWorldPlazaPlotSubscription';
 import { usingWorldPlazaTemporaryPlotLifecycle } from '@/components/world/building/hooks/usingWorldPlazaTemporaryPlotLifecycle';
@@ -911,7 +911,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   usingWorldPlazaSessionBuildingCleanup(
     isLocalGameplayEnabled && onlineUserId !== null,
-    onlineUserId,
+    onlineUserId
   );
 
   const isLocalhostDevEnvironment = usingWorldPlazaLocalhostDevEnvironment();
@@ -1077,7 +1077,8 @@ function RenderingWorldPlazaPixiSceneConnected({
   const onSuccessfulBlockPlacementRef = useRef<
     | ((
         tilePosition: DefiningWorldBuildingTilePosition,
-        placedBlockId: string
+        placedBlockId: string,
+        isSessionPlacement?: boolean
       ) => void)
     | null
   >(null);
@@ -1448,7 +1449,8 @@ function RenderingWorldPlazaPixiSceneConnected({
   const handlingSuccessfulCraftedBlockPlacement = useCallback(
     (
       _tilePosition: DefiningWorldBuildingTilePosition,
-      placedBlockId: string
+      placedBlockId: string,
+      isSessionPlacement = false
     ): void => {
       const pendingRecipeId = pendingCraftRecipeIdRef.current;
 
@@ -1482,7 +1484,9 @@ function RenderingWorldPlazaPixiSceneConnected({
             committedRecipeId
           );
           showingGameplayHudToast(
-            LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_SUCCESS_TOAST
+            isSessionPlacement
+              ? LABELING_WORLD_BUILDING_SESSION_PLACEMENT_SUCCESS_TOAST
+              : LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_SUCCESS_TOAST
           );
           // Disarm ghost selection; flush/exit silent build. Craft HUD stays via resolver.
           selectingBlockDefinition(entityOutcome.blockDefinitionId);

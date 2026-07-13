@@ -23,7 +23,7 @@ export type RenderingWorldPlazaMiniMapLayerBarProps = {
 };
 
 /**
- * Compact `Layer N` label above the minimap canvas.
+ * Compact `Elevation N` label above the minimap canvas.
  */
 export function RenderingWorldPlazaMiniMapLayerBar({
   playerPositionRef,
