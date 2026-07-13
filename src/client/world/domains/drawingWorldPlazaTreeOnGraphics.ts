@@ -381,19 +381,20 @@ function drawingWorldPlazaTreeGroundShadow(
       0.5;
 
   for (const softLayer of DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_SOFT_LAYERS) {
-    graphics.ellipse(
-      shadowCenterX,
-      shadowCenterY,
-      stretchedRadiusXPx * softLayer.radiusScale,
-      coreRadiusYPx * softLayer.radiusScale
-    );
-    graphics.fill({
-      color: DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_FILL_COLOR,
-      alpha:
-        DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_BASE_ALPHA *
-        sunState.shadowAlphaScale *
-        softLayer.alphaScale,
-    });
+    graphics
+      .ellipse(
+        shadowCenterX,
+        shadowCenterY,
+        stretchedRadiusXPx * softLayer.radiusScale,
+        coreRadiusYPx * softLayer.radiusScale
+      )
+      .fill({
+        color: DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_FILL_COLOR,
+        alpha:
+          DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_BASE_ALPHA *
+          sunState.shadowAlphaScale *
+          softLayer.alphaScale,
+      });
   }
 }
 

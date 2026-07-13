@@ -435,6 +435,16 @@ export function RenderingWorldPlazaActionBar({
                 </div>
 
                 {hungerHud ? (
+                  <span
+                    className={
+                      DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME
+                    }
+                    style={viewportStyles.dividerStyle}
+                    aria-hidden="true"
+                  />
+                ) : null}
+
+                {hungerHud ? (
                   <div
                     className={
                       STYLING_WORLD_PLAZA_ACTION_BAR_HUNGER_ANCHOR_CLASS_NAME

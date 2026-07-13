@@ -366,6 +366,11 @@ export function creatingWorldPlazaTerrainLayerEngine(
       !(
         descriptor.id === RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.FLOOR_CHUNKS &&
         !entry.isComplete
+      ) &&
+      // Tree shadows are tiny ellipse draws; do not let heavy terrain starve them.
+      !(
+        descriptor.id === RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.TREE_SHADOWS &&
+        !entry.isComplete
       )
     ) {
       return;

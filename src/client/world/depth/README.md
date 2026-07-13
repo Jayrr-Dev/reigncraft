@@ -13,12 +13,13 @@ Unified isometric depth sorting for the plaza world. Import from `@/components/w
 
 `resolvingWorldDepthAvatarBodySortKey` applies three rules in one provider footprint scan:
 
-| Rule                    | When                                                                                                                                          |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Standing bump**       | Column surface ≤ your standing layer → you sort above it                                                                                      |
-| **Behind-column raise** | Column foot strictly north (`footX+footY < youX+youY`) → you sort above it (beats tall-cliff height bias when standing south)                 |
-| **Front occluder cap**  | Column in front (`footX+footY > youX+youY`) or taller same-tile overhead (roofs; trees opt out), silhouette reaches feet → you sort behind it |
-| **Hard floor raise**    | After cap, coplanar caps at your feet stay under your legs when possible                                                                      |
+| Rule                    | When                                                                                                                                                                    |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Standing bump**       | Column surface ≤ your standing layer → you sort above it                                                                                                                |
+| **Behind-column raise** | Column foot strictly north (`footX+footY < youX+youY`) → you sort above it (beats tall-cliff height bias when standing south)                                           |
+| **Front occluder cap**  | Column in front (`footX+footY > youX+youY`) or taller same-tile overhead (placed roofs only; terrain/trees/rocks opt out), silhouette reaches feet → you sort behind it |
+| **Hard floor raise**    | After cap, coplanar caps at your feet stay under your legs when possible                                                                                                |
+| **Behind re-assert**    | After front clamp, keep avatar above northern columns whose tops/cliff faces still overlap on screen                                                                    |
 
 Shadows use `resolvingWorldDepthAvatarShadowSortKey` with the same provider registry for occluder scans.
 

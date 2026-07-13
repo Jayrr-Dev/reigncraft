@@ -254,7 +254,8 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_PROFILE_LOW: DefiningWorldPlazaPer
     wildlifeSimulationMaxStepsPerFrame: 1,
     navigationReplanIntervalFrames: 6,
     navigationMaxNodeExpansions: 1024,
-    drawsTreeShadows: false,
+    // Cheap ellipse draws; keep on so mobile/coarse (stuck on LOW) still get contact shadows.
+    drawsTreeShadows: true,
     drawsTreeShake: false,
     drawsPlacedBlockShadowBlur: false,
     waterShimmerUpdateIntervalFrames: 9,

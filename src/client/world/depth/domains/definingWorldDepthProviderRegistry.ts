@@ -77,14 +77,19 @@ const DEFINING_WORLD_DEPTH_TERRAIN_COLUMN_PROVIDER: DefiningWorldDepthProvider =
     resolvingSortKeyAtTileIndex: (tileX, tileY) =>
       resolvingWorldPlazaTerrainElevationColumnEntityZIndex(tileX, tileY),
     resolvingDepthSortFootAtTileIndex: (tileX, tileY) => ({
-      x: tileX,
-      y: tileY,
+      // Tile center: NW integer foot made rim tiles look "in front" too early
+      // and skipped behind-raise while the drawn diamond still covered south.
+      x: tileX + 0.5,
+      y: tileY + 0.5,
     }),
     alwaysTallerForFrontOcclusion: false,
     participatesInStandingBump: true,
     standingBumpRequiresRaisedSurface: false,
     participatesInFrontOcclusion: true,
-    participatesInSameTileOverheadOcclusion: true,
+    // Terrain columns are solid fill, not walk-under roofs. Same-tile overhead
+    // tucked avatars behind plateau tops / cliff faces when their foot still
+    // floored onto the raised tile at the rim.
+    participatesInSameTileOverheadOcclusion: false,
     participatesInShadowOcclusion: true,
     requiresSilhouetteReachForFrontOcclusion: true,
     checkingHasColumnAtTileIndex: () => true,
@@ -180,7 +185,10 @@ const DEFINING_WORLD_DEPTH_COLUMN_ROCK_PROVIDER: DefiningWorldDepthProvider = {
   participatesInStandingBump: false,
   standingBumpRequiresRaisedSurface: true,
   participatesInFrontOcclusion: true,
-  participatesInSameTileOverheadOcclusion: true,
+  // Boulders are solid mass, not walk-under roofs. Same-tile overhead tucked
+  // avatars behind 1-tile field rocks and mega-boulder footprint tiles when
+  // standing south of the drawn body.
+  participatesInSameTileOverheadOcclusion: false,
   participatesInShadowOcclusion: true,
   requiresSilhouetteReachForFrontOcclusion: true,
   checkingHasColumnAtTileIndex: (tileX, tileY) => {

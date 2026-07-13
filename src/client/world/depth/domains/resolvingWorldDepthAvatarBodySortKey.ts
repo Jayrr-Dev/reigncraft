@@ -272,6 +272,15 @@ export function resolvingWorldDepthAvatarBodySortKey(
         occluderHardCeilingSortKey
       );
     }
+
+    // Front-occluder clamp must not pull the avatar under northern columns
+    // whose tops/cliff faces still overlap on screen.
+    if (Number.isFinite(scan.maxBehindColumnSortKey)) {
+      standingBodySortKey = Math.max(
+        standingBodySortKey,
+        Math.min(scan.maxBehindColumnSortKey + 1, scan.minFrontOccluderCap)
+      );
+    }
   }
 
   return standingBodySortKey;

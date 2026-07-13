@@ -7,6 +7,12 @@ Usage (from repo root):
     --output public/inventory/sprites/name.webp \\
     --columns 5 --rows 1 --cell-size 32 --padding 2
 
+  # High quality (64x64 cells, padding 4):
+  python .agents/skills/creating-sprites/scripts/processing_sprite_sheet.py \\
+    --from-images icon0.png icon1.png icon2.png \\
+    --output public/inventory/sprites/name.webp \\
+    --columns 3 --rows 1 --high-quality --expected-occupied 3
+
   # Pack separate icon files into one sheet (more reliable equal cells):
   python .agents/skills/creating-sprites/scripts/processing_sprite_sheet.py \\
     --from-images icon0.png icon1.png icon2.png \\
@@ -197,8 +203,23 @@ def parsing_args() -> argparse.Namespace:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--columns", type=int, default=4)
     parser.add_argument("--rows", type=int, default=3)
-    parser.add_argument("--cell-size", type=int, default=32)
-    parser.add_argument("--padding", type=int, default=2)
+    parser.add_argument(
+        "--cell-size",
+        type=int,
+        default=None,
+        help="Cell edge in px. Default 32, or 64 with --high-quality.",
+    )
+    parser.add_argument(
+        "--padding",
+        type=int,
+        default=None,
+        help="Inner cell padding in px. Default 2, or 4 with --high-quality.",
+    )
+    parser.add_argument(
+        "--high-quality",
+        action="store_true",
+        help="Use 64x64 cells and padding 4 (unless --cell-size/--padding set).",
+    )
     parser.add_argument("--bg-max", type=int, default=200)
     parser.add_argument("--bg-saturation", type=float, default=0.08)
     parser.add_argument(
@@ -219,12 +240,38 @@ def parsing_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def resolving_cell_size_and_padding(args: argparse.Namespace) -> tuple[int, int]:
+    """Resolve cell size + padding from flags (high-quality → 64 / 4)."""
+    cell_size = (
+        args.cell_size
+        if args.cell_size is not None
+        else (64 if args.high_quality else 32)
+    )
+    padding = (
+        args.padding
+        if args.padding is not None
+        else (4 if args.high_quality else 2)
+    )
+    return cell_size, padding
+
+
 def main() -> None:
     args = parsing_args()
     if args.columns < 1 or args.rows < 1:
         raise SystemExit("columns and rows must be >= 1")
-    if args.cell_size < 1:
+
+    cell_size, padding = resolving_cell_size_and_padding(args)
+    if cell_size < 1:
         raise SystemExit("cell-size must be >= 1")
+    if padding < 0:
+        raise SystemExit("padding must be >= 0")
+    if padding * 2 >= cell_size:
+        raise SystemExit("padding too large for cell-size")
+    if cell_size not in (32, 64):
+        print(
+            f"warning: cell-size {cell_size} is unusual; prefer 32 or 64",
+            flush=True,
+        )
     if bool(args.input) == bool(args.from_images):
         raise SystemExit("Provide exactly one of --input or --from-images")
 
@@ -238,8 +285,8 @@ def main() -> None:
             args.from_images,
             columns=args.columns,
             rows=args.rows,
-            cell_size=args.cell_size,
-            padding=args.padding,
+            cell_size=cell_size,
+            padding=padding,
             remove_bg=remove_bg,
             max_channel=args.bg_max,
             max_saturation=args.bg_saturation,
@@ -261,8 +308,8 @@ def main() -> None:
             image,
             columns=args.columns,
             rows=args.rows,
-            cell_size=args.cell_size,
-            padding=args.padding,
+            cell_size=cell_size,
+            padding=padding,
         )
         expected_occupied = args.expected_occupied
 
@@ -270,7 +317,7 @@ def main() -> None:
         sheet,
         columns=args.columns,
         rows=args.rows,
-        cell_size=args.cell_size,
+        cell_size=cell_size,
         expected_occupied=expected_occupied,
     )
 
@@ -280,9 +327,11 @@ def main() -> None:
     if args.keep_png:
         sheet.save(args.output.with_suffix(".png"))
 
+    quality_label = "high-quality" if cell_size >= 64 else "standard"
     print(
         f"{args.output}: {sheet.width}x{sheet.height}, "
-        f"{args.columns}x{args.rows} cells @ {args.cell_size}px"
+        f"{args.columns}x{args.rows} cells @ {cell_size}px "
+        f"(padding {padding}, {quality_label})"
     )
     print("; ".join(reports))
 

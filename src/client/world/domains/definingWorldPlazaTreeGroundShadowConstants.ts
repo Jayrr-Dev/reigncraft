@@ -14,7 +14,7 @@ export const DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_CORE_RADIUS_X_PX = 20;
 export const DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_CORE_RADIUS_Y_PX = 9;
 
 /** Peak opacity for the innermost tree shadow layer. */
-export const DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_BASE_ALPHA = 0.13;
+export const DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_BASE_ALPHA = 0.22;
 
 /** Soft halo layers drawn largest first for a round contact shadow. */
 export const DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_SOFT_LAYERS = [
@@ -33,4 +33,5 @@ export const DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS = 3;
  * Entity-layer sort bias so the shadow draws above terrain columns on coplanar
  * tiles, but below the trunk.
  */
-export const DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_ENTITY_DEPTH_BIAS = 1 as const;
+export const DEFINING_WORLD_PLAZA_TREE_GROUND_SHADOW_ENTITY_DEPTH_BIAS =
+  1 as const;

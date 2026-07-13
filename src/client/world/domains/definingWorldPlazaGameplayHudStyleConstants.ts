@@ -133,16 +133,16 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
     panelBelow: 'plaza-hud-explanation-popover--placement-below',
     /** World-anchored buff card: gap to icons comes from health-bar constants. */
     panelInline:
-      'relative mb-0 max-w-[min(14rem,calc(100vw-2rem))] text-center',
+      'relative mb-0 max-w-[min(16rem,calc(100vw-2rem))] text-center',
     title:
-      'font-display text-[9px] font-bold uppercase tracking-[0.04em] leading-none text-poster-teal-deep',
+      'font-display text-[12px] font-bold uppercase tracking-[0.04em] leading-none text-poster-teal-deep',
     subtitle:
-      'mt-px font-body text-[7px] font-semibold uppercase tracking-[0.03em] leading-none text-ink/65',
-    body: 'mt-px font-body text-[8px] font-medium italic leading-tight text-ink-soft',
-    detailList: 'mt-0.5 flex flex-col gap-px text-left',
-    detailLine: 'font-body text-[8px] font-medium leading-tight text-ink/80',
+      'mt-0.5 font-body text-[10px] font-semibold uppercase tracking-[0.03em] leading-none text-ink/65',
+    body: 'mt-0.5 font-body text-[11px] font-medium italic leading-snug text-ink-soft',
+    detailList: 'mt-1 flex flex-col gap-0.5 text-left',
+    detailLine: 'font-body text-[11px] font-medium leading-snug text-ink/80',
     footer:
-      'mt-0.5 font-body text-[8px] font-semibold leading-none tabular-nums text-ink/70',
+      'mt-1 font-body text-[10px] font-semibold leading-none tabular-nums text-ink/70',
   },
 
   /** Small count / notification badges. */
