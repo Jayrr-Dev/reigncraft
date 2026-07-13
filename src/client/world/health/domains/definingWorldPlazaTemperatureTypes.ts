@@ -47,6 +47,16 @@ export type DefiningWorldPlazaEntityTemperatureResistance = {
   /** Extra cold damage taken as a fraction (0 = none, 1 = +100%). */
   readonly coldWeakness: number;
   /**
+   * Innate comfort low (°C) before cold-tolerance bonuses.
+   * Character/species specific; defaults to global comfort low.
+   */
+  readonly baseComfortLowCelsius: number;
+  /**
+   * Innate comfort high (°C) before heat-tolerance bonuses.
+   * Character/species specific; defaults to global comfort high.
+   */
+  readonly baseComfortHighCelsius: number;
+  /**
    * Extra °C added to comfort high before heat DoT starts.
    * Stacks with heat-tolerance buffs.
    */

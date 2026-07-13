@@ -58,6 +58,14 @@ export type DefiningWorldPlazaCharacterEngineDefinition = {
     readonly defensePerLevel: number;
   };
   readonly immunities: readonly DefiningWorldPlazaCharacterEngineImmunity[];
+  /**
+   * Innate ambient comfort band (°C). When omitted, uses the global human
+   * default (0–40) unless a matching wildlife species comfort entry exists.
+   */
+  readonly temperatureComfort?: {
+    readonly comfortLowCelsius: number;
+    readonly comfortHighCelsius: number;
+  };
   readonly startingStatusEffectIds: readonly string[];
   readonly skillIds: readonly string[];
 };

@@ -5,6 +5,7 @@ import {
 import { convertingWorldPlazaCelsiusToFahrenheit } from '@/components/world/health/domains/convertingWorldPlazaTemperatureUnits';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import {
+  DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT,
   DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS,
   DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_LOW_CELSIUS,
   DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_TOLERANCE_BONUS_CELSIUS,
@@ -121,14 +122,8 @@ describe('applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond', () =>
         rawDamage,
         'heat',
         {
+          ...DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT,
           heatResistance: 0.5,
-          coldResistance: 0,
-          heatWeakness: 0,
-          coldWeakness: 0,
-          heatComfortBonusCelsius: 0,
-          coldComfortBonusCelsius: 0,
-          isHeatImmune: false,
-          isColdImmune: false,
         }
       );
     const immune =
@@ -136,14 +131,8 @@ describe('applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond', () =>
         rawDamage,
         'heat',
         {
-          heatResistance: 0,
-          coldResistance: 0,
-          heatWeakness: 0,
-          coldWeakness: 0,
-          heatComfortBonusCelsius: 0,
-          coldComfortBonusCelsius: 0,
+          ...DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT,
           isHeatImmune: true,
-          isColdImmune: false,
         }
       );
 
@@ -153,34 +142,22 @@ describe('applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond', () =>
 
   it('amplifies heat damage with weakness and stacks with resistance', () => {
     const rawDamage = 10;
-    const weak =
-      applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond(
-        rawDamage,
-        'heat',
-        {
-          heatResistance: 0,
-          coldResistance: 0,
-          heatWeakness: 0.5,
-          coldWeakness: 0,
-          heatComfortBonusCelsius: 0,
-          coldComfortBonusCelsius: 0,
-          isHeatImmune: false,
-          isColdImmune: false,
-        }
-      );
+    const weak = applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond(
+      rawDamage,
+      'heat',
+      {
+        ...DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT,
+        heatWeakness: 0.5,
+      }
+    );
     const resistedAndWeak =
       applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond(
         rawDamage,
         'heat',
         {
+          ...DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT,
           heatResistance: 0.5,
-          coldResistance: 0,
           heatWeakness: 0.5,
-          coldWeakness: 0,
-          heatComfortBonusCelsius: 0,
-          coldComfortBonusCelsius: 0,
-          isHeatImmune: false,
-          isColdImmune: false,
         }
       );
 
@@ -190,21 +167,14 @@ describe('applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond', () =>
 
   it('amplifies cold damage with cold weakness', () => {
     const rawDamage = 10;
-    const weak =
-      applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond(
-        rawDamage,
-        'cold',
-        {
-          heatResistance: 0,
-          coldResistance: 0,
-          heatWeakness: 0,
-          coldWeakness: 0.25,
-          heatComfortBonusCelsius: 0,
-          coldComfortBonusCelsius: 0,
-          isHeatImmune: false,
-          isColdImmune: false,
-        }
-      );
+    const weak = applyingWorldPlazaEntityTemperatureResistanceToDamagePerSecond(
+      rawDamage,
+      'cold',
+      {
+        ...DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT,
+        coldWeakness: 0.25,
+      }
+    );
 
     expect(weak).toBe(12.5);
   });

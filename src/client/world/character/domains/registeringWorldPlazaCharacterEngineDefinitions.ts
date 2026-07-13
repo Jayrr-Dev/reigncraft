@@ -71,6 +71,10 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_HUSKY: DefiningWorldPlazaCharacterEn
       defensePerLevel: 1,
     },
     immunities: ['cold'],
+    temperatureComfort: {
+      comfortLowCelsius: -20,
+      comfortHighCelsius: 22,
+    },
     startingStatusEffectIds: [],
     skillIds: ['minor-heal', 'swift-stride'],
   };
@@ -128,6 +132,10 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GRIZZLY: DefiningWorldPlazaCharacter
       defensePerLevel: 2,
     },
     immunities: ['bleed'],
+    temperatureComfort: {
+      comfortLowCelsius: -15,
+      comfortHighCelsius: 30,
+    },
     startingStatusEffectIds: [],
     skillIds: ['minor-heal', 'heat-ward'],
   };
@@ -157,6 +165,10 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_PINGUIN: DefiningWorldPlazaCharacter
       defensePerLevel: 1,
     },
     immunities: ['cold'],
+    temperatureComfort: {
+      comfortLowCelsius: -25,
+      comfortHighCelsius: 14,
+    },
     startingStatusEffectIds: [],
     skillIds: ['minor-heal', 'swift-stride'],
   };
@@ -185,11 +197,13 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_CAT_ORANGE: DefiningWorldPlazaCharac
       defensePerLevel: 1,
     },
     immunities: [],
+    temperatureComfort: {
+      comfortLowCelsius: 5,
+      comfortHighCelsius: 42,
+    },
     startingStatusEffectIds: [],
     skillIds: ['minor-heal', 'swift-stride'],
   };
-
-/** Hand-tuned character definitions keyed by character id. */
 const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_HAND_TUNED_DEFINITIONS: Record<
   string,
   DefiningWorldPlazaCharacterEngineDefinition

@@ -9,10 +9,12 @@ import type {
   DefiningWorldPlazaEntityHealthDamageRollModifier,
   DefiningWorldPlazaEntityHealthState,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { settingWorldPlazaEntityTemperatureResistance } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { creatingWildlifeLargeSizeFrameHealthState } from '@/components/world/wildlife/domains/creatingWildlifeLargeSizeFrameHealthState';
-import { checkingWildlifeOmegaWolfSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeLargeSizeFrame } from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
+import { checkingWildlifeOmegaWolfSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { resolvingWildlifeSpeciesTemperatureComfortBand } from '@/components/world/wildlife/domains/definingWildlifeSpeciesTemperatureComfortRegistry';
 
 function mappingWildlifeSpeciesPassiveDamageRollModifiers(
   species: DefiningWildlifeSpeciesDefinition
@@ -34,6 +36,7 @@ function mappingWildlifeSpeciesPassiveDamageRollModifiers(
 /**
  * Builds initial health for a wildlife spawn: obese frame skews plus any
  * permanent species passives (e.g. turtle shell block bias, omega lifesteal).
+ * Also seeds per-species temperature comfort and hazard immunities.
  */
 export function creatingWildlifeSpawnHealthState(
   baseMaxHealth: number,
@@ -43,6 +46,18 @@ export function creatingWildlifeSpawnHealthState(
   const frameHealthState = creatingWildlifeLargeSizeFrameHealthState(
     baseMaxHealth,
     largeSizeFrame
+  );
+  const comfortBand = resolvingWildlifeSpeciesTemperatureComfortBand(
+    species.speciesId
+  );
+  const temperatureSeededState = settingWorldPlazaEntityTemperatureResistance(
+    frameHealthState,
+    {
+      baseComfortLowCelsius: comfortBand.comfortLowCelsius,
+      baseComfortHighCelsius: comfortBand.comfortHighCelsius,
+      isHeatImmune: species.hazards.isHeatImmune,
+      isColdImmune: species.hazards.isColdImmune,
+    }
   );
   const speciesModifiers =
     mappingWildlifeSpeciesPassiveDamageRollModifiers(species);
@@ -60,17 +75,17 @@ export function creatingWildlifeSpawnHealthState(
   const hasMods = speciesModifiers.length > 0 || lifestealModifiers.length > 0;
 
   if (!hasMods) {
-    return frameHealthState;
+    return temperatureSeededState;
   }
 
   return {
-    ...frameHealthState,
+    ...temperatureSeededState,
     damageRollModifiers: [
-      ...frameHealthState.damageRollModifiers,
+      ...temperatureSeededState.damageRollModifiers,
       ...speciesModifiers,
     ],
     physicalDamageLifestealModifiers: [
-      ...frameHealthState.physicalDamageLifestealModifiers,
+      ...temperatureSeededState.physicalDamageLifestealModifiers,
       ...lifestealModifiers,
     ],
   };

@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaCharacterEngineDefinition } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
+import { resolvingWorldPlazaCharacterEngineTemperatureComfortBand } from '@/components/world/character/domains/resolvingWorldPlazaCharacterEngineTemperatureComfortBand';
 import type {
   DefiningWorldPlazaEntityDamageKind,
   DefiningWorldPlazaEntityHealthState,
@@ -50,28 +51,27 @@ export function listingWorldPlazaCharacterEngineImmunityDamageKinds(
 }
 
 /**
- * Applies temperature and damage-kind immunities from a character definition.
+ * Applies temperature comfort, immunities, and damage-kind blocks from a character definition.
  */
 export function applyingWorldPlazaCharacterEngineImmunities(
   state: DefiningWorldPlazaEntityHealthState,
   definition: DefiningWorldPlazaCharacterEngineDefinition
 ): DefiningWorldPlazaEntityHealthState {
-  let nextState = state;
+  const comfortBand =
+    resolvingWorldPlazaCharacterEngineTemperatureComfortBand(definition);
 
-  if (
-    definition.immunities.includes('heat') ||
-    definition.immunities.includes('lava')
-  ) {
-    nextState = settingWorldPlazaEntityTemperatureResistance(nextState, {
-      isHeatImmune: true,
-    });
-  }
-
-  if (definition.immunities.includes('cold')) {
-    nextState = settingWorldPlazaEntityTemperatureResistance(nextState, {
-      isColdImmune: true,
-    });
-  }
+  let nextState = settingWorldPlazaEntityTemperatureResistance(state, {
+    baseComfortLowCelsius: comfortBand.comfortLowCelsius,
+    baseComfortHighCelsius: comfortBand.comfortHighCelsius,
+    isHeatImmune:
+      definition.immunities.includes('heat') ||
+      definition.immunities.includes('lava')
+        ? true
+        : state.temperatureResistance.isHeatImmune,
+    isColdImmune: definition.immunities.includes('cold')
+      ? true
+      : state.temperatureResistance.isColdImmune,
+  });
 
   const damageKindImmunities =
     listingWorldPlazaCharacterEngineImmunityDamageKinds(definition);

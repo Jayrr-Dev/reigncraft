@@ -20,10 +20,10 @@ import type {
   DefiningWorldPlazaEntityHealthConfusionEffect,
   DefiningWorldPlazaEntityHealthDamageOptions,
   DefiningWorldPlazaEntityHealthDamageRollModifier,
+  DefiningWorldPlazaEntityHealthHealBlockModifier,
   DefiningWorldPlazaEntityHealthIncomingDamageHealModifier,
   DefiningWorldPlazaEntityHealthIncomingDamageModifier,
   DefiningWorldPlazaEntityHealthIncomingHealAmplifierModifier,
-  DefiningWorldPlazaEntityHealthHealBlockModifier,
   DefiningWorldPlazaEntityHealthMovementModifier,
   DefiningWorldPlazaEntityHealthOutgoingHealAmplifierModifier,
   DefiningWorldPlazaEntityHealthPhysicalDamageLifestealModifier,
@@ -598,8 +598,7 @@ export function checkingWorldPlazaEntityHealthHealIsBlocked(
   nowMs: number
 ): boolean {
   return state.healBlockModifiers.some(
-    (modifier) =>
-      modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs
+    (modifier) => modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs
   );
 }
 
@@ -892,6 +891,14 @@ export function settingWorldPlazaEntityTemperatureResistance(
           : clampingWorldPlazaEntityTemperatureWeaknessFraction(
               patch.coldWeakness
             ),
+      baseComfortLowCelsius:
+        patch.baseComfortLowCelsius === undefined
+          ? state.temperatureResistance.baseComfortLowCelsius
+          : patch.baseComfortLowCelsius,
+      baseComfortHighCelsius:
+        patch.baseComfortHighCelsius === undefined
+          ? state.temperatureResistance.baseComfortHighCelsius
+          : patch.baseComfortHighCelsius,
       heatComfortBonusCelsius:
         patch.heatComfortBonusCelsius === undefined
           ? state.temperatureResistance.heatComfortBonusCelsius

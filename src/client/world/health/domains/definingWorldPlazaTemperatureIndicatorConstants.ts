@@ -1,8 +1,8 @@
 /**
  * Action-bar temperature orb: thermometer range, gradient palette, and labels.
  *
- * Comfort edges (#d7edff … #ffcfbf) track the character comfort band. Cold and
- * hot stops continue that palette beyond the band toward climate extremes.
+ * Comfort mid is sky blue. Colder stops bleach toward white; warmer stops keep
+ * the peach→red heat ramp. Comfort edges (#b8dff0 … #ffcfbf) track the band.
  *
  * @module components/world/health/domains/definingWorldPlazaTemperatureIndicatorConstants
  */
@@ -33,22 +33,22 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MAX_CELSIUS =
 /**
  * Ordered cold→hot orb fill palette (9 stops).
  *
- * Comfort band maps to indices 3–5 (#d7edff → #ffffff → #ffcfbf). Stops outside
- * that range stretch from indicator min/max toward the comfort edges.
+ * Comfort band maps to indices 3–5 (#b8dff0 → #87ceeb → #ffcfbf). Cold stops
+ * bleach to white; hot stops stretch toward red past comfort high.
  */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_GRADIENT_HEX_STOPS = [
-  '#00b7ff',
-  '#76c8ff',
-  '#abdaff',
-  '#d7edff',
   '#ffffff',
+  '#f0f7fc',
+  '#dceef8',
+  '#b8dff0',
+  '#87ceeb',
   '#ffcfbf',
   '#ff9e81',
   '#ff6846',
   '#ff0000',
 ] as const;
 
-/** Coldest stop (indicator min °C). */
+/** Coldest stop (indicator min °C): frost white. */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_COLD_COLOR =
   DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_GRADIENT_HEX_STOPS[0];
 
@@ -56,7 +56,7 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_COLD_COLOR =
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_COOL_EDGE_COLOR =
   DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_GRADIENT_HEX_STOPS[3];
 
-/** White mid stop (comfort midpoint). */
+/** Sky-blue mid stop (comfort midpoint). */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MID_COLOR =
   DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_GRADIENT_HEX_STOPS[4];
 

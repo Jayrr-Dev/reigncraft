@@ -137,6 +137,9 @@ export const DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT: Definin
     coldResistance: 0,
     heatWeakness: 0,
     coldWeakness: 0,
+    baseComfortLowCelsius: DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_LOW_CELSIUS,
+    baseComfortHighCelsius:
+      DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS,
     heatComfortBonusCelsius: 0,
     coldComfortBonusCelsius: 0,
     isHeatImmune: false,
