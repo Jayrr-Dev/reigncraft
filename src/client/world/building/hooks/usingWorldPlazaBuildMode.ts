@@ -257,7 +257,7 @@ export function usingWorldPlazaBuildMode({
   /**
    * Synchronous mirror of `buildDraft`. Craft placement calls
    * `togglingEditSession` in the same turn as `setState`, so flush/save must
-   * read the post-placement draft here — not the stale React closure.
+   * read the post-placement draft here, not the stale React closure.
    */
   const buildDraftRef = useRef<DefiningWorldBuildingBuildDraftState | null>(
     null
@@ -949,6 +949,7 @@ export function usingWorldPlazaBuildMode({
     },
     [
       activeViewportPlots,
+      assigningBuildDraft,
       buildDraft,
       onBlockRemovedRef,
       onlineUserId,
@@ -1672,7 +1673,13 @@ export function usingWorldPlazaBuildMode({
         onlineUserId
       );
     });
-  }, [assigningBuildDraft, isEditSessionActive, onlineUserId, ownedPlots, plots]);
+  }, [
+    assigningBuildDraft,
+    isEditSessionActive,
+    onlineUserId,
+    ownedPlots,
+    plots,
+  ]);
 
   return {
     editMode,
