@@ -10,7 +10,12 @@ import {
   DEFINING_WORLD_PLAZA_CHARACTER_HEIGHT_ATTRIBUTE_ICON,
   LABELING_WORLD_PLAZA_CHARACTER_HEIGHT_ATTRIBUTE,
 } from '@/components/world/character/domains/definingWorldPlazaCharacterHeightDisplayConstants';
+import {
+  DEFINING_WORLD_PLAZA_CHARACTER_WEIGHT_ATTRIBUTE_ICON,
+  LABELING_WORLD_PLAZA_CHARACTER_WEIGHT_ATTRIBUTE,
+} from '@/components/world/character/domains/definingWorldPlazaCharacterWeightDisplayConstants';
 import { resolvingWorldPlazaCharacterHeightDisplayText } from '@/components/world/character/domains/resolvingWorldPlazaCharacterHeightDisplayText';
+import { resolvingWorldPlazaCharacterWeightDisplayText } from '@/components/world/character/domains/resolvingWorldPlazaCharacterWeightDisplayText';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import {
   DEFINING_WORLD_PLAZA_PROFILE_PANEL_COLD_THRESHOLD_ATTRIBUTE_ICON,
@@ -208,6 +213,14 @@ export function resolvingWorldPlazaProfilePanelSections(input: {
       iconName: DEFINING_WORLD_PLAZA_CHARACTER_HEIGHT_ATTRIBUTE_ICON,
       valueText: resolvingWorldPlazaCharacterHeightDisplayText(
         derivedStats.heightWorldLayers
+      ),
+    },
+    {
+      id: 'weight',
+      label: LABELING_WORLD_PLAZA_CHARACTER_WEIGHT_ATTRIBUTE,
+      iconName: DEFINING_WORLD_PLAZA_CHARACTER_WEIGHT_ATTRIBUTE_ICON,
+      valueText: resolvingWorldPlazaCharacterWeightDisplayText(
+        derivedStats.massKg
       ),
     },
     {

@@ -44,6 +44,11 @@ export type DefiningWorldPlazaCharacterEngineDefinition = {
     readonly baseMaxHealth: number;
     readonly healthRegenPerSecond?: number;
   };
+  /**
+   * Body mass in kilograms. Animals inherit wildlife `massKg`; Girl defaults
+   * to the shared player reference mass when omitted.
+   */
+  readonly massKg?: number;
   readonly stats: {
     readonly attackPower: number;
     /** Multiplier on baseline melee swing speed (1 = default strip timing). */
@@ -91,5 +96,6 @@ export type ComputingWorldPlazaCharacterEngineDerivedStats = {
   readonly jumpDistanceScale: number;
   readonly healthRegenPerSecond: number;
   readonly hungerDrainMultiplier: number;
+  readonly massKg: number;
   readonly isLavaWalkable: boolean;
 };

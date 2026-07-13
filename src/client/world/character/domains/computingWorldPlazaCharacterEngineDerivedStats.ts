@@ -14,6 +14,7 @@ import type {
   ComputingWorldPlazaCharacterEngineDerivedStats,
   DefiningWorldPlazaCharacterEngineDefinition,
 } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
+import { DEFINING_WORLD_PLAZA_CHARACTER_DEFAULT_MASS_KG } from '@/components/world/character/domains/definingWorldPlazaCharacterWeightDisplayConstants';
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_GRID_RUN_SPEED_PER_SECOND,
   DEFINING_WORLD_PLAZA_ISOMETRIC_GRID_WALK_SPEED_PER_SECOND,
@@ -92,6 +93,7 @@ export function computingWorldPlazaCharacterEngineDerivedStats(
       vitals.healthRegenPerSecond ??
       DEFINING_WORLD_PLAZA_ENTITY_HEALTH_REGEN_PER_SECOND,
     hungerDrainMultiplier: stats.hungerDrainMultiplier,
+    massKg: definition.massKg ?? DEFINING_WORLD_PLAZA_CHARACTER_DEFAULT_MASS_KG,
     isLavaWalkable: immunities.includes('lava'),
   };
 }

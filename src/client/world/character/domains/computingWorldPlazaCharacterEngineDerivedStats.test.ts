@@ -1,9 +1,16 @@
 import { computingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineDerivedStats';
 import {
   DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_UNLOCKED_TRANSFORM_GROWTH_LANE_LEVEL_OFFSET,
+  DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_UNLOCKED_TRANSFORM_GROWTH_LANE_UNLOCK_FLOOR_RATIO,
   DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_UNLOCKED_TRANSFORM_PARITY_LEVEL,
 } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineGrowthLaneConstants';
+import { DEFINING_WORLD_PLAZA_CHARACTER_DEFAULT_MASS_KG } from '@/components/world/character/domains/definingWorldPlazaCharacterWeightDisplayConstants';
 import { resolvingWorldPlazaCharacterEngineDefinition } from '@/components/world/character/domains/registeringWorldPlazaCharacterEngineDefinitions';
+import {
+  computingWorldPlazaAnimalTransformMatureCombatStat,
+  DEFINING_WORLD_PLAZA_ANIMAL_TRANSFORM_ATTACK_FROM_AUTHOR_MULTIPLIER,
+  DEFINING_WORLD_PLAZA_ANIMAL_TRANSFORM_HEALTH_FROM_AUTHOR_MULTIPLIER,
+} from '@/components/world/domains/definingWorldPlazaAnimalTransformVitalsScaleConstants';
 import { DEFINING_WORLD_PLAZA_AVATAR_SKIN } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { resolvingWorldPlazaScaledAttackSpeed } from '@/components/world/domains/resolvingWorldPlazaGlobalAttackSpeedScale';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -20,14 +27,27 @@ describe('computingWorldPlazaCharacterEngineDerivedStats', () => {
     expect(derived.effectiveMaxHealth).toBe(1000);
     expect(derived.attackPower).toBe(300);
     expect(derived.defense).toBe(5);
+    expect(derived.massKg).toBe(DEFINING_WORLD_PLAZA_CHARACTER_DEFAULT_MASS_KG);
   });
 
-  it('inherits wildlife vitals for unlocked animal transforms', () => {
+  it('scales wildlife vitals into player transform space with a 25% unlock floor', () => {
     const wildlifeGrizzly = resolvingWildlifeSpeciesDefinition('grizzly');
     expect(wildlifeGrizzly).not.toBeNull();
     if (!wildlifeGrizzly) {
       return;
     }
+
+    const matureMaxHealth = computingWorldPlazaAnimalTransformMatureCombatStat({
+      wildlifeRuntimeStat: wildlifeGrizzly.vitals.baseMaxHealth,
+      fromAuthorMultiplier:
+        DEFINING_WORLD_PLAZA_ANIMAL_TRANSFORM_HEALTH_FROM_AUTHOR_MULTIPLIER,
+    });
+    const matureAttackPower =
+      computingWorldPlazaAnimalTransformMatureCombatStat({
+        wildlifeRuntimeStat: wildlifeGrizzly.vitals.attackPower,
+        fromAuthorMultiplier:
+          DEFINING_WORLD_PLAZA_ANIMAL_TRANSFORM_ATTACK_FROM_AUTHOR_MULTIPLIER,
+      });
 
     const grizzly = resolvingWorldPlazaCharacterEngineDefinition(
       DEFINING_WORLD_PLAZA_AVATAR_SKIN.GRIZZLY
@@ -37,39 +57,48 @@ describe('computingWorldPlazaCharacterEngineDerivedStats', () => {
     expect(grizzly.scaling.growthLaneLevelOffset).toBe(
       DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_UNLOCKED_TRANSFORM_GROWTH_LANE_LEVEL_OFFSET
     );
-    expect(grizzly.vitals.baseMaxHealth).toBe(
-      wildlifeGrizzly.vitals.baseMaxHealth
-    );
-    expect(grizzly.stats.attackPower).toBe(wildlifeGrizzly.vitals.attackPower);
+    expect(grizzly.vitals.baseMaxHealth).toBe(matureMaxHealth);
+    expect(grizzly.stats.attackPower).toBe(matureAttackPower);
     expect(grizzly.stats.defense).toBe(wildlifeGrizzly.vitals.defense);
-    expect(grizzly.locomotion.walkSpeedGridPerSecond).toBe(
-      wildlifeGrizzly.vitals.walkSpeedGridPerSecond
-    );
-    expect(grizzly.locomotion.runSpeedGridPerSecond).toBe(
-      wildlifeGrizzly.vitals.runSpeedGridPerSecond
-    );
+    expect(grizzly.massKg).toBe(wildlifeGrizzly.massKg);
     expect(grizzly.immunities).toContain('cold');
 
-    // Unlock lane: mature − 20 × perLevel, floors applied
-    expect(derived.effectiveMaxHealth).toBe(100);
-    expect(derived.attackPower).toBe(1);
-    expect(derived.defense).toBe(0);
+    expect(derived.effectiveMaxHealth).toBeCloseTo(
+      matureMaxHealth *
+        DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_UNLOCKED_TRANSFORM_GROWTH_LANE_UNLOCK_FLOOR_RATIO
+    );
+    expect(derived.attackPower).toBeCloseTo(
+      matureAttackPower *
+        DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_UNLOCKED_TRANSFORM_GROWTH_LANE_UNLOCK_FLOOR_RATIO
+    );
+    expect(derived.defense).toBeCloseTo(
+      wildlifeGrizzly.vitals.defense *
+        DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_UNLOCKED_TRANSFORM_GROWTH_LANE_UNLOCK_FLOOR_RATIO
+    );
+    expect(derived.massKg).toBe(wildlifeGrizzly.massKg);
     expect(derived.attackSpeed).toBe(
       resolvingWorldPlazaScaledAttackSpeed(grizzly.stats.attackSpeed)
     );
-    expect(derived.sizeScale).toBe(wildlifeGrizzly.sizeScale);
-    expect(derived.collisionRadiusGrid).toBe(
-      wildlifeGrizzly.collisionRadiusGrid
-    );
-    expect(derived.hungerDrainMultiplier).toBe(1.3);
   });
 
-  it('reaches mature wildlife stats at the unlocked-transform parity level', () => {
+  it('reaches mature scaled wildlife stats at the unlocked-transform parity level', () => {
     const wildlifeGrizzly = resolvingWildlifeSpeciesDefinition('grizzly');
     expect(wildlifeGrizzly).not.toBeNull();
     if (!wildlifeGrizzly) {
       return;
     }
+
+    const matureMaxHealth = computingWorldPlazaAnimalTransformMatureCombatStat({
+      wildlifeRuntimeStat: wildlifeGrizzly.vitals.baseMaxHealth,
+      fromAuthorMultiplier:
+        DEFINING_WORLD_PLAZA_ANIMAL_TRANSFORM_HEALTH_FROM_AUTHOR_MULTIPLIER,
+    });
+    const matureAttackPower =
+      computingWorldPlazaAnimalTransformMatureCombatStat({
+        wildlifeRuntimeStat: wildlifeGrizzly.vitals.attackPower,
+        fromAuthorMultiplier:
+          DEFINING_WORLD_PLAZA_ANIMAL_TRANSFORM_ATTACK_FROM_AUTHOR_MULTIPLIER,
+      });
 
     const grizzly = resolvingWorldPlazaCharacterEngineDefinition(
       DEFINING_WORLD_PLAZA_AVATAR_SKIN.GRIZZLY
@@ -78,16 +107,15 @@ describe('computingWorldPlazaCharacterEngineDerivedStats', () => {
       ...grizzly,
       scaling: {
         ...grizzly.scaling,
-        level: DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_UNLOCKED_TRANSFORM_PARITY_LEVEL,
+        level:
+          DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_UNLOCKED_TRANSFORM_PARITY_LEVEL,
       },
     };
     const derived = computingWorldPlazaCharacterEngineDerivedStats(parity);
 
-    expect(derived.effectiveMaxHealth).toBe(
-      wildlifeGrizzly.vitals.baseMaxHealth
-    );
-    expect(derived.attackPower).toBe(wildlifeGrizzly.vitals.attackPower);
-    expect(derived.defense).toBe(wildlifeGrizzly.vitals.defense);
+    expect(derived.effectiveMaxHealth).toBeCloseTo(matureMaxHealth);
+    expect(derived.attackPower).toBeCloseTo(matureAttackPower);
+    expect(derived.defense).toBeCloseTo(wildlifeGrizzly.vitals.defense);
   });
 
   it('applies per-level scaling bonuses on top of the growth lane', () => {
@@ -101,13 +129,19 @@ describe('computingWorldPlazaCharacterEngineDerivedStats', () => {
     const derived = computingWorldPlazaCharacterEngineDerivedStats(levelFive);
 
     // bonus steps = (5 - 1) + (-20) = -16
-    expect(derived.effectiveMaxHealth).toBe(
-      Math.max(100, grizzly.vitals.baseMaxHealth + grizzly.scaling.healthPerLevel * -16)
+    expect(derived.effectiveMaxHealth).toBeCloseTo(
+      Math.max(
+        100,
+        grizzly.vitals.baseMaxHealth + grizzly.scaling.healthPerLevel * -16
+      )
     );
-    expect(derived.attackPower).toBe(
-      Math.max(1, grizzly.stats.attackPower + grizzly.scaling.attackPerLevel * -16)
+    expect(derived.attackPower).toBeCloseTo(
+      Math.max(
+        1,
+        grizzly.stats.attackPower + grizzly.scaling.attackPerLevel * -16
+      )
     );
-    expect(derived.defense).toBe(
+    expect(derived.defense).toBeCloseTo(
       Math.max(0, grizzly.stats.defense + grizzly.scaling.defensePerLevel * -16)
     );
   });

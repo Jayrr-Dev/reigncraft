@@ -24,6 +24,7 @@ const DEFINING_PROFILE_PANEL_TEST_DERIVED_STATS: ComputingWorldPlazaCharacterEng
     jumpDistanceScale: 1,
     healthRegenPerSecond: 2,
     hungerDrainMultiplier: 1,
+    massKg: 70,
     isLavaWalkable: false,
   };
 
@@ -106,6 +107,14 @@ describe('resolvingWorldPlazaProfilePanelSections', () => {
       label: 'Heat threshold',
       iconName: 'mdi:fire',
       valueText: `${DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS}°C`,
+    });
+    expect(
+      sections.attributeEntries.find((entry) => entry.id === 'weight')
+    ).toEqual({
+      id: 'weight',
+      label: 'Weight',
+      iconName: 'mdi:scale-balance',
+      valueText: '70 kg',
     });
   });
 

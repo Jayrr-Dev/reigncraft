@@ -17,6 +17,7 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_DEFAULT_LOCOMOTION = {
  */
 
 import type { DefiningWorldPlazaCharacterEngineDefinition } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
+import { DEFINING_WORLD_PLAZA_CHARACTER_DEFAULT_MASS_KG } from '@/components/world/character/domains/definingWorldPlazaCharacterWeightDisplayConstants';
 import { buildingWorldPlazaDefaultAnimalCharacterEngineDefinition } from '@/components/world/domains/buildingWorldPlazaDefaultAnimalCharacterEngineDefinition';
 import { DEFINING_WORLD_PLAZA_ANIMAL_PLAYABLE_AVATAR_SKIN_BY_ID } from '@/components/world/domains/definingWorldPlazaAnimalPlayableAvatarSkinRegistry';
 import type { DefiningWorldPlazaAvatarMotionKind } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
@@ -30,6 +31,7 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GIRL_SAMPLE: DefiningWorldPlazaChara
     size: { sizeScale: 1 },
     locomotion: { ...DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_DEFAULT_LOCOMOTION },
     vitals: { baseMaxHealth: 1000 },
+    massKg: DEFINING_WORLD_PLAZA_CHARACTER_DEFAULT_MASS_KG,
     stats: {
       attackPower: 300,
       attackSpeed: 1,
