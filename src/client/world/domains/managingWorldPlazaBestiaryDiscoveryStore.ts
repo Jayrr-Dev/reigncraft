@@ -71,7 +71,9 @@ function notifyingWorldPlazaBestiaryDiscoverySubscribers(): void {
   }
 }
 
-function mirroringWorldPlazaBestiaryDiscoveryToCloudSave(): void {
+function mirroringWorldPlazaBestiaryDiscoveryToCloudSave(
+  options?: Readonly<{ readonly skipWhenEmpty?: boolean }>
+): void {
   if (managingWorldPlazaBestiaryDiscoveryCloudSaveSlotIndex === null) {
     return;
   }
@@ -83,6 +85,10 @@ function mirroringWorldPlazaBestiaryDiscoveryToCloudSave(): void {
   const hasDiscovery =
     sightedSpeciesIds.length > 0 ||
     Object.keys(studyCountsBySpeciesId).length > 0;
+
+  if (options?.skipWhenEmpty && !hasDiscovery) {
+    return;
+  }
 
   void savingPlazaSinglePlayerSaveSlotData(
     managingWorldPlazaBestiaryDiscoveryCloudSaveSlotIndex,
@@ -126,7 +132,15 @@ export function initializingWorldPlazaBestiaryDiscoveryStore(
   const cloudSaveSlotIndex = options?.cloudSaveSlotIndex ?? null;
 
   if (managingWorldPlazaBestiaryDiscoveryStorageOwnerId === storageOwnerId) {
+    const previousCloudSaveSlotIndex =
+      managingWorldPlazaBestiaryDiscoveryCloudSaveSlotIndex;
     managingWorldPlazaBestiaryDiscoveryCloudSaveSlotIndex = cloudSaveSlotIndex;
+
+    // Cloud slot arrived after local hydrate: push current study progress up.
+    if (previousCloudSaveSlotIndex === null && cloudSaveSlotIndex !== null) {
+      mirroringWorldPlazaBestiaryDiscoveryToCloudSave();
+    }
+
     return;
   }
 
@@ -142,6 +156,11 @@ export function initializingWorldPlazaBestiaryDiscoveryStore(
   );
   refreshingWorldPlazaBestiaryDiscoverySnapshotCaches();
   notifyingWorldPlazaBestiaryDiscoverySubscribers();
+
+  // Heal Redis from local after boot hydrate (covers failed prior mirrors).
+  if (cloudSaveSlotIndex !== null) {
+    mirroringWorldPlazaBestiaryDiscoveryToCloudSave();
+  }
 }
 
 /** Returns a stable snapshot of sighted species ids for React subscriptions. */

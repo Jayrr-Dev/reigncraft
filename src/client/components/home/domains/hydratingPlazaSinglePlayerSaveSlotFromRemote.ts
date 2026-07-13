@@ -1,3 +1,4 @@
+import { mergingPlazaSinglePlayerSaveBestiaryDiscovery } from '@/components/home/domains/mergingPlazaSinglePlayerSaveBestiaryDiscovery';
 import { fetchingPlazaSinglePlayerSaveSlotData } from '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi';
 import { parsingInventoryState } from '@/components/inventory/domains/parsingInventoryState';
 import { checkingWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry';
@@ -5,6 +6,7 @@ import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/cra
 import { DEFINING_WORLD_PLAZA_BIOME_CATALOG } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import { creatingWorldPlazaLastPosition } from '@/components/world/domains/definingWorldPlazaLastPosition';
+import { readingWorldPlazaBestiaryDiscoveryFromStorage } from '@/components/world/domains/readingWorldPlazaBestiaryDiscoveryFromStorage';
 import { writingWorldPlazaBestiaryDiscoveryToStorage } from '@/components/world/domains/writingWorldPlazaBestiaryDiscoveryToStorage';
 import { writingWorldPlazaDiscoveredNamedRealmsToStorage } from '@/components/world/domains/writingWorldPlazaDiscoveredNamedRealmsToStorage';
 import { writingWorldPlazaExploredBiomesToStorage } from '@/components/world/domains/writingWorldPlazaExploredBiomesToStorage';
@@ -117,15 +119,18 @@ export async function hydratingPlazaSinglePlayerSaveSlotFromRemote(
       speciesId: string
     ): speciesId is DefiningWildlifeSpeciesId =>
       DEFINING_WORLD_PLAZA_BESTIARY_SPECIES_ID_SET.has(speciesId);
-    const sightedSpeciesIds = new Set(
+    const remoteSightedSpeciesIds = new Set(
       remoteData.bestiaryDiscovery.sightedSpeciesIds.filter(
         checkingKnownSpeciesId
       )
     );
-    const studyCountsBySpeciesId = new Map<DefiningWildlifeSpeciesId, number>();
+    const remoteStudyCountsBySpeciesId = new Map<
+      DefiningWildlifeSpeciesId,
+      number
+    >();
 
     for (const [speciesId, studyCount] of Object.entries(
-      remoteData.bestiaryDiscovery.studyCountsBySpeciesId
+      remoteData.bestiaryDiscovery.studyCountsBySpeciesId ?? {}
     )) {
       if (!checkingKnownSpeciesId(speciesId)) {
         continue;
@@ -135,14 +140,24 @@ export async function hydratingPlazaSinglePlayerSaveSlotFromRemote(
         continue;
       }
 
-      studyCountsBySpeciesId.set(speciesId, Math.floor(studyCount));
-      sightedSpeciesIds.add(speciesId);
+      remoteStudyCountsBySpeciesId.set(speciesId, Math.floor(studyCount));
+      remoteSightedSpeciesIds.add(speciesId);
     }
+
+    // Merge with local so a lagging Redis snapshot (sighted-only, older
+    // study totals) cannot wipe fresher localStorage study progress.
+    const localBestiaryDiscovery =
+      readingWorldPlazaBestiaryDiscoveryFromStorage(localPersistenceOwnerId);
+    const mergedBestiaryDiscovery =
+      mergingPlazaSinglePlayerSaveBestiaryDiscovery(localBestiaryDiscovery, {
+        sightedSpeciesIds: remoteSightedSpeciesIds,
+        studyCountsBySpeciesId: remoteStudyCountsBySpeciesId,
+      });
 
     writingWorldPlazaBestiaryDiscoveryToStorage(
       localPersistenceOwnerId,
-      sightedSpeciesIds,
-      studyCountsBySpeciesId
+      mergedBestiaryDiscovery.sightedSpeciesIds,
+      mergedBestiaryDiscovery.studyCountsBySpeciesId
     );
   }
 

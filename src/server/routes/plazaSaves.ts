@@ -256,19 +256,19 @@ function parsingBestiaryDiscovery(
     return null;
   }
 
-  const candidate = value as Partial<PlazaSinglePlayerSaveBestiaryDiscovery>;
+  const candidate = value as Partial<PlazaSinglePlayerSaveBestiaryDiscovery> & {
+    killCountsBySpeciesId?: unknown;
+  };
   const sightedSpeciesIds =
     parsingSortedStringIdList(candidate.sightedSpeciesIds) ?? [];
   const studyCountsBySpeciesId: Record<string, number> = {};
 
-  if (
-    candidate.studyCountsBySpeciesId &&
-    typeof candidate.studyCountsBySpeciesId === 'object' &&
-    !Array.isArray(candidate.studyCountsBySpeciesId)
-  ) {
-    for (const [speciesId, rawCount] of Object.entries(
-      candidate.studyCountsBySpeciesId
-    )) {
+  const applyingStudyCountRecord = (rawCounts: unknown): void => {
+    if (!rawCounts || typeof rawCounts !== 'object' || Array.isArray(rawCounts)) {
+      return;
+    }
+
+    for (const [speciesId, rawCount] of Object.entries(rawCounts)) {
       if (typeof speciesId !== 'string' || speciesId.length === 0) {
         continue;
       }
@@ -283,9 +283,16 @@ function parsingBestiaryDiscovery(
         continue;
       }
 
-      studyCountsBySpeciesId[speciesId] = studyCount;
+      studyCountsBySpeciesId[speciesId] = Math.max(
+        studyCountsBySpeciesId[speciesId] ?? 0,
+        studyCount
+      );
     }
-  }
+  };
+
+  applyingStudyCountRecord(candidate.studyCountsBySpeciesId);
+  // Legacy Redis payloads used killCounts before Study renamed the field.
+  applyingStudyCountRecord(candidate.killCountsBySpeciesId);
 
   const sortedStudyCounts = Object.fromEntries(
     Object.entries(studyCountsBySpeciesId).sort(([left], [right]) =>
