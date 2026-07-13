@@ -79,6 +79,7 @@ import { RenderingWorldPlazaAvatarFootsteps } from '@/components/world/component
 import { RenderingWorldPlazaAvatarMeleeSfx } from '@/components/world/components/renderingWorldPlazaAvatarMeleeSfx';
 import { RenderingWorldPlazaAvatarMotionSfx } from '@/components/world/components/renderingWorldPlazaAvatarMotionSfx';
 import { RenderingWorldPlazaBestiaryOverlay } from '@/components/world/components/renderingWorldPlazaBestiaryOverlay';
+import { RenderingWorldPlazaRecipesOverlay } from '@/components/world/components/renderingWorldPlazaRecipesOverlay';
 import { RenderingWorldPlazaBiomeAmbience } from '@/components/world/components/renderingWorldPlazaBiomeAmbience';
 import { RenderingWorldPlazaBiomeBackdrop } from '@/components/world/components/renderingWorldPlazaBiomeBackdrop';
 import { RenderingWorldPlazaBiomeMusic } from '@/components/world/components/renderingWorldPlazaBiomeMusic';
@@ -124,6 +125,10 @@ import {
 } from '@/components/world/components/syncingWorldPlazaPixiViewportFrameResize';
 import { checkingWorldPlazaCraftRecipeAffordable } from '@/components/world/crafting/domains/checkingWorldPlazaCraftRecipeAffordable';
 import { committingWorldPlazaCraftRecipePlaceablePlacement } from '@/components/world/crafting/domains/committingWorldPlazaCraftRecipePlaceablePlacement';
+import {
+  initializingWorldPlazaRecipeDiscoveryStore,
+  recordingWorldPlazaRecipePageAttached,
+} from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
 import { resolvingWorldPlazaCraftModeRecipeDefinition } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry';
 import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import {
@@ -1457,6 +1462,7 @@ function RenderingWorldPlazaPixiSceneConnected({
             placedBlockId,
             committedRecipeId
           );
+          recordingWorldPlazaRecipePageAttached(committedRecipeId);
           showingGameplayHudToast(
             LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_SUCCESS_TOAST
           );
@@ -1515,6 +1521,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           );
 
           if (craftResult.outcome === 'crafted') {
+            recordingWorldPlazaRecipePageAttached(recipeId);
             showingGameplayHudToast(
               LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INVENTORY_SUCCESS_TOAST
             );
@@ -1537,6 +1544,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
 
       pendingCraftRecipeIdRef.current = recipeId;
+      recordingWorldPlazaRecipePageAttached(recipeId);
       setOpenCraftCookbookId(null);
       selectingHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD);
       enteringBuildPlacementForBlockDefinition(
@@ -3974,6 +3982,12 @@ function RenderingWorldPlazaPixiSceneConnected({
     wildlifeStoreRef,
   });
 
+  useEffect(() => {
+    initializingWorldPlazaRecipeDiscoveryStore(
+      onlineUserId ?? localPersistenceOwnerId
+    );
+  }, [localPersistenceOwnerId, onlineUserId]);
+
   const {
     isTeleportFadeOverlayMounted,
     teleportFadeOverlayOpacity,
@@ -6256,6 +6270,10 @@ function RenderingWorldPlazaPixiSceneConnected({
       />
       <RenderingWorldPlazaBestiaryOverlay
         isOpen={activeCodexSection === 'bestiary'}
+        onClose={closingCodexSection}
+      />
+      <RenderingWorldPlazaRecipesOverlay
+        isOpen={activeCodexSection === 'recipes'}
         onClose={closingCodexSection}
       />
       <RenderingWorldPlazaLoreBookOverlay

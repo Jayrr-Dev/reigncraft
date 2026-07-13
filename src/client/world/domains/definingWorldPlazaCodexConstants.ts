@@ -17,6 +17,7 @@ export type WorldPlazaCodexSectionId =
   | 'mechanics'
   | 'biomes'
   | 'bestiary'
+  | 'recipes'
   | 'lore';
 
 /** One selectable entry in the codex dropdown menu. */
@@ -53,6 +54,12 @@ export const DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS: readonly WorldPlazaCodexMe
       label: 'Bestiary',
       icon: 'mdi:paw',
       description: 'Sighted animals and hidden ones',
+    },
+    {
+      id: 'recipes',
+      label: 'Recipes',
+      icon: 'mdi:book-outline',
+      description: 'Cookbook pages and craft recipes',
     },
     {
       id: 'lore',

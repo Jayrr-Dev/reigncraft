@@ -8,8 +8,10 @@
 
 import { DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaBestiaryGuideConstants';
 import { DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
+import { DEFINING_PLAZA_RECIPES_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaRecipesGuideConstants';
 import { formattingPlazaBestiaryCodexMenuDescription } from '@/components/home/domains/resolvingPlazaBestiaryGuideDisplayEntries';
 import { formattingPlazaBiomesCodexMenuDescription } from '@/components/home/domains/resolvingPlazaBiomesGuideDisplayEntries';
+import { formattingPlazaRecipesCodexMenuDescription } from '@/components/home/domains/resolvingPlazaRecipesGuideDisplayEntries';
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
@@ -28,6 +30,10 @@ import {
   gettingWorldPlazaExploredBiomesSnapshot,
   subscribingWorldPlazaExploredBiomes,
 } from '@/components/world/domains/managingWorldPlazaExploredBiomesStore';
+import {
+  gettingWorldPlazaRecipeAttachedSnapshot,
+  subscribingWorldPlazaRecipeDiscovery,
+} from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
 import { cn } from '@/lib/utils';
 import { useSyncExternalStore } from 'react';
 
@@ -40,7 +46,7 @@ export type RenderingWorldPlazaCodexMenuPanelProps = {
 };
 
 /**
- * Dropdown panel listing Controls, Mechanics, Biomes, and Lore below the book button.
+ * Dropdown panel listing Guide sections below the book button.
  */
 export function RenderingWorldPlazaCodexMenuPanel({
   isOpen,
@@ -54,6 +60,11 @@ export function RenderingWorldPlazaCodexMenuPanel({
   const sightedBestiarySpeciesIds = useSyncExternalStore(
     subscribingWorldPlazaBestiaryDiscovery,
     gettingWorldPlazaBestiarySightedSpeciesSnapshot,
+    () => []
+  );
+  const attachedRecipeIds = useSyncExternalStore(
+    subscribingWorldPlazaRecipeDiscovery,
+    gettingWorldPlazaRecipeAttachedSnapshot,
     () => []
   );
 
@@ -76,6 +87,13 @@ export function RenderingWorldPlazaCodexMenuPanel({
       return formattingPlazaBestiaryCodexMenuDescription(
         sightedBestiarySpeciesIds.length,
         DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES.length
+      );
+    }
+
+    if (optionId === 'recipes') {
+      return formattingPlazaRecipesCodexMenuDescription(
+        attachedRecipeIds.length,
+        DEFINING_PLAZA_RECIPES_GUIDE_ENTRIES.length
       );
     }
 
