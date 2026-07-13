@@ -216,6 +216,7 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
     id: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
     name: 'Campfire',
     category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
+    isPaletteVisible: false,
     collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
     isInteractive: true,
     visualConfig: {

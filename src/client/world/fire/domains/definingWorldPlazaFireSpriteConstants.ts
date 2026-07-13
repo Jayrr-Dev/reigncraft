@@ -113,14 +113,43 @@ export function resolvingWorldPlazaFireSmokeSheetUrl(
 }
 
 /**
+ * Authored flame frame heights (px). Tiers 3 and 5 ship smaller sheets than
+ * the 32×48 baseline, so display scale must compensate or mid/high fuel looks
+ * weaker than low fuel.
+ */
+export const DEFINING_WORLD_PLAZA_FIRE_FLAME_NATIVE_FRAME_HEIGHT_PX_BY_TIER: Record<
+  DefiningWorldPlazaFireIntensityTier,
+  number
+> = {
+  1: 48,
+  2: 48,
+  3: 32,
+  4: 48,
+  5: 32,
+};
+
+/** Baseline frame height used when compensating undersized flame sheets. */
+export const DEFINING_WORLD_PLAZA_FIRE_FLAME_REFERENCE_FRAME_HEIGHT_PX = 48;
+
+/**
  * Display scale for a flame tier in isometric world-local pixels.
+ *
+ * Includes a height-compensation factor so undersized authored sheets (tier 3
+ * and 5) still grow with fuel instead of visually shrinking.
  *
  * @param tier - Intensity tier 1..5.
  */
 export function resolvingWorldPlazaFireFlameDisplayScaleForTier(
   tier: DefiningWorldPlazaFireIntensityTier
 ): number {
-  return 0.85 + tier * 0.14;
+  const intensityScale = 0.85 + tier * 0.14;
+  const nativeFrameHeightPx =
+    DEFINING_WORLD_PLAZA_FIRE_FLAME_NATIVE_FRAME_HEIGHT_PX_BY_TIER[tier];
+  const frameSizeCompensation =
+    DEFINING_WORLD_PLAZA_FIRE_FLAME_REFERENCE_FRAME_HEIGHT_PX /
+    nativeFrameHeightPx;
+
+  return intensityScale * frameSizeCompensation;
 }
 
 /**

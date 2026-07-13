@@ -52,13 +52,47 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_NIGHT_COOLING_CELSIUS = 8;
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_LAVA_CELSIUS = 920;
 
 /**
- * Campfire standing-tile temperature (°C).
+ * Lit campfire heat with zero fed wood (°C).
  *
- * Kept at comfort high so a lit pit warms cold biomes via neighbor averaging
- * without dealing standing heat DoT. Unlit pits emit no heat (lit fire cells only).
+ * Each inventory wood raises standing-tile heat from this floor. Unlit pits
+ * emit no heat (lit fire cells only).
+ */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_BASE_CELSIUS = 38;
+
+/** Extra standing-tile heat (°C) per inventory wood fed to a lit campfire. */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS_PER_WOOD = 12;
+
+/** Cap for campfire standing-tile heat (°C), below lava. */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_MAX_CELSIUS = 120;
+
+/**
+ * One-wood campfire standing-tile temperature (°C).
+ *
+ * Equals base + one wood step. Prefer
+ * {@link computingWorldPlazaCampfireTemperatureCelsiusFromFuelWoodCount}
+ * when wood count is known.
  */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS =
-  DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS;
+  DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_BASE_CELSIUS +
+  DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS_PER_WOOD;
+
+/**
+ * Standing-tile campfire temperature from inventory wood fed to the pit (°C).
+ */
+export function computingWorldPlazaCampfireTemperatureCelsiusFromFuelWoodCount(
+  fuelWoodCount: number
+): number {
+  const woodCount = Math.max(
+    0,
+    Number.isFinite(fuelWoodCount) ? fuelWoodCount : 0
+  );
+
+  return Math.min(
+    DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_MAX_CELSIUS,
+    DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_BASE_CELSIUS +
+      woodCount * DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS_PER_WOOD
+  );
+}
 
 /** Ice block standing-tile temperature (°C). Freezes nearby surface water. */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_ICE_BLOCK_CELSIUS = -22;

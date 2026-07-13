@@ -9,7 +9,7 @@ import type { DefiningWorldPlazaMinedRockTileState } from '@/components/world/ha
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { syncingWorldPlazaProximityInteractableBlockSelection } from '@/components/world/interaction/domains/syncingWorldPlazaProximityInteractableBlockSelection';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
-import { useLayoutEffect, type RefObject } from 'react';
+import { useLayoutEffect, useRef, type RefObject } from 'react';
 
 export type UsingWorldPlazaProximityInteractableBlockSelectionParams = {
   readonly enabled: boolean;
@@ -55,10 +55,21 @@ export function usingWorldPlazaProximityInteractableBlockSelection({
   hasEquippedScytheRef,
   hasSeedsInInventoryRef,
 }: UsingWorldPlazaProximityInteractableBlockSelectionParams): void {
+  const wasEnabledRef = useRef(enabled);
+
   useLayoutEffect(() => {
     if (!enabled) {
+      if (
+        wasEnabledRef.current &&
+        selectedInteractableBlockKeysRef.current.size > 0
+      ) {
+        selectedInteractableBlockKeysRef.current.clear();
+      }
+      wasEnabledRef.current = false;
       return;
     }
+
+    wasEnabledRef.current = true;
 
     return subscribingWorldPlazaDomOverlayFrame(() => {
       const playerPosition = playerPositionRef.current;

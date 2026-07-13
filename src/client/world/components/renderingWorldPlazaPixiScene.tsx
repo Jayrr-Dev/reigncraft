@@ -55,6 +55,7 @@ import {
   snappingWorldBuildingTilePositionFromGridPoint,
 } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import type { DefiningWorldPlazaCraftModeCookbookId } from '@/components/world/building/domains/definingWorldPlazaCraftModeCookbookRegistry';
 import { mergingWorldBuildingClaimModeOverlayPlots } from '@/components/world/building/domains/mergingWorldBuildingClaimModeOverlayPlots';
 import { projectingWorldBuildingTilePositionFromViewportPointer } from '@/components/world/building/domains/projectingWorldBuildingTilePositionFromViewportPointerEvent';
 import { findingWorldBuildingPlacedBlockAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingCollision';
@@ -121,6 +122,19 @@ import {
   SYNCING_WORLD_PLAZA_PIXI_VIEWPORT_FRAME_CANVAS_CLASS_NAME,
   SyncingWorldPlazaPixiViewportFrameResize,
 } from '@/components/world/components/syncingWorldPlazaPixiViewportFrameResize';
+import { checkingWorldPlazaCraftRecipeAffordable } from '@/components/world/crafting/domains/checkingWorldPlazaCraftRecipeAffordable';
+import { committingWorldPlazaCraftRecipePlaceablePlacement } from '@/components/world/crafting/domains/committingWorldPlazaCraftRecipePlaceablePlacement';
+import { resolvingWorldPlazaCraftModeRecipeDefinition } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry';
+import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
+import {
+  LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INVENTORY_FULL_TOAST,
+  LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INVENTORY_SUCCESS_TOAST,
+  LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_MISSING_MATERIALS_TOAST,
+  LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_CANCELED_TOAST,
+  LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_MATERIALS_LOST_TOAST,
+  LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_SUCCESS_TOAST,
+} from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeUiConstants';
+import { executingWorldPlazaCraftRecipeInventoryOutcome } from '@/components/world/crafting/domains/executingWorldPlazaCraftRecipeInventoryOutcome';
 import {
   DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_AVATAR_SUB_LAYER_Z_INDEX,
   DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_CANOPY_SUB_LAYER_Z_INDEX,
@@ -332,6 +346,7 @@ import {
 } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerCursorConstants';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
 import {
+  clearingWorldPlazaInteractableBlockClickSelection,
   selectingWorldPlazaFarmlandTileForClickAction,
   selectingWorldPlazaFishingTileForClickAction,
   selectingWorldPlazaInteractableBlockForClickAction,
@@ -341,6 +356,7 @@ import {
   selectingWorldPlazaWildlifeCorpseForClickAction,
 } from '@/components/world/interaction/domains/managingWorldPlazaInteractableBlockClickSelection';
 import { trackingWorldPlazaInteractableBlockPointerInteraction } from '@/components/world/interaction/hooks/trackingWorldPlazaInteractableBlockPointerInteraction';
+import { usingWorldPlazaHideActionsEnabled } from '@/components/world/interaction/hooks/usingWorldPlazaHideActionsEnabled';
 import { usingWorldPlazaProximityInteractableBlockSelection } from '@/components/world/interaction/hooks/usingWorldPlazaProximityInteractableBlockSelection';
 import { RenderingWorldPlazaGroundItems } from '@/components/world/inventory/components/renderingWorldPlazaGroundItems';
 import { RenderingWorldPlazaInventoryBagSfx } from '@/components/world/inventory/components/renderingWorldPlazaInventoryBagSfx';
@@ -924,6 +940,11 @@ function RenderingWorldPlazaPixiSceneConnected({
     ];
   const isHudHotbarEnabled =
     generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_HOTBAR];
+  const isHudCraftingEnabled =
+    isHudHotbarEnabled &&
+    generationFeatureFlags[
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_CRAFTING
+    ];
   const isHudDayNightEnabled =
     generationFeatureFlags[
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_DAY_NIGHT
@@ -1032,6 +1053,13 @@ function RenderingWorldPlazaPixiSceneConnected({
   });
 
   const [isRemovingTemporaryPlot, setIsRemovingTemporaryPlot] = useState(false);
+  const [openCraftCookbookId, setOpenCraftCookbookId] =
+    useState<DefiningWorldPlazaCraftModeCookbookId | null>(null);
+  const onSuccessfulBlockPlacementRef = useRef<
+    ((tilePosition: DefiningWorldBuildingTilePosition) => void) | null
+  >(null);
+  const pendingCraftRecipeIdRef =
+    useRef<DefiningWorldPlazaCraftModeRecipeId | null>(null);
 
   const {
     isEditSessionActive,
@@ -1076,6 +1104,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     cancelingBuildDraftDiscard,
     confirmingBuildDraftDiscard,
     selectingBlockDefinition,
+    enteringBuildPlacementForBlockDefinition,
     selectingWorldLayer,
     selectingBlockHeight,
     selectingCutFootprintMask,
@@ -1102,6 +1131,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     ownedPlots,
     plotOwnerLimits,
     refetchingPlots,
+    onSuccessfulBlockPlacementRef,
   });
 
   const { hudToolbarMode, selectingHudToolbarMode } =
@@ -1328,6 +1358,180 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const { showingGameplayHudToast } = usingWorldPlazaGameplayHudToast();
 
+  const clearingPendingCraftPlacement = useCallback(
+    (showCanceledToast: boolean): void => {
+      if (pendingCraftRecipeIdRef.current === null) {
+        return;
+      }
+
+      pendingCraftRecipeIdRef.current = null;
+
+      if (showCanceledToast) {
+        showingGameplayHudToast(
+          LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_CANCELED_TOAST
+        );
+      }
+    },
+    [showingGameplayHudToast]
+  );
+
+  const handlingSuccessfulCraftedBlockPlacement = useCallback(
+    (_tilePosition: DefiningWorldBuildingTilePosition): void => {
+      const pendingRecipeId = pendingCraftRecipeIdRef.current;
+
+      if (pendingRecipeId === null) {
+        return;
+      }
+
+      const recipeDefinition =
+        resolvingWorldPlazaCraftModeRecipeDefinition(pendingRecipeId);
+
+      if (!recipeDefinition || recipeDefinition.outcome.kind !== 'placeable') {
+        pendingCraftRecipeIdRef.current = null;
+        return;
+      }
+
+      pendingCraftRecipeIdRef.current = null;
+
+      updatingInventoryState((currentState) => {
+        const commitResult = committingWorldPlazaCraftRecipePlaceablePlacement(
+          currentState,
+          recipeDefinition
+        );
+
+        if (commitResult.outcome === 'committed') {
+          showingGameplayHudToast(
+            LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_SUCCESS_TOAST
+          );
+          selectingBlockDefinition(recipeDefinition.outcome.blockDefinitionId);
+          return commitResult.nextState;
+        }
+
+        showingGameplayHudToast(
+          LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_MATERIALS_LOST_TOAST
+        );
+        return null;
+      });
+    },
+    [selectingBlockDefinition, showingGameplayHudToast, updatingInventoryState]
+  );
+
+  useEffect(() => {
+    onSuccessfulBlockPlacementRef.current =
+      handlingSuccessfulCraftedBlockPlacement;
+
+    return () => {
+      onSuccessfulBlockPlacementRef.current = null;
+    };
+  }, [handlingSuccessfulCraftedBlockPlacement]);
+
+  const handlingCraftRecipe = useCallback(
+    (recipeId: DefiningWorldPlazaCraftModeRecipeId): void => {
+      if (!isHudCraftingEnabled || !isBuildModeEnabled) {
+        return;
+      }
+
+      const recipeDefinition =
+        resolvingWorldPlazaCraftModeRecipeDefinition(recipeId);
+
+      if (!recipeDefinition) {
+        return;
+      }
+
+      if (
+        !checkingWorldPlazaCraftRecipeAffordable(
+          inventoryState,
+          recipeDefinition
+        )
+      ) {
+        showingGameplayHudToast(
+          LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_MISSING_MATERIALS_TOAST
+        );
+        return;
+      }
+
+      if (recipeDefinition.outcome.kind === 'inventory') {
+        updatingInventoryState((currentState) => {
+          const craftResult = executingWorldPlazaCraftRecipeInventoryOutcome(
+            currentState,
+            recipeDefinition
+          );
+
+          if (craftResult.outcome === 'crafted') {
+            showingGameplayHudToast(
+              LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INVENTORY_SUCCESS_TOAST
+            );
+            return craftResult.nextState;
+          }
+
+          if (craftResult.outcome === 'inventory-full') {
+            showingGameplayHudToast(
+              LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INVENTORY_FULL_TOAST
+            );
+          } else {
+            showingGameplayHudToast(
+              LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_MISSING_MATERIALS_TOAST
+            );
+          }
+
+          return null;
+        });
+        return;
+      }
+
+      pendingCraftRecipeIdRef.current = recipeId;
+      setOpenCraftCookbookId(null);
+      selectingHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD);
+      enteringBuildPlacementForBlockDefinition(
+        recipeDefinition.outcome.blockDefinitionId,
+        recipeDefinition.outcome.blockHeight
+      );
+    },
+    [
+      enteringBuildPlacementForBlockDefinition,
+      inventoryState,
+      isBuildModeEnabled,
+      isHudCraftingEnabled,
+      selectingHudToolbarMode,
+      showingGameplayHudToast,
+      updatingInventoryState,
+    ]
+  );
+
+  useEffect(() => {
+    if (!isBlockBuildModeActive) {
+      clearingPendingCraftPlacement(true);
+      return;
+    }
+
+    const pendingRecipeId = pendingCraftRecipeIdRef.current;
+
+    if (pendingRecipeId === null) {
+      return;
+    }
+
+    const recipeDefinition =
+      resolvingWorldPlazaCraftModeRecipeDefinition(pendingRecipeId);
+
+    if (!recipeDefinition || recipeDefinition.outcome.kind !== 'placeable') {
+      pendingCraftRecipeIdRef.current = null;
+      return;
+    }
+
+    const isStillArmed =
+      isBuildPlacementSelectionActive &&
+      selectedDefinitionId === recipeDefinition.outcome.blockDefinitionId;
+
+    if (!isStillArmed) {
+      clearingPendingCraftPlacement(true);
+    }
+  }, [
+    clearingPendingCraftPlacement,
+    isBlockBuildModeActive,
+    isBuildPlacementSelectionActive,
+    selectedDefinitionId,
+  ]);
+
   const chopPersistenceOwnerId = localPersistenceOwnerId ?? onlineUserId;
   equippedHeldItemPresentationRef.current =
     resolvingWorldPlazaEquippedHeldItemPresentation(
@@ -1473,6 +1677,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const isCampfireActionPendingRef = useRef(false);
   const selectedInteractableBlockKeysRef = useRef(new Set<string>());
+  const { isHideActionsEnabled } = usingWorldPlazaHideActionsEnabled();
   const campfireInventorySlotsRef = useRef<
     readonly { itemTypeId: string; quantity: number }[]
   >([]);
@@ -1551,9 +1756,16 @@ function RenderingWorldPlazaPixiSceneConnected({
   );
 
   const clearingInteractableBlockClickSelection = useCallback((): void => {
-    // Proximity selection owns the interactable label set each overlay frame.
-    // Clearing on pointer-miss would flash labels off for a frame.
-  }, []);
+    // Proximity mode owns the label set each overlay frame; miss-clear would flash.
+    // Hide Actions restores click-to-show, so miss should dismiss the popover.
+    if (!isHideActionsEnabled) {
+      return;
+    }
+
+    clearingWorldPlazaInteractableBlockClickSelection(
+      selectedInteractableBlockKeysRef
+    );
+  }, [isHideActionsEnabled]);
 
   const { handlingInteractableBlockPointerDown } =
     trackingWorldPlazaInteractableBlockPointerInteraction({
@@ -2565,7 +2777,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   ]);
 
   usingWorldPlazaProximityInteractableBlockSelection({
-    enabled: isLocalGameplayEnabled,
+    enabled: isLocalGameplayEnabled && !isHideActionsEnabled,
     playerPositionRef,
     selectedInteractableBlockKeysRef,
     placedBlocksRef: proximityPlacedBlocksRef,
@@ -5657,7 +5869,13 @@ function RenderingWorldPlazaPixiSceneConnected({
                     ) : null}
                     {hudToolbarMode ===
                     DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CRAFT ? (
-                      <RenderingWorldPlazaHudToolbarCraftModePanel />
+                      <RenderingWorldPlazaHudToolbarCraftModePanel
+                        inventoryState={inventoryState}
+                        isCraftingEnabled={isHudCraftingEnabled}
+                        openCookbookId={openCraftCookbookId}
+                        onOpenCookbookIdChange={setOpenCraftCookbookId}
+                        onCraftRecipe={handlingCraftRecipe}
+                      />
                     ) : null}
                     {hudToolbarEditModeHotbar}
                   </RenderingWorldPlazaHudToolbarBottomAnchor>
@@ -5780,7 +5998,13 @@ function RenderingWorldPlazaPixiSceneConnected({
                     ) : null}
                     {hudToolbarMode ===
                     DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CRAFT ? (
-                      <RenderingWorldPlazaHudToolbarCraftModePanel />
+                      <RenderingWorldPlazaHudToolbarCraftModePanel
+                        inventoryState={inventoryState}
+                        isCraftingEnabled={isHudCraftingEnabled}
+                        openCookbookId={openCraftCookbookId}
+                        onOpenCookbookIdChange={setOpenCraftCookbookId}
+                        onCraftRecipe={handlingCraftRecipe}
+                      />
                     ) : null}
                     {hudToolbarEditModeHotbar}
                   </RenderingWorldPlazaHudToolbarBottomAnchor>

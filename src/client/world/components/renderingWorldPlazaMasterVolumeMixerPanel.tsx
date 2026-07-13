@@ -42,6 +42,8 @@ import { usingWorldPlazaMasterVolume } from '@/components/world/hooks/usingWorld
 import { usingWorldPlazaMinimapEnabled } from '@/components/world/hooks/usingWorldPlazaMinimapEnabled';
 import { usingWorldPlazaMobileAutoJumpEnabled } from '@/components/world/hooks/usingWorldPlazaMobileAutoJumpEnabled';
 import { usingWorldPlazaSfxVolume } from '@/components/world/hooks/usingWorldPlazaSfxVolume';
+import { LABELING_WORLD_PLAZA_HIDE_ACTIONS_TOGGLE } from '@/components/world/interaction/domains/definingWorldPlazaHideActionsPreferenceConstants';
+import { usingWorldPlazaHideActionsEnabled } from '@/components/world/interaction/hooks/usingWorldPlazaHideActionsEnabled';
 import { LABELING_WORLD_PLAZA_GROUND_ITEM_AUTO_PICKUP_TOGGLE } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemAutoPickupPreferenceConstants';
 import { usingWorldPlazaGroundItemAutoPickupEnabled } from '@/components/world/inventory/hooks/usingWorldPlazaGroundItemAutoPickupEnabled';
 
@@ -54,7 +56,8 @@ export type RenderingWorldPlazaMasterVolumeMixerPanelProps = {
 };
 
 /**
- * Dropdown panel with music volume, ambience volume, SFX volume, auto-pickup, auto-jump, and °F/°C settings.
+ * Dropdown panel with music volume, ambience volume, SFX volume, hide actions,
+ * auto-pickup, auto-jump, and °F/°C settings.
  */
 export function RenderingWorldPlazaMasterVolumeMixerPanel({
   isOpen,
@@ -66,6 +69,8 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
   const { sfxVolume, settingSfxVolume } = usingWorldPlazaSfxVolume();
   const { isGroundItemAutoPickupEnabled, settingGroundItemAutoPickupEnabled } =
     usingWorldPlazaGroundItemAutoPickupEnabled();
+  const { isHideActionsEnabled, settingHideActionsEnabled } =
+    usingWorldPlazaHideActionsEnabled();
   const { isMobileAutoJumpEnabled, settingMobileAutoJumpEnabled } =
     usingWorldPlazaMobileAutoJumpEnabled();
   const { isMinimapPreferenceEnabled, settingMinimapEnabled } =
@@ -195,6 +200,21 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
           }}
         />
         <span>{LABELING_WORLD_PLAZA_MINIMAP_TOGGLE}</span>
+      </label>
+      <label
+        className={STYLING_WORLD_PLAZA_MOBILE_AUTO_JUMP_TOGGLE_ROW_CLASS_NAME}
+        htmlFor="world-plaza-hide-actions"
+      >
+        <input
+          id="world-plaza-hide-actions"
+          type="checkbox"
+          checked={isHideActionsEnabled}
+          className={STYLING_WORLD_PLAZA_MOBILE_AUTO_JUMP_CHECKBOX_CLASS_NAME}
+          onChange={(event) => {
+            settingHideActionsEnabled(event.currentTarget.checked);
+          }}
+        />
+        <span>{LABELING_WORLD_PLAZA_HIDE_ACTIONS_TOGGLE}</span>
       </label>
       <label
         className={STYLING_WORLD_PLAZA_MOBILE_AUTO_JUMP_TOGGLE_ROW_CLASS_NAME}

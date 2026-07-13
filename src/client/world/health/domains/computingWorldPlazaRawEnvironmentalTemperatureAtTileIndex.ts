@@ -6,13 +6,12 @@ import { checkingWorldPlazaWaterIsClimateFrozenAtTileIndex } from '@/components/
 import { DEFINING_WORLD_PLAZA_FIRELANDS_AMBIENT_TEMPERATURE_CELSIUS } from '@/components/world/domains/definingWorldPlazaFirelandsBiomeConstants';
 import { resolvingWorldPlazaClimateAtTile } from '@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
-import { checkingWorldPlazaLitCampfireHeatAtTileIndex } from '@/components/world/fire/domains/managingWorldPlazaLitCampfireHeatTilesStore';
+import { resolvingWorldPlazaLitCampfireHeatCelsiusAtTileIndex } from '@/components/world/fire/domains/managingWorldPlazaLitCampfireHeatTilesStore';
 import { applyingWorldPlazaTemperatureDebugOverrideToCelsius } from '@/components/world/health/domains/applyingWorldPlazaTemperatureDebugOverride';
 import { mergingWorldPlazaEnvironmentalTemperatureLevels } from '@/components/world/health/domains/combiningWorldPlazaEnvironmentalTemperatureLevel';
 import { convertingWorldPlazaClimateNormalizedToCelsius } from '@/components/world/health/domains/convertingWorldPlazaClimateNormalizedToCelsius';
 import { resolvingWorldPlazaTemperatureAreaProfileAtTileIndex } from '@/components/world/health/domains/definingWorldPlazaTemperatureAreaProfiles';
 import {
-  DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS,
   DEFINING_WORLD_PLAZA_TEMPERATURE_FROZEN_WATER_CELSIUS,
   DEFINING_WORLD_PLAZA_TEMPERATURE_LAVA_CELSIUS,
   DEFINING_WORLD_PLAZA_TEMPERATURE_NIGHT_COOLING_CELSIUS,
@@ -92,11 +91,11 @@ export function computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
     );
   }
 
-  if (checkingWorldPlazaLitCampfireHeatAtTileIndex(tileX, tileY)) {
-    effectiveCelsius = Math.max(
-      effectiveCelsius,
-      DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS
-    );
+  const litCampfireCelsius =
+    resolvingWorldPlazaLitCampfireHeatCelsiusAtTileIndex(tileX, tileY);
+
+  if (litCampfireCelsius !== null) {
+    effectiveCelsius = Math.max(effectiveCelsius, litCampfireCelsius);
   }
 
   return effectiveCelsius;

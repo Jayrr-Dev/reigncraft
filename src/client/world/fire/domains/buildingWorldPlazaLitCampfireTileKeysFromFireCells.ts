@@ -2,15 +2,15 @@ import { formattingWorldPlazaLitCampfireHeatTileKey } from '@/components/world/f
 import type { WorldFireDevvitCell } from '../../../../shared/worldFireDevvit';
 
 /**
- * Builds 2D tile keys for campfires that are currently lit.
+ * Builds 2D tile → inventory fuel-wood counts for campfires that are lit.
  *
  * Any world-layer campfire with fuel counts; environmental heat is sampled in
- * tile X/Y only.
+ * tile X/Y only. Same X/Y on multiple layers keeps the higher wood count.
  */
 export function buildingWorldPlazaLitCampfireTileKeysFromFireCells(
   fireCells: readonly WorldFireDevvitCell[]
-): ReadonlySet<string> {
-  const litCampfireTileKeys = new Set<string>();
+): ReadonlyMap<string, number> {
+  const litCampfireFuelWoodByTile = new Map<string, number>();
 
   for (const cell of fireCells) {
     if (
@@ -21,10 +21,17 @@ export function buildingWorldPlazaLitCampfireTileKeysFromFireCells(
       continue;
     }
 
-    litCampfireTileKeys.add(
-      formattingWorldPlazaLitCampfireHeatTileKey(cell.tileX, cell.tileY)
+    const tileKey = formattingWorldPlazaLitCampfireHeatTileKey(
+      cell.tileX,
+      cell.tileY
     );
+    const fuelWoodCount = Math.max(0, cell.inventoryFuelWoodCount ?? 0);
+    const existingFuelWoodCount = litCampfireFuelWoodByTile.get(tileKey) ?? 0;
+
+    if (fuelWoodCount >= existingFuelWoodCount) {
+      litCampfireFuelWoodByTile.set(tileKey, fuelWoodCount);
+    }
   }
 
-  return litCampfireTileKeys;
+  return litCampfireFuelWoodByTile;
 }

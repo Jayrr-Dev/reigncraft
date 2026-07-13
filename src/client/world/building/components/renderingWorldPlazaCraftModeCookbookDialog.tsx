@@ -1,13 +1,16 @@
 'use client';
 
 /**
- * Pixel open-book dialog for one craft-mode cookbook (blank pages until recipes).
+ * Pixel open-book dialog for one craft-mode cookbook.
  *
  * @module components/world/building/components/renderingWorldPlazaCraftModeCookbookDialog
  */
 
 import { playingPlazaBookSfx } from '@/components/home/domains/playingPlazaBookSfx';
+import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import { Icon } from '@/components/ui/icon';
+import { RenderingWorldPlazaCraftModeRecipeSpreadLeftPage } from '@/components/world/building/components/renderingWorldPlazaCraftModeRecipeSpreadLeftPage';
+import { RenderingWorldPlazaCraftModeRecipeSpreadRightPage } from '@/components/world/building/components/renderingWorldPlazaCraftModeRecipeSpreadRightPage';
 import {
   DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_OPEN_BOOK_ASPECT_RATIO,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_OPEN_BOOK_URL,
@@ -16,11 +19,15 @@ import {
   resolvingWorldPlazaCraftModeCookbookSpriteSheetIcon,
   type DefiningWorldPlazaCraftModeCookbookDefinition,
 } from '@/components/world/building/domains/definingWorldPlazaCraftModeCookbookRegistry';
+import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
+import { LABELING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_NO_RECIPES_PAGE } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeUiConstants';
+import { listingWorldPlazaCraftRecipesForCookbook } from '@/components/world/crafting/domains/listingWorldPlazaCraftRecipesForCookbook';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_CODEX_OVERLAY_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaCodexConstants';
 import {
   useCallback,
   useEffect,
+  useMemo,
   useState,
   type CSSProperties,
   type SyntheticEvent,
@@ -73,19 +80,45 @@ function RenderingWorldPlazaCraftModeCookbookCoverGlyph({
 /** Props for {@link RenderingWorldPlazaCraftModeCookbookDialog}. */
 export type RenderingWorldPlazaCraftModeCookbookDialogProps = {
   readonly cookbookDefinition: DefiningWorldPlazaCraftModeCookbookDefinition | null;
+  readonly inventoryState: DefiningInventoryState;
+  readonly isCraftingEnabled: boolean;
+  readonly onCraftRecipe: (
+    recipeId: DefiningWorldPlazaCraftModeRecipeId
+  ) => void;
   readonly onClose: () => void;
 };
 
 /**
- * Modal dialog: pixel open-book art with blank page content overlaid.
+ * Modal dialog: pixel open-book art with recipe spreads or blank pages.
  */
 export function RenderingWorldPlazaCraftModeCookbookDialog({
   cookbookDefinition,
+  inventoryState,
+  isCraftingEnabled,
+  onCraftRecipe,
   onClose,
 }: RenderingWorldPlazaCraftModeCookbookDialogProps): React.JSX.Element | null {
   const isOpen = cookbookDefinition !== null;
   const [leafIndex, setLeafIndex] = useState(0);
-  const leafCount = Math.max(1, cookbookDefinition?.blankPageCount ?? 1);
+
+  const cookbookRecipes = useMemo(
+    () =>
+      cookbookDefinition === null
+        ? []
+        : listingWorldPlazaCraftRecipesForCookbook(cookbookDefinition.id),
+    [cookbookDefinition]
+  );
+
+  const leafCount = Math.max(
+    1,
+    isCraftingEnabled && cookbookRecipes.length > 0
+      ? cookbookRecipes.length
+      : (cookbookDefinition?.blankPageCount ?? 1)
+  );
+  const activeRecipe =
+    isCraftingEnabled && cookbookRecipes.length > 0
+      ? (cookbookRecipes[leafIndex] ?? null)
+      : null;
 
   const stoppingPlazaWalkPointerPropagation = useCallback(
     (event: SyntheticEvent<HTMLElement>): void => {
@@ -156,6 +189,11 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
     setLeafIndex(nextLeafIndex);
   };
 
+  const blankPageCopy =
+    isCraftingEnabled && cookbookRecipes.length === 0
+      ? LABELING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_NO_RECIPES_PAGE
+      : LABELING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_BLANK_PAGE;
+
   return createPortal(
     <div
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
@@ -212,16 +250,22 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
             className="absolute flex flex-col overflow-hidden p-2 sm:p-3"
             style={resolvingCookbookPageBoxStyle('left')}
           >
-            <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center">
-              <Icon
-                icon={cookbookDefinition.emblemIconifyIcon}
-                className="size-7 text-[#6b4e2e]/25 sm:size-8"
-                aria-hidden
+            {activeRecipe ? (
+              <RenderingWorldPlazaCraftModeRecipeSpreadLeftPage
+                recipeDefinition={activeRecipe}
               />
-              <p className="max-w-[16rem] text-[11px] font-medium italic leading-relaxed text-[#6b4e2e]/70 sm:text-xs">
-                {LABELING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_BLANK_PAGE}
-              </p>
-            </div>
+            ) : (
+              <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center">
+                <Icon
+                  icon={cookbookDefinition.emblemIconifyIcon}
+                  className="size-7 text-[#6b4e2e]/25 sm:size-8"
+                  aria-hidden
+                />
+                <p className="max-w-[16rem] text-[11px] font-medium italic leading-relaxed text-[#6b4e2e]/70 sm:text-xs">
+                  {blankPageCopy}
+                </p>
+              </div>
+            )}
           </div>
 
           <div
@@ -229,16 +273,25 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
             className="absolute flex flex-col overflow-hidden p-2 sm:p-3"
             style={resolvingCookbookPageBoxStyle('right')}
           >
-            <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center">
-              <Icon
-                icon={cookbookDefinition.emblemIconifyIcon}
-                className="size-7 text-[#6b4e2e]/20 sm:size-8"
-                aria-hidden
+            {activeRecipe ? (
+              <RenderingWorldPlazaCraftModeRecipeSpreadRightPage
+                recipeDefinition={activeRecipe}
+                inventoryState={inventoryState}
+                isCraftingEnabled={isCraftingEnabled}
+                onCraftRecipe={onCraftRecipe}
               />
-              <p className="max-w-[16rem] text-[11px] font-medium italic leading-relaxed text-[#6b4e2e]/60 sm:text-xs">
-                {LABELING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_BLANK_PAGE}
-              </p>
-            </div>
+            ) : (
+              <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center">
+                <Icon
+                  icon={cookbookDefinition.emblemIconifyIcon}
+                  className="size-7 text-[#6b4e2e]/20 sm:size-8"
+                  aria-hidden
+                />
+                <p className="max-w-[16rem] text-[11px] font-medium italic leading-relaxed text-[#6b4e2e]/60 sm:text-xs">
+                  {blankPageCopy}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

@@ -1,10 +1,6 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import {
-  DEFINING_WORLD_BUILDING_CLAIM_MODE_SAVE_BUTTON_CLASS_NAME,
-  DEFINING_WORLD_BUILDING_CLAIM_MODE_SECTION_LABEL_CLASS_NAME,
-} from '@/components/world/building/domains/definingWorldBuildingClaimModeConstants';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { DefiningWorldPlazaSavedCoords } from '@/components/world/domains/definingWorldPlazaSavedCoords';
 import {
@@ -14,7 +10,9 @@ import {
   DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_EMPTY_MESSAGE,
   DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_EMPTY_TEXT_CLASS_NAME,
   DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_ROW_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_SAVE_BUTTON_CLASS_NAME,
   DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_SECTION_LABEL,
+  DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_SECTION_LABEL_CLASS_NAME,
   DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_TRACK_BUTTON_ACTIVE_CLASS_NAME,
   DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_TRACK_BUTTON_CLASS_NAME,
   DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_TRACK_BUTTON_LABEL,
@@ -64,7 +62,9 @@ export function RenderingWorldPlazaClaimModeSavedCoordsList({
   return (
     <div className="flex flex-col gap-1.5">
       <p
-        className={DEFINING_WORLD_BUILDING_CLAIM_MODE_SECTION_LABEL_CLASS_NAME}
+        className={
+          DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_SECTION_LABEL_CLASS_NAME
+        }
       >
         {DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_SECTION_LABEL} (
         {savedCoordsCount})
@@ -85,7 +85,9 @@ export function RenderingWorldPlazaClaimModeSavedCoordsList({
 
             onStartSaveCoordsPlacement();
           }}
-          className={DEFINING_WORLD_BUILDING_CLAIM_MODE_SAVE_BUTTON_CLASS_NAME}
+          className={
+            DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_SAVE_BUTTON_CLASS_NAME
+          }
         >
           {isSavingCoords
             ? LABELING_WORLD_PLAZA_SAVED_COORDS_SAVING_BUTTON

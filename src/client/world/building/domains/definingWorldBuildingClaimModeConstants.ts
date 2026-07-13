@@ -171,6 +171,14 @@ export const STYLING_WORLD_PLAZA_CLAIM_MODE_PLOT_POPOVER_PANEL_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_CLAIM_MODE_PLOT_POPOVER_TITLE_CLASS_NAME =
   'mb-1 text-center font-display text-[10px] font-bold uppercase tracking-[0.14em] text-poster-teal-deep' as const;
 
+/** Compact parchment popover shell for the saves tool. */
+export const STYLING_WORLD_PLAZA_CLAIM_MODE_SAVES_POPOVER_PANEL_CLASS_NAME =
+  `${STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_CLASS} ${STYLING_WORLD_PLAZA_GAMEPLAY_HUD_LIGHT_THEME_SCOPE_CLASS} pointer-events-auto absolute bottom-full left-1/2 z-50 mb-2 w-max min-w-[11rem] max-w-[min(100vw-1.5rem,18rem)] p-1.5` as const;
+
+/** Saves popover title on parchment chrome. */
+export const STYLING_WORLD_PLAZA_CLAIM_MODE_SAVES_POPOVER_TITLE_CLASS_NAME =
+  STYLING_WORLD_PLAZA_CLAIM_MODE_PLOT_POPOVER_TITLE_CLASS_NAME;
+
 /** Claim mode plot teleport button classes. */
 export const DEFINING_WORLD_BUILDING_CLAIM_MODE_PLOT_TELEPORT_BUTTON_CLASS_NAME =
   'h-5 shrink-0 rounded-sm border border-sky-300/40 bg-sky-400/10 px-1 text-[8px] font-semibold text-sky-100 transition hover:bg-sky-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70' as const;

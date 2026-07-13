@@ -98,7 +98,14 @@ import { persistingWorldBuildingBuildDraft } from '@/components/world/building/r
 import { removingWorldBuildingPlotPersistence } from '@/components/world/building/repositories/persistingWorldBuildingPlacedBlock';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_SIDEBAR_PANEL_DISMISS_KEY } from '@/components/world/domains/definingWorldPlazaSidebarPanelConstants';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MutableRefObject,
+} from 'react';
 
 /** Result from {@link usingWorldPlazaBuildMode}. */
 export interface UsingWorldPlazaBuildModeResult {
@@ -154,6 +161,10 @@ export interface UsingWorldPlazaBuildModeResult {
   selectingBlockDefinition: (
     definitionId: DefiningWorldBuildingBlockDefinitionId
   ) => void;
+  enteringBuildPlacementForBlockDefinition: (
+    definitionId: DefiningWorldBuildingBlockDefinitionId,
+    blockHeight: number
+  ) => void;
   selectingWorldLayer: (worldLayer: number) => void;
   selectingBlockHeight: (blockHeight: number) => void;
   selectingCutFootprintMask: (cutFootprintMask: number) => void;
@@ -200,6 +211,9 @@ export interface UsingWorldPlazaBuildModeParams {
   ownedPlots: DefiningWorldBuildingPlot[];
   plotOwnerLimits?: DefiningWorldBuildingPlotOwnerLimits | null;
   refetchingPlots: () => Promise<RefetchingWorldBuildingPlotsResult>;
+  onSuccessfulBlockPlacementRef?: MutableRefObject<
+    ((tilePosition: DefiningWorldBuildingTilePosition) => void) | null
+  >;
 }
 
 /**
@@ -214,6 +228,7 @@ export function usingWorldPlazaBuildMode({
   ownedPlots,
   plotOwnerLimits,
   refetchingPlots,
+  onSuccessfulBlockPlacementRef,
 }: UsingWorldPlazaBuildModeParams): UsingWorldPlazaBuildModeResult {
   const resolvedPlotOwnerLimits = useMemo(
     () => resolvingWorldBuildingPlotOwnerLimits(plotOwnerLimits),
@@ -341,6 +356,27 @@ export function usingWorldPlazaBuildMode({
       setBuildErrorMessage(null);
     },
     []
+  );
+
+  const enteringBuildPlacementForBlockDefinition = useCallback(
+    (
+      definitionId: DefiningWorldBuildingBlockDefinitionId,
+      blockHeight: number
+    ): void => {
+      setSelectedDefinitionId(definitionId);
+
+      const selectionResult =
+        applyingWorldBuildingBuildModeBlockHeightSelection({
+          requestedBlockHeight: blockHeight,
+          selectedWorldLayer,
+        });
+
+      setIsPresetBlockTypeSelected(true);
+      setSelectedWorldLayer(selectionResult.selectedWorldLayer);
+      setSelectedBlockHeight(selectionResult.selectedBlockHeight);
+      setBuildErrorMessage(null);
+    },
+    [selectedWorldLayer]
   );
 
   const selectingWorldLayer = useCallback((worldLayer: number): void => {
@@ -805,12 +841,14 @@ export function usingWorldPlazaBuildMode({
 
       setBuildDraft(placementResult.draft);
       setBuildErrorMessage(null);
+      onSuccessfulBlockPlacementRef?.current?.(tilePosition);
     },
     [
       buildDraft,
       effectiveSelectedCutFootprintMask,
       effectiveSelectedCutGridAxisCellCount,
       isBuildPlacementSelectionActive,
+      onSuccessfulBlockPlacementRef,
       onlineUserId,
       plots,
       resolvingPlacementWorldLayerForTile,
@@ -1610,6 +1648,7 @@ export function usingWorldPlazaBuildMode({
     cancelingBuildDraftDiscard,
     confirmingBuildDraftDiscard,
     selectingBlockDefinition,
+    enteringBuildPlacementForBlockDefinition,
     selectingWorldLayer,
     selectingBlockHeight,
     selectingCutFootprintMask,
