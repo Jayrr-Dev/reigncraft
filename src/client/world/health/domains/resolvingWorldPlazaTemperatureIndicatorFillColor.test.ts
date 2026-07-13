@@ -20,7 +20,7 @@ const DEFAULT_COMFORT_BAND = {
 } as const;
 
 describe('resolvingWorldPlazaTemperatureIndicatorFillColor', () => {
-  it('uses frost white at the indicator min', () => {
+  it('uses white at the indicator min', () => {
     expect(
       resolvingWorldPlazaTemperatureIndicatorFillColor(
         DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MIN_CELSIUS,
@@ -32,19 +32,19 @@ describe('resolvingWorldPlazaTemperatureIndicatorFillColor', () => {
     );
   });
 
-  it('uses the cool comfort edge at the character comfort low', () => {
+  it('uses yellow at the character comfort low', () => {
     expect(
       resolvingWorldPlazaTemperatureIndicatorFillColor(
         DEFAULT_COMFORT_BAND.comfortLowCelsius,
         DEFAULT_COMFORT_BAND
       )
-    ).toBe('rgb(184, 223, 240)');
+    ).toBe('rgb(255, 229, 102)');
     expect(DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_COOL_EDGE_COLOR).toBe(
-      '#b8dff0'
+      '#ffe566'
     );
   });
 
-  it('uses sky blue at the comfort midpoint', () => {
+  it('uses orange at the comfort midpoint', () => {
     const comfortMidCelsius =
       (DEFAULT_COMFORT_BAND.comfortLowCelsius +
         DEFAULT_COMFORT_BAND.comfortHighCelsius) /
@@ -55,25 +55,25 @@ describe('resolvingWorldPlazaTemperatureIndicatorFillColor', () => {
         comfortMidCelsius,
         DEFAULT_COMFORT_BAND
       )
-    ).toBe('rgb(135, 206, 235)');
+    ).toBe('rgb(255, 158, 0)');
     expect(DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MID_COLOR).toBe(
-      '#87ceeb'
+      '#ff9e00'
     );
   });
 
-  it('uses the warm comfort edge at the character comfort high', () => {
+  it('uses orange-red at the character comfort high', () => {
     expect(
       resolvingWorldPlazaTemperatureIndicatorFillColor(
         DEFAULT_COMFORT_BAND.comfortHighCelsius,
         DEFAULT_COMFORT_BAND
       )
-    ).toBe('rgb(255, 207, 191)');
+    ).toBe('rgb(255, 69, 0)');
     expect(DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_WARM_EDGE_COLOR).toBe(
-      '#ffcfbf'
+      '#ff4500'
     );
   });
 
-  it('uses the hottest stop at the indicator max', () => {
+  it('uses pure red at the indicator max', () => {
     expect(
       resolvingWorldPlazaTemperatureIndicatorFillColor(
         DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MAX_CELSIUS,
@@ -85,23 +85,27 @@ describe('resolvingWorldPlazaTemperatureIndicatorFillColor', () => {
     );
   });
 
-  it('shifts the soft range when the character comfort band widens', () => {
-    const wideComfortBand = {
-      comfortLowCelsius: -20,
-      comfortHighCelsius: 70,
-    } as const;
+  it('passes through light blue and blue between white and yellow', () => {
+    const coldSpan =
+      DEFAULT_COMFORT_BAND.comfortLowCelsius -
+      DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MIN_CELSIUS;
+    const lightBlueCelsius =
+      DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MIN_CELSIUS + coldSpan / 3;
+    const blueCelsius =
+      DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MIN_CELSIUS +
+      (2 * coldSpan) / 3;
 
     expect(
       resolvingWorldPlazaTemperatureIndicatorFillColor(
-        wideComfortBand.comfortLowCelsius,
-        wideComfortBand
+        lightBlueCelsius,
+        DEFAULT_COMFORT_BAND
       )
-    ).toBe('rgb(184, 223, 240)');
+    ).toBe('rgb(200, 230, 255)');
     expect(
       resolvingWorldPlazaTemperatureIndicatorFillColor(
-        wideComfortBand.comfortHighCelsius,
-        wideComfortBand
+        blueCelsius,
+        DEFAULT_COMFORT_BAND
       )
-    ).toBe('rgb(255, 207, 191)');
+    ).toBe('rgb(59, 158, 255)');
   });
 });

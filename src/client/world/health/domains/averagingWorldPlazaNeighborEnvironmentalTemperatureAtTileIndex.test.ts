@@ -21,11 +21,43 @@ const AVERAGING_WORLD_PLAZA_LAVA_TILE_TEST = {
   tileY: -40,
 } as const;
 
+/** Deterministic painted heat zone used by the mocked area-profile resolver. */
+const AVERAGING_WORLD_PLAZA_HEAT_ZONE_TILE_TEST = {
+  tileX: 9,
+  tileY: 9,
+  temperatureCelsius: 58,
+} as const;
+
 vi.mock('@/components/world/domains/checkingWorldPlazaLavaAtTileIndex', () => ({
   checkingWorldPlazaLavaAtTileIndex: (tileX: number, tileY: number) =>
     tileX === AVERAGING_WORLD_PLAZA_LAVA_TILE_TEST.tileX &&
     tileY === AVERAGING_WORLD_PLAZA_LAVA_TILE_TEST.tileY,
 }));
+
+vi.mock(
+  '@/components/world/health/domains/definingWorldPlazaTemperatureAreaProfiles',
+  () => ({
+    resolvingWorldPlazaTemperatureAreaProfileAtTileIndex: (
+      tileX: number,
+      tileY: number
+    ) =>
+      tileX === AVERAGING_WORLD_PLAZA_HEAT_ZONE_TILE_TEST.tileX &&
+      tileY === AVERAGING_WORLD_PLAZA_HEAT_ZONE_TILE_TEST.tileY
+        ? {
+            id: 'test-heat-zone',
+            label: 'Test heat zone',
+            minTileX: AVERAGING_WORLD_PLAZA_HEAT_ZONE_TILE_TEST.tileX,
+            maxTileX: AVERAGING_WORLD_PLAZA_HEAT_ZONE_TILE_TEST.tileX,
+            minTileY: AVERAGING_WORLD_PLAZA_HEAT_ZONE_TILE_TEST.tileY,
+            maxTileY: AVERAGING_WORLD_PLAZA_HEAT_ZONE_TILE_TEST.tileY,
+            temperature: {
+              localTemperatureCelsius:
+                AVERAGING_WORLD_PLAZA_HEAT_ZONE_TILE_TEST.temperatureCelsius,
+            },
+          }
+        : null,
+  })
+);
 
 describe('averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex', () => {
   beforeEach(() => {
@@ -39,12 +71,14 @@ describe('averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex', () =>
   it('keeps painted heat-zone tiles at their source temperature', () => {
     const effectiveCelsius =
       resolvingWorldPlazaEnvironmentalTemperatureAtTileIndex({
-        tileX: 9,
-        tileY: 9,
+        tileX: AVERAGING_WORLD_PLAZA_HEAT_ZONE_TILE_TEST.tileX,
+        tileY: AVERAGING_WORLD_PLAZA_HEAT_ZONE_TILE_TEST.tileY,
         isDaytime: true,
       });
 
-    expect(effectiveCelsius).toBe(58);
+    expect(effectiveCelsius).toBe(
+      AVERAGING_WORLD_PLAZA_HEAT_ZONE_TILE_TEST.temperatureCelsius
+    );
   });
 
   it('warms neighboring tiles toward nearby heat sources', () => {

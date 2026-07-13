@@ -17,7 +17,7 @@ import type { CSSProperties } from 'react';
 
 /** Design-space icon size for the sun/moon inside the orb. */
 export const DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_ICON_BASE_PX =
-  12 as const;
+  20 as const;
 
 export type DefiningWorldPlazaDayNightIndicatorViewportStyles = {
   readonly sphereStyle: CSSProperties;

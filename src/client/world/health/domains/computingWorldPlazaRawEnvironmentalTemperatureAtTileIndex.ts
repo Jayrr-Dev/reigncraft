@@ -4,6 +4,8 @@ import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/ch
 import { checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex';
 import { checkingWorldPlazaWaterIsClimateFrozenAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
 import { DEFINING_WORLD_PLAZA_FIRELANDS_AMBIENT_TEMPERATURE_CELSIUS } from '@/components/world/domains/definingWorldPlazaFirelandsBiomeConstants';
+import { applyingWorldPlazaForestCanopyAmbientCelsius } from '@/components/world/domains/definingWorldPlazaForestTemperatureConstants';
+import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { resolvingWorldPlazaClimateAtTile } from '@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { resolvingWorldPlazaLitCampfireHeatCelsiusAtTileIndex } from '@/components/world/fire/domains/managingWorldPlazaLitCampfireHeatTilesStore';
@@ -27,6 +29,10 @@ export type ComputingWorldPlazaRawEnvironmentalTemperatureAtTileIndexParams = {
 
 /**
  * Returns the per-tile source temperature before neighbor averaging (°C).
+ *
+ * Woodland temperate ceilings clamp climate ambient here; lava / campfire still
+ * raise the tile afterward. Averaging re-applies the ceiling when no nearby
+ * assignable heat source is diluting the blend.
  */
 export function computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
   tileX,
@@ -42,6 +48,11 @@ export function computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
   if (!isDaytime) {
     ambientCelsius -= DEFINING_WORLD_PLAZA_TEMPERATURE_NIGHT_COOLING_CELSIUS;
   }
+
+  ambientCelsius = applyingWorldPlazaForestCanopyAmbientCelsius(
+    ambientCelsius,
+    resolvingWorldPlazaBiomeAtTileIndex(tileX, tileY).kind
+  );
 
   if (checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex(tileX, tileY)) {
     ambientCelsius = Math.max(

@@ -114,7 +114,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
   forest: {
     kind: 'forest',
     displayName: 'Forest',
-    temperature: 0.42,
+    temperature: 0.34,
     altitudeFactor: 0.18,
     tileFillColor: 0x4a7c3f,
     blockAccentColor: 0x5c4033,
@@ -129,7 +129,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
   flower_forest: {
     kind: 'flower_forest',
     displayName: 'Flower Forest',
-    temperature: 0.48,
+    temperature: 0.4,
     altitudeFactor: 0.12,
     tileFillColor: 0x6faa42,
     blockAccentColor: 0x6b5024,
