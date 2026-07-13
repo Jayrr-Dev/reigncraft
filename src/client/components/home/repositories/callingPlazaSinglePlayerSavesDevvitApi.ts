@@ -1,3 +1,4 @@
+import { queuingPlazaSinglePlayerSaveSlotWrite } from '@/components/home/domains/queuingPlazaSinglePlayerSaveSlotWrites';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 import type {
   PlazaSinglePlayerSaveSlotPersistedData,
@@ -126,6 +127,10 @@ export async function deletingPlazaSinglePlayerSaveSlotData(
 /**
  * Upserts one single-player save slot payload to Devvit Redis.
  *
+ * Writes for the same slot are queued on the client so concurrent partial
+ * updates (inventory + lastPosition + recipes + …) cannot read-merge-write
+ * over each other and drop inventory.
+ *
  * @param saveSlotIndex - Save slot (1–3).
  * @param update - Partial save payload to merge.
  */
@@ -133,18 +138,20 @@ export async function savingPlazaSinglePlayerSaveSlotData(
   saveSlotIndex: PlazaSaveSlotIndex,
   update: PlazaSinglePlayerSaveSlotUpdateRequest
 ): Promise<void> {
-  const body = await callingPlazaSinglePlayerSavesDevvitApi(
-    `${PLAZA_SINGLE_PLAYER_SAVES_API_BASE_PATH}/${saveSlotIndex}`,
-    {
-      method: 'PUT',
-      body: JSON.stringify(update),
-      // Let the save survive page close (flush-on-pagehide persistence).
-      keepalive: true,
-    }
-  );
-  const payload = body as Partial<PlazaSinglePlayerSaveSlotSaveResponse>;
+  await queuingPlazaSinglePlayerSaveSlotWrite(saveSlotIndex, async () => {
+    const body = await callingPlazaSinglePlayerSavesDevvitApi(
+      `${PLAZA_SINGLE_PLAYER_SAVES_API_BASE_PATH}/${saveSlotIndex}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(update),
+        // Let the save survive page close (flush-on-pagehide persistence).
+        keepalive: true,
+      }
+    );
+    const payload = body as Partial<PlazaSinglePlayerSaveSlotSaveResponse>;
 
-  if (payload.type !== 'saved') {
-    throw new Error('Invalid save slot save response.');
-  }
+    if (payload.type !== 'saved') {
+      throw new Error('Invalid save slot save response.');
+    }
+  });
 }

@@ -107,6 +107,16 @@ export function enqueueingWorldPlazaEntityHealthFloatText({
     };
   }
 
+  if (
+    kind === 'item_gain' &&
+    (itemTypeId === null || itemTypeId.length === 0)
+  ) {
+    return {
+      floats: activeFloats,
+      lastBlockedFloatAtMs,
+    };
+  }
+
   const nextFloat: DefiningWorldPlazaEntityHealthFloatText = {
     id: creatingWorldPlazaEntityHealthFloatTextId(),
     kind,

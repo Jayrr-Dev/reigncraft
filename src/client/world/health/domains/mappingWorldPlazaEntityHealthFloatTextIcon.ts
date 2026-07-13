@@ -44,8 +44,7 @@ export type MappingWorldPlazaEntityHealthFloatTextIconName =
   | 'game-icons:scythe'
   | 'mdi:flash'
   | 'mdi:weather-night'
-  | 'mdi:book-open-page-variant'
-  | 'mdi:cube-outline';
+  | 'mdi:book-open-page-variant';
 
 const MAPPING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_KIND_ICON: Partial<
   Record<
@@ -61,8 +60,6 @@ const MAPPING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_KIND_ICON: Partial<
   blocked: 'mdi:shield-off',
   miss: 'mdi:close',
   study: 'mdi:book-open-page-variant',
-  /** Fallback only; `item_gain` floats prefer the inventory item glyph. */
-  item_gain: 'mdi:cube-outline',
 };
 
 function listingWorldPlazaEntityHealthFloatTextKindIconsFromTierRegistry(): Partial<

@@ -603,6 +603,55 @@ function mergingSaveSlotData(
   return merged;
 }
 
+const DEFINING_PLAZA_SAVE_SLOT_WRITE_MAX_ATTEMPTS = 8 as const;
+
+/**
+ * Atomically merges a partial save update into the Redis hash field for one slot.
+ * Uses WATCH/MULTI so concurrent inventory + position writes cannot clobber each other.
+ */
+async function writingSaveSlotDataAtomically(
+  savesKey: string,
+  saveSlotIndex: PlazaSaveSlotIndex,
+  update: PlazaSinglePlayerSaveSlotUpdateRequest
+): Promise<{
+  readonly merged: PlazaSinglePlayerSaveSlotPersistedData | null;
+  readonly updatedAtMs: number;
+}> {
+  for (
+    let attempt = 0;
+    attempt < DEFINING_PLAZA_SAVE_SLOT_WRITE_MAX_ATTEMPTS;
+    attempt += 1
+  ) {
+    const txn = await redis.watch(savesKey);
+    const rawExisting = await redis.hGet(savesKey, String(saveSlotIndex));
+    const existing = rawExisting
+      ? parsingPersistedSaveSlotData(rawExisting)
+      : null;
+    const merged = mergingSaveSlotData(existing, update);
+
+    await txn.multi();
+
+    if (!merged) {
+      await txn.hDel(savesKey, [String(saveSlotIndex)]);
+    } else {
+      await txn.hSet(savesKey, {
+        [String(saveSlotIndex)]: JSON.stringify(merged),
+      });
+    }
+
+    const execResult = await txn.exec();
+
+    if (execResult !== null) {
+      return {
+        merged,
+        updatedAtMs: merged?.updatedAtMs ?? Date.now(),
+      };
+    }
+  }
+
+  throw new Error('Save slot write conflict after retries.');
+}
+
 export const plazaSaves = new Hono();
 
 plazaSaves.get('/', async (c) => {
@@ -715,29 +764,26 @@ plazaSaves.put('/:saveSlotIndex', async (c) => {
   }
 
   const savesKey = buildingPlazaSaveSlotsRedisKey(userId);
-  const rawExisting = await redis.hGet(savesKey, String(saveSlotIndex));
-  const existing = rawExisting
-    ? parsingPersistedSaveSlotData(rawExisting)
-    : null;
-  const merged = mergingSaveSlotData(existing, update);
 
-  if (!merged) {
-    await redis.hDel(savesKey, [String(saveSlotIndex)]);
+  try {
+    const { merged, updatedAtMs } = await writingSaveSlotDataAtomically(
+      savesKey,
+      saveSlotIndex,
+      update
+    );
 
     return c.json<PlazaSinglePlayerSaveSlotSaveResponse>({
       type: 'saved',
       saveSlotIndex,
-      updatedAtMs: Date.now(),
+      updatedAtMs: merged?.updatedAtMs ?? updatedAtMs,
     });
+  } catch {
+    return c.json<PlazaSinglePlayerSaveSlotSaveResponse>(
+      {
+        type: 'error',
+        message: 'Could not save progress. Try again.',
+      },
+      409
+    );
   }
-
-  await redis.hSet(savesKey, {
-    [String(saveSlotIndex)]: JSON.stringify(merged),
-  });
-
-  return c.json<PlazaSinglePlayerSaveSlotSaveResponse>({
-    type: 'saved',
-    saveSlotIndex,
-    updatedAtMs: merged.updatedAtMs,
-  });
 });

@@ -252,8 +252,39 @@ export function usingWorldPlazaBuildMode({
   const isBuildModeActive = isEditSessionActive;
   const isClaimModeActive =
     editMode === DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM;
-  const [buildDraft, setBuildDraft] =
+  const [buildDraft, setBuildDraftState] =
     useState<DefiningWorldBuildingBuildDraftState | null>(null);
+  /**
+   * Synchronous mirror of `buildDraft`. Craft placement calls
+   * `togglingEditSession` in the same turn as `setState`, so flush/save must
+   * read the post-placement draft here — not the stale React closure.
+   */
+  const buildDraftRef = useRef<DefiningWorldBuildingBuildDraftState | null>(
+    null
+  );
+  const assigningBuildDraft = useCallback(
+    (
+      nextDraft:
+        | DefiningWorldBuildingBuildDraftState
+        | null
+        | ((
+            currentDraft: DefiningWorldBuildingBuildDraftState | null
+          ) => DefiningWorldBuildingBuildDraftState | null)
+    ): void => {
+      if (typeof nextDraft === 'function') {
+        setBuildDraftState((currentDraft) => {
+          const resolvedDraft = nextDraft(currentDraft);
+          buildDraftRef.current = resolvedDraft;
+          return resolvedDraft;
+        });
+        return;
+      }
+
+      buildDraftRef.current = nextDraft;
+      setBuildDraftState(nextDraft);
+    },
+    []
+  );
   const [selectedDefinitionId, setSelectedDefinitionId] =
     useState<DefiningWorldBuildingBlockDefinitionId | null>(
       DEFINING_WORLD_BUILDING_DEFAULT_BLOCK_DEFINITION_ID
@@ -850,11 +881,12 @@ export function usingWorldPlazaBuildMode({
         return;
       }
 
-      setBuildDraft(placementResult.draft);
+      assigningBuildDraft(placementResult.draft);
       setBuildErrorMessage(null);
       onSuccessfulBlockPlacementRef?.current?.(tilePosition, blockId);
     },
     [
+      assigningBuildDraft,
       buildDraft,
       effectiveSelectedCutFootprintMask,
       effectiveSelectedCutGridAxisCellCount,
@@ -908,7 +940,7 @@ export function usingWorldPlazaBuildMode({
         return;
       }
 
-      setBuildDraft(removalResult.draft);
+      assigningBuildDraft(removalResult.draft);
       setBuildErrorMessage(null);
 
       if (removedBlock) {
@@ -966,7 +998,7 @@ export function usingWorldPlazaBuildMode({
       return;
     }
 
-    setBuildDraft(provisionResult.draft);
+    assigningBuildDraft(provisionResult.draft);
     setBuildErrorMessage(null);
   }, [
     buildDraft,
@@ -1012,14 +1044,14 @@ export function usingWorldPlazaBuildMode({
         return;
       }
 
-      setBuildDraft(unclaimResult.draft);
+      assigningBuildDraft(unclaimResult.draft);
       setBuildErrorMessage(null);
 
       if (!isLocalPlot) {
         try {
           await removingWorldBuildingPlotPersistence(plot.plotId);
           const freshPlots = await refetchingPlots();
-          setBuildDraft(
+          assigningBuildDraft(
             initializingWorldBuildingBuildDraftFromServerPlots(
               freshPlots.plots,
               freshPlots.ownedPlots,
@@ -1056,7 +1088,7 @@ export function usingWorldPlazaBuildMode({
         return;
       }
 
-      setBuildDraft(unclaimResult.draft);
+      assigningBuildDraft(unclaimResult.draft);
       setBuildErrorMessage(null);
     },
     [buildDraft, onlineUserId, plots]
@@ -1102,7 +1134,7 @@ export function usingWorldPlazaBuildMode({
           );
 
         if (!('errorMessage' in starterPlotProvisionResult)) {
-          setBuildDraft(starterPlotProvisionResult.draft);
+          assigningBuildDraft(starterPlotProvisionResult.draft);
           setBuildErrorMessage(null);
           return;
         }
@@ -1127,7 +1159,7 @@ export function usingWorldPlazaBuildMode({
           return;
         }
 
-        setBuildDraft(temporaryPlotProvisionResult.draft);
+        assigningBuildDraft(temporaryPlotProvisionResult.draft);
         setBuildErrorMessage(null);
         return;
       }
@@ -1176,16 +1208,22 @@ export function usingWorldPlazaBuildMode({
   }, [closingBuildModeTilePopover, selectedTilePosition, unclaimingPlotAtTile]);
 
   const savingBuildDraft = useCallback(async (): Promise<void> => {
-    if (!onlineUserId || !buildDraft || !hasUnsavedBuildChanges) {
+    const draftToPersist = buildDraftRef.current;
+
+    if (
+      !onlineUserId ||
+      !draftToPersist ||
+      !checkingWorldBuildingBuildDraftHasUnsavedChanges(draftToPersist)
+    ) {
       return;
     }
 
     setIsSavingBuildDraft(true);
 
     try {
-      await persistingWorldBuildingBuildDraft(buildDraft, onlineUserId);
+      await persistingWorldBuildingBuildDraft(draftToPersist, onlineUserId);
       const freshPlots = await refetchingPlots();
-      setBuildDraft(
+      assigningBuildDraft(
         initializingWorldBuildingBuildDraftFromServerPlots(
           freshPlots.plots,
           freshPlots.ownedPlots,
@@ -1200,18 +1238,20 @@ export function usingWorldPlazaBuildMode({
     } finally {
       setIsSavingBuildDraft(false);
     }
-  }, [buildDraft, hasUnsavedBuildChanges, onlineUserId, refetchingPlots]);
+  }, [assigningBuildDraft, onlineUserId, refetchingPlots]);
 
   isSavingBuildDraftRef.current = isSavingBuildDraft;
 
   const flushingBuildDraftBeforeExiting =
     useCallback(async (): Promise<void> => {
-      if (checkingWorldBuildingBuildDraftHasUnsavedChanges(buildDraft)) {
+      if (
+        checkingWorldBuildingBuildDraftHasUnsavedChanges(buildDraftRef.current)
+      ) {
         await savingBuildDraft();
       }
 
       exitingBuildMode();
-    }, [buildDraft, exitingBuildMode, savingBuildDraft]);
+    }, [exitingBuildMode, savingBuildDraft]);
 
   const switchingEditMode = useCallback(
     (targetMode: Exclude<DefiningWorldBuildingEditMode, 'off'>): void => {
@@ -1419,7 +1459,7 @@ export function usingWorldPlazaBuildMode({
       await refetchingPlots();
 
       if (isEditSessionActive) {
-        setBuildDraft(creatingEmptyWorldBuildingBuildDraftState());
+        assigningBuildDraft(creatingEmptyWorldBuildingBuildDraftState());
       }
 
       setBuildErrorMessage(null);
@@ -1609,16 +1649,16 @@ export function usingWorldPlazaBuildMode({
       setHoverTilePosition(null);
       setSelectedTilePosition(null);
       setIsBuildTilePopoverOpen(false);
-      setBuildDraft(null);
+      assigningBuildDraft(null);
       return;
     }
 
     if (!onlineUserId) {
-      setBuildDraft(null);
+      assigningBuildDraft(null);
       return;
     }
 
-    setBuildDraft((currentDraft) => {
+    assigningBuildDraft((currentDraft) => {
       if (
         currentDraft &&
         checkingWorldBuildingBuildDraftHasUnsavedChanges(currentDraft)

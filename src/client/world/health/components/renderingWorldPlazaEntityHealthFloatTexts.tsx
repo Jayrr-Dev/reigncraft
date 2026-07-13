@@ -1,6 +1,7 @@
 'use client';
 
 import { Icon } from '@/components/ui/icon';
+import { DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INGREDIENT_ICON_PX } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeUiConstants';
 import {
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
   computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
@@ -38,6 +39,11 @@ const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_WRAPPER_CLASS_NAME =
 
 const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_INITIAL_SCALE_STYLE =
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle();
+
+const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_ITEM_GAIN_GLYPH_STYLE = {
+  width: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INGREDIENT_ICON_PX,
+  height: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INGREDIENT_ICON_PX,
+} as const;
 
 function computingWorldPlazaEntityHealthFloatTextIconSizePx(
   fontSizePx: number
@@ -209,7 +215,6 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
           studyFontSizePx ??
           itemGainFontSizePx ??
           18;
-        const iconName = mappingWorldPlazaEntityHealthFloatTextIcon(floatText);
         const amountLabel =
           formattingWorldPlazaEntityHealthFloatTextAmount(floatText);
         const iconSizePx =
@@ -244,7 +249,7 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
             }}
           >
             <span
-              className={`plaza-combat-float-text inline-flex items-center justify-center gap-0.5 whitespace-nowrap text-center font-bold leading-none ${colorClass} ${
+              className={`plaza-combat-float-text inline-flex items-center justify-center gap-1 whitespace-nowrap text-center font-bold leading-none ${colorClass} ${
                 usesDisplayFont ? STYLING_WORLD_PLAZA_HUD_LABEL_CLASS : ''
               }`}
               style={{
@@ -261,28 +266,35 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
                       textShadow: healVisualStyle.textShadow,
                     }
                   : {}),
+                ...(isItemGainFloat
+                  ? {
+                      WebkitTextStroke: '0',
+                      textShadow: 'none',
+                    }
+                  : {}),
               }}
             >
               {itemTypeId !== null ? (
-                <RenderingWorldPlazaInventoryItemGlyph
-                  itemTypeId={itemTypeId}
-                  registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
-                  iconClassName="shrink-0"
-                  iconStyle={{
-                    width: iconSizePx,
-                    height: iconSizePx,
-                  }}
-                  emojiStyle={{
-                    fontSize: `${iconSizePx}px`,
-                    lineHeight: 1,
-                  }}
-                  fallbackTextStyle={{
-                    fontSize: `${Math.max(10, Math.round(iconSizePx * 0.7))}px`,
-                  }}
-                />
+                <span className="inline-flex size-7 shrink-0 items-center justify-center overflow-hidden leading-none">
+                  <RenderingWorldPlazaInventoryItemGlyph
+                    itemTypeId={itemTypeId}
+                    registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
+                    iconStyle={
+                      RENDERING_WORLD_PLAZA_ENTITY_HEALTH_ITEM_GAIN_GLYPH_STYLE
+                    }
+                    emojiStyle={
+                      RENDERING_WORLD_PLAZA_ENTITY_HEALTH_ITEM_GAIN_GLYPH_STYLE
+                    }
+                    fallbackTextStyle={
+                      RENDERING_WORLD_PLAZA_ENTITY_HEALTH_ITEM_GAIN_GLYPH_STYLE
+                    }
+                    emojiClassName="flex size-full items-center justify-center text-[1.25rem] leading-none"
+                    iconClassName="flex size-full items-center justify-center"
+                  />
+                </span>
               ) : (
                 <Icon
-                  icon={iconName}
+                  icon={mappingWorldPlazaEntityHealthFloatTextIcon(floatText)}
                   aria-hidden
                   className="shrink-0 text-current"
                   width={iconSizePx}
@@ -290,7 +302,15 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
                 />
               )}
               {amountLabel !== null ? (
-                <span className="tabular-nums">{amountLabel}</span>
+                <span
+                  className={
+                    isItemGainFloat
+                      ? 'tabular-nums text-poster-gold [paint-order:stroke_fill] [-webkit-text-stroke:1px_rgba(20,37,43,0.95)] [text-shadow:0_2px_0_rgba(20,37,43,0.95)]'
+                      : 'tabular-nums'
+                  }
+                >
+                  {amountLabel}
+                </span>
               ) : null}
             </span>
           </div>
