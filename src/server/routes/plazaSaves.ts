@@ -264,7 +264,11 @@ function parsingBestiaryDiscovery(
   const studyCountsBySpeciesId: Record<string, number> = {};
 
   const applyingStudyCountRecord = (rawCounts: unknown): void => {
-    if (!rawCounts || typeof rawCounts !== 'object' || Array.isArray(rawCounts)) {
+    if (
+      !rawCounts ||
+      typeof rawCounts !== 'object' ||
+      Array.isArray(rawCounts)
+    ) {
       return;
     }
 

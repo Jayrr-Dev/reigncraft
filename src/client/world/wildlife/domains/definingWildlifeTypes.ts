@@ -262,6 +262,15 @@ export type DefiningWildlifeAggroState = {
   threats: readonly DefiningWildlifeThreatEntry[];
   activeTargetId: string | null;
   lastDamagedAtMs: number | null;
+  /** Last time this animal landed melee damage on a combat target. */
+  lastDealtDamageAtMs?: number | null;
+  /** Timestamp when the current active-target pursuit began. */
+  chaseEngagedAtMs?: number | null;
+  /**
+   * After a no-damage chase give-up, skip player proximity threat until the
+   * player leaves the aggro radius (or damages this animal).
+   */
+  chaseGiveUpUntilPlayerExitsAggro?: boolean;
   /** Timestamp when this stalker first locked onto the active prey target. */
   stalkingPreySinceMs?: number | null;
   /** Timestamp when the pack hit confident size (5+); starts the formation timer. */

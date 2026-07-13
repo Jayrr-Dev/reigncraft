@@ -28,7 +28,7 @@ export function resolvingWorldPlazaCharacterStrengthProfile(
   const derived = computingWorldPlazaCharacterEngineDerivedStats(definition);
   const attacksPerSecond =
     (1000 / DEFINING_WORLD_PLAZA_STRENGTH_PLAYER_BASELINE_ATTACK_INTERVAL_MS) *
-    derived.attackSpeed;
+    Math.max(0.25, definition.stats.attackSpeed);
 
   return {
     subjectId: definition.characterId,

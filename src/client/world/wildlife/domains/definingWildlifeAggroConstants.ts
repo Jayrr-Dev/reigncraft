@@ -18,3 +18,9 @@ export const DEFINING_WILDLIFE_MELEE_RANGE_GRID = 1.1;
 
 /** How long the one-shot attack clip is held before falling back to idle (ms). */
 export const DEFINING_WILDLIFE_ATTACK_CLIP_HOLD_MS = 450;
+
+/**
+ * Tiger drops player chase when it has not landed a hit within this window.
+ * Clock starts at chase engage and resets on each successful melee hit.
+ */
+export const DEFINING_WILDLIFE_TIGER_CHASE_GIVE_UP_WITHOUT_DAMAGE_MS = 10_000;

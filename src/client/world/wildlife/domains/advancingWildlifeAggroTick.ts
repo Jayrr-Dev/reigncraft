@@ -9,6 +9,7 @@ import { advancingWildlifeStalkAggroTick } from '@/components/world/wildlife/dom
 import { advancingWildlifeStalkerBehaviour } from '@/components/world/wildlife/domains/advancingWildlifeStalkerBehaviour';
 import { applyingWildlifeFavoritePreyPlayerRevengeAggro } from '@/components/world/wildlife/domains/applyingWildlifeFavoritePreyPlayerRevengeAggro';
 import { applyingWildlifeFavoritePreyThreatBoost } from '@/components/world/wildlife/domains/applyingWildlifeFavoritePreyThreatBoost';
+import { checkingWildlifeChaseShouldGiveUpWithoutDamage } from '@/components/world/wildlife/domains/checkingWildlifeChaseShouldGiveUpWithoutDamage';
 import { checkingWildlifeInstanceHasProvokedWildlifeAggro } from '@/components/world/wildlife/domains/checkingWildlifeInstanceHasProvokedWildlifeAggro';
 import { checkingWildlifeIsMotivatedToHunt } from '@/components/world/wildlife/domains/checkingWildlifeIsMotivatedToHunt';
 import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight';
@@ -49,6 +50,7 @@ import { listingWildlifeStalkerPreyTargetCandidates } from '@/components/world/w
 import { pickingWildlifeStalkAlphaPreyTargetId } from '@/components/world/wildlife/domains/pickingWildlifeStalkAlphaPreyTargetId';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import { resolvingWildlifeAggroLastAggroedAtMs } from '@/components/world/wildlife/domains/resolvingWildlifeAggroLastAggroedAtMs';
+import { resolvingWildlifeChaseEngagedAtMs } from '@/components/world/wildlife/domains/resolvingWildlifeChaseEngagedAtMs';
 import { resolvingWildlifeInstancePlayerAggroRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstancePlayerAggroRadius';
 import { resolvingWildlifeNearestFavoritePreyTargetId } from '@/components/world/wildlife/domains/resolvingWildlifeNearestFavoritePreyTargetId';
 import { resolvingWildlifePreyProximityAttackRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifePreyProximityAttackRadiusGrid';
@@ -274,6 +276,10 @@ export function advancingWildlifeAggroTick({
     nowMs
   );
 
+  let chaseGiveUpUntilPlayerExitsAggro =
+    instance.aggroState.chaseGiveUpUntilPlayerExitsAggro === true;
+  let lastDealtDamageAtMs = instance.aggroState.lastDealtDamageAtMs ?? null;
+
   if (playerUserId && playerPosition) {
     const aggressionProfile = resolvingWildlifeAggressionLevelProfile(
       instance.aggressionLevel
@@ -281,6 +287,10 @@ export function advancingWildlifeAggroTick({
     const distanceToPlayer = Math.hypot(
       instance.position.x - playerPosition.x,
       instance.position.y - playerPosition.y
+    );
+    const playerAggroRadiusGrid = resolvingWildlifeInstancePlayerAggroRadiusGrid(
+      species,
+      instance
     );
     const playerOccludedByBoulder = checkingWildlifePlayerOccludedByColumnRock(
       instance.position,
@@ -290,20 +300,25 @@ export function advancingWildlifeAggroTick({
       ? DEFINING_WILDLIFE_BOULDER_COVER_DETECTION_THREAT_MULTIPLIER
       : 1;
 
+    if (
+      chaseGiveUpUntilPlayerExitsAggro &&
+      distanceToPlayer > playerAggroRadiusGrid
+    ) {
+      chaseGiveUpUntilPlayerExitsAggro = false;
+    }
+
     if (aggressionProfile.proximityThreatMode !== 'none') {
-      if (
-        distanceToPlayer <=
-        resolvingWildlifeInstancePlayerAggroRadiusGrid(species, instance)
-      ) {
+      if (distanceToPlayer <= playerAggroRadiusGrid) {
         const shouldBuildProximityThreat =
-          aggressionProfile.proximityThreatMode === 'starving'
+          !chaseGiveUpUntilPlayerExitsAggro &&
+          (aggressionProfile.proximityThreatMode === 'starving'
             ? instance.hungerState.driveLevel === 'starving'
             : checkingWildlifeMayAggroPlayerOnSight(
                 species,
                 instance.aggressionLevel,
                 instance.hungerState.driveLevel
               ) &&
-              (species.temperamentId !== 'stalker' || mayInitiatePreyStalk);
+              (species.temperamentId !== 'stalker' || mayInitiatePreyStalk));
 
         if (
           shouldBuildProximityThreat &&
@@ -562,7 +577,7 @@ export function advancingWildlifeAggroTick({
     }
   }
 
-  const activeTargetId = resolvingWildlifeStalkLockedActiveTargetId({
+  let activeTargetId = resolvingWildlifeStalkLockedActiveTargetId({
     threats,
     stalkLockedPreyTargetId,
     currentTargetId: instance.aggroState.activeTargetId,
@@ -570,10 +585,53 @@ export function advancingWildlifeAggroTick({
     resolveHighestThreatTargetId: resolvingHighestThreatTargetId,
   });
 
+  let chaseEngagedAtMs = resolvingWildlifeChaseEngagedAtMs({
+    previousChaseEngagedAtMs: instance.aggroState.chaseEngagedAtMs,
+    previousActiveTargetId: instance.aggroState.activeTargetId,
+    activeTargetId,
+    nowMs,
+  });
+
+  if (
+    checkingWildlifeChaseShouldGiveUpWithoutDamage({
+      chaseGiveUpWithoutDamageMs: species.aggro.chaseGiveUpWithoutDamageMs,
+      activeTargetId,
+      playerUserId,
+      lastDealtDamageAtMs,
+      chaseEngagedAtMs,
+      nowMs,
+    }) &&
+    playerUserId
+  ) {
+    threats = threats.filter((entry) => entry.targetId !== playerUserId);
+
+    if (stalkLockedPreyTargetId === playerUserId) {
+      stalkLockedPreyTargetId = null;
+    }
+
+    activeTargetId = resolvingWildlifeStalkLockedActiveTargetId({
+      threats,
+      stalkLockedPreyTargetId,
+      currentTargetId: null,
+      targetSwitchMargin: species.aggro.targetSwitchMargin,
+      resolveHighestThreatTargetId: resolvingHighestThreatTargetId,
+    });
+    chaseEngagedAtMs = resolvingWildlifeChaseEngagedAtMs({
+      previousChaseEngagedAtMs: null,
+      previousActiveTargetId: playerUserId,
+      activeTargetId,
+      nowMs,
+    });
+    chaseGiveUpUntilPlayerExitsAggro = true;
+  }
+
   const baseAggroState: DefiningWildlifeAggroState = {
     threats,
     activeTargetId,
     lastDamagedAtMs: instance.aggroState.lastDamagedAtMs,
+    lastDealtDamageAtMs,
+    chaseEngagedAtMs,
+    chaseGiveUpUntilPlayerExitsAggro,
     stalkingPreySinceMs: shouldResetStalkStateForFavoritePrey
       ? null
       : instance.aggroState.stalkingPreySinceMs,
@@ -699,6 +757,7 @@ export function applyingWildlifeDamageThreat(
       threats,
       activeTargetId,
       lastDamagedAtMs: nowMs,
+      chaseGiveUpUntilPlayerExitsAggro: false,
       lastAggroedAtMs: resolvingWildlifeAggroLastAggroedAtMs(
         instance.aggroState.lastAggroedAtMs,
         activeTargetId,

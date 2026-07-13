@@ -6,6 +6,7 @@
 
 import type { DefiningWorldPlazaEntityHealthDamageRollModifierKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { DEFINING_WILDLIFE_DIFFICULTY_LEVERS } from '@/components/world/wildlife/domains/definingWildlifeDifficultyLevers';
+import { DEFINING_WILDLIFE_TIGER_CHASE_GIVE_UP_WITHOUT_DAMAGE_MS } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import { DEFINING_WILDLIFE_FAIRY_ALWAYS_FOLLOW_MAX_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeFairyConstants';
 import { resolvingWildlifeMeatCatalogEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import type { DefiningWildlifeSpeciesNameTagConfig } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
@@ -79,6 +80,11 @@ export type DefiningWildlifeSpeciesAggroConfig = {
   packShareRadiusGrid: number;
   targetSwitchMargin: number;
   proximityThreatAtStarving: number;
+  /**
+   * Drop player chase when no melee hit lands within this many ms of engage
+   * (or since the last landed hit). Undefined = never give up for this reason.
+   */
+  chaseGiveUpWithoutDamageMs?: number;
 };
 
 /**
@@ -2164,6 +2170,8 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
       aggroRadiusGrid: 9,
       packShareRadiusGrid: 0,
+      chaseGiveUpWithoutDamageMs:
+        DEFINING_WILDLIFE_TIGER_CHASE_GIVE_UP_WITHOUT_DAMAGE_MS,
     },
     territory: DEFINING_WILDLIFE_LION_TERRITORY_CONFIG,
     preyAllowSpeciesIds: ['boar', 'pig', 'deer', 'monkey', 'chimp'],

@@ -1,3 +1,4 @@
+import { DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_UNLOCKED_TRANSFORM_PARITY_LEVEL } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineGrowthLaneConstants';
 import { resolvingWorldPlazaCharacterEngineDefinition } from '@/components/world/character/domains/registeringWorldPlazaCharacterEngineDefinitions';
 import { DEFINING_WORLD_PLAZA_AVATAR_SKIN } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { DEFINING_WORLD_PLAZA_STRENGTH_BASELINE_INDEX } from '@/components/world/strength/domains/definingWorldPlazaStrengthIndexConstants';
@@ -20,17 +21,29 @@ describe('resolvingWorldPlazaCharacterStrengthIndex', () => {
     );
   });
 
-  it('ranks the grizzly tank above the penguin', () => {
-    const grizzly = resolvingWorldPlazaCharacterStrengthIndex(
-      resolvingWorldPlazaCharacterEngineDefinition(
-        DEFINING_WORLD_PLAZA_AVATAR_SKIN.GRIZZLY
-      )
+  it('ranks the grizzly tank above the penguin at mature parity', () => {
+    const grizzlyDefinition = resolvingWorldPlazaCharacterEngineDefinition(
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.GRIZZLY
     );
-    const penguin = resolvingWorldPlazaCharacterStrengthIndex(
-      resolvingWorldPlazaCharacterEngineDefinition(
-        DEFINING_WORLD_PLAZA_AVATAR_SKIN.PINGUIN
-      )
+    const penguinDefinition = resolvingWorldPlazaCharacterEngineDefinition(
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.PINGUIN
     );
+    const grizzly = resolvingWorldPlazaCharacterStrengthIndex({
+      ...grizzlyDefinition,
+      scaling: {
+        ...grizzlyDefinition.scaling,
+        level:
+          DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_UNLOCKED_TRANSFORM_PARITY_LEVEL,
+      },
+    });
+    const penguin = resolvingWorldPlazaCharacterStrengthIndex({
+      ...penguinDefinition,
+      scaling: {
+        ...penguinDefinition.scaling,
+        level:
+          DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_UNLOCKED_TRANSFORM_PARITY_LEVEL,
+      },
+    });
 
     expect(grizzly.strengthIndex).toBeGreaterThan(penguin.strengthIndex);
   });
