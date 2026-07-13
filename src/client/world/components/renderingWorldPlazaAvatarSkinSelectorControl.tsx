@@ -19,9 +19,13 @@ import {
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { LABELING_WORLD_PLAZA_AVATAR_SKIN_SELECTOR_PANEL_CLOSE } from '@/components/world/domains/definingWorldPlazaDevPanelCloseButtonConstants';
 import { listingWorldPlazaAvatarSkinOptionsForUser } from '@/components/world/domains/listingWorldPlazaAvatarSkinOptionsForUser';
+import {
+  gettingWorldPlazaBestiaryStudyCountsSnapshot,
+  subscribingWorldPlazaBestiaryDiscovery,
+} from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { settingWorldPlazaSelectedAvatarSkin } from '@/components/world/domains/managingWorldPlazaAvatarSkinSelectionStore';
 import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 
 export interface RenderingWorldPlazaAvatarSkinSelectorControlProps {
   /** True when the skin selector panel is open. */
@@ -39,14 +43,20 @@ export function RenderingWorldPlazaAvatarSkinSelectorControl({
 }: RenderingWorldPlazaAvatarSkinSelectorControlProps): React.JSX.Element {
   const { data: userData } = useUserData();
   const selectedSkinId = usingWorldPlazaSelectedAvatarSkin();
+  const studyCountsBySpeciesId = useSyncExternalStore(
+    subscribingWorldPlazaBestiaryDiscovery,
+    gettingWorldPlazaBestiaryStudyCountsSnapshot,
+    gettingWorldPlazaBestiaryStudyCountsSnapshot
+  );
   const [filterText, setFilterText] = useState('');
   const avatarSkinOptions = useMemo(
     () =>
       listingWorldPlazaAvatarSkinOptionsForUser(
         userData?.username,
-        userData?.alias
+        userData?.alias,
+        studyCountsBySpeciesId
       ),
-    [userData?.alias, userData?.username]
+    [studyCountsBySpeciesId, userData?.alias, userData?.username]
   );
   const normalizedFilterText = filterText.trim().toLowerCase();
   const filteredAvatarSkinOptions = useMemo(() => {

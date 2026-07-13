@@ -58,7 +58,7 @@ export function formattingPlazaBestiaryKillProgressLabel(
   return `Studied ${studyCount} · Next unlock at ${nextUnlockStudyCount}`;
 }
 
-/** Compact `current/200` progress label for cards and detail. */
+/** Compact `current/100` progress label for cards and detail. */
 export function formattingPlazaBestiaryStudyCountProgress(
   studyCount: number
 ): string {

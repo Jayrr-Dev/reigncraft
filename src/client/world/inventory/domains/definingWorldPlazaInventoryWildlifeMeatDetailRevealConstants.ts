@@ -30,9 +30,10 @@ export type DefiningWorldPlazaInventoryWildlifeMeatDetailReveal = {
  * - sighted (0): title only
  * - studied (1): flavor tier 1 (vague sensory line)
  * - combat (10): flavor tier 2 (cautious risk hint) + hunger numbers
- * - procs (50): flavor tier 3 (full copy) + preparation hint
- * - ecology (100): disease and well-fed names without odds
- * - full (200): exact chances, residual risk, poison damage values
+ * - procs (20): flavor tier 3 (full copy) + preparation hint
+ * - ecology (50): disease and well-fed names without odds
+ * - full (75): exact chances, residual risk, poison damage values
+ * - playable (100): same meat inspect depth as full
  */
 export const DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER: Readonly<
   Record<PlazaBestiaryStudyTierId, DefiningWorldPlazaInventoryWildlifeMeatDetailReveal>
@@ -98,6 +99,18 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER:
     showGenericItemMeta: true,
   },
   full: {
+    descriptionTier: 3,
+    showHungerRestore: true,
+    showPreparationHint: true,
+    showDiseaseName: true,
+    showDiseaseChance: true,
+    showWellFedName: true,
+    showWellFedChance: true,
+    showResidualDisease: true,
+    showPoisonDamage: true,
+    showGenericItemMeta: true,
+  },
+  playable: {
     descriptionTier: 3,
     showHungerRestore: true,
     showPreparationHint: true,

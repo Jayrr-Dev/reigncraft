@@ -167,7 +167,7 @@ export function resolvingPlazaBestiaryGuideCombatStats(
   };
 }
 
-/** On-hit proc rows unlocked at 50 studies. */
+/** On-hit proc rows unlocked at the procs study tier. */
 export function resolvingPlazaBestiaryGuideOnHitProcRows(
   speciesId: DefiningWildlifeSpeciesId,
   killCount: number
@@ -181,7 +181,7 @@ export function resolvingPlazaBestiaryGuideOnHitProcRows(
   return rows.length > 0 ? rows : [];
 }
 
-/** Ecology and hunting stats unlocked at 100 studies. */
+/** Ecology and hunting stats unlocked at the ecology study tier. */
 export function resolvingPlazaBestiaryGuideEcologyStats(
   speciesId: DefiningWildlifeSpeciesId,
   killCount: number
@@ -214,7 +214,7 @@ export function resolvingPlazaBestiaryGuideEcologyStats(
   };
 }
 
-/** Loot and disease risk unlocked at 200 studies. */
+/** Loot and disease risk unlocked at the full study tier. */
 export function resolvingPlazaBestiaryGuideLootStats(
   speciesId: DefiningWildlifeSpeciesId,
   killCount: number

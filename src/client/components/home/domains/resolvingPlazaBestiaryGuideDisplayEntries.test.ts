@@ -44,10 +44,10 @@ describe('resolvingPlazaBestiaryGuideDisplayEntries', () => {
     expect(wolf?.apostleFlavor).toBeNull();
   });
 
-  it('unlocks on-hit proc rows at 50 studies', () => {
+  it('unlocks on-hit proc rows at 20 studies', () => {
     const entries = resolvingPlazaBestiaryGuideDisplayEntries(
       new Set(['grey-wolf']),
-      { 'grey-wolf': 50 }
+      { 'grey-wolf': 20 }
     );
     const wolf = entries.find((entry) => entry.speciesId === 'grey-wolf');
 

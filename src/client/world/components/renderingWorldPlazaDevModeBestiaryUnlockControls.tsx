@@ -192,8 +192,8 @@ export function RenderingWorldPlazaDevModeBestiaryUnlockControls(): React.JSX.El
       </span>
       <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[9px] leading-snug text-white/60">
         Toggle sighted vs locked per species. Kill presets unlock study tiers at
-        1 / 10 / 50 / 100 / 200. Unlock all sights every catalog entry and sets
-        full study.
+        1 / 10 / 20 / 50 / 75 / 100. Unlock all sights every catalog entry and sets
+        full study (playable unlock).
       </div>
       <div className="flex flex-wrap gap-1">
         <button

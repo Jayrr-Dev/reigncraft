@@ -34,7 +34,7 @@ describe('resolvingWorldPlazaInventoryWildlifeMeatDetailReveal', () => {
       resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(10).descriptionTier
     ).toBe(2);
     expect(
-      resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(50).descriptionTier
+      resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(20).descriptionTier
     ).toBe(3);
   });
 
@@ -43,16 +43,15 @@ describe('resolvingWorldPlazaInventoryWildlifeMeatDetailReveal', () => {
       resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(10).showHungerRestore
     ).toBe(true);
     expect(
-      resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(100).showDiseaseName
+      resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(50).showDiseaseName
     ).toBe(true);
     expect(
-      resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(100)
-        .showDiseaseChance
+      resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(50).showDiseaseChance
     ).toBe(false);
   });
 
   it('shows exact chances at full dossier', () => {
-    const reveal = resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(200);
+    const reveal = resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(75);
 
     expect(reveal.showDiseaseChance).toBe(true);
     expect(reveal.showWellFedChance).toBe(true);
@@ -111,12 +110,12 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel wildlife meat', () 
     expect(model?.infoRows.some((row) => row.id === 'raw-disease')).toBe(false);
   });
 
-  it('shows full flavor at 50 studies', () => {
+  it('shows full flavor at 20 studies', () => {
     const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       RAW_BOAR_MEAT_ITEM,
       {
         isEquipped: false,
-        studyCountsBySpeciesId: { boar: 50 },
+        studyCountsBySpeciesId: { boar: 20 },
       }
     );
 
@@ -143,12 +142,12 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel wildlife meat', () 
     expect(model?.infoRows.some((row) => row.id === 'raw-disease')).toBe(false);
   });
 
-  it('shows disease name without chance at 100 studies', () => {
+  it('shows disease name without chance at 50 studies', () => {
     const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       RAW_BOAR_MEAT_ITEM,
       {
         isEquipped: false,
-        studyCountsBySpeciesId: { boar: 100 },
+        studyCountsBySpeciesId: { boar: 50 },
       }
     );
 
@@ -157,19 +156,19 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel wildlife meat', () 
     );
   });
 
-  it('shows exact disease chance and well-fed buff at 200 studies', () => {
+  it('shows exact disease chance and well-fed buff at 75 studies', () => {
     const rawModel = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       RAW_BOAR_MEAT_ITEM,
       {
         isEquipped: false,
-        studyCountsBySpeciesId: { boar: 200 },
+        studyCountsBySpeciesId: { boar: 75 },
       }
     );
     const cookedModel = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       COOKED_BOAR_MEAT_ITEM,
       {
         isEquipped: false,
-        studyCountsBySpeciesId: { boar: 200 },
+        studyCountsBySpeciesId: { boar: 75 },
       }
     );
 

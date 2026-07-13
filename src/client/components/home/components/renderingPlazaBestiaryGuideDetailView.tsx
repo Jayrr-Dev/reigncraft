@@ -3,6 +3,7 @@
 import { RenderingPlazaBestiarySpritePortrait } from '@/components/home/components/renderingPlazaBestiarySpritePortrait';
 import { DEFINING_PLAZA_BESTIARY_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaBestiarySpritePortraitConstants';
 import {
+  LABELING_PLAZA_BESTIARY_PLAYABLE_UNLOCKED,
   LABELING_PLAZA_BESTIARY_STUDY_TIER_SECTION_TITLES,
   LABELING_PLAZA_BESTIARY_STUDY_TIER_TEASERS,
   type PlazaBestiaryStudyTierId,
@@ -514,6 +515,15 @@ export function RenderingPlazaBestiaryGuideDetailView({
                   ) : null}
                 </div>
               ) : null}
+            </RenderingPlazaBestiaryGuideDetailSection>
+
+            <RenderingPlazaBestiaryGuideDetailSection
+              tierId="playable"
+              killCount={entry.killCount}
+            >
+              <p className="text-[11px] font-medium text-ink">
+                {LABELING_PLAZA_BESTIARY_PLAYABLE_UNLOCKED}
+              </p>
             </RenderingPlazaBestiaryGuideDetailSection>
           </div>
         </article>
