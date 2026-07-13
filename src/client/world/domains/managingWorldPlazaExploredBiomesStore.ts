@@ -1,12 +1,17 @@
 /**
  * Module-level store for explored plaza biomes.
  *
+ * LocalStorage is the hot cache. Signed-in single-player also mirrors
+ * explored biomes into the Devvit Redis save slot.
+ *
  * @module components/world/domains/managingWorldPlazaExploredBiomesStore
  */
 
+import { savingPlazaSinglePlayerSaveSlotData } from '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import { readingWorldPlazaExploredBiomesFromStorage } from '@/components/world/domains/readingWorldPlazaExploredBiomesFromStorage';
 import { writingWorldPlazaExploredBiomesToStorage } from '@/components/world/domains/writingWorldPlazaExploredBiomesToStorage';
+import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 const managingWorldPlazaExploredBiomesSubscribers = new Set<() => void>();
 
@@ -14,6 +19,8 @@ const MANAGING_WORLD_PLAZA_EXPLORED_BIOMES_EMPTY_SNAPSHOT: readonly DefiningWorl
   [];
 
 let managingWorldPlazaExploredBiomesStorageOwnerId: string | null = null;
+let managingWorldPlazaExploredBiomesCloudSaveSlotIndex: PlazaSaveSlotIndex | null =
+  null;
 let managingWorldPlazaExploredBiomesKinds =
   new Set<DefiningWorldPlazaBiomeKind>();
 let managingWorldPlazaExploredBiomesSnapshotCache: readonly DefiningWorldPlazaBiomeKind[] =
@@ -37,19 +44,55 @@ function notifyingWorldPlazaExploredBiomesSubscribers(): void {
   }
 }
 
+function mirroringWorldPlazaExploredBiomesToCloudSave(): void {
+  if (managingWorldPlazaExploredBiomesCloudSaveSlotIndex === null) {
+    return;
+  }
+
+  const exploredBiomeKinds = managingWorldPlazaExploredBiomesSnapshotCache;
+
+  void savingPlazaSinglePlayerSaveSlotData(
+    managingWorldPlazaExploredBiomesCloudSaveSlotIndex,
+    {
+      exploredBiomeKinds:
+        exploredBiomeKinds.length > 0 ? exploredBiomeKinds : null,
+    }
+  ).catch(() => {
+    // Cloud mirror is best-effort; localStorage remains source for the session.
+  });
+}
+
+function persistingWorldPlazaExploredBiomes(): void {
+  writingWorldPlazaExploredBiomesToStorage(
+    managingWorldPlazaExploredBiomesStorageOwnerId,
+    managingWorldPlazaExploredBiomesKinds
+  );
+  mirroringWorldPlazaExploredBiomesToCloudSave();
+}
+
+export type InitializingWorldPlazaExploredBiomesStoreOptions = {
+  cloudSaveSlotIndex?: PlazaSaveSlotIndex | null;
+};
+
 /**
  * Hydrates explored biomes from localStorage for one session owner.
  *
  * @param storageOwnerId - Session owner id, or null for guest sessions.
+ * @param options - Optional Redis save-slot mirror context.
  */
 export function initializingWorldPlazaExploredBiomesStore(
-  storageOwnerId: string | null
+  storageOwnerId: string | null,
+  options?: InitializingWorldPlazaExploredBiomesStoreOptions
 ): void {
+  const cloudSaveSlotIndex = options?.cloudSaveSlotIndex ?? null;
+
   if (managingWorldPlazaExploredBiomesStorageOwnerId === storageOwnerId) {
+    managingWorldPlazaExploredBiomesCloudSaveSlotIndex = cloudSaveSlotIndex;
     return;
   }
 
   managingWorldPlazaExploredBiomesStorageOwnerId = storageOwnerId;
+  managingWorldPlazaExploredBiomesCloudSaveSlotIndex = cloudSaveSlotIndex;
   managingWorldPlazaExploredBiomesKinds = new Set(
     readingWorldPlazaExploredBiomesFromStorage(storageOwnerId)
   );
@@ -80,11 +123,8 @@ export function recordingWorldPlazaExploredBiomeKind(
     ...managingWorldPlazaExploredBiomesKinds,
     biomeKind,
   ]);
-  writingWorldPlazaExploredBiomesToStorage(
-    managingWorldPlazaExploredBiomesStorageOwnerId,
-    managingWorldPlazaExploredBiomesKinds
-  );
   refreshingWorldPlazaExploredBiomesSnapshotCache();
+  persistingWorldPlazaExploredBiomes();
   notifyingWorldPlazaExploredBiomesSubscribers();
 }
 
@@ -101,4 +141,13 @@ export function subscribingWorldPlazaExploredBiomes(
   return () => {
     managingWorldPlazaExploredBiomesSubscribers.delete(onStoreChange);
   };
+}
+
+/** Test helper: clears in-memory state between unit tests. */
+export function resettingWorldPlazaExploredBiomesStoreForTests(): void {
+  managingWorldPlazaExploredBiomesStorageOwnerId = null;
+  managingWorldPlazaExploredBiomesCloudSaveSlotIndex = null;
+  managingWorldPlazaExploredBiomesKinds = new Set();
+  refreshingWorldPlazaExploredBiomesSnapshotCache();
+  managingWorldPlazaExploredBiomesSubscribers.clear();
 }

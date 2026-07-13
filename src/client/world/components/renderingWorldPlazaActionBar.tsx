@@ -14,6 +14,7 @@ import {
 import { RenderingReigncraftToaster } from '@/components/ui/sonner';
 import { RenderingWorldPlazaActionBarTransformPanel } from '@/components/world/components/renderingWorldPlazaActionBarTransformPanel';
 import { RenderingWorldPlazaCodexMenuPanel } from '@/components/world/components/renderingWorldPlazaCodexMenuPanel';
+import { RenderingWorldPlazaDayNightIndicator } from '@/components/world/components/renderingWorldPlazaDayNightIndicator';
 import { RenderingWorldPlazaExitHomeConfirmDialog } from '@/components/world/components/renderingWorldPlazaExitHomeConfirmDialog';
 import { RenderingWorldPlazaMasterVolumeMixerPanel } from '@/components/world/components/renderingWorldPlazaMasterVolumeMixerPanel';
 import {
@@ -39,6 +40,7 @@ import {
   STYLING_WORLD_PLAZA_ACTION_BAR_CODEX_ANCHOR_CLASS_NAME,
   type WorldPlazaCodexSectionId,
 } from '@/components/world/domains/definingWorldPlazaCodexConstants';
+import { STYLING_WORLD_PLAZA_ACTION_BAR_DAY_NIGHT_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDayNightIndicatorConstants';
 import {
   LABELING_WORLD_PLAZA_ACTION_BAR_SETTINGS,
   STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME,
@@ -49,6 +51,9 @@ import {
   DEFINING_WORLD_PLAZA_VIEWPORT_FULLSCREEN_EXIT_LABEL,
 } from '@/components/world/domains/definingWorldPlazaViewportFullscreenConstants';
 import { resolvingWorldPlazaActionBarViewportStyles } from '@/components/world/domains/resolvingWorldPlazaActionBarViewportStyles';
+import { RenderingWorldPlazaTemperatureIndicator } from '@/components/world/health/components/renderingWorldPlazaTemperatureIndicator';
+import { STYLING_WORLD_PLAZA_ACTION_BAR_TEMPERATURE_ANCHOR_CLASS_NAME } from '@/components/world/health/domains/definingWorldPlazaTemperatureIndicatorConstants';
+import type { DefiningWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
 import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
 import { RenderingWorldPlazaHungerIndicator } from '@/components/world/hunger/components/renderingWorldPlazaHungerIndicator';
 import { RenderingWorldPlazaHungerPanel } from '@/components/world/hunger/components/renderingWorldPlazaHungerPanel';
@@ -105,6 +110,11 @@ export interface RenderingWorldPlazaActionBarProps {
     readonly tier: DefiningWorldPlazaHungerTier;
     readonly isStarving: boolean;
   } | null;
+  /** When set, shows the temperature sphere beside hunger. */
+  temperatureHud?: {
+    readonly localTemperatureCelsius: number | null;
+    readonly temperatureDisplayUnit: DefiningWorldPlazaTemperatureDisplayUnit;
+  } | null;
 }
 
 /**
@@ -141,6 +151,7 @@ export function RenderingWorldPlazaActionBar({
   isFullscreenViewport = false,
   inlineChatSlot = null,
   hungerHud = null,
+  temperatureHud = null,
 }: RenderingWorldPlazaActionBarProps): React.JSX.Element | null {
   const viewportStyles = useMemo(
     () =>
@@ -401,43 +412,65 @@ export function RenderingWorldPlazaActionBar({
                 </div>
 
                 {hungerHud ? (
-                  <>
-                    <span
-                      className={
-                        DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME
-                      }
-                      style={viewportStyles.dividerStyle}
-                      aria-hidden="true"
+                  <div
+                    className={
+                      STYLING_WORLD_PLAZA_ACTION_BAR_HUNGER_ANCHOR_CLASS_NAME
+                    }
+                  >
+                    <RenderingWorldPlazaHungerIndicator
+                      hungerRatio={hungerHud.hungerRatio}
+                      tier={hungerHud.tier}
+                      isStarving={hungerHud.isStarving}
+                      viewportHudScale={viewportHudScale}
+                      isMobile={isMobile}
+                      isOpen={isHungerPanelOpen}
+                      onToggle={() => {
+                        setIsTransformPanelOpen(false);
+                        setIsSoundMixerOpen(false);
+                        setIsCodexMenuOpen(false);
+                        setIsHungerPanelOpen((wasOpen) => !wasOpen);
+                      }}
                     />
-                    <div
-                      className={
-                        STYLING_WORLD_PLAZA_ACTION_BAR_HUNGER_ANCHOR_CLASS_NAME
-                      }
-                    >
-                      <RenderingWorldPlazaHungerIndicator
+                    {isHungerPanelOpen ? (
+                      <RenderingWorldPlazaHungerPanel
                         hungerRatio={hungerHud.hungerRatio}
                         tier={hungerHud.tier}
                         isStarving={hungerHud.isStarving}
-                        viewportHudScale={viewportHudScale}
-                        isMobile={isMobile}
-                        isOpen={isHungerPanelOpen}
-                        onToggle={() => {
-                          setIsTransformPanelOpen(false);
-                          setIsSoundMixerOpen(false);
-                          setIsCodexMenuOpen(false);
-                          setIsHungerPanelOpen((wasOpen) => !wasOpen);
-                        }}
                       />
-                      {isHungerPanelOpen ? (
-                        <RenderingWorldPlazaHungerPanel
-                          hungerRatio={hungerHud.hungerRatio}
-                          tier={hungerHud.tier}
-                          isStarving={hungerHud.isStarving}
-                        />
-                      ) : null}
-                    </div>
-                  </>
+                    ) : null}
+                  </div>
                 ) : null}
+
+                {temperatureHud &&
+                temperatureHud.localTemperatureCelsius !== null ? (
+                  <div
+                    className={
+                      STYLING_WORLD_PLAZA_ACTION_BAR_TEMPERATURE_ANCHOR_CLASS_NAME
+                    }
+                  >
+                    <RenderingWorldPlazaTemperatureIndicator
+                      localTemperatureCelsius={
+                        temperatureHud.localTemperatureCelsius
+                      }
+                      temperatureDisplayUnit={
+                        temperatureHud.temperatureDisplayUnit
+                      }
+                      viewportHudScale={viewportHudScale}
+                      isMobile={isMobile}
+                    />
+                  </div>
+                ) : null}
+
+                <div
+                  className={
+                    STYLING_WORLD_PLAZA_ACTION_BAR_DAY_NIGHT_ANCHOR_CLASS_NAME
+                  }
+                >
+                  <RenderingWorldPlazaDayNightIndicator
+                    viewportHudScale={viewportHudScale}
+                    isMobile={isMobile}
+                  />
+                </div>
 
                 {isFullscreenSupported ? (
                   <>

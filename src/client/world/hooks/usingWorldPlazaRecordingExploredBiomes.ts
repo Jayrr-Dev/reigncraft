@@ -11,10 +11,12 @@ import {
 import { resolvingWorldPlazaBiomeAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint';
 import type { RefObject } from 'react';
 import { useEffect, useSyncExternalStore } from 'react';
+import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 export type UsingWorldPlazaRecordingExploredBiomesOptions = {
   isEnabled: boolean;
   storageOwnerId: string | null;
+  cloudSaveSlotIndex?: PlazaSaveSlotIndex | null;
   playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint | null>;
 };
 
@@ -24,6 +26,7 @@ export type UsingWorldPlazaRecordingExploredBiomesOptions = {
 export function usingWorldPlazaRecordingExploredBiomes({
   isEnabled,
   storageOwnerId,
+  cloudSaveSlotIndex = null,
   playerPositionRef,
 }: UsingWorldPlazaRecordingExploredBiomesOptions): readonly string[] {
   const exploredBiomeKinds = useSyncExternalStore(
@@ -33,8 +36,10 @@ export function usingWorldPlazaRecordingExploredBiomes({
   );
 
   useEffect(() => {
-    initializingWorldPlazaExploredBiomesStore(storageOwnerId);
-  }, [storageOwnerId]);
+    initializingWorldPlazaExploredBiomesStore(storageOwnerId, {
+      cloudSaveSlotIndex,
+    });
+  }, [cloudSaveSlotIndex, storageOwnerId]);
 
   useEffect(() => {
     if (!isEnabled) {

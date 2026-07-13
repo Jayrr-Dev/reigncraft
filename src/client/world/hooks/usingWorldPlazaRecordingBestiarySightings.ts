@@ -16,10 +16,12 @@ import {
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import type { RefObject } from 'react';
 import { useEffect } from 'react';
+import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 export type UsingWorldPlazaRecordingBestiarySightingsOptions = {
   isEnabled: boolean;
   storageOwnerId: string | null;
+  cloudSaveSlotIndex?: PlazaSaveSlotIndex | null;
   playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint | null>;
   wildlifeStoreRef: RefObject<ManagingWildlifeInstanceStore>;
 };
@@ -30,12 +32,15 @@ export type UsingWorldPlazaRecordingBestiarySightingsOptions = {
 export function usingWorldPlazaRecordingBestiarySightings({
   isEnabled,
   storageOwnerId,
+  cloudSaveSlotIndex = null,
   playerPositionRef,
   wildlifeStoreRef,
 }: UsingWorldPlazaRecordingBestiarySightingsOptions): void {
   useEffect(() => {
-    initializingWorldPlazaBestiaryDiscoveryStore(storageOwnerId);
-  }, [storageOwnerId]);
+    initializingWorldPlazaBestiaryDiscoveryStore(storageOwnerId, {
+      cloudSaveSlotIndex,
+    });
+  }, [cloudSaveSlotIndex, storageOwnerId]);
 
   useEffect(() => {
     if (!isEnabled) {

@@ -115,6 +115,11 @@ export async function deletingPlazaSinglePlayerSaveSlotData(
   await savingPlazaSinglePlayerSaveSlotData(saveSlotIndex, {
     lastPosition: null,
     inventory: null,
+    playerConditions: null,
+    attachedRecipeIds: null,
+    bestiaryDiscovery: null,
+    exploredBiomeKinds: null,
+    discoveredNamedRealmIds: null,
   });
 }
 

@@ -401,7 +401,7 @@ describe('advancingWildlifeBehaviorTick', () => {
     expect(intent.mode).not.toBe('flee');
   });
 
-  it('predator keeps returning to its anchor until well inside the leash', () => {
+  it('predator keeps returning to its anchor until well inside the leash when idle', () => {
     const base = buildingBlackboard('lion').instance;
     const blackboard = buildingBlackboard('lion', {
       playerPosition: { x: 20, y: 1.5, layer: 1 },
@@ -418,11 +418,17 @@ describe('advancingWildlifeBehaviorTick', () => {
           docileFollowUntilMs: null,
           docileLastReactAtMs: null,
         },
+        // No active hunt or threat: leash hysteresis must finish the walk home.
         aggroState: {
-          threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
-          activeTargetId: 'player-1',
-          lastDamagedAtMs: 1000,
+          threats: [],
+          activeTargetId: null,
+          lastDamagedAtMs: null,
           stalkingPreySinceMs: null,
+        },
+        hungerState: {
+          hungerRatio: 0.95,
+          driveLevel: 'sated',
+          lastFedAtMs: null,
         },
       },
     });
@@ -449,6 +455,57 @@ describe('advancingWildlifeBehaviorTick', () => {
           docileFollowUntilMs: null,
           docileLastReactAtMs: null,
         },
+        aggroState: {
+          threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
+          activeTargetId: 'player-1',
+          lastDamagedAtMs: 1000,
+          stalkingPreySinceMs: null,
+        },
+      },
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('chase');
+  });
+
+  it('predator keeps chasing past the leash when committed to a hunt', () => {
+    const deer = {
+      ...buildingBlackboard('deer').instance,
+      instanceId: 'wildlife:2:2:0',
+      position: { x: 26, y: 1.5, layer: 1 },
+    };
+    const base = buildingBlackboard('tiger').instance;
+    const blackboard = buildingBlackboard('tiger', {
+      nearbyInstances: [deer],
+      selectedPreyInstanceId: deer.instanceId,
+      instance: {
+        ...base,
+        // Past default leash (18) while still hunting.
+        position: { x: 22, y: 1.5, layer: 1 },
+        hungerState: {
+          hungerRatio: 0.2,
+          driveLevel: 'starving',
+          lastFedAtMs: null,
+        },
+      },
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('chase');
+    if (intent.mode === 'chase') {
+      expect(intent.targetInstanceId).toBe(deer.instanceId);
+    }
+  });
+
+  it('predator keeps chasing a player threat past the leash', () => {
+    const base = buildingBlackboard('tiger').instance;
+    const blackboard = buildingBlackboard('tiger', {
+      playerPosition: { x: 30, y: 1.5, layer: 1 },
+      instance: {
+        ...base,
+        position: { x: 22, y: 1.5, layer: 1 },
         aggroState: {
           threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
           activeTargetId: 'player-1',

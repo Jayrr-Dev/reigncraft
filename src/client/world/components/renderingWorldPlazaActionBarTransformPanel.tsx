@@ -134,22 +134,23 @@ export function RenderingWorldPlazaActionBarTransformPanel({
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
       />
 
-      <button
-        type="button"
-        aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_SCROLL_UP}
-        disabled={!canScrollUp}
-        className={
-          STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_SCROLL_ARROW_CLASS_NAME
-        }
-        onClick={() => {
-          scrollingTransformListBy(
-            -DEFINING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_LIST_SCROLL_STEP_PX
-          );
-        }}
-        {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-      >
-        <Icon icon="mdi:chevron-up" className="size-4" aria-hidden="true" />
-      </button>
+      {canScrollUp ? (
+        <button
+          type="button"
+          aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_SCROLL_UP}
+          className={
+            STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_SCROLL_ARROW_CLASS_NAME
+          }
+          onClick={() => {
+            scrollingTransformListBy(
+              -DEFINING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_LIST_SCROLL_STEP_PX
+            );
+          }}
+          {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+        >
+          <Icon icon="mdi:chevron-up" className="size-4" aria-hidden="true" />
+        </button>
+      ) : null}
 
       <div
         ref={listRef}
@@ -182,22 +183,23 @@ export function RenderingWorldPlazaActionBarTransformPanel({
         })}
       </div>
 
-      <button
-        type="button"
-        aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_SCROLL_DOWN}
-        disabled={!canScrollDown}
-        className={
-          STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_SCROLL_ARROW_CLASS_NAME
-        }
-        onClick={() => {
-          scrollingTransformListBy(
-            DEFINING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_LIST_SCROLL_STEP_PX
-          );
-        }}
-        {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-      >
-        <Icon icon="mdi:chevron-down" className="size-4" aria-hidden="true" />
-      </button>
+      {canScrollDown ? (
+        <button
+          type="button"
+          aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_SCROLL_DOWN}
+          className={
+            STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_SCROLL_ARROW_CLASS_NAME
+          }
+          onClick={() => {
+            scrollingTransformListBy(
+              DEFINING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_LIST_SCROLL_STEP_PX
+            );
+          }}
+          {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+        >
+          <Icon icon="mdi:chevron-down" className="size-4" aria-hidden="true" />
+        </button>
+      ) : null}
     </div>
   );
 }

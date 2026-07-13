@@ -139,3 +139,19 @@ export const STYLING_WORLD_PLAZA_PROFILE_PANEL_EFFECT_DESCRIPTION_CLASS_NAME =
 
 /** Icon size for vital and attribute glyphs. */
 export const DEFINING_WORLD_PLAZA_PROFILE_PANEL_ICON_SIZE_PX = 13 as const;
+
+/** Profile attribute label for the cold comfort floor. */
+export const LABELING_WORLD_PLAZA_PROFILE_PANEL_COLD_THRESHOLD_ATTRIBUTE =
+  'Cold threshold' as const;
+
+/** Iconify id for the cold threshold attribute chip. */
+export const DEFINING_WORLD_PLAZA_PROFILE_PANEL_COLD_THRESHOLD_ATTRIBUTE_ICON =
+  'mdi:snowflake' as const;
+
+/** Profile attribute label for the heat comfort ceiling. */
+export const LABELING_WORLD_PLAZA_PROFILE_PANEL_HEAT_THRESHOLD_ATTRIBUTE =
+  'Heat threshold' as const;
+
+/** Iconify id for the heat threshold attribute chip. */
+export const DEFINING_WORLD_PLAZA_PROFILE_PANEL_HEAT_THRESHOLD_ATTRIBUTE_ICON =
+  'mdi:fire' as const;

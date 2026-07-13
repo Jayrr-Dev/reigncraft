@@ -12,7 +12,15 @@ import {
 } from '@/components/world/character/domains/definingWorldPlazaCharacterHeightDisplayConstants';
 import { resolvingWorldPlazaCharacterHeightDisplayText } from '@/components/world/character/domains/resolvingWorldPlazaCharacterHeightDisplayText';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
+import {
+  DEFINING_WORLD_PLAZA_PROFILE_PANEL_COLD_THRESHOLD_ATTRIBUTE_ICON,
+  DEFINING_WORLD_PLAZA_PROFILE_PANEL_HEAT_THRESHOLD_ATTRIBUTE_ICON,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_COLD_THRESHOLD_ATTRIBUTE,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_HEAT_THRESHOLD_ATTRIBUTE,
+} from '@/components/world/domains/definingWorldPlazaProfilePanelConstants';
 import { DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
+import { formattingWorldPlazaTemperature } from '@/components/world/health/domains/convertingWorldPlazaTemperatureUnits';
+import { resolvingWorldPlazaEntityTemperatureComfortBand } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureComfortBand';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import type { DefiningWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import type { UsingWorldPlazaPlayerHungerHudSnapshot } from '@/components/world/hunger/hooks/usingWorldPlazaPlayerHunger';
@@ -132,6 +140,9 @@ export function resolvingWorldPlazaProfilePanelSections(input: {
   derivedStats: ComputingWorldPlazaCharacterEngineDerivedStats;
 }): ResolvingWorldPlazaProfilePanelSections {
   const { health, stamina, hunger, derivedStats } = input;
+  const comfortBand = resolvingWorldPlazaEntityTemperatureComfortBand(
+    health.temperatureResistance
+  );
 
   const vitalRows: ResolvingWorldPlazaProfilePanelVitalRow[] = [
     {
@@ -197,6 +208,26 @@ export function resolvingWorldPlazaProfilePanelSections(input: {
       iconName: DEFINING_WORLD_PLAZA_CHARACTER_HEIGHT_ATTRIBUTE_ICON,
       valueText: resolvingWorldPlazaCharacterHeightDisplayText(
         derivedStats.heightWorldLayers
+      ),
+    },
+    {
+      id: 'cold-threshold',
+      label: LABELING_WORLD_PLAZA_PROFILE_PANEL_COLD_THRESHOLD_ATTRIBUTE,
+      iconName:
+        DEFINING_WORLD_PLAZA_PROFILE_PANEL_COLD_THRESHOLD_ATTRIBUTE_ICON,
+      valueText: formattingWorldPlazaTemperature(
+        comfortBand.comfortLowCelsius,
+        health.temperatureDisplayUnit
+      ),
+    },
+    {
+      id: 'heat-threshold',
+      label: LABELING_WORLD_PLAZA_PROFILE_PANEL_HEAT_THRESHOLD_ATTRIBUTE,
+      iconName:
+        DEFINING_WORLD_PLAZA_PROFILE_PANEL_HEAT_THRESHOLD_ATTRIBUTE_ICON,
+      valueText: formattingWorldPlazaTemperature(
+        comfortBand.comfortHighCelsius,
+        health.temperatureDisplayUnit
       ),
     },
   ];

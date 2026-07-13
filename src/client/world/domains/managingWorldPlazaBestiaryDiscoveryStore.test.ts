@@ -9,11 +9,21 @@ import {
   lockingWorldPlazaBestiaryDiscoveryAllForDev,
   recordingWorldPlazaBestiarySpeciesSighted,
   recordingWorldPlazaBestiarySpeciesStudied,
+  resettingWorldPlazaBestiaryDiscoveryStoreForTests,
   settingWorldPlazaBestiarySpeciesKillCountForDev,
   settingWorldPlazaBestiarySpeciesSightedForDev,
   unlockingWorldPlazaBestiaryDiscoveryAllForDev,
 } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { readingWorldPlazaBestiaryDiscoveryFromStorage } from '@/components/world/domains/readingWorldPlazaBestiaryDiscoveryFromStorage';
+
+vi.mock(
+  '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi',
+  () => ({
+    savingPlazaSinglePlayerSaveSlotData: vi.fn(async () => undefined),
+  })
+);
+
+import { savingPlazaSinglePlayerSaveSlotData } from '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi';
 
 function creatingTestLocalStorage(): Storage {
   const storage = new Map<string, string>();
@@ -44,6 +54,8 @@ describe('managingWorldPlazaBestiaryDiscoveryStore', () => {
   beforeEach(() => {
     vi.stubGlobal('localStorage', creatingTestLocalStorage());
     vi.stubGlobal('window', globalThis);
+    resettingWorldPlazaBestiaryDiscoveryStoreForTests();
+    vi.mocked(savingPlazaSinglePlayerSaveSlotData).mockClear();
   });
 
   it('records sighted species once', () => {
@@ -54,6 +66,21 @@ describe('managingWorldPlazaBestiaryDiscoveryStore', () => {
     expect(gettingWorldPlazaBestiarySightedSpeciesSnapshot()).toEqual(['deer']);
     expect(gettingWorldPlazaBestiaryKilledSpeciesSnapshot()).toEqual([]);
     expect(gettingWorldPlazaBestiaryKillCountsSnapshot()).toEqual({});
+    expect(savingPlazaSinglePlayerSaveSlotData).not.toHaveBeenCalled();
+  });
+
+  it('mirrors sightings to the Redis save slot when cloud context is set', () => {
+    initializingWorldPlazaBestiaryDiscoveryStore('test-bestiary-cloud', {
+      cloudSaveSlotIndex: 2,
+    });
+    recordingWorldPlazaBestiarySpeciesSighted('deer');
+
+    expect(savingPlazaSinglePlayerSaveSlotData).toHaveBeenCalledWith(2, {
+      bestiaryDiscovery: {
+        sightedSpeciesIds: ['deer'],
+        studyCountsBySpeciesId: {},
+      },
+    });
   });
 
   it('increments study counts on every Study completion', () => {

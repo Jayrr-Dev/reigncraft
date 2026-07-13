@@ -79,7 +79,6 @@ import { RenderingWorldPlazaAvatarFootsteps } from '@/components/world/component
 import { RenderingWorldPlazaAvatarMeleeSfx } from '@/components/world/components/renderingWorldPlazaAvatarMeleeSfx';
 import { RenderingWorldPlazaAvatarMotionSfx } from '@/components/world/components/renderingWorldPlazaAvatarMotionSfx';
 import { RenderingWorldPlazaBestiaryOverlay } from '@/components/world/components/renderingWorldPlazaBestiaryOverlay';
-import { RenderingWorldPlazaRecipesOverlay } from '@/components/world/components/renderingWorldPlazaRecipesOverlay';
 import { RenderingWorldPlazaBiomeAmbience } from '@/components/world/components/renderingWorldPlazaBiomeAmbience';
 import { RenderingWorldPlazaBiomeBackdrop } from '@/components/world/components/renderingWorldPlazaBiomeBackdrop';
 import { RenderingWorldPlazaBiomeMusic } from '@/components/world/components/renderingWorldPlazaBiomeMusic';
@@ -108,6 +107,7 @@ import { RenderingWorldPlazaPlayerNightLightGroundGlow } from '@/components/worl
 import { RenderingWorldPlazaPlayerTeleportFadeOverlay } from '@/components/world/components/renderingWorldPlazaPlayerTeleportFadeOverlay';
 import { RenderingWorldPlazaPresenceReconnectOverlay } from '@/components/world/components/renderingWorldPlazaPresenceReconnectOverlay';
 import { RenderingWorldPlazaProfilePanel } from '@/components/world/components/renderingWorldPlazaProfilePanel';
+import { RenderingWorldPlazaRecipesOverlay } from '@/components/world/components/renderingWorldPlazaRecipesOverlay';
 import { RenderingWorldPlazaRemotePlayers } from '@/components/world/components/renderingWorldPlazaRemotePlayers';
 import { RenderingWorldPlazaRoomChatBubbles } from '@/components/world/components/renderingWorldPlazaRoomChatBubbles';
 import { RenderingWorldPlazaRoomChatPanel } from '@/components/world/components/renderingWorldPlazaRoomChatPanel';
@@ -125,10 +125,6 @@ import {
 } from '@/components/world/components/syncingWorldPlazaPixiViewportFrameResize';
 import { checkingWorldPlazaCraftRecipeAffordable } from '@/components/world/crafting/domains/checkingWorldPlazaCraftRecipeAffordable';
 import { committingWorldPlazaCraftRecipePlaceablePlacement } from '@/components/world/crafting/domains/committingWorldPlazaCraftRecipePlaceablePlacement';
-import {
-  initializingWorldPlazaRecipeDiscoveryStore,
-  recordingWorldPlazaRecipePageAttached,
-} from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
 import { resolvingWorldPlazaCraftModeRecipeDefinition } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry';
 import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import {
@@ -215,6 +211,10 @@ import {
 import { findingWorldPlazaBiomeTeleportWorldPointForDev } from '@/components/world/domains/findingWorldPlazaBiomeTeleportWorldPointForDev';
 import { recordingWorldPlazaBestiarySpeciesStudied } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
+import {
+  initializingWorldPlazaRecipeDiscoveryStore,
+  recordingWorldPlazaRecipePageAttached,
+} from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
 import { settingWorldPlazaPerformanceDiagnosticsEnabled } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { parsingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync';
 import { parsingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync';
@@ -3963,30 +3963,44 @@ function RenderingWorldPlazaPixiSceneConnected({
     },
   });
 
+  const isSignedInSinglePlayerCloudSave =
+    onlineUserId === null &&
+    redditUserId !== null &&
+    singlePlayerSaveSlotIndex !== null;
+  const discoveryCloudSaveSlotIndex = isSignedInSinglePlayerCloudSave
+    ? singlePlayerSaveSlotIndex
+    : null;
+
   usingWorldPlazaRecordingExploredBiomes({
     isEnabled: isLocalGameplayEnabled,
     storageOwnerId: onlineUserId ?? localPersistenceOwnerId,
+    cloudSaveSlotIndex: discoveryCloudSaveSlotIndex,
     playerPositionRef,
   });
 
   usingWorldPlazaRecordingDiscoveredNamedRealms({
     isEnabled: isLocalGameplayEnabled,
     storageOwnerId: onlineUserId ?? localPersistenceOwnerId,
+    cloudSaveSlotIndex: discoveryCloudSaveSlotIndex,
     playerPositionRef,
   });
 
   usingWorldPlazaRecordingBestiarySightings({
     isEnabled: isLocalGameplayEnabled,
     storageOwnerId: onlineUserId ?? localPersistenceOwnerId,
+    cloudSaveSlotIndex: discoveryCloudSaveSlotIndex,
     playerPositionRef,
     wildlifeStoreRef,
   });
 
   useEffect(() => {
     initializingWorldPlazaRecipeDiscoveryStore(
-      onlineUserId ?? localPersistenceOwnerId
+      onlineUserId ?? localPersistenceOwnerId,
+      {
+        cloudSaveSlotIndex: discoveryCloudSaveSlotIndex,
+      }
     );
-  }, [localPersistenceOwnerId, onlineUserId]);
+  }, [discoveryCloudSaveSlotIndex, localPersistenceOwnerId, onlineUserId]);
 
   const {
     isTeleportFadeOverlayMounted,
@@ -5982,6 +5996,12 @@ function RenderingWorldPlazaPixiSceneConnected({
                     });
                   }}
                   hungerHud={hungerHudSnapshot}
+                  temperatureHud={{
+                    localTemperatureCelsius:
+                      playerHealthHudSnapshot.localTemperatureCelsius,
+                    temperatureDisplayUnit:
+                      playerHealthHudSnapshot.temperatureDisplayUnit,
+                  }}
                   inlineChatSlot={
                     isPlazaSocialEnabled ? (
                       <RenderingWorldPlazaRoomChatPanel
@@ -6124,6 +6144,12 @@ function RenderingWorldPlazaPixiSceneConnected({
                     });
                   }}
                   hungerHud={hungerHudSnapshot}
+                  temperatureHud={{
+                    localTemperatureCelsius:
+                      playerHealthHudSnapshot.localTemperatureCelsius,
+                    temperatureDisplayUnit:
+                      playerHealthHudSnapshot.temperatureDisplayUnit,
+                  }}
                 />
               ) : null}
               {isHudHotbarEnabled ? (

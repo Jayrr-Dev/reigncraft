@@ -1,11 +1,14 @@
+import { resolvingWorldPlazaBestiaryDiscoveryStorageKey } from '@/components/world/domains/definingWorldPlazaBestiaryDiscoveryConstants';
 import { resolvingWorldPlazaExploredBiomesStorageKey } from '@/components/world/domains/definingWorldPlazaExploredBiomesConstants';
 import { resolvingWorldPlazaLastPositionStorageKey } from '@/components/world/domains/definingWorldPlazaLastPositionConstants';
+import { resolvingWorldPlazaDiscoveredNamedRealmsStorageKey } from '@/components/world/domains/definingWorldPlazaNamedRealmConstants';
+import { resolvingWorldPlazaRecipeDiscoveryStorageKey } from '@/components/world/domains/definingWorldPlazaRecipeDiscoveryConstants';
 import { resolvingWorldPlazaSavedCoordsStorageKey } from '@/components/world/domains/definingWorldPlazaSavedCoordsConstants';
 import { resolvingWorldPlazaFireCellsLocalStorageKey } from '@/components/world/fire/domains/managingWorldPlazaLocalFireCells';
 import { resolvingWorldPlazaChoppedTreesLocalStorageKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import { resolvingWorldPlazaPlayerConditionsStorageKey } from '@/components/world/health/domains/definingWorldPlazaPlayerConditionsConstants';
 import { resolvingWorldPlazaGroundItemsLocalStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemLocalStorageConstants';
 import { resolvingWorldPlazaInventoryStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
-import { resolvingWorldPlazaPlayerConditionsStorageKey } from '@/components/world/health/domains/definingWorldPlazaPlayerConditionsConstants';
 
 /**
  * Removes all local single-player save data for one persistence owner.
@@ -24,6 +27,9 @@ export function clearingPlazaSinglePlayerSaveSlotLocalStorage(
     resolvingWorldPlazaInventoryStorageKey(persistenceOwnerId),
     resolvingWorldPlazaSavedCoordsStorageKey(persistenceOwnerId),
     resolvingWorldPlazaExploredBiomesStorageKey(persistenceOwnerId),
+    resolvingWorldPlazaBestiaryDiscoveryStorageKey(persistenceOwnerId),
+    resolvingWorldPlazaDiscoveredNamedRealmsStorageKey(persistenceOwnerId),
+    resolvingWorldPlazaRecipeDiscoveryStorageKey(persistenceOwnerId),
     resolvingWorldPlazaGroundItemsLocalStorageKey(persistenceOwnerId),
     resolvingWorldPlazaChoppedTreesLocalStorageKey(persistenceOwnerId),
     resolvingWorldPlazaFireCellsLocalStorageKey(persistenceOwnerId),

@@ -38,11 +38,25 @@ export type PlazaSinglePlayerSavePlayerConditions = {
   hungerRatio?: number;
 };
 
+/** Persisted bestiary Guide progress for one save slot. */
+export type PlazaSinglePlayerSaveBestiaryDiscovery = {
+  sightedSpeciesIds: readonly string[];
+  studyCountsBySpeciesId: Readonly<Record<string, number>>;
+};
+
 /** Full persisted payload for one single-player save slot. */
 export type PlazaSinglePlayerSaveSlotPersistedData = {
   lastPosition: PlazaSinglePlayerSaveLastPosition | null;
   inventory: WorldInventoryDevvitPersistedState | null;
   playerConditions: PlazaSinglePlayerSavePlayerConditions | null;
+  /** Cookbook recipe page ids the player has attached (Guide unlock). */
+  attachedRecipeIds: readonly string[] | null;
+  /** Bestiary sighted / studied progress. */
+  bestiaryDiscovery: PlazaSinglePlayerSaveBestiaryDiscovery | null;
+  /** Biome kinds entered at least once. */
+  exploredBiomeKinds: readonly string[] | null;
+  /** Named realm ids entered at least once (`latticeX:latticeY`). */
+  discoveredNamedRealmIds: readonly string[] | null;
   updatedAtMs: number;
 };
 
@@ -51,6 +65,10 @@ export type PlazaSinglePlayerSaveSlotUpdateRequest = {
   lastPosition?: PlazaSinglePlayerSaveLastPosition | null;
   inventory?: WorldInventoryDevvitPersistedState | null;
   playerConditions?: PlazaSinglePlayerSavePlayerConditions | null;
+  attachedRecipeIds?: readonly string[] | null;
+  bestiaryDiscovery?: PlazaSinglePlayerSaveBestiaryDiscovery | null;
+  exploredBiomeKinds?: readonly string[] | null;
+  discoveredNamedRealmIds?: readonly string[] | null;
 };
 
 /** Summary shown on the home screen for one save slot. */

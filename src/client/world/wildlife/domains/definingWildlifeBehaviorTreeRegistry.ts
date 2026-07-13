@@ -276,13 +276,8 @@ const DEFINING_WILDLIFE_PREDATOR_TREE: DefiningWildlifeBehaviorTreeDefinition =
     root: {
       kind: 'selector',
       children: [
-        {
-          kind: 'sequence',
-          children: [
-            { kind: 'condition', conditionId: 'isBeyondLeashDistance' },
-            { kind: 'action', actionId: 'returnToLeashAnchor' },
-          ],
-        },
+        // Hunt / combat first so a chase past the leash still commits.
+        // Leash return only runs when nothing is left to fight or hunt.
         ...DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES,
         {
           kind: 'sequence',
@@ -306,6 +301,13 @@ const DEFINING_WILDLIFE_PREDATOR_TREE: DefiningWildlifeBehaviorTreeDefinition =
             { kind: 'condition', conditionId: 'isMotivatedToHunt' },
             { kind: 'condition', conditionId: 'hasHuntablePreyNearby' },
             { kind: 'action', actionId: 'chaseTarget' },
+          ],
+        },
+        {
+          kind: 'sequence',
+          children: [
+            { kind: 'condition', conditionId: 'isBeyondLeashDistance' },
+            { kind: 'action', actionId: 'returnToLeashAnchor' },
           ],
         },
         {

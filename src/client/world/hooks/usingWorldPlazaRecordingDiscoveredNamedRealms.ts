@@ -1,8 +1,8 @@
 'use client';
 
 import { DEFINING_WORLD_PLAZA_DISCOVERED_NAMED_REALMS_POLL_INTERVAL_MS } from '@/components/world/domains/definingWorldPlazaNamedRealmConstants';
-import { formattingWorldPlazaNamedRealmWelcomeMessage } from '@/components/world/domains/definingWorldPlazaWorldNotificationsConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { formattingWorldPlazaNamedRealmWelcomeMessage } from '@/components/world/domains/definingWorldPlazaWorldNotificationsConstants';
 import {
   gettingWorldPlazaDiscoveredNamedRealmsSnapshot,
   initializingWorldPlazaDiscoveredNamedRealmsStore,
@@ -12,10 +12,12 @@ import { enqueueingWorldPlazaWorldNotification } from '@/components/world/domain
 import { resolvingWorldPlazaNamedRealmAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaNamedRealmAtTileIndex';
 import type { RefObject } from 'react';
 import { useEffect } from 'react';
+import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 export type UsingWorldPlazaRecordingDiscoveredNamedRealmsOptions = {
   isEnabled: boolean;
   storageOwnerId: string | null;
+  cloudSaveSlotIndex?: PlazaSaveSlotIndex | null;
   playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint | null>;
 };
 
@@ -28,11 +30,14 @@ export type UsingWorldPlazaRecordingDiscoveredNamedRealmsOptions = {
 export function usingWorldPlazaRecordingDiscoveredNamedRealms({
   isEnabled,
   storageOwnerId,
+  cloudSaveSlotIndex = null,
   playerPositionRef,
 }: UsingWorldPlazaRecordingDiscoveredNamedRealmsOptions): void {
   useEffect(() => {
-    initializingWorldPlazaDiscoveredNamedRealmsStore(storageOwnerId);
-  }, [storageOwnerId]);
+    initializingWorldPlazaDiscoveredNamedRealmsStore(storageOwnerId, {
+      cloudSaveSlotIndex,
+    });
+  }, [cloudSaveSlotIndex, storageOwnerId]);
 
   useEffect(() => {
     if (!isEnabled) {
@@ -49,7 +54,9 @@ export function usingWorldPlazaRecordingDiscoveredNamedRealms({
       const realm = resolvingWorldPlazaNamedRealmAtWorldPoint(playerPosition);
       const isFirstSpawnWelcome =
         gettingWorldPlazaDiscoveredNamedRealmsSnapshot().length === 0;
-      const didDiscover = recordingWorldPlazaDiscoveredNamedRealm(realm.realmId);
+      const didDiscover = recordingWorldPlazaDiscoveredNamedRealm(
+        realm.realmId
+      );
 
       if (!didDiscover) {
         return;

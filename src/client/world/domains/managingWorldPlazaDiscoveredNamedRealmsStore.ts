@@ -1,18 +1,27 @@
 /**
  * Module-level store for discovered named realms.
  *
+ * LocalStorage is the hot cache. Signed-in single-player also mirrors
+ * discovered realms into the Devvit Redis save slot.
+ *
  * @module components/world/domains/managingWorldPlazaDiscoveredNamedRealmsStore
  */
 
+import { savingPlazaSinglePlayerSaveSlotData } from '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi';
 import { readingWorldPlazaDiscoveredNamedRealmsFromStorage } from '@/components/world/domains/readingWorldPlazaDiscoveredNamedRealmsFromStorage';
 import { writingWorldPlazaDiscoveredNamedRealmsToStorage } from '@/components/world/domains/writingWorldPlazaDiscoveredNamedRealmsToStorage';
+import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
-const managingWorldPlazaDiscoveredNamedRealmsSubscribers = new Set<() => void>();
+const managingWorldPlazaDiscoveredNamedRealmsSubscribers = new Set<
+  () => void
+>();
 
 const MANAGING_WORLD_PLAZA_DISCOVERED_NAMED_REALMS_EMPTY_SNAPSHOT: readonly string[] =
   [];
 
 let managingWorldPlazaDiscoveredNamedRealmsStorageOwnerId: string | null = null;
+let managingWorldPlazaDiscoveredNamedRealmsCloudSaveSlotIndex: PlazaSaveSlotIndex | null =
+  null;
 let managingWorldPlazaDiscoveredNamedRealmsIds = new Set<string>();
 let managingWorldPlazaDiscoveredNamedRealmsSnapshotCache: readonly string[] =
   MANAGING_WORLD_PLAZA_DISCOVERED_NAMED_REALMS_EMPTY_SNAPSHOT;
@@ -35,19 +44,60 @@ function notifyingWorldPlazaDiscoveredNamedRealmsSubscribers(): void {
   }
 }
 
+function mirroringWorldPlazaDiscoveredNamedRealmsToCloudSave(): void {
+  if (managingWorldPlazaDiscoveredNamedRealmsCloudSaveSlotIndex === null) {
+    return;
+  }
+
+  const discoveredNamedRealmIds =
+    managingWorldPlazaDiscoveredNamedRealmsSnapshotCache;
+
+  void savingPlazaSinglePlayerSaveSlotData(
+    managingWorldPlazaDiscoveredNamedRealmsCloudSaveSlotIndex,
+    {
+      discoveredNamedRealmIds:
+        discoveredNamedRealmIds.length > 0 ? discoveredNamedRealmIds : null,
+    }
+  ).catch(() => {
+    // Cloud mirror is best-effort; localStorage remains source for the session.
+  });
+}
+
+function persistingWorldPlazaDiscoveredNamedRealms(): void {
+  writingWorldPlazaDiscoveredNamedRealmsToStorage(
+    managingWorldPlazaDiscoveredNamedRealmsStorageOwnerId,
+    managingWorldPlazaDiscoveredNamedRealmsIds
+  );
+  mirroringWorldPlazaDiscoveredNamedRealmsToCloudSave();
+}
+
+export type InitializingWorldPlazaDiscoveredNamedRealmsStoreOptions = {
+  cloudSaveSlotIndex?: PlazaSaveSlotIndex | null;
+};
+
 /**
  * Hydrates discovered named realms from localStorage for one session owner.
  *
  * @param storageOwnerId - Session owner id, or null for guest sessions.
+ * @param options - Optional Redis save-slot mirror context.
  */
 export function initializingWorldPlazaDiscoveredNamedRealmsStore(
-  storageOwnerId: string | null
+  storageOwnerId: string | null,
+  options?: InitializingWorldPlazaDiscoveredNamedRealmsStoreOptions
 ): void {
-  if (managingWorldPlazaDiscoveredNamedRealmsStorageOwnerId === storageOwnerId) {
+  const cloudSaveSlotIndex = options?.cloudSaveSlotIndex ?? null;
+
+  if (
+    managingWorldPlazaDiscoveredNamedRealmsStorageOwnerId === storageOwnerId
+  ) {
+    managingWorldPlazaDiscoveredNamedRealmsCloudSaveSlotIndex =
+      cloudSaveSlotIndex;
     return;
   }
 
   managingWorldPlazaDiscoveredNamedRealmsStorageOwnerId = storageOwnerId;
+  managingWorldPlazaDiscoveredNamedRealmsCloudSaveSlotIndex =
+    cloudSaveSlotIndex;
   managingWorldPlazaDiscoveredNamedRealmsIds = new Set(
     readingWorldPlazaDiscoveredNamedRealmsFromStorage(storageOwnerId)
   );
@@ -79,11 +129,8 @@ export function recordingWorldPlazaDiscoveredNamedRealm(
     ...managingWorldPlazaDiscoveredNamedRealmsIds,
     realmId,
   ]);
-  writingWorldPlazaDiscoveredNamedRealmsToStorage(
-    managingWorldPlazaDiscoveredNamedRealmsStorageOwnerId,
-    managingWorldPlazaDiscoveredNamedRealmsIds
-  );
   refreshingWorldPlazaDiscoveredNamedRealmsSnapshotCache();
+  persistingWorldPlazaDiscoveredNamedRealms();
   notifyingWorldPlazaDiscoveredNamedRealmsSubscribers();
 
   return true;
@@ -102,4 +149,13 @@ export function subscribingWorldPlazaDiscoveredNamedRealms(
   return () => {
     managingWorldPlazaDiscoveredNamedRealmsSubscribers.delete(onStoreChange);
   };
+}
+
+/** Test helper: clears in-memory state between unit tests. */
+export function resettingWorldPlazaDiscoveredNamedRealmsStoreForTests(): void {
+  managingWorldPlazaDiscoveredNamedRealmsStorageOwnerId = null;
+  managingWorldPlazaDiscoveredNamedRealmsCloudSaveSlotIndex = null;
+  managingWorldPlazaDiscoveredNamedRealmsIds = new Set();
+  refreshingWorldPlazaDiscoveredNamedRealmsSnapshotCache();
+  managingWorldPlazaDiscoveredNamedRealmsSubscribers.clear();
 }

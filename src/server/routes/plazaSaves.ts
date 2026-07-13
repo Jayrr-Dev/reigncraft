@@ -6,6 +6,7 @@ import {
   type PlazaSaveSlotIndex,
 } from '../../shared/plazaGameSession';
 import type {
+  PlazaSinglePlayerSaveBestiaryDiscovery,
   PlazaSinglePlayerSaveLastPosition,
   PlazaSinglePlayerSavePersistedDiseaseEffect,
   PlazaSinglePlayerSavePlayerConditions,
@@ -210,6 +211,152 @@ function parsingPersistedPlayerConditions(
   };
 }
 
+/**
+ * Parses attached cookbook recipe page ids from save JSON.
+ * Unknown / non-string values are dropped. Empty → null.
+ */
+function parsingAttachedRecipeIds(value: unknown): readonly string[] | null {
+  return parsingSortedStringIdList(value);
+}
+
+/**
+ * Parses a sorted, deduped list of non-empty strings. Empty → null.
+ */
+function parsingSortedStringIdList(value: unknown): readonly string[] | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const ids = [
+    ...new Set(
+      value.filter(
+        (id): id is string => typeof id === 'string' && id.length > 0
+      )
+    ),
+  ].sort();
+
+  return ids.length > 0 ? ids : null;
+}
+
+/**
+ * Parses bestiary discovery progress from save JSON. Empty → null.
+ */
+function parsingBestiaryDiscovery(
+  value: unknown
+): PlazaSinglePlayerSaveBestiaryDiscovery | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return null;
+  }
+
+  const candidate = value as Partial<PlazaSinglePlayerSaveBestiaryDiscovery>;
+  const sightedSpeciesIds =
+    parsingSortedStringIdList(candidate.sightedSpeciesIds) ?? [];
+  const studyCountsBySpeciesId: Record<string, number> = {};
+
+  if (
+    candidate.studyCountsBySpeciesId &&
+    typeof candidate.studyCountsBySpeciesId === 'object' &&
+    !Array.isArray(candidate.studyCountsBySpeciesId)
+  ) {
+    for (const [speciesId, rawCount] of Object.entries(
+      candidate.studyCountsBySpeciesId
+    )) {
+      if (typeof speciesId !== 'string' || speciesId.length === 0) {
+        continue;
+      }
+
+      if (typeof rawCount !== 'number' || !Number.isFinite(rawCount)) {
+        continue;
+      }
+
+      const studyCount = Math.max(0, Math.floor(rawCount));
+
+      if (studyCount <= 0) {
+        continue;
+      }
+
+      studyCountsBySpeciesId[speciesId] = studyCount;
+    }
+  }
+
+  const sortedStudyCounts = Object.fromEntries(
+    Object.entries(studyCountsBySpeciesId).sort(([left], [right]) =>
+      left.localeCompare(right)
+    )
+  );
+
+  if (
+    sightedSpeciesIds.length === 0 &&
+    Object.keys(sortedStudyCounts).length === 0
+  ) {
+    return null;
+  }
+
+  return {
+    sightedSpeciesIds,
+    studyCountsBySpeciesId: sortedStudyCounts,
+  };
+}
+
+/**
+ * Parses named realm ids (`latticeX:latticeY`). Empty → null.
+ */
+function parsingDiscoveredNamedRealmIds(
+  value: unknown
+): readonly string[] | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const realmIds = [
+    ...new Set(
+      value.filter(
+        (realmId): realmId is string =>
+          typeof realmId === 'string' &&
+          realmId.length > 0 &&
+          realmId.includes(':')
+      )
+    ),
+  ].sort();
+
+  return realmIds.length > 0 ? realmIds : null;
+}
+
+function checkingSaveSlotHasPersistedData(
+  data: Pick<
+    PlazaSinglePlayerSaveSlotPersistedData,
+    | 'lastPosition'
+    | 'inventory'
+    | 'playerConditions'
+    | 'attachedRecipeIds'
+    | 'bestiaryDiscovery'
+    | 'exploredBiomeKinds'
+    | 'discoveredNamedRealmIds'
+  >
+): boolean {
+  return Boolean(
+    data.lastPosition ||
+    data.inventory ||
+    data.playerConditions ||
+    (data.attachedRecipeIds && data.attachedRecipeIds.length > 0) ||
+    data.bestiaryDiscovery ||
+    (data.exploredBiomeKinds && data.exploredBiomeKinds.length > 0) ||
+    (data.discoveredNamedRealmIds && data.discoveredNamedRealmIds.length > 0)
+  );
+}
+
 function parsingPersistedSaveSlotData(
   rawValue: string
 ): PlazaSinglePlayerSaveSlotPersistedData | null {
@@ -232,22 +379,40 @@ function parsingPersistedSaveSlotData(
       parsed.playerConditions === null || parsed.playerConditions === undefined
         ? null
         : parsingPersistedPlayerConditions(parsed.playerConditions);
+    const attachedRecipeIds = parsingAttachedRecipeIds(
+      parsed.attachedRecipeIds
+    );
+    const bestiaryDiscovery = parsingBestiaryDiscovery(
+      parsed.bestiaryDiscovery
+    );
+    const exploredBiomeKinds = parsingSortedStringIdList(
+      parsed.exploredBiomeKinds
+    );
+    const discoveredNamedRealmIds = parsingDiscoveredNamedRealmIds(
+      parsed.discoveredNamedRealmIds
+    );
     const updatedAtMs =
       typeof parsed.updatedAtMs === 'number' &&
       Number.isFinite(parsed.updatedAtMs)
         ? parsed.updatedAtMs
         : Math.max(lastPosition?.updatedAtMs ?? 0, 0);
 
-    if (!lastPosition && !inventory && !playerConditions) {
-      return null;
-    }
-
-    return {
+    const persistedData = {
       lastPosition,
       inventory,
       playerConditions,
+      attachedRecipeIds,
+      bestiaryDiscovery,
+      exploredBiomeKinds,
+      discoveredNamedRealmIds,
       updatedAtMs,
     };
+
+    if (!checkingSaveSlotHasPersistedData(persistedData)) {
+      return null;
+    }
+
+    return persistedData;
   } catch {
     return null;
   }
@@ -307,10 +472,66 @@ function parsingSaveSlotUpdateBody(
     update.playerConditions = payload.playerConditions ?? null;
   }
 
+  if ('attachedRecipeIds' in payload) {
+    if (payload.attachedRecipeIds === null) {
+      update.attachedRecipeIds = null;
+    } else if (!Array.isArray(payload.attachedRecipeIds)) {
+      return null;
+    } else {
+      update.attachedRecipeIds = parsingAttachedRecipeIds(
+        payload.attachedRecipeIds
+      );
+    }
+  }
+
+  if ('bestiaryDiscovery' in payload) {
+    if (payload.bestiaryDiscovery === null) {
+      update.bestiaryDiscovery = null;
+    } else if (
+      !payload.bestiaryDiscovery ||
+      typeof payload.bestiaryDiscovery !== 'object' ||
+      Array.isArray(payload.bestiaryDiscovery)
+    ) {
+      return null;
+    } else {
+      update.bestiaryDiscovery = parsingBestiaryDiscovery(
+        payload.bestiaryDiscovery
+      );
+    }
+  }
+
+  if ('exploredBiomeKinds' in payload) {
+    if (payload.exploredBiomeKinds === null) {
+      update.exploredBiomeKinds = null;
+    } else if (!Array.isArray(payload.exploredBiomeKinds)) {
+      return null;
+    } else {
+      update.exploredBiomeKinds = parsingSortedStringIdList(
+        payload.exploredBiomeKinds
+      );
+    }
+  }
+
+  if ('discoveredNamedRealmIds' in payload) {
+    if (payload.discoveredNamedRealmIds === null) {
+      update.discoveredNamedRealmIds = null;
+    } else if (!Array.isArray(payload.discoveredNamedRealmIds)) {
+      return null;
+    } else {
+      update.discoveredNamedRealmIds = parsingDiscoveredNamedRealmIds(
+        payload.discoveredNamedRealmIds
+      );
+    }
+  }
+
   if (
     update.lastPosition === undefined &&
     update.inventory === undefined &&
-    update.playerConditions === undefined
+    update.playerConditions === undefined &&
+    update.attachedRecipeIds === undefined &&
+    update.bestiaryDiscovery === undefined &&
+    update.exploredBiomeKinds === undefined &&
+    update.discoveredNamedRealmIds === undefined
   ) {
     return null;
   }
@@ -334,23 +555,52 @@ function mergingSaveSlotData(
     update.playerConditions !== undefined
       ? update.playerConditions
       : (existing?.playerConditions ?? null);
+  const nextAttachedRecipeIds =
+    update.attachedRecipeIds !== undefined
+      ? update.attachedRecipeIds === null
+        ? null
+        : (parsingAttachedRecipeIds(update.attachedRecipeIds) ?? null)
+      : (existing?.attachedRecipeIds ?? null);
+  const nextBestiaryDiscovery =
+    update.bestiaryDiscovery !== undefined
+      ? update.bestiaryDiscovery === null
+        ? null
+        : parsingBestiaryDiscovery(update.bestiaryDiscovery)
+      : (existing?.bestiaryDiscovery ?? null);
+  const nextExploredBiomeKinds =
+    update.exploredBiomeKinds !== undefined
+      ? update.exploredBiomeKinds === null
+        ? null
+        : (parsingSortedStringIdList(update.exploredBiomeKinds) ?? null)
+      : (existing?.exploredBiomeKinds ?? null);
+  const nextDiscoveredNamedRealmIds =
+    update.discoveredNamedRealmIds !== undefined
+      ? update.discoveredNamedRealmIds === null
+        ? null
+        : (parsingDiscoveredNamedRealmIds(update.discoveredNamedRealmIds) ??
+          null)
+      : (existing?.discoveredNamedRealmIds ?? null);
 
-  if (!nextLastPosition && !nextInventory && !nextPlayerConditions) {
-    return null;
-  }
-
-  const updatedAtMs = Math.max(
-    existing?.updatedAtMs ?? 0,
-    nextLastPosition?.updatedAtMs ?? 0,
-    Date.now()
-  );
-
-  return {
+  const merged = {
     lastPosition: nextLastPosition,
     inventory: nextInventory,
     playerConditions: nextPlayerConditions,
-    updatedAtMs,
+    attachedRecipeIds: nextAttachedRecipeIds,
+    bestiaryDiscovery: nextBestiaryDiscovery,
+    exploredBiomeKinds: nextExploredBiomeKinds,
+    discoveredNamedRealmIds: nextDiscoveredNamedRealmIds,
+    updatedAtMs: Math.max(
+      existing?.updatedAtMs ?? 0,
+      nextLastPosition?.updatedAtMs ?? 0,
+      Date.now()
+    ),
   };
+
+  if (!checkingSaveSlotHasPersistedData(merged)) {
+    return null;
+  }
+
+  return merged;
 }
 
 export const plazaSaves = new Hono();

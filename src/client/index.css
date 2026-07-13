@@ -1706,13 +1706,12 @@ body {
   background: linear-gradient(180deg, #2c4a52 0%, #223a42 100%);
 }
 
-/* Hunger orb: beveled bronze ring matching action-bar gold chrome. */
-.plaza-hunger-orb {
+/* Hunger / temperature / day-night orbs: beveled bronze ring matching action-bar gold chrome. */
+.plaza-hunger-orb,
+.plaza-temperature-orb,
+.plaza-day-night-orb {
   border: 0;
   padding: 0;
-  cursor: pointer;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
   background: linear-gradient(
     145deg,
     #f0e0b8 0%,
@@ -1730,6 +1729,12 @@ body {
     filter 120ms ease-out,
     box-shadow 120ms ease-out,
     transform 120ms ease-out;
+}
+
+.plaza-hunger-orb {
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .plaza-hunger-orb:hover {

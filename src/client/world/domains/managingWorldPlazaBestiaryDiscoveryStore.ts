@@ -1,12 +1,17 @@
 /**
  * Module-level store for bestiary sighted species and per-species study counts.
  *
+ * LocalStorage is the hot cache. Signed-in single-player also mirrors
+ * progress into the Devvit Redis save slot.
+ *
  * @module components/world/domains/managingWorldPlazaBestiaryDiscoveryStore
  */
 
+import { savingPlazaSinglePlayerSaveSlotData } from '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi';
 import { readingWorldPlazaBestiaryDiscoveryFromStorage } from '@/components/world/domains/readingWorldPlazaBestiaryDiscoveryFromStorage';
 import { writingWorldPlazaBestiaryDiscoveryToStorage } from '@/components/world/domains/writingWorldPlazaBestiaryDiscoveryToStorage';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 const managingWorldPlazaBestiaryDiscoverySubscribers = new Set<() => void>();
 
@@ -18,6 +23,8 @@ const MANAGING_WORLD_PLAZA_BESTIARY_DISCOVERY_EMPTY_STUDY_COUNTS: Readonly<
 > = {};
 
 let managingWorldPlazaBestiaryDiscoveryStorageOwnerId: string | null = null;
+let managingWorldPlazaBestiaryDiscoveryCloudSaveSlotIndex: PlazaSaveSlotIndex | null =
+  null;
 let managingWorldPlazaBestiaryDiscoverySightedSpeciesIds =
   new Set<DefiningWildlifeSpeciesId>();
 let managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId = new Map<
@@ -64,27 +71,67 @@ function notifyingWorldPlazaBestiaryDiscoverySubscribers(): void {
   }
 }
 
+function mirroringWorldPlazaBestiaryDiscoveryToCloudSave(): void {
+  if (managingWorldPlazaBestiaryDiscoveryCloudSaveSlotIndex === null) {
+    return;
+  }
+
+  const sightedSpeciesIds =
+    managingWorldPlazaBestiaryDiscoverySightedSnapshotCache;
+  const studyCountsBySpeciesId =
+    managingWorldPlazaBestiaryDiscoveryStudyCountsSnapshotCache;
+  const hasDiscovery =
+    sightedSpeciesIds.length > 0 ||
+    Object.keys(studyCountsBySpeciesId).length > 0;
+
+  void savingPlazaSinglePlayerSaveSlotData(
+    managingWorldPlazaBestiaryDiscoveryCloudSaveSlotIndex,
+    {
+      bestiaryDiscovery: hasDiscovery
+        ? {
+            sightedSpeciesIds,
+            studyCountsBySpeciesId,
+          }
+        : null,
+    }
+  ).catch(() => {
+    // Cloud mirror is best-effort; localStorage remains source for the session.
+  });
+}
+
 function persistingWorldPlazaBestiaryDiscovery(): void {
+  refreshingWorldPlazaBestiaryDiscoverySnapshotCaches();
   writingWorldPlazaBestiaryDiscoveryToStorage(
     managingWorldPlazaBestiaryDiscoveryStorageOwnerId,
     managingWorldPlazaBestiaryDiscoverySightedSpeciesIds,
     managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId
   );
+  mirroringWorldPlazaBestiaryDiscoveryToCloudSave();
 }
+
+export type InitializingWorldPlazaBestiaryDiscoveryStoreOptions = {
+  cloudSaveSlotIndex?: PlazaSaveSlotIndex | null;
+};
 
 /**
  * Hydrates bestiary discovery from localStorage for one session owner.
  *
  * @param storageOwnerId - Session owner id, or null for guest sessions.
+ * @param options - Optional Redis save-slot mirror context.
  */
 export function initializingWorldPlazaBestiaryDiscoveryStore(
-  storageOwnerId: string | null
+  storageOwnerId: string | null,
+  options?: InitializingWorldPlazaBestiaryDiscoveryStoreOptions
 ): void {
+  const cloudSaveSlotIndex = options?.cloudSaveSlotIndex ?? null;
+
   if (managingWorldPlazaBestiaryDiscoveryStorageOwnerId === storageOwnerId) {
+    managingWorldPlazaBestiaryDiscoveryCloudSaveSlotIndex = cloudSaveSlotIndex;
     return;
   }
 
   managingWorldPlazaBestiaryDiscoveryStorageOwnerId = storageOwnerId;
+  managingWorldPlazaBestiaryDiscoveryCloudSaveSlotIndex = cloudSaveSlotIndex;
   const snapshot =
     readingWorldPlazaBestiaryDiscoveryFromStorage(storageOwnerId);
   managingWorldPlazaBestiaryDiscoverySightedSpeciesIds = new Set(
@@ -297,4 +344,14 @@ export function subscribingWorldPlazaBestiaryDiscovery(
   return () => {
     managingWorldPlazaBestiaryDiscoverySubscribers.delete(onStoreChange);
   };
+}
+
+/** Test helper: clears in-memory state between unit tests. */
+export function resettingWorldPlazaBestiaryDiscoveryStoreForTests(): void {
+  managingWorldPlazaBestiaryDiscoveryStorageOwnerId = null;
+  managingWorldPlazaBestiaryDiscoveryCloudSaveSlotIndex = null;
+  managingWorldPlazaBestiaryDiscoverySightedSpeciesIds = new Set();
+  managingWorldPlazaBestiaryDiscoveryStudyCountsBySpeciesId = new Map();
+  refreshingWorldPlazaBestiaryDiscoverySnapshotCaches();
+  managingWorldPlazaBestiaryDiscoverySubscribers.clear();
 }
