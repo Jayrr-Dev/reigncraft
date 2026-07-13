@@ -10,7 +10,6 @@ import { Icon } from '@/components/ui/icon';
 import { usingWorldPlazaViewportHudScaleContext } from '@/components/world/components/providingWorldPlazaViewportHudScale';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
-  DEFINING_WORLD_PLAZA_HUD_TOOLBAR_BUILD_CLAIM_TOGGLE_ICON,
   DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_REGISTRY,
   LABELING_WORLD_PLAZA_HUD_TOOLBAR_MODE_SWITCHER,
   STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BUTTON_ACTIVE_CLASS_NAME,
@@ -122,9 +121,7 @@ export function RenderingWorldPlazaHudToolbarModeBadges({
                       aria-hidden
                     >
                       <Icon
-                        icon={
-                          DEFINING_WORLD_PLAZA_HUD_TOOLBAR_BUILD_CLAIM_TOGGLE_ICON
-                        }
+                        icon={toggleFace.iconifyIcon}
                         className={
                           STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ICON_CLASS_NAME
                         }

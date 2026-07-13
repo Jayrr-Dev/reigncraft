@@ -23,13 +23,11 @@ export type DefiningWorldPlazaHudToolbarBuildClaimToggleFace = {
     | typeof DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM;
   readonly label: string;
   readonly ariaLabel: string;
+  /** Mode glyph (hammer for build, land-plots for claim). */
+  readonly iconifyIcon: string;
   /** Active badge chrome (distinct color per toggle side). */
   readonly activeButtonClassName: string;
 };
-
-/** Shared swap glyph for the Build↔Claim toggle (signals it is switchable). */
-export const DEFINING_WORLD_PLAZA_HUD_TOOLBAR_BUILD_CLAIM_TOGGLE_ICON =
-  'mdi:swap-horizontal-bold' as const;
 
 /** Display + icon metadata for a single-mode HUD toolbar badge. */
 export type DefiningWorldPlazaHudToolbarSingleModeBadgeDefinition = {
@@ -60,6 +58,7 @@ export const DEFINING_WORLD_PLAZA_HUD_TOOLBAR_BUILD_CLAIM_TOGGLE_FACES = {
     modeId: DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD,
     label: 'Build',
     ariaLabel: 'Build mode. Click again to switch to claim.',
+    iconifyIcon: 'mdi:hammer',
     activeButtonClassName:
       'inline-flex shrink-0 items-center justify-center rounded-md border border-amber-300/80 bg-[linear-gradient(180deg,#7a4a18_0%,#4a2e0e_100%)] font-bold uppercase text-amber-100 shadow-[0_0_0_1px_rgba(251,191,36,0.35),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-40',
   },
@@ -67,6 +66,7 @@ export const DEFINING_WORLD_PLAZA_HUD_TOOLBAR_BUILD_CLAIM_TOGGLE_FACES = {
     modeId: DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM,
     label: 'Claim',
     ariaLabel: 'Claim mode. Click again to switch to build.',
+    iconifyIcon: 'mdi:land-plots',
     activeButtonClassName:
       'inline-flex shrink-0 items-center justify-center rounded-md border border-sky-300/80 bg-[linear-gradient(180deg,#1e4a5c_0%,#123040_100%)] font-bold uppercase text-sky-100 shadow-[0_0_0_1px_rgba(125,211,252,0.35),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-40',
   },

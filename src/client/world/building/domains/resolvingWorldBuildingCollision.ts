@@ -1,5 +1,11 @@
-import { checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock } from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
-import { DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
+import {
+  checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock,
+  computingWorldBuildingPlacedBlockOccupiedLayerBand,
+} from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
+import {
+  checkingWorldBuildingPlacedBlockIsPassableTile,
+  DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
+} from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import { DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_WATER_STREAM } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import {
   DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE,
@@ -18,8 +24,8 @@ import {
   type IndexingWorldBuildingPlacedBlocksByTile,
 } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import {
-  checkingWorldBuildingPlayerCircleOverlapsPlacedBlockCutColliders,
   checkingWorldBuildingPlacedBlockCutColliderBlocksPlayerCircle,
+  checkingWorldBuildingPlayerCircleOverlapsPlacedBlockCutColliders,
   pushingWorldBuildingPlayerCircleOutsidePlacedBlockCutColliders,
 } from '@/components/world/building/domains/resolvingWorldBuildingCutFootprintCollision';
 import {
@@ -50,36 +56,73 @@ import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/co
 const RESOLVING_WORLD_BUILDING_COLLISION_MIN_PUSH_DISTANCE = 1e-4;
 
 /**
- * Passable floor tops still have physical underside volume when elevated.
- * They block only when they intersect the body as a ceiling, not when they are
- * a reachable step or the support under the player's feet.
+ * Passable materials (Pine floors) still occupy volume when extruded.
+ *
+ * - Column through the standing layer → solid wall (no walk-through).
+ * - Elevated slab / roof intersecting the body → ceiling block.
+ * - +1 walkable floor step above the feet (thin elevated floor only) → allow.
+ * - Flat 0H tiles → never block here.
+ * - Standing on the column top (same tile, feet at/above L) → allow.
  */
 function checkingWorldBuildingPassableBlockOverheadVolumeBlocksPlayer(
   block: DefiningWorldBuildingPlacedBlock,
   collisionShape: DefiningWorldBuildingCollisionShape,
   applyBlockCollision: boolean,
   playerLayer: number,
-  playerHeightWorldLayers: number
+  playerHeightWorldLayers: number,
+  blockIsOnPlayerStandingTile = false
 ): boolean {
   if (
     !applyBlockCollision ||
-    collisionShape.kind !== DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_NONE ||
-    checkingWorldBuildingPlacedBlockIsWalkableStep(block, playerLayer)
+    collisionShape.kind !== DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_NONE
   ) {
     return false;
   }
 
   const blockLayer = resolvingWorldBuildingPlacedBlockWorldLayer(block);
+  const blockHeight = resolvingWorldBuildingPlacedBlockBlockHeight(block);
 
-  return (
-    blockLayer > playerLayer &&
-    checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock(
+  if (checkingWorldBuildingPlacedBlockIsPassableTile(blockHeight)) {
+    return false;
+  }
+
+  // Support underfoot / standing on the platform top.
+  if (blockIsOnPlayerStandingTile && blockLayer <= playerLayer) {
+    return false;
+  }
+
+  if (
+    !checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock(
       playerLayer,
       blockLayer,
-      resolvingWorldBuildingPlacedBlockBlockHeight(block),
+      blockHeight,
       playerHeightWorldLayers
     )
+  ) {
+    return false;
+  }
+
+  const occupiedBand = computingWorldBuildingPlacedBlockOccupiedLayerBand(
+    blockLayer,
+    blockHeight
   );
+
+  // Extruded stack fills the standing layer — treat as a wall, even when the
+  // top is only +1 (walkable-step height). That stops phasing through towers.
+  if (
+    occupiedBand.bottomLayer <= playerLayer &&
+    occupiedBand.topLayer >= playerLayer
+  ) {
+    return true;
+  }
+
+  // Pure overhead / roof volume: still block headroom unless this is a thin
+  // +1 floor the player is mounting as a step.
+  if (checkingWorldBuildingPlacedBlockIsWalkableStep(block, playerLayer)) {
+    return false;
+  }
+
+  return blockLayer > playerLayer;
 }
 
 /**
@@ -286,7 +329,9 @@ export function checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders(
         collisionShape,
         applyBlockCollision,
         playerLayer,
-        playerHeightWorldLayers
+        playerHeightWorldLayers,
+        block.tilePosition.tileX === centerTile.tileX &&
+          block.tilePosition.tileY === centerTile.tileY
       ) &&
       checkingWorldBuildingPlayerCircleOverlapsPlacedBlockCutColliders(
         center,
@@ -374,16 +419,20 @@ export function checkingWorldBuildingGridPointBlockedByPlacedBlocks(
       continue;
     }
 
+    const blockIsOnPlayerStandingTile =
+      block.tilePosition.tileX === standingTile.tileX &&
+      block.tilePosition.tileY === standingTile.tileY;
+
     if (
       checkingWorldBuildingPassableBlockOverheadVolumeBlocksPlayer(
         block,
         collisionShape,
         applyBlockCollision,
         playerLayer,
-        playerHeightWorldLayers
+        playerHeightWorldLayers,
+        blockIsOnPlayerStandingTile
       ) &&
-      block.tilePosition.tileX === standingTile.tileX &&
-      block.tilePosition.tileY === standingTile.tileY
+      blockIsOnPlayerStandingTile
     ) {
       return true;
     }
@@ -460,7 +509,8 @@ export function resolvingWorldBuildingPlacedBlockCollisionPushOut(
         collisionShape,
         applyBlockCollision,
         playerLayer,
-        playerHeightWorldLayers
+        playerHeightWorldLayers,
+        blockIsOnPlayerStandingTile
       )
     ) {
       const pushedPosition =

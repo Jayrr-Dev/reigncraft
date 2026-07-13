@@ -44,6 +44,16 @@ describe('resolvingWorldPlazaHudToolbarBuildClaimToggle', () => {
     expect(
       resolvingWorldPlazaHudToolbarBuildClaimToggleFace(
         DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD
+      ).iconifyIcon
+    ).toBe('mdi:hammer');
+    expect(
+      resolvingWorldPlazaHudToolbarBuildClaimToggleFace(
+        DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM
+      ).iconifyIcon
+    ).toBe('mdi:land-plots');
+    expect(
+      resolvingWorldPlazaHudToolbarBuildClaimToggleFace(
+        DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD
       ).activeButtonClassName
     ).toContain('amber');
     expect(

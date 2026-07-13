@@ -129,6 +129,42 @@ describe('walk under elevated slab', () => {
     ).toBe(false);
   });
 
+  it('blocks walking through a pine tower that fills the standing layer', () => {
+    const tower = creatingElevatedSlab(
+      DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_WOOD,
+      2,
+      2
+    );
+
+    expect(
+      checkingWorldBuildingGridPointBlockedByPlacedBlocks(
+        { x: 10, y: 10, layer: 1 },
+        [tower],
+        true,
+        false,
+        1
+      )
+    ).toBe(true);
+  });
+
+  it('blocks walking through a tall pine stack (L5 H5)', () => {
+    const tower = creatingElevatedSlab(
+      DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_WOOD,
+      5,
+      5
+    );
+
+    expect(
+      checkingWorldBuildingGridPointBlockedByPlacedBlocks(
+        { x: 10, y: 10, layer: 1 },
+        [tower],
+        true,
+        false,
+        1
+      )
+    ).toBe(true);
+  });
+
   it('does not block ground walk under a L7 stone slab', () => {
     const roof = creatingElevatedSlab(
       DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE,
