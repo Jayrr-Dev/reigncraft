@@ -30,7 +30,23 @@ export const LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INVENTORY_FULL_TOAST =
 
 /** Toast when crafted placement is canceled or selection changes. */
 export const LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_CANCELED_TOAST =
-  'Placement canceled. Materials were not used.' as const;
+  'Placement canceled. Materials returned.' as const;
+
+/** Toast after a crafted campfire is removed in build mode. */
+export const LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_REFUNDED_TOAST =
+  'Campfire removed. Craft materials returned.' as const;
+
+/** Toast when refund cannot fit in inventory. */
+export const LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REFUND_INVENTORY_FULL_TOAST =
+  'Inventory is full. Could not return all craft materials.' as const;
+
+/** Pixi canvas size for the map campfire recipe preview. */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_PREVIEW_WIDTH_PX = 120;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_PREVIEW_HEIGHT_PX = 72;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_PREVIEW_CENTER_X_PX =
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_PREVIEW_WIDTH_PX / 2;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_PREVIEW_CENTER_Y_PX =
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_PREVIEW_HEIGHT_PX * 0.58;
 
 /** Toast after a crafted placeable is committed. */
 export const LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_SUCCESS_TOAST =

@@ -1,32 +1,30 @@
-"use client";
+'use client';
 
+import { computingWorldPlazaCameraZoomedDomOverlayPositionTransform } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
+import { computingWorldPlazaSavedCoordsScreenDirectionAngleDegrees } from '@/components/world/domains/computingWorldPlazaSavedCoordsScreenDirectionAngleDegrees';
+import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
+import type { DefiningWorldPlazaSavedCoords } from '@/components/world/domains/definingWorldPlazaSavedCoords';
 import {
-  computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
-} from "@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform";
-import { computingWorldPlazaSavedCoordsScreenDirectionAngleDegrees } from "@/components/world/domains/computingWorldPlazaSavedCoordsScreenDirectionAngleDegrees";
-import type { DefiningWorldPlazaCameraOffset } from "@/components/world/domains/definingWorldPlazaCameraOffset";
-import type { DefiningWorldPlazaSavedCoords } from "@/components/world/domains/definingWorldPlazaSavedCoords";
-import {
+  DEFINING_WORLD_PLAZA_SAVED_COORDS_TRACK_ARRIVAL_THRESHOLD_PX,
   DEFINING_WORLD_PLAZA_SAVED_COORDS_TRACK_ARROW_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_SAVED_COORDS_TRACK_ARROW_ORBIT_RADIUS_PX,
   DEFINING_WORLD_PLAZA_SAVED_COORDS_TRACK_ARROW_WIDTH_PX,
-  DEFINING_WORLD_PLAZA_SAVED_COORDS_TRACK_ARRIVAL_THRESHOLD_PX,
-} from "@/components/world/domains/definingWorldPlazaSavedCoordsConstants";
+} from '@/components/world/domains/definingWorldPlazaSavedCoordsConstants';
 import {
   DEFINING_WORLD_PLAZA_SAVED_COORDS_DIRECTION_ARROW_FILL_COLOR,
   DEFINING_WORLD_PLAZA_SAVED_COORDS_DIRECTION_ARROW_WRAPPER_CLASS_NAME,
-} from "@/components/world/domains/definingWorldPlazaSavedCoordsTrackUiConstants";
-import type { DefiningWorldPlazaWorldPoint } from "@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint";
-import { projectingWorldPlazaGridPointToViewportScreenPoint } from "@/components/world/domains/projectingWorldPlazaGridPointToViewportScreenPoint";
-import { useLayoutEffect, useRef } from "react";
+} from '@/components/world/domains/definingWorldPlazaSavedCoordsTrackUiConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { projectingWorldPlazaGridPointToViewportScreenPoint } from '@/components/world/domains/projectingWorldPlazaGridPointToViewportScreenPoint';
+import { useLayoutEffect, useRef } from 'react';
 
 /** Off-screen default before the first animation frame positions the arrow. */
 const RENDERING_WORLD_PLAZA_SAVED_COORDS_DIRECTION_ARROW_HIDDEN_TRANSFORM =
-  "translate(-9999px, -9999px)" as const;
+  'translate(-9999px, -9999px)' as const;
 
 /** Minimalist north-pointing arrow path (tip at top). */
 const RENDERING_WORLD_PLAZA_SAVED_COORDS_DIRECTION_ARROW_PATH_D =
-  "M5 0 L9.5 14.5 L6.4 14.5 L6.4 18 L3.6 18 L3.6 14.5 L0.5 14.5 Z" as const;
+  'M5 0 L9.5 14.5 L6.4 14.5 L6.4 18 L3.6 18 L3.6 14.5 L0.5 14.5 Z' as const;
 
 export interface RenderingWorldPlazaSavedCoordsDirectionArrowOverlayProps {
   /** True when the direction arrow should render. */
@@ -39,6 +37,8 @@ export interface RenderingWorldPlazaSavedCoordsDirectionArrowOverlayProps {
   cameraOffsetRef: React.RefObject<DefiningWorldPlazaCameraOffset>;
   /** Effective world-container zoom. */
   cameraWorldZoomRef: React.RefObject<number>;
+  /** Clears tracking once the player reaches the saved tile. */
+  onArrived?: () => void;
 }
 
 /**
@@ -50,14 +50,22 @@ export function RenderingWorldPlazaSavedCoordsDirectionArrowOverlay({
   playerPositionRef,
   cameraOffsetRef,
   cameraWorldZoomRef,
+  onArrived,
 }: RenderingWorldPlazaSavedCoordsDirectionArrowOverlayProps): React.JSX.Element | null {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const arrowRef = useRef<SVGSVGElement | null>(null);
   const isVisibleRef = useRef(isVisible);
   const savedCoordsRef = useRef(savedCoords);
+  const onArrivedRef = useRef(onArrived);
+  const hasReportedArrivalRef = useRef(false);
 
   isVisibleRef.current = isVisible;
   savedCoordsRef.current = savedCoords;
+  onArrivedRef.current = onArrived;
+
+  useLayoutEffect(() => {
+    hasReportedArrivalRef.current = false;
+  }, [savedCoords?.savedCoordsId]);
 
   useLayoutEffect(() => {
     if (!isVisible || !savedCoords) {
@@ -90,25 +98,34 @@ export function RenderingWorldPlazaSavedCoordsDirectionArrowOverlay({
         return;
       }
 
-      const playerViewportPoint = projectingWorldPlazaGridPointToViewportScreenPoint(
-        playerPosition,
-        cameraOffset,
-        cameraWorldZoom,
-      );
-      const savedViewportPoint = projectingWorldPlazaGridPointToViewportScreenPoint(
-        {
-          x: activeSavedCoords.tileX,
-          y: activeSavedCoords.tileY,
-        },
-        cameraOffset,
-        cameraWorldZoom,
-      );
+      const playerViewportPoint =
+        projectingWorldPlazaGridPointToViewportScreenPoint(
+          playerPosition,
+          cameraOffset,
+          cameraWorldZoom
+        );
+      const savedViewportPoint =
+        projectingWorldPlazaGridPointToViewportScreenPoint(
+          {
+            x: activeSavedCoords.tileX,
+            y: activeSavedCoords.tileY,
+          },
+          cameraOffset,
+          cameraWorldZoom
+        );
       const deltaX = savedViewportPoint.x - playerViewportPoint.x;
       const deltaY = savedViewportPoint.y - playerViewportPoint.y;
       const distancePx = Math.hypot(deltaX, deltaY);
 
-      if (distancePx <= DEFINING_WORLD_PLAZA_SAVED_COORDS_TRACK_ARRIVAL_THRESHOLD_PX) {
-        wrapperElement.style.opacity = "0";
+      if (
+        distancePx <=
+        DEFINING_WORLD_PLAZA_SAVED_COORDS_TRACK_ARRIVAL_THRESHOLD_PX
+      ) {
+        wrapperElement.style.opacity = '0';
+        if (!hasReportedArrivalRef.current) {
+          hasReportedArrivalRef.current = true;
+          onArrivedRef.current?.();
+        }
         animationFrameId = window.requestAnimationFrame(updatingDirectionArrow);
         return;
       }
@@ -121,20 +138,23 @@ export function RenderingWorldPlazaSavedCoordsDirectionArrowOverlay({
         playerViewportPoint.x + Math.cos(directionAngleRadians) * orbitRadiusPx;
       const arrowCenterY =
         playerViewportPoint.y + Math.sin(directionAngleRadians) * orbitRadiusPx;
-      const rotationDegrees = computingWorldPlazaSavedCoordsScreenDirectionAngleDegrees(
-        { x: arrowCenterX, y: arrowCenterY },
-        savedViewportPoint,
-      );
+      const rotationDegrees =
+        computingWorldPlazaSavedCoordsScreenDirectionAngleDegrees(
+          { x: arrowCenterX, y: arrowCenterY },
+          savedViewportPoint
+        );
       const arrowWidthPx =
-        DEFINING_WORLD_PLAZA_SAVED_COORDS_TRACK_ARROW_WIDTH_PX * cameraWorldZoom;
+        DEFINING_WORLD_PLAZA_SAVED_COORDS_TRACK_ARROW_WIDTH_PX *
+        cameraWorldZoom;
       const arrowHeightPx =
-        DEFINING_WORLD_PLAZA_SAVED_COORDS_TRACK_ARROW_HEIGHT_PX * cameraWorldZoom;
+        DEFINING_WORLD_PLAZA_SAVED_COORDS_TRACK_ARROW_HEIGHT_PX *
+        cameraWorldZoom;
 
-      wrapperElement.style.opacity = "1";
+      wrapperElement.style.opacity = '1';
       wrapperElement.style.transform =
         computingWorldPlazaCameraZoomedDomOverlayPositionTransform(
           arrowCenterX,
-          arrowCenterY,
+          arrowCenterY
         );
       arrowElement.style.width = `${arrowWidthPx}px`;
       arrowElement.style.height = `${arrowHeightPx}px`;
@@ -165,9 +185,12 @@ export function RenderingWorldPlazaSavedCoordsDirectionArrowOverlay({
     <div
       ref={wrapperRef}
       aria-hidden
-      className={DEFINING_WORLD_PLAZA_SAVED_COORDS_DIRECTION_ARROW_WRAPPER_CLASS_NAME}
+      className={
+        DEFINING_WORLD_PLAZA_SAVED_COORDS_DIRECTION_ARROW_WRAPPER_CLASS_NAME
+      }
       style={{
-        transform: RENDERING_WORLD_PLAZA_SAVED_COORDS_DIRECTION_ARROW_HIDDEN_TRANSFORM,
+        transform:
+          RENDERING_WORLD_PLAZA_SAVED_COORDS_DIRECTION_ARROW_HIDDEN_TRANSFORM,
       }}
     >
       <svg

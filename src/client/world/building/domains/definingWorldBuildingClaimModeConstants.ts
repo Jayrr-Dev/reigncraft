@@ -173,7 +173,7 @@ export const STYLING_WORLD_PLAZA_CLAIM_MODE_PLOT_POPOVER_TITLE_CLASS_NAME =
 
 /** Compact parchment popover shell for the saves tool. */
 export const STYLING_WORLD_PLAZA_CLAIM_MODE_SAVES_POPOVER_PANEL_CLASS_NAME =
-  `${STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_CLASS} ${STYLING_WORLD_PLAZA_GAMEPLAY_HUD_LIGHT_THEME_SCOPE_CLASS} pointer-events-auto absolute bottom-full left-1/2 z-50 mb-2 w-max min-w-[11rem] max-w-[min(100vw-1.5rem,18rem)] p-1.5` as const;
+  `${STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_CLASS} ${STYLING_WORLD_PLAZA_GAMEPLAY_HUD_LIGHT_THEME_SCOPE_CLASS} pointer-events-auto absolute bottom-full left-1/2 z-50 mb-2 w-[12.5rem] max-w-[min(100vw-1.5rem,12.5rem)] p-1.5` as const;
 
 /** Saves popover title on parchment chrome. */
 export const STYLING_WORLD_PLAZA_CLAIM_MODE_SAVES_POPOVER_TITLE_CLASS_NAME =

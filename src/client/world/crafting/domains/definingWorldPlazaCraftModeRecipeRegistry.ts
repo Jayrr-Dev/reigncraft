@@ -31,7 +31,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
     title: 'Campfire',
     description:
       'A stone ring and dry wood for warmth, cooking, and light on claimed ground.',
-    recipeEmblemIconifyIcon: 'mdi:campfire',
+    recipeVisual: { visualKind: 'world-plaza-campfire' },
     ingredients: [
       {
         itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,

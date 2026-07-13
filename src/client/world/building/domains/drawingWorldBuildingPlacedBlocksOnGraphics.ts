@@ -657,6 +657,33 @@ export function drawingWorldBuildingPlacementPreviewOnGraphics(
     ownerId: DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_SYNTHETIC_ID,
     placedAt: '1970-01-01T00:00:00.000Z',
   });
+
+  // Campfire before flat-tile / extrusion paths so tile-height craft placement
+  // shows the same stone ring + logs as the map, not a material wash only.
+  if (definition.id === DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE) {
+    const campfireWashRadiusPx =
+      0.35 * DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
+    drawingWorldBuildingPlacementPreviewFlatSpriteOnGraphics(
+      graphics,
+      tileX,
+      tileY,
+      worldLayer,
+      validityTintColor,
+      validityTintColor,
+      campfireWashRadiusPx,
+      DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_WASH_ALPHA,
+      DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_STROKE_ALPHA
+    );
+    drawingWorldPlazaCampfirePlacedBlockOnGraphics(graphics, previewBlock);
+    drawingWorldBuildingPlacementGuideToFloorOnGraphics({
+      graphics,
+      tileX,
+      tileY,
+      worldLayer,
+    });
+    return;
+  }
+
   const visualColors = resolvingWorldBuildingPlacedBlockVisualColors(
     previewBlock,
     definition
@@ -742,30 +769,6 @@ export function drawingWorldBuildingPlacementPreviewOnGraphics(
           }
         : undefined
     );
-  } else if (
-    definition.id === DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE
-  ) {
-    drawingWorldPlazaCampfirePlacedBlockOnGraphics(graphics, previewBlock);
-    const campfireWashRadiusPx =
-      0.35 * DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
-    drawingWorldBuildingPlacementPreviewFlatSpriteOnGraphics(
-      graphics,
-      tileX,
-      tileY,
-      worldLayer,
-      validityTintColor,
-      validityTintColor,
-      campfireWashRadiusPx,
-      DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_WASH_ALPHA,
-      DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_STROKE_ALPHA
-    );
-    drawingWorldBuildingPlacementGuideToFloorOnGraphics({
-      graphics,
-      tileX,
-      tileY,
-      worldLayer,
-    });
-    return;
   } else if (checkingWorldBuildingBlockUsesFlatPlacedBlockSprite(definition)) {
     const radiusGrid =
       definition.collisionShape.kind ===

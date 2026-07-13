@@ -132,9 +132,13 @@ import {
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_MISSING_MATERIALS_TOAST,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_CANCELED_TOAST,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_MATERIALS_LOST_TOAST,
+  LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_REFUNDED_TOAST,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_SUCCESS_TOAST,
+  LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REFUND_INVENTORY_FULL_TOAST,
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeUiConstants';
 import { executingWorldPlazaCraftRecipeInventoryOutcome } from '@/components/world/crafting/domains/executingWorldPlazaCraftRecipeInventoryOutcome';
+import { refundingWorldPlazaCraftRecipeIngredients } from '@/components/world/crafting/domains/refundingWorldPlazaCraftRecipeIngredients';
+import { showingWorldPlazaCraftRecipeRefundFloatFeedback } from '@/components/world/crafting/domains/showingWorldPlazaCraftRecipeRefundFloatFeedback';
 import {
   DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_AVATAR_SUB_LAYER_Z_INDEX,
   DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_CANOPY_SUB_LAYER_Z_INDEX,
@@ -1056,10 +1060,29 @@ function RenderingWorldPlazaPixiSceneConnected({
   const [openCraftCookbookId, setOpenCraftCookbookId] =
     useState<DefiningWorldPlazaCraftModeCookbookId | null>(null);
   const onSuccessfulBlockPlacementRef = useRef<
-    ((tilePosition: DefiningWorldBuildingTilePosition) => void) | null
+    | ((
+        tilePosition: DefiningWorldBuildingTilePosition,
+        placedBlockId: string
+      ) => void)
+    | null
+  >(null);
+  const onBlockRemovedRef = useRef<
+    ((removedBlock: DefiningWorldBuildingPlacedBlock) => void) | null
   >(null);
   const pendingCraftRecipeIdRef =
     useRef<DefiningWorldPlazaCraftModeRecipeId | null>(null);
+  const craftedCommittedBlockRecipeByBlockIdRef = useRef(
+    new Map<string, DefiningWorldPlazaCraftModeRecipeId>()
+  );
+  const showingCraftRefundFloatsRef = useRef<
+    (
+      recipeDefinition: NonNullable<
+        ReturnType<typeof resolvingWorldPlazaCraftModeRecipeDefinition>
+      >
+    ) => void
+  >(() => undefined);
+  /** After exiting build with armed craft, skip refund UI once this session. */
+  const craftPlacementCancelRefundWaivedForSessionRef = useRef(false);
 
   const {
     isEditSessionActive,
@@ -1132,6 +1155,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     plotOwnerLimits,
     refetchingPlots,
     onSuccessfulBlockPlacementRef,
+    onBlockRemovedRef,
   });
 
   const { hudToolbarMode, selectingHudToolbarMode } =
@@ -1359,14 +1383,39 @@ function RenderingWorldPlazaPixiSceneConnected({
   const { showingGameplayHudToast } = usingWorldPlazaGameplayHudToast();
 
   const clearingPendingCraftPlacement = useCallback(
-    (showCanceledToast: boolean): void => {
-      if (pendingCraftRecipeIdRef.current === null) {
+    (options: {
+      readonly showCanceledToast: boolean;
+      readonly showRefundFeedback: boolean;
+      readonly honorSessionWaiver: boolean;
+    }): void => {
+      const pendingRecipeId = pendingCraftRecipeIdRef.current;
+
+      if (pendingRecipeId === null) {
         return;
       }
 
+      const recipeDefinition =
+        resolvingWorldPlazaCraftModeRecipeDefinition(pendingRecipeId);
+
       pendingCraftRecipeIdRef.current = null;
 
-      if (showCanceledToast) {
+      let shouldShowRefundFeedback = options.showRefundFeedback;
+      let shouldShowCanceledToast = options.showCanceledToast;
+
+      if (
+        options.honorSessionWaiver &&
+        craftPlacementCancelRefundWaivedForSessionRef.current
+      ) {
+        shouldShowRefundFeedback = false;
+        shouldShowCanceledToast = false;
+        craftPlacementCancelRefundWaivedForSessionRef.current = false;
+      }
+
+      if (recipeDefinition && shouldShowRefundFeedback) {
+        showingCraftRefundFloatsRef.current(recipeDefinition);
+      }
+
+      if (shouldShowCanceledToast) {
         showingGameplayHudToast(
           LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_CANCELED_TOAST
         );
@@ -1376,7 +1425,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   );
 
   const handlingSuccessfulCraftedBlockPlacement = useCallback(
-    (_tilePosition: DefiningWorldBuildingTilePosition): void => {
+    (
+      _tilePosition: DefiningWorldBuildingTilePosition,
+      placedBlockId: string
+    ): void => {
       const pendingRecipeId = pendingCraftRecipeIdRef.current;
 
       if (pendingRecipeId === null) {
@@ -1391,6 +1443,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
+      const committedRecipeId = pendingRecipeId;
       pendingCraftRecipeIdRef.current = null;
 
       updatingInventoryState((currentState) => {
@@ -1400,6 +1453,10 @@ function RenderingWorldPlazaPixiSceneConnected({
         );
 
         if (commitResult.outcome === 'committed') {
+          craftedCommittedBlockRecipeByBlockIdRef.current.set(
+            placedBlockId,
+            committedRecipeId
+          );
           showingGameplayHudToast(
             LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_SUCCESS_TOAST
           );
@@ -1500,7 +1557,18 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   useEffect(() => {
     if (!isBlockBuildModeActive) {
-      clearingPendingCraftPlacement(true);
+      const hadPendingCraftPlacement = pendingCraftRecipeIdRef.current !== null;
+
+      clearingPendingCraftPlacement({
+        showCanceledToast: false,
+        showRefundFeedback: false,
+        honorSessionWaiver: false,
+      });
+
+      if (hadPendingCraftPlacement) {
+        craftPlacementCancelRefundWaivedForSessionRef.current = true;
+      }
+
       return;
     }
 
@@ -1523,7 +1591,11 @@ function RenderingWorldPlazaPixiSceneConnected({
       selectedDefinitionId === recipeDefinition.outcome.blockDefinitionId;
 
     if (!isStillArmed) {
-      clearingPendingCraftPlacement(true);
+      clearingPendingCraftPlacement({
+        showCanceledToast: true,
+        showRefundFeedback: true,
+        honorSessionWaiver: true,
+      });
     }
   }, [
     clearingPendingCraftPlacement,
@@ -2497,6 +2569,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     syncingHealthHudFromStateRef,
     takeDamageRef,
     enqueueMissFloatRef,
+    enqueueHealAmountFloatRef,
     healRef,
     applyFallDamageRef,
     killRef,
@@ -2538,6 +2611,79 @@ function RenderingWorldPlazaPixiSceneConnected({
     rollDodgeProgressRef,
     isRollingRef,
   });
+
+  useEffect(() => {
+    showingCraftRefundFloatsRef.current = (recipeDefinition) => {
+      showingWorldPlazaCraftRecipeRefundFloatFeedback(
+        (amount) => enqueueHealAmountFloatRef.current(amount),
+        recipeDefinition
+      );
+    };
+  }, [enqueueHealAmountFloatRef]);
+
+  const handlingRemovedCraftedBlock = useCallback(
+    (removedBlock: DefiningWorldBuildingPlacedBlock): void => {
+      if (
+        removedBlock.definitionId !==
+        DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE
+      ) {
+        return;
+      }
+
+      const recipeId = craftedCommittedBlockRecipeByBlockIdRef.current.get(
+        removedBlock.blockId
+      );
+
+      if (!recipeId) {
+        return;
+      }
+
+      craftedCommittedBlockRecipeByBlockIdRef.current.delete(
+        removedBlock.blockId
+      );
+
+      const recipeDefinition =
+        resolvingWorldPlazaCraftModeRecipeDefinition(recipeId);
+
+      if (!recipeDefinition) {
+        return;
+      }
+
+      updatingInventoryState((currentState) => {
+        const refundResult = refundingWorldPlazaCraftRecipeIngredients(
+          currentState,
+          recipeDefinition
+        );
+
+        if (refundResult.outcome === 'refunded') {
+          const refundedQuantity = recipeDefinition.ingredients.reduce(
+            (total, ingredient) => total + ingredient.quantity,
+            0
+          );
+          notifyingWorldPlazaInventoryItemAdded(refundedQuantity);
+          showingCraftRefundFloatsRef.current(recipeDefinition);
+          showingGameplayHudToast(
+            LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_REFUNDED_TOAST
+          );
+          return refundResult.nextState;
+        }
+
+        showingGameplayHudToast(
+          LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REFUND_INVENTORY_FULL_TOAST
+        );
+        return null;
+      });
+    },
+    [showingGameplayHudToast, updatingInventoryState]
+  );
+
+  useEffect(() => {
+    onBlockRemovedRef.current = handlingRemovedCraftedBlock;
+
+    return () => {
+      onBlockRemovedRef.current = null;
+    };
+  }, [handlingRemovedCraftedBlock]);
 
   const remoteWildlifeUserIds = roomSnapshot.remotePlayers.map(
     (remotePlayer) => remotePlayer.userId
@@ -5531,6 +5677,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 playerPositionRef={playerPositionRef}
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
+                onArrived={clearingSavedCoordsTracking}
               />
               <RenderingWorldPlazaSavedCoordsTileStarMarkers
                 trackedSavedCoords={trackedSavedCoords}

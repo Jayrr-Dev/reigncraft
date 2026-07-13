@@ -202,6 +202,8 @@ export interface UsingWorldPlazaPlayerHealthResult {
   >;
   /** Enqueues a gray spatial Miss float above the local player (jump dodge, etc.). */
   enqueueMissFloatRef: React.RefObject<() => void>;
+  /** Enqueues a green +amount float without changing health (craft refunds, etc.). */
+  enqueueHealAmountFloatRef: React.RefObject<(amount: number) => void>;
   healRef: React.RefObject<(amount: number) => void>;
   applyFallDamageRef: React.RefObject<(layerDelta: number) => void>;
   killRef: React.RefObject<() => void>;
@@ -916,6 +918,9 @@ export function usingWorldPlazaPlayerHealth({
     (amount: number, kind?: DefiningWorldPlazaEntityDamageKind) => void
   >(() => undefined);
   const enqueueMissFloatRef = useRef<() => void>(() => undefined);
+  const enqueueHealAmountFloatRef = useRef<(amount: number) => void>(
+    () => undefined
+  );
   const healRef = useRef<(amount: number) => void>(() => undefined);
   const applyFallDamageRef = useRef<(layerDelta: number) => void>(
     () => undefined
@@ -985,6 +990,7 @@ export function usingWorldPlazaPlayerHealth({
       environmentalTemperatureLastTickAtMsRef.current = null;
       applyStarvationDamageRef.current = () => undefined;
       enqueueMissFloatRef.current = () => undefined;
+      enqueueHealAmountFloatRef.current = () => undefined;
       pushingHudSnapshot(performance.now());
       return;
     }
@@ -995,6 +1001,19 @@ export function usingWorldPlazaPlayerHealth({
         {
           kind: 'miss',
           amount: 0,
+        },
+        nowMs
+      );
+      pushingHudSnapshot(nowMs);
+    };
+
+    enqueueHealAmountFloatRef.current = (amount) => {
+      const nowMs = performance.now();
+      enqueueFloatText(
+        {
+          kind: 'heal',
+          amount,
+          damageKind: null,
         },
         nowMs
       );
@@ -1598,6 +1617,7 @@ export function usingWorldPlazaPlayerHealth({
     syncingHealthHudFromStateRef,
     takeDamageRef,
     enqueueMissFloatRef,
+    enqueueHealAmountFloatRef,
     healRef,
     applyFallDamageRef,
     killRef,

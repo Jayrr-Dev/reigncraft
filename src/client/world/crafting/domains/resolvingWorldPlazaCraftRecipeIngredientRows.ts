@@ -28,7 +28,9 @@ export function resolvingWorldPlazaCraftRecipeIngredientRows(
       ingredient.itemTypeId
     );
     const itemDefinition =
-      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY[ingredient.itemTypeId];
+      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY.resolvingItemType(
+        ingredient.itemTypeId
+      );
 
     return {
       itemTypeId: ingredient.itemTypeId,

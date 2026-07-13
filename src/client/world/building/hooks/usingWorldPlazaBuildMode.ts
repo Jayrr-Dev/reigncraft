@@ -212,7 +212,14 @@ export interface UsingWorldPlazaBuildModeParams {
   plotOwnerLimits?: DefiningWorldBuildingPlotOwnerLimits | null;
   refetchingPlots: () => Promise<RefetchingWorldBuildingPlotsResult>;
   onSuccessfulBlockPlacementRef?: MutableRefObject<
-    ((tilePosition: DefiningWorldBuildingTilePosition) => void) | null
+    | ((
+        tilePosition: DefiningWorldBuildingTilePosition,
+        placedBlockId: string
+      ) => void)
+    | null
+  >;
+  onBlockRemovedRef?: MutableRefObject<
+    ((removedBlock: DefiningWorldBuildingPlacedBlock) => void) | null
   >;
 }
 
@@ -229,6 +236,7 @@ export function usingWorldPlazaBuildMode({
   plotOwnerLimits,
   refetchingPlots,
   onSuccessfulBlockPlacementRef,
+  onBlockRemovedRef,
 }: UsingWorldPlazaBuildModeParams): UsingWorldPlazaBuildModeResult {
   const resolvedPlotOwnerLimits = useMemo(
     () => resolvingWorldBuildingPlotOwnerLimits(plotOwnerLimits),
@@ -820,6 +828,9 @@ export function usingWorldPlazaBuildMode({
         selectedWorldLayer
       );
 
+      const blockId = crypto.randomUUID();
+      const placedAt = new Date().toISOString();
+
       const placementResult = applyingWorldBuildingBuildDraftBlockPlacement({
         draft: buildDraft,
         viewportPlots: plots,
@@ -830,8 +841,8 @@ export function usingWorldPlazaBuildMode({
         cutFootprintMask: effectiveSelectedCutFootprintMask,
         cutGridAxisCellCount: effectiveSelectedCutGridAxisCellCount,
         actorUserId: onlineUserId,
-        blockId: crypto.randomUUID(),
-        placedAt: new Date().toISOString(),
+        blockId,
+        placedAt,
       });
 
       if ('errorMessage' in placementResult) {
@@ -841,7 +852,7 @@ export function usingWorldPlazaBuildMode({
 
       setBuildDraft(placementResult.draft);
       setBuildErrorMessage(null);
-      onSuccessfulBlockPlacementRef?.current?.(tilePosition);
+      onSuccessfulBlockPlacementRef?.current?.(tilePosition, blockId);
     },
     [
       buildDraft,
@@ -871,6 +882,19 @@ export function usingWorldPlazaBuildMode({
         return;
       }
 
+      const plot = findingWorldBuildingPlotContainingTilePosition(
+        activeViewportPlots,
+        tilePosition
+      );
+      const removedBlock =
+        plot === null
+          ? null
+          : findingWorldBuildingPlotRemovableBlockAtTileLayerPosition(
+              plot,
+              tilePosition,
+              removalWorldLayer
+            );
+
       const removalResult = applyingWorldBuildingBuildDraftBlockRemoval({
         draft: buildDraft,
         viewportPlots: plots,
@@ -886,8 +910,19 @@ export function usingWorldPlazaBuildMode({
 
       setBuildDraft(removalResult.draft);
       setBuildErrorMessage(null);
+
+      if (removedBlock) {
+        onBlockRemovedRef?.current?.(removedBlock);
+      }
     },
-    [buildDraft, onlineUserId, plots, resolvingRemovalWorldLayerForTile]
+    [
+      activeViewportPlots,
+      buildDraft,
+      onBlockRemovedRef,
+      onlineUserId,
+      plots,
+      resolvingRemovalWorldLayerForTile,
+    ]
   );
 
   const placingBlockAtSelectedTile = useCallback((): void => {

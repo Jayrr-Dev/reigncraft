@@ -17,6 +17,7 @@ import {
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { executingWorldPlazaCraftRecipeInventoryOutcome } from '@/components/world/crafting/domains/executingWorldPlazaCraftRecipeInventoryOutcome';
 import { listingWorldPlazaCraftRecipesForCookbook } from '@/components/world/crafting/domains/listingWorldPlazaCraftRecipesForCookbook';
+import { refundingWorldPlazaCraftRecipeIngredients } from '@/components/world/crafting/domains/refundingWorldPlazaCraftRecipeIngredients';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { describe, expect, it } from 'vitest';
 
@@ -183,6 +184,45 @@ describe('committingWorldPlazaCraftRecipePlaceablePlacement', () => {
         campfireRecipe
       ).outcome
     ).toBe('missing-materials');
+  });
+});
+
+describe('refundingWorldPlazaCraftRecipeIngredients', () => {
+  const campfireRecipe = resolvingWorldPlazaCraftModeRecipeDefinition(
+    DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE
+  );
+
+  it('returns stone and wood after a crafted campfire is removed', () => {
+    expect(campfireRecipe).not.toBeNull();
+    if (!campfireRecipe) {
+      return;
+    }
+
+    const emptyState = buildingInventoryState(
+      Array.from({ length: 8 }, () => null)
+    );
+    const refundResult = refundingWorldPlazaCraftRecipeIngredients(
+      emptyState,
+      campfireRecipe
+    );
+
+    expect(refundResult.outcome).toBe('refunded');
+    if (refundResult.outcome !== 'refunded') {
+      return;
+    }
+
+    expect(
+      countingWorldPlazaInventoryItemTypeQuantity(
+        refundResult.nextState,
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE
+      )
+    ).toBe(DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_STONE_COST);
+    expect(
+      countingWorldPlazaInventoryItemTypeQuantity(
+        refundResult.nextState,
+        'world-plaza-wood'
+      )
+    ).toBe(DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_WOOD_COST);
   });
 });
 

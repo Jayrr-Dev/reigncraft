@@ -41,14 +41,23 @@ export type DefiningWorldPlazaCraftModeRecipeOutcome =
   | DefiningWorldPlazaCraftModeRecipePlaceableOutcome
   | DefiningWorldPlazaCraftModeRecipeInventoryOutcome;
 
+/** Left-page art for one recipe spread. */
+export type DefiningWorldPlazaCraftModeRecipeVisual =
+  | {
+      readonly visualKind: 'iconify';
+      readonly recipeEmblemIconifyIcon: string;
+    }
+  | {
+      readonly visualKind: 'world-plaza-campfire';
+    };
+
 /** Display + rules metadata for one recipe. */
 export type DefiningWorldPlazaCraftModeRecipeDefinition = {
   readonly id: DefiningWorldPlazaCraftModeRecipeId;
   readonly cookbookId: DefiningWorldPlazaCraftModeCookbookId;
   readonly title: string;
   readonly description: string;
-  /** Iconify emblem for the cookbook left page (matches build block art language). */
-  readonly recipeEmblemIconifyIcon: string;
+  readonly recipeVisual: DefiningWorldPlazaCraftModeRecipeVisual;
   readonly ingredients: readonly DefiningWorldPlazaCraftModeRecipeIngredient[];
   readonly outcome: DefiningWorldPlazaCraftModeRecipeOutcome;
 };

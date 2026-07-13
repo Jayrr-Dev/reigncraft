@@ -66,6 +66,10 @@ import {
 const RENDERING_WORLD_PLAZA_EDIT_MODE_SCROLL_POPOVER_BODY_CLASS_NAME =
   'flex max-h-[min(50vh,22rem)] min-w-[20rem] flex-col gap-2 overflow-y-auto' as const;
 
+/** Compact scroll shell for the saves popover (fits parchment panel width). */
+const RENDERING_WORLD_PLAZA_EDIT_MODE_SAVES_POPOVER_BODY_CLASS_NAME =
+  'flex max-h-[min(50vh,22rem)] w-full min-w-0 flex-col gap-2 overflow-y-auto' as const;
+
 /** Stacked section gap inside combined popovers. */
 const RENDERING_WORLD_PLAZA_EDIT_MODE_COMBINED_SECTION_CLASS_NAME =
   'flex flex-col gap-2' as const;
@@ -260,7 +264,7 @@ function RenderingWorldPlazaEditModeFunctionPopoverBody({
       return (
         <div
           className={
-            RENDERING_WORLD_PLAZA_EDIT_MODE_SCROLL_POPOVER_BODY_CLASS_NAME
+            RENDERING_WORLD_PLAZA_EDIT_MODE_SAVES_POPOVER_BODY_CLASS_NAME
           }
         >
           <RenderingWorldPlazaClaimModeSavedCoordsList
