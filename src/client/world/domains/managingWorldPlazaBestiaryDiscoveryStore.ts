@@ -138,7 +138,7 @@ export function initializingWorldPlazaBestiaryDiscoveryStore(
 
     // Cloud slot arrived after local hydrate: push current study progress up.
     if (previousCloudSaveSlotIndex === null && cloudSaveSlotIndex !== null) {
-      mirroringWorldPlazaBestiaryDiscoveryToCloudSave();
+      mirroringWorldPlazaBestiaryDiscoveryToCloudSave({ skipWhenEmpty: true });
     }
 
     return;
@@ -159,7 +159,7 @@ export function initializingWorldPlazaBestiaryDiscoveryStore(
 
   // Heal Redis from local after boot hydrate (covers failed prior mirrors).
   if (cloudSaveSlotIndex !== null) {
-    mirroringWorldPlazaBestiaryDiscoveryToCloudSave();
+    mirroringWorldPlazaBestiaryDiscoveryToCloudSave({ skipWhenEmpty: true });
   }
 }
 

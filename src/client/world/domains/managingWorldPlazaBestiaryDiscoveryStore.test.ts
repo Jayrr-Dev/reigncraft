@@ -83,6 +83,23 @@ describe('managingWorldPlazaBestiaryDiscoveryStore', () => {
     });
   });
 
+  it('uploads existing local study counts to Redis when cloud context is set', () => {
+    initializingWorldPlazaBestiaryDiscoveryStore('test-bestiary-upload');
+    recordingWorldPlazaBestiarySpeciesStudied('boar', 4);
+    vi.mocked(savingPlazaSinglePlayerSaveSlotData).mockClear();
+
+    initializingWorldPlazaBestiaryDiscoveryStore('test-bestiary-upload', {
+      cloudSaveSlotIndex: 1,
+    });
+
+    expect(savingPlazaSinglePlayerSaveSlotData).toHaveBeenCalledWith(1, {
+      bestiaryDiscovery: {
+        sightedSpeciesIds: ['boar'],
+        studyCountsBySpeciesId: { boar: 4 },
+      },
+    });
+  });
+
   it('increments study counts on every Study completion', () => {
     initializingWorldPlazaBestiaryDiscoveryStore('test-study-increment');
     recordingWorldPlazaBestiarySpeciesStudied('boar');
