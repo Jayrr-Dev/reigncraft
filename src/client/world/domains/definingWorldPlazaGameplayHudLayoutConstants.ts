@@ -114,7 +114,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
       },
     },
 
-    /** Top-right: online room status and local buff/debuff stack. */
+    /** Top-right: online room status, buff stack, and (desktop) open minimap. */
     topRight: {
       roomStatusHud: {
         anchorClassName:

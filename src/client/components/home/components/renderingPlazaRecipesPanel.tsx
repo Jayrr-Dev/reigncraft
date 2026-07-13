@@ -22,8 +22,9 @@ import {
   resolvingPlazaRecipesGuideDisplayEntries,
   type PlazaRecipesGuideDisplayEntry,
 } from '@/components/home/domains/resolvingPlazaRecipesGuideDisplayEntries';
-import { Icon } from '@/components/ui/icon';
 import { DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER } from '@/components/home/domains/definingPlazaBestiarySpritePortraitConstants';
+import { Icon } from '@/components/ui/icon';
+import { RenderingWorldPlazaCampfireRecipePreview } from '@/components/world/building/components/renderingWorldPlazaCampfireRecipePreview';
 import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import {
   gettingWorldPlazaRecipeAttachedSnapshot,
@@ -53,6 +54,38 @@ const PLAZA_RECIPES_GUIDE_TILE_STAGE_CLASS_NAME =
 const PLAZA_RECIPES_GUIDE_TILE_NAME_CLASS_NAME =
   'block truncate border-t px-1 py-1 text-center font-display text-[10px] font-bold uppercase tracking-wide sm:text-[11px]';
 
+function RenderingPlazaRecipesGuideCardArt({
+  entry,
+}: {
+  readonly entry: PlazaRecipesGuideDisplayEntry;
+}): React.JSX.Element {
+  if (
+    entry.recipeDefinition.recipeVisual.visualKind === 'world-plaza-campfire'
+  ) {
+    return (
+      <RenderingWorldPlazaCampfireRecipePreview
+        presentation="card"
+        isSilhouette={!entry.isAttached}
+      />
+    );
+  }
+
+  return (
+    <Icon
+      icon={entry.silhouetteIconifyIcon}
+      className={
+        entry.isAttached ? 'size-[72%] text-[#8b5a2b]' : 'size-[72%] text-ink'
+      }
+      style={
+        entry.isAttached
+          ? undefined
+          : { filter: DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER }
+      }
+      aria-hidden
+    />
+  );
+}
+
 export type RenderingPlazaRecipesPanelProps = {
   onBack?: () => void;
   onClose?: () => void;
@@ -75,12 +108,7 @@ function RenderingPlazaRecipesGuideCard({
         )}
       >
         <div className={PLAZA_RECIPES_GUIDE_TILE_STAGE_CLASS_NAME} aria-hidden>
-          <Icon
-            icon={entry.silhouetteIconifyIcon}
-            className="size-[72%] text-ink"
-            style={{ filter: DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER }}
-            aria-hidden
-          />
+          <RenderingPlazaRecipesGuideCardArt entry={entry} />
         </div>
         <span
           className={cn(
@@ -105,11 +133,7 @@ function RenderingPlazaRecipesGuideCard({
       aria-label={`View ${entry.displayName} recipe`}
     >
       <div className={PLAZA_RECIPES_GUIDE_TILE_STAGE_CLASS_NAME} aria-hidden>
-        <Icon
-          icon={entry.silhouetteIconifyIcon}
-          className="size-[72%] text-[#8b5a2b]"
-          aria-hidden
-        />
+        <RenderingPlazaRecipesGuideCardArt entry={entry} />
       </div>
       <span
         className={cn(

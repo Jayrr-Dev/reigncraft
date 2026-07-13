@@ -1,33 +1,28 @@
 'use client';
 
 /**
- * World-layer sphere for the plaza action bar: standing layer as `4L`,
- * toggles the minimap when clicked.
+ * Compass orb for the plaza action bar; click opens the minimap dropdown.
  *
  * @module components/world/components/renderingWorldPlazaWorldLayerIndicator
  */
 
+import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
-import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
+  DEFINING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_COMPASS_ICON,
   DEFINING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_FILL_COLOR,
-  DEFINING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_REFRESH_INTERVAL_MS,
   LABELING_WORLD_PLAZA_ACTION_BAR_WORLD_LAYER,
   LABELING_WORLD_PLAZA_ACTION_BAR_WORLD_LAYER_MINIMAP_HINT,
   STYLING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_FILL_DISC_CLASS_NAME,
+  STYLING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_ICON_CLASS_NAME,
   STYLING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_ORB_CLASS_NAME,
-  STYLING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_VALUE_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaWorldLayerIndicatorConstants';
-import { formattingWorldPlazaWorldLayerIndicatorLabel } from '@/components/world/domains/formattingWorldPlazaWorldLayerIndicatorLabel';
 import { resolvingWorldPlazaWorldLayerIndicatorViewportStyles } from '@/components/world/domains/resolvingWorldPlazaWorldLayerIndicatorViewportStyles';
 import { cn } from '@/lib/utils';
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo, useMemo } from 'react';
 
 /** Props for {@link RenderingWorldPlazaWorldLayerIndicator}. */
 export type RenderingWorldPlazaWorldLayerIndicatorProps = {
-  /** Live local player position in grid space. */
-  playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   /** Live HUD scale from the plaza viewport frame. */
   viewportHudScale?: number;
   /** When true, applies the action bar mobile shrink. */
@@ -39,21 +34,15 @@ export type RenderingWorldPlazaWorldLayerIndicatorProps = {
 };
 
 /**
- * Circular world-layer orb with compact `NL` readout; click opens the minimap.
+ * Circular compass orb; click opens the minimap.
  */
 export const RenderingWorldPlazaWorldLayerIndicator = memo(
   function RenderingWorldPlazaWorldLayerIndicator({
-    playerPositionRef,
     viewportHudScale = 1,
     isMobile = false,
     isOpen = false,
     onToggle,
   }: RenderingWorldPlazaWorldLayerIndicatorProps): React.JSX.Element {
-    const [worldLayer, setWorldLayer] = useState(() =>
-      resolvingWorldPlazaPlayerWorldLayer(
-        playerPositionRef.current ?? { x: 0, y: 0 }
-      )
-    );
     const viewportStyles = useMemo(
       () =>
         resolvingWorldPlazaWorldLayerIndicatorViewportStyles(
@@ -62,34 +51,8 @@ export const RenderingWorldPlazaWorldLayerIndicator = memo(
         ),
       [viewportHudScale, isMobile]
     );
-    const layerLabel = useMemo(
-      () => formattingWorldPlazaWorldLayerIndicatorLabel(worldLayer),
-      [worldLayer]
-    );
 
-    useEffect(() => {
-      const refreshingWorldLayer = (): void => {
-        const playerPosition = playerPositionRef.current;
-
-        if (!playerPosition) {
-          return;
-        }
-
-        setWorldLayer(resolvingWorldPlazaPlayerWorldLayer(playerPosition));
-      };
-
-      refreshingWorldLayer();
-      const intervalId = window.setInterval(
-        refreshingWorldLayer,
-        DEFINING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_REFRESH_INTERVAL_MS
-      );
-
-      return () => {
-        window.clearInterval(intervalId);
-      };
-    }, [playerPositionRef]);
-
-    const ariaLabel = `${LABELING_WORLD_PLAZA_ACTION_BAR_WORLD_LAYER}: ${layerLabel}. ${LABELING_WORLD_PLAZA_ACTION_BAR_WORLD_LAYER_MINIMAP_HINT}`;
+    const ariaLabel = `${LABELING_WORLD_PLAZA_ACTION_BAR_WORLD_LAYER}. ${LABELING_WORLD_PLAZA_ACTION_BAR_WORLD_LAYER_MINIMAP_HINT}`;
 
     return (
       <button
@@ -115,12 +78,15 @@ export const RenderingWorldPlazaWorldLayerIndicator = memo(
           }}
           aria-hidden="true"
         />
-        <span
-          className={STYLING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_VALUE_CLASS_NAME}
-          style={viewportStyles.valueStyle}
-        >
-          {layerLabel}
-        </span>
+        <Icon
+          icon={DEFINING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_COMPASS_ICON}
+          className={STYLING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_ICON_CLASS_NAME}
+          style={{
+            width: viewportStyles.iconSizePx,
+            height: viewportStyles.iconSizePx,
+          }}
+          aria-hidden="true"
+        />
       </button>
     );
   }

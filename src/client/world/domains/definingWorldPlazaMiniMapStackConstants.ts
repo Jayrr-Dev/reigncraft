@@ -1,5 +1,5 @@
 /**
- * Declarative layout for the action-bar minimap dropdown card.
+ * Declarative layout for the action-bar minimap card (dropdown or far-right corner).
  *
  * @module components/world/domains/definingWorldPlazaMiniMapStackConstants
  */
@@ -24,16 +24,21 @@ export type DefiningWorldPlazaMiniMapStackViewportLayout = {
  *
  * - embedded: normal in-feed / windowed game view
  * - fullscreen: expanded fullscreen game view
- * - desktop: wide screens (768px and up)
- * - mobile: narrow screens (under 768px)
+ * - desktop: wide screens (768px and up) — open map pins top-right
+ * - mobile: narrow screens — open map drops under the compass orb
  */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
   /**
-   * Dropdown shell under the action-bar layer orb (same pattern as hunger /
-   * temperature / day-night panels).
+   * Dropdown shell under the action-bar compass orb (mobile / tight viewports).
    */
   dropdownClassName:
     `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarDropdown} pointer-events-auto absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2` as const,
+  /**
+   * Far-right corner shell when the viewport has room (desktop / fullscreen).
+   * Position is applied via inline styles from the corner viewport resolver.
+   */
+  cornerAnchorClassName:
+    'pointer-events-auto fixed z-50 flex flex-col items-end select-none' as const,
   /** Column that hosts the parchment minimap card. */
   columnClassName: 'relative flex flex-col items-start',
   /**
@@ -44,7 +49,17 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
   /** Inner frame that insets the minimap canvas like a framed game map. */
   mapFrameClassName:
     STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_INSET_FRAME_CLASS,
-  /** Top inset for top-left chrome (Dev tools) — matches the action bar row. */
+  /** Top status row (standing layer) — same slot the old time/temp bar used. */
+  layerBarClassName:
+    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.environmentBar,
+  layerBarMobileClassName:
+    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.environmentBarMobile,
+  layerBarValueClassName:
+    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.environmentBarValue,
+  layerBarValueMobileClassName:
+    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography
+      .environmentBarValueMobile,
+  /** Top inset for corner map and top-left Dev tools — matches the action bar row. */
   topInsetBasePx: 4,
   /** Parchment card vertical padding (p-0.5 top + bottom). */
   cardVerticalChromeBasePx: 4,
@@ -72,9 +87,14 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
   },
 } as const satisfies {
   dropdownClassName: string;
+  cornerAnchorClassName: string;
   columnClassName: string;
   cardClassName: string;
   mapFrameClassName: string;
+  layerBarClassName: string;
+  layerBarMobileClassName: string;
+  layerBarValueClassName: string;
+  layerBarValueMobileClassName: string;
   topInsetBasePx: number;
   cardVerticalChromeBasePx: number;
   belowMinimapGapBasePx: number;

@@ -1,4 +1,7 @@
-import { resolvingWorldPlazaMiniMapStackViewportStyles } from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportStyles';
+import {
+  resolvingWorldPlazaMiniMapStackCornerViewportStyles,
+  resolvingWorldPlazaMiniMapStackViewportStyles,
+} from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportStyles';
 import { describe, expect, it } from 'vitest';
 
 describe('resolvingWorldPlazaMiniMapStackViewportStyles', () => {
@@ -25,6 +28,21 @@ describe('resolvingWorldPlazaMiniMapStackViewportStyles', () => {
     ).toEqual({
       top: 'calc(4px + env(safe-area-inset-top, 0px))',
       left: 'calc(4px + env(safe-area-inset-left, 0px))',
+    });
+  });
+});
+
+describe('resolvingWorldPlazaMiniMapStackCornerViewportStyles', () => {
+  it('pins desktop maps to the top-right edge', () => {
+    expect(
+      resolvingWorldPlazaMiniMapStackCornerViewportStyles({
+        viewportHudScale: 1,
+        isMobile: false,
+        isFullscreen: false,
+      })
+    ).toEqual({
+      top: 'calc(4px + env(safe-area-inset-top, 0px))',
+      right: 'calc(4px + env(safe-area-inset-right, 0px))',
     });
   });
 });

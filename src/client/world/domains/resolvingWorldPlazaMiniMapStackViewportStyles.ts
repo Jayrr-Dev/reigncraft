@@ -93,3 +93,27 @@ export function resolvingWorldPlazaMiniMapStackViewportStyles({
     left: `calc(${leftInsetPx}px + env(safe-area-inset-left, 0px))`,
   };
 }
+
+/**
+ * Resolves top-right fixed offsets for the desktop / fullscreen minimap card.
+ */
+export function resolvingWorldPlazaMiniMapStackCornerViewportStyles({
+  viewportHudScale,
+  isMobile,
+  isFullscreen,
+}: ResolvingWorldPlazaMiniMapStackViewportStylesParams): CSSProperties {
+  const rightInsetPx = computingWorldPlazaMiniMapStackLeftInsetPx(
+    viewportHudScale,
+    isMobile,
+    isFullscreen
+  );
+  const topPx = computingWorldPlazaMiniMapStackTopPx(
+    viewportHudScale,
+    isMobile
+  );
+
+  return {
+    top: `calc(${topPx}px + env(safe-area-inset-top, 0px))`,
+    right: `calc(${rightInsetPx}px + env(safe-area-inset-right, 0px))`,
+  };
+}

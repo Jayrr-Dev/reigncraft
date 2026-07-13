@@ -3,11 +3,14 @@
 import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
 import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
 import { RenderingWorldPlazaMiniMap } from '@/components/world/components/renderingWorldPlazaMiniMap';
+import { RenderingWorldPlazaMiniMapLayerBar } from '@/components/world/components/renderingWorldPlazaMiniMapLayerBar';
+import { checkingWorldPlazaMiniMapUsesCornerPlacement } from '@/components/world/domains/checkingWorldPlazaMiniMapUsesCornerPlacement';
 import { computingWorldPlazaMiniMapLayout } from '@/components/world/domains/computingWorldPlazaMiniMapLayout';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT } from '@/components/world/domains/definingWorldPlazaMiniMapStackConstants';
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaMiniMapStackCornerViewportStyles } from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportStyles';
 import { resolvingWorldPlazaMinimapVisible } from '@/components/world/domains/resolvingWorldPlazaMinimapVisible';
 import { usingWorldPlazaMinimapEnabled } from '@/components/world/hooks/usingWorldPlazaMinimapEnabled';
 import { usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
@@ -24,10 +27,12 @@ export interface RenderingWorldPlazaMiniMapStackProps {
   localUserId: string | null;
   isFullscreen: boolean;
   ownedPlotsRef: React.RefObject<DefiningWorldBuildingPlot[]>;
+  /** Live HUD scale from the plaza viewport frame. */
+  viewportHudScale?: number;
 }
 
 /**
- * Minimap parchment card dropped below the action-bar layer orb.
+ * Minimap parchment card: under the compass on mobile, far-right on desktop.
  */
 export function RenderingWorldPlazaMiniMapStack({
   playerPositionRef,
@@ -37,12 +42,15 @@ export function RenderingWorldPlazaMiniMapStack({
   localUserId,
   isFullscreen,
   ownedPlotsRef,
+  viewportHudScale = 1,
 }: RenderingWorldPlazaMiniMapStackProps): React.JSX.Element | null {
   const performanceProfile = usingWorldPlazaPerformanceProfile();
   const { isMinimapPreferenceEnabled } = usingWorldPlazaMinimapEnabled();
   const renderLayerFlags =
     usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags();
   const isMobile = useIsMobile();
+  const usesCornerPlacement =
+    checkingWorldPlazaMiniMapUsesCornerPlacement(isMobile);
   const miniMapLayout = useMemo(
     () =>
       computingWorldPlazaMiniMapLayout(
@@ -51,6 +59,17 @@ export function RenderingWorldPlazaMiniMapStack({
         performanceProfile.minimapViewRadiusTiles
       ),
     [isFullscreen, isMobile, performanceProfile.minimapViewRadiusTiles]
+  );
+  const cornerAnchorStyle = useMemo(
+    () =>
+      usesCornerPlacement
+        ? resolvingWorldPlazaMiniMapStackCornerViewportStyles({
+            viewportHudScale,
+            isMobile,
+            isFullscreen,
+          })
+        : undefined,
+    [usesCornerPlacement, viewportHudScale, isMobile, isFullscreen]
   );
   const isMinimapVisible = resolvingWorldPlazaMinimapVisible({
     isMinimapPreferenceEnabled,
@@ -64,7 +83,12 @@ export function RenderingWorldPlazaMiniMapStack({
   return (
     <div
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-      className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.dropdownClassName}
+      className={
+        usesCornerPlacement
+          ? DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.cornerAnchorClassName
+          : DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.dropdownClassName
+      }
+      style={cornerAnchorStyle}
       role="dialog"
       aria-label="Minimap"
     >
@@ -75,6 +99,10 @@ export function RenderingWorldPlazaMiniMapStack({
         <div
           className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.cardClassName}
         >
+          <RenderingWorldPlazaMiniMapLayerBar
+            playerPositionRef={playerPositionRef}
+            isMobile={isMobile}
+          />
           <div
             className={
               DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.mapFrameClassName

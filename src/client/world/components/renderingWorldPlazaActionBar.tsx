@@ -590,7 +590,6 @@ export function RenderingWorldPlazaActionBar({
                     }
                   >
                     <RenderingWorldPlazaWorldLayerIndicator
-                      playerPositionRef={playerPositionRef}
                       viewportHudScale={viewportHudScale}
                       isMobile={isMobile}
                       isOpen={isMinimapPreferenceEnabled}
@@ -615,6 +614,7 @@ export function RenderingWorldPlazaActionBar({
                         localUserId={minimapHud.localUserId}
                         isFullscreen={isFullscreenViewport || isFullscreen}
                         ownedPlotsRef={minimapHud.ownedPlotsRef}
+                        viewportHudScale={viewportHudScale}
                       />
                     ) : null}
                   </div>

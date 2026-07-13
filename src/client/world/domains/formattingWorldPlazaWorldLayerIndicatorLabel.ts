@@ -1,5 +1,5 @@
 /**
- * Formats the compact action-bar world-layer readout (`4L`).
+ * Formats player-facing world-layer copy for the minimap status bar.
  *
  * @module components/world/domains/formattingWorldPlazaWorldLayerIndicatorLabel
  */
@@ -7,12 +7,12 @@
 import { clampingWorldBuildingWorldLayer } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 
 /**
- * Returns the short layer label shown inside the action-bar orb.
+ * Returns the layer label shown above the minimap (`Layer 1`).
  *
  * @param worldLayer - One-based standing layer index.
  */
 export function formattingWorldPlazaWorldLayerIndicatorLabel(
   worldLayer: number
 ): string {
-  return `${clampingWorldBuildingWorldLayer(worldLayer)}L`;
+  return `Layer ${clampingWorldBuildingWorldLayer(worldLayer)}`;
 }

@@ -6,6 +6,7 @@
  * @module components/world/building/components/renderingWorldPlazaCampfireRecipePreview
  */
 
+import { DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER } from '@/components/home/domains/definingPlazaBestiarySpritePortraitConstants';
 import {
   DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_PREVIEW_CENTER_X_PX,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_PREVIEW_CENTER_Y_PX,
@@ -14,15 +15,33 @@ import {
   DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_PREVIEW_WIDTH_PX,
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeUiConstants';
 import { drawingWorldPlazaCampfireOnGraphicsAtScreenPoint } from '@/components/world/fire/domains/drawingWorldPlazaCampfireOnGraphics';
+import { cn } from '@/lib/utils';
 import { Application, Graphics } from 'pixi.js';
 import 'pixi.js/unsafe-eval';
 import { useEffect, useRef } from 'react';
 
+export type RenderingWorldPlazaCampfireRecipePreviewPresentation =
+  | 'full'
+  | 'card';
+
+export type RenderingWorldPlazaCampfireRecipePreviewProps = {
+  /** `full` for detail / cookbook pages; `card` for guide grid tiles. */
+  readonly presentation?: RenderingWorldPlazaCampfireRecipePreviewPresentation;
+  /** Dark silhouette (locked Recipes guide entries). */
+  readonly isSilhouette?: boolean;
+  readonly className?: string;
+};
+
 /**
  * Renders the same unlit campfire body used on the world map.
  */
-export function RenderingWorldPlazaCampfireRecipePreview(): React.JSX.Element {
+export function RenderingWorldPlazaCampfireRecipePreview({
+  presentation = 'full',
+  isSilhouette = false,
+  className,
+}: RenderingWorldPlazaCampfireRecipePreviewProps = {}): React.JSX.Element {
   const hostRef = useRef<HTMLDivElement>(null);
+  const isCard = presentation === 'card';
 
   useEffect(() => {
     const host = hostRef.current;
@@ -83,7 +102,17 @@ export function RenderingWorldPlazaCampfireRecipePreview(): React.JSX.Element {
   return (
     <div
       ref={hostRef}
-      className="h-28 w-44 shrink-0 sm:h-36 sm:w-56 [&_canvas]:size-full [&_canvas]:[image-rendering:pixelated]"
+      className={cn(
+        isCard
+          ? 'size-[78%] max-h-full max-w-full [&_canvas]:size-full [&_canvas]:[image-rendering:pixelated]'
+          : 'h-28 w-44 shrink-0 sm:h-36 sm:w-56 [&_canvas]:size-full [&_canvas]:[image-rendering:pixelated]',
+        className
+      )}
+      style={
+        isSilhouette
+          ? { filter: DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER }
+          : undefined
+      }
       aria-hidden
     />
   );
