@@ -19,6 +19,7 @@ import { checkingWorldPlazaTileHasColumnRockAtTileIndex } from '@/components/wor
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex';
+import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex';
 import { resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex';
 
@@ -34,6 +35,26 @@ type ResolvingWorldDepthAvatarBodyFootprintScan = {
   minFrontOccluderCap: number;
   maxHardFloorSortKey: number;
 };
+
+/**
+ * Standing layer used for occlusion. Prefer the higher of the synced player
+ * layer and procedural terrain underfoot so a stale `layer: 1` on a plateau
+ * does not let rim cliff faces front-occlude the avatar.
+ */
+function resolvingWorldDepthAvatarBodyOcclusionStandingLayer(
+  gridPoint: DefiningWorldPlazaWorldPoint,
+  centerTileX: number,
+  centerTileY: number
+): number {
+  const declaredStandingLayer = resolvingWorldPlazaPlayerWorldLayer(gridPoint);
+  const terrainSurfaceAtFoot =
+    resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
+      centerTileX,
+      centerTileY
+    );
+
+  return Math.max(declaredStandingLayer, terrainSurfaceAtFoot);
+}
 
 function computingWorldDepthAvatarBodyStandingZIndexCapBehindOccluder(
   occluderSortKey: number
@@ -205,7 +226,11 @@ export function resolvingWorldDepthAvatarBodySortKey(
     DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS;
   const centerTileX = Math.floor(gridPoint.x);
   const centerTileY = Math.floor(gridPoint.y);
-  const standingLayer = resolvingWorldPlazaPlayerWorldLayer(gridPoint);
+  const standingLayer = resolvingWorldDepthAvatarBodyOcclusionStandingLayer(
+    gridPoint,
+    centerTileX,
+    centerTileY
+  );
   const scan = scanningWorldDepthAvatarBodyFootprint(
     gridPoint,
     centerTileX,
@@ -214,11 +239,12 @@ export function resolvingWorldDepthAvatarBodySortKey(
     context
   );
 
-  let standingBodySortKey = Math.max(
-    footSortKey,
-    scan.maxStandingBumpSortKey +
+  const standingBumpBodySortKey = Number.isFinite(scan.maxStandingBumpSortKey)
+    ? scan.maxStandingBumpSortKey +
       DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS
-  );
+    : Number.NEGATIVE_INFINITY;
+
+  let standingBodySortKey = Math.max(footSortKey, standingBumpBodySortKey);
 
   if (Number.isFinite(scan.maxBehindColumnSortKey)) {
     standingBodySortKey = Math.max(
@@ -279,6 +305,15 @@ export function resolvingWorldDepthAvatarBodySortKey(
       standingBodySortKey = Math.max(
         standingBodySortKey,
         Math.min(scan.maxBehindColumnSortKey + 1, scan.minFrontOccluderCap)
+      );
+    }
+
+    // Keep coplanar plateau / rim columns under the avatar after clamp so a
+    // taller spur further south cannot leave SW cliff faces covering the body.
+    if (Number.isFinite(standingBumpBodySortKey)) {
+      standingBodySortKey = Math.max(
+        standingBodySortKey,
+        Math.min(standingBumpBodySortKey, scan.minFrontOccluderCap)
       );
     }
   }

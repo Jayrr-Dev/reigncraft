@@ -1,8 +1,5 @@
 import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
-import {
-  DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_LAYOUT,
-  DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_MAX_LABEL_LENGTH,
-} from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
+import { DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_LAYOUT } from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
 import { DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import type { CSSProperties } from 'react';
 
@@ -20,7 +17,8 @@ export type DefiningWorldPlazaHudToolbarModeBadgesViewportStyles = {
  * Resolves badge chrome for the HUD toolbar mode strip.
  *
  * Parent stack owns shell width. Badge row centers content-sized tabs over
- * the hotbar, with a shared icon+label footprint so every tab matches ITEMS.
+ * the hotbar. Labels size to glyphs (no fixed ch lock) so display-font
+ * tracking cannot spill into neighbors.
  */
 export function resolvingWorldPlazaHudToolbarModeBadgesViewportStyles(
   viewportHudScale: number,
@@ -89,7 +87,6 @@ export function resolvingWorldPlazaHudToolbarModeBadgesViewportStyles(
     labelStyle: {
       fontSize: labelTextPx,
       letterSpacing: `${labelTrackingEm}em`,
-      width: `${DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_MAX_LABEL_LENGTH}ch`,
     },
   };
 }

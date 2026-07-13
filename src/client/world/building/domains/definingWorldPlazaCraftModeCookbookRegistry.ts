@@ -61,8 +61,6 @@ export type DefiningWorldPlazaCraftModeCookbookDefinition = {
   readonly spriteColumnIndex: number;
   /** Iconify emblem shown on the dialog header chip. */
   readonly emblemIconifyIcon: string;
-  /** Blank leaves shown until recipes ship. */
-  readonly blankPageCount: number;
 };
 
 /**
@@ -76,7 +74,6 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_REGISTRY = [
     ariaLabel: 'Open the Survival Cookbook',
     spriteColumnIndex: 0,
     emblemIconifyIcon: 'mdi:campfire',
-    blankPageCount: 4,
   },
   {
     id: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.BLACKSMITH,
@@ -85,7 +82,6 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_REGISTRY = [
     ariaLabel: "Open the Blacksmith's Cookbook",
     spriteColumnIndex: 1,
     emblemIconifyIcon: 'mdi:anvil',
-    blankPageCount: 4,
   },
   {
     id: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.HEALER,
@@ -94,7 +90,6 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_REGISTRY = [
     ariaLabel: "Open the Healer's Cookbook",
     spriteColumnIndex: 2,
     emblemIconifyIcon: 'mdi:mortar-pestle-plus',
-    blankPageCount: 4,
   },
 ] as const satisfies readonly DefiningWorldPlazaCraftModeCookbookDefinition[];
 

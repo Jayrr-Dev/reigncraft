@@ -99,4 +99,23 @@ describe('terrain elevation south layering', () => {
 
     expect(bodyZ).toBeGreaterThan(rimZ);
   });
+
+  it('keeps avatar above SW rim cliff face while standing on the plateau', () => {
+    // Plateau underfoot layer 6; SW-ish rim at (10, 10) also layer 6 (x+y=20).
+    // Declared layer left stale at 1 (pre-sync) — occlusion must still use terrain.
+    const rimZ = resolvingWorldPlazaTerrainElevationColumnEntityZIndex(10, 10);
+    const bodyZ = resolvingWorldDepthAvatarBodySortKey({
+      x: 9.55,
+      y: 9.4,
+      layer: 1,
+    });
+
+    expect(
+      resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(9, 9)
+    ).toBe(6);
+    expect(
+      resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(10, 10)
+    ).toBe(6);
+    expect(bodyZ).toBeGreaterThan(rimZ);
+  });
 });

@@ -108,15 +108,15 @@ export const DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_LAYOUT = {
   /** Vertical padding inside each badge. */
   paddingYBasePx: 3,
   /** Horizontal padding inside each badge. */
-  paddingXBasePx: 3,
+  paddingXBasePx: 6,
   /** Tighter horizontal padding on narrow viewports. */
-  mobilePaddingXBasePx: 2,
+  mobilePaddingXBasePx: 4,
   /** Gap between icon and label. */
   iconLabelGapBasePx: 3,
   /** Tighter icon/label gap on narrow viewports. */
   mobileIconLabelGapBasePx: 2,
   /** Gap between badge buttons. */
-  buttonGapBasePx: 3,
+  buttonGapBasePx: 6,
   /** Label font size (desktop). */
   labelTextBasePx: 10,
   /** Label font on narrow viewports. */
@@ -160,10 +160,9 @@ export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ICON_SLOT_CLASS_NAME =
 
 /**
  * Shared icon+label cluster inside each mode badge.
- * Width is locked via viewport styles so content matches across modes.
  */
 export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_CONTENT_CLASS_NAME =
-  'inline-flex max-w-full items-center justify-center' as const;
+  'inline-flex items-center justify-center' as const;
 
 /**
  * Column wrapping mode badges and the active bottom toolbar body.
@@ -177,10 +176,10 @@ export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_HEADER_CLASS_NAME =
   'pointer-events-auto flex w-full flex-col' as const;
 
 /**
- * Label text inside a mode badge — fixed ch width from longest registry label.
+ * Label text inside a mode badge.
  */
 export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_LABEL_CLASS_NAME =
-  'shrink-0 text-center leading-none' as const;
+  'whitespace-nowrap text-center leading-none' as const;
 
 /**
  * Longest mode label length (chars). Drives uniform label column width.

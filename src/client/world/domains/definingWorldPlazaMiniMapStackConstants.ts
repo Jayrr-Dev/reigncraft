@@ -1,17 +1,16 @@
 /**
- * Declarative layout for the top-left unified minimap card (environment bar + map).
+ * Declarative layout for the top-left minimap parchment card.
  *
  * @module components/world/domains/definingWorldPlazaMiniMapStackConstants
  */
 
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_MINI_MAP_STACK_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
 import {
-  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE,
   STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_CLASS,
   STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_INSET_FRAME_CLASS,
 } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 
-/** Where the minimap + time/temperature bar sit for one screen size combo. */
+/** Where the minimap card sits for one screen size combo. */
 export type DefiningWorldPlazaMiniMapStackViewportLayout = {
   /**
    * Distance from the left and top screen edges when nothing else pushes
@@ -19,8 +18,6 @@ export type DefiningWorldPlazaMiniMapStackViewportLayout = {
    * to tuck it closer.
    */
   readonly edgeInsetBasePx: number;
-  /** Base font size for time/temperature values before viewport HUD scale. */
-  readonly environmentBarValueTextBasePx: number;
 };
 
 /**
@@ -33,7 +30,7 @@ export type DefiningWorldPlazaMiniMapStackViewportLayout = {
  */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
   /**
-   * CSS classes for the outer wrapper that positions the unified minimap card
+   * CSS classes for the outer wrapper that positions the minimap card
    * in the top-left HUD corner.
    */
   anchorClassName:
@@ -41,31 +38,17 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
   /** Column that hosts the parchment minimap card. */
   columnClassName: 'relative flex flex-col items-start',
   /**
-   * Shared parchment card chrome for the time/temperature bar and minimap.
+   * Shared parchment card chrome for the minimap.
    * Matches the aged-paper poster panels used on the home screen menus.
    */
   cardClassName: STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_CLASS,
   /** Inner frame that insets the minimap canvas like a framed game map. */
   mapFrameClassName:
     STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_INSET_FRAME_CLASS,
-  environmentBarClassName:
-    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.environmentBar,
-  environmentBarMobileClassName:
-    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.environmentBarMobile,
-  environmentBarValueClassName:
-    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography.environmentBarValue,
-  environmentBarValueMobileClassName:
-    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.typography
-      .environmentBarValueMobile,
   /** Top inset — matches the action bar row (`anchorTopBasePx`). */
   topInsetBasePx: 4,
   /** Parchment card vertical padding (p-0.5 top + bottom). */
   cardVerticalChromeBasePx: 4,
-  /** Environment bar row height before viewport HUD scale. */
-  environmentBarOccupiedBasePx: {
-    desktop: 16,
-    mobile: 12,
-  },
   /** Gap before Dev tools / other chrome below the minimap card. */
   belowMinimapGapBasePx: 6,
   viewportLayouts: {
@@ -74,12 +57,10 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
       /** Wide screens — stack sits in the top-left corner. */
       desktop: {
         edgeInsetBasePx: 4,
-        environmentBarValueTextBasePx: 11,
       },
       /** Phone-sized screens — same top-left corner as the action bar row. */
       mobile: {
         edgeInsetBasePx: 4,
-        environmentBarValueTextBasePx: 9,
       },
     },
     /** Expanded fullscreen game view. */
@@ -87,12 +68,10 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
       /** Wide screens — same edge inset as embedded (matches top y). */
       desktop: {
         edgeInsetBasePx: 4,
-        environmentBarValueTextBasePx: 12,
       },
       /** Phone-sized fullscreen — same top-left anchor. */
       mobile: {
         edgeInsetBasePx: 4,
-        environmentBarValueTextBasePx: 9,
       },
     },
   },
@@ -101,13 +80,8 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
   columnClassName: string;
   cardClassName: string;
   mapFrameClassName: string;
-  environmentBarClassName: string;
-  environmentBarMobileClassName: string;
-  environmentBarValueClassName: string;
-  environmentBarValueMobileClassName: string;
   topInsetBasePx: number;
   cardVerticalChromeBasePx: number;
-  environmentBarOccupiedBasePx: Record<'desktop' | 'mobile', number>;
   belowMinimapGapBasePx: number;
   viewportLayouts: Record<
     'embedded' | 'fullscreen',

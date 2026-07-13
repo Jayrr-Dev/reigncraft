@@ -5635,13 +5635,6 @@ function RenderingWorldPlazaPixiSceneConnected({
               localUserId={onlineUserId}
               isFullscreen={hudIsFullscreen}
               ownedPlotsRef={ownedPlotsRef}
-              localTemperatureCelsius={
-                playerHealthHudSnapshot.localTemperatureCelsius
-              }
-              temperatureDisplayUnit={
-                playerHealthHudSnapshot.temperatureDisplayUnit
-              }
-              isTemperatureVisible={isLocalGameplayEnabled}
               viewportHudScale={viewportHudScale}
             />
           ) : null}
@@ -6070,6 +6063,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                       playerHealthHudSnapshot.temperatureDisplayUnit,
                     comfortBand: temperatureComfortBand,
                   }}
+                  playerPositionRef={playerPositionRef}
                   inlineChatSlot={
                     isPlazaSocialEnabled ? (
                       <RenderingWorldPlazaRoomChatPanel
@@ -6222,6 +6216,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                       playerHealthHudSnapshot.temperatureDisplayUnit,
                     comfortBand: temperatureComfortBand,
                   }}
+                  playerPositionRef={playerPositionRef}
                 />
               ) : null}
               {isHudHotbarEnabled ? (

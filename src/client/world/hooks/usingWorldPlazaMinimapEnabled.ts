@@ -30,8 +30,8 @@ export type UsingWorldPlazaMinimapEnabledResult = {
 /**
  * Subscribes to the minimap preference store.
  *
- * Unset preference defaults on for mobile and desktop when the active
- * performance tier allows the minimap.
+ * Unset preference defaults off for mobile and desktop when the active
+ * performance tier allows the minimap (player opens it from the layer orb).
  */
 export function usingWorldPlazaMinimapEnabled(): UsingWorldPlazaMinimapEnabledResult {
   const isMobile = useIsMobile();

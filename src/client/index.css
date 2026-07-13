@@ -1706,10 +1706,11 @@ body {
   background: linear-gradient(180deg, #2c4a52 0%, #223a42 100%);
 }
 
-/* Hunger / temperature / day-night orbs: beveled bronze ring matching action-bar gold chrome. */
+/* Hunger / temperature / day-night / world-layer orbs: beveled bronze ring matching action-bar gold chrome. */
 .plaza-hunger-orb,
 .plaza-temperature-orb,
-.plaza-day-night-orb {
+.plaza-day-night-orb,
+.plaza-world-layer-orb {
   border: 0;
   padding: 0;
   background: linear-gradient(
@@ -1733,7 +1734,8 @@ body {
 
 .plaza-hunger-orb,
 .plaza-temperature-orb,
-.plaza-day-night-orb {
+.plaza-day-night-orb,
+.plaza-world-layer-orb {
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -1741,20 +1743,23 @@ body {
 
 .plaza-hunger-orb:hover,
 .plaza-temperature-orb:hover,
-.plaza-day-night-orb:hover {
+.plaza-day-night-orb:hover,
+.plaza-world-layer-orb:hover {
   filter: brightness(1.06);
 }
 
 .plaza-hunger-orb:focus-visible,
 .plaza-temperature-orb:focus-visible,
-.plaza-day-night-orb:focus-visible {
+.plaza-day-night-orb:focus-visible,
+.plaza-world-layer-orb:focus-visible {
   outline: 2px solid var(--color-poster-gold);
   outline-offset: 2px;
 }
 
 .plaza-hunger-orb:active,
 .plaza-temperature-orb:active,
-.plaza-day-night-orb:active {
+.plaza-day-night-orb:active,
+.plaza-world-layer-orb:active {
   transform: translateY(1px);
   box-shadow:
     0 1px 2px rgba(20, 14, 8, 0.4),
@@ -1764,7 +1769,8 @@ body {
 
 .plaza-hunger-orb--open,
 .plaza-temperature-orb--open,
-.plaza-day-night-orb--open {
+.plaza-day-night-orb--open,
+.plaza-world-layer-orb--open {
   box-shadow:
     0 2px 3px rgba(20, 14, 8, 0.45),
     0 0 0 2px rgba(217, 164, 65, 0.55),

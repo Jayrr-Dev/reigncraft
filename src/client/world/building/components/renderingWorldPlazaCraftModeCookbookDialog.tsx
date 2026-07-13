@@ -125,12 +125,11 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
     [attachedRecipeIdSet, cookbookDefinition]
   );
 
-  const leafCount = Math.max(
-    1,
+  const leafCount =
     isCraftingEnabled && cookbookRecipes.length > 0
       ? cookbookRecipes.length
-      : (cookbookDefinition?.blankPageCount ?? 1)
-  );
+      : 1;
+  const showCookbookPager = leafCount > 1;
   const activeRecipe =
     isCraftingEnabled && cookbookRecipes.length > 0
       ? (cookbookRecipes[leafIndex] ?? null)
@@ -311,29 +310,31 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
           </div>
         </div>
 
-        <footer className="flex items-center justify-center gap-3 sm:gap-4">
-          <button
-            type="button"
-            onClick={() => turningCookbookLeaf(-1)}
-            disabled={leafIndex <= 0}
-            className={COOKBOOK_PAGER_BUTTON_CLASS_NAME}
-          >
-            <Icon icon="mdi:chevron-left" className="size-4" aria-hidden />
-            <span className="hidden sm:inline">Prev</span>
-          </button>
-          <span className="font-mono text-xs font-medium text-parchment/75 sm:text-sm">
-            {leafIndex + 1}/{leafCount}
-          </span>
-          <button
-            type="button"
-            onClick={() => turningCookbookLeaf(1)}
-            disabled={leafIndex >= leafCount - 1}
-            className={COOKBOOK_PAGER_BUTTON_CLASS_NAME}
-          >
-            <span className="hidden sm:inline">Next</span>
-            <Icon icon="mdi:chevron-right" className="size-4" aria-hidden />
-          </button>
-        </footer>
+        {showCookbookPager ? (
+          <footer className="flex items-center justify-center gap-3 sm:gap-4">
+            <button
+              type="button"
+              onClick={() => turningCookbookLeaf(-1)}
+              disabled={leafIndex <= 0}
+              className={COOKBOOK_PAGER_BUTTON_CLASS_NAME}
+            >
+              <Icon icon="mdi:chevron-left" className="size-4" aria-hidden />
+              <span className="hidden sm:inline">Prev</span>
+            </button>
+            <span className="font-mono text-xs font-medium text-parchment/75 sm:text-sm">
+              {leafIndex + 1}/{leafCount}
+            </span>
+            <button
+              type="button"
+              onClick={() => turningCookbookLeaf(1)}
+              disabled={leafIndex >= leafCount - 1}
+              className={COOKBOOK_PAGER_BUTTON_CLASS_NAME}
+            >
+              <span className="hidden sm:inline">Next</span>
+              <Icon icon="mdi:chevron-right" className="size-4" aria-hidden />
+            </button>
+          </footer>
+        ) : null}
       </div>
     </div>,
     document.body

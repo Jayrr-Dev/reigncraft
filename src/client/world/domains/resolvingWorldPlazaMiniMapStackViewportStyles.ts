@@ -24,7 +24,7 @@ export function computingWorldPlazaMiniMapStackTopPx(
 }
 
 /**
- * Vertical footprint of the minimap parchment card (environment bar + map).
+ * Vertical footprint of the minimap parchment card (map frame only).
  */
 export function computingWorldPlazaMiniMapStackOccupiedHeightPx(
   viewportHudScale: number,
@@ -35,18 +35,12 @@ export function computingWorldPlazaMiniMapStackOccupiedHeightPx(
   const platform = isMobile ? 'mobile' : 'desktop';
   const canvasSizePx =
     DEFINING_WORLD_PLAZA_MINI_MAP_CANVAS_SIZE_PX[viewportMode][platform];
-  const environmentBarPx = computingWorldPlazaViewportHudScaledPx(
-    DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.environmentBarOccupiedBasePx[
-      platform
-    ],
-    viewportHudScale
-  );
   const cardChromePx = computingWorldPlazaViewportHudScaledPx(
     DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.cardVerticalChromeBasePx,
     viewportHudScale
   );
 
-  return environmentBarPx + cardChromePx + canvasSizePx;
+  return cardChromePx + canvasSizePx;
 }
 
 /**

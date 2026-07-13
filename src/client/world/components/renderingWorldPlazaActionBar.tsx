@@ -18,6 +18,7 @@ import { RenderingWorldPlazaDayNightIndicator } from '@/components/world/compone
 import { RenderingWorldPlazaDayNightPanel } from '@/components/world/components/renderingWorldPlazaDayNightPanel';
 import { RenderingWorldPlazaExitHomeConfirmDialog } from '@/components/world/components/renderingWorldPlazaExitHomeConfirmDialog';
 import { RenderingWorldPlazaMasterVolumeMixerPanel } from '@/components/world/components/renderingWorldPlazaMasterVolumeMixerPanel';
+import { RenderingWorldPlazaWorldLayerIndicator } from '@/components/world/components/renderingWorldPlazaWorldLayerIndicator';
 import {
   DEFINING_WORLD_PLAZA_ACTION_BAR_ANCHOR_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ACTION_BAR_BUTTON_ACTIVE_CLASS_NAME,
@@ -47,15 +48,18 @@ import {
   STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaMasterVolumeConstants';
 import { LABELING_WORLD_PLAZA_ACTION_BAR_PROFILE } from '@/components/world/domains/definingWorldPlazaProfilePanelConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   DEFINING_WORLD_PLAZA_VIEWPORT_FULLSCREEN_ENTER_LABEL,
   DEFINING_WORLD_PLAZA_VIEWPORT_FULLSCREEN_EXIT_LABEL,
 } from '@/components/world/domains/definingWorldPlazaViewportFullscreenConstants';
+import { STYLING_WORLD_PLAZA_ACTION_BAR_WORLD_LAYER_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaWorldLayerIndicatorConstants';
 import { resolvingWorldPlazaActionBarViewportStyles } from '@/components/world/domains/resolvingWorldPlazaActionBarViewportStyles';
 import { RenderingWorldPlazaTemperatureIndicator } from '@/components/world/health/components/renderingWorldPlazaTemperatureIndicator';
 import { RenderingWorldPlazaTemperaturePanel } from '@/components/world/health/components/renderingWorldPlazaTemperaturePanel';
 import { STYLING_WORLD_PLAZA_ACTION_BAR_TEMPERATURE_ANCHOR_CLASS_NAME } from '@/components/world/health/domains/definingWorldPlazaTemperatureIndicatorConstants';
 import type { DefiningWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
+import { usingWorldPlazaMinimapEnabled } from '@/components/world/hooks/usingWorldPlazaMinimapEnabled';
 import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
 import { RenderingWorldPlazaHungerIndicator } from '@/components/world/hunger/components/renderingWorldPlazaHungerIndicator';
 import { RenderingWorldPlazaHungerPanel } from '@/components/world/hunger/components/renderingWorldPlazaHungerPanel';
@@ -122,6 +126,8 @@ export interface RenderingWorldPlazaActionBarProps {
       readonly comfortHighCelsius: number;
     } | null;
   } | null;
+  /** Live local player position; drives the world-layer orb and minimap toggle. */
+  playerPositionRef?: React.RefObject<DefiningWorldPlazaWorldPoint> | null;
 }
 
 /**
@@ -159,6 +165,7 @@ export function RenderingWorldPlazaActionBar({
   inlineChatSlot = null,
   hungerHud = null,
   temperatureHud = null,
+  playerPositionRef = null,
 }: RenderingWorldPlazaActionBarProps): React.JSX.Element | null {
   const viewportStyles = useMemo(
     () =>
@@ -171,6 +178,8 @@ export function RenderingWorldPlazaActionBar({
   );
 
   const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();
+  const { isMinimapPreferenceEnabled, settingMinimapEnabled } =
+    usingWorldPlazaMinimapEnabled();
   const [isTransformPanelOpen, setIsTransformPanelOpen] = useState(false);
   const [isHungerPanelOpen, setIsHungerPanelOpen] = useState(false);
   const [isTemperaturePanelOpen, setIsTemperaturePanelOpen] = useState(false);
@@ -536,6 +545,30 @@ export function RenderingWorldPlazaActionBar({
                     <RenderingWorldPlazaDayNightPanel />
                   ) : null}
                 </div>
+
+                {playerPositionRef ? (
+                  <div
+                    className={
+                      STYLING_WORLD_PLAZA_ACTION_BAR_WORLD_LAYER_ANCHOR_CLASS_NAME
+                    }
+                  >
+                    <RenderingWorldPlazaWorldLayerIndicator
+                      playerPositionRef={playerPositionRef}
+                      viewportHudScale={viewportHudScale}
+                      isMobile={isMobile}
+                      isOpen={isMinimapPreferenceEnabled}
+                      onToggle={() => {
+                        setIsTransformPanelOpen(false);
+                        setIsSoundMixerOpen(false);
+                        setIsCodexMenuOpen(false);
+                        setIsHungerPanelOpen(false);
+                        setIsTemperaturePanelOpen(false);
+                        setIsDayNightPanelOpen(false);
+                        settingMinimapEnabled(!isMinimapPreferenceEnabled);
+                      }}
+                    />
+                  </div>
+                ) : null}
 
                 {isFullscreenSupported ? (
                   <>
