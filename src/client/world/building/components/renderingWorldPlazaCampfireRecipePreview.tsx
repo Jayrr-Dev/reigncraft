@@ -10,6 +10,7 @@ import {
   DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_PREVIEW_CENTER_X_PX,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_PREVIEW_CENTER_Y_PX,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_PREVIEW_HEIGHT_PX,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_PREVIEW_SCALE,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_PREVIEW_WIDTH_PX,
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeUiConstants';
 import { drawingWorldPlazaCampfireOnGraphicsAtScreenPoint } from '@/components/world/fire/domains/drawingWorldPlazaCampfireOnGraphics';
@@ -64,6 +65,9 @@ export function RenderingWorldPlazaCampfireRecipePreview(): React.JSX.Element {
         DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_PREVIEW_CENTER_Y_PX,
         'unlit'
       );
+      graphics.scale.set(
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_PREVIEW_SCALE
+      );
       nextApplication.stage.addChild(graphics);
     };
 
@@ -79,7 +83,7 @@ export function RenderingWorldPlazaCampfireRecipePreview(): React.JSX.Element {
   return (
     <div
       ref={hostRef}
-      className="size-20 shrink-0 sm:size-24 [&_canvas]:size-full [&_canvas]:[image-rendering:pixelated]"
+      className="h-28 w-44 shrink-0 sm:h-36 sm:w-56 [&_canvas]:size-full [&_canvas]:[image-rendering:pixelated]"
       aria-hidden
     />
   );
