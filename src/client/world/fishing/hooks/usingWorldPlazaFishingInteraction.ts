@@ -12,10 +12,15 @@ import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/invent
 import { wearingWorldPlazaEquippedInventoryToolDurability } from '@/components/world/inventory/domains/wearingWorldPlazaEquippedInventoryToolDurability';
 import { useCallback, type RefObject } from 'react';
 
+export type UpdatingWorldPlazaFishingInventoryState = (
+  updater: (
+    currentState: DefiningInventoryState
+  ) => DefiningInventoryState | null
+) => void;
+
 export type UsingWorldPlazaFishingInteractionParams = {
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
-  readonly inventoryState: DefiningInventoryState;
-  readonly updatingInventoryState: (next: DefiningInventoryState) => void;
+  readonly updatingInventoryState: UpdatingWorldPlazaFishingInventoryState;
   readonly selectedSlotIndex: number | null;
   readonly showingGameplayHudToast: (message: string) => void;
 };
@@ -34,7 +39,6 @@ export type UsingWorldPlazaFishingInteractionResult = {
  */
 export function usingWorldPlazaFishingInteraction({
   playerPositionRef,
-  inventoryState,
   updatingInventoryState,
   selectedSlotIndex,
   showingGameplayHudToast,
@@ -84,38 +88,53 @@ export function usingWorldPlazaFishingInteraction({
         return;
       }
 
-      const wearResult = wearingWorldPlazaEquippedInventoryToolDurability(
-        inventoryState,
-        selectedSlotIndex,
-        'fishrod'
-      );
+      let didBreak = false;
+      let quantityAccepted = 0;
+      let wasInventoryFull = false;
 
-      const withFish = addingInventoryItemWithStacking(
-        wearResult.nextState,
-        {
-          id: `fishing-catch-${entry.tileX}-${entry.tileY}`,
-          itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISH,
-          quantity: DEFINING_WORLD_PLAZA_FISHING_CATCH_QUANTITY,
-        },
-        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
-      );
+      updatingInventoryState((currentState) => {
+        const wearResult = wearingWorldPlazaEquippedInventoryToolDurability(
+          currentState,
+          selectedSlotIndex,
+          'fishrod'
+        );
 
-      if (withFish.quantityOverflow > 0) {
+        const withFish = addingInventoryItemWithStacking(
+          wearResult.nextState,
+          {
+            id: `fishing-catch-${entry.tileX}-${entry.tileY}`,
+            itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISH,
+            quantity: DEFINING_WORLD_PLAZA_FISHING_CATCH_QUANTITY,
+          },
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+        );
+
+        if (withFish.quantityOverflow > 0) {
+          wasInventoryFull = true;
+          return null;
+        }
+
+        didBreak = wearResult.broken;
+        quantityAccepted = withFish.quantityAccepted;
+        return withFish.state;
+      });
+
+      if (wasInventoryFull) {
         showingGameplayHudToast('Inventory is full.');
         return;
       }
 
-      updatingInventoryState(withFish.state);
-      notifyingWorldPlazaInventoryItemAdded(withFish.quantityAccepted);
+      if (quantityAccepted > 0) {
+        notifyingWorldPlazaInventoryItemAdded(quantityAccepted);
+      }
 
-      if (wearResult.broken) {
+      if (didBreak) {
         showingGameplayHudToast('Your fishing rod broke.');
       } else {
         showingGameplayHudToast('Caught a fish.');
       }
     },
     [
-      inventoryState,
       playerPositionRef,
       selectedSlotIndex,
       showingGameplayHudToast,

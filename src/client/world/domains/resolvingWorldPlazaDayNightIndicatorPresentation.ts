@@ -4,15 +4,11 @@
  * @module components/world/domains/resolvingWorldPlazaDayNightIndicatorPresentation
  */
 
+import type { DefiningWorldPlazaDayNightCelestialBody } from '@/components/world/domains/definingWorldPlazaDayNightCelestialSpriteSheetConstants';
 import {
   DEFINING_WORLD_PLAZA_DAY_NIGHT_SUNRISE_PHASE,
   DEFINING_WORLD_PLAZA_DAY_NIGHT_SUNSET_PHASE,
 } from '@/components/world/domains/definingWorldPlazaDayNightCycleConstants';
-import {
-  DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_CELESTIAL_INSET,
-  DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_MOON_ICON,
-  DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_SUN_ICON,
-} from '@/components/world/domains/definingWorldPlazaDayNightIndicatorConstants';
 
 /** Layout values for the action-bar day/night orb. */
 export type ResolvingWorldPlazaDayNightIndicatorPresentation = {
@@ -24,8 +20,8 @@ export type ResolvingWorldPlazaDayNightIndicatorPresentation = {
   readonly celestialLeftRatio: number;
   /** Top position of the sun/moon center inside the disc (0..1). */
   readonly celestialTopRatio: number;
-  /** Iconify id for the active celestial body. */
-  readonly celestialIcon: string;
+  /** Active celestial body for the sprite sheet crop. */
+  readonly celestialBody: DefiningWorldPlazaDayNightCelestialBody;
 };
 
 /**
@@ -56,10 +52,10 @@ function resolvingWorldPlazaDayNightIndicatorArcProgress(cyclePhase: number): {
 }
 
 /**
- * Maps cycle phase to thermometer daylight fill and sun/moon disc position.
+ * Maps cycle phase to thermometer daylight fill and which celestial body shows.
  *
  * Daytime fill rises with sun altitude (black at dawn/dusk, full sunny at noon).
- * Night stays black. The active body sweeps left→right and rises/sets vertically.
+ * Night stays black. Sun/moon stay centered in the disc (same as hunger glyph).
  *
  * @param cyclePhase - Shared day/night phase (0 = midnight, 0.5 = noon)
  */
@@ -69,16 +65,12 @@ export function resolvingWorldPlazaDayNightIndicatorPresentation(
   const { arcProgress, isDaytime } =
     resolvingWorldPlazaDayNightIndicatorArcProgress(cyclePhase);
   const altitude = Math.sin(arcProgress * Math.PI);
-  const inset = DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_CELESTIAL_INSET;
-  const travel = 1 - 2 * inset;
 
   return {
     isDaytime,
     daylightFillRatio: isDaytime ? altitude : 0,
-    celestialLeftRatio: inset + arcProgress * travel,
-    celestialTopRatio: inset + (1 - altitude) * travel,
-    celestialIcon: isDaytime
-      ? DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_SUN_ICON
-      : DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_MOON_ICON,
+    celestialLeftRatio: 0.5,
+    celestialTopRatio: 0.5,
+    celestialBody: isDaytime ? 'sun' : 'moon',
   };
 }

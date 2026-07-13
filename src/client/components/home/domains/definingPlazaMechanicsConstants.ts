@@ -180,7 +180,7 @@ export const DEFINING_PLAZA_MECHANICS_DAMAGE_SECTIONS: readonly PlazaMechanicsSe
       id: 'environmental-cold',
       title: 'Frost (Cold)',
       description:
-        'Freezing biomes deal frost damage per second. Cold resistance reduces how quickly the chill wears you down. Cold weakness makes frost hit harder. Below freezing, frost also slows walk and run speed. The colder it gets, the slower you move. At absolute zero you cannot move at all. Prolonged cold builds frostbite stacks: walking slows further, but you can still sprint until Necrotic freeze at max stacks. Warm up above your comfort threshold to recover: you lose about one frostbite stack per degree above that threshold each second (for example, 59°C when your comfort low is −10°C clears roughly 69 stacks per second).',
+        'Freezing biomes deal frost damage per second. Cold resistance reduces how quickly the chill wears you down. Cold weakness makes frost hit harder. Below freezing, frost also slows walk and run speed. The colder it gets, the slower you move. At absolute zero you cannot move at all. Prolonged cold builds frostbite stacks: walking slows further, but you can still sprint until Necrotic freeze at max stacks. Warm up above your comfort threshold to recover: you lose about one frostbite stack per degree above that threshold each second (for example, 40°C when your comfort low is 0°C clears roughly 40 stacks per second).',
       icon: damageCold.floatIcon ?? 'mdi:snowflake',
     },
     {

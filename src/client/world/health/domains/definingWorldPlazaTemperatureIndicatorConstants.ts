@@ -1,5 +1,8 @@
 /**
- * Action-bar temperature orb: thermometer range, colors, and labels.
+ * Action-bar temperature orb: thermometer range, gradient palette, and labels.
+ *
+ * Comfort edges (#d7edff … #ffcfbf) track the character comfort band. Cold and
+ * hot stops continue that palette beyond the band toward climate extremes.
  *
  * @module components/world/health/domains/definingWorldPlazaTemperatureIndicatorConstants
  */
@@ -28,36 +31,42 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MAX_CELSIUS =
   DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_MAX_CELSIUS;
 
 /**
- * Celsius where bluish tones begin (at and below).
- * Above this, the orb stays white-toned until the warm stop.
+ * Ordered cold→hot orb fill palette (9 stops).
+ *
+ * Comfort band maps to indices 3–5 (#d7edff → #ffffff → #ffcfbf). Stops outside
+ * that range stretch from indicator min/max toward the comfort edges.
  */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_COOL_STOP_CELSIUS = 15;
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_GRADIENT_HEX_STOPS = [
+  '#00b7ff',
+  '#76c8ff',
+  '#abdaff',
+  '#d7edff',
+  '#ffffff',
+  '#ffcfbf',
+  '#ff9e81',
+  '#ff6846',
+  '#ff0000',
+] as const;
 
-/**
- * Celsius where red tones begin (at and above).
- * Below this (down to the cool stop), the orb stays white-toned.
- */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_WARM_STOP_CELSIUS = 25;
-
-/** Hot stop for the solid temp-driven fill color (at indicator max). */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_HOT_COLOR =
-  '#e03328' as const;
-
-/** Soft red at the warm comfort edge (°C). */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_WARM_EDGE_COLOR =
-  '#d45a4a' as const;
-
-/** White mid stop across the comfortable band. */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MID_COLOR =
-  '#f3efe8' as const;
-
-/** Cool-white edge where bluish tones begin (°C). */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_COOL_EDGE_COLOR =
-  '#e8eef5' as const;
-
-/** Cold stop for the solid temp-driven fill color (at indicator min). */
+/** Coldest stop (indicator min °C). */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_COLD_COLOR =
-  '#3b7fd4' as const;
+  DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_GRADIENT_HEX_STOPS[0];
+
+/** Cool comfort edge (character comfort low °C). */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_COOL_EDGE_COLOR =
+  DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_GRADIENT_HEX_STOPS[3];
+
+/** White mid stop (comfort midpoint). */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MID_COLOR =
+  DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_GRADIENT_HEX_STOPS[4];
+
+/** Warm comfort edge (character comfort high °C). */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_WARM_EDGE_COLOR =
+  DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_GRADIENT_HEX_STOPS[5];
+
+/** Hottest stop (indicator max °C). */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_HOT_COLOR =
+  DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_GRADIENT_HEX_STOPS[8];
 
 /** Wrapper anchoring the temperature orb in the action bar. */
 export const STYLING_WORLD_PLAZA_ACTION_BAR_TEMPERATURE_ANCHOR_CLASS_NAME =

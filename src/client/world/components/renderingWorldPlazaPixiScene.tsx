@@ -9,7 +9,6 @@ import { RenderingUserProfileFriendRequestPlazaModal } from '@/components/friend
 import { usingUserProfileFriendPlazaNotifications } from '@/components/friends/hooks/usingUserProfileFriendPlazaNotifications';
 import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/hooks/usingUserProfileFriendRequestPlazaDialogs';
 import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
-import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import { sendingWorldPlazaAudioLifecycleEvent } from '@/components/world/audio/lifecycle/managingWorldPlazaAudioLifecycleStore';
 import { RenderingSpiritedSpritesBetaLayer } from '@/components/world/beta/spirited/components/renderingSpiritedSpritesBetaLayer';
@@ -307,6 +306,7 @@ import type { DefiningWorldPlazaEntityHealthSyncSnapshot } from '@/components/wo
 import { DEFINING_WORLD_PLAZA_ENTITY_SOULBREAK_DEV_HEALTH_PERCENT_EV } from '@/components/world/health/domains/definingWorldPlazaEntitySoulbreakConstants';
 import { formattingWorldPlazaEntityDeathScreenTitle } from '@/components/world/health/domains/formattingWorldPlazaEntityDeathScreenTitle';
 import { resolvingWorldPlazaEntityHealthAttackSpeedMultiplier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthAttackSpeedMultiplier';
+import { resolvingWorldPlazaEntityTemperatureComfortBand } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureComfortBand';
 import { usingWorldPlazaPersistingPlayerConditions } from '@/components/world/health/hooks/usingWorldPlazaPersistingPlayerConditions';
 import { usingWorldPlazaPlayerHealth } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import { trackingWorldPlazaArrowKeyInput } from '@/components/world/hooks/trackingWorldPlazaArrowKeyInput';
@@ -2314,18 +2314,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   hasSeedsInInventoryRef.current = hasSeedsInInventory;
   proximityPlacedBlocksRef.current = activeScenePlacedBlocks;
 
-  const applyingInventoryStateUpdate = useCallback(
-    (nextState: DefiningInventoryState): void => {
-      updatingInventoryState(() => nextState);
-    },
-    [updatingInventoryState]
-  );
-
   const { validatingFishingCastStart, completingFishingCast } =
     usingWorldPlazaFishingInteraction({
       playerPositionRef,
-      inventoryState,
-      updatingInventoryState: applyingInventoryStateUpdate,
+      updatingInventoryState,
       selectedSlotIndex: equipment.selectedSlotIndex,
       showingGameplayHudToast,
     });
@@ -2401,7 +2393,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       persistenceOwnerId: chopPersistenceOwnerId,
       playerPositionRef,
       inventoryState,
-      updatingInventoryState: applyingInventoryStateUpdate,
+      updatingInventoryState,
       selectedSlotIndex: equipment.selectedSlotIndex,
       showingGameplayHudToast,
       onFarmlandStateChanged: refreshingFarmlandState,
@@ -3038,18 +3030,26 @@ function RenderingWorldPlazaPixiSceneConnected({
       melee.damageAmount
     );
 
-    const wearResult = wearingWorldPlazaEquippedInventoryToolDurability(
-      inventoryState,
-      equipment.selectedSlotIndex,
-      'sword'
-    );
+    const selectedSlotIndex = equipment.selectedSlotIndex;
+    let didBreak = false;
 
-    if (wearResult.applied) {
-      updatingInventoryState(() => wearResult.nextState);
+    updatingInventoryState((currentState) => {
+      const wearResult = wearingWorldPlazaEquippedInventoryToolDurability(
+        currentState,
+        selectedSlotIndex,
+        'sword'
+      );
 
-      if (wearResult.broken) {
-        showingGameplayHudToast('Your sword broke.');
+      if (!wearResult.applied) {
+        return null;
       }
+
+      didBreak = wearResult.broken;
+      return wearResult.nextState;
+    });
+
+    if (didBreak) {
+      showingGameplayHudToast('Your sword broke.');
     }
   };
 
@@ -3857,6 +3857,13 @@ function RenderingWorldPlazaPixiSceneConnected({
   });
 
   const isPlayerDead = playerHealthHudSnapshot.isDead;
+  const temperatureComfortBand = useMemo(
+    () =>
+      resolvingWorldPlazaEntityTemperatureComfortBand(
+        playerHealthHudSnapshot.temperatureResistance
+      ),
+    [playerHealthHudSnapshot.temperatureResistance]
+  );
   const wasPlayerDeadForAudioRef = useRef(isPlayerDead);
 
   useEffect(() => {
@@ -6001,6 +6008,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                       playerHealthHudSnapshot.localTemperatureCelsius,
                     temperatureDisplayUnit:
                       playerHealthHudSnapshot.temperatureDisplayUnit,
+                    comfortBand: temperatureComfortBand,
                   }}
                   inlineChatSlot={
                     isPlazaSocialEnabled ? (
@@ -6149,6 +6157,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                       playerHealthHudSnapshot.localTemperatureCelsius,
                     temperatureDisplayUnit:
                       playerHealthHudSnapshot.temperatureDisplayUnit,
+                    comfortBand: temperatureComfortBand,
                   }}
                 />
               ) : null}

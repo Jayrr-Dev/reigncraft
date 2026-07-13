@@ -114,6 +114,11 @@ export interface RenderingWorldPlazaActionBarProps {
   temperatureHud?: {
     readonly localTemperatureCelsius: number | null;
     readonly temperatureDisplayUnit: DefiningWorldPlazaTemperatureDisplayUnit;
+    /** Character comfort band for soft blue→peach orb colors. */
+    readonly comfortBand?: {
+      readonly comfortLowCelsius: number;
+      readonly comfortHighCelsius: number;
+    } | null;
   } | null;
 }
 
@@ -455,6 +460,7 @@ export function RenderingWorldPlazaActionBar({
                       temperatureDisplayUnit={
                         temperatureHud.temperatureDisplayUnit
                       }
+                      comfortBand={temperatureHud.comfortBand}
                       viewportHudScale={viewportHudScale}
                       isMobile={isMobile}
                     />

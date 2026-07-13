@@ -2,7 +2,7 @@
 
 /**
  * Temperature sphere for the plaza action bar: full disc filled with a
- * solid color that shifts cold → mid → hot from ambient °C, plus readout.
+ * solid color that shifts cold → comfort → hot from ambient °C, plus readout.
  *
  * @module components/world/health/components/renderingWorldPlazaTemperatureIndicator
  */
@@ -15,7 +15,10 @@ import {
   STYLING_WORLD_PLAZA_TEMPERATURE_INDICATOR_ORB_CLASS_NAME,
   STYLING_WORLD_PLAZA_TEMPERATURE_INDICATOR_VALUE_CLASS_NAME,
 } from '@/components/world/health/domains/definingWorldPlazaTemperatureIndicatorConstants';
-import type { DefiningWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
+import type {
+  DefiningWorldPlazaEntityTemperatureComfortBand,
+  DefiningWorldPlazaTemperatureDisplayUnit,
+} from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
 import { resolvingWorldPlazaTemperatureIndicatorFillColor } from '@/components/world/health/domains/resolvingWorldPlazaTemperatureIndicatorFillColor';
 import { resolvingWorldPlazaTemperatureIndicatorViewportStyles } from '@/components/world/health/domains/resolvingWorldPlazaTemperatureIndicatorViewportStyles';
 import { memo, useMemo } from 'react';
@@ -26,6 +29,8 @@ export type RenderingWorldPlazaTemperatureIndicatorProps = {
   localTemperatureCelsius: number | null;
   /** Preferred HUD unit (°C or °F). */
   temperatureDisplayUnit: DefiningWorldPlazaTemperatureDisplayUnit;
+  /** Character comfort band that anchors the soft blue→peach orb range. */
+  comfortBand?: DefiningWorldPlazaEntityTemperatureComfortBand | null;
   /** Live HUD scale from the plaza viewport frame. */
   viewportHudScale?: number;
   /** When true, applies the action bar mobile shrink. */
@@ -39,6 +44,7 @@ export const RenderingWorldPlazaTemperatureIndicator = memo(
   function RenderingWorldPlazaTemperatureIndicator({
     localTemperatureCelsius,
     temperatureDisplayUnit,
+    comfortBand = null,
     viewportHudScale = 1,
     isMobile = false,
   }: RenderingWorldPlazaTemperatureIndicatorProps): React.JSX.Element | null {
@@ -68,9 +74,10 @@ export const RenderingWorldPlazaTemperatureIndicator = memo(
       }
 
       return resolvingWorldPlazaTemperatureIndicatorFillColor(
-        localTemperatureCelsius
+        localTemperatureCelsius,
+        comfortBand
       );
-    }, [localTemperatureCelsius]);
+    }, [comfortBand, localTemperatureCelsius]);
 
     if (temperatureLabel === null || fillColor === null) {
       return null;

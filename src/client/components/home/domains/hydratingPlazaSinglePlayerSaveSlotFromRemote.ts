@@ -56,15 +56,39 @@ export async function hydratingPlazaSinglePlayerSaveSlotFromRemote(
   }
 
   if (remoteData.inventory && typeof window !== 'undefined') {
-    const parsedInventory = parsingInventoryState(
-      remoteData.inventory,
-      DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
-      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+    const inventoryStorageKey = resolvingWorldPlazaInventoryStorageKey(
+      localPersistenceOwnerId
     );
+    const existingLocalInventoryJson =
+      window.localStorage.getItem(inventoryStorageKey);
+    let localHasItems = false;
 
-    if (parsedInventory) {
+    if (existingLocalInventoryJson) {
+      try {
+        const existingLocalInventory = parsingInventoryState(
+          JSON.parse(existingLocalInventoryJson),
+          DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+        );
+        localHasItems = existingLocalInventory.slots.some(
+          (slot) => slot !== null
+        );
+      } catch {
+        localHasItems = false;
+      }
+    }
+
+    // Prefer local inventory when present so a lagging Redis snapshot cannot
+    // wipe worn tool durability after a successful local save.
+    if (!localHasItems) {
+      const parsedInventory = parsingInventoryState(
+        remoteData.inventory,
+        DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+      );
+
       window.localStorage.setItem(
-        resolvingWorldPlazaInventoryStorageKey(localPersistenceOwnerId),
+        inventoryStorageKey,
         JSON.stringify(parsedInventory)
       );
     }

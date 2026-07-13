@@ -21,11 +21,17 @@ import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/invent
 import { wearingWorldPlazaEquippedInventoryToolDurability } from '@/components/world/inventory/domains/wearingWorldPlazaEquippedInventoryToolDurability';
 import { useCallback } from 'react';
 
+export type UpdatingWorldPlazaFarmingInventoryState = (
+  updater: (
+    currentState: DefiningInventoryState
+  ) => DefiningInventoryState | null
+) => void;
+
 export type UsingWorldPlazaFarmingInteractionParams = {
   readonly persistenceOwnerId: string | null;
   readonly playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   readonly inventoryState: DefiningInventoryState;
-  readonly updatingInventoryState: (next: DefiningInventoryState) => void;
+  readonly updatingInventoryState: UpdatingWorldPlazaFarmingInventoryState;
   readonly selectedSlotIndex: number | null;
   readonly showingGameplayHudToast: (message: string) => void;
   readonly onFarmlandStateChanged?: () => void;
@@ -130,11 +136,22 @@ export function usingWorldPlazaFarmingInteraction({
         DEFINING_WORLD_PLAZA_CROP_REGISTRY[DEFINING_WORLD_PLAZA_CROP_WHEAT_ID];
 
       if (entry.interactionKind === 'till') {
-        const wearResult = wearingWorldPlazaEquippedInventoryToolDurability(
-          inventoryState,
-          selectedSlotIndex,
-          'hoe'
-        );
+        let didBreak = false;
+
+        updatingInventoryState((currentState) => {
+          const wearResult = wearingWorldPlazaEquippedInventoryToolDurability(
+            currentState,
+            selectedSlotIndex,
+            'hoe'
+          );
+
+          if (!wearResult.applied) {
+            return null;
+          }
+
+          didBreak = wearResult.broken;
+          return wearResult.nextState;
+        });
 
         writingWorldPlazaLocalFarmlandTileState(
           persistenceOwnerId,
@@ -147,10 +164,9 @@ export function usingWorldPlazaFarmingInteraction({
           }
         );
 
-        updatingInventoryState(wearResult.nextState);
         onFarmlandStateChanged?.();
 
-        if (wearResult.broken) {
+        if (didBreak) {
           showingGameplayHudToast('Your hoe broke.');
         } else {
           showingGameplayHudToast('Soil tilled.');
@@ -160,13 +176,24 @@ export function usingWorldPlazaFarmingInteraction({
       }
 
       if (entry.interactionKind === 'plant') {
-        const consumeSeed = consumingWorldPlazaInventoryItemByType(
-          inventoryState,
-          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED,
-          1
-        );
+        let didConsume = false;
 
-        if (!consumeSeed.consumed) {
+        updatingInventoryState((currentState) => {
+          const consumeSeed = consumingWorldPlazaInventoryItemByType(
+            currentState,
+            DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED,
+            1
+          );
+
+          if (!consumeSeed.consumed) {
+            return null;
+          }
+
+          didConsume = true;
+          return consumeSeed.nextState;
+        });
+
+        if (!didConsume) {
           showingGameplayHudToast('You need wheat seeds.');
           return;
         }
@@ -182,30 +209,44 @@ export function usingWorldPlazaFarmingInteraction({
           }
         );
 
-        updatingInventoryState(consumeSeed.nextState);
         onFarmlandStateChanged?.();
         showingGameplayHudToast('Seeds planted.');
         return;
       }
 
       if (entry.interactionKind === 'harvest' && crop) {
-        const wearResult = wearingWorldPlazaEquippedInventoryToolDurability(
-          inventoryState,
-          selectedSlotIndex,
-          'scythe'
-        );
+        let didBreak = false;
+        let quantityAccepted = 0;
+        let wasInventoryFull = false;
 
-        const withHarvest = addingInventoryItemWithStacking(
-          wearResult.nextState,
-          {
-            id: `farming-harvest-${entry.tileX}-${entry.tileY}`,
-            itemTypeId: crop.harvestItemTypeId,
-            quantity: crop.harvestQuantity,
-          },
-          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
-        );
+        updatingInventoryState((currentState) => {
+          const wearResult = wearingWorldPlazaEquippedInventoryToolDurability(
+            currentState,
+            selectedSlotIndex,
+            'scythe'
+          );
 
-        if (withHarvest.quantityOverflow > 0) {
+          const withHarvest = addingInventoryItemWithStacking(
+            wearResult.nextState,
+            {
+              id: `farming-harvest-${entry.tileX}-${entry.tileY}`,
+              itemTypeId: crop.harvestItemTypeId,
+              quantity: crop.harvestQuantity,
+            },
+            DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+          );
+
+          if (withHarvest.quantityOverflow > 0) {
+            wasInventoryFull = true;
+            return null;
+          }
+
+          didBreak = wearResult.broken;
+          quantityAccepted = withHarvest.quantityAccepted;
+          return withHarvest.state;
+        });
+
+        if (wasInventoryFull) {
           showingGameplayHudToast('Inventory is full.');
           return;
         }
@@ -217,11 +258,13 @@ export function usingWorldPlazaFarmingInteraction({
           null
         );
 
-        updatingInventoryState(withHarvest.state);
-        notifyingWorldPlazaInventoryItemAdded(withHarvest.quantityAccepted);
+        if (quantityAccepted > 0) {
+          notifyingWorldPlazaInventoryItemAdded(quantityAccepted);
+        }
+
         onFarmlandStateChanged?.();
 
-        if (wearResult.broken) {
+        if (didBreak) {
           showingGameplayHudToast('Your scythe broke.');
         } else {
           showingGameplayHudToast('Crop harvested.');
@@ -229,7 +272,6 @@ export function usingWorldPlazaFarmingInteraction({
       }
     },
     [
-      inventoryState,
       onFarmlandStateChanged,
       persistenceOwnerId,
       selectedSlotIndex,

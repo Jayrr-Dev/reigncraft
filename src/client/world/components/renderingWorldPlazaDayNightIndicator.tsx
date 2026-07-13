@@ -2,12 +2,11 @@
 
 /**
  * Day/night sphere for the plaza action bar: black→sunny daylight fill with a
- * sun or moon that arcs across the disc as the shared cycle advances.
+ * sun or moon sprite that arcs across the disc as the shared cycle advances.
  *
  * @module components/world/components/renderingWorldPlazaDayNightIndicator
  */
 
-import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_DAY_NIGHT_CLOCK_REFRESH_INTERVAL_MS } from '@/components/world/domains/definingWorldPlazaDayNightClockConstants';
 import {
@@ -15,14 +14,15 @@ import {
   DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_NIGHT_COLOR,
   LABELING_WORLD_PLAZA_ACTION_BAR_DAY_NIGHT,
   STYLING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_CELESTIAL_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_CELESTIAL_LAYER_CLASS_NAME,
   STYLING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_FILL_DISC_CLASS_NAME,
   STYLING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_ORB_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaDayNightIndicatorConstants';
 import { formattingWorldPlazaDayNightClockTime } from '@/components/world/domains/formattingWorldPlazaDayNightClockTime';
+import { resolvingWorldPlazaDayNightCelestialSpriteIconStyle } from '@/components/world/domains/resolvingWorldPlazaDayNightCelestialSpriteIconStyle';
 import { resolvingWorldPlazaDayNightIndicatorPresentation } from '@/components/world/domains/resolvingWorldPlazaDayNightIndicatorPresentation';
 import { resolvingWorldPlazaDayNightIndicatorViewportStyles } from '@/components/world/domains/resolvingWorldPlazaDayNightIndicatorViewportStyles';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
-import { cn } from '@/lib/utils';
 import { memo, useEffect, useMemo, useState } from 'react';
 
 /** Props for {@link RenderingWorldPlazaDayNightIndicator}. */
@@ -57,6 +57,14 @@ export const RenderingWorldPlazaDayNightIndicator = memo(
       () =>
         resolvingWorldPlazaDayNightIndicatorPresentation(sunState.cyclePhase),
       [sunState.cyclePhase]
+    );
+    const celestialSpriteStyle = useMemo(
+      () =>
+        resolvingWorldPlazaDayNightCelestialSpriteIconStyle(
+          presentation.celestialBody,
+          viewportStyles.iconSizePx
+        ),
+      [presentation.celestialBody, viewportStyles.iconSizePx]
     );
 
     useEffect(() => {
@@ -106,25 +114,23 @@ export const RenderingWorldPlazaDayNightIndicator = memo(
                 DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_FILL_BACKGROUND_CSS,
             }}
           />
+        </span>
+        <span
+          className={
+            STYLING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_CELESTIAL_LAYER_CLASS_NAME
+          }
+          aria-hidden="true"
+        >
           <span
-            className={cn(
-              STYLING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_CELESTIAL_CLASS_NAME,
-              presentation.isDaytime ? 'text-amber-100' : 'text-sky-100'
-            )}
+            className={
+              STYLING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_CELESTIAL_CLASS_NAME
+            }
             style={{
               left: `${presentation.celestialLeftRatio * 100}%`,
               top: `${presentation.celestialTopRatio * 100}%`,
-              width: viewportStyles.iconSizePx,
-              height: viewportStyles.iconSizePx,
+              ...celestialSpriteStyle,
             }}
-          >
-            <Icon
-              icon={presentation.celestialIcon}
-              width={viewportStyles.iconSizePx}
-              height={viewportStyles.iconSizePx}
-              aria-hidden="true"
-            />
-          </span>
+          />
         </span>
       </div>
     );

@@ -1947,8 +1947,8 @@ export function RenderingPlazaTutorialTemperatureDemo(): React.JSX.Element {
       </div>
 
       <p className="text-center text-xs font-medium text-ink-soft">
-        Safe between about -10°C and 50°C. A fire or snowflake badge appears
-        when heat or frost damage starts ticking.
+        Safe between about 0°C and 40°C. A fire or snowflake badge appears when
+        heat or frost damage starts ticking.
       </p>
     </div>
   );

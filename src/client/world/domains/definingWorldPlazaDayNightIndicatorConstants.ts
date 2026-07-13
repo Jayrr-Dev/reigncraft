@@ -7,14 +7,6 @@
 /** Accessible name for the day/night orb. */
 export const LABELING_WORLD_PLAZA_ACTION_BAR_DAY_NIGHT = 'Time of day' as const;
 
-/** Daytime celestial icon (bundled Iconify id). */
-export const DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_SUN_ICON =
-  'mdi:weather-sunny' as const;
-
-/** Nighttime celestial icon (bundled Iconify id). */
-export const DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_MOON_ICON =
-  'mdi:weather-night' as const;
-
 /** Sunny stop at the top of the daylight fill. */
 export const DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_SUNNY_TOP_COLOR =
   '#ffe566' as const;
@@ -38,12 +30,6 @@ export const DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_NIGHT_COLOR =
 export const DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_FILL_BACKGROUND_CSS =
   `linear-gradient(180deg, ${DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_SUNNY_TOP_COLOR} 0%, ${DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_SUNNY_MID_COLOR} 48%, ${DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_SUNNY_BOTTOM_COLOR} 100%)` as const;
 
-/**
- * Horizontal/vertical inset for the sun/moon inside the fill disc (0..0.5).
- * Keeps the icon from clipping the bronze ring.
- */
-export const DEFINING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_CELESTIAL_INSET = 0.16;
-
 /** Wrapper anchoring the day/night orb in the action bar. */
 export const STYLING_WORLD_PLAZA_ACTION_BAR_DAY_NIGHT_ANCHOR_CLASS_NAME =
   'relative flex shrink-0 items-center' as const;
@@ -56,6 +42,13 @@ export const STYLING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_ORB_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_FILL_DISC_CLASS_NAME =
   'absolute inset-[3px] overflow-hidden rounded-full' as const;
 
-/** CSS class for the moving sun/moon icon. */
+/**
+ * Positioning layer matching the fill disc inset, without overflow clip.
+ * Keeps the sun/moon from being sliced by the sky fill mask.
+ */
+export const STYLING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_CELESTIAL_LAYER_CLASS_NAME =
+  'pointer-events-none absolute inset-[3px] z-10' as const;
+
+/** CSS class for the centered sun/moon sprite. */
 export const STYLING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_CELESTIAL_CLASS_NAME =
-  'pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2 text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.85)] transition-[left,top,color] duration-500 ease-out' as const;
+  'pointer-events-none absolute -translate-x-1/2 -translate-y-1/2' as const;
