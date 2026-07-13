@@ -39,7 +39,7 @@ export function RenderingWorldPlazaCampfireRecipePreview({
   presentation = 'full',
   isSilhouette = false,
   className,
-}: RenderingWorldPlazaCampfireRecipePreviewProps = {}): React.JSX.Element {
+}: RenderingWorldPlazaCampfireRecipePreviewProps): React.JSX.Element {
   const hostRef = useRef<HTMLDivElement>(null);
   const isCard = presentation === 'card';
 

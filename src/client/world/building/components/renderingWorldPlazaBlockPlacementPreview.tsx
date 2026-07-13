@@ -14,6 +14,7 @@ import { DEFINING_WORLD_BUILDING_WORLD_LAYER_BUILD_DEFAULT } from '@/components/
 import { drawingWorldBuildingPlacementPreviewOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingPlacedBlocksOnGraphics';
 import { drawingWorldBuildingPlotClaimPreviewOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingPlotClaimTilesOnGraphics';
 import { resolvingWorldBuildingClaimModePlotOverlayEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingClaimModePlotOverlayZIndex';
+import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
 import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady';
 import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import { useApplication } from '@pixi/react';
@@ -74,11 +75,6 @@ export function RenderingWorldPlazaBlockPlacementPreview({
       return;
     }
 
-    graphics.zIndex =
-      resolvingWorldBuildingClaimModePlotOverlayEntityZIndex(
-        previewTilePosition
-      );
-
     const isPreviewValid = isPreviewTileValidRef.current ?? false;
     const previewWorldLayer =
       previewWorldLayerRef.current ??
@@ -94,6 +90,10 @@ export function RenderingWorldPlazaBlockPlacementPreview({
       DEFINING_WORLD_BUILDING_CUT_GRID_AXIS_CELL_COUNT_DEFAULT;
 
     if (previewWorldLayer === DEFINING_WORLD_BUILDING_PLOT_CLAIM_WORLD_LAYER) {
+      graphics.zIndex =
+        resolvingWorldBuildingClaimModePlotOverlayEntityZIndex(
+          previewTilePosition
+        );
       drawingWorldBuildingPlotClaimPreviewOnGraphics(
         graphics,
         previewTilePosition.tileX,
@@ -102,6 +102,14 @@ export function RenderingWorldPlazaBlockPlacementPreview({
       );
       return;
     }
+
+    // Match placed-block depth so elevated previews clear terrain they sit on
+    // and stay behind taller cliffs (same rules as a real placement).
+    graphics.zIndex = resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
+      previewTilePosition.tileX,
+      previewTilePosition.tileY,
+      previewWorldLayer
+    );
 
     drawingWorldBuildingPlacementPreviewOnGraphics(
       graphics,

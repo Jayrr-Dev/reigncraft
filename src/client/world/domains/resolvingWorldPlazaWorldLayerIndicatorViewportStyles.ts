@@ -10,11 +10,17 @@ import {
 } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
 import {
   DEFINING_WORLD_PLAZA_ACTION_BAR_BUTTON_BASE_PX,
-  DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_BASE_PX,
   DEFINING_WORLD_PLAZA_ACTION_BAR_MOBILE_SCALE,
   DEFINING_WORLD_PLAZA_ACTION_BAR_SCALE,
 } from '@/components/world/domains/definingWorldPlazaActionBarConstants';
 import type { CSSProperties } from 'react';
+
+/**
+ * Compass glyph size in design space. Larger than the shared action-bar icon
+ * base so the Iconify compass fills the orb like the day/night sprite.
+ */
+export const DEFINING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_ICON_BASE_PX =
+  24 as const;
 
 export type DefiningWorldPlazaWorldLayerIndicatorViewportStyles = {
   readonly sphereStyle: CSSProperties;
@@ -42,7 +48,7 @@ export function resolvingWorldPlazaWorldLayerIndicatorViewportStyles(
       designScale
     ),
     iconSizePx: computingWorldPlazaViewportHudScaledPx(
-      DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_BASE_PX,
+      DEFINING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_ICON_BASE_PX,
       viewportHudScale,
       designScale
     ),

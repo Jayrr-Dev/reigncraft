@@ -194,9 +194,17 @@ const boxiconsSwordFilled: IconifyIcon = {
   height: 24,
 };
 
+/** Röntgen map compass — inlined (no @iconify-icons/roentgen package). */
+const roentgenCompass: IconifyIcon = {
+  body: '<path fill="currentColor" d="M7.5 1a6.5 6.5 0 1 0 0 13a6.5 6.5 0 0 0 0-13m0 2a.5.5 0 0 1 .447.277l2 4a.5.5 0 0 1 0 .446l-2 4a.5.5 0 0 1-.894 0l-2-4a.5.5 0 0 1 0-.446l2-4A.5.5 0 0 1 7.5 3m0 1.617L6.059 7.5H8.94zM2.5 7h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1 0-1m9 0h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1 0-1"/>',
+  width: 16,
+  height: 16,
+};
+
 const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'boxicons:sword-filled': boxiconsSwordFilled,
   'boxicons:target': boxiconsTarget,
+  'roentgen:compass': roentgenCompass,
   'fluent-emoji:bacon': fluentEmojiBacon,
   'fluent-emoji:bear': fluentEmojiBear,
   'fluent-emoji:bison': fluentEmojiBison,

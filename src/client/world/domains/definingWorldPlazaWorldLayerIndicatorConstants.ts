@@ -13,7 +13,7 @@ export const LABELING_WORLD_PLAZA_ACTION_BAR_WORLD_LAYER_MINIMAP_HINT =
 
 /** Iconify glyph for the compass orb. */
 export const DEFINING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_COMPASS_ICON =
-  'mdi:compass' as const;
+  'roentgen:compass' as const;
 
 /** Solid fill for the compass orb disc (muted map-teal). */
 export const DEFINING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_FILL_COLOR =
