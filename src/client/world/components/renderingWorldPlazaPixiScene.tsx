@@ -1285,7 +1285,16 @@ function RenderingWorldPlazaPixiSceneConnected({
   previewBlockHeightRef.current = previewBlockHeight;
   previewCutFootprintMaskRef.current = previewCutFootprintMask;
   previewCutGridAxisCellCountRef.current = previewCutGridAxisCellCount;
-  previewDefinitionIdRef.current = selectedDefinitionId;
+  const pendingCraftPreviewRecipeDefinition =
+    pendingCraftRecipeIdRef.current === null
+      ? null
+      : resolvingWorldPlazaCraftModeRecipeDefinition(
+          pendingCraftRecipeIdRef.current
+        );
+  previewDefinitionIdRef.current =
+    pendingCraftPreviewRecipeDefinition?.outcome.kind === 'entity'
+      ? pendingCraftPreviewRecipeDefinition.outcome.blockDefinitionId
+      : selectedDefinitionId;
   hoveredRemovableBlockRef.current = hoveredRemovableBlock;
   isBuildTilePopoverOpenRef.current = isBuildTilePopoverOpen;
   isEditSessionActiveRef.current = isEditSessionActive;
@@ -1452,6 +1461,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
+      const entityOutcome = recipeDefinition.outcome;
       const committedRecipeId = pendingRecipeId;
       pendingCraftRecipeIdRef.current = null;
 
@@ -1469,7 +1479,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           showingGameplayHudToast(
             LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_SUCCESS_TOAST
           );
-          selectingBlockDefinition(recipeDefinition.outcome.blockDefinitionId);
+          selectingBlockDefinition(entityOutcome.blockDefinitionId);
           return commitResult.nextState;
         }
 
@@ -1553,6 +1563,8 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
 
       pendingCraftRecipeIdRef.current = recipeId;
+      previewDefinitionIdRef.current =
+        recipeDefinition.outcome.blockDefinitionId;
       setOpenCraftCookbookId(null);
       selectingHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD);
       enteringBuildPlacementForBlockDefinition(
