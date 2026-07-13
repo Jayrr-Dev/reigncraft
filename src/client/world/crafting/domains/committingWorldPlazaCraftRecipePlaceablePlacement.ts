@@ -30,7 +30,7 @@ export function committingWorldPlazaCraftRecipePlaceablePlacement(
   inventoryState: DefiningInventoryState,
   recipeDefinition: DefiningWorldPlazaCraftModeRecipeDefinition
 ): CommittingWorldPlazaCraftRecipePlaceablePlacementResult {
-  if (recipeDefinition.outcome.kind !== 'placeable') {
+  if (recipeDefinition.outcome.kind !== 'entity') {
     return { outcome: 'not-placeable-recipe' };
   }
 

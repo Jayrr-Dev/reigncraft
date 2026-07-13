@@ -55,10 +55,20 @@ describe('listingWorldPlazaCraftRecipesForCookbook', () => {
       DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE
     );
     expect(recipes[0]?.outcome).toEqual({
-      kind: 'placeable',
+      kind: 'entity',
       blockDefinitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
       blockHeight: 0,
     });
+    expect(recipes[0]?.recipeType).toBe('entity');
+  });
+
+  it('hides recipes that are not attached when an attach filter is provided', () => {
+    const recipes = listingWorldPlazaCraftRecipesForCookbook(
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.SURVIVAL,
+      { attachedRecipeIds: new Set() }
+    );
+
+    expect(recipes).toHaveLength(0);
   });
 });
 
@@ -227,7 +237,7 @@ describe('refundingWorldPlazaCraftRecipeIngredients', () => {
 });
 
 describe('executingWorldPlazaCraftRecipeInventoryOutcome', () => {
-  it('rejects placeable recipes', () => {
+  it('rejects entity recipes', () => {
     const campfireRecipe = resolvingWorldPlazaCraftModeRecipeDefinition(
       DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE
     );

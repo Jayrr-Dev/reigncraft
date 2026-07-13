@@ -25,10 +25,15 @@ import { listingWorldPlazaCraftRecipesForCookbook } from '@/components/world/cra
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_CODEX_OVERLAY_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaCodexConstants';
 import {
+  gettingWorldPlazaRecipeAttachedSnapshot,
+  subscribingWorldPlazaRecipeDiscovery,
+} from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
+import {
   useCallback,
   useEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
   type CSSProperties,
   type SyntheticEvent,
 } from 'react';
@@ -100,13 +105,24 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
 }: RenderingWorldPlazaCraftModeCookbookDialogProps): React.JSX.Element | null {
   const isOpen = cookbookDefinition !== null;
   const [leafIndex, setLeafIndex] = useState(0);
+  const attachedRecipeIds = useSyncExternalStore(
+    subscribingWorldPlazaRecipeDiscovery,
+    gettingWorldPlazaRecipeAttachedSnapshot,
+    gettingWorldPlazaRecipeAttachedSnapshot
+  );
+  const attachedRecipeIdSet = useMemo(
+    () => new Set(attachedRecipeIds),
+    [attachedRecipeIds]
+  );
 
   const cookbookRecipes = useMemo(
     () =>
       cookbookDefinition === null
         ? []
-        : listingWorldPlazaCraftRecipesForCookbook(cookbookDefinition.id),
-    [cookbookDefinition]
+        : listingWorldPlazaCraftRecipesForCookbook(cookbookDefinition.id, {
+            attachedRecipeIds: attachedRecipeIdSet,
+          }),
+    [attachedRecipeIdSet, cookbookDefinition]
   );
 
   const leafCount = Math.max(

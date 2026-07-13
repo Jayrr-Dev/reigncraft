@@ -60,6 +60,18 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INGREDIENT_ICON_PX = 28;
 export const LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_SUCCESS_TOAST =
   'Campfire placed.' as const;
 
-/** Blank spread copy when a cookbook has no registered recipes yet. */
+/** Blank spread copy when a cookbook has no attached recipes yet. */
 export const LABELING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_NO_RECIPES_PAGE =
-  'This page is still blank. Recipes will be written here soon.' as const;
+  'No recipes attached yet. Double-click a recipe page in your inventory to write it here.' as const;
+
+/** Toast when craft is attempted for a recipe that is not attached. */
+export const LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_NOT_ATTACHED_TOAST =
+  'Attach that recipe page to your cookbook first.' as const;
+
+/** Toast after a recipe page is attached from inventory. */
+export const LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PAGE_ATTACHED_TOAST =
+  'Recipe page attached to your cookbook.' as const;
+
+/** Toast when the player tries to attach a page they already have. */
+export const LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PAGE_ALREADY_ATTACHED_TOAST =
+  'That recipe is already in your cookbook.' as const;

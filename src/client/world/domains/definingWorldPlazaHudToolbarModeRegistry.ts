@@ -61,14 +61,14 @@ export const DEFINING_WORLD_PLAZA_HUD_TOOLBAR_BUILD_CLAIM_TOGGLE_FACES = {
     label: 'Build',
     ariaLabel: 'Build mode. Click again to switch to claim.',
     activeButtonClassName:
-      'inline-flex min-w-0 w-full items-center justify-center rounded-md border border-amber-300/80 bg-[linear-gradient(180deg,#7a4a18_0%,#4a2e0e_100%)] font-bold uppercase text-amber-100 shadow-[0_0_0_1px_rgba(251,191,36,0.35),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-40',
+      'inline-flex shrink-0 items-center justify-center rounded-md border border-amber-300/80 bg-[linear-gradient(180deg,#7a4a18_0%,#4a2e0e_100%)] font-bold uppercase text-amber-100 shadow-[0_0_0_1px_rgba(251,191,36,0.35),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-40',
   },
   [DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM]: {
     modeId: DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM,
     label: 'Claim',
     ariaLabel: 'Claim mode. Click again to switch to build.',
     activeButtonClassName:
-      'inline-flex min-w-0 w-full items-center justify-center rounded-md border border-sky-300/80 bg-[linear-gradient(180deg,#1e4a5c_0%,#123040_100%)] font-bold uppercase text-sky-100 shadow-[0_0_0_1px_rgba(125,211,252,0.35),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-40',
+      'inline-flex shrink-0 items-center justify-center rounded-md border border-sky-300/80 bg-[linear-gradient(180deg,#1e4a5c_0%,#123040_100%)] font-bold uppercase text-sky-100 shadow-[0_0_0_1px_rgba(125,211,252,0.35),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-40',
   },
 } as const satisfies Record<
   | typeof DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD
@@ -136,19 +136,19 @@ export const LABELING_WORLD_PLAZA_HUD_TOOLBAR_MODE_SWITCHER =
   'Inventory, craft, or build and claim' as const;
 
 /**
- * Badge row stretches to the inventory hotbar shell width.
- * Equal columns so every mode tab matches ITEMS width.
+ * Badge row spans the inventory hotbar shell width.
+ * Content-sized badges sit centered over the hotbar.
  */
 export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_SWITCHER_CLASS_NAME =
-  'grid w-full' as const;
+  'flex w-full items-center justify-center' as const;
 
-/** Inactive HUD toolbar mode badge shell — fills one equal grid column. */
+/** Inactive HUD toolbar mode badge shell — width follows icon+label. */
 export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BUTTON_CLASS_NAME =
-  'inline-flex min-w-0 w-full items-center justify-center rounded-md border border-poster-gold/30 bg-poster-teal-deep/90 font-bold uppercase text-parchment shadow-md shadow-black/35 backdrop-blur-sm transition-[transform,background-color,border-color,box-shadow] hover:border-poster-gold/50 hover:bg-poster-teal-deep hover:text-parchment disabled:cursor-not-allowed disabled:opacity-40' as const;
+  'inline-flex shrink-0 items-center justify-center rounded-md border border-poster-gold/30 bg-poster-teal-deep/90 font-bold uppercase text-parchment shadow-md shadow-black/35 backdrop-blur-sm transition-[transform,background-color,border-color,box-shadow] hover:border-poster-gold/50 hover:bg-poster-teal-deep hover:text-parchment disabled:cursor-not-allowed disabled:opacity-40' as const;
 
-/** Active HUD toolbar mode badge shell — fills one equal grid column. */
+/** Active HUD toolbar mode badge shell — width follows icon+label. */
 export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BUTTON_ACTIVE_CLASS_NAME =
-  'inline-flex min-w-0 w-full items-center justify-center rounded-md border border-poster-gold/70 bg-[linear-gradient(180deg,#2c4a52_0%,#1a3038_100%)] font-bold uppercase text-[#f4d35e] shadow-[0_0_0_1px_rgba(244,211,94,0.25),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-40' as const;
+  'inline-flex shrink-0 items-center justify-center rounded-md border border-poster-gold/70 bg-[linear-gradient(180deg,#2c4a52_0%,#1a3038_100%)] font-bold uppercase text-[#f4d35e] shadow-[0_0_0_1px_rgba(244,211,94,0.25),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-40' as const;
 
 /** Icon size inside a HUD toolbar mode badge (edge set via inline styles). */
 export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ICON_CLASS_NAME =
@@ -159,7 +159,7 @@ export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ICON_SLOT_CLASS_NAME =
   'inline-flex shrink-0 items-center justify-center' as const;
 
 /**
- * Shared icon+label cluster centered in each equal-width tab.
+ * Shared icon+label cluster inside each mode badge.
  * Width is locked via viewport styles so content matches across modes.
  */
 export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_CONTENT_CLASS_NAME =

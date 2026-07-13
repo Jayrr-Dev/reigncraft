@@ -86,6 +86,8 @@ export type RenderingWorldPlazaInventorySlotCellProps =
     readonly onCloseItemDetailPopover?: () => void;
     /** Eat action surfaced inside the item action popover for food. */
     readonly onEatHotbarSlot?: (slotIndex: number) => void;
+    /** Attach a cookbook recipe page from inventory. */
+    readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
     /** Drop action surfaced inside the item action popover. */
     readonly onDropHotbarSlot?: (slotIndex: number) => void;
     /** Active enchantment use from the item action popover. */
@@ -206,6 +208,7 @@ export function RenderingWorldPlazaInventorySlotCell({
   isItemDetailPopoverOpen = false,
   onCloseItemDetailPopover,
   onEatHotbarSlot,
+  onAttachRecipePageHotbarSlot,
   onDropHotbarSlot,
   onUseActiveEnchantment,
   onOpenBagPopover,
@@ -300,6 +303,7 @@ export function RenderingWorldPlazaInventorySlotCell({
       isItemDetailPopoverOpen={isItemDetailPopoverOpen}
       onCloseItemDetailPopover={onCloseItemDetailPopover}
       onEatHotbarSlot={onEatHotbarSlot}
+      onAttachRecipePageHotbarSlot={onAttachRecipePageHotbarSlot}
       onDropHotbarSlot={onDropHotbarSlot}
       onUseActiveEnchantment={onUseActiveEnchantment}
       onOpenBagPopover={onOpenBagPopover}
@@ -327,6 +331,7 @@ type InventoryPlazaSlotItemProps = {
   readonly isItemDetailPopoverOpen?: boolean;
   readonly onCloseItemDetailPopover?: () => void;
   readonly onEatHotbarSlot?: (slotIndex: number) => void;
+  readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
   readonly onDropHotbarSlot?: (slotIndex: number) => void;
   readonly onUseActiveEnchantment?: (
     slotIndex: number,
@@ -353,6 +358,7 @@ function InventoryPlazaSlotItem({
   isItemDetailPopoverOpen = false,
   onCloseItemDetailPopover,
   onEatHotbarSlot,
+  onAttachRecipePageHotbarSlot,
   onDropHotbarSlot,
   onUseActiveEnchantment,
   onOpenBagPopover,
@@ -479,6 +485,10 @@ function InventoryPlazaSlotItem({
         onEatHotbarSlot?.(slotIndex);
         onCloseItemDetailPopover?.();
         return;
+      case 'attach-recipe-page':
+        onAttachRecipePageHotbarSlot?.(slotIndex);
+        onCloseItemDetailPopover?.();
+        return;
       case 'equip':
         onEquipSlot?.(slotIndex);
         onCloseItemDetailPopover?.();
@@ -493,6 +503,7 @@ function InventoryPlazaSlotItem({
   }, [
     isEquipped,
     item.itemTypeId,
+    onAttachRecipePageHotbarSlot,
     onCloseItemDetailPopover,
     onEatHotbarSlot,
     onEquipSlot,

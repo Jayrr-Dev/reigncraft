@@ -177,6 +177,27 @@ The plaza hook wires Redis/save-slot persistence and optional demo seed. World f
 
 ---
 
+### 4b. Craft cookbook recipes
+
+**Purpose:** Declarative craft recipes in cookbooks. Pages attach once from inventory; craft only after attach.
+
+| Piece                                    | Path                                                                                  |
+| ---------------------------------------- | ------------------------------------------------------------------------------------- |
+| Types (`recipeType: 'entity' \| 'item'`) | `crafting/domains/definingWorldPlazaCraftModeRecipeTypes.ts`                          |
+| Registry (add recipes here)              | `crafting/domains/definingWorldPlazaCraftModeRecipeRegistry.ts`                       |
+| Cookbook UI                              | `building/components/renderingWorldPlazaCraftModeCookbookDialog.tsx`                  |
+| Attach store                             | `domains/managingWorldPlazaRecipeDiscoveryStore.ts` (`attachingWorldPlazaRecipePage`) |
+| Recipe-page items (auto from registry)   | `crafting/domains/registeringWorldPlazaCraftRecipePageInventoryItems.ts`              |
+
+**Extend (new recipe):**
+
+1. Add id to `DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID`.
+2. Append one row to `DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY` with `title`, `description`, `ingredients`, `recipeType`, and matching `outcome.kind` (`entity` = place block, `item` = inventory grant).
+3. Recipe-page inventory item + Recipes guide entry appear automatically.
+4. Player double-clicks the page item to attach (second attach refused). Cookbook only lists attached recipes.
+
+---
+
 ### 5. Character engine
 
 **Purpose:** Declarative per-avatar stats, movement rules, immunities, starting buffs, and skill ids.

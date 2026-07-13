@@ -5,6 +5,7 @@ import { resolvingPlazaRecipesGuideDisplayEntries } from '@/components/home/doma
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID } from '@/components/world/building/domains/definingWorldPlazaCraftModeCookbookRegistry';
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import {
+  attachingWorldPlazaRecipePage,
   gettingWorldPlazaRecipeAttachedSnapshot,
   initializingWorldPlazaRecipeDiscoveryStore,
   recordingWorldPlazaRecipePageAttached,
@@ -56,12 +57,16 @@ describe('managingWorldPlazaRecipeDiscoveryStore', () => {
 
   it('records attached recipe pages once and persists them', () => {
     initializingWorldPlazaRecipeDiscoveryStore('test-recipes-attach');
-    recordingWorldPlazaRecipePageAttached(
-      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE
-    );
-    recordingWorldPlazaRecipePageAttached(
-      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE
-    );
+    expect(
+      attachingWorldPlazaRecipePage(
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE
+      )
+    ).toBe('attached');
+    expect(
+      attachingWorldPlazaRecipePage(
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE
+      )
+    ).toBe('already-attached');
 
     expect(gettingWorldPlazaRecipeAttachedSnapshot()).toEqual([
       DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE,

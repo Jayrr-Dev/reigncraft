@@ -130,6 +130,9 @@ import {
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INVENTORY_FULL_TOAST,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INVENTORY_SUCCESS_TOAST,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_MISSING_MATERIALS_TOAST,
+  LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_NOT_ATTACHED_TOAST,
+  LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PAGE_ALREADY_ATTACHED_TOAST,
+  LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PAGE_ATTACHED_TOAST,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_CANCELED_TOAST,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_MATERIALS_LOST_TOAST,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_REFUNDED_TOAST,
@@ -211,8 +214,9 @@ import { findingWorldPlazaBiomeTeleportWorldPointForDev } from '@/components/wor
 import { recordingWorldPlazaBestiarySpeciesStudied } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
+  attachingWorldPlazaRecipePage,
+  checkingWorldPlazaRecipePageAttachedInStore,
   initializingWorldPlazaRecipeDiscoveryStore,
-  recordingWorldPlazaRecipePageAttached,
 } from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
 import { settingWorldPlazaPerformanceDiagnosticsEnabled } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { parsingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync';
@@ -382,6 +386,7 @@ import { disarmingWorldPlazaInventorySlotArmedHarvestEnchantments } from '@/comp
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { resolvingWorldPlazaInventoryFoodEatEffects } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects';
 import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
+import { resolvingWorldPlazaInventoryItemRecipePageRecipeId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemRecipePage';
 import { wearingWorldPlazaEquippedInventoryToolDurability } from '@/components/world/inventory/domains/wearingWorldPlazaEquippedInventoryToolDurability';
 import { trackingWorldPlazaInventoryDropPlacement } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
@@ -1443,7 +1448,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       const recipeDefinition =
         resolvingWorldPlazaCraftModeRecipeDefinition(pendingRecipeId);
 
-      if (!recipeDefinition || recipeDefinition.outcome.kind !== 'placeable') {
+      if (!recipeDefinition || recipeDefinition.outcome.kind !== 'entity') {
         pendingCraftRecipeIdRef.current = null;
         return;
       }
@@ -1462,7 +1467,6 @@ function RenderingWorldPlazaPixiSceneConnected({
             placedBlockId,
             committedRecipeId
           );
-          recordingWorldPlazaRecipePageAttached(committedRecipeId);
           showingGameplayHudToast(
             LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_SUCCESS_TOAST
           );
@@ -1501,6 +1505,13 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
+      if (!checkingWorldPlazaRecipePageAttachedInStore(recipeId)) {
+        showingGameplayHudToast(
+          LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_NOT_ATTACHED_TOAST
+        );
+        return;
+      }
+
       if (
         !checkingWorldPlazaCraftRecipeAffordable(
           inventoryState,
@@ -1513,7 +1524,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      if (recipeDefinition.outcome.kind === 'inventory') {
+      if (recipeDefinition.outcome.kind === 'item') {
         updatingInventoryState((currentState) => {
           const craftResult = executingWorldPlazaCraftRecipeInventoryOutcome(
             currentState,
@@ -1521,7 +1532,6 @@ function RenderingWorldPlazaPixiSceneConnected({
           );
 
           if (craftResult.outcome === 'crafted') {
-            recordingWorldPlazaRecipePageAttached(recipeId);
             showingGameplayHudToast(
               LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INVENTORY_SUCCESS_TOAST
             );
@@ -1544,7 +1554,6 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
 
       pendingCraftRecipeIdRef.current = recipeId;
-      recordingWorldPlazaRecipePageAttached(recipeId);
       setOpenCraftCookbookId(null);
       selectingHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD);
       enteringBuildPlacementForBlockDefinition(
@@ -1561,6 +1570,57 @@ function RenderingWorldPlazaPixiSceneConnected({
       showingGameplayHudToast,
       updatingInventoryState,
     ]
+  );
+
+  const handlingAttachRecipePageHotbarSlot = useCallback(
+    (slotIndex: number): void => {
+      const slotItem = inventoryState.slots[slotIndex];
+
+      if (!slotItem) {
+        return;
+      }
+
+      const recipeId = resolvingWorldPlazaInventoryItemRecipePageRecipeId(
+        slotItem.itemTypeId
+      );
+
+      if (recipeId === null) {
+        return;
+      }
+
+      if (checkingWorldPlazaRecipePageAttachedInStore(recipeId)) {
+        showingGameplayHudToast(
+          LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PAGE_ALREADY_ATTACHED_TOAST
+        );
+        return;
+      }
+
+      updatingInventoryState((currentState) => {
+        if (checkingWorldPlazaRecipePageAttachedInStore(recipeId)) {
+          showingGameplayHudToast(
+            LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PAGE_ALREADY_ATTACHED_TOAST
+          );
+          return null;
+        }
+
+        const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
+          currentState,
+          slotIndex,
+          1
+        );
+
+        if (!consumeResult.consumed) {
+          return null;
+        }
+
+        attachingWorldPlazaRecipePage(recipeId);
+        showingGameplayHudToast(
+          LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PAGE_ATTACHED_TOAST
+        );
+        return consumeResult.nextState;
+      });
+    },
+    [inventoryState.slots, showingGameplayHudToast, updatingInventoryState]
   );
 
   useEffect(() => {
@@ -1589,7 +1649,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     const recipeDefinition =
       resolvingWorldPlazaCraftModeRecipeDefinition(pendingRecipeId);
 
-    if (!recipeDefinition || recipeDefinition.outcome.kind !== 'placeable') {
+    if (!recipeDefinition || recipeDefinition.outcome.kind !== 'entity') {
       pendingCraftRecipeIdRef.current = null;
       return;
     }
@@ -6050,6 +6110,9 @@ function RenderingWorldPlazaPixiSceneConnected({
                         selectedSlotIndex={equipment.selectedSlotIndex}
                         onSelectHotbarSlot={equipment.selectingHotbarSlot}
                         onEatHotbarSlot={handlingEatHotbarSlot}
+                        onAttachRecipePageHotbarSlot={
+                          handlingAttachRecipePageHotbarSlot
+                        }
                         onUseActiveEnchantment={handlingUseActiveEnchantment}
                         playerEffectiveMaxHealth={
                           playerHealthHudSnapshot.effectiveMaxHealth
@@ -6186,6 +6249,9 @@ function RenderingWorldPlazaPixiSceneConnected({
                         selectedSlotIndex={equipment.selectedSlotIndex}
                         onSelectHotbarSlot={equipment.selectingHotbarSlot}
                         onEatHotbarSlot={handlingEatHotbarSlot}
+                        onAttachRecipePageHotbarSlot={
+                          handlingAttachRecipePageHotbarSlot
+                        }
                         onUseActiveEnchantment={handlingUseActiveEnchantment}
                         playerEffectiveMaxHealth={
                           playerHealthHudSnapshot.effectiveMaxHealth

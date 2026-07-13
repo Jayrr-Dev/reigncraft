@@ -24,6 +24,7 @@ export type WorldPlazaInventoryHotbarSlotInteractions = {
   readonly openBagHotbarSlotIndex: number | null;
   readonly onSelectHotbarSlot?: (slotIndex: number) => void;
   readonly onEatHotbarSlot?: (slotIndex: number) => void;
+  readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
   readonly onDropHotbarSlot?: (slotIndex: number) => void;
   readonly onUseActiveEnchantment?: (
     slotIndex: number,
@@ -86,6 +87,7 @@ export const RenderingWorldPlazaInventoryHotbarSlotCell = memo(
       openBagHotbarSlotIndex,
       onSelectHotbarSlot,
       onEatHotbarSlot,
+      onAttachRecipePageHotbarSlot,
       onDropHotbarSlot,
       onUseActiveEnchantment,
       togglingItemActionPopover,
@@ -108,6 +110,7 @@ export const RenderingWorldPlazaInventoryHotbarSlotCell = memo(
         isItemDetailPopoverOpen={openItemDetailSlotIndex === props.slotIndex}
         onCloseItemDetailPopover={closingItemActionPopover}
         onEatHotbarSlot={onEatHotbarSlot}
+        onAttachRecipePageHotbarSlot={onAttachRecipePageHotbarSlot}
         onDropHotbarSlot={onDropHotbarSlot}
         onUseActiveEnchantment={onUseActiveEnchantment}
         onOpenBagPopover={openingBagPopover}
@@ -128,6 +131,7 @@ export function usingWorldPlazaInventoryHotbarSlotInteractionsValue(
     [
       input.closingBagPopover,
       input.closingItemActionPopover,
+      input.onAttachRecipePageHotbarSlot,
       input.onDropHotbarSlot,
       input.onEatHotbarSlot,
       input.onSelectHotbarSlot,

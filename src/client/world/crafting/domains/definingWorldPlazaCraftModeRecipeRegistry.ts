@@ -1,6 +1,35 @@
 /**
  * Declarative craft recipe registry.
  *
+ * To add a recipe, append one object to
+ * {@link DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY}:
+ *
+ * ```ts
+ * {
+ *   id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.MY_RECIPE,
+ *   cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.SURVIVAL,
+ *   title: 'My Recipe',
+ *   description: 'What the player reads on the left page.',
+ *   recipeVisual: { visualKind: 'iconify', recipeEmblemIconifyIcon: 'mdi:hammer' },
+ *   ingredients: [
+ *     { itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE, quantity: 3 },
+ *   ],
+ *   recipeType: 'entity', // or 'item'
+ *   outcome: {
+ *     kind: 'entity',
+ *     blockDefinitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_...,
+ *     blockHeight: DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_TILE,
+ *   },
+ *   // item example:
+ *   // recipeType: 'item',
+ *   // outcome: { kind: 'item', itemTypeId: '...', quantity: 1 },
+ * }
+ * ```
+ *
+ * Also add the id to {@link DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID}.
+ * A recipe-page inventory item is registered automatically from this list.
+ * The recipe only appears in its cookbook after that page is attached.
+ *
  * @module components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry
  */
 
@@ -23,6 +52,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_WOOD_COST = 5;
 
 /**
  * All registered craft recipes in cookbook pager order.
+ * Append new recipes here — Guides, page items, and attach gating follow automatically.
  */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
   {
@@ -42,8 +72,9 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
         quantity: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_WOOD_COST,
       },
     ],
+    recipeType: 'entity',
     outcome: {
-      kind: 'placeable',
+      kind: 'entity',
       blockDefinitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
       blockHeight: DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_TILE,
     },

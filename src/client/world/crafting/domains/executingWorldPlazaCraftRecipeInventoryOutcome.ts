@@ -32,7 +32,7 @@ export function executingWorldPlazaCraftRecipeInventoryOutcome(
   inventoryState: DefiningInventoryState,
   recipeDefinition: DefiningWorldPlazaCraftModeRecipeDefinition
 ): ExecutingWorldPlazaCraftRecipeInventoryOutcomeResult {
-  if (recipeDefinition.outcome.kind !== 'inventory') {
+  if (recipeDefinition.outcome.kind !== 'item') {
     return { outcome: 'missing-materials' };
   }
 

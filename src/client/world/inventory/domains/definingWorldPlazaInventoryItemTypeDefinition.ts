@@ -1,4 +1,5 @@
 import type { DefiningInventoryItemTypeDefinition } from '@/components/inventory/domains/definingInventoryItemRegistry';
+import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import type { DefiningWorldPlazaEquipmentItemCapabilities } from '@/components/world/equipment/domains/definingWorldPlazaEquipmentToolKind';
 import type { DefiningWorldPlazaInventoryItemCost } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemResolvedCost';
 import type { DefiningWorldPlazaInventoryCustomItemIconId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
@@ -83,4 +84,10 @@ export type DefiningWorldPlazaInventoryItemTypeDefinition =
     readonly forgeLevel?: number;
     /** Economy base cost plus optional named multipliers. */
     readonly cost?: DefiningWorldPlazaInventoryItemCost;
+    /**
+     * Loose cookbook recipe page: double-click attaches `recipeId` once.
+     */
+    readonly recipePage?: {
+      readonly recipeId: DefiningWorldPlazaCraftModeRecipeId;
+    };
   };

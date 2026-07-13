@@ -98,17 +98,22 @@ export function initializingWorldPlazaRecipeDiscoveryStore(
   notifyingWorldPlazaRecipeDiscoverySubscribers();
 }
 
+/** Result of attempting to attach a recipe page. */
+export type AttachingWorldPlazaRecipePageResult =
+  | 'attached'
+  | 'already-attached';
+
 /**
- * Records that a recipe page was attached to the player's cookbook.
- * No-op when already attached.
+ * Attaches a recipe page to the player's cookbook.
+ * Idempotent: returns `already-attached` and does not re-persist when present.
  *
  * @param recipeId - Craft recipe id that was attached
  */
-export function recordingWorldPlazaRecipePageAttached(
+export function attachingWorldPlazaRecipePage(
   recipeId: DefiningWorldPlazaCraftModeRecipeId
-): void {
+): AttachingWorldPlazaRecipePageResult {
   if (managingWorldPlazaRecipeDiscoveryAttachedRecipeIds.has(recipeId)) {
-    return;
+    return 'already-attached';
   }
 
   managingWorldPlazaRecipeDiscoveryAttachedRecipeIds = new Set(
@@ -118,6 +123,27 @@ export function recordingWorldPlazaRecipePageAttached(
   refreshingWorldPlazaRecipeDiscoverySnapshotCaches();
   persistingWorldPlazaRecipeDiscovery();
   notifyingWorldPlazaRecipeDiscoverySubscribers();
+  return 'attached';
+}
+
+/**
+ * @deprecated Prefer {@link attachingWorldPlazaRecipePage} (returns attach status).
+ */
+export function recordingWorldPlazaRecipePageAttached(
+  recipeId: DefiningWorldPlazaCraftModeRecipeId
+): void {
+  attachingWorldPlazaRecipePage(recipeId);
+}
+
+/**
+ * Snapshot helper: whether one recipe page is attached in the live store.
+ *
+ * @param recipeId - Craft recipe id
+ */
+export function checkingWorldPlazaRecipePageAttachedInStore(
+  recipeId: DefiningWorldPlazaCraftModeRecipeId
+): boolean {
+  return managingWorldPlazaRecipeDiscoveryAttachedRecipeIds.has(recipeId);
 }
 
 export function subscribingWorldPlazaRecipeDiscovery(

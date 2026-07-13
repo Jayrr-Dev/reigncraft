@@ -89,6 +89,8 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
   readonly onSelectHotbarSlot?: (slotIndex: number) => void;
   /** Eat action from the item action popover for food slots. */
   readonly onEatHotbarSlot?: (slotIndex: number) => void;
+  /** Attach cookbook recipe page from a hotbar/storage slot. */
+  readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
   /** Active enchantment use from the item action popover. */
   readonly onUseActiveEnchantment?: (
     slotIndex: number,
@@ -109,6 +111,7 @@ type RenderingWorldPlazaInventoryHotbarInventoryShellProps = {
   readonly onStoragePageIndexChange: (nextPageIndex: number) => void;
   readonly onSelectHotbarSlot?: (slotIndex: number) => void;
   readonly onEatHotbarSlot?: (slotIndex: number) => void;
+  readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
   readonly onDropHotbarSlot?: (slotIndex: number) => void;
   readonly onUseActiveEnchantment?: (
     slotIndex: number,
@@ -142,6 +145,7 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
     onStoragePageIndexChange,
     onSelectHotbarSlot,
     onEatHotbarSlot,
+    onAttachRecipePageHotbarSlot,
     onDropHotbarSlot,
     onUseActiveEnchantment,
     openBagHotbarSlotIndex,
@@ -219,6 +223,7 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
         openBagHotbarSlotIndex,
         onSelectHotbarSlot,
         onEatHotbarSlot,
+        onAttachRecipePageHotbarSlot,
         onDropHotbarSlot,
         onUseActiveEnchantment,
         togglingItemActionPopover,
@@ -307,6 +312,7 @@ export function RenderingWorldPlazaInventoryHotbar({
   selectedSlotIndex = null,
   onSelectHotbarSlot,
   onEatHotbarSlot,
+  onAttachRecipePageHotbarSlot,
   onUseActiveEnchantment,
   isEmbeddedInHudToolbarStack = false,
   playerEffectiveMaxHealth,
@@ -548,6 +554,7 @@ export function RenderingWorldPlazaInventoryHotbar({
           onStoragePageIndexChange={handlingStoragePageIndexChange}
           onSelectHotbarSlot={onSelectHotbarSlot}
           onEatHotbarSlot={onEatHotbarSlot}
+          onAttachRecipePageHotbarSlot={onAttachRecipePageHotbarSlot}
           onDropHotbarSlot={handlingDropHotbarSlot}
           onUseActiveEnchantment={onUseActiveEnchantment}
           openBagHotbarSlotIndex={openBagHotbarSlotIndex}
