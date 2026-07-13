@@ -1,15 +1,10 @@
 /**
  * Character engine template for playable animal skins.
- * Inherits wildlife identity (ratios, speed, mass, immunities) scaled into
- * player transform combat space.
+ * Inherits wildlife vitals 1:1 (runtime HP/atk/def, speed, mass, immunities).
  *
  * @module components/world/domains/buildingWorldPlazaDefaultAnimalCharacterEngineDefinition
  */
 
-import {
-  computingWorldPlazaCharacterEngineGrowthLanePerLevel,
-  DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_UNLOCKED_TRANSFORM_GROWTH_LANE_LEVEL_OFFSET,
-} from '@/components/world/character/domains/definingWorldPlazaCharacterEngineGrowthLaneConstants';
 import type {
   DefiningWorldPlazaCharacterEngineDefinition,
   DefiningWorldPlazaCharacterEngineImmunity,
@@ -17,11 +12,6 @@ import type {
 import { DEFINING_WORLD_PLAZA_CHARACTER_DEFAULT_MASS_KG } from '@/components/world/character/domains/definingWorldPlazaCharacterWeightDisplayConstants';
 import type { DefiningWorldPlazaAnimalPlayableAvatarSkinRow } from '@/components/world/domains/definingWorldPlazaAnimalPlayableAvatarSkinRegistry';
 import { DEFINING_WORLD_PLAZA_ANIMAL_PLAYABLE_SPRITE_FOLDER_TO_WILDLIFE_SPECIES_ID } from '@/components/world/domains/definingWorldPlazaAnimalPlayableAvatarWildlifeSpeciesIdAliases';
-import {
-  computingWorldPlazaAnimalTransformMatureCombatStat,
-  DEFINING_WORLD_PLAZA_ANIMAL_TRANSFORM_ATTACK_FROM_AUTHOR_MULTIPLIER,
-  DEFINING_WORLD_PLAZA_ANIMAL_TRANSFORM_HEALTH_FROM_AUTHOR_MULTIPLIER,
-} from '@/components/world/domains/definingWorldPlazaAnimalTransformVitalsScaleConstants';
 import { DEFINING_WORLD_PLAZA_STRENGTH_PLAYER_BASELINE_ATTACK_INTERVAL_MS } from '@/components/world/strength/domains/definingWorldPlazaStrengthIndexConstants';
 import {
   resolvingWildlifeSpeciesDefinition,
@@ -94,10 +84,16 @@ function computingWorldPlazaAnimalCharacterEngineAttackSpeed(
   );
 }
 
+/** Per-level bump from species mature stats (20 levels ≈ +100% of base). */
+function computingWorldPlazaAnimalCharacterEnginePerLevel(
+  matureStat: number
+): number {
+  return Math.max(0, matureStat / 20);
+}
+
 /**
  * Builds a character engine definition for one animal playable skin row.
- * Mature combat vitals are wildlife-authored values scaled into player space;
- * unlocks keep the −20 growth lane (25% floor → full at parity).
+ * Combat vitals match the wildlife species counterpart at level 1.
  */
 export function buildingWorldPlazaDefaultAnimalCharacterEngineDefinition(
   skinRow: DefiningWorldPlazaAnimalPlayableAvatarSkinRow
@@ -128,14 +124,9 @@ export function buildingWorldPlazaDefaultAnimalCharacterEngineDefinition(
       },
       scaling: {
         level: 1,
-        healthPerLevel:
-          computingWorldPlazaCharacterEngineGrowthLanePerLevel(1000),
-        attackPerLevel:
-          computingWorldPlazaCharacterEngineGrowthLanePerLevel(300),
-        defensePerLevel:
-          computingWorldPlazaCharacterEngineGrowthLanePerLevel(5),
-        growthLaneLevelOffset:
-          DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_UNLOCKED_TRANSFORM_GROWTH_LANE_LEVEL_OFFSET,
+        healthPerLevel: 50,
+        attackPerLevel: 2,
+        defensePerLevel: 1,
       },
       immunities: [],
       startingStatusEffectIds: [],
@@ -144,17 +135,6 @@ export function buildingWorldPlazaDefaultAnimalCharacterEngineDefinition(
   }
 
   const { vitals } = species;
-  const matureMaxHealth = computingWorldPlazaAnimalTransformMatureCombatStat({
-    wildlifeRuntimeStat: vitals.baseMaxHealth,
-    fromAuthorMultiplier:
-      DEFINING_WORLD_PLAZA_ANIMAL_TRANSFORM_HEALTH_FROM_AUTHOR_MULTIPLIER,
-  });
-  const matureAttackPower = computingWorldPlazaAnimalTransformMatureCombatStat({
-    wildlifeRuntimeStat: vitals.attackPower,
-    fromAuthorMultiplier:
-      DEFINING_WORLD_PLAZA_ANIMAL_TRANSFORM_ATTACK_FROM_AUTHOR_MULTIPLIER,
-  });
-  const matureDefense = vitals.defense;
 
   return {
     characterId: skinRow.skinId,
@@ -169,26 +149,27 @@ export function buildingWorldPlazaDefaultAnimalCharacterEngineDefinition(
       walkSpeedGridPerSecond: vitals.walkSpeedGridPerSecond,
       runSpeedGridPerSecond: vitals.runSpeedGridPerSecond,
     },
-    vitals: { baseMaxHealth: matureMaxHealth },
+    vitals: { baseMaxHealth: vitals.baseMaxHealth },
     massKg: species.massKg,
     stats: {
-      attackPower: matureAttackPower,
+      attackPower: vitals.attackPower,
       attackSpeed: computingWorldPlazaAnimalCharacterEngineAttackSpeed(
         vitals.attackIntervalMs
       ),
-      defense: matureDefense,
+      defense: vitals.defense,
       hungerDrainMultiplier: skinRow.hungerDrainMultiplier,
     },
     scaling: {
       level: 1,
-      healthPerLevel:
-        computingWorldPlazaCharacterEngineGrowthLanePerLevel(matureMaxHealth),
-      attackPerLevel:
-        computingWorldPlazaCharacterEngineGrowthLanePerLevel(matureAttackPower),
-      defensePerLevel:
-        computingWorldPlazaCharacterEngineGrowthLanePerLevel(matureDefense),
-      growthLaneLevelOffset:
-        DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_UNLOCKED_TRANSFORM_GROWTH_LANE_LEVEL_OFFSET,
+      healthPerLevel: computingWorldPlazaAnimalCharacterEnginePerLevel(
+        vitals.baseMaxHealth
+      ),
+      attackPerLevel: computingWorldPlazaAnimalCharacterEnginePerLevel(
+        vitals.attackPower
+      ),
+      defensePerLevel: computingWorldPlazaAnimalCharacterEnginePerLevel(
+        vitals.defense
+      ),
     },
     immunities: resolvingWorldPlazaAnimalCharacterEngineImmunities(species),
     startingStatusEffectIds: [],

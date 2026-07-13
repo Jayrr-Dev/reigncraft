@@ -26,9 +26,13 @@ export const LABELING_WORLD_PLAZA_PROFILE_PANEL_VITALS_SECTION =
 export const LABELING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTES_SECTION =
   'Attributes' as const;
 
-/** Section heading above active buffs and ailments. */
-export const LABELING_WORLD_PLAZA_PROFILE_PANEL_EFFECTS_SECTION =
-  'Active effects' as const;
+/** Section heading above inherited wildlife passives. */
+export const LABELING_WORLD_PLAZA_PROFILE_PANEL_PASSIVES_SECTION =
+  'Passives' as const;
+
+/** Copy shown when the current form has no on-hit or trait passives. */
+export const LABELING_WORLD_PLAZA_PROFILE_PANEL_PASSIVES_EMPTY =
+  'No inherited passives' as const;
 
 /** Copy shown in the effects section when nothing is active. */
 export const LABELING_WORLD_PLAZA_PROFILE_PANEL_EFFECTS_EMPTY =

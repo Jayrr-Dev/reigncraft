@@ -414,6 +414,7 @@ import type {
 } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import type { ManagingWorldPlazaProjectileStore } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
 import { usingWorldPlazaProjectileEngine } from '@/components/world/projectile/hooks/usingWorldPlazaProjectileEngine';
+import { resolvingWorldPlazaAnimalPlayableAvatarUnlockWildlifeSpeciesId } from '@/components/world/domains/checkingWorldPlazaAnimalPlayableAvatarSkinStudyUnlocked';
 import {
   DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID,
   findingWildlifeInstanceAtGridPoint,
@@ -421,6 +422,7 @@ import {
   resolvingWildlifeSpeciesDefinition,
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
+import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { RenderingWildlifeDocileBetrayInteractionLabels } from '@/components/world/wildlife/components/renderingWildlifeDocileBetrayInteractionLabels';
 import { RenderingWildlifeFootsteps } from '@/components/world/wildlife/components/renderingWildlifeFootsteps';
 import { RenderingWildlifeOmegaWolfSfx } from '@/components/world/wildlife/components/renderingWildlifeOmegaWolfSfx';
@@ -2908,6 +2910,12 @@ function RenderingWorldPlazaPixiSceneConnected({
     ...DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE,
   });
   const playerStillDurationMsRef = useRef(0);
+  const playerTransformWildlifeSpeciesIdRef =
+    useRef<DefiningWildlifeSpeciesId | null>(null);
+  playerTransformWildlifeSpeciesIdRef.current =
+    resolvingWorldPlazaAnimalPlayableAvatarUnlockWildlifeSpeciesId(
+      selectedCharacterEngineDefinition.presentation.skinId
+    );
 
   const { wildlifeStoreRef, tickConfigRef, applyWildlifeDamageRef } =
     usingWildlifeSimulation({
@@ -2934,6 +2942,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       wildlifeHoveredInstanceIdRef,
       wildlifeDamagedPlayerAtMsByInstanceIdRef,
       meatDropContextRef: wildlifeMeatDropContextRef,
+      playerTransformWildlifeSpeciesIdRef,
       onPlayerHitByWildlife: (hit) => {
         wildlifeDamagedPlayerAtMsByInstanceIdRef.current.set(
           hit.instanceId,

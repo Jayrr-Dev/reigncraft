@@ -18,6 +18,8 @@ import {
   LABELING_WORLD_PLAZA_PROFILE_PANEL_CLOSE,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_EFFECTS_EMPTY,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_EFFECTS_SECTION,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_PASSIVES_EMPTY,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_PASSIVES_SECTION,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_TITLE,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_VITALS_SECTION,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_ANCHOR_CLASS_NAME,
@@ -100,6 +102,7 @@ export function RenderingWorldPlazaProfilePanel({
     stamina: staminaHud,
     hunger: hungerHudSnapshot,
     derivedStats,
+    skinId: selectedAvatarSkinId,
   });
 
   return (
@@ -289,6 +292,62 @@ export function RenderingWorldPlazaProfilePanel({
                 </span>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section
+          aria-label={LABELING_WORLD_PLAZA_PROFILE_PANEL_PASSIVES_SECTION}
+        >
+          <h3
+            className={
+              STYLING_WORLD_PLAZA_PROFILE_PANEL_SECTION_HEADING_CLASS_NAME
+            }
+          >
+            {LABELING_WORLD_PLAZA_PROFILE_PANEL_PASSIVES_SECTION}
+          </h3>
+          <div
+            className={`mt-1.5 ${STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_GRID_CLASS_NAME}`}
+          >
+            {sections.passiveEntries.length === 0 ? (
+              <p
+                className={
+                  STYLING_WORLD_PLAZA_PROFILE_PANEL_VITAL_DETAIL_CLASS_NAME
+                }
+              >
+                {LABELING_WORLD_PLAZA_PROFILE_PANEL_PASSIVES_EMPTY}
+              </p>
+            ) : (
+              sections.passiveEntries.map((entry) => (
+                <div
+                  key={entry.id}
+                  className={
+                    STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_CHIP_CLASS_NAME
+                  }
+                >
+                  <Icon
+                    icon={entry.iconName}
+                    width={DEFINING_WORLD_PLAZA_PROFILE_PANEL_ICON_SIZE_PX}
+                    height={DEFINING_WORLD_PLAZA_PROFILE_PANEL_ICON_SIZE_PX}
+                    className="shrink-0 text-poster-orange-deep"
+                    aria-hidden
+                  />
+                  <span
+                    className={
+                      STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_LABEL_CLASS_NAME
+                    }
+                  >
+                    {entry.label}
+                  </span>
+                  <span
+                    className={
+                      STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_CLASS_NAME
+                    }
+                  >
+                    {entry.valueText}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </section>
 

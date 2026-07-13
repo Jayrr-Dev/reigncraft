@@ -63,8 +63,8 @@ export type DefiningWorldPlazaCharacterEngineDefinition = {
     readonly defensePerLevel: number;
     /**
      * Added to `(level − 1)` before per-level bonuses.
-     * Unlocked animal transforms use −20 so catalog numbers are mature/parity
-     * targets reached at level 21. Omit or 0 for full-power baselines (Girl).
+     * Omit or 0 for full baseline at level 1 (Girl + animal transforms that
+     * inherit wildlife vitals 1:1).
      */
     readonly growthLaneLevelOffset?: number;
   };

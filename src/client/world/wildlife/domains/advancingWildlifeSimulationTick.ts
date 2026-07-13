@@ -68,6 +68,7 @@ import {
 import { applyingWildlifeHerbivoreHerdFleeResponse } from '@/components/world/wildlife/domains/applyingWildlifeHerbivoreHerdFleeResponse';
 import { applyingWildlifeInstanceHealthPayload } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthPayload';
 import { applyingWildlifeInstancePhysicalDamage } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
+import { applyingWildlifeTransformMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifeTransformMeleeHitSideEffects';
 import { applyingWildlifePackAlphaDeathScatter } from '@/components/world/wildlife/domains/applyingWildlifePackAlphaDeathScatter';
 import { applyingWildlifeSpawnPackAlphaLocks } from '@/components/world/wildlife/domains/applyingWildlifeSpawnPackAlphaLocks';
 import { applyingWildlifeSpeechTickWithSpeciesSfx } from '@/components/world/wildlife/domains/applyingWildlifeSpeechTickWithSpeciesSfx';
@@ -134,6 +135,7 @@ import type {
   DefiningWildlifeNetworkSnapshot,
   DefiningWildlifePlayerContactEvent,
   DefiningWildlifePlayerMeleeHit,
+  DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
   DEFINING_WILDLIFE_WOLF_ATTACK2_CLIP_HOLD_MS,
@@ -2353,7 +2355,8 @@ export function applyingWildlifeInstanceDamage(
   stalkShadowingContext: Omit<
     ResolvingWildlifeStalkShadowingAtDamageContextParams,
     'preyTargetId' | 'nearbyInstances'
-  > | null = null
+  > | null = null,
+  attackerTransformSpeciesId: DefiningWildlifeSpeciesId | null = null
 ): DefiningWildlifeInstance | null {
   const instance = store.instances.get(instanceId);
 
@@ -2397,13 +2400,25 @@ export function applyingWildlifeInstanceDamage(
         wakeContext,
       });
 
-  const died = damageAppliedInstance.isDead;
+  const transformProcInstance =
+    !projectileArchetype &&
+    attackerTransformSpeciesId &&
+    !damageAppliedInstance.isDead
+      ? applyingWildlifeTransformMeleeHitSideEffects({
+          instance: damageAppliedInstance,
+          attackerSpeciesId: attackerTransformSpeciesId,
+          meleeDamage: damageAmount,
+          nowMs,
+        })
+      : damageAppliedInstance;
+
+  const died = transformProcInstance.isDead;
   const appliedHealthDamage = Math.max(
     0,
     instance.healthState.currentHealth -
-      damageAppliedInstance.healthState.currentHealth
+      transformProcInstance.healthState.currentHealth
   );
-  let behaviorResponseInstance = damageAppliedInstance;
+  let behaviorResponseInstance = transformProcInstance;
 
   if (
     !died &&
@@ -2411,7 +2426,7 @@ export function applyingWildlifeInstanceDamage(
     checkingWildlifeSpeciesWandersAwayAtDaybreak(species.speciesId)
   ) {
     behaviorResponseInstance = applyingWildlifeFairyBetrayalDeparture({
-      instance: damageAppliedInstance,
+      instance: transformProcInstance,
       species,
       threatPoint: meatDropContext.playerPosition,
       hazardSampling: {
@@ -2427,7 +2442,7 @@ export function applyingWildlifeInstanceDamage(
     checkingWildlifeSpeciesIsDocile(species)
   ) {
     behaviorResponseInstance = applyingWildlifeDocilePlayerHitBehaviorResponse({
-      instance: damageAppliedInstance,
+      instance: transformProcInstance,
       species,
       threatPoint: meatDropContext.playerPosition,
       hazardSampling: {

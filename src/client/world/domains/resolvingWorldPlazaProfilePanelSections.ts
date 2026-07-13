@@ -23,7 +23,10 @@ import {
   LABELING_WORLD_PLAZA_PROFILE_PANEL_COLD_THRESHOLD_ATTRIBUTE,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_HEAT_THRESHOLD_ATTRIBUTE,
 } from '@/components/world/domains/definingWorldPlazaProfilePanelConstants';
+import { resolvingWorldPlazaProfilePanelPassiveEntries } from '@/components/world/domains/resolvingWorldPlazaProfilePanelPassiveEntries';
+import type { ResolvingWorldPlazaProfilePanelPassiveEntry } from '@/components/world/domains/resolvingWorldPlazaProfilePanelPassiveEntries';
 import { DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
+import type { DefiningWorldPlazaAvatarSkinId } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { formattingWorldPlazaTemperature } from '@/components/world/health/domains/convertingWorldPlazaTemperatureUnits';
 import { resolvingWorldPlazaEntityTemperatureComfortBand } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureComfortBand';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
@@ -63,6 +66,7 @@ export type ResolvingWorldPlazaProfilePanelAttributeEntry = {
 export type ResolvingWorldPlazaProfilePanelSections = {
   vitalRows: readonly ResolvingWorldPlazaProfilePanelVitalRow[];
   attributeEntries: readonly ResolvingWorldPlazaProfilePanelAttributeEntry[];
+  passiveEntries: readonly ResolvingWorldPlazaProfilePanelPassiveEntry[];
 };
 
 const DEFINING_PROFILE_PANEL_HUNGER_TIER_LABELS: Record<
@@ -143,8 +147,9 @@ export function resolvingWorldPlazaProfilePanelSections(input: {
   stamina: ResolvingWorldPlazaProfilePanelStaminaHud;
   hunger: UsingWorldPlazaPlayerHungerHudSnapshot;
   derivedStats: ComputingWorldPlazaCharacterEngineDerivedStats;
+  skinId?: DefiningWorldPlazaAvatarSkinId;
 }): ResolvingWorldPlazaProfilePanelSections {
-  const { health, stamina, hunger, derivedStats } = input;
+  const { health, stamina, hunger, derivedStats, skinId } = input;
   const comfortBand = resolvingWorldPlazaEntityTemperatureComfortBand(
     health.temperatureResistance
   );
@@ -245,5 +250,9 @@ export function resolvingWorldPlazaProfilePanelSections(input: {
     },
   ];
 
-  return { vitalRows, attributeEntries };
+  const passiveEntries = skinId
+    ? resolvingWorldPlazaProfilePanelPassiveEntries(skinId)
+    : [];
+
+  return { vitalRows, attributeEntries, passiveEntries };
 }

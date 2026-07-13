@@ -77,6 +77,19 @@ export const DEFINING_WILDLIFE_SPECIES_ON_HIT_EFFECTS: Partial<
       procChance: 0.22,
     },
   ],
+  grizzly: [
+    {
+      kind: 'bleed',
+      severity: 'hemorrhaging',
+      procChance: 0.5,
+      damageScale: 0.35,
+    },
+    {
+      kind: 'buff',
+      buffId: 'sluggish-debuff',
+      procChance: 0.22,
+    },
+  ],
   lion: [
     {
       kind: 'bleed',

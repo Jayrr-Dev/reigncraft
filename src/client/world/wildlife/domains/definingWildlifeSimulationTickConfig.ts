@@ -19,6 +19,7 @@ import type {
   DefiningWildlifeNetworkSnapshot,
   DefiningWildlifePlayerContactEvent,
   DefiningWildlifePlayerMeleeHit,
+  DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type DefiningWildlifeSimulationTickConfig = {
@@ -67,4 +68,9 @@ export type DefiningWildlifeSimulationTickConfig = {
   ) => void;
   /** When set, leader sim drops raw meat on first wildlife death tick. */
   meatDropContextRef?: React.RefObject<DefiningWildlifeMeatDropContext | null>;
+  /**
+   * Wildlife species id for the local player's current animal transform.
+   * Used to inherit on-hit passives (bleed on bite, etc.) when melee hits land.
+   */
+  playerTransformWildlifeSpeciesIdRef?: React.RefObject<DefiningWildlifeSpeciesId | null>;
 };

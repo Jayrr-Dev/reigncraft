@@ -130,7 +130,9 @@ export function usingWildlifeSimulation(
           playerStaminaRatio: playerRunStaminaState?.staminaRatio ?? null,
           playerStaminaIsDepleted: playerRunStaminaState?.isDepleted ?? false,
           playerStillDurationMs: playerStillDurationMsRef?.current ?? 0,
-        }
+        },
+        tickConfigRef.current.playerTransformWildlifeSpeciesIdRef?.current ??
+          null
       );
     },
     []
