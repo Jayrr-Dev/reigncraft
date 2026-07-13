@@ -95,7 +95,6 @@ import { RenderingWorldPlazaGirlSampleWalkAvatar } from '@/components/world/comp
 import { RenderingWorldPlazaHudToolbarBottomAnchor } from '@/components/world/components/renderingWorldPlazaHudToolbarBottomAnchor';
 import { RenderingWorldPlazaLoreBookOverlay } from '@/components/world/components/renderingWorldPlazaLoreBookOverlay';
 import { RenderingWorldPlazaMechanicsOverlay } from '@/components/world/components/renderingWorldPlazaMechanicsOverlay';
-import { RenderingWorldPlazaMiniMapStack } from '@/components/world/components/renderingWorldPlazaMiniMapStack';
 import { RenderingWorldPlazaMobileDebugPanel } from '@/components/world/components/renderingWorldPlazaMobileDebugPanel';
 import { RenderingWorldPlazaMobileLandscapePrompt } from '@/components/world/components/renderingWorldPlazaMobileLandscapePrompt';
 import { RenderingWorldPlazaMobileRollButton } from '@/components/world/components/renderingWorldPlazaMobileRollButton';
@@ -5626,18 +5625,6 @@ function RenderingWorldPlazaPixiSceneConnected({
           <RenderingWorldPlazaMobileLandscapePrompt
             isVisible={shouldShowLandscapePrompt}
           />
-          {isHudMinimapEnabled ? (
-            <RenderingWorldPlazaMiniMapStack
-              playerPositionRef={playerPositionRef}
-              playerRenderPositionRegistryRef={playerRenderPositionRegistryRef}
-              isWalkingRef={isWalkingRef}
-              isRunningRef={isRunningRef}
-              localUserId={onlineUserId}
-              isFullscreen={hudIsFullscreen}
-              ownedPlotsRef={ownedPlotsRef}
-              viewportHudScale={viewportHudScale}
-            />
-          ) : null}
           {isHudStatusEnabled && isLocalGameplayEnabled ? (
             <RenderingWorldPlazaWorldNotifications isMobile={hudIsMobile} />
           ) : null}
@@ -6064,6 +6051,18 @@ function RenderingWorldPlazaPixiSceneConnected({
                     comfortBand: temperatureComfortBand,
                   }}
                   playerPositionRef={playerPositionRef}
+                  minimapHud={
+                    isHudMinimapEnabled
+                      ? {
+                          playerRenderPositionRegistryRef:
+                            playerRenderPositionRegistryRef,
+                          isWalkingRef,
+                          isRunningRef,
+                          localUserId: onlineUserId,
+                          ownedPlotsRef,
+                        }
+                      : null
+                  }
                   inlineChatSlot={
                     isPlazaSocialEnabled ? (
                       <RenderingWorldPlazaRoomChatPanel
@@ -6217,6 +6216,18 @@ function RenderingWorldPlazaPixiSceneConnected({
                     comfortBand: temperatureComfortBand,
                   }}
                   playerPositionRef={playerPositionRef}
+                  minimapHud={
+                    isHudMinimapEnabled
+                      ? {
+                          playerRenderPositionRegistryRef:
+                            playerRenderPositionRegistryRef,
+                          isWalkingRef,
+                          isRunningRef,
+                          localUserId: onlineUserId,
+                          ownedPlotsRef,
+                        }
+                      : null
+                  }
                 />
               ) : null}
               {isHudHotbarEnabled ? (

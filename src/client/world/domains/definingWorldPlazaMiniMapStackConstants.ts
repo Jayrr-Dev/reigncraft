@@ -1,27 +1,26 @@
 /**
- * Declarative layout for the top-left minimap parchment card.
+ * Declarative layout for the action-bar minimap dropdown card.
  *
  * @module components/world/domains/definingWorldPlazaMiniMapStackConstants
  */
 
-import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_MINI_MAP_STACK_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
 import {
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE,
   STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_CLASS,
   STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_INSET_FRAME_CLASS,
 } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 
-/** Where the minimap card sits for one screen size combo. */
+/** Where the minimap card sits for one screen size combo (edge insets for Dev tools). */
 export type DefiningWorldPlazaMiniMapStackViewportLayout = {
   /**
-   * Distance from the left and top screen edges when nothing else pushes
-   * the stack down. Increase to move the stack away from the corner; decrease
-   * to tuck it closer.
+   * Distance from the left and top screen edges for top-left chrome that used
+   * to share a column with the minimap (Dev tools).
    */
   readonly edgeInsetBasePx: number;
 };
 
 /**
- * Minimap HUD stack layout keyed by viewport mode and platform.
+ * Minimap HUD layout keyed by viewport mode and platform.
  *
  * - embedded: normal in-feed / windowed game view
  * - fullscreen: expanded fullscreen game view
@@ -30,11 +29,11 @@ export type DefiningWorldPlazaMiniMapStackViewportLayout = {
  */
 export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
   /**
-   * CSS classes for the outer wrapper that positions the minimap card
-   * in the top-left HUD corner.
+   * Dropdown shell under the action-bar layer orb (same pattern as hunger /
+   * temperature / day-night panels).
    */
-  anchorClassName:
-    DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_MINI_MAP_STACK_ANCHOR_CLASS_NAME,
+  dropdownClassName:
+    `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarDropdown} pointer-events-auto absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2` as const,
   /** Column that hosts the parchment minimap card. */
   columnClassName: 'relative flex flex-col items-start',
   /**
@@ -45,38 +44,34 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
   /** Inner frame that insets the minimap canvas like a framed game map. */
   mapFrameClassName:
     STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_INSET_FRAME_CLASS,
-  /** Top inset — matches the action bar row (`anchorTopBasePx`). */
+  /** Top inset for top-left chrome (Dev tools) — matches the action bar row. */
   topInsetBasePx: 4,
   /** Parchment card vertical padding (p-0.5 top + bottom). */
   cardVerticalChromeBasePx: 4,
-  /** Gap before Dev tools / other chrome below the minimap card. */
+  /** Gap below top-left chrome when stacking Dev tools under other HUD. */
   belowMinimapGapBasePx: 6,
   viewportLayouts: {
     /** Normal (non-fullscreen) game view. */
     embedded: {
-      /** Wide screens — stack sits in the top-left corner. */
       desktop: {
         edgeInsetBasePx: 4,
       },
-      /** Phone-sized screens — same top-left corner as the action bar row. */
       mobile: {
         edgeInsetBasePx: 4,
       },
     },
     /** Expanded fullscreen game view. */
     fullscreen: {
-      /** Wide screens — same edge inset as embedded (matches top y). */
       desktop: {
         edgeInsetBasePx: 4,
       },
-      /** Phone-sized fullscreen — same top-left anchor. */
       mobile: {
         edgeInsetBasePx: 4,
       },
     },
   },
 } as const satisfies {
-  anchorClassName: string;
+  dropdownClassName: string;
   columnClassName: string;
   cardClassName: string;
   mapFrameClassName: string;

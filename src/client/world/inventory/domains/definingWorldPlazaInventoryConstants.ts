@@ -4,6 +4,10 @@
  * @module components/world/inventory/domains/definingWorldPlazaInventoryConstants
  */
 
+import {
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID,
+  resolvingWorldPlazaCraftRecipePageItemTypeId,
+} from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
@@ -180,6 +184,12 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_STARTER_ITEMS: readonly DefiningWorl
     },
     {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_STARTER_BAG_ITEM_TYPE_ID,
+      quantity: 1,
+    },
+    {
+      itemTypeId: resolvingWorldPlazaCraftRecipePageItemTypeId(
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE
+      ),
       quantity: 1,
     },
   ] as const;

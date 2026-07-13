@@ -3,10 +3,6 @@ import {
   type DefiningInventoryItemRegistry,
 } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import { DEFINING_INVENTORY_UNLIMITED_STACK_SIZE } from '@/components/inventory/domains/definingInventoryStackConstants';
-import {
-  DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID,
-  resolvingWorldPlazaCraftRecipePageItemTypeId,
-} from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { registeringWorldPlazaCraftRecipePageInventoryItems } from '@/components/world/crafting/domains/registeringWorldPlazaCraftRecipePageInventoryItems';
 import {
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE,
@@ -298,12 +294,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS: readonly DefiningWo
     {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED,
       quantity: 8,
-    },
-    {
-      itemTypeId: resolvingWorldPlazaCraftRecipePageItemTypeId(
-        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE
-      ),
-      quantity: 1,
     },
   ] as const;
 

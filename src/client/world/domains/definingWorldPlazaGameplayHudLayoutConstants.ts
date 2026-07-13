@@ -77,15 +77,15 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
   },
 
   regions: {
-    /** Top-left: minimap card, then Dev tools + Perf launcher below it. */
+    /** Top-left: Dev tools + Perf launcher (minimap drops from the action bar). */
     topLeft: {
       minimapStack: {
         anchorClassName:
           'pointer-events-none absolute z-20 flex flex-col items-start select-none',
       },
       devModePanel: {
-        // Top offset resolved from minimap occupied height (see MiniMapStack constants).
-        // Collapsed Dev / Perf row width matches minimap (see viewport layout resolver).
+        // Top offset: action-bar row inset + small gap (see DevModePanel viewport layout).
+        // Collapsed Dev / Perf row width matches minimap canvas size.
         anchorClassName:
           'pointer-events-none absolute z-30 flex select-none flex-row items-stretch gap-0.5',
         topWithStaminaBarClassName: '',

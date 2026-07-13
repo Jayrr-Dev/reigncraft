@@ -192,6 +192,10 @@ export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_ENCHANTMENTS =
 export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO =
   'Item details' as const;
 
+/** Action tower button: attach a cookbook recipe page. */
+export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ATTACH =
+  'Attach' as const;
+
 /** Human-readable labels for equipped tool kinds. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS: Readonly<
   Record<DefiningWorldPlazaEquipmentToolKind, string>

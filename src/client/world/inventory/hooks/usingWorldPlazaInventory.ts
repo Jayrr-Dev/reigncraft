@@ -32,6 +32,7 @@ import {
   readingWorldPlazaInventoryKingpinTestSeedVersion,
   writingWorldPlazaInventoryKingpinTestSeedVersion,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryKingpinTestSeed';
+import { ensuringWorldPlazaInventoryCampfireRecipePage } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryCampfireRecipePage';
 import { movingWorldPlazaInventoryItemToSlot } from '@/components/world/inventory/domains/movingWorldPlazaInventoryItemToSlot';
 import { normalizingWorldPlazaInventoryWeaponToolSlot } from '@/components/world/inventory/domains/normalizingWorldPlazaInventoryWeaponToolSlot';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
@@ -120,6 +121,7 @@ export function usingWorldPlazaInventory(
 
   const hasSeededRef = useRef(false);
   const hasNormalizedWeaponToolSlotRef = useRef(false);
+  const hasEnsuredCampfireRecipePageRef = useRef(false);
   const hasKingpinSeededRef = useRef(false);
   const isKingpinAccount =
     checkingWorldPlazaInventoryUserIsKingpin(onlineUsername);
@@ -299,6 +301,19 @@ export function usingWorldPlazaInventory(
 
       if (normalizedState !== state) {
         setState(normalizedState);
+        return;
+      }
+    }
+
+    if (!hasEnsuredCampfireRecipePageRef.current) {
+      hasEnsuredCampfireRecipePageRef.current = true;
+      const withCampfirePage = ensuringWorldPlazaInventoryCampfireRecipePage(
+        state,
+        { storageOwnerId: persistenceOwnerId }
+      );
+
+      if (withCampfirePage !== state) {
+        setState(withCampfirePage);
       }
     }
   }, [

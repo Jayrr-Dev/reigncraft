@@ -5,7 +5,6 @@ import {
 } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 import {
   computingWorldPlazaMiniMapStackLeftInsetPx,
-  computingWorldPlazaMiniMapStackOccupiedHeightPx,
   computingWorldPlazaMiniMapStackOccupiedWidthPx,
   computingWorldPlazaMiniMapStackTopPx,
 } from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportStyles';
@@ -18,9 +17,9 @@ export type DefiningWorldPlazaDevModePanelViewportLayout = {
 
 /**
  * Resolves anchor classes and offsets for the Dev tools panel.
- * Sits below the top-left minimap card on every viewport.
+ * Sits in the top-left corner (minimap now drops from the action bar).
  *
- * When the panel is collapsed, the Dev / Perf row matches minimap width.
+ * When the panel is collapsed, the Dev / Perf row matches minimap canvas width.
  */
 export function resolvingWorldPlazaDevModePanelViewportLayout({
   viewportHudScale,
@@ -35,11 +34,6 @@ export function resolvingWorldPlazaDevModePanelViewportLayout({
 }): DefiningWorldPlazaDevModePanelViewportLayout {
   const topPx =
     computingWorldPlazaMiniMapStackTopPx(viewportHudScale, isMobile) +
-    computingWorldPlazaMiniMapStackOccupiedHeightPx(
-      viewportHudScale,
-      isMobile,
-      isFullscreen
-    ) +
     computingWorldPlazaViewportHudScaledPx(
       DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_BELOW_MINIMAP_GAP_BASE_PX,
       viewportHudScale

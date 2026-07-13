@@ -31,6 +31,7 @@ import {
   resolvingWorldPlazaInventoryItemCreatedBy,
   resolvingWorldPlazaInventoryItemForgeLevel,
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemInstanceInspectFields';
+import { checkingWorldPlazaInventoryItemIsRecipePage } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemRecipePage';
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 import {
@@ -52,6 +53,7 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly activeEnhancements: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
   readonly activeEnchantments: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
   readonly canEat: boolean;
+  readonly canAttachRecipePage: boolean;
   readonly canDrop: boolean;
   readonly canEquip: boolean;
   readonly canOpenBag: boolean;
@@ -411,6 +413,9 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       activeEnhancements: [],
       activeEnchantments: [],
       canEat: checkingWorldPlazaInventoryItemIsFood(item.itemTypeId),
+      canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
+        item.itemTypeId
+      ),
       canDrop: definition.isDroppable,
       canEquip: false,
       canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),
@@ -455,6 +460,9 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     activeEnhancements,
     activeEnchantments,
     canEat: checkingWorldPlazaInventoryItemIsFood(item.itemTypeId),
+    canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
+      item.itemTypeId
+    ),
     canDrop: definition.isDroppable,
     canEquip: false,
     canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),

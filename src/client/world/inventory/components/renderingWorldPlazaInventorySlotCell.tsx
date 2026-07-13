@@ -433,6 +433,11 @@ function InventoryPlazaSlotItem({
     onCloseItemDetailPopover?.();
   }, [onCloseItemDetailPopover, onEatHotbarSlot, slotIndex]);
 
+  const handlingAttachRecipePageFromDetailPopover = useCallback((): void => {
+    onAttachRecipePageHotbarSlot?.(slotIndex);
+    onCloseItemDetailPopover?.();
+  }, [onAttachRecipePageHotbarSlot, onCloseItemDetailPopover, slotIndex]);
+
   const handlingDropFromDetailPopover = useCallback((): void => {
     onDropHotbarSlot?.(slotIndex);
     onCloseItemDetailPopover?.();
@@ -750,6 +755,12 @@ function InventoryPlazaSlotItem({
           onEatItem={
             detailPopoverModel.canEat && onEatHotbarSlot
               ? handlingEatFromDetailPopover
+              : undefined
+          }
+          onAttachRecipePage={
+            detailPopoverModel.canAttachRecipePage &&
+            onAttachRecipePageHotbarSlot
+              ? handlingAttachRecipePageFromDetailPopover
               : undefined
           }
           onDropItem={

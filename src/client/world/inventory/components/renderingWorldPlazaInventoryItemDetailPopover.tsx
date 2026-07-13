@@ -6,6 +6,7 @@ import { usingWorldPlazaAnchoredPopoverViewportShiftX } from '@/components/world
 import { RenderingWorldPlazaInventoryItemInfoDialog } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemInfoDialog';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_ICONIFY_ICON,
+  LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ATTACH,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemDetailConstants';
 import type { DefiningWorldPlazaInventoryItemActionTowerClassNames } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemActionTowerClassNames';
@@ -18,6 +19,7 @@ import { useCallback, useState, type SyntheticEvent } from 'react';
 export type RenderingWorldPlazaInventoryItemDetailPopoverProps = {
   readonly model: ResolvingWorldPlazaInventoryItemDetailPopoverModel;
   readonly onEatItem?: () => void;
+  readonly onAttachRecipePage?: () => void;
   readonly onDropItem?: () => void;
   readonly onEquipItem?: () => void;
   readonly onOpenBag?: () => void;
@@ -30,6 +32,7 @@ export type RenderingWorldPlazaInventoryItemDetailPopoverProps = {
 export function RenderingWorldPlazaInventoryItemDetailPopover({
   model,
   onEatItem,
+  onAttachRecipePage,
   onDropItem,
   onEquipItem,
   onOpenBag,
@@ -116,6 +119,17 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
               onClick={onEatItem}
             >
               Eat
+            </button>
+          ) : null}
+
+          {model.canAttachRecipePage && onAttachRecipePage ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={actionTowerClassNames.button}
+              onClick={onAttachRecipePage}
+            >
+              {LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ATTACH}
             </button>
           ) : null}
 

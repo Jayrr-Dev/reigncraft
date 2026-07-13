@@ -180,21 +180,3 @@ export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_HEADER_CLASS_NAME =
  */
 export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_LABEL_CLASS_NAME =
   'whitespace-nowrap text-center leading-none' as const;
-
-/**
- * Longest mode label length (chars). Drives uniform label column width.
- * Includes Build/Claim toggle faces so the shared column stays stable.
- */
-export const DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_MAX_LABEL_LENGTH = Math.max(
-  ...DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_REGISTRY.flatMap(
-    (badgeDefinition) => {
-      if (badgeDefinition.kind === 'mode') {
-        return [badgeDefinition.label.length];
-      }
-
-      return Object.values(
-        DEFINING_WORLD_PLAZA_HUD_TOOLBAR_BUILD_CLAIM_TOGGLE_FACES
-      ).map((face) => face.label.length);
-    }
-  )
-);

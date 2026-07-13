@@ -12,12 +12,14 @@ import {
   DEFINING_REIGNCRAFT_TOASTER_ID,
 } from '@/components/ui/domains/definingReigncraftToastConstants';
 import { RenderingReigncraftToaster } from '@/components/ui/sonner';
+import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
 import { RenderingWorldPlazaActionBarTransformPanel } from '@/components/world/components/renderingWorldPlazaActionBarTransformPanel';
 import { RenderingWorldPlazaCodexMenuPanel } from '@/components/world/components/renderingWorldPlazaCodexMenuPanel';
 import { RenderingWorldPlazaDayNightIndicator } from '@/components/world/components/renderingWorldPlazaDayNightIndicator';
 import { RenderingWorldPlazaDayNightPanel } from '@/components/world/components/renderingWorldPlazaDayNightPanel';
 import { RenderingWorldPlazaExitHomeConfirmDialog } from '@/components/world/components/renderingWorldPlazaExitHomeConfirmDialog';
 import { RenderingWorldPlazaMasterVolumeMixerPanel } from '@/components/world/components/renderingWorldPlazaMasterVolumeMixerPanel';
+import { RenderingWorldPlazaMiniMapStack } from '@/components/world/components/renderingWorldPlazaMiniMapStack';
 import { RenderingWorldPlazaWorldLayerIndicator } from '@/components/world/components/renderingWorldPlazaWorldLayerIndicator';
 import {
   DEFINING_WORLD_PLAZA_ACTION_BAR_ANCHOR_CLASS_NAME,
@@ -47,6 +49,7 @@ import {
   LABELING_WORLD_PLAZA_ACTION_BAR_SETTINGS,
   STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaMasterVolumeConstants';
+import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import { LABELING_WORLD_PLAZA_ACTION_BAR_PROFILE } from '@/components/world/domains/definingWorldPlazaProfilePanelConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
@@ -126,8 +129,18 @@ export interface RenderingWorldPlazaActionBarProps {
       readonly comfortHighCelsius: number;
     } | null;
   } | null;
-  /** Live local player position; drives the world-layer orb and minimap toggle. */
+  /** Live local player position; drives the world-layer orb. */
   playerPositionRef?: React.RefObject<DefiningWorldPlazaWorldPoint> | null;
+  /** When set, layer orb toggles the minimap dropdown under the action bar. */
+  minimapHud?: {
+    readonly playerRenderPositionRegistryRef: React.RefObject<
+      Map<string, DefiningWorldPlazaPlayerRenderPosition>
+    >;
+    readonly isWalkingRef: React.RefObject<boolean>;
+    readonly isRunningRef: React.RefObject<boolean>;
+    readonly localUserId: string | null;
+    readonly ownedPlotsRef: React.RefObject<DefiningWorldBuildingPlot[]>;
+  } | null;
 }
 
 /**
@@ -166,6 +179,7 @@ export function RenderingWorldPlazaActionBar({
   hungerHud = null,
   temperatureHud = null,
   playerPositionRef = null,
+  minimapHud = null,
 }: RenderingWorldPlazaActionBarProps): React.JSX.Element | null {
   const viewportStyles = useMemo(
     () =>
@@ -199,7 +213,29 @@ export function RenderingWorldPlazaActionBar({
     setIsDayNightPanelOpen(false);
     setIsSoundMixerOpen(false);
     setIsCodexMenuOpen(false);
-  }, [isChatOpen]);
+    settingMinimapEnabled(false);
+  }, [isChatOpen, settingMinimapEnabled]);
+
+  useEffect(() => {
+    if (
+      !isTransformPanelOpen &&
+      !isHungerPanelOpen &&
+      !isTemperaturePanelOpen &&
+      !isDayNightPanelOpen &&
+      !isCodexMenuOpen
+    ) {
+      return;
+    }
+
+    settingMinimapEnabled(false);
+  }, [
+    isTransformPanelOpen,
+    isHungerPanelOpen,
+    isTemperaturePanelOpen,
+    isDayNightPanelOpen,
+    isCodexMenuOpen,
+    settingMinimapEnabled,
+  ]);
 
   if (!isVisible) {
     return null;
@@ -245,6 +281,7 @@ export function RenderingWorldPlazaActionBar({
                       setIsDayNightPanelOpen(false);
                       setIsTransformPanelOpen(false);
                       setIsCodexMenuOpen(false);
+                      settingMinimapEnabled(false);
                       setIsSoundMixerOpen((wasOpen) => !wasOpen);
                     }}
                     className={stylingWorldPlazaActionBarButton(
@@ -567,6 +604,19 @@ export function RenderingWorldPlazaActionBar({
                         settingMinimapEnabled(!isMinimapPreferenceEnabled);
                       }}
                     />
+                    {minimapHud && isMinimapPreferenceEnabled ? (
+                      <RenderingWorldPlazaMiniMapStack
+                        playerPositionRef={playerPositionRef}
+                        playerRenderPositionRegistryRef={
+                          minimapHud.playerRenderPositionRegistryRef
+                        }
+                        isWalkingRef={minimapHud.isWalkingRef}
+                        isRunningRef={minimapHud.isRunningRef}
+                        localUserId={minimapHud.localUserId}
+                        isFullscreen={isFullscreenViewport || isFullscreen}
+                        ownedPlotsRef={minimapHud.ownedPlotsRef}
+                      />
+                    ) : null}
                   </div>
                 ) : null}
 

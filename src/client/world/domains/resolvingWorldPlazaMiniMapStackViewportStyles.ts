@@ -11,7 +11,7 @@ export type ResolvingWorldPlazaMiniMapStackViewportStylesParams = {
 };
 
 /**
- * Top offset for the minimap stack — same row as the top action bar.
+ * Top offset for top-left HUD chrome on the action bar row.
  */
 export function computingWorldPlazaMiniMapStackTopPx(
   viewportHudScale: number,
@@ -24,27 +24,22 @@ export function computingWorldPlazaMiniMapStackTopPx(
 }
 
 /**
- * Vertical footprint of the minimap parchment card (map frame only).
+ * Vertical footprint reserved for a corner minimap (unused; map is a dropdown).
+ * Kept at chrome-only so Dev tools can sit on the top-left edge.
  */
 export function computingWorldPlazaMiniMapStackOccupiedHeightPx(
   viewportHudScale: number,
-  isMobile: boolean,
-  isFullscreen: boolean
+  _isMobile: boolean,
+  _isFullscreen: boolean
 ): number {
-  const viewportMode = isFullscreen ? 'fullscreen' : 'embedded';
-  const platform = isMobile ? 'mobile' : 'desktop';
-  const canvasSizePx =
-    DEFINING_WORLD_PLAZA_MINI_MAP_CANVAS_SIZE_PX[viewportMode][platform];
-  const cardChromePx = computingWorldPlazaViewportHudScaledPx(
+  return computingWorldPlazaViewportHudScaledPx(
     DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.cardVerticalChromeBasePx,
     viewportHudScale
   );
-
-  return cardChromePx + canvasSizePx;
 }
 
 /**
- * Horizontal footprint of the minimap parchment card (matches stack column width).
+ * Horizontal footprint matching the minimap canvas (Dev tools collapsed width).
  */
 export function computingWorldPlazaMiniMapStackOccupiedWidthPx(
   isMobile: boolean,
@@ -57,7 +52,7 @@ export function computingWorldPlazaMiniMapStackOccupiedWidthPx(
 }
 
 /**
- * Left inset for top-left HUD chrome that aligns with the minimap stack.
+ * Left inset for top-left HUD chrome.
  */
 export function computingWorldPlazaMiniMapStackLeftInsetPx(
   viewportHudScale: number,
@@ -76,10 +71,7 @@ export function computingWorldPlazaMiniMapStackLeftInsetPx(
 }
 
 /**
- * Resolves top-left anchor offsets for the minimap stack.
- *
- * Uses inline px values so positioning does not depend on Tailwind spacing
- * utilities being present in the production CSS bundle.
+ * Resolves top-left anchor offsets (legacy corner stack; Dev tools still use this).
  */
 export function resolvingWorldPlazaMiniMapStackViewportStyles({
   viewportHudScale,

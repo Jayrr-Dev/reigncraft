@@ -8,7 +8,6 @@ import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domai
 import { DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT } from '@/components/world/domains/definingWorldPlazaMiniMapStackConstants';
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { resolvingWorldPlazaMiniMapStackViewportStyles } from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportStyles';
 import { resolvingWorldPlazaMinimapVisible } from '@/components/world/domains/resolvingWorldPlazaMinimapVisible';
 import { usingWorldPlazaMinimapEnabled } from '@/components/world/hooks/usingWorldPlazaMinimapEnabled';
 import { usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
@@ -25,12 +24,10 @@ export interface RenderingWorldPlazaMiniMapStackProps {
   localUserId: string | null;
   isFullscreen: boolean;
   ownedPlotsRef: React.RefObject<DefiningWorldBuildingPlot[]>;
-  /** Live HUD scale from the plaza viewport frame. */
-  viewportHudScale?: number;
 }
 
 /**
- * Top-left minimap parchment card (map only; no time/temperature chrome).
+ * Minimap parchment card dropped below the action-bar layer orb.
  */
 export function RenderingWorldPlazaMiniMapStack({
   playerPositionRef,
@@ -40,7 +37,6 @@ export function RenderingWorldPlazaMiniMapStack({
   localUserId,
   isFullscreen,
   ownedPlotsRef,
-  viewportHudScale = 1,
 }: RenderingWorldPlazaMiniMapStackProps): React.JSX.Element | null {
   const performanceProfile = usingWorldPlazaPerformanceProfile();
   const { isMinimapPreferenceEnabled } = usingWorldPlazaMinimapEnabled();
@@ -56,15 +52,6 @@ export function RenderingWorldPlazaMiniMapStack({
       ),
     [isFullscreen, isMobile, performanceProfile.minimapViewRadiusTiles]
   );
-  const stackAnchorStyle = useMemo(
-    () =>
-      resolvingWorldPlazaMiniMapStackViewportStyles({
-        viewportHudScale,
-        isMobile,
-        isFullscreen,
-      }),
-    [viewportHudScale, isMobile, isFullscreen]
-  );
   const isMinimapVisible = resolvingWorldPlazaMinimapVisible({
     isMinimapPreferenceEnabled,
     renderLayerFlags,
@@ -76,9 +63,10 @@ export function RenderingWorldPlazaMiniMapStack({
 
   return (
     <div
-      {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
-      className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.anchorClassName}
-      style={stackAnchorStyle}
+      {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+      className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.dropdownClassName}
+      role="dialog"
+      aria-label="Minimap"
     >
       <div
         className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.columnClassName}
