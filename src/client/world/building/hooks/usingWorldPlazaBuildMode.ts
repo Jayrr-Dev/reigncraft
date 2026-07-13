@@ -1672,7 +1672,7 @@ export function usingWorldPlazaBuildMode({
         onlineUserId
       );
     });
-  }, [isEditSessionActive, onlineUserId, ownedPlots, plots]);
+  }, [assigningBuildDraft, isEditSessionActive, onlineUserId, ownedPlots, plots]);
 
   return {
     editMode,
