@@ -6,6 +6,7 @@
 
 import { checkingWildlifeSpeciesHasPassiveTrait } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesHasPassiveTrait';
 import { DEFINING_WILDLIFE_ADRENALINE_RUSH_STAMINA_RESTORE_RATIO } from '@/components/world/wildlife/domains/definingWildlifeSpeciesPassiveTraitConstants';
+import { DEFINING_WILDLIFE_STAMINA_FATIGUE_INITIAL_TIER } from '@/components/world/wildlife/domains/definingWildlifeStaminaFatigueConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeBehaviorIntent,
@@ -60,6 +61,11 @@ export function applyingWildlifeAdrenalineRushOnFleeEntry({
       ...instance.staminaState,
       staminaRatio: restoredRatio,
       isExhausted: false,
+      fatigueTier:
+        restoredRatio >= maxStaminaRatio
+          ? DEFINING_WILDLIFE_STAMINA_FATIGUE_INITIAL_TIER
+          : (instance.staminaState.fatigueTier ??
+            DEFINING_WILDLIFE_STAMINA_FATIGUE_INITIAL_TIER),
     },
   };
 }

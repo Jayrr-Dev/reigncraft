@@ -24,6 +24,7 @@ import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildl
 import { checkingWildlifeShouldDocileApproachReact } from '@/components/world/wildlife/domains/checkingWildlifeShouldDocileApproachReact';
 import { checkingWildlifeSocialHunterMayHunt } from '@/components/world/wildlife/domains/checkingWildlifeSocialHunterMayHunt';
 import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
+import { checkingWildlifeIsStalkHuntTemperament } from '@/components/world/wildlife/domains/checkingWildlifeIsStalkHuntTemperament';
 import { checkingWildlifeStalkPackmateMayAttackPrey } from '@/components/world/wildlife/domains/checkingWildlifeStalkPackmateMayAttackPrey';
 import {
   checkingWildlifeStalkPhaseIsAttacking,
@@ -179,7 +180,9 @@ function resolvingWildlifeStalkPreyFromBlackboard(
 function checkingWildlifeBlackboardStalkKillWindowOpen(
   blackboard: DefiningWildlifeBehaviorBlackboard
 ): boolean {
-  if (blackboard.species.temperamentId !== 'stalker') {
+  if (
+    !checkingWildlifeIsStalkHuntTemperament(blackboard.species.temperamentId)
+  ) {
     return false;
   }
 
@@ -389,14 +392,16 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     const prey = resolvingWildlifeStalkPreyFromBlackboard(blackboard);
 
     return (
-      blackboard.species.temperamentId === 'stalker' &&
+      checkingWildlifeIsStalkHuntTemperament(
+        blackboard.species.temperamentId
+      ) &&
       prey !== null &&
       blackboard.instance.aggroState.activeTargetId === prey.targetId &&
       checkingWildlifeStalkPhaseIsShadowing(blackboard.instance.aggroState)
     );
   },
   isStalkPackmateMayAttackPrey: (blackboard) => {
-    if (blackboard.species.temperamentId !== 'stalker') {
+    if (blackboard.species.temperamentId !== 'pack_hunter') {
       return true;
     }
 
@@ -414,14 +419,16 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     });
   },
   isStalkPackFleeing: (blackboard) =>
-    blackboard.species.temperamentId === 'stalker' &&
+    checkingWildlifeIsStalkHuntTemperament(
+      blackboard.species.temperamentId
+    ) &&
     ((blackboard.instance.packAlphaDeathScatterUntilMs !== null &&
       blackboard.instance.packAlphaDeathScatterUntilMs !== undefined &&
       blackboard.nowMs < blackboard.instance.packAlphaDeathScatterUntilMs) ||
       checkingWildlifeStalkPhaseIsFleeing(blackboard.instance.aggroState) ||
       checkingWildlifeStalkPhaseIsRegrouping(blackboard.instance.aggroState)),
   isStalkPackSurroundCommit: (blackboard) => {
-    if (blackboard.species.temperamentId !== 'stalker') {
+    if (blackboard.species.temperamentId !== 'pack_hunter') {
       return false;
     }
 
@@ -431,7 +438,7 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     );
   },
   isStalkConfidentFormingUp: (blackboard) =>
-    blackboard.species.temperamentId === 'stalker' &&
+    blackboard.species.temperamentId === 'pack_hunter' &&
     checkingWildlifeStalkPhaseIsFormingUp(blackboard.instance.aggroState),
 };
 
@@ -515,7 +522,9 @@ export function resolvingWildlifeNearestHuntablePreyInstanceId(
 export function checkingWildlifeMayTargetPlayer(
   blackboard: DefiningWildlifeBehaviorBlackboard
 ): boolean {
-  if (blackboard.species.temperamentId === 'stalker') {
+  if (
+    checkingWildlifeIsStalkHuntTemperament(blackboard.species.temperamentId)
+  ) {
     return checkingWildlifeBlackboardStalkKillWindowOpen(blackboard);
   }
 

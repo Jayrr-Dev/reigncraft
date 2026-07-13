@@ -298,3 +298,14 @@ export function choppingWorldPlazaLocalTreeLayer(
     isFullyFelled: mutation.isFullyFelled,
   };
 }
+
+/**
+ * Drops in-memory chopped-tree cache for one persistence owner (save-slot wipe).
+ *
+ * @param persistenceOwnerId - Scoped localStorage owner id for the slot.
+ */
+export function clearingWorldPlazaLocalChoppedTreesMemoryForOwner(
+  persistenceOwnerId: string
+): void {
+  managingWorldPlazaLocalChoppedTreesByOwner.delete(persistenceOwnerId);
+}

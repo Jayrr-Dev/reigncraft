@@ -5,9 +5,10 @@
  */
 
 export type DefiningWorldPlazaEntityFrostbiteStageId =
-  | 'chilled'
-  | 'numb'
-  | 'frostnip'
+  | 'chilly'
+  | 'cold'
+  | 'shivering'
+  | 'freezing'
   | 'hypothermia'
   | 'frostbite'
   | 'necrotic';
@@ -22,18 +23,18 @@ export type DefiningWorldPlazaEntityFrostbiteStageDescriptor = {
   minStacks: number;
   /**
    * Hide-from-HUD buffs this stage contributes. Sync applies every reached
-   * stage's buffs; overlapping movement / outgoing-damage keep the harshest.
+   * stage's buffs; overlapping movement keep the harshest.
    */
   buffIds: readonly string[];
-  /** Extra %maxHP frost damage on cold ticks (Frostnip+). */
+  /** Extra %maxHP frost damage on cold ticks (Freezing+). */
   appliesPercentMaxHealthFrostDamage: boolean;
   /** Multiply ambient + percent frost damage (Frostbite+). */
   amplifiesFrostDamage: boolean;
   /** Block all healing (Necrotic). */
   blocksHeal: boolean;
-  /** Full immobilize via stun (Necrotic). */
+  /** Full immobilize via deep sleep (Necrotic). */
   forcesImmobilize: boolean;
-  /** Apply icy avatar tint (Necrotic). */
+  /** Apply icy avatar tint (Freezing+; intensity scales with stacks). */
   appliesAvatarTint: boolean;
   /** Keep confusion active (Hypothermia+). */
   appliesConfusion: boolean;
@@ -47,11 +48,11 @@ export type DefiningWorldPlazaEntityFrostbiteStageDescriptor = {
 export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly DefiningWorldPlazaEntityFrostbiteStageDescriptor[] =
   [
     {
-      id: 'chilled',
-      label: 'Chilled',
-      description: 'Slight movement slowdown from cold stacks.',
+      id: 'chilly',
+      label: 'Chilly',
+      description: 'First bite of cold as stacks begin.',
       hudEffectLines: [],
-      minStacks: 50,
+      minStacks: 0,
       buffIds: [],
       appliesPercentMaxHealthFrostDamage: false,
       amplifiesFrostDamage: false,
@@ -64,14 +65,12 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly Defi
       hudIconBorderClassName: 'border-sky-400/50 bg-sky-950/80',
     },
     {
-      id: 'numb',
-      label: 'Numb',
-      description: 'Slower movement; reduced max stamina and regen.',
-      hudEffectLines: [
-        '20% less max stamina',
-      ],
-      minStacks: 100,
-      buffIds: ['frostbite-numb-debuff'],
+      id: 'cold',
+      label: 'Cold',
+      description: 'Mild cold stacks; movement still mostly fine.',
+      hudEffectLines: [],
+      minStacks: 50,
+      buffIds: [],
       appliesPercentMaxHealthFrostDamage: false,
       amplifiesFrostDamage: false,
       blocksHeal: false,
@@ -83,17 +82,13 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly Defi
       hudIconBorderClassName: 'border-cyan-400/55 bg-cyan-950/80',
     },
     {
-      id: 'frostnip',
-      label: 'Frostnip',
-      description:
-        'Heavy slow; weaker strikes; extra percent frost damage on cold ticks.',
-      hudEffectLines: [
-        '15% less damage dealt',
-        'Extra frost damage scales with severity',
-      ],
-      minStacks: 200,
-      buffIds: ['frostbite-frostnip-damage-debuff'],
-      appliesPercentMaxHealthFrostDamage: true,
+      id: 'shivering',
+      label: 'Shivering',
+      description: 'Linear walk and stamina regen slow from cold stacks.',
+      hudEffectLines: [],
+      minStacks: 100,
+      buffIds: [],
+      appliesPercentMaxHealthFrostDamage: false,
       amplifiesFrostDamage: false,
       blocksHeal: false,
       forcesImmobilize: false,
@@ -104,31 +99,45 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly Defi
       hudIconBorderClassName: 'border-teal-400/55 bg-teal-950/80',
     },
     {
-      id: 'hypothermia',
-      label: 'Hypothermia',
+      id: 'freezing',
+      label: 'Freezing',
       description:
-        'Severe slow; half stamina and jump; confusion; sleep spells.',
+        'Heavy slow; extra percent frost damage on cold ticks; icy tint.',
       hudEffectLines: [
-        '50% less max stamina',
-        '50% shorter jump',
-        '25% less damage dealt',
-        'Confusion',
-        'Sleep spells as it worsens',
+        'Extra frost damage scales with severity',
+        'Icy tint (grows with severity)',
       ],
-      minStacks: 500,
-      buffIds: [
-        'frostbite-hypothermia-debuff',
-        'frostbite-hypothermia-damage-debuff',
-      ],
+      minStacks: 200,
+      buffIds: [],
       appliesPercentMaxHealthFrostDamage: true,
       amplifiesFrostDamage: false,
       blocksHeal: false,
       forcesImmobilize: false,
-      appliesAvatarTint: false,
-      appliesConfusion: true,
-      appliesSleepSpells: true,
+      appliesAvatarTint: true,
+      appliesConfusion: false,
+      appliesSleepSpells: false,
       hudIconColorClassName: 'text-indigo-200',
       hudIconBorderClassName: 'border-indigo-400/55 bg-indigo-950/80',
+    },
+    {
+      id: 'hypothermia',
+      label: 'Hypothermia',
+      description: 'Severe slow; half jump; confusion.',
+      hudEffectLines: [
+        '50% shorter jump',
+        'Confusion',
+      ],
+      minStacks: 500,
+      buffIds: ['frostbite-hypothermia-debuff'],
+      appliesPercentMaxHealthFrostDamage: true,
+      amplifiesFrostDamage: false,
+      blocksHeal: false,
+      forcesImmobilize: false,
+      appliesAvatarTint: true,
+      appliesConfusion: true,
+      appliesSleepSpells: false,
+      hudIconColorClassName: 'text-blue-200',
+      hudIconBorderClassName: 'border-blue-400/60 bg-blue-950/85',
     },
     {
       id: 'frostbite',
@@ -136,30 +145,26 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly Defi
       description: 'Near-immobile; cannot jump; triple frost damage taken.',
       hudEffectLines: [
         'Cannot jump',
-        '50% less damage dealt',
         '3× frost damage taken',
       ],
       minStacks: 750,
-      buffIds: [
-        'frostbite-frostbite-debuff',
-        'frostbite-frostbite-damage-debuff',
-      ],
+      buffIds: ['frostbite-frostbite-debuff'],
       appliesPercentMaxHealthFrostDamage: true,
       amplifiesFrostDamage: true,
       blocksHeal: false,
       forcesImmobilize: false,
-      appliesAvatarTint: false,
+      appliesAvatarTint: true,
       appliesConfusion: true,
-      appliesSleepSpells: true,
-      hudIconColorClassName: 'text-blue-200',
-      hudIconBorderClassName: 'border-blue-400/60 bg-blue-950/85',
+      appliesSleepSpells: false,
+      hudIconColorClassName: 'text-sky-200',
+      hudIconBorderClassName: 'border-sky-400/65 bg-sky-950/85',
     },
     {
       id: 'necrotic',
       label: 'Necrotic Frostbite',
-      description: 'Frozen solid; cannot move or heal; icy blue tint.',
+      description: 'Frozen solid in deep sleep; cannot move or heal; icy blue tint.',
       hudEffectLines: [
-        'Cannot move',
+        'Deep sleep (cannot wake from damage)',
         'Cannot heal',
         '3× frost damage taken',
         'Frozen solid',
@@ -175,7 +180,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_STAGE_REGISTRY: readonly Defi
       forcesImmobilize: true,
       appliesAvatarTint: true,
       appliesConfusion: true,
-      appliesSleepSpells: true,
+      appliesSleepSpells: false,
       hudIconColorClassName: 'text-sky-100',
       hudIconBorderClassName: 'border-sky-300/70 bg-slate-950/90',
     },

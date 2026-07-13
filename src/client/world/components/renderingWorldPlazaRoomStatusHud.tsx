@@ -7,6 +7,12 @@ import {
   DEFINING_WORLD_PLAZA_ONLINE_ROOM_MAX_PLAYERS,
   type DefiningWorldPlazaOnlineRoomSnapshot,
 } from '@/components/world/domains/definingWorldPlazaOnlineRoom';
+import {
+  buildingPlazaDevvitOnlineRoomApiUrl,
+  PLAZA_DEVVIT_ONLINE_ROOMS_KICK_API_PATH,
+  type PlazaDevvitOnlineKickPlayerResponse,
+} from '../../../shared/plazaDevvitOnline';
+import { useState } from 'react';
 
 /** Label suffix for the signed-in user in the online list. */
 const RENDERING_WORLD_PLAZA_ROOM_STATUS_HUD_LOCAL_PLAYER_SUFFIX =
@@ -27,6 +33,7 @@ export interface RenderingWorldPlazaRoomStatusHudProps {
 
 /**
  * Overlay showing plaza room connection status and player count.
+ * World hosts can kick other travelers from the roster list.
  */
 export function RenderingWorldPlazaRoomStatusHud({
   roomSnapshot,
@@ -34,9 +41,17 @@ export function RenderingWorldPlazaRoomStatusHud({
   maxPlayers = DEFINING_WORLD_PLAZA_ONLINE_ROOM_MAX_PLAYERS,
   isHidden = false,
 }: RenderingWorldPlazaRoomStatusHudProps): React.JSX.Element | null {
+  const [kickingUserId, setKickingUserId] = useState<string | null>(null);
+  const [kickError, setKickError] = useState<string | null>(null);
+
   if (isHidden) {
     return null;
   }
+
+  const isLocalHost =
+    roomSnapshot.createdBy !== null &&
+    roomSnapshot.createdBy === localUserId &&
+    roomSnapshot.roomId !== null;
 
   const connectionLabel = roomSnapshot.lastError
     ? 'Connection failed'
@@ -72,6 +87,39 @@ export function RenderingWorldPlazaRoomStatusHud({
       RENDERING_WORLD_PLAZA_ROOM_STATUS_HUD_MAX_ONLINE_NAMES
   );
 
+  const handlingKickPlayer = async (targetUserId: string): Promise<void> => {
+    if (!roomSnapshot.roomId || kickingUserId) {
+      return;
+    }
+
+    setKickError(null);
+    setKickingUserId(targetUserId);
+
+    try {
+      const response = await fetch(
+        buildingPlazaDevvitOnlineRoomApiUrl(
+          PLAZA_DEVVIT_ONLINE_ROOMS_KICK_API_PATH,
+          roomSnapshot.roomId
+        ),
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetUserId }),
+        }
+      );
+      const data =
+        (await response.json()) as PlazaDevvitOnlineKickPlayerResponse;
+
+      if (data.type === 'error') {
+        setKickError(data.message);
+      }
+    } catch {
+      setKickError('Could not kick that traveler.');
+    } finally {
+      setKickingUserId(null);
+    }
+  };
+
   return (
     <div
       className={`${STYLING_WORLD_PLAZA_ROOM_STATUS_HUD_ANCHOR_CLASS_NAME} ${STYLING_WORLD_PLAZA_ROOM_STATUS_HUD_SHELL_CLASS_NAME}`}
@@ -79,15 +127,17 @@ export function RenderingWorldPlazaRoomStatusHud({
       {connectionLabel ? (
         <p className="font-medium">{connectionLabel}</p>
       ) : null}
-      {roomSnapshot.roomIndex !== null ? (
-        <p>Room {roomSnapshot.roomIndex}</p>
+      {roomSnapshot.roomDisplayName ? (
+        <p>{roomSnapshot.roomDisplayName}</p>
       ) : null}
       <p>
-        Players {roomSnapshot.participantCount}/{maxPlayers}
+        Players {roomSnapshot.participantCount}/
+        {roomSnapshot.maxPlayers ?? maxPlayers}
       </p>
       {roomSnapshot.lastError ? (
         <p className="text-amber-200">{roomSnapshot.lastError}</p>
       ) : null}
+      {kickError ? <p className="text-amber-200">{kickError}</p> : null}
       {roomSnapshot.remotePlayers.length === 0 &&
       roomSnapshot.isJoined &&
       roomSnapshot.participantCount > 1 ? (
@@ -112,11 +162,27 @@ export function RenderingWorldPlazaRoomStatusHud({
                     : null}
                 </span>
                 {isLocalParticipant ? null : (
-                  <RenderingWorldPlazaRoomStatusHudFriendButton
-                    participantUserId={participant.userId}
-                    participantDisplayName={participant.displayName}
-                    viewerUserId={localUserId}
-                  />
+                  <>
+                    <RenderingWorldPlazaRoomStatusHudFriendButton
+                      participantUserId={participant.userId}
+                      participantDisplayName={participant.displayName}
+                      viewerUserId={localUserId}
+                    />
+                    {isLocalHost ? (
+                      <button
+                        type="button"
+                        disabled={kickingUserId === participant.userId}
+                        onClick={() => {
+                          void handlingKickPlayer(participant.userId);
+                        }}
+                        className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-100 underline-offset-2 hover:underline disabled:opacity-50"
+                      >
+                        {kickingUserId === participant.userId
+                          ? '...'
+                          : 'Kick'}
+                      </button>
+                    ) : null}
+                  </>
                 )}
               </li>
             );

@@ -18,14 +18,42 @@ import { resolvingWorldPlazaCharacterHeightDisplayText } from '@/components/worl
 import { resolvingWorldPlazaCharacterWeightDisplayText } from '@/components/world/character/domains/resolvingWorldPlazaCharacterWeightDisplayText';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import {
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_FORWARD_GRID_DISTANCE,
+  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_JUMP_FORWARD_GRID_DISTANCE,
+} from '@/components/world/domains/definingWorldPlazaGirlSampleJumpConstants';
+import {
+  DEFINING_WORLD_PLAZA_PROFILE_PANEL_ACCELERATION_ATTRIBUTE_ICON,
   DEFINING_WORLD_PLAZA_PROFILE_PANEL_COLD_THRESHOLD_ATTRIBUTE_ICON,
   DEFINING_WORLD_PLAZA_PROFILE_PANEL_HEAT_THRESHOLD_ATTRIBUTE_ICON,
+  DEFINING_WORLD_PLAZA_PROFILE_PANEL_JUMP_COST_ATTRIBUTE_ICON,
+  DEFINING_WORLD_PLAZA_PROFILE_PANEL_JUMP_DISTANCE_ATTRIBUTE_ICON,
+  DEFINING_WORLD_PLAZA_PROFILE_PANEL_JUMP_HEIGHT_ATTRIBUTE_ICON,
+  DEFINING_WORLD_PLAZA_PROFILE_PANEL_ROLL_COST_ATTRIBUTE_ICON,
+  DEFINING_WORLD_PLAZA_PROFILE_PANEL_STAMINA_REGEN_ATTRIBUTE_ICON,
+  DEFINING_WORLD_PLAZA_PROFILE_PANEL_TOP_SPEED_ATTRIBUTE_ICON,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_ACCELERATION_ATTRIBUTE,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_AGILITY_SECTION,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_COLD_THRESHOLD_ATTRIBUTE,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_COMBAT_SECTION,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_HEAT_THRESHOLD_ATTRIBUTE,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_JUMP_COST_ATTRIBUTE,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_JUMP_DISTANCE_ATTRIBUTE,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_JUMP_HEIGHT_ATTRIBUTE,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_PHYSICALITY_SECTION,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_ROLL_COST_ATTRIBUTE,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_STAMINA_REGEN_ATTRIBUTE,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_TOP_SPEED_ATTRIBUTE,
+  type DefiningWorldPlazaProfilePanelAttributeCategoryId,
 } from '@/components/world/domains/definingWorldPlazaProfilePanelConstants';
 import { resolvingWorldPlazaProfilePanelPassiveEntries } from '@/components/world/domains/resolvingWorldPlazaProfilePanelPassiveEntries';
 import type { ResolvingWorldPlazaProfilePanelPassiveEntry } from '@/components/world/domains/resolvingWorldPlazaProfilePanelPassiveEntries';
-import { DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
+import {
+  DEFINING_WORLD_PLAZA_JUMP_STAMINA_COST_RATIO,
+  DEFINING_WORLD_PLAZA_ROLL_STAMINA_COST_RATIO,
+  DEFINING_WORLD_PLAZA_RUN_JUMP_STAMINA_COST_RATIO,
+  DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS,
+  DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND,
+} from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
 import type { DefiningWorldPlazaAvatarSkinId } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { formattingWorldPlazaTemperature } from '@/components/world/health/domains/convertingWorldPlazaTemperatureUnits';
 import { resolvingWorldPlazaEntityTemperatureComfortBand } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureComfortBand';
@@ -62,9 +90,18 @@ export type ResolvingWorldPlazaProfilePanelAttributeEntry = {
   valueText: string;
 };
 
+/** One labeled attribute category on the Stats tab. */
+export type ResolvingWorldPlazaProfilePanelAttributeCategory = {
+  id: DefiningWorldPlazaProfilePanelAttributeCategoryId;
+  label: string;
+  entries: readonly ResolvingWorldPlazaProfilePanelAttributeEntry[];
+};
+
 /** Resolved profile panel content. */
 export type ResolvingWorldPlazaProfilePanelSections = {
   vitalRows: readonly ResolvingWorldPlazaProfilePanelVitalRow[];
+  attributeCategories: readonly ResolvingWorldPlazaProfilePanelAttributeCategory[];
+  /** Flat attribute list across all categories (tests / lookups). */
   attributeEntries: readonly ResolvingWorldPlazaProfilePanelAttributeEntry[];
   passiveEntries: readonly ResolvingWorldPlazaProfilePanelPassiveEntry[];
 };
@@ -139,6 +176,30 @@ function resolvingHungerDetailText(
   return DEFINING_PROFILE_PANEL_HUNGER_TIER_LABELS[hunger.tier];
 }
 
+function formattingProfilePanelJumpDistanceGrid(distance: number): string {
+  return (Math.round(distance * 10) / 10).toFixed(1);
+}
+
+function formattingProfilePanelStaminaCostPercent(ratio: number): string {
+  return `${Math.round(ratio * 100)}%`;
+}
+
+function formattingProfilePanelStaminaRegenPerSecond(ratioPerSecond: number): string {
+  return `+${Math.round(ratioPerSecond * 100)}%/s`;
+}
+
+function formattingProfilePanelAccelerationGridPerSec2(
+  walkSpeedGridPerSecond: number,
+  runSpeedGridPerSecond: number,
+  rampSeconds: number
+): string {
+  const safeRampSeconds = Math.max(rampSeconds, Number.EPSILON);
+  const accelerationGridPerSec2 =
+    (runSpeedGridPerSecond - walkSpeedGridPerSecond) / safeRampSeconds;
+
+  return `${accelerationGridPerSec2.toFixed(2)}/s²`;
+}
+
 /**
  * Resolves the profile panel vital bars and attribute chips from live data.
  */
@@ -187,7 +248,7 @@ export function resolvingWorldPlazaProfilePanelSections(input: {
     },
   ];
 
-  const attributeEntries: ResolvingWorldPlazaProfilePanelAttributeEntry[] = [
+  const combatEntries: ResolvingWorldPlazaProfilePanelAttributeEntry[] = [
     {
       id: 'attack',
       label: 'Attack',
@@ -206,12 +267,79 @@ export function resolvingWorldPlazaProfilePanelSections(input: {
       iconName: 'mdi:flash',
       valueText: `${derivedStats.attackSpeed.toFixed(1)}/s`,
     },
+  ];
+
+  const agilityEntries: ResolvingWorldPlazaProfilePanelAttributeEntry[] = [
     {
       id: 'move-speed',
       label: 'Speed',
       iconName: 'mdi:run-fast',
       valueText: `${derivedStats.walkSpeedGridPerSecond.toFixed(1)} / ${derivedStats.runSpeedGridPerSecond.toFixed(1)}`,
     },
+    {
+      id: 'acceleration',
+      label: LABELING_WORLD_PLAZA_PROFILE_PANEL_ACCELERATION_ATTRIBUTE,
+      iconName: DEFINING_WORLD_PLAZA_PROFILE_PANEL_ACCELERATION_ATTRIBUTE_ICON,
+      valueText: formattingProfilePanelAccelerationGridPerSec2(
+        derivedStats.walkSpeedGridPerSecond,
+        derivedStats.runSpeedGridPerSecond,
+        DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS
+      ),
+    },
+    {
+      id: 'top-speed',
+      label: LABELING_WORLD_PLAZA_PROFILE_PANEL_TOP_SPEED_ATTRIBUTE,
+      iconName: DEFINING_WORLD_PLAZA_PROFILE_PANEL_TOP_SPEED_ATTRIBUTE_ICON,
+      valueText: derivedStats.runSpeedGridPerSecond.toFixed(1),
+    },
+    {
+      id: 'jump-distance',
+      label: LABELING_WORLD_PLAZA_PROFILE_PANEL_JUMP_DISTANCE_ATTRIBUTE,
+      iconName:
+        DEFINING_WORLD_PLAZA_PROFILE_PANEL_JUMP_DISTANCE_ATTRIBUTE_ICON,
+      valueText: `${formattingProfilePanelJumpDistanceGrid(
+        DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_FORWARD_GRID_DISTANCE *
+          derivedStats.jumpDistanceScale
+      )} / ${formattingProfilePanelJumpDistanceGrid(
+        DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_JUMP_FORWARD_GRID_DISTANCE *
+          derivedStats.jumpDistanceScale
+      )}`,
+    },
+    {
+      id: 'jump-height',
+      label: LABELING_WORLD_PLAZA_PROFILE_PANEL_JUMP_HEIGHT_ATTRIBUTE,
+      iconName: DEFINING_WORLD_PLAZA_PROFILE_PANEL_JUMP_HEIGHT_ATTRIBUTE_ICON,
+      valueText: `${derivedStats.maxJumpLayerReach}L`,
+    },
+    {
+      id: 'jump-cost',
+      label: LABELING_WORLD_PLAZA_PROFILE_PANEL_JUMP_COST_ATTRIBUTE,
+      iconName: DEFINING_WORLD_PLAZA_PROFILE_PANEL_JUMP_COST_ATTRIBUTE_ICON,
+      valueText: `${formattingProfilePanelStaminaCostPercent(
+        DEFINING_WORLD_PLAZA_JUMP_STAMINA_COST_RATIO
+      )} / ${formattingProfilePanelStaminaCostPercent(
+        DEFINING_WORLD_PLAZA_RUN_JUMP_STAMINA_COST_RATIO
+      )}`,
+    },
+    {
+      id: 'roll-cost',
+      label: LABELING_WORLD_PLAZA_PROFILE_PANEL_ROLL_COST_ATTRIBUTE,
+      iconName: DEFINING_WORLD_PLAZA_PROFILE_PANEL_ROLL_COST_ATTRIBUTE_ICON,
+      valueText: formattingProfilePanelStaminaCostPercent(
+        DEFINING_WORLD_PLAZA_ROLL_STAMINA_COST_RATIO
+      ),
+    },
+    {
+      id: 'stamina-regen',
+      label: LABELING_WORLD_PLAZA_PROFILE_PANEL_STAMINA_REGEN_ATTRIBUTE,
+      iconName: DEFINING_WORLD_PLAZA_PROFILE_PANEL_STAMINA_REGEN_ATTRIBUTE_ICON,
+      valueText: formattingProfilePanelStaminaRegenPerSecond(
+        DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND
+      ),
+    },
+  ];
+
+  const physicalityEntries: ResolvingWorldPlazaProfilePanelAttributeEntry[] = [
     {
       id: 'height',
       label: LABELING_WORLD_PLAZA_CHARACTER_HEIGHT_ATTRIBUTE,
@@ -250,9 +378,32 @@ export function resolvingWorldPlazaProfilePanelSections(input: {
     },
   ];
 
+  const attributeCategories: ResolvingWorldPlazaProfilePanelAttributeCategory[] =
+    [
+      {
+        id: 'combat',
+        label: LABELING_WORLD_PLAZA_PROFILE_PANEL_COMBAT_SECTION,
+        entries: combatEntries,
+      },
+      {
+        id: 'agility',
+        label: LABELING_WORLD_PLAZA_PROFILE_PANEL_AGILITY_SECTION,
+        entries: agilityEntries,
+      },
+      {
+        id: 'physicality',
+        label: LABELING_WORLD_PLAZA_PROFILE_PANEL_PHYSICALITY_SECTION,
+        entries: physicalityEntries,
+      },
+    ];
+
+  const attributeEntries = attributeCategories.flatMap(
+    (category) => category.entries
+  );
+
   const passiveEntries = skinId
     ? resolvingWorldPlazaProfilePanelPassiveEntries(skinId)
     : [];
 
-  return { vitalRows, attributeEntries, passiveEntries };
+  return { vitalRows, attributeCategories, attributeEntries, passiveEntries };
 }

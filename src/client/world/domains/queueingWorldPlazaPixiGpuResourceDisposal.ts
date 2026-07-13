@@ -13,7 +13,7 @@ type QueueingWorldPlazaPixiGpuResourceDisposalTask = () => void;
 /** Max destroy callbacks executed per animation frame. */
 const QUEUEING_WORLD_PLAZA_PIXI_GPU_RESOURCE_DISPOSAL_MAX_TASKS_PER_FRAME = 8;
 
-let queueingWorldPlazaPixiGpuResourceDisposalPendingTasks: QueueingWorldPlazaPixiGpuResourceDisposalTask[] =
+const queueingWorldPlazaPixiGpuResourceDisposalPendingTasks: QueueingWorldPlazaPixiGpuResourceDisposalTask[] =
   [];
 let queueingWorldPlazaPixiGpuResourceDisposalFrameIsScheduled = false;
 

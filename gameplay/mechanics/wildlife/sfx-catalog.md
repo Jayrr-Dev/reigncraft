@@ -33,9 +33,9 @@ Every species uses a **subset** of these events. Events align with speech contex
 | `flee_start`   | Intent ? `flee` (first frame)                                         | Medium?loud             | 4s min between flees        |
 | `flee_mid`     | Sustained flee bucket (optional)                                      | Quiet                   | 2s bucket                   |
 | `warn`         | Intent ? `territoryWarn`                                              | Loud                    | Per warn entry              |
-| `stalk`        | Stalker `shadowing` phase ambient                                     | Quiet                   | 12s+                        |
+| `stalk`        | PackHunter `shadowing` phase ambient                                     | Quiet                   | 12s+                        |
 | `howl`         | Pack alpha hunt open / forming up (`howl` speech)                     | Loud + distance falloff | Wolf howl cooldown (~14s)   |
-| `chase_call`   | Stalker alpha rush (`stalk` ? `chase`/`attack`)                       | Loud                    | Shared with howl family     |
+| `chase_call`   | PackHunter alpha rush (`stalk` ? `chase`/`attack`)                       | Loud                    | Shared with howl family     |
 | `attack`       | Attack motion clip start (bite/charge/snap)                           | Medium                  | No repeat while vocal plays |
 | `hit_taken`    | `applyingWildlifeInstancePhysicalDamage`                              | Medium                  | No repeat while vocal plays |
 | `death`        | Live→dead edge: silence in-flight vocals; death cry clip still future | Medium                  | Once (silence always)       |
@@ -66,7 +66,7 @@ Falloff is quartic after the full-volume radius. Hot pools (`pig_grunt`, `pixaba
 
 Which events each temperament should implement. Empty cells = skip (no clip needed).
 
-| Event          | passive | docile | skittish | retaliator | stalker | predator | ambusher |
+| Event          | passive | docile | skittish | retaliator | Pack hunter | stalker | predator | ambusher |
 | -------------- | ------- | ------ | -------- | ---------- | ------- | -------- | -------- |
 | `idle_ambient` | ?       | ?      | ?        | ?          | ?       | ?        | ?        |
 | `idle_eating`  | ?       | ?      | ?        | ?          | ?       | ?        | ?        |
@@ -223,7 +223,7 @@ Status key: **WIRED** ? **PARTIAL** (stand-in pool, events fire) ? **MISSING** (
 | hippo           | pixabay_hippo_grunt | warn, attack                    | WIRED   |
 | mammoth         | elephant_trumpet    | warn, attack, hit, chase        | PARTIAL |
 
-### stalker
+### PackHunter
 
 | speciesId  | Pool(s)             | Events wired                                    | Status    |
 | ---------- | ------------------- | ----------------------------------------------- | --------- |

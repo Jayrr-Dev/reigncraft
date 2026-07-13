@@ -20,7 +20,7 @@ Manus made Corpus, everyone knows it, and his only question is "Can you rise?" H
 
 ### 2. The soul is the economy
 
-Every living thing carries a Soulcore and drops it at death. Cores are money, mana, experience, and rank in one object: proof that you survived. To grow stronger, something else has to become loot, and the whole world runs on not saying that out loud. See [`world/soul-and-soulcore.md`](soul-and-soulcore.md).
+Every living thing carries a Spritcore and drops it at death. Cores are money, mana, experience, and rank in one object: proof that you survived. To grow stronger, something else has to become loot, and the whole world runs on not saying that out loud. See [`world/soul-and-spritcore.md`](soul-and-spritcore.md).
 
 ### 3. The world is owned
 
@@ -41,7 +41,7 @@ Grounded, funny in a deadpan way, and quietly dark. Most of the world is believa
 ## What the setting is not
 
 - Not a mystery-box cosmology. Manus and the ladder are known facts in-world. Mysteries that remain (the Seven Death Sins, what befriending does to a soul) are tracked deliberately in [`meta/open-questions.md`](../meta/open-questions.md).
-- Not high fantasy in vocabulary. No elves, wizards, or prophecies. Strange things get concrete names: Soulcore, ember vents, obelisks, the ladder.
+- Not high fantasy in vocabulary. No elves, wizards, or prophecies. Strange things get concrete names: Spritcore, ember vents, obelisks, the ladder.
 - Not preachy, and never on the nose. The world contains a pointed argument about wealth, worth, and generous founders, and the lore's job is to stage it in details, in deniable fantasy language, not to win it or explain it. The reference rules live in [`meta/style-guide.md`](../meta/style-guide.md).
 
 ## Deprecated pillars

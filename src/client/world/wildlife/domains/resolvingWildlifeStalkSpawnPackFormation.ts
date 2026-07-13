@@ -1,5 +1,5 @@
 /**
- * Area-pack formation rank for stalker hunts (alpha leads, followers trail).
+ * Area-pack formation rank for PackHunter hunts (alpha leads, followers trail).
  *
  * @module components/world/wildlife/domains/resolvingWildlifeStalkSpawnPackFormation
  */

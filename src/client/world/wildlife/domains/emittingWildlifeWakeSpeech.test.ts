@@ -19,7 +19,7 @@ describe('emittingWildlifeWakeSpeech', () => {
 
     expect(speechState.activeBubble).not.toBeNull();
     expect(speechState.lastContextKey).toBe('wake');
-    expect(speechState.activeBubble?.message).toMatch(/\?\!/);
+    expect(speechState.activeBubble?.message).toMatch(/\?!/);
   });
 
   it('gives every registered species at least one unique wake line', () => {

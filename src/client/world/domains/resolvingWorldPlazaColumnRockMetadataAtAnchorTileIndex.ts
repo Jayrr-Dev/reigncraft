@@ -287,7 +287,7 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     anchorTileY,
     DEFINING_WORLD_PLAZA_TERRAIN_ROCK_SEED_SALT_FOOTPRINT_HEIGHT
   );
-  let surfaceWorldLayer = mediumFieldBoulderPlacement
+  const surfaceWorldLayer = mediumFieldBoulderPlacement
     ? mediumFieldBoulderPlacement.surfaceWorldLayer
     : resolvingWorldPlazaTerrainRockColumnSurfaceWorldLayerFromSeeds(
         tierIndex,

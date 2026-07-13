@@ -2,6 +2,7 @@
 
 import { USER_PROFILE_UNFRIENDED_USER_IDS_QUERY_KEY } from '@/components/friends/domains/definingUserProfileFriend';
 import { fetchingUserProfileUnfriendedUserIds } from '@/components/friends/utils/fetchingUserProfileUnfriendedUserIds';
+import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
 import {
   DEFINING_WORLD_BUILDING_PLOT_OWNER_LABELS_QUERY_KEY_ROOT,
   DEFINING_WORLD_BUILDING_PLOTS_REGISTRY_QUERY_KEY_ROOT,
@@ -10,6 +11,7 @@ import {
   filteringWorldBuildingPlotRegistryOwnerGroupsForClaimModeViewer,
   groupingWorldBuildingPlotRegistryEntriesByOwner,
 } from '@/components/world/building/domains/groupingWorldBuildingPlotRegistryEntriesByOwner';
+import { mergingWorldBuildingPlotRegistryWithLocalOwnedDraftPlots } from '@/components/world/building/domains/mergingWorldBuildingPlotRegistryWithLocalOwnedDraftPlots';
 import { fetchingWorldBuildingPlotOwnerDisplayLabelsByUserIds } from '@/components/world/building/repositories/fetchingWorldBuildingPlotOwnerDisplayLabelsByUserIds';
 import { fetchingWorldBuildingPlotsRegistry } from '@/components/world/building/repositories/fetchingWorldBuildingPlotsRegistry';
 import { useQuery } from '@tanstack/react-query';
@@ -19,6 +21,8 @@ import { useMemo } from 'react';
 export interface UsingWorldPlazaClaimModePlotRegistryQueryParams {
   isEnabled: boolean;
   localUserId: string | null;
+  /** Local draft ownership so unclaims update the plots list before save. */
+  localOwnedDraftPlots?: readonly DefiningWorldBuildingPlot[] | null;
 }
 
 /** Result from {@link usingWorldPlazaClaimModePlotRegistryQuery}. */
@@ -39,6 +43,7 @@ export interface UsingWorldPlazaClaimModePlotRegistryQueryResult {
 export function usingWorldPlazaClaimModePlotRegistryQuery({
   isEnabled,
   localUserId,
+  localOwnedDraftPlots = null,
 }: UsingWorldPlazaClaimModePlotRegistryQueryParams): UsingWorldPlazaClaimModePlotRegistryQueryResult {
   const registryQuery = useQuery({
     queryKey: [DEFINING_WORLD_BUILDING_PLOTS_REGISTRY_QUERY_KEY_ROOT],
@@ -59,15 +64,24 @@ export function usingWorldPlazaClaimModePlotRegistryQuery({
     return new Set(unfriendedUserIdsQuery.data?.userIds ?? []);
   }, [unfriendedUserIdsQuery.data?.userIds]);
 
+  const effectiveRegistryPlots = useMemo(
+    () =>
+      mergingWorldBuildingPlotRegistryWithLocalOwnedDraftPlots(
+        registryQuery.data ?? [],
+        localOwnedDraftPlots,
+        localUserId
+      ),
+    [localOwnedDraftPlots, localUserId, registryQuery.data]
+  );
+
   const ownerUserIds = useMemo(() => {
     if (!localUserId) {
       return [];
     }
 
-    const registryPlots = registryQuery.data ?? [];
     const labelUserIds = new Set<string>([localUserId]);
 
-    for (const plot of registryPlots) {
+    for (const plot of effectiveRegistryPlots) {
       if (
         plot.ownerId === localUserId ||
         !unfriendedUserIds.has(plot.ownerId)
@@ -77,7 +91,7 @@ export function usingWorldPlazaClaimModePlotRegistryQuery({
     }
 
     return [...labelUserIds];
-  }, [localUserId, registryQuery.data, unfriendedUserIds]);
+  }, [effectiveRegistryPlots, localUserId, unfriendedUserIds]);
 
   const ownerLabelsQuery = useQuery({
     queryKey: [
@@ -94,14 +108,19 @@ export function usingWorldPlazaClaimModePlotRegistryQuery({
     () =>
       filteringWorldBuildingPlotRegistryOwnerGroupsForClaimModeViewer(
         groupingWorldBuildingPlotRegistryEntriesByOwner(
-          registryQuery.data ?? [],
+          effectiveRegistryPlots,
           localUserId,
           ownerLabelsQuery.data ?? {}
         ),
         localUserId,
         unfriendedUserIds
       ),
-    [localUserId, ownerLabelsQuery.data, registryQuery.data, unfriendedUserIds]
+    [
+      effectiveRegistryPlots,
+      localUserId,
+      ownerLabelsQuery.data,
+      unfriendedUserIds,
+    ]
   );
 
   return {

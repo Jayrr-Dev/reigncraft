@@ -38,7 +38,7 @@ import {
   upsertingWorldFireDevvitCell,
 } from '../domains/managingWorldFireDevvitSimulation';
 import { resolvingDevvitRedditUserId } from '../domains/resolvingDevvitRedditUserId';
-import { resolvingPlazaDevvitOnlineRoomScope } from '../domains/resolvingPlazaDevvitOnlineRoomScope';
+import { resolvingPlazaDevvitOnlineRoomScopeFromRequest } from '../domains/resolvingPlazaDevvitOnlineRoomScopeFromRequest';
 
 function computingChebyshevDistance(
   fromX: number,
@@ -160,7 +160,7 @@ worldFire.get('/cells', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const roomScope = resolvingPlazaDevvitOnlineRoomScopeFromRequest(c);
   const simulationResult = await advancingWorldFireDevvitSimulation(roomScope);
 
   return c.json<WorldFireDevvitCellsResponse>({
@@ -216,7 +216,7 @@ worldFire.post('/ignite', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const roomScope = resolvingPlazaDevvitOnlineRoomScopeFromRequest(c);
   await advancingWorldFireDevvitSimulation(roomScope);
 
   const existingCell = await findingWorldFireDevvitCellAtTile(
@@ -413,7 +413,7 @@ worldFire.post('/add-fuel', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const roomScope = resolvingPlazaDevvitOnlineRoomScopeFromRequest(c);
   await advancingWorldFireDevvitSimulation(roomScope);
 
   const existingCell = await findingWorldFireDevvitCellAtTile(

@@ -21,6 +21,9 @@ import {
   STYLING_WORLD_PLAZA_SETTINGS_EXIT_HOME_BUTTON_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaMasterVolumeConstants';
 import {
+  LABELING_WORLD_PLAZA_DANGER_SENSE_TOGGLE,
+} from '@/components/world/domains/definingWorldPlazaDangerSenseHudConstants';
+import {
   LABELING_WORLD_PLAZA_MINIMAP_TOGGLE,
   STYLING_WORLD_PLAZA_MINIMAP_CHECKBOX_CLASS_NAME,
   STYLING_WORLD_PLAZA_MINIMAP_TOGGLE_ROW_CLASS_NAME,
@@ -38,6 +41,7 @@ import { unlockingWorldPlazaBiomeMusicFromUserGesture } from '@/components/world
 import { LABELING_WORLD_PLAZA_TEMPERATURE_DISPLAY_FAHRENHEIT_TOGGLE } from '@/components/world/health/domains/definingWorldPlazaTemperatureDisplayUnitPreferenceConstants';
 import { usingWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/hooks/usingWorldPlazaTemperatureDisplayUnit';
 import { usingWorldPlazaAmbienceVolume } from '@/components/world/hooks/usingWorldPlazaAmbienceVolume';
+import { usingWorldPlazaDangerSenseEnabled } from '@/components/world/hooks/usingWorldPlazaDangerSenseEnabled';
 import { usingWorldPlazaMasterVolume } from '@/components/world/hooks/usingWorldPlazaMasterVolume';
 import { usingWorldPlazaMinimapEnabled } from '@/components/world/hooks/usingWorldPlazaMinimapEnabled';
 import { usingWorldPlazaMobileAutoJumpEnabled } from '@/components/world/hooks/usingWorldPlazaMobileAutoJumpEnabled';
@@ -57,7 +61,7 @@ export type RenderingWorldPlazaMasterVolumeMixerPanelProps = {
 
 /**
  * Dropdown panel with music volume, ambience volume, SFX volume, hide actions,
- * auto-pickup, auto-jump, and °F/°C settings.
+ * auto-pickup, auto-jump, danger sense, and °F/°C settings.
  */
 export function RenderingWorldPlazaMasterVolumeMixerPanel({
   isOpen,
@@ -75,6 +79,8 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
     usingWorldPlazaMobileAutoJumpEnabled();
   const { isMinimapPreferenceEnabled, settingMinimapEnabled } =
     usingWorldPlazaMinimapEnabled();
+  const { isDangerSenseEnabled, settingDangerSenseEnabled } =
+    usingWorldPlazaDangerSenseEnabled();
   const { isFahrenheitDisplayEnabled, settingFahrenheitDisplayEnabled } =
     usingWorldPlazaTemperatureDisplayUnit();
 
@@ -200,6 +206,21 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
           }}
         />
         <span>{LABELING_WORLD_PLAZA_MINIMAP_TOGGLE}</span>
+      </label>
+      <label
+        className={STYLING_WORLD_PLAZA_MINIMAP_TOGGLE_ROW_CLASS_NAME}
+        htmlFor="world-plaza-danger-sense-enabled"
+      >
+        <input
+          id="world-plaza-danger-sense-enabled"
+          type="checkbox"
+          checked={isDangerSenseEnabled}
+          className={STYLING_WORLD_PLAZA_MINIMAP_CHECKBOX_CLASS_NAME}
+          onChange={(event) => {
+            settingDangerSenseEnabled(event.currentTarget.checked);
+          }}
+        />
+        <span>{LABELING_WORLD_PLAZA_DANGER_SENSE_TOGGLE}</span>
       </label>
       <label
         className={STYLING_WORLD_PLAZA_MOBILE_AUTO_JUMP_TOGGLE_ROW_CLASS_NAME}

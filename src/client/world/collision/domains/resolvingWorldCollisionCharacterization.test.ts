@@ -88,6 +88,30 @@ describe('world collision characterization (legacy modules)', () => {
         })
       ).toBe(false);
     });
+
+    it('uses mover jumpLayerReachMax instead of the shared default', () => {
+      expect(
+        checkingWorldCollisionVerticalColumnBlocksPlayer({
+          playerLayer: 1,
+          surfaceLayer: 4,
+          applyBlockCollision: true,
+          isWalkableStep: false,
+          verticalBandsOverlap: true,
+          jumpLayerReachMax: 2,
+        })
+      ).toBe(true);
+
+      expect(
+        checkingWorldCollisionVerticalColumnBlocksPlayer({
+          playerLayer: 1,
+          surfaceLayer: 3,
+          applyBlockCollision: false,
+          isWalkableStep: false,
+          verticalBandsOverlap: true,
+          jumpLayerReachMax: 2,
+        })
+      ).toBe(false);
+    });
   });
 
   describe('resolver baseline', () => {

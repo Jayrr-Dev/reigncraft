@@ -22,11 +22,26 @@ import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE } from '@/components/wor
 import { describe, expect, it } from 'vitest';
 
 function buildingInventoryState(
-  slots: DefiningInventoryState['slots']
+  slots: readonly (
+    | {
+        readonly id: string;
+        readonly itemTypeId: string;
+        readonly quantity: number;
+        readonly slotIndex?: number;
+      }
+    | null
+  )[]
 ): DefiningInventoryState {
   return {
     capacity: slots.length,
-    slots,
+    slots: slots.map((slot, slotIndex) =>
+      slot == null
+        ? null
+        : {
+            ...slot,
+            slotIndex: slot.slotIndex ?? slotIndex,
+          }
+    ),
   };
 }
 

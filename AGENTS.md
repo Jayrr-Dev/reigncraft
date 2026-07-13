@@ -25,7 +25,7 @@ When changing world gameplay, combat, terrain sync, collision, depth, inventory,
 
 ### Lore and narrative content
 
-When working on lore, narrative, flavor text, item descriptions, NPC dialogue, or codex content, **read `memory/lore-canon-reference.md` first**. It holds the settled canon (the world is Corpus, Manus, the ladder, the Twelve Apostles, factions, Soulcore semantics), the canonical term list, and the writing style rules. The full world bible lives under `lore/`; check `lore/meta/open-questions.md` before answering any open mystery in shipped copy.
+When working on lore, narrative, flavor text, item descriptions, NPC dialogue, or codex content, **read `memory/lore-canon-reference.md` first**. It holds the settled canon (the world is Corpus, Manus, the ladder, the Twelve Apostles, factions, Spritcore semantics), the canonical term list, and the writing style rules. The full world bible lives under `lore/`; check `lore/meta/open-questions.md` before answering any open mystery in shipped copy.
 
 ## Frontend
 

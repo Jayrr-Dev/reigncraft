@@ -1,5 +1,5 @@
 /**
- * Thin phase predicates for stalker behavior and damage checks.
+ * Thin phase predicates for PackHunter behavior and damage checks.
  *
  * @module components/world/wildlife/domains/checkingWildlifeStalkPhase
  */

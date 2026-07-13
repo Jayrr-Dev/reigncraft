@@ -80,7 +80,7 @@ describe('advancingWildlifeBluffCharge', () => {
           ...charging.aiState,
           bluffChargePlayerExitedTerritory: true,
           hasUsedBluffCharge: false,
-          bluffReturnPoint: null,
+          bluffReturnPoint: { x: 6, y: 5, layer: 1 },
           docileFollowUntilMs: null,
           docileLastReactAtMs: null,
         },

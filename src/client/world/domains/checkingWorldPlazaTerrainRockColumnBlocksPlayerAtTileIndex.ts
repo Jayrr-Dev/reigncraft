@@ -28,6 +28,7 @@ export function checkingWorldPlazaTerrainRockColumnBlocksPlayerAtTileIndex(
   tileY: number,
   playerLayer: number,
   applyBlockCollision: boolean,
+  jumpLayerReachMax?: number,
 ): boolean {
   const rockSurfaceLayer =
     resolvingWorldPlazaTerrainRockColumnSurfaceLayerAtTileIndex(tileX, tileY);
@@ -47,5 +48,6 @@ export function checkingWorldPlazaTerrainRockColumnBlocksPlayerAtTileIndex(
     applyBlockCollision,
     isWalkableStep: false,
     verticalBandsOverlap: true,
+    jumpLayerReachMax,
   });
 }

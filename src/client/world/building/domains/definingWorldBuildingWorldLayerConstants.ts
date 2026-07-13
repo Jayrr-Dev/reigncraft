@@ -26,16 +26,17 @@ export const DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX = 4;
 
 /**
  * Effective max upward layer delta from a jump reach multiplier (buffs/debuffs).
+ *
+ * @param jumpLayerReachMultiplier - Buff/debuff multiplier on base reach.
+ * @param baseJumpLayerReach - Character or species max jump layer reach.
  */
 export function computingWorldPlazaPlayerJumpLayerReachMaxFromMultiplier(
-  jumpLayerReachMultiplier: number
+  jumpLayerReachMultiplier: number,
+  baseJumpLayerReach: number = DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX
 ): number {
   return Math.max(
-    1,
-    Math.floor(
-      DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX *
-        jumpLayerReachMultiplier
-    )
+    0,
+    Math.floor(baseJumpLayerReach * jumpLayerReachMultiplier)
   );
 }
 

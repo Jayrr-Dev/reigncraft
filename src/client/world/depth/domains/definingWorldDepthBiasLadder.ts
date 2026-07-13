@@ -7,8 +7,9 @@ import {
  * Ordered depth-sort biases applied on top of the base grid projection.
  *
  * Invariant ladder (lowest to highest within one tile foot):
- *   shadow (+1) < block terrain clearance (+1) < trunk (+2) < occluder margin (3)
- *   < rock column (+5) < terrain surface-layer step (+4 per layer above ground)
+ *   shadow (+1) < block terrain clearance (+1) < fire flame above column (+1)
+ *   < trunk (+2) < occluder margin (3) < rock column (+5)
+ *   < terrain surface-layer step (+4 per layer above ground)
  *   < avatar on-block (+80)
  *
  * Terrain surface-layer bias keeps taller columns strictly above lower caps on
@@ -75,8 +76,18 @@ export const DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS = Math.round(
 /** Floor-layer warm glow bias above coplanar floor chunks. */
 export const DEFINING_WORLD_DEPTH_LIGHT_GLOW_FLOOR_DEPTH_BIAS = 1 as const;
 
-/** Floor-layer fire flame sort bias above coplanar floor chunks. */
+/** Floor-layer fire glow sort bias above coplanar floor chunks. */
 export const DEFINING_WORLD_DEPTH_FIRE_GLOW_FLOOR_DEPTH_BIAS = 2 as const;
+
+/**
+ * Entity-layer flame bias above the coplanar placed-block / terrain column.
+ *
+ * Campfire wood lives on the placed-block column key (including terrain
+ * clearance). Flames must track that same key or elevated pits bury the sprite
+ * behind the procedural logs.
+ */
+export const DEFINING_WORLD_DEPTH_FIRE_FLAME_ENTITY_ABOVE_COLUMN_DEPTH_BIAS =
+  1 as const;
 
 /** Floor-layer player night-light warm glow bias. */
 export const DEFINING_WORLD_DEPTH_PLAYER_NIGHT_LIGHT_FLOOR_WARM_GLOW_DEPTH_BIAS =

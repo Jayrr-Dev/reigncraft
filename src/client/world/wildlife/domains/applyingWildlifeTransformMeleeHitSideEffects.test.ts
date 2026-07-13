@@ -20,7 +20,7 @@ function buildingTestWildlifeInstance(
     healthState: creatingWorldPlazaEntityHealthInitialState(),
     hungerState: {
       hungerRatio: 1,
-      driveLevel: 'content',
+      driveLevel: 'sated',
       lastFedAtMs: null,
     },
     staminaState: creatingWildlifeInitialStaminaState(),

@@ -1,5 +1,5 @@
 /**
- * Applies a pack-wide flee, enrage, or regroup response when the player rushes a stalker.
+ * Applies a pack-wide flee, enrage, or regroup response when the player rushes a PackHunter.
  *
  * @module components/world/wildlife/domains/applyingWildlifeStalkPlayerApproachResponse
  */
@@ -31,7 +31,7 @@ export type ApplyingWildlifeStalkPlayerApproachResponseParams = {
 };
 
 /**
- * Rolls once per pack and applies flee, enrage, or regroup to every hunting stalker.
+ * Rolls once per pack and applies flee, enrage, or regroup to every hunting PackHunter.
  */
 export function applyingWildlifeStalkPlayerApproachResponse({
   store,

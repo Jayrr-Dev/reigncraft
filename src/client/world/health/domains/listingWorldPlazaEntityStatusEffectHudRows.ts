@@ -299,9 +299,9 @@ function listingWorldPlazaEntityStatusEffectHudFrostbiteRow(
   }
 
   const stage = resolvingWorldPlazaEntityFrostbiteStage(frostbite.stackCount);
-  const preChilledStyle =
-    resolvingWorldPlazaEntityFrostbiteStageDescriptor('chilled');
-  const displayStage = stage ?? preChilledStyle;
+  const chillyStyle =
+    resolvingWorldPlazaEntityFrostbiteStageDescriptor('chilly');
+  const displayStage = stage ?? chillyStyle;
   const stackCount = Math.round(frostbite.stackCount);
 
   return {
@@ -311,7 +311,7 @@ function listingWorldPlazaEntityStatusEffectHudFrostbiteRow(
     icon: 'mdi:snowflake',
     hudIconColorClassName: displayStage.hudIconColorClassName,
     hudIconBorderClassName: displayStage.hudIconBorderClassName,
-    summaryLabel: stage?.label ?? 'Frostbite',
+    summaryLabel: stage?.label ?? 'Chilly',
     sortOrder: 96,
     expiresAtMs: null,
     detailLines:

@@ -10,7 +10,7 @@
 import { savingPlazaSinglePlayerSaveSlotData } from '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi';
 import { readingWorldPlazaDiscoveredNamedRealmsFromStorage } from '@/components/world/domains/readingWorldPlazaDiscoveredNamedRealmsFromStorage';
 import { writingWorldPlazaDiscoveredNamedRealmsToStorage } from '@/components/world/domains/writingWorldPlazaDiscoveredNamedRealmsToStorage';
-import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
+import type { PlazaSaveSlotIndex } from '../../../shared/plazaGameSession';
 
 const managingWorldPlazaDiscoveredNamedRealmsSubscribers = new Set<
   () => void

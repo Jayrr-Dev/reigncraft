@@ -1,6 +1,6 @@
 /**
- * Declarative stalker-temperament behaviour statechart for any species with
- * temperamentId `stalker` (wolves today; reusable for future hunters).
+ * Declarative solo stalker behaviour statechart.
+ * temperamentId `stalker` (tiger, jaguar): shadow → rush, no pack surround.
  *
  * @module components/world/wildlife/domains/definingWildlifeStalkerBehaviourMachine
  */
@@ -10,7 +10,7 @@ import type { DefiningStateMachineDefinition } from '@/lib/stateMachine/defining
 export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_MACHINE_ID =
   'wildlife.stalker.behaviour';
 
-/** Data-driven stalk hunt phases; consumed by the shared statechart engine. */
+/** Slim stalk hunt phases for solo stalkers. */
 export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_MACHINE: DefiningStateMachineDefinition =
   {
     id: DEFINING_WILDLIFE_STALKER_BEHAVIOUR_MACHINE_ID,
@@ -21,8 +21,6 @@ export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_MACHINE: DefiningStateMachineDe
       shadowing: { kind: 'atomic', onEnter: ['stalker.onEnterShadowing'] },
       retreating: { kind: 'atomic', onEnter: ['stalker.onEnterRetreating'] },
       regrouping: { kind: 'atomic', onEnter: ['stalker.onEnterRegrouping'] },
-      formingUp: { kind: 'atomic', onEnter: ['stalker.onEnterFormingUp'] },
-      surrounding: { kind: 'atomic', onEnter: ['stalker.onEnterSurrounding'] },
       attacking: { kind: 'atomic', onEnter: ['stalker.onEnterAttacking'] },
       fleeing: { kind: 'atomic', onEnter: ['stalker.onEnterFleeing'] },
     },
@@ -54,19 +52,6 @@ export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_MACHINE: DefiningStateMachineDe
         to: 'shadowing',
         event: 'REGROUP_DISTANCE_REACHED',
       },
-      { from: 'shadowing', to: 'formingUp', event: 'PACK_CONFIDENT' },
-      { from: 'formingUp', to: 'shadowing', event: 'PACK_THINNED' },
-      {
-        from: 'formingUp',
-        to: 'surrounding',
-        event: 'FORMATION_TIMER_DONE',
-      },
-      {
-        from: 'shadowing',
-        to: 'surrounding',
-        event: 'KILL_WINDOW_PLUS_PACK',
-        priority: 20,
-      },
       {
         from: 'shadowing',
         to: 'attacking',
@@ -74,13 +59,8 @@ export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_MACHINE: DefiningStateMachineDe
         priority: 10,
       },
       {
-        from: 'surrounding',
-        to: 'attacking',
-        event: 'SLOT_REACHED_OR_ALPHA_COMMIT',
-      },
-      {
         from: 'attacking',
-        to: 'surrounding',
+        to: 'shadowing',
         event: 'ATTACK_TIMEOUT_10S',
       },
       { from: 'shadowing', to: 'fleeing', event: 'DAMAGED_ROLL_FLEE' },
@@ -98,7 +78,6 @@ export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_MACHINE: DefiningStateMachineDe
         event: 'TARGET_DEAD_OR_LOST',
         priority: 100,
       },
-      { from: '*', to: 'fleeing', event: 'ALPHA_DIED', priority: 90 },
       {
         from: 'attacking',
         to: 'attacking',

@@ -16,7 +16,7 @@ import {
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import type { RefObject } from 'react';
 import { useEffect } from 'react';
-import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
+import type { PlazaSaveSlotIndex } from '../../../shared/plazaGameSession';
 
 export type UsingWorldPlazaRecordingBestiarySightingsOptions = {
   isEnabled: boolean;

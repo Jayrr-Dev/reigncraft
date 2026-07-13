@@ -20,6 +20,7 @@ import {
   gettingWildlifeInstance,
   type ManagingWildlifeInstanceStore,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { DEFINING_WILDLIFE_DOCILE_PET_LABEL_OFFSET_ABOVE_NAME_TAG_PX } from '@/components/world/wildlife/domains/definingWildlifeDocilePetConstants';
 import {
   resolvingWildlifeDocilePetIdleLabel,
   resolvingWildlifeDocilePettingLabel,
@@ -116,13 +117,20 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
       const frameHeightPx = species
         ? resolvingWildlifeSpeciesSpritePresentation(species).frameHeightPx
         : undefined;
-      const screenPoint = resolvingWorldPlazaWildlifeNameTagScreenPoint({
+      const nameTagScreenPoint = resolvingWorldPlazaWildlifeNameTagScreenPoint({
         gridPoint: instance.position,
         sizeScale,
         cameraOffset,
         cameraWorldZoom,
         ...(frameHeightPx !== undefined ? { frameHeightPx } : {}),
       });
+      const screenPoint = {
+        x: nameTagScreenPoint.x,
+        y:
+          nameTagScreenPoint.y -
+          DEFINING_WILDLIFE_DOCILE_PET_LABEL_OFFSET_ABOVE_NAME_TAG_PX *
+            cameraWorldZoom,
+      };
 
       labelElement.style.transform =
         computingWorldPlazaCameraZoomedDomOverlayPositionTransform(

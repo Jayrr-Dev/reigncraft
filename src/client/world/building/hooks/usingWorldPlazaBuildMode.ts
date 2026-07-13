@@ -869,7 +869,7 @@ export function usingWorldPlazaBuildMode({
   );
 
   const placingBlockAtTile = useCallback(
-    (tilePosition: DefiningWorldBuildingTilePosition): void => {
+    async (tilePosition: DefiningWorldBuildingTilePosition): Promise<void> => {
       if (
         !onlineUserId ||
         !buildDraft ||
@@ -913,21 +913,33 @@ export function usingWorldPlazaBuildMode({
       assigningBuildDraft(placementResult.draft);
       setBuildErrorMessage(null);
 
+      // Session builds are not "unsaved draft" changes. Craft success exits edit
+      // mode in the same turn, which clears the draft. Persist + refetch must
+      // finish first or the campfire vanishes when the scene drops back to
+      // server `placedBlocks`.
       if (placementResult.isSessionPlacement) {
         const placedSessionBlock = placementResult.draft.sessionBlocks.find(
           (block) => block.blockId === blockId
         );
 
         if (placedSessionBlock) {
-          void persistingWorldBuildingSessionBlock(placedSessionBlock).catch(
-            (error) => {
-              setBuildErrorMessage(
-                error instanceof Error
-                  ? error.message
-                  : 'Could not place temporary build.'
-              );
-            }
-          );
+          try {
+            await persistingWorldBuildingSessionBlock(placedSessionBlock);
+            await refetchingPlots();
+          } catch (error) {
+            assigningBuildDraft({
+              ...placementResult.draft,
+              sessionBlocks: placementResult.draft.sessionBlocks.filter(
+                (block) => block.blockId !== blockId
+              ),
+            });
+            setBuildErrorMessage(
+              error instanceof Error
+                ? error.message
+                : 'Could not place temporary build.'
+            );
+            return;
+          }
         }
       }
 
@@ -946,6 +958,7 @@ export function usingWorldPlazaBuildMode({
       onSuccessfulBlockPlacementRef,
       onlineUserId,
       plots,
+      refetchingPlots,
       resolvingPlacementWorldLayerForTile,
       selectedDefinitionId,
       selectedBlockHeight,
@@ -1015,7 +1028,7 @@ export function usingWorldPlazaBuildMode({
       return;
     }
 
-    placingBlockAtTile(selectedTilePosition);
+    void placingBlockAtTile(selectedTilePosition);
   }, [placingBlockAtTile, selectedTilePosition]);
 
   const removingBlockAtSelectedTile = useCallback((): void => {
@@ -1389,7 +1402,7 @@ export function usingWorldPlazaBuildMode({
           isBuildPlacementSelectionActive &&
           checkingCanPlaceAtTile(tilePosition)
         ) {
-          placingBlockAtTile(tilePosition);
+          void placingBlockAtTile(tilePosition);
           return;
         }
 
@@ -1480,7 +1493,7 @@ export function usingWorldPlazaBuildMode({
           isBuildPlacementSelectionActive &&
           checkingCanPlaceAtTile(tilePosition)
         ) {
-          placingBlockAtTile(tilePosition);
+          void placingBlockAtTile(tilePosition);
         }
         return;
       }

@@ -1,4 +1,4 @@
-﻿# Reigncraft game engines — AI reference
+# Reigncraft game engines — AI reference
 
 |                  |            |
 | ---------------- | ---------- |
@@ -416,15 +416,15 @@ Depends on inventory state from `usingWorldPlazaInventory`. Used by harvest, fir
 
 **Texture LRU eviction:** `advancingWildlifeSpeciesTextureEviction` (every 5s from `renderingWildlifeLayer.tsx`) uses `resolvingWildlifeProximateSpeciesIdsAtWorldPoint`: mobile pins only the top `DEFINING_WILDLIFE_TEXTURE_EVICTION_MAX_CACHED_SPECIES_MOBILE` (6) highest-weight species from the **current** biome; desktop pins every species spawnable in the player tile plus a 48-tile sample ring (`resolvingWildlifeNearbyBiomeKindsAtWorldPoint`). Species outside that set cull after `DEFINING_WILDLIFE_BIOME_PROXIMITY_OUT_OF_RANGE_GRACE_MS` (5s). In-range species use the normal grace (45s desktop / 20s mobile) and the mobile resolved-texture cap. Boot warms only `DEFINING_WILDLIFE_BOOT_PRELOAD_MAX_SPECIES_MOBILE` (4) plains species on mobile. Skip eviction while load pending. `loadedSpeciesRef` must shrink on eviction or the species never reloads.
 
-**Registered temperaments:** `docile`, `passive`, `skittish`, `retaliator`, `predator`, `ambusher`, `stalker` (docile = dogs/cats; friendliness = aggression level; Attack? gate)
+**Registered temperaments:** `docile`, `passive`, `skittish`, `retaliator`, `predator`, `ambusher`, `pack_hunter`, `stalker` (docile = dogs/cats; friendliness = aggression level; Attack? gate)
 
 **Registered species:** `cow`, `sheep`, `chicken`, `deer`, `zebra`, `boar`, `grey-wolf`, `brown-bear`, `lion`, `lioness`, `crocodile`
 
-**Stalker / pack pipeline** (grey-wolf is the reference `stalker` implementation):
+**PackHunter / pack pipeline** (grey-wolf is the reference `PackHunter` implementation):
 
 Phases (`definingWildlifeStalkPhaseTypes.ts`): `idle` → `shadowing` → `retreating` → `regrouping` → `formingUp` → `surrounding` → `attacking` → `fleeing`
 
-Statechart: `definingWildlifeStalkerBehaviourMachine.ts` + `definingWildlifeStalkerBehaviourRegistry.ts`, driven by `advancingWildlifeStalkerBehaviour.ts`.
+Statechart: `definingWildlifePackHunterBehaviourMachine.ts` + `definingWildlifePackHunterBehaviourRegistry.ts`, driven by `advancingWildlifePackHunterBehaviour.ts`.
 
 | Concern                          | File                                                                                               |
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
@@ -492,7 +492,7 @@ flowchart TD
 1. Add species in `definingWildlifeSpeciesRegistry.ts` + biome entry in `definingWildlifeBiomeSpawnTable.ts`.
 2. Register animation clips in `registeringWildlifeAnimationClips.ts`.
 3. If new temperament: add behavior tree + condition/action registry entries.
-4. If stalker-like: extend stalk phase types / statechart (grey-wolf is the template).
+4. If PackHunter-like: extend stalk phase types / statechart (grey-wolf is the template).
 5. If meat drops: add entry in `definingWildlifeMeatRegistry.ts` + inventory registration.
 
 ---
@@ -626,7 +626,7 @@ Use these folders when the task is not covered above:
 | Combat too fast / slow for everyone             | `definingWorldPlazaGlobalCombatAttackSpeedConstants.ts` (`DEFINING_WORLD_PLAZA_GLOBAL_ATTACK_SPEED_SCALE`; 0.7 = 70% speed)                     |
 | Attack-speed buffs (player / wildlife)          | `attack_speed` modifier + `quick-strikes-buff` / `bloodlust-buff` / `blinding-flurry-buff` / `relentless-tempo-buff` in buff registry           |
 | Combat dev tuning                               | Dev panel combat tab, subcategory `engine`                                                                                                      |
-| Wolf pack not stalking / wrong phase            | `definingWildlifeStalkerBehaviourMachine.ts`, `advancingWildlifeStalkAggroTick.ts`                                                              |
+| Wolf pack not stalking / wrong phase            | `definingWildlifePackHunterBehaviourMachine.ts`, `advancingWildlifeStalkAggroTick.ts`                                                              |
 | Pack flees when alpha dies                      | `applyingWildlifePackAlphaDeathScatter.ts`                                                                                                      |
 | Player spotted while wolf shadows prey          | `advancingWildlifeStalkPlayerApproachTick.ts`                                                                                                   |
 | New wildlife species                            | `definingWildlifeSpeciesRegistry.ts` + `definingWildlifeBiomeSpawnTable.ts`                                                                     |
@@ -660,7 +660,7 @@ Engine characterization tests usually live next to the engine:
 | Wildlife        | `advancingWildlife*.test.ts`, `applyingWildlife*.test.ts`, `resolvingWildlife*.test.ts`, `checkingWildlife*.test.ts` (~88 files)              |
 | Navigation      | `resolvingWorldPlazaNavigation*.test.ts`, `checkingWorldPlazaNavigationPathNeedsReplan.test.ts`, `computingNavigationAStarPath.test.ts` (lib) |
 
-Key wildlife characterization tests: `advancingWildlifeStalkerBehaviour.test.ts`, `advancingWildlifeStalkAggroTick.test.ts`, `applyingWildlifePackAlphaDeathScatter.test.ts`, `advancingWildlifeFavoritePreyAggro.test.ts`, `electingWildlifeSimulationLeaderUserId.test.ts`.
+Key wildlife characterization tests: `advancingWildlifePackHunterBehaviour.test.ts`, `advancingWildlifeStalkAggroTick.test.ts`, `applyingWildlifePackAlphaDeathScatter.test.ts`, `advancingWildlifeFavoritePreyAggro.test.ts`, `electingWildlifeSimulationLeaderUserId.test.ts`.
 
 Run: `npm run test -- <file-name-without-path>`
 

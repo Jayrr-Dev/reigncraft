@@ -7,6 +7,7 @@ Design notes and reference architectures saved for later use. Not active code â€
 | [game-engines-reference.md](./game-engines-reference.md)     | Plaza game engines map (collision, health, terrain, inventory, etc.)                                          |
 | [lore-canon-reference.md](./lore-canon-reference.md)         | World bible summary (Corpus, Manus, the ladder, Apostles, factions); read before any lore or flavor-text work |
 | [game-mechanics-reference.md](./game-mechanics-reference.md) | Player-facing rules and tuning numbers (combat, survival, wildlife, world)                                    |
+| [bug-postmortems/](./bug-postmortems/)                       | Fixed bug write-ups (root cause, fix, regression guards)                                                      |
 
 ## Gameplay docs (DDD, agent-synced)
 

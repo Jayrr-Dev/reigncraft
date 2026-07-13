@@ -258,9 +258,6 @@ export function resolvingWildlifeInstanceStaminaConfig(
   return {
     drainMultiplier,
     regenMultiplier,
-    ...(species.stamina.exhaustedRecoveryRatio !== undefined
-      ? { exhaustedRecoveryRatio: species.stamina.exhaustedRecoveryRatio }
-      : {}),
     ...(species.stamina.maxStaminaRatio !== undefined
       ? { maxStaminaRatio: species.stamina.maxStaminaRatio }
       : {}),

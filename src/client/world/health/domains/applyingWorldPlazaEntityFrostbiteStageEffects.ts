@@ -9,6 +9,7 @@ import {
   DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_EFFECT_ID_PREFIX,
   DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_LINEAR_SPEED_EFFECT_INSTANCE_ID,
   DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_LINEAR_STAMINA_REGEN_EFFECT_INSTANCE_ID,
+  DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_NECROTIC_SLEEP_WAKE_BONUS_DAMAGE,
 } from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteConstants';
 import type { DefiningWorldPlazaEntityFrostbiteStageDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteStageRegistry';
 import { listingWorldPlazaEntityFrostbiteStageDescriptors } from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteStageRegistry';
@@ -24,11 +25,11 @@ import {
   addingWorldPlazaEntityHealthConfusionEffect,
   addingWorldPlazaEntityHealthHealBlockModifier,
   addingWorldPlazaEntityHealthMovementModifier,
-  addingWorldPlazaEntityHealthStunEffect,
+  addingWorldPlazaEntityHealthSleepEffect,
   removingWorldPlazaEntityHealthConfusionEffect,
   removingWorldPlazaEntityHealthHealBlockModifier,
   removingWorldPlazaEntityHealthMovementModifier,
-  removingWorldPlazaEntityHealthStunEffect,
+  removingWorldPlazaEntityHealthSleepEffect,
 } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 
 export function buildingWorldPlazaEntityFrostbiteStageEffectInstanceId(
@@ -50,12 +51,12 @@ export function resolvingWorldPlazaEntityFrostbiteStageTemplateBuffId(
 }
 
 const FROSTBITE_CONFUSION_EFFECT_ID = `${DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_EFFECT_ID_PREFIX}confusion`;
-const FROSTBITE_NECROTIC_STUN_EFFECT_ID = `${DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_EFFECT_ID_PREFIX}necrotic-stun`;
+const FROSTBITE_NECROTIC_SLEEP_EFFECT_ID = `${DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_EFFECT_ID_PREFIX}necrotic-sleep`;
 
 function listingWorldPlazaEntityFrostbiteScopedInstanceIds(): string[] {
   const ids: string[] = [
     FROSTBITE_CONFUSION_EFFECT_ID,
-    FROSTBITE_NECROTIC_STUN_EFFECT_ID,
+    FROSTBITE_NECROTIC_SLEEP_EFFECT_ID,
     DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_LINEAR_SPEED_EFFECT_INSTANCE_ID,
     DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_LINEAR_STAMINA_REGEN_EFFECT_INSTANCE_ID,
   ];
@@ -85,7 +86,7 @@ function listingWorldPlazaEntityFrostbiteScopedInstanceIds(): string[] {
 }
 
 /**
- * Removes all frostbite-scoped movement, heal-block, confusion, stun, and
+ * Removes all frostbite-scoped movement, heal-block, confusion, sleep, and
  * attacker damage-roll modifiers.
  */
 export function clearingWorldPlazaEntityFrostbiteScopedEffects(
@@ -113,9 +114,9 @@ export function clearingWorldPlazaEntityFrostbiteScopedEffects(
     nextState,
     FROSTBITE_CONFUSION_EFFECT_ID
   );
-  nextState = removingWorldPlazaEntityHealthStunEffect(
+  nextState = removingWorldPlazaEntityHealthSleepEffect(
     nextState,
-    FROSTBITE_NECROTIC_STUN_EFFECT_ID
+    FROSTBITE_NECROTIC_SLEEP_EFFECT_ID
   );
 
   return {
@@ -214,8 +215,8 @@ function applyingWorldPlazaEntityFrostbiteBuffDescriptor(
 
 /**
  * Syncs linear stack speed and stamina regen, every reached tier's other buffs,
- * plus confusion / necrotic stun. Overlapping stamina max, jump, and outgoing-damage
- * modifiers keep the harshest value only.
+ * plus confusion / necrotic sleep. Overlapping jump modifiers keep the harshest
+ * value only.
  */
 export function syncingWorldPlazaEntityFrostbiteStageEffects({
   state,
@@ -233,7 +234,7 @@ export function syncingWorldPlazaEntityFrostbiteStageEffects({
   state: DefiningWorldPlazaEntityHealthState;
   attackerDamageRollModifiers: DefiningWorldPlazaEntityHealthDamageRollModifier[];
 } {
-  let cleared = clearingWorldPlazaEntityFrostbiteScopedEffects(
+  const cleared = clearingWorldPlazaEntityFrostbiteScopedEffects(
     state,
     attackerDamageRollModifiers
   );
@@ -277,10 +278,6 @@ export function syncingWorldPlazaEntityFrostbiteStageEffects({
   }
 
   nextState = collapsingWorldPlazaEntityFrostbiteMovementModifiers(nextState);
-  nextAttackerModifiers =
-    collapsingWorldPlazaEntityFrostbiteAttackerExpectedModifiers(
-      nextAttackerModifiers
-    );
 
   if (stage.appliesConfusion) {
     nextState = addingWorldPlazaEntityHealthConfusionEffect(nextState, {
@@ -293,11 +290,13 @@ export function syncingWorldPlazaEntityFrostbiteStageEffects({
   }
 
   if (stage.forcesImmobilize) {
-    nextState = addingWorldPlazaEntityHealthStunEffect(nextState, {
-      id: FROSTBITE_NECROTIC_STUN_EFFECT_ID,
+    nextState = addingWorldPlazaEntityHealthSleepEffect(nextState, {
+      id: FROSTBITE_NECROTIC_SLEEP_EFFECT_ID,
       appliedAtMs: nowMs,
       expiresAtMs: Number.POSITIVE_INFINITY,
-      phaseSeed: 1.3,
+      wakeBonusDamage:
+        DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_NECROTIC_SLEEP_WAKE_BONUS_DAMAGE,
+      canWakeFromDamage: false,
     });
   }
 
@@ -380,40 +379,4 @@ function collapsingWorldPlazaEntityFrostbiteMovementModifiers(
     ...state,
     movementModifiers: [...otherModifiers, ...harshestByKind.values()],
   };
-}
-
-/**
- * Among frostbite attacker `expected` modifiers, keep only the lowest value.
- */
-function collapsingWorldPlazaEntityFrostbiteAttackerExpectedModifiers(
-  attackerDamageRollModifiers: readonly DefiningWorldPlazaEntityHealthDamageRollModifier[]
-): DefiningWorldPlazaEntityHealthDamageRollModifier[] {
-  const frostbiteExpected = attackerDamageRollModifiers.filter(
-    (modifier) =>
-      modifier.id.startsWith(
-        DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_EFFECT_ID_PREFIX
-      ) && modifier.kind === 'expected'
-  );
-  const others = attackerDamageRollModifiers.filter(
-    (modifier) =>
-      !(
-        modifier.id.startsWith(
-          DEFINING_WORLD_PLAZA_ENTITY_FROSTBITE_EFFECT_ID_PREFIX
-        ) && modifier.kind === 'expected'
-      )
-  );
-
-  if (frostbiteExpected.length === 0) {
-    return [...attackerDamageRollModifiers];
-  }
-
-  let harshest = frostbiteExpected[0];
-
-  for (const modifier of frostbiteExpected) {
-    if (modifier.value < harshest.value) {
-      harshest = modifier;
-    }
-  }
-
-  return [...others, harshest];
 }

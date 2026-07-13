@@ -6,12 +6,14 @@ Sync payload fields, TTLs, intervals, event shapes, and code touchpoints.
 
 ## Room capacity and timing
 
-| Constant                                 | Value   | Effect                     |
-| ---------------------------------------- | ------- | -------------------------- |
-| `PLAZA_DEVVIT_ONLINE_MAX_PLAYERS`        | **3**   | Hard cap per room shard    |
-| `PLAZA_DEVVIT_ONLINE_PLAYER_TTL_SECONDS` | **5**   | Redis player record expiry |
-| `PLAZA_DEVVIT_ONLINE_SYNC_INTERVAL_MS`   | **150** | Client POST rate           |
-| `PLAZA_DEVVIT_ONLINE_POLL_INTERVAL_MS`   | **400** | Client GET remotes rate    |
+| Constant                                      | Value   | Effect                                  |
+| --------------------------------------------- | ------- | --------------------------------------- |
+| `PLAZA_DEVVIT_ONLINE_MIN_PLAYERS`             | **2**   | Lowest create-time traveler cap         |
+| `PLAZA_DEVVIT_ONLINE_MAX_PLAYERS`             | **4**   | Highest create-time traveler cap        |
+| `PLAZA_DEVVIT_ONLINE_DEFAULT_MAX_PLAYERS`     | **3**   | Default when host does not pick a value |
+| `PLAZA_DEVVIT_ONLINE_PLAYER_TTL_SECONDS`      | **5**   | Redis player record expiry              |
+| `PLAZA_DEVVIT_ONLINE_SYNC_INTERVAL_MS`        | **150** | Client POST rate                        |
+| `PLAZA_DEVVIT_ONLINE_POLL_INTERVAL_MS`        | **400** | Client GET remotes rate                 |
 
 ## Client sync scheduling
 
@@ -38,13 +40,17 @@ Helpers: `incrementingWorldPlazaPerformanceDiagnosticsCounter`, `beginningWorldP
 
 ## API paths
 
-| Constant                               | Path                 |
-| -------------------------------------- | -------------------- |
-| `PLAZA_DEVVIT_ONLINE_SYNC_API_PATH`    | `/api/plaza/sync`    |
-| `PLAZA_DEVVIT_ONLINE_PLAYERS_API_PATH` | `/api/plaza/players` |
-| `PLAZA_DEVVIT_ONLINE_ROOMS_API_PATH`   | `/api/plaza/rooms`   |
+| Constant                                      | Path                      |
+| --------------------------------------------- | ------------------------- |
+| `PLAZA_DEVVIT_ONLINE_SYNC_API_PATH`           | `/api/plaza/sync`         |
+| `PLAZA_DEVVIT_ONLINE_PLAYERS_API_PATH`        | `/api/plaza/players`      |
+| `PLAZA_DEVVIT_ONLINE_ROOMS_API_PATH`          | `/api/plaza/rooms`        |
+| `PLAZA_DEVVIT_ONLINE_ROOMS_MINE_API_PATH`     | `/api/plaza/rooms/mine`   |
+| `PLAZA_DEVVIT_ONLINE_ROOMS_LOOKUP_API_PATH`   | `/api/plaza/rooms/lookup` |
+| `PLAZA_DEVVIT_ONLINE_ROOMS_HOSTED_API_PATH`   | `/api/plaza/rooms/hosted` |
+| `PLAZA_DEVVIT_ONLINE_ROOMS_KICK_API_PATH`     | `/api/plaza/rooms/kick`   |
 
-Room shard: `buildingPlazaDevvitOnlineRoomApiUrl(path, roomIndex)` → `{path}?room={index}`.
+Room query: `buildingPlazaDevvitOnlineRoomApiUrl(path, roomId)` → `{path}?room={roomId}`.
 
 ## Sync request fields (`PlazaDevvitOnlineSyncRequest`)
 
@@ -171,10 +177,12 @@ Cap constant: `DEFINING_WORLD_PLAZA_PROJECTILE_ONLINE_SYNC_MAX_SPAWN_EVENTS` = *
 
 | Field              | Type    |
 | ------------------ | ------- |
-| `roomIndex`        | number  |
+| `roomId`           | string  |
+| `displayName`      | string  |
 | `participantCount` | number  |
 | `maxPlayers`       | number  |
 | `isFull`           | boolean |
+| `isPrivate`        | boolean |
 
 ## Application files
 
@@ -212,10 +220,10 @@ Cap constant: `DEFINING_WORLD_PLAZA_PROJECTILE_ONLINE_SYNC_MAX_SPAWN_EVENTS` = *
 | Fire (no room)    | `managingWorldPlazaLocalFireCells`   |
 | Disease           | Save slot `playerConditions`         |
 
-## Checklist: change room size
+## Checklist: change traveler cap
 
-1. [ ] Edit `PLAZA_DEVVIT_ONLINE_MAX_PLAYERS`
-2. [ ] Update full-room toast in `usingWorldPlazaDevvitPollingRoom.ts`
-3. [ ] Update room browser copy if hardcoded
+1. [ ] Edit `MIN` / `MAX` / `DEFAULT_MAX_PLAYERS` in `plazaDevvitOnline.ts`
+2. [ ] Update full-room toasts (poll hook + server sync)
+3. [ ] Confirm home / room browser use constants (no hardcoded 2-4)
 4. [ ] Load-test Redis write rate (sync × player count)
 5. [ ] Update this catalog and [mechanics.md](./mechanics.md)

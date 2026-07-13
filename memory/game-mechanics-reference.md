@@ -65,7 +65,7 @@ For engine wiring (hooks, Pixi ticks, registries, folder layout), see [game-engi
 - Full stamina bar drains in **12.8s** running; refills in **4.5s** resting.
 - Jump costs **6.25%** stamina standing, **8.75%** run jump; roll = **1.5×** standing jump cost (**9.375%**).
 - After full empty: **2s** regen delay; action spend pauses regen **600ms**.
-- Fatigue tiers (`fresh` through `collapsed`) gate re-use until bar refills to tier threshold; collapsed needs **15%** before run/jump/roll again.
+- Fatigue tiers (`fresh` → `winded` → `drained` → `spent`): unlock at **66% → 33% → full 100%**; full bar resets to fresh (same ladder as wildlife).
 - Default jump reach: **4** layers above current standing layer.
 
 **Key files**
@@ -218,9 +218,9 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 - Each cold tick adds **1 stack per °C below comfort low**; warm recovery requires **local temp above comfort low** (default comfort low **−10°C**)
 - Each warm tick removes **1 stack per °C above comfort low** (same 1s interval as cold); e.g. local **59°C** at default comfort low **−10°C** → **−69 stacks/tick**
-- Stages at **50 / 100 / 200 / 500 / 750 / 1000**: Chilled → Numb → Frostnip → Hypothermia → Frostbite → Necrotic
-- Walk speed and stamina regen linear: **75% slow at 1000 stacks** (`1 - 0.75 × stacks/1000`); frostbite walk slow does not block sprint; tier buffs inherit for stamina max/jump/damage
-- Frostnip+: ambient cold DoT **plus** `(stacks × 0.01)%` max HP per tick; Frostbite+ takes **3×** frost damage
+- Stages at **0 / 50 / 100 / 200 / 500 / 750 / 1000**: Chilly → Cold → Shivering → Freezing → Hypothermia → Frostbite → Necrotic
+- Walk speed and stamina regen linear: **50% slow at 1000 stacks** (`1 - 0.5 × stacks/1000`); frostbite walk slow does not block sprint; tier buffs inherit for jump
+- Freezing+: ambient cold DoT **plus** `(stacks × 0.01)%` max HP per tick; Frostbite+ takes **3×** frost damage
 - Tunables: `definingWorldPlazaEntityFrostbiteConstants.ts` + stage registry
 
 ---
@@ -355,8 +355,10 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 | passive / skittish | Flee when hurt; graze when hungry; aggressive (pissed) herbivores warn on territory then fight                                                                                    |
 | retaliator         | Territory warnings then combat (boar, bear, **rhino** home **11** / warn **7** / escalate **3.5**; rhino first charge may **bluff** at **50%** stamina if player left home patch) |
 | predator           | Hunt prey in **14** grid radius; engage within **6**                                                                                                                              |
-| ambusher           | Short-range ambush patterns                                                                                                                                                       |
-| stalker            | Grey-wolf pack pipeline (section 11)                                                                                                                                              |
+| ambusher           | Short-range ambush patterns (crocodile)                                                                                                                                        |
+| pack_hunter        | Pack shadow → surround → rush (wolves, hyena)                                                                                                                                  |
+| stalker            | Solo shadow → rush on weakness or hungry/aggressive patience (tiger, jaguar)                                                                                                   |
+| Pack hunter | Grey-wolf pack pipeline (section 11)                                                                                                                                              |
 
 **Aggro** (`definingWildlifeAggroConstants.ts`)
 
@@ -402,7 +404,7 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 **Phases:** `idle` → `shadowing` → `retreating` → `regrouping` → `formingUp` → `surrounding` → `attacking` → `fleeing`
 
-Statechart: `definingWildlifeStalkerBehaviourMachine.ts` + `definingWildlifeStalkerBehaviourRegistry.ts`
+Statechart: `definingWildlifePackHunterBehaviourMachine.ts` + `definingWildlifePackHunterBehaviourRegistry.ts`
 
 **Commit rules** (`definingWildlifeStalkConstants.ts`)
 
@@ -424,11 +426,11 @@ Statechart: `definingWildlifeStalkerBehaviourMachine.ts` + `definingWildlifeStal
 | Damage during stalk: pack abandons hunt                                    | **65%** chance                                         |
 | Player rushing shadowing wolf (within **5.5** grid, closing dot **≥0.35**) | **⅓** flee, **⅓** enrage, **⅓** regroup                |
 
-**Grey wolf stamina** (`DEFINING_WILDLIFE_SPECIES_STAMINA`): drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~**16s** sprint, ~**3s** refill).
+**Grey wolf stamina** (`DEFINING_WILDLIFE_SPECIES_STAMINA`): drain **0.28×**, regen **2.4×**. Exhaust unlocks use the global wildlife fatigue ladder (**66% → 33% → full 100%**); full bar resets to fresh.
 
 **Howl rally:** each howl gives every idle wolf within **45** grid a **45%** roll to run to the howl point for up to **25s** (arrive **4** grid); constants in `definingWildlifeWolfVocalizationConstants.ts` (see [wildlife mechanics](../gameplay/mechanics/wildlife/mechanics.md)).
 
-**Fleet prey locomotion** (deer, stag, antilope, oryx, zebra, ostrich): exhaust exit **75%**; raised `maxStaminaRatio`; per-species burst/momentum accel in `definingWildlifeSpeciesAccelerationRegistry.ts` (see [wildlife mechanics](../gameplay/mechanics/wildlife/mechanics.md)).
+**Fleet prey locomotion** (deer, stag, antilope, oryx, zebra, ostrich): same fatigue ladder as all animals; raised `maxStaminaRatio`; per-species burst/momentum accel in `definingWildlifeSpeciesAccelerationRegistry.ts` (see [wildlife mechanics](../gameplay/mechanics/wildlife/mechanics.md)).
 
 **Safe-terrain seeking** (deer, stag, antilope, oryx, zebra): flee headings bias toward nearby rivers/cliffs (`definingWildlifeSafeTerrainSeekingConstants.ts`); ostrich excluded.
 
@@ -520,9 +522,11 @@ Engine wiring for stalk ticks: [game-engines-reference § Wildlife](./game-engin
 
 **Gameplay docs:** [multiplayer](../gameplay/mechanics/multiplayer/)
 
-**Room** (`src/shared/plazaDevvitOnline.ts`)
+**Named world** (`src/shared/plazaDevvitOnline.ts`)
 
-- Max **3** players per post room
+- Host creates unique name; traveler cap **2-4** (default **3**)
+- Open list = public + occupied; private join-by-name; Continue for alumni
+- One hosted world per user; host kick / delete
 - Position sync POST every **150ms**; poll remotes **400ms**
 - Player TTL **5s** in Redis
 

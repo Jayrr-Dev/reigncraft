@@ -4,10 +4,10 @@
  * @module components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds
  */
 
-/** Glowing soul orb used by Soulcore. */
-export const DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SOULCORE_SPHERE =
-  'soulcore-sphere' as const;
+/** Glowing soul orb used by Spritcore. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SPRITCORE_SPHERE =
+  'spritcore-sphere' as const;
 
 /** Registered custom inventory item icon ids. */
 export type DefiningWorldPlazaInventoryCustomItemIconId =
-  typeof DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SOULCORE_SPHERE;
+  typeof DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SPRITCORE_SPHERE;

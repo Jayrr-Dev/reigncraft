@@ -104,17 +104,14 @@ describe('updatingWorldPlazaRunStamina action regen pause', () => {
 });
 
 describe('player stamina fatigue tiers', () => {
-  it('progresses fresh -> winded -> fatigued -> spent -> collapsed on full depletions', () => {
+  it('progresses fresh -> winded -> drained -> spent on full depletions', () => {
     expect(advancingWorldPlazaPlayerStaminaFatigueTier('fresh')).toBe('winded');
-    expect(advancingWorldPlazaPlayerStaminaFatigueTier('winded')).toBe('fatigued');
-    expect(advancingWorldPlazaPlayerStaminaFatigueTier('fatigued')).toBe('spent');
-    expect(advancingWorldPlazaPlayerStaminaFatigueTier('spent')).toBe('collapsed');
-    expect(advancingWorldPlazaPlayerStaminaFatigueTier('collapsed')).toBe(
-      'collapsed'
-    );
+    expect(advancingWorldPlazaPlayerStaminaFatigueTier('winded')).toBe('drained');
+    expect(advancingWorldPlazaPlayerStaminaFatigueTier('drained')).toBe('spent');
+    expect(advancingWorldPlazaPlayerStaminaFatigueTier('spent')).toBe('spent');
   });
 
-  it('locks winded usage until 85% of the bar refills', () => {
+  it('locks winded usage until 66% of the bar refills', () => {
     const depletedAtMs = 0;
     const state = applyingWorldPlazaPlayerStaminaOnFullDepletion({
       state: DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE,
@@ -124,30 +121,30 @@ describe('player stamina fatigue tiers', () => {
 
     expect(state.fatigueTier).toBe('winded');
     expect(
-      checkingWorldPlazaPlayerStaminaFatigueCanUseStaminaAgain(state, 0.84)
+      checkingWorldPlazaPlayerStaminaFatigueCanUseStaminaAgain(state, 0.65)
     ).toBe(false);
     expect(
-      checkingWorldPlazaPlayerStaminaFatigueCanUseStaminaAgain(state, 0.85)
+      checkingWorldPlazaPlayerStaminaFatigueCanUseStaminaAgain(state, 0.66)
     ).toBe(true);
   });
 
-  it('unlocks spent usage at 40% bar fill', () => {
+  it('unlocks drained usage at 33% bar fill', () => {
     const state = {
       ...DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE,
-      fatigueTier: 'spent' as const,
+      fatigueTier: 'drained' as const,
       isDepleted: true,
       depletedAtMs: 0,
     };
 
     expect(
-      checkingWorldPlazaPlayerStaminaFatigueCanUseStaminaAgain(state, 0.39)
+      checkingWorldPlazaPlayerStaminaFatigueCanUseStaminaAgain(state, 0.32)
     ).toBe(false);
     expect(
-      checkingWorldPlazaPlayerStaminaFatigueCanUseStaminaAgain(state, 0.4)
+      checkingWorldPlazaPlayerStaminaFatigueCanUseStaminaAgain(state, 0.33)
     ).toBe(true);
   });
 
-  it('regenerates at full speed while collapsed', () => {
+  it('regenerates at full speed while spent', () => {
     const depletedAtMs = 0;
     const afterHoldMs =
       depletedAtMs + DEFINING_WORLD_PLAZA_RUN_STAMINA_DEPLETION_REGEN_DELAY_MS + 1;
@@ -155,7 +152,7 @@ describe('player stamina fatigue tiers', () => {
       ...applyingWorldPlazaPlayerStaminaOnFullDepletion({
         state: {
           ...DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE,
-          fatigueTier: 'spent',
+          fatigueTier: 'drained',
         },
         nextStaminaRatio: 0,
         nowMs: depletedAtMs,
@@ -163,7 +160,7 @@ describe('player stamina fatigue tiers', () => {
       regenPausedUntilMs: null,
     };
 
-    expect(state.fatigueTier).toBe('collapsed');
+    expect(state.fatigueTier).toBe('spent');
 
     const { state: normalRegen } = updatingWorldPlazaRunStamina({
       state: {
@@ -178,21 +175,21 @@ describe('player stamina fatigue tiers', () => {
       isAttemptingRun: false,
     });
 
-    const { state: collapsedRegen } = updatingWorldPlazaRunStamina({
+    const { state: spentRegen } = updatingWorldPlazaRunStamina({
       state,
       deltaSeconds: 1,
       nowMs: afterHoldMs,
       isAttemptingRun: false,
     });
 
-    expect(collapsedRegen.staminaRatio).toBeCloseTo(normalRegen.staminaRatio, 5);
+    expect(spentRegen.staminaRatio).toBeCloseTo(normalRegen.staminaRatio, 5);
   });
 
   it('resets fatigue tier when the bar returns to full', () => {
     const state = resettingWorldPlazaPlayerStaminaFatigueOnFullBar({
       ...DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE,
       staminaRatio: 1,
-      fatigueTier: 'collapsed',
+      fatigueTier: 'spent',
       isDepleted: false,
       depletedAtMs: null,
     });
@@ -250,7 +247,7 @@ describe('player stamina fatigue tiers', () => {
     expect(stopped.state.runningForSeconds).toBe(0);
   });
 
-  it('clears depletion at the collapsed 15% usage gate without resetting tier until full', () => {
+  it('clears depletion only at full bar when spent, and resets tier to fresh', () => {
     const depletedAtMs = 0;
     const afterHoldMs =
       depletedAtMs + DEFINING_WORLD_PLAZA_RUN_STAMINA_DEPLETION_REGEN_DELAY_MS + 1;
@@ -258,7 +255,7 @@ describe('player stamina fatigue tiers', () => {
       ...applyingWorldPlazaPlayerStaminaOnFullDepletion({
         state: {
           ...DEFINING_WORLD_PLAZA_RUN_STAMINA_INITIAL_STATE,
-          fatigueTier: 'spent',
+          fatigueTier: 'drained',
         },
         nextStaminaRatio: 0,
         nowMs: depletedAtMs,
@@ -266,18 +263,30 @@ describe('player stamina fatigue tiers', () => {
       regenPausedUntilMs: null,
     };
 
-    expect(depletedState.fatigueTier).toBe('collapsed');
+    expect(depletedState.fatigueTier).toBe('spent');
 
-    const regenSeconds = 0.16 / DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND;
-    const { state: recoveredState } = updatingWorldPlazaRunStamina({
+    const almostFullSeconds =
+      0.99 / DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND;
+    const { state: almostFull } = updatingWorldPlazaRunStamina({
       state: depletedState,
-      deltaSeconds: regenSeconds,
+      deltaSeconds: almostFullSeconds,
       nowMs: afterHoldMs,
       isAttemptingRun: false,
     });
 
-    expect(recoveredState.staminaRatio).toBeGreaterThanOrEqual(0.15);
+    expect(almostFull.staminaRatio).toBeLessThan(1);
+    expect(almostFull.isDepleted).toBe(true);
+    expect(almostFull.fatigueTier).toBe('spent');
+
+    const { state: recoveredState } = updatingWorldPlazaRunStamina({
+      state: almostFull,
+      deltaSeconds: 1,
+      nowMs: afterHoldMs + 1,
+      isAttemptingRun: false,
+    });
+
+    expect(recoveredState.staminaRatio).toBe(1);
     expect(recoveredState.isDepleted).toBe(false);
-    expect(recoveredState.fatigueTier).toBe('collapsed');
+    expect(recoveredState.fatigueTier).toBe('fresh');
   });
 });

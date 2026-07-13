@@ -6,12 +6,13 @@ Terms for Devvit HTTP polling multiplayer rooms.
 
 | Term                             | Meaning                                                                                                                                                   |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Room**                         | One shard of a Reddit post plaza; max **3** players (`PLAZA_DEVVIT_ONLINE_MAX_PLAYERS`).                                                                  |
-| **Room index**                   | 1-based `?room=` query param on sync/players API URLs.                                                                                                    |
+| **World / room**                 | One named multiplayer session under a Reddit post; host sets max **2-4** travelers (`PLAZA_DEVVIT_ONLINE_MIN_PLAYERS` / `MAX`).                          |
+| **Room id**                      | Slug from the unique world name; `?room=` on sync/players/world API URLs.                                                                                 |
 | **Participant count**            | Live roster size returned on sync/players responses.                                                                                                      |
 | **Online participant**           | HUD roster entry: `userId` + `displayName` (`DefiningWorldPlazaOnlineParticipant`).                                                                       |
 | **Participants snapshot change** | Pure gate: count or any roster `userId` / `displayName` differs from the TanStack Query snapshot (`checkingWorldPlazaOnlineParticipantsSnapshotChanged`). |
-| **Room full**                    | Join/sync rejected when count ≥ max; toast mentions 3 player cap.                                                                                         |
+| **Room full**                    | Join/sync rejected when count ≥ that world's `maxPlayers`.                                                                                                |
+| **Host**                         | Creator of the world; may kick travelers or delete the world (one hosted world per user).                                                                 |
 
 ## Sync terms
 

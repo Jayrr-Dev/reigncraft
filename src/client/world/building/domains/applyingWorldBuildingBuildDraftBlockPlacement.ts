@@ -4,6 +4,7 @@ import {
   mergingWorldBuildingViewportPlotsWithBuildDraft,
   type DefiningWorldBuildingBuildDraftState,
 } from '@/components/world/building/domains/definingWorldBuildingBuildDraft';
+import type { DefiningWorldBuildingCutGridAxisCellCount } from '@/components/world/building/domains/definingWorldBuildingCutFootprintConstants';
 import {
   checkingWorldBuildingPlotOwnedByUser,
   findingWorldBuildingPlotContainingTilePosition,
@@ -45,7 +46,7 @@ export interface ApplyingWorldBuildingBuildDraftBlockPlacementInput {
   readonly worldLayer: number;
   readonly blockHeight: number;
   readonly cutFootprintMask?: number;
-  readonly cutGridAxisCellCount?: number;
+  readonly cutGridAxisCellCount?: DefiningWorldBuildingCutGridAxisCellCount;
   readonly actorUserId: string;
   readonly blockId: string;
   readonly placedAt: string;

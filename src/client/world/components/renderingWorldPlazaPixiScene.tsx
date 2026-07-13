@@ -87,6 +87,7 @@ import { RenderingWorldPlazaBiomesOverlay } from '@/components/world/components/
 import { RenderingWorldPlazaCameraRig } from '@/components/world/components/renderingWorldPlazaCameraRig';
 import { RenderingWorldPlazaClickArrowEffect } from '@/components/world/components/renderingWorldPlazaClickArrowEffect';
 import { RenderingWorldPlazaDayNightOverlay } from '@/components/world/components/renderingWorldPlazaDayNightOverlay';
+import { RenderingWorldPlazaDangerSenseHudOverlay } from '@/components/world/components/renderingWorldPlazaDangerSenseHudOverlay';
 import { RenderingWorldPlazaDeclarativeTerrainSync } from '@/components/world/components/renderingWorldPlazaDeclarativeTerrainSync';
 import { RenderingWorldPlazaDevModePanel } from '@/components/world/components/renderingWorldPlazaDevModePanel';
 import { RenderingWorldPlazaFriendsPanel } from '@/components/world/components/renderingWorldPlazaFriendsPanel';
@@ -333,6 +334,7 @@ import { usingWorldPlazaFriendsPanelKeyboardShortcuts } from '@/components/world
 import { usingWorldPlazaFriendsPanelVisibleState } from '@/components/world/hooks/usingWorldPlazaFriendsPanelVisibleState';
 import { usingWorldPlazaFriendTrackingState } from '@/components/world/hooks/usingWorldPlazaFriendTrackingState';
 import { usingWorldPlazaGameplayHudToast } from '@/components/world/hooks/usingWorldPlazaGameplayHudToast';
+import { usingWorldPlazaDangerSenseEnabled } from '@/components/world/hooks/usingWorldPlazaDangerSenseEnabled';
 import { usingWorldPlazaGenerationFeaturesState } from '@/components/world/hooks/usingWorldPlazaGenerationFeaturesState';
 import { usingWorldPlazaHudToolbarMode } from '@/components/world/hooks/usingWorldPlazaHudToolbarMode';
 import { usingWorldPlazaMobileDebug } from '@/components/world/hooks/usingWorldPlazaMobileDebug';
@@ -431,7 +433,9 @@ import { RenderingWorldPlazaWildlifeCorpseStudyLabels } from '@/components/world
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
 import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeNameTags';
 import { RenderingWorldPlazaWildlifeSpeechBubbles } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeSpeechBubbles';
+import { applyingWildlifeDocilePetComplete } from '@/components/world/wildlife/domains/applyingWildlifeDocilePetComplete';
 import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
+import { checkingWildlifeDocilePetIsReady } from '@/components/world/wildlife/domains/checkingWildlifeDocilePetIsReady';
 import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile';
 import { resolvingWildlifeDocilePetKind } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsPettable';
 import { clearingWildlifeAreaOnPlayerDeath } from '@/components/world/wildlife/domains/clearingWildlifeAreaOnPlayerDeath';
@@ -448,7 +452,6 @@ import type {
   DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { enqueueingWildlifeCorpseStudyFloatFeedback } from '@/components/world/wildlife/domains/enqueueingWildlifeCorpseStudyFloatFeedback';
-import { enqueueingWildlifeDocilePetStudyFloatFeedback } from '@/components/world/wildlife/domains/enqueueingWildlifeDocilePetStudyFloatFeedback';
 import { enqueueingWildlifeMissFloatFeedback } from '@/components/world/wildlife/domains/enqueueingWildlifeMissFloatFeedback';
 import { findingWildlifeCorpseAtGridPoint } from '@/components/world/wildlife/domains/findingWildlifeCorpseAtGridPoint';
 import type { ListingWildlifeCorpsesInStudyRangeEntry } from '@/components/world/wildlife/domains/listingWildlifeCorpsesInStudyRange';
@@ -470,17 +473,20 @@ import { spawningWildlifeDevGreyWolfRandomlyNearPoint } from '@/components/world
 import { spawningWildlifeDevSpeciesNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevSpeciesNearPoint';
 import { usingWildlifeDocileAttackConfirm } from '@/components/world/wildlife/hooks/usingWildlifeDocileAttackConfirm';
 import { usingWildlifeDocileBetrayProgress } from '@/components/world/wildlife/hooks/usingWildlifeDocileBetrayProgress';
+import { usingWildlifeDocilePetProximitySelection } from '@/components/world/wildlife/hooks/usingWildlifeDocilePetProximitySelection';
 import { usingWorldPlazaWildlifeCorpseStudyProgress } from '@/components/world/wildlife/hooks/usingWorldPlazaWildlifeCorpseStudyProgress';
 import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
+import { showToast } from '@devvit/web/client';
 import type { Container } from 'pixi.js';
 import { CullerPlugin } from 'pixi.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { settingWorldPlazaOnlineRoomId } from '@/components/world/domains/managingWorldPlazaOnlineRoomIdStore';
 import type {
   PlazaDevvitOnlineWildlifeDamageEvent,
   PlazaDevvitOnlineWildlifeSnapshot,
 } from '../../../shared/plazaDevvitOnline';
-import { PLAZA_DEVVIT_ONLINE_MAX_PLAYERS } from '../../../shared/plazaDevvitOnline';
+import { PLAZA_DEVVIT_ONLINE_DEFAULT_MAX_PLAYERS } from '../../../shared/plazaDevvitOnline';
 import type { PlazaSaveSlotIndex } from '../../../shared/plazaGameSession';
 
 /** Live online room binding passed into the connected plaza scene. */
@@ -543,10 +549,10 @@ export interface RenderingWorldPlazaPixiSceneProps {
   onlineAvatarUrl?: string | null;
   /** `fill` uses the full iframe; `embedded` keeps the 16:9 frame. */
   hostLayout?: 'embedded' | 'fill';
-  /** Player cap shown in the room HUD. */
+  /** Player cap shown in the room HUD (fallback when room meta not yet loaded). */
   onlineMaxPlayers?: number;
-  /** Selected multiplayer room shard index. */
-  onlineRoomIndex?: number;
+  /** Selected multiplayer named room id. */
+  onlineRoomId?: string | null;
   /** Returns to the home screen when provided. */
   onExitToHome?: () => void;
 }
@@ -563,10 +569,26 @@ export function RenderingWorldPlazaPixiScene({
   onlineProfileStatusKind = null,
   onlineAvatarUrl = null,
   hostLayout = 'embedded',
-  onlineMaxPlayers = PLAZA_DEVVIT_ONLINE_MAX_PLAYERS,
-  onlineRoomIndex = 1,
+  onlineMaxPlayers = PLAZA_DEVVIT_ONLINE_DEFAULT_MAX_PLAYERS,
+  onlineRoomId = null,
   onExitToHome,
 }: RenderingWorldPlazaPixiSceneProps): React.JSX.Element {
+  useEffect(() => {
+    settingWorldPlazaOnlineRoomId(onlineUserId ? onlineRoomId : null);
+
+    return () => {
+      settingWorldPlazaOnlineRoomId(null);
+    };
+  }, [onlineRoomId, onlineUserId]);
+
+  const handlingForcedOnlineExit = useCallback(
+    (reason: string): void => {
+      showToast(reason);
+      onExitToHome?.();
+    },
+    [onExitToHome]
+  );
+
   const playerPositionRef = useRef<DefiningWorldPlazaWorldPoint>(
     resolvingWorldPlazaInitialPlayerSpawnWorldPoint(
       onlineUserId,
@@ -624,8 +646,8 @@ export function RenderingWorldPlazaPixiScene({
     displayName: onlineDisplayName,
     profileStatusKind: onlineProfileStatusKind,
     avatarUrl: onlineAvatarUrl,
-    enabled: isOnlineRoomEnabled,
-    roomIndex: onlineRoomIndex,
+    enabled: isOnlineRoomEnabled && Boolean(onlineRoomId),
+    roomId: onlineRoomId ?? '',
     playerPositionRef,
     localAvatarMotionStateRef,
     healthSyncSnapshotRef,
@@ -634,6 +656,7 @@ export function RenderingWorldPlazaPixiScene({
     wildlifeSnapshotsOutRef,
     pendingWildlifeDamageEventsRef,
     remoteWildlifeSnapshotsRef,
+    onForcedExit: handlingForcedOnlineExit,
   });
 
   const roomChat = usingWorldPlazaDevvitPollingRoomChat({
@@ -641,8 +664,8 @@ export function RenderingWorldPlazaPixiScene({
     displayName: onlineDisplayName,
     playerPositionRef,
     isRoomJoined: onlineRoom.roomSnapshot.isJoined,
-    enabled: isOnlineRoomEnabled,
-    roomIndex: onlineRoomIndex,
+    enabled: isOnlineRoomEnabled && Boolean(onlineRoomId),
+    roomId: onlineRoomId ?? '',
   });
 
   return (
@@ -669,7 +692,7 @@ export function RenderingWorldPlazaPixiScene({
         reconnectingPresence={reconnectingPresence}
         registeringLocomotionActivityRef={registeringLocomotionActivityRef}
         onlineMaxPlayers={onlineMaxPlayers}
-        onlineRoomIndex={onlineRoomIndex}
+        onlineRoomId={onlineRoomId}
         onExitToHome={onExitToHome}
         onlineRoom={onlineRoom}
         roomChat={roomChat}
@@ -705,7 +728,7 @@ interface RenderingWorldPlazaPixiSceneConnectedProps {
   reconnectingPresence: () => void;
   registeringLocomotionActivityRef: React.RefObject<(() => boolean) | null>;
   onlineMaxPlayers: number;
-  onlineRoomIndex: number;
+  onlineRoomId: string | null;
   onExitToHome?: () => void;
   onlineRoom: RenderingWorldPlazaOnlineRoomBinding;
   roomChat: UsingWorldPlazaOnlineRoomChatResult;
@@ -743,7 +766,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   reconnectingPresence,
   registeringLocomotionActivityRef,
   onlineMaxPlayers,
-  onlineRoomIndex,
+  onlineRoomId,
   onExitToHome,
   onlineRoom,
   roomChat,
@@ -969,6 +992,14 @@ function RenderingWorldPlazaPixiSceneConnected({
     generationFeatureFlags[
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_DAY_NIGHT
     ];
+  const isHudDangerSenseFeatureEnabled =
+    generationFeatureFlags[
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_DANGER_SENSE
+    ];
+  const { isDangerSenseEnabled: isDangerSensePreferenceEnabled } =
+    usingWorldPlazaDangerSenseEnabled();
+  const isHudDangerSenseEnabled =
+    isHudDangerSenseFeatureEnabled && isDangerSensePreferenceEnabled;
   const isHudStatusEnabled =
     generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_STATUS];
   const isHudHealthEnabled =
@@ -1216,6 +1247,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     isEnabled:
       isBuildModeEnabled && (isClaimModeActive || isBlockBuildModeActive),
     localUserId: buildModeUserId,
+    localOwnedDraftPlots: activeOwnedPlots,
   });
 
   const wasSavingBuildDraftRef = useRef(false);
@@ -3085,7 +3117,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       const studyPoints = DEFINING_WILDLIFE_DOCILE_PET_STUDY_POINTS;
       replacingWildlifeInstance(
         wildlifeStoreRef.current,
-        enqueueingWildlifeDocilePetStudyFloatFeedback({
+        applyingWildlifeDocilePetComplete({
           instance,
           studyPoints,
           nowMs: Date.now(),
@@ -3106,6 +3138,20 @@ function RenderingWorldPlazaPixiSceneConnected({
     playerPositionRef,
     wildlifeStoreRef,
     onBetrayComplete: handlingDocileBetrayComplete,
+  });
+
+  const activeDocilePettingInstanceIdRef = useRef<string | null>(null);
+  activeDocilePettingInstanceIdRef.current =
+    docileBetrayProgressSnapshot.isActive
+      ? docileBetrayProgressSnapshot.activeTargetKey
+      : null;
+
+  usingWildlifeDocilePetProximitySelection({
+    enabled: isLocalGameplayEnabled && !isHideActionsEnabled,
+    playerPositionRef,
+    wildlifeStoreRef,
+    selectedInteractableBlockKeysRef,
+    activePettingInstanceIdRef: activeDocilePettingInstanceIdRef,
   });
 
   const handlingDocileBetrayInteraction = useCallback(
@@ -3646,6 +3692,11 @@ function RenderingWorldPlazaPixiSceneConnected({
         if (!petKind) {
           clearingWildlifeDocileAttackConfirmPending();
           return false;
+        }
+
+        if (!checkingWildlifeDocilePetIsReady(clickedInstance, Date.now())) {
+          clearingWildlifeDocileAttackConfirmPending();
+          return true;
         }
 
         const reachDistance = Math.hypot(
@@ -5673,6 +5724,15 @@ function RenderingWorldPlazaPixiSceneConnected({
         </div>
 
         {isHudDayNightEnabled ? <RenderingWorldPlazaDayNightOverlay /> : null}
+        {isHudDangerSenseEnabled ? (
+          <RenderingWorldPlazaDangerSenseHudOverlay
+            wildlifeStoreRef={wildlifeStoreRef}
+            playerPositionRef={playerPositionRef}
+            playerUserId={
+              onlineUserId ?? localPersistenceOwnerId ?? 'local-player'
+            }
+          />
+        ) : null}
 
         <RenderingWorldPlazaGameplayHud>
           <RenderingWorldPlazaPresenceReconnectOverlay

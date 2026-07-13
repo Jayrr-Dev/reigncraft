@@ -76,8 +76,14 @@ export interface DefiningWorldPlazaOnlineRoomSnapshot {
   /** Every unique auth user in the room, including the local client. */
   onlineParticipants: DefiningWorldPlazaOnlineParticipant[];
   participantCount: number;
-  /** Assigned shard index when connected; null before assignment. */
-  roomIndex: number | null;
+  /** Named room id when connected; null before assignment. */
+  roomId: string | null;
+  /** Player-facing world name when connected; null before assignment. */
+  roomDisplayName: string | null;
+  /** Cap from room meta when known; defaults applied by HUD when null. */
+  maxPlayers: number | null;
+  /** Host user id from room meta when known. */
+  createdBy: string | null;
   /** Assigned Realtime channel name when connected; null before assignment. */
   roomChannelName: string | null;
   isConnected: boolean;
@@ -95,7 +101,10 @@ export const DEFINING_WORLD_PLAZA_ONLINE_ROOM_INITIAL_SNAPSHOT: DefiningWorldPla
     remotePlayers: [],
     onlineParticipants: [],
     participantCount: 0,
-    roomIndex: null,
+    roomId: null,
+    roomDisplayName: null,
+    maxPlayers: null,
+    createdBy: null,
     roomChannelName: null,
     isConnected: false,
     isJoined: false,

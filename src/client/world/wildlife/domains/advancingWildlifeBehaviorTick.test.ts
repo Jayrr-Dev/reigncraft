@@ -500,8 +500,8 @@ describe('advancingWildlifeBehaviorTick', () => {
   });
 
   it('predator keeps chasing a player threat past the leash', () => {
-    const base = buildingBlackboard('tiger').instance;
-    const blackboard = buildingBlackboard('tiger', {
+    const base = buildingBlackboard('lion').instance;
+    const blackboard = buildingBlackboard('lion', {
       playerPosition: { x: 30, y: 1.5, layer: 1 },
       instance: {
         ...base,
@@ -591,7 +591,7 @@ describe('advancingWildlifeBehaviorTick', () => {
     }
   });
 
-  it('stalker temperament shadows the player until a kill trigger opens', () => {
+  it('PackHunter temperament shadows the player until a kill trigger opens', () => {
     const blackboard = buildingBlackboard('grey-wolf', {
       playerPosition: { x: 10, y: 1.5, layer: 1 },
       nowMs: 5_000,
@@ -645,7 +645,7 @@ describe('advancingWildlifeBehaviorTick', () => {
     expect(intent.mode).toBe('stalk');
   });
 
-  it('stalker temperament keeps patrolling when caught up to a still player', () => {
+  it('PackHunter temperament keeps patrolling when caught up to a still player', () => {
     const blackboard = buildingBlackboard('grey-wolf', {
       playerPosition: { x: 10, y: 1.5, layer: 1 },
       nowMs: 5_000,
@@ -671,7 +671,7 @@ describe('advancingWildlifeBehaviorTick', () => {
     }
   });
 
-  it('stalker temperament attacks when the player drops below half health', () => {
+  it('PackHunter temperament attacks when the player drops below half health', () => {
     const blackboard = buildingBlackboard('grey-wolf', {
       playerPosition: { x: 3, y: 1.5, layer: 1 },
       nowMs: 31_000,
@@ -697,7 +697,7 @@ describe('advancingWildlifeBehaviorTick', () => {
     expect(intent.mode === 'attack' || intent.mode === 'chase').toBe(true);
   });
 
-  it('stalker temperament attacks when the player has stood still for eight seconds', () => {
+  it('PackHunter temperament attacks when the player has stood still for eight seconds', () => {
     const blackboard = buildingBlackboard('grey-wolf', {
       playerPosition: { x: 3, y: 1.5, layer: 1 },
       nowMs: 31_000,

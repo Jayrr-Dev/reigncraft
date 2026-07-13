@@ -1,8 +1,15 @@
 import { context, reddit, redis } from '@devvit/web/server';
 import { Hono } from 'hono';
 import {
-  PLAZA_DEVVIT_ONLINE_MAX_PLAYERS,
+  checkingPlazaDevvitOnlineRoomIsPublicBrowseable,
   PLAZA_DEVVIT_ONLINE_PLAYER_TTL_SECONDS,
+  type PlazaDevvitOnlineCreateRoomRequest,
+  type PlazaDevvitOnlineCreateRoomResponse,
+  type PlazaDevvitOnlineDeleteRoomResponse,
+  type PlazaDevvitOnlineHostedRoomResponse,
+  type PlazaDevvitOnlineKickPlayerRequest,
+  type PlazaDevvitOnlineKickPlayerResponse,
+  type PlazaDevvitOnlineLookupRoomResponse,
   type PlazaDevvitOnlinePlayerSnapshot,
   type PlazaDevvitOnlinePlayersResponse,
   type PlazaDevvitOnlineProjectileSpawnEvent,
@@ -25,14 +32,28 @@ import {
   type PlazaDevvitOnlineChatTypingRequest,
   type PlazaDevvitOnlineTypingUser,
 } from '../../shared/plazaDevvitOnlineChat';
-import { PLAZA_MULTIPLAYER_BROWSEABLE_ROOM_COUNT } from '../../shared/plazaGameSession';
 import {
   buildingPlazaDevvitOnlineChatRedisKey,
   buildingPlazaDevvitOnlinePlayerRedisKey,
   buildingPlazaDevvitOnlineRosterRedisKey,
   buildingPlazaDevvitOnlineTypingRedisKey,
 } from '../domains/buildingPlazaDevvitOnlineRedisKeys';
-import { resolvingPlazaDevvitOnlineRoomScope } from '../domains/resolvingPlazaDevvitOnlineRoomScope';
+import {
+  checkingPlazaDevvitOnlineRoomUserIsKicked,
+  creatingPlazaDevvitOnlineRoom,
+  deletingPlazaDevvitOnlineRoom,
+  kickingPlazaDevvitOnlineRoomPlayer,
+  listingPlazaDevvitOnlineRoomIds,
+  listingPlazaDevvitOnlineUserRoomIds,
+  loadingPlazaDevvitOnlineHostedRoomMeta,
+  loadingPlazaDevvitOnlineRoomMeta,
+  lookingUpPlazaDevvitOnlineRoomByName,
+  recordingPlazaDevvitOnlineRoomAlumni,
+} from '../domains/managingPlazaDevvitOnlineRoomRegistry';
+import {
+  parsingPlazaDevvitOnlineRoomIdFromQuery,
+  resolvingPlazaDevvitOnlineRoomScope,
+} from '../domains/resolvingPlazaDevvitOnlineRoomScope';
 
 type PlazaDevvitOnlineErrorResponse = {
   type: 'error';
@@ -40,24 +61,45 @@ type PlazaDevvitOnlineErrorResponse = {
   isRoomFull?: boolean;
 };
 
-function parsingPlazaDevvitOnlineRoomIndexFromQuery(
-  rawRoomIndex: string | undefined
-): number {
-  if (!rawRoomIndex) {
-    return 1;
+async function buildingPlazaDevvitOnlineRoomListingEntry(
+  roomId: string,
+  participantCount: number
+): Promise<PlazaDevvitOnlineRoomListingEntry | null> {
+  const meta = await loadingPlazaDevvitOnlineRoomMeta(roomId);
+
+  if (!meta) {
+    return null;
   }
 
-  const parsedRoomIndex = Number.parseInt(rawRoomIndex, 10);
+  return {
+    roomId: meta.roomId,
+    displayName: meta.displayName,
+    participantCount,
+    maxPlayers: meta.maxPlayers,
+    isFull: participantCount >= meta.maxPlayers,
+    isPrivate: meta.isPrivate,
+  };
+}
 
-  if (
-    !Number.isFinite(parsedRoomIndex) ||
-    parsedRoomIndex < 1 ||
-    parsedRoomIndex > PLAZA_MULTIPLAYER_BROWSEABLE_ROOM_COUNT
-  ) {
-    return 1;
+function parsingPlazaDevvitOnlineCreateRoomRequest(
+  body: unknown
+): PlazaDevvitOnlineCreateRoomRequest | null {
+  if (!body || typeof body !== 'object') {
+    return null;
   }
 
-  return parsedRoomIndex;
+  const payload = body as Partial<PlazaDevvitOnlineCreateRoomRequest>;
+
+  if (typeof payload.name !== 'string') {
+    return null;
+  }
+
+  return {
+    name: payload.name,
+    maxPlayers:
+      typeof payload.maxPlayers === 'number' ? payload.maxPlayers : 3,
+    isPrivate: Boolean(payload.isPrivate),
+  };
 }
 
 function parsingPlazaDevvitOnlineWildlifeSnapshot(
@@ -598,29 +640,324 @@ plazaOnline.get('/rooms', async (c) => {
     );
   }
 
+  const roomIds = await listingPlazaDevvitOnlineRoomIds();
   const rooms: PlazaDevvitOnlineRoomListingEntry[] = [];
 
-  for (
-    let roomIndex = 1;
-    roomIndex <= PLAZA_MULTIPLAYER_BROWSEABLE_ROOM_COUNT;
-    roomIndex += 1
-  ) {
-    const roomScope = resolvingPlazaDevvitOnlineRoomScope(roomIndex);
+  for (const roomId of roomIds) {
+    const roomScope = resolvingPlazaDevvitOnlineRoomScope(roomId);
     const participantCount =
       await countingPlazaDevvitOnlineParticipants(roomScope);
+    const entry = await buildingPlazaDevvitOnlineRoomListingEntry(
+      roomId,
+      participantCount
+    );
 
-    rooms.push({
-      roomIndex,
-      participantCount,
-      maxPlayers: PLAZA_DEVVIT_ONLINE_MAX_PLAYERS,
-      isFull: participantCount >= PLAZA_DEVVIT_ONLINE_MAX_PLAYERS,
-    });
+    if (!entry || !checkingPlazaDevvitOnlineRoomIsPublicBrowseable(entry)) {
+      continue;
+    }
+
+    rooms.push(entry);
   }
+
+  rooms.sort((left, right) =>
+    left.displayName.localeCompare(right.displayName)
+  );
 
   return c.json<PlazaDevvitOnlineRoomsResponse>({
     type: 'rooms',
     rooms,
-    maxPlayers: PLAZA_DEVVIT_ONLINE_MAX_PLAYERS,
+  });
+});
+
+plazaOnline.get('/rooms/mine', async (c) => {
+  const userId = await resolvingPlazaDevvitOnlineUserId();
+
+  if (!userId) {
+    return c.json<PlazaDevvitOnlineRoomsResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to continue plaza worlds.',
+      },
+      401
+    );
+  }
+
+  const roomIds = await listingPlazaDevvitOnlineUserRoomIds(userId);
+  const rooms: PlazaDevvitOnlineRoomListingEntry[] = [];
+
+  for (const roomId of roomIds) {
+    const roomScope = resolvingPlazaDevvitOnlineRoomScope(roomId);
+    const participantCount =
+      await countingPlazaDevvitOnlineParticipants(roomScope);
+    const entry = await buildingPlazaDevvitOnlineRoomListingEntry(
+      roomId,
+      participantCount
+    );
+
+    if (!entry) {
+      continue;
+    }
+
+    rooms.push(entry);
+  }
+
+  rooms.sort((left, right) =>
+    left.displayName.localeCompare(right.displayName)
+  );
+
+  return c.json<PlazaDevvitOnlineRoomsResponse>({
+    type: 'rooms',
+    rooms,
+  });
+});
+
+plazaOnline.get('/rooms/hosted', async (c) => {
+  const userId = await resolvingPlazaDevvitOnlineUserId();
+
+  if (!userId) {
+    return c.json<PlazaDevvitOnlineHostedRoomResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to view your hosted world.',
+      },
+      401
+    );
+  }
+
+  const hostedMeta = await loadingPlazaDevvitOnlineHostedRoomMeta(userId);
+
+  if (!hostedMeta) {
+    return c.json<PlazaDevvitOnlineHostedRoomResponse>({
+      type: 'hosted',
+      room: null,
+    });
+  }
+
+  const roomScope = resolvingPlazaDevvitOnlineRoomScope(hostedMeta.roomId);
+  const participantCount =
+    await countingPlazaDevvitOnlineParticipants(roomScope);
+  const entry = await buildingPlazaDevvitOnlineRoomListingEntry(
+    hostedMeta.roomId,
+    participantCount
+  );
+
+  return c.json<PlazaDevvitOnlineHostedRoomResponse>({
+    type: 'hosted',
+    room: entry,
+  });
+});
+
+plazaOnline.delete('/rooms', async (c) => {
+  const userId = await resolvingPlazaDevvitOnlineUserId();
+
+  if (!userId) {
+    return c.json<PlazaDevvitOnlineDeleteRoomResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to delete a plaza world.',
+      },
+      401
+    );
+  }
+
+  const roomId = parsingPlazaDevvitOnlineRoomIdFromQuery(c.req.query('room'));
+
+  if (!roomId) {
+    return c.json<PlazaDevvitOnlineDeleteRoomResponse>(
+      {
+        type: 'error',
+        message: 'Missing or invalid plaza room id.',
+      },
+      400
+    );
+  }
+
+  const deleteResult = await deletingPlazaDevvitOnlineRoom(roomId, userId);
+
+  if (!deleteResult.ok) {
+    return c.json<PlazaDevvitOnlineDeleteRoomResponse>(
+      {
+        type: 'error',
+        message: deleteResult.message,
+      },
+      403
+    );
+  }
+
+  return c.json<PlazaDevvitOnlineDeleteRoomResponse>({
+    type: 'deleted',
+    roomId,
+  });
+});
+
+plazaOnline.post('/rooms/kick', async (c) => {
+  const userId = await resolvingPlazaDevvitOnlineUserId();
+
+  if (!userId) {
+    return c.json<PlazaDevvitOnlineKickPlayerResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to kick travelers.',
+      },
+      401
+    );
+  }
+
+  const roomId = parsingPlazaDevvitOnlineRoomIdFromQuery(c.req.query('room'));
+
+  if (!roomId) {
+    return c.json<PlazaDevvitOnlineKickPlayerResponse>(
+      {
+        type: 'error',
+        message: 'Missing or invalid plaza room id.',
+      },
+      400
+    );
+  }
+
+  const body: unknown = await c.req.json().catch(() => null);
+  const targetUserId =
+    body &&
+    typeof body === 'object' &&
+    'targetUserId' in body &&
+    typeof (body as PlazaDevvitOnlineKickPlayerRequest).targetUserId ===
+      'string'
+      ? (body as PlazaDevvitOnlineKickPlayerRequest).targetUserId.trim()
+      : '';
+
+  if (!targetUserId) {
+    return c.json<PlazaDevvitOnlineKickPlayerResponse>(
+      {
+        type: 'error',
+        message: 'Missing traveler to kick.',
+      },
+      400
+    );
+  }
+
+  const kickResult = await kickingPlazaDevvitOnlineRoomPlayer(
+    roomId,
+    userId,
+    targetUserId
+  );
+
+  if (!kickResult.ok) {
+    return c.json<PlazaDevvitOnlineKickPlayerResponse>(
+      {
+        type: 'error',
+        message: kickResult.message,
+      },
+      403
+    );
+  }
+
+  return c.json<PlazaDevvitOnlineKickPlayerResponse>({
+    type: 'kicked',
+    targetUserId,
+  });
+});
+
+plazaOnline.get('/rooms/lookup', async (c) => {
+  const userId = await resolvingPlazaDevvitOnlineUserId();
+
+  if (!userId) {
+    return c.json<PlazaDevvitOnlineLookupRoomResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to look up plaza worlds.',
+      },
+      401
+    );
+  }
+
+  const rawName = c.req.query('name') ?? '';
+
+  if (!rawName.trim()) {
+    return c.json<PlazaDevvitOnlineLookupRoomResponse>(
+      {
+        type: 'error',
+        message: 'Enter a world name to join.',
+      },
+      400
+    );
+  }
+
+  const meta = await lookingUpPlazaDevvitOnlineRoomByName(rawName);
+
+  if (!meta) {
+    return c.json<PlazaDevvitOnlineLookupRoomResponse>(
+      {
+        type: 'error',
+        message: 'No world found with that name.',
+      },
+      404
+    );
+  }
+
+  const roomScope = resolvingPlazaDevvitOnlineRoomScope(meta.roomId);
+  const participantCount =
+    await countingPlazaDevvitOnlineParticipants(roomScope);
+
+  return c.json<PlazaDevvitOnlineLookupRoomResponse>({
+    type: 'room',
+    roomId: meta.roomId,
+    displayName: meta.displayName,
+    maxPlayers: meta.maxPlayers,
+    isPrivate: meta.isPrivate,
+    participantCount,
+    isFull: participantCount >= meta.maxPlayers,
+  });
+});
+
+plazaOnline.post('/rooms', async (c) => {
+  const userId = await resolvingPlazaDevvitOnlineUserId();
+
+  if (!userId) {
+    return c.json<PlazaDevvitOnlineCreateRoomResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to create a plaza world.',
+      },
+      401
+    );
+  }
+
+  const body: unknown = await c.req.json().catch(() => null);
+  const createRequest = parsingPlazaDevvitOnlineCreateRoomRequest(body);
+
+  if (!createRequest) {
+    return c.json<PlazaDevvitOnlineCreateRoomResponse>(
+      {
+        type: 'error',
+        message: 'Invalid create-world payload.',
+      },
+      400
+    );
+  }
+
+  const createResult = await creatingPlazaDevvitOnlineRoom({
+    name: createRequest.name,
+    maxPlayers: createRequest.maxPlayers,
+    isPrivate: createRequest.isPrivate,
+    createdBy: userId,
+  });
+
+  if (!createResult.ok) {
+    return c.json<PlazaDevvitOnlineCreateRoomResponse>(
+      {
+        type: 'error',
+        message: createResult.message,
+      },
+      409
+    );
+  }
+
+  return c.json<PlazaDevvitOnlineCreateRoomResponse>({
+    type: 'created',
+    roomId: createResult.meta.roomId,
+    displayName: createResult.meta.displayName,
+    maxPlayers: createResult.meta.maxPlayers,
+    isPrivate: createResult.meta.isPrivate,
   });
 });
 
@@ -650,9 +987,42 @@ plazaOnline.post('/sync', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope(
-    parsingPlazaDevvitOnlineRoomIndexFromQuery(c.req.query('room'))
-  );
+  const roomId = parsingPlazaDevvitOnlineRoomIdFromQuery(c.req.query('room'));
+
+  if (!roomId) {
+    return c.json<PlazaDevvitOnlineErrorResponse>(
+      {
+        type: 'error',
+        message: 'Missing or invalid plaza room id.',
+      },
+      400
+    );
+  }
+
+  const roomMeta = await loadingPlazaDevvitOnlineRoomMeta(roomId);
+
+  if (!roomMeta) {
+    return c.json<PlazaDevvitOnlineErrorResponse>(
+      {
+        type: 'error',
+        message: 'That plaza world no longer exists.',
+      },
+      404
+    );
+  }
+
+  if (await checkingPlazaDevvitOnlineRoomUserIsKicked(roomId, userId)) {
+    return c.json<PlazaDevvitOnlineSyncResponse>(
+      {
+        type: 'error',
+        message: 'You were kicked from this world.',
+        isKicked: true,
+      },
+      403
+    );
+  }
+
+  const roomScope = resolvingPlazaDevvitOnlineRoomScope(roomId);
   const rosterKey = buildingPlazaDevvitOnlineRosterRedisKey(roomScope);
   const playerKey = buildingPlazaDevvitOnlinePlayerRedisKey(roomScope, userId);
   const isExistingPlayer = (await redis.get(playerKey)) !== null;
@@ -661,11 +1031,11 @@ plazaOnline.post('/sync', async (c) => {
     const participantCount =
       await countingPlazaDevvitOnlineParticipants(roomScope);
 
-    if (participantCount >= PLAZA_DEVVIT_ONLINE_MAX_PLAYERS) {
+    if (participantCount >= roomMeta.maxPlayers) {
       return c.json<PlazaDevvitOnlineSyncResponse>(
         {
           type: 'error',
-          message: 'This plaza is full (3 players max). Try again in a moment.',
+          message: `This plaza is full (${roomMeta.maxPlayers} travelers max). Try again in a moment.`,
           isRoomFull: true,
         },
         409
@@ -683,6 +1053,7 @@ plazaOnline.post('/sync', async (c) => {
   await redis.expire(playerKey, PLAZA_DEVVIT_ONLINE_PLAYER_TTL_SECONDS);
   await redis.hSet(rosterKey, { [userId]: playerSnapshot.updatedAt });
   await redis.expire(rosterKey, PLAZA_DEVVIT_ONLINE_PLAYER_TTL_SECONDS * 2);
+  await recordingPlazaDevvitOnlineRoomAlumni(roomId, userId);
 
   const participantCount =
     await countingPlazaDevvitOnlineParticipants(roomScope);
@@ -690,7 +1061,10 @@ plazaOnline.post('/sync', async (c) => {
   return c.json<PlazaDevvitOnlineSyncResponse>({
     type: 'sync',
     participantCount,
-    maxPlayers: PLAZA_DEVVIT_ONLINE_MAX_PLAYERS,
+    maxPlayers: roomMeta.maxPlayers,
+    roomId: roomMeta.roomId,
+    displayName: roomMeta.displayName,
+    createdBy: roomMeta.createdBy,
   });
 });
 
@@ -707,9 +1081,42 @@ plazaOnline.get('/players', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope(
-    parsingPlazaDevvitOnlineRoomIndexFromQuery(c.req.query('room'))
-  );
+  const roomId = parsingPlazaDevvitOnlineRoomIdFromQuery(c.req.query('room'));
+
+  if (!roomId) {
+    return c.json<PlazaDevvitOnlineErrorResponse>(
+      {
+        type: 'error',
+        message: 'Missing or invalid plaza room id.',
+      },
+      400
+    );
+  }
+
+  const roomMeta = await loadingPlazaDevvitOnlineRoomMeta(roomId);
+
+  if (!roomMeta) {
+    return c.json<PlazaDevvitOnlineErrorResponse>(
+      {
+        type: 'error',
+        message: 'That plaza world no longer exists.',
+      },
+      404
+    );
+  }
+
+  if (await checkingPlazaDevvitOnlineRoomUserIsKicked(roomId, userId)) {
+    return c.json<PlazaDevvitOnlinePlayersResponse>(
+      {
+        type: 'error',
+        message: 'You were kicked from this world.',
+        isKicked: true,
+      },
+      403
+    );
+  }
+
+  const roomScope = resolvingPlazaDevvitOnlineRoomScope(roomId);
   const remotePlayers = await listingPlazaDevvitOnlinePlayers(
     roomScope,
     userId
@@ -721,7 +1128,10 @@ plazaOnline.get('/players', async (c) => {
     type: 'players',
     players: remotePlayers,
     participantCount,
-    maxPlayers: PLAZA_DEVVIT_ONLINE_MAX_PLAYERS,
+    maxPlayers: roomMeta.maxPlayers,
+    roomId: roomMeta.roomId,
+    displayName: roomMeta.displayName,
+    createdBy: roomMeta.createdBy,
   });
 });
 
@@ -738,9 +1148,19 @@ plazaOnline.get('/chat', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope(
-    parsingPlazaDevvitOnlineRoomIndexFromQuery(c.req.query('room'))
-  );
+  const roomId = parsingPlazaDevvitOnlineRoomIdFromQuery(c.req.query('room'));
+
+  if (!roomId) {
+    return c.json<PlazaDevvitOnlineChatPollResponse>(
+      {
+        type: 'error',
+        message: 'Missing or invalid plaza room id.',
+      },
+      400
+    );
+  }
+
+  const roomScope = resolvingPlazaDevvitOnlineRoomScope(roomId);
   const messages = await listingPlazaDevvitOnlineChatMessages(roomScope);
   const typingUsers = await listingPlazaDevvitOnlineTypingUsers(
     roomScope,
@@ -794,9 +1214,19 @@ plazaOnline.post('/chat', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope(
-    parsingPlazaDevvitOnlineRoomIndexFromQuery(c.req.query('room'))
-  );
+  const roomId = parsingPlazaDevvitOnlineRoomIdFromQuery(c.req.query('room'));
+
+  if (!roomId) {
+    return c.json<PlazaDevvitOnlineChatSendResponse>(
+      {
+        type: 'error',
+        message: 'Missing or invalid plaza room id.',
+      },
+      400
+    );
+  }
+
+  const roomScope = resolvingPlazaDevvitOnlineRoomScope(roomId);
   const playerKey = buildingPlazaDevvitOnlinePlayerRedisKey(roomScope, userId);
   const isActivePlayer = (await redis.get(playerKey)) !== null;
 
@@ -856,9 +1286,19 @@ plazaOnline.post('/chat/typing', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope(
-    parsingPlazaDevvitOnlineRoomIndexFromQuery(c.req.query('room'))
-  );
+  const roomId = parsingPlazaDevvitOnlineRoomIdFromQuery(c.req.query('room'));
+
+  if (!roomId) {
+    return c.json<PlazaDevvitOnlineErrorResponse>(
+      {
+        type: 'error',
+        message: 'Missing or invalid plaza room id.',
+      },
+      400
+    );
+  }
+
+  const roomScope = resolvingPlazaDevvitOnlineRoomScope(roomId);
   const playerKey = buildingPlazaDevvitOnlinePlayerRedisKey(roomScope, userId);
   const isActivePlayer = (await redis.get(playerKey)) !== null;
 

@@ -1,5 +1,5 @@
 /**
- * Kill-window predicates for stalker temperament animals.
+ * Kill-window predicates for pack_hunter and solo stalker temperaments.
  *
  * @module components/world/wildlife/domains/checkingWildlifeStalkKillConditions
  */
@@ -12,6 +12,10 @@ import {
   DEFINING_WILDLIFE_STALK_PREY_STILL_COMMIT_MS,
 } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
 import type { DefiningWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/definingWildlifeStalkPreyTypes';
+import type {
+  DefiningWildlifeAggressionLevel,
+  DefiningWildlifeHungerDriveLevel,
+} from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { checkingWildlifeStalkConfidenceCommit } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPackConfidenceCommit';
 
 export type CheckingWildlifeStalkWeaknessKillTriggerParams = {
@@ -37,6 +41,13 @@ export type CheckingWildlifeStalkPackSurroundCommitParams =
     preyTargetId?: string | null;
     stalkingPreySinceMs?: number | null;
     nowMs?: number;
+  };
+
+export type CheckingWildlifeSoloStalkerKillConditionsParams =
+  CheckingWildlifeStalkWeaknessKillTriggerParams & {
+    stalkingElapsedMs: number;
+    hungerDriveLevel: DefiningWildlifeHungerDriveLevel;
+    aggressionLevel: DefiningWildlifeAggressionLevel;
   };
 
 /** Returns true once the mandatory opening shadow phase has elapsed. */
@@ -118,7 +129,7 @@ function checkingWildlifeStalkConfidenceCommitIfReady({
 }
 
 /**
- * Returns true when stalkers should stop shadowing and attack the prey.
+ * Returns true when PackHunters should stop shadowing and attack the prey.
  * After the opening shadow: prey weakness force-commits, otherwise a pack-size
  * confidence roll may commit (higher chance with more wolves; 5+ is likely).
  * Once surrounding/attacking, the pack stays committed via attack-burst → re-flank.
@@ -192,4 +203,39 @@ export function checkingWildlifeStalkPackSurroundCommit({
     stalkingPreySinceMs,
     nowMs,
   });
+}
+
+/**
+ * Solo stalker kill window: after the opening shadow, rush on prey weakness
+ * or when the hunter is hungry/starving/aggressive (no pack confidence roll).
+ */
+export function checkingWildlifeSoloStalkerKillConditions({
+  preyHealthRatio,
+  preyStaminaRatio,
+  preyStaminaIsDepleted,
+  preyStillDurationMs,
+  stalkingElapsedMs,
+  hungerDriveLevel,
+  aggressionLevel,
+}: CheckingWildlifeSoloStalkerKillConditionsParams): boolean {
+  if (!checkingWildlifeStalkInitialPhaseComplete(stalkingElapsedMs)) {
+    return false;
+  }
+
+  if (
+    checkingWildlifeStalkWeaknessKillTriggers({
+      preyHealthRatio,
+      preyStaminaRatio,
+      preyStaminaIsDepleted,
+      preyStillDurationMs,
+    })
+  ) {
+    return true;
+  }
+
+  if (aggressionLevel === 'aggressive') {
+    return true;
+  }
+
+  return hungerDriveLevel === 'hungry' || hungerDriveLevel === 'starving';
 }

@@ -97,7 +97,7 @@ import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/dom
 import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
 import { checkingWildlifeSpeciesWandersAwayAtDaybreak } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesWandersAwayAtDaybreak';
 import { checkingWildlifeStalkPhaseIsFleeing } from '@/components/world/wildlife/domains/checkingWildlifeStalkPhase';
-import { checkingWildlifeStalkerShadowingAtDamage } from '@/components/world/wildlife/domains/checkingWildlifeStalkerShadowingAtDamage';
+import { checkingWildlifePackHunterShadowingAtDamage } from '@/components/world/wildlife/domains/checkingWildlifePackHunterShadowingAtDamage';
 import { computingWildlifeAcceleratedRunSpeed } from '@/components/world/wildlife/domains/computingWildlifeAcceleratedRunSpeed';
 import {
   DEFINING_WILDLIFE_ATTACK_CLIP_HOLD_MS,
@@ -126,7 +126,7 @@ import { DEFINING_WILDLIFE_OMEGA_WOLF_ATTACK_MOTION_CLIP_TO_SFX_EVENT_KIND } fro
 import { DEFINING_WILDLIFE_SEPARATION_ANXIETY_COMFORT_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeSeparationAnxietyConstants';
 import { DEFINING_WILDLIFE_SOCIAL_HUNTER_COMFORT_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeSocialHunterConstants';
 import { resolvingWildlifeSpeciesAccelerationConfig } from '@/components/world/wildlife/domains/definingWildlifeSpeciesAccelerationRegistry';
-import { resolvingWildlifeSpeciesExhaustedExitRatio } from '@/components/world/wildlife/domains/definingWildlifeSpeciesChargeRegistry';
+import { DEFINING_WILDLIFE_STAMINA_FATIGUE_INITIAL_TIER } from '@/components/world/wildlife/domains/definingWildlifeStaminaFatigueConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { DEFINING_WILDLIFE_STEERING_WEIGHTS } from '@/components/world/wildlife/domains/definingWildlifeSteeringWeights';
 import type {
@@ -910,7 +910,8 @@ function applyingWildlifeMeleeAttack(
   let nextAttacker: DefiningWildlifeInstance = attacker;
 
   if (
-    attackerSpecies.temperamentId === 'stalker' &&
+    (attackerSpecies.temperamentId === 'pack_hunter' ||
+      attackerSpecies.temperamentId === 'stalker') &&
     hitPlayer &&
     stalkMeleeContext
   ) {
@@ -1466,7 +1467,6 @@ export function advancingWildlifeSimulationTick({
           false,
           deltaSeconds,
           resolvingWildlifeInstanceStaminaConfig(species, nextInstance),
-          resolvingWildlifeSpeciesExhaustedExitRatio(species.speciesId),
           resolvingWildlifeInstanceMaxStaminaRatio(nextInstance, species)
         );
 
@@ -1832,6 +1832,9 @@ export function advancingWildlifeSimulationTick({
                 species
               ),
               isExhausted: false,
+              fatigueTier:
+                nextInstance.staminaState.fatigueTier ??
+                DEFINING_WILDLIFE_STAMINA_FATIGUE_INITIAL_TIER,
               // Keep run-time for acceleration ramps; immortal only skips drain.
               runningForSeconds: wantsToRunForStamina
                 ? nextInstance.staminaState.runningForSeconds +
@@ -1845,7 +1848,6 @@ export function advancingWildlifeSimulationTick({
             wantsToRunForStamina,
             deltaSeconds,
             resolvingWildlifeInstanceStaminaConfig(species, nextInstance),
-            resolvingWildlifeSpeciesExhaustedExitRatio(species.speciesId),
             resolvingWildlifeInstanceMaxStaminaRatio(nextInstance, species)
           );
 
@@ -2082,6 +2084,7 @@ export function advancingWildlifeSimulationTick({
 
       if (intent.mode === 'attack') {
         const stalkMeleeContext =
+          species.temperamentId === 'pack_hunter' ||
           species.temperamentId === 'stalker'
             ? {
                 nearbyInstances: behaviorNeighbors,
@@ -2479,7 +2482,7 @@ export function applyingWildlifeInstanceDamage(
         });
   const stalkResponseApplied =
     appliedHealthDamage > 0 &&
-    checkingWildlifeStalkerShadowingAtDamage({
+    checkingWildlifePackHunterShadowingAtDamage({
       instance: damageAppliedInstance,
       species,
       preyTargetId: attackerTargetId,

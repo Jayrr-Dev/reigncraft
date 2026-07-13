@@ -71,7 +71,15 @@ try {
 
 const child = spawn(
   process.execPath,
-  ['--no-warnings=ExperimentalWarning', devvitEntry, 'playtest'],
+  [
+    '--no-warnings=ExperimentalWarning',
+    devvitEntry,
+    'playtest',
+    // Large WebView uploads + Windows public/ sync need headroom so a second
+    // rebuild does not race "already running version" / AcceptInvite retries.
+    '--debounce',
+    '2500',
+  ],
   {
     cwd: repoRoot,
     env: { ...process.env, DEVVIT_PLAYTEST_SKIP_PUBLIC_COPY: '1' },

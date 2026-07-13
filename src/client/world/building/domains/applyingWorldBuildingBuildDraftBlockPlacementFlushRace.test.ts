@@ -11,6 +11,10 @@ import { describe, expect, it } from 'vitest';
  * Regression for craft campfire place: success handler flushes/exits in the same
  * synchronous turn as placement. Flush must use the post-placement draft, not
  * the prior React state snapshot (which has no campfire yet).
+ *
+ * Outside-claim session campfires are intentionally not "unsaved" draft state;
+ * `placingBlockAtTile` must await session persist + plot refetch before the
+ * craft success callback exits edit mode, or the campfire vanishes instantly.
  */
 describe('craft campfire placement draft flush race', () => {
   it('marks the post-placement draft unsaved so an immediate flush would persist', () => {

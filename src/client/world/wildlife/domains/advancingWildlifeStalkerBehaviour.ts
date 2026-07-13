@@ -1,19 +1,13 @@
 /**
- * Runs the shared statechart engine for stalker-temperament wildlife.
+ * Runs the shared statechart engine for solo stalker-temperament wildlife.
  *
  * @module components/world/wildlife/domains/advancingWildlifeStalkerBehaviour
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { checkingWildlifePackAlphaHasCommittedPreyAttack } from '@/components/world/wildlife/domains/checkingWildlifePackAlphaHasCommittedPreyAttack';
 import { checkingWildlifeStalkAttackPhaseExpired } from '@/components/world/wildlife/domains/checkingWildlifeStalkAttackPhaseExpired';
 import {
-  checkingWildlifeStalkConfidentAssaultReady,
-  checkingWildlifeStalkPackIsConfident,
-} from '@/components/world/wildlife/domains/checkingWildlifeStalkConfidentPack';
-import {
-  checkingWildlifeStalkKillConditions,
-  checkingWildlifeStalkPackSurroundCommit,
+  checkingWildlifeSoloStalkerKillConditions,
   resolvingWildlifeStalkWeaknessKillTriggerParamsFromPrey,
 } from '@/components/world/wildlife/domains/checkingWildlifeStalkKillConditions';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -35,8 +29,6 @@ import type {
   DefiningWildlifeAggroState,
   DefiningWildlifeInstance,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { countingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
-import { resolvingWildlifeSpawnPackAlphaInstance } from '@/components/world/wildlife/domains/resolvingWildlifeSpawnPackAlphaInstance';
 import { resolvingWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPreyContext';
 import { processingStateMachineExplicitEvents } from '@/lib/stateMachine/advancingStateMachine';
 import type { DefiningStateMachineSnapshot } from '@/lib/stateMachine/definingStateMachineTypes';
@@ -66,20 +58,6 @@ function resolvingDistanceGrid(
   return Math.hypot(left.x - right.x, left.y - right.y);
 }
 
-function listingWildlifeNearbyAndSelf(
-  instance: DefiningWildlifeInstance,
-  nearbyInstances: readonly DefiningWildlifeInstance[]
-): DefiningWildlifeInstance[] {
-  const byId = new Map<string, DefiningWildlifeInstance>();
-  byId.set(instance.instanceId, instance);
-
-  for (const neighbor of nearbyInstances) {
-    byId.set(neighbor.instanceId, neighbor);
-  }
-
-  return [...byId.values()];
-}
-
 function listingStalkerBehaviourTimerEvents(
   context: DefiningWildlifeStalkerBehaviourContext
 ): DefiningWildlifeStalkEventKind[] {
@@ -87,23 +65,12 @@ function listingStalkerBehaviourTimerEvents(
   const phase = context.enteredPhase;
   const { aggroState, prey, instance, nowMs } = context;
 
-  if (
-    phase === 'fleeing' &&
-    instance.packAlphaDeathScatterUntilMs !== null &&
-    instance.packAlphaDeathScatterUntilMs !== undefined &&
-    nowMs >= instance.packAlphaDeathScatterUntilMs
-  ) {
-    events.push('FLEE_DISTANCE_REACHED');
-  }
-
   if (!prey) {
     return events;
   }
 
   if (
     phase === 'fleeing' &&
-    (instance.packAlphaDeathScatterUntilMs === null ||
-      instance.packAlphaDeathScatterUntilMs === undefined) &&
     resolvingDistanceGrid(instance.position, prey.position) >=
       DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID
   ) {
@@ -130,69 +97,16 @@ function listingStalkerBehaviourTimerEvents(
     events.push('ATTACK_TIMEOUT_10S');
   }
 
-  if (
-    phase === 'formingUp' &&
-    checkingWildlifeStalkConfidentAssaultReady({
-      stalkConfidentSinceMs: aggroState.stalkConfidentSinceMs,
-      preyTargetId: prey.targetId,
-      nowMs,
-    })
-  ) {
-    events.push('FORMATION_TIMER_DONE');
-  }
-
-  if (phase === 'surrounding') {
-    const alpha = resolvingWildlifeSpawnPackAlphaInstance({
-      instance,
-      instances: listingWildlifeNearbyAndSelf(
-        instance,
-        context.nearbyInstances
-      ),
-      resolveSpecies: context.resolveSpecies,
-    });
-
-    if (
-      alpha &&
-      checkingWildlifePackAlphaHasCommittedPreyAttack({
-        alpha,
-        preyTargetId: prey.targetId,
-        preyPosition: prey.position,
-      })
-    ) {
-      events.push('SLOT_REACHED_OR_ALPHA_COMMIT');
-    }
-  }
-
-  if (
-    (phase === 'shadowing' || phase === 'formingUp') &&
-    !checkingWildlifeStalkPackIsConfident(context.stalkPackCount) &&
-    (aggroState.stalkConfidentSinceMs ?? null) !== null
-  ) {
-    events.push('PACK_THINNED');
-  }
-
   const weaknessParams =
     resolvingWildlifeStalkWeaknessKillTriggerParamsFromPrey(prey);
-  const confidenceCommitParams = {
-    stalkPackCount: context.stalkPackCount,
-    preyTargetId: prey.targetId,
-    stalkingPreySinceMs: aggroState.stalkingPreySinceMs,
-    nowMs: context.nowMs,
-  };
-  const killWindowOpen = checkingWildlifeStalkKillConditions({
+  const killWindowOpen = checkingWildlifeSoloStalkerKillConditions({
     ...weaknessParams,
     stalkingElapsedMs: context.stalkingElapsedMs,
-    ...confidenceCommitParams,
-  });
-  const surroundCommit = checkingWildlifeStalkPackSurroundCommit({
-    ...weaknessParams,
-    stalkingElapsedMs: context.stalkingElapsedMs,
-    ...confidenceCommitParams,
+    hungerDriveLevel: instance.hungerState.driveLevel,
+    aggressionLevel: instance.aggressionLevel,
   });
 
-  if (phase === 'shadowing' && surroundCommit) {
-    events.push('KILL_WINDOW_PLUS_PACK');
-  } else if (phase === 'shadowing' && killWindowOpen) {
+  if (phase === 'shadowing' && killWindowOpen) {
     events.push('KILL_WINDOW_OPEN');
   }
 
@@ -233,14 +147,6 @@ function creatingStalkerBehaviourContext(
     aggroState.stalkingPreySinceMs === undefined
       ? 0
       : Math.max(0, params.nowMs - aggroState.stalkingPreySinceMs);
-  const stalkPackCount =
-    prey === null
-      ? 0
-      : countingWildlifeStalkPackmatesTargetingPrey({
-          instance: params.instance,
-          nearbyInstances: params.nearbyInstances,
-          preyTargetId: prey.targetId,
-        });
 
   return {
     species: params.species,
@@ -257,7 +163,6 @@ function creatingStalkerBehaviourContext(
     preyTargetId: activeTargetId,
     prey,
     stalkingElapsedMs,
-    stalkPackCount,
     aggroState,
     enteredPhase: aggroState.stalkPhase ?? DEFINING_WILDLIFE_STALK_PHASE_IDLE,
   };
@@ -282,8 +187,7 @@ function syncingAggroStateFromSnapshot(
 }
 
 /**
- * Advances stalker behaviour through the shared statechart engine.
- * Replaces the bespoke phase tick; any `stalker` temperament species uses this.
+ * Advances solo stalker behaviour through the shared statechart engine.
  */
 export function advancingWildlifeStalkerBehaviour({
   instance,

@@ -95,6 +95,7 @@ export function usingWorldPlazaProximityInteractableBlockSelection({
           hasEquippedHoe: hasEquippedHoeRef.current,
           hasEquippedScythe: hasEquippedScytheRef.current,
           hasSeedsInInventory: hasSeedsInInventoryRef.current,
+          nowMs: Date.now(),
         }
       );
     });

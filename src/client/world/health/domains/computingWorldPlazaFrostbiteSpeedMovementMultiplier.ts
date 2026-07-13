@@ -10,7 +10,7 @@ import {
 } from '@/components/world/health/domains/definingWorldPlazaEntityFrostbiteConstants';
 
 /**
- * Speed multiplier from stacks: 1 at 0 stacks, 0.25 at 1000 (75% slower).
+ * Speed multiplier from stacks: 1 at 0 stacks, 0.5 at 1000 (50% slower).
  */
 export function computingWorldPlazaFrostbiteSpeedMovementMultiplier(
   stackCount: number

@@ -9,7 +9,7 @@
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import { Icon as IconifyGlyph } from '@/components/ui/icon';
 import {
-  DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SOULCORE_SPHERE,
+  DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SPRITCORE_SPHERE,
   type DefiningWorldPlazaInventoryCustomItemIconId,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
 import {
@@ -20,7 +20,7 @@ import {
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_IMAGE_ICON_CLASS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
-import { RenderingWorldPlazaSoulcoreSphereIcon } from '@/components/world/soulcore/components/renderingWorldPlazaSoulcoreSphereIcon';
+import { RenderingWorldPlazaSpritcoreSphereIcon } from '@/components/world/spritcore/components/renderingWorldPlazaSpritcoreSphereIcon';
 import { cn } from '@/lib/utils';
 import type * as React from 'react';
 import { memo } from 'react';
@@ -43,10 +43,10 @@ function renderingWorldPlazaInventoryCustomItemIcon(
 ): React.JSX.Element | null {
   if (
     customIconId ===
-    DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SOULCORE_SPHERE
+    DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SPRITCORE_SPHERE
   ) {
     return (
-      <RenderingWorldPlazaSoulcoreSphereIcon
+      <RenderingWorldPlazaSpritcoreSphereIcon
         className={className}
         style={style}
       />

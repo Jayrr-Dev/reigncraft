@@ -51,7 +51,7 @@ describe('resolvingWorldBuildingHoverPlacementWorldLayer', () => {
     ).toBe(5);
   });
 
-  it('anchors 1H wood above elevated terrain surface', () => {
+  it('anchors 1H wood flush on elevated terrain surface', () => {
     resolvingWorldPlazaBaseSurfaceLayerAtTileIndexMock.mockReturnValue(4);
 
     expect(
@@ -59,6 +59,19 @@ describe('resolvingWorldBuildingHoverPlacementWorldLayer', () => {
         tilePosition: { tileX: 8, tileY: 9 },
         selectedWorldLayer: DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND,
         selectedBlockHeight: 1,
+        placedBlocks: [],
+      })
+    ).toBe(4);
+  });
+
+  it('anchors taller extrusion flush from elevated terrain surface', () => {
+    resolvingWorldPlazaBaseSurfaceLayerAtTileIndexMock.mockReturnValue(2);
+
+    expect(
+      resolvingWorldBuildingHoverPlacementWorldLayer({
+        tilePosition: { tileX: 8, tileY: 9 },
+        selectedWorldLayer: 4,
+        selectedBlockHeight: 4,
         placedBlocks: [],
       })
     ).toBe(5);
@@ -77,7 +90,7 @@ describe('resolvingWorldBuildingHoverPlacementWorldLayer', () => {
     ).toBe(8);
   });
 
-  it('stacks above an existing block when plaza surface includes it', () => {
+  it('stacks above an existing solid block when plaza surface includes it', () => {
     resolvingWorldPlazaBaseSurfaceLayerAtTileIndexMock.mockReturnValue(6);
 
     const existingBlock = creatingWorldBuildingPlacedBlock({
@@ -99,5 +112,29 @@ describe('resolvingWorldBuildingHoverPlacementWorldLayer', () => {
         placedBlocks: [existingBlock],
       })
     ).toBe(7);
+  });
+
+  it('sits flush on a passable floor at the elevated surface', () => {
+    resolvingWorldPlazaBaseSurfaceLayerAtTileIndexMock.mockReturnValue(2);
+
+    const passableFloor = creatingWorldBuildingPlacedBlock({
+      blockId: 'tile-1',
+      plotId: 'plot-1',
+      definitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_WOOD,
+      tilePosition: { tileX: 4, tileY: 5 },
+      worldLayer: 2,
+      blockHeight: DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_TILE,
+      ownerId: 'owner-1',
+      placedAt: '1970-01-01T00:00:00.000Z',
+    });
+
+    expect(
+      resolvingWorldBuildingHoverPlacementWorldLayer({
+        tilePosition: { tileX: 4, tileY: 5 },
+        selectedWorldLayer: DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND,
+        selectedBlockHeight: 1,
+        placedBlocks: [passableFloor],
+      })
+    ).toBe(2);
   });
 });

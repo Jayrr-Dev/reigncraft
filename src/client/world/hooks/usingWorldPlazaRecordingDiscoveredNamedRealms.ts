@@ -12,7 +12,7 @@ import { enqueueingWorldPlazaWorldNotification } from '@/components/world/domain
 import { resolvingWorldPlazaNamedRealmAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaNamedRealmAtTileIndex';
 import type { RefObject } from 'react';
 import { useEffect } from 'react';
-import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
+import type { PlazaSaveSlotIndex } from '../../../shared/plazaGameSession';
 
 export type UsingWorldPlazaRecordingDiscoveredNamedRealmsOptions = {
   isEnabled: boolean;

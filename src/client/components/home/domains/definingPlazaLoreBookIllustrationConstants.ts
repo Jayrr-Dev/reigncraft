@@ -12,7 +12,7 @@ export type PlazaLoreBookIllustrationId =
   | 'biome-rings'
   | 'quiet-hand'
   | 'ladder-rungs'
-  | 'soulcore-orb'
+  | 'spritcore-orb'
   | 'apostle-circle'
   | 'two-creeds'
   | 'beast-tiers'
@@ -56,7 +56,7 @@ export const DEFINING_PLAZA_LORE_BOOK_ILLUSTRATIONS_BY_ENTRY_ID: Readonly<
     caption: 'Lose, return, grow, try again',
   },
   'the-core': {
-    id: 'soulcore-orb',
+    id: 'spritcore-orb',
     caption: 'Money, mana, experience, rank',
   },
   'the-stewards': {

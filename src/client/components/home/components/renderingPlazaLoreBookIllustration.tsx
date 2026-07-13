@@ -241,7 +241,7 @@ function RenderingLadderRungsScene(): React.JSX.Element {
   );
 }
 
-function RenderingSoulcoreOrbScene(): React.JSX.Element {
+function RenderingSpritcoreOrbScene(): React.JSX.Element {
   return (
     <>
       <circle
@@ -750,7 +750,7 @@ const RENDERING_PLAZA_LORE_BOOK_ILLUSTRATION_SCENES: Record<
   'biome-rings': RenderingBiomeRingsScene,
   'quiet-hand': RenderingQuietHandScene,
   'ladder-rungs': RenderingLadderRungsScene,
-  'soulcore-orb': RenderingSoulcoreOrbScene,
+  'spritcore-orb': RenderingSpritcoreOrbScene,
   'apostle-circle': RenderingApostleCircleScene,
   'two-creeds': RenderingTwoCreedsScene,
   'beast-tiers': RenderingBeastTiersScene,

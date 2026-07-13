@@ -58,6 +58,7 @@ export function checkingWildlifeMayAggroPlayerOnSight(
   return (
     species.temperamentId === 'predator' ||
     species.temperamentId === 'ambusher' ||
+    species.temperamentId === 'pack_hunter' ||
     species.temperamentId === 'stalker'
   );
 }

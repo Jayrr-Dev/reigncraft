@@ -30,8 +30,8 @@ The count used to be eleven. Then the census caught up with the rest of the map,
 ### Tier 2: the middle of the chain
 
 - **Boar**: omnivores that give territorial warnings before charging. Fair, by the standards of Corpus. Ignore the warning and what happens next is on you.
-- **Grey Wolf**: nocturnal pack stalkers. Wolves aggro as a pack, and their name tags run from Pup to Alpha. The forest at night is theirs, and wanderer camp placement customs exist because of it.
-- **Hyena**: the savanna's night shift. Stalkers like the wolves, but where a wolf pack hunts, a hyena pack negotiates, loudly, with teeth. The laugh is not a laugh. Do not laugh back.
+- **Grey Wolf**: nocturnal pack hunters. Wolves aggro as a pack, and their name tags run from Pup to Alpha. The forest at night is theirs, and wanderer camp placement customs exist because of it.
+- **Hyena**: the savanna's night shift. Pack hunters like the wolves, but where a wolf pack hunts, a hyena pack negotiates, loudly, with teeth. The laugh is not a laugh. Do not laugh back.
 - **Bison** and **Bull**: heavy plains grazers that took the boar's warning system and added mass. Both are retaliators; the bull additionally charges, and the plains have taught more than one wanderer what a full-speed bull does to a wooden wall.
 - **Water Buffalo**: the swamp's heavy grazer. Placid in the mud right up until it is not. Shares the crocodile's water and somehow they have an arrangement.
 
@@ -40,7 +40,7 @@ The count used to be eleven. Then the census caught up with the rest of the map,
 - **Brown Bear**: cathemeral omnivores, immune to cold, and the reason "retaliator" is a temperament category. A bear ignores you until you give it a reason.
 - **Polar Bear**: the frost's answer to the brown bear, except it skipped the "ignores you" part. A true predator of the snowy plains, and the reason deer up north stay nervous.
 - **Lion** and **Lioness**: crepuscular pride hunters of the savanna. Pride aggro means pulling one means pulling all. Lion meat's shipped description calls it cut from the king of the grasslands (the current string says "plaza grasslands", a legacy term pending rename), and it is priced in scars accordingly.
-- **Tiger** and **Jaguar**: the jungle's hunters. The tiger stalks and the jaguar ambushes, which means the jungle offers both the danger you might see coming and the one you will not.
+- **Tiger** and **Jaguar**: the jungle's solo stalkers. Both trail prey in quiet shadow, then rush when you weaken or when hunger (or a mean spawn roll) opens the kill window.
 - **Crocodile**: swamp ambushers, deadly in water, slow on land. The entire strategy for surviving them is knowing which side of the waterline you are on.
 - **Elephant**, **Rhino**, and **Hippo**: the big three. All retaliators with wide territories and long memories. The elephant warns, the rhino charges, and the hippo holds the swamp's undisputed record for wanderers who thought a grazer was safe.
 - **Giraffe**: tall, calm, and heat-proof. Technically a retaliator; in practice you have to work hard to earn the kick, and the kick is not worth earning.
@@ -48,7 +48,7 @@ The count used to be eleven. Then the census caught up with the rest of the map,
 
 ## Temperament vocabulary
 
-Keep these consistent in all copy: **passive**, **skittish**, **retaliator**, **stalker**, **predator**, **ambusher**. Each is a promise to the player about behavior, so lore text must not contradict them (never write a "gentle crocodile" scene).
+Keep these consistent in all copy: **passive**, **skittish**, **retaliator**, **pack_hunter**, **stalker**, **predator**, **ambusher**. Each is a promise to the player about behavior, so lore text must not contradict them (never write a "gentle crocodile" scene).
 
 ## Individuality: the uncanny layer
 
@@ -56,7 +56,7 @@ Every animal in Corpus is an individual, and the world itself seems to announce 
 
 In fiction, wanderers can simply tell these things at a glance, the way you can tell a big dog from a small one. The extreme upper tiers (Demon, Mythical) are animals grown far past what one lifetime allows, because they have had more than one. These are the ladder's old climbers: killed, returned, grew, tried again, across more lives than anyone has counted (see [`world/the-ladder.md`](../world/the-ladder.md)). A Mythical bear is not a freak. It is a success story with teeth, and the reason veterans check name tags before checking anything else.
 
-This also connects to wealth. Strong things can find core-heavy prey more easily, and a wanderer hauling a fortune reads, to something Mythical, like an easy rung up (Proposed; see [`world/soul-and-soulcore.md`](../world/soul-and-soulcore.md)).
+This also connects to wealth. Strong things can find core-heavy prey more easily, and a wanderer hauling a fortune reads, to something Mythical, like an easy rung up (Proposed; see [`world/soul-and-spritcore.md`](../world/soul-and-spritcore.md)).
 
 Deprecated: the old "soul saturation" folk theory (animals passively soaking loose soul energy). Superseded by the ladder canon above; do not use it in new content.
 

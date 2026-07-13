@@ -6,12 +6,14 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { advancingWildlifeStalkAggroTick } from '@/components/world/wildlife/domains/advancingWildlifeStalkAggroTick';
+import { advancingWildlifePackHunterBehaviour } from '@/components/world/wildlife/domains/advancingWildlifePackHunterBehaviour';
 import { advancingWildlifeStalkerBehaviour } from '@/components/world/wildlife/domains/advancingWildlifeStalkerBehaviour';
 import { applyingWildlifeFavoritePreyPlayerRevengeAggro } from '@/components/world/wildlife/domains/applyingWildlifeFavoritePreyPlayerRevengeAggro';
 import { applyingWildlifeFavoritePreyThreatBoost } from '@/components/world/wildlife/domains/applyingWildlifeFavoritePreyThreatBoost';
 import { checkingWildlifeChaseShouldGiveUpWithoutDamage } from '@/components/world/wildlife/domains/checkingWildlifeChaseShouldGiveUpWithoutDamage';
 import { checkingWildlifeInstanceHasProvokedWildlifeAggro } from '@/components/world/wildlife/domains/checkingWildlifeInstanceHasProvokedWildlifeAggro';
 import { checkingWildlifeIsMotivatedToHunt } from '@/components/world/wildlife/domains/checkingWildlifeIsMotivatedToHunt';
+import { checkingWildlifeIsStalkHuntTemperament } from '@/components/world/wildlife/domains/checkingWildlifeIsStalkHuntTemperament';
 import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight';
 import { checkingWildlifePlayerOccludedByColumnRock } from '@/components/world/wildlife/domains/checkingWildlifePlayerOccludedByColumnRock';
 import { checkingWildlifePlayerRevengeAggroIsActive } from '@/components/world/wildlife/domains/checkingWildlifePlayerRevengeAggroIsActive';
@@ -19,7 +21,7 @@ import { checkingWildlifePointIsInsideTerritoryAnchor } from '@/components/world
 import { checkingWildlifeShareSpawnPack } from '@/components/world/wildlife/domains/checkingWildlifeShareSpawnPack';
 import { checkingWildlifeSocialHunterMayHunt } from '@/components/world/wildlife/domains/checkingWildlifeSocialHunterMayHunt';
 import { checkingWildlifeSpeciesIsFavoritePrey } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsFavoritePrey';
-import { checkingWildlifeStalkerMayInitiatePreyStalk } from '@/components/world/wildlife/domains/checkingWildlifeStalkerMayInitiatePreyStalk';
+import { checkingWildlifePackHunterMayInitiatePreyStalk } from '@/components/world/wildlife/domains/checkingWildlifePackHunterMayInitiatePreyStalk';
 import {
   resolvingWildlifeSpeciesTerritoryConfig,
   resolvingWildlifeTerritoryLingerThreatPerSecond,
@@ -46,7 +48,7 @@ import type {
   DefiningWildlifeInstance,
   DefiningWildlifeThreatEntry,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { listingWildlifeStalkerPreyTargetCandidates } from '@/components/world/wildlife/domains/listingWildlifeStalkerPreyTargetCandidates';
+import { listingWildlifePackHunterPreyTargetCandidates } from '@/components/world/wildlife/domains/listingWildlifePackHunterPreyTargetCandidates';
 import { pickingWildlifeStalkAlphaPreyTargetId } from '@/components/world/wildlife/domains/pickingWildlifeStalkAlphaPreyTargetId';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import { resolvingWildlifeAggroLastAggroedAtMs } from '@/components/world/wildlife/domains/resolvingWildlifeAggroLastAggroedAtMs';
@@ -174,19 +176,21 @@ export function advancingWildlifeAggroTick({
       : (instance.aggroState.playerRevengeAggroUntilMs ?? null);
   const mayInitiatePreyStalk =
     species.temperamentId === 'stalker'
-      ? checkingWildlifeStalkerMayInitiatePreyStalk({
-          instance,
-          nearbyInstances,
-          resolveSpecies: resolvingWildlifeSpeciesDefinition,
-        }) &&
-        checkingWildlifeSocialHunterMayHunt({
-          instance,
-          species,
-          nearbyInstances,
-        })
-      : false;
+      ? true
+      : species.temperamentId === 'pack_hunter'
+        ? checkingWildlifePackHunterMayInitiatePreyStalk({
+            instance,
+            nearbyInstances,
+            resolveSpecies: resolvingWildlifeSpeciesDefinition,
+          }) &&
+          checkingWildlifeSocialHunterMayHunt({
+            instance,
+            species,
+            nearbyInstances,
+          })
+        : false;
   const packJoinPreyTargetId =
-    species.temperamentId === 'stalker'
+    species.temperamentId === 'pack_hunter'
       ? resolvingWildlifeStalkPackJoinPreyTargetId({
           instance,
           nearbyInstances,
@@ -216,20 +220,21 @@ export function advancingWildlifeAggroTick({
     stalkLockedPreyTargetId = sightedFavoritePreyTargetId;
   }
 
-  const stalkPreyCandidates =
-    species.temperamentId === 'stalker'
-      ? listingWildlifeStalkerPreyTargetCandidates({
-          instance,
-          species,
-          nearbyInstances,
-          playerPosition,
-          playerUserId,
-          resolveSpecies: resolvingWildlifeSpeciesDefinition,
-          nowMs,
-        })
-      : [];
+  const stalkPreyCandidates = checkingWildlifeIsStalkHuntTemperament(
+    species.temperamentId
+  )
+    ? listingWildlifePackHunterPreyTargetCandidates({
+        instance,
+        species,
+        nearbyInstances,
+        playerPosition,
+        playerUserId,
+        resolveSpecies: resolvingWildlifeSpeciesDefinition,
+        nowMs,
+      })
+    : [];
 
-  if (species.temperamentId === 'stalker') {
+  if (checkingWildlifeIsStalkHuntTemperament(species.temperamentId)) {
     if (
       !playerRevengeAggroActive &&
       packJoinPreyTargetId === null &&
@@ -258,7 +263,7 @@ export function advancingWildlifeAggroTick({
   }
 
   const mayBuildThreatToTarget = (targetId: string): boolean => {
-    if (species.temperamentId !== 'stalker') {
+    if (!checkingWildlifeIsStalkHuntTemperament(species.temperamentId)) {
       return true;
     }
 
@@ -278,7 +283,7 @@ export function advancingWildlifeAggroTick({
 
   let chaseGiveUpUntilPlayerExitsAggro =
     instance.aggroState.chaseGiveUpUntilPlayerExitsAggro === true;
-  let lastDealtDamageAtMs = instance.aggroState.lastDealtDamageAtMs ?? null;
+  const lastDealtDamageAtMs = instance.aggroState.lastDealtDamageAtMs ?? null;
 
   if (playerUserId && playerPosition) {
     const aggressionProfile = resolvingWildlifeAggressionLevelProfile(
@@ -316,7 +321,7 @@ export function advancingWildlifeAggroTick({
                 instance.aggressionLevel,
                 instance.hungerState.driveLevel
               ) &&
-              (species.temperamentId !== 'stalker' || mayInitiatePreyStalk));
+              (species.temperamentId !== 'pack_hunter' || mayInitiatePreyStalk));
 
         if (
           shouldBuildProximityThreat &&
@@ -469,7 +474,10 @@ export function advancingWildlifeAggroTick({
       continue;
     }
 
-    if (species.temperamentId === 'stalker' && !mayInitiatePreyStalk) {
+    if (
+      species.temperamentId === 'pack_hunter' &&
+      !mayInitiatePreyStalk
+    ) {
       continue;
     }
 
@@ -538,7 +546,10 @@ export function advancingWildlifeAggroTick({
     );
   }
 
-  if (species.temperamentId === 'stalker' && stalkLockedPreyTargetId) {
+  if (
+    checkingWildlifeIsStalkHuntTemperament(species.temperamentId) &&
+    stalkLockedPreyTargetId
+  ) {
     const territorialIntruderIds = new Set(
       nearbyInstances
         .filter(
@@ -686,7 +697,7 @@ export function advancingWildlifeAggroTick({
     },
   });
 
-  const stalkPhaseState = advancingWildlifeStalkerBehaviour({
+  const stalkBehaviourParams = {
     instance,
     species,
     nearbyInstances,
@@ -700,7 +711,12 @@ export function advancingWildlifeAggroTick({
     aggroState: stalkAggroResult.aggroState,
     tickEvents: stalkAggroResult.events,
     resolveSpecies: resolvingWildlifeSpeciesDefinition,
-  });
+  };
+
+  const stalkPhaseState =
+    species.temperamentId === 'stalker'
+      ? advancingWildlifeStalkerBehaviour(stalkBehaviourParams)
+      : advancingWildlifePackHunterBehaviour(stalkBehaviourParams);
 
   return {
     ...stalkPhaseState,
@@ -765,7 +781,7 @@ export function applyingWildlifeDamageThreat(
       stalkingPreySinceMs:
         activeTargetId === attackerTargetId &&
         instance.speciesId &&
-        species.temperamentId === 'stalker'
+        checkingWildlifeIsStalkHuntTemperament(species.temperamentId)
           ? (instance.aggroState.stalkingPreySinceMs ?? nowMs)
           : instance.aggroState.stalkingPreySinceMs,
       defendingYoungUntilMs:
@@ -901,7 +917,7 @@ export function sharingWildlifePackThreat(
         nowMs
       ),
       stalkingPreySinceMs:
-        species.temperamentId === 'stalker' &&
+        checkingWildlifeIsStalkHuntTemperament(species.temperamentId) &&
         activeTargetId === attackerTargetId
           ? (packmate.aggroState.stalkingPreySinceMs ?? nowMs)
           : packmate.aggroState.stalkingPreySinceMs,

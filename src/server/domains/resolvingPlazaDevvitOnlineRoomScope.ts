@@ -3,7 +3,7 @@ import { context } from '@devvit/web/server';
 /**
  * Resolves the base plaza scope (post or playtest subreddit) before room sharding.
  */
-function resolvingPlazaDevvitOnlineBaseScope(): string {
+export function resolvingPlazaDevvitOnlineBaseScope(): string {
   const { postId, subredditName } = context;
 
   if (postId) {
@@ -18,15 +18,41 @@ function resolvingPlazaDevvitOnlineBaseScope(): string {
 }
 
 /**
- * Scopes plaza multiplayer to a Reddit post room shard.
+ * Scopes plaza multiplayer / world Redis keys to one named room.
  *
- * Each shard holds up to {@link PLAZA_DEVVIT_ONLINE_MAX_PLAYERS} players.
- *
- * @param roomIndex - One-based room shard index (defaults to 1).
+ * @param roomId - Named room id slug (required for multiplayer isolation).
  */
-export function resolvingPlazaDevvitOnlineRoomScope(roomIndex = 1): string {
-  const normalizedRoomIndex =
-    Number.isInteger(roomIndex) && roomIndex >= 1 ? roomIndex : 1;
+export function resolvingPlazaDevvitOnlineRoomScope(roomId: string): string {
+  const trimmedRoomId = roomId.trim();
 
-  return `${resolvingPlazaDevvitOnlineBaseScope()}:room-${normalizedRoomIndex}`;
+  if (!trimmedRoomId) {
+    throw new Error('Plaza room id is required.');
+  }
+
+  return `${resolvingPlazaDevvitOnlineBaseScope()}:room:${trimmedRoomId}`;
+}
+
+/**
+ * Parses a room id from a `?room=` query value.
+ *
+ * @param rawRoomId - Raw query string value.
+ */
+export function parsingPlazaDevvitOnlineRoomIdFromQuery(
+  rawRoomId: string | undefined
+): string | null {
+  if (!rawRoomId) {
+    return null;
+  }
+
+  const trimmedRoomId = rawRoomId.trim();
+
+  if (!trimmedRoomId || trimmedRoomId.length > 64) {
+    return null;
+  }
+
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(trimmedRoomId)) {
+    return null;
+  }
+
+  return trimmedRoomId;
 }

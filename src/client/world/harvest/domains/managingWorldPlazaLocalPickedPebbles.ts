@@ -255,3 +255,14 @@ export function pickingWorldPlazaLocalPebble(
     stoneQuantity: mutation.stoneQuantity,
   };
 }
+
+/**
+ * Drops in-memory picked-pebble cache for one persistence owner (save-slot wipe).
+ *
+ * @param persistenceOwnerId - Scoped localStorage owner id for the slot.
+ */
+export function clearingWorldPlazaLocalPickedPebblesMemoryForOwner(
+  persistenceOwnerId: string
+): void {
+  managingWorldPlazaLocalPickedPebblesByOwner.delete(persistenceOwnerId);
+}

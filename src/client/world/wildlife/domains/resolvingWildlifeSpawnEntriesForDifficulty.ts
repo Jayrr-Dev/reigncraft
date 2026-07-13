@@ -19,6 +19,7 @@ function gettingWildlifeSpawnDifficultyRole(
   if (
     temperamentId === 'predator' ||
     temperamentId === 'ambusher' ||
+    temperamentId === 'pack_hunter' ||
     temperamentId === 'stalker'
   ) {
     return 'predator';
@@ -36,6 +37,10 @@ function checkingWildlifeTemperamentAllowedForSpawn(
   }
 
   if (temperamentId === 'ambusher' && !levers.allowAmbusherSpawns) {
+    return false;
+  }
+
+  if (temperamentId === 'pack_hunter' && !levers.allowPackHunterSpawns) {
     return false;
   }
 

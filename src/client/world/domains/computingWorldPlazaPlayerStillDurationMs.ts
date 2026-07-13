@@ -1,5 +1,5 @@
 /**
- * Tracks how long the local player has stood still for stalker kill triggers.
+ * Tracks how long the local player has stood still for PackHunter kill triggers.
  *
  * @module components/world/domains/computingWorldPlazaPlayerStillDurationMs
  */

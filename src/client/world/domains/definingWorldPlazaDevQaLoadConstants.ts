@@ -24,6 +24,12 @@ export const LABELING_WORLD_PLAZA_DEV_QA_LOAD_SUBTITLE =
 export const DEFINING_WORLD_PLAZA_DEV_QA_LOAD_OWNER_ID = 'single-player:dev-qa';
 
 /**
+ * Player base / current HP while Dev QA load is active.
+ * High so combat and hazard tests are not interrupted by death.
+ */
+export const DEFINING_WORLD_PLAZA_DEV_QA_PLAYER_BASE_MAX_HEALTH = 1_000_000;
+
+/**
  * Session override applied when Dev QA load starts: generation layers off,
  * audio left on so footsteps / mixer stay usable while profiling.
  *

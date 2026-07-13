@@ -31,7 +31,7 @@ import {
 import { checkingWorldBuildingDevvitSessionPlacementDefinitionId } from '../domains/checkingWorldBuildingDevvitSessionPlacementDefinitionId';
 import { buildingPlazaDevvitOnlinePlayerRedisKey } from '../domains/buildingPlazaDevvitOnlineRedisKeys';
 import { resolvingDevvitRedditUserId } from '../domains/resolvingDevvitRedditUserId';
-import { resolvingPlazaDevvitOnlineRoomScope } from '../domains/resolvingPlazaDevvitOnlineRoomScope';
+import { resolvingPlazaDevvitOnlineRoomScopeFromRequest } from '../domains/resolvingPlazaDevvitOnlineRoomScopeFromRequest';
 
 type TileBounds = {
   minTileX: number;
@@ -510,7 +510,7 @@ worldBuilding.get('/plots/registry', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const roomScope = resolvingPlazaDevvitOnlineRoomScopeFromRequest(c);
   const plots = await listingWorldBuildingDevvitPlots(roomScope);
 
   plots.sort(
@@ -551,7 +551,7 @@ worldBuilding.get('/plots/bounds', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const roomScope = resolvingPlazaDevvitOnlineRoomScopeFromRequest(c);
   const allPlots = await listingWorldBuildingDevvitPlots(roomScope);
   const matchingPlots = allPlots.filter((plot) =>
     checkingPlotRowIntersectsBounds(plot, bounds)
@@ -587,7 +587,7 @@ worldBuilding.get('/plots/owned', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const roomScope = resolvingPlazaDevvitOnlineRoomScopeFromRequest(c);
   const allPlots = await listingWorldBuildingDevvitPlots(roomScope);
   const ownedPlots = allPlots.filter((plot) => plot.owner_id === userId);
   const blocks = await listingWorldBuildingDevvitBlocksForPlotIds(
@@ -625,7 +625,7 @@ worldBuilding.post('/plots/claim', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const roomScope = resolvingPlazaDevvitOnlineRoomScopeFromRequest(c);
   const rosterKey = buildingWorldBuildingPlotsRosterRedisKey(roomScope);
   const plots = await listingWorldBuildingDevvitPlots(roomScope);
 
@@ -738,7 +738,7 @@ worldBuilding.delete('/plots/:plotId', async (c) => {
   }
 
   const plotId = c.req.param('plotId');
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const roomScope = resolvingPlazaDevvitOnlineRoomScopeFromRequest(c);
   const rosterKey = buildingWorldBuildingPlotsRosterRedisKey(roomScope);
   const rawPlot = await redis.hGet(rosterKey, plotId);
 
@@ -804,7 +804,7 @@ worldBuilding.post('/blocks', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const roomScope = resolvingPlazaDevvitOnlineRoomScopeFromRequest(c);
   const rosterKey = buildingWorldBuildingPlotsRosterRedisKey(roomScope);
   const rawPlot = await redis.hGet(rosterKey, placeRequest.plotId);
   const plotRow = rawPlot ? parsingWorldBuildingDevvitPlotRow(rawPlot) : null;
@@ -883,7 +883,7 @@ worldBuilding.delete('/blocks/:blockId', async (c) => {
   }
 
   const blockId = c.req.param('blockId');
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const roomScope = resolvingPlazaDevvitOnlineRoomScopeFromRequest(c);
   const blockIndexKey = buildingWorldBuildingBlockIndexRedisKey(roomScope);
   const plotId = await redis.hGet(blockIndexKey, blockId);
 
@@ -958,7 +958,7 @@ worldBuilding.post('/session-blocks', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const roomScope = resolvingPlazaDevvitOnlineRoomScopeFromRequest(c);
   const plots = await listingWorldBuildingDevvitPlots(roomScope);
 
   if (checkingTileAlreadyClaimed(plots, placeRequest.tileX, placeRequest.tileY)) {
@@ -1013,7 +1013,7 @@ worldBuilding.delete('/session-blocks', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const roomScope = resolvingPlazaDevvitOnlineRoomScopeFromRequest(c);
   const deletedBlockCount = await deletingWorldBuildingDevvitSessionBlocksForOwner(
     roomScope,
     userId

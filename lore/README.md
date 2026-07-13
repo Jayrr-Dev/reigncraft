@@ -2,7 +2,7 @@
 
 The lore and worldbuilding reference for Reigncraft ("CLAIM, STUDY, AND CONQUER"). Everything the in-game Codex Lore section, item flavor text, and future narrative content should draw from lives here.
 
-The short version of the canon: the world is **Corpus**, built by the one god **Manus** as a contest to find a successor. Everything that dies comes back (the ladder). Every soul carries a **Soulcore**, dropped at death: money, mana, experience, and rank in one orb. Twelve loyal **Apostles** own everything people need to live, and a mortal must best all twelve to stand before Manus. The dominant faith (**Mereonism**) says the worthy rise; the rebellion (**the Uncored**) says no one rises alone. A quick always-loaded summary for AI sessions lives at `memory/lore-canon-reference.md`.
+The short version of the canon: the world is **Corpus**, built by the one god **Manus** as a contest to find a successor. Everything that dies comes back (the ladder). Every soul carries a **Spritcore**, dropped at death: money, mana, experience, and rank in one orb. Twelve loyal **Apostles** own everything people need to live, and a mortal must best all twelve to stand before Manus. The dominant faith (**Mereonism**) says the worthy rise; the rebellion (**the Uncored**) says no one rises alone. A quick always-loaded summary for AI sessions lives at `memory/lore-canon-reference.md`.
 
 ## How this bible works
 
@@ -21,7 +21,7 @@ Every entry is a markdown file with a small metadata header. The rules:
 
 | Folder       | Contents                                                                                 |
 | ------------ | ---------------------------------------------------------------------------------------- |
-| `world/`     | Manus, the ladder, the soul and Soulcore, the Twelve Apostles, history, setting overview |
+| `world/`     | Manus, the ladder, the soul and Spritcore, the Twelve Apostles, history, setting overview |
 | `locations/` | Corpus itself, the thirteen biomes, the Firelands ruins                                  |
 | `species/`   | Wildlife ecology, the Cucco, the Wanderers, travelers and friends (NPCs)                 |
 | `systems/`   | Lore-facing rules: factions and faith, disease and immunity, claims and settlement       |
@@ -34,7 +34,7 @@ Every entry is a markdown file with a small metadata header. The rules:
 - [`world/overview.md`](world/overview.md): what the setting is and the five lore pillars
 - [`world/manus.md`](world/manus.md): the one god, the Quiet Hand, his Addresses and gifts
 - [`world/the-ladder.md`](world/the-ladder.md): universal resurrection, merit, and its consequences
-- [`world/soul-and-soulcore.md`](world/soul-and-soulcore.md): Soulcore canon, Soulbreak, death and return
+- [`world/soul-and-spritcore.md`](world/soul-and-spritcore.md): Spritcore canon, Soulbreak, death and return
 - [`world/the-twelve-apostles.md`](world/the-twelve-apostles.md): the twelve stewards, their domains, and challenging them
 - [`world/history.md`](world/history.md): creation, the Forgewrights, the Scorching, the Claim Age
 

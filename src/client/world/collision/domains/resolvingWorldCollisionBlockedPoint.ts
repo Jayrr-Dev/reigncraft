@@ -466,7 +466,8 @@ function checkingWorldPlazaGridPointStandsOnWalkingBlockedTile(
   playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(gridPoint),
   playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
   terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext,
-  includePlacedBlocks = true
+  includePlacedBlocks = true,
+  jumpLayerReachMax?: number
 ): boolean {
   const standingTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(gridPoint);
@@ -493,7 +494,8 @@ function checkingWorldPlazaGridPointStandsOnWalkingBlockedTile(
       applyBlockCollision,
       isJumping,
       playerLayer,
-      playerHeightWorldLayers
+      playerHeightWorldLayers,
+      jumpLayerReachMax
     )
   ) {
     return true;
@@ -506,7 +508,8 @@ function checkingWorldPlazaGridPointStandsOnWalkingBlockedTile(
       playerLayer,
       applyBlockCollision,
       terrainColumnCollisionContext,
-      playerHeightWorldLayers
+      playerHeightWorldLayers,
+      jumpLayerReachMax
     )
   ) {
     return true;
@@ -561,7 +564,8 @@ function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
   playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(center),
   playerRadiusGrid: number = DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
   playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
-  terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext
+  terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext,
+  jumpLayerReachMax?: number
 ): boolean {
   if (playerRadiusGrid <= 0) {
     return checkingWorldPlazaGridPointStandsOnWalkingBlockedTile(
@@ -571,7 +575,9 @@ function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
       placedBlocks,
       playerLayer,
       playerHeightWorldLayers,
-      terrainColumnCollisionContext
+      terrainColumnCollisionContext,
+      true,
+      jumpLayerReachMax
     );
   }
 
@@ -593,7 +599,8 @@ function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
       isJumping,
       playerLayer,
       playerRadiusGrid,
-      playerHeightWorldLayers
+      playerHeightWorldLayers,
+      jumpLayerReachMax
     )
   ) {
     return true;
@@ -643,7 +650,8 @@ function checkingWorldPlazaPlayerCircleOverlapsWalkingBlockedTile(
           playerLayer,
           playerHeightWorldLayers,
           terrainColumnCollisionContext,
-          false
+          false,
+          jumpLayerReachMax
         )
       ) {
         return true;
@@ -670,7 +678,8 @@ function resolvingWorldPlazaNearestWalkableGridPointAroundBlockedPosition(
   isJumping: boolean,
   placedBlocks: DefiningWorldBuildingPlacedBlock[],
   playerLayer: number,
-  playerHeightWorldLayers: number
+  playerHeightWorldLayers: number,
+  jumpLayerReachMax?: number
 ): DefiningWorldPlazaWorldPoint | null {
   const originTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(blockedPosition);
@@ -716,7 +725,10 @@ function resolvingWorldPlazaNearestWalkableGridPointAroundBlockedPosition(
             isJumping,
             placedBlocks,
             playerLayer,
-            playerHeightWorldLayers
+            playerHeightWorldLayers,
+            undefined,
+            true,
+            jumpLayerReachMax
           )
         ) {
           continue;
@@ -770,6 +782,7 @@ export function resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(
   const playerHeightWorldLayers =
     options.playerHeightWorldLayers ??
     DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS;
+  const jumpLayerReachMax = options.jumpLayerReachMax;
   const terrainColumnCollisionContext =
     resolvingWorldCollisionTerrainElevationColumnCollisionContextFromOptions(
       options
@@ -793,7 +806,9 @@ export function resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(
       nearbyPlacedBlocks,
       playerLayer,
       playerHeightWorldLayers,
-      terrainColumnCollisionContext
+      terrainColumnCollisionContext,
+      true,
+      jumpLayerReachMax
     )
   ) {
     const ejectedPosition =
@@ -803,7 +818,8 @@ export function resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(
         isJumping,
         nearbyPlacedBlocks,
         playerLayer,
-        playerHeightWorldLayers
+        playerHeightWorldLayers,
+        jumpLayerReachMax
       );
 
     if (ejectedPosition) {
@@ -916,7 +932,8 @@ function clampingWorldPlazaPointBeforeBlockedTile(
   placedBlocks: DefiningWorldBuildingPlacedBlock[] = [],
   playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(from),
   playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
-  terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext
+  terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext,
+  jumpLayerReachMax?: number
 ): DefiningWorldPlazaWorldPoint {
   return clampingWorldCollisionPointBeforeGridPointPredicate(
     from,
@@ -930,7 +947,8 @@ function clampingWorldPlazaPointBeforeBlockedTile(
         playerLayer,
         DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
         playerHeightWorldLayers,
-        terrainColumnCollisionContext
+        terrainColumnCollisionContext,
+        jumpLayerReachMax
       )
   );
 }
@@ -994,6 +1012,7 @@ export function resolvingWorldCollisionBlockedWorldPoint(
   const playerHeightWorldLayers =
     options.playerHeightWorldLayers ??
     DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS;
+  const jumpLayerReachMax = options.jumpLayerReachMax;
 
   const standingTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint({
     x: resolvedX,
@@ -1132,7 +1151,8 @@ export function resolvingWorldCollisionBlockedWorldPoint(
       nearbyPlacedBlocks,
       playerLayer,
       playerHeightWorldLayers,
-      terrainColumnCollisionContext
+      terrainColumnCollisionContext,
+      jumpLayerReachMax
     );
 
     if (
@@ -1143,7 +1163,9 @@ export function resolvingWorldCollisionBlockedWorldPoint(
         nearbyPlacedBlocks,
         playerLayer,
         playerHeightWorldLayers,
-        terrainColumnCollisionContext
+        terrainColumnCollisionContext,
+        true,
+        jumpLayerReachMax
       ) &&
       !checkingWorldPlazaGridPointStandsOnWalkingBlockedTile(
         options.fallbackPosition,
@@ -1152,7 +1174,9 @@ export function resolvingWorldCollisionBlockedWorldPoint(
         nearbyPlacedBlocks,
         playerLayer,
         playerHeightWorldLayers,
-        terrainColumnCollisionContext
+        terrainColumnCollisionContext,
+        true,
+        jumpLayerReachMax
       )
     ) {
       return options.fallbackPosition;

@@ -1,5 +1,5 @@
 /**
- * Pack-wide flee, enrage, or regroup roll when the player rushes a shadowing stalker.
+ * Pack-wide flee, enrage, or regroup roll when the player rushes a shadowing PackHunter.
  *
  * @module components/world/wildlife/domains/resolvingWildlifeStalkPlayerApproachResponse
  */

@@ -19,6 +19,7 @@ import type {
 } from '../../shared/plazaSinglePlayerSavesDevvit';
 import type { WorldInventoryDevvitPersistedState } from '../../shared/worldInventoryDevvit';
 import { buildingPlazaSaveSlotsRedisKey } from '../domains/buildingPlazaSaveSlotRedisKeys';
+import { clearingPlazaSinglePlayerSaveSlotWorldPersistence } from '../domains/clearingPlazaSinglePlayerSaveSlotWorldPersistence';
 import { resolvingDevvitRedditUserId } from '../domains/resolvingDevvitRedditUserId';
 
 function parsingSaveSlotIndex(rawValue: string): PlazaSaveSlotIndex | null {
@@ -782,6 +783,14 @@ plazaSaves.put('/:saveSlotIndex', async (c) => {
       saveSlotIndex,
       update
     );
+
+    // Full slot wipe (all fields null) also clears plots / harvest / ground Redis.
+    if (merged === null) {
+      await clearingPlazaSinglePlayerSaveSlotWorldPersistence(
+        userId,
+        saveSlotIndex
+      );
+    }
 
     return c.json<PlazaSinglePlayerSaveSlotSaveResponse>({
       type: 'saved',

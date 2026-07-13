@@ -10,9 +10,9 @@ Always-loaded summary of the world bible for AI sessions. Full detail lives unde
 
 **The ladder:** everything that dies, Manus resurrects: players, wildlife, enemies, Apostles. This retroactively explains shipped player and wildlife respawn. Death screen titles name the manner of death; flavor line names Manus reforging the soul for the climb (no afterlife destination). Enemies can return stronger and remember their killers. Demon/Mythical name-tag animals are old souls who climbed across many lives (the old "soul saturation" theory is Deprecated).
 
-## Soulcore
+## Spritcore
 
-Every entity carries a **Soulcore** (shipped item: purple orb, "Condensed soul energy", non-droppable currency). In canon it is simultaneously money, mana, experience, and social rank: proof you survived. Design intent (Proposed, conflicts with shipped behavior): 20% of carried cores drop on death, and wealth attracts stronger predators. Soulbreak damage (shipped) is a hit that wounds the core directly. Open naming question: designer notes say "Magiccore"; bible uses Soulcore. Do not rename code.
+Every entity carries a **Spritcore** (shipped item: purple orb, "Condensed soul energy", non-droppable currency). In canon it is simultaneously money, mana, experience, and social rank: proof you survived. Design intent (Proposed, conflicts with shipped behavior): 20% of carried cores drop on death, and wealth attracts stronger predators. Soulbreak damage (shipped) is a hit that wounds the core directly. Final name is Spritcore (not Magiccore or Soulcore).
 
 ## The Twelve Apostles
 
@@ -45,7 +45,7 @@ The main character is a non-combatant: can only run and jump, but befriends easi
 
 ## Canonical terms
 
-Corpus, Manus, the Quiet Hand, Address (Manus's), the ladder, Soulcore, Soulbreak, the Twelve Apostles (names above), Mereonism / Mereons / the Worthy, the Uncored / the Many, Corekeeper, The Weal of Wanderers, Adom the Sifter, The Equal Flame, The Red Choir, Wanderer (player), Traveler (roaming NPC), Forgewrights, the Scorching, the Claim Age, Cucco. Damage kinds: Scorch, Frost, Burn, Soulbreak.
+Corpus, Manus, the Quiet Hand, Address (Manus's), the ladder, Spritcore, Soulbreak, the Twelve Apostles (names above), Mereonism / Mereons / the Worthy, the Uncored / the Many, Corekeeper, The Weal of Wanderers, Adom the Sifter, The Equal Flame, The Red Choir, Wanderer (player), Traveler (roaming NPC), Forgewrights, the Scorching, the Claim Age, Cucco. Damage kinds: Scorch, Frost, Burn, Soulbreak.
 
 ## Style rules (compressed)
 
@@ -55,6 +55,6 @@ Corpus, Manus, the Quiet Hand, Address (Manus's), the ladder, Soulcore, Soulbrea
 
 ## Pointers
 
-- Full bible: `lore/README.md` (index), `lore/world/` (Manus, ladder, Soulcore, Apostles, history), `lore/systems/factions-and-faith.md`, `lore/species/npcs-and-friends.md`.
+- Full bible: `lore/README.md` (index), `lore/world/` (Manus, ladder, Spritcore, Apostles, history), `lore/systems/factions-and-faith.md`, `lore/species/npcs-and-friends.md`.
 - Canon statuses matter: Established = shipped (do not contradict), Proposed = lore only, Deprecated = do not use.
-- Open items (Soulcore naming, core drops, Seven Death Sins, permadeath exceptions, Apostle mappings, plaza rename pass): `lore/meta/open-questions.md`. Check it before resolving anything that looks unresolved.
+- Open items (core drops, Seven Death Sins, permadeath exceptions, Apostle mappings, plaza rename pass): `lore/meta/open-questions.md`. Check it before resolving anything that looks unresolved.

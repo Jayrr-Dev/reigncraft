@@ -205,6 +205,7 @@ export function creatingWildlifeInstanceAtPosition({
     diedAtMs: null,
     hasDroppedLoot: false,
     hasBeenStudied: false,
+    petCooldownUntilMs: null,
     softDepartureStartedAtMs: null,
     softDepartureReason: null,
   };

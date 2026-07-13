@@ -102,7 +102,7 @@ export function applyingWildlifeStalkPackResponse({
 }
 
 /**
- * Rolls once per pack and applies flee or full attack to every hunting stalker.
+ * Rolls once per pack and applies flee or full attack to every hunting PackHunter.
  */
 export function applyingWildlifeStalkPackDamageResponse({
   store,

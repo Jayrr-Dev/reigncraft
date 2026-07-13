@@ -9,6 +9,7 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import type { DefiningWorldPlazaEntityHealthFloatText } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextTypes';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { DefiningWildlifeLargeSizeFrame } from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
+import type { DefiningWildlifeStaminaFatigueTier } from '@/components/world/wildlife/domains/definingWildlifeStaminaFatigueConstants';
 import type {
   DefiningWildlifeStalkEventKind,
   DefiningWildlifeStalkPhase,
@@ -32,6 +33,7 @@ export type DefiningWildlifeTemperamentId =
   | 'retaliator'
   | 'predator'
   | 'ambusher'
+  | 'pack_hunter'
   | 'stalker';
 
 /**
@@ -71,6 +73,8 @@ export type DefiningWildlifeHungerState = {
 export type DefiningWildlifeStaminaState = {
   staminaRatio: number;
   isExhausted: boolean;
+  /** Fatigue after repeated full depletions; resets on a full bar. */
+  fatigueTier: DefiningWildlifeStaminaFatigueTier;
   /** Continuous seconds spent running; resets when the animal stops sprinting. */
   runningForSeconds: number;
 };
@@ -247,7 +251,7 @@ export type DefiningWildlifeStalkPackResponseKind =
   | 'enrage'
   | 'regroup';
 
-/** Gradual retreat leg while the player closes on a shadowing stalker. */
+/** Gradual retreat leg while the player closes on a shadowing PackHunter. */
 export type DefiningWildlifeStalkPlayerApproachState = {
   noticedAtMs: number;
   noticeDelayMs: number;
@@ -271,7 +275,7 @@ export type DefiningWildlifeAggroState = {
    * player leaves the aggro radius (or damages this animal).
    */
   chaseGiveUpUntilPlayerExitsAggro?: boolean;
-  /** Timestamp when this stalker first locked onto the active prey target. */
+  /** Timestamp when this PackHunter first locked onto the active prey target. */
   stalkingPreySinceMs?: number | null;
   /** Timestamp when the pack hit confident size (5+); starts the formation timer. */
   stalkConfidentSinceMs?: number | null;
@@ -297,7 +301,7 @@ export type DefiningWildlifeAggroState = {
    * timestamp so predators may hunt them despite the trait.
    */
   provokedWildlifeAggroUntilMs?: number | null;
-  /** Explicit stalk hunt phase for stalker temperament. */
+  /** Explicit stalk hunt phase for PackHunter temperament. */
   stalkPhase?: DefiningWildlifeStalkPhase;
   /** Timestamp when the current stalkPhase began. */
   stalkPhaseEnteredAtMs?: number | null;
@@ -381,6 +385,11 @@ export type DefiningWildlifeInstance = {
   hasDroppedLoot: boolean;
   /** True after the local player finishes a Study channel on this corpse. */
   hasBeenStudied: boolean;
+  /**
+   * Wall-clock ms until this living companion accepts another Pet.
+   * Null/undefined when never petted or cooldown already expired.
+   */
+  petCooldownUntilMs?: number | null;
   /**
    * Soft-despawn clock for fairy daybreak / betrayal departure. Null while
    * still a normal companion.

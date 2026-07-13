@@ -104,7 +104,7 @@ function applyingWildlifePackmateAlphaDeathScatter({
         : { mode: 'idle' };
 
   const scattered =
-    species.temperamentId === 'stalker'
+    species.temperamentId === 'pack_hunter'
       ? applyingWildlifeStalkEventToInstance({
           instance,
           species,

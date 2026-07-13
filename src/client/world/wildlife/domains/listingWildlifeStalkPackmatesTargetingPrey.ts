@@ -1,5 +1,5 @@
 /**
- * Counts pack-species stalkers currently focused on one prey target.
+ * Counts pack-species PackHunters currently focused on one prey target.
  *
  * @module components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey
  */

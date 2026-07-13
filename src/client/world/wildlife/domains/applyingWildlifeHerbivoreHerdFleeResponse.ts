@@ -144,7 +144,8 @@ export function applyingWildlifeHerbivoreHerdFleeResponse({
     }
 
     if (
-      memberSpecies.temperamentId === 'stalker' &&
+      (memberSpecies.temperamentId === 'pack_hunter' ||
+        memberSpecies.temperamentId === 'stalker') &&
       checkingWildlifeStalkPhaseIsFleeing(herdMember.aggroState)
     ) {
       continue;

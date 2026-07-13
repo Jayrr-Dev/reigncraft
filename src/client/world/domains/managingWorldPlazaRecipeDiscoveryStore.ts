@@ -11,7 +11,7 @@ import { savingPlazaSinglePlayerSaveSlotData } from '@/components/home/repositor
 import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { readingWorldPlazaRecipeDiscoveryFromStorage } from '@/components/world/domains/readingWorldPlazaRecipeDiscoveryFromStorage';
 import { writingWorldPlazaRecipeDiscoveryToStorage } from '@/components/world/domains/writingWorldPlazaRecipeDiscoveryToStorage';
-import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
+import type { PlazaSaveSlotIndex } from '../../../shared/plazaGameSession';
 
 const managingWorldPlazaRecipeDiscoverySubscribers = new Set<() => void>();
 

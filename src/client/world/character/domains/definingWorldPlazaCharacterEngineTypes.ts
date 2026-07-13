@@ -39,6 +39,8 @@ export type DefiningWorldPlazaCharacterEngineDefinition = {
     readonly walkSpeedGridPerSecond?: number;
     readonly runSpeedGridPerSecond?: number;
     readonly jumpDistanceScale?: number;
+    /** Max upward world layers this character can jump onto. Defaults to 4. */
+    readonly maxJumpLayerReach?: number;
   };
   readonly vitals: {
     readonly baseMaxHealth: number;
@@ -94,6 +96,7 @@ export type ComputingWorldPlazaCharacterEngineDerivedStats = {
   readonly walkSpeedGridPerSecond: number;
   readonly runSpeedGridPerSecond: number;
   readonly jumpDistanceScale: number;
+  readonly maxJumpLayerReach: number;
   readonly healthRegenPerSecond: number;
   readonly hungerDrainMultiplier: number;
   readonly massKg: number;

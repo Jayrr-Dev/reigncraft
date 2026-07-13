@@ -36,9 +36,9 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE =
   'world-plaza-apple' as const;
 
-/** Soulcore currency item type id. */
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SOULCORE =
-  'world-plaza-soulcore' as const;
+/** Spritcore currency item type id. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE =
+  'world-plaza-spritcore' as const;
 
 /** Tiny starter bag (2x2). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_POUCH =

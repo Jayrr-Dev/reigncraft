@@ -22,6 +22,8 @@ export type DefiningWildlifeDifficultyLevers = {
   allowPredatorSpawns: boolean;
   /** When false, species with temperament `ambusher` never spawn. */
   allowAmbusherSpawns: boolean;
+  /** When false, species with temperament `pack_hunter` never spawn. */
+  allowPackHunterSpawns: boolean;
   /** When false, species with temperament `stalker` never spawn. */
   allowStalkerSpawns: boolean;
   /** Global multiplier on species base health and attack at registry build. */
@@ -44,6 +46,7 @@ export const DEFINING_WILDLIFE_DIFFICULTY_LEVERS: DefiningWildlifeDifficultyLeve
     },
     allowPredatorSpawns: true,
     allowAmbusherSpawns: true,
+    allowPackHunterSpawns: true,
     allowStalkerSpawns: true,
     healthAndAttackPowerScale: 10,
     aggroRadiusMultiplier: 1,

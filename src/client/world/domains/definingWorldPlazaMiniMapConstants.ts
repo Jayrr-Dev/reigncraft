@@ -17,11 +17,11 @@ import { DEFINING_WORLD_PLAZA_HUD_CANVAS_BORDER_COLOR } from '@/components/world
 export const DEFINING_WORLD_PLAZA_MINI_MAP_CANVAS_SIZE_PX = {
   embedded: {
     desktop: 102,
-    mobile: 61,
+    mobile: 70,
   },
   fullscreen: {
     desktop: 170,
-    mobile: 82,
+    mobile: 94,
   },
 } as const;
 

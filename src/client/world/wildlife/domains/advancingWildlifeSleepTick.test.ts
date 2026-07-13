@@ -104,7 +104,7 @@ describe('advancingWildlifeSleepTick', () => {
     expect(nextInstance.aiState.isSleeping).toBe(false);
     expect(nextInstance.aiState.motionClip).toBe('idle');
     expect(nextInstance.speechState.lastContextKey).toBe('wake');
-    expect(nextInstance.speechState.activeBubble?.message).toMatch(/\?\!/);
+    expect(nextInstance.speechState.activeBubble?.message).toMatch(/\?!/);
   });
 
   it('does not re-enter sleep after the animal has been disturbed by damage', () => {

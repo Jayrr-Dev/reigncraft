@@ -19,7 +19,7 @@ import {
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 
 const DEFINING_WILDLIFE_SLEEP_WAKE_ATTACK_TEMPERAMENTS: ReadonlySet<DefiningWildlifeTemperamentId> =
-  new Set(['predator', 'ambusher', 'stalker']);
+  new Set(['predator', 'ambusher', 'pack_hunter', 'stalker']);
 
 export type ResolvingWildlifeSleepWakeStartleIntentParams = {
   position: DefiningWorldPlazaWorldPoint;

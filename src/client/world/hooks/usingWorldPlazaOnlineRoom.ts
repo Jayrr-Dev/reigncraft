@@ -491,7 +491,8 @@ export function usingWorldPlazaOnlineRoom({
     const markingPreferredShardFull = (roomIndex: number): void => {
       isTrackingPresenceRef.current = false;
       updatingRoomSnapshot({
-        roomIndex,
+        roomId: String(roomIndex),
+        roomDisplayName: `Room ${roomIndex}`,
         isJoined: false,
         isRoomFull: true,
         lastError: DEFINING_WORLD_PLAZA_ONLINE_ROOM_PREFERRED_SHARD_FULL_MESSAGE,
@@ -562,7 +563,10 @@ export function usingWorldPlazaOnlineRoom({
 
       currentRoomIndexRef.current = roomIndex;
       updatingRoomSnapshot({
-        roomIndex,
+        roomId: String(roomIndex),
+        roomDisplayName: `Room ${roomIndex}`,
+        maxPlayers: DEFINING_WORLD_PLAZA_ONLINE_ROOM_MAX_PLAYERS,
+        createdBy: null,
         roomChannelName,
         remotePlayers: [],
         participantCount: 0,

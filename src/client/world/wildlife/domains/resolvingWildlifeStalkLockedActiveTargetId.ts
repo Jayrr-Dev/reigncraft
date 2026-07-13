@@ -1,5 +1,5 @@
 /**
- * Active target resolution while a stalker hunt lock is active.
+ * Active target resolution while a PackHunter hunt lock is active.
  *
  * @module components/world/wildlife/domains/resolvingWildlifeStalkLockedActiveTargetId
  */

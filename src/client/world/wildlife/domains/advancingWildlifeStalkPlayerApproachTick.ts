@@ -9,8 +9,8 @@ import { applyingWildlifeStalkPackEvent } from '@/components/world/wildlife/doma
 import { applyingWildlifeStalkPlayerApproachResponse } from '@/components/world/wildlife/domains/applyingWildlifeStalkPlayerApproachResponse';
 import { applyingWildlifeStalkPlayerApproachState } from '@/components/world/wildlife/domains/applyingWildlifeStalkPlayerApproachState';
 import { checkingWildlifeStalkInstanceHasCommittedRoll } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPackCommittedRoll';
-import { checkingWildlifePlayerApproachingStalker } from '@/components/world/wildlife/domains/checkingWildlifePlayerApproachingStalker';
-import { checkingWildlifeStalkerIsShadowingPlayer } from '@/components/world/wildlife/domains/checkingWildlifeStalkerIsShadowingPlayer';
+import { checkingWildlifePlayerApproachingPackHunter } from '@/components/world/wildlife/domains/checkingWildlifePlayerApproachingPackHunter';
+import { checkingWildlifePackHunterIsShadowingPlayer } from '@/components/world/wildlife/domains/checkingWildlifePackHunterIsShadowingPlayer';
 import { checkingWildlifeSameStalkPackSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_REACTION_COOLDOWN_MS } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
@@ -47,12 +47,12 @@ export type AdvancingWildlifeStalkPlayerApproachTickParams = {
   ) => DefiningWildlifeSpeciesDefinition | null;
 };
 
-type ResolvingClosestApproachingStalkerResult = {
+type ResolvingClosestApproachingPackHunterResult = {
   instance: DefiningWildlifeInstance;
   species: DefiningWildlifeSpeciesDefinition;
 } | null;
 
-function resolvingClosestApproachingStalker({
+function resolvingClosestApproachingPackHunter({
   instances,
   playerPosition,
   playerPreviousPosition,
@@ -80,7 +80,7 @@ function resolvingClosestApproachingStalker({
   resolveSpecies: (
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null;
-}): ResolvingClosestApproachingStalkerResult {
+}): ResolvingClosestApproachingPackHunterResult {
   let closestMatch: {
     instance: DefiningWildlifeInstance;
     species: DefiningWildlifeSpeciesDefinition;
@@ -94,7 +94,11 @@ function resolvingClosestApproachingStalker({
 
     const species = resolveSpecies(instance.speciesId);
 
-    if (!species || species.temperamentId !== 'stalker') {
+    if (
+      !species ||
+      (species.temperamentId !== 'pack_hunter' &&
+        species.temperamentId !== 'stalker')
+    ) {
       continue;
     }
 
@@ -122,7 +126,7 @@ function resolvingClosestApproachingStalker({
     const stalkingElapsedMs = Math.max(0, nowMs - stalkingStartedAtMs);
 
     if (
-      !checkingWildlifeStalkerIsShadowingPlayer({
+      !checkingWildlifePackHunterIsShadowingPlayer({
         species,
         aggroState: instance.aggroState,
         playerUserId,
@@ -137,7 +141,7 @@ function resolvingClosestApproachingStalker({
     }
 
     if (
-      !checkingWildlifePlayerApproachingStalker({
+      !checkingWildlifePlayerApproachingPackHunter({
         playerPosition,
         playerPreviousPosition,
         wolfPosition: instance.position,
@@ -236,7 +240,11 @@ function clearingWildlifeStalkPlayerApproachStateForHuntingPlayer({
 
     const species = resolveSpecies(instance.speciesId);
 
-    if (!species || species.temperamentId !== 'stalker') {
+    if (
+      !species ||
+      (species.temperamentId !== 'pack_hunter' &&
+        species.temperamentId !== 'stalker')
+    ) {
       continue;
     }
 
@@ -278,7 +286,7 @@ export function advancingWildlifeStalkPlayerApproachTick({
     return;
   }
 
-  const closestApproachingStalker = resolvingClosestApproachingStalker({
+  const closestApproachingPackHunter = resolvingClosestApproachingPackHunter({
     instances: listingWildlifeInstances(store),
     playerPosition,
     playerPreviousPosition,
@@ -293,7 +301,7 @@ export function advancingWildlifeStalkPlayerApproachTick({
     resolveSpecies,
   });
 
-  if (!closestApproachingStalker) {
+  if (!closestApproachingPackHunter) {
     clearingWildlifeStalkPlayerApproachStateForHuntingPlayer({
       store,
       playerUserId,
@@ -307,13 +315,13 @@ export function advancingWildlifeStalkPlayerApproachTick({
   );
   const nearbyInstances = queryingWildlifeInstancesNearPoint({
     grid: spatialGrid,
-    point: closestApproachingStalker.instance.position,
-    radiusGrid: closestApproachingStalker.species.aggro.packShareRadiusGrid,
-    excludeInstanceId: closestApproachingStalker.instance.instanceId,
+    point: closestApproachingPackHunter.instance.position,
+    radiusGrid: closestApproachingPackHunter.species.aggro.packShareRadiusGrid,
+    excludeInstanceId: closestApproachingPackHunter.instance.instanceId,
   });
   const liveTriggerInstance =
-    store.instances.get(closestApproachingStalker.instance.instanceId) ??
-    closestApproachingStalker.instance;
+    store.instances.get(closestApproachingPackHunter.instance.instanceId) ??
+    closestApproachingPackHunter.instance;
   const existingApproachState =
     liveTriggerInstance.aggroState.stalkPlayerApproachState ?? null;
   const playerPace: 'walk' | 'run' = isPlayerRunning ? 'run' : 'walk';
@@ -341,7 +349,7 @@ export function advancingWildlifeStalkPlayerApproachTick({
     applyingWildlifeStalkPlayerApproachResponse({
       store,
       triggerInstance: liveTriggerInstance,
-      species: closestApproachingStalker.species,
+      species: closestApproachingPackHunter.species,
       preyTargetId: playerUserId,
       nearbyInstances,
       nowMs,
@@ -391,7 +399,7 @@ export function advancingWildlifeStalkPlayerApproachTick({
     applyingWildlifeStalkPackEvent({
       store,
       anchorInstance: liveTriggerInstance,
-      species: closestApproachingStalker.species,
+      species: closestApproachingPackHunter.species,
       preyTargetId: playerUserId,
       nearbyInstances,
       eventKind: 'PLAYER_APPROACH_NOTICED',

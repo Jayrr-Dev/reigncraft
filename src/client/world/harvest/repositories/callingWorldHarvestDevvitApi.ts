@@ -1,3 +1,4 @@
+import { appendingWorldPlazaOnlineRoomQueryToApiPath } from '@/components/world/domains/managingWorldPlazaOnlineRoomIdStore';
 import type {
   WorldHarvestDevvitChoppedTreesResponse,
   WorldHarvestDevvitChopTreeRequest,
@@ -40,7 +41,7 @@ async function callingWorldHarvestDevvitApi(
   path: string,
   init?: RequestInit,
 ): Promise<unknown> {
-  const response = await fetch(path, {
+  const response = await fetch(appendingWorldPlazaOnlineRoomQueryToApiPath(path), {
     ...init,
     headers: {
       'Content-Type': 'application/json',

@@ -41,7 +41,7 @@ describe('computingWorldPlazaEnvironmentalTemperatureHudExposure', () => {
     expect(exposure?.damagePerSecond).toBeCloseTo(6.8, 5);
   });
 
-  it('adds frostnip percent max HP to the cold damage per second badge', () => {
+  it('adds freezing percent max HP to the cold damage per second badge', () => {
     const nowMs = 0;
     let state = creatingWorldPlazaEntityHealthInitialState();
     state = applyingWorldPlazaEntityFrostbiteStack({

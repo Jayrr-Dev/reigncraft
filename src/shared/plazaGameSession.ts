@@ -1,9 +1,6 @@
 /** Number of offline single-player save slots. */
 export const PLAZA_SINGLE_PLAYER_SAVE_SLOT_COUNT = 3;
 
-/** Multiplayer rooms listed on the home screen (each holds up to 3 players). */
-export const PLAZA_MULTIPLAYER_BROWSEABLE_ROOM_COUNT = 12;
-
 /** Valid save slot indices for single-player mode. */
 export type PlazaSaveSlotIndex = 1 | 2 | 3;
 
@@ -20,7 +17,7 @@ export type PlazaGameSession =
     }
   | {
       mode: 'multiplayer';
-      roomIndex: number;
+      roomId: string;
     };
 
 /**
@@ -35,19 +32,6 @@ export function checkingPlazaSaveSlotIndex(
     Number.isInteger(value) &&
     value >= 1 &&
     value <= PLAZA_SINGLE_PLAYER_SAVE_SLOT_COUNT
-  );
-}
-
-/**
- * Returns true when a number is a valid multiplayer room index.
- *
- * @param value - Candidate room index.
- */
-export function checkingPlazaMultiplayerRoomIndex(value: number): boolean {
-  return (
-    Number.isInteger(value) &&
-    value >= 1 &&
-    value <= PLAZA_MULTIPLAYER_BROWSEABLE_ROOM_COUNT
   );
 }
 

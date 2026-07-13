@@ -1,5 +1,5 @@
 /**
- * Trailing follow point for stalker temperament shadowing.
+ * Trailing follow point for PackHunter temperament shadowing.
  *
  * @module components/world/wildlife/domains/resolvingWildlifeStalkFollowTargetPoint
  */

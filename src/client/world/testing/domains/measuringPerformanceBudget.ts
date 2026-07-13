@@ -17,7 +17,16 @@ export const DEFINING_PERFORMANCE_BUDGET_SCALE_ENV = 'PERF_BUDGET_SCALE';
  * Reads {@link DEFINING_PERFORMANCE_BUDGET_SCALE_ENV}; invalid / missing → 1.
  */
 export function resolvingPerformanceBudgetScale(): number {
-  const raw = process.env[DEFINING_PERFORMANCE_BUDGET_SCALE_ENV];
+  const processEnv =
+    typeof globalThis === 'object' &&
+    globalThis !== null &&
+    'process' in globalThis &&
+    typeof (globalThis as { process?: { env?: Record<string, string | undefined> } })
+      .process?.env === 'object'
+      ? (globalThis as { process: { env: Record<string, string | undefined> } })
+          .process.env
+      : undefined;
+  const raw = processEnv?.[DEFINING_PERFORMANCE_BUDGET_SCALE_ENV];
 
   if (raw === undefined || raw === '') {
     return 1;

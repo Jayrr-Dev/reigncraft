@@ -26,7 +26,7 @@ export interface ApplyingWorldBuildingBuildModeBlockHeightSelectionResult {
 
 /**
  * Applies build-mode block height selection and snaps the placement layer to each
- * preset's default anchor (slab 2, half 3, block 5, tile ground). Tower keeps
+ * preset's default anchor (slab 1, half 2, full 4, tile ground). Tower keeps
  * the current layer because its height follows L.
  *
  * @param input - Requested preset height and the current sidebar layer.

@@ -11,7 +11,8 @@
       Reddit webview click bridge can call elementFromPoint with NaN / close over
       native hit-testing. Classic external script (CSP-safe) must run first.
     -->
-    <script src="./bootingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard.boot.js"></script>
+    <!-- Absolute /public asset: Vite must not try to bundle this classic script. -->
+    <script src="/bootingWorldPlazaDocumentElementFromPointFiniteCoordinateGuard.boot.js"></script>
   </head>
   <body class="h-full">
     <div id="root" class="h-full"></div>

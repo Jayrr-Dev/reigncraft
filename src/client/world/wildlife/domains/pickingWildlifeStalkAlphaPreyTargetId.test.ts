@@ -1,7 +1,7 @@
 import { creatingWildlifeTestInstance } from '@/components/world/wildlife/domains/creatingWildlifeTestFixtures';
 import { checkingWildlifePredatorMayHuntPrey } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import { listingWildlifeStalkerPreyTargetCandidates } from '@/components/world/wildlife/domains/listingWildlifeStalkerPreyTargetCandidates';
+import { listingWildlifePackHunterPreyTargetCandidates } from '@/components/world/wildlife/domains/listingWildlifePackHunterPreyTargetCandidates';
 import { pickingWildlifeStalkAlphaPreyTargetId } from '@/components/world/wildlife/domains/pickingWildlifeStalkAlphaPreyTargetId';
 import { resolvingWildlifeStalkPreyPickWeight } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPreyPickWeight';
 import { describe, expect, it } from 'vitest';
@@ -71,7 +71,7 @@ describe('pickingWildlifeStalkAlphaPreyTargetId', () => {
   });
 });
 
-describe('listingWildlifeStalkerPreyTargetCandidates', () => {
+describe('listingWildlifePackHunterPreyTargetCandidates', () => {
   it('includes boar and excludes rival wolves', () => {
     const species = DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'];
     const instance = creatingWildlifeTestInstance({
@@ -93,7 +93,7 @@ describe('listingWildlifeStalkerPreyTargetCandidates', () => {
       position: { x: 5, y: 1, layer: 1 },
     });
 
-    const candidates = listingWildlifeStalkerPreyTargetCandidates({
+    const candidates = listingWildlifePackHunterPreyTargetCandidates({
       instance,
       species,
       nearbyInstances: [boar, rivalWolf],
@@ -136,7 +136,7 @@ describe('listingWildlifeStalkerPreyTargetCandidates', () => {
       sizeScaleSample: 1,
     });
 
-    const candidates = listingWildlifeStalkerPreyTargetCandidates({
+    const candidates = listingWildlifePackHunterPreyTargetCandidates({
       instance,
       species,
       nearbyInstances: [sheep],

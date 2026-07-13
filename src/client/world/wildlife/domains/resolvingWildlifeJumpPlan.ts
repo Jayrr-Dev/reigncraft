@@ -9,7 +9,6 @@
  */
 
 import {
-  DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX,
   DEFINING_WORLD_BUILDING_WORLD_LAYER_WALK_STEP_LAYER_DELTA,
 } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
@@ -200,7 +199,7 @@ export function resolvingWildlifeGapSampleKind(
   );
   const layerDelta = surfaceLayer - originLayer;
 
-  if (layerDelta > DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX) {
+  if (layerDelta > species.jump.maxJumpLayerReach) {
     return 'unjumpable';
   }
 
@@ -344,9 +343,7 @@ export function resolvingWildlifeTerrainGapJumpPlan({
     );
     const landingLayerDelta = (landingPoint.layer ?? originLayer) - originLayer;
 
-    if (
-      landingLayerDelta > DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX
-    ) {
+    if (landingLayerDelta > species.jump.maxJumpLayerReach) {
       continue;
     }
 

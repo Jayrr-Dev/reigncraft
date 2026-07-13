@@ -1,6 +1,8 @@
 /**
- * Player-only stamina fatigue tiers. Each full bar depletion (100% to 0%) advances
+ * Player stamina fatigue tiers. Each full bar depletion (100% to 0%) advances
  * the tier; reaching a full bar resets back to fresh.
+ *
+ * Matches wildlife: 66% → 33% → full 100% heal.
  *
  * @module components/world/domains/definingWorldPlazaPlayerStaminaFatigueConstants
  */
@@ -9,13 +11,12 @@
 export type DefiningWorldPlazaPlayerStaminaFatigueTier =
   | 'fresh'
   | 'winded'
-  | 'fatigued'
-  | 'spent'
-  | 'collapsed';
+  | 'drained'
+  | 'spent';
 
 /** Ordered progression when the stamina bar fully empties. */
 export const DEFINING_WORLD_PLAZA_PLAYER_STAMINA_FATIGUE_TIER_ORDER: readonly DefiningWorldPlazaPlayerStaminaFatigueTier[] =
-  ['fresh', 'winded', 'fatigued', 'spent', 'collapsed'];
+  ['fresh', 'winded', 'drained', 'spent'];
 
 export type DefiningWorldPlazaPlayerStaminaFatigueTierConfig = {
   /** How much the bar must refill after a full empty before run, jump, or roll work again. */
@@ -34,19 +35,15 @@ export const DEFINING_WORLD_PLAZA_PLAYER_STAMINA_FATIGUE_TIER_CONFIG: Record<
     regenMultiplier: 1,
   },
   winded: {
-    useUnlockRatio: 0.85,
+    useUnlockRatio: 0.66,
     regenMultiplier: 1,
   },
-  fatigued: {
-    useUnlockRatio: 0.6,
+  drained: {
+    useUnlockRatio: 0.33,
     regenMultiplier: 1,
   },
   spent: {
-    useUnlockRatio: 0.4,
-    regenMultiplier: 1,
-  },
-  collapsed: {
-    useUnlockRatio: 0.15,
+    useUnlockRatio: 1,
     regenMultiplier: 1,
   },
 };

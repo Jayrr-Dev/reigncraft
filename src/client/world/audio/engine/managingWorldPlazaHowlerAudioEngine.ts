@@ -369,12 +369,15 @@ export function creatingWorldPlazaHowlerAudioEngine(): ManagingWorldPlazaHowlerA
       entry,
       sources
     );
+    // Default 0 so HTML5/WebAudio inherit silence on play(); per-id volume is
+    // applied immediately after. Volume 1 here made lava/water ambience blast
+    // max for one frame before proximity gain landed.
     const howl = new Howl({
       src: [...sources],
       html5: isStreamed,
       preload: false,
       pool: DEFINING_WORLD_PLAZA_AUDIO_HOWL_POOL_SIZE,
-      volume: 1,
+      volume: 0,
     });
     const asset: ManagingWorldPlazaHowlerCachedAsset = {
       id,
@@ -458,6 +461,8 @@ export function creatingWorldPlazaHowlerAudioEngine(): ManagingWorldPlazaHowlerA
     activeVoices.set(engineVoiceId, voice);
     asset.activeVoiceCount += 1;
     asset.lastUsedAtMs = Date.now();
+    // Apply gain before loop/rate so streamed ambience never audibly starts at
+    // the Howl default (0) without the proximity target.
     asset.howl.volume(resolvingVoiceEffectiveVolume(voice), soundId);
 
     if (options.rate !== undefined) {

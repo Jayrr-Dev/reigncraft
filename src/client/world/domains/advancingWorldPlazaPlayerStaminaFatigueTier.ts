@@ -4,7 +4,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaPlayerStaminaFatigueConstants';
 
 /**
- * Returns the next fatigue tier after a full stamina depletion, capped at collapsed.
+ * Returns the next fatigue tier after a full stamina depletion, capped at spent.
  */
 export function advancingWorldPlazaPlayerStaminaFatigueTier(
   currentTier: DefiningWorldPlazaPlayerStaminaFatigueTier

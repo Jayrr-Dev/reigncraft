@@ -42,7 +42,7 @@ He is also not reachable. To stand before Manus, a mortal must first best all tw
 
 ## Writing rules for Manus content
 
-- Manus is a fact, not a mystery. Never write "if the god exists" copy. The old "nobody knows what recycles the dead" framing is Deprecated (see [`world/soul-and-soulcore.md`](soul-and-soulcore.md)).
+- Manus is a fact, not a mystery. Never write "if the god exists" copy. The old "nobody knows what recycles the dead" framing is Deprecated (see [`world/soul-and-spritcore.md`](soul-and-spritcore.md)).
 - He never intervenes in shipped content without a deliberate canon decision. His presence is the system working, plus the occasional gift with his name on it.
 - The founder persona is delivered in fantasy-deniable language only: Addresses, gifts, endowments, the Founder of Corpus. No real-world business vocabulary in fiction; the reference key for writers is in [`meta/style-guide.md`](../meta/style-guide.md).
 - Keep his logic coherent. Manus is fair in the brutal, mechanical sense, never the emotional one, and completely sincere about both. The comedy is that he means every word.

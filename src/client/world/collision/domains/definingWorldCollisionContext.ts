@@ -21,5 +21,7 @@ export type DefiningWorldCollisionContext = {
   readonly movementDelta?: DefiningWorldPlazaWorldPoint;
   readonly playerRadiusGrid?: number;
   readonly playerHeightWorldLayers?: number;
+  /** Max upward layers this mover can jump onto. */
+  readonly jumpLayerReachMax?: number;
   readonly terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext;
 };

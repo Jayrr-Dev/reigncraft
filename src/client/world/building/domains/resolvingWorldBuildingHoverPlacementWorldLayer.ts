@@ -3,12 +3,16 @@ import {
   resolvingWorldBuildingEffectiveBlockHeight,
 } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { resolvingWorldBuildingPlacedBlockBlockHeight } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import {
   clampingWorldBuildingWorldLayer,
   DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND,
 } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
-import { listingWorldBuildingPlacedBlocksAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
+import {
+  findingWorldBuildingPlacedBlockAtTileLayerIndex,
+  listingWorldBuildingPlacedBlocksAtTileIndex,
+} from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
 import { resolvingWorldPlazaBaseSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 
 /**
@@ -25,14 +29,42 @@ export interface ResolvingWorldBuildingHoverPlacementWorldLayerParams {
 }
 
 /**
+ * Returns true when a non-passable block caps the tile at the walkable surface.
+ *
+ * Solid caps need the next block stacked above (`L = S + H`). Terrain and
+ * passable floors are walkable volume at `S`, so new blocks sit flush
+ * (`L = S + H - 1`).
+ */
+function checkingWorldBuildingHoverPlacementHasSolidSurfaceCap(
+  tileX: number,
+  tileY: number,
+  surfaceLayer: number,
+  placedBlocks: DefiningWorldBuildingPlacedBlock[]
+): boolean {
+  const blockAtSurface = findingWorldBuildingPlacedBlockAtTileLayerIndex(
+    tileX,
+    tileY,
+    surfaceLayer,
+    placedBlocks
+  );
+
+  if (!blockAtSurface) {
+    return false;
+  }
+
+  return !checkingWorldBuildingPlacedBlockIsPassableTile(
+    resolvingWorldBuildingPlacedBlockBlockHeight(blockAtSurface)
+  );
+}
+
+/**
  * Returns the top anchor layer used for preview and placement on a hovered tile.
  *
- * World layer is the **top** anchor and columns extrude downward, so a block of
- * height H resting on a stack whose top is at layer S must anchor at S + H (its
- * bottom then rests at S + 1, directly on top of the existing column). Empty
- * flat-ground tiles keep the sidebar layer, and a manually raised layer is still
- * honored. Elevated terrain / rock columns count as a stack top so previews sit
- * on the plateau instead of drawing at ground height inside the cliff face.
+ * World layer is the **top** anchor and columns extrude downward. On a walkable
+ * surface `S` (terrain or passable floor), height `H` anchors at `S + H - 1` so
+ * the bottom rests on `S`. On a solid block cap at `S`, anchors at `S + H` so
+ * the bottom rests at `S + 1` (stacked on top). Empty flat-ground tiles keep
+ * the sidebar layer, and a manually raised layer is still honored.
  *
  * @param params - Hover tile, sidebar layer, block height, and placed blocks.
  */
@@ -78,10 +110,18 @@ export function resolvingWorldBuildingHoverPlacementWorldLayer(
     );
   }
 
-  // Extruded blocks anchor above the stack by their height (H).
   const stackingBlockHeight = Math.max(1, effectiveBlockHeight);
+  const hasSolidSurfaceCap = checkingWorldBuildingHoverPlacementHasSolidSurfaceCap(
+    tileX,
+    tileY,
+    stackTopLayer,
+    params.placedBlocks
+  );
+  // Solid cap: stack above (`S + H`). Terrain / passable: sit flush (`S + H - 1`).
   const stackedTopAnchorLayer = clampingWorldBuildingWorldLayer(
-    stackTopLayer + stackingBlockHeight
+    hasSolidSurfaceCap
+      ? stackTopLayer + stackingBlockHeight
+      : stackTopLayer + stackingBlockHeight - 1
   );
 
   return clampingWorldBuildingWorldLayer(

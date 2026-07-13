@@ -142,7 +142,7 @@ describe('resolvingWildlifePackRoamWanderIntent', () => {
     }
   });
 
-  it('routes non-stalker herbivores into herd landmark wander', () => {
+  it('routes non-PackHunter herbivores into herd landmark wander', () => {
     const deer = creatingWildlifeTestInstance({
       speciesId: 'deer',
       anchorId: 'wildlife:2:2:0',

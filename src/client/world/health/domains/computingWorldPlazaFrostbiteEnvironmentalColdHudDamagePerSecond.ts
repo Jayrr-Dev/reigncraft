@@ -1,5 +1,5 @@
 /**
- * Cold HUD DPS including Frostnip+ percent max HP and Frostbite+ multipliers.
+ * Cold HUD DPS including Freezing+ percent max HP and Frostbite+ multipliers.
  *
  * @module components/world/health/domains/computingWorldPlazaFrostbiteEnvironmentalColdHudDamagePerSecond
  */

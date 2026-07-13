@@ -1,5 +1,5 @@
 /**
- * Alpha-led calm wander for spawn-pack stalkers with no active prey.
+ * Alpha-led calm wander for spawn-pack PackHunters with no active prey.
  *
  * @module components/world/wildlife/domains/resolvingWildlifePackRoamWanderIntent
  */
@@ -80,7 +80,7 @@ function resolvingWildlifeFollowAlphaRoamIntent(
 export function resolvingWildlifePackRoamWanderIntent(
   blackboard: DefiningWildlifeBehaviorBlackboard
 ): DefiningWildlifeBehaviorIntent {
-  if (blackboard.species.temperamentId !== 'stalker') {
+  if (blackboard.species.temperamentId !== 'pack_hunter') {
     // Passive / skittish herds rest then travel to water, trees, or pasture.
     return resolvingWildlifeHerdLandmarkWanderIntent(blackboard);
   }

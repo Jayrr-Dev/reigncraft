@@ -60,7 +60,7 @@ export function applyingWorldPlazaCharacterEngineImmunities(
   const comfortBand =
     resolvingWorldPlazaCharacterEngineTemperatureComfortBand(definition);
 
-  let nextState = settingWorldPlazaEntityTemperatureResistance(state, {
+  const nextState = settingWorldPlazaEntityTemperatureResistance(state, {
     baseComfortLowCelsius: comfortBand.comfortLowCelsius,
     baseComfortHighCelsius: comfortBand.comfortHighCelsius,
     isHeatImmune:

@@ -48,7 +48,7 @@ import {
   type ReactNode,
 } from 'react';
 import { createRoot } from 'react-dom/client';
-import { PLAZA_DEVVIT_ONLINE_MAX_PLAYERS } from '../shared/plazaDevvitOnline';
+import { PLAZA_DEVVIT_ONLINE_DEFAULT_MAX_PLAYERS } from '../shared/plazaDevvitOnline';
 import type { PlazaGameSession } from '../shared/plazaGameSession';
 import {
   checkingPlazaSinglePlayerDevQaLoadSession,
@@ -378,7 +378,7 @@ export const App = () => {
         redditUserId: redditOnlineUserId,
         // Skip Redis save hydration for the ephemeral QA load.
         saveSlotIndex: isDevQaLoad ? null : gameSession.saveSlotIndex,
-        onlineRoomIndex: 1,
+        onlineRoomId: null as string | null,
       };
     }
 
@@ -387,7 +387,7 @@ export const App = () => {
       localPersistenceOwnerId: redditOnlineUserId,
       redditUserId: null,
       saveSlotIndex: null,
-      onlineRoomIndex: gameSession.roomIndex,
+      onlineRoomId: gameSession.roomId,
     };
   }, [gameSession, redditOnlineUserId]);
 
@@ -438,8 +438,8 @@ export const App = () => {
                   singlePlayerSaveSlotIndex={sessionConfig.saveSlotIndex}
                   onlineDisplayName={onlineDisplayName}
                   onlineAvatarUrl={onlineAvatarUrl}
-                  onlineMaxPlayers={PLAZA_DEVVIT_ONLINE_MAX_PLAYERS}
-                  onlineRoomIndex={sessionConfig.onlineRoomIndex}
+                  onlineMaxPlayers={PLAZA_DEVVIT_ONLINE_DEFAULT_MAX_PLAYERS}
+                  onlineRoomId={sessionConfig.onlineRoomId}
                   onExitToHome={handlingExitToHome}
                 />
               </Suspense>

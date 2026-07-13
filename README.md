@@ -52,7 +52,7 @@ Biomes differ in climate, forage, and which animals show up. Snowy plains and fi
 
 Spawn is per biome, not world-wide random. `definingWildlifeBiomeSpawnTable.ts` holds weighted pools: density threshold, species weights, pack size ranges. Anchors drop packs on a grid. Each animal rolls size tier, sleep schedule, and aggression (`tame`, `normal`, or `aggressive`). A few entries only appear at night (omega-wolf packs). Global difficulty levers can thin density or shift the predator mix.
 
-Species also differ in vitals, diet, activity window (day, night, dusk, or anytime), and aggro radius. Behavior comes from one of seven temperaments:
+Species also differ in vitals, diet, activity window (day, night, dusk, or anytime), and aggro radius. Behavior comes from one of eight temperaments:
 
 | Temperament | Behavior                                                     | Examples                     |
 | ----------- | ------------------------------------------------------------ | ---------------------------- |
@@ -61,8 +61,9 @@ Species also differ in vitals, diet, activity window (day, night, dusk, or anyti
 | Skittish    | Bolt when startled; some run toward rivers or cliffs         | Deer, zebra, horses          |
 | Retaliator  | Warn on territory, then chase; defend young                  | Boar, bear, elephant, rhino  |
 | Predator    | Hunt in a wide radius; pride or pack pressure                | Lion, lioness, polar bear    |
-| Ambusher    | Short aggro; pounce from cover or water edge                 | Crocodile, jaguar            |
-| Stalker     | Shadow at range, surround, then rush                         | Grey wolf, omega wolf, hyena |
+| Ambusher    | Short aggro; pounce from cover or water edge                 | Crocodile                    |
+| Pack hunter | Shadow at range, surround, then rush                         | Grey wolf, omega wolf, hyena |
+| Stalker     | Solo shadow; rush on weakness or after stalk if hungry/aggro | Tiger, jaguar                |
 
 On top of temperament: pack and herd panic, defend-young, juveniles seeking adults, gap jumps over water and terrain, hunting prey on the food chain, vocals and speech bubbles, corpse Study for the bestiary, and meat loot. Kill an animal, cook the raw meat at a campfire, then eat it. Raw meat is the main way you catch disease.
 

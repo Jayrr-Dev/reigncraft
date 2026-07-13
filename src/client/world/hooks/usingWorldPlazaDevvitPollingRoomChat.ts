@@ -43,7 +43,7 @@ export interface UsingWorldPlazaDevvitPollingRoomChatParams {
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   isRoomJoined: boolean;
   enabled: boolean;
-  roomIndex?: number;
+  roomId: string;
 }
 
 /**
@@ -55,7 +55,7 @@ export function usingWorldPlazaDevvitPollingRoomChat({
   playerPositionRef,
   isRoomJoined,
   enabled,
-  roomIndex = 1,
+  roomId,
 }: UsingWorldPlazaDevvitPollingRoomChatParams): UsingWorldPlazaOnlineRoomChatResult {
   const queryClient = useQueryClient();
   const lastSentAtMsRef = useRef(0);
@@ -128,7 +128,7 @@ export function usingWorldPlazaDevvitPollingRoomChat({
       void fetch(
         buildingPlazaDevvitOnlineRoomApiUrl(
           PLAZA_DEVVIT_ONLINE_TYPING_API_PATH,
-          roomIndex,
+          roomId,
         ),
         {
         method: "POST",
@@ -328,7 +328,7 @@ export function usingWorldPlazaDevvitPollingRoomChat({
         const response = await fetch(
           buildingPlazaDevvitOnlineRoomApiUrl(
             PLAZA_DEVVIT_ONLINE_CHAT_API_PATH,
-            roomIndex,
+            roomId,
           ),
           {
           method: "POST",
@@ -411,7 +411,7 @@ export function usingWorldPlazaDevvitPollingRoomChat({
         const response = await fetch(
           buildingPlazaDevvitOnlineRoomApiUrl(
             PLAZA_DEVVIT_ONLINE_CHAT_API_PATH,
-            roomIndex,
+            roomId,
           ),
         );
 

@@ -1,5 +1,5 @@
 /**
- * Frostnip+ percent-of-max-HP frost damage from stack count.
+ * Freezing+ percent-of-max-HP frost damage from stack count.
  *
  * @module components/world/health/domains/computingWorldPlazaFrostbitePercentMaxHealthDamage
  */

@@ -10,7 +10,7 @@
  * @module components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes
  */
 
-import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import type { DefiningWorldPlazaCraftModeCookbookId } from '@/components/world/building/domains/definingWorldPlazaCraftModeCookbookRegistry';
 
 /** Stable ids for craft-mode recipes. */

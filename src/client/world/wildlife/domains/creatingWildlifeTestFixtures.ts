@@ -89,6 +89,7 @@ export function creatingWildlifeTestInstance(
     diedAtMs: null,
     hasDroppedLoot: false,
     hasBeenStudied: false,
+    petCooldownUntilMs: null,
     ...overrides,
   };
 }

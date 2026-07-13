@@ -9,6 +9,7 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
 import { usingWorldPlazaTimedInteractionProgress } from '@/components/world/interaction/hooks/usingWorldPlazaTimedInteractionProgress';
+import { checkingWildlifeDocilePetIsReady } from '@/components/world/wildlife/domains/checkingWildlifeDocilePetIsReady';
 import {
   DEFINING_WILDLIFE_DOCILE_PET_PROGRESS_ICON,
   DEFINING_WILDLIFE_DOCILE_PET_WINDUP_MS,
@@ -92,6 +93,11 @@ export function usingWildlifeDocileBetrayProgress({
       );
 
       if (!instance || instance.isDead) {
+        clearingWildlifeDocileAttackConfirmPending();
+        return false;
+      }
+
+      if (!checkingWildlifeDocilePetIsReady(instance, Date.now())) {
         clearingWildlifeDocileAttackConfirmPending();
         return false;
       }

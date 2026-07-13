@@ -22,6 +22,7 @@ const DEFINING_PROFILE_PANEL_TEST_DERIVED_STATS: ComputingWorldPlazaCharacterEng
     walkSpeedGridPerSecond: 2,
     runSpeedGridPerSecond: 3,
     jumpDistanceScale: 1,
+    maxJumpLayerReach: 4,
     healthRegenPerSecond: 2,
     hungerDrainMultiplier: 1,
     massKg: 70,
@@ -78,6 +79,49 @@ const DEFINING_PROFILE_PANEL_TEST_HUNGER: UsingWorldPlazaPlayerHungerHudSnapshot
   };
 
 describe('resolvingWorldPlazaProfilePanelSections', () => {
+  it('groups attributes into combat, agility, and physicality', () => {
+    const sections = resolvingWorldPlazaProfilePanelSections({
+      health: buildingMinimalHealthHud(
+        DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT
+      ),
+      stamina: {
+        staminaRatio: 1,
+        isRunning: false,
+        isDepleted: false,
+      },
+      hunger: DEFINING_PROFILE_PANEL_TEST_HUNGER,
+      derivedStats: DEFINING_PROFILE_PANEL_TEST_DERIVED_STATS,
+    });
+
+    expect(sections.attributeCategories.map((category) => category.id)).toEqual(
+      ['combat', 'agility', 'physicality']
+    );
+    expect(
+      sections.attributeCategories
+        .find((category) => category.id === 'combat')
+        ?.entries.map((entry) => entry.id)
+    ).toEqual(['attack', 'defense', 'attack-speed']);
+    expect(
+      sections.attributeCategories
+        .find((category) => category.id === 'agility')
+        ?.entries.map((entry) => entry.id)
+    ).toEqual([
+      'move-speed',
+      'acceleration',
+      'top-speed',
+      'jump-distance',
+      'jump-height',
+      'jump-cost',
+      'roll-cost',
+      'stamina-regen',
+    ]);
+    expect(
+      sections.attributeCategories
+        .find((category) => category.id === 'physicality')
+        ?.entries.map((entry) => entry.id)
+    ).toEqual(['height', 'weight', 'cold-threshold', 'heat-threshold']);
+  });
+
   it('shows default cold and heat comfort thresholds as attributes', () => {
     const sections = resolvingWorldPlazaProfilePanelSections({
       health: buildingMinimalHealthHud(
@@ -115,6 +159,62 @@ describe('resolvingWorldPlazaProfilePanelSections', () => {
       label: 'Weight',
       iconName: 'mdi:scale-balance',
       valueText: '70 kg',
+    });
+    expect(
+      sections.attributeEntries.find((entry) => entry.id === 'acceleration')
+    ).toEqual({
+      id: 'acceleration',
+      label: 'Acceleration',
+      iconName: 'mdi:trending-up',
+      valueText: '0.25/s²',
+    });
+    expect(
+      sections.attributeEntries.find((entry) => entry.id === 'top-speed')
+    ).toEqual({
+      id: 'top-speed',
+      label: 'Top speed',
+      iconName: 'mdi:speedometer',
+      valueText: '3.0',
+    });
+    expect(
+      sections.attributeEntries.find((entry) => entry.id === 'jump-distance')
+    ).toEqual({
+      id: 'jump-distance',
+      label: 'Jump distance',
+      iconName: 'mdi:jump',
+      valueText: '0.6 / 3.5',
+    });
+    expect(
+      sections.attributeEntries.find((entry) => entry.id === 'jump-height')
+    ).toEqual({
+      id: 'jump-height',
+      label: 'Jump height',
+      iconName: 'mdi:stairs-up',
+      valueText: '4L',
+    });
+    expect(
+      sections.attributeEntries.find((entry) => entry.id === 'jump-cost')
+    ).toEqual({
+      id: 'jump-cost',
+      label: 'Jump cost',
+      iconName: 'mdi:battery-minus',
+      valueText: '6% / 9%',
+    });
+    expect(
+      sections.attributeEntries.find((entry) => entry.id === 'roll-cost')
+    ).toEqual({
+      id: 'roll-cost',
+      label: 'Roll cost',
+      iconName: 'mdi:rotate-right',
+      valueText: '9%',
+    });
+    expect(
+      sections.attributeEntries.find((entry) => entry.id === 'stamina-regen')
+    ).toEqual({
+      id: 'stamina-regen',
+      label: 'Stamina regen',
+      iconName: 'mdi:battery-plus',
+      valueText: '+22%/s',
     });
   });
 

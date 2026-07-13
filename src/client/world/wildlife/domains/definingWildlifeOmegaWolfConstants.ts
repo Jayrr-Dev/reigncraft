@@ -1,5 +1,5 @@
 /**
- * Omega Wolf elite stalker: ids, pack composition, and combat skews.
+ * Omega Wolf elite pack hunter: ids, pack composition, and combat skews.
  *
  * @module components/world/wildlife/domains/definingWildlifeOmegaWolfConstants
  */

@@ -1103,7 +1103,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     );
     const jumpLayerReachMax =
       computingWorldPlazaPlayerJumpLayerReachMaxFromMultiplier(
-        movementMultipliers.jumpLayerReachMultiplier
+        movementMultipliers.jumpLayerReachMultiplier,
+        characterEngineDerivedStats.maxJumpLayerReach
       );
 
     let jumpArcOffsetPx = 0;
@@ -2065,6 +2066,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
             playerRadiusGrid: characterEngineDerivedStats.collisionRadiusGrid,
             playerHeightWorldLayers:
               characterEngineDerivedStats.heightWorldLayers,
+            jumpLayerReachMax,
           }
         );
 
@@ -2404,6 +2406,10 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     const combatSpriteOffsetBelowGridAnchorPx =
       combatSpritePresentation.offsetBelowGridAnchorPx *
       characterEngineDerivedStats.sizeScale;
+    const avatarFootOffsetBelowGridAnchorPx =
+      resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx(
+        characterDefinition
+      ) * characterEngineDerivedStats.sizeScale;
 
     sprite.anchor.set(
       combatSpritePresentation.anchorXNormalized,
@@ -2458,6 +2464,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       {
         placedBlocks: scenePlacedBlocks,
         placedBlocksByTile: scenePlacedBlocksByTile,
+        avatarFootOffsetBelowGridAnchorPx,
       },
       placedBlocksDepthRevision
     );
@@ -2552,7 +2559,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       );
     sprite.alpha = respawnInvincibilityBlinkAlpha;
     sprite.tint = computingWorldPlazaFrostbiteAvatarTint(
-      healthStateRef?.current?.frostbite?.activeStageId ?? null
+      healthStateRef?.current?.frostbite?.stackCount ?? 0
     );
     shadowContainer.alpha = respawnInvincibilityBlinkAlpha;
     const heldItemSwingProfile = activeToolAction
@@ -2578,9 +2585,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       jumpArcOffsetPx + fallVerticalOffsetPx,
       groundShadowLiftPeakScreenPx,
       activeDirection,
-      resolvingWorldPlazaAvatarFootOffsetBelowGridAnchorPx(
-        characterDefinition
-      ) * characterEngineDerivedStats.sizeScale,
+      avatarFootOffsetBelowGridAnchorPx,
       avatarGroundShadowSizeScale
     );
 

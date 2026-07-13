@@ -196,19 +196,19 @@ export const DEFINING_PLAZA_LORE_BOOK_CHAPTERS: readonly PlazaLoreBookChapter[] 
       ],
     },
     {
-      id: 'soulcore',
-      title: 'Soulcore',
+      id: 'spritcore',
+      title: 'Spritcore',
       icon: 'game-icons:crystal-ball',
       blurb: 'The score, made portable',
       entries: [
         {
           id: 'the-core',
           kind: 'account',
-          title: 'Soulcore',
+          title: 'Spritcore',
           subtitle: 'One orb, four jobs',
           icon: 'game-icons:crystal-ball',
           paragraphs: [
-            'Soulcore is condensed soul energy: small purple orbs, warm to the touch, faintly humming. Everyone and everything on the ladder carries a core. A Soulcore is proof that you survived, made portable.',
+            'Spritcore is condensed soul energy: small purple orbs, warm to the touch, faintly humming. Everyone and everything on the ladder carries a core. A Spritcore is proof that you survived, made portable.',
             'One object, four jobs. Money, because cores are the only currency everyone must earn the same way. Mana, because spellwork burns them, which keeps magic honest and mages greedy. Experience, because growth across lives is stored in them. And rank, because the church counts them, merchants count them, and so does everyone else, whatever they claim.',
             'The arithmetic underneath all four is simple and nobody likes looking straight at it: for you to get stronger, something else has to become loot. The whole economy of Corpus stands on that sentence.',
           ],

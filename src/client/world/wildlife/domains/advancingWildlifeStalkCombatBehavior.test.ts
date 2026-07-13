@@ -127,7 +127,7 @@ function buildingBlackboard(
   };
 }
 
-describe('stalker attack timeout behavior', () => {
+describe('PackHunter attack timeout behavior', () => {
   it('returns to surround / flank after an attack burst without a kill', () => {
     const blackboard = buildingBlackboard({
       nowMs: 1_000 + DEFINING_WILDLIFE_STALK_ATTACK_KILL_TIMEOUT_MS,

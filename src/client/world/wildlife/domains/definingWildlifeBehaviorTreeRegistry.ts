@@ -373,8 +373,8 @@ const DEFINING_WILDLIFE_AMBUSHER_TREE: DefiningWildlifeBehaviorTreeDefinition =
     },
   };
 
-const DEFINING_WILDLIFE_STALKER_TREE: DefiningWildlifeBehaviorTreeDefinition = {
-  temperamentId: 'stalker',
+const DEFINING_WILDLIFE_PACK_HUNTER_TREE: DefiningWildlifeBehaviorTreeDefinition = {
+  temperamentId: 'pack_hunter',
   root: {
     kind: 'selector',
     children: [
@@ -451,6 +451,65 @@ const DEFINING_WILDLIFE_STALKER_TREE: DefiningWildlifeBehaviorTreeDefinition = {
   },
 };
 
+/** Solo stalk: shadow, wait for weakness or hungry/aggressive patience, then rush. */
+const DEFINING_WILDLIFE_STALKER_TREE: DefiningWildlifeBehaviorTreeDefinition = {
+  temperamentId: 'stalker',
+  root: {
+    kind: 'selector',
+    children: [
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'isStalkPackFleeing' },
+          { kind: 'action', actionId: 'fleeFromThreat' },
+        ],
+      },
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
+          { kind: 'condition', conditionId: 'isStalkKillWindowOpen' },
+          { kind: 'action', actionId: 'meleeAttack' },
+        ],
+      },
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
+          { kind: 'condition', conditionId: 'isStalkKillWindowOpen' },
+          { kind: 'action', actionId: 'chaseTarget' },
+        ],
+      },
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'isStalkingPrey' },
+          { kind: 'action', actionId: 'stalkPrey' },
+        ],
+      },
+      ...DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES,
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'isMotivatedToHunt' },
+          { kind: 'condition', conditionId: 'hasHuntablePreyNearby' },
+          { kind: 'action', actionId: 'chaseTarget' },
+        ],
+      },
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'isMotivatedToForageGroundFood' },
+          { kind: 'condition', conditionId: 'hasEdibleGroundFoodNearby' },
+          { kind: 'action', actionId: 'forageGroundFood' },
+        ],
+      },
+      ...DEFINING_WILDLIFE_SEPARATION_ANXIETY_BRANCHES,
+      { kind: 'action', actionId: 'wander' },
+    ],
+  },
+};
+
 export const DEFINING_WILDLIFE_BEHAVIOR_TREE_REGISTRY: Record<
   DefiningWildlifeTemperamentId,
   DefiningWildlifeBehaviorTreeDefinition
@@ -461,6 +520,7 @@ export const DEFINING_WILDLIFE_BEHAVIOR_TREE_REGISTRY: Record<
   retaliator: DEFINING_WILDLIFE_RETALIATOR_TREE,
   predator: DEFINING_WILDLIFE_PREDATOR_TREE,
   ambusher: DEFINING_WILDLIFE_AMBUSHER_TREE,
+  pack_hunter: DEFINING_WILDLIFE_PACK_HUNTER_TREE,
   stalker: DEFINING_WILDLIFE_STALKER_TREE,
 };
 

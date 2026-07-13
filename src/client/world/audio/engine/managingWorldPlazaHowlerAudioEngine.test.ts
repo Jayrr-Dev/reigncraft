@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 type FakeHowlInstance = {
   readonly volumes: Map<number, number>;
   readonly playingIds: Set<number>;
+  readonly defaultVolume: number;
   isUnloaded: boolean;
 };
 
@@ -38,11 +39,13 @@ vi.mock('howler', () => {
   class FakeHowl {
     readonly volumes = new Map<number, number>();
     readonly playingIds = new Set<number>();
+    readonly defaultVolume: number;
     isUnloaded = false;
     private loadState: 'unloaded' | 'loaded' = 'unloaded';
     private listeners = new Map<string, Set<() => void>>();
 
-    constructor() {
+    constructor(options: { volume?: number } = {}) {
+      this.defaultVolume = options.volume ?? 1;
       howlerMocks.instances.push(this);
     }
 
@@ -70,6 +73,8 @@ vi.mock('howler', () => {
       const resolvedSoundId = soundId ?? nextSoundId;
       nextSoundId += soundId === undefined ? 1 : 0;
       this.playingIds.add(resolvedSoundId);
+      // Howler inherits Howl._volume until volume(id) runs.
+      this.volumes.set(resolvedSoundId, this.defaultVolume);
       return resolvedSoundId;
     }
 
@@ -160,6 +165,29 @@ describe('creatingWorldPlazaHowlerAudioEngine', () => {
     quiet.setVolume(0.1);
     expect(howlerMocks.instances[0].volumes.get(quiet.soundId)).toBe(0.1);
     expect(howlerMocks.instances[0].volumes.get(loud.soundId)).toBe(0.8);
+    engine.destroy();
+  });
+
+  it('creates Howls silent so proximity ambience cannot blast before gain applies', async () => {
+    const engine = creatingWorldPlazaHowlerAudioEngine();
+    await engine.preload({
+      river: {
+        src: '/environment/ambience/river.ogg',
+        group: 'ambience',
+      },
+    });
+
+    expect(howlerMocks.instances[0]?.defaultVolume).toBe(0);
+
+    await engine.unlock();
+    const handle = engine.play('river', { volume: 0.18, group: 'ambience' });
+
+    expect(handle).not.toBeNull();
+    if (handle?.soundId === undefined || !howlerMocks.instances[0]) {
+      throw new Error('Expected ambience play handle.');
+    }
+
+    expect(howlerMocks.instances[0].volumes.get(handle.soundId)).toBe(0.18);
     engine.destroy();
   });
 

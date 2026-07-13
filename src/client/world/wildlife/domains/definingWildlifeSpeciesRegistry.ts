@@ -131,6 +131,8 @@ export type DefiningWildlifeSpeciesJumpConfig = {
   canJump: boolean;
   /** Whether predators may pounce at chase targets. */
   canPounce: boolean;
+  /** Max upward world layers this species can jump onto. */
+  maxJumpLayerReach: number;
   /** Longest jump the species can clear (grid units). */
   maxJumpDistanceGrid: number;
   /** Horizontal travel speed while airborne (grid units per second). */
@@ -147,11 +149,6 @@ export type DefiningWildlifeSpeciesStaminaConfig = {
   drainMultiplier: number;
   /** Multiplier on regen while walking or idle; higher values mean faster recovery. */
   regenMultiplier: number;
-  /**
-   * Stamina ratio required to run again after exhaustion.
-   * When omitted, the global default applies.
-   */
-  exhaustedRecoveryRatio?: number;
   /**
    * Stamina bar capacity as a ratio of the global 1.0 pool.
    * Fleet prey use values above 1 so chases last longer before exhaustion.
@@ -184,18 +181,15 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   fairy: { drainMultiplier: 0.5, regenMultiplier: 1.5 },
 
   // Prey — deer burst hard; zebras gallop long but recover slowly.
-  // Fleet grazers must recover most of the bar before sprinting again,
-  // giving predators a real window once they gas a herd out.
+  // Fleet grazers use larger stamina pools; fatigue unlocks are global (66/33/100).
   deer: {
     drainMultiplier: 0.72,
     regenMultiplier: 1.2,
-    exhaustedRecoveryRatio: 0.75,
     maxStaminaRatio: 1.15,
   },
   zebra: {
     drainMultiplier: 0.48,
     regenMultiplier: 0.55,
-    exhaustedRecoveryRatio: 0.75,
     maxStaminaRatio: 1.5,
   },
 
@@ -205,7 +199,6 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   grizzly: {
     drainMultiplier: 1.35,
     regenMultiplier: 0.9,
-    exhaustedRecoveryRatio: 0.75,
     maxStaminaRatio: 1.6,
   },
 
@@ -213,13 +206,11 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   'grey-wolf': {
     drainMultiplier: 0.28,
     regenMultiplier: 2.4,
-    exhaustedRecoveryRatio: 0.22,
   },
   // Omega Wolf — 1.5x endurance beyond grey wolf baseline.
   'omega-wolf': {
     drainMultiplier: 0.187,
     regenMultiplier: 3.6,
-    exhaustedRecoveryRatio: 0.22,
   },
   lion: { drainMultiplier: 1.45, regenMultiplier: 0.85 },
   lioness: { drainMultiplier: 1.12, regenMultiplier: 0.98 },
@@ -229,20 +220,17 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   antilope: {
     drainMultiplier: 0.7,
     regenMultiplier: 1.2,
-    exhaustedRecoveryRatio: 0.75,
     maxStaminaRatio: 1.5,
   },
   oryx: {
     drainMultiplier: 0.85,
     regenMultiplier: 1.05,
-    exhaustedRecoveryRatio: 0.75,
     maxStaminaRatio: 1.7,
   },
   giraffe: { drainMultiplier: 1.3, regenMultiplier: 0.9 },
   ostrich: {
     drainMultiplier: 0.45,
     regenMultiplier: 0.9,
-    exhaustedRecoveryRatio: 0.75,
     maxStaminaRatio: 1.3,
   },
   elephant: { drainMultiplier: 1.5, regenMultiplier: 0.8 },
@@ -252,7 +240,6 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   hyena: {
     drainMultiplier: 0.75,
     regenMultiplier: 1.1,
-    exhaustedRecoveryRatio: 0.45,
   },
 
   // Plains herds and feral horses — horses are the endurance champions.
@@ -262,19 +249,16 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   stag: {
     drainMultiplier: 0.78,
     regenMultiplier: 1.2,
-    exhaustedRecoveryRatio: 0.75,
     maxStaminaRatio: 1.35,
   },
   'brown-horse': {
     drainMultiplier: 0.5,
     regenMultiplier: 0.7,
-    exhaustedRecoveryRatio: 0.5,
   },
   'work-horse': { drainMultiplier: 0.6, regenMultiplier: 0.75 },
   'arabian-horse': {
     drainMultiplier: 0.45,
     regenMultiplier: 0.7,
-    exhaustedRecoveryRatio: 0.5,
   },
   donkey: { drainMultiplier: 0.75, regenMultiplier: 0.95 },
 
@@ -322,6 +306,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: false,
       canPounce: false,
+      maxJumpLayerReach: 0,
       maxJumpDistanceGrid: 0,
       jumpSpeedGridPerSecond: 0,
       jumpArcPeakPx: 0,
@@ -334,6 +319,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: false,
       canPounce: false,
+      maxJumpLayerReach: 0,
       maxJumpDistanceGrid: 0,
       jumpSpeedGridPerSecond: 0,
       jumpArcPeakPx: 0,
@@ -346,6 +332,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 2,
       jumpSpeedGridPerSecond: 3.5,
       jumpArcPeakPx: 14,
@@ -358,6 +345,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 1.5,
       jumpSpeedGridPerSecond: 4.5,
       jumpArcPeakPx: 28,
@@ -370,6 +358,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 2,
       jumpSpeedGridPerSecond: 4,
       jumpArcPeakPx: 16,
@@ -382,6 +371,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 2.2,
       jumpSpeedGridPerSecond: 4.2,
       jumpArcPeakPx: 16,
@@ -394,6 +384,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 2,
       jumpSpeedGridPerSecond: 4,
       jumpArcPeakPx: 16,
@@ -406,6 +397,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 2.5,
       jumpSpeedGridPerSecond: 5,
       jumpArcPeakPx: 22,
@@ -418,6 +410,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 2.5,
       jumpSpeedGridPerSecond: 5,
       jumpArcPeakPx: 22,
@@ -430,6 +423,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 2.5,
       jumpSpeedGridPerSecond: 5,
       jumpArcPeakPx: 22,
@@ -442,6 +436,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 2.8,
       jumpSpeedGridPerSecond: 5.2,
       jumpArcPeakPx: 24,
@@ -456,6 +451,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 4,
       jumpSpeedGridPerSecond: 7,
       jumpArcPeakPx: 24,
@@ -468,6 +464,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 3.5,
       jumpSpeedGridPerSecond: 6,
       jumpArcPeakPx: 16,
@@ -482,6 +479,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: true,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 1.8,
       jumpSpeedGridPerSecond: 4,
       jumpArcPeakPx: 10,
@@ -494,6 +492,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: true,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 2,
       jumpSpeedGridPerSecond: 3.5,
       jumpArcPeakPx: 10,
@@ -506,6 +505,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: true,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 2.2,
       jumpSpeedGridPerSecond: 3.7,
       jumpArcPeakPx: 12,
@@ -520,6 +520,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: true,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 3.5,
       jumpSpeedGridPerSecond: 6.5,
       jumpArcPeakPx: 14,
@@ -533,6 +534,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: true,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 3.5,
       jumpSpeedGridPerSecond: 6.5,
       jumpArcPeakPx: 14,
@@ -545,6 +547,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: true,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 5.5,
       jumpSpeedGridPerSecond: 8,
       jumpArcPeakPx: 22,
@@ -557,6 +560,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: true,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 5.5,
       jumpSpeedGridPerSecond: 8.5,
       jumpArcPeakPx: 22,
@@ -569,6 +573,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: true,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 1.8,
       jumpSpeedGridPerSecond: 7,
       jumpArcPeakPx: 6,
@@ -583,6 +588,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 4.5,
       jumpSpeedGridPerSecond: 8,
       jumpArcPeakPx: 28,
@@ -595,6 +601,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 3,
       jumpSpeedGridPerSecond: 6,
       jumpArcPeakPx: 18,
@@ -637,6 +644,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: true,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 3,
       jumpSpeedGridPerSecond: 6,
       jumpArcPeakPx: 13,
@@ -666,6 +674,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 4.5,
       jumpSpeedGridPerSecond: 7,
       jumpArcPeakPx: 26,
@@ -678,6 +687,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 3.5,
       jumpSpeedGridPerSecond: 6.5,
       jumpArcPeakPx: 18,
@@ -690,6 +700,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 3,
       jumpSpeedGridPerSecond: 6,
       jumpArcPeakPx: 16,
@@ -702,6 +713,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 3.8,
       jumpSpeedGridPerSecond: 7,
       jumpArcPeakPx: 18,
@@ -714,6 +726,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 2,
       jumpSpeedGridPerSecond: 4.5,
       jumpArcPeakPx: 12,
@@ -750,6 +763,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 1.2,
       jumpSpeedGridPerSecond: 3.8,
       jumpArcPeakPx: 18,
@@ -762,6 +776,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: true,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 2,
       jumpSpeedGridPerSecond: 3.5,
       jumpArcPeakPx: 10,
@@ -786,6 +801,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 3.5,
       jumpSpeedGridPerSecond: 6,
       jumpArcPeakPx: 20,
@@ -798,6 +814,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 2,
       jumpSpeedGridPerSecond: 4.5,
       jumpArcPeakPx: 14,
@@ -810,6 +827,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 2,
       jumpSpeedGridPerSecond: 4.5,
       jumpArcPeakPx: 14,
@@ -829,6 +847,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: true,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 5.5,
       jumpSpeedGridPerSecond: 8.5,
       jumpArcPeakPx: 22,
@@ -841,6 +860,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: true,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 6,
       jumpSpeedGridPerSecond: 8.5,
       jumpArcPeakPx: 24,
@@ -853,6 +873,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: false,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 3,
       jumpSpeedGridPerSecond: 6.5,
       jumpArcPeakPx: 26,
@@ -865,6 +886,7 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: {
       canJump: true,
       canPounce: true,
+      maxJumpLayerReach: 4,
       maxJumpDistanceGrid: 2.5,
       jumpSpeedGridPerSecond: 5.5,
       jumpArcPeakPx: 20,
@@ -884,6 +906,7 @@ function definingWildlifeGroundedJumpConfig(): DefiningWildlifeSpeciesJumpConfig
   return {
     canJump: false,
     canPounce: false,
+    maxJumpLayerReach: 0,
     maxJumpDistanceGrid: 0,
     jumpSpeedGridPerSecond: 0,
     jumpArcPeakPx: 0,
@@ -901,6 +924,7 @@ function resolvingWildlifeSpeciesMovementConfig(
       jump: {
         canJump: false,
         canPounce: false,
+        maxJumpLayerReach: 0,
         maxJumpDistanceGrid: 0,
         jumpSpeedGridPerSecond: 0,
         jumpArcPeakPx: 0,
@@ -919,13 +943,6 @@ function resolvingWildlifeSpeciesStaminaConfig(
       regenMultiplier: 1,
     }
   );
-}
-
-/** Species-specific stamina recovery threshold after exhaustion, if configured. */
-export function resolvingWildlifeSpeciesStaminaExhaustedRecoveryRatio(
-  speciesId: DefiningWildlifeSpeciesId
-): number | undefined {
-  return DEFINING_WILDLIFE_SPECIES_STAMINA[speciesId]?.exhaustedRecoveryRatio;
 }
 
 /** Per-species hazard movement overrides. */
@@ -1373,7 +1390,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     diet: 'carnivore',
     trophicTier: 2,
     massKg: 45,
-    temperamentId: 'stalker',
+    temperamentId: 'pack_hunter',
     activityPattern: 'nocturnal',
     aggressionSpawn: { bellCurveMeanShift: 0.3 },
     aggro: {
@@ -1427,7 +1444,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     diet: 'carnivore',
     trophicTier: 3,
     massKg: 135,
-    temperamentId: 'stalker',
+    temperamentId: 'pack_hunter',
     activityPattern: 'nocturnal',
     neverSleeps: true,
     alwaysPackAlpha: true,
@@ -1782,7 +1799,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     diet: 'carnivore',
     trophicTier: 2,
     massKg: 60,
-    temperamentId: 'stalker',
+    temperamentId: 'pack_hunter',
     activityPattern: 'nocturnal',
     aggressionSpawn: { bellCurveMeanShift: 0.3 },
     aggro: {
@@ -2163,7 +2180,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     diet: 'carnivore',
     trophicTier: 3,
     massKg: 220,
-    temperamentId: 'predator',
+    temperamentId: 'stalker',
     activityPattern: 'crepuscular',
     aggressionSpawn: { bellCurveMeanShift: 0.35 },
     aggro: {
@@ -2199,12 +2216,12 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     diet: 'carnivore',
     trophicTier: 3,
     massKg: 95,
-    temperamentId: 'ambusher',
+    temperamentId: 'stalker',
     activityPattern: 'nocturnal',
     aggressionSpawn: { bellCurveMeanShift: 0.35 },
     aggro: {
       ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
-      aggroRadiusGrid: 5,
+      aggroRadiusGrid: 8,
       leashDistanceGrid: 14,
       packShareRadiusGrid: 0,
     },

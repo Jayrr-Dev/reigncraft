@@ -66,13 +66,13 @@ describe('listingWorldPlazaEntityStatusEffectHudRows', () => {
     });
     const frostbiteRow = rows.find((row) => row.id === 'frostbite');
 
-    expect(frostbiteRow?.summaryLabel).toBe('Frostnip');
+    expect(frostbiteRow?.summaryLabel).toBe('Freezing');
     expect(frostbiteRow?.displayMode).toBe('amount');
     expect(frostbiteRow?.numericValue).toBe(333);
     expect(frostbiteRow?.popoverFooter).toBeNull();
   });
 
-  it('lists frostbite stacks below the chilled threshold', () => {
+  it('lists frostbite stacks in the chilly band', () => {
     const nowMs = 0;
     const applied = applyingWorldPlazaEntityFrostbiteStack({
       state: creatingWorldPlazaEntityHealthInitialState(),
@@ -88,8 +88,11 @@ describe('listingWorldPlazaEntityStatusEffectHudRows', () => {
 
     expect(frostbiteRow?.displayMode).toBe('amount');
     expect(frostbiteRow?.numericValue).toBe(12);
-    expect(frostbiteRow?.summaryLabel).toBe('Frostbite');
-    expect(frostbiteRow?.detailLines).toEqual([]);
+    expect(frostbiteRow?.summaryLabel).toBe('Chilly');
+    expect(frostbiteRow?.detailLines).toEqual([
+      '1% slower walking',
+      '1% slower stamina regen',
+    ]);
     expect(frostbiteRow?.popoverFooter).toBeNull();
   });
 

@@ -256,6 +256,45 @@ describe('resolvingWildlifeTerrainGapJumpPlan', () => {
     resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockImplementation(() => 1);
   });
 
+  it('rejects elevated landings beyond species maxJumpLayerReach', () => {
+    const species = {
+      ...DEFINING_WILDLIFE_SPECIES_REGISTRY.deer,
+      jump: {
+        ...DEFINING_WILDLIFE_SPECIES_REGISTRY.deer.jump,
+        maxJumpLayerReach: 2,
+      },
+    };
+    const instance = buildingJumpInstance({ x: 8.5, y: 4.5 });
+
+    checkingWorldCollisionBlockedAtPointMock.mockImplementation(
+      (
+        point: { x: number; y: number },
+        options?: { playerLayer?: number }
+      ): boolean => {
+        const tileX = Math.floor(point.x);
+        const standingLayer = options?.playerLayer ?? 1;
+
+        return tileX === 9 && standingLayer < 4;
+      }
+    );
+    resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockImplementation(
+      (tileX: number): number => (tileX === 9 ? 4 : 1)
+    );
+
+    const plan = resolvingWildlifeTerrainGapJumpPlan({
+      instance,
+      species,
+      desiredDirection: { x: 1, y: 0 },
+      hazardSampling: HAZARD_SAMPLING,
+      nowMs: 1000,
+    });
+
+    expect(plan).toBeNull();
+
+    checkingWorldCollisionBlockedAtPointMock.mockImplementation(() => false);
+    resolvingWorldPlazaSurfaceLayerAtTileIndexMock.mockImplementation(() => 1);
+  });
+
   it('returns null for species that cannot jump', () => {
     const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.cow;
     const instance = buildingJumpInstance({ x: 4.5, y: 4.5 });

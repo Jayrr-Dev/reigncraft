@@ -12,6 +12,7 @@ import { resolvingWorldPlazaEntityDiseaseDescriptor } from '@/components/world/h
 import { resolvingWorldPlazaEntityPoisonPotencyDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import { resolvingWorldPlazaEntityBuffHudIcon } from '@/components/world/health/domains/mappingWorldPlazaEntityBuffHudIcon';
 import { resolvingWildlifeMeatCatalogEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
+import { DEFINING_WILDLIFE_STAMINA_FATIGUE_TIER_CONFIG } from '@/components/world/wildlife/domains/definingWildlifeStaminaFatigueConstants';
 import { listingWildlifeSpeciesOnHitEffects } from '@/components/world/wildlife/domains/definingWildlifeSpeciesOnHitEffectRegistry';
 import {
   resolvingWildlifeSpeciesDefinition,
@@ -208,7 +209,7 @@ export function resolvingPlazaBestiaryGuideEcologyStats(
     staminaDrainMultiplier: speciesDefinition.stamina.drainMultiplier,
     staminaRegenMultiplier: speciesDefinition.stamina.regenMultiplier,
     staminaExhaustedRecoveryRatio:
-      speciesDefinition.stamina.exhaustedRecoveryRatio ?? null,
+      DEFINING_WILDLIFE_STAMINA_FATIGUE_TIER_CONFIG.winded.useUnlockRatio,
     massKg: speciesDefinition.massKg,
     trophicTier: speciesDefinition.trophicTier,
   };

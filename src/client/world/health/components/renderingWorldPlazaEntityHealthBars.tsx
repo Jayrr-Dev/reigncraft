@@ -350,9 +350,7 @@ function RenderingWorldPlazaEntityHealthBarVisual({
               : null
           }
           description={openBuff.description}
-          detailLines={
-            openBuff.isDisease === true ? (openBuff.detailLines ?? []) : []
-          }
+          detailLines={openBuff.detailLines ?? []}
           footer={openBuffPopoverFooter}
           placement="inline"
         />

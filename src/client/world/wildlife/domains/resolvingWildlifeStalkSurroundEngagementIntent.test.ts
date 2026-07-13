@@ -1,6 +1,6 @@
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
-import { checkingWildlifeStalkerCaughtUpToStillPrey } from '@/components/world/wildlife/domains/checkingWildlifeStalkerCaughtUpToStillPrey';
+import { checkingWildlifePackHunterCaughtUpToStillPrey } from '@/components/world/wildlife/domains/checkingWildlifePackHunterCaughtUpToStillPrey';
 import { DEFINING_WILDLIFE_MELEE_RANGE_GRID } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import { DEFINING_WILDLIFE_STALK_SURROUND_APPROACH_WALK_MAX_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -76,12 +76,12 @@ function buildingStalkFormationInstance(
   };
 }
 
-describe('checkingWildlifeStalkerCaughtUpToStillPrey', () => {
+describe('checkingWildlifePackHunterCaughtUpToStillPrey', () => {
   const preyPosition = { x: 10, y: 10, layer: 1 };
 
   it('returns false while the prey is still moving', () => {
     expect(
-      checkingWildlifeStalkerCaughtUpToStillPrey({
+      checkingWildlifePackHunterCaughtUpToStillPrey({
         position: { x: 3, y: 10, layer: 1 },
         preyPosition,
         preyStillDurationMs: 0,
@@ -91,7 +91,7 @@ describe('checkingWildlifeStalkerCaughtUpToStillPrey', () => {
 
   it('returns true when caught up and the prey has been still', () => {
     expect(
-      checkingWildlifeStalkerCaughtUpToStillPrey({
+      checkingWildlifePackHunterCaughtUpToStillPrey({
         position: { x: 3, y: 10, layer: 1 },
         preyPosition,
         preyStillDurationMs: 2_000,
@@ -101,7 +101,7 @@ describe('checkingWildlifeStalkerCaughtUpToStillPrey', () => {
 
   it('returns false when still catching up to the prey', () => {
     expect(
-      checkingWildlifeStalkerCaughtUpToStillPrey({
+      checkingWildlifePackHunterCaughtUpToStillPrey({
         position: { x: -5, y: 10, layer: 1 },
         preyPosition,
         preyStillDurationMs: 2_000,

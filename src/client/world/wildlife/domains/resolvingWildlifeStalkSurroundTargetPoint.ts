@@ -1,5 +1,5 @@
 /**
- * Organic flank points for a committed stalker pack surround.
+ * Organic flank points for a committed PackHunter pack surround.
  *
  * @module components/world/wildlife/domains/resolvingWildlifeStalkSurroundTargetPoint
  */

@@ -2,10 +2,10 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.1.3      |
-| **Last updated** | 2026-07-11 |
+| **Version**      | 1.2.0      |
+| **Last updated** | 2026-07-13 |
 
-Plaza **multiplayer** defines Devvit HTTP polling rooms: player cap, sync payload, Redis TTL, request coalescing, wildlife leader election, held-item overlay fields, sync perf meters (round-trip / skip / failure / participant gauge), and what stays local.
+Plaza **multiplayer** defines Devvit HTTP polling **named worlds**: create/join/continue, per-room cap **2-4**, host kick/delete, sync payload, Redis TTL, wildlife leader election, and what stays local.
 
 ## Docs in this folder
 
@@ -19,7 +19,7 @@ Plaza **multiplayer** defines Devvit HTTP polling rooms: player cap, sync payloa
 
 ### Bounded context
 
-**Plaza Devvit Online Room** — up to **3** players per Reddit post room shard share position/health/held-item snapshots via Redis; wildlife leader publishes mob state; followers consume.
+**Plaza Devvit Online Room** — one **named world** (unique name per Reddit post) with a host-chosen cap of **2-4** travelers. Players share position/health/held-item snapshots via Redis; wildlife leader publishes mob state; followers consume. Hosts may kick travelers or delete their world.
 
 Touches **Wildlife** (leader sim), **Combat** (projectile spawn events), **Inventory / equipment** (held-item visual + tier on wire), **Building/Fire/Harvest** (room-scoped Redis APIs), and **Entity Health** (synced HP/shields). Does not own hunger/stamina simulation or inventory contents.
 
@@ -32,7 +32,7 @@ Touches **Wildlife** (leader sim), **Combat** (projectile spawn events), **Inven
 
 ### Value objects
 
-- `roomIndex` — 1-based shard query param on API URLs
+- `roomId` — named world slug on `?room=` for sync/players/world APIs
 - `PlazaDevvitOnlineSyncRequest` — outbound POST body from each client
 - Wildlife snapshot/damage event records
 - Projectile spawn event records (max **8** per sync)

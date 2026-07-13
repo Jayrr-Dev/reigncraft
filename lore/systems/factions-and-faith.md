@@ -63,4 +63,4 @@ No sermons in shipped copy. No character explains the theme. If a detail needs a
 - Mereonist comedy is the Cucco register applied to money: deadpan, specific, and slightly alarming when read twice (see [`species/the-cucco.md`](../species/the-cucco.md)).
 - Faction membership mechanics, reputation, and quests do not exist. Keep everything here at the level of culture and voice until systems ship.
 
-Cross-links: [`world/manus.md`](../world/manus.md), [`world/the-ladder.md`](../world/the-ladder.md), [`world/soul-and-soulcore.md`](../world/soul-and-soulcore.md).
+Cross-links: [`world/manus.md`](../world/manus.md), [`world/the-ladder.md`](../world/the-ladder.md), [`world/soul-and-spritcore.md`](../world/soul-and-spritcore.md).

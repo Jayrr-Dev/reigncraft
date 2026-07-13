@@ -19,7 +19,7 @@ sequenceDiagram
     W->>P: Melee if linger or escalate
   else Predator / ambusher
     W->>P: Chase and melee when hungry or threatened
-  else Stalker pack (grey-wolf)
+  else PackHunter pack (grey-wolf)
     W->>W: Shadow at distance (15s min)
     W->>P: Surround and rush on weakness
   end
@@ -56,7 +56,8 @@ Prefix pick is stable per spawn anchor. Full pools and reveal radii: wildlife ca
 | retaliator  | boar, brown-bear                              | Territory warning, then chase/attack threats; hunt prey when motivated.                                                                           |
 | predator    | lion, lioness                                 | Hunt in 14 grid radius; leash return; pride territory warnings.                                                                                   |
 | ambusher    | crocodile                                     | Short aggro radius (3.5); pounce from water edge; melee player in radius.                                                                         |
-| stalker     | grey-wolf                                     | Pack shadow hunt on player or prey (see stalk section).                                                                                           |
+| pack_hunter | grey-wolf, omega-wolf, hyena                  | Pack shadow hunt on player or prey (see stalk section).                                                                                           |
+| stalker     | tiger, jaguar                                 | Solo shadow; rush on weakness or after stalk if hungry/aggressive.                                                                                |
 
 ## Docile (dogs and cats)
 
@@ -121,10 +122,11 @@ Biome pools in `definingWildlifeBiomeSpawnTable.ts` define **what** can appear w
 | `densityThresholdBias`       | Added to every biome `densityThreshold`. Higher = fewer spawn patches. |
 | `packSizeMultiplier`         | Scales rolled pack size min/max.                                       |
 | `spawnWeightByRole.prey`     | Weight multiplier for passive / skittish / retaliator spawns.          |
-| `spawnWeightByRole.predator` | Weight multiplier for predator / ambusher / stalker spawns.            |
-| `allowPredatorSpawns`        | Toggle temperament `predator` (lion, hyena, �).                        |
-| `allowAmbusherSpawns`        | Toggle temperament `ambusher` (crocodile).                             |
-| `allowStalkerSpawns`         | Toggle temperament `stalker` (grey-wolf).                              |
+| `spawnWeightByRole.predator` | Weight multiplier for predator / ambusher / pack_hunter / stalker spawns. |
+| `allowPredatorSpawns`        | Toggle temperament `predator` (lion, …).                                  |
+| `allowAmbusherSpawns`        | Toggle temperament `ambusher` (crocodile).                                |
+| `allowPackHunterSpawns`      | Toggle temperament `pack_hunter` (grey-wolf, …).                          |
+| `allowStalkerSpawns`         | Toggle temperament `stalker` (tiger, jaguar).                             |
 | `healthAndAttackPowerScale`  | Global HP and melee damage multiplier at registry build.               |
 | `aggroRadiusMultiplier`      | Runtime on-sight aggro radius multiplier.                              |
 | `preyHuntRadiusMultiplier`   | Hunt notice radius and favorite-prey sight radius.                     |
@@ -162,7 +164,7 @@ Threat accumulates from damage, starving proximity, territory linger, prey scent
 
 **Target switch margin** default **1.25**: a new threat must beat the active target by this factor to steal aggro.
 
-Stalkers only melee the **player** once the stalk kill window is open (`checkingWildlifeMayTargetPlayer`). Until then they shadow or surround.
+PackHunters only melee the **player** once the stalk kill window is open (`checkingWildlifeMayTargetPlayer`). Until then they shadow or surround.
 
 ### Species passive traits
 
@@ -358,7 +360,7 @@ Previous heading comes from `aiState.steeringCache` even when the intent key chu
 
 ## Omega Wolf (night elite)
 
-The **Omega Wolf** is a rare, night-only elite stalker that spawns in packs of 5: 1 Omega + 4 grey-wolf escorts. It never sleeps, is always elected pack alpha, and shares the grey wolf's stalk behavior tree.
+The **Omega Wolf** is a rare, night-only elite PackHunter that spawns in packs of 5: 1 Omega + 4 grey-wolf escorts. It never sleeps, is always elected pack alpha, and shares the grey wolf's stalk behavior tree.
 
 ### Spawn rules
 
@@ -401,7 +403,7 @@ Omega-wolf and grey-wolf count as one stalk pack everywhere pack membership matt
 
 ## Stalk and pack hunts (grey-wolf + omega-wolf)
 
-Only `temperamentId: 'stalker'` runs `DEFINING_WILDLIFE_STALKER_BEHAVIOUR_MACHINE`. The chart is reusable for future stalker species.
+Only `temperamentId: 'pack_hunter'` runs `DEFINING_WILDLIFE_PACK_HUNTER_BEHAVIOUR_MACHINE`. Solo `stalker` runs `DEFINING_WILDLIFE_STALKER_BEHAVIOUR_MACHINE`.
 
 ### Statechart
 
@@ -465,7 +467,7 @@ stateDiagram-v2
 
 ### Comfort-band shadow wander
 
-Inside the follow ring (6�9.5 grid), stalkers no longer flip between circle / widen / hold legs. They reuse the same **bounded random walk** as calm wander, anchored on the prey:
+Inside the follow ring (6�9.5 grid), PackHunters no longer flip between circle / widen / hold legs. They reuse the same **bounded random walk** as calm wander, anchored on the prey:
 
 | Rule                | Value                                     |
 | ------------------- | ----------------------------------------- |
@@ -478,7 +480,7 @@ Too-close and too-far corrections still override wander. Pack followers still ca
 
 ### Stalk prey eligibility
 
-Alpha wolves pick targets from `listingWildlifeStalkerPreyTargetCandidates`:
+Alpha wolves pick targets from `listingWildlifePackHunterPreyTargetCandidates`:
 
 - **Player**: inside aggro radius and passes on-sight gate (not tame). Treated as **70 kg** for size bias.
 - **Wildlife prey**: in allow list or trophic/mass rules; within 14 grid scent, 6 grid proximity, or favorite prey sight.
@@ -489,7 +491,7 @@ When several candidates are in range, the alpha rolls a **mass-weighted** pick (
 
 **Pack alpha:** largest living nearby pack wolf at first election (`packAlphaInstanceId`). The lock sticks even if a bigger wolf joins later. When the alpha dies, survivors flee to a shared regroup point for **8s**, stay unlocked during that window, then elect a new alpha from whoever is nearby again. When the name tag is revealed (proximity / facing / hover / recent combat), the locked alpha uses the **Alpha** prefix and drops aggression/size prefixes. Hunting the player alone does not force the label on.
 
-Other species are **not** stalk-eligible; they use predator, ambusher, or retaliator trees instead.
+Other species are **not** stalk-eligible; they use predator, ambusher, or retaliator trees instead. Solo stalkers (`tiger`, `jaguar`) use the stalker tree/statechart.
 
 ## Death and loot
 
@@ -532,7 +534,7 @@ True respawns after a kill still go through `pendingRespawns` (player must leave
 ## Failure and edge cases
 
 - **Tame spawns** never on-sight aggro; skittish herbivores still flee.
-- **Stalker player damage** before kill window: shadow/regroup/flee, not immediate full pack melee.
+- **PackHunter player damage** before kill window: shadow/regroup/flee, not immediate full pack melee.
 - **Leash**: lions and crocodiles return to anchor if chase exceeds leash (18 grid default; croc **10**).
 - **Sleeping hunters**: crocodile and bear may be caught in cathemeral sleep at night buckets.
 - **Chicken aggressive spawn**: only herbivore with `aggressiveAttacksOnSight: true`.

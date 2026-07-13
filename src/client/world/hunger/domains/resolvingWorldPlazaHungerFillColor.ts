@@ -93,8 +93,9 @@ export function resolvingWorldPlazaHungerFillColors(
   const clampedRatio = Math.min(1, Math.max(0, hungerRatio));
   const stops = DEFINING_WORLD_PLAZA_HUNGER_FILL_COLOR_STOPS;
 
-  let upperStop = stops[0];
-  let lowerStop = stops[stops.length - 1];
+  let upperStop: DefiningWorldPlazaHungerFillColorStop = stops[0];
+  let lowerStop: DefiningWorldPlazaHungerFillColorStop =
+    stops[stops.length - 1];
 
   for (let stopIndex = 0; stopIndex < stops.length - 1; stopIndex += 1) {
     const candidateUpper = stops[stopIndex];

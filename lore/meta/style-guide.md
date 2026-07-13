@@ -20,7 +20,7 @@ Short, concrete, and carrying attitude without announcing it. Match this. (The "
 1. **Concrete over grand.** "Ember vents and ash" beats "a land of eternal flame". Name physical things.
 2. **The known is stated flat; the unknown is attributed.** Manus, the ladder, and the Apostles are facts and copy treats them as facts. Genuinely open things (the Forgewrights' story, the Seven Death Sins) come sourced: "the ruins suggest", "the chronicle claims", "some wanderers say".
 3. **Sentence-length variety.** Mix short and long. Avoid stacks of dramatic fragments.
-4. **No high fantasy vocabulary.** No elves, wizards, prophecies, or "ancient evil". Strange things get plain names: Soulcore, obelisks, the ladder, the Scorching.
+4. **No high fantasy vocabulary.** No elves, wizards, prophecies, or "ancient evil". Strange things get plain names: Spritcore, obelisks, the ladder, the Scorching.
 5. **Comedy is allowed where earned.** The Cucco file is the template: funny because the threat is real. Mereonist and Founder material runs the same register applied to money and generosity: deadpan, specific, slightly alarming on the second read.
 6. **The satire is felt, not stated.** No character explains the theme, no narrator editorializes. Stage the argument in concrete detail (the village that cannot afford healing, the worker who mines cores and owns none) and stop there.
 7. **No em dashes or en dashes anywhere in prose.** Use commas, periods, colons, or parentheses.
@@ -37,7 +37,7 @@ Short, concrete, and carrying attitude without announcing it. Match this. (The "
 | Address (Manus's) | The god's public appearances and collected sayings | "sermon" for Manus specifically (sermons are for clergy) |
 | The ladder | The resurrection and merit cosmology | "samsara", "the cycle", afterlife terms |
 | Apostle / the Twelve | Manus's stewards, by name (Willus Quill, Rockless Fellus, Carnegus, Dominus, Stanous Black, Herford, Vander, Amboser, Leon Astronavis, Zeche Tore, Quacker Berg, Japa Morgus) | "gods", "demigods", "bosses" |
-| Soulcore | The core item (singular and plural), full canon in the soul file | "Magiccore" (design-notes name), "souls", "soul gems" |
+| Spritcore | The core item (singular and plural), full canon in the soul file | "Magiccore", "Soulcore", "souls", "soul gems" |
 | Mereonism / Mereons / the Worthy | The dominant faith and its followers | Real-world economic or political labels |
 | The Uncored / the Many | The rebel faction | "communists", "rebels" as a proper name |
 | Corekeeper | The Uncored's insult for accumulators, the player included | Using it as a neutral title |

@@ -1,5 +1,5 @@
 /**
- * Surround-slot movement and post-ring rush intents for stalker packs.
+ * Surround-slot movement and post-ring rush intents for PackHunter packs.
  *
  * @module components/world/wildlife/domains/resolvingWildlifeStalkSurroundEngagementIntent
  */

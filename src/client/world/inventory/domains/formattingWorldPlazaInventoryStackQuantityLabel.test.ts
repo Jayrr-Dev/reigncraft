@@ -1,9 +1,9 @@
 import { formattingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryStackQuantityLabel';
-import { DEFINING_WORLD_PLAZA_SOULCORE_STACK_QUANTITY_DISPLAY } from '@/components/world/soulcore/domains/definingWorldPlazaSoulcoreConstants';
+import { DEFINING_WORLD_PLAZA_SPRITCORE_STACK_QUANTITY_DISPLAY } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreConstants';
 import { describe, expect, it } from 'vitest';
 
 describe('formattingWorldPlazaInventoryStackQuantityLabel', () => {
-  const display = DEFINING_WORLD_PLAZA_SOULCORE_STACK_QUANTITY_DISPLAY;
+  const display = DEFINING_WORLD_PLAZA_SPRITCORE_STACK_QUANTITY_DISPLAY;
 
   it('shows exact counts up to 999', () => {
     expect(formattingWorldPlazaInventoryStackQuantityLabel(1, display)).toBe(

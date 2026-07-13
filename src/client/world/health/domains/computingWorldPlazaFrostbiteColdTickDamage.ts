@@ -16,7 +16,7 @@ export type ComputingWorldPlazaFrostbiteColdTickDamageResult = {
 };
 
 /**
- * Scales ambient cold tick damage and optional Frostnip+ percent damage.
+ * Scales ambient cold tick damage and optional Freezing+ percent damage.
  */
 export function computingWorldPlazaFrostbiteColdTickDamage({
   ambientTickDamage,

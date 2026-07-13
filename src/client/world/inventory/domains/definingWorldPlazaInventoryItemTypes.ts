@@ -10,7 +10,7 @@ import {
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_FISH,
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_WHEAT,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
-import { DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SOULCORE_SPHERE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
+import { DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SPRITCORE_SPHERE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
   DEFINING_WORLD_PLAZA_INVENTORY_BUILD_TOOL_MAX_DURABILITY,
@@ -35,7 +35,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RUCKSACK,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SCYTHE_WOOD,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SOULCORE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
@@ -49,9 +49,9 @@ import { registeringWorldPlazaTieredToolInventoryItems } from '@/components/worl
 import { registeringWorldPlazaWildlifeMeatInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems';
 import { resolvingWorldPlazaInventoryFoodHealDeclaration } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealDeclaration';
 import {
-  DEFINING_WORLD_PLAZA_SOULCORE_ITEM_NAME,
-  DEFINING_WORLD_PLAZA_SOULCORE_STACK_QUANTITY_DISPLAY,
-} from '@/components/world/soulcore/domains/definingWorldPlazaSoulcoreConstants';
+  DEFINING_WORLD_PLAZA_SPRITCORE_ITEM_NAME,
+  DEFINING_WORLD_PLAZA_SPRITCORE_STACK_QUANTITY_DISPLAY,
+} from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreConstants';
 import { Leaf, Package } from 'lucide-react';
 
 export {
@@ -64,7 +64,7 @@ export {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_POUCH,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RUCKSACK,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SOULCORE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
@@ -225,16 +225,16 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       },
     },
     {
-      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SOULCORE,
-      name: DEFINING_WORLD_PLAZA_SOULCORE_ITEM_NAME,
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
+      name: DEFINING_WORLD_PLAZA_SPRITCORE_ITEM_NAME,
       rarity: 'legendary',
       customIconId:
-        DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SOULCORE_SPHERE,
+        DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SPRITCORE_SPHERE,
       maxStack: DEFINING_INVENTORY_UNLIMITED_STACK_SIZE,
       isDroppable: false,
       isStackable: true,
       stackQuantityDisplay:
-        DEFINING_WORLD_PLAZA_SOULCORE_STACK_QUANTITY_DISPLAY,
+        DEFINING_WORLD_PLAZA_SPRITCORE_STACK_QUANTITY_DISPLAY,
     },
     ...registeringWorldPlazaInventoryBagItemDefinitions(),
     ...registeringWorldPlazaCraftRecipePageInventoryItems(),

@@ -1,5 +1,5 @@
 /**
- * Stalker-specific aggro: pack join, hunt timer, and timeout release.
+ * PackHunter-specific aggro: pack join, hunt timer, and timeout release.
  *
  * @module components/world/wildlife/domains/advancingWildlifeStalkAggroTick
  */
@@ -10,9 +10,11 @@ import {
   checkingWildlifeStalkPackIsConfident,
 } from '@/components/world/wildlife/domains/checkingWildlifeStalkConfidentPack';
 import {
+  checkingWildlifeSoloStalkerKillConditions,
   checkingWildlifeStalkKillConditions,
   resolvingWildlifeStalkWeaknessKillTriggerParamsFromPrey,
 } from '@/components/world/wildlife/domains/checkingWildlifeStalkKillConditions';
+import { checkingWildlifeIsStalkHuntTemperament } from '@/components/world/wildlife/domains/checkingWildlifeIsStalkHuntTemperament';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import {
   DEFINING_WILDLIFE_STALK_AGGRO_TIMEOUT_MS,
@@ -148,7 +150,7 @@ function pushingUniqueEvent(
 }
 
 /**
- * Applies stalker pack join threat, starts hunt timers, and emits phase events.
+ * Applies stalk hunt aggro: pack join (pack_hunter only), hunt timer, timeout.
  */
 export function advancingWildlifeStalkAggroTick({
   instance,
@@ -165,19 +167,22 @@ export function advancingWildlifeStalkAggroTick({
   resolveSpecies,
   aggroState,
 }: AdvancingWildlifeStalkAggroTickParams): AdvancingWildlifeStalkAggroTickResult {
-  if (species.temperamentId !== 'stalker') {
+  if (!checkingWildlifeIsStalkHuntTemperament(species.temperamentId)) {
     return { aggroState, events: [] };
   }
 
+  const isPackHunter = species.temperamentId === 'pack_hunter';
   const previousStalkingSinceMs = aggroState.stalkingPreySinceMs ?? null;
   const previousConfidentSinceMs = aggroState.stalkConfidentSinceMs ?? null;
   let nextAggroState = aggroState;
   const events: DefiningWildlifeStalkEventKind[] = [];
-  const packJoinPreyTargetId = resolvingWildlifeStalkPackJoinPreyTargetId({
-    instance,
-    nearbyInstances,
-    resolveSpecies,
-  });
+  const packJoinPreyTargetId = isPackHunter
+    ? resolvingWildlifeStalkPackJoinPreyTargetId({
+        instance,
+        nearbyInstances,
+        resolveSpecies,
+      })
+    : null;
 
   if (packJoinPreyTargetId) {
     nextAggroState = {
@@ -239,66 +244,78 @@ export function advancingWildlifeStalkAggroTick({
       : Math.max(0, nowMs - previousStalkingSinceMs);
   const weaknessParams =
     resolvingWildlifeStalkWeaknessKillTriggerParamsFromPrey(prey);
-  const stalkPackCount = countingWildlifeStalkPackmatesTargetingPrey({
-    instance,
-    nearbyInstances,
-    preyTargetId: prey.targetId,
-  });
-  const packIsConfident = checkingWildlifeStalkPackIsConfident(stalkPackCount);
-  const killWindowOpen =
-    checkingWildlifeStalkKillConditions({
-      ...weaknessParams,
-      stalkingElapsedMs,
-      stalkPackCount,
-      preyTargetId: prey.targetId,
-      stalkingPreySinceMs: nextAggroState.stalkingPreySinceMs,
-      nowMs,
-    }) ||
-    checkingWildlifeStalkConfidentAssaultReady({
-      stalkConfidentSinceMs: nextAggroState.stalkConfidentSinceMs,
-      preyTargetId: prey.targetId,
-      nowMs,
-    });
+  const stalkPackCount = isPackHunter
+    ? countingWildlifeStalkPackmatesTargetingPrey({
+        instance,
+        nearbyInstances,
+        preyTargetId: prey.targetId,
+      })
+    : 1;
+  const packIsConfident =
+    isPackHunter && checkingWildlifeStalkPackIsConfident(stalkPackCount);
+  const killWindowOpen = isPackHunter
+    ? checkingWildlifeStalkKillConditions({
+        ...weaknessParams,
+        stalkingElapsedMs,
+        stalkPackCount,
+        preyTargetId: prey.targetId,
+        stalkingPreySinceMs: nextAggroState.stalkingPreySinceMs,
+        nowMs,
+      }) ||
+      checkingWildlifeStalkConfidentAssaultReady({
+        stalkConfidentSinceMs: nextAggroState.stalkConfidentSinceMs,
+        preyTargetId: prey.targetId,
+        nowMs,
+      })
+    : checkingWildlifeSoloStalkerKillConditions({
+        ...weaknessParams,
+        stalkingElapsedMs,
+        hungerDriveLevel: instance.hungerState.driveLevel,
+        aggressionLevel: instance.aggressionLevel,
+      });
 
   if (nextAggroState.activeTargetId === prey.targetId) {
-    if (packIsConfident) {
-      const sharedConfidentSinceMs =
-        resolvingWildlifeSpawnPackAlphaConfidentSinceMs({
-          instance,
-          instances: listingWildlifeNearbyAndSelf(instance, nearbyInstances),
-          preyTargetId: prey.targetId,
-          resolveSpecies,
-        });
+    if (isPackHunter) {
+      if (packIsConfident) {
+        const sharedConfidentSinceMs =
+          resolvingWildlifeSpawnPackAlphaConfidentSinceMs({
+            instance,
+            instances: listingWildlifeNearbyAndSelf(instance, nearbyInstances),
+            preyTargetId: prey.targetId,
+            resolveSpecies,
+          });
 
-      nextAggroState = {
-        ...nextAggroState,
-        stalkConfidentSinceMs:
-          nextAggroState.stalkConfidentSinceMs ??
-          sharedConfidentSinceMs ??
-          nowMs,
-      };
+        nextAggroState = {
+          ...nextAggroState,
+          stalkConfidentSinceMs:
+            nextAggroState.stalkConfidentSinceMs ??
+            sharedConfidentSinceMs ??
+            nowMs,
+        };
 
-      if (previousConfidentSinceMs === null) {
-        pushingUniqueEvent(events, 'PACK_CONFIDENT');
+        if (previousConfidentSinceMs === null) {
+          pushingUniqueEvent(events, 'PACK_CONFIDENT');
+        }
+      } else if ((nextAggroState.stalkConfidentSinceMs ?? null) !== null) {
+        nextAggroState = {
+          ...nextAggroState,
+          stalkConfidentSinceMs: null,
+        };
+        pushingUniqueEvent(events, 'PACK_THINNED');
       }
-    } else if ((nextAggroState.stalkConfidentSinceMs ?? null) !== null) {
-      nextAggroState = {
-        ...nextAggroState,
-        stalkConfidentSinceMs: null,
-      };
-      pushingUniqueEvent(events, 'PACK_THINNED');
     }
 
     const stalkingStartedAtMs = nextAggroState.stalkingPreySinceMs ?? null;
 
     if (stalkingStartedAtMs === null) {
-      const alphaStalkingSinceMs =
-        resolvingWildlifeSpawnPackAlphaStalkingSinceMs({
-          instance,
-          instances: listingWildlifeNearbyAndSelf(instance, nearbyInstances),
-          preyTargetId: prey.targetId,
-          resolveSpecies,
-        });
+      const alphaStalkingSinceMs = isPackHunter
+        ? resolvingWildlifeSpawnPackAlphaStalkingSinceMs({
+            instance,
+            instances: listingWildlifeNearbyAndSelf(instance, nearbyInstances),
+            preyTargetId: prey.targetId,
+            resolveSpecies,
+          })
+        : null;
 
       nextAggroState = {
         ...nextAggroState,

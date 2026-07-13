@@ -14,12 +14,14 @@ import type {
  * Missing base edges fall back to the global human default band.
  */
 export function resolvingWorldPlazaEntityTemperatureComfortBand(
-  resistance?: Pick<
-    DefiningWorldPlazaEntityTemperatureResistance,
-    | 'baseComfortLowCelsius'
-    | 'baseComfortHighCelsius'
-    | 'heatComfortBonusCelsius'
-    | 'coldComfortBonusCelsius'
+  resistance?: Partial<
+    Pick<
+      DefiningWorldPlazaEntityTemperatureResistance,
+      | 'baseComfortLowCelsius'
+      | 'baseComfortHighCelsius'
+      | 'heatComfortBonusCelsius'
+      | 'coldComfortBonusCelsius'
+    >
   > | null
 ): DefiningWorldPlazaEntityTemperatureComfortBand {
   const heatBonusCelsius = Math.max(

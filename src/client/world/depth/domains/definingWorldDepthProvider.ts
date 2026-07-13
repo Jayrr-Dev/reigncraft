@@ -12,6 +12,8 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 export type DefiningWorldDepthProviderContext = {
   readonly placedBlocks?: readonly DefiningWorldBuildingPlacedBlock[];
   readonly placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile;
+  /** Painted feet below the logical grid anchor, after avatar size scaling. */
+  readonly avatarFootOffsetBelowGridAnchorPx?: number;
 };
 
 /** Identifier for a registered depth provider. */
@@ -61,11 +63,25 @@ export type DefiningWorldDepthProvider = {
   /** When true, provider can cap avatar z-index when in front/overhead and taller. */
   readonly participatesInFrontOcclusion: boolean;
   /**
-   * When true, a taller column on the avatar's standing tile caps the body
-   * behind it (walk-under roofs/slabs). Tree trunks set this false so standing
-   * south of the trunk on the same tile still draws in front.
+   * When true, a taller column on the avatar's standing tile can cap the body
+   * behind it (walk-under roofs/slabs). Tree trunks / rocks / terrain set this
+   * false so standing south on the same tile still draws in front.
+   *
+   * Placed blocks keep this true but gate with
+   * {@link checkingAppliesSameTileOverheadOcclusionAtTileIndex} so only
+   * floating slabs (air under the column) tuck — solid pine/walls do not.
    */
   readonly participatesInSameTileOverheadOcclusion: boolean;
+  /**
+   * Optional gate for same-tile overhead. When omitted, the boolean flag alone
+   * decides. Placed blocks require a floating slab above the standing layer.
+   */
+  readonly checkingAppliesSameTileOverheadOcclusionAtTileIndex?: (
+    tileX: number,
+    tileY: number,
+    standingLayer: number,
+    context: DefiningWorldDepthProviderContext
+  ) => boolean;
   /** When true, provider can occlude avatar ground shadows in the footprint. */
   readonly participatesInShadowOcclusion: boolean;
   /**

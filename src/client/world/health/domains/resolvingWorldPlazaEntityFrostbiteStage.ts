@@ -12,7 +12,7 @@ import { formattingWorldPlazaFrostbiteSpeedSlowHudEffectLine } from '@/component
 import { formattingWorldPlazaFrostbiteStaminaRegenSlowHudEffectLine } from '@/components/world/health/domains/computingWorldPlazaFrostbiteStaminaRegenMovementMultiplier';
 
 /**
- * Highest stage whose minStacks is at or below stackCount, or null below Chilled.
+ * Highest stage whose minStacks is at or below stackCount (Chilly at 0+).
  */
 export function resolvingWorldPlazaEntityFrostbiteStage(
   stackCount: number
@@ -63,10 +63,6 @@ function resolvingWorldPlazaEntityFrostbiteHudEffectLineFamily(
     return 'jump';
   }
 
-  if (/less damage dealt/.test(line)) {
-    return 'outgoing_damage';
-  }
-
   if (/frost damage/.test(line)) {
     return 'frost_damage';
   }
@@ -83,7 +79,7 @@ function resolvingWorldPlazaEntityFrostbiteHudEffectLineFamily(
     return 'heal_block';
   }
 
-  if (/Cannot move|Frozen solid/.test(line)) {
+  if (/Cannot move|Frozen solid|Deep sleep/.test(line)) {
     return 'immobilize';
   }
 
@@ -124,7 +120,6 @@ export function listingWorldPlazaEntityFrostbiteInheritedHudEffectLines(
   const familyOrder = [
     'stamina_max',
     'jump',
-    'outgoing_damage',
     'frost_damage',
     'confusion',
     'sleep',

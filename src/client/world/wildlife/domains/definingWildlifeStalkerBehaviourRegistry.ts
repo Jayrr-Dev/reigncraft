@@ -1,7 +1,5 @@
 /**
- * Stalker behaviour domain registry: guards and actions for the shared
- * statechart engine. Any species with temperamentId `stalker` uses this
- * vocabulary; species-specific tuning stays in constants and species defs.
+ * Solo stalker behaviour domain registry for the shared statechart engine.
  *
  * @module components/world/wildlife/domains/definingWildlifeStalkerBehaviourRegistry
  */
@@ -36,7 +34,6 @@ export type DefiningWildlifeStalkerBehaviourContext = {
   preyTargetId: string | null;
   prey: DefiningWildlifeStalkPreyContext | null;
   stalkingElapsedMs: number;
-  stalkPackCount: number;
   aggroState: DefiningWildlifeAggroState;
   enteredPhase: DefiningWildlifeStalkPhase;
 };
@@ -58,7 +55,7 @@ function releasingStalkerAggroOnPrey(
   );
 }
 
-/** Stalker bounded-context registry for the shared statechart engine. */
+/** Solo stalker registry for the shared statechart engine. */
 export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_REGISTRY: DefiningStateMachineRegistry<
   DefiningWildlifeStalkerBehaviourContext,
   DefiningWildlifeStalkerBehaviourCommand
@@ -155,8 +152,7 @@ export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_REGISTRY: DefiningStateMachineR
     'stalker.onEnterFleeing': (context, event) => {
       const releasedAggro =
         event?.type === 'RETREAT_DONE_ROLL_FLEE' ||
-        event?.type === 'DAMAGED_ROLL_FLEE' ||
-        event?.type === 'ALPHA_DIED';
+        event?.type === 'DAMAGED_ROLL_FLEE';
 
       if (releasedAggro) {
         releasingStalkerAggroOnPrey(context);
@@ -187,16 +183,6 @@ export const DEFINING_WILDLIFE_STALKER_BEHAVIOUR_REGISTRY: DefiningStateMachineR
         return;
       }
 
-      context.aggroState = {
-        ...context.aggroState,
-        stalkAttackingPreySinceMs: null,
-        stalkPlayerApproachState: null,
-      };
-    },
-
-    'stalker.onEnterFormingUp': () => {},
-    'stalker.onEnterSurrounding': (context) => {
-      // Clear the burst timer so the next rush starts fresh after re-flanking.
       context.aggroState = {
         ...context.aggroState,
         stalkAttackingPreySinceMs: null,

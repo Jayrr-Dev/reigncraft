@@ -17,10 +17,6 @@ const RENDERING_WORLD_PLAZA_WORLD_LOADING_KEYFRAMES = `
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-3px); }
 }
-@keyframes plaza-loading-destination-pulse {
-  0%, 100% { opacity: 0.9; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.25); }
-}
 @keyframes plaza-loading-bar-sheen {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(300%); }
@@ -201,21 +197,12 @@ function RenderingWorldPlazaWorldLoadingMapScene({
 
       {/* Destination: X marks the plaza */}
       <g transform={`translate(${destination.x} ${destination.y})`}>
-        <g
-          style={{
-            animation:
-              'plaza-loading-destination-pulse 1.8s ease-in-out infinite',
-            transformBox: 'fill-box',
-            transformOrigin: 'center',
-          }}
-        >
-          <path
-            d="M -11 -11 L 11 11 M 11 -11 L -11 11"
-            stroke={trail}
-            strokeWidth={5}
-            strokeLinecap="round"
-          />
-        </g>
+        <path
+          d="M -11 -11 L 11 11 M 11 -11 L -11 11"
+          stroke={trail}
+          strokeWidth={5}
+          strokeLinecap="round"
+        />
       </g>
       <circle
         cx={destination.x}

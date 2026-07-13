@@ -104,7 +104,10 @@ export function checkingWildlifePredatorMayAttackPlayer(
     return isAggroed;
   }
 
-  if (predator.temperamentId === 'stalker') {
+  if (
+    predator.temperamentId === 'pack_hunter' ||
+    predator.temperamentId === 'stalker'
+  ) {
     return isAggroed;
   }
 

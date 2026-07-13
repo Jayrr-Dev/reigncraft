@@ -42,6 +42,8 @@ describe('applyingWorldBuildingBuildDraftBlockPlacement session builds', () => {
     }
 
     expect(placementResult.isSessionPlacement).toBe(true);
+    // Not unsaved: craft exit flush will not save these. Persist must complete
+    // before edit mode clears the draft, or the campfire disappears instantly.
     expect(
       checkingWorldBuildingBuildDraftHasUnsavedChanges(placementResult.draft),
     ).toBe(false);

@@ -70,6 +70,7 @@ function formattingPlazaBestiaryTemperamentLabel(
     docile: 'Docile',
     skittish: 'Skittish',
     retaliator: 'Retaliator',
+    pack_hunter: 'Pack hunter',
     stalker: 'Stalker',
     predator: 'Predator',
     ambusher: 'Ambusher',

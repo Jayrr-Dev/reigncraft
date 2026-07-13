@@ -1,3 +1,4 @@
+import { checkingWorldBuildingFloatingOverheadSlabAboveStandingLayerAtTileIndex } from '@/components/world/building/domains/checkingWorldBuildingFloatingOverheadSlabAboveStandingLayerAtTileIndex';
 import { checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering } from '@/components/world/building/domains/checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering';
 import { resolvingWorldBuildingBlockDefinition } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
@@ -128,6 +129,19 @@ const DEFINING_WORLD_DEPTH_PLACED_BLOCK_COLUMN_PROVIDER: DefiningWorldDepthProvi
     standingBumpRequiresRaisedSurface: true,
     participatesInFrontOcclusion: true,
     participatesInSameTileOverheadOcclusion: true,
+    checkingAppliesSameTileOverheadOcclusionAtTileIndex: (
+      tileX,
+      tileY,
+      standingLayer,
+      context
+    ) =>
+      checkingWorldBuildingFloatingOverheadSlabAboveStandingLayerAtTileIndex(
+        tileX,
+        tileY,
+        standingLayer,
+        context.placedBlocks ?? [],
+        context.placedBlocksByTile
+      ),
     participatesInShadowOcclusion: true,
     requiresSilhouetteReachForFrontOcclusion: true,
     checkingHasColumnAtTileIndex:

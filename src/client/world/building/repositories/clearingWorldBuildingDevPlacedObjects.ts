@@ -4,6 +4,8 @@
  * @module components/world/building/repositories/clearingWorldBuildingDevPlacedObjects
  */
 
+import { appendingWorldPlazaOnlineRoomQueryToApiPath } from '@/components/world/domains/managingWorldPlazaOnlineRoomIdStore';
+
 /** Dev-only API route for wiping all world building persistence. */
 const CLEARING_WORLD_BUILDING_DEV_PLACED_OBJECTS_API_PATH =
   "/api/world/building/dev/clear-all" as const;
@@ -18,9 +20,14 @@ export interface ClearingWorldBuildingDevPlacedObjectsResult {
  * Deletes all rows from `world_plots` and `world_placed_blocks` via the dev API.
  */
 export async function clearingWorldBuildingDevPlacedObjects(): Promise<ClearingWorldBuildingDevPlacedObjectsResult> {
-  const response = await fetch(CLEARING_WORLD_BUILDING_DEV_PLACED_OBJECTS_API_PATH, {
-    method: "POST",
-  });
+  const response = await fetch(
+    appendingWorldPlazaOnlineRoomQueryToApiPath(
+      CLEARING_WORLD_BUILDING_DEV_PLACED_OBJECTS_API_PATH,
+    ),
+    {
+      method: "POST",
+    },
+  );
 
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as {

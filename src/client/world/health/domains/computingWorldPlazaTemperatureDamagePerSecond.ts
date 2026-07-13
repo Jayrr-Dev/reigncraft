@@ -53,9 +53,14 @@ export function computingWorldPlazaEnvironmentalTemperatureTotalDamagePerSecond(
  */
 export function computingWorldPlazaTemperatureDamagePerSecond(
   celsius: number,
-  resistance?: Pick<
-    DefiningWorldPlazaEntityTemperatureResistance,
-    'heatComfortBonusCelsius' | 'coldComfortBonusCelsius'
+  resistance?: Partial<
+    Pick<
+      DefiningWorldPlazaEntityTemperatureResistance,
+      | 'baseComfortLowCelsius'
+      | 'baseComfortHighCelsius'
+      | 'heatComfortBonusCelsius'
+      | 'coldComfortBonusCelsius'
+    >
   > | null
 ): ComputingWorldPlazaTemperatureDamagePerSecondResult {
   const comfortBand =
@@ -108,9 +113,14 @@ export function computingWorldPlazaTemperatureDamagePerSecond(
  */
 export function buildingWorldPlazaEnvironmentalTemperatureSample(
   celsius: number,
-  resistance?: Pick<
-    DefiningWorldPlazaEntityTemperatureResistance,
-    'heatComfortBonusCelsius' | 'coldComfortBonusCelsius'
+  resistance?: Partial<
+    Pick<
+      DefiningWorldPlazaEntityTemperatureResistance,
+      | 'baseComfortLowCelsius'
+      | 'baseComfortHighCelsius'
+      | 'heatComfortBonusCelsius'
+      | 'coldComfortBonusCelsius'
+    >
   > | null
 ): DefiningWorldPlazaEnvironmentalTemperatureSample {
   const damage = computingWorldPlazaTemperatureDamagePerSecond(

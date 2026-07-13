@@ -27,7 +27,7 @@ The bible should treat these as everyday facts of the world, not twists:
 
 ## Merit and its receipts
 
-Climbing has a currency. When anything dies, it drops the proof of its lives: its Soulcore (see [`world/soul-and-soulcore.md`](soul-and-soulcore.md)). Cores are how the ladder keeps score, and taking them off a corpse is how everyone, from the church to the vulture, participates in the arrangement Manus designed. To get stronger, something else has to become loot. Nobody in Corpus has found a way around that sentence, though the Uncored are trying.
+Climbing has a currency. When anything dies, it drops the proof of its lives: its Spritcore (see [`world/soul-and-spritcore.md`](soul-and-spritcore.md)). Cores are how the ladder keeps score, and taking them off a corpse is how everyone, from the church to the vulture, participates in the arrangement Manus designed. To get stronger, something else has to become loot. Nobody in Corpus has found a way around that sentence, though the Uncored are trying.
 
 ## Writing rules for ladder content
 

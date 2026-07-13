@@ -110,6 +110,7 @@ export function checkingWildlifeHazardAtPoint({
       placedBlocks,
       playerLayer: point.layer,
       playerRadiusGrid: species.collisionRadiusGrid,
+      jumpLayerReachMax: species.jump.maxJumpLayerReach,
     }
   );
 

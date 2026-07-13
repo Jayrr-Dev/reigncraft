@@ -39,7 +39,7 @@ Every item type requires **`rarity`**. Optional: `tags`, `forgeLevel`, `cost`.
 | Rare      | `rare`      | Steel tools, expedition bag                   |
 | Epic      | `epic`      | Gold tools                                    |
 | Mythic    | `mythic`    | (reserved)                                    |
-| Legendary | `legendary` | Soulcore                                      |
+| Legendary | `legendary` | Spritcore                                      |
 | Godly     | `godly`     | (reserved)                                    |
 
 Special tags (optional): `godforge`, `unique`, `quest-reward`. Paint + labels: `definingWorldPlazaInventoryItemRarityConstants.ts`, `definingWorldPlazaInventoryItemSpecialTagConstants.ts`.
@@ -60,7 +60,7 @@ Swords set both `attackEvModifier` (multiplicative from tier) and `meleeDamageMu
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
 | Slot index         | **0** (far left): `DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX`                                                |
 | Allowed items      | Any item type with non-empty `equipment.toolKinds` (axe, pickaxe, sword, hoe, scythe, fishrod, build, ignite/flint, …)   |
-| Blocked items      | Food, resources, bags, seeds, Soulcores, and other non-equipment stacks                                                  |
+| Blocked items      | Food, resources, bags, seeds, Spritcores, and other non-equipment stacks                                                  |
 | Always equipped    | Whatever is in slot 0 is the equipped tool (no separate Equip toggle). Empty = unarmed fist melee                        |
 | UI outline         | Charcoal border (`.plaza-inventory-slot--weapon-tool`) so the equipment socket reads as distinct from general slots      |
 | Empty presentation | Faded `ph:hand-fist` icon (`DEFINING_WORLD_PLAZA_INVENTORY_EMPTY_FIST_OPACITY` = **0.4**); label **Unarmed (fist)**      |

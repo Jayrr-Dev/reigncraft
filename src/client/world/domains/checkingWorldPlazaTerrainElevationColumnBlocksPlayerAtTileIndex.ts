@@ -135,6 +135,7 @@ export function checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex(
   applyBlockCollision: boolean,
   collisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext,
   playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
+  jumpLayerReachMax?: number,
 ): boolean {
   if (
     checkingWorldPlazaColumnRockFootprintTileIsWalkableGroundForPlayerLayer(
@@ -191,5 +192,6 @@ export function checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex(
         tileY,
         collisionContext,
       ),
+    jumpLayerReachMax,
   });
 }

@@ -2,7 +2,8 @@
  * Hold-to-run stamina tuning for the plaza avatar.
  *
  * Stamina is tracked as a 0..1 ratio so the HUD bar maps directly to width.
- * Fatigue tiers (winded through collapsed) gate recovery after full depletions;
+ * Fatigue tiers (winded through spent) gate recovery after full depletions;
+ * ladder matches wildlife: 66% → 33% → full 100% heal.
  * see {@link definingWorldPlazaPlayerStaminaFatigueConstants}.
  *
  * @module components/world/domains/definingWorldPlazaRunStaminaConstants

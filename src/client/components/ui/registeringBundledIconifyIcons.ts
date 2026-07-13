@@ -80,6 +80,8 @@ import mdiBagCarryOn from '@iconify-icons/mdi/bag-carry-on';
 import mdiBagChecked from '@iconify-icons/mdi/bag-checked';
 import mdiBagPersonal from '@iconify-icons/mdi/bag-personal';
 import mdiBagSuitcase from '@iconify-icons/mdi/bag-suitcase';
+import mdiBatteryMinus from '@iconify-icons/mdi/battery-minus';
+import mdiBatteryPlus from '@iconify-icons/mdi/battery-plus';
 import mdiBeach from '@iconify-icons/mdi/beach';
 import mdiBiohazard from '@iconify-icons/mdi/biohazard';
 import mdiBloodBag from '@iconify-icons/mdi/blood-bag';
@@ -124,6 +126,7 @@ import mdiHeartOutline from '@iconify-icons/mdi/heart-outline';
 import mdiHeartPlus from '@iconify-icons/mdi/heart-plus';
 import mdiHome from '@iconify-icons/mdi/home';
 import mdiHumanMaleHeight from '@iconify-icons/mdi/human-male-height';
+import mdiJump from '@iconify-icons/mdi/jump';
 import mdiImageFilterHdr from '@iconify-icons/mdi/image-filter-hdr';
 import mdiInformationOutline from '@iconify-icons/mdi/information-outline';
 import mdiLandPlots from '@iconify-icons/mdi/land-plots';
@@ -141,6 +144,7 @@ import mdiPlay from '@iconify-icons/mdi/play';
 import mdiPowerSleep from '@iconify-icons/mdi/power-sleep';
 import mdiPurse from '@iconify-icons/mdi/purse';
 import mdiRefresh from '@iconify-icons/mdi/refresh';
+import mdiRotateRight from '@iconify-icons/mdi/rotate-right';
 import mdiRunFast from '@iconify-icons/mdi/run-fast';
 import mdiScaleBalance from '@iconify-icons/mdi/scale-balance';
 import mdiShapeSquarePlus from '@iconify-icons/mdi/shape-square-plus';
@@ -153,6 +157,7 @@ import mdiShieldOff from '@iconify-icons/mdi/shield-off';
 import mdiShieldPlus from '@iconify-icons/mdi/shield-plus';
 import mdiSleep from '@iconify-icons/mdi/sleep';
 import mdiSnowflake from '@iconify-icons/mdi/snowflake';
+import mdiSpeedometer from '@iconify-icons/mdi/speedometer';
 import mdiSprout from '@iconify-icons/mdi/sprout';
 import mdiStairsUp from '@iconify-icons/mdi/stairs-up';
 import mdiStarFourPoints from '@iconify-icons/mdi/star-four-points';
@@ -162,6 +167,7 @@ import mdiTerrain from '@iconify-icons/mdi/terrain';
 import mdiThermometer from '@iconify-icons/mdi/thermometer';
 import mdiTreasureChest from '@iconify-icons/mdi/treasure-chest';
 import mdiTreeOutline from '@iconify-icons/mdi/tree-outline';
+import mdiTrendingUp from '@iconify-icons/mdi/trending-up';
 import mdiViewGridOutline from '@iconify-icons/mdi/view-grid-outline';
 import mdiWater from '@iconify-icons/mdi/water';
 import mdiWaves from '@iconify-icons/mdi/waves';
@@ -289,6 +295,8 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:bag-checked': mdiBagChecked,
   'mdi:bag-personal': mdiBagPersonal,
   'mdi:bag-suitcase': mdiBagSuitcase,
+  'mdi:battery-minus': mdiBatteryMinus,
+  'mdi:battery-plus': mdiBatteryPlus,
   'mdi:beach': mdiBeach,
   'mdi:biohazard': mdiBiohazard,
   'mdi:blood-bag': mdiBloodBag,
@@ -334,6 +342,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:heart-plus': mdiHeartPlus,
   'mdi:home': mdiHome,
   'mdi:human-male-height': mdiHumanMaleHeight,
+  'mdi:jump': mdiJump,
   'mdi:image-filter-hdr': mdiImageFilterHdr,
   'mdi:information-outline': mdiInformationOutline,
   'mdi:land-plots': mdiLandPlots,
@@ -350,6 +359,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:play': mdiPlay,
   'mdi:purse': mdiPurse,
   'mdi:refresh': mdiRefresh,
+  'mdi:rotate-right': mdiRotateRight,
   'mdi:run-fast': mdiRunFast,
   'mdi:scale-balance': mdiScaleBalance,
   'mdi:shape-square-plus': mdiShapeSquarePlus,
@@ -363,6 +373,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:power-sleep': mdiPowerSleep,
   'mdi:sleep': mdiSleep,
   'mdi:snowflake': mdiSnowflake,
+  'mdi:speedometer': mdiSpeedometer,
   'mdi:sprout': mdiSprout,
   'mdi:stairs-up': mdiStairsUp,
   'mdi:star-four-points': mdiStarFourPoints,
@@ -372,6 +383,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:terrain': mdiTerrain,
   'mdi:treasure-chest': mdiTreasureChest,
   'mdi:tree-outline': mdiTreeOutline,
+  'mdi:trending-up': mdiTrendingUp,
   'mdi:view-grid-outline': mdiViewGridOutline,
   'mdi:water': mdiWater,
   'mdi:waves': mdiWaves,

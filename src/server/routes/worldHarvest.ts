@@ -25,7 +25,7 @@ import {
   pickingWorldHarvestDevvitPebble,
 } from '../domains/managingWorldHarvestDevvitPickedPebbles';
 import { resolvingDevvitRedditUserId } from '../domains/resolvingDevvitRedditUserId';
-import { resolvingPlazaDevvitOnlineRoomScope } from '../domains/resolvingPlazaDevvitOnlineRoomScope';
+import { resolvingPlazaDevvitOnlineRoomScopeFromRequest } from '../domains/resolvingPlazaDevvitOnlineRoomScopeFromRequest';
 
 /**
  * Resolves harvest persistence scope: a private per-user scope for single-player
@@ -34,6 +34,7 @@ import { resolvingPlazaDevvitOnlineRoomScope } from '../domains/resolvingPlazaDe
 function resolvingHarvestScope(
   userId: string,
   saveSlotIndex: number | null | undefined,
+  roomScopeFromRequest: string,
 ): string {
   if (
     typeof saveSlotIndex === 'number' &&
@@ -42,7 +43,7 @@ function resolvingHarvestScope(
     return `single-player:${userId}:slot-${saveSlotIndex}`;
   }
 
-  return resolvingPlazaDevvitOnlineRoomScope();
+  return roomScopeFromRequest;
 }
 
 function parsingWorldHarvestDevvitChopTreeRequest(
@@ -160,7 +161,11 @@ worldHarvest.get('/chopped-trees', async (c) => {
   const parsedSaveSlotIndex = rawSaveSlotIndex
     ? Number.parseInt(rawSaveSlotIndex, 10)
     : null;
-  const harvestScope = resolvingHarvestScope(userId, parsedSaveSlotIndex);
+  const harvestScope = resolvingHarvestScope(
+    userId,
+    parsedSaveSlotIndex,
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c),
+  );
   const tiles = await listingWorldHarvestDevvitChoppedTrees(harvestScope);
 
   return c.json<WorldHarvestDevvitChoppedTreesResponse>({
@@ -195,7 +200,11 @@ worldHarvest.post('/chop-tree', async (c) => {
     );
   }
 
-  const harvestScope = resolvingHarvestScope(userId, chopRequest.saveSlotIndex);
+  const harvestScope = resolvingHarvestScope(
+    userId,
+    chopRequest.saveSlotIndex,
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c),
+  );
   const chopResult = await choppingWorldHarvestDevvitTreeLayer(
     harvestScope,
     chopRequest,
@@ -239,7 +248,11 @@ worldHarvest.get('/mined-rocks', async (c) => {
   const parsedSaveSlotIndex = rawSaveSlotIndex
     ? Number.parseInt(rawSaveSlotIndex, 10)
     : null;
-  const harvestScope = resolvingHarvestScope(userId, parsedSaveSlotIndex);
+  const harvestScope = resolvingHarvestScope(
+    userId,
+    parsedSaveSlotIndex,
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c),
+  );
   const tiles = await listingWorldHarvestDevvitMinedRocks(harvestScope);
 
   return c.json<WorldHarvestDevvitMinedRocksResponse>({
@@ -274,7 +287,11 @@ worldHarvest.post('/mine-rock', async (c) => {
     );
   }
 
-  const harvestScope = resolvingHarvestScope(userId, mineRequest.saveSlotIndex);
+  const harvestScope = resolvingHarvestScope(
+    userId,
+    mineRequest.saveSlotIndex,
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c),
+  );
   const mineResult = await miningWorldHarvestDevvitRockLayer(
     harvestScope,
     mineRequest,
@@ -318,7 +335,11 @@ worldHarvest.get('/picked-pebbles', async (c) => {
   const parsedSaveSlotIndex = rawSaveSlotIndex
     ? Number.parseInt(rawSaveSlotIndex, 10)
     : null;
-  const harvestScope = resolvingHarvestScope(userId, parsedSaveSlotIndex);
+  const harvestScope = resolvingHarvestScope(
+    userId,
+    parsedSaveSlotIndex,
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c),
+  );
   const tiles = await listingWorldHarvestDevvitPickedPebbles(harvestScope);
 
   return c.json<WorldHarvestDevvitPickedPebblesResponse>({
@@ -353,7 +374,11 @@ worldHarvest.post('/pick-pebble', async (c) => {
     );
   }
 
-  const harvestScope = resolvingHarvestScope(userId, pickRequest.saveSlotIndex);
+  const harvestScope = resolvingHarvestScope(
+    userId,
+    pickRequest.saveSlotIndex,
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c),
+  );
   const pickResult = await pickingWorldHarvestDevvitPebble(
     harvestScope,
     pickRequest,

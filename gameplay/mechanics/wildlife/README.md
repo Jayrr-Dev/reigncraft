@@ -36,11 +36,11 @@ A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It 
 ### Value objects
 
 - `DefiningWildlifeSpeciesId`: stable kebab-case key (`grey-wolf`, `brown-bear`, …)
-- `DefiningWildlifeTemperamentId`: behavior tree key (`passive`, `stalker`, …)
+- `DefiningWildlifeTemperamentId`: behavior tree key (`passive`, `pack_hunter`, …)
 - `DefiningWildlifeActivityPattern`: `diurnal | nocturnal | crepuscular | cathemeral`
 - `DefiningWildlifeAggressionLevel`: per-spawn roll: `tame | normal | aggressive`
 - `DefiningWildlifeThreatEntry`: `{ targetId, threat, lastUpdatedAtMs }`
-- `DefiningWildlifeStalkPhase`: stalker hunt phase (`shadowing`, `surrounding`, …)
+- `DefiningWildlifeStalkPhase`: PackHunter hunt phase (`shadowing`, `surrounding`, …)
 
 ### Domain services (pure)
 
@@ -49,7 +49,7 @@ A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It 
 | Food chain eligibility | `definingWildlifeFoodChain.ts`                  |
 | Sleep at cycle phase   | `resolvingWildlifeShouldSleepAtCyclePhase.ts`   |
 | On-hit proc resolution | `resolvingWildlifeSpeciesOnHitPlayerProcs.ts`   |
-| Stalk prey candidates  | `listingWildlifeStalkerPreyTargetCandidates.ts` |
+| Stalk prey candidates  | `listingWildlifePackHunterPreyTargetCandidates.ts` |
 | On-sight aggro gate    | `checkingWildlifeMayAggroPlayerOnSight.ts`      |
 
 ### Application layer
@@ -59,7 +59,7 @@ A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It 
 | Simulation tick      | `advancingWildlifeSimulationTick.ts`                                                                    |
 | Threat + target pick | `advancingWildlifeAggroTick.ts`                                                                         |
 | Wildlife melee gate  | `checkingWildlifeMayMeleeWildlifeTarget.ts`                                                             |
-| Stalk phase machine  | `advancingWildlifeStalkerBehaviour.ts`                                                                  |
+| Stalk phase machine  | `advancingWildlifePackHunterBehaviour.ts`                                                                  |
 | Behavior tree eval   | `advancingWildlifeBehaviorTick.ts`                                                                      |
 | Player melee damage  | `applyingWildlifeInstancePhysicalDamage.ts` + `resolvingWildlifePlayerOutgoingPhysicalDamageOptions.ts` |
 | Corpse loot drop     | wired through death tick + inventory spawn                                                              |
@@ -86,7 +86,7 @@ A **spawn anchor** (`DefiningWildlifeSpawnAnchor`) is not an aggregate root. It 
 | On-hit player procs                                     | `definingWildlifeSpeciesOnHitEffectRegistry.ts`                                                                                                                                                                       |
 | Biome spawn pools                                       | `definingWildlifeBiomeSpawnTable.ts`                                                                                                                                                                                  |
 | Difficulty levers (spawn density, predator mix, combat) | `definingWildlifeDifficultyLevers.ts`                                                                                                                                                                                 |
-| Stalker statechart                                      | `definingWildlifeStalkerBehaviourMachine.ts`                                                                                                                                                                          |
+| PackHunter statechart                                      | `definingWildlifePackHunterBehaviourMachine.ts`                                                                                                                                                                          |
 | Aggro / pack / stalk / sleep tuning                     | `definingWildlifeAggroConstants.ts`, `PackConstants.ts`, `StalkConstants.ts`, `SleepScheduleConstants.ts`, `FavoritePreyConstants.ts`, `HunterFeedingConstants.ts`                                                    |
 | Ground-food forage scent + chew delay                   | `definingWildlifeHuntConstants.ts` (`GROUND_FOOD_SCENT_RADIUS_GRID`, `GROUND_FOOD_BITE_DELAY_MIN/MAX_MS`); chew apply in `applyingWildlifeGroundFoodBite.ts`                                                          |
 | Meal theft (contested pickup + hard aggro)              | `definingWildlifeMealTheftConstants.ts`; apply in `applyingWildlifeMealTheftAggroForGroundItem.ts` (wired from ground-item pickup start)                                                                              |
@@ -109,20 +109,20 @@ flowchart TB
     SR[definingWildlifeSpeciesRegistry]
     BT[definingWildlifeBehaviorTreeRegistry]
     OH[definingWildlifeSpeciesOnHitEffectRegistry]
-    SM[definingWildlifeStalkerBehaviourMachine]
+    SM[definingWildlifePackHunterBehaviourMachine]
   end
 
   subgraph domain [Domain layer]
     FC[definingWildlifeFoodChain]
     SL[resolvingWildlifeShouldSleepAtCyclePhase]
-    ST[listingWildlifeStalkerPreyTargetCandidates]
+    ST[listingWildlifePackHunterPreyTargetCandidates]
   end
 
   subgraph application [Application layer]
     SIM[advancingWildlifeSimulationTick]
     AGG[advancingWildlifeAggroTick]
     BEH[advancingWildlifeBehaviorTick]
-    STK[advancingWildlifeStalkerBehaviour]
+    STK[advancingWildlifePackHunterBehaviour]
     DMG[applyingWildlifeInstancePhysicalDamage]
   end
 

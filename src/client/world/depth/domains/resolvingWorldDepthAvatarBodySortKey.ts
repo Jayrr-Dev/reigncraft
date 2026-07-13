@@ -1,10 +1,13 @@
+import { DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
+  checkingWorldDepthAvatarFootIsAtOrSouthOfColumnSouthTipOnScreen,
   checkingWorldDepthColumnFootIsInFrontOfAvatarFoot,
   checkingWorldDepthColumnFootIsOnAvatarStandingTile,
   checkingWorldDepthColumnIsAtOrBelowAvatarStandingLayer,
   checkingWorldDepthColumnIsRaisedAtOrBelowAvatarStandingLayer,
   checkingWorldDepthColumnIsTallerThanAvatarStandingLayer,
   checkingWorldDepthColumnSilhouetteReachesAvatarFootOnScreen,
+  checkingWorldDepthElevatedColumnOccludesAvatarBehindOnScreen,
 } from '@/components/world/depth/domains/checkingWorldDepthColumnSilhouetteReachesAvatarFootOnScreen';
 import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
 import {
@@ -122,7 +125,52 @@ function scanningWorldDepthAvatarBodyFootprint(
           );
         const appliesSameTileOverhead =
           provider.participatesInSameTileOverheadOcclusion &&
-          isOverheadOnStandingTile;
+          isOverheadOnStandingTile &&
+          (provider.checkingAppliesSameTileOverheadOcclusionAtTileIndex?.(
+            tileX,
+            tileY,
+            standingLayer,
+            context
+          ) ??
+            true);
+        const isFloatingOverheadOnColumnTile =
+          provider.participatesInSameTileOverheadOcclusion &&
+          (provider.checkingAppliesSameTileOverheadOcclusionAtTileIndex?.(
+            tileX,
+            tileY,
+            standingLayer,
+            context
+          ) ??
+            false);
+        // Footprint tip for floating roofs uses standing layer (raised tip always
+        // looks "north" of ground feet). Solid columns keep the surface tip so
+        // painted feet south of a tall front face still sort in front.
+        const southTipWorldLayer = isFloatingOverheadOnColumnTile
+          ? standingLayer
+          : surfaceLayer;
+        const isVisuallyOnOrSouthOfFrontFace =
+          provider.id === 'placedBlockColumn' &&
+          checkingWorldDepthAvatarFootIsAtOrSouthOfColumnSouthTipOnScreen(
+            gridPoint,
+            standingLayer,
+            tileX,
+            tileY,
+            southTipWorldLayer,
+            context.avatarFootOffsetBelowGridAnchorPx
+          );
+        const isElevatedBehindOccluder =
+          provider.id === 'placedBlockColumn' &&
+          checkingWorldDepthElevatedColumnOccludesAvatarBehindOnScreen(
+            gridPoint,
+            standingLayer,
+            tileX,
+            tileY,
+            surfaceLayer,
+            context.avatarFootOffsetBelowGridAnchorPx,
+            DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
+            context.placedBlocks ?? [],
+            context.placedBlocksByTile
+          );
 
         if (
           provider.participatesInStandingBump &&
@@ -139,11 +187,15 @@ function scanningWorldDepthAvatarBodyFootprint(
           maxStandingBumpSortKey = Math.max(maxStandingBumpSortKey, sortKey);
         }
 
-        // Northern/behind columns (lower foot sum) must stay under a southern
-        // avatar even when height bias inflates their sort key.
+        // Northern/behind columns, coplanar side neighbors, and columns whose
+        // south tip is at/above the avatar feet on screen must stay under the
+        // avatar (unless this is a walk-under floating roof or elevated north
+        // occluder that should cover the body).
         if (
-          depthSortFoot.x + depthSortFoot.y < avatarFootSum &&
-          !appliesSameTileOverhead
+          (depthSortFoot.x + depthSortFoot.y <= avatarFootSum ||
+            isVisuallyOnOrSouthOfFrontFace) &&
+          !appliesSameTileOverhead &&
+          !isElevatedBehindOccluder
         ) {
           maxBehindColumnSortKey = Math.max(maxBehindColumnSortKey, sortKey);
         }
@@ -170,10 +222,19 @@ function scanningWorldDepthAvatarBodyFootprint(
               surfaceLayer
             );
 
+          // Never front-occlude a solid column the avatar is already standing on
+          // the south face of (flat-floor cover bug). Floating same-tile roofs
+          // and elevated north/under overlaps still tuck even without a large
+          // foot-sum lead.
           if (
             isTaller &&
-            (isInFront || appliesSameTileOverhead) &&
-            silhouetteOk
+            (isInFront ||
+              appliesSameTileOverhead ||
+              isElevatedBehindOccluder) &&
+            silhouetteOk &&
+            (appliesSameTileOverhead ||
+              isElevatedBehindOccluder ||
+              !isVisuallyOnOrSouthOfFrontFace)
           ) {
             minFrontOccluderCap = Math.min(
               minFrontOccluderCap,

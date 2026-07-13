@@ -158,3 +158,14 @@ export function writingWorldPlazaLocalFarmlandTileState(
     byTileKey: nextByTileKey,
   });
 }
+
+/**
+ * Drops in-memory farmland cache for one persistence owner (save-slot wipe).
+ *
+ * @param persistenceOwnerId - Scoped localStorage owner id for the slot.
+ */
+export function clearingWorldPlazaLocalFarmlandMemoryForOwner(
+  persistenceOwnerId: string
+): void {
+  managingWorldPlazaLocalFarmlandByOwner.delete(persistenceOwnerId);
+}

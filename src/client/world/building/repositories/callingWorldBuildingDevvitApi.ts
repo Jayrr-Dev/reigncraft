@@ -1,3 +1,4 @@
+import { appendingWorldPlazaOnlineRoomQueryToApiPath } from '@/components/world/domains/managingWorldPlazaOnlineRoomIdStore';
 import type {
   WorldBuildingDevvitClaimPlotResponse,
   WorldBuildingDevvitDeleteSessionBlocksResponse,
@@ -50,7 +51,7 @@ export async function callingWorldBuildingDevvitApi(
   path: string,
   init?: RequestInit,
 ): Promise<unknown> {
-  const response = await fetch(path, {
+  const response = await fetch(appendingWorldPlazaOnlineRoomQueryToApiPath(path), {
     ...init,
     headers: {
       'Content-Type': 'application/json',

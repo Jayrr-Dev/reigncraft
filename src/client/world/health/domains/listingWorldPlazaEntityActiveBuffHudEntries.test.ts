@@ -1,3 +1,4 @@
+import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import { applyingWorldPlazaEntityDisease } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
 import {
   computingWorldPlazaEntityBuffHudRemainingSeconds,
@@ -84,5 +85,32 @@ describe('listingWorldPlazaEntityActiveBuffHudEntries disease rows', () => {
         performanceNowMs
       )
     ).toBeGreaterThan(1_000_000);
+  });
+});
+
+describe('listingWorldPlazaEntityActiveBuffHudEntries well-fed rows', () => {
+  it('puts mechanical food bonus under the flavor description', () => {
+    const nowMs = 1_000_000;
+    const state = applyingWorldPlazaEntityBuff(
+      creatingWorldPlazaEntityHealthInitialState(),
+      'well-fed-comfort-buff',
+      nowMs
+    );
+
+    const rows = listingWorldPlazaEntityActiveBuffHudEntries({
+      state,
+      nowMs,
+      defenderModifierIds: [],
+      attackerModifierIds: [],
+    });
+
+    const comfortFoodRow = rows.find(
+      (row) => row.id === 'well-fed-comfort-buff'
+    );
+
+    expect(comfortFoodRow?.description).toBe(
+      'Chicken settles the stomach and nerves.'
+    );
+    expect(comfortFoodRow?.detailLines).toEqual(['Stamina regen ×1.2']);
   });
 });

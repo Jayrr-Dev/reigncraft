@@ -1,5 +1,5 @@
 /**
- * Deterministic mass-weighted prey pick for stalker alphas.
+ * Deterministic mass-weighted prey pick for PackHunter alphas.
  *
  * @module components/world/wildlife/domains/pickingWildlifeStalkAlphaPreyTargetId
  */

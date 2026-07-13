@@ -7,6 +7,7 @@
 import { applyingWorldPlazaCharacterEngineImmunities } from '@/components/world/character/domains/applyingWorldPlazaCharacterEngineImmunities';
 import { computingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineDerivedStats';
 import type { DefiningWorldPlazaCharacterEngineDefinition } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
+import { applyingWorldPlazaDevQaPlayerHealthOverride } from '@/components/world/domains/applyingWorldPlazaDevQaPlayerHealthOverride';
 import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
@@ -53,9 +54,11 @@ export function creatingWorldPlazaCharacterEngineInitialHealthState(
     damageKindImmunities: [],
   };
 
-  return reseedingWorldPlazaCharacterEngineHealthBaseline(
-    state,
-    definition,
-    nowMs
+  return applyingWorldPlazaDevQaPlayerHealthOverride(
+    reseedingWorldPlazaCharacterEngineHealthBaseline(
+      state,
+      definition,
+      nowMs
+    )
   );
 }

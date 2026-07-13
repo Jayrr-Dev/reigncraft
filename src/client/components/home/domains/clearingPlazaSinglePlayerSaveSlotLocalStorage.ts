@@ -4,8 +4,23 @@ import { resolvingWorldPlazaLastPositionStorageKey } from '@/components/world/do
 import { resolvingWorldPlazaDiscoveredNamedRealmsStorageKey } from '@/components/world/domains/definingWorldPlazaNamedRealmConstants';
 import { resolvingWorldPlazaRecipeDiscoveryStorageKey } from '@/components/world/domains/definingWorldPlazaRecipeDiscoveryConstants';
 import { resolvingWorldPlazaSavedCoordsStorageKey } from '@/components/world/domains/definingWorldPlazaSavedCoordsConstants';
+import {
+  clearingWorldPlazaLocalFarmlandMemoryForOwner,
+  resolvingWorldPlazaFarmlandLocalStorageKey,
+} from '@/components/world/farming/domains/managingWorldPlazaLocalFarmland';
 import { resolvingWorldPlazaFireCellsLocalStorageKey } from '@/components/world/fire/domains/managingWorldPlazaLocalFireCells';
-import { resolvingWorldPlazaChoppedTreesLocalStorageKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import {
+  clearingWorldPlazaLocalChoppedTreesMemoryForOwner,
+  resolvingWorldPlazaChoppedTreesLocalStorageKey,
+} from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import {
+  clearingWorldPlazaLocalMinedRocksMemoryForOwner,
+  resolvingWorldPlazaMinedRocksLocalStorageKey,
+} from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
+import {
+  clearingWorldPlazaLocalPickedPebblesMemoryForOwner,
+  resolvingWorldPlazaPickedPebblesLocalStorageKey,
+} from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { resolvingWorldPlazaPlayerConditionsStorageKey } from '@/components/world/health/domains/definingWorldPlazaPlayerConditionsConstants';
 import { resolvingWorldPlazaGroundItemsLocalStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemLocalStorageConstants';
 import { resolvingWorldPlazaInventoryStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
@@ -32,6 +47,9 @@ export function clearingPlazaSinglePlayerSaveSlotLocalStorage(
     resolvingWorldPlazaRecipeDiscoveryStorageKey(persistenceOwnerId),
     resolvingWorldPlazaGroundItemsLocalStorageKey(persistenceOwnerId),
     resolvingWorldPlazaChoppedTreesLocalStorageKey(persistenceOwnerId),
+    resolvingWorldPlazaMinedRocksLocalStorageKey(persistenceOwnerId),
+    resolvingWorldPlazaPickedPebblesLocalStorageKey(persistenceOwnerId),
+    resolvingWorldPlazaFarmlandLocalStorageKey(persistenceOwnerId),
     resolvingWorldPlazaFireCellsLocalStorageKey(persistenceOwnerId),
     resolvingWorldPlazaPlayerConditionsStorageKey(persistenceOwnerId),
   ];
@@ -39,4 +57,9 @@ export function clearingPlazaSinglePlayerSaveSlotLocalStorage(
   for (const storageKey of storageKeys) {
     window.localStorage.removeItem(storageKey);
   }
+
+  clearingWorldPlazaLocalChoppedTreesMemoryForOwner(persistenceOwnerId);
+  clearingWorldPlazaLocalMinedRocksMemoryForOwner(persistenceOwnerId);
+  clearingWorldPlazaLocalPickedPebblesMemoryForOwner(persistenceOwnerId);
+  clearingWorldPlazaLocalFarmlandMemoryForOwner(persistenceOwnerId);
 }

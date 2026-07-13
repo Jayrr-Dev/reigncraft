@@ -1,15 +1,15 @@
 import { computingWorldBuildingWorldLayerScreenOffsetPx } from "@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx";
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from "@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint";
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
 } from "@/components/world/domains/definingWorldPlazaIsometricConstants";
+import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from "@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex";
 import type { Graphics } from "pixi.js";
 
 /**
  * Draws a dashed vertical "drop edge" from an elevated placement preview down to
- * the floor so the player can read which ground tile a block sits above.
+ * the tile surface so the player can read height above the plateau.
  *
  * @module components/world/building/domains/drawingWorldBuildingPlacementGuideOnGraphics
  */
@@ -81,15 +81,22 @@ export interface DrawingWorldBuildingPlacementGuideToFloorParams {
 }
 
 /**
- * Draws dashed drop edges from an elevated preview's top corners to the floor,
- * plus a faint floor footprint diamond. No-op for ground-level placements.
+ * Draws dashed drop edges from an elevated preview down to the tile surface,
+ * plus a faint surface footprint diamond. No-op when preview is flush with the
+ * procedural terrain plateau (or lower).
  *
  * @param params - Preview tile indices and target world layer.
  */
 export function drawingWorldBuildingPlacementGuideToFloorOnGraphics(
   params: DrawingWorldBuildingPlacementGuideToFloorParams,
 ): void {
-  if (params.worldLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND) {
+  const floorWorldLayer =
+    resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
+      params.tileX,
+      params.tileY,
+    );
+
+  if (params.worldLayer <= floorWorldLayer) {
     return;
   }
 
@@ -99,9 +106,10 @@ export function drawingWorldBuildingPlacementGuideToFloorOnGraphics(
   });
   const topCenterY =
     center.y + computingWorldBuildingWorldLayerScreenOffsetPx(params.worldLayer);
-  const groundCenterY = center.y;
+  const floorCenterY =
+    center.y + computingWorldBuildingWorldLayerScreenOffsetPx(floorWorldLayer);
 
-  if (topCenterY >= groundCenterY) {
+  if (topCenterY >= floorCenterY) {
     return;
   }
 
@@ -117,21 +125,21 @@ export function drawingWorldBuildingPlacementGuideToFloorOnGraphics(
     westX,
     topCenterY,
     westX,
-    groundCenterY,
+    floorCenterY,
   );
   appendingWorldBuildingDashedLinePath(
     params.graphics,
     eastX,
     topCenterY,
     eastX,
-    groundCenterY,
+    floorCenterY,
   );
   appendingWorldBuildingDashedLinePath(
     params.graphics,
     southX,
     topCenterY + halfHeight,
     southX,
-    groundCenterY + halfHeight,
+    floorCenterY + halfHeight,
   );
 
   params.graphics.stroke({
@@ -143,30 +151,30 @@ export function drawingWorldBuildingPlacementGuideToFloorOnGraphics(
   appendingWorldBuildingDashedLinePath(
     params.graphics,
     southX,
-    groundCenterY - halfHeight,
+    floorCenterY - halfHeight,
     eastX,
-    groundCenterY,
+    floorCenterY,
   );
   appendingWorldBuildingDashedLinePath(
     params.graphics,
     eastX,
-    groundCenterY,
+    floorCenterY,
     southX,
-    groundCenterY + halfHeight,
+    floorCenterY + halfHeight,
   );
   appendingWorldBuildingDashedLinePath(
     params.graphics,
     southX,
-    groundCenterY + halfHeight,
+    floorCenterY + halfHeight,
     westX,
-    groundCenterY,
+    floorCenterY,
   );
   appendingWorldBuildingDashedLinePath(
     params.graphics,
     westX,
-    groundCenterY,
+    floorCenterY,
     southX,
-    groundCenterY - halfHeight,
+    floorCenterY - halfHeight,
   );
 
   params.graphics.stroke({

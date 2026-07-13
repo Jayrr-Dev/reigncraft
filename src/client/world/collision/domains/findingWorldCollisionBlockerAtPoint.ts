@@ -62,6 +62,8 @@ export interface FindingWorldPlazaBlockedWorldPointBlockerAtGridPointOptions {
   playerRadiusGrid?: number;
   /** Player vertical body height in world layers. */
   playerHeightWorldLayers?: number;
+  /** Max upward layers this mover can jump onto. */
+  jumpLayerReachMax?: number;
   /** Ledge lip relief context. */
   terrainColumnCollisionContext?: CheckingWorldPlazaTerrainElevationColumnCollisionContext;
 }
@@ -126,7 +128,8 @@ function findingWorldPlazaTileGridBlockerAtGridPoint(
       options.isJumping,
       playerLayer,
       options.playerHeightWorldLayers ??
-        DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
+        DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
+      options.jumpLayerReachMax
     )
   ) {
     return {
@@ -151,7 +154,8 @@ function findingWorldPlazaTileGridBlockerAtGridPoint(
       options.applyBlockCollision,
       options.terrainColumnCollisionContext,
       options.playerHeightWorldLayers ??
-        DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
+        DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
+      options.jumpLayerReachMax
     )
   ) {
     return {
@@ -401,7 +405,8 @@ export function findingWorldCollisionBlockerAtPoint(
       playerLayer,
       playerRadiusGrid,
       options.playerHeightWorldLayers ??
-        DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
+        DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
+      options.jumpLayerReachMax
     )
   ) {
     const standingTile =

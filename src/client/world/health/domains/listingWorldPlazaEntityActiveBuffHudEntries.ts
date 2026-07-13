@@ -13,8 +13,11 @@ import {
   resolvingWorldPlazaEntityBuffHudIcon,
   type MappingWorldPlazaEntityBuffHudIconName,
 } from '@/components/world/health/domains/mappingWorldPlazaEntityBuffHudIcon';
+import { resolvingWorldPlazaEntityBuffHudBonusDetailLines } from '@/components/world/health/domains/resolvingWorldPlazaEntityBuffHudBonusDetailLines';
 import { resolvingWorldPlazaEntityDiseaseHudDetailLines } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseHudDetailLines';
 import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
+
+const DEFINING_WORLD_PLAZA_ENTITY_WELL_FED_BUFF_ID_PREFIX = 'well-fed-';
 
 export type DefiningWorldPlazaEntityActiveBuffHudEntry = {
   id: string;
@@ -174,14 +177,23 @@ export function listingWorldPlazaEntityActiveBuffHudEntries({
         attackerModifierIds,
       })
     )
-    .map((descriptor) => ({
-      id: descriptor.id,
-      label: descriptor.label,
-      description: descriptor.description,
-      polarity: descriptor.polarity,
-      icon: resolvingWorldPlazaEntityBuffHudIcon(descriptor.id),
-      expiresAtMs: resolvingWorldPlazaEntityBuffExpiresAtMs(descriptor, state),
-    }));
+    .map((descriptor) => {
+      const detailLines = descriptor.id.startsWith(
+        DEFINING_WORLD_PLAZA_ENTITY_WELL_FED_BUFF_ID_PREFIX
+      )
+        ? resolvingWorldPlazaEntityBuffHudBonusDetailLines(descriptor.effect)
+        : undefined;
+
+      return {
+        id: descriptor.id,
+        label: descriptor.label,
+        description: descriptor.description,
+        polarity: descriptor.polarity,
+        icon: resolvingWorldPlazaEntityBuffHudIcon(descriptor.id),
+        expiresAtMs: resolvingWorldPlazaEntityBuffExpiresAtMs(descriptor, state),
+        detailLines,
+      };
+    });
 
   const diseaseEntries = state.diseaseEffects
     .filter((diseaseEffect) =>

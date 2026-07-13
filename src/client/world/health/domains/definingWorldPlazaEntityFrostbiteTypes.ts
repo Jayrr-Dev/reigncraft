@@ -10,7 +10,7 @@ import type { DefiningWorldPlazaEntityFrostbiteStageId } from '@/components/worl
 export type DefiningWorldPlazaEntityFrostbiteState = {
   /** Accumulated frost damage ticks (0..max). */
   stackCount: number;
-  /** Stage resolved from {@link stackCount}, or null below Chilled. */
+  /** Stage resolved from {@link stackCount} (Chilly at 0+). */
   activeStageId: DefiningWorldPlazaEntityFrostbiteStageId | null;
   /** Simulation clock of last stack gain. */
   lastGainAtMs: number | null;

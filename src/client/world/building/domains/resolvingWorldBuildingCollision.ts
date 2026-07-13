@@ -210,7 +210,8 @@ function checkingWorldBuildingPlacedBlockColliderBlocksPlayer(
   isJumping: boolean,
   playerLayer: number,
   playerHeightWorldLayers: number,
-  blockIsOnPlayerStandingTile: boolean
+  blockIsOnPlayerStandingTile: boolean,
+  jumpLayerReachMax: number = DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX
 ): boolean {
   const blockLayer = resolvingWorldBuildingPlacedBlockWorldLayer(block);
   const blockHeight = resolvingWorldBuildingPlacedBlockBlockHeight(block);
@@ -245,10 +246,7 @@ function checkingWorldBuildingPlacedBlockColliderBlocksPlayer(
   // Tall columns that still intersect the walk band stay solid for the whole
   // run/jump arc (unjumpable walls). Floating roofs with air under the feet
   // already returned false above via the vertical-band check.
-  if (
-    blockLayer - playerLayer >
-    DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX
-  ) {
+  if (blockLayer - playerLayer > jumpLayerReachMax) {
     return true;
   }
 
@@ -368,7 +366,8 @@ export function checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders(
   isJumping: boolean,
   playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(center),
   playerRadiusGrid: number = DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID,
-  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
+  jumpLayerReachMax: number = DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX
 ): boolean {
   const centerTile = resolvingWorldPlazaIsometricTileIndexAtGridPoint(center);
   const nearbyBlocks = listingWorldBuildingPlacedBlocksNearTileIndex(
@@ -421,7 +420,8 @@ export function checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders(
           isJumping,
           playerLayer,
           playerHeightWorldLayers,
-          blockIsOnPlayerStandingTile
+          blockIsOnPlayerStandingTile,
+          jumpLayerReachMax
         ) &&
         checkingWorldBuildingPlayerCircleOverlapsPlacedBlockCircle(
           center,
@@ -450,7 +450,8 @@ export function checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders(
             isJumping,
             playerLayer,
             playerHeightWorldLayers,
-            blockIsOnPlayerStandingTile
+            blockIsOnPlayerStandingTile,
+            jumpLayerReachMax
           )
       )
     ) {
@@ -476,7 +477,8 @@ export function checkingWorldBuildingGridPointBlockedByPlacedBlocks(
   applyBlockCollision: boolean,
   isJumping: boolean,
   playerLayer: number = resolvingWorldPlazaPlayerWorldLayer(gridPoint),
-  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS
+  playerHeightWorldLayers: number = DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS,
+  jumpLayerReachMax: number = DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX
 ): boolean {
   const standingTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(gridPoint);
@@ -536,7 +538,8 @@ export function checkingWorldBuildingGridPointBlockedByPlacedBlocks(
           isJumping,
           playerLayer,
           playerHeightWorldLayers,
-          blockIsOnPlayerStandingTile
+          blockIsOnPlayerStandingTile,
+          jumpLayerReachMax
         ) &&
         checkingWorldBuildingPlayerCircleOverlapsPlacedBlockCircle(
           gridPoint,
@@ -565,7 +568,8 @@ export function checkingWorldBuildingGridPointBlockedByPlacedBlocks(
             isJumping,
             playerLayer,
             playerHeightWorldLayers,
-            blockIsOnPlayerStandingTile
+            blockIsOnPlayerStandingTile,
+            jumpLayerReachMax
           )
       )
     ) {

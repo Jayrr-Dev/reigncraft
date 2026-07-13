@@ -33,7 +33,7 @@ export async function copyingWorldPlazaTextToClipboard(
   textarea.focus();
   textarea.select();
 
-  let didCopy = false;
+  let didCopy: boolean;
 
   try {
     didCopy = document.execCommand('copy');

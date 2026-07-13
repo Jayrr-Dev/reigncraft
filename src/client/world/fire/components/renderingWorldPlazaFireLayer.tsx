@@ -14,12 +14,10 @@ import {
   resolvingWorldPlazaDeclarativeAnimationFrame,
 } from '@/components/world/animation/domains/resolvingWorldPlazaDeclarativeAnimationFrame';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
-import { DEFINING_WORLD_DEPTH_FIRE_GLOW_FLOOR_DEPTH_BIAS } from '@/components/world/depth';
 import { computingWorldPlazaEmissiveNightBrightnessMultiplierFromSunState } from '@/components/world/domains/computingWorldPlazaEmissiveNightBrightnessMultiplierFromSunState';
 import { computingWorldPlazaTileCenterScreenAnchorFromGridPoint } from '@/components/world/domains/computingWorldPlazaTileCenterScreenAnchorFromGridPoint';
 import { DEFINING_WORLD_PLAZA_EMISSIVE_CAMPFIRE_FLAME_ALPHA_BOOST_AT_MIDNIGHT } from '@/components/world/domains/definingWorldPlazaEmissiveNightBoostConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex } from '@/components/world/domains/resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex';
 import {
   checkingWorldPlazaFireCellUsesSmallSurfaceFlame,
   DEFINING_WORLD_PLAZA_FIRE_SMALL_SURFACE_FLAME_SCALE,
@@ -38,6 +36,7 @@ import {
   checkingWorldPlazaFireSpriteTexturesAreReady,
   preloadingWorldPlazaFireSpriteTextures,
 } from '@/components/world/fire/domains/loadingWorldPlazaFireSpriteTextures';
+import { resolvingWorldPlazaFireFlameEntityZIndex } from '@/components/world/fire/domains/resolvingWorldPlazaFireFlameEntityZIndex';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
 import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import type { DefiningWorldPlazaLightSource } from '@/components/world/lighting/domains/definingWorldPlazaLightSource';
@@ -602,11 +601,11 @@ export function RenderingWorldPlazaFireLayer({
       const gridPoint = resolvingWorldPlazaFireGridPointFromCell(cell);
       const tileAnchor =
         computingWorldPlazaTileCenterScreenAnchorFromGridPoint(gridPoint);
-      const flameZIndex =
-        resolvingWorldPlazaPlayerNightLightFloorTorchGraphicsZIndex(
-          gridPoint,
-          DEFINING_WORLD_DEPTH_FIRE_GLOW_FLOOR_DEPTH_BIAS
-        );
+      const flameZIndex = resolvingWorldPlazaFireFlameEntityZIndex(
+        cell.tileX,
+        cell.tileY,
+        cell.worldLayer
+      );
       const nextVisualState =
         visibleFireVisualStatesByTileKeyRef.current.get(tileKey);
 

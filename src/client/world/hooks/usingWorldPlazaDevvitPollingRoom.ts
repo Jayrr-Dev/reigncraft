@@ -42,7 +42,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef } from 'react';
 import {
   buildingPlazaDevvitOnlineRoomApiUrl,
-  PLAZA_DEVVIT_ONLINE_MAX_PLAYERS,
   PLAZA_DEVVIT_ONLINE_PLAYERS_API_PATH,
   PLAZA_DEVVIT_ONLINE_POLL_INTERVAL_MS,
   PLAZA_DEVVIT_ONLINE_SYNC_API_PATH,
@@ -56,7 +55,7 @@ import {
 } from '../../../shared/plazaDevvitOnline';
 
 const USING_WORLD_PLAZA_DEVVIT_POLLING_ROOM_FULL_MESSAGE =
-  'This plaza is full (3 players max). Try again in a moment.' as const;
+  'This plaza is full. Try again in a moment.' as const;
 
 const USING_WORLD_PLAZA_DEVVIT_POLLING_CONNECTION_FAILED_MESSAGE =
   'Could not connect to the plaza. Check your connection and try again.' as const;
@@ -67,7 +66,7 @@ export interface UsingWorldPlazaDevvitPollingRoomParams {
   profileStatusKind?: CommunityMemberProfileStatusKind | null;
   avatarUrl?: string | null;
   enabled: boolean;
-  roomIndex?: number;
+  roomId: string;
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   localAvatarMotionStateRef: React.RefObject<DefiningWorldPlazaAvatarMotionState>;
   healthSyncSnapshotRef?: React.RefObject<{
@@ -91,6 +90,8 @@ export interface UsingWorldPlazaDevvitPollingRoomParams {
   remoteWildlifeSnapshotsRef?: React.RefObject<
     PlazaDevvitOnlineWildlifeSnapshot[]
   >;
+  /** Called when the local player is kicked or the world is deleted. */
+  onForcedExit?: (reason: string) => void;
 }
 
 export interface UsingWorldPlazaDevvitPollingRoomResult {
@@ -103,7 +104,7 @@ export interface UsingWorldPlazaDevvitPollingRoomResult {
 
 /**
  * HTTP polling multiplayer for Reddit Devvit webviews (no WebSockets).
- * Caps each post/playtest room at {@link PLAZA_DEVVIT_ONLINE_MAX_PLAYERS}.
+ * Caps each named room using per-room maxPlayers from the server.
  */
 export function usingWorldPlazaDevvitPollingRoom({
   userId,
@@ -111,7 +112,7 @@ export function usingWorldPlazaDevvitPollingRoom({
   profileStatusKind = null,
   avatarUrl = null,
   enabled,
-  roomIndex = 1,
+  roomId,
   playerPositionRef,
   localAvatarMotionStateRef,
   healthSyncSnapshotRef,
@@ -120,6 +121,7 @@ export function usingWorldPlazaDevvitPollingRoom({
   wildlifeSnapshotsOutRef,
   pendingWildlifeDamageEventsRef,
   remoteWildlifeSnapshotsRef,
+  onForcedExit,
 }: UsingWorldPlazaDevvitPollingRoomParams): UsingWorldPlazaDevvitPollingRoomResult {
   const queryClient = useQueryClient();
   const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();
@@ -143,12 +145,12 @@ export function usingWorldPlazaDevvitPollingRoom({
   const {
     data: roomSnapshot = DEFINING_WORLD_PLAZA_ONLINE_ROOM_INITIAL_SNAPSHOT,
   } = useQuery({
-    queryKey: [...DEFINING_WORLD_PLAZA_ONLINE_ROOM_QUERY_KEY, roomIndex],
+    queryKey: [...DEFINING_WORLD_PLAZA_ONLINE_ROOM_QUERY_KEY, roomId],
     queryFn: async (): Promise<DefiningWorldPlazaOnlineRoomSnapshot> => {
       return (
         queryClient.getQueryData<DefiningWorldPlazaOnlineRoomSnapshot>([
           ...DEFINING_WORLD_PLAZA_ONLINE_ROOM_QUERY_KEY,
-          roomIndex,
+          roomId,
         ]) ?? DEFINING_WORLD_PLAZA_ONLINE_ROOM_INITIAL_SNAPSHOT
       );
     },
@@ -167,20 +169,20 @@ export function usingWorldPlazaDevvitPollingRoom({
       ) => DefiningWorldPlazaOnlineRoomSnapshot
     ): void => {
       queryClient.setQueryData<DefiningWorldPlazaOnlineRoomSnapshot>(
-        [...DEFINING_WORLD_PLAZA_ONLINE_ROOM_QUERY_KEY, roomIndex],
+        [...DEFINING_WORLD_PLAZA_ONLINE_ROOM_QUERY_KEY, roomId],
         (currentSnapshot) =>
           updater(
             currentSnapshot ?? DEFINING_WORLD_PLAZA_ONLINE_ROOM_INITIAL_SNAPSHOT
           )
       );
     },
-    [queryClient, roomIndex]
+    [queryClient, roomId]
   );
 
   const updatingRoomSnapshot = useCallback(
     (patch: Partial<DefiningWorldPlazaOnlineRoomSnapshot>): void => {
       queryClient.setQueryData<DefiningWorldPlazaOnlineRoomSnapshot>(
-        [...DEFINING_WORLD_PLAZA_ONLINE_ROOM_QUERY_KEY, roomIndex],
+        [...DEFINING_WORLD_PLAZA_ONLINE_ROOM_QUERY_KEY, roomId],
         (currentSnapshot) => {
           const resolvedCurrentSnapshot =
             currentSnapshot ??
@@ -202,7 +204,7 @@ export function usingWorldPlazaDevvitPollingRoom({
         }
       );
     },
-    [queryClient, roomIndex]
+    [queryClient, roomId]
   );
 
   const resettingPlazaRoomConnectionState = useCallback((): void => {
@@ -326,8 +328,8 @@ export function usingWorldPlazaDevvitPollingRoom({
     }
 
     updatingRoomSnapshot({
-      roomIndex,
-      roomChannelName: `devvit-polling-room-${roomIndex}`,
+      roomId,
+      roomChannelName: `devvit-polling-room-${roomId}`,
       isConnected: false,
       isJoined: false,
       isReconnecting: false,
@@ -361,7 +363,7 @@ export function usingWorldPlazaDevvitPollingRoom({
         const response = await fetch(
           buildingPlazaDevvitOnlineRoomApiUrl(
             PLAZA_DEVVIT_ONLINE_SYNC_API_PATH,
-            roomIndex
+            roomId
           ),
           {
             method: 'POST',
@@ -387,6 +389,14 @@ export function usingWorldPlazaDevvitPollingRoom({
             lastError: data.message,
           });
           isJoinedRef.current = false;
+
+          if (
+            data.isKicked === true ||
+            data.message.includes('no longer exists')
+          ) {
+            onForcedExit?.(data.message);
+          }
+
           return false;
         }
 
@@ -412,6 +422,10 @@ export function usingWorldPlazaDevvitPollingRoom({
           isReconnecting: false,
           isRoomFull: false,
           lastError: null,
+          roomId: data.roomId,
+          roomDisplayName: data.displayName,
+          maxPlayers: data.maxPlayers,
+          createdBy: data.createdBy,
           participantCount: data.participantCount,
           onlineParticipants: [
             {
@@ -465,26 +479,51 @@ export function usingWorldPlazaDevvitPollingRoom({
         const response = await fetch(
           buildingPlazaDevvitOnlineRoomApiUrl(
             PLAZA_DEVVIT_ONLINE_PLAYERS_API_PATH,
-            roomIndex
+            roomId
           )
         );
 
-        if (!response.ok) {
+        const data =
+          (await response.json().catch(() => null)) as
+            | PlazaDevvitOnlinePlayersResponse
+            | null;
+
+        if (cancelled) {
+          return;
+        }
+
+        if (!data || typeof data !== 'object') {
           incrementingWorldPlazaPerformanceDiagnosticsCounter(
             DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.ONLINE_POLL_FAILURE
           );
           return;
         }
 
-        const data =
-          (await response.json()) as PlazaDevvitOnlinePlayersResponse;
+        if (data.type === 'error') {
+          incrementingWorldPlazaPerformanceDiagnosticsCounter(
+            DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.ONLINE_POLL_FAILURE
+          );
 
-        if (cancelled || data.type !== 'players' || !userId) {
-          if (!cancelled) {
-            incrementingWorldPlazaPerformanceDiagnosticsCounter(
-              DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.ONLINE_POLL_FAILURE
-            );
+          if (
+            data.isKicked === true ||
+            data.message.includes('no longer exists')
+          ) {
+            updatingRoomSnapshot({
+              isConnected: false,
+              isJoined: false,
+              lastError: data.message,
+            });
+            isJoinedRef.current = false;
+            onForcedExit?.(data.message);
           }
+
+          return;
+        }
+
+        if (!response.ok || data.type !== 'players' || !userId) {
+          incrementingWorldPlazaPerformanceDiagnosticsCounter(
+            DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER.ONLINE_POLL_FAILURE
+          );
           return;
         }
 
@@ -572,7 +611,7 @@ export function usingWorldPlazaDevvitPollingRoom({
         const currentSnapshot =
           queryClient.getQueryData<DefiningWorldPlazaOnlineRoomSnapshot>([
             ...DEFINING_WORLD_PLAZA_ONLINE_ROOM_QUERY_KEY,
-            roomIndex,
+            roomId,
           ]) ?? DEFINING_WORLD_PLAZA_ONLINE_ROOM_INITIAL_SNAPSHOT;
 
         if (
@@ -580,11 +619,18 @@ export function usingWorldPlazaDevvitPollingRoom({
             currentSnapshot,
             data.participantCount,
             nextOnlineParticipants
-          )
+          ) ||
+          currentSnapshot.maxPlayers !== data.maxPlayers ||
+          currentSnapshot.roomDisplayName !== data.displayName ||
+          currentSnapshot.createdBy !== data.createdBy
         ) {
           updatingRoomSnapshot({
             participantCount: data.participantCount,
             onlineParticipants: nextOnlineParticipants,
+            maxPlayers: data.maxPlayers,
+            roomId: data.roomId,
+            roomDisplayName: data.displayName,
+            createdBy: data.createdBy,
           });
         }
       } catch {
@@ -623,7 +669,8 @@ export function usingWorldPlazaDevvitPollingRoom({
   }, [
     buildingSyncPayload,
     enabled,
-    roomIndex,
+    roomId,
+    onForcedExit,
     onRemoteProjectileSpawnEvents,
     pendingProjectileSpawnEventsRef,
     resettingPlazaRoomConnectionState,
@@ -655,5 +702,3 @@ export function usingWorldPlazaDevvitPollingRoom({
     syncingMovePositionRef,
   };
 }
-
-export { PLAZA_DEVVIT_ONLINE_MAX_PLAYERS };

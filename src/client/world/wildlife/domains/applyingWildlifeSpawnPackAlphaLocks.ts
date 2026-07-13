@@ -62,7 +62,7 @@ export function applyingWildlifeSpawnPackAlphaLocks({
 
     const species = resolveSpecies(instance.speciesId);
 
-    if (!species || species.temperamentId !== 'stalker') {
+    if (!species || species.temperamentId !== 'pack_hunter') {
       continue;
     }
 

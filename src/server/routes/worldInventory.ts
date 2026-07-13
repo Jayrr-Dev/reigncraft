@@ -25,7 +25,7 @@ import {
   buildingWorldInventoryStateRedisKey,
 } from '../domains/buildingWorldInventoryDevvitRedisKeys';
 import { resolvingDevvitRedditUserId } from '../domains/resolvingDevvitRedditUserId';
-import { resolvingPlazaDevvitOnlineRoomScope } from '../domains/resolvingPlazaDevvitOnlineRoomScope';
+import { resolvingPlazaDevvitOnlineRoomScopeFromRequest } from '../domains/resolvingPlazaDevvitOnlineRoomScopeFromRequest';
 
 /**
  * Resolves the ground-items scope: a private per-user scope for single-player
@@ -33,10 +33,12 @@ import { resolvingPlazaDevvitOnlineRoomScope } from '../domains/resolvingPlazaDe
  *
  * @param userId - Authenticated Reddit user id.
  * @param saveSlotIndex - Optional single-player save slot from the request.
+ * @param roomScopeFromRequest - Online room scope when not in a save slot.
  */
 function resolvingGroundItemsScope(
   userId: string,
-  saveSlotIndex: number | null | undefined
+  saveSlotIndex: number | null | undefined,
+  roomScopeFromRequest: string
 ): string {
   if (
     typeof saveSlotIndex === 'number' &&
@@ -45,7 +47,7 @@ function resolvingGroundItemsScope(
     return `single-player:${userId}:slot-${saveSlotIndex}`;
   }
 
-  return resolvingPlazaDevvitOnlineRoomScope();
+  return roomScopeFromRequest;
 }
 
 function computingChebyshevDistance(
@@ -297,9 +299,9 @@ async function removingOnlineInventorySlotForGroundDrop(
   userId: string,
   slotIndex: number,
   itemTypeId: string,
-  quantity: number
+  quantity: number,
+  roomScope: string
 ): Promise<boolean> {
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
   const stateKey = buildingWorldInventoryStateRedisKey(roomScope, userId);
   const rawState = await redis.get(stateKey);
 
@@ -343,7 +345,7 @@ worldInventory.get('/state', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const roomScope = resolvingPlazaDevvitOnlineRoomScopeFromRequest(c);
   const stateKey = buildingWorldInventoryStateRedisKey(roomScope, userId);
   const rawState = await redis.get(stateKey);
 
@@ -388,7 +390,7 @@ worldInventory.put('/state', async (c) => {
     );
   }
 
-  const roomScope = resolvingPlazaDevvitOnlineRoomScope();
+  const roomScope = resolvingPlazaDevvitOnlineRoomScopeFromRequest(c);
   const stateKey = buildingWorldInventoryStateRedisKey(roomScope, userId);
   await redis.set(stateKey, JSON.stringify(state));
 
@@ -413,7 +415,11 @@ worldInventory.get('/ground-items', async (c) => {
     const parsedSaveSlotIndex = rawSaveSlotIndex
       ? Number.parseInt(rawSaveSlotIndex, 10)
       : null;
-    const groundScope = resolvingGroundItemsScope(userId, parsedSaveSlotIndex);
+    const groundScope = resolvingGroundItemsScope(
+      userId,
+      parsedSaveSlotIndex,
+      resolvingPlazaDevvitOnlineRoomScopeFromRequest(c)
+    );
     const items = await listingWorldInventoryDevvitGroundItems(groundScope);
 
     return c.json<WorldInventoryDevvitGroundItemsResponse>({
@@ -492,7 +498,8 @@ worldInventory.post('/ground-items/drop', async (c) => {
         userId,
         dropRequest.slotIndex,
         dropRequest.itemTypeId,
-        dropRequest.quantity
+        dropRequest.quantity,
+        resolvingPlazaDevvitOnlineRoomScopeFromRequest(c)
       );
 
     if (!didRemoveInventorySlot) {
@@ -507,7 +514,8 @@ worldInventory.post('/ground-items/drop', async (c) => {
 
   const groundScope = resolvingGroundItemsScope(
     userId,
-    dropRequest.saveSlotIndex
+    dropRequest.saveSlotIndex,
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c)
   );
   const groundItemsKey = buildingWorldInventoryGroundItemsRedisKey(groundScope);
   const groundItemId = randomUUID();
@@ -562,7 +570,8 @@ worldInventory.post('/ground-items/pickup', async (c) => {
 
   const groundScope = resolvingGroundItemsScope(
     userId,
-    pickupRequest.saveSlotIndex
+    pickupRequest.saveSlotIndex,
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c)
   );
   const groundItemsKey = buildingWorldInventoryGroundItemsRedisKey(groundScope);
   const rawItem = await redis.hGet(groundItemsKey, pickupRequest.groundItemId);
@@ -666,7 +675,8 @@ worldInventory.post('/ground-items/consume', async (c) => {
 
   const groundScope = resolvingGroundItemsScope(
     userId,
-    consumeRequest.saveSlotIndex
+    consumeRequest.saveSlotIndex,
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c)
   );
   const groundItemsKey = buildingWorldInventoryGroundItemsRedisKey(groundScope);
   const rawItem = await redis.hGet(groundItemsKey, consumeRequest.groundItemId);

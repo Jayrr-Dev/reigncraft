@@ -24,7 +24,7 @@ export type ResolvingWildlifeDiseaseDisposition =
   | 'aggressive';
 
 const DEFINING_WILDLIFE_AGGRESSIVE_TEMPERAMENT_IDS: ReadonlySet<DefiningWildlifeTemperamentId> =
-  new Set(['predator', 'ambusher', 'stalker']);
+  new Set(['predator', 'ambusher', 'pack_hunter', 'stalker']);
 
 const DEFINING_WILDLIFE_FRIENDLY_TEMPERAMENT_IDS: ReadonlySet<DefiningWildlifeTemperamentId> =
   new Set(['docile']);

@@ -11,7 +11,7 @@ import {
 import { resolvingWorldPlazaBiomeAtWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBiomeAtWorldPoint';
 import type { RefObject } from 'react';
 import { useEffect, useSyncExternalStore } from 'react';
-import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
+import type { PlazaSaveSlotIndex } from '../../../shared/plazaGameSession';
 
 export type UsingWorldPlazaRecordingExploredBiomesOptions = {
   isEnabled: boolean;

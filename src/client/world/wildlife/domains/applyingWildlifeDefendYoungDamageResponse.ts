@@ -95,7 +95,8 @@ export function applyingWildlifeDefendYoungDamageResponse({
     }
 
     if (
-      allySpecies.temperamentId === 'stalker' &&
+      (allySpecies.temperamentId === 'pack_hunter' ||
+        allySpecies.temperamentId === 'stalker') &&
       checkingWildlifeStalkPhaseIsFleeing(ally.aggroState)
     ) {
       continue;

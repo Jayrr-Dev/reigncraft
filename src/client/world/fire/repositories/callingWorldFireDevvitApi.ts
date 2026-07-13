@@ -1,3 +1,4 @@
+import { appendingWorldPlazaOnlineRoomQueryToApiPath } from '@/components/world/domains/managingWorldPlazaOnlineRoomIdStore';
 import type {
   WorldFireDevvitAddFuelRequest,
   WorldFireDevvitAddFuelResponse,
@@ -36,7 +37,7 @@ async function callingWorldFireDevvitApi(
   path: string,
   init?: RequestInit
 ): Promise<unknown> {
-  const response = await fetch(path, {
+  const response = await fetch(appendingWorldPlazaOnlineRoomQueryToApiPath(path), {
     ...init,
     headers: {
       'Content-Type': 'application/json',

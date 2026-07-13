@@ -82,8 +82,14 @@ export function checkingWorldPlazaOnlineRoomSnapshotPatchChanged(
   }
 
   return (
-    (patch.roomIndex !== undefined &&
-      patch.roomIndex !== currentSnapshot.roomIndex) ||
+    (patch.roomId !== undefined &&
+      patch.roomId !== currentSnapshot.roomId) ||
+    (patch.roomDisplayName !== undefined &&
+      patch.roomDisplayName !== currentSnapshot.roomDisplayName) ||
+    (patch.maxPlayers !== undefined &&
+      patch.maxPlayers !== currentSnapshot.maxPlayers) ||
+    (patch.createdBy !== undefined &&
+      patch.createdBy !== currentSnapshot.createdBy) ||
     (patch.roomChannelName !== undefined &&
       patch.roomChannelName !== currentSnapshot.roomChannelName) ||
     (patch.isConnected !== undefined &&

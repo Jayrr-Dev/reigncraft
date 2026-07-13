@@ -31,7 +31,7 @@ export type ResolvingWildlifeStalkPackFollowDistances = {
 
 export type ResolvingWildlifeStalkPackFollowDistancesParams =
   ResolvingWildlifeStalkSpawnPackFormation & {
-    /** Species of the stalker resolving this band (Omega uses a farther alpha ring). */
+    /** Species of the PackHunter resolving this band (Omega uses a farther alpha ring). */
     speciesId?: string;
   };
 

@@ -1,4 +1,4 @@
-﻿# Wildlife glossary (ubiquitous language)
+# Wildlife glossary (ubiquitous language)
 
 Terms used consistently across code, docs, and player-facing copy for the Plaza wildlife bounded context.
 
@@ -8,9 +8,9 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Species**           | A catalogued animal type (`DefiningWildlifeSpeciesDefinition`). Full roster in `definingWildlifeSpeciesRegistry.ts`.                                                                                                                                                            |
 | **Species id**        | Stable kebab-case key (`grey-wolf`, `omega-wolf`, …). Used in registry, spawn tables, and meat catalog.                                                                                                                                                                         |
-| **Omega Wolf**        | Night-only elite stalker (`omega-wolf`). Spawns with 4 grey-wolf escorts, never sleeps, always pack alpha, forced +3σ, dark-red name tag, siphoning lifesteal. Despawns at sunrise; killed Omegas do **not** use the normal pending random-respawn ring.                        |
+| **Omega Wolf**        | Night-only elite PackHunter (`omega-wolf`). Spawns with 4 grey-wolf escorts, never sleeps, always pack alpha, forced +3σ, dark-red name tag, siphoning lifesteal. Despawns at sunrise; killed Omegas do **not** use the normal pending random-respawn ring.                        |
 | **Wildlife instance** | One live animal in the simulation (`DefiningWildlifeInstance`). Carries rolled aggression, sleep sample, size sample, and runtime AI/aggro state.                                                                                                                               |
-| **Temperament**       | Behavior tree key: `docile`, `passive`, `skittish`, `retaliator`, `predator`, `ambusher`, `stalker`. One tree per temperament in `definingWildlifeBehaviorTreeRegistry.ts`.                                                                                                     |
+| **Temperament**       | Behavior tree key: `docile`, `passive`, `skittish`, `retaliator`, `predator`, `ambusher`, `pack_hunter`, `stalker`. One tree per temperament in `definingWildlifeBehaviorTreeRegistry.ts`.                                                                                                     |
 | **Docile**            | Friendly stock (dogs/cats). Never opens combat on the player. Approach rolls follow vs flee from **aggression level**. Player hits need **Betray?** confirm.                                                                                                                    |
 | **Betray?**           | Outlined white label over unauthorized docile wildlife (same chrome as Chop). Click starts a **Betraying....** windup (**2s**, backstab ring) then applies damage. No melee attack animation. Session auth per instance in `managingWildlifeDocileAttackAuthorizationStore.ts`. |
 | **Spawn anchor**      | Deterministic tile placement seed for a pack or solo animal. Drives aggression, sleep, and size bell-curve rolls.                                                                                                                                                               |
@@ -41,7 +41,7 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Aggression level**            | Per-instance bell-curve roll: `tame` / `normal` / `aggressive`. For **docile** species this is also friendliness (follow chance). Player hits demote one step. |
 | **Aggressive attacks on sight** | When true (chicken), aggressive herbivore spawns may melee the player without prior damage.                                                                    |
-| **On-sight aggro**              | Predators, ambushers, and stalkers may open combat when aggressive; normal spawns need hunger drive unless already threatened.                                 |
+| **On-sight aggro**              | Predators, ambushers, pack hunters, and stalkers may open combat when aggressive; normal spawns need hunger drive unless already threatened.                                 |
 
 ## Food chain and hunting
 
@@ -120,20 +120,22 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | **Ground shadow**               | Soft ellipse under the animal (shared avatar drawer). Foot Y scales with `sizeScale` so empty sheet margin does not float large animals or bury runts.                                                                                                                                    |
 | **Planted feet**                | Override where painted feet sit on the grid anchor (`anchorY` = `footY`) and the avatar foot nudge is cancelled. Used for chicken and tall/megafauna sheets with large empty margin under the feet.                                                                                       |
 
-## Stalk hunt (stalker temperament)
+## Stalk hunt (pack_hunter and stalker)
 
 | Term                        | Meaning                                                                                                          |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Stalker**                 | Temperament using the pack stalk pipeline. Only **grey-wolf** today; statechart is species-agnostic.             |
-| **Stalk phase**             | Hunt state: `idle`, `shadowing`, `retreating`, `regrouping`, `formingUp`, `surrounding`, `attacking`, `fleeing`. |
-| **Shadowing**               | Mandatory **15s** trailing phase after target lock before pack commit triggers.                                  |
-| **Kill window**             | Force-commit on prey HP **<50%**, stamina **≤2%**, or still **8s**; else pack-confidence roll after shadow.      |
+| **PackHunter**              | Temperament using the pack stalk pipeline (`grey-wolf`, `omega-wolf`, `hyena`).                                  |
+| **Stalker**                 | Solo stalk temperament (`tiger`, `jaguar`): shadow then rush on weakness or hungry/aggressive patience.          |
+| **Stalk phase**             | Hunt state: `idle`, `shadowing`, `retreating`, `regrouping`, `formingUp`/`surrounding` (pack only), `attacking`, `fleeing`. |
+| **Shadowing**               | Mandatory **15s** trailing phase after target lock before commit triggers.                                       |
+| **Kill window (pack)**      | Force-commit on prey HP **<50%**, stamina **≤2%**, or still **8s**; else pack-confidence roll after shadow.      |
+| **Kill window (solo)**      | After shadow: same weakness triggers, or rush when `hungry`/`starving`/`aggressive`.                             |
 | **Pack confidence**         | Post-shadow commit chance by hunter count: **10% / 22% / 40% / 62% / 88%** (1–5+). Re-rolls every **4s**.        |
-| **Attack burst**            | Once committed: **4s** melee, then peel to **surrounding** to re-flank (does not drop back to passive shadow).   |
+| **Attack burst**            | Once committed: **4s** melee, then peel (pack re-flanks; solo returns to shadow).                                |
 | **Pack surround commit**    | Requires **≥3** wolves on one prey plus weakness or a successful confidence roll.                                |
 | **Confident pack**          | **≥5** wolves may enter **formingUp** early; **10-15s** formation timer before surround.                         |
 | **Stalk aggro timeout**     | **120s** without a kill drops player stalk.                                                                      |
-| **Stalk eligibility**       | Only `temperamentId: 'stalker'` runs the statechart. Other species use predator/ambusher trees.                  |
+| **Stalk eligibility**       | `pack_hunter` and `stalker` run stalk statecharts. Other species use predator/ambusher/retaliator trees.         |
 | **Mass-weighted prey pick** | Alpha stalk lock prefers lighter prey (`1 / √mass`); favorites get **1.75×**. Re-roll bucket **15s**.            |
 | **Shared pack prey**        | Nearby same-species wolves share one hunt; followers inherit the alpha stalk lock within **14** grid.            |
 
@@ -146,14 +148,14 @@ Terms used consistently across code, docs, and player-facing copy for the Plaza 
 | `applying*`  | Damage, pack events, herd flee, favorite-prey revenge    |
 | `checking*`  | On-sight aggro, sleep blocked, stalk phase predicates    |
 | `resolving*` | Sleep schedule, on-hit procs, behavior tree lookup       |
-| `listing*`   | Stalker prey candidates, species ids                     |
+| `listing*`   | PackHunter prey candidates, species ids                     |
 | `spawning*`  | Biome and dev spawn helpers                              |
 
 ## Anti-patterns (words to avoid)
 
 | Don't say          | Say instead                                                                            |
 | ------------------ | -------------------------------------------------------------------------------------- |
-| "Wolf AI"          | **Stalker temperament** pipeline (grey-wolf is the reference species)                  |
+| "Wolf AI"          | **PackHunter temperament** pipeline (grey-wolf is the reference species)                  |
 | "Aggro range"      | **Aggro radius** (`aggroRadiusGrid`) or **hunt radius** (14 grid) depending on context |
 | "Pack attack mode" | **Stalk phase** `surrounding` or `attacking`                                           |
 | "Sleeping buff"    | Animal is **asleep** on schedule (`aiState.motionClip: 'sleep'`)                       |

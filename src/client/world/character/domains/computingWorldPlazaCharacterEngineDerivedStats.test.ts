@@ -78,6 +78,45 @@ describe('computingWorldPlazaCharacterEngineDerivedStats', () => {
     );
   });
 
+  it('defaults maxJumpLayerReach to 4 for girl', () => {
+    const girl = resolvingWorldPlazaCharacterEngineDefinition(
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+    );
+    const derived = computingWorldPlazaCharacterEngineDerivedStats(girl);
+
+    expect(derived.maxJumpLayerReach).toBe(4);
+  });
+
+  it('inherits wildlife maxJumpLayerReach for animal skins', () => {
+    const wildlifeCowBrown = resolvingWildlifeSpeciesDefinition('cow-brown');
+    const wildlifeGrizzly = resolvingWildlifeSpeciesDefinition('grizzly');
+    expect(wildlifeCowBrown).not.toBeNull();
+    expect(wildlifeGrizzly).not.toBeNull();
+    if (!wildlifeCowBrown || !wildlifeGrizzly) {
+      return;
+    }
+
+    const cowBrown = resolvingWorldPlazaCharacterEngineDefinition('cow-brown');
+    const grizzly = resolvingWorldPlazaCharacterEngineDefinition(
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.GRIZZLY
+    );
+
+    expect(cowBrown.locomotion.maxJumpLayerReach).toBe(
+      wildlifeCowBrown.jump.maxJumpLayerReach
+    );
+    expect(grizzly.locomotion.maxJumpLayerReach).toBe(
+      wildlifeGrizzly.jump.maxJumpLayerReach
+    );
+    expect(
+      computingWorldPlazaCharacterEngineDerivedStats(cowBrown).maxJumpLayerReach
+    ).toBe(0);
+    expect(
+      computingWorldPlazaCharacterEngineDerivedStats(grizzly).maxJumpLayerReach
+    ).toBe(4);
+    expect(cowBrown.locomotion.allowedMotionKinds.includes('jump')).toBe(false);
+    expect(grizzly.locomotion.allowedMotionKinds.includes('jump')).toBe(true);
+  });
+
   it('allows an explicit collision height override', () => {
     const girl = resolvingWorldPlazaCharacterEngineDefinition(
       DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE

@@ -223,7 +223,7 @@
           "despawningWildlifeNightOnlyInstancesDuringDaytime",
           "advancingWildlifePendingRespawns",
           "definingWildlifeStalkConstants",
-          "definingWildlifeStalkerBehaviour",
+          "definingWildlifePackHunterBehaviour",
           "definingWildlifeSleepConstants",
           "definingWildlifeDocile",
           "managingWildlifeDocile",

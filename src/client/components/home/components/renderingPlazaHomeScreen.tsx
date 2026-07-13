@@ -22,6 +22,10 @@ import type {
   PlazaGameSession,
   PlazaSaveSlotIndex,
 } from '../../../../shared/plazaGameSession';
+import {
+  PLAZA_DEVVIT_ONLINE_MAX_PLAYERS,
+  PLAZA_DEVVIT_ONLINE_MIN_PLAYERS,
+} from '../../../../shared/plazaDevvitOnline';
 
 // Sub-panels stay out of the initial home bundle; the tutorial demo library
 // alone is ~70 KB of source and only needed after a menu choice.
@@ -148,10 +152,10 @@ export function RenderingPlazaHomeScreen({
     });
   };
 
-  const handlingJoinRoom = (roomIndex: number): void => {
+  const handlingJoinRoom = (roomId: string): void => {
     onStartSession({
       mode: 'multiplayer',
-      roomIndex,
+      roomId,
     });
   };
 
@@ -232,7 +236,7 @@ export function RenderingPlazaHomeScreen({
                     Single Player
                   </span>
                   <span className="mt-0.5 block text-sm font-medium italic text-parchment/85">
-                    A solo expedition — 3 save slots
+                    A solo expedition.
                   </span>
                 </span>
                 <Icon
@@ -262,7 +266,8 @@ export function RenderingPlazaHomeScreen({
                     Multiplayer
                   </span>
                   <span className="mt-0.5 block text-sm font-medium italic text-parchment/85">
-                    Fellowship of up to 3 travelers
+                   Fellowship of {PLAZA_DEVVIT_ONLINE_MIN_PLAYERS}
+                    -{PLAZA_DEVVIT_ONLINE_MAX_PLAYERS} travelers
                   </span>
                 </span>
                 <Icon

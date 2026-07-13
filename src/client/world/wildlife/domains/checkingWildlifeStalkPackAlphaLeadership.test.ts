@@ -1,5 +1,5 @@
 import { creatingWildlifeTestInstance } from '@/components/world/wildlife/domains/creatingWildlifeTestFixtures';
-import { checkingWildlifeStalkerMayInitiatePreyStalk } from '@/components/world/wildlife/domains/checkingWildlifeStalkerMayInitiatePreyStalk';
+import { checkingWildlifePackHunterMayInitiatePreyStalk } from '@/components/world/wildlife/domains/checkingWildlifePackHunterMayInitiatePreyStalk';
 import { checkingWildlifeStalkPackmateMayAttackPrey } from '@/components/world/wildlife/domains/checkingWildlifeStalkPackmateMayAttackPrey';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { describe, expect, it } from 'vitest';
@@ -25,20 +25,20 @@ function buildingPackWolf(
   });
 }
 
-describe('checkingWildlifeStalkerMayInitiatePreyStalk', () => {
+describe('checkingWildlifePackHunterMayInitiatePreyStalk', () => {
   it('allows only the alpha to start stalking on sight', () => {
     const alpha = buildingPackWolf(1, 1.2);
     const follower = buildingPackWolf(0, -0.5);
 
     expect(
-      checkingWildlifeStalkerMayInitiatePreyStalk({
+      checkingWildlifePackHunterMayInitiatePreyStalk({
         instance: alpha,
         nearbyInstances: [follower],
         resolveSpecies,
       })
     ).toBe(true);
     expect(
-      checkingWildlifeStalkerMayInitiatePreyStalk({
+      checkingWildlifePackHunterMayInitiatePreyStalk({
         instance: follower,
         nearbyInstances: [alpha],
         resolveSpecies,

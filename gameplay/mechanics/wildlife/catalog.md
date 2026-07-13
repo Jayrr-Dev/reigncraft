@@ -18,7 +18,7 @@ Every registered species, combat profile, prey rules, on-hit procs, sleep schedu
 
 ## Summary table
 
-Full roster (**48** species). Numbers from `DEFINING_WILDLIFE_SPECIES_REGISTRY` / builders in `definingWildlifeSpeciesRegistry.ts`. Stalk eligible = temperament `stalker` (shared stalker statechart).
+Full roster (**48** species). Numbers from `DEFINING_WILDLIFE_SPECIES_REGISTRY` / builders in `definingWildlifeSpeciesRegistry.ts`. Pack stalk eligible = `pack_hunter`. Solo stalk eligible = `stalker`.
 
 | speciesId       | Display            | Temperament | Diet      | Activity    | Aggro radius | Pack share | Stalk eligible |
 | --------------- | ------------------ | ----------- | --------- | ----------- | ------------ | ---------- | -------------- |
@@ -53,15 +53,15 @@ Full roster (**48** species). Numbers from `DEFINING_WILDLIFE_SPECIES_REGISTRY` 
 | bison           | Bison              | retaliator  | herbivore | cathemeral  | 5            | 10         | No             |
 | bull            | Bull               | retaliator  | herbivore | diurnal     | 5            | 8          | No             |
 | water-buffalo   | Water Buffalo      | retaliator  | herbivore | diurnal     | 5            | 10         | No             |
-| grey-wolf       | Grey Wolf          | stalker     | carnivore | nocturnal   | 8            | 10         | **Yes**        |
-| omega-wolf      | Omega Wolf         | stalker     | carnivore | nocturnal   | 10           | 12         | **Yes**        |
-| hyena           | Hyena              | stalker     | carnivore | nocturnal   | 8            | 10         | **Yes**        |
+| grey-wolf       | Grey Wolf          | Pack hunter | carnivore | nocturnal   | 8            | 10         | **Yes**        |
+| omega-wolf      | Omega Wolf         | Pack hunter | carnivore | nocturnal   | 10           | 12         | **Yes**        |
+| hyena           | Hyena              | Pack hunter | carnivore | nocturnal   | 8            | 10         | **Yes**        |
 | brown-bear      | Brown Bear         | retaliator  | omnivore  | cathemeral  | 6            | 8          | No             |
 | polar-bear      | Polar Bear         | predator    | carnivore | cathemeral  | 7            | 8          | No             |
 | lion            | Lion               | predator    | carnivore | crepuscular | 9            | 12         | No             |
 | lioness         | Lioness            | predator    | carnivore | crepuscular | 9            | 12         | No             |
-| tiger           | Tiger              | predator    | carnivore | crepuscular | 9            | 0          | No             |
-| jaguar          | Jaguar             | ambusher    | carnivore | nocturnal   | 5            | 0          | No             |
+| tiger           | Tiger              | stalker     | carnivore | crepuscular | 9            | 0          | Solo           |
+| jaguar          | Jaguar             | stalker     | carnivore | nocturnal   | 8            | 0          | Solo           |
 | crocodile       | Crocodile          | ambusher    | carnivore | cathemeral  | 3.5          | 8          | No             |
 | giraffe         | Giraffe            | retaliator  | herbivore | diurnal     | 5            | 8          | No             |
 | elephant        | Elephant           | retaliator  | herbivore | cathemeral  | 6            | 8          | No             |
@@ -585,13 +585,13 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 
 ---
 
-## stalker
+## PackHunter
 
 ### `grey-wolf`: Grey Wolf
 
 | Field                | Value                                                                                             |
 | -------------------- | ------------------------------------------------------------------------------------------------- |
-| **Temperament**      | stalker                                                                                           |
+| **Temperament**      | Pack hunter |
 | **Diet / tier**      | carnivore, tier 2                                                                                 |
 | **Aggro radius**     | 8 grid; **pack share 10**                                                                         |
 | **Territory**        | warn 6 / escalate 3 / linger 3s                                                                   |
@@ -601,7 +601,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **On-hit procs**     | bleed `bleeding` **35%** (0.25× damage scale)                                                     |
 | **Sleep**            | nocturnal (sleeps by day)                                                                         |
 | **Hazards**          | Heat and cold immune                                                                              |
-| **Stalk eligible**   | **Yes** (shared stalker statechart)                                                               |
+| **Stalk eligible**   | **Yes** (shared PackHunter statechart)                                                               |
 | **Social hunter**    | **Yes** (min pack **3**; seek packmates while solo)                                               |
 | **Stamina**          | Drain **0.28×**, regen **2.4×**, exhaust exit **22%** (~16s sprint, ~3s full refill)              |
 | **Passive trait**    | **Adrenaline Rush**: restore stamina to full when entering flee                                   |
@@ -609,7 +609,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 | **Name tags**        | Global size-σ pools (see **Name tags** below); locked pack alpha uses **Alpha** when revealed     |
 | **Bestiary studied** | Mentions pack howl rally + **Adrenaline Rush** on flee (`definingPlazaBestiaryGuideConstants.ts`) |
 
-**Stalk tuning:** `definingWildlifeStalkConstants.ts`, `definingWildlifeStalkerBehaviourMachine.ts`
+**Stalk tuning:** `definingWildlifeStalkConstants.ts`, `definingWildlifePackHunterBehaviourMachine.ts`
 **Social hunter:** `definingWildlifeSocialHunterConstants.ts`
 **Stamina:** `DEFINING_WILDLIFE_SPECIES_STAMINA` in `definingWildlifeSpeciesRegistry.ts`
 **Adrenaline Rush:** `adrenalineRush: true` + `applyingWildlifeAdrenalineRushOnFleeEntry.ts` (`DEFINING_WILDLIFE_ADRENALINE_RUSH_STAMINA_RESTORE_RATIO` **1**)
@@ -618,7 +618,7 @@ Default aggro fields unless overridden: threat/damage **2.5**, decay **0.4/s**, 
 
 | Field                | Value                                                                                       |
 | -------------------- | ------------------------------------------------------------------------------------------- |
-| **Temperament**      | stalker                                                                                     |
+| **Temperament**      | Pack hunter |
 | **Diet / tier**      | carnivore, tier 3                                                                           |
 | **Aggro radius**     | 10 grid; **pack share 12**                                                                  |
 | **Territory**        | same warn/escalate as grey-wolf                                                             |
@@ -641,7 +641,7 @@ Meat: higher hunger, **50%** wolf-fever on raw; cooked well-fed roll (**50%**) g
 
 | Field              | Value                                                |
 | ------------------ | ---------------------------------------------------- |
-| **Temperament**    | stalker                                              |
+| **Temperament**    | Pack hunter |
 | **Diet / tier**    | carnivore, tier 2                                    |
 | **Aggro radius**   | 8 grid; pack share **10**                            |
 | **Territory**      | same warn/escalate as grey-wolf                      |
@@ -650,7 +650,7 @@ Meat: higher hunger, **50%** wolf-fever on raw; cooked well-fed roll (**50%**) g
 | **Favorite prey**  | antilope                                             |
 | **Sleep**          | nocturnal                                            |
 | **Hazards**        | Heat immune                                          |
-| **Stalk eligible** | **Yes** (temperament `stalker`)                      |
+| **Stalk eligible** | **Yes** (temperament `pack_hunter`)                      |
 
 ---
 
@@ -702,14 +702,26 @@ Meat: higher hunger, **50%** wolf-fever on raw; cooked well-fed roll (**50%**) g
 
 | Field              | Value                               |
 | ------------------ | ----------------------------------- |
-| **Temperament**    | predator                            |
+| **Temperament**    | stalker                             |
 | **Diet / tier**    | carnivore, tier 3                   |
 | **Aggro radius**   | 9 grid; **pack share 0** (solitary) |
 | **Territory**      | lion territory config               |
 | **Prey allow**     | boar, pig, deer, monkey, chimp      |
 | **Hazards**        | Swamp-safe; heat immune             |
 | **Sleep**          | crepuscular                         |
-| **Stalk eligible** | No                                  |
+| **Stalk eligible** | **Yes** (solo stalker statechart)   |
+
+### `jaguar`: Jaguar
+
+| Field              | Value                                  |
+| ------------------ | -------------------------------------- |
+| **Temperament**    | stalker                                |
+| **Diet / tier**    | carnivore, tier 3                      |
+| **Aggro radius**   | 8 grid; leash **14**; pack share **0** |
+| **Prey allow**     | boar, pig, deer, monkey, chimp         |
+| **Hazards**        | Swamp-safe; heat immune                |
+| **Sleep**          | nocturnal                              |
+| **Stalk eligible** | **Yes** (solo stalker statechart)      |
 
 ---
 
@@ -730,24 +742,13 @@ Meat: higher hunger, **50%** wolf-fever on raw; cooked well-fed roll (**50%**) g
 | **Loot**           | Raw Crocodile Meat                                                                |
 | **Note**           | `idleNearWater` behavior branch when adjacent to water                            |
 
-### `jaguar`: Jaguar
-
-| Field              | Value                                  |
-| ------------------ | -------------------------------------- |
-| **Temperament**    | ambusher                               |
-| **Diet / tier**    | carnivore, tier 3                      |
-| **Aggro radius**   | 5 grid; leash **14**; pack share **0** |
-| **Prey allow**     | boar, pig, deer, monkey, chimp         |
-| **Hazards**        | Swamp-safe; heat immune                |
-| **Sleep**          | nocturnal                              |
-| **Stalk eligible** | No                                     |
-
 ---
 
-## Stalk phase reference (temperament `stalker`)
+## Stalk phase reference (temperament `pack_hunter`)
 
-Any species with `temperamentId: 'stalker'` uses the shared stalker statechart (`grey-wolf`, `omega-wolf`, `hyena`).
+Any species with `temperamentId: 'pack_hunter'` uses the shared PackHunter statechart (`grey-wolf`, `omega-wolf`, `hyena`).
 
+Solo `stalker` species (`tiger`, `jaguar`) use `DEFINING_WILDLIFE_STALKER_BEHAVIOUR_MACHINE`: shadow → attack (no surround / form-up). Kill window = weakness after 15s, or hungry/starving/aggressive after 15s.
 | Phase       | Player-visible behavior                                                                 |
 | ----------- | --------------------------------------------------------------------------------------- |
 | idle        | Pack not committed to a hunt                                                            |

@@ -289,7 +289,7 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
     {
       speciesId: 'grey-wolf',
       icon: 'mdi:paw',
-      summary: 'Nocturnal pack stalker of forest and beyond.',
+      summary: 'Nocturnal pack PackHunter of forest and beyond.',
       studiedSummary:
         'Wolves aggro as a pack, and a howl carries: wolves you cannot see may answer it and come running. When they break and flee, Adrenaline Rush fills their stamina so the sprint is fresh. Their name tags run from Pup to Alpha, and the forest at night is theirs.',
       apostleFlavor:
@@ -361,16 +361,16 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
     {
       speciesId: 'tiger',
       icon: 'mdi:paw',
-      summary: 'Jungle predator that stalks what it can see coming.',
+      summary: 'Jungle stalker. Shadows prey, then rushes when you weaken or it gets hungry.',
       studiedSummary:
-        'Tigers stalk through heat and canopy. The jungle offers the danger you might see coming.',
+        'Tigers trail through heat and canopy. They wait for a stumble, then close fast.',
     },
     {
       speciesId: 'jaguar',
       icon: 'mdi:paw',
-      summary: 'Jungle ambusher. The danger you will not see.',
+      summary: 'Night stalker. Shadows you until weakness or hunger opens the rush.',
       studiedSummary:
-        'Jaguars ambush from cover. The jungle pairs them with tigers so nothing feels safe.',
+        'Jaguars stalk from the dark. The jungle pairs them with tigers so nothing feels safe.',
     },
     {
       speciesId: 'crocodile',

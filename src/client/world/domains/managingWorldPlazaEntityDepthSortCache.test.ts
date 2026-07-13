@@ -74,4 +74,25 @@ describe('resolvingWorldPlazaCachedAvatarBodySortKey', () => {
 
     expect(resolvingWorldDepthAvatarBodySortKey).toHaveBeenCalledTimes(2);
   });
+
+  it('recomputes when the painted-foot offset changes', () => {
+    vi.mocked(resolvingWorldDepthAvatarBodySortKey).mockClear();
+    const cache = creatingWorldPlazaEntityDepthSortCache();
+    const gridPoint = { x: 10.1, y: 20.1, layer: 1 };
+
+    resolvingWorldPlazaCachedAvatarBodySortKey(
+      gridPoint,
+      cache,
+      { avatarFootOffsetBelowGridAnchorPx: 0 },
+      3
+    );
+    resolvingWorldPlazaCachedAvatarBodySortKey(
+      gridPoint,
+      cache,
+      { avatarFootOffsetBelowGridAnchorPx: 14 },
+      3
+    );
+
+    expect(resolvingWorldDepthAvatarBodySortKey).toHaveBeenCalledTimes(2);
+  });
 });

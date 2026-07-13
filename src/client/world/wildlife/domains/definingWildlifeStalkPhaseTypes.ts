@@ -1,10 +1,10 @@
 /**
- * Stalker hunt phase union, events, and machine state shape.
+ * PackHunter hunt phase union, events, and machine state shape.
  *
  * @module components/world/wildlife/domains/definingWildlifeStalkPhaseTypes
  */
 
-/** Explicit hunt phase for stalker-temperament wildlife. */
+/** Explicit hunt phase for PackHunter-temperament wildlife. */
 export type DefiningWildlifeStalkPhase =
   | 'idle'
   | 'shadowing'

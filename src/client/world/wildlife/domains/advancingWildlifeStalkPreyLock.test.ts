@@ -6,7 +6,7 @@ import { creatingWildlifeTestInstance } from '@/components/world/wildlife/domain
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { describe, expect, it } from 'vitest';
 
-describe('stalker prey lock aggro', () => {
+describe('PackHunter prey lock aggro', () => {
   it('alpha randomly locks onto one prey and ignores another nearby target', () => {
     const species = DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'];
     const instance = creatingWildlifeTestInstance({

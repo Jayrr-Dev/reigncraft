@@ -134,7 +134,10 @@ export function buildingWorldPlazaDefaultAnimalCharacterEngineDefinition(
     };
   }
 
-  const { vitals } = species;
+  const { vitals, jump } = species;
+  const allowedMotionKinds = jump.canJump
+    ? (['idle', 'walk', 'run', 'jump'] as const)
+    : (['idle', 'walk', 'run'] as const);
 
   return {
     characterId: skinRow.skinId,
@@ -145,9 +148,10 @@ export function buildingWorldPlazaDefaultAnimalCharacterEngineDefinition(
       collisionRadiusGrid: species.collisionRadiusGrid,
     },
     locomotion: {
-      allowedMotionKinds: ['idle', 'walk', 'run', 'jump'],
+      allowedMotionKinds,
       walkSpeedGridPerSecond: vitals.walkSpeedGridPerSecond,
       runSpeedGridPerSecond: vitals.runSpeedGridPerSecond,
+      maxJumpLayerReach: jump.maxJumpLayerReach,
     },
     vitals: { baseMaxHealth: vitals.baseMaxHealth },
     massKg: species.massKg,

@@ -7,6 +7,7 @@ import type { DefiningWorldPlazaAvatarMotionState } from '@/components/world/dom
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import { pushingWorldPlazaDangerSenseStatusDamagePulse } from '@/components/world/domains/managingWorldPlazaDangerSenseStatusDamagePulseStore';
 import { notifyingWorldPlazaGirlSampleVoiceSfxEvent } from '@/components/world/domains/notifyingWorldPlazaGirlSampleVoiceSfxEvent';
 import { resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry';
 import { resolvingWorldPlazaGirlSampleRollDodgeDamageOptions } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeDamageOptions';
@@ -110,6 +111,7 @@ import {
   creatingWorldPlazaCharacterEngineInitialHealthState,
   reseedingWorldPlazaCharacterEngineHealthBaseline,
 } from '@/components/world/character/domains/creatingWorldPlazaCharacterEngineInitialHealthState';
+import { applyingWorldPlazaDevQaPlayerHealthOverride } from '@/components/world/domains/applyingWorldPlazaDevQaPlayerHealthOverride';
 import type { DefiningWorldPlazaCharacterEngineDefinition } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_REACTION_DURATION_MS,
@@ -406,7 +408,9 @@ export function usingWorldPlazaPlayerHealth({
       ? creatingWorldPlazaCharacterEngineInitialHealthState(
           characterEngineDefinition
         )
-      : creatingWorldPlazaEntityHealthInitialState()
+      : applyingWorldPlazaDevQaPlayerHealthOverride(
+          creatingWorldPlazaEntityHealthInitialState()
+        )
   );
   const lastTickMsRef = useRef<number | null>(null);
   const lastHudPushMsRef = useRef(0);
@@ -572,6 +576,15 @@ export function usingWorldPlazaPlayerHealth({
             nowMs
           );
         }
+      }
+
+      if (damageResult.appliedDamage.healthDamage > 0) {
+        pushingWorldPlazaDangerSenseStatusDamagePulse({
+          damageKind: kind,
+          nowMs,
+          damageAmount: damageResult.appliedDamage.healthDamage,
+          currentHealth: state.currentHealth,
+        });
       }
 
       if (
@@ -1084,6 +1097,15 @@ export function usingWorldPlazaPlayerHealth({
       mutatingHealthState((state, nowMs) => {
         const nextHealth = Math.max(0, state.currentHealth - amount);
 
+        if (nextHealth < state.currentHealth) {
+          pushingWorldPlazaDangerSenseStatusDamagePulse({
+            damageKind: 'starvation',
+            nowMs,
+            damageAmount: state.currentHealth - nextHealth,
+            currentHealth: state.currentHealth,
+          });
+        }
+
         if (nextHealth > 0) {
           enqueueFloatText(
             { kind: 'damage', amount, damageKind: 'starvation' },
@@ -1564,6 +1586,13 @@ export function usingWorldPlazaPlayerHealth({
           },
           frameTimeMs
         );
+
+        pushingWorldPlazaDangerSenseStatusDamagePulse({
+          damageKind: healthStateRef.current.lastDamageKind,
+          nowMs: frameTimeMs,
+          damageAmount: healthLost,
+          currentHealth: previousHealth,
+        });
 
         damageFlashUntilMsRef.current =
           frameTimeMs + USING_WORLD_PLAZA_PLAYER_HEALTH_DAMAGE_FLASH_MS;

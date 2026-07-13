@@ -30,16 +30,20 @@ Devvit webviews use **HTTP polling** only. No persistent WebSocket channel.
 
 ## Room capacity
 
-| Parameter            | Value      |
-| -------------------- | ---------- |
-| Max players per room | **3**      |
-| Player TTL           | **5 s**    |
-| Sync POST interval   | **150 ms** |
-| Remote poll interval | **400 ms** |
+| Parameter             | Value      |
+| --------------------- | ---------- |
+| Min players per world | **2**      |
+| Max players per world | **4**      |
+| Default on create     | **3**      |
+| Player TTL            | **5 s**    |
+| Sync POST interval    | **150 ms** |
+| Remote poll interval  | **400 ms** |
 
-Joining when full returns error with `isRoomFull: true`. UI message: "This plaza is full (3 players max)."
+Joining when full returns error with `isRoomFull: true`. Message uses that world's `maxPlayers` (not a fixed 3).
 
-Room browser lists shards via `GET /api/plaza/rooms`.
+Home flow: **Create** / **Open** (public occupied) / **Join by name** / **Continue** (alumni). Empty public worlds hide from Open but keep progress. Private worlds never appear on Open.
+
+API: `GET/POST /api/plaza/rooms`, `GET .../mine`, `GET .../lookup`, `GET .../hosted`, `DELETE /api/plaza/rooms?room=`, `POST .../kick`.
 
 ## Sync loop (per client)
 
@@ -155,13 +159,17 @@ Online room routes (**building**, **fire**, **harvest**) use `resolvingPlazaDevv
 
 ## Room API URLs
 
-`buildingPlazaDevvitOnlineRoomApiUrl(path, roomIndex)` appends `?room={index}` (minimum **1**).
+`buildingPlazaDevvitOnlineRoomApiUrl(path, roomId)` appends `?room={roomId}`.
 
-| Path                 | Role                   |
-| -------------------- | ---------------------- |
-| `/api/plaza/sync`    | POST heartbeat + state |
-| `/api/plaza/players` | GET remote roster      |
-| `/api/plaza/rooms`   | GET shard listing      |
+| Path                        | Role                                      |
+| --------------------------- | ----------------------------------------- |
+| `/api/plaza/sync`           | POST heartbeat + state                    |
+| `/api/plaza/players`        | GET remote roster                         |
+| `/api/plaza/rooms`          | GET open public worlds / POST create      |
+| `/api/plaza/rooms/mine`     | GET Continue worlds                       |
+| `/api/plaza/rooms/lookup`   | GET join-by-name                          |
+| `/api/plaza/rooms/hosted`   | GET host's world                          |
+| `/api/plaza/rooms/kick`     | POST host kick                            |
 
 ## Remote player application
 
@@ -199,14 +207,15 @@ Use this before rewriting HUD-facing TanStack Query fields so join/leave/rename 
 
 | Knob           | Location                                                       |
 | -------------- | -------------------------------------------------------------- |
-| Max players    | `PLAZA_DEVVIT_ONLINE_MAX_PLAYERS`                              |
+| Traveler cap   | `MIN` / `MAX` / `DEFAULT_MAX_PLAYERS` in `plazaDevvitOnline.ts` |
 | TTL            | `PLAZA_DEVVIT_ONLINE_PLAYER_TTL_SECONDS`                       |
 | Intervals      | `SYNC_INTERVAL_MS`, `POLL_INTERVAL_MS`                         |
 | Projectile cap | `DEFINING_WORLD_PLAZA_PROJECTILE_ONLINE_SYNC_MAX_SPAWN_EVENTS` |
 
 ## Edge cases
 
-- **Multiple room shards**: Browser picks `roomIndex`; APIs scoped per shard.
+- **Named worlds**: Create/join/continue by unique name; APIs scoped by `roomId`.
+- **Host kick / delete**: Kick blocks rejoin; delete frees name and host slot; clients force-exit home.
 - **Leader disconnect**: Next lexicographic user becomes leader on next election tick.
 - **Projectile burst**: Engine queues spawns; only first **8** per sync POST ship.
 - **Health defaults**: If ref unset, sync uses `DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX`.

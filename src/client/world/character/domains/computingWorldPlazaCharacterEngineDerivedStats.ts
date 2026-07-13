@@ -5,6 +5,7 @@
  */
 
 import { DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import {
   DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GROWTH_LANE_MIN_ATTACK_POWER,
   DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GROWTH_LANE_MIN_DEFENSE,
@@ -89,6 +90,13 @@ export function computingWorldPlazaCharacterEngineDerivedStats(
       locomotion.runSpeedGridPerSecond ??
       DEFINING_WORLD_PLAZA_ISOMETRIC_GRID_RUN_SPEED_PER_SECOND,
     jumpDistanceScale: locomotion.jumpDistanceScale ?? 1,
+    maxJumpLayerReach: Math.max(
+      0,
+      Math.floor(
+        locomotion.maxJumpLayerReach ??
+          DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX
+      )
+    ),
     healthRegenPerSecond:
       vitals.healthRegenPerSecond ??
       DEFINING_WORLD_PLAZA_ENTITY_HEALTH_REGEN_PER_SECOND,

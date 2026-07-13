@@ -191,8 +191,10 @@ export function loadingWildlifeSpeciesTextures(
     return cached;
   }
 
-  let loadingPromise!: Promise<DefiningWildlifeSpeciesTextures>;
-  loadingPromise = (async (): Promise<DefiningWildlifeSpeciesTextures> => {
+  const loadingPromiseHolder: {
+    current?: Promise<DefiningWildlifeSpeciesTextures>;
+  } = {};
+  const loadingPromise = (async (): Promise<DefiningWildlifeSpeciesTextures> => {
     const loadedSheetUrls = new Set<string>();
     const idleLoaded = await loadingWildlifeMotionSheet(species, 'idle');
     loadedSheetUrls.add(idleLoaded.sheetUrl);
@@ -244,7 +246,10 @@ export function loadingWildlifeSpeciesTextures(
       })
     );
 
-    if (loadingWildlifeSpeciesTexturesCache.get(cacheKey) === loadingPromise) {
+    if (
+      loadingWildlifeSpeciesTexturesCache.get(cacheKey) ===
+      loadingPromiseHolder.current
+    ) {
       loadingWildlifeSpeciesLoadedSheetUrls.set(cacheKey, loadedSheetUrls);
     }
 
@@ -254,6 +259,7 @@ export function loadingWildlifeSpeciesTextures(
       ...Object.fromEntries(extendedEntries),
     } as DefiningWildlifeSpeciesTextures;
   })();
+  loadingPromiseHolder.current = loadingPromise;
 
   loadingWildlifeSpeciesTexturesCache.set(cacheKey, loadingPromise);
 

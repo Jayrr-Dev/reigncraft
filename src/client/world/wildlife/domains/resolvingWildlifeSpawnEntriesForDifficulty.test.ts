@@ -27,6 +27,7 @@ function buildingTestLevers(
     },
     allowPredatorSpawns: true,
     allowAmbusherSpawns: true,
+    allowPackHunterSpawns: true,
     allowStalkerSpawns: true,
     healthAndAttackPowerScale: 10,
     aggroRadiusMultiplier: 1,
@@ -64,10 +65,10 @@ describe('resolvingWildlifeSpawnEntriesForDifficulty', () => {
     expect(entries).toEqual(FOREST_ENTRIES);
   });
 
-  it('removes predator temperaments when stalker spawns are disabled', () => {
+  it('removes predator temperaments when PackHunter spawns are disabled', () => {
     const entries = resolvingWildlifeSpawnEntriesForDifficulty(
       FOREST_ENTRIES,
-      buildingTestLevers({ allowStalkerSpawns: false })
+      buildingTestLevers({ allowPackHunterSpawns: false })
     );
 
     expect(entries.map((entry) => entry.speciesId)).toEqual([
@@ -94,11 +95,31 @@ describe('resolvingWildlifeSpawnEntriesForDifficulty', () => {
     ]);
   });
 
+  it('removes stalker temperaments when stalker spawns are disabled', () => {
+    const jungleEntries: readonly DefiningWildlifeBiomeSpawnEntry[] = [
+      { speciesId: 'deer', weight: 4, packSizeRange: [1, 3] },
+      { speciesId: 'tiger', weight: 2, packSizeRange: [1, 1] },
+      { speciesId: 'jaguar', weight: 1, packSizeRange: [1, 1] },
+      { speciesId: 'crocodile', weight: 2, packSizeRange: [1, 1] },
+    ];
+
+    const entries = resolvingWildlifeSpawnEntriesForDifficulty(
+      jungleEntries,
+      buildingTestLevers({ allowStalkerSpawns: false })
+    );
+
+    expect(entries.map((entry) => entry.speciesId)).toEqual([
+      'deer',
+      'crocodile',
+    ]);
+  });
+
   it('returns an empty pool when every predator temperament is disabled', () => {
     const predatorOnlyEntries: readonly DefiningWildlifeBiomeSpawnEntry[] = [
       { speciesId: 'grey-wolf', weight: 2, packSizeRange: [2, 4] },
       { speciesId: 'lion', weight: 2, packSizeRange: [1, 2] },
       { speciesId: 'crocodile', weight: 5, packSizeRange: [1, 2] },
+      { speciesId: 'tiger', weight: 1, packSizeRange: [1, 1] },
     ];
 
     const entries = resolvingWildlifeSpawnEntriesForDifficulty(
@@ -106,6 +127,7 @@ describe('resolvingWildlifeSpawnEntriesForDifficulty', () => {
       buildingTestLevers({
         allowPredatorSpawns: false,
         allowAmbusherSpawns: false,
+        allowPackHunterSpawns: false,
         allowStalkerSpawns: false,
       })
     );

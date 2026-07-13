@@ -3,6 +3,11 @@
 import { deletingPlazaSinglePlayerSaveSlot } from '@/components/home/domains/deletingPlazaSinglePlayerSaveSlot';
 import type { PlazaSinglePlayerSaveSlotSummary } from '@/components/home/domains/readingPlazaSinglePlayerSaveSlotSummary';
 import { PLAZA_SINGLE_PLAYER_SAVE_SLOTS_QUERY_KEY_ROOT } from '@/components/home/hooks/usingPlazaSinglePlayerSaveSlotsQuery';
+import { DEFINING_WORLD_BUILDING_PLOTS_REGISTRY_QUERY_KEY_ROOT } from '@/components/world/building/domains/definingWorldBuildingClaimModeConstants';
+import { DEFINING_WORLD_BUILDING_PLOT_OWNER_LIMITS_QUERY_KEY_ROOT } from '@/components/world/building/domains/definingWorldBuildingPlotConstants';
+import { DEFINING_WORLD_PLAZA_CHOPPED_TREES_QUERY_KEY_ROOT } from '@/components/world/harvest/hooks/usingWorldPlazaChoppedTrees';
+import { DEFINING_WORLD_PLAZA_MINED_ROCKS_QUERY_KEY_ROOT } from '@/components/world/harvest/hooks/usingWorldPlazaMinedRocks';
+import { DEFINING_WORLD_PLAZA_PICKED_PEBBLES_QUERY_KEY_ROOT } from '@/components/world/harvest/hooks/usingWorldPlazaPickedPebbles';
 import { context } from '@devvit/web/client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
@@ -54,6 +59,22 @@ export function usingPlazaSinglePlayerSaveSlotDeleteMutation(): {
           clearingSaveSlotSummary
         );
       }
+
+      void queryClient.invalidateQueries({
+        queryKey: [DEFINING_WORLD_BUILDING_PLOTS_REGISTRY_QUERY_KEY_ROOT],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: [DEFINING_WORLD_BUILDING_PLOT_OWNER_LIMITS_QUERY_KEY_ROOT],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: [DEFINING_WORLD_PLAZA_CHOPPED_TREES_QUERY_KEY_ROOT],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: [DEFINING_WORLD_PLAZA_MINED_ROCKS_QUERY_KEY_ROOT],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: [DEFINING_WORLD_PLAZA_PICKED_PEBBLES_QUERY_KEY_ROOT],
+      });
     },
   });
 

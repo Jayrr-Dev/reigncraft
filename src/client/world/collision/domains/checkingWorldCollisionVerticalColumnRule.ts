@@ -21,6 +21,8 @@ export type CheckingWorldCollisionVerticalColumnRuleInput = {
   readonly verticalBandsOverlap: boolean;
   /** When true, skip blocking (ledge lip walked off behind movement). */
   readonly cliffLipRelief?: boolean;
+  /** Max upward layers this mover can jump onto. */
+  readonly jumpLayerReachMax?: number;
 };
 
 /**
@@ -47,10 +49,10 @@ export function checkingWorldCollisionVerticalColumnBlocksPlayer(
     return false;
   }
 
-  if (
-    input.surfaceLayer - input.playerLayer >
-    DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX
-  ) {
+  const jumpLayerReachMax =
+    input.jumpLayerReachMax ?? DEFINING_WORLD_BUILDING_WORLD_LAYER_JUMP_HEIGHT_MAX;
+
+  if (input.surfaceLayer - input.playerLayer > jumpLayerReachMax) {
     return true;
   }
 

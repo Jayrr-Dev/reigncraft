@@ -1,5 +1,5 @@
 /**
- * Stalker shadowing intents: follow bands, calm shadow wander, and pack cohesion.
+ * PackHunter shadowing intents: follow bands, calm shadow wander, and pack cohesion.
  *
  * @module components/world/wildlife/domains/resolvingWildlifeStalkEngagementIntent
  */

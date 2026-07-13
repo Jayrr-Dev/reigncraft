@@ -18,6 +18,7 @@ export type ManagingWorldPlazaEntityDepthSortCache = {
   lastCenterTileY: number;
   lastFootSumBucket: number;
   lastStandingLayer: number;
+  lastAvatarFootOffsetBelowGridAnchorPx: number;
   lastPlacedBlocksRevision: number;
   lastSortKey: number;
 };
@@ -31,6 +32,7 @@ export function creatingWorldPlazaEntityDepthSortCache(): ManagingWorldPlazaEnti
     lastCenterTileY: Number.NaN,
     lastFootSumBucket: Number.NaN,
     lastStandingLayer: Number.NaN,
+    lastAvatarFootOffsetBelowGridAnchorPx: Number.NaN,
     lastPlacedBlocksRevision: -1,
     lastSortKey: 0,
   };
@@ -78,6 +80,8 @@ export function resolvingWorldPlazaCachedAvatarBodySortKey(
   const centerTileX = Math.floor(gridPoint.x);
   const centerTileY = Math.floor(gridPoint.y);
   const standingLayer = resolvingWorldPlazaPlayerWorldLayer(gridPoint);
+  const avatarFootOffsetBelowGridAnchorPx =
+    context.avatarFootOffsetBelowGridAnchorPx ?? 0;
   const footSumBucket =
     computingWorldPlazaAvatarBodySortCacheFootSumBucket(gridPoint);
 
@@ -86,6 +90,8 @@ export function resolvingWorldPlazaCachedAvatarBodySortKey(
     cache.lastCenterTileY === centerTileY &&
     cache.lastFootSumBucket === footSumBucket &&
     cache.lastStandingLayer === standingLayer &&
+    cache.lastAvatarFootOffsetBelowGridAnchorPx ===
+      avatarFootOffsetBelowGridAnchorPx &&
     cache.lastPlacedBlocksRevision === placedBlocksRevision
   ) {
     incrementingWorldPlazaPerformanceDiagnosticsCounter(
@@ -103,6 +109,8 @@ export function resolvingWorldPlazaCachedAvatarBodySortKey(
   cache.lastCenterTileY = centerTileY;
   cache.lastFootSumBucket = footSumBucket;
   cache.lastStandingLayer = standingLayer;
+  cache.lastAvatarFootOffsetBelowGridAnchorPx =
+    avatarFootOffsetBelowGridAnchorPx;
   cache.lastPlacedBlocksRevision = placedBlocksRevision;
   cache.lastSortKey = sortKey;
   return sortKey;
@@ -110,9 +118,15 @@ export function resolvingWorldPlazaCachedAvatarBodySortKey(
 
 /**
  * Assigns zIndex only when the sort key changed (avoids parent re-sort).
+ * When it does change, marks the parent dirty and sorts immediately so avatar
+ * ↔ placed-block order updates this frame (Pixi also sorts on collect, but
+ * other systems in this repo call sortChildren after imperative zIndex writes).
  */
 export function applyingWorldPlazaCachedDisplayObjectZIndex(
-  displayObject: { zIndex: number },
+  displayObject: {
+    zIndex: number;
+    parent?: { sortableChildren?: boolean; sortChildren?: () => void } | null;
+  },
   sortKey: number,
   previousSortKeyRef: { current: number }
 ): boolean {
@@ -122,5 +136,11 @@ export function applyingWorldPlazaCachedDisplayObjectZIndex(
 
   previousSortKeyRef.current = sortKey;
   displayObject.zIndex = sortKey;
+
+  const parent = displayObject.parent;
+  if (parent?.sortableChildren && typeof parent.sortChildren === 'function') {
+    parent.sortChildren();
+  }
+
   return true;
 }

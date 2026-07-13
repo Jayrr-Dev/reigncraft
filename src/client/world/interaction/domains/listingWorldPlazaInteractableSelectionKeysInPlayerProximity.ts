@@ -29,8 +29,12 @@ import { formattingWorldPlazaInteractableBlockSelectionKey } from '@/components/
 import { formattingWorldPlazaInteractablePebbleSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractablePebbleSelectionKey';
 import { formattingWorldPlazaInteractableRockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableRockSelectionKey';
 import { formattingWorldPlazaInteractableTreeSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableTreeSelectionKey';
+import { checkingWildlifeDocilePetIsReady } from '@/components/world/wildlife/domains/checkingWildlifeDocilePetIsReady';
+import { resolvingWildlifeDocilePetKind } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsPettable';
 import { formattingWildlifeCorpseStudySelectionKey } from '@/components/world/wildlife/domains/formattingWildlifeCorpseStudySelectionKey';
+import { formattingWildlifeDocilePetSelectionKey } from '@/components/world/wildlife/domains/formattingWildlifeDocilePetSelectionKey';
 import {
+  DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID,
   listingWildlifeInstances,
   type ManagingWildlifeInstanceStore,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
@@ -61,6 +65,8 @@ export type ListingWorldPlazaInteractableSelectionKeysInPlayerProximityParams =
     readonly hasEquippedScythe?: boolean;
     readonly hasSeedsInInventory?: boolean;
     readonly proximityRadiusTiles?: number;
+    /** Wall-clock ms used to filter Pet cooldowns on living companions. */
+    readonly nowMs?: number;
   };
 
 /**
@@ -226,27 +232,48 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
   }
 
   if (params.wildlifeStore) {
+    const nowMs = params.nowMs ?? Date.now();
+    const meleeReachSq =
+      DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID *
+      DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID;
+
     for (const instance of listingWildlifeInstances(params.wildlifeStore)) {
       if (
-        !instance.isDead ||
-        instance.hasBeenStudied ||
-        instance.diedAtMs === null
+        instance.isDead &&
+        !instance.hasBeenStudied &&
+        instance.diedAtMs !== null
       ) {
+        if (
+          checkingWorldPlazaInteractionLabelTileInPlayerProximity(
+            params.playerPosition,
+            Math.floor(instance.position.x),
+            Math.floor(instance.position.y),
+            radius
+          )
+        ) {
+          keys.add(
+            formattingWildlifeCorpseStudySelectionKey(instance.instanceId)
+          );
+        }
         continue;
       }
 
       if (
-        !checkingWorldPlazaInteractionLabelTileInPlayerProximity(
-          params.playerPosition,
-          Math.floor(instance.position.x),
-          Math.floor(instance.position.y),
-          radius
-        )
+        instance.isDead ||
+        resolvingWildlifeDocilePetKind(instance.speciesId) === null ||
+        !checkingWildlifeDocilePetIsReady(instance, nowMs)
       ) {
         continue;
       }
 
-      keys.add(formattingWildlifeCorpseStudySelectionKey(instance.instanceId));
+      const dx = instance.position.x - params.playerPosition.x;
+      const dy = instance.position.y - params.playerPosition.y;
+
+      if (dx * dx + dy * dy > meleeReachSq) {
+        continue;
+      }
+
+      keys.add(formattingWildlifeDocilePetSelectionKey(instance.instanceId));
     }
   }
 

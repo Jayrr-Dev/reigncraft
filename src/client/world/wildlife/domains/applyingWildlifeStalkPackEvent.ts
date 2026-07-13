@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/applyingWildlifeStalkPackEvent
  */
 
+import { advancingWildlifePackHunterBehaviour } from '@/components/world/wildlife/domains/advancingWildlifePackHunterBehaviour';
 import { advancingWildlifeStalkerBehaviour } from '@/components/world/wildlife/domains/advancingWildlifeStalkerBehaviour';
 import type { DefiningWildlifeStalkEventKind } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -81,7 +82,7 @@ export function applyingWildlifeStalkEventToInstance({
             stalkPlayerApproachReactedAtMs: reactedAtMs,
           },
         };
-  const nextAggroState = advancingWildlifeStalkerBehaviour({
+  const behaviourParams = {
     instance: withReactionTimestamp,
     species,
     nearbyInstances,
@@ -95,7 +96,11 @@ export function applyingWildlifeStalkEventToInstance({
     aggroState: withReactionTimestamp.aggroState,
     tickEvents: [eventKind],
     resolveSpecies,
-  });
+  };
+  const nextAggroState =
+    species.temperamentId === 'stalker'
+      ? advancingWildlifeStalkerBehaviour(behaviourParams)
+      : advancingWildlifePackHunterBehaviour(behaviourParams);
 
   const phaseEnteredViaFlee =
     eventKind === 'RETREAT_DONE_ROLL_FLEE' ||

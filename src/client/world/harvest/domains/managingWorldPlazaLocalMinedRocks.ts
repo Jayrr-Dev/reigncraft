@@ -302,3 +302,14 @@ export function miningWorldPlazaLocalRockLayer(
     isFullyDepleted: mutation.isFullyDepleted,
   };
 }
+
+/**
+ * Drops in-memory mined-rock cache for one persistence owner (save-slot wipe).
+ *
+ * @param persistenceOwnerId - Scoped localStorage owner id for the slot.
+ */
+export function clearingWorldPlazaLocalMinedRocksMemoryForOwner(
+  persistenceOwnerId: string
+): void {
+  managingWorldPlazaLocalMinedRocksByOwner.delete(persistenceOwnerId);
+}
