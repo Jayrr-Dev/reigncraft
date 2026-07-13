@@ -949,6 +949,11 @@ function applyingWildlifeMeleeAttack(
   return {
     attacker: {
       ...nextAttacker,
+      aggroState: {
+        ...nextAttacker.aggroState,
+        lastDealtDamageAtMs: nowMs,
+        chaseGiveUpUntilPlayerExitsAggro: false,
+      },
       aiState: {
         ...nextAttacker.aiState,
         isMoving: false,

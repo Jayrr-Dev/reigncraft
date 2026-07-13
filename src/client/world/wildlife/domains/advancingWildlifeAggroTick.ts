@@ -288,10 +288,8 @@ export function advancingWildlifeAggroTick({
       instance.position.x - playerPosition.x,
       instance.position.y - playerPosition.y
     );
-    const playerAggroRadiusGrid = resolvingWildlifeInstancePlayerAggroRadiusGrid(
-      species,
-      instance
-    );
+    const playerAggroRadiusGrid =
+      resolvingWildlifeInstancePlayerAggroRadiusGrid(species, instance);
     const playerOccludedByBoulder = checkingWildlifePlayerOccludedByColumnRock(
       instance.position,
       playerPosition
@@ -351,6 +349,7 @@ export function advancingWildlifeAggroTick({
     if (
       territory &&
       instance.aggressionLevel !== 'tame' &&
+      !chaseGiveUpUntilPlayerExitsAggro &&
       (instance.aggroState.activeTargetId === null || !stalkLockedPreyTargetId)
     ) {
       if (

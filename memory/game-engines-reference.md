@@ -633,6 +633,7 @@ Use these folders when the task is not covered above:
 | Animal feet moonwalk / too fast                 | `resolvingWildlifeLocomotionAnimationSpeedScale.ts`, sheet overrides in `definingWildlifeSpriteSheetLayout.ts`                                  |
 | Animal stuck at river / cliff gap               | `resolvingWildlifeTerrainGapJumpPlan` in `resolvingWildlifeJumpPlan.ts` (forward scan + landing surface layer)                                  |
 | Tiger/cat freezes after pounce                  | Jump land fall-through + live chase target in `advancingWildlifeSimulationTick.ts`; attack→chase in `resolvingWildlifeMeleeEngagementIntent.ts` |
+| Tiger endless chase with no hits                | `chaseGiveUpWithoutDamageMs` on tiger aggro + `checkingWildlifeChaseShouldGiveUpWithoutDamage.ts`                                               |
 | Wolf runs backwards / stuck on run clip         | `resolvingWildlifeInstanceFacingDirection.ts` (face move while locomoting); jump land clears run in `advancingWildlifeSimulationTick.ts`        |
 | Wolf stalk back-and-forth / jittery shadowing   | `resolvingWildlifeStalkEngagementIntent.ts` + `resolvingWildlifeStalkShadowWanderTargetPoint.ts` (prey-ring random walk)                        |
 | New temperament behavior                        | `definingWildlifeBehaviorTreeRegistry.ts`                                                                                                       |

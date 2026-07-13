@@ -387,3 +387,75 @@ describe('applyingWildlifeDamageThreat', () => {
     expect(nextBoar.aggroState.threats[0]?.threat ?? 0).toBeGreaterThan(0);
   });
 });
+
+describe('tiger chase give-up without damage', () => {
+  it('drops player chase after the no-hit window and blocks immediate re-aggro', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.tiger;
+    const giveUpMs = species.aggro.chaseGiveUpWithoutDamageMs ?? 10_000;
+    const instance = buildingTestWildlifeInstance({
+      speciesId: 'tiger',
+      aggressionLevel: 'aggressive',
+      hungerState: {
+        hungerRatio: 0.9,
+        driveLevel: 'sated',
+        lastFedAtMs: null,
+      },
+      position: { x: 1, y: 1, layer: 1 },
+      aggroState: {
+        threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1_000 }],
+        activeTargetId: 'player-1',
+        lastDamagedAtMs: null,
+        lastDealtDamageAtMs: null,
+        chaseEngagedAtMs: 1_000,
+        chaseGiveUpUntilPlayerExitsAggro: false,
+      },
+    });
+
+    const nextAggro = advancingWildlifeAggroTick({
+      instance,
+      species,
+      nearbyInstances: [],
+      playerPosition: { x: 2, y: 1, layer: 1 },
+      playerUserId: 'player-1',
+      deltaSeconds: 0.25,
+      nowMs: 1_000 + giveUpMs,
+    });
+
+    expect(nextAggro.activeTargetId).toBeNull();
+    expect(
+      nextAggro.threats.some((entry) => entry.targetId === 'player-1')
+    ).toBe(false);
+    expect(nextAggro.chaseGiveUpUntilPlayerExitsAggro).toBe(true);
+  });
+
+  it('keeps chasing when a hit landed recently', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.tiger;
+    const giveUpMs = species.aggro.chaseGiveUpWithoutDamageMs ?? 10_000;
+    const instance = buildingTestWildlifeInstance({
+      speciesId: 'tiger',
+      aggressionLevel: 'aggressive',
+      position: { x: 1, y: 1, layer: 1 },
+      aggroState: {
+        threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 8_000 }],
+        activeTargetId: 'player-1',
+        lastDamagedAtMs: null,
+        lastDealtDamageAtMs: 8_000,
+        chaseEngagedAtMs: 1_000,
+        chaseGiveUpUntilPlayerExitsAggro: false,
+      },
+    });
+
+    const nextAggro = advancingWildlifeAggroTick({
+      instance,
+      species,
+      nearbyInstances: [],
+      playerPosition: { x: 2, y: 1, layer: 1 },
+      playerUserId: 'player-1',
+      deltaSeconds: 0.25,
+      nowMs: 8_000 + giveUpMs - 1,
+    });
+
+    expect(nextAggro.activeTargetId).toBe('player-1');
+    expect(nextAggro.chaseGiveUpUntilPlayerExitsAggro).toBe(false);
+  });
+});
