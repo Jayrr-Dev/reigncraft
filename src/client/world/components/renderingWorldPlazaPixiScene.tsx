@@ -156,6 +156,7 @@ import {
   buildingWorldPlazaPlacedBlocksSceneRef,
   type DefiningWorldPlazaPlacedBlocksSceneRef,
 } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
+import { resolvingWorldPlazaAnimalPlayableAvatarUnlockWildlifeSpeciesId } from '@/components/world/domains/checkingWorldPlazaAnimalPlayableAvatarSkinStudyUnlocked';
 import {
   computingWorldPlazaEmbeddedHostSizeStyle,
   computingWorldPlazaExpandedHostSizeStyle,
@@ -414,7 +415,6 @@ import type {
 } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import type { ManagingWorldPlazaProjectileStore } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
 import { usingWorldPlazaProjectileEngine } from '@/components/world/projectile/hooks/usingWorldPlazaProjectileEngine';
-import { resolvingWorldPlazaAnimalPlayableAvatarUnlockWildlifeSpeciesId } from '@/components/world/domains/checkingWorldPlazaAnimalPlayableAvatarSkinStudyUnlocked';
 import {
   DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID,
   findingWildlifeInstanceAtGridPoint,
@@ -422,7 +422,6 @@ import {
   resolvingWildlifeSpeciesDefinition,
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
-import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { RenderingWildlifeDocileBetrayInteractionLabels } from '@/components/world/wildlife/components/renderingWildlifeDocileBetrayInteractionLabels';
 import { RenderingWildlifeFootsteps } from '@/components/world/wildlife/components/renderingWildlifeFootsteps';
 import { RenderingWildlifeOmegaWolfSfx } from '@/components/world/wildlife/components/renderingWildlifeOmegaWolfSfx';
@@ -3524,11 +3523,13 @@ function RenderingWorldPlazaPixiSceneConnected({
         targetGridY: instance.position.y,
         targetInstanceId: instance.instanceId,
         damageAmount: Math.round(
-          resolvingWorldPlazaEquippedAttackEv(
-            selectedCharacterEngineDerivedStats.attackPower,
-            inventoryState,
-            equipment.selectedSlotIndex
-          )
+          playerTransformWildlifeSpeciesIdRef.current
+            ? selectedCharacterEngineDerivedStats.attackPower
+            : resolvingWorldPlazaEquippedAttackEv(
+                selectedCharacterEngineDerivedStats.attackPower,
+                inventoryState,
+                equipment.selectedSlotIndex
+              )
         ),
         durationMs: meleeTiming.durationMs,
         animationFps: meleeTiming.animationFps,
@@ -3546,6 +3547,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       inventoryState,
       localAvatarMotionStateRef,
       playerPositionRef,
+      playerTransformWildlifeSpeciesIdRef,
       selectedAvatarCharacterDefinition,
       selectedCharacterEngineDerivedStats.attackPower,
       selectedCharacterEngineDerivedStats.attackSpeed,

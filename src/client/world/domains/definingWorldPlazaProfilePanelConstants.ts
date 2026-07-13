@@ -34,6 +34,10 @@ export const LABELING_WORLD_PLAZA_PROFILE_PANEL_PASSIVES_SECTION =
 export const LABELING_WORLD_PLAZA_PROFILE_PANEL_PASSIVES_EMPTY =
   'No inherited passives' as const;
 
+/** Section heading above active buffs and ailments. */
+export const LABELING_WORLD_PLAZA_PROFILE_PANEL_EFFECTS_SECTION =
+  'Active effects' as const;
+
 /** Copy shown in the effects section when nothing is active. */
 export const LABELING_WORLD_PLAZA_PROFILE_PANEL_EFFECTS_EMPTY =
   'No active effects' as const;

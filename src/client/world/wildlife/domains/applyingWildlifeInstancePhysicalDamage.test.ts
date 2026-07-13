@@ -213,4 +213,29 @@ describe('applyingWildlifeInstancePhysicalDamage', () => {
       expect(nextInstance.healthState.currentHealth).toBeLessThan(550);
     }
   });
+
+  it('deals flat wildlife attack power for animal transform melee', () => {
+    const awakeInstance = {
+      ...buildingSleepingWildlifeInstance(),
+      aiState: {
+        ...buildingSleepingWildlifeInstance().aiState,
+        isSleeping: false,
+        hasUsedBluffCharge: false,
+        bluffChargePlayerExitedTerritory: false,
+        bluffReturnPoint: null,
+        docileFollowUntilMs: null,
+        docileLastReactAtMs: null,
+      },
+    };
+    const nextInstance = applyingWildlifeInstancePhysicalDamage({
+      instance: awakeInstance,
+      rawAmount: 520,
+      nowMs: 1000,
+      outgoingDamageStyle: 'wildlife-flat',
+    });
+
+    expect(nextInstance.floatingTexts[0]?.outcomeTier).toBeNull();
+    expect(nextInstance.floatingTexts[0]?.amount).toBe(520);
+    expect(nextInstance.healthState.currentHealth).toBe(30);
+  });
 });

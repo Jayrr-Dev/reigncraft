@@ -31,6 +31,10 @@ export type ApplyingWildlifeInstancePhysicalDamageWakeContext = {
   hazardSampling: ResolvingWildlifeSteeringHazardSampling;
 };
 
+export type ApplyingWildlifeOutgoingPhysicalDamageStyle =
+  | 'player-ev'
+  | 'wildlife-flat';
+
 export type ApplyingWildlifeInstancePhysicalDamageParams = {
   instance: DefiningWildlifeInstance;
   rawAmount: number;
@@ -40,6 +44,11 @@ export type ApplyingWildlifeInstancePhysicalDamageParams = {
     DefiningWildlifeInstance,
     'largeSizeFrame' | 'aiState' | 'speciesId'
   > | null;
+  /**
+   * Player girl/tool hits use EV. Animal transforms match wildlife→wildlife flat.
+   * Ignored when `attacker` is set (always flat) or sleep/special options win.
+   */
+  outgoingDamageStyle?: ApplyingWildlifeOutgoingPhysicalDamageStyle;
 };
 
 /**
@@ -51,6 +60,7 @@ export function applyingWildlifeInstancePhysicalDamage({
   nowMs,
   wakeContext = null,
   attacker = null,
+  outgoingDamageStyle = 'player-ev',
 }: ApplyingWildlifeInstancePhysicalDamageParams): DefiningWildlifeInstance {
   const sleepAmbushOptions =
     resolvingWildlifeSleepAmbushHealthDamageOptions(instance);
@@ -62,12 +72,14 @@ export function applyingWildlifeInstancePhysicalDamage({
   const omegaOutgoingOptions = attacker?.speciesId
     ? resolvingWildlifeOmegaWolfOutgoingDamageOptions(attacker.speciesId)
     : null;
+  const useWildlifeFlatOutgoing =
+    attacker !== null || outgoingDamageStyle === 'wildlife-flat';
   const damageOptions =
     sleepAmbushOptions ??
     omegaOutgoingOptions ??
     obeseJumpAttackOptions ??
     obeseIncomingOptions ??
-    (attacker
+    (useWildlifeFlatOutgoing
       ? { skipDamageRoll: true }
       : resolvingWildlifePlayerOutgoingPhysicalDamageOptions());
   const wasSleeping = sleepAmbushOptions !== null;

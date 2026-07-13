@@ -68,12 +68,12 @@ import {
 import { applyingWildlifeHerbivoreHerdFleeResponse } from '@/components/world/wildlife/domains/applyingWildlifeHerbivoreHerdFleeResponse';
 import { applyingWildlifeInstanceHealthPayload } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthPayload';
 import { applyingWildlifeInstancePhysicalDamage } from '@/components/world/wildlife/domains/applyingWildlifeInstancePhysicalDamage';
-import { applyingWildlifeTransformMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifeTransformMeleeHitSideEffects';
 import { applyingWildlifePackAlphaDeathScatter } from '@/components/world/wildlife/domains/applyingWildlifePackAlphaDeathScatter';
 import { applyingWildlifeSpawnPackAlphaLocks } from '@/components/world/wildlife/domains/applyingWildlifeSpawnPackAlphaLocks';
 import { applyingWildlifeSpeechTickWithSpeciesSfx } from '@/components/world/wildlife/domains/applyingWildlifeSpeechTickWithSpeciesSfx';
 import { applyingWildlifeStalkPackDamageResponse } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackDamageResponse';
 import { applyingWildlifeStalkEventToInstance } from '@/components/world/wildlife/domains/applyingWildlifeStalkPackEvent';
+import { applyingWildlifeTransformMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifeTransformMeleeHitSideEffects';
 import { applyingWildlifeUnnoticedProvokeOnWildlifeHit } from '@/components/world/wildlife/domains/applyingWildlifeUnnoticedProvokeOnWildlifeHit';
 import {
   applyingWildlifeWolfHowlPackAttraction,
@@ -2398,6 +2398,9 @@ export function applyingWildlifeInstanceDamage(
         rawAmount: damageAmount,
         nowMs,
         wakeContext,
+        outgoingDamageStyle: attackerTransformSpeciesId
+          ? 'wildlife-flat'
+          : 'player-ev',
       });
 
   const transformProcInstance =
