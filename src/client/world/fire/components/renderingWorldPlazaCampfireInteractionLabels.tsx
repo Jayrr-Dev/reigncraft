@@ -9,7 +9,10 @@ import {
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
-import { DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME } from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
+import {
+  DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_STACK_CLASS_NAME,
+} from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
 import { formattingWorldPlazaCampfireCookProgressTargetKey } from '@/components/world/fire/domains/formattingWorldPlazaCampfireCookProgressTargetKey';
 import type {
   DefiningWorldPlazaCampfireInteractionAction,
@@ -27,9 +30,6 @@ const RENDERING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_HIDDEN_TRANSFORM =
 
 const RENDERING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_WRAPPER_CLASS_NAME =
   'pointer-events-none absolute left-0 top-0 z-10 will-change-transform select-none' as const;
-
-const RENDERING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_ROW_CLASS_NAME =
-  'pointer-events-auto flex items-center justify-center gap-2' as const;
 
 export type RenderingWorldPlazaCampfireInteractionLabelsProps = {
   readonly placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
@@ -242,7 +242,7 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
                 rowElementByTileKeyRef.current.delete(tileKey);
               }}
               className={
-                RENDERING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_ROW_CLASS_NAME
+                DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_STACK_CLASS_NAME
               }
             >
               {entry.actions.map((action) => {

@@ -167,18 +167,28 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
       onClick={closingDialogOnBackdropClick}
     >
       <div className="plaza-pop-in relative flex w-full max-w-[min(94vw,52rem)] flex-col items-center gap-3 font-body sm:gap-4">
-        <header className="flex w-full items-center justify-center gap-3 px-2 sm:px-4">
-          <RenderingWorldPlazaCraftModeCookbookCoverGlyph
-            cookbookDefinition={cookbookDefinition}
-          />
-          <div className="min-w-0">
-            <h2 className="font-display text-base font-bold uppercase leading-tight tracking-wide text-parchment sm:text-lg md:text-xl">
-              {cookbookDefinition.title}
-            </h2>
-            <p className="mt-1 text-xs font-medium italic leading-snug text-parchment/70 sm:text-sm">
-              {cookbookDefinition.subtitle}
-            </p>
+        <header className="flex w-full items-center gap-3 px-2 sm:px-4">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <RenderingWorldPlazaCraftModeCookbookCoverGlyph
+              cookbookDefinition={cookbookDefinition}
+            />
+            <div className="min-w-0">
+              <h2 className="font-display text-base font-bold uppercase leading-tight tracking-wide text-parchment sm:text-lg md:text-xl">
+                {cookbookDefinition.title}
+              </h2>
+              <p className="mt-1 text-xs font-medium italic leading-snug text-parchment/70 sm:text-sm">
+                {cookbookDefinition.subtitle}
+              </p>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className={COOKBOOK_CLOSE_BUTTON_CLASS_NAME}
+          >
+            <Icon icon="mdi:close" className="size-4 sm:size-5" aria-hidden />
+          </button>
         </header>
 
         <div
@@ -196,15 +206,6 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
             className="pointer-events-none absolute inset-0 size-full select-none object-contain [image-rendering:pixelated]"
             aria-hidden
           />
-
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className={`${COOKBOOK_CLOSE_BUTTON_CLASS_NAME} absolute right-[1.5%] top-[2%] z-20`}
-          >
-            <Icon icon="mdi:close" className="size-4 sm:size-5" aria-hidden />
-          </button>
 
           <div
             key={`${cookbookDefinition.id}-leaf-${leafIndex}-left`}

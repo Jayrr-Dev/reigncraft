@@ -1879,11 +1879,11 @@ body {
 }
 
 /*
- * Reigncraft Sonner (plaza): keep toasts in the minimap column.
+ * Reigncraft Sonner (plaza): keep toasts under the top action bar.
  * Sonner defaults to position:fixed + absolute toast items. Absolute items do
  * not size a relative toaster, so the ol collapses to 0 height and the stack
  * disappears (often clipped by the overflow-hidden game host). Force normal
- * flow so the bottom-full toast host can grow upward above the minimap.
+ * flow so the top-full toast host can grow downward under the action pill.
  */
 .plaza-reigncraft-toaster--plaza[data-sonner-toaster] {
   position: relative !important;
@@ -1893,9 +1893,9 @@ body {
   top: auto !important;
   bottom: auto !important;
   display: flex !important;
-  flex-direction: column-reverse !important;
+  flex-direction: column !important;
   align-items: stretch !important;
-  /* Lock to live minimap canvas width (set via --width from toastWidthPx). */
+  /* Lock to action-bar toast width (set via --width from toastWidthPx). */
   box-sizing: border-box !important;
   width: var(--width) !important;
   min-width: var(--width) !important;

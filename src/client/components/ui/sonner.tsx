@@ -15,7 +15,13 @@ import { Toaster as SonnerToaster, type ToasterProps } from 'sonner';
 
 export type RenderingReigncraftToasterProps = Omit<
   ToasterProps,
-  'id' | 'toastOptions' | 'theme' | 'position' | 'duration' | 'gap' | 'visibleToasts'
+  | 'id'
+  | 'toastOptions'
+  | 'theme'
+  | 'position'
+  | 'duration'
+  | 'gap'
+  | 'visibleToasts'
 > & {
   readonly toasterId: DefiningReigncraftToasterId;
   readonly position?: ToasterProps['position'];
@@ -23,8 +29,7 @@ export type RenderingReigncraftToasterProps = Omit<
   /** When true, use compact gameplay chrome instead of parchment cards. */
   readonly variant?: 'parchment' | 'gameplay';
   /**
-   * Toast column width in CSS px. Plaza should pass the live minimap canvas
-   * width so the stack balances with the map card.
+   * Toast column width in CSS px. Plaza passes the action-bar toast width.
    */
   readonly toastWidthPx?: number;
 };
@@ -62,7 +67,7 @@ export function RenderingReigncraftToaster({
       )}
       style={
         {
-          // Plaza: live minimap canvas width. Global: fallback embedded size.
+          // Plaza: action-bar toast column width. Global: same default.
           '--width': `${resolvedWidthPx}px`,
           width: `${resolvedWidthPx}px`,
           minWidth: `${resolvedWidthPx}px`,

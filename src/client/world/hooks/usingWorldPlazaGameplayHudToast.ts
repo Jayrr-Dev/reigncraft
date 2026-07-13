@@ -9,7 +9,7 @@ export type UsingWorldPlazaGameplayHudToastResult = {
 
 /**
  * Plaza gameplay toast helper. Routes through the Reigncraft Sonner toaster
- * stacked above the minimap.
+ * stacked under the top action bar.
  */
 export function usingWorldPlazaGameplayHudToast(): UsingWorldPlazaGameplayHudToastResult {
   const showingGameplayHudToast = useCallback((message: string): void => {

@@ -5,13 +5,12 @@
  */
 
 import { STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_CLASS } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
-import { DEFINING_WORLD_PLAZA_MINI_MAP_EMBEDDED_CANVAS_SIZE_PX } from '@/components/world/domains/definingWorldPlazaMiniMapConstants';
 
 /** Sonner toaster instance ids (multi-toaster routing). */
 export const DEFINING_REIGNCRAFT_TOASTER_ID = {
   /** App-level toasts (home, friends, error boundary). */
   global: 'reigncraft-global',
-  /** Plaza gameplay toasts stacked above the minimap. */
+  /** Plaza gameplay toasts stacked under the top action bar. */
   plaza: 'reigncraft-plaza',
 } as const;
 
@@ -28,24 +27,16 @@ export const DEFINING_REIGNCRAFT_TOAST_VISIBLE_COUNT = 3;
 export const DEFINING_REIGNCRAFT_TOAST_GAP_PX = 8;
 
 /**
- * Extra CSS px added on top of the live minimap canvas width for plaza toasts.
+ * Plaza toast column width under the action bar (readable, near pill width).
  */
-export const DEFINING_REIGNCRAFT_TOAST_WIDTH_EXTRA_PX = 10;
-
-/**
- * Fallback toast width when no live minimap size is passed (embedded desktop).
- * Plaza toaster should prefer live minimap canvas width + {@link DEFINING_REIGNCRAFT_TOAST_WIDTH_EXTRA_PX}.
- */
-export const DEFINING_REIGNCRAFT_TOAST_WIDTH_PX =
-  DEFINING_WORLD_PLAZA_MINI_MAP_EMBEDDED_CANVAS_SIZE_PX +
-  DEFINING_REIGNCRAFT_TOAST_WIDTH_EXTRA_PX;
+export const DEFINING_REIGNCRAFT_TOAST_WIDTH_PX = 220;
 
 /**
  * Shared toast chrome class names.
- * Plaza gameplay: plain white fill, black outline, wraps to minimap width.
+ * Plaza gameplay: plain white fill, black outline, fixed toast column width.
  */
 export const DEFINING_REIGNCRAFT_TOAST_STYLE = {
-  /** Outer Sonner list host for the plaza (flow layout above minimap). */
+  /** Outer Sonner list host for the plaza (flow layout under the action bar). */
   plazaToasterClassName:
     'plaza-reigncraft-toaster plaza-reigncraft-toaster--plaza pointer-events-none',
   /** Outer Sonner list host for app-level toasts. */
@@ -64,7 +55,7 @@ export const DEFINING_REIGNCRAFT_TOAST_STYLE = {
   warningClassName: '!border-black',
   infoClassName: '!border-black',
   iconClassName: 'mt-0.5 shrink-0 text-black',
-  /** Compact gameplay toast: white + black outline, locked to minimap width. */
+  /** Compact gameplay toast: white + black outline, locked to toast column width. */
   gameplayToastClassName: [
     'pointer-events-auto !box-border !flex !w-[var(--width)] !min-w-[var(--width)] !max-w-[var(--width)] select-none !items-start !rounded-md !border !border-black !bg-white !px-2 !py-1.5 !shadow-none',
     'font-body text-[11px] font-medium leading-snug text-black',

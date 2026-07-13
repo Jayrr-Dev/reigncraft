@@ -38,14 +38,8 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
    */
   anchorClassName:
     DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_MINI_MAP_STACK_ANCHOR_CLASS_NAME,
-  /**
-   * Column that hosts the parchment minimap card plus an absolute toast stack
-   * anchored just below the card.
-   */
+  /** Column that hosts the parchment minimap card. */
   columnClassName: 'relative flex flex-col items-start',
-  /** Absolute host for Sonner so empty toasts do not push the minimap. */
-  toastHostClassName:
-    'pointer-events-none absolute top-full left-0 z-30 mt-1.5 flex w-full flex-col items-stretch overflow-visible',
   /**
    * Shared parchment card chrome for the time/temperature bar and minimap.
    * Matches the aged-paper poster panels used on the home screen menus.
@@ -105,7 +99,6 @@ export const DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT = {
 } as const satisfies {
   anchorClassName: string;
   columnClassName: string;
-  toastHostClassName: string;
   cardClassName: string;
   mapFrameClassName: string;
   environmentBarClassName: string;

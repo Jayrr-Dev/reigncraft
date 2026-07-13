@@ -65,6 +65,18 @@ export const DEFINING_WORLD_PLAZA_ACTION_BAR_NOTIFICATION_BADGE_BASE_PX =
 export const DEFINING_WORLD_PLAZA_ACTION_BAR_NOTIFICATION_BADGE_TEXT_BASE_PX =
   8 as const;
 
+/**
+ * Relative column wrapping the action pill and the absolute toast stack under it.
+ */
+export const DEFINING_WORLD_PLAZA_ACTION_BAR_COLUMN_CLASS_NAME =
+  'relative flex flex-col items-center' as const;
+
+/**
+ * Absolute Sonner host under the action pill so empty toasts do not push the bar.
+ */
+export const DEFINING_WORLD_PLAZA_ACTION_BAR_TOAST_HOST_CLASS_NAME =
+  'pointer-events-none absolute top-full left-1/2 z-30 mt-1.5 flex -translate-x-1/2 flex-col items-stretch overflow-visible' as const;
+
 /** Pill shell wrapping all plaza action buttons (sizes via inline viewport styles). */
 export const DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_CLASS_NAME =
   `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarShell} pointer-events-auto flex items-center font-body` as const;

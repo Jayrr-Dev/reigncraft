@@ -1,10 +1,5 @@
 'use client';
 
-import {
-  DEFINING_REIGNCRAFT_TOAST_WIDTH_EXTRA_PX,
-  DEFINING_REIGNCRAFT_TOASTER_ID,
-} from '@/components/ui/domains/definingReigncraftToastConstants';
-import { RenderingReigncraftToaster } from '@/components/ui/sonner';
 import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
 import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
 import { RenderingWorldPlazaMiniMap } from '@/components/world/components/renderingWorldPlazaMiniMap';
@@ -82,8 +77,6 @@ export function RenderingWorldPlazaMiniMapStack({
     isMinimapPreferenceEnabled,
     renderLayerFlags,
   });
-  const toastWidthPx =
-    miniMapLayout.canvasSizePx + DEFINING_REIGNCRAFT_TOAST_WIDTH_EXTRA_PX;
 
   return (
     <div
@@ -95,25 +88,6 @@ export function RenderingWorldPlazaMiniMapStack({
         className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.columnClassName}
         style={{ width: miniMapLayout.canvasSizePx }}
       >
-        <div
-          className={
-            DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.toastHostClassName
-          }
-          style={{
-            width:
-              miniMapLayout.canvasSizePx +
-              DEFINING_REIGNCRAFT_TOAST_WIDTH_EXTRA_PX,
-          }}
-        >
-          <RenderingReigncraftToaster
-            toasterId={DEFINING_REIGNCRAFT_TOASTER_ID.plaza}
-            variant="gameplay"
-            position="top-left"
-            offset={0}
-            mobileOffset={0}
-            toastWidthPx={toastWidthPx}
-          />
-        </div>
         <div
           className={DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.cardClassName}
         >

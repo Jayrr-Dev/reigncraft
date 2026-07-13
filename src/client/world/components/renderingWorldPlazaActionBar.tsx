@@ -7,6 +7,11 @@
  * @module components/world/components/renderingWorldPlazaActionBar
  */
 
+import {
+  DEFINING_REIGNCRAFT_TOAST_WIDTH_PX,
+  DEFINING_REIGNCRAFT_TOASTER_ID,
+} from '@/components/ui/domains/definingReigncraftToastConstants';
+import { RenderingReigncraftToaster } from '@/components/ui/sonner';
 import { RenderingWorldPlazaActionBarTransformPanel } from '@/components/world/components/renderingWorldPlazaActionBarTransformPanel';
 import { RenderingWorldPlazaCodexMenuPanel } from '@/components/world/components/renderingWorldPlazaCodexMenuPanel';
 import { RenderingWorldPlazaExitHomeConfirmDialog } from '@/components/world/components/renderingWorldPlazaExitHomeConfirmDialog';
@@ -15,10 +20,12 @@ import {
   DEFINING_WORLD_PLAZA_ACTION_BAR_ANCHOR_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ACTION_BAR_BUTTON_ACTIVE_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ACTION_BAR_BUTTON_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_ACTION_BAR_COLUMN_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ACTION_BAR_MOBILE_ANCHOR_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_ACTION_BAR_TOAST_HOST_CLASS_NAME,
   LABELING_WORLD_PLAZA_ACTION_BAR_CHAT,
   LABELING_WORLD_PLAZA_ACTION_BAR_FRIENDS,
   LABELING_WORLD_PLAZA_ACTION_BAR_TRANSFORM,
@@ -181,69 +188,35 @@ export function RenderingWorldPlazaActionBar({
           STYLING_WORLD_PLAZA_ACTION_BAR_LIGHT_THEME_SCOPE_CLASS
         )}
       >
-        <div
-          {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-          className={DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_CLASS_NAME}
-          style={viewportStyles.shellStyle}
-          role="toolbar"
-          aria-label="Plaza actions"
-        >
-          {!isChatOpen ? (
-            <>
-              <div
-                className={
-                  STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME
-                }
-              >
-                <button
-                  type="button"
-                  aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_SETTINGS}
-                  aria-pressed={isSoundMixerOpen}
-                  aria-expanded={isSoundMixerOpen}
-                  onClick={() => {
-                    setIsSoundMixerOpen((wasOpen) => !wasOpen);
-                  }}
-                  className={stylingWorldPlazaActionBarButton(isSoundMixerOpen)}
-                  style={viewportStyles.buttonStyle}
-                >
-                  <Settings
-                    className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
-                    style={viewportStyles.iconStyle}
-                    aria-hidden="true"
-                  />
-                </button>
-                <RenderingWorldPlazaMasterVolumeMixerPanel
-                  isOpen={isSoundMixerOpen}
-                  onRequestExitToHome={
-                    onExitToHome
-                      ? () => {
-                          setIsSoundMixerOpen(false);
-                          setIsExitHomeConfirmOpen(true);
-                        }
-                      : undefined
-                  }
-                />
-              </div>
-              {onSelectCodexSection ? (
+        <div className={DEFINING_WORLD_PLAZA_ACTION_BAR_COLUMN_CLASS_NAME}>
+          <div
+            {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+            className={DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_CLASS_NAME}
+            style={viewportStyles.shellStyle}
+            role="toolbar"
+            aria-label="Plaza actions"
+          >
+            {!isChatOpen ? (
+              <>
                 <div
                   className={
-                    STYLING_WORLD_PLAZA_ACTION_BAR_CODEX_ANCHOR_CLASS_NAME
+                    STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME
                   }
                 >
                   <button
                     type="button"
-                    aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_CODEX}
-                    aria-pressed={isCodexMenuOpen}
-                    aria-expanded={isCodexMenuOpen}
+                    aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_SETTINGS}
+                    aria-pressed={isSoundMixerOpen}
+                    aria-expanded={isSoundMixerOpen}
                     onClick={() => {
-                      setIsCodexMenuOpen((wasOpen) => !wasOpen);
+                      setIsSoundMixerOpen((wasOpen) => !wasOpen);
                     }}
                     className={stylingWorldPlazaActionBarButton(
-                      isCodexMenuOpen
+                      isSoundMixerOpen
                     )}
                     style={viewportStyles.buttonStyle}
                   >
-                    <BookOpen
+                    <Settings
                       className={
                         DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME
                       }
@@ -251,225 +224,282 @@ export function RenderingWorldPlazaActionBar({
                       aria-hidden="true"
                     />
                   </button>
-                  <RenderingWorldPlazaCodexMenuPanel
-                    isOpen={isCodexMenuOpen}
-                    onSelectSection={(section) => {
-                      setIsCodexMenuOpen(false);
-                      onSelectCodexSection(section);
-                    }}
+                  <RenderingWorldPlazaMasterVolumeMixerPanel
+                    isOpen={isSoundMixerOpen}
+                    onRequestExitToHome={
+                      onExitToHome
+                        ? () => {
+                            setIsSoundMixerOpen(false);
+                            setIsExitHomeConfirmOpen(true);
+                          }
+                        : undefined
+                    }
                   />
                 </div>
-              ) : null}
-              <span
-                className={DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME}
-                style={viewportStyles.dividerStyle}
-                aria-hidden="true"
-              />
-            </>
-          ) : null}
-          {isSocialEnabled ? (
-            <button
-              type="button"
-              aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_CHAT}
-              aria-pressed={isChatOpen}
-              onClick={onToggleChat}
-              className={stylingWorldPlazaActionBarButton(isChatOpen)}
-              style={viewportStyles.buttonStyle}
-            >
-              <MessageCircle
-                className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
-                style={viewportStyles.iconStyle}
-                aria-hidden="true"
-              />
-            </button>
-          ) : null}
+                {onSelectCodexSection ? (
+                  <div
+                    className={
+                      STYLING_WORLD_PLAZA_ACTION_BAR_CODEX_ANCHOR_CLASS_NAME
+                    }
+                  >
+                    <button
+                      type="button"
+                      aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_CODEX}
+                      aria-pressed={isCodexMenuOpen}
+                      aria-expanded={isCodexMenuOpen}
+                      onClick={() => {
+                        setIsCodexMenuOpen((wasOpen) => !wasOpen);
+                      }}
+                      className={stylingWorldPlazaActionBarButton(
+                        isCodexMenuOpen
+                      )}
+                      style={viewportStyles.buttonStyle}
+                    >
+                      <BookOpen
+                        className={
+                          DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME
+                        }
+                        style={viewportStyles.iconStyle}
+                        aria-hidden="true"
+                      />
+                    </button>
+                    <RenderingWorldPlazaCodexMenuPanel
+                      isOpen={isCodexMenuOpen}
+                      onSelectSection={(section) => {
+                        setIsCodexMenuOpen(false);
+                        onSelectCodexSection(section);
+                      }}
+                    />
+                  </div>
+                ) : null}
+                <span
+                  className={DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME}
+                  style={viewportStyles.dividerStyle}
+                  aria-hidden="true"
+                />
+              </>
+            ) : null}
+            {isSocialEnabled ? (
+              <button
+                type="button"
+                aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_CHAT}
+                aria-pressed={isChatOpen}
+                onClick={onToggleChat}
+                className={stylingWorldPlazaActionBarButton(isChatOpen)}
+                style={viewportStyles.buttonStyle}
+              >
+                <MessageCircle
+                  className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
+                  style={viewportStyles.iconStyle}
+                  aria-hidden="true"
+                />
+              </button>
+            ) : null}
 
-          {!isChatOpen ? (
-            <>
-              {isSocialEnabled ? (
-                <>
+            {!isChatOpen ? (
+              <>
+                {isSocialEnabled ? (
+                  <>
+                    <button
+                      type="button"
+                      aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_FRIENDS}
+                      aria-pressed={isFriendsOpen}
+                      onClick={onToggleFriends}
+                      className={cn(
+                        stylingWorldPlazaActionBarButton(isFriendsOpen),
+                        'relative'
+                      )}
+                      style={viewportStyles.buttonStyle}
+                    >
+                      <Users
+                        className={
+                          DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME
+                        }
+                        style={viewportStyles.iconStyle}
+                        aria-hidden="true"
+                      />
+                      {pendingFriendRequestCount > 0 ? (
+                        <span
+                          className={
+                            STYLING_WORLD_PLAZA_ACTION_BAR_FRIENDS_NOTIFICATION_BADGE
+                          }
+                          style={viewportStyles.notificationBadgeStyle}
+                          aria-hidden="true"
+                        >
+                          {pendingFriendRequestCount > 9
+                            ? '9+'
+                            : pendingFriendRequestCount}
+                        </span>
+                      ) : null}
+                    </button>
+
+                    <span
+                      className={
+                        DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME
+                      }
+                      style={viewportStyles.dividerStyle}
+                      aria-hidden="true"
+                    />
+                  </>
+                ) : null}
+
+                {onToggleProfile ? (
                   <button
                     type="button"
-                    aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_FRIENDS}
-                    aria-pressed={isFriendsOpen}
-                    onClick={onToggleFriends}
-                    className={cn(
-                      stylingWorldPlazaActionBarButton(isFriendsOpen),
-                      'relative'
-                    )}
+                    aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_PROFILE}
+                    aria-pressed={isProfileOpen}
+                    onClick={onToggleProfile}
+                    className={stylingWorldPlazaActionBarButton(isProfileOpen)}
                     style={viewportStyles.buttonStyle}
                   >
-                    <Users
+                    <UserRound
                       className={
                         DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME
                       }
                       style={viewportStyles.iconStyle}
                       aria-hidden="true"
                     />
-                    {pendingFriendRequestCount > 0 ? (
-                      <span
-                        className={
-                          STYLING_WORLD_PLAZA_ACTION_BAR_FRIENDS_NOTIFICATION_BADGE
-                        }
-                        style={viewportStyles.notificationBadgeStyle}
-                        aria-hidden="true"
-                      >
-                        {pendingFriendRequestCount > 9
-                          ? '9+'
-                          : pendingFriendRequestCount}
-                      </span>
-                    ) : null}
+                  </button>
+                ) : null}
+
+                <div
+                  className={
+                    STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_ANCHOR_CLASS_NAME
+                  }
+                >
+                  <button
+                    type="button"
+                    aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_TRANSFORM}
+                    aria-pressed={isTransformPanelOpen}
+                    aria-expanded={isTransformPanelOpen}
+                    onClick={() => {
+                      setIsHungerPanelOpen(false);
+                      setIsTransformPanelOpen((wasOpen) => !wasOpen);
+                    }}
+                    className={stylingWorldPlazaActionBarButton(
+                      isTransformPanelOpen
+                    )}
+                    style={viewportStyles.buttonStyle}
+                  >
+                    <Shell
+                      className={
+                        DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME
+                      }
+                      style={viewportStyles.iconStyle}
+                      aria-hidden="true"
+                    />
                   </button>
 
-                  <span
-                    className={
-                      DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME
-                    }
-                    style={viewportStyles.dividerStyle}
-                    aria-hidden="true"
-                  />
-                </>
-              ) : null}
-
-              {onToggleProfile ? (
-                <button
-                  type="button"
-                  aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_PROFILE}
-                  aria-pressed={isProfileOpen}
-                  onClick={onToggleProfile}
-                  className={stylingWorldPlazaActionBarButton(isProfileOpen)}
-                  style={viewportStyles.buttonStyle}
-                >
-                  <UserRound
-                    className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
-                    style={viewportStyles.iconStyle}
-                    aria-hidden="true"
-                  />
-                </button>
-              ) : null}
-
-              <div
-                className={
-                  STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_ANCHOR_CLASS_NAME
-                }
-              >
-                <button
-                  type="button"
-                  aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_TRANSFORM}
-                  aria-pressed={isTransformPanelOpen}
-                  aria-expanded={isTransformPanelOpen}
-                  onClick={() => {
-                    setIsHungerPanelOpen(false);
-                    setIsTransformPanelOpen((wasOpen) => !wasOpen);
-                  }}
-                  className={stylingWorldPlazaActionBarButton(
-                    isTransformPanelOpen
-                  )}
-                  style={viewportStyles.buttonStyle}
-                >
-                  <Shell
-                    className={DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME}
-                    style={viewportStyles.iconStyle}
-                    aria-hidden="true"
-                  />
-                </button>
-
-                {isTransformPanelOpen ? (
-                  <RenderingWorldPlazaActionBarTransformPanel
-                    selectedAvatarSkinId={selectedAvatarSkinId}
-                    onSelectSkin={() => {
-                      setIsTransformPanelOpen(false);
-                    }}
-                  />
-                ) : null}
-              </div>
-
-              {hungerHud ? (
-                <>
-                  <span
-                    className={
-                      DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME
-                    }
-                    style={viewportStyles.dividerStyle}
-                    aria-hidden="true"
-                  />
-                  <div
-                    className={
-                      STYLING_WORLD_PLAZA_ACTION_BAR_HUNGER_ANCHOR_CLASS_NAME
-                    }
-                  >
-                    <RenderingWorldPlazaHungerIndicator
-                      hungerRatio={hungerHud.hungerRatio}
-                      tier={hungerHud.tier}
-                      isStarving={hungerHud.isStarving}
-                      viewportHudScale={viewportHudScale}
-                      isMobile={isMobile}
-                      isOpen={isHungerPanelOpen}
-                      onToggle={() => {
+                  {isTransformPanelOpen ? (
+                    <RenderingWorldPlazaActionBarTransformPanel
+                      selectedAvatarSkinId={selectedAvatarSkinId}
+                      onSelectSkin={() => {
                         setIsTransformPanelOpen(false);
-                        setIsSoundMixerOpen(false);
-                        setIsCodexMenuOpen(false);
-                        setIsHungerPanelOpen((wasOpen) => !wasOpen);
                       }}
                     />
-                    {isHungerPanelOpen ? (
-                      <RenderingWorldPlazaHungerPanel
+                  ) : null}
+                </div>
+
+                {hungerHud ? (
+                  <>
+                    <span
+                      className={
+                        DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME
+                      }
+                      style={viewportStyles.dividerStyle}
+                      aria-hidden="true"
+                    />
+                    <div
+                      className={
+                        STYLING_WORLD_PLAZA_ACTION_BAR_HUNGER_ANCHOR_CLASS_NAME
+                      }
+                    >
+                      <RenderingWorldPlazaHungerIndicator
                         hungerRatio={hungerHud.hungerRatio}
                         tier={hungerHud.tier}
                         isStarving={hungerHud.isStarving}
+                        viewportHudScale={viewportHudScale}
+                        isMobile={isMobile}
+                        isOpen={isHungerPanelOpen}
+                        onToggle={() => {
+                          setIsTransformPanelOpen(false);
+                          setIsSoundMixerOpen(false);
+                          setIsCodexMenuOpen(false);
+                          setIsHungerPanelOpen((wasOpen) => !wasOpen);
+                        }}
                       />
-                    ) : null}
+                      {isHungerPanelOpen ? (
+                        <RenderingWorldPlazaHungerPanel
+                          hungerRatio={hungerHud.hungerRatio}
+                          tier={hungerHud.tier}
+                          isStarving={hungerHud.isStarving}
+                        />
+                      ) : null}
+                    </div>
+                  </>
+                ) : null}
+
+                {isFullscreenSupported ? (
+                  <>
+                    <span
+                      className={
+                        DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME
+                      }
+                      style={viewportStyles.dividerStyle}
+                      aria-hidden="true"
+                    />
+                    <button
+                      type="button"
+                      aria-label={fullscreenLabel}
+                      aria-pressed={isFullscreen}
+                      onClick={onToggleFullscreen}
+                      className={stylingWorldPlazaActionBarButton(isFullscreen)}
+                      style={viewportStyles.buttonStyle}
+                    >
+                      {isFullscreen ? (
+                        <Minimize2
+                          className={
+                            DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME
+                          }
+                          style={viewportStyles.iconStyle}
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <Maximize2
+                          className={
+                            DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME
+                          }
+                          style={viewportStyles.iconStyle}
+                          aria-hidden="true"
+                        />
+                      )}
+                    </button>
+                  </>
+                ) : null}
+
+                {inlineChatSlot ? (
+                  <div className="hidden" aria-hidden="true">
+                    {inlineChatSlot}
                   </div>
-                </>
-              ) : null}
-
-              {isFullscreenSupported ? (
-                <>
-                  <span
-                    className={
-                      DEFINING_WORLD_PLAZA_ACTION_BAR_DIVIDER_CLASS_NAME
-                    }
-                    style={viewportStyles.dividerStyle}
-                    aria-hidden="true"
-                  />
-                  <button
-                    type="button"
-                    aria-label={fullscreenLabel}
-                    aria-pressed={isFullscreen}
-                    onClick={onToggleFullscreen}
-                    className={stylingWorldPlazaActionBarButton(isFullscreen)}
-                    style={viewportStyles.buttonStyle}
-                  >
-                    {isFullscreen ? (
-                      <Minimize2
-                        className={
-                          DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME
-                        }
-                        style={viewportStyles.iconStyle}
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <Maximize2
-                        className={
-                          DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME
-                        }
-                        style={viewportStyles.iconStyle}
-                        aria-hidden="true"
-                      />
-                    )}
-                  </button>
-                </>
-              ) : null}
-
-              {inlineChatSlot ? (
-                <div className="hidden" aria-hidden="true">
-                  {inlineChatSlot}
-                </div>
-              ) : null}
-            </>
-          ) : (
-            inlineChatSlot
-          )}
+                ) : null}
+              </>
+            ) : (
+              inlineChatSlot
+            )}
+          </div>
+          <div
+            className={DEFINING_WORLD_PLAZA_ACTION_BAR_TOAST_HOST_CLASS_NAME}
+            style={{ width: DEFINING_REIGNCRAFT_TOAST_WIDTH_PX }}
+          >
+            <RenderingReigncraftToaster
+              toasterId={DEFINING_REIGNCRAFT_TOASTER_ID.plaza}
+              variant="gameplay"
+              position="top-center"
+              offset={0}
+              mobileOffset={0}
+              toastWidthPx={DEFINING_REIGNCRAFT_TOAST_WIDTH_PX}
+            />
+          </div>
         </div>
       </div>
       {onExitToHome ? (
