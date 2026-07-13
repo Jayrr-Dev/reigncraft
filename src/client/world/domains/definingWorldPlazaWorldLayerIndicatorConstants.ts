@@ -27,14 +27,18 @@ export const DEFINING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_REFRESH_INTERVAL_MS =
 export const STYLING_WORLD_PLAZA_ACTION_BAR_WORLD_LAYER_ANCHOR_CLASS_NAME =
   'relative flex shrink-0 items-center' as const;
 
+/** Extra hit padding around the compass orb (CSS px, outside the bronze ring). */
+export const DEFINING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_HIT_SLOP_PX =
+  6 as const;
+
 /** CSS class for the compass orb shell (bronze ring). */
 export const STYLING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_ORB_CLASS_NAME =
   'plaza-world-layer-orb relative flex shrink-0 items-center justify-center rounded-full' as const;
 
 /** CSS class for the clipped fill disc inside the compass orb. */
 export const STYLING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_FILL_DISC_CLASS_NAME =
-  'absolute inset-[3px] overflow-hidden rounded-full' as const;
+  'pointer-events-none absolute inset-[3px] overflow-hidden rounded-full' as const;
 
 /** CSS class for the centered compass glyph. */
 export const STYLING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_ICON_CLASS_NAME =
-  'relative z-10 shrink-0 text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.75)]' as const;
+  'pointer-events-none relative z-10 shrink-0 text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.75)]' as const;

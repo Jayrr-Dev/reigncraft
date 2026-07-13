@@ -86,8 +86,14 @@ function checkingWorldBuildingPassableBlockOverheadVolumeBlocksPlayer(
     return false;
   }
 
-  // Support underfoot / standing on the platform top.
-  if (blockIsOnPlayerStandingTile && blockLayer <= playerLayer) {
+  if (
+    checkingWorldBuildingPlacedBlockSupportsPlayerFromBelow(
+      block,
+      blockLayer,
+      playerLayer,
+      blockIsOnPlayerStandingTile
+    )
+  ) {
     return false;
   }
 
@@ -158,6 +164,36 @@ export function listingWorldBuildingPlacedBlocksNearTileIndex(
 }
 
 /**
+ * Returns true when a same-tile block is genuinely below the player's feet.
+ *
+ * Equality only counts as standing on a block top when that top is raised above
+ * procedural terrain. Ground/co-layer blocks still occupy the player's walk
+ * band and must not disable their collider after the player enters the tile.
+ */
+function checkingWorldBuildingPlacedBlockSupportsPlayerFromBelow(
+  block: DefiningWorldBuildingPlacedBlock,
+  blockLayer: number,
+  playerLayer: number,
+  blockIsOnPlayerStandingTile: boolean
+): boolean {
+  if (!blockIsOnPlayerStandingTile || blockLayer > playerLayer) {
+    return false;
+  }
+
+  if (blockLayer < playerLayer) {
+    return true;
+  }
+
+  const terrainSurfaceLayer =
+    resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
+      block.tilePosition.tileX,
+      block.tilePosition.tileY
+    );
+
+  return blockLayer > terrainSurfaceLayer;
+}
+
+/**
  * Returns true when a placed block collider should affect the player.
  *
  * @param block - Placed block entity.
@@ -179,7 +215,14 @@ function checkingWorldBuildingPlacedBlockColliderBlocksPlayer(
   const blockLayer = resolvingWorldBuildingPlacedBlockWorldLayer(block);
   const blockHeight = resolvingWorldBuildingPlacedBlockBlockHeight(block);
 
-  if (blockIsOnPlayerStandingTile && blockLayer <= playerLayer) {
+  if (
+    checkingWorldBuildingPlacedBlockSupportsPlayerFromBelow(
+      block,
+      blockLayer,
+      playerLayer,
+      blockIsOnPlayerStandingTile
+    )
+  ) {
     return false;
   }
 
@@ -288,6 +331,26 @@ function pushingWorldBuildingPointOutsidePlacedBlockCircle(
 }
 
 /**
+ * Returns true when a player footprint overlaps a circular placed-block shape.
+ */
+function checkingWorldBuildingPlayerCircleOverlapsPlacedBlockCircle(
+  center: DefiningWorldPlazaWorldPoint,
+  playerRadiusGrid: number,
+  block: DefiningWorldBuildingPlacedBlock,
+  collisionShape: DefiningWorldBuildingCollisionShape
+): boolean {
+  const contactRadius =
+    Math.max(0, collisionShape.radiusGrid ?? 0) + Math.max(0, playerRadiusGrid);
+
+  return (
+    Math.hypot(
+      center.x - block.tilePosition.tileX,
+      center.y - block.tilePosition.tileY
+    ) < contactRadius
+  );
+}
+
+/**
  * Returns true when a footprint overlaps any nearby placed block tile collider.
  *
  * @param center - Player footprint center in grid space.
@@ -346,6 +409,30 @@ export function checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders(
       collisionShape.kind ===
       DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE
     ) {
+      const blockIsOnPlayerStandingTile =
+        block.tilePosition.tileX === centerTile.tileX &&
+        block.tilePosition.tileY === centerTile.tileY;
+
+      if (
+        checkingWorldBuildingPlacedBlockColliderBlocksPlayer(
+          block,
+          collisionShape,
+          applyBlockCollision,
+          isJumping,
+          playerLayer,
+          playerHeightWorldLayers,
+          blockIsOnPlayerStandingTile
+        ) &&
+        checkingWorldBuildingPlayerCircleOverlapsPlacedBlockCircle(
+          center,
+          playerRadiusGrid,
+          block,
+          collisionShape
+        )
+      ) {
+        return true;
+      }
+
       continue;
     }
 
@@ -441,6 +528,26 @@ export function checkingWorldBuildingGridPointBlockedByPlacedBlocks(
       collisionShape.kind ===
       DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE
     ) {
+      if (
+        checkingWorldBuildingPlacedBlockColliderBlocksPlayer(
+          block,
+          collisionShape,
+          applyBlockCollision,
+          isJumping,
+          playerLayer,
+          playerHeightWorldLayers,
+          blockIsOnPlayerStandingTile
+        ) &&
+        checkingWorldBuildingPlayerCircleOverlapsPlacedBlockCircle(
+          gridPoint,
+          0,
+          block,
+          collisionShape
+        )
+      ) {
+        return true;
+      }
+
       continue;
     }
 

@@ -31,6 +31,7 @@ import {
   LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_POPOVER_TITLE,
   listingWorldPlazaEditModeFunctionsForSession,
   type DefiningWorldPlazaEditModeFunctionId,
+  type DefiningWorldPlazaEditModeSessionModeId,
 } from '@/components/world/building/domains/definingWorldPlazaEditModeFunctionRegistry';
 import { DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID } from '@/components/world/building/domains/definingWorldPlazaHudModeToolBoardConstants';
 import type { DefiningWorldBuildingPlotRegistryOwnerGroup } from '@/components/world/building/domains/groupingWorldBuildingPlotRegistryEntriesByOwner';
@@ -446,17 +447,21 @@ export function RenderingWorldPlazaEditModeHotbar({
     []
   );
 
-  const togglingSessionMode = useCallback((): void => {
-    setOpenFunctionId(null);
+  const selectingSessionMode = useCallback(
+    (sessionModeId: DefiningWorldPlazaEditModeSessionModeId): void => {
+      setOpenFunctionId(null);
 
-    if (isClaimModeActive) {
+      if (
+        sessionModeId === DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.CLAIM
+      ) {
+        onActivateClaimMode();
+        return;
+      }
+
       onActivateBuildMode();
-      return;
-    }
-
-    onActivateClaimMode();
-  }, [isClaimModeActive, onActivateBuildMode, onActivateClaimMode]);
-
+    },
+    [onActivateBuildMode, onActivateClaimMode]
+  );
   const renderingToolPopover = useCallback(
     (toolId: DefiningWorldPlazaEditModeFunctionId): ReactNode => {
       return (
@@ -623,7 +628,7 @@ export function RenderingWorldPlazaEditModeHotbar({
           trailingContent={
             <RenderingWorldPlazaEditModeSessionToggleArrows
               activeSessionModeId={activeSessionModeId}
-              onToggleSessionMode={togglingSessionMode}
+              onSelectSessionMode={selectingSessionMode}
             />
           }
         />

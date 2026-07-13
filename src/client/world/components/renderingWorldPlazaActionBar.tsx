@@ -326,6 +326,7 @@ export function RenderingWorldPlazaActionBar({
                         setIsDayNightPanelOpen(false);
                         setIsTransformPanelOpen(false);
                         setIsSoundMixerOpen(false);
+                        settingMinimapEnabled(false);
                         setIsCodexMenuOpen((wasOpen) => !wasOpen);
                       }}
                       className={stylingWorldPlazaActionBarButton(
@@ -454,6 +455,9 @@ export function RenderingWorldPlazaActionBar({
                       setIsHungerPanelOpen(false);
                       setIsTemperaturePanelOpen(false);
                       setIsDayNightPanelOpen(false);
+                      setIsSoundMixerOpen(false);
+                      setIsCodexMenuOpen(false);
+                      settingMinimapEnabled(false);
                       setIsTransformPanelOpen((wasOpen) => !wasOpen);
                     }}
                     className={stylingWorldPlazaActionBarButton(
@@ -509,6 +513,7 @@ export function RenderingWorldPlazaActionBar({
                         setIsCodexMenuOpen(false);
                         setIsTemperaturePanelOpen(false);
                         setIsDayNightPanelOpen(false);
+                        settingMinimapEnabled(false);
                         setIsHungerPanelOpen((wasOpen) => !wasOpen);
                       }}
                     />
@@ -546,6 +551,7 @@ export function RenderingWorldPlazaActionBar({
                         setIsCodexMenuOpen(false);
                         setIsHungerPanelOpen(false);
                         setIsDayNightPanelOpen(false);
+                        settingMinimapEnabled(false);
                         setIsTemperaturePanelOpen((wasOpen) => !wasOpen);
                       }}
                     />
@@ -575,6 +581,7 @@ export function RenderingWorldPlazaActionBar({
                       setIsCodexMenuOpen(false);
                       setIsHungerPanelOpen(false);
                       setIsTemperaturePanelOpen(false);
+                      settingMinimapEnabled(false);
                       setIsDayNightPanelOpen((wasOpen) => !wasOpen);
                     }}
                   />
@@ -594,13 +601,20 @@ export function RenderingWorldPlazaActionBar({
                       isMobile={isMobile}
                       isOpen={isMinimapPreferenceEnabled}
                       onToggle={() => {
+                        const nextMinimapEnabled = !isMinimapPreferenceEnabled;
                         setIsTransformPanelOpen(false);
                         setIsSoundMixerOpen(false);
                         setIsCodexMenuOpen(false);
                         setIsHungerPanelOpen(false);
                         setIsTemperaturePanelOpen(false);
                         setIsDayNightPanelOpen(false);
-                        settingMinimapEnabled(!isMinimapPreferenceEnabled);
+                        // Defer store write until panel setStates commit. Sync
+                        // minimap updates re-render before those flush, and the
+                        // "close map when a panel is open" effect would see stale
+                        // open panels and immediately undo the open.
+                        queueMicrotask(() => {
+                          settingMinimapEnabled(nextMinimapEnabled);
+                        });
                       }}
                     />
                     {minimapHud && isMinimapPreferenceEnabled ? (

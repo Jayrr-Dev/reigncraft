@@ -158,7 +158,17 @@ export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_CLASS_NAME =
 
 /** Solid wood-framed parchment face centered inside the hit wrapper. */
 export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_FACE_CLASS_NAME =
-  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventorySlot} pointer-events-none flex items-center justify-center transition-[filter,box-shadow] group-hover:brightness-105 group-disabled:group-hover:brightness-100` as const;
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventorySlot} pointer-events-none flex items-center justify-center transition-[filter,box-shadow,opacity] group-hover:brightness-105 group-disabled:group-hover:brightness-100` as const;
+
+/**
+ * Active Build/Claim session face — same gold ring as an equipped inventory slot.
+ */
+export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_FACE_ACTIVE_CLASS_NAME =
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventorySlotEquipped;
+
+/** Dim inactive session-toggle glyph so the equipped face reads clearly. */
+export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_FACE_INACTIVE_CLASS_NAME =
+  'opacity-55' as const;
 
 /** Drag-hover highlight on a page arrow drop target. */
 export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_DRAG_OVER_CLASS_NAME =

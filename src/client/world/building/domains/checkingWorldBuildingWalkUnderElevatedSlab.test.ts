@@ -2,19 +2,21 @@ import { checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock } from '@/co
 import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_WOOD,
   DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_CHEST_BASIC,
 } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import { creatingWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { creatingWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import {
   checkingWorldBuildingGridPointBlockedByPlacedBlocks,
   checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex,
+  checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders,
   resolvingWorldBuildingJumpForwardGridDistanceClampedToWall,
 } from '@/components/world/building/domains/resolvingWorldBuildingCollision';
 import {
   resolvingWorldBuildingJumpLandableSurfaceLayerAtTileIndex,
   resolvingWorldBuildingStandableWalkSurfaceLayerAtTileIndex,
 } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
-import { resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint } from '@/components/world/domains/resolvingWorldPlazaBlockedWorldPoint';
+import { resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint } from '@/components/world/collision';
 import { describe, expect, it } from 'vitest';
 
 function creatingElevatedSlab(
@@ -35,6 +37,76 @@ function creatingElevatedSlab(
 }
 
 describe('walk under elevated slab', () => {
+  it('keeps a ground-layer solid block collidable on its own tile', () => {
+    const groundWall = creatingElevatedSlab(
+      DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE,
+      1
+    );
+
+    expect(
+      checkingWorldBuildingGridPointBlockedByPlacedBlocks(
+        { x: 10, y: 10, layer: 1 },
+        [groundWall],
+        true,
+        false,
+        1
+      )
+    ).toBe(true);
+  });
+
+  it('ejects the player instead of allowing passage through a ground wall', () => {
+    const groundWall = creatingElevatedSlab(
+      DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE,
+      1
+    );
+
+    const resolved = resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(
+      { x: 10, y: 10, layer: 1 },
+      {
+        placedBlocks: [groundWall],
+        playerLayer: 1,
+        fallbackPosition: { x: 9.2, y: 10, layer: 1 },
+      }
+    );
+
+    expect(resolved.x).toBeLessThan(9.5);
+  });
+
+  it('still allows the player to stand on a raised block top', () => {
+    const raisedWall = creatingElevatedSlab(
+      DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE,
+      2
+    );
+
+    expect(
+      checkingWorldBuildingGridPointBlockedByPlacedBlocks(
+        { x: 10, y: 10, layer: 2 },
+        [raisedWall],
+        true,
+        false,
+        2
+      )
+    ).toBe(false);
+  });
+
+  it('includes circular placed blocks in player-footprint overlap checks', () => {
+    const chest = creatingElevatedSlab(
+      DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_CHEST_BASIC,
+      2
+    );
+
+    expect(
+      checkingWorldBuildingPlayerCircleOverlapsPlacedBlockColliders(
+        { x: 10, y: 10, layer: 1 },
+        [chest],
+        true,
+        false,
+        1,
+        0.2
+      )
+    ).toBe(true);
+  });
+
   it('uses character height to determine roof clearance', () => {
     expect(
       checkingWorldBuildingPlayerVerticalBandOverlapsPlacedBlock(1, 5, 1, 4)
@@ -188,7 +260,7 @@ describe('walk under elevated slab', () => {
       7
     );
 
-    const resolved = resolvingWorldPlazaEjectingPlayerFromBlockedWorldPoint(
+    const resolved = resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(
       { x: 10, y: 10, layer: 1 },
       {
         placedBlocks: [roof],

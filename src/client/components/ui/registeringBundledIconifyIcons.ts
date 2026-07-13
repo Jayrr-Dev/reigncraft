@@ -193,9 +193,13 @@ const boxiconsSwordFilled: IconifyIcon = {
   height: 24,
 };
 
-/** Röntgen map compass — inlined (no @iconify-icons/roentgen package). */
+/**
+ * Röntgen map compass needle — inlined (no @iconify-icons/roentgen package).
+ * Needle + ticks only (no outer disc), centered at 8,8 in a 16×16 viewBox so
+ * the teal orb fill shows and the glyph sits true-center in the button.
+ */
 const roentgenCompass: IconifyIcon = {
-  body: '<path fill="currentColor" d="M7.5 1a6.5 6.5 0 1 0 0 13a6.5 6.5 0 0 0 0-13m0 2a.5.5 0 0 1 .447.277l2 4a.5.5 0 0 1 0 .446l-2 4a.5.5 0 0 1-.894 0l-2-4a.5.5 0 0 1 0-.446l2-4A.5.5 0 0 1 7.5 3m0 1.617L6.059 7.5H8.94zM2.5 7h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1 0-1m9 0h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1 0-1"/>',
+  body: '<path fill="currentColor" d="M8 3a.5.5 0 0 1 .447.277l2 4a.5.5 0 0 1 0 .446l-2 4a.5.5 0 0 1-.894 0l-2-4a.5.5 0 0 1 0-.446l2-4A.5.5 0 0 1 8 3m0 1.617L6.559 7.5H9.441zM3 7h1a.5.5 0 0 1 0 1H3a.5.5 0 0 1 0-1m9 0h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1 0-1"/>',
   width: 16,
   height: 16,
 };

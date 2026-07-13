@@ -7,6 +7,7 @@ import { drawingWorldBuildingPlacedBlockColumnOnGraphics } from '@/components/wo
 import {
   formattingWorldBuildingPlacedBlocksTileColumnKey,
   groupingWorldBuildingPlacedBlocksByTileColumn,
+  type GroupingWorldBuildingPlacedBlocksTileColumn,
 } from '@/components/world/building/domains/groupingWorldBuildingPlacedBlocksByTileColumn';
 import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
@@ -15,13 +16,79 @@ import {
   usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags,
 } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
 import type { Graphics } from 'pixi.js';
-import { useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 
 export interface RenderingWorldPlazaPlacedBlocksProps {
   placedBlocks: DefiningWorldBuildingPlacedBlock[];
   /** When below 1, entire columns render semi-transparent (claim mode). */
   blockColumnAlpha?: number;
 }
+
+type RenderingWorldPlazaPlacedBlockTileColumnProps = {
+  readonly tileColumn: GroupingWorldBuildingPlacedBlocksTileColumn;
+  readonly blockColumnAlpha: number;
+};
+
+/**
+ * Stable signature for one column's block geometry so Craft/HUD re-renders do
+ * not force @pixi/react to re-run `draw` (clearing Graphics mid-scene corrupts Batcher).
+ */
+function formattingWorldBuildingPlacedBlockColumnContentKey(
+  blocks: readonly DefiningWorldBuildingPlacedBlock[]
+): string {
+  return blocks
+    .map(
+      (block) =>
+        `${block.blockId}:${block.definitionId}:${block.worldLayer}:${block.blockHeight}`
+    )
+    .join('|');
+}
+
+/**
+ * One depth-sorted tile-column Graphics. Memoized so unrelated plaza re-renders
+ * keep a stable `draw` callback identity.
+ */
+const RenderingWorldPlazaPlacedBlockTileColumn = memo(
+  function RenderingWorldPlazaPlacedBlockTileColumn({
+    tileColumn,
+    blockColumnAlpha,
+  }: RenderingWorldPlazaPlacedBlockTileColumnProps): React.JSX.Element {
+    const columnContentKey = formattingWorldBuildingPlacedBlockColumnContentKey(
+      tileColumn.blocks
+    );
+    const tileColumnTopWorldLayer = tileColumn.blocks.reduce(
+      (highestWorldLayer, block) =>
+        Math.max(
+          highestWorldLayer,
+          resolvingWorldBuildingPlacedBlockTopWorldLayer(block)
+        ),
+      0
+    );
+    const tileColumnZIndex =
+      resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
+        tileColumn.tileX,
+        tileColumn.tileY,
+        tileColumnTopWorldLayer
+      );
+
+    const drawingColumn = useCallback(
+      (graphics: Graphics) => {
+        graphics.clear();
+        drawingWorldBuildingPlacedBlockColumnOnGraphics(graphics, tileColumn);
+      },
+      [columnContentKey, tileColumn]
+    );
+
+    return (
+      <pixiGraphics
+        eventMode="none"
+        alpha={blockColumnAlpha}
+        zIndex={tileColumnZIndex}
+        draw={drawingColumn}
+      />
+    );
+  }
+);
 
 /**
  * Renders persisted player-placed blocks as one depth-sorted graphics per tile
@@ -65,34 +132,12 @@ export function RenderingWorldPlazaPlacedBlocks({
           tileColumn.tileX,
           tileColumn.tileY
         );
-        const tileColumnTopWorldLayer = tileColumn.blocks.reduce(
-          (highestWorldLayer, block) =>
-            Math.max(
-              highestWorldLayer,
-              resolvingWorldBuildingPlacedBlockTopWorldLayer(block)
-            ),
-          0
-        );
-        const tileColumnZIndex =
-          resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
-            tileColumn.tileX,
-            tileColumn.tileY,
-            tileColumnTopWorldLayer
-          );
 
         return (
-          <pixiGraphics
+          <RenderingWorldPlazaPlacedBlockTileColumn
             key={tileColumnKey}
-            eventMode="none"
-            alpha={blockColumnAlpha}
-            zIndex={tileColumnZIndex}
-            draw={(graphics: Graphics) => {
-              graphics.clear();
-              drawingWorldBuildingPlacedBlockColumnOnGraphics(
-                graphics,
-                tileColumn
-              );
-            }}
+            tileColumn={tileColumn}
+            blockColumnAlpha={blockColumnAlpha}
           />
         );
       })}

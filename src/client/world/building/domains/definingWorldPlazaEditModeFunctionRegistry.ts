@@ -123,6 +123,23 @@ export const LABELING_WORLD_PLAZA_EDIT_MODE_SESSION_TOGGLE = {
 } as const satisfies Record<DefiningWorldPlazaEditModeSessionModeId, string>;
 
 /**
+ * Glyphs for the right-side Build/Claim session switcher
+ * (top = Build hammer, bottom = Claim land-plots).
+ */
+export const DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_TOGGLE_ICONS = {
+  [DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD]: 'mdi:hammer',
+  [DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.CLAIM]: 'mdi:land-plots',
+} as const satisfies Record<DefiningWorldPlazaEditModeSessionModeId, string>;
+
+/**
+ * Vertical order of session switcher buttons (top → bottom).
+ */
+export const DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_TOGGLE_ORDER = [
+  DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
+  DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.CLAIM,
+] as const satisfies readonly DefiningWorldPlazaEditModeSessionModeId[];
+
+/**
  * Checks whether a mode-board tool id is an edit-mode function id.
  *
  * @param toolId - Any HUD mode-board tool id

@@ -11,6 +11,7 @@ import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domai
 import {
   DEFINING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_COMPASS_ICON,
   DEFINING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_FILL_COLOR,
+  DEFINING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_HIT_SLOP_PX,
   LABELING_WORLD_PLAZA_ACTION_BAR_WORLD_LAYER,
   LABELING_WORLD_PLAZA_ACTION_BAR_WORLD_LAYER_MINIMAP_HINT,
   STYLING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_FILL_DISC_CLASS_NAME,
@@ -19,6 +20,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaWorldLayerIndicatorConstants';
 import { resolvingWorldPlazaWorldLayerIndicatorViewportStyles } from '@/components/world/domains/resolvingWorldPlazaWorldLayerIndicatorViewportStyles';
 import { cn } from '@/lib/utils';
+import type { CSSProperties } from 'react';
 import { memo, useMemo } from 'react';
 
 /** Props for {@link RenderingWorldPlazaWorldLayerIndicator}. */
@@ -52,6 +54,13 @@ export const RenderingWorldPlazaWorldLayerIndicator = memo(
       [viewportHudScale, isMobile]
     );
 
+    const sphereStyle = useMemo((): CSSProperties => {
+      return {
+        ...viewportStyles.sphereStyle,
+        ['--plaza-world-layer-hit-slop' as string]: `${DEFINING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_HIT_SLOP_PX}px`,
+      };
+    }, [viewportStyles.sphereStyle]);
+
     const ariaLabel = `${LABELING_WORLD_PLAZA_ACTION_BAR_WORLD_LAYER}. ${LABELING_WORLD_PLAZA_ACTION_BAR_WORLD_LAYER_MINIMAP_HINT}`;
 
     return (
@@ -62,7 +71,7 @@ export const RenderingWorldPlazaWorldLayerIndicator = memo(
           STYLING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_ORB_CLASS_NAME,
           isOpen && 'plaza-world-layer-orb--open'
         )}
-        style={viewportStyles.sphereStyle}
+        style={sphereStyle}
         aria-label={ariaLabel}
         aria-pressed={isOpen}
         title={ariaLabel}

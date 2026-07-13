@@ -1767,6 +1767,30 @@ body {
     inset 0 1px 0 rgba(255, 248, 220, 0.25);
 }
 
+/*
+ * Compass orb: keep the button box fixed on press so edge clicks still fire
+ * after :active, and grow an invisible hit pad around the bronze ring.
+ */
+.plaza-world-layer-orb {
+  isolation: isolate;
+}
+
+.plaza-world-layer-orb::before {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--plaza-world-layer-hit-slop, 6px));
+  border-radius: 9999px;
+  z-index: -1;
+}
+
+.plaza-world-layer-orb:active {
+  transform: none;
+}
+
+.plaza-world-layer-orb:active > * {
+  transform: translateY(1px);
+}
+
 .plaza-hunger-orb--open,
 .plaza-temperature-orb--open,
 .plaza-day-night-orb--open,
