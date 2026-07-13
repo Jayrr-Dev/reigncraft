@@ -332,7 +332,6 @@ import {
 } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerCursorConstants';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
 import {
-  clearingWorldPlazaInteractableBlockClickSelection,
   selectingWorldPlazaFarmlandTileForClickAction,
   selectingWorldPlazaFishingTileForClickAction,
   selectingWorldPlazaInteractableBlockForClickAction,
@@ -1552,9 +1551,8 @@ function RenderingWorldPlazaPixiSceneConnected({
   );
 
   const clearingInteractableBlockClickSelection = useCallback((): void => {
-    clearingWorldPlazaInteractableBlockClickSelection(
-      selectedInteractableBlockKeysRef
-    );
+    // Proximity selection owns the interactable label set each overlay frame.
+    // Clearing on pointer-miss would flash labels off for a frame.
   }, []);
 
   const { handlingInteractableBlockPointerDown } =

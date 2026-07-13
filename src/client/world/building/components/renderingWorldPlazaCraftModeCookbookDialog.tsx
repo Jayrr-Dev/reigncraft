@@ -28,10 +28,10 @@ import {
 import { createPortal } from 'react-dom';
 
 const COOKBOOK_CLOSE_BUTTON_CLASS_NAME =
-  'plaza-btn-3d absolute right-0 top-0 z-20 flex size-10 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b] sm:size-11';
+  'flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-sm border border-parchment/40 bg-parchment text-ink shadow-[0_2px_0_0_rgba(46,36,22,0.55)] transition hover:bg-parchment-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-parchment/60 sm:size-9';
 
 const COOKBOOK_PAGER_BUTTON_CLASS_NAME =
-  'flex cursor-pointer items-center gap-1 rounded-sm border-2 border-poster-gold/50 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-parchment shadow-[0_3px_0_0_#14252b] transition hover:brightness-110 disabled:cursor-default disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/40';
+  'flex cursor-pointer items-center gap-1 rounded-sm border border-parchment/40 bg-parchment px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-ink shadow-[0_2px_0_0_rgba(46,36,22,0.55)] transition hover:bg-parchment-100 disabled:cursor-default disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-parchment/60';
 
 function resolvingCookbookPageBoxStyle(side: 'left' | 'right'): CSSProperties {
   const layout = DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_PAGE_LAYOUT[side];
@@ -58,7 +58,7 @@ function RenderingWorldPlazaCraftModeCookbookCoverGlyph({
 
   return (
     <span
-      className="block size-7 shrink-0 [image-rendering:pixelated] sm:size-8"
+      className="inline-block size-12 shrink-0 [image-rendering:pixelated] sm:size-14"
       style={{
         backgroundImage: `url("${spriteSheet.spriteSheetUrl}")`,
         backgroundPosition: `${backgroundPositionX}% 0%`,
@@ -167,16 +167,7 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
       onClick={closingDialogOnBackdropClick}
     >
       <div className="plaza-pop-in relative flex w-full max-w-[min(94vw,52rem)] flex-col items-center gap-3 font-body sm:gap-4">
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className={COOKBOOK_CLOSE_BUTTON_CLASS_NAME}
-        >
-          <Icon icon="mdi:close" className="size-5" aria-hidden />
-        </button>
-
-        <header className="flex max-w-md flex-col items-center gap-2 px-4 text-center">
+        <header className="flex w-full items-center justify-center gap-3 px-2 sm:px-4">
           <RenderingWorldPlazaCraftModeCookbookCoverGlyph
             cookbookDefinition={cookbookDefinition}
           />
@@ -205,6 +196,15 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
             className="pointer-events-none absolute inset-0 size-full select-none object-contain [image-rendering:pixelated]"
             aria-hidden
           />
+
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className={`${COOKBOOK_CLOSE_BUTTON_CLASS_NAME} absolute right-[1.5%] top-[2%] z-20`}
+          >
+            <Icon icon="mdi:close" className="size-4 sm:size-5" aria-hidden />
+          </button>
 
           <div
             key={`${cookbookDefinition.id}-leaf-${leafIndex}-left`}

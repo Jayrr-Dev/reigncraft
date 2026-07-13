@@ -1,6 +1,5 @@
 import { DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
-import { computingWorldPlazaGridChebyshevDistance } from '@/components/world/domains/computingWorldPlazaGridChebyshevDistance';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from '@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds';
 import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex';
@@ -24,6 +23,7 @@ import type { DefiningWorldPlazaMinedRockTileState } from '@/components/world/ha
 import { formattingWorldPlazaMinedRockTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { formattingWorldPlazaPickedPebbleTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
+import { checkingWorldPlazaInteractionLabelTileInPlayerProximity } from '@/components/world/interaction/domains/checkingWorldPlazaInteractionLabelTileInPlayerProximity';
 import { DEFINING_WORLD_PLAZA_INTERACTION_LABEL_PROXIMITY_RADIUS_TILES } from '@/components/world/interaction/domains/definingWorldPlazaInteractionLabelProximityConstants';
 import { formattingWorldPlazaInteractableBlockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableBlockSelectionKey';
 import { formattingWorldPlazaInteractablePebbleSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractablePebbleSelectionKey';
@@ -66,8 +66,8 @@ export type ListingWorldPlazaInteractableSelectionKeysInPlayerProximityParams =
 /**
  * Builds selection keys for every label-worthy interactable within proximity.
  *
- * Keys match the click-selection formatters so existing label list/progress
- * hooks keep working without per-label rewrites.
+ * Distance is floor-tile Chebyshev (not continuous center distance), so any
+ * standing point on an adjacent tile counts — including the far / “above” edge.
  */
 export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
   params: ListingWorldPlazaInteractableSelectionKeysInPlayerProximityParams
@@ -87,14 +87,14 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
       continue;
     }
 
-    const distance = computingWorldPlazaGridChebyshevDistance(
-      params.playerPosition.x,
-      params.playerPosition.y,
-      block.tilePosition.tileX + 0.5,
-      block.tilePosition.tileY + 0.5
-    );
-
-    if (distance > radius) {
+    if (
+      !checkingWorldPlazaInteractionLabelTileInPlayerProximity(
+        params.playerPosition,
+        block.tilePosition.tileX,
+        block.tilePosition.tileY,
+        radius
+      )
+    ) {
       continue;
     }
 
@@ -182,15 +182,7 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
           tileY
         );
 
-        if (
-          fishingEligibility.isEligible &&
-          computingWorldPlazaGridChebyshevDistance(
-            params.playerPosition.x,
-            params.playerPosition.y,
-            tileX + 0.5,
-            tileY + 0.5
-          ) <= radius
-        ) {
+        if (fishingEligibility.isEligible) {
           keys.add(formattingWorldPlazaFishingTileSelectionKey(tileX, tileY));
         }
       }
@@ -212,14 +204,14 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
     });
 
     for (const entry of farmlandEntries) {
-      const distance = computingWorldPlazaGridChebyshevDistance(
-        params.playerPosition.x,
-        params.playerPosition.y,
-        entry.tileX + 0.5,
-        entry.tileY + 0.5
-      );
-
-      if (distance > radius) {
+      if (
+        !checkingWorldPlazaInteractionLabelTileInPlayerProximity(
+          params.playerPosition,
+          entry.tileX,
+          entry.tileY,
+          radius
+        )
+      ) {
         continue;
       }
 
@@ -243,14 +235,14 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
         continue;
       }
 
-      const distance = computingWorldPlazaGridChebyshevDistance(
-        params.playerPosition.x,
-        params.playerPosition.y,
-        instance.position.x,
-        instance.position.y
-      );
-
-      if (distance > radius) {
+      if (
+        !checkingWorldPlazaInteractionLabelTileInPlayerProximity(
+          params.playerPosition,
+          Math.floor(instance.position.x),
+          Math.floor(instance.position.y),
+          radius
+        )
+      ) {
         continue;
       }
 
