@@ -13,11 +13,12 @@ Unified isometric depth sorting for the plaza world. Import from `@/components/w
 
 `resolvingWorldDepthAvatarBodySortKey` applies three rules in one provider footprint scan:
 
-| Rule                   | When                                                                                                                                                  |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Standing bump**      | Column surface ≤ your standing layer → you sort above it                                                                                              |
-| **Front occluder cap** | Column in front (`footX+footY > youX+youY`) or taller overhead on your standing tile, silhouette reaches feet → you sort behind it (walk-under roofs) |
-| **Hard floor raise**   | After cap, coplanar caps at your feet stay under your legs when possible                                                                              |
+| Rule                    | When                                                                                                                                          |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Standing bump**       | Column surface ≤ your standing layer → you sort above it                                                                                      |
+| **Behind-column raise** | Column foot strictly north (`footX+footY < youX+youY`) → you sort above it (beats tall-cliff height bias when standing south)                 |
+| **Front occluder cap**  | Column in front (`footX+footY > youX+youY`) or taller same-tile overhead (roofs; trees opt out), silhouette reaches feet → you sort behind it |
+| **Hard floor raise**    | After cap, coplanar caps at your feet stay under your legs when possible                                                                      |
 
 Shadows use `resolvingWorldDepthAvatarShadowSortKey` with the same provider registry for occluder scans.
 
@@ -31,7 +32,7 @@ Shadows use `resolvingWorldDepthAvatarShadowSortKey` with the same provider regi
    - `resolvingSurfaceLayerAtTileIndex` (if walkable)
    - `resolvingSortKeyAtTileIndex`
    - `resolvingDepthSortFootAtTileIndex` (use forward-shifted foot for multi-tile sprites)
-   - Flags: `participatesInStandingBump`, `standingBumpRequiresRaisedSurface`, `participatesInFrontOcclusion`, `alwaysTallerForFrontOcclusion`, etc.
+   - Flags: `participatesInStandingBump`, `standingBumpRequiresRaisedSurface`, `participatesInFrontOcclusion`, `participatesInSameTileOverheadOcclusion`, `alwaysTallerForFrontOcclusion`, etc.
 2. Register in `DEFINING_WORLD_DEPTH_SURFACE_LAYER_PROVIDERS` and/or `DEFINING_WORLD_DEPTH_AVATAR_OCCLUSION_PROVIDERS`.
 3. Add a bias constant to `definingWorldDepthBiasLadder.ts` if needed.
 4. Add characterization tests in `resolvingWorldDepthCharacterization.test.ts`.

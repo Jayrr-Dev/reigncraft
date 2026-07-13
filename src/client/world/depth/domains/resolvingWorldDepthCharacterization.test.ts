@@ -12,7 +12,6 @@ import {
 } from '@/components/world/domains/resolvingWorldPlazaAvatarGroundShadowEntityZIndex';
 import { resolvingWorldPlazaIsometricEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricEntityZIndex';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
-import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 import { resolvingWorldPlazaTerrainElevationColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationColumnEntityZIndex';
 import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex';
 import { resolvingWorldPlazaTreeTrunkEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTreeTrunkEntityZIndex';
@@ -170,6 +169,21 @@ describe('world depth characterization (legacy modules)', () => {
 
       expect(bodyZ).toBeGreaterThan(wallZ);
     });
+
+    it('stays in front when standing south of a northern wall', () => {
+      const wall = creatingWorldDepthCharacterizationWallBlock(10, 10, 8, 8);
+      const bodyZ = resolvingWorldPlazaAvatarBodyEntityZIndex(
+        { x: 10.4, y: 11.2, layer: 1 },
+        [wall]
+      );
+      const wallZ = resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
+        10,
+        10,
+        8
+      );
+
+      expect(bodyZ).toBeGreaterThan(wallZ);
+    });
   });
 
   describe('avatar shadow sort key', () => {
@@ -200,103 +214,67 @@ describe('world depth characterization (legacy modules)', () => {
     });
   });
 
-  describe('terrain cliff layer intersection', () => {
-    /**
-     * Procedural cliff pair that shares one grid row (x+y = 120):
-     * lower raised floor at (83, 37) layer 2, taller wall at (84, 36) layer 3.
-     * Entity stands north of both so the taller column is a front occluder.
-     */
-    const lowerFloorTile = { x: 83, y: 37 } as const;
-    const tallerCliffTile = { x: 84, y: 36 } as const;
-    const entityFoot = { x: 83.4, y: 35.4 } as const;
-    const entityStandingTile = { x: 83, y: 35 } as const;
-
-    it('gives taller cliff a higher column sort key than coplanar lower floor', () => {
-      const lowerLayer =
-        resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
-          lowerFloorTile.x,
-          lowerFloorTile.y
-        );
-      const tallerLayer =
-        resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
-          tallerCliffTile.x,
-          tallerCliffTile.y
-        );
-      const lowerZ = resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
-        lowerFloorTile.x,
-        lowerFloorTile.y
+  describe('front occluder and south layering', () => {
+    it('tucks avatar behind a taller southern wall while staying above a northern stub', () => {
+      const northernStub = creatingWorldDepthCharacterizationWallBlock(
+        8,
+        8,
+        2,
+        2
       );
-      const tallerZ = resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
-        tallerCliffTile.x,
-        tallerCliffTile.y
+      const southernWall = creatingWorldDepthCharacterizationWallBlock(
+        11,
+        11,
+        6,
+        6
+      );
+      const northernZ = resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
+        8,
+        8,
+        2
+      );
+      const southernZ = resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
+        11,
+        11,
+        6
+      );
+      const bodyZ = resolvingWorldDepthAvatarBodySortKey(
+        { x: 9.5, y: 9.5, layer: 1 },
+        { placedBlocks: [northernStub, southernWall] }
       );
 
-      expect(lowerFloorTile.x + lowerFloorTile.y).toBe(
-        tallerCliffTile.x + tallerCliffTile.y
-      );
-      expect(tallerLayer).toBeGreaterThan(lowerLayer);
-      expect(tallerZ).toBeGreaterThan(lowerZ);
-    });
-
-    it('sorts avatar between lower floor cap and taller cliff wall', () => {
-      const standingLayer =
-        resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
-          entityStandingTile.x,
-          entityStandingTile.y
-        );
-      const lowerZ = resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
-        lowerFloorTile.x,
-        lowerFloorTile.y
-      );
-      const tallerZ = resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
-        tallerCliffTile.x,
-        tallerCliffTile.y
-      );
-      const bodyZ = resolvingWorldDepthAvatarBodySortKey({
-        x: entityFoot.x,
-        y: entityFoot.y,
-        layer: standingLayer,
-      });
-
-      expect(bodyZ).toBeGreaterThan(lowerZ);
-      expect(bodyZ).toBeLessThan(tallerZ);
-    });
-
-    it('sorts wildlife-style body key between lower floor and taller cliff', () => {
-      const standingLayer =
-        resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(
-          entityStandingTile.x,
-          entityStandingTile.y
-        );
-      const lowerZ = resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
-        lowerFloorTile.x,
-        lowerFloorTile.y
-      );
-      const tallerZ = resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
-        tallerCliffTile.x,
-        tallerCliffTile.y
-      );
-      const wildlifeBodyZ = resolvingWorldDepthAvatarBodySortKey({
-        x: entityFoot.x,
-        y: entityFoot.y,
-        layer: standingLayer,
-      });
-
-      expect(wildlifeBodyZ).toBeGreaterThan(lowerZ);
-      expect(wildlifeBodyZ).toBeLessThan(tallerZ);
+      expect(bodyZ).toBeGreaterThan(northernZ);
+      expect(bodyZ).toBeLessThan(southernZ);
     });
 
     it('keeps tree trunk above its tile terrain column after height bias', () => {
       const columnZ = resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
-        tallerCliffTile.x,
-        tallerCliffTile.y
+        11,
+        9
       );
-      const trunkZ = resolvingWorldPlazaTreeTrunkEntityZIndex(
-        tallerCliffTile.x,
-        tallerCliffTile.y
-      );
+      const trunkZ = resolvingWorldPlazaTreeTrunkEntityZIndex(11, 9);
 
       expect(trunkZ).toBeGreaterThan(columnZ);
+    });
+
+    it('keeps avatar in front of a northern taller column when standing south', () => {
+      const northernWall = creatingWorldDepthCharacterizationWallBlock(
+        12,
+        12,
+        10,
+        10
+      );
+      const wallZ = resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
+        12,
+        12,
+        10
+      );
+      const bodyZ = resolvingWorldDepthAvatarBodySortKey(
+        { x: 12.5, y: 13.2, layer: 1 },
+        { placedBlocks: [northernWall] }
+      );
+
+      expect(bodyZ).toBeGreaterThan(wallZ);
     });
   });
 });

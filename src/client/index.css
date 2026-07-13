@@ -1731,22 +1731,30 @@ body {
     transform 120ms ease-out;
 }
 
-.plaza-hunger-orb {
+.plaza-hunger-orb,
+.plaza-temperature-orb,
+.plaza-day-night-orb {
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
-.plaza-hunger-orb:hover {
+.plaza-hunger-orb:hover,
+.plaza-temperature-orb:hover,
+.plaza-day-night-orb:hover {
   filter: brightness(1.06);
 }
 
-.plaza-hunger-orb:focus-visible {
+.plaza-hunger-orb:focus-visible,
+.plaza-temperature-orb:focus-visible,
+.plaza-day-night-orb:focus-visible {
   outline: 2px solid var(--color-poster-gold);
   outline-offset: 2px;
 }
 
-.plaza-hunger-orb:active {
+.plaza-hunger-orb:active,
+.plaza-temperature-orb:active,
+.plaza-day-night-orb:active {
   transform: translateY(1px);
   box-shadow:
     0 1px 2px rgba(20, 14, 8, 0.4),
@@ -1754,7 +1762,9 @@ body {
     inset 0 1px 0 rgba(255, 248, 220, 0.25);
 }
 
-.plaza-hunger-orb--open {
+.plaza-hunger-orb--open,
+.plaza-temperature-orb--open,
+.plaza-day-night-orb--open {
   box-shadow:
     0 2px 3px rgba(20, 14, 8, 0.45),
     0 0 0 2px rgba(217, 164, 65, 0.55),

@@ -1,8 +1,8 @@
 /**
  * Resolves the solid fill color for the temperature orb from ambient °C.
  *
- * Comfort mid is sky blue; colder stops bleach toward white. Warm/hot stops
- * keep the peach→red ramp beyond comfort high.
+ * Cold: white → light blue → sky blue. Comfort band stays flat sky blue.
+ * Heat past comfort high: peach → red.
  *
  * @module components/world/health/domains/resolvingWorldPlazaTemperatureIndicatorFillColor
  */

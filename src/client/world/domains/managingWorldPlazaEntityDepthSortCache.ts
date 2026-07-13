@@ -4,6 +4,7 @@
  * @module components/world/domains/managingWorldPlazaEntityDepthSortCache
  */
 
+import { DEFINING_WORLD_DEPTH_AVATAR_BODY_SORT_CACHE_FOOT_SUM_QUANTIZATION } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
 import type { DefiningWorldDepthProviderContext } from '@/components/world/depth/domains/definingWorldDepthProvider';
 import { resolvingWorldDepthAvatarBodySortKey } from '@/components/world/depth/domains/resolvingWorldDepthAvatarBodySortKey';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_COUNTER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
@@ -15,6 +16,7 @@ import { incrementingWorldPlazaPerformanceDiagnosticsCounter } from '@/component
 export type ManagingWorldPlazaEntityDepthSortCache = {
   lastCenterTileX: number;
   lastCenterTileY: number;
+  lastFootSumBucket: number;
   lastStandingLayer: number;
   lastPlacedBlocksRevision: number;
   lastSortKey: number;
@@ -27,10 +29,23 @@ export function creatingWorldPlazaEntityDepthSortCache(): ManagingWorldPlazaEnti
   return {
     lastCenterTileX: Number.NaN,
     lastCenterTileY: Number.NaN,
+    lastFootSumBucket: Number.NaN,
     lastStandingLayer: Number.NaN,
     lastPlacedBlocksRevision: -1,
     lastSortKey: 0,
   };
+}
+
+/**
+ * Buckets continuous foot depth so within-tile south/north walks invalidate cache.
+ */
+export function computingWorldPlazaAvatarBodySortCacheFootSumBucket(
+  gridPoint: DefiningWorldPlazaWorldPoint
+): number {
+  return Math.round(
+    (gridPoint.x + gridPoint.y) *
+      DEFINING_WORLD_DEPTH_AVATAR_BODY_SORT_CACHE_FOOT_SUM_QUANTIZATION
+  );
 }
 
 /**
@@ -52,7 +67,7 @@ export function computingWorldPlazaPlacedBlocksDepthRevision(
 }
 
 /**
- * Resolves avatar body sort key, reusing the prior scan when the foot tile is unchanged.
+ * Resolves avatar body sort key, reusing the prior scan when foot depth is unchanged.
  */
 export function resolvingWorldPlazaCachedAvatarBodySortKey(
   gridPoint: DefiningWorldPlazaWorldPoint,
@@ -63,10 +78,13 @@ export function resolvingWorldPlazaCachedAvatarBodySortKey(
   const centerTileX = Math.floor(gridPoint.x);
   const centerTileY = Math.floor(gridPoint.y);
   const standingLayer = resolvingWorldPlazaPlayerWorldLayer(gridPoint);
+  const footSumBucket =
+    computingWorldPlazaAvatarBodySortCacheFootSumBucket(gridPoint);
 
   if (
     cache.lastCenterTileX === centerTileX &&
     cache.lastCenterTileY === centerTileY &&
+    cache.lastFootSumBucket === footSumBucket &&
     cache.lastStandingLayer === standingLayer &&
     cache.lastPlacedBlocksRevision === placedBlocksRevision
   ) {
@@ -83,6 +101,7 @@ export function resolvingWorldPlazaCachedAvatarBodySortKey(
   const sortKey = resolvingWorldDepthAvatarBodySortKey(gridPoint, context);
   cache.lastCenterTileX = centerTileX;
   cache.lastCenterTileY = centerTileY;
+  cache.lastFootSumBucket = footSumBucket;
   cache.lastStandingLayer = standingLayer;
   cache.lastPlacedBlocksRevision = placedBlocksRevision;
   cache.lastSortKey = sortKey;

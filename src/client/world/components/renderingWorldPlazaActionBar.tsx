@@ -15,6 +15,7 @@ import { RenderingReigncraftToaster } from '@/components/ui/sonner';
 import { RenderingWorldPlazaActionBarTransformPanel } from '@/components/world/components/renderingWorldPlazaActionBarTransformPanel';
 import { RenderingWorldPlazaCodexMenuPanel } from '@/components/world/components/renderingWorldPlazaCodexMenuPanel';
 import { RenderingWorldPlazaDayNightIndicator } from '@/components/world/components/renderingWorldPlazaDayNightIndicator';
+import { RenderingWorldPlazaDayNightPanel } from '@/components/world/components/renderingWorldPlazaDayNightPanel';
 import { RenderingWorldPlazaExitHomeConfirmDialog } from '@/components/world/components/renderingWorldPlazaExitHomeConfirmDialog';
 import { RenderingWorldPlazaMasterVolumeMixerPanel } from '@/components/world/components/renderingWorldPlazaMasterVolumeMixerPanel';
 import {
@@ -52,6 +53,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaViewportFullscreenConstants';
 import { resolvingWorldPlazaActionBarViewportStyles } from '@/components/world/domains/resolvingWorldPlazaActionBarViewportStyles';
 import { RenderingWorldPlazaTemperatureIndicator } from '@/components/world/health/components/renderingWorldPlazaTemperatureIndicator';
+import { RenderingWorldPlazaTemperaturePanel } from '@/components/world/health/components/renderingWorldPlazaTemperaturePanel';
 import { STYLING_WORLD_PLAZA_ACTION_BAR_TEMPERATURE_ANCHOR_CLASS_NAME } from '@/components/world/health/domains/definingWorldPlazaTemperatureIndicatorConstants';
 import type { DefiningWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
 import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
@@ -171,6 +173,8 @@ export function RenderingWorldPlazaActionBar({
   const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();
   const [isTransformPanelOpen, setIsTransformPanelOpen] = useState(false);
   const [isHungerPanelOpen, setIsHungerPanelOpen] = useState(false);
+  const [isTemperaturePanelOpen, setIsTemperaturePanelOpen] = useState(false);
+  const [isDayNightPanelOpen, setIsDayNightPanelOpen] = useState(false);
   const [isSoundMixerOpen, setIsSoundMixerOpen] = useState(false);
   const [isCodexMenuOpen, setIsCodexMenuOpen] = useState(false);
   const [isExitHomeConfirmOpen, setIsExitHomeConfirmOpen] = useState(false);
@@ -182,6 +186,8 @@ export function RenderingWorldPlazaActionBar({
 
     setIsTransformPanelOpen(false);
     setIsHungerPanelOpen(false);
+    setIsTemperaturePanelOpen(false);
+    setIsDayNightPanelOpen(false);
     setIsSoundMixerOpen(false);
     setIsCodexMenuOpen(false);
   }, [isChatOpen]);
@@ -225,6 +231,11 @@ export function RenderingWorldPlazaActionBar({
                     aria-pressed={isSoundMixerOpen}
                     aria-expanded={isSoundMixerOpen}
                     onClick={() => {
+                      setIsHungerPanelOpen(false);
+                      setIsTemperaturePanelOpen(false);
+                      setIsDayNightPanelOpen(false);
+                      setIsTransformPanelOpen(false);
+                      setIsCodexMenuOpen(false);
                       setIsSoundMixerOpen((wasOpen) => !wasOpen);
                     }}
                     className={stylingWorldPlazaActionBarButton(
@@ -264,6 +275,11 @@ export function RenderingWorldPlazaActionBar({
                       aria-pressed={isCodexMenuOpen}
                       aria-expanded={isCodexMenuOpen}
                       onClick={() => {
+                        setIsHungerPanelOpen(false);
+                        setIsTemperaturePanelOpen(false);
+                        setIsDayNightPanelOpen(false);
+                        setIsTransformPanelOpen(false);
+                        setIsSoundMixerOpen(false);
                         setIsCodexMenuOpen((wasOpen) => !wasOpen);
                       }}
                       className={stylingWorldPlazaActionBarButton(
@@ -390,6 +406,8 @@ export function RenderingWorldPlazaActionBar({
                     aria-expanded={isTransformPanelOpen}
                     onClick={() => {
                       setIsHungerPanelOpen(false);
+                      setIsTemperaturePanelOpen(false);
+                      setIsDayNightPanelOpen(false);
                       setIsTransformPanelOpen((wasOpen) => !wasOpen);
                     }}
                     className={stylingWorldPlazaActionBarButton(
@@ -433,6 +451,8 @@ export function RenderingWorldPlazaActionBar({
                         setIsTransformPanelOpen(false);
                         setIsSoundMixerOpen(false);
                         setIsCodexMenuOpen(false);
+                        setIsTemperaturePanelOpen(false);
+                        setIsDayNightPanelOpen(false);
                         setIsHungerPanelOpen((wasOpen) => !wasOpen);
                       }}
                     />
@@ -463,7 +483,24 @@ export function RenderingWorldPlazaActionBar({
                       comfortBand={temperatureHud.comfortBand}
                       viewportHudScale={viewportHudScale}
                       isMobile={isMobile}
+                      isOpen={isTemperaturePanelOpen}
+                      onToggle={() => {
+                        setIsTransformPanelOpen(false);
+                        setIsSoundMixerOpen(false);
+                        setIsCodexMenuOpen(false);
+                        setIsHungerPanelOpen(false);
+                        setIsDayNightPanelOpen(false);
+                        setIsTemperaturePanelOpen((wasOpen) => !wasOpen);
+                      }}
                     />
+                    {isTemperaturePanelOpen ? (
+                      <RenderingWorldPlazaTemperaturePanel
+                        temperatureDisplayUnit={
+                          temperatureHud.temperatureDisplayUnit
+                        }
+                        comfortBand={temperatureHud.comfortBand}
+                      />
+                    ) : null}
                   </div>
                 ) : null}
 
@@ -475,7 +512,19 @@ export function RenderingWorldPlazaActionBar({
                   <RenderingWorldPlazaDayNightIndicator
                     viewportHudScale={viewportHudScale}
                     isMobile={isMobile}
+                    isOpen={isDayNightPanelOpen}
+                    onToggle={() => {
+                      setIsTransformPanelOpen(false);
+                      setIsSoundMixerOpen(false);
+                      setIsCodexMenuOpen(false);
+                      setIsHungerPanelOpen(false);
+                      setIsTemperaturePanelOpen(false);
+                      setIsDayNightPanelOpen((wasOpen) => !wasOpen);
+                    }}
                   />
+                  {isDayNightPanelOpen ? (
+                    <RenderingWorldPlazaDayNightPanel />
+                  ) : null}
                 </div>
 
                 {isFullscreenSupported ? (

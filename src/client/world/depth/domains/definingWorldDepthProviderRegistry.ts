@@ -54,7 +54,9 @@ function checkingWorldDepthPlacedBlockColumnAtTileIndex(
       continue;
     }
 
-    const definition = resolvingWorldBuildingBlockDefinition(block.definitionId);
+    const definition = resolvingWorldBuildingBlockDefinition(
+      block.definitionId
+    );
 
     if (
       definition &&
@@ -67,21 +69,26 @@ function checkingWorldDepthPlacedBlockColumnAtTileIndex(
   return false;
 }
 
-const DEFINING_WORLD_DEPTH_TERRAIN_COLUMN_PROVIDER: DefiningWorldDepthProvider = {
-  id: 'terrainColumn',
-  resolvingSurfaceLayerAtTileIndex: (tileX, tileY) =>
-    resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(tileX, tileY),
-  resolvingSortKeyAtTileIndex: (tileX, tileY) =>
-    resolvingWorldPlazaTerrainElevationColumnEntityZIndex(tileX, tileY),
-  resolvingDepthSortFootAtTileIndex: (tileX, tileY) => ({ x: tileX, y: tileY }),
-  alwaysTallerForFrontOcclusion: false,
-  participatesInStandingBump: true,
-  standingBumpRequiresRaisedSurface: false,
-  participatesInFrontOcclusion: true,
-  participatesInShadowOcclusion: true,
-  requiresSilhouetteReachForFrontOcclusion: true,
-  checkingHasColumnAtTileIndex: () => true,
-};
+const DEFINING_WORLD_DEPTH_TERRAIN_COLUMN_PROVIDER: DefiningWorldDepthProvider =
+  {
+    id: 'terrainColumn',
+    resolvingSurfaceLayerAtTileIndex: (tileX, tileY) =>
+      resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(tileX, tileY),
+    resolvingSortKeyAtTileIndex: (tileX, tileY) =>
+      resolvingWorldPlazaTerrainElevationColumnEntityZIndex(tileX, tileY),
+    resolvingDepthSortFootAtTileIndex: (tileX, tileY) => ({
+      x: tileX,
+      y: tileY,
+    }),
+    alwaysTallerForFrontOcclusion: false,
+    participatesInStandingBump: true,
+    standingBumpRequiresRaisedSurface: false,
+    participatesInFrontOcclusion: true,
+    participatesInSameTileOverheadOcclusion: true,
+    participatesInShadowOcclusion: true,
+    requiresSilhouetteReachForFrontOcclusion: true,
+    checkingHasColumnAtTileIndex: () => true,
+  };
 
 const DEFINING_WORLD_DEPTH_PLACED_BLOCK_COLUMN_PROVIDER: DefiningWorldDepthProvider =
   {
@@ -107,14 +114,19 @@ const DEFINING_WORLD_DEPTH_PLACED_BLOCK_COLUMN_PROVIDER: DefiningWorldDepthProvi
         surfaceLayer
       );
     },
-    resolvingDepthSortFootAtTileIndex: (tileX, tileY) => ({ x: tileX, y: tileY }),
+    resolvingDepthSortFootAtTileIndex: (tileX, tileY) => ({
+      x: tileX,
+      y: tileY,
+    }),
     alwaysTallerForFrontOcclusion: false,
     participatesInStandingBump: true,
     standingBumpRequiresRaisedSurface: true,
     participatesInFrontOcclusion: true,
+    participatesInSameTileOverheadOcclusion: true,
     participatesInShadowOcclusion: true,
     requiresSilhouetteReachForFrontOcclusion: true,
-    checkingHasColumnAtTileIndex: checkingWorldDepthPlacedBlockColumnAtTileIndex,
+    checkingHasColumnAtTileIndex:
+      checkingWorldDepthPlacedBlockColumnAtTileIndex,
   };
 
 const DEFINING_WORLD_DEPTH_COLUMN_ROCK_PROVIDER: DefiningWorldDepthProvider = {
@@ -133,7 +145,10 @@ const DEFINING_WORLD_DEPTH_COLUMN_ROCK_PROVIDER: DefiningWorldDepthProvider = {
         metadata.sizeTierIndex
       )
     ) {
-      return resolvingWorldPlazaTerrainElevationColumnEntityZIndex(tileX, tileY);
+      return resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
+        tileX,
+        tileY
+      );
     }
 
     return resolvingWorldPlazaTerrainRockColumnEntityZIndex(
@@ -165,6 +180,7 @@ const DEFINING_WORLD_DEPTH_COLUMN_ROCK_PROVIDER: DefiningWorldDepthProvider = {
   participatesInStandingBump: false,
   standingBumpRequiresRaisedSurface: true,
   participatesInFrontOcclusion: true,
+  participatesInSameTileOverheadOcclusion: true,
   participatesInShadowOcclusion: true,
   requiresSilhouetteReachForFrontOcclusion: true,
   checkingHasColumnAtTileIndex: (tileX, tileY) => {
@@ -195,7 +211,10 @@ const DEFINING_WORLD_DEPTH_TREE_TRUNK_PROVIDER: DefiningWorldDepthProvider = {
     );
 
     if (!tree) {
-      return resolvingWorldPlazaTerrainElevationColumnEntityZIndex(tileX, tileY);
+      return resolvingWorldPlazaTerrainElevationColumnEntityZIndex(
+        tileX,
+        tileY
+      );
     }
 
     return Math.max(
@@ -220,6 +239,7 @@ const DEFINING_WORLD_DEPTH_TREE_TRUNK_PROVIDER: DefiningWorldDepthProvider = {
   participatesInStandingBump: false,
   standingBumpRequiresRaisedSurface: true,
   participatesInFrontOcclusion: true,
+  participatesInSameTileOverheadOcclusion: false,
   participatesInShadowOcclusion: false,
   requiresSilhouetteReachForFrontOcclusion: false,
   checkingHasColumnAtTileIndex: (tileX, tileY, context) =>
@@ -242,11 +262,15 @@ const DEFINING_WORLD_DEPTH_TREE_FLAT_CANOPY_PROVIDER: DefiningWorldDepthProvider
         context.placedBlocksByTile
       ),
     resolvingSortKeyAtTileIndex: () => 0,
-    resolvingDepthSortFootAtTileIndex: (tileX, tileY) => ({ x: tileX, y: tileY }),
+    resolvingDepthSortFootAtTileIndex: (tileX, tileY) => ({
+      x: tileX,
+      y: tileY,
+    }),
     alwaysTallerForFrontOcclusion: false,
     participatesInStandingBump: false,
     standingBumpRequiresRaisedSurface: true,
     participatesInFrontOcclusion: false,
+    participatesInSameTileOverheadOcclusion: false,
     participatesInShadowOcclusion: false,
     requiresSilhouetteReachForFrontOcclusion: false,
     checkingHasColumnAtTileIndex: () => false,

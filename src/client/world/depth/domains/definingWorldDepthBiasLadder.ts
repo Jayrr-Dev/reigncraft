@@ -146,6 +146,14 @@ export const DEFINING_WORLD_DEPTH_TREE_GROUND_SHADOW_FOOTPRINT_TILE_RADIUS =
   3 as const;
 
 /**
+ * Quantization for cached avatar body sort keys within a tile. Front-occluder
+ * and behind-column tests use continuous foot sums, so the cache must refresh
+ * when the avatar walks south/north inside the same tile.
+ */
+export const DEFINING_WORLD_DEPTH_AVATAR_BODY_SORT_CACHE_FOOT_SUM_QUANTIZATION =
+  4 as const;
+
+/**
  * Dev assertion: verifies the documented bias ladder ordering holds.
  * Call once at module init in development builds if desired.
  */
@@ -163,7 +171,8 @@ export function assertingWorldDepthBiasLadderOrdering(): void {
       DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS ||
     DEFINING_WORLD_DEPTH_TERRAIN_ELEVATION_COLUMN_SURFACE_LAYER_DEPTH_BIAS <=
       DEFINING_WORLD_DEPTH_AVATAR_BODY_FRONT_OCCLUDER_STANDING_Z_INDEX_MARGIN ||
-    maxTerrainSurfaceLayerBias >= DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS * 2
+    maxTerrainSurfaceLayerBias >=
+      DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS * 2
   ) {
     throw new Error('World depth bias ladder ordering invariant violated.');
   }

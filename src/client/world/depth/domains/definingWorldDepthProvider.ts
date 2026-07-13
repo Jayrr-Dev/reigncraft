@@ -60,6 +60,12 @@ export type DefiningWorldDepthProvider = {
   readonly standingBumpRequiresRaisedSurface: boolean;
   /** When true, provider can cap avatar z-index when in front/overhead and taller. */
   readonly participatesInFrontOcclusion: boolean;
+  /**
+   * When true, a taller column on the avatar's standing tile caps the body
+   * behind it (walk-under roofs/slabs). Tree trunks set this false so standing
+   * south of the trunk on the same tile still draws in front.
+   */
+  readonly participatesInSameTileOverheadOcclusion: boolean;
   /** When true, provider can occlude avatar ground shadows in the footprint. */
   readonly participatesInShadowOcclusion: boolean;
   /**

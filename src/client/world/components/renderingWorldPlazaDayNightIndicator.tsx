@@ -23,6 +23,7 @@ import { resolvingWorldPlazaDayNightCelestialSpriteIconStyle } from '@/component
 import { resolvingWorldPlazaDayNightIndicatorPresentation } from '@/components/world/domains/resolvingWorldPlazaDayNightIndicatorPresentation';
 import { resolvingWorldPlazaDayNightIndicatorViewportStyles } from '@/components/world/domains/resolvingWorldPlazaDayNightIndicatorViewportStyles';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
+import { cn } from '@/lib/utils';
 import { memo, useEffect, useMemo, useState } from 'react';
 
 /** Props for {@link RenderingWorldPlazaDayNightIndicator}. */
@@ -31,6 +32,10 @@ export type RenderingWorldPlazaDayNightIndicatorProps = {
   viewportHudScale?: number;
   /** When true, applies the action bar mobile shrink. */
   isMobile?: boolean;
+  /** Whether the world-clock panel is open. */
+  isOpen?: boolean;
+  /** Toggles the world-clock panel. */
+  onToggle?: () => void;
 };
 
 /**
@@ -40,6 +45,8 @@ export const RenderingWorldPlazaDayNightIndicator = memo(
   function RenderingWorldPlazaDayNightIndicator({
     viewportHudScale = 1,
     isMobile = false,
+    isOpen = false,
+    onToggle,
   }: RenderingWorldPlazaDayNightIndicatorProps): React.JSX.Element {
     const sunState = usingWorldPlazaDayNightSunState();
     const [clockTime, setClockTime] = useState(() =>
@@ -88,13 +95,19 @@ export const RenderingWorldPlazaDayNightIndicator = memo(
     }`;
 
     return (
-      <div
-        role="status"
+      <button
+        type="button"
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-        className={STYLING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_ORB_CLASS_NAME}
+        className={cn(
+          STYLING_WORLD_PLAZA_DAY_NIGHT_INDICATOR_ORB_CLASS_NAME,
+          isOpen && 'plaza-day-night-orb--open'
+        )}
         style={viewportStyles.sphereStyle}
         aria-label={ariaLabel}
+        aria-pressed={isOpen}
+        aria-expanded={isOpen}
         title={ariaLabel}
+        onClick={onToggle}
       >
         <span
           className={
@@ -132,7 +145,7 @@ export const RenderingWorldPlazaDayNightIndicator = memo(
             }}
           />
         </span>
-      </div>
+      </button>
     );
   }
 );

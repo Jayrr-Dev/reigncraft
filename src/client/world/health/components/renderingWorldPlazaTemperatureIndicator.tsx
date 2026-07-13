@@ -21,6 +21,7 @@ import type {
 } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
 import { resolvingWorldPlazaTemperatureIndicatorFillColor } from '@/components/world/health/domains/resolvingWorldPlazaTemperatureIndicatorFillColor';
 import { resolvingWorldPlazaTemperatureIndicatorViewportStyles } from '@/components/world/health/domains/resolvingWorldPlazaTemperatureIndicatorViewportStyles';
+import { cn } from '@/lib/utils';
 import { memo, useMemo } from 'react';
 
 /** Props for {@link RenderingWorldPlazaTemperatureIndicator}. */
@@ -29,12 +30,16 @@ export type RenderingWorldPlazaTemperatureIndicatorProps = {
   localTemperatureCelsius: number | null;
   /** Preferred HUD unit (°C or °F). */
   temperatureDisplayUnit: DefiningWorldPlazaTemperatureDisplayUnit;
-  /** Character comfort band that anchors the soft blue→peach orb range. */
+  /** Character comfort band that anchors the orb fill colors. */
   comfortBand?: DefiningWorldPlazaEntityTemperatureComfortBand | null;
   /** Live HUD scale from the plaza viewport frame. */
   viewportHudScale?: number;
   /** When true, applies the action bar mobile shrink. */
   isMobile?: boolean;
+  /** Whether the tolerance panel is open. */
+  isOpen?: boolean;
+  /** Toggles the tolerance panel. */
+  onToggle?: () => void;
 };
 
 /**
@@ -47,6 +52,8 @@ export const RenderingWorldPlazaTemperatureIndicator = memo(
     comfortBand = null,
     viewportHudScale = 1,
     isMobile = false,
+    isOpen = false,
+    onToggle,
   }: RenderingWorldPlazaTemperatureIndicatorProps): React.JSX.Element | null {
     const viewportStyles = useMemo(
       () =>
@@ -86,13 +93,19 @@ export const RenderingWorldPlazaTemperatureIndicator = memo(
     const ariaLabel = `${LABELING_WORLD_PLAZA_ACTION_BAR_TEMPERATURE}: ${temperatureLabel}`;
 
     return (
-      <div
-        role="status"
+      <button
+        type="button"
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-        className={STYLING_WORLD_PLAZA_TEMPERATURE_INDICATOR_ORB_CLASS_NAME}
+        className={cn(
+          STYLING_WORLD_PLAZA_TEMPERATURE_INDICATOR_ORB_CLASS_NAME,
+          isOpen && 'plaza-temperature-orb--open'
+        )}
         style={viewportStyles.sphereStyle}
         aria-label={ariaLabel}
+        aria-pressed={isOpen}
+        aria-expanded={isOpen}
         title={ariaLabel}
+        onClick={onToggle}
       >
         <span
           className={
@@ -109,7 +122,7 @@ export const RenderingWorldPlazaTemperatureIndicator = memo(
         >
           {temperatureLabel}
         </span>
-      </div>
+      </button>
     );
   }
 );

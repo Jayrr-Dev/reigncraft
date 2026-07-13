@@ -1,8 +1,8 @@
 /**
  * Action-bar temperature orb: thermometer range, gradient palette, and labels.
  *
- * Full ramp: white → light blue → blue → yellow → orange → red.
- * Comfort band is yellow → orange → red-orange. Edges track the character band.
+ * Cold ramp: white → light blue → sky blue. Whole comfort band stays sky blue.
+ * Heat ramp past comfort high: peach → red.
  *
  * @module components/world/health/domains/definingWorldPlazaTemperatureIndicatorConstants
  */
@@ -30,22 +30,25 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MIN_CELSIUS =
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MAX_CELSIUS =
   DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_MAX_CELSIUS;
 
+/** Shared fill for the entire character comfort band. */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_SKY_BLUE = '#87ceeb';
+
 /**
  * Ordered cold→hot orb fill palette (9 stops).
  *
- * Cold: white → light blue → blue.
- * Comfort (indices 3–5): yellow → orange → orange-red.
- * Hot: deeper red to pure red.
+ * Cold (0–2): white → light blue → sky blue.
+ * Comfort (3–5): sky blue flat across the band.
+ * Hot (6–8): peach → red past comfort high.
  */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_GRADIENT_HEX_STOPS = [
   '#ffffff',
   '#c8e6ff',
-  '#3b9eff',
-  '#ffe566',
-  '#ff9e00',
-  '#ff4500',
-  '#ff2a00',
-  '#ff1100',
+  DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_SKY_BLUE,
+  DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_SKY_BLUE,
+  DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_SKY_BLUE,
+  DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_SKY_BLUE,
+  '#ff9e81',
+  '#ff6846',
   '#ff0000',
 ] as const;
 
@@ -53,15 +56,15 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_GRADIENT_HEX_STOPS = [
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_COLD_COLOR =
   DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_GRADIENT_HEX_STOPS[0];
 
-/** Cool comfort edge (character comfort low °C): yellow. */
+/** Cool comfort edge (character comfort low °C): sky blue. */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_COOL_EDGE_COLOR =
   DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_GRADIENT_HEX_STOPS[3];
 
-/** Orange mid stop (comfort midpoint). */
+/** Comfort midpoint: sky blue. */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MID_COLOR =
   DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_GRADIENT_HEX_STOPS[4];
 
-/** Warm comfort edge (character comfort high °C): orange-red. */
+/** Warm comfort edge (character comfort high °C): sky blue. */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_WARM_EDGE_COLOR =
   DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_GRADIENT_HEX_STOPS[5];
 

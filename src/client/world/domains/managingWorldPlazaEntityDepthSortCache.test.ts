@@ -13,7 +13,7 @@ vi.mock(
 );
 
 describe('resolvingWorldPlazaCachedAvatarBodySortKey', () => {
-  it('reuses the cached sort key while the foot tile is unchanged', () => {
+  it('reuses the cached sort key while the foot-sum bucket is unchanged', () => {
     const cache = creatingWorldPlazaEntityDepthSortCache();
     const gridPoint = { x: 10.4, y: 20.6, layer: 0 };
 
@@ -24,7 +24,7 @@ describe('resolvingWorldPlazaCachedAvatarBodySortKey', () => {
       3
     );
     const second = resolvingWorldPlazaCachedAvatarBodySortKey(
-      { x: 10.8, y: 20.2, layer: 0 },
+      { x: 10.41, y: 20.59, layer: 0 },
       cache,
       {},
       3
@@ -33,6 +33,26 @@ describe('resolvingWorldPlazaCachedAvatarBodySortKey', () => {
     expect(first).toBe(42);
     expect(second).toBe(42);
     expect(resolvingWorldDepthAvatarBodySortKey).toHaveBeenCalledTimes(1);
+  });
+
+  it('recomputes when the avatar walks south enough to change foot-sum bucket', () => {
+    vi.mocked(resolvingWorldDepthAvatarBodySortKey).mockClear();
+    const cache = creatingWorldPlazaEntityDepthSortCache();
+
+    resolvingWorldPlazaCachedAvatarBodySortKey(
+      { x: 10.1, y: 20.1, layer: 0 },
+      cache,
+      {},
+      3
+    );
+    resolvingWorldPlazaCachedAvatarBodySortKey(
+      { x: 10.8, y: 20.8, layer: 0 },
+      cache,
+      {},
+      3
+    );
+
+    expect(resolvingWorldDepthAvatarBodySortKey).toHaveBeenCalledTimes(2);
   });
 
   it('recomputes when the foot tile changes', () => {
