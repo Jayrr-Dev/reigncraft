@@ -25,6 +25,13 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_BASE_PX = 40 as const;
 /** Base Lucide icon edge length in px. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_ICON_BASE_PX = 20 as const;
 
+/**
+ * Base pixel-sprite glyph edge in a slot (cookbooks, bags, etc.).
+ * Larger than Lucide icons so 32px art fills most of the 40px slot.
+ */
+export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_SPRITE_ICON_BASE_PX =
+  32 as const;
+
 /** Base gap between hotbar slots and shell items in px. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_SHELL_GAP_BASE_PX = 4 as const;
 

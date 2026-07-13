@@ -278,7 +278,11 @@ export function RenderingWorldPlazaHudModeToolBoard({
               >
                 <RenderingWorldPlazaHudModeToolGlyph
                   toolDefinition={draggingToolDefinition}
-                  iconStyle={viewportStyles.iconStyle}
+                  iconStyle={
+                    draggingToolDefinition.spriteSheetIcon
+                      ? viewportStyles.spriteIconStyle
+                      : viewportStyles.iconStyle
+                  }
                 />
               </div>
             ) : null}

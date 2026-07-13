@@ -21,6 +21,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_SLOT_EMOJI_BASE_PX,
   DEFINING_WORLD_PLAZA_INVENTORY_SLOT_FALLBACK_TEXT_BASE_PX,
   DEFINING_WORLD_PLAZA_INVENTORY_SLOT_ICON_BASE_PX,
+  DEFINING_WORLD_PLAZA_INVENTORY_SLOT_SPRITE_ICON_BASE_PX,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import type { CSSProperties } from 'react';
 
@@ -41,6 +42,8 @@ export interface DefiningWorldPlazaInventoryHotbarViewportStyles {
   readonly slotStyle: CSSProperties;
   readonly dragSurfaceStyle: CSSProperties;
   readonly iconStyle: CSSProperties;
+  /** Near-slot pixel-art glyph size (sprite sheets). */
+  readonly spriteIconStyle: CSSProperties;
   readonly emptyFistIconStyle: CSSProperties;
   readonly emojiStyle: CSSProperties;
   readonly fallbackTextStyle: CSSProperties;
@@ -113,6 +116,11 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
   );
   const iconStyle = stylingWorldPlazaViewportHudSquarePx(
     DEFINING_WORLD_PLAZA_INVENTORY_SLOT_ICON_BASE_PX,
+    viewportHudScale,
+    DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE
+  );
+  const spriteIconStyle = stylingWorldPlazaViewportHudSquarePx(
+    DEFINING_WORLD_PLAZA_INVENTORY_SLOT_SPRITE_ICON_BASE_PX,
     viewportHudScale,
     DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE
   );
@@ -218,6 +226,7 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
     slotStyle,
     dragSurfaceStyle: slotStyle,
     iconStyle,
+    spriteIconStyle,
     emptyFistIconStyle: {
       width: emptyFistIconEdgePx,
       height: emptyFistIconEdgePx,

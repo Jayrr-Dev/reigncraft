@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Book-styled dialog for one craft-mode cookbook (blank pages until recipes).
+ * Pixel open-book dialog for one craft-mode cookbook (blank pages until recipes).
  *
  * @module components/world/building/components/renderingWorldPlazaCraftModeCookbookDialog
  */
@@ -9,20 +9,40 @@
 import { playingPlazaBookSfx } from '@/components/home/domains/playingPlazaBookSfx';
 import { Icon } from '@/components/ui/icon';
 import {
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_OPEN_BOOK_ASPECT_RATIO,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_OPEN_BOOK_URL,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_PAGE_LAYOUT,
   LABELING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_BLANK_PAGE,
   resolvingWorldPlazaCraftModeCookbookSpriteSheetIcon,
   type DefiningWorldPlazaCraftModeCookbookDefinition,
 } from '@/components/world/building/domains/definingWorldPlazaCraftModeCookbookRegistry';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_CODEX_OVERLAY_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaCodexConstants';
-import { useCallback, useEffect, useState, type SyntheticEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type CSSProperties,
+  type SyntheticEvent,
+} from 'react';
 import { createPortal } from 'react-dom';
 
-const COOKBOOK_HEADER_BUTTON_CLASS_NAME =
-  'plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]';
+const COOKBOOK_CLOSE_BUTTON_CLASS_NAME =
+  'plaza-btn-3d absolute right-0 top-0 z-20 flex size-10 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b] sm:size-11';
 
 const COOKBOOK_PAGER_BUTTON_CLASS_NAME =
-  'flex cursor-pointer items-center gap-1 rounded-sm border border-poster-teal/25 bg-parchment/50 px-2 py-1 text-xs font-bold uppercase tracking-wide text-poster-teal-deep transition hover:bg-parchment/80 disabled:cursor-default disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40';
+  'flex cursor-pointer items-center gap-1 rounded-sm border-2 border-poster-gold/50 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-parchment shadow-[0_3px_0_0_#14252b] transition hover:brightness-110 disabled:cursor-default disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/40';
+
+function resolvingCookbookPageBoxStyle(side: 'left' | 'right'): CSSProperties {
+  const layout = DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_PAGE_LAYOUT[side];
+
+  return {
+    top: `${layout.topPercent}%`,
+    left: `${layout.leftPercent}%`,
+    width: `${layout.widthPercent}%`,
+    height: `${layout.heightPercent}%`,
+  };
+}
 
 function RenderingWorldPlazaCraftModeCookbookCoverGlyph({
   cookbookDefinition,
@@ -38,7 +58,7 @@ function RenderingWorldPlazaCraftModeCookbookCoverGlyph({
 
   return (
     <span
-      className="block size-8 shrink-0 [image-rendering:pixelated]"
+      className="block size-7 shrink-0 [image-rendering:pixelated] sm:size-8"
       style={{
         backgroundImage: `url("${spriteSheet.spriteSheetUrl}")`,
         backgroundPosition: `${backgroundPositionX}% 0%`,
@@ -50,35 +70,6 @@ function RenderingWorldPlazaCraftModeCookbookCoverGlyph({
   );
 }
 
-function RenderingWorldPlazaCraftModeCookbookBlankLeaf({
-  cookbookDefinition,
-  side,
-}: {
-  readonly cookbookDefinition: DefiningWorldPlazaCraftModeCookbookDefinition;
-  readonly side: 'left' | 'right';
-}): React.JSX.Element {
-  return (
-    <div
-      className={`lore-book-page h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden ${
-        side === 'left'
-          ? 'lore-book-page--left hidden rounded-l-md rounded-r-sm sm:flex'
-          : 'lore-book-page--right flex rounded-r-md rounded-l-sm'
-      }`}
-    >
-      <div className="lore-book-page-turn flex min-h-0 flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-        <Icon
-          icon={cookbookDefinition.emblemIconifyIcon}
-          className="size-8 text-ink-soft/25"
-          aria-hidden
-        />
-        <p className="max-w-56 text-sm font-medium italic leading-relaxed text-ink-soft/60">
-          {LABELING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_BLANK_PAGE}
-        </p>
-      </div>
-    </div>
-  );
-}
-
 /** Props for {@link RenderingWorldPlazaCraftModeCookbookDialog}. */
 export type RenderingWorldPlazaCraftModeCookbookDialogProps = {
   readonly cookbookDefinition: DefiningWorldPlazaCraftModeCookbookDefinition | null;
@@ -86,7 +77,7 @@ export type RenderingWorldPlazaCraftModeCookbookDialogProps = {
 };
 
 /**
- * Modal book dialog: cookbook cover chrome around a blank two-page spread.
+ * Modal dialog: pixel open-book art with blank page content overlaid.
  */
 export function RenderingWorldPlazaCraftModeCookbookDialog({
   cookbookDefinition,
@@ -175,46 +166,82 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
       onPointerDown={stoppingPlazaWalkPointerPropagation}
       onClick={closingDialogOnBackdropClick}
     >
-      <div className="lore-book-cover plaza-pop-in flex h-[min(80dvh,36rem)] w-full max-w-3xl flex-col gap-3 overflow-hidden rounded-lg p-3 font-body sm:p-4">
-        <div className="relative flex shrink-0 items-center gap-3">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-md border-2 border-poster-gold/50 bg-black/25">
-            <RenderingWorldPlazaCraftModeCookbookCoverGlyph
-              cookbookDefinition={cookbookDefinition}
-            />
-          </span>
-          <div className="min-w-0 flex-1">
-            <h2 className="font-display text-xl font-bold tracking-wide text-parchment">
+      <div className="plaza-pop-in relative flex w-full max-w-[min(94vw,52rem)] flex-col items-center gap-3 font-body sm:gap-4">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className={COOKBOOK_CLOSE_BUTTON_CLASS_NAME}
+        >
+          <Icon icon="mdi:close" className="size-5" aria-hidden />
+        </button>
+
+        <header className="flex max-w-md flex-col items-center gap-2 px-4 text-center">
+          <RenderingWorldPlazaCraftModeCookbookCoverGlyph
+            cookbookDefinition={cookbookDefinition}
+          />
+          <div className="min-w-0">
+            <h2 className="font-display text-base font-bold uppercase leading-tight tracking-wide text-parchment sm:text-lg md:text-xl">
               {cookbookDefinition.title}
             </h2>
-            <p className="truncate text-xs font-medium italic text-parchment/65 sm:text-sm">
+            <p className="mt-1 text-xs font-medium italic leading-snug text-parchment/70 sm:text-sm">
               {cookbookDefinition.subtitle}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className={COOKBOOK_HEADER_BUTTON_CLASS_NAME}
-          >
-            <Icon icon="mdi:close" className="size-5" aria-hidden />
-          </button>
-        </div>
+        </header>
 
         <div
-          key={`${cookbookDefinition.id}-leaf-${leafIndex}`}
-          className="relative flex min-h-0 flex-1 gap-1.5 overflow-hidden"
+          className="relative w-full"
+          style={{
+            aspectRatio: String(
+              DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_OPEN_BOOK_ASPECT_RATIO
+            ),
+          }}
         >
-          <RenderingWorldPlazaCraftModeCookbookBlankLeaf
-            cookbookDefinition={cookbookDefinition}
-            side="left"
+          <img
+            src={DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_OPEN_BOOK_URL}
+            alt=""
+            draggable={false}
+            className="pointer-events-none absolute inset-0 size-full select-none object-contain [image-rendering:pixelated]"
+            aria-hidden
           />
-          <RenderingWorldPlazaCraftModeCookbookBlankLeaf
-            cookbookDefinition={cookbookDefinition}
-            side="right"
-          />
+
+          <div
+            key={`${cookbookDefinition.id}-leaf-${leafIndex}-left`}
+            className="absolute flex flex-col overflow-hidden p-2 sm:p-3"
+            style={resolvingCookbookPageBoxStyle('left')}
+          >
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center">
+              <Icon
+                icon={cookbookDefinition.emblemIconifyIcon}
+                className="size-7 text-[#6b4e2e]/25 sm:size-8"
+                aria-hidden
+              />
+              <p className="max-w-[16rem] text-[11px] font-medium italic leading-relaxed text-[#6b4e2e]/70 sm:text-xs">
+                {LABELING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_BLANK_PAGE}
+              </p>
+            </div>
+          </div>
+
+          <div
+            key={`${cookbookDefinition.id}-leaf-${leafIndex}-right`}
+            className="absolute flex flex-col overflow-hidden p-2 sm:p-3"
+            style={resolvingCookbookPageBoxStyle('right')}
+          >
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center">
+              <Icon
+                icon={cookbookDefinition.emblemIconifyIcon}
+                className="size-7 text-[#6b4e2e]/20 sm:size-8"
+                aria-hidden
+              />
+              <p className="max-w-[16rem] text-[11px] font-medium italic leading-relaxed text-[#6b4e2e]/60 sm:text-xs">
+                {LABELING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_BLANK_PAGE}
+              </p>
+            </div>
+          </div>
         </div>
 
-        <footer className="flex shrink-0 items-center justify-between gap-2 px-1">
+        <footer className="flex items-center justify-center gap-3 sm:gap-4">
           <button
             type="button"
             onClick={() => turningCookbookLeaf(-1)}
@@ -222,10 +249,10 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
             className={COOKBOOK_PAGER_BUTTON_CLASS_NAME}
           >
             <Icon icon="mdi:chevron-left" className="size-4" aria-hidden />
-            <span className="hidden sm:inline">Previous</span>
+            <span className="hidden sm:inline">Prev</span>
           </button>
-          <span className="font-mono text-[11px] font-medium text-parchment/70">
-            Page {leafIndex + 1} of {leafCount}
+          <span className="font-mono text-xs font-medium text-parchment/75 sm:text-sm">
+            {leafIndex + 1}/{leafCount}
           </span>
           <button
             type="button"

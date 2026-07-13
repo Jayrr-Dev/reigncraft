@@ -24,6 +24,33 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_SPRITE_SHEET_URL =
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_SPRITE_SHEET_COLUMN_COUNT = 3;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_SPRITE_SHEET_ROW_COUNT = 1;
 
+/** Open-book pixel frame used by the craft cookbook dialog. */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_OPEN_BOOK_URL =
+  '/inventory/ui/inventory-cookbook-open-book.webp' as const;
+
+/** Native open-book art size (width / height). */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_OPEN_BOOK_ASPECT_RATIO =
+  1024 / 617;
+
+/**
+ * Content boxes overlaid on the open-book art (percent of frame).
+ * Tuned to clear the brown cover, spine, and corner ornaments.
+ */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_PAGE_LAYOUT = {
+  left: {
+    topPercent: 13,
+    leftPercent: 7,
+    widthPercent: 39,
+    heightPercent: 70,
+  },
+  right: {
+    topPercent: 13,
+    leftPercent: 54,
+    widthPercent: 39,
+    heightPercent: 70,
+  },
+} as const;
+
 /** Display + dialog metadata for one cookbook. */
 export type DefiningWorldPlazaCraftModeCookbookDefinition = {
   readonly id: DefiningWorldPlazaCraftModeCookbookId;

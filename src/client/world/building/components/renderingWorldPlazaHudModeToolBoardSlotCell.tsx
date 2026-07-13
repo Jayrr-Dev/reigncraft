@@ -179,7 +179,11 @@ function RenderingWorldPlazaHudModeToolBoardFilledSlot({
       >
         <RenderingWorldPlazaHudModeToolGlyph
           toolDefinition={toolDefinition}
-          iconStyle={viewportStyles.iconStyle}
+          iconStyle={
+            toolDefinition.spriteSheetIcon
+              ? viewportStyles.spriteIconStyle
+              : viewportStyles.iconStyle
+          }
         />
       </button>
     </div>
