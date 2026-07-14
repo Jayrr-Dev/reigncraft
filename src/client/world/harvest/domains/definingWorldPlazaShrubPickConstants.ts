@@ -5,10 +5,10 @@
  */
 
 /** Shortest berry-shrub pick channel (ms). */
-export const DEFINING_WORLD_PLAZA_SHRUB_PICK_DURATION_MIN_MS = 400;
+export const DEFINING_WORLD_PLAZA_SHRUB_PICK_DURATION_MIN_MS = 800;
 
 /** Longest berry-shrub pick channel (ms). */
-export const DEFINING_WORLD_PLAZA_SHRUB_PICK_DURATION_MAX_MS = 600;
+export const DEFINING_WORLD_PLAZA_SHRUB_PICK_DURATION_MAX_MS = 1200;
 
 /** Max Chebyshev distance from player to shrub tile center. */
 export const DEFINING_WORLD_PLAZA_SHRUB_PICK_PLAYER_RANGE_TILES = 2;

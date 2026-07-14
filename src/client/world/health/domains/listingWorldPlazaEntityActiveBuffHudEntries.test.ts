@@ -1,6 +1,10 @@
 import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import { applyingWorldPlazaEntityDisease } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
 import {
+  LABELING_WORLD_PLAZA_ENTITY_DISEASE_HUD_EFFECTS_TEASER,
+  LABELING_WORLD_PLAZA_ENTITY_DISEASE_HUD_UNKNOWN_NAME,
+} from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseHudDetailRevealConstants';
+import {
   computingWorldPlazaEntityBuffHudRemainingSeconds,
   listingWorldPlazaEntityActiveBuffHudEntries,
 } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
@@ -26,12 +30,13 @@ describe('listingWorldPlazaEntityActiveBuffHudEntries disease rows', () => {
       nowMs,
       defenderModifierIds: [],
       attackerModifierIds: [],
+      pathologyStudyCountByDiseaseId: { salmonellosis: 0 },
     });
 
     expect(rows.find((row) => row.isDisease)).toBeUndefined();
   });
 
-  it('shows one disease-styled row and hides internal disease buffs', () => {
+  it('stage 1: unknown illness until Pathology field notes', () => {
     const uniformValues = [Math.exp(-0.5), 0.25, Math.exp(-0.5), 0.25];
     let uniformIndex = 0;
     const state = applyingWorldPlazaEntityDisease(
@@ -48,6 +53,65 @@ describe('listingWorldPlazaEntityActiveBuffHudEntries disease rows', () => {
       worldEpochMs: symptomaticAtMs,
       defenderModifierIds: [],
       attackerModifierIds: [],
+      pathologyStudyCountByDiseaseId: { salmonellosis: 0 },
+    });
+
+    const diseaseRow = rows.find((row) => row.isDisease);
+
+    expect(diseaseRow?.label).toBe(
+      LABELING_WORLD_PLAZA_ENTITY_DISEASE_HUD_UNKNOWN_NAME
+    );
+    expect(diseaseRow?.severityLabel).toBeUndefined();
+    expect(diseaseRow?.detailLines).toEqual([]);
+  });
+
+  it('stage 2: name and flavor, mechanics still locked', () => {
+    const uniformValues = [Math.exp(-0.5), 0.25, Math.exp(-0.5), 0.25];
+    let uniformIndex = 0;
+    const state = applyingWorldPlazaEntityDisease(
+      creatingWorldPlazaEntityHealthInitialState(),
+      'salmonellosis',
+      nowMs,
+      () => uniformValues[uniformIndex++ % uniformValues.length]!
+    );
+    const symptomaticAtMs = state.diseaseEffects[0]!.symptomsStartAtMs;
+
+    const rows = listingWorldPlazaEntityActiveBuffHudEntries({
+      state,
+      nowMs: symptomaticAtMs,
+      worldEpochMs: symptomaticAtMs,
+      defenderModifierIds: [],
+      attackerModifierIds: [],
+      pathologyStudyCountByDiseaseId: { salmonellosis: 1 },
+    });
+
+    const diseaseRow = rows.find((row) => row.isDisease);
+
+    expect(diseaseRow?.label).toBe('Salmonellosis');
+    expect(diseaseRow?.severityLabel).toBe('Mild');
+    expect(diseaseRow?.detailLines).toEqual([
+      LABELING_WORLD_PLAZA_ENTITY_DISEASE_HUD_EFFECTS_TEASER,
+    ]);
+  });
+
+  it('stage 3: full mechanics and hides internal disease buffs', () => {
+    const uniformValues = [Math.exp(-0.5), 0.25, Math.exp(-0.5), 0.25];
+    let uniformIndex = 0;
+    const state = applyingWorldPlazaEntityDisease(
+      creatingWorldPlazaEntityHealthInitialState(),
+      'salmonellosis',
+      nowMs,
+      () => uniformValues[uniformIndex++ % uniformValues.length]!
+    );
+    const symptomaticAtMs = state.diseaseEffects[0]!.symptomsStartAtMs;
+
+    const rows = listingWorldPlazaEntityActiveBuffHudEntries({
+      state,
+      nowMs: symptomaticAtMs,
+      worldEpochMs: symptomaticAtMs,
+      defenderModifierIds: [],
+      attackerModifierIds: [],
+      pathologyStudyCountByDiseaseId: { salmonellosis: 5 },
     });
 
     const diseaseRow = rows.find((row) => row.isDisease);

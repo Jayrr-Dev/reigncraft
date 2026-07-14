@@ -71,7 +71,10 @@ import {
   resolvingWildlifeJumpScareFatalDamageOptions,
   resolvingWildlifePouncerJumpRangeMultiplier,
 } from '@/components/world/wildlife/domains/advancingWildlifePouncerTick';
-import { resolvingWildlifeSpeciesPouncerConfig } from '@/components/world/wildlife/domains/definingWildlifeSpeciesPouncerRegistry';
+import {
+  DEFINING_WILDLIFE_POUNCER_RETREAT_ARRIVAL_SLACK_GRID,
+  resolvingWildlifeSpeciesPouncerConfig,
+} from '@/components/world/wildlife/domains/definingWildlifeSpeciesPouncerRegistry';
 import {
   checkingWildlifePouncerRetreatComplete,
   resolvingWildlifePouncerRetreatIntent,
@@ -640,7 +643,11 @@ function resolvingDesiredDirection(
           : intent.mode === 'followPlayer'
             ? DEFINING_WILDLIFE_DOCILE_FOLLOW_COMFORT_DISTANCE_GRID
             : intent.mode === 'stalk'
-              ? 0.55
+              ? // Pouncer retreat must keep stepping until completion slack;
+                // normal stalk keeps the orbit-prevention deadzone.
+                instance.aiState.pouncerPhase === 'retreat'
+                ? DEFINING_WILDLIFE_TARGET_ARRIVAL_RADIUS_GRID
+                : DEFINING_WILDLIFE_POUNCER_RETREAT_ARRIVAL_SLACK_GRID
               : DEFINING_WILDLIFE_TARGET_ARRIVAL_RADIUS_GRID;
 
   // Arrival deadzone: without it animals orbit their target in tight circles.

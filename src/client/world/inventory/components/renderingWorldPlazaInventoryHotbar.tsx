@@ -69,6 +69,7 @@ import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 export type RenderingWorldPlazaInventoryOreSmeltingStation = {
   readonly stationName: string;
+  readonly stationBlockDefinitionId: string;
   readonly stationState: DefiningWorldPlazaOreSmeltingStationState;
   readonly progressRatio: number;
   readonly onClose: () => void;
@@ -375,6 +376,9 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
                   {oreSmeltingStation ? (
                     <RenderingWorldPlazaOreSmeltingPopover
                       stationName={oreSmeltingStation.stationName}
+                      stationBlockDefinitionId={
+                        oreSmeltingStation.stationBlockDefinitionId
+                      }
                       stationState={oreSmeltingStation.stationState}
                       progressRatio={oreSmeltingStation.progressRatio}
                       onClose={oreSmeltingStation.onClose}

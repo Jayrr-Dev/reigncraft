@@ -131,12 +131,16 @@ export function usingWorldPlazaOreSmeltingStations({
         return;
       }
 
-      const recipe = resolvingWorldPlazaOreSmeltingRecipe(
+      const recipeForStation = resolvingWorldPlazaOreSmeltingRecipe(
+        inventoryItem.itemTypeId,
+        block.definitionId
+      );
+      const recipeAnywhere = resolvingWorldPlazaOreSmeltingRecipe(
         inventoryItem.itemTypeId
       );
       const isValid =
         slotKind === 'ore'
-          ? recipe !== null
+          ? recipeForStation !== null
           : checkingWorldPlazaOreSmeltingFuelItemTypeId(
               inventoryItem.itemTypeId
             );
@@ -144,7 +148,9 @@ export function usingWorldPlazaOreSmeltingStations({
       if (!isValid) {
         showingToast(
           slotKind === 'ore'
-            ? 'That item cannot be smelted.'
+            ? recipeAnywhere !== null
+              ? 'Fire wet clay ware in a clay kiln.'
+              : 'That item cannot be smelted.'
             : 'Fuel must be wood or coal.'
         );
         return;

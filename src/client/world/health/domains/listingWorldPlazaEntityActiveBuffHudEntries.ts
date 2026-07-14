@@ -15,6 +15,10 @@ import {
 } from '@/components/world/health/domains/mappingWorldPlazaEntityBuffHudIcon';
 import { resolvingWorldPlazaEntityBuffHudBonusDetailLines } from '@/components/world/health/domains/resolvingWorldPlazaEntityBuffHudBonusDetailLines';
 import { resolvingWorldPlazaEntityDiseaseHudDetailLines } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseHudDetailLines';
+import {
+  resolvingWorldPlazaEntityDiseaseHudTooltipContent,
+  resolvingWorldPlazaPathologyStudyCountForDisease,
+} from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseHudDetailReveal';
 import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 
 const DEFINING_WORLD_PLAZA_ENTITY_WELL_FED_BUFF_ID_PREFIX = 'well-fed-';
@@ -164,12 +168,20 @@ export function listingWorldPlazaEntityActiveBuffHudEntries({
   worldEpochMs = resolvingWorldPlazaEntityDiseaseWorldEpochMs(),
   defenderModifierIds,
   attackerModifierIds,
+  pathologyStudyCountByDiseaseId,
 }: {
   state: DefiningWorldPlazaEntityHealthState;
   nowMs: number;
   worldEpochMs?: number;
   defenderModifierIds: readonly string[];
   attackerModifierIds: readonly string[];
+  /**
+   * Optional Pathology study overrides (tests). When omitted, reads the
+   * Pathology discovery store for each disease id.
+   */
+  pathologyStudyCountByDiseaseId?: Readonly<
+    Partial<Record<DefiningWorldPlazaEntityDiseaseId, number>>
+  >;
 }): DefiningWorldPlazaEntityActiveBuffHudEntry[] {
   const buffEntries = listingWorldPlazaEntityBuffDescriptors()
     .filter(
@@ -215,26 +227,35 @@ export function listingWorldPlazaEntityActiveBuffHudEntries({
       )
     )
     .map((diseaseEffect) => {
-      const descriptor = resolvingWorldPlazaEntityDiseaseDescriptor(
-        diseaseEffect.diseaseId as DefiningWorldPlazaEntityDiseaseId
-      );
+      const diseaseId =
+        diseaseEffect.diseaseId as DefiningWorldPlazaEntityDiseaseId;
+      const descriptor = resolvingWorldPlazaEntityDiseaseDescriptor(diseaseId);
       const detail = resolvingWorldPlazaEntityDiseaseHudDetailLines({
         descriptor,
         diseaseEffect,
         worldEpochMs,
       });
+      const studyCount =
+        pathologyStudyCountByDiseaseId?.[diseaseId] ??
+        resolvingWorldPlazaPathologyStudyCountForDisease(diseaseId);
+      const tooltip = resolvingWorldPlazaEntityDiseaseHudTooltipContent({
+        trueLabel: descriptor.label,
+        trueDescription: descriptor.description,
+        detail,
+        studyCount,
+      });
 
       return {
         id: `disease-${diseaseEffect.id}`,
-        label: descriptor.label,
-        description: descriptor.description,
+        label: tooltip.label,
+        description: tooltip.description,
         polarity: 'debuff' as const,
         icon: descriptor.icon,
         expiresAtMs: diseaseEffect.expiresAtMs,
         isDisease: true,
         diseaseId: descriptor.id,
-        severityLabel: detail.severityLabel,
-        detailLines: detail.effectLines,
+        severityLabel: tooltip.severityLabel,
+        detailLines: tooltip.detailLines,
         hudIconColorClassName: descriptor.hudIconColorClassName,
         hudIconBorderClassName: descriptor.hudIconBorderClassName,
       };

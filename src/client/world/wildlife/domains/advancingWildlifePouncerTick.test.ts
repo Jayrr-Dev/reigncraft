@@ -89,6 +89,79 @@ describe('sunhead pouncer / jump scare', () => {
     expect(result.intent.mode).toBe('idle');
   });
 
+  it('completes retreat inside stalk arrival slack so sunhead does not freeze', () => {
+    // Traveled 2.7 of 3.2: inside the 0.55 stalk deadzone that used to stall forever.
+    const position = { x: 3.2, y: 0.5, layer: 1 as const };
+
+    expect(
+      checkingWildlifePouncerRetreatComplete({
+        position,
+        retreatFromX: 0.5,
+        retreatFromY: 0.5,
+        retreatDistanceGrid: 3.2,
+      })
+    ).toBe(true);
+
+    const instance = creatingWildlifeTestInstance({
+      speciesId: 'sunhead',
+      position,
+      aiState: {
+        ...creatingWildlifeTestInstance().aiState,
+        intent: {
+          mode: 'stalk',
+          targetInstanceId: 'player-1',
+          targetPoint: { x: 3.55, y: 0.5, layer: 1 },
+          facingPoint: { x: 0.5, y: 0.5, layer: 1 },
+          pace: 'run',
+        },
+        pouncerPhase: 'retreat',
+        pouncerRetreatFromX: 0.5,
+        pouncerRetreatFromY: 0.5,
+        lastJumpScareAtMs: null,
+      },
+    });
+
+    const result = advancingWildlifePouncerThink({
+      instance,
+      intent: instance.aiState.intent,
+      playerPosition: { x: 0.5, y: 0.5, layer: 1 },
+      playerUserId: 'player-1',
+      nowMs: 5_000,
+    });
+
+    expect(result.instance.aiState.pouncerPhase).toBe('cast');
+  });
+
+  it('leaves expired jump-scare cast into pounce without waiting for null stamp', () => {
+    const instance = creatingWildlifeTestInstance({
+      speciesId: 'sunhead',
+      position: { x: 4, y: 0.5, layer: 1 },
+      aiState: {
+        ...creatingWildlifeTestInstance().aiState,
+        intent: {
+          mode: 'chase',
+          targetInstanceId: 'player-1',
+          targetPoint: { x: 0.5, y: 0.5, layer: 1 },
+        },
+        pouncerPhase: 'cast',
+        jumpScareUntilMs: 4_000,
+        jumpScareArmed: true,
+      },
+    });
+
+    const result = advancingWildlifePouncerThink({
+      instance,
+      intent: instance.aiState.intent,
+      playerPosition: { x: 0.5, y: 0.5, layer: 1 },
+      playerUserId: 'player-1',
+      nowMs: 5_000,
+    });
+
+    expect(result.instance.aiState.pouncerPhase).toBe('pounce');
+    expect(result.instance.aiState.jumpScareUntilMs).toBeNull();
+    expect(result.intent.mode).toBe('chase');
+  });
+
   it('doubles jump range and arms fatal melee after jump-scare pounce lands', () => {
     const armed = creatingWildlifeTestInstance({
       speciesId: 'sunhead',

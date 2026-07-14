@@ -57,9 +57,14 @@ export type DefiningWorldPlazaOreSmeltingRecipe = {
   readonly inputItemTypeId: string;
   readonly outputItemTypeId: string;
   readonly outputDisplayName: string;
+  /**
+   * When set, only these station block definition ids may run the recipe.
+   * Omit for every bloomery / kiln / stove.
+   */
+  readonly allowedStationBlockDefinitionIds?: readonly string[];
 };
 
-/** One-to-one ore refinement recipes shared by all smelting stations. */
+/** One-to-one ore refinement + kiln-only ceramics firing recipes. */
 export const DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY = [
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_IRON,
@@ -95,22 +100,48 @@ export const DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY = [
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CUP,
     outputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
     outputDisplayName: 'Empty Clay Cup',
+    allowedStationBlockDefinitionIds: [
+      DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
+    ],
   },
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT,
     outputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT,
     outputDisplayName: 'Empty Clay Tea Pot',
+    allowedStationBlockDefinitionIds: [
+      DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
+    ],
   },
 ] as const satisfies readonly DefiningWorldPlazaOreSmeltingRecipe[];
 
+/**
+ * Resolves a smelting / firing recipe for an input item.
+ * Pass `stationBlockDefinitionId` to enforce kiln-only ceramics (and similar).
+ */
 export function resolvingWorldPlazaOreSmeltingRecipe(
-  inputItemTypeId: string
+  inputItemTypeId: string,
+  stationBlockDefinitionId?: string
 ): DefiningWorldPlazaOreSmeltingRecipe | null {
-  return (
+  const recipe =
     DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY.find(
-      (recipe) => recipe.inputItemTypeId === inputItemTypeId
-    ) ?? null
-  );
+      (candidate) => candidate.inputItemTypeId === inputItemTypeId
+    ) ?? null;
+
+  if (!recipe) {
+    return null;
+  }
+
+  if (stationBlockDefinitionId === undefined) {
+    return recipe;
+  }
+
+  const allowedStationIds = recipe.allowedStationBlockDefinitionIds;
+
+  if (!allowedStationIds || allowedStationIds.length === 0) {
+    return recipe;
+  }
+
+  return allowedStationIds.includes(stationBlockDefinitionId) ? recipe : null;
 }
 
 export function checkingWorldPlazaOreSmeltingFuelItemTypeId(

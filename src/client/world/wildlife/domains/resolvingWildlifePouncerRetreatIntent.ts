@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { DEFINING_WILDLIFE_POUNCER_RETREAT_ARRIVAL_SLACK_GRID } from '@/components/world/wildlife/domains/definingWildlifeSpeciesPouncerRegistry';
 import type { DefiningWildlifeBehaviorIntent } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type ResolvingWildlifePouncerRetreatIntentParams = {
@@ -32,8 +33,14 @@ export function checkingWildlifePouncerRetreatComplete({
     position.x - retreatFromX,
     position.y - retreatFromY
   );
+  // Match stalk arrival deadzone: remaining <= slack freezes desiredDirection
+  // at 0, so require full distance and sunhead never leaves retreat/stalk.
+  const completionDistanceGrid = Math.max(
+    0,
+    retreatDistanceGrid - DEFINING_WILDLIFE_POUNCER_RETREAT_ARRIVAL_SLACK_GRID
+  );
 
-  return traveledGrid >= retreatDistanceGrid;
+  return traveledGrid >= completionDistanceGrid;
 }
 
 /** Stalk intent that steps away from prey while facing them. */

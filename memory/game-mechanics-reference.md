@@ -332,6 +332,7 @@ Full registry: `definingWorldPlazaEntityBuffRegistry.ts` (~80 entries). Summariz
 - **Food well-fed**: species-specific cooked meat buffs (hearty meal, fleet footed, predator strength, …)
 - **Disease symptoms**: nausea, muscle lock, joint lock, roll lock, weakness, stamina sick
 - **Incapacitation**: sleep, stun, confusion
+- **Injury**: broken leg / ankle / arm / finger, injured eye
 
 Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `resolvingPlazaMechanicsDiseaseBadgeGuideEntries.ts`
 

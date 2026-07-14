@@ -2,17 +2,21 @@
 export type MappingWorldPlazaEntityBuffHudIconName =
   | 'boxicons:sword-filled'
   | 'boxicons:target'
+  | 'game-icons:broken-bone'
   | 'game-icons:broken-heart'
   | 'game-icons:death-skull'
   | 'game-icons:scythe'
+  | 'mdi:arm-flex'
   | 'mdi:arrow-down-bold'
   | 'mdi:arrow-up-bold'
   | 'mdi:compass'
   | 'mdi:clover'
   | 'mdi:crosshairs-gps'
   | 'mdi:dice-multiple'
+  | 'mdi:eye-off'
   | 'mdi:fire'
   | 'mdi:flash'
+  | 'mdi:foot-print'
   | 'mdi:hammer'
   | 'mdi:head-question'
   | 'mdi:heart-flash'
@@ -37,6 +41,7 @@ export type MappingWorldPlazaEntityBuffHudIconName =
   | 'mdi:flower'
   | 'mdi:sprout'
   | 'mdi:weather-night'
+  | 'ph:hand-fist'
   | 'ph:heart-half'
   | 'ph:person-simple-run'
   | 'solar:fire-bold'
@@ -116,6 +121,11 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'sleep-debuff': 'mdi:sleep',
   'deep-sleep-debuff': 'mdi:power-sleep',
   'stun-debuff': 'mdi:star-four-points',
+  'broken-leg-debuff': 'game-icons:broken-bone',
+  'broken-ankle-debuff': 'mdi:foot-print',
+  'broken-arm-debuff': 'mdi:arm-flex',
+  'broken-finger-debuff': 'ph:hand-fist',
+  'injured-eye-debuff': 'mdi:eye-off',
   'well-fed-hearty-buff': 'mdi:heart-plus',
   'well-fed-fleet-buff': 'mdi:run-fast',
   'well-fed-strength-buff': 'boxicons:sword-filled',

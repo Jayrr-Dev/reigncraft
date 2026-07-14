@@ -1803,6 +1803,90 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
         multiplier: 0,
       },
     },
+    {
+      id: 'broken-leg-debuff',
+      label: 'Broken Leg',
+      description:
+        'Shattered femur. Movement crawls at half speed; cannot sprint. Jump distance is halved.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      actionLocks: ['sprint'],
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 0.5,
+        companionModifiers: [
+          {
+            modifierKind: 'jump_distance',
+            multiplier: 0.5,
+          },
+        ],
+      },
+    },
+    {
+      id: 'broken-ankle-debuff',
+      label: 'Broken Ankle',
+      description:
+        'The joint will not hold. Walk slower; cannot jump or roll.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      actionLocks: ['jump', 'roll'],
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 0.75,
+      },
+    },
+    {
+      id: 'broken-arm-debuff',
+      label: 'Broken Arm',
+      description: 'Arm hangs limp. Attack speed is cut nearly in half.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'attack_speed',
+        multiplier: 0.55,
+      },
+    },
+    {
+      id: 'broken-finger-debuff',
+      label: 'Broken Finger',
+      description: 'Grip slips. Attacks come 20% slower.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'attack_speed',
+        multiplier: 0.8,
+      },
+    },
+    {
+      id: 'injured-eye-debuff',
+      label: 'Injured Eye',
+      description:
+        'Depth perception gone. Aim wanders: worse luck and wilder damage rolls.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'damage_roll_modifiers',
+        side: 'attacker',
+        modifiers: [
+          { kind: 'luck', value: -0.5 },
+          { kind: 'variance', value: 1.4 },
+        ],
+      },
+    },
   ].map((descriptor) => [descriptor.id, descriptor])
 ) as Record<string, DefiningWorldPlazaEntityBuffDescriptor>;
 

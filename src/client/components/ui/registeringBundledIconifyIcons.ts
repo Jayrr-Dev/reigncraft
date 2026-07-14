@@ -55,6 +55,7 @@ import gameIconsBlackBook from '@iconify-icons/game-icons/black-book';
 import gameIconsBoots from '@iconify-icons/game-icons/boots';
 import gameIconsBreastplate from '@iconify-icons/game-icons/breastplate';
 import gameIconsBroadsword from '@iconify-icons/game-icons/broadsword';
+import gameIconsBrokenBone from '@iconify-icons/game-icons/broken-bone';
 import gameIconsBrokenHeart from '@iconify-icons/game-icons/broken-heart';
 import gameIconsBrokenTablet from '@iconify-icons/game-icons/broken-tablet';
 import gameIconsCampfire from '@iconify-icons/game-icons/campfire';
@@ -81,6 +82,7 @@ import gameIconsWarPick from '@iconify-icons/game-icons/war-pick';
 import gameIconsWolfHowl from '@iconify-icons/game-icons/wolf-howl';
 import gameIconsWoodAxe from '@iconify-icons/game-icons/wood-axe';
 import mdiAnvil from '@iconify-icons/mdi/anvil';
+import mdiArmFlex from '@iconify-icons/mdi/arm-flex';
 import mdiArrowDownBold from '@iconify-icons/mdi/arrow-down-bold';
 import mdiArrowLeft from '@iconify-icons/mdi/arrow-left';
 import mdiArrowUpBold from '@iconify-icons/mdi/arrow-up-bold';
@@ -117,6 +119,7 @@ import mdiDeleteOutline from '@iconify-icons/mdi/delete-outline';
 import mdiDiceMultiple from '@iconify-icons/mdi/dice-multiple';
 import mdiDoorOpen from '@iconify-icons/mdi/door-open';
 import mdiEarth from '@iconify-icons/mdi/earth';
+import mdiEyeOff from '@iconify-icons/mdi/eye-off';
 import mdiFeather from '@iconify-icons/mdi/feather';
 import mdiFire from '@iconify-icons/mdi/fire';
 import mdiFireOff from '@iconify-icons/mdi/fire-off';
@@ -126,6 +129,7 @@ import mdiFlower from '@iconify-icons/mdi/flower';
 import mdiFoodAppleOutline from '@iconify-icons/mdi/food-apple-outline';
 import mdiFoodDrumstick from '@iconify-icons/mdi/food-drumstick';
 import mdiFoodDrumstickOff from '@iconify-icons/mdi/food-drumstick-off';
+import mdiFootPrint from '@iconify-icons/mdi/foot-print';
 import mdiFruitCherries from '@iconify-icons/mdi/fruit-cherries';
 import mdiGauge from '@iconify-icons/mdi/gauge';
 import mdiGrass from '@iconify-icons/mdi/grass';
@@ -284,6 +288,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'game-icons:breastplate': gameIconsBreastplate,
   'game-icons:broadsword': gameIconsBroadsword,
   'game-icons:black-book': gameIconsBlackBook,
+  'game-icons:broken-bone': gameIconsBrokenBone,
   'game-icons:broken-heart': gameIconsBrokenHeart,
   'game-icons:broken-tablet': gameIconsBrokenTablet,
   'game-icons:campfire': gameIconsCampfire,
@@ -326,6 +331,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:book-outline': mdiBookOutline,
   'mdi:bookmark': mdiBookmark,
   'mdi:anvil': mdiAnvil,
+  'mdi:arm-flex': mdiArmFlex,
   'mdi:cactus': mdiCactus,
   'mdi:campfire': mdiCampfire,
   'mdi:chat': mdiChat,
@@ -347,6 +353,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:delete-outline': mdiDeleteOutline,
   'mdi:dice-multiple': mdiDiceMultiple,
   'mdi:door-open': mdiDoorOpen,
+  'mdi:eye-off': mdiEyeOff,
   'mdi:fire': mdiFire,
   'mdi:fire-off': mdiFireOff,
   'mdi:fishing': mdiFishing,
@@ -355,6 +362,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:food-apple-outline': mdiFoodAppleOutline,
   'mdi:food-drumstick': mdiFoodDrumstick,
   'mdi:food-drumstick-off': mdiFoodDrumstickOff,
+  'mdi:foot-print': mdiFootPrint,
   'mdi:fruit-cherries': mdiFruitCherries,
   'mdi:gauge': mdiGauge,
   'mdi:grass': mdiGrass,

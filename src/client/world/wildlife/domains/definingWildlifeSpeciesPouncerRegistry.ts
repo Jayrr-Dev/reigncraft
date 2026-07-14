@@ -36,6 +36,13 @@ export type DefiningWildlifeSpeciesPouncerConfig = {
   jumpScareMeleeWindowMs: number;
 };
 
+/**
+ * Stalk intents use an arrival deadzone so animals do not orbit. Pouncer
+ * retreat must finish inside that deadzone or the sunhead freezes forever
+ * mid-retreat (stalk mode never upgrades to melee attack).
+ */
+export const DEFINING_WILDLIFE_POUNCER_RETREAT_ARRIVAL_SLACK_GRID = 0.55;
+
 const DEFINING_WILDLIFE_SPECIES_POUNCER_REGISTRY: Partial<
   Record<DefiningWildlifeSpeciesId, DefiningWildlifeSpeciesPouncerConfig>
 > = {

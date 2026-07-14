@@ -208,7 +208,13 @@ export function advancingWildlifePouncerThink({
     };
   }
 
-  if (phase === 'cast' && (nextInstance.aiState.jumpScareUntilMs ?? null) === null) {
+  // Cast done when untilMs is null or already expired (presentation may clear
+  // the stamp one frame later; do not stay stuck in cast forever).
+  const jumpScareUntilMs = nextInstance.aiState.jumpScareUntilMs ?? null;
+  const jumpScareCastActive =
+    jumpScareUntilMs !== null && jumpScareUntilMs > nowMs;
+
+  if (phase === 'cast' && !jumpScareCastActive) {
     phase = 'pounce';
     nextInstance = {
       ...nextInstance,
@@ -216,6 +222,7 @@ export function advancingWildlifePouncerThink({
         ...nextInstance.aiState,
         pouncerPhase: 'pounce',
         jumpScareArmed: true,
+        jumpScareUntilMs: null,
         pouncerRetreatFromX: null,
         pouncerRetreatFromY: null,
       },

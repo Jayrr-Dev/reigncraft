@@ -5,6 +5,11 @@ import {
   resolvingWorldPlazaOreSmeltingRecipe,
 } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingRegistry';
 import {
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE,
+} from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON,
@@ -45,6 +50,33 @@ describe('ore smelting registry', () => {
         DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT
       )?.outputItemTypeId
     ).toBe(DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT);
+  });
+
+  it('only allows wet clay ware at a clay kiln', () => {
+    expect(
+      resolvingWorldPlazaOreSmeltingRecipe(
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CUP,
+        DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN
+      )
+    ).not.toBeNull();
+    expect(
+      resolvingWorldPlazaOreSmeltingRecipe(
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CUP,
+        DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY
+      )
+    ).toBeNull();
+    expect(
+      resolvingWorldPlazaOreSmeltingRecipe(
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT,
+        DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE
+      )
+    ).toBeNull();
+    expect(
+      resolvingWorldPlazaOreSmeltingRecipe(
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_IRON,
+        DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY
+      )
+    ).not.toBeNull();
   });
 
   it('accepts wood or coal as fuel and rejects clay as ore', () => {

@@ -14,6 +14,7 @@ import { formattingWorldPlazaTemperature } from '@/components/world/health/domai
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import { DEFINING_WORLD_PLAZA_INCAPACITATION_DEBUFF_DEV_CONTROLS } from '@/components/world/health/domains/definingWorldPlazaEntityIncapacitationDebuffDevControlsConstants';
+import { DEFINING_WORLD_PLAZA_INJURY_DEBUFF_DEV_CONTROLS } from '@/components/world/health/domains/definingWorldPlazaEntityInjuryDebuffDevControlsConstants';
 import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 
@@ -314,6 +315,40 @@ export function RenderingWorldPlazaDevModeHealthControls({
                 );
               }
             )}
+          </div>
+          <span
+            className={
+              STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
+            }
+          >
+            Injury debuffs
+          </span>
+          <div className={STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HINT_CLASS_NAME}>
+            Toggle limb and eye injuries. Re-click to clear.
+          </div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {DEFINING_WORLD_PLAZA_INJURY_DEBUFF_DEV_CONTROLS.map((control) => {
+              const isActive = hudSnapshot.activeBuffIds.includes(
+                control.buffId
+              );
+
+              return (
+                <button
+                  key={control.buffId}
+                  type="button"
+                  title={control.description}
+                  className={`${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME} ${
+                    isActive
+                      ? STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_ACTIVE_CLASS_NAME
+                      : control.buttonAccentClassName
+                  }`}
+                  onClick={() => onToggleBuff(control.buffId)}
+                >
+                  {isActive ? '✓ ' : ''}
+                  {control.label}
+                </button>
+              );
+            })}
           </div>
         </>
       ) : null}

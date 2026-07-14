@@ -98,6 +98,7 @@ import {
   subscribingWorldPlazaTemperatureDisplayUnit,
   togglingWorldPlazaTemperatureDisplayUnit,
 } from '@/components/world/health/domains/managingWorldPlazaTemperatureDisplayUnitStore';
+import { subscribingWorldPlazaPathologyDiscovery } from '@/components/world/domains/managingWorldPlazaPathologyDiscoveryStore';
 import { mappingWorldPlazaDamageOutcomeTierToFloatTextKind } from '@/components/world/health/domains/mappingWorldPlazaDamageOutcomeTierToFloatTextKind';
 import { mappingWorldPlazaEnvironmentalHazardKindToDamageKind } from '@/components/world/health/domains/mappingWorldPlazaEnvironmentalHazardKindToDamageKind';
 import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
@@ -804,11 +805,19 @@ export function usingWorldPlazaPlayerHealth({
           previous.activeBuffIds.join(',') ===
             nextSnapshot.activeBuffIds.join(',') &&
           previous.activeBuffs.length === nextSnapshot.activeBuffs.length &&
-          previous.activeBuffs.every(
-            (buff, index) =>
-              buff.id === nextSnapshot.activeBuffs[index]?.id &&
-              buff.expiresAtMs === nextSnapshot.activeBuffs[index]?.expiresAtMs
-          ) &&
+          previous.activeBuffs.every((buff, index) => {
+            const nextBuff = nextSnapshot.activeBuffs[index];
+
+            return (
+              buff.id === nextBuff?.id &&
+              buff.expiresAtMs === nextBuff?.expiresAtMs &&
+              buff.label === nextBuff?.label &&
+              buff.description === nextBuff?.description &&
+              buff.severityLabel === nextBuff?.severityLabel &&
+              (buff.detailLines?.join('\0') ?? '') ===
+                (nextBuff?.detailLines?.join('\0') ?? '')
+            );
+          }) &&
           areWorldPlazaEntityStatusEffectHudRowsUnchanged(
             previous.statusEffectHudRows,
             nextSnapshot.statusEffectHudRows
@@ -829,6 +838,12 @@ export function usingWorldPlazaPlayerHealth({
     return subscribingWorldPlazaTemperatureDisplayUnit(() => {
       temperatureDisplayUnitRef.current =
         gettingWorldPlazaTemperatureDisplayUnit();
+      pushingHudSnapshot(performance.now());
+    });
+  }, [pushingHudSnapshot]);
+
+  useEffect(() => {
+    return subscribingWorldPlazaPathologyDiscovery(() => {
       pushingHudSnapshot(performance.now());
     });
   }, [pushingHudSnapshot]);

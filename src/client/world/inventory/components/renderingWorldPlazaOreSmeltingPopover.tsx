@@ -23,6 +23,7 @@ type RenderingWorldPlazaOreSmeltingSlotProps = {
   readonly slotKind: DefiningWorldPlazaOreSmeltingStationSlotKind;
   readonly itemTypeId: string | null;
   readonly isLocked: boolean;
+  readonly stationBlockDefinitionId: string;
 };
 
 function resolvingDraggedItemTypeId(active: Active | null): string | null {
@@ -38,6 +39,7 @@ function RenderingWorldPlazaOreSmeltingSlot({
   slotKind,
   itemTypeId,
   isLocked,
+  stationBlockDefinitionId,
 }: RenderingWorldPlazaOreSmeltingSlotProps): React.JSX.Element {
   const { active } = useDndContext();
   const draggedItemTypeId = resolvingDraggedItemTypeId(active);
@@ -45,7 +47,10 @@ function RenderingWorldPlazaOreSmeltingSlot({
     draggedItemTypeId === null
       ? true
       : slotKind === 'ore'
-        ? resolvingWorldPlazaOreSmeltingRecipe(draggedItemTypeId) !== null
+        ? resolvingWorldPlazaOreSmeltingRecipe(
+            draggedItemTypeId,
+            stationBlockDefinitionId
+          ) !== null
         : checkingWorldPlazaOreSmeltingFuelItemTypeId(draggedItemTypeId);
   const { setNodeRef, isOver } = useDroppable({
     id: definingWorldPlazaOreSmeltingSlotDroppableId(slotKind),
@@ -87,6 +92,7 @@ function RenderingWorldPlazaOreSmeltingSlot({
 
 export type RenderingWorldPlazaOreSmeltingPopoverProps = {
   readonly stationName: string;
+  readonly stationBlockDefinitionId: string;
   readonly stationState: DefiningWorldPlazaOreSmeltingStationState;
   readonly progressRatio: number;
   readonly onClose: () => void;
@@ -95,6 +101,7 @@ export type RenderingWorldPlazaOreSmeltingPopoverProps = {
 
 export function RenderingWorldPlazaOreSmeltingPopover({
   stationName,
+  stationBlockDefinitionId,
   stationState,
   progressRatio,
   onClose,
@@ -124,11 +131,13 @@ export function RenderingWorldPlazaOreSmeltingPopover({
           slotKind="ore"
           itemTypeId={stationState.inputItemTypeId}
           isLocked={isSmelting}
+          stationBlockDefinitionId={stationBlockDefinitionId}
         />
         <RenderingWorldPlazaOreSmeltingSlot
           slotKind="fuel"
           itemTypeId={stationState.fuelItemTypeId}
           isLocked={isSmelting}
+          stationBlockDefinitionId={stationBlockDefinitionId}
         />
       </div>
 

@@ -1798,6 +1798,8 @@ function RenderingWorldPlazaPixiSceneConnected({
             resolvingWorldBuildingBlockDefinition(
               oreSmeltingStations.selectedStationBlock.definitionId
             )?.name ?? 'Smelting station',
+          stationBlockDefinitionId:
+            oreSmeltingStations.selectedStationBlock.definitionId,
           stationState: oreSmeltingStations.selectedStationState,
           progressRatio: oreSmeltingStations.progressRatio,
           onClose: oreSmeltingStations.closingStation,
