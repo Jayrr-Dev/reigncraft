@@ -25,11 +25,18 @@ import type { DefiningWorldBuildingTilePosition } from '@/components/world/build
 import { STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_STACK_CLASS_NAME } from '@/components/world/building/domains/definingWorldPlazaBuildModeFunctionHotbarConstants';
 import {
   checkingWorldPlazaEditModeFunctionId,
+  checkingWorldPlazaEditModeFunctionIsBuildPaintTool,
+  checkingWorldPlazaEditModeFunctionIsClaimPaintTool,
+  checkingWorldPlazaEditModeFunctionIsPaintTool,
   DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID,
   DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID,
   LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_HOTBAR,
   LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_POPOVER_TITLE,
   listingWorldPlazaEditModeFunctionsForSession,
+  resolvingWorldPlazaEditModeBuildPaintAction,
+  resolvingWorldPlazaEditModeClaimPaintAction,
+  type DefiningWorldPlazaEditModeBuildPaintFunctionId,
+  type DefiningWorldPlazaEditModeClaimPaintFunctionId,
   type DefiningWorldPlazaEditModeFunctionId,
   type DefiningWorldPlazaEditModeSessionModeId,
 } from '@/components/world/building/domains/definingWorldPlazaEditModeFunctionRegistry';
@@ -83,6 +90,10 @@ export interface RenderingWorldPlazaEditModeHotbarProps {
   isClaimModeActive: boolean;
   onActivateBuildMode: () => void;
   onActivateClaimMode: () => void;
+  selectedClaimPaintAction: 'claim' | 'unclaim' | null;
+  onSelectClaimPaintAction: (paintAction: 'claim' | 'unclaim' | null) => void;
+  selectedBuildPaintAction: 'place' | 'remove' | null;
+  onSelectBuildPaintAction: (paintAction: 'place' | 'remove' | null) => void;
   selectedDefinitionId: DefiningWorldBuildingBlockDefinitionId | null;
   selectedWorldLayer: number;
   selectedBlockHeight: number;
@@ -189,6 +200,10 @@ function RenderingWorldPlazaEditModeFunctionPopoverBody({
   | 'isClaimModeActive'
   | 'onActivateBuildMode'
   | 'onActivateClaimMode'
+  | 'selectedClaimPaintAction'
+  | 'onSelectClaimPaintAction'
+  | 'selectedBuildPaintAction'
+  | 'onSelectBuildPaintAction'
 >): React.JSX.Element {
   const localTemporaryTileClaimCount =
     countingWorldBuildingOwnerTemporaryTileClaims(
@@ -282,6 +297,11 @@ function RenderingWorldPlazaEditModeFunctionPopoverBody({
           />
         </div>
       );
+    case DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CLAIM:
+    case DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.UNCLAIM:
+    case DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLACE:
+    case DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.REMOVE:
+      return <></>;
   }
 }
 
@@ -339,6 +359,10 @@ export function RenderingWorldPlazaEditModeHotbar({
   isClaimModeActive,
   onActivateBuildMode,
   onActivateClaimMode,
+  selectedClaimPaintAction,
+  onSelectClaimPaintAction,
+  selectedBuildPaintAction,
+  onSelectBuildPaintAction,
   selectedDefinitionId,
   selectedWorldLayer,
   selectedBlockHeight,
@@ -416,8 +440,54 @@ export function RenderingWorldPlazaEditModeHotbar({
     [activeSessionModeId]
   );
 
+  const selectedClaimPaintFunctionId: DefiningWorldPlazaEditModeClaimPaintFunctionId | null =
+    selectedClaimPaintAction === 'unclaim'
+      ? DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.UNCLAIM
+      : selectedClaimPaintAction === 'claim'
+        ? DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CLAIM
+        : null;
+
+  const selectedBuildPaintFunctionId: DefiningWorldPlazaEditModeBuildPaintFunctionId | null =
+    selectedBuildPaintAction === 'remove'
+      ? DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.REMOVE
+      : selectedBuildPaintAction === 'place'
+        ? DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLACE
+        : null;
+
+  const selectedPaintFunctionId = isClaimModeActive
+    ? selectedClaimPaintFunctionId
+    : selectedBuildPaintFunctionId;
+
+  const activeToolId = openFunctionId ?? selectedPaintFunctionId;
+
   const togglingFunction = useCallback(
     (functionId: DefiningWorldPlazaEditModeFunctionId): void => {
+      if (checkingWorldPlazaEditModeFunctionIsClaimPaintTool(functionId)) {
+        const paintAction = resolvingWorldPlazaEditModeClaimPaintAction(
+          functionId
+        );
+        const nextPaintAction =
+          selectedClaimPaintAction === paintAction ? null : paintAction;
+
+        setOpenFunctionId(null);
+        onSelectClaimPaintAction(nextPaintAction);
+        onActivateClaimMode();
+        return;
+      }
+
+      if (checkingWorldPlazaEditModeFunctionIsBuildPaintTool(functionId)) {
+        const paintAction = resolvingWorldPlazaEditModeBuildPaintAction(
+          functionId
+        );
+        const nextPaintAction =
+          selectedBuildPaintAction === paintAction ? null : paintAction;
+
+        setOpenFunctionId(null);
+        onSelectBuildPaintAction(nextPaintAction);
+        onActivateBuildMode();
+        return;
+      }
+
       const nextOpenFunctionId =
         openFunctionId === functionId ? null : functionId;
 
@@ -437,7 +507,15 @@ export function RenderingWorldPlazaEditModeHotbar({
 
       onActivateClaimMode();
     },
-    [onActivateBuildMode, onActivateClaimMode, openFunctionId]
+    [
+      onActivateBuildMode,
+      onActivateClaimMode,
+      onSelectBuildPaintAction,
+      onSelectClaimPaintAction,
+      openFunctionId,
+      selectedBuildPaintAction,
+      selectedClaimPaintAction,
+    ]
   );
 
   const stoppingPlazaWalkPointerPropagation = useCallback(
@@ -464,6 +542,10 @@ export function RenderingWorldPlazaEditModeHotbar({
   );
   const renderingToolPopover = useCallback(
     (toolId: DefiningWorldPlazaEditModeFunctionId): ReactNode => {
+      if (checkingWorldPlazaEditModeFunctionIsPaintTool(toolId)) {
+        return null;
+      }
+
       return (
         <RenderingWorldPlazaEditModeFunctionPopoverPanel
           functionId={toolId}
@@ -614,14 +696,15 @@ export function RenderingWorldPlazaEditModeHotbar({
       <div className={STYLING_WORLD_PLAZA_BUILD_MODE_HOTBAR_STACK_CLASS_NAME}>
         <RenderingWorldPlazaHudModeToolBoard
           boardId={modeToolBoardId}
-          activeToolId={openFunctionId}
+          activeToolId={activeToolId}
           onActivateTool={(toolId) => {
             if (checkingWorldPlazaEditModeFunctionId(toolId)) {
               togglingFunction(toolId);
             }
           }}
           renderingToolPopover={(toolId) =>
-            checkingWorldPlazaEditModeFunctionId(toolId)
+            checkingWorldPlazaEditModeFunctionId(toolId) &&
+            openFunctionId === toolId
               ? renderingToolPopover(toolId)
               : null
           }

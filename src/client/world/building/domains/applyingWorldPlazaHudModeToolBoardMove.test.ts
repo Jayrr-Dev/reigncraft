@@ -54,11 +54,11 @@ describe('resolvingWorldPlazaHudModeToolBoardDefaults', () => {
         DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.BUILD
       )
     ).toEqual([
+      DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLACE,
+      DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.REMOVE,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.MATERIALS,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.BLOCKS,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CUT,
-      null,
-      null,
       null,
     ]);
   });
@@ -69,21 +69,25 @@ describe('resolvingWorldPlazaHudModeToolBoardDefaults', () => {
         DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.CLAIM
       )
     ).toEqual([
+      DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CLAIM,
+      DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.UNCLAIM,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLOTS,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.SAVES,
-      null,
-      null,
       null,
       null,
     ]);
   });
 
-  it('returns all empty slots for craft', () => {
-    expect(
-      resolvingWorldPlazaHudModeToolBoardDefaults(
-        DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.CRAFT
-      )
-    ).toEqual([null, null, null, null, null, null]);
+  it('left-packs craft cookbooks and leaves empty slots', () => {
+    const craftDefaults = resolvingWorldPlazaHudModeToolBoardDefaults(
+      DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.CRAFT
+    );
+
+    expect(craftDefaults.filter((slot) => slot !== null).length).toBeGreaterThan(
+      0
+    );
+    expect(craftDefaults).toHaveLength(6);
+    expect(craftDefaults.slice(-2)).toEqual([null, null]);
   });
 });
 
@@ -96,10 +100,10 @@ describe('normalizingWorldPlazaHudModeToolBoardLayout', () => {
       )
     ).toEqual([
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CUT,
+      DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLACE,
+      DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.REMOVE,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.MATERIALS,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.BLOCKS,
-      null,
-      null,
       null,
     ]);
   });

@@ -12,6 +12,7 @@ import { DEFINING_WORLD_PLAZA_STUN_DEFAULT_DURATION_MS } from '@/components/worl
 import {
   DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_TOLERANCE_BONUS_CELSIUS,
   DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_TOLERANCE_BONUS_CELSIUS,
+  DEFINING_WORLD_PLAZA_TEMPERATURE_SUNHEAD_HEAT_TOLERANCE_BONUS_CELSIUS,
 } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import { encodingWorldPlazaEntityHealthDamageRollForcedTierValue } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollForcedTier';
 
@@ -1562,6 +1563,20 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
         kind: 'damage_roll_modifiers',
         side: 'attacker',
         modifiers: [{ kind: 'expected', value: 1.15 }],
+      },
+    },
+    {
+      id: 'well-fed-sunhead-heat-buff',
+      label: 'Sunhead Heat',
+      description: `Firelands meat raises your heat comfort by ${DEFINING_WORLD_PLAZA_TEMPERATURE_SUNHEAD_HEAT_TOLERANCE_BONUS_CELSIUS}°C.`,
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 90_000,
+      effect: {
+        kind: 'heat_tolerance',
+        amountCelsius:
+          DEFINING_WORLD_PLAZA_TEMPERATURE_SUNHEAD_HEAT_TOLERANCE_BONUS_CELSIUS,
       },
     },
     {

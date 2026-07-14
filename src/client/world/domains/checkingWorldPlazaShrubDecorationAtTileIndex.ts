@@ -1,7 +1,10 @@
+import { checkingWorldPlazaLandNearCliffEdgeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLandNearCliffEdgeAtTileIndex';
 import { checkingWorldPlazaLandNearLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLandNearLavaAtTileIndex';
-import { checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex';
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
-import { DEFINING_WORLD_PLAZA_SHRUB_LAVA_CLEARANCE_RADIUS_TILES } from '@/components/world/domains/definingWorldPlazaShrubConstants';
+import {
+  DEFINING_WORLD_PLAZA_SHRUB_CLIFF_EDGE_CLEARANCE_RADIUS_TILES,
+  DEFINING_WORLD_PLAZA_SHRUB_LAVA_CLEARANCE_RADIUS_TILES,
+} from '@/components/world/domains/definingWorldPlazaShrubConstants';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
@@ -13,7 +16,8 @@ import { checkingWorldShrubPlacementAtTileIndex } from '../../../shared/worldShr
 /**
  * True when a tile would draw a berry-shrub sprite.
  *
- * Cliff-edge tiles stay bare so shrubs do not hang over extruded slope faces.
+ * Tiles within the cliff-edge clearance stay bare so shrubs do not hang over
+ * extruded slope faces.
  */
 export function checkingWorldPlazaShrubDecorationAtTileIndex(
   tileX: number,
@@ -32,7 +36,11 @@ export function checkingWorldPlazaShrubDecorationAtTileIndex(
   }
 
   if (
-    checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex(tileX, tileY)
+    checkingWorldPlazaLandNearCliffEdgeAtTileIndex(
+      tileX,
+      tileY,
+      DEFINING_WORLD_PLAZA_SHRUB_CLIFF_EDGE_CLEARANCE_RADIUS_TILES
+    )
   ) {
     return false;
   }

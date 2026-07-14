@@ -128,6 +128,13 @@ function checkingWorldPlazaEntityBuffDescriptorIsActive({
   }
 
   if (effect.kind === 'heat_tolerance') {
+    if (descriptor.durationKind === 'timed') {
+      return state.timedTemperatureModifiers.some(
+        (modifier) =>
+          modifier.id === descriptor.id && modifier.expiresAtMs > nowMs
+      );
+    }
+
     return (
       state.temperatureResistance.heatComfortBonusCelsius >=
       effect.amountCelsius
@@ -135,6 +142,13 @@ function checkingWorldPlazaEntityBuffDescriptorIsActive({
   }
 
   if (effect.kind === 'cold_tolerance') {
+    if (descriptor.durationKind === 'timed') {
+      return state.timedTemperatureModifiers.some(
+        (modifier) =>
+          modifier.id === descriptor.id && modifier.expiresAtMs > nowMs
+      );
+    }
+
     return (
       state.temperatureResistance.coldComfortBonusCelsius >=
       effect.amountCelsius

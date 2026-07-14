@@ -5,8 +5,8 @@
  */
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
-import { addingInventoryItemWithStacking } from '@/components/inventory/domains/reducingInventoryState';
 import type { DefiningWorldPlazaCraftModeRecipeDefinition } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
+import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 
 export type RefundingWorldPlazaCraftRecipeIngredientsResult =
@@ -31,7 +31,7 @@ export function refundingWorldPlazaCraftRecipeIngredients(
   let nextState = inventoryState;
 
   for (const ingredient of recipeDefinition.ingredients) {
-    const addResult = addingInventoryItemWithStacking(
+    const addResult = addingWorldPlazaInventoryItemWithStacking(
       nextState,
       {
         id: `craft-refund-${ingredient.itemTypeId}`,

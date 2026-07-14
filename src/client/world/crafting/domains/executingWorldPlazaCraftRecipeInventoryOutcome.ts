@@ -5,9 +5,9 @@
  */
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
-import { addingInventoryItemWithStacking } from '@/components/inventory/domains/reducingInventoryState';
 import { consumingWorldPlazaCraftRecipeIngredients } from '@/components/world/crafting/domains/consumingWorldPlazaCraftRecipeIngredients';
 import type { DefiningWorldPlazaCraftModeRecipeDefinition } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
+import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 
 export type ExecutingWorldPlazaCraftRecipeInventoryOutcomeResult =
@@ -24,6 +24,7 @@ export type ExecutingWorldPlazaCraftRecipeInventoryOutcomeResult =
 
 /**
  * Capacity-probes output, consumes ingredients, and adds crafted items atomically.
+ * Uses plaza stacking so non-tools never occupy the reserved weapon/tool slot.
  *
  * @param inventoryState - Current inventory state
  * @param recipeDefinition - Recipe with an inventory outcome
@@ -36,7 +37,7 @@ export function executingWorldPlazaCraftRecipeInventoryOutcome(
     return { outcome: 'missing-materials' };
   }
 
-  const capacityProbe = addingInventoryItemWithStacking(
+  const capacityProbe = addingWorldPlazaInventoryItemWithStacking(
     inventoryState,
     {
       id: 'craft-recipe-capacity-probe',
@@ -59,7 +60,7 @@ export function executingWorldPlazaCraftRecipeInventoryOutcome(
     return { outcome: 'missing-materials' };
   }
 
-  const addResult = addingInventoryItemWithStacking(
+  const addResult = addingWorldPlazaInventoryItemWithStacking(
     consumeResult.nextState,
     {
       id: 'craft-recipe-output',

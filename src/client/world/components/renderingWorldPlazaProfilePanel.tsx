@@ -12,10 +12,12 @@ import { Icon } from '@/components/ui/icon';
 import type { ComputingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
+  DEFINING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_SIZE_PX,
   DEFINING_WORLD_PLAZA_PROFILE_PANEL_DEFAULT_TAB_ID,
   DEFINING_WORLD_PLAZA_PROFILE_PANEL_ICON_SIZE_PX,
   DEFINING_WORLD_PLAZA_PROFILE_PANEL_PORTRAIT_ZOOM,
   DEFINING_WORLD_PLAZA_PROFILE_PANEL_TAB_REGISTRY,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SECTION,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_CLOSE,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_EFFECTS_EMPTY,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_EFFECTS_SECTION,
@@ -27,6 +29,10 @@ import {
   LABELING_WORLD_PLAZA_PROFILE_PANEL_TITLE,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_VITALS_SECTION,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_ANCHOR_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_CELL_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_GRID_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_LABEL_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_CHIP_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_GRID_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_LABEL_CLASS_NAME,
@@ -68,6 +74,8 @@ import {
   type ResolvingWorldPlazaProfilePanelStaminaHud,
   type ResolvingWorldPlazaProfilePanelVitalRow,
 } from '@/components/world/domains/resolvingWorldPlazaProfilePanelSections';
+import type { DefiningWorldPlazaArmorSlotDefinition } from '@/components/world/equipment/domains/definingWorldPlazaArmorSlotRegistry';
+import { resolvingWorldPlazaArmorSlotsForAvatarSkin } from '@/components/world/equipment/domains/resolvingWorldPlazaArmorSlotsForAvatarSkin';
 import { RenderingWorldPlazaEntityDiseaseIconGlyph } from '@/components/world/health/components/renderingWorldPlazaEntityDiseaseIconGlyph';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
@@ -144,6 +152,46 @@ function RenderingWorldPlazaProfilePanelVitalRows({
           >
             {row.detailText}
           </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RenderingWorldPlazaProfilePanelArmorSlots({
+  slots,
+}: {
+  slots: readonly DefiningWorldPlazaArmorSlotDefinition[];
+}): React.JSX.Element {
+  return (
+    <div
+      className={STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_GRID_CLASS_NAME}
+      style={{
+        gridTemplateColumns: `repeat(${slots.length}, minmax(0, 1fr))`,
+      }}
+    >
+      {slots.map((slot) => (
+        <div
+          key={slot.id}
+          className={STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_CELL_CLASS_NAME}
+          aria-label={`${slot.label} armor slot (empty)`}
+        >
+          <Icon
+            icon={slot.iconName}
+            width={DEFINING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_SIZE_PX}
+            height={DEFINING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_SIZE_PX}
+            className={
+              STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_CLASS_NAME
+            }
+            aria-hidden
+          />
+          <span
+            className={
+              STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_LABEL_CLASS_NAME
+            }
+          >
+            {slot.label}
+          </span>
         </div>
       ))}
     </div>
@@ -247,6 +295,11 @@ export function RenderingWorldPlazaProfilePanel({
 
   const portrait = useMemo(
     () => resolvingWorldPlazaAvatarSkinPortrait(selectedAvatarSkinId),
+    [selectedAvatarSkinId]
+  );
+
+  const armorSlots = useMemo(
+    () => resolvingWorldPlazaArmorSlotsForAvatarSkin(selectedAvatarSkinId),
     [selectedAvatarSkinId]
   );
 
@@ -391,6 +444,19 @@ export function RenderingWorldPlazaProfilePanel({
                 <RenderingWorldPlazaProfilePanelVitalRows
                   vitalRows={sections.vitalRows}
                 />
+              </section>
+
+              <section
+                aria-label={LABELING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SECTION}
+              >
+                <h3
+                  className={
+                    STYLING_WORLD_PLAZA_PROFILE_PANEL_SECTION_HEADING_CLASS_NAME
+                  }
+                >
+                  {LABELING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SECTION}
+                </h3>
+                <RenderingWorldPlazaProfilePanelArmorSlots slots={armorSlots} />
               </section>
 
               <section

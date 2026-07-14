@@ -26,6 +26,7 @@ import {
   addingWorldPlazaEntityHealthSleepEffect,
   addingWorldPlazaEntityHealthStunEffect,
   addingWorldPlazaEntityHealthTemporaryMax,
+  addingWorldPlazaEntityHealthTimedTemperatureModifier,
   doublingWorldPlazaEntityHealthMax,
   halvingWorldPlazaEntityHealthMax,
   increasingWorldPlazaEntityColdResistance,
@@ -48,6 +49,7 @@ import {
   togglingWorldPlazaEntityHeatComfortBonus,
   togglingWorldPlazaEntityHeatImmunity,
 } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import { creatingWorldPlazaEntityHealthTimedTemperatureModifier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthEffectiveTemperatureResistance';
 
 export type ApplyingWorldPlazaEntityBuffContext = {
   attackerDamageRollModifiers?: readonly DefiningWorldPlazaEntityHealthDamageRollModifier[];
@@ -414,6 +416,23 @@ function applyingWorldPlazaEntityBuffDescriptor(
   }
 
   if (effect.kind === 'heat_tolerance') {
+    if (descriptor.durationKind === 'timed' && descriptor.durationMs !== null) {
+      const durationMs =
+        context.durationMsOverride ?? descriptor.durationMs;
+
+      return addingWorldPlazaEntityHealthTimedTemperatureModifier(
+        state,
+        creatingWorldPlazaEntityHealthTimedTemperatureModifier(descriptor.id, {
+          heatComfortBonusCelsius: effect.amountCelsius,
+          coldComfortBonusCelsius: 0,
+          heatResistance: 0,
+          coldResistance: 0,
+          diseaseContractionChanceMultiplier: 1,
+          expiresAtMs: nowMs + durationMs,
+        })
+      );
+    }
+
     return togglingWorldPlazaEntityHeatComfortBonus(
       state,
       effect.amountCelsius
@@ -421,6 +440,23 @@ function applyingWorldPlazaEntityBuffDescriptor(
   }
 
   if (effect.kind === 'cold_tolerance') {
+    if (descriptor.durationKind === 'timed' && descriptor.durationMs !== null) {
+      const durationMs =
+        context.durationMsOverride ?? descriptor.durationMs;
+
+      return addingWorldPlazaEntityHealthTimedTemperatureModifier(
+        state,
+        creatingWorldPlazaEntityHealthTimedTemperatureModifier(descriptor.id, {
+          heatComfortBonusCelsius: 0,
+          coldComfortBonusCelsius: effect.amountCelsius,
+          heatResistance: 0,
+          coldResistance: 0,
+          diseaseContractionChanceMultiplier: 1,
+          expiresAtMs: nowMs + durationMs,
+        })
+      );
+    }
+
     return togglingWorldPlazaEntityColdComfortBonus(
       state,
       effect.amountCelsius

@@ -75,8 +75,13 @@ export function resolvingWorldPlazaBlacksmithUtilitySpriteSheetIcon(
 
 /** Display scale vs one isometric tile width (kiln / bloomery span ~2 tiles). */
 export const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_DISPLAY_SCALE = {
-  [DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.ANVIL]: 0.85,
+  /** Waist-high smithing block; keep under player torso height. */
+  [DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.ANVIL]: 0.52,
   [DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.BLOOMERY]: 1.85,
   [DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.CLAY_KILN]: 1.85,
   [DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.CLAY_STOVE]: 0.95,
 } as const satisfies Record<DefiningWorldPlazaBlacksmithUtilityKind, number>;
+
+/** Ghost alpha while dragging a blacksmith utility in craft/build placement. */
+export const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_ALPHA =
+  0.72 as const;

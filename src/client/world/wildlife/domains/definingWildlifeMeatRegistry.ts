@@ -892,6 +892,10 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       rawDiseaseId: 'toxoplasmosis',
       rawDiseaseChance: 0.42,
       cookedWellFedBuffId: 'well-fed-strength-buff',
+      cookedWellFedBuffIds: [
+        'well-fed-strength-buff',
+        'well-fed-sunhead-heat-buff',
+      ],
       cookedWellFedChance: 0.48,
     },
     {

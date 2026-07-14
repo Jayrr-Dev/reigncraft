@@ -1,8 +1,11 @@
+import { checkingWorldPlazaLandNearCliffEdgeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLandNearCliffEdgeAtTileIndex';
 import { checkingWorldPlazaLandNearLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLandNearLavaAtTileIndex';
 import { checkingWorldPlazaRareShrubTallGrassCompanionAtTileIndex } from '@/components/world/domains/checkingWorldPlazaRareShrubTallGrassCompanionAtTileIndex';
-import { checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex';
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
-import { DEFINING_WORLD_PLAZA_LONG_GRASS_LAVA_CLEARANCE_RADIUS_TILES } from '@/components/world/domains/definingWorldPlazaLongGrassConstants';
+import {
+  DEFINING_WORLD_PLAZA_LONG_GRASS_CLIFF_EDGE_CLEARANCE_RADIUS_TILES,
+  DEFINING_WORLD_PLAZA_LONG_GRASS_LAVA_CLEARANCE_RADIUS_TILES,
+} from '@/components/world/domains/definingWorldPlazaLongGrassConstants';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
@@ -14,8 +17,8 @@ import { checkingWorldLongGrassPlacementAtTileIndex } from '../../../shared/worl
 /**
  * True when a tile would draw a long-grass sprite clump.
  *
- * Cliff-edge tiles (raised surface with a lower cardinal neighbor) stay bare so
- * clumps do not hang over extruded slope faces.
+ * Tiles within the cliff-edge clearance stay bare so clumps do not hang over
+ * extruded slope faces.
  */
 export function checkingWorldPlazaLongGrassDecorationAtTileIndex(
   tileX: number,
@@ -33,7 +36,13 @@ export function checkingWorldPlazaLongGrassDecorationAtTileIndex(
     return false;
   }
 
-  if (checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex(tileX, tileY)) {
+  if (
+    checkingWorldPlazaLandNearCliffEdgeAtTileIndex(
+      tileX,
+      tileY,
+      DEFINING_WORLD_PLAZA_LONG_GRASS_CLIFF_EDGE_CLEARANCE_RADIUS_TILES
+    )
+  ) {
     return false;
   }
 

@@ -56,6 +56,11 @@ import { RenderingWorldPlazaHudToolbarCraftModePanel } from '@/components/world/
 import { RenderingWorldPlazaPlacedBlockGroundShadows } from '@/components/world/building/components/renderingWorldPlazaPlacedBlockGroundShadows';
 import { RenderingWorldPlazaPlacedBlocks } from '@/components/world/building/components/renderingWorldPlazaPlacedBlocks';
 import { RenderingWorldPlazaBlacksmithUtilityLayer } from '@/components/world/building/components/renderingWorldPlazaBlacksmithUtilityLayer';
+import { creatingWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import {
+  checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility,
+  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID,
+} from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
 import { RenderingWorldPlazaChestInteractionLabels } from '@/components/world/chest/components/renderingWorldPlazaChestInteractionLabels';
 import { RenderingWorldPlazaChestLayer } from '@/components/world/chest/components/renderingWorldPlazaChestLayer';
 import { usingWorldPlazaChestOpenInteraction } from '@/components/world/chest/hooks/usingWorldPlazaChestOpenInteraction';
@@ -195,7 +200,6 @@ import { resolvingWorldPlazaCraftModeRecipeDefinition } from '@/components/world
 import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import {
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INVENTORY_FULL_TOAST,
-  LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INVENTORY_SUCCESS_TOAST,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_MISSING_MATERIALS_TOAST,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_NOT_ATTACHED_TOAST,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PAGE_ALREADY_ATTACHED_TOAST,
@@ -1136,6 +1140,9 @@ function RenderingWorldPlazaPixiSceneConnected({
   const isBlockBuildModeActiveRef = useRef(false);
   const isBuildModeActiveRef = useRef(false);
   const isClaimModeActiveRef = useRef(false);
+  const selectedBuildPaintActionRef = useRef<'place' | 'remove' | null>(
+    'place'
+  );
   const isSaveCoordsPlacementActiveRef = useRef(false);
   const isEditPaintPointerHeldRef = useRef(false);
   const editPaintActionRef =
@@ -1402,6 +1409,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     togglingEditSession,
     activatingBuildMode,
     activatingClaimMode,
+    selectedClaimPaintAction,
+    selectingClaimPaintAction,
+    selectedBuildPaintAction,
+    selectingBuildPaintAction,
     cancelingBuildDraftDiscard,
     confirmingBuildDraftDiscard,
     selectingBlockDefinition,
@@ -1558,11 +1569,54 @@ function RenderingWorldPlazaPixiSceneConnected({
   previewDefinitionIdRef.current =
     pendingCraftPlacementPreviewDefinitionId ?? selectedDefinitionId;
   hoveredRemovableBlockRef.current = hoveredRemovableBlock;
+
+  const blacksmithUtilityPlacementPreviewBlock = useMemo(() => {
+    const isPlacementPreviewVisible =
+      isEditSessionActive &&
+      !isClaimModeActive &&
+      ((selectedBuildPaintAction === 'place' &&
+        isBuildPlacementSelectionActive) ||
+        pendingCraftPlacementPreviewDefinitionId !== null);
+    const definitionId =
+      pendingCraftPlacementPreviewDefinitionId ?? selectedDefinitionId;
+
+    if (
+      !isPlacementPreviewVisible ||
+      !previewTilePosition ||
+      !definitionId ||
+      !checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility(definitionId)
+    ) {
+      return null;
+    }
+
+    return creatingWorldBuildingPlacedBlock({
+      blockId: DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID,
+      plotId: DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID,
+      definitionId,
+      tilePosition: previewTilePosition,
+      worldLayer: previewWorldLayer,
+      blockHeight: previewBlockHeight,
+      ownerId: DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID,
+      placedAt: '1970-01-01T00:00:00.000Z',
+    });
+  }, [
+    isBuildPlacementSelectionActive,
+    isClaimModeActive,
+    isEditSessionActive,
+    pendingCraftPlacementPreviewDefinitionId,
+    previewBlockHeight,
+    previewTilePosition,
+    previewWorldLayer,
+    selectedBuildPaintAction,
+    selectedDefinitionId,
+  ]);
+
   isBuildTilePopoverOpenRef.current = isBuildTilePopoverOpen;
   isEditSessionActiveRef.current = isEditSessionActive;
   isBlockBuildModeActiveRef.current = isBlockBuildModeActive;
   isBuildModeActiveRef.current = isEditSessionActive;
   isClaimModeActiveRef.current = isClaimModeActive;
+  selectedBuildPaintActionRef.current = selectedBuildPaintAction;
   isTerrainCollisionDebugVisibleRef.current =
     isDevDebugActive && isTerrainCollisionDebugVisible;
   selectedWorldLayerRef.current = selectedWorldLayer;
@@ -1865,6 +1919,8 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
 
       if (recipeDefinition.outcome.kind === 'item') {
+        let didCraftIntoInventory = false;
+
         updatingInventoryState((currentState) => {
           const craftResult = executingWorldPlazaCraftRecipeInventoryOutcome(
             currentState,
@@ -1872,8 +1928,12 @@ function RenderingWorldPlazaPixiSceneConnected({
           );
 
           if (craftResult.outcome === 'crafted') {
+            didCraftIntoInventory = true;
+            notifyingWorldPlazaInventoryItemAdded(
+              recipeDefinition.outcome.quantity
+            );
             showingGameplayHudToast(
-              LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INVENTORY_SUCCESS_TOAST
+              `${recipeDefinition.title} added to inventory.`
             );
             return craftResult.nextState;
           }
@@ -1890,6 +1950,14 @@ function RenderingWorldPlazaPixiSceneConnected({
 
           return null;
         });
+
+        // Craft HUD hides the Items hotbar; flip back so the new stack is visible.
+        if (didCraftIntoInventory) {
+          setOpenCraftCookbookId(null);
+          selectingHudToolbarMode(
+            DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS
+          );
+        }
         return;
       }
 
@@ -1914,6 +1982,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       inventoryState,
       isBuildModeEnabled,
       isHudCraftingEnabled,
+      selectingHudToolbarMode,
       showingGameplayHudToast,
       updatingInventoryState,
     ]
@@ -6535,6 +6604,10 @@ function RenderingWorldPlazaPixiSceneConnected({
         isClaimModeActive={isClaimModeActive}
         onActivateBuildMode={activatingBuildMode}
         onActivateClaimMode={activatingClaimMode}
+        selectedClaimPaintAction={selectedClaimPaintAction}
+        onSelectClaimPaintAction={selectingClaimPaintAction}
+        selectedBuildPaintAction={selectedBuildPaintAction}
+        onSelectBuildPaintAction={selectingBuildPaintAction}
         selectedDefinitionId={selectedDefinitionId}
         selectedWorldLayer={selectedWorldLayer}
         selectedBlockHeight={selectedBlockHeight}
@@ -6580,6 +6653,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   }, [
     activatingBuildMode,
     activatingClaimMode,
+    selectedClaimPaintAction,
+    selectingClaimPaintAction,
+    selectedBuildPaintAction,
+    selectingBuildPaintAction,
     activeViewportPlots,
     buildModeUserId,
     canSaveMoreCoords,
@@ -6757,6 +6834,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
         if (
           isBlockBuildModeActiveRef.current &&
+          selectedBuildPaintActionRef.current === 'remove' &&
           event.button ===
             DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_SECONDARY_POINTER_BUTTON &&
           hoverTile
@@ -7336,6 +7414,9 @@ function RenderingWorldPlazaPixiSceneConnected({
                   <RenderingWorldPlazaBlacksmithUtilityLayer
                     placedBlocks={activeScenePlacedBlocks}
                     activeBlockIds={oreSmeltingStations.activeBlockIds}
+                    placementPreviewBlock={
+                      blacksmithUtilityPlacementPreviewBlock
+                    }
                   />
                   <RenderingWorldPlazaClaimModePlotOwnershipOverlay
                     isVisible={isClaimModeActive}
@@ -7425,7 +7506,8 @@ function RenderingWorldPlazaPixiSceneConnected({
                     isVisible={
                       isEditSessionActive &&
                       (isClaimModeActive ||
-                        isBuildPlacementSelectionActive ||
+                        (selectedBuildPaintAction === 'place' &&
+                          isBuildPlacementSelectionActive) ||
                         pendingCraftPlacementPreviewDefinitionId !== null)
                     }
                     isClaimModePreview={isClaimModeActive}
@@ -7441,7 +7523,8 @@ function RenderingWorldPlazaPixiSceneConnected({
                   />
                   <RenderingWorldPlazaBlockRemovalHoverHighlight
                     isVisible={
-                      isBlockBuildModeActive && !isBuildPlacementSelectionActive
+                      isBlockBuildModeActive &&
+                      selectedBuildPaintAction === 'remove'
                     }
                     hoveredRemovableBlockRef={hoveredRemovableBlockRef}
                   />

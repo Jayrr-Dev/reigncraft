@@ -191,6 +191,9 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_NEIGHBOR_AVERAGING_RING = 2;
 /** Default heat-tolerance buff: raise comfort high by this many °C. */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_HEAT_TOLERANCE_BONUS_CELSIUS = 15;
 
+/** Cooked sunhead meat well-fed: raise heat comfort ceiling by this many °C. */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_SUNHEAD_HEAT_TOLERANCE_BONUS_CELSIUS = 30;
+
 /** Default cold-tolerance buff: lower comfort low by this many °C. */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_TOLERANCE_BONUS_CELSIUS = 15;
 

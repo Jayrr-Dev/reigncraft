@@ -120,6 +120,10 @@ export interface UsingWorldPlazaBuildModeResult {
   selectedDefinitionId: DefiningWorldBuildingBlockDefinitionId | null;
   isPresetBlockTypeSelected: boolean;
   isBuildPlacementSelectionActive: boolean;
+  /** Sticky claim hotbar paint tool (`claim` / `unclaim`), or null when none selected. */
+  selectedClaimPaintAction: 'claim' | 'unclaim' | null;
+  /** Sticky build hotbar paint tool (`place` / `remove`), or null when none selected. */
+  selectedBuildPaintAction: 'place' | 'remove' | null;
   selectedWorldLayer: number;
   selectedBlockHeight: number;
   selectedCutFootprintMask: number;
@@ -159,6 +163,8 @@ export interface UsingWorldPlazaBuildModeResult {
   ) => void;
   activatingBuildMode: () => void;
   activatingClaimMode: () => void;
+  selectingClaimPaintAction: (paintAction: 'claim' | 'unclaim' | null) => void;
+  selectingBuildPaintAction: (paintAction: 'place' | 'remove' | null) => void;
   cancelingBuildDraftDiscard: () => void;
   confirmingBuildDraftDiscard: () => void;
   selectingBlockDefinition: (
@@ -256,6 +262,12 @@ export function usingWorldPlazaBuildMode({
   const isBuildModeActive = isEditSessionActive;
   const isClaimModeActive =
     editMode === DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM;
+  const [selectedClaimPaintAction, setSelectedClaimPaintAction] = useState<
+    'claim' | 'unclaim' | null
+  >('claim');
+  const [selectedBuildPaintAction, setSelectedBuildPaintAction] = useState<
+    'place' | 'remove' | null
+  >('place');
   const [buildDraft, setBuildDraftState] =
     useState<DefiningWorldBuildingBuildDraftState | null>(null);
   /**
@@ -518,7 +530,7 @@ export function usingWorldPlazaBuildMode({
   const hoveredRemovableBlock = useMemo(() => {
     if (
       !isBlockBuildModeActive ||
-      isBuildPlacementSelectionActive ||
+      selectedBuildPaintAction !== 'remove' ||
       !onlineUserId ||
       !hoverTilePosition
     ) {
@@ -539,8 +551,8 @@ export function usingWorldPlazaBuildMode({
     activeViewportPlots,
     hoverTilePosition,
     isBlockBuildModeActive,
-    isBuildPlacementSelectionActive,
     onlineUserId,
+    selectedBuildPaintAction,
   ]);
 
   const selectingCutFootprintMask = useCallback(
@@ -664,7 +676,7 @@ export function usingWorldPlazaBuildMode({
 
       if (plot) {
         return checkingWorldBuildingPlotCanPlaceBlockFootprintAtAnchor(
-          plot,
+          activeViewportPlots,
           tilePosition,
           onlineUserId,
           placementWorldLayer,
@@ -795,7 +807,10 @@ export function usingWorldPlazaBuildMode({
       return canClaimAtPreviewTile || canClaimTemporaryAtPreviewTile;
     }
 
-    if (!isBuildPlacementSelectionActive) {
+    if (
+      selectedBuildPaintAction !== 'place' ||
+      !isBuildPlacementSelectionActive
+    ) {
       return false;
     }
 
@@ -818,6 +833,7 @@ export function usingWorldPlazaBuildMode({
     previewBlockHeight,
     previewTilePosition,
     previewWorldLayer,
+    selectedBuildPaintAction,
   ]);
 
   const resolvingRemovalWorldLayerForTile = useCallback(
@@ -1168,7 +1184,7 @@ export function usingWorldPlazaBuildMode({
       );
 
       if (existingPlot?.ownerId === onlineUserId) {
-        unclaimingPlotAtTile(tilePosition);
+        setBuildErrorMessage('That tile is already yours.');
         return;
       }
 
@@ -1246,7 +1262,6 @@ export function usingWorldPlazaBuildMode({
       onlineUserId,
       plots,
       resolvedPlotOwnerLimits,
-      unclaimingPlotAtTile,
     ]
   );
 
@@ -1372,6 +1387,20 @@ export function usingWorldPlazaBuildMode({
     activatingEditMode(DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM);
   }, [activatingEditMode]);
 
+  const selectingClaimPaintAction = useCallback(
+    (paintAction: 'claim' | 'unclaim' | null): void => {
+      setSelectedClaimPaintAction(paintAction);
+    },
+    []
+  );
+
+  const selectingBuildPaintAction = useCallback(
+    (paintAction: 'place' | 'remove' | null): void => {
+      setSelectedBuildPaintAction(paintAction);
+    },
+    []
+  );
+
   const actingOnEditModeTileAtViewport = useCallback(
     (tilePosition: DefiningWorldBuildingTilePosition | null): void => {
       if (!tilePosition || !onlineUserId) {
@@ -1387,22 +1416,49 @@ export function usingWorldPlazaBuildMode({
       setBuildErrorMessage(null);
 
       if (editMode === DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM) {
-        claimingPlotAtTile(tilePosition);
+        if (selectedClaimPaintAction === 'unclaim') {
+          unclaimingPlotAtTile(tilePosition);
+          return;
+        }
+
+        if (selectedClaimPaintAction === 'claim') {
+          claimingPlotAtTile(tilePosition);
+          return;
+        }
+
+        setBuildErrorMessage('Select Claim or Unclaim first.');
         return;
       }
 
       if (editMode === DEFINING_WORLD_BUILDING_EDIT_MODE_BUILD) {
-        if (
-          isBuildPlacementSelectionActive &&
-          checkingCanPlaceAtTile(tilePosition)
-        ) {
-          void placingBlockAtTile(tilePosition);
+        if (selectedBuildPaintAction === 'place') {
+          if (
+            isBuildPlacementSelectionActive &&
+            checkingCanPlaceAtTile(tilePosition)
+          ) {
+            void placingBlockAtTile(tilePosition);
+            return;
+          }
+
+          setBuildErrorMessage(
+            isBuildPlacementSelectionActive
+              ? 'Cannot place here.'
+              : 'Pick a material and block size first.'
+          );
           return;
         }
 
-        if (resolvingRemovalWorldLayerForTile(tilePosition) !== null) {
-          removingBlockAtTile(tilePosition);
+        if (selectedBuildPaintAction === 'remove') {
+          if (resolvingRemovalWorldLayerForTile(tilePosition) !== null) {
+            removingBlockAtTile(tilePosition);
+            return;
+          }
+
+          setBuildErrorMessage('Nothing to remove here.');
+          return;
         }
+
+        setBuildErrorMessage('Select Place or Remove first.');
       }
     },
     [
@@ -1414,6 +1470,9 @@ export function usingWorldPlazaBuildMode({
       placingBlockAtTile,
       removingBlockAtTile,
       resolvingRemovalWorldLayerForTile,
+      selectedBuildPaintAction,
+      selectedClaimPaintAction,
+      unclaimingPlotAtTile,
     ]
   );
 
@@ -1434,6 +1493,8 @@ export function usingWorldPlazaBuildMode({
         canPlaceAtTile: checkingCanPlaceAtTile(tilePosition),
         canRemoveAtTile:
           resolvingRemovalWorldLayerForTile(tilePosition) !== null,
+        selectedClaimPaintAction,
+        selectedBuildPaintAction,
       });
     },
     [
@@ -1443,6 +1504,8 @@ export function usingWorldPlazaBuildMode({
       isBuildPlacementSelectionActive,
       onlineUserId,
       resolvingRemovalWorldLayerForTile,
+      selectedBuildPaintAction,
+      selectedClaimPaintAction,
     ]
   );
 
@@ -1749,6 +1812,8 @@ export function usingWorldPlazaBuildMode({
     selectedDefinitionId,
     isPresetBlockTypeSelected,
     isBuildPlacementSelectionActive,
+    selectedClaimPaintAction,
+    selectedBuildPaintAction,
     selectedWorldLayer,
     selectedBlockHeight,
     selectedCutFootprintMask,
@@ -1786,6 +1851,8 @@ export function usingWorldPlazaBuildMode({
     activatingEditMode,
     activatingBuildMode,
     activatingClaimMode,
+    selectingClaimPaintAction,
+    selectingBuildPaintAction,
     cancelingBuildDraftDiscard,
     confirmingBuildDraftDiscard,
     selectingBlockDefinition,

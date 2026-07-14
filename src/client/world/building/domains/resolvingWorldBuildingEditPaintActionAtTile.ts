@@ -24,6 +24,10 @@ export type ResolvingWorldBuildingEditPaintActionAtTileInput = {
   readonly isBuildPlacementSelectionActive: boolean;
   readonly canPlaceAtTile: boolean;
   readonly canRemoveAtTile: boolean;
+  /** Selected claim hotbar paint tool; required for claim-mode painting. */
+  readonly selectedClaimPaintAction: 'claim' | 'unclaim' | null;
+  /** Selected build hotbar paint tool; required for build-mode painting. */
+  readonly selectedBuildPaintAction: 'place' | 'remove' | null;
 };
 
 /**
@@ -40,28 +44,39 @@ export function resolvingWorldBuildingEditPaintActionAtTile(
     isBuildPlacementSelectionActive,
     canPlaceAtTile,
     canRemoveAtTile,
+    selectedClaimPaintAction,
+    selectedBuildPaintAction,
   } = input;
 
   if (editMode === DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM) {
+    if (selectedClaimPaintAction === null) {
+      return null;
+    }
+
     const existingPlot = findingWorldBuildingPlotContainingTilePosition(
       activeViewportPlots,
       tilePosition
     );
+    const ownsTile = existingPlot?.ownerId === ownerUserId;
 
-    if (existingPlot?.ownerId === ownerUserId) {
-      return 'unclaim';
+    if (selectedClaimPaintAction === 'claim') {
+      return ownsTile ? null : 'claim';
     }
 
-    return 'claim';
+    return ownsTile ? 'unclaim' : null;
   }
 
   if (editMode === DEFINING_WORLD_BUILDING_EDIT_MODE_BUILD) {
-    if (isBuildPlacementSelectionActive && canPlaceAtTile) {
-      return 'place';
+    if (selectedBuildPaintAction === 'place') {
+      if (isBuildPlacementSelectionActive && canPlaceAtTile) {
+        return 'place';
+      }
+
+      return null;
     }
 
-    if (canRemoveAtTile) {
-      return 'remove';
+    if (selectedBuildPaintAction === 'remove') {
+      return canRemoveAtTile ? 'remove' : null;
     }
   }
 

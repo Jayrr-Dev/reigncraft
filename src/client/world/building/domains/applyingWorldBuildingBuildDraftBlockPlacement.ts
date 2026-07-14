@@ -76,6 +76,23 @@ function formattingWorldBuildingFootprintSatelliteBlockId(
   return `${anchorBlockId}:fp:${tilePosition.tileX}:${tilePosition.tileY}`;
 }
 
+function upsertingWorldBuildingWorkingPlot(
+  workingPlots: readonly DefiningWorldBuildingPlot[],
+  nextPlot: DefiningWorldBuildingPlot
+): DefiningWorldBuildingPlot[] {
+  const hasWorkingPlot = workingPlots.some(
+    (workingPlotEntry) => workingPlotEntry.plotId === nextPlot.plotId
+  );
+
+  if (hasWorkingPlot) {
+    return workingPlots.map((workingPlotEntry) =>
+      workingPlotEntry.plotId === nextPlot.plotId ? nextPlot : workingPlotEntry
+    );
+  }
+
+  return [...workingPlots, nextPlot];
+}
+
 /**
  * Validates and records a block placement in the draft without touching Supabase.
  *
@@ -103,15 +120,18 @@ export function applyingWorldBuildingBuildDraftBlockPlacement(
     input.draft,
     input.actorUserId
   );
-  const plot = findingWorldBuildingPlotContainingTilePosition(
+  const anchorPlot = findingWorldBuildingPlotContainingTilePosition(
     effectivePlots,
     input.tilePosition
   );
 
-  if (plot && checkingWorldBuildingPlotOwnedByUser(plot, input.actorUserId)) {
+  if (
+    anchorPlot &&
+    checkingWorldBuildingPlotOwnedByUser(anchorPlot, input.actorUserId)
+  ) {
     if (
       !checkingWorldBuildingPlotCanPlaceBlockFootprintAtAnchor(
-        plot,
+        effectivePlots,
         input.tilePosition,
         input.actorUserId,
         input.worldLayer,
@@ -127,11 +147,36 @@ export function applyingWorldBuildingBuildDraftBlockPlacement(
       };
     }
 
-    let workingPlot = plot;
+    // Claims are 1x1 plots; a multi-tile footprint may span adjacent owned tiles.
+    // Keep a live plot map so each satellite lands on its own claim plot.
+    const workingPlotsById = new Map(
+      effectivePlots
+        .filter((plot) =>
+          checkingWorldBuildingPlotOwnedByUser(plot, input.actorUserId)
+        )
+        .map((plot) => [plot.plotId, plot] as const)
+    );
     const placedBlocks: DefiningWorldBuildingPlacedBlock[] = [];
     const footprintGroupId = input.blockId;
 
     for (const tilePosition of footprintTiles) {
+      const livePlots = Array.from(workingPlotsById.values());
+      const plotForTile = findingWorldBuildingPlotContainingTilePosition(
+        livePlots,
+        tilePosition
+      );
+
+      if (
+        !plotForTile ||
+        !checkingWorldBuildingPlotOwnedByUser(plotForTile, input.actorUserId)
+      ) {
+        return {
+          errorMessage: isMultiTile
+            ? 'Need a clear 2 by 2 pad on your claim for that build.'
+            : 'That tile is not available for building.',
+        };
+      }
+
       const isAnchor =
         tilePosition.tileX === input.tilePosition.tileX &&
         tilePosition.tileY === input.tilePosition.tileY;
@@ -143,7 +188,7 @@ export function applyingWorldBuildingBuildDraftBlockPlacement(
           );
 
       const placementResult = placingWorldBuildingBlockOnPlot({
-        plot: workingPlot,
+        plot: plotForTile,
         definitionId: input.definitionId,
         tilePosition,
         worldLayer: input.worldLayer,
@@ -170,20 +215,22 @@ export function applyingWorldBuildingBuildDraftBlockPlacement(
         };
       }
 
-      workingPlot = placementResult.value.plot;
+      workingPlotsById.set(
+        placementResult.value.plot.plotId,
+        placementResult.value.plot
+      );
       placedBlocks.push(placementResult.value.block);
     }
 
-    const hasWorkingPlot = input.draft.workingPlots.some(
-      (workingPlotEntry) => workingPlotEntry.plotId === workingPlot.plotId
-    );
-    const nextWorkingPlots = hasWorkingPlot
-      ? input.draft.workingPlots.map((workingPlotEntry) =>
-          workingPlotEntry.plotId === workingPlot.plotId
-            ? workingPlot
-            : workingPlotEntry
-        )
-      : [...input.draft.workingPlots, workingPlot];
+    let nextWorkingPlots = input.draft.workingPlots;
+
+    for (const nextPlot of workingPlotsById.values()) {
+      nextWorkingPlots = upsertingWorldBuildingWorkingPlot(
+        nextWorkingPlots,
+        nextPlot
+      );
+    }
+
     const nextAddedDraftBlockIds = new Set(input.draft.addedDraftBlockIds);
 
     for (const placedBlock of placedBlocks) {
@@ -202,7 +249,7 @@ export function applyingWorldBuildingBuildDraftBlockPlacement(
   }
 
   if (
-    !plot &&
+    !anchorPlot &&
     checkingWorldBuildingBlockDefinitionAllowsSessionPlacementOutsideClaim(
       input.definitionId
     )
@@ -252,7 +299,7 @@ export function applyingWorldBuildingBuildDraftBlockPlacement(
   }
 
   if (
-    !plot &&
+    !anchorPlot &&
     isMultiTile &&
     !checkingWorldBuildingBlockDefinitionAllowsSessionPlacementOutsideClaim(
       input.definitionId

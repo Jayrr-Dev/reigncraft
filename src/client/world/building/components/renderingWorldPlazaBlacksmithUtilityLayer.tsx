@@ -22,6 +22,8 @@ import { useCallback, useRef } from 'react';
 export type RenderingWorldPlazaBlacksmithUtilityLayerProps = {
   readonly placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
   readonly activeBlockIds?: ReadonlySet<string>;
+  /** Craft/build ghost while placing anvil / kiln / bloomery / stove. */
+  readonly placementPreviewBlock?: DefiningWorldBuildingPlacedBlock | null;
 };
 
 /**
@@ -30,6 +32,7 @@ export type RenderingWorldPlazaBlacksmithUtilityLayerProps = {
 export function RenderingWorldPlazaBlacksmithUtilityLayer({
   placedBlocks,
   activeBlockIds,
+  placementPreviewBlock = null,
 }: RenderingWorldPlazaBlacksmithUtilityLayerProps): React.JSX.Element | null {
   const applicationContext = useApplication();
   const containerRef = useRef<Container | null>(null);
@@ -41,6 +44,8 @@ export function RenderingWorldPlazaBlacksmithUtilityLayer({
   placedBlocksRef.current = placedBlocks;
   const activeBlockIdsRef = useRef(activeBlockIds);
   activeBlockIdsRef.current = activeBlockIds;
+  const placementPreviewBlockRef = useRef(placementPreviewBlock);
+  placementPreviewBlockRef.current = placementPreviewBlock;
 
   const attachingContainer = useCallback((container: Container | null): void => {
     containerRef.current = container;
@@ -58,6 +63,7 @@ export function RenderingWorldPlazaBlacksmithUtilityLayer({
 
     const syncResult = syncingWorldPlazaVisibleBlacksmithUtilityLayer({
       placedBlocks: placedBlocksRef.current,
+      placementPreviewBlock: placementPreviewBlockRef.current,
       activeBlockIds: activeBlockIdsRef.current,
       state: stateRef.current,
       creatingSprite: () => {

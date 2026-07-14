@@ -35,6 +35,9 @@ export interface RenderingWorldPlazaBlockPlacementPreviewProps {
 
 /**
  * Ghost tile preview for build mode placement and claim selection.
+ *
+ * Blacksmith utility sprites are drawn by {@link RenderingWorldPlazaBlacksmithUtilityLayer}
+ * from a synthetic preview block; this graphics layer keeps the validity wash.
  */
 export function RenderingWorldPlazaBlockPlacementPreview({
   isVisible,

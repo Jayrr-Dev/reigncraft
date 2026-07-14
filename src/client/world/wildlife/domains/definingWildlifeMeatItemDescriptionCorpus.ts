@@ -398,7 +398,7 @@ export const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_ENTRIES: readonly DefiningW
       rawDescription:
         'Still warm. Cut from a Firelands apex that burned before it bled. Raw sunhead risks toxoplasmosis: nausea and scrambled footing.',
       cookedDescription:
-        'Dense meat with a scorched edge. Safe when cooked; may grant a strong predator strength buff.',
+        'Dense meat with a scorched edge. Safe when cooked; may grant predator strength and +30°C heat tolerance.',
     },
     {
       speciesId: 'fairy',

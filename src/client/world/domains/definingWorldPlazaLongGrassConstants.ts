@@ -19,6 +19,13 @@ export const DEFINING_WORLD_PLAZA_LONG_GRASS_DISPLAY_SCALE = 1.15;
  */
 export const DEFINING_WORLD_PLAZA_LONG_GRASS_LAVA_CLEARANCE_RADIUS_TILES = 2;
 
+/**
+ * Chebyshev tile radius around cliff-edge tiles where long grass must not spawn.
+ * Keeps tall clumps off the rim and the next inward ring so they do not hang
+ * over extruded slope faces.
+ */
+export const DEFINING_WORLD_PLAZA_LONG_GRASS_CLIFF_EDGE_CLEARANCE_RADIUS_TILES = 2;
+
 /** All shipped long-grass sprite URLs (preload manifest). */
 export const DEFINING_WORLD_PLAZA_LONG_GRASS_SPRITE_URLS: readonly string[] = (
   ['b1', 'b5'] as const

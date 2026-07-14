@@ -50,7 +50,10 @@ import fluentEmojiZebra from '@iconify-icons/fluent-emoji/zebra';
 import gameIconsAmphora from '@iconify-icons/game-icons/amphora';
 import gameIconsAnvil from '@iconify-icons/game-icons/anvil';
 import gameIconsBackstab from '@iconify-icons/game-icons/backstab';
+import gameIconsBarbute from '@iconify-icons/game-icons/barbute';
 import gameIconsBlackBook from '@iconify-icons/game-icons/black-book';
+import gameIconsBoots from '@iconify-icons/game-icons/boots';
+import gameIconsBreastplate from '@iconify-icons/game-icons/breastplate';
 import gameIconsBroadsword from '@iconify-icons/game-icons/broadsword';
 import gameIconsBrokenHeart from '@iconify-icons/game-icons/broken-heart';
 import gameIconsBrokenTablet from '@iconify-icons/game-icons/broken-tablet';
@@ -60,8 +63,11 @@ import gameIconsCrystalBall from '@iconify-icons/game-icons/crystal-ball';
 import gameIconsDeathSkull from '@iconify-icons/game-icons/death-skull';
 import gameIconsDrop from '@iconify-icons/game-icons/drop';
 import gameIconsFarmTractor from '@iconify-icons/game-icons/farm-tractor';
+import gameIconsGauntlet from '@iconify-icons/game-icons/gauntlet';
 import gameIconsHolySymbol from '@iconify-icons/game-icons/holy-symbol';
 import gameIconsLadder from '@iconify-icons/game-icons/ladder';
+import gameIconsLeatherArmor from '@iconify-icons/game-icons/leather-armor';
+import gameIconsLegArmor from '@iconify-icons/game-icons/leg-armor';
 import gameIconsPortal from '@iconify-icons/game-icons/portal';
 import gameIconsScrollUnfurled from '@iconify-icons/game-icons/scroll-unfurled';
 import gameIconsScythe from '@iconify-icons/game-icons/scythe';
@@ -138,6 +144,7 @@ import mdiLeaf from '@iconify-icons/mdi/leaf';
 import mdiLock from '@iconify-icons/mdi/lock';
 import mdiMagnify from '@iconify-icons/mdi/magnify';
 import mdiMapLegend from '@iconify-icons/mdi/map-legend';
+import mdiMapMarkerMinus from '@iconify-icons/mdi/map-marker-minus';
 import mdiMapMarkerPlus from '@iconify-icons/mdi/map-marker-plus';
 import mdiMortarPestlePlus from '@iconify-icons/mdi/mortar-pestle-plus';
 import mdiPalmTree from '@iconify-icons/mdi/palm-tree';
@@ -271,6 +278,9 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'game-icons:amphora': gameIconsAmphora,
   'game-icons:anvil': gameIconsAnvil,
   'game-icons:backstab': gameIconsBackstab,
+  'game-icons:barbute': gameIconsBarbute,
+  'game-icons:boots': gameIconsBoots,
+  'game-icons:breastplate': gameIconsBreastplate,
   'game-icons:broadsword': gameIconsBroadsword,
   'game-icons:black-book': gameIconsBlackBook,
   'game-icons:broken-heart': gameIconsBrokenHeart,
@@ -281,8 +291,11 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'game-icons:death-skull': gameIconsDeathSkull,
   'game-icons:drop': gameIconsDrop,
   'game-icons:farm-tractor': gameIconsFarmTractor,
+  'game-icons:gauntlet': gameIconsGauntlet,
   'game-icons:holy-symbol': gameIconsHolySymbol,
   'game-icons:ladder': gameIconsLadder,
+  'game-icons:leather-armor': gameIconsLeatherArmor,
+  'game-icons:leg-armor': gameIconsLegArmor,
   'game-icons:portal': gameIconsPortal,
   'game-icons:scroll-unfurled': gameIconsScrollUnfurled,
   'game-icons:scythe': gameIconsScythe,
@@ -360,6 +373,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:magnify': mdiMagnify,
   'mdi:mortar-pestle-plus': mdiMortarPestlePlus,
   'mdi:map-legend': mdiMapLegend,
+  'mdi:map-marker-minus': mdiMapMarkerMinus,
   'mdi:map-marker-plus': mdiMapMarkerPlus,
   'mdi:palm-tree': mdiPalmTree,
   'mdi:paw': mdiPaw,

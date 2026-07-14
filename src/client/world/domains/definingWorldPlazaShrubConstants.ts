@@ -15,6 +15,13 @@ export const DEFINING_WORLD_PLAZA_SHRUB_DISPLAY_SCALE = 1.2;
  */
 export const DEFINING_WORLD_PLAZA_SHRUB_LAVA_CLEARANCE_RADIUS_TILES = 2;
 
+/**
+ * Chebyshev tile radius around cliff-edge tiles where shrubs must not spawn.
+ * Keeps bushes off the rim and the next inward ring so they do not hang over
+ * extruded slope faces.
+ */
+export const DEFINING_WORLD_PLAZA_SHRUB_CLIFF_EDGE_CLEARANCE_RADIUS_TILES = 2;
+
 const DEFINING_WORLD_PLAZA_SHRUB_FACINGS: readonly WorldShrubFacing[] = [
   'n',
   'e',

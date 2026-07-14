@@ -88,6 +88,10 @@ export const DEFINING_WORLD_PLAZA_PROFILE_PANEL_IMMUNE_SYSTEM_ATTRIBUTE_ICON =
 export const LABELING_WORLD_PLAZA_PROFILE_PANEL_DISEASE_IMMUNITY_VALUE =
   'Immune' as const;
 
+/** Section heading above empty armor equipment slots. */
+export const LABELING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SECTION =
+  'Armor' as const;
+
 /** Section heading above active buffs and ailments. */
 export const LABELING_WORLD_PLAZA_PROFILE_PANEL_EFFECTS_SECTION =
   'Active effects' as const;
@@ -190,6 +194,26 @@ export const STYLING_WORLD_PLAZA_PROFILE_PANEL_TAB_BODY_CLASS_NAME =
 /** Stack of blocks inside one tab. */
 export const STYLING_WORLD_PLAZA_PROFILE_PANEL_TAB_SECTION_STACK_CLASS_NAME =
   'flex flex-col gap-1.5' as const;
+
+/** Wrap grid of empty armor equipment slots (column count set inline). */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_GRID_CLASS_NAME =
+  'mt-1 grid gap-1' as const;
+
+/** One empty armor slot cell (icon watermark + label). */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_CELL_CLASS_NAME =
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.surface.parchmentCardInsetFrame} flex aspect-square flex-col items-center justify-center gap-0.5 bg-parchment-dark/35 px-0.5` as const;
+
+/** Faded slot glyph when nothing is equipped. */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_CLASS_NAME =
+  'shrink-0 text-poster-teal-deep/45' as const;
+
+/** Tiny slot name under the glyph. */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_LABEL_CLASS_NAME =
+  'max-w-full truncate text-center text-[8px] font-semibold leading-none text-ink-soft' as const;
+
+/** Icon size inside an empty armor slot. */
+export const DEFINING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_SIZE_PX =
+  16 as const;
 
 /** Small-caps section heading. */
 export const STYLING_WORLD_PLAZA_PROFILE_PANEL_SECTION_HEADING_CLASS_NAME =

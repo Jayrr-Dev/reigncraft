@@ -144,6 +144,14 @@ function resolvingWorldPlazaEntityBuffExpiresAtMs(
     return modifier.expiresAtMs;
   }
 
+  if (effect.kind === 'heat_tolerance' || effect.kind === 'cold_tolerance') {
+    const modifier = state.timedTemperatureModifiers.find(
+      (entry) => entry.id === descriptor.id
+    );
+
+    return modifier?.expiresAtMs ?? null;
+  }
+
   return null;
 }
 

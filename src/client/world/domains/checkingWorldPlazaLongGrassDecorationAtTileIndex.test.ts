@@ -1,8 +1,9 @@
+import { checkingWorldPlazaLandNearCliffEdgeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLandNearCliffEdgeAtTileIndex';
 import { checkingWorldPlazaLandNearLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLandNearLavaAtTileIndex';
 import { checkingWorldPlazaLongGrassDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLongGrassDecorationAtTileIndex';
-import { checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex';
 import { DEFINING_WORLD_PLAZA_BIOME_CATALOG } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
+import { DEFINING_WORLD_PLAZA_LONG_GRASS_CLIFF_EDGE_CLEARANCE_RADIUS_TILES } from '@/components/world/domains/definingWorldPlazaLongGrassConstants';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
@@ -22,9 +23,9 @@ vi.mock('@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex', () => 
   resolvingWorldPlazaWaterAtTileIndex: vi.fn(),
 }));
 vi.mock(
-  '@/components/world/domains/checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex',
+  '@/components/world/domains/checkingWorldPlazaLandNearCliffEdgeAtTileIndex',
   () => ({
-    checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex: vi.fn(),
+    checkingWorldPlazaLandNearCliffEdgeAtTileIndex: vi.fn(),
   })
 );
 vi.mock(
@@ -65,8 +66,8 @@ vi.mock('../../../shared/worldLongGrassPlacement', async (importOriginal) => {
 
 const featureEnabledMock = vi.mocked(checkingWorldPlazaGenerationFeatureEnabled);
 const waterMock = vi.mocked(resolvingWorldPlazaWaterAtTileIndex);
-const cliffEdgeMock = vi.mocked(
-  checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex
+const nearCliffEdgeMock = vi.mocked(
+  checkingWorldPlazaLandNearCliffEdgeAtTileIndex
 );
 const lavaMock = vi.mocked(checkingWorldPlazaLandNearLavaAtTileIndex);
 const lakeShoreMock = vi.mocked(checkingWorldPlazaLakeShoreBlockAtTileIndex);
@@ -80,7 +81,7 @@ describe('checkingWorldPlazaLongGrassDecorationAtTileIndex', () => {
     vi.clearAllMocks();
     featureEnabledMock.mockReturnValue(true);
     waterMock.mockReturnValue(false);
-    cliffEdgeMock.mockReturnValue(false);
+    nearCliffEdgeMock.mockReturnValue(false);
     lavaMock.mockReturnValue(false);
     lakeShoreMock.mockReturnValue(false);
     oceanShoreMock.mockReturnValue(false);
@@ -89,12 +90,16 @@ describe('checkingWorldPlazaLongGrassDecorationAtTileIndex', () => {
     placementMock.mockReturnValue(true);
   });
 
-  it('returns false on cliff-edge slope tiles', () => {
-    cliffEdgeMock.mockReturnValue(true);
+  it('returns false within cliff-edge clearance', () => {
+    nearCliffEdgeMock.mockReturnValue(true);
 
     expect(checkingWorldPlazaLongGrassDecorationAtTileIndex(3, 7)).toBe(false);
     expect(placementMock).not.toHaveBeenCalled();
-    expect(cliffEdgeMock).toHaveBeenCalledWith(3, 7);
+    expect(nearCliffEdgeMock).toHaveBeenCalledWith(
+      3,
+      7,
+      DEFINING_WORLD_PLAZA_LONG_GRASS_CLIFF_EDGE_CLEARANCE_RADIUS_TILES
+    );
   });
 
   it('keeps placement on plateau interior tiles', () => {

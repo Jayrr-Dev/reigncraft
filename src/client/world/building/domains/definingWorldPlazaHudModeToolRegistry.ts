@@ -55,6 +55,20 @@ const DEFINING_WORLD_PLAZA_HUD_MODE_COOKBOOK_TOOLS =
 export const DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_REGISTRY = [
   ...DEFINING_WORLD_PLAZA_HUD_MODE_COOKBOOK_TOOLS,
   {
+    id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLACE,
+    boardId: DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.BUILD,
+    label: 'Place',
+    ariaLabel: 'Place blocks',
+    iconifyIcon: 'mdi:hammer',
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.REMOVE,
+    boardId: DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.BUILD,
+    label: 'Remove',
+    ariaLabel: 'Remove blocks',
+    iconifyIcon: 'mdi:delete-outline',
+  },
+  {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.MATERIALS,
     boardId: DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.BUILD,
     label: 'Materials',
@@ -74,6 +88,20 @@ export const DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_REGISTRY = [
     label: 'Cut',
     ariaLabel: 'Cut footprint',
     iconifyIcon: 'mdi:view-grid-outline',
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CLAIM,
+    boardId: DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.CLAIM,
+    label: 'Claim',
+    ariaLabel: 'Claim land tiles',
+    iconifyIcon: 'mdi:map-marker-plus',
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.UNCLAIM,
+    boardId: DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.CLAIM,
+    label: 'Unclaim',
+    ariaLabel: 'Unclaim owned land tiles',
+    iconifyIcon: 'mdi:map-marker-minus',
   },
   {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLOTS,
