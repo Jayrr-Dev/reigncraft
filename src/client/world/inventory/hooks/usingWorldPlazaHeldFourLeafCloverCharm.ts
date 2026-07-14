@@ -5,8 +5,9 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { scoutingWorldPlazaRareBiomesWhileLucky } from '@/components/world/domains/scoutingWorldPlazaRareBiomesWhileLucky';
 import {
-  DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DECAY_REAL_MS_WHILE_HELD,
+  DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DECAY_REAL_MS_AFTER_PICKUP,
   DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DURABILITY_MAX,
+  DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_PICKED_AT_MS_METADATA_KEY,
   DEFINING_WORLD_PLAZA_LUCKY_BUFF_ATTACKER_ID,
   DEFINING_WORLD_PLAZA_LUCKY_BUFF_DEFENDER_ID,
   DEFINING_WORLD_PLAZA_LUCKY_CHARM_ITEM_TYPE_ID,
@@ -31,18 +32,71 @@ export type UsingWorldPlazaHeldFourLeafCloverCharmParams = {
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint | null>;
 };
 
-function cloningInventorySlotsWithSlotUpdate(
-  slots: DefiningInventoryState['slots'],
-  slotIndex: number,
-  nextSlot: DefiningInventoryState['slots'][number]
-): DefiningInventoryState['slots'] {
-  const nextSlots = [...slots];
-  nextSlots[slotIndex] = nextSlot;
-  return nextSlots;
+function agingWorldPlazaFourLeafCloversFromPickupTime(
+  state: DefiningInventoryState,
+  nowEpochMs: number
+): DefiningInventoryState | null {
+  let didChange = false;
+  const nextSlots = state.slots.map((slot) => {
+    if (
+      !slot ||
+      slot.itemTypeId !== DEFINING_WORLD_PLAZA_LUCKY_CHARM_ITEM_TYPE_ID
+    ) {
+      return slot;
+    }
+
+    const rawPickedAtMs =
+      slot.metadata?.[
+        DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_PICKED_AT_MS_METADATA_KEY
+      ];
+    const hasValidPickedAtMs =
+      typeof rawPickedAtMs === 'number' &&
+      Number.isFinite(rawPickedAtMs) &&
+      rawPickedAtMs <= nowEpochMs;
+    const pickedAtMs = hasValidPickedAtMs ? rawPickedAtMs : nowEpochMs;
+    const elapsedSincePickupMs = Math.max(0, nowEpochMs - pickedAtMs);
+    const nextRemaining = Math.max(
+      0,
+      Math.ceil(
+        DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DURABILITY_MAX *
+          (1 -
+            elapsedSincePickupMs /
+              DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DECAY_REAL_MS_AFTER_PICKUP)
+      )
+    );
+    const durabilitySnapshot = resolvingWorldPlazaInventoryItemDurability(slot);
+
+    if (nextRemaining <= 0) {
+      didChange = true;
+      return null;
+    }
+
+    if (hasValidPickedAtMs && durabilitySnapshot?.remaining === nextRemaining) {
+      return slot;
+    }
+
+    didChange = true;
+    return {
+      ...slot,
+      metadata: {
+        ...slot.metadata,
+        [DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_PICKED_AT_MS_METADATA_KEY]:
+          pickedAtMs,
+        [DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_METADATA_KEY]: nextRemaining,
+      },
+    };
+  });
+
+  return didChange
+    ? {
+        capacity: state.capacity,
+        slots: nextSlots,
+      }
+    : null;
 }
 
 /**
- * Applies lucky-charm buffs and durability decay while the four-leaf clover is held.
+ * Ages every four-leaf clover from pickup and applies luck while one is held.
  */
 export function usingWorldPlazaHeldFourLeafCloverCharm({
   enabled,
@@ -55,8 +109,6 @@ export function usingWorldPlazaHeldFourLeafCloverCharm({
   const inventoryStateRef = useRef(inventoryState);
   const selectedSlotIndexRef = useRef(selectedSlotIndex);
   const wasLuckyActiveRef = useRef(false);
-  const lastDecayAtMsRef = useRef<number | null>(null);
-  const accumulatedDecayMsByItemIdRef = useRef(new Map<string, number>());
   const lastScoutAtMsRef = useRef<number | null>(null);
 
   inventoryStateRef.current = inventoryState;
@@ -71,13 +123,17 @@ export function usingWorldPlazaHeldFourLeafCloverCharm({
         wasLuckyActiveRef.current = false;
       }
 
-      lastDecayAtMsRef.current = null;
       return;
     }
 
     const syncingHeldCharm = (_deltaMs: number, frameTimeMs: number): void => {
       const slotIndex = selectedSlotIndexRef.current;
       const state = inventoryStateRef.current;
+
+      updatingInventoryState((currentState) =>
+        agingWorldPlazaFourLeafCloversFromPickupTime(currentState, Date.now())
+      );
+
       const slotItem =
         slotIndex === null || slotIndex < 0 || slotIndex >= state.capacity
           ? null
@@ -96,107 +152,21 @@ export function usingWorldPlazaHeldFourLeafCloverCharm({
         toggleBuffRef.current?.(DEFINING_WORLD_PLAZA_LUCKY_BUFF_DEFENDER_ID);
         toggleBuffRef.current?.(DEFINING_WORLD_PLAZA_LUCKY_BUFF_ATTACKER_ID);
         wasLuckyActiveRef.current = true;
-        lastDecayAtMsRef.current = frameTimeMs;
       } else if (!shouldBeActive && wasLuckyActiveRef.current) {
         registeringWorldPlazaHeldLuckyBuffBridge(false);
         toggleBuffRef.current?.(DEFINING_WORLD_PLAZA_LUCKY_BUFF_DEFENDER_ID);
         toggleBuffRef.current?.(DEFINING_WORLD_PLAZA_LUCKY_BUFF_ATTACKER_ID);
         wasLuckyActiveRef.current = false;
-        lastDecayAtMsRef.current = null;
       }
 
-      if (
-        !shouldBeActive ||
-        slotIndex === null ||
-        !slotItem ||
-        !durabilitySnapshot
-      ) {
+      if (!shouldBeActive) {
         return;
       }
-
-      const previousDecayAtMs = lastDecayAtMsRef.current ?? frameTimeMs;
-      const elapsedMs = Math.max(0, frameTimeMs - previousDecayAtMs);
-      lastDecayAtMsRef.current = frameTimeMs;
-
-      if (elapsedMs <= 0) {
-        return;
-      }
-
-      const wearIntervalMs =
-        DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DECAY_REAL_MS_WHILE_HELD /
-        DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DURABILITY_MAX;
-      const accumulatedDecayMs =
-        (accumulatedDecayMsByItemIdRef.current.get(slotItem.id) ?? 0) +
-        elapsedMs;
-      const wearAmount = Math.floor(accumulatedDecayMs / wearIntervalMs);
-
-      accumulatedDecayMsByItemIdRef.current.set(
-        slotItem.id,
-        accumulatedDecayMs - wearAmount * wearIntervalMs
-      );
-
-      if (wearAmount <= 0) {
-        const playerPosition = playerPositionRef.current;
-        const lastScoutAtMs = lastScoutAtMsRef.current ?? 0;
-
-        if (
-          playerPosition &&
-          frameTimeMs - lastScoutAtMs >= SCOUT_INTERVAL_MS
-        ) {
-          scoutingWorldPlazaRareBiomesWhileLucky(playerPosition);
-          lastScoutAtMsRef.current = frameTimeMs;
-        }
-
-        return;
-      }
-
-      const nextRemaining = Math.max(
-        0,
-        durabilitySnapshot.remaining - wearAmount
-      );
-
-      if (nextRemaining <= 0) {
-        accumulatedDecayMsByItemIdRef.current.delete(slotItem.id);
-      }
-
-      updatingInventoryState((currentState) => {
-        const currentSlot = currentState.slots[slotIndex];
-
-        if (!currentSlot || currentSlot.id !== slotItem.id) {
-          return null;
-        }
-
-        if (nextRemaining <= 0) {
-          return {
-            capacity: currentState.capacity,
-            slots: cloningInventorySlotsWithSlotUpdate(
-              currentState.slots,
-              slotIndex,
-              null
-            ),
-          };
-        }
-
-        return {
-          capacity: currentState.capacity,
-          slots: cloningInventorySlotsWithSlotUpdate(
-            currentState.slots,
-            slotIndex,
-            {
-              ...currentSlot,
-              metadata: {
-                ...currentSlot.metadata,
-                [DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_METADATA_KEY]:
-                  nextRemaining,
-              },
-            }
-          ),
-        };
-      });
 
       const playerPosition = playerPositionRef.current;
+      const lastScoutAtMs = lastScoutAtMsRef.current ?? 0;
 
-      if (playerPosition) {
+      if (playerPosition && frameTimeMs - lastScoutAtMs >= SCOUT_INTERVAL_MS) {
         scoutingWorldPlazaRareBiomesWhileLucky(playerPosition);
         lastScoutAtMsRef.current = frameTimeMs;
       }
@@ -213,8 +183,6 @@ export function usingWorldPlazaHeldFourLeafCloverCharm({
         toggleBuffRef.current?.(DEFINING_WORLD_PLAZA_LUCKY_BUFF_ATTACKER_ID);
         wasLuckyActiveRef.current = false;
       }
-
-      lastDecayAtMsRef.current = null;
     };
   }, [enabled, playerPositionRef, toggleBuffRef, updatingInventoryState]);
 }

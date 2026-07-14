@@ -13,8 +13,8 @@ import {
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
   computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
-import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
+import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import {
   DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME,
@@ -36,6 +36,7 @@ import {
 import { resolvingWildlifeInstanceSizeScale } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
 import { resolvingWorldPlazaWildlifeNameTagScreenPoint } from '@/components/world/wildlife/domains/resolvingWorldPlazaWildlifeNameTagScreenPoint';
+import { checkingWildlifePetNeedsOwnerFeed } from '@/components/world/wildlife/pets/domains/checkingWildlifePetNeedsOwnerFeed';
 import {
   DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTIONS_REVEAL_MS,
   LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED,
@@ -96,12 +97,14 @@ type RenderingWildlifeDocileBetrayLiveLabelSnapshot = {
   readonly hasPermanentName: boolean;
   readonly loyalty: number;
   readonly activeCommand: DefiningWildlifePetCommandId | null;
+  /** True when hunger is below the owner-feed threshold. */
+  readonly needsOwnerFeed: boolean;
 };
 
 function formattingWildlifeDocileBetrayLiveLabelSnapshotKey(
   snapshot: RenderingWildlifeDocileBetrayLiveLabelSnapshot
 ): string {
-  return `${snapshot.label}\0${snapshot.isCompanionNameAction ? '1' : '0'}\0${snapshot.hasPermanentName ? '1' : '0'}\0${snapshot.loyalty}\0${snapshot.activeCommand ?? ''}`;
+  return `${snapshot.label}\0${snapshot.isCompanionNameAction ? '1' : '0'}\0${snapshot.hasPermanentName ? '1' : '0'}\0${snapshot.loyalty}\0${snapshot.activeCommand ?? ''}\0${snapshot.needsOwnerFeed ? '1' : '0'}`;
 }
 
 function readingWildlifeDocileBetrayLiveLabelSnapshot(
@@ -116,6 +119,7 @@ function readingWildlifeDocileBetrayLiveLabelSnapshot(
       hasPermanentName: false,
       loyalty: 0,
       activeCommand: null,
+      needsOwnerFeed: false,
     };
   }
 
@@ -128,6 +132,9 @@ function readingWildlifeDocileBetrayLiveLabelSnapshot(
   const hasPermanentName = Boolean(pendingInstance?.customDisplayName?.trim());
   const isNamable =
     loyalty > 0 && checkingWildlifePetHasCapability(loyalty, 'namable');
+  const needsOwnerFeed = checkingWildlifePetNeedsOwnerFeed(
+    pendingInstance?.hungerState.hungerRatio ?? 1
+  );
 
   // Familiar+: overhead is Name? / pet name (+ delayed care stack when named).
   if (isNamable) {
@@ -141,6 +148,7 @@ function readingWildlifeDocileBetrayLiveLabelSnapshot(
       hasPermanentName,
       loyalty,
       activeCommand,
+      needsOwnerFeed,
     };
   }
 
@@ -151,6 +159,7 @@ function readingWildlifeDocileBetrayLiveLabelSnapshot(
       hasPermanentName: false,
       loyalty,
       activeCommand,
+      needsOwnerFeed,
     };
   }
 
@@ -165,6 +174,7 @@ function readingWildlifeDocileBetrayLiveLabelSnapshot(
       hasPermanentName: false,
       loyalty,
       activeCommand,
+      needsOwnerFeed,
     };
   }
 
@@ -174,6 +184,7 @@ function readingWildlifeDocileBetrayLiveLabelSnapshot(
     hasPermanentName: false,
     loyalty,
     activeCommand,
+    needsOwnerFeed,
   };
 }
 
@@ -209,6 +220,7 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
       hasPermanentName: false,
       loyalty: 0,
       activeCommand: null,
+      needsOwnerFeed: false,
     });
   const [areCareActionsRevealed, setAreCareActionsRevealed] = useState(false);
   const nameHoverRevealTimeoutRef = useRef<number | null>(null);
@@ -458,7 +470,9 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
         {liveLabelSnapshot.hasPermanentName ? (
           <div
             ref={rowElementRef}
-            className={STYLING_WILDLIFE_PET_COMPANION_CARE_ACTION_STACK_CLASS_NAME}
+            className={
+              STYLING_WILDLIFE_PET_COMPANION_CARE_ACTION_STACK_CLASS_NAME
+            }
           >
             <button
               type="button"
@@ -506,13 +520,17 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
                   className={
                     DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME
                   }
-                  disabled={!canFeedPet}
-                  style={canFeedPet ? undefined : { opacity: 0.45 }}
+                  disabled={!canFeedPet || !liveLabelSnapshot.needsOwnerFeed}
+                  style={
+                    canFeedPet && liveLabelSnapshot.needsOwnerFeed
+                      ? undefined
+                      : { opacity: 0.45 }
+                  }
                   onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
 
-                    if (!canFeedPet) {
+                    if (!canFeedPet || !liveLabelSnapshot.needsOwnerFeed) {
                       return;
                     }
 

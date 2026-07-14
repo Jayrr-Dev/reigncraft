@@ -13,6 +13,7 @@ import {
 import {
   checkingWorldPlazaTerrainDependencyKeysChanged,
   DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY,
+  type DefiningWorldPlazaTerrainDependencyKeyId,
   type DefiningWorldPlazaTerrainDependencySnapshot,
 } from '@/components/world/engine/definingWorldPlazaTerrainDependencyKeys';
 import type {
@@ -22,8 +23,27 @@ import type {
   DefiningWorldPlazaTerrainRedrawLayerDescriptor,
   RunningWorldPlazaTerrainLayerEngineContext,
 } from '@/components/world/engine/definingWorldPlazaTerrainLayerDescriptor';
-import { REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID } from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
+import {
+  REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID,
+  type RegisteringWorldPlazaTextureAssetId,
+} from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
 import type { Container } from 'pixi.js';
+
+/**
+ * Exhaustive texture gate registry. Adding a manifest asset id requires its
+ * readiness dependency here, preventing layers from completing with empty textures.
+ */
+const RUNNING_WORLD_PLAZA_TERRAIN_TEXTURE_READINESS_DEPENDENCY_BY_ASSET_ID: Record<
+  RegisteringWorldPlazaTextureAssetId,
+  DefiningWorldPlazaTerrainDependencyKeyId
+> = {
+  [REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.FIRELANDS_SPRITES]:
+    DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FIRELANDS_TEXTURES_READY,
+  [REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.LAVA_STATIC_TILE]:
+    DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LAVA_TEXTURES_READY,
+  [REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.LONG_GRASS_SPRITES]:
+    DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LONG_GRASS_TEXTURES_READY,
+};
 
 /**
  * Generic terrain layer engine runner.
@@ -235,30 +255,13 @@ export function creatingWorldPlazaTerrainLayerEngine(
     }
 
     for (const textureAssetId of descriptor.requiresTextures) {
-      if (
-        textureAssetId ===
-        REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.FIRELANDS_SPRITES
-      ) {
-        if (
-          dependencySnapshot[
-            DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FIRELANDS_TEXTURES_READY
-          ] !== '1'
-        ) {
-          return false;
-        }
-      }
+      const readinessDependencyKey =
+        RUNNING_WORLD_PLAZA_TERRAIN_TEXTURE_READINESS_DEPENDENCY_BY_ASSET_ID[
+          textureAssetId
+        ];
 
-      if (
-        textureAssetId ===
-        REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.LAVA_STATIC_TILE
-      ) {
-        if (
-          dependencySnapshot[
-            DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LAVA_TEXTURES_READY
-          ] !== '1'
-        ) {
-          return false;
-        }
+      if (dependencySnapshot[readinessDependencyKey] !== '1') {
+        return false;
       }
     }
 

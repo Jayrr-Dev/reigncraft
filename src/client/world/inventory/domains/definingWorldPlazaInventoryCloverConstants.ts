@@ -15,14 +15,18 @@ export const DEFINING_WORLD_PLAZA_LUCKY_BUFF_ATTACKER_ID =
 /** Max charm durability for a fresh four-leaf clover. */
 export const DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DURABILITY_MAX = 100;
 
-/** Charm fades over this many in-game days while held in the hotbar. */
+/** Charm fades this many in-game days after being picked. */
 export const DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DECAY_IN_GAME_DAYS = 1;
 
-/** Real-ms wear budget for one full charm while held. */
-export const DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DECAY_REAL_MS_WHILE_HELD =
+/** Real-ms lifetime for one full charm after pickup. */
+export const DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DECAY_REAL_MS_AFTER_PICKUP =
   computingWorldPlazaInGameDaysToRealMs(
     DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DECAY_IN_GAME_DAYS
   );
+
+/** Inventory metadata timestamp marking when the clover was picked. */
+export const DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_PICKED_AT_MS_METADATA_KEY =
+  'fourLeafCloverPickedAtMs' as const;
 
 /** Disease contraction multiplier while lucky (50% less likely). */
 export const DEFINING_WORLD_PLAZA_LUCKY_DISEASE_CONTRACTION_MULTIPLIER = 0.5;

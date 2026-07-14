@@ -28,7 +28,7 @@ describe('checkingWildlifeVitalsGraphicsShouldShow', () => {
     ).toBe(false);
   });
 
-  it('shows hunger circle alone when bars are full', () => {
+  it('hides hunger when bars are full even for domesticated pets', () => {
     expect(
       checkingWildlifeVitalsGraphicsShouldShow({
         isDead: false,
@@ -38,13 +38,29 @@ describe('checkingWildlifeVitalsGraphicsShouldShow', () => {
         showHungerCircle: true,
       })
     ).toEqual({
-      showGraphics: true,
+      showGraphics: false,
       showBars: false,
+      showHungerCircle: false,
+    });
+  });
+
+  it('shows hunger with bars for domesticated pets when HP/stamina drop', () => {
+    expect(
+      checkingWildlifeVitalsGraphicsShouldShow({
+        isDead: false,
+        isImmortal: false,
+        healthRatio: 0.5,
+        staminaRatio: 1,
+        showHungerCircle: true,
+      })
+    ).toEqual({
+      showGraphics: true,
+      showBars: true,
       showHungerCircle: true,
     });
   });
 
-  it('shows bars without hunger when the feature is off', () => {
+  it('shows bars without hunger for wild animals', () => {
     expect(
       checkingWildlifeVitalsGraphicsShouldShow({
         isDead: false,

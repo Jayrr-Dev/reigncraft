@@ -1,5 +1,7 @@
+import { DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumCloverStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
 import { DEFINING_PLAZA_LAPIDARY_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaLapidaryStudyTier';
+import { resolvingWorldPlazaCloverItemTypeIdFromLootKind } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverSpriteSheetConstants';
 import { resolvingWorldPlazaFlowerItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFlowerSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { resolvingWorldPlazaOreItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
@@ -286,5 +288,59 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel ore Study', () => {
     expect(
       full?.infoRows.some((row) => row.value.includes('ladder reference'))
     ).toBe(true);
+  });
+});
+
+describe('resolvingWorldPlazaInventoryItemDetailPopoverModel clover Study', () => {
+  const threeLeafItemTypeId =
+    resolvingWorldPlazaCloverItemTypeIdFromLootKind('three_leaf');
+  const fourLeafItemTypeId =
+    resolvingWorldPlazaCloverItemTypeIdFromLootKind('four_leaf');
+
+  it('offers Study while combined clover progress is incomplete', () => {
+    const threeLeaf = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'clover-3-1',
+        itemTypeId: threeLeafItemTypeId,
+        quantity: 9,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        cloverStudyCount: 24,
+      }
+    );
+    const fourLeaf = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'clover-4-1',
+        itemTypeId: fourLeafItemTypeId,
+        quantity: 1,
+        slotIndex: 1,
+      },
+      {
+        isEquipped: false,
+        cloverStudyCount: 24,
+      }
+    );
+
+    expect(threeLeaf?.canStudy).toBe(true);
+    expect(fourLeaf?.canStudy).toBe(true);
+  });
+
+  it('hides Study once the shared clover track is fully studied', () => {
+    const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'clover-3-1',
+        itemTypeId: threeLeafItemTypeId,
+        quantity: 9,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        cloverStudyCount: DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_FULL_COUNT,
+      }
+    );
+
+    expect(model?.canStudy).toBe(false);
   });
 });

@@ -1,13 +1,23 @@
+import { computingWorldPlazaAnchoredPopoverViewportShiftX } from '@/components/world/domains/computingWorldPlazaAnchoredPopoverViewportShiftX';
+import { DEFINING_WORLD_PLAZA_ANCHORED_POPOVER_VIEWPORT_EDGE_INSET_PX } from '@/components/world/domains/definingWorldPlazaAnchoredPopoverViewportConstants';
 import {
   DEFINING_WORLD_PLAZA_CAMERA_VISIBLE_TILE_BOUNDS_REFERENCE_ZOOM,
   DEFINING_WORLD_PLAZA_CAMERA_ZOOM,
 } from '@/components/world/domains/definingWorldPlazaCameraConstants';
-import { computingWorldPlazaAnchoredPopoverViewportShiftX } from '@/components/world/domains/computingWorldPlazaAnchoredPopoverViewportShiftX';
-import { DEFINING_WORLD_PLAZA_ANCHORED_POPOVER_VIEWPORT_EDGE_INSET_PX } from '@/components/world/domains/definingWorldPlazaAnchoredPopoverViewportConstants';
 
 /** CSS transform-origin for plaza avatar DOM overlays (bottom-center anchor). */
 export const COMPUTING_WORLD_PLAZA_CAMERA_ZOOMED_DOM_OVERLAY_TRANSFORM_ORIGIN =
   'bottom center' as const;
+
+/**
+ * Inherited CSS custom property for live camera world zoom.
+ *
+ * World-anchored shells set this while applying `scale(zoom)`. Screen-space
+ * children (buff detail cards) counter-scale with
+ * `scale(calc(1 / var(--plaza-camera-world-zoom)))`.
+ */
+export const COMPUTING_WORLD_PLAZA_CAMERA_WORLD_ZOOM_CSS_VARIABLE =
+  '--plaza-camera-world-zoom' as const;
 
 /**
  * Outer CSS transform that pins a DOM overlay above an avatar in viewport space.
@@ -108,11 +118,33 @@ export function computingWorldPlazaCameraZoomedDomOverlayScaleStyle(
 ): {
   transform: string;
   transformOrigin: typeof COMPUTING_WORLD_PLAZA_CAMERA_ZOOMED_DOM_OVERLAY_TRANSFORM_ORIGIN;
+  [COMPUTING_WORLD_PLAZA_CAMERA_WORLD_ZOOM_CSS_VARIABLE]: string;
 } {
   return {
     transform: `scale(${worldZoom})`,
     transformOrigin:
       COMPUTING_WORLD_PLAZA_CAMERA_ZOOMED_DOM_OVERLAY_TRANSFORM_ORIGIN,
+    [COMPUTING_WORLD_PLAZA_CAMERA_WORLD_ZOOM_CSS_VARIABLE]: String(worldZoom),
+  };
+}
+
+/**
+ * Counter-scale so a child stays screen-sized inside a camera-zoomed overlay.
+ *
+ * Pair with {@link computingWorldPlazaCameraZoomedDomOverlayScaleStyle} on an
+ * ancestor. Uses the inherited `--plaza-camera-world-zoom` custom property.
+ *
+ * @param placement - Vertical anchor relative to the host control.
+ */
+export function computingWorldPlazaCameraZoomedDomOverlayScreenSpaceCounterScaleStyle(
+  placement: 'above' | 'below' = 'above'
+): {
+  transform: string;
+  transformOrigin: 'bottom center' | 'top center';
+} {
+  return {
+    transform: `translateX(-50%) scale(calc(1 / var(${COMPUTING_WORLD_PLAZA_CAMERA_WORLD_ZOOM_CSS_VARIABLE}, ${DEFINING_WORLD_PLAZA_CAMERA_ZOOM})))`,
+    transformOrigin: placement === 'above' ? 'bottom center' : 'top center',
   };
 }
 
@@ -139,6 +171,20 @@ export function applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
 
   if (element.style.transformOrigin !== scaleStyle.transformOrigin) {
     element.style.transformOrigin = scaleStyle.transformOrigin;
+  }
+
+  const zoomVariableValue =
+    scaleStyle[COMPUTING_WORLD_PLAZA_CAMERA_WORLD_ZOOM_CSS_VARIABLE];
+
+  if (
+    element.style.getPropertyValue(
+      COMPUTING_WORLD_PLAZA_CAMERA_WORLD_ZOOM_CSS_VARIABLE
+    ) !== zoomVariableValue
+  ) {
+    element.style.setProperty(
+      COMPUTING_WORLD_PLAZA_CAMERA_WORLD_ZOOM_CSS_VARIABLE,
+      zoomVariableValue
+    );
   }
 }
 

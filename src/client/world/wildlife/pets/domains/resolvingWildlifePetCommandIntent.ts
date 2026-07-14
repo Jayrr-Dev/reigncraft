@@ -10,6 +10,7 @@ import type {
   DefiningWildlifeInstance,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { checkingWildlifePetMayAcceptCommand } from '@/components/world/wildlife/pets/domains/checkingWildlifePetMayAcceptCommand';
+import { checkingWildlifePetNeedsOwnerFeed } from '@/components/world/wildlife/pets/domains/checkingWildlifePetNeedsOwnerFeed';
 
 /** Follow window stamped far ahead so it reads as "until commanded otherwise". */
 const DEFINING_WILDLIFE_PET_FOLLOW_HORIZON_MS = 365 * 24 * 60 * 60 * 1000;
@@ -73,6 +74,18 @@ export function resolvingWildlifePetCommandIntent(
     ? petBond.command
     : 'follow';
 
+  // Hungry companions break Stay to trail the owner for Feed.
+  if (
+    effectiveCommand === 'stay' &&
+    checkingWildlifePetNeedsOwnerFeed(instance.hungerState.hungerRatio)
+  ) {
+    return resolvingWildlifePetFollowIntent(
+      playerUserId,
+      playerPosition,
+      nowMs
+    );
+  }
+
   if (effectiveCommand === 'stay') {
     const stayPoint = petBond.stayPoint ?? instance.position;
 
@@ -96,7 +109,11 @@ export function resolvingWildlifePetCommandIntent(
       };
     }
 
-    return resolvingWildlifePetFollowIntent(playerUserId, playerPosition, nowMs);
+    return resolvingWildlifePetFollowIntent(
+      playerUserId,
+      playerPosition,
+      nowMs
+    );
   }
 
   if (effectiveCommand === 'defend') {
@@ -116,7 +133,11 @@ export function resolvingWildlifePetCommandIntent(
       };
     }
 
-    return resolvingWildlifePetFollowIntent(playerUserId, playerPosition, nowMs);
+    return resolvingWildlifePetFollowIntent(
+      playerUserId,
+      playerPosition,
+      nowMs
+    );
   }
 
   return resolvingWildlifePetFollowIntent(playerUserId, playerPosition, nowMs);

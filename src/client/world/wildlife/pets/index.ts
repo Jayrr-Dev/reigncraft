@@ -49,6 +49,8 @@ export {
 
 export { checkingWildlifePetAllied } from '@/components/world/wildlife/pets/domains/checkingWildlifePetAllied';
 
+export { checkingWildlifePetNeedsOwnerFeed } from '@/components/world/wildlife/pets/domains/checkingWildlifePetNeedsOwnerFeed';
+
 export {
   checkingWildlifePetItemIsEquippableWeapon,
   checkingWildlifePetItemTypeIdIsEquippableWeapon,

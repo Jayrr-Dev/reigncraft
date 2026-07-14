@@ -27,6 +27,8 @@ import {
   DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_TRACK_BUTTON_ACTIVE_CLASS_NAME,
   DEFINING_WORLD_PLAZA_SAVED_COORDS_LIST_TRACK_BUTTON_LABEL,
 } from '@/components/world/domains/definingWorldPlazaSavedCoordsListUiConstants';
+import { RenderingWorldPlazaEntityDiseaseIconGlyph } from '@/components/world/health/components/renderingWorldPlazaEntityDiseaseIconGlyph';
+import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import {
   DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_EMPTY_COLOR,
   DEFINING_WORLD_PLAZA_HUNGER_INDICATOR_FOOD_FILL_COLOR,
@@ -1497,6 +1499,7 @@ type RenderingPlazaTutorialBuffBadgeDemoRow = {
   icon: string;
   label: string;
   polarity: 'buff' | 'debuff' | 'disease';
+  diseaseId?: DefiningWorldPlazaEntityDiseaseId;
   borderClassName?: string;
   iconClassName?: string;
 };
@@ -1518,6 +1521,7 @@ const PLAZA_TUTORIAL_DISEASE_BUFF_BADGE_DEMO_ROWS: RenderingPlazaTutorialBuffBad
       icon: 'mdi:stomach',
       label: 'Salmonellosis',
       polarity: 'disease',
+      diseaseId: 'salmonellosis',
       borderClassName: 'border-lime-500/70 bg-lime-950/90',
       iconClassName: 'text-lime-300',
     },
@@ -1525,6 +1529,7 @@ const PLAZA_TUTORIAL_DISEASE_BUFF_BADGE_DEMO_ROWS: RenderingPlazaTutorialBuffBad
       icon: 'mdi:biohazard',
       label: 'Trichinellosis',
       polarity: 'disease',
+      diseaseId: 'trichinellosis',
       borderClassName: 'border-amber-500/70 bg-amber-950/90',
       iconClassName: 'text-amber-300',
     },
@@ -1532,6 +1537,7 @@ const PLAZA_TUTORIAL_DISEASE_BUFF_BADGE_DEMO_ROWS: RenderingPlazaTutorialBuffBad
       icon: 'mdi:head-question',
       label: 'Chronic Wasting',
       polarity: 'disease',
+      diseaseId: 'chronic-wasting',
       borderClassName: 'border-purple-500/70 bg-purple-950/90',
       iconClassName: 'text-purple-300',
     },
@@ -1569,7 +1575,14 @@ function RenderingPlazaTutorialBuffBadgeDemoIcon({
       <div
         className={`flex size-8 items-center justify-center rounded-[2px] border p-0.5 shadow-[0_1px_0_rgba(255,255,255,0.08)_inset] ${borderClassName}`}
       >
-        <Icon icon={row.icon} className={`size-4 ${iconClassName}`} />
+        {row.diseaseId ? (
+          <RenderingWorldPlazaEntityDiseaseIconGlyph
+            diseaseId={row.diseaseId}
+            className="size-4"
+          />
+        ) : (
+          <Icon icon={row.icon} className={`size-4 ${iconClassName}`} />
+        )}
       </div>
       <span className="max-w-[4.5rem] text-center text-[9px] font-semibold leading-tight text-ink-soft">
         {row.label}
@@ -1682,7 +1695,10 @@ export function RenderingPlazaTutorialCookWildMeatDemo({
           <div className="flex justify-center gap-2" aria-hidden>
             <div className="flex flex-col items-center gap-1">
               <div className="flex size-8 items-center justify-center rounded-[2px] border border-lime-500/70 bg-lime-950/90 p-0.5">
-                <Icon icon="mdi:biohazard" className="size-4 text-lime-300" />
+                <RenderingWorldPlazaEntityDiseaseIconGlyph
+                  diseaseId="salmonellosis"
+                  className="size-4"
+                />
               </div>
               <span className="text-[9px] font-semibold text-lime-300">
                 Disease

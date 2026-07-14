@@ -8,16 +8,17 @@ import { checkingPlazaBestiaryStudyTierUnlocked } from '@/components/home/domain
 import { resolvingWorldPlazaScaledAttackIntervalMs } from '@/components/world/domains/resolvingWorldPlazaGlobalAttackSpeedScale';
 import { resolvingWorldPlazaEntityBleedSeverityDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import { resolvingWorldPlazaEntityBuffDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
+import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import { resolvingWorldPlazaEntityDiseaseDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import { resolvingWorldPlazaEntityPoisonPotencyDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import { resolvingWorldPlazaEntityBuffHudIcon } from '@/components/world/health/domains/mappingWorldPlazaEntityBuffHudIcon';
 import { resolvingWildlifeMeatCatalogEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
-import { DEFINING_WILDLIFE_STAMINA_FATIGUE_TIER_CONFIG } from '@/components/world/wildlife/domains/definingWildlifeStaminaFatigueConstants';
 import { listingWildlifeSpeciesOnHitEffects } from '@/components/world/wildlife/domains/definingWildlifeSpeciesOnHitEffectRegistry';
 import {
   resolvingWildlifeSpeciesDefinition,
   type DefiningWildlifeSpeciesDefinition,
 } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { DEFINING_WILDLIFE_STAMINA_FATIGUE_TIER_CONFIG } from '@/components/world/wildlife/domains/definingWildlifeStaminaFatigueConstants';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type PlazaBestiaryGuideCombatStats = {
@@ -50,6 +51,7 @@ export type PlazaBestiaryGuideEcologyStats = {
 export type PlazaBestiaryGuideLootStats = {
   rawMeatLabel: string;
   lootQuantity: number;
+  rawDiseaseId: DefiningWorldPlazaEntityDiseaseId | null;
   rawDiseaseLabel: string | null;
   rawDiseaseIcon: string | null;
   rawDiseaseChancePercent: number | null;
@@ -245,6 +247,7 @@ export function resolvingPlazaBestiaryGuideLootStats(
       'None',
     lootQuantity: meatEntry?.lootQuantity ?? speciesDefinition.loot.quantity,
     rawDiseaseLabel: diseaseDescriptor?.label ?? null,
+    rawDiseaseId: meatEntry?.rawDiseaseId ?? null,
     rawDiseaseIcon: diseaseDescriptor?.icon ?? null,
     rawDiseaseChancePercent: meatEntry
       ? formattingPlazaBestiaryProcChancePercent(meatEntry.rawDiseaseChance)

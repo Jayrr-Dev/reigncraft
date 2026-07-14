@@ -21,6 +21,13 @@ import {
   DEFINING_WORLD_PLAZA_FIRELANDS_TEMPERATURE_MIN,
 } from '@/components/world/domains/definingWorldPlazaFirelandsBiomeConstants';
 import {
+  DEFINING_WORLD_PLAZA_FLOWER_FOREST_BODY_NOISE_FREQUENCY,
+  DEFINING_WORLD_PLAZA_FLOWER_FOREST_BODY_NOISE_OCTAVES,
+  DEFINING_WORLD_PLAZA_FLOWER_FOREST_BODY_NOISE_SEED,
+  DEFINING_WORLD_PLAZA_FLOWER_FOREST_BODY_NOISE_THRESHOLD,
+  DEFINING_WORLD_PLAZA_FLOWER_FOREST_HUMIDITY_MIN,
+} from '@/components/world/domains/definingWorldPlazaFlowerForestBiomeConstants';
+import {
   DEFINING_WORLD_PLAZA_GENERATION_FEATURE,
   DEFINING_WORLD_PLAZA_GENERATION_FEATURE_FLAT_BIOME_KIND,
 } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
@@ -83,9 +90,6 @@ const DEFINING_WORLD_PLAZA_BIOME_SWAMP_HUMIDITY_MIN = 0.82;
 
 /** Humidity threshold for forest biomes. */
 const DEFINING_WORLD_PLAZA_BIOME_FOREST_HUMIDITY_MIN = 0.62;
-
-/** Humidity threshold for flower forest biomes. */
-const DEFINING_WORLD_PLAZA_BIOME_FLOWER_FOREST_HUMIDITY_MIN = 0.48;
 
 /** Humidity threshold for beach biomes. */
 const DEFINING_WORLD_PLAZA_BIOME_BEACH_HUMIDITY_MIN = 0.72;

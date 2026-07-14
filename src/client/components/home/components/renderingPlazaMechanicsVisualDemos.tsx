@@ -20,6 +20,7 @@ import type { PlazaMechanicsBuffBadgeRollCurvePreviewModifiers } from '@/compone
 import { resolvingPlazaMechanicsBuffBadgeRollCurvePreview } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeRollCurvePreview';
 import { resolvingPlazaMechanicsCombatDamageKindPreviewSample } from '@/components/home/domains/resolvingPlazaMechanicsCombatDamageKindPreviewSample';
 import { Icon } from '@/components/ui/icon';
+import { RenderingWorldPlazaEntityDiseaseIconGlyph } from '@/components/world/health/components/renderingWorldPlazaEntityDiseaseIconGlyph';
 import { resolvingWorldPlazaDamageOutcomeTierForcedDeviationScore } from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierForcedDeviationScores';
 import { DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_REGISTRY } from '@/components/world/health/domains/definingWorldPlazaDamageOutcomeTierRegistry';
 import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
@@ -625,7 +626,10 @@ export function RenderingPlazaMechanicsStatusEffectTypeDemo({
           </div>
           <div className="flex flex-col items-center gap-1" aria-hidden>
             <div className="flex size-8 items-center justify-center rounded-[2px] border border-lime-500/70 bg-lime-950/90 p-0.5">
-              <Icon icon="mdi:biohazard" className="size-4 text-lime-300" />
+              <RenderingWorldPlazaEntityDiseaseIconGlyph
+                diseaseId="salmonellosis"
+                className="size-4"
+              />
             </div>
             <span className="text-[10px] font-bold tabular-nums text-white/90">
               92

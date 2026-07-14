@@ -16,6 +16,7 @@ import {
   gettingWorldPlazaPathologyObtainedDiseasesSnapshot,
   subscribingWorldPlazaPathologyDiscovery,
 } from '@/components/world/domains/managingWorldPlazaPathologyDiscoveryStore';
+import { RenderingWorldPlazaEntityDiseaseIconGlyph } from '@/components/world/health/components/renderingWorldPlazaEntityDiseaseIconGlyph';
 import { cn } from '@/lib/utils';
 import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
 
@@ -56,10 +57,11 @@ function RenderingPlazaPathologyGuideCard({
           className={PLAZA_PATHOLOGY_GUIDE_TILE_STAGE_CLASS_NAME}
           aria-hidden
         >
-          <Icon
-            icon="mdi:biohazard"
-            className="size-[42%] text-ink-soft/35"
-            aria-hidden
+          <RenderingWorldPlazaEntityDiseaseIconGlyph
+            diseaseId={entry.diseaseId}
+            fallbackIcon="mdi:biohazard"
+            variant="silhouette"
+            className="size-[42%]"
           />
         </div>
         <span
@@ -88,10 +90,10 @@ function RenderingPlazaPathologyGuideCard({
         <span
           className={`flex size-[48%] items-center justify-center rounded-[3px] border ${entry.hudIconBorderClassName}`}
         >
-          <Icon
-            icon={entry.icon}
-            className={`size-[55%] ${entry.hudIconColorClassName}`}
-            aria-hidden
+          <RenderingWorldPlazaEntityDiseaseIconGlyph
+            diseaseId={entry.diseaseId}
+            fallbackIcon={entry.icon}
+            className="size-[70%]"
           />
         </span>
         <span className="absolute left-1 top-1 flex items-center gap-0.5 rounded-sm border border-poster-teal/35 bg-poster-teal-deep/90 px-1 py-0.5 shadow">
@@ -161,8 +163,7 @@ export function RenderingPlazaPathologyPanel({
       selectedEntryId === null
         ? null
         : (guideEntries.find(
-            (entry) =>
-              resolvingPlazaPathologyEntryId(entry) === selectedEntryId
+            (entry) => resolvingPlazaPathologyEntryId(entry) === selectedEntryId
           ) ?? null),
     [guideEntries, resolvingPlazaPathologyEntryId, selectedEntryId]
   );

@@ -9,7 +9,10 @@ export type CheckingWildlifeVitalsGraphicsShouldShowParams = {
   isImmortal: boolean;
   healthRatio: number;
   staminaRatio: number;
-  /** When true, always show the hunger orb for living mortal animals. */
+  /**
+   * When true, this living animal may show a hunger orb (domesticated / bonded
+   * pets only; wild animals stay off).
+   */
   showHungerCircle: boolean;
 };
 
@@ -21,6 +24,7 @@ export type CheckingWildlifeVitalsGraphicsShouldShowResult = {
 
 /**
  * Resolves whether vitals Graphics should mount and which pieces to draw.
+ * Hunger orb rides the same show/hide window as HP + stamina bars.
  */
 export function checkingWildlifeVitalsGraphicsShouldShow({
   isDead,
@@ -38,10 +42,10 @@ export function checkingWildlifeVitalsGraphicsShouldShow({
   }
 
   const showBars = healthRatio < 0.999 || staminaRatio < 0.999;
-  const hungerVisible = showHungerCircle;
+  const hungerVisible = showHungerCircle && showBars;
 
   return {
-    showGraphics: showBars || hungerVisible,
+    showGraphics: showBars,
     showBars,
     showHungerCircle: hungerVisible,
   };

@@ -14,6 +14,7 @@ import {
 } from '@/components/home/domains/resolvingPlazaPathologyStudyTier';
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
+import { RenderingWorldPlazaEntityDiseaseIconGlyph } from '@/components/world/health/components/renderingWorldPlazaEntityDiseaseIconGlyph';
 import { cn } from '@/lib/utils';
 
 const PLAZA_PATHOLOGY_DETAIL_HEADER_BUTTON_CLASS_NAME =
@@ -137,15 +138,17 @@ export function RenderingPlazaPathologyGuideDetailView({
             <span
               className={`flex size-20 items-center justify-center rounded-[4px] border sm:size-24 ${entry.hudIconBorderClassName}`}
             >
-              <Icon
-                icon={entry.icon}
-                className={`size-10 sm:size-12 ${entry.hudIconColorClassName}`}
-                aria-hidden
+              <RenderingWorldPlazaEntityDiseaseIconGlyph
+                diseaseId={entry.diseaseId}
+                fallbackIcon={entry.icon}
+                className="size-14 sm:size-16"
               />
             </span>
             {entry.isFullyStudied ? (
               <div className="absolute right-3 top-3 z-10">
-                <div className={PLAZA_PATHOLOGY_DETAIL_STUDIED_BADGE_CLASS_NAME}>
+                <div
+                  className={PLAZA_PATHOLOGY_DETAIL_STUDIED_BADGE_CLASS_NAME}
+                >
                   <span
                     className={
                       PLAZA_PATHOLOGY_DETAIL_STUDIED_BADGE_SOCKET_CLASS_NAME
@@ -164,7 +167,9 @@ export function RenderingPlazaPathologyGuideDetailView({
               </div>
             ) : entry.isStudied ? (
               <div className="absolute right-3 top-3 z-10">
-                <div className={PLAZA_PATHOLOGY_DETAIL_STUDIED_BADGE_CLASS_NAME}>
+                <div
+                  className={PLAZA_PATHOLOGY_DETAIL_STUDIED_BADGE_CLASS_NAME}
+                >
                   <span
                     className={
                       PLAZA_PATHOLOGY_DETAIL_STUDIED_BADGE_SOCKET_CLASS_NAME

@@ -5,12 +5,14 @@
  */
 
 import { seedingWorldPlazaGrassTileDecorationFromTileIndex } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
+import { checkingWildlifeInstanceIsOwnedPet } from '@/components/world/wildlife/domains/checkingWildlifeInstanceIsOwnedPet';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import { DEFINING_WILDLIFE_DOCILE_APPROACH_REACT_SEED_SALT } from '@/components/world/wildlife/domains/definingWildlifeDocileConstants';
 import type { DefiningWildlifeBehaviorIntent } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeDocileApproachReaction } from '@/components/world/wildlife/domains/resolvingWildlifeDocileApproachReaction';
 import { resolvingWildlifeDocileFollowPlayerIntent } from '@/components/world/wildlife/domains/resolvingWildlifeDocileFollowPlayerIntent';
 import { resolvingWildlifeFleeFromThreatPointIntent } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
+import { checkingWildlifePetNeedsOwnerFeed } from '@/components/world/wildlife/pets/domains/checkingWildlifePetNeedsOwnerFeed';
 
 function resolvingWildlifeDocileApproachReactRoll(
   blackboard: DefiningWildlifeBehaviorBlackboard
@@ -27,15 +29,24 @@ function resolvingWildlifeDocileApproachReactRoll(
 }
 
 /**
- * Picks follow or flee from aggressionLevel; caller applies timer side effects.
+ * Picks follow or flee from aggressionLevel; hungry bonded pets always follow
+ * so they can reach the owner for Feed. Caller applies timer side effects.
  */
 export function resolvingWildlifeDocileApproachReactIntent(
   blackboard: DefiningWildlifeBehaviorBlackboard
 ): DefiningWildlifeBehaviorIntent {
-  const reaction = resolvingWildlifeDocileApproachReaction({
-    aggressionLevel: blackboard.instance.aggressionLevel,
-    roll: resolvingWildlifeDocileApproachReactRoll(blackboard),
-  });
+  const hungryPetSeeksFeed =
+    checkingWildlifeInstanceIsOwnedPet(blackboard.instance) &&
+    checkingWildlifePetNeedsOwnerFeed(
+      blackboard.instance.hungerState.hungerRatio
+    );
+
+  const reaction = hungryPetSeeksFeed
+    ? 'follow'
+    : resolvingWildlifeDocileApproachReaction({
+        aggressionLevel: blackboard.instance.aggressionLevel,
+        roll: resolvingWildlifeDocileApproachReactRoll(blackboard),
+      });
 
   if (reaction === 'follow') {
     return resolvingWildlifeDocileFollowPlayerIntent(blackboard);

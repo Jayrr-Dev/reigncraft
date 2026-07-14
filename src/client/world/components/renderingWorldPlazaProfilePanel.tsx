@@ -19,6 +19,8 @@ import {
   LABELING_WORLD_PLAZA_PROFILE_PANEL_CLOSE,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_EFFECTS_EMPTY,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_EFFECTS_SECTION,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_IMMUNITY_EMPTY,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_IMMUNITY_SECTION,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_PASSIVES_EMPTY,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_PASSIVES_SECTION,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_TAB_LIST,
@@ -58,13 +60,16 @@ import {
   type DefiningWorldPlazaProfilePanelTabId,
 } from '@/components/world/domains/definingWorldPlazaProfilePanelConstants';
 import { resolvingWorldPlazaAvatarSkinPortrait } from '@/components/world/domains/resolvingWorldPlazaAvatarSkinPortrait';
+import type { ResolvingWorldPlazaProfilePanelImmunityEntry } from '@/components/world/domains/resolvingWorldPlazaProfilePanelImmunityEntries';
+import type { ResolvingWorldPlazaProfilePanelPassiveEntry } from '@/components/world/domains/resolvingWorldPlazaProfilePanelPassiveEntries';
 import {
   resolvingWorldPlazaProfilePanelSections,
   type ResolvingWorldPlazaProfilePanelAttributeEntry,
   type ResolvingWorldPlazaProfilePanelStaminaHud,
   type ResolvingWorldPlazaProfilePanelVitalRow,
 } from '@/components/world/domains/resolvingWorldPlazaProfilePanelSections';
-import type { ResolvingWorldPlazaProfilePanelPassiveEntry } from '@/components/world/domains/resolvingWorldPlazaProfilePanelPassiveEntries';
+import { RenderingWorldPlazaEntityDiseaseIconGlyph } from '@/components/world/health/components/renderingWorldPlazaEntityDiseaseIconGlyph';
+import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
 import type { UsingWorldPlazaPlayerHungerHudSnapshot } from '@/components/world/hunger/hooks/usingWorldPlazaPlayerHunger';
@@ -152,6 +157,7 @@ function RenderingWorldPlazaProfilePanelAttributeGrid({
   entries: readonly (
     | ResolvingWorldPlazaProfilePanelAttributeEntry
     | ResolvingWorldPlazaProfilePanelPassiveEntry
+    | ResolvingWorldPlazaProfilePanelImmunityEntry
   )[];
   emptyLabel?: string;
 }): React.JSX.Element {
@@ -164,37 +170,57 @@ function RenderingWorldPlazaProfilePanelAttributeGrid({
   }
 
   return (
-    <div className={STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_GRID_CLASS_NAME}>
-      {entries.map((entry) => (
-        <div
-          key={entry.id}
-          className={
-            STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_CHIP_CLASS_NAME
-          }
-        >
-          <Icon
-            icon={entry.iconName}
-            width={DEFINING_WORLD_PLAZA_PROFILE_PANEL_ICON_SIZE_PX}
-            height={DEFINING_WORLD_PLAZA_PROFILE_PANEL_ICON_SIZE_PX}
-            className="shrink-0 text-poster-orange-deep"
-            aria-hidden
-          />
-          <span
+    <div
+      className={STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_GRID_CLASS_NAME}
+    >
+      {entries.map((entry) => {
+        const diseaseId =
+          'diseaseId' in entry
+            ? (entry.diseaseId as DefiningWorldPlazaEntityDiseaseId | undefined)
+            : undefined;
+
+        return (
+          <div
+            key={entry.id}
             className={
-              STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_LABEL_CLASS_NAME
+              STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_CHIP_CLASS_NAME
             }
           >
-            {entry.label}
-          </span>
-          <span
-            className={
-              STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_CLASS_NAME
-            }
-          >
-            {entry.valueText}
-          </span>
-        </div>
-      ))}
+            {diseaseId ? (
+              <RenderingWorldPlazaEntityDiseaseIconGlyph
+                diseaseId={diseaseId}
+                className="shrink-0"
+                style={{
+                  width: DEFINING_WORLD_PLAZA_PROFILE_PANEL_ICON_SIZE_PX,
+                  height: DEFINING_WORLD_PLAZA_PROFILE_PANEL_ICON_SIZE_PX,
+                }}
+              />
+            ) : (
+              <Icon
+                icon={entry.iconName}
+                width={DEFINING_WORLD_PLAZA_PROFILE_PANEL_ICON_SIZE_PX}
+                height={DEFINING_WORLD_PLAZA_PROFILE_PANEL_ICON_SIZE_PX}
+                className="shrink-0 text-poster-orange-deep"
+                aria-hidden
+              />
+            )}
+            <span
+              className={
+                STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_LABEL_CLASS_NAME
+              }
+            >
+              {entry.label}
+            </span>
+            <span
+              className={
+                STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_CLASS_NAME
+              }
+            >
+              {entry.valueText}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -439,6 +465,29 @@ export function RenderingWorldPlazaProfilePanel({
                   </div>
                 </section>
               ))}
+
+              <section
+                aria-label={LABELING_WORLD_PLAZA_PROFILE_PANEL_IMMUNITY_SECTION}
+              >
+                <h3
+                  className={
+                    STYLING_WORLD_PLAZA_PROFILE_PANEL_SECTION_HEADING_CLASS_NAME
+                  }
+                >
+                  {LABELING_WORLD_PLAZA_PROFILE_PANEL_IMMUNITY_SECTION}
+                </h3>
+                <div className="mt-1 flex flex-col gap-1">
+                  <RenderingWorldPlazaProfilePanelAttributeGrid
+                    entries={[sections.immunity.factorEntry]}
+                  />
+                  <RenderingWorldPlazaProfilePanelAttributeGrid
+                    entries={sections.immunity.diseaseEntries}
+                    emptyLabel={
+                      LABELING_WORLD_PLAZA_PROFILE_PANEL_IMMUNITY_EMPTY
+                    }
+                  />
+                </div>
+              </section>
 
               <section
                 aria-label={LABELING_WORLD_PLAZA_PROFILE_PANEL_PASSIVES_SECTION}

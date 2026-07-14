@@ -10,6 +10,7 @@ import type {
   DefiningWorldPlazaTerrainRedrawLayerDescriptor,
   RunningWorldPlazaTerrainLayerEngineContext,
 } from '@/components/world/engine/definingWorldPlazaTerrainLayerDescriptor';
+import { REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID } from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
 import {
   creatingWorldPlazaTerrainLayerEngine,
   RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID,
@@ -167,6 +168,79 @@ describe('creatingWorldPlazaTerrainLayerEngine', () => {
     expect(floorSyncCount).toBe(2);
     expect(engine.checkingHeavyLayersFullySynced()).toBe(true);
     expect(engine.checkingSpawnBootFloorChunksReady()).toBe(true);
+  });
+
+  it('waits for long-grass textures before completing the grass layer', () => {
+    let longGrassSyncCount = 0;
+    const longGrassLayer: DefiningWorldPlazaTerrainIncrementalLayerDescriptor =
+      {
+        kind: 'incremental',
+        id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.LONG_GRASS_DECORATIONS,
+        parentLayer: 'floor',
+        boundsProfile: 'floor',
+        participatesInHeavyIdleSkip: true,
+        requiresTextures: [
+          REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.LONG_GRASS_SPRITES,
+        ],
+        invalidateOn: [
+          DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LONG_GRASS_TEXTURES_READY,
+        ],
+        createRuntimeState: () => ({ spriteByKey: new Map() }),
+        sync: () => {
+          longGrassSyncCount += 1;
+          return { isComplete: true, needsChildSort: false };
+        },
+        resetRuntimeState: () => {},
+        destroyRuntimeState: () => {},
+      };
+    const engine = creatingWorldPlazaTerrainLayerEngine([longGrassLayer]);
+    const context = creatingTestContext();
+    const loadingDependencySnapshot = {
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.VIEWPORT_SIZE]: '800x600',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS]: '0:8:0:8',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.ELEVATION_BOUNDS]: '',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.TREE_BOUNDS]: '',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PLACED_TREE_BLOCKS]: '',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.CHOPPED_TREES]: '',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_PEBBLES]: '',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_LONG_GRASS]: '',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS]: '',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL]: '0|',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.SUN_BUCKET]: '0',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PLAYER_TILE]: '4,4',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.ISLAND_MODE_REVISION]: '0',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PROCEDURAL_TREES_AND_ROCKS_REVISION]:
+        '0',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FIRELANDS_TEXTURES_READY]:
+        '1',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LAVA_TEXTURES_READY]: '1',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LONG_GRASS_TEXTURES_READY]:
+        '0',
+    };
+    const tickInput = {
+      context,
+      dependencySnapshot: loadingDependencySnapshot,
+      idleHeavySyncKey: 'idle-1',
+      floorBoundsForRedraw: context.floorBounds,
+      floorBoundsKeyForRedraw: context.floorBoundsKey,
+    };
+
+    engine.tick(tickInput);
+
+    expect(longGrassSyncCount).toBe(0);
+    expect(engine.checkingHeavyLayersFullySynced()).toBe(false);
+
+    engine.tick({
+      ...tickInput,
+      dependencySnapshot: {
+        ...loadingDependencySnapshot,
+        [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LONG_GRASS_TEXTURES_READY]:
+          '1',
+      },
+    });
+
+    expect(longGrassSyncCount).toBe(1);
+    expect(engine.checkingHeavyLayersFullySynced()).toBe(true);
   });
 
   it('skips static redraw layers until bounds or invalidateOn dependencies change', () => {

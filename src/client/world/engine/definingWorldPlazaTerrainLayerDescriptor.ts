@@ -8,9 +8,10 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import type { ManagingWorldPlazaTerrainFrameWorkBudget } from '@/components/world/domains/managingWorldPlazaTerrainFrameWorkBudget';
 import type { DefiningWorldPlazaTerrainDependencyKeyId } from '@/components/world/engine/definingWorldPlazaTerrainDependencyKeys';
+import type { RegisteringWorldPlazaTextureAssetId } from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
-import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
+import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import type { Container } from 'pixi.js';
 import type { RefObject } from 'react';
@@ -124,7 +125,7 @@ type DefiningWorldPlazaTerrainLayerDescriptorBase = {
     | 'floor'
     | 'trunk'
     | 'canopy';
-  readonly requiresTextures?: readonly string[];
+  readonly requiresTextures?: readonly RegisteringWorldPlazaTextureAssetId[];
   /**
    * When set, the layer is skipped (and cleared once) unless at least one listed
    * generation feature is enabled. Used by blank-slate / Features debug gates.

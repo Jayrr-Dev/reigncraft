@@ -68,6 +68,8 @@ function buildingMinimalHealthHud(
     activeBuffIds: [],
     activeBuffs: [],
     statusEffectHudRows: [],
+    immuneSystemFactor: 0,
+    diseaseImmunityIds: [],
   };
 }
 
@@ -242,5 +244,39 @@ describe('resolvingWorldPlazaProfilePanelSections', () => {
       sections.attributeEntries.find((entry) => entry.id === 'heat-threshold')
         ?.valueText
     ).toBe(`${DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS + 15}°C`);
+  });
+
+  it('shows immune system factor and sorted disease immunities', () => {
+    const sections = resolvingWorldPlazaProfilePanelSections({
+      health: {
+        ...buildingMinimalHealthHud(
+          DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT
+        ),
+        immuneSystemFactor: 17,
+        diseaseImmunityIds: ['trichinellosis', 'salmonellosis'],
+      },
+      stamina: {
+        staminaRatio: 1,
+        isRunning: false,
+        isDepleted: false,
+      },
+      hunger: DEFINING_PROFILE_PANEL_TEST_HUNGER,
+      derivedStats: DEFINING_PROFILE_PANEL_TEST_DERIVED_STATS,
+    });
+
+    expect(sections.immunity.factorEntry).toEqual({
+      id: 'immune-system',
+      label: 'Immune system',
+      iconName: 'mdi:shield-check',
+      valueText: '17 / 100',
+    });
+    expect(sections.immunity.diseaseEntries.map((entry) => entry.id)).toEqual([
+      'disease-immunity-salmonellosis',
+      'disease-immunity-trichinellosis',
+    ]);
+    expect(sections.immunity.diseaseEntries[0]).toMatchObject({
+      label: 'Salmonellosis',
+      valueText: 'Immune',
+    });
   });
 });

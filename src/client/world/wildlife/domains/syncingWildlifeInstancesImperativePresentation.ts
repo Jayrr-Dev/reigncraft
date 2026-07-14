@@ -28,6 +28,7 @@ import {
   type ManagingWorldPlazaEntityDepthSortCache,
 } from '@/components/world/domains/managingWorldPlazaEntityDepthSortCache';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
+import { checkingWildlifeInstanceIsOwnedPet } from '@/components/world/wildlife/domains/checkingWildlifeInstanceIsOwnedPet';
 import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
 import { checkingWildlifeSpeciesUsesGlowOrbPresentation } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesUsesGlowOrbPresentation';
 import { checkingWildlifeVitalsGraphicsShouldShow } from '@/components/world/wildlife/domains/checkingWildlifeVitalsGraphicsShouldShow';
@@ -394,9 +395,11 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
           isImmortal: checkingWildlifeSpeciesIsImmortal(species),
           healthRatio,
           staminaRatio: instance.staminaState.staminaRatio,
-          showHungerCircle: checkingWorldPlazaGenerationFeatureEnabled(
-            DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_HUNGER_CIRCLE
-          ),
+          showHungerCircle:
+            checkingWildlifeInstanceIsOwnedPet(instance) &&
+            checkingWorldPlazaGenerationFeatureEnabled(
+              DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_HUNGER_CIRCLE
+            ),
         });
 
         if (vitalsVisibility.showGraphics) {

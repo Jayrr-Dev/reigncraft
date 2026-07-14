@@ -21,6 +21,7 @@ import {
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { RenderingWildlifePetSpeciesPortrait } from '@/components/world/wildlife/pets/components/renderingWildlifePetSpeciesPortrait';
 import { checkingWildlifePetItemIsEquippableWeapon } from '@/components/world/wildlife/pets/domains/checkingWildlifePetItemIsEquippableWeapon';
+import { checkingWildlifePetNeedsOwnerFeed } from '@/components/world/wildlife/pets/domains/checkingWildlifePetNeedsOwnerFeed';
 import { DEFINING_WILDLIFE_PET_MAX_LOYALTY } from '@/components/world/wildlife/pets/domains/definingWildlifePetLoyaltyTiersRegistry';
 import {
   DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_ACTIVE_CLASS_NAME,
@@ -315,6 +316,9 @@ export function RenderingWildlifePetModal({
     (slot) =>
       slot !== null && checkingWorldPlazaInventoryItemIsFood(slot.itemTypeId)
   );
+  const canFeedPet =
+    feedableFoodSlotIndex >= 0 &&
+    checkingWildlifePetNeedsOwnerFeed(instanceSnapshot.hungerState.hungerRatio);
 
   const vitalRows = hasBasicUi
     ? listingWildlifePetModalVitalRows(
@@ -465,7 +469,7 @@ export function RenderingWildlifePetModal({
                   className={
                     DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_CLASS_NAME
                   }
-                  disabled={feedableFoodSlotIndex < 0}
+                  disabled={!canFeedPet}
                   onClick={() => onFeed(instanceId, feedableFoodSlotIndex)}
                 >
                   <Icon

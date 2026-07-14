@@ -166,6 +166,10 @@ export type UsingWorldPlazaPlayerHealthHudSnapshot = {
   activeBuffIds: readonly string[];
   activeBuffs: readonly DefiningWorldPlazaEntityActiveBuffHudEntry[];
   statusEffectHudRows: readonly DefiningWorldPlazaEntityStatusEffectHudRow[];
+  /** Immune system factor (0..max); lowers infection odds and symptoms. */
+  immuneSystemFactor: number;
+  /** Disease ids the player cannot contract again. */
+  diseaseImmunityIds: readonly DefiningWorldPlazaEntityDiseaseId[];
 };
 
 export interface UsingWorldPlazaPlayerHealthParams {
@@ -386,6 +390,8 @@ function buildingHudSnapshot(
     activeBuffIds,
     activeBuffs: mergedActiveBuffs,
     statusEffectHudRows,
+    immuneSystemFactor: state.immuneSystemFactor,
+    diseaseImmunityIds: [...state.diseaseImmunityIds],
   };
 }
 

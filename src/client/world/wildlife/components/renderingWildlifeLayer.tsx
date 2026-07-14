@@ -47,6 +47,7 @@ import {
   applyingWildlifeInstanceDamage,
 } from '@/components/world/wildlife/domains/advancingWildlifeSimulationTick';
 import { advancingWildlifeSpeciesTextureEviction } from '@/components/world/wildlife/domains/advancingWildlifeSpeciesTextureEviction';
+import { checkingWildlifeInstanceIsOwnedPet } from '@/components/world/wildlife/domains/checkingWildlifeInstanceIsOwnedPet';
 import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
 import { checkingWildlifeSpeciesUsesGlowOrbPresentation } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesUsesGlowOrbPresentation';
 import { checkingWildlifeVitalsGraphicsShouldShow } from '@/components/world/wildlife/domains/checkingWildlifeVitalsGraphicsShouldShow';
@@ -136,6 +137,8 @@ type RenderingWildlifeInstanceSpriteProps = {
   healthRatio: number;
   staminaRatio: number;
   hungerRatio: number;
+  /** Bonded / domesticated companion; wild animals never show hunger orbs. */
+  isDomesticatedPet: boolean;
   isDead: boolean;
   spriteAlpha: number;
   jumpLiftPx: number;
@@ -160,6 +163,7 @@ const RenderingWildlifeInstanceSprite = memo(
     healthRatio,
     staminaRatio,
     hungerRatio,
+    isDomesticatedPet,
     isDead,
     spriteAlpha,
     jumpLiftPx,
@@ -236,9 +240,11 @@ const RenderingWildlifeInstanceSprite = memo(
       isImmortal: checkingWildlifeSpeciesIsImmortal(species),
       healthRatio,
       staminaRatio,
-      showHungerCircle: checkingWorldPlazaGenerationFeatureEnabled(
-        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_HUNGER_CIRCLE
-      ),
+      showHungerCircle:
+        isDomesticatedPet &&
+        checkingWorldPlazaGenerationFeatureEnabled(
+          DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_HUNGER_CIRCLE
+        ),
     });
     const spritePresentation =
       resolvingWildlifeSpeciesSpritePresentation(species);
@@ -1014,6 +1020,7 @@ export function RenderingWildlifeLayer({
             hungerRatio={quantizingWildlifeRenderVitalsRatio(
               instance.hungerState.hungerRatio
             )}
+            isDomesticatedPet={checkingWildlifeInstanceIsOwnedPet(instance)}
             isDead={instance.isDead}
             spriteAlpha={spriteAlpha}
             jumpLiftPx={jumpLiftPx}

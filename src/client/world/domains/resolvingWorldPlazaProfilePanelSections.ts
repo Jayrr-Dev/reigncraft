@@ -16,6 +16,7 @@ import {
 } from '@/components/world/character/domains/definingWorldPlazaCharacterWeightDisplayConstants';
 import { resolvingWorldPlazaCharacterHeightDisplayText } from '@/components/world/character/domains/resolvingWorldPlazaCharacterHeightDisplayText';
 import { resolvingWorldPlazaCharacterWeightDisplayText } from '@/components/world/character/domains/resolvingWorldPlazaCharacterWeightDisplayText';
+import type { DefiningWorldPlazaAvatarSkinId } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_FORWARD_GRID_DISTANCE,
@@ -45,8 +46,6 @@ import {
   LABELING_WORLD_PLAZA_PROFILE_PANEL_TOP_SPEED_ATTRIBUTE,
   type DefiningWorldPlazaProfilePanelAttributeCategoryId,
 } from '@/components/world/domains/definingWorldPlazaProfilePanelConstants';
-import { resolvingWorldPlazaProfilePanelPassiveEntries } from '@/components/world/domains/resolvingWorldPlazaProfilePanelPassiveEntries';
-import type { ResolvingWorldPlazaProfilePanelPassiveEntry } from '@/components/world/domains/resolvingWorldPlazaProfilePanelPassiveEntries';
 import {
   DEFINING_WORLD_PLAZA_JUMP_STAMINA_COST_RATIO,
   DEFINING_WORLD_PLAZA_ROLL_STAMINA_COST_RATIO,
@@ -54,7 +53,12 @@ import {
   DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS,
   DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND,
 } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
-import type { DefiningWorldPlazaAvatarSkinId } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
+import {
+  resolvingWorldPlazaProfilePanelImmunityEntries,
+  type ResolvingWorldPlazaProfilePanelImmunitySections,
+} from '@/components/world/domains/resolvingWorldPlazaProfilePanelImmunityEntries';
+import type { ResolvingWorldPlazaProfilePanelPassiveEntry } from '@/components/world/domains/resolvingWorldPlazaProfilePanelPassiveEntries';
+import { resolvingWorldPlazaProfilePanelPassiveEntries } from '@/components/world/domains/resolvingWorldPlazaProfilePanelPassiveEntries';
 import { formattingWorldPlazaTemperature } from '@/components/world/health/domains/convertingWorldPlazaTemperatureUnits';
 import { resolvingWorldPlazaEntityTemperatureComfortBand } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureComfortBand';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
@@ -104,6 +108,8 @@ export type ResolvingWorldPlazaProfilePanelSections = {
   /** Flat attribute list across all categories (tests / lookups). */
   attributeEntries: readonly ResolvingWorldPlazaProfilePanelAttributeEntry[];
   passiveEntries: readonly ResolvingWorldPlazaProfilePanelPassiveEntry[];
+  /** Immune system factor + permanent disease immunities. */
+  immunity: ResolvingWorldPlazaProfilePanelImmunitySections;
 };
 
 const DEFINING_PROFILE_PANEL_HUNGER_TIER_LABELS: Record<
@@ -184,7 +190,9 @@ function formattingProfilePanelStaminaCostPercent(ratio: number): string {
   return `${Math.round(ratio * 100)}%`;
 }
 
-function formattingProfilePanelStaminaRegenPerSecond(ratioPerSecond: number): string {
+function formattingProfilePanelStaminaRegenPerSecond(
+  ratioPerSecond: number
+): string {
   return `+${Math.round(ratioPerSecond * 100)}%/s`;
 }
 
@@ -295,8 +303,7 @@ export function resolvingWorldPlazaProfilePanelSections(input: {
     {
       id: 'jump-distance',
       label: LABELING_WORLD_PLAZA_PROFILE_PANEL_JUMP_DISTANCE_ATTRIBUTE,
-      iconName:
-        DEFINING_WORLD_PLAZA_PROFILE_PANEL_JUMP_DISTANCE_ATTRIBUTE_ICON,
+      iconName: DEFINING_WORLD_PLAZA_PROFILE_PANEL_JUMP_DISTANCE_ATTRIBUTE_ICON,
       valueText: `${formattingProfilePanelJumpDistanceGrid(
         DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_FORWARD_GRID_DISTANCE *
           derivedStats.jumpDistanceScale
@@ -405,5 +412,16 @@ export function resolvingWorldPlazaProfilePanelSections(input: {
     ? resolvingWorldPlazaProfilePanelPassiveEntries(skinId)
     : [];
 
-  return { vitalRows, attributeCategories, attributeEntries, passiveEntries };
+  const immunity = resolvingWorldPlazaProfilePanelImmunityEntries({
+    immuneSystemFactor: health.immuneSystemFactor,
+    diseaseImmunityIds: health.diseaseImmunityIds,
+  });
+
+  return {
+    vitalRows,
+    attributeCategories,
+    attributeEntries,
+    passiveEntries,
+    immunity,
+  };
 }

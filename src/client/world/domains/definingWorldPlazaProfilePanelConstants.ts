@@ -68,6 +68,26 @@ export const LABELING_WORLD_PLAZA_PROFILE_PANEL_PASSIVES_SECTION =
 export const LABELING_WORLD_PLAZA_PROFILE_PANEL_PASSIVES_EMPTY =
   'No inherited passives' as const;
 
+/** Section heading for immune system factor and disease immunities. */
+export const LABELING_WORLD_PLAZA_PROFILE_PANEL_IMMUNITY_SECTION =
+  'Immunity' as const;
+
+/** Copy shown when the player has no per-disease immunities yet. */
+export const LABELING_WORLD_PLAZA_PROFILE_PANEL_IMMUNITY_EMPTY =
+  'No disease immunities' as const;
+
+/** Profile attribute label for immune system factor. */
+export const LABELING_WORLD_PLAZA_PROFILE_PANEL_IMMUNE_SYSTEM_ATTRIBUTE =
+  'Immune system' as const;
+
+/** Iconify id for the immune system attribute chip. */
+export const DEFINING_WORLD_PLAZA_PROFILE_PANEL_IMMUNE_SYSTEM_ATTRIBUTE_ICON =
+  'mdi:shield-check' as const;
+
+/** Value chip text for a permanent disease immunity row. */
+export const LABELING_WORLD_PLAZA_PROFILE_PANEL_DISEASE_IMMUNITY_VALUE =
+  'Immune' as const;
+
 /** Section heading above active buffs and ailments. */
 export const LABELING_WORLD_PLAZA_PROFILE_PANEL_EFFECTS_SECTION =
   'Active effects' as const;

@@ -28,6 +28,7 @@ export type DefiningWorldPlazaEntityActiveBuffHudEntry = {
   /** When set, the HUD shows a seconds countdown until this timestamp. */
   expiresAtMs: number | null;
   isDisease?: boolean;
+  diseaseId?: DefiningWorldPlazaEntityDiseaseId;
   severityLabel?: string;
   detailLines?: readonly string[];
   hudIconColorClassName?: string;
@@ -190,7 +191,10 @@ export function listingWorldPlazaEntityActiveBuffHudEntries({
         description: descriptor.description,
         polarity: descriptor.polarity,
         icon: resolvingWorldPlazaEntityBuffHudIcon(descriptor.id),
-        expiresAtMs: resolvingWorldPlazaEntityBuffExpiresAtMs(descriptor, state),
+        expiresAtMs: resolvingWorldPlazaEntityBuffExpiresAtMs(
+          descriptor,
+          state
+        ),
         detailLines,
       };
     });
@@ -220,6 +224,7 @@ export function listingWorldPlazaEntityActiveBuffHudEntries({
         icon: descriptor.icon,
         expiresAtMs: diseaseEffect.expiresAtMs,
         isDisease: true,
+        diseaseId: descriptor.id,
         severityLabel: detail.severityLabel,
         detailLines: detail.effectLines,
         hudIconColorClassName: descriptor.hudIconColorClassName,

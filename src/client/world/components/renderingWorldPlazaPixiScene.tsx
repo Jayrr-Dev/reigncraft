@@ -10,6 +10,10 @@ import { usingUserProfileFriendPlazaNotifications } from '@/components/friends/h
 import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/hooks/usingUserProfileFriendRequestPlazaDialogs';
 import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
 import {
+  checkingPlazaHerbariumCloverStudyTierUnlocked,
+  formattingPlazaHerbariumCloverStudyCountProgress,
+} from '@/components/home/domains/resolvingPlazaHerbariumCloverStudyTier';
+import {
   checkingPlazaHerbariumStudyTierUnlocked,
   formattingPlazaHerbariumStudyCountProgress,
 } from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
@@ -229,8 +233,10 @@ import { findingWorldPlazaBiomeTeleportWorldPointForDev } from '@/components/wor
 import { recordingWorldPlazaBestiarySpeciesStudied } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
+  gettingWorldPlazaHerbariumCloverStudyCountSnapshot,
   gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
   gettingWorldPlazaHerbariumTreeStudyCountsSnapshot,
+  recordingWorldPlazaHerbariumCloverStudied,
   recordingWorldPlazaHerbariumFlowerStudied,
   recordingWorldPlazaHerbariumTreeStudied,
 } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
@@ -455,6 +461,7 @@ import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED } from '@/component
 import { parsingWorldPlazaOreSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { disarmingWorldPlazaInventorySlotArmedHarvestEnchantments } from '@/components/world/inventory/domains/disarmingWorldPlazaInventorySlotArmedHarvestEnchantments';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
+import { parsingWorldPlazaCloverKindFromItemTypeId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryCloverDetailReveal';
 import { resolvingWorldPlazaInventoryFoodEatEffects } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects';
 import {
   checkingWorldPlazaInventoryItemIsFood,
@@ -560,6 +567,7 @@ import {
   applyingWildlifePetOwnerHeal,
   checkingWildlifePetHasCapability,
   checkingWildlifePetItemIsEquippableWeapon,
+  checkingWildlifePetNeedsOwnerFeed,
   formattingWildlifePetInstanceId,
   syncingWildlifePetBondToRoster,
   syncingWildlifePetInstanceVitalsToRoster,
@@ -3667,6 +3675,12 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
+      if (
+        !checkingWildlifePetNeedsOwnerFeed(instance.hungerState.hungerRatio)
+      ) {
+        return;
+      }
+
       const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
 
       if (!species) {
@@ -5035,6 +5049,9 @@ function RenderingWorldPlazaPixiSceneConnected({
       const oreSpeciesId = parsingWorldPlazaOreSpeciesIdFromItemTypeId(
         item.itemTypeId
       );
+      const cloverKind = parsingWorldPlazaCloverKindFromItemTypeId(
+        item.itemTypeId
+      );
 
       if (flowerSpeciesId) {
         const currentStudyCount =
@@ -5110,6 +5127,46 @@ function RenderingWorldPlazaPixiSceneConnected({
           gettingWorldPlazaLapidaryOreStudyCountsSnapshot()[oreSpeciesId] ?? 1;
         showingGameplayHudToast(
           `Studied · Lapidary ${formattingPlazaLapidaryStudyCountProgress(studyCount)}`
+        );
+        return;
+      }
+
+      if (cloverKind) {
+        const currentStudyCount =
+          gettingWorldPlazaHerbariumCloverStudyCountSnapshot();
+
+        if (
+          checkingPlazaHerbariumCloverStudyTierUnlocked(
+            'full',
+            currentStudyCount
+          )
+        ) {
+          showingGameplayHudToast('Already fully studied.');
+          return;
+        }
+
+        let didConsume = false;
+
+        updatingInventoryState((currentState) => {
+          const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
+            currentState,
+            slotIndex,
+            1
+          );
+
+          didConsume = consumeResult.consumed;
+          return consumeResult.consumed ? consumeResult.nextState : null;
+        });
+
+        if (!didConsume) {
+          showingGameplayHudToast('Nothing left to study.');
+          return;
+        }
+
+        recordingWorldPlazaHerbariumCloverStudied(cloverKind);
+        const studyCount = gettingWorldPlazaHerbariumCloverStudyCountSnapshot();
+        showingGameplayHudToast(
+          `Studied · Herbarium ${formattingPlazaHerbariumCloverStudyCountProgress(studyCount)}`
         );
       }
     },

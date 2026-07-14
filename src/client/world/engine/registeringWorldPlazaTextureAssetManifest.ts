@@ -16,6 +16,10 @@ export const REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID = {
   LONG_GRASS_SPRITES: 'long-grass-sprites',
 } as const;
 
+/** One registered terrain texture asset id. */
+export type RegisteringWorldPlazaTextureAssetId =
+  (typeof REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID)[keyof typeof REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID];
+
 /** Public URL for the static lava surface texture. */
 export const LOADING_WORLD_PLAZA_LAVA_STATIC_TILE_URL =
   '/fire/sprites/props/4227f58876b6da124ab41e5f50b9e8a7.webp';

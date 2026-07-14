@@ -2,6 +2,7 @@
 
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { RenderingWorldPlazaEntityDiseaseIconGlyph } from '@/components/world/health/components/renderingWorldPlazaEntityDiseaseIconGlyph';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ROW_GAP_BELOW_ICONS_PX,
@@ -90,18 +91,26 @@ function RenderingWorldPlazaEntityHealthBuffIcon({
       <div
         className={`flex items-center justify-center rounded-[2px] border p-px shadow-[0_1px_0_rgba(255,255,255,0.08)_inset] ${borderClassName}`}
       >
-        <Icon
-          icon={buff.icon}
-          width={DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX}
-          height={DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX}
-          className={
-            buff.isDisease
-              ? (buff.hudIconColorClassName ?? 'text-lime-300')
-              : buff.polarity === 'debuff'
-                ? 'text-red-200'
-                : 'text-poster-gold'
-          }
-        />
+        {buff.isDisease && buff.diseaseId ? (
+          <RenderingWorldPlazaEntityDiseaseIconGlyph
+            diseaseId={buff.diseaseId}
+            fallbackIcon={buff.icon}
+            className="shrink-0"
+            style={{
+              width: DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX,
+              height: DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX,
+            }}
+          />
+        ) : (
+          <Icon
+            icon={buff.icon}
+            width={DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX}
+            height={DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_ICON_SIZE_PX}
+            className={
+              buff.polarity === 'debuff' ? 'text-red-200' : 'text-poster-gold'
+            }
+          />
+        )}
       </div>
       {remainingSeconds !== null ? (
         <span className="text-[5px] font-bold leading-none tabular-nums text-white/90">

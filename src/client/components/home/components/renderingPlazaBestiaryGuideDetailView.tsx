@@ -17,6 +17,7 @@ import {
 } from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
+import { RenderingWorldPlazaEntityDiseaseIconGlyph } from '@/components/world/health/components/renderingWorldPlazaEntityDiseaseIconGlyph';
 import { cn } from '@/lib/utils';
 
 const PLAZA_BESTIARY_DETAIL_HEADER_BUTTON_CLASS_NAME =
@@ -189,9 +190,7 @@ export function RenderingPlazaBestiaryGuideDetailView({
                 {entry.biomeChips.map((chip) => (
                   <span
                     key={chip.kind}
-                    title={
-                      chip.isExplored ? chip.label : 'Undiscovered region'
-                    }
+                    title={chip.isExplored ? chip.label : 'Undiscovered region'}
                     className={
                       chip.isExplored
                         ? 'rounded-sm border border-poster-teal/25 bg-parchment/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-poster-teal-deep'
@@ -448,11 +447,10 @@ export function RenderingPlazaBestiaryGuideDetailView({
                         </dt>
                         <dd className="mt-0.5 flex items-center justify-between gap-2 font-medium text-ink">
                           <span className="flex min-w-0 items-center gap-1.5">
-                            {entry.lootStats.rawDiseaseIcon ? (
-                              <Icon
-                                icon={entry.lootStats.rawDiseaseIcon}
-                                className="size-4 shrink-0 text-poster-teal-deep"
-                                aria-hidden
+                            {entry.lootStats.rawDiseaseId ? (
+                              <RenderingWorldPlazaEntityDiseaseIconGlyph
+                                diseaseId={entry.lootStats.rawDiseaseId}
+                                className="size-4 shrink-0"
                               />
                             ) : null}
                             <span className="truncate">

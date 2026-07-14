@@ -1,3 +1,4 @@
+import { checkingPlazaHerbariumCloverStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaHerbariumCloverStudyTier';
 import { checkingPlazaHerbariumFlowerStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaHerbariumFlowerStudyTier';
 import { checkingPlazaLapidaryStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaLapidaryStudyTier';
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
@@ -156,6 +157,23 @@ function checkingWorldPlazaInventoryItemCanStudyOre(
 }
 
 /**
+ * True when a clover still has shared herbarium Study progress left.
+ */
+function checkingWorldPlazaInventoryItemCanStudyClover(
+  itemTypeId: string,
+  cloverStudyCount: number | undefined
+): boolean {
+  if (!parsingWorldPlazaCloverKindFromItemTypeId(itemTypeId)) {
+    return false;
+  }
+
+  return !checkingPlazaHerbariumCloverStudyTierUnlocked(
+    'full',
+    cloverStudyCount ?? 0
+  );
+}
+
+/**
  * True when the item can be Studied for Herbarium or Lapidary progress.
  */
 function checkingWorldPlazaInventoryItemCanStudy(
@@ -165,7 +183,8 @@ function checkingWorldPlazaInventoryItemCanStudy(
     | undefined,
   oreStudyCountsBySpeciesId:
     | Readonly<Partial<Record<WorldOreSpeciesId, number>>>
-    | undefined
+    | undefined,
+  cloverStudyCount: number | undefined
 ): boolean {
   return (
     checkingWorldPlazaInventoryItemCanStudyFlower(
@@ -175,7 +194,8 @@ function checkingWorldPlazaInventoryItemCanStudy(
     checkingWorldPlazaInventoryItemCanStudyOre(
       itemTypeId,
       oreStudyCountsBySpeciesId
-    )
+    ) ||
+    checkingWorldPlazaInventoryItemCanStudyClover(itemTypeId, cloverStudyCount)
   );
 }
 
@@ -590,7 +610,8 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       canStudy: checkingWorldPlazaInventoryItemCanStudy(
         item.itemTypeId,
         options.flowerStudyCountsBySpeciesId,
-        options.oreStudyCountsBySpeciesId
+        options.oreStudyCountsBySpeciesId,
+        options.cloverStudyCount
       ),
       canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
         item.itemTypeId
@@ -658,7 +679,8 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     canStudy: checkingWorldPlazaInventoryItemCanStudy(
       item.itemTypeId,
       options.flowerStudyCountsBySpeciesId,
-      options.oreStudyCountsBySpeciesId
+      options.oreStudyCountsBySpeciesId,
+      options.cloverStudyCount
     ),
     canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
       item.itemTypeId

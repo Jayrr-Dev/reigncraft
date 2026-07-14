@@ -1,10 +1,25 @@
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 
 /** How often a biome appears while exploring the world. */
-export type PlazaBiomesRarityId = 'common' | 'uncommon' | 'rare' | 'legendary';
+export type PlazaBiomesRarityId =
+  | 'common'
+  | 'uncommon'
+  | 'rare'
+  | 'epic'
+  | 'legendary';
 
 /** Rarity tab filter, including the full list. */
 export type PlazaBiomesRarityFilterId = 'all' | PlazaBiomesRarityId;
+
+/**
+ * Only this biome may use the epic codex tier (just below legendary).
+ *
+ * Validated by:
+ * - `src/client/world/domains/checkingPlazaBiomesGuideRarityAgainstWorldFrequencies.ts`
+ * - `src/client/world/domains/resolvingWorldPlazaBiomeFrequencySampling.test.ts`
+ */
+export const DEFINING_PLAZA_BIOMES_EPIC_KIND: DefiningWorldPlazaBiomeKind =
+  'flower_forest';
 
 /**
  * Only this biome may use the legendary codex tier.
@@ -34,6 +49,7 @@ export const DEFINING_PLAZA_BIOMES_RARITY_FILTERS: readonly {
   { id: 'common', label: 'Common' },
   { id: 'uncommon', label: 'Uncommon' },
   { id: 'rare', label: 'Rare' },
+  { id: 'epic', label: 'Epic' },
   { id: 'legendary', label: 'Legendary' },
 ] as const;
 
@@ -62,8 +78,14 @@ export const DEFINING_PLAZA_BIOMES_RARITY_REGISTRY: Record<
   rare: {
     label: 'Rare',
     icon: 'mdi:star-four-points',
-    borderClassName: 'border-violet-400/60 bg-violet-950/88',
-    iconClassName: 'text-violet-200',
+    borderClassName: 'border-blue-400/60 bg-blue-950/88',
+    iconClassName: 'text-blue-200',
+  },
+  epic: {
+    label: 'Epic',
+    icon: 'ph:sparkle',
+    borderClassName: 'border-fuchsia-400/65 bg-fuchsia-950/88',
+    iconClassName: 'text-fuchsia-200',
   },
   legendary: {
     label: 'Legendary',
@@ -97,12 +119,6 @@ export const DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES: readonly DefiningPlazaBiomesGu
       kind: 'forest',
       icon: 'mdi:pine-tree',
       summary: 'Dense trees, shade, and quiet ground cover.',
-      rarity: 'common',
-    },
-    {
-      kind: 'flower_forest',
-      icon: 'mdi:flower',
-      summary: 'Bright meadows packed with colorful blooms.',
       rarity: 'common',
     },
     {
@@ -158,6 +174,12 @@ export const DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES: readonly DefiningPlazaBiomesGu
       icon: 'mdi:waves',
       summary: 'Deep water far from any shore.',
       rarity: 'rare',
+    },
+    {
+      kind: 'flower_forest',
+      icon: 'mdi:flower',
+      summary: 'Bright meadows packed with colorful blooms.',
+      rarity: 'epic',
     },
     {
       kind: 'firelands',

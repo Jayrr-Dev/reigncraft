@@ -4,6 +4,7 @@ import {
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
+import { RenderingWorldPlazaEntityDiseaseIconGlyph } from '@/components/world/health/components/renderingWorldPlazaEntityDiseaseIconGlyph';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SEVERITY_SORT_ORDER,
   listingWorldPlazaEntityDiseaseDescriptors,
@@ -12,7 +13,7 @@ import {
 import { DEFINING_WORLD_PLAZA_ENTITY_DISEASE_DEV_PREVIEW_DURATION_SCALE } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseTimeConstants';
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_DISEASE_BUTTON_CLASS_NAME =
-  `${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME} border-lime-400/35 text-lime-100/90 hover:bg-lime-500/15` as const;
+  `${STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ACTION_BUTTON_CLASS_NAME} flex items-center justify-start gap-1.5 border-lime-400/35 text-lime-100/90 hover:bg-lime-500/15` as const;
 
 const RENDERING_WORLD_PLAZA_DEV_MODE_DISEASE_DESCRIPTORS =
   listingWorldPlazaEntityDiseaseDescriptors().sort((left, right) => {
@@ -65,7 +66,12 @@ export function RenderingWorldPlazaDevModeDiseaseControls({
               }
               onClick={() => onApplyDisease(descriptor.id)}
             >
-              {descriptor.label}
+              <RenderingWorldPlazaEntityDiseaseIconGlyph
+                diseaseId={descriptor.id}
+                fallbackIcon={descriptor.icon}
+                className="size-3.5 shrink-0"
+              />
+              <span className="truncate">{descriptor.label}</span>
             </button>
           )
         )}

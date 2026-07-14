@@ -11,6 +11,7 @@ import {
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import type { ListingWorldPlazaLongGrassInInteractionRangeEntry } from '@/components/world/harvest/hooks/usingWorldPlazaLongGrassSearchProgress';
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
+import { DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_PICKED_AT_MS_METADATA_KEY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverConstants';
 import { resolvingWorldPlazaCloverItemTypeIdFromLootKind } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
@@ -192,6 +193,14 @@ export function usingWorldPlazaLongGrassSearchInteraction({
               id: crypto.randomUUID(),
               itemTypeId,
               quantity: lootQuantity,
+              ...(lootKind === 'four_leaf'
+                ? {
+                    metadata: {
+                      [DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_PICKED_AT_MS_METADATA_KEY]:
+                        Date.now(),
+                    },
+                  }
+                : {}),
             },
             DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
           );

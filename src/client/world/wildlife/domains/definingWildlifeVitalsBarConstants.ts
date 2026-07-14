@@ -23,13 +23,13 @@ export const DEFINING_WILDLIFE_VITALS_STAMINA_BAR_HEIGHT_PX = 2;
 export const DEFINING_WILDLIFE_VITALS_BAR_GAP_PX = 0.5;
 
 /** Outer radius of the wildlife hunger orb (bronze ring). */
-export const DEFINING_WILDLIFE_HUNGER_CIRCLE_OUTER_RADIUS_PX = 6;
+export const DEFINING_WILDLIFE_HUNGER_CIRCLE_OUTER_RADIUS_PX = 4;
 
 /** Inner fill disc radius (inside the bronze ring). */
-export const DEFINING_WILDLIFE_HUNGER_CIRCLE_INNER_RADIUS_PX = 4.5;
+export const DEFINING_WILDLIFE_HUNGER_CIRCLE_INNER_RADIUS_PX = 3;
 
 /** Gap between hunger circle and HP/stamina bars. */
-export const DEFINING_WILDLIFE_HUNGER_CIRCLE_GAP_FROM_BARS_PX = 3;
+export const DEFINING_WILDLIFE_HUNGER_CIRCLE_GAP_FROM_BARS_PX = 2;
 
 /** Bronze ring fill approximating the HUD hunger orb chrome. */
 export const DEFINING_WILDLIFE_HUNGER_CIRCLE_RING_COLOR = 0xd4b06a;

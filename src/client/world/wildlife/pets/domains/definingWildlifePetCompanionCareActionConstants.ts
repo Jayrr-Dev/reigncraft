@@ -6,6 +6,12 @@
 
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_STACK_CLASS_NAME } from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
 
+/**
+ * Below this hunger ratio, a bonded pet seeks the owner (follow) and Feed is
+ * available. Matches the player well-fed cutoff (75%).
+ */
+export const DEFINING_WILDLIFE_PET_FEED_HUNGER_RATIO_THRESHOLD = 0.75 as const;
+
 /** Hover / near dwell before Pet, Feed, and commands appear under the name. */
 export const DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTIONS_REVEAL_MS =
   5_000 as const;

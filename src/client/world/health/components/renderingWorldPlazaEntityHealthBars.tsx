@@ -8,6 +8,7 @@ import {
   applyingWorldPlazaCameraZoomedDomOverlayPositionToElement,
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle,
+  computingWorldPlazaCameraZoomedDomOverlayScreenSpaceCounterScaleStyle,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import type { DefiningWorldPlazaRemotePlayer } from '@/components/world/domains/definingWorldPlazaOnlineRoom';
@@ -332,15 +333,21 @@ function RenderingWorldPlazaEntityHealthBarVisual({
     openBuff === null ? null : (
       <div
         ref={buffCardRef}
-        style={
-          buffCardPlacement === 'above'
+        className="pointer-events-auto absolute left-1/2 z-50"
+        style={{
+          ...computingWorldPlazaCameraZoomedDomOverlayScreenSpaceCounterScaleStyle(
+            buffCardPlacement
+          ),
+          ...(buffCardPlacement === 'above'
             ? {
+                bottom: '100%',
                 marginBottom: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_CARD_GAP_ABOVE_ICONS_PX}px`,
               }
             : {
+                top: '100%',
                 marginTop: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_CARD_GAP_BELOW_ICONS_PX}px`,
-              }
-        }
+              }),
+        }}
       >
         <RenderingWorldPlazaGameplayHudExplanationPopover
           title={openBuff.label}
@@ -366,17 +373,16 @@ function RenderingWorldPlazaEntityHealthBarVisual({
           opacity: isFullHealth ? 0.92 : 1,
         }}
       >
-        {buffCardPlacement === 'above' ? openBuffCard : null}
-
         {activeBuffs !== undefined ? (
-          <RenderingWorldPlazaEntityHealthBuffIconRow
-            activeBuffs={activeBuffs}
-            openBuffId={openBuffId}
-            onOpenBuffIdChange={setOpenBuffId}
-          />
+          <div className="relative flex flex-col items-center">
+            {openBuffCard}
+            <RenderingWorldPlazaEntityHealthBuffIconRow
+              activeBuffs={activeBuffs}
+              openBuffId={openBuffId}
+              onOpenBuffIdChange={setOpenBuffId}
+            />
+          </div>
         ) : null}
-
-        {buffCardPlacement === 'below' ? openBuffCard : null}
 
         {hasNameLabel ? (
           <RenderingWorldPlazaPlayerNameLabelRowWithProfilePopover
