@@ -77,7 +77,11 @@ import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/
 import { DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE,
+  resolvingWorldBuildingBlockDefinition,
 } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import { DEFINING_WORLD_BUILDING_CLAIM_MODE_PLACED_BLOCK_ALPHA } from '@/components/world/building/domains/definingWorldBuildingClaimModeConstants';
 import {
@@ -188,6 +192,8 @@ import {
 import { executingWorldPlazaCraftRecipeInventoryOutcome } from '@/components/world/crafting/domains/executingWorldPlazaCraftRecipeInventoryOutcome';
 import { refundingWorldPlazaCraftRecipeIngredients } from '@/components/world/crafting/domains/refundingWorldPlazaCraftRecipeIngredients';
 import { showingWorldPlazaCraftRecipeRefundFloatFeedback } from '@/components/world/crafting/domains/showingWorldPlazaCraftRecipeRefundFloatFeedback';
+import { usingWorldPlazaOreSmeltingStations } from '@/components/world/crafting/hooks/usingWorldPlazaOreSmeltingStations';
+import { updatingWorldPlazaActiveOreSmeltingHeatTilesFromPlacedBlocks } from '@/components/world/crafting/domains/managingWorldPlazaActiveOreSmeltingHeatTilesStore';
 import {
   DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_AVATAR_SUB_LAYER_Z_INDEX,
   DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_CANOPY_SUB_LAYER_Z_INDEX,
@@ -262,6 +268,7 @@ import {
   gettingWorldPlazaBestiaryStudyCountsSnapshot,
   recordingWorldPlazaBestiarySpeciesStudied,
 } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
+import { attachingWorldPlazaAllCraftModeRecipesForDevQa } from '@/components/world/domains/attachingWorldPlazaAllCraftModeRecipesForDevQa';
 import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
   gettingWorldPlazaHerbariumCloverStudyCountSnapshot,
@@ -1631,6 +1638,48 @@ function RenderingWorldPlazaPixiSceneConnected({
     useRef<DefiningWorldPlazaHeldItemPresentation | null>(null);
 
   const { showingGameplayHudToast } = usingWorldPlazaGameplayHudToast();
+  const oreSmeltingStations = usingWorldPlazaOreSmeltingStations({
+    inventoryState,
+    updatingInventoryState,
+    addingItemWithStacking: addItemWithStacking,
+    showingToast: showingGameplayHudToast,
+  });
+  useEffect(() => {
+    updatingWorldPlazaActiveOreSmeltingHeatTilesFromPlacedBlocks(
+      activeScenePlacedBlocks,
+      oreSmeltingStations.activeBlockIds
+    );
+
+    return () => {
+      updatingWorldPlazaActiveOreSmeltingHeatTilesFromPlacedBlocks([], new Set());
+    };
+  }, [activeScenePlacedBlocks, oreSmeltingStations.activeBlockIds]);
+  const selectingOreSmeltingStation = useCallback(
+    (block: DefiningWorldBuildingPlacedBlock): void => {
+      oreSmeltingStations.selectingStation(block);
+      selectingHudToolbarMode(
+        DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS
+      );
+    },
+    [oreSmeltingStations.selectingStation, selectingHudToolbarMode]
+  );
+  const oreSmeltingStationHotbar =
+    oreSmeltingStations.selectedStationBlock &&
+    oreSmeltingStations.selectedStationState
+      ? {
+          stationName:
+            resolvingWorldBuildingBlockDefinition(
+              oreSmeltingStations.selectedStationBlock.definitionId
+            )?.name ?? 'Smelting station',
+          stationState: oreSmeltingStations.selectedStationState,
+          progressRatio: oreSmeltingStations.progressRatio,
+          onClose: oreSmeltingStations.closingStation,
+          onCollectOutput:
+            oreSmeltingStations.collectingSelectedStationOutput,
+          onDropInventorySlot:
+            oreSmeltingStations.droppingInventorySlotIntoStation,
+        }
+      : null;
 
   const clearingPendingCraftPlacement = useCallback(
     (options: {
@@ -2475,6 +2524,12 @@ function RenderingWorldPlazaPixiSceneConnected({
       handlers: {
         [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE]:
           selectingCampfireForInteractionLabel,
+        [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY]:
+          selectingOreSmeltingStation,
+        [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN]:
+          selectingOreSmeltingStation,
+        [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE]:
+          selectingOreSmeltingStation,
         [DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK]:
           selectingTreeForInteractionLabel,
       },
@@ -5707,6 +5762,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         cloudSaveSlotIndex: discoveryCloudSaveSlotIndex,
       }
     );
+    attachingWorldPlazaAllCraftModeRecipesForDevQa();
   }, [discoveryCloudSaveSlotIndex, localPersistenceOwnerId, onlineUserId]);
 
   const {
@@ -7122,6 +7178,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   />
                   <RenderingWorldPlazaBlacksmithUtilityLayer
                     placedBlocks={activeScenePlacedBlocks}
+                    activeBlockIds={oreSmeltingStations.activeBlockIds}
                   />
                   <RenderingWorldPlazaClaimModePlotOwnershipOverlay
                     isVisible={isClaimModeActive}
@@ -7903,6 +7960,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                         playerEffectiveMaxHealth={
                           playerHealthHudSnapshot.effectiveMaxHealth
                         }
+                        oreSmeltingStation={oreSmeltingStationHotbar}
                       />
                     ) : null}
                     {hudToolbarMode ===
@@ -8107,6 +8165,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                         playerEffectiveMaxHealth={
                           playerHealthHudSnapshot.effectiveMaxHealth
                         }
+                        oreSmeltingStation={oreSmeltingStationHotbar}
                       />
                     ) : null}
                     {hudToolbarMode ===

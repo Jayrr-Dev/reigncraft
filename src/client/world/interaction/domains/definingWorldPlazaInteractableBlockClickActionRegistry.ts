@@ -3,7 +3,10 @@ import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_DOOR_WOODEN,
   DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_SIGN_WOODEN,
   DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE,
 } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_POINTER_CLICK_MAX_CHEBYSHEV_GRID_DISTANCE } from '@/components/world/fire/domains/definingWorldPlazaCampfirePointerInteractionConstants';
 import {
@@ -30,6 +33,30 @@ export const DEFINING_WORLD_PLAZA_INTERACTABLE_BLOCK_CLICK_ACTION_REGISTRY: Read
     pointerHitRadiusTiles:
       DEFINING_WORLD_PLAZA_CAMPFIRE_POINTER_CLICK_MAX_CHEBYSHEV_GRID_DISTANCE,
     playerRangeTiles: WORLD_FIRE_DEVVIT_INTERACTION_RADIUS_TILES,
+    requiresPlotOwner: false,
+  },
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY]: {
+    dispatch: 'popover',
+    hitTest: 'forgiving',
+    pointerHitRadiusTiles: 1,
+    playerRangeTiles:
+      DEFINING_WORLD_PLAZA_INTERACTABLE_BLOCK_DEFAULT_PLAYER_RANGE_TILES,
+    requiresPlotOwner: false,
+  },
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN]: {
+    dispatch: 'popover',
+    hitTest: 'forgiving',
+    pointerHitRadiusTiles: 1,
+    playerRangeTiles:
+      DEFINING_WORLD_PLAZA_INTERACTABLE_BLOCK_DEFAULT_PLAYER_RANGE_TILES,
+    requiresPlotOwner: false,
+  },
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE]: {
+    dispatch: 'popover',
+    hitTest: 'forgiving',
+    pointerHitRadiusTiles: 1,
+    playerRangeTiles:
+      DEFINING_WORLD_PLAZA_INTERACTABLE_BLOCK_DEFAULT_PLAYER_RANGE_TILES,
     requiresPlotOwner: false,
   },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK]: {

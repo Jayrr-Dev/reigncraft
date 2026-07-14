@@ -4,7 +4,10 @@
  * @module components/world/npc/domains/managingNpcInstanceStore
  */
 
-import { DEFINING_NPC_PLACEMENT_REGISTRY } from '@/components/world/npc/domains/definingNpcPlacementRegistry';
+import {
+  DEFINING_NPC_PLACEMENT_REGISTRY,
+  type DefiningNpcPlacement,
+} from '@/components/world/npc/domains/definingNpcPlacementRegistry';
 import { resolvingNpcSpeciesDefinition } from '@/components/world/npc/domains/definingNpcSpeciesRegistry';
 import type {
   DefiningNpcId,
@@ -22,7 +25,7 @@ type ManagingNpcInstanceListener = () => void;
 const listeners = new Set<ManagingNpcInstanceListener>();
 
 function creatingNpcInstanceFromPlacement(
-  placement: (typeof DEFINING_NPC_PLACEMENT_REGISTRY)[number]
+  placement: DefiningNpcPlacement
 ): DefiningNpcInstance | null {
   const species = resolvingNpcSpeciesDefinition(placement.speciesId);
 

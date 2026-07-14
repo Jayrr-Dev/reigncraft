@@ -20,6 +20,9 @@ export const DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_FLOWER = 1_200;
 /** Berries: quick snack. */
 export const DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_BERRIES = 1_000;
 
+/** Brewed coffee: short drink. */
+export const DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_BREWED_COFFEE = 1_400;
+
 /** Apple: slightly longer than berries. */
 export const DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_APPLE = 1_500;
 
@@ -103,6 +106,10 @@ export function resolvingWorldPlazaInventoryFoodEatDurationMs(options: {
     itemTypeId === 'world-plaza-berry-golden'
   ) {
     return DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_BERRIES;
+  }
+
+  if (itemTypeId === 'world-plaza-brewed-coffee') {
+    return DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_BREWED_COFFEE;
   }
 
   if (itemTypeId === 'world-plaza-apple') {

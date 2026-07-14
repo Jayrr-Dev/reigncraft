@@ -1,13 +1,36 @@
+import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
+import { resolvingWorldPlazaEntityBuffDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+
+function listingWorldPlazaExpiredMovementBuffIds(
+  state: DefiningWorldPlazaEntityHealthState,
+  nowMs: number
+): readonly string[] {
+  const expiredIds = new Set<string>();
+
+  for (const modifier of state.movementModifiers) {
+    if (modifier.expiresAtMs !== null && modifier.expiresAtMs <= nowMs) {
+      expiredIds.add(modifier.id);
+    }
+  }
+
+  return [...expiredIds];
+}
 
 /**
  * Removes expired temporary bonuses, modifiers, DoTs, and invincibility buffs.
+ * Applies declarative follow-on buffs for movement effects that expire naturally.
  */
 export function expiringWorldPlazaEntityHealthTimedEffects(
   state: DefiningWorldPlazaEntityHealthState,
   nowMs: number
 ): DefiningWorldPlazaEntityHealthState {
-  return {
+  const expiredMovementBuffIds = listingWorldPlazaExpiredMovementBuffIds(
+    state,
+    nowMs
+  );
+
+  let nextState: DefiningWorldPlazaEntityHealthState = {
     ...state,
     temporaryMaxHealthBonuses: state.temporaryMaxHealthBonuses.filter(
       (bonus) => bonus.expiresAtMs > nowMs
@@ -71,4 +94,23 @@ export function expiringWorldPlazaEntityHealthTimedEffects(
         ? null
         : state.invincibleUntilMs,
   };
+
+  for (const expiredBuffId of expiredMovementBuffIds) {
+    const descriptor = resolvingWorldPlazaEntityBuffDescriptor(expiredBuffId);
+    const followOnBuffIds = descriptor?.followOnBuffIds;
+
+    if (!followOnBuffIds || followOnBuffIds.length === 0) {
+      continue;
+    }
+
+    for (const followOnBuffId of followOnBuffIds) {
+      nextState = applyingWorldPlazaEntityBuff(
+        nextState,
+        followOnBuffId,
+        nowMs
+      );
+    }
+  }
+
+  return nextState;
 }

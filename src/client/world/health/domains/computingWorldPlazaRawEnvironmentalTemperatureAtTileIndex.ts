@@ -10,6 +10,7 @@ import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/
 import { resolvingWorldPlazaClimateAtTile } from '@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { resolvingWorldPlazaLitCampfireHeatCelsiusAtTileIndex } from '@/components/world/fire/domains/managingWorldPlazaLitCampfireHeatTilesStore';
+import { resolvingWorldPlazaActiveOreSmeltingHeatCelsiusAtTileIndex } from '@/components/world/crafting/domains/managingWorldPlazaActiveOreSmeltingHeatTilesStore';
 import { applyingWorldPlazaTemperatureDebugOverrideToCelsius } from '@/components/world/health/domains/applyingWorldPlazaTemperatureDebugOverride';
 import { mergingWorldPlazaEnvironmentalTemperatureLevels } from '@/components/world/health/domains/combiningWorldPlazaEnvironmentalTemperatureLevel';
 import { convertingWorldPlazaClimateNormalizedToCelsius } from '@/components/world/health/domains/convertingWorldPlazaClimateNormalizedToCelsius';
@@ -114,6 +115,13 @@ export function computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
 
   if (litCampfireCelsius !== null) {
     effectiveCelsius = Math.max(effectiveCelsius, litCampfireCelsius);
+  }
+
+  const activeOreSmeltingCelsius =
+    resolvingWorldPlazaActiveOreSmeltingHeatCelsiusAtTileIndex(tileX, tileY);
+
+  if (activeOreSmeltingCelsius !== null) {
+    effectiveCelsius = Math.max(effectiveCelsius, activeOreSmeltingCelsius);
   }
 
   return effectiveCelsius;

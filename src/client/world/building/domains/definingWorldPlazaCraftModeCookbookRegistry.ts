@@ -11,17 +11,18 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID = {
   SURVIVAL: 'cookbook-survival',
   BLACKSMITH: 'cookbook-blacksmith',
   HEALER: 'cookbook-healer',
+  CERAMICS: 'cookbook-ceramics',
 } as const;
 
 /** One craft-mode cookbook id. */
 export type DefiningWorldPlazaCraftModeCookbookId =
   (typeof DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID)[keyof typeof DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID];
 
-/** Cookbook icon sprite sheet (3 columns x 1 row of 32px cells). */
+/** Cookbook icon sprite sheet (4 columns x 1 row of 32px cells). */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_SPRITE_SHEET_URL =
   '/inventory/sprites/inventory-cookbook-sprites.webp' as const;
 
-export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_SPRITE_SHEET_COLUMN_COUNT = 3;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_SPRITE_SHEET_COLUMN_COUNT = 4;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_SPRITE_SHEET_ROW_COUNT = 1;
 
 /** Open-book pixel frame used by the craft cookbook dialog. */
@@ -90,6 +91,14 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_REGISTRY = [
     ariaLabel: "Open the Healer's Cookbook",
     spriteColumnIndex: 2,
     emblemIconifyIcon: 'mdi:mortar-pestle-plus',
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.CERAMICS,
+    title: 'Ceramics Cookbook',
+    subtitle: 'Clay kilns, stoves, and fired ware from packed earth.',
+    ariaLabel: 'Open the Ceramics Cookbook',
+    spriteColumnIndex: 3,
+    emblemIconifyIcon: 'game-icons:amphora',
   },
 ] as const satisfies readonly DefiningWorldPlazaCraftModeCookbookDefinition[];
 

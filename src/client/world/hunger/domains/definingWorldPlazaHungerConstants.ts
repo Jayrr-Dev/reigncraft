@@ -107,6 +107,9 @@ export const DEFINING_WORLD_PLAZA_HUNGER_MAX_FRAME_DELTA_SECONDS = 0.125;
 /** Hunger ratio restored by eating berries. */
 export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES = 0.15;
 
+/** Hunger ratio restored by drinking brewed coffee. */
+export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BREWED_COFFEE = 0.08;
+
 /** Hunger ratio restored by eating an apple. */
 export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE = 0.25;
 

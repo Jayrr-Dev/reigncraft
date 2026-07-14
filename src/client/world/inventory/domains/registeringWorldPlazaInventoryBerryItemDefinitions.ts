@@ -17,9 +17,10 @@ import { resolvingWorldPlazaInventoryFoodHealDeclaration } from '@/components/wo
 const DEFINING_WORLD_PLAZA_BERRY_INVENTORY_ITEM_SEEDS = [
   {
     typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED,
-    name: 'Red berry',
+    name: 'Coffee Cherry',
     rarity: 'common' as const,
-    description: 'A tart red berry from a forest shrub. Snackable.',
+    description:
+      'A ripe red coffee cherry from a forest shrub. Tart flesh, light buzz, soft crash.',
   },
   {
     typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_BLUE,
@@ -52,6 +53,12 @@ export function registeringWorldPlazaInventoryBerryItemDefinitions(): readonly D
       healthHeal: resolvingWorldPlazaInventoryFoodHealDeclaration({
         hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
       }),
+      ...(seed.typeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED
+        ? {
+            cookedWellFedBuffId: 'coffee-cherry-buzz-buff',
+            cookedWellFedChance: 1,
+          }
+        : {}),
     },
   }));
 }

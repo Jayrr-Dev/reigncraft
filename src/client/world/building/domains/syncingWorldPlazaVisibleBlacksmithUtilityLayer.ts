@@ -1,9 +1,11 @@
 import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE,
 } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import {
+  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_ACTIVE_WORLD_SPRITE_URL,
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_DISPLAY_SCALE,
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND,
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL,
@@ -39,6 +41,8 @@ const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND_BY_BLOCK_ID: Record<
 > = {
   [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL]:
     DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.ANVIL,
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY]:
+    DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.BLOOMERY,
   [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN]:
     DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.CLAY_KILN,
   [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE]:
@@ -99,6 +103,7 @@ function applyingWorldPlazaBlacksmithUtilityToSprite(
  */
 export function syncingWorldPlazaVisibleBlacksmithUtilityLayer(input: {
   readonly placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
+  readonly activeBlockIds?: ReadonlySet<string>;
   readonly state: SyncingWorldPlazaBlacksmithUtilitySpriteState;
   readonly creatingSprite: () => Sprite;
   readonly destroyingSprite: (sprite: Sprite) => void;
@@ -119,8 +124,11 @@ export function syncingWorldPlazaVisibleBlacksmithUtilityLayer(input: {
       continue;
     }
 
-    const spriteUrl =
-      DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL[utilityKind];
+    const spriteUrl = input.activeBlockIds?.has(block.blockId)
+      ? DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_ACTIVE_WORLD_SPRITE_URL[
+          utilityKind
+        ]
+      : DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL[utilityKind];
     const texture = peekingWorldPlazaBlacksmithUtilitySpriteTextureForUrl(spriteUrl);
 
     if (!texture) {

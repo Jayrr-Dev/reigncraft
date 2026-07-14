@@ -4,14 +4,14 @@
  * @module components/world/harvest/domains/definingWorldPlazaShrubPickConstants
  */
 
-/** Fixed pick duration (ms). */
-export const DEFINING_WORLD_PLAZA_SHRUB_PICK_DURATION_MS = 450;
+/** Fixed pick duration (ms). Kept short so berry picks respond on the first tap. */
+export const DEFINING_WORLD_PLAZA_SHRUB_PICK_DURATION_MS = 250;
 
 /** Max Chebyshev distance from player to shrub tile center. */
 export const DEFINING_WORLD_PLAZA_SHRUB_PICK_PLAYER_RANGE_TILES = 2;
 
 /** Minimum pointer hit radius around the shrub tile center (tiles). */
-export const DEFINING_WORLD_PLAZA_SHRUB_PICK_POINTER_HIT_RADIUS_TILES = 0.75;
+export const DEFINING_WORLD_PLAZA_SHRUB_PICK_POINTER_HIT_RADIUS_TILES = 1;
 
 /** Tile radius scanned around the pointer when resolving a shrub pick click. */
 export const DEFINING_WORLD_PLAZA_SHRUB_PICK_POINTER_CANDIDATE_TILE_SEARCH_RADIUS_TILES = 2;

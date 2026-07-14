@@ -94,6 +94,70 @@ export function computingWorldPlazaCampfireTemperatureCelsiusFromFuelWoodCount(
   );
 }
 
+/**
+ * Lit campfire paints assignable heat onto its tile plus this Chebyshev ring
+ * (1 = one block around), matching lava-style source tiles without using the
+ * wider neighbor-averaging ring.
+ */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_HEAT_RADIATION_RING = 1;
+
+/**
+ * Floor for adjacent campfire heat tiles (°C). Keeps the one-block ring above
+ * comfort so floor tint / mild heat damage still read after dilution.
+ */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_ADJACENT_MIN_CELSIUS = 55;
+
+/** Adjacent campfire tile heat as a fraction of the standing-tile temperature. */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_ADJACENT_CELSIUS_RATIO = 0.65;
+
+/**
+ * Adjacent campfire heat (°C) from the standing-tile temperature.
+ */
+export function computingWorldPlazaCampfireAdjacentTemperatureCelsius(
+  standingTileCelsius: number
+): number {
+  return Math.max(
+    DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_ADJACENT_MIN_CELSIUS,
+    Math.round(
+      standingTileCelsius *
+        DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_ADJACENT_CELSIUS_RATIO
+    )
+  );
+}
+
+/**
+ * Active ore-smelting station standing-tile heat (°C). Between campfire max and
+ * lava so bloomery / kiln / stove warm nearby tiles while smelting.
+ */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_ORE_SMELTING_CELSIUS = 280;
+
+/**
+ * Active smelting paints assignable heat onto footprint tiles plus this
+ * Chebyshev ring (1 = one block around), same pattern as lit campfires.
+ */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_ORE_SMELTING_HEAT_RADIATION_RING = 1;
+
+/** Floor for adjacent smelting heat tiles (°C). */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_ORE_SMELTING_ADJACENT_MIN_CELSIUS = 90;
+
+/** Adjacent smelting tile heat as a fraction of station temperature. */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_ORE_SMELTING_ADJACENT_CELSIUS_RATIO = 0.55;
+
+/**
+ * Adjacent ore-smelting heat (°C) from the station standing-tile temperature.
+ */
+export function computingWorldPlazaOreSmeltingAdjacentTemperatureCelsius(
+  standingTileCelsius: number
+): number {
+  return Math.max(
+    DEFINING_WORLD_PLAZA_TEMPERATURE_ORE_SMELTING_ADJACENT_MIN_CELSIUS,
+    Math.round(
+      standingTileCelsius *
+        DEFINING_WORLD_PLAZA_TEMPERATURE_ORE_SMELTING_ADJACENT_CELSIUS_RATIO
+    )
+  );
+}
+
 /** Ice block standing-tile temperature (°C). Freezes nearby surface water. */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_ICE_BLOCK_CELSIUS = -22;
 

@@ -80,6 +80,10 @@ export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE =
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL =
   'utility:anvil' as const;
 
+/** Bloomery block id (2x2 footprint). */
+export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY =
+  'utility:bloomery' as const;
+
 /** Clay kiln block id (2x2 footprint). */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN =
   'utility:clay-kiln' as const;
@@ -252,13 +256,28 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
       strokeColor: 0x3a3a3a,
     },
   },
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY]: {
+    id: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
+    name: 'Bloomery',
+    category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
+    isPaletteVisible: false,
+    collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK,
+    isInteractive: true,
+    placementFootprintTileWidth: 2,
+    placementFootprintTileHeight: 2,
+    visualConfig: {
+      label: 'Bloomery',
+      fillColor: 0xa6875f,
+      strokeColor: 0x6c5033,
+    },
+  },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN]: {
     id: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
     name: 'Clay kiln',
     category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
     isPaletteVisible: false,
     collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK,
-    isInteractive: false,
+    isInteractive: true,
     placementFootprintTileWidth: 2,
     placementFootprintTileHeight: 2,
     visualConfig: {
@@ -273,7 +292,7 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
     category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
     isPaletteVisible: false,
     collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK,
-    isInteractive: false,
+    isInteractive: true,
     visualConfig: {
       label: 'Stove',
       fillColor: 0xb8956a,

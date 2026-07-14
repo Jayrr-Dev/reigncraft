@@ -18,6 +18,7 @@ import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/wo
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID = {
   CAMPFIRE: 'recipe-campfire',
   ANVIL: 'recipe-anvil',
+  BLOOMERY: 'recipe-bloomery',
   CLAY_KILN: 'recipe-clay-kiln',
   CLAY_STOVE: 'recipe-clay-stove',
 } as const;

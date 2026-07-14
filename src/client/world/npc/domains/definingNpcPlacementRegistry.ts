@@ -1,5 +1,7 @@
 /**
- * Fixed world placements for plaza NPCs (near origin spawn ring).
+ * Fixed world placements for plaza NPCs.
+ *
+ * Empty until designers pick spots. Add rows here to spawn villagers.
  *
  * @module components/world/npc/domains/definingNpcPlacementRegistry
  */
@@ -17,28 +19,11 @@ export type DefiningNpcPlacement = {
   readonly worldY: number;
 };
 
-/** Three starter villagers near world origin; move later via this registry. */
+/**
+ * Live plaza placements. Keep empty for no world spawns.
+ *
+ * Example row:
+ * `{ npcId: 'npc-villager-a', speciesId: 'villager-a', displayName: 'Villager', worldX: 4, worldY: 2 }`
+ */
 export const DEFINING_NPC_PLACEMENT_REGISTRY: readonly DefiningNpcPlacement[] =
-  [
-    {
-      npcId: 'npc-villager-a',
-      speciesId: 'villager-a',
-      displayName: 'Villager',
-      worldX: 4,
-      worldY: 2,
-    },
-    {
-      npcId: 'npc-villager-b',
-      speciesId: 'villager-b',
-      displayName: 'Villager',
-      worldX: 6,
-      worldY: 1,
-    },
-    {
-      npcId: 'npc-villager-c',
-      speciesId: 'villager-c',
-      displayName: 'Villager',
-      worldX: 5,
-      worldY: -2,
-    },
-  ] as const;
+  [];

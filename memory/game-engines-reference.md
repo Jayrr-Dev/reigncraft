@@ -2,8 +2,8 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.3.22     |
-| **Last updated** | 2026-07-12 |
+| **Version**      | 1.3.23     |
+| **Last updated** | 2026-07-14 |
 
 Read this when working on plaza world gameplay, combat, rendering sync, or inventory. There is **no central engine registry**; engines are folders and naming conventions scattered under `src/client/world/` and `src/client/components/inventory/`.
 
@@ -189,6 +189,7 @@ The plaza hook wires Redis/save-slot persistence and optional demo seed. World f
 | Cookbook UI                              | `building/components/renderingWorldPlazaCraftModeCookbookDialog.tsx`                  |
 | Attach store                             | `domains/managingWorldPlazaRecipeDiscoveryStore.ts` (`attachingWorldPlazaRecipePage`) |
 | Recipe-page items (auto from registry)   | `crafting/domains/registeringWorldPlazaCraftRecipePageInventoryItems.ts`              |
+| Dev QA: attach all + 99× ingredients     | `attachingWorldPlazaAllCraftModeRecipesForDevQa.ts`, `listingWorldPlazaCraftModeRecipeIngredientSeedItems.ts` (wired from Pixi recipe init + `usingWorldPlazaInventory`) |
 
 **Extend (new recipe):**
 
@@ -196,6 +197,18 @@ The plaza hook wires Redis/save-slot persistence and optional demo seed. World f
 2. Append one row to `DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY` with `title`, `description`, `ingredients`, `recipeType`, and matching `outcome.kind` (`entity` = place block, `item` = inventory grant).
 3. Recipe-page inventory item + Recipes guide entry appear automatically.
 4. Player double-clicks the page item to attach (second attach refused). Cookbook only lists attached recipes.
+5. Dev QA load auto-attaches every registry recipe and seeds 99 of each unique ingredient (no extra wiring).
+
+### 4c. Ore smelting stations
+
+**Purpose:** Bloomery, clay kiln, and clay stove accept one metal ore plus wood or coal, run a four-second timer, then add the matching ingot (scarlet ore produces mercury).
+
+| Piece | Path |
+| ----- | ---- |
+| Ore/fuel/output registry | `crafting/domains/definingWorldPlazaOreSmeltingRegistry.ts` |
+| Timed station state hook | `crafting/hooks/usingWorldPlazaOreSmeltingStations.ts` |
+| Inventory DnD popover | `inventory/components/renderingWorldPlazaOreSmeltingPopover.tsx` |
+| Active glow + bloomery smoke | `building/components/renderingWorldPlazaBlacksmithUtilityLayer.tsx` |
 
 ---
 

@@ -1,5 +1,9 @@
 import { DEFINING_WORLD_DEPTH_LONG_GRASS_DECORATION_LAYER_Z_INDEX } from '@/components/world/depth';
 import { checkingWorldPlazaLongGrassDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLongGrassDecorationAtTileIndex';
+import {
+  checkingWorldPlazaRareShrubTallGrassCompanionAtTileIndex,
+  resolvingWorldPlazaRareShrubTallGrassCompanionSizeVariantAtTileIndex,
+} from '@/components/world/domains/checkingWorldPlazaRareShrubTallGrassCompanionAtTileIndex';
 import { computingWorldPlazaTerrainElevationScreenOffsetPxAtTileIndex } from '@/components/world/domains/computingWorldPlazaTerrainElevationScreenOffsetPxAtTileIndex';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import {
@@ -79,10 +83,13 @@ function listingWorldPlazaVisibleLongGrassCandidatesInBounds(
       continue;
     }
 
-    const sizeVariant = resolvingWorldLongGrassSizeVariantAtTileIndex(
-      tileX,
-      tileY
-    );
+    const sizeVariant =
+      checkingWorldPlazaRareShrubTallGrassCompanionAtTileIndex(tileX, tileY)
+        ? resolvingWorldPlazaRareShrubTallGrassCompanionSizeVariantAtTileIndex(
+            tileX,
+            tileY
+          )
+        : resolvingWorldLongGrassSizeVariantAtTileIndex(tileX, tileY);
     const facing = resolvingWorldLongGrassFacingAtTileIndex(tileX, tileY);
 
     candidates.push({

@@ -4,6 +4,7 @@ import { RenderingPlazaBestiaryGuideDetailView } from '@/components/home/compone
 import { RenderingPlazaBestiarySpritePortrait } from '@/components/home/components/renderingPlazaBestiarySpritePortrait';
 import { DEFINING_PLAZA_BESTIARY_PANEL_SUBTITLE } from '@/components/home/domains/definingPlazaBestiaryGuideConstants';
 import { filteringPlazaBestiaryGuideDisplayEntriesByBiome } from '@/components/home/domains/filteringPlazaBestiaryGuideDisplayEntriesByBiome';
+import { resolvingPlazaBestiaryBiomeFilterDisplayEntries } from '@/components/home/domains/resolvingPlazaBestiaryBiomeFilterDisplayEntries';
 import {
   resolvingPlazaBestiaryGuideDisplayEntries,
   type PlazaBestiaryGuideDisplayEntry,
@@ -189,7 +190,14 @@ export function RenderingPlazaBestiaryPanel({
           ) ?? null),
     [guideEntries, selectedSpeciesId]
   );
-  const biomeFilters = useMemo(() => listingWildlifeDevSpawnBiomeFilters(), []);
+  const biomeFilters = useMemo(
+    () =>
+      resolvingPlazaBestiaryBiomeFilterDisplayEntries(
+        listingWildlifeDevSpawnBiomeFilters(),
+        exploredKinds
+      ),
+    [exploredKinds]
+  );
   const selectingBiomeFilter = useCallback(
     (filterId: DefiningWildlifeDevSpawnBiomeFilterId): void => {
       setBiomeFilterId(filterId);
@@ -301,9 +309,13 @@ export function RenderingPlazaBestiaryPanel({
               type="button"
               role="tab"
               aria-selected={isActive}
+              title={
+                filter.isExplored ? filter.label : 'Undiscovered region'
+              }
               className={cn(
                 PLAZA_BESTIARY_BIOME_TAB_BUTTON_CLASS_NAME,
-                isActive && PLAZA_BESTIARY_BIOME_TAB_BUTTON_ACTIVE_CLASS_NAME
+                isActive && PLAZA_BESTIARY_BIOME_TAB_BUTTON_ACTIVE_CLASS_NAME,
+                !filter.isExplored && 'text-ink-soft/55'
               )}
               onClick={() => selectingBiomeFilter(filter.id)}
             >

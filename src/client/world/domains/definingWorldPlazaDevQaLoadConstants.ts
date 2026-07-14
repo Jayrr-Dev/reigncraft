@@ -30,6 +30,12 @@ export const DEFINING_WORLD_PLAZA_DEV_QA_LOAD_OWNER_ID = 'single-player:dev-qa';
 export const DEFINING_WORLD_PLAZA_DEV_QA_PLAYER_BASE_MAX_HEALTH = 1_000_000;
 
 /**
+ * Stack size granted for every unique craft-recipe ingredient on Dev QA load.
+ * Matches common inventory maxStack so one slot per material is enough.
+ */
+export const DEFINING_WORLD_PLAZA_DEV_QA_CRAFT_INGREDIENT_SEED_QUANTITY = 99;
+
+/**
  * Session override applied when Dev QA load starts: generation layers off,
  * audio left on so footsteps / mixer stay usable while profiling.
  *

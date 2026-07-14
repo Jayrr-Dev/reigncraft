@@ -1,4 +1,5 @@
 import { checkingWorldPlazaLandNearLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLandNearLavaAtTileIndex';
+import { checkingWorldPlazaRareShrubTallGrassCompanionAtTileIndex } from '@/components/world/domains/checkingWorldPlazaRareShrubTallGrassCompanionAtTileIndex';
 import { checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex';
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import { DEFINING_WORLD_PLAZA_LONG_GRASS_LAVA_CLEARANCE_RADIUS_TILES } from '@/components/world/domains/definingWorldPlazaLongGrassConstants';
@@ -60,9 +61,12 @@ export function checkingWorldPlazaLongGrassDecorationAtTileIndex(
     return false;
   }
 
-  return checkingWorldLongGrassPlacementAtTileIndex(
-    tileX,
-    tileY,
-    biome.longGrassTileModulus
+  return (
+    checkingWorldPlazaRareShrubTallGrassCompanionAtTileIndex(tileX, tileY) ||
+    checkingWorldLongGrassPlacementAtTileIndex(
+      tileX,
+      tileY,
+      biome.longGrassTileModulus
+    )
   );
 }

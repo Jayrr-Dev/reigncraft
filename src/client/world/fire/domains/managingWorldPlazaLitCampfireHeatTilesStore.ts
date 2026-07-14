@@ -5,8 +5,9 @@ import type { WorldFireDevvitCell } from '../../../../shared/worldFireDevvit';
 /**
  * Module store for tiles that radiate campfire environmental heat.
  *
- * Heat follows lit campfire fire cells, not the placed pit block. Standing-tile
- * temperature scales with inventory wood fed to that cell.
+ * Heat follows lit campfire fire cells, not the placed pit block. The standing
+ * tile plus one Chebyshev ring around it are assignable heat sources (lava-style
+ * but only one block out). Standing-tile temperature scales with fed wood.
  *
  * @module components/world/fire/domains/managingWorldPlazaLitCampfireHeatTilesStore
  */
@@ -19,15 +20,15 @@ export function formattingWorldPlazaLitCampfireHeatTileKey(
   return `${tileX},${tileY}`;
 }
 
-let litCampfireFuelWoodByTile = new Map<string, number>();
+let litCampfireHeatCelsiusByTile = new Map<string, number>();
 let litCampfireHeatTilesCacheKey = '';
 
 function rebuildingWorldPlazaLitCampfireHeatTilesCacheKey(
-  fuelWoodByTile: ReadonlyMap<string, number>
+  heatCelsiusByTile: ReadonlyMap<string, number>
 ): string {
-  return Array.from(fuelWoodByTile.entries())
+  return Array.from(heatCelsiusByTile.entries())
     .sort(([tileKeyA], [tileKeyB]) => tileKeyA.localeCompare(tileKeyB))
-    .map(([tileKey, fuelWoodCount]) => `${tileKey}@${fuelWoodCount}`)
+    .map(([tileKey, heatCelsius]) => `${tileKey}@${heatCelsius}`)
     .join('|');
 }
 
@@ -37,43 +38,39 @@ function rebuildingWorldPlazaLitCampfireHeatTilesCacheKey(
 export function updatingWorldPlazaLitCampfireHeatTilesFromFireCells(
   fireCells: readonly WorldFireDevvitCell[]
 ): void {
-  litCampfireFuelWoodByTile = new Map(
+  litCampfireHeatCelsiusByTile = new Map(
     buildingWorldPlazaLitCampfireTileKeysFromFireCells(fireCells)
   );
   litCampfireHeatTilesCacheKey =
-    rebuildingWorldPlazaLitCampfireHeatTilesCacheKey(litCampfireFuelWoodByTile);
+    rebuildingWorldPlazaLitCampfireHeatTilesCacheKey(
+      litCampfireHeatCelsiusByTile
+    );
 }
 
 /**
- * Returns true when a lit campfire fire cell radiates heat on the tile.
+ * Returns true when a lit campfire radiates assignable heat on the tile.
  */
 export function checkingWorldPlazaLitCampfireHeatAtTileIndex(
   tileX: number,
   tileY: number
 ): boolean {
-  return litCampfireFuelWoodByTile.has(
+  return litCampfireHeatCelsiusByTile.has(
     formattingWorldPlazaLitCampfireHeatTileKey(tileX, tileY)
   );
 }
 
 /**
- * Standing-tile campfire temperature for a lit heat tile (°C), or null.
+ * Standing / radiated campfire temperature for a heat tile (°C), or null.
  */
 export function resolvingWorldPlazaLitCampfireHeatCelsiusAtTileIndex(
   tileX: number,
   tileY: number
 ): number | null {
-  const fuelWoodCount = litCampfireFuelWoodByTile.get(
+  const heatCelsius = litCampfireHeatCelsiusByTile.get(
     formattingWorldPlazaLitCampfireHeatTileKey(tileX, tileY)
   );
 
-  if (fuelWoodCount === undefined) {
-    return null;
-  }
-
-  return computingWorldPlazaCampfireTemperatureCelsiusFromFuelWoodCount(
-    fuelWoodCount
-  );
+  return heatCelsius === undefined ? null : heatCelsius;
 }
 
 /**
@@ -85,22 +82,26 @@ export function gettingWorldPlazaLitCampfireHeatTilesCacheKey(): string {
 
 /** Test helper: clears lit heat tiles. */
 export function clearingWorldPlazaLitCampfireHeatTilesForTest(): void {
-  litCampfireFuelWoodByTile = new Map();
+  litCampfireHeatCelsiusByTile = new Map();
   litCampfireHeatTilesCacheKey = '';
 }
 
-/** Test helper: marks one tile as lit campfire heat. */
+/** Test helper: marks one tile as lit campfire standing heat. */
 export function markingWorldPlazaLitCampfireHeatTileForTest(
   tileX: number,
   tileY: number,
   fuelWoodCount = 1
 ): void {
-  litCampfireFuelWoodByTile = new Map([
+  litCampfireHeatCelsiusByTile = new Map([
     [
       formattingWorldPlazaLitCampfireHeatTileKey(tileX, tileY),
-      Math.max(0, fuelWoodCount),
+      computingWorldPlazaCampfireTemperatureCelsiusFromFuelWoodCount(
+        Math.max(0, fuelWoodCount)
+      ),
     ],
   ]);
   litCampfireHeatTilesCacheKey =
-    rebuildingWorldPlazaLitCampfireHeatTilesCacheKey(litCampfireFuelWoodByTile);
+    rebuildingWorldPlazaLitCampfireHeatTilesCacheKey(
+      litCampfireHeatCelsiusByTile
+    );
 }

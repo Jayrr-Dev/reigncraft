@@ -39,6 +39,7 @@ import {
 } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE,
@@ -69,6 +70,11 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_WOOD_COST = 5;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ANVIL_STONE_COST = 12;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ANVIL_IRON_COST = 6;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ANVIL_WOOD_COST = 4;
+
+/** Bloomery recipe ingredient counts. */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BLOOMERY_CLAY_COST = 10;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BLOOMERY_STONE_COST = 8;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BLOOMERY_WOOD_COST = 4;
 
 /** Clay kiln recipe ingredient counts (2x2 footprint). */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CLAY_KILN_CLAY_COST = 16;
@@ -143,8 +149,41 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
     },
   },
   {
-    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CLAY_KILN,
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.BLOOMERY,
     cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.BLACKSMITH,
+    title: 'Bloomery',
+    description:
+      'A clay shaft furnace that turns mined metal ore into workable ingots.',
+    recipeVisual: {
+      visualKind: 'sprite-sheet',
+      spriteSheetIcon: resolvingWorldPlazaBlacksmithUtilitySpriteSheetIcon(
+        DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.BLOOMERY
+      ),
+    },
+    ingredients: [
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_CLAY,
+        quantity: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BLOOMERY_CLAY_COST,
+      },
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
+        quantity: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BLOOMERY_STONE_COST,
+      },
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+        quantity: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BLOOMERY_WOOD_COST,
+      },
+    ],
+    recipeType: 'entity',
+    outcome: {
+      kind: 'entity',
+      blockDefinitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
+      blockHeight: DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT,
+    },
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CLAY_KILN,
+    cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.CERAMICS,
     title: 'Clay Kiln',
     description:
       'A beehive of packed clay for firing ore and brick. Needs a full 2 by 2 pad of clear ground.',
@@ -177,7 +216,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
   },
   {
     id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CLAY_STOVE,
-    cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.BLACKSMITH,
+    cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.CERAMICS,
     title: 'Clay Stove',
     description:
       'A short clay hearth with a dark cook plate. Smaller than a kiln, still hungry for coal.',

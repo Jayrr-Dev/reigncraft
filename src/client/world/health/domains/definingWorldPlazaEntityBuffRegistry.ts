@@ -171,6 +171,11 @@ export type DefiningWorldPlazaEntityBuffDescriptor = {
   actionLocks?: readonly DefiningWorldPlazaEntityBuffActionLock[];
   /** When true, only the parent disease icon shows in the HUD row. */
   hideFromHud?: boolean;
+  /**
+   * Buff ids applied when this timed effect expires naturally (not when
+   * cleared early by toggle / refresh).
+   */
+  followOnBuffIds?: readonly string[];
 };
 
 /** Single source of truth for temporary buffs and debuffs. */
@@ -1483,6 +1488,66 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
         kind: 'movement_modifier',
         modifierKind: 'speed',
         multiplier: 1.2,
+      },
+    },
+    {
+      id: 'coffee-cherry-buzz-buff',
+      label: 'Cherry Buzz',
+      description:
+        'A light caffeine kick from coffee cherry flesh. Crash follows.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 45_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 1.1,
+      },
+      followOnBuffIds: ['coffee-cherry-crash-debuff'],
+    },
+    {
+      id: 'coffee-buzz-buff',
+      label: 'Coffee Buzz',
+      description:
+        'Hot clay-cup coffee puts a spring in your step. Crash follows.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 120_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 1.25,
+      },
+      followOnBuffIds: ['coffee-crash-debuff'],
+    },
+    {
+      id: 'coffee-cherry-crash-debuff',
+      label: 'Cherry Crash',
+      description: 'The cherry buzz fades. Legs feel a little heavy.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 30_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 0.9,
+      },
+    },
+    {
+      id: 'coffee-crash-debuff',
+      label: 'Coffee Crash',
+      description: 'The brew wears off. Your stride turns sluggish.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 60_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 0.75,
       },
     },
     {

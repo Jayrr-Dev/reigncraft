@@ -1,5 +1,6 @@
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
+import { gettingWorldPlazaActiveOreSmeltingHeatTilesCacheKey } from '@/components/world/crafting/domains/managingWorldPlazaActiveOreSmeltingHeatTilesStore';
 import { gettingWorldPlazaLitCampfireHeatTilesCacheKey } from '@/components/world/fire/domains/managingWorldPlazaLitCampfireHeatTilesStore';
 import { resolvingWorldPlazaBlockEnvironmentalTemperatureLevel } from '@/components/world/health/domains/resolvingWorldPlazaBlockEnvironmentalTemperatureLevel';
 
@@ -24,6 +25,10 @@ export function checkingWorldPlazaPlacedBlocksByTileHasEnvironmentalHeatSources(
   placedBlocksByTile: IndexingWorldBuildingPlacedBlocksByTile
 ): boolean {
   if (gettingWorldPlazaLitCampfireHeatTilesCacheKey().length > 0) {
+    return true;
+  }
+
+  if (gettingWorldPlazaActiveOreSmeltingHeatTilesCacheKey().length > 0) {
     return true;
   }
 
@@ -87,10 +92,16 @@ export function buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey(
     .sort()
     .join('|');
   const litCampfireHeatKey = gettingWorldPlazaLitCampfireHeatTilesCacheKey();
+  const activeOreSmeltingHeatKey =
+    gettingWorldPlazaActiveOreSmeltingHeatTilesCacheKey();
 
-  if (placedBlockHeatKey.length === 0 && litCampfireHeatKey.length === 0) {
+  if (
+    placedBlockHeatKey.length === 0 &&
+    litCampfireHeatKey.length === 0 &&
+    activeOreSmeltingHeatKey.length === 0
+  ) {
     return '';
   }
 
-  return `${placedBlockHeatKey}|lit:${litCampfireHeatKey}`;
+  return `${placedBlockHeatKey}|lit:${litCampfireHeatKey}|smelt:${activeOreSmeltingHeatKey}`;
 }

@@ -9,6 +9,7 @@ import {
 } from '@/components/world/fire/domains/managingWorldPlazaLitCampfireHeatTilesStore';
 import {
   DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS,
+  computingWorldPlazaCampfireAdjacentTemperatureCelsius,
   computingWorldPlazaCampfireTemperatureCelsiusFromFuelWoodCount,
 } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -43,12 +44,21 @@ describe('managingWorldPlazaLitCampfireHeatTilesStore', () => {
       }),
     ]);
 
+    const standingCelsius =
+      computingWorldPlazaCampfireTemperatureCelsiusFromFuelWoodCount(3);
+    const adjacentCelsius =
+      computingWorldPlazaCampfireAdjacentTemperatureCelsius(standingCelsius);
+
     expect(checkingWorldPlazaLitCampfireHeatAtTileIndex(5, 6)).toBe(true);
-    expect(checkingWorldPlazaLitCampfireHeatAtTileIndex(5, 7)).toBe(false);
+    expect(checkingWorldPlazaLitCampfireHeatAtTileIndex(6, 6)).toBe(true);
+    expect(checkingWorldPlazaLitCampfireHeatAtTileIndex(5, 8)).toBe(false);
     expect(resolvingWorldPlazaLitCampfireHeatCelsiusAtTileIndex(5, 6)).toBe(
-      computingWorldPlazaCampfireTemperatureCelsiusFromFuelWoodCount(3)
+      standingCelsius
     );
-    expect(gettingWorldPlazaLitCampfireHeatTilesCacheKey()).toBe('5,6@3');
+    expect(resolvingWorldPlazaLitCampfireHeatCelsiusAtTileIndex(6, 6)).toBe(
+      adjacentCelsius
+    );
+    expect(gettingWorldPlazaLitCampfireHeatTilesCacheKey()).toContain('5,6@');
   });
 
   it('clears heat when fire cells empty', () => {

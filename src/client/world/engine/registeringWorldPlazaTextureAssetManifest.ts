@@ -7,7 +7,10 @@ import {
   DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_COLUMN_COUNT,
   DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_URL,
 } from '@/components/world/trap/domains/definingWorldPlazaBearTrapConstants';
-import { DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL } from '@/components/world/building/domains/definingWorldPlazaBlacksmithUtilitySpriteConstants';
+import {
+  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_ACTIVE_WORLD_SPRITE_URL,
+  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL,
+} from '@/components/world/building/domains/definingWorldPlazaBlacksmithUtilitySpriteConstants';
 import { creatingWorldPlazaTextureAssetLoader } from '@/components/world/engine/creatingWorldPlazaTextureAssetLoader';
 import { Assets, Rectangle, Texture } from 'pixi.js';
 
@@ -300,9 +303,16 @@ export const registeringWorldPlazaBearTrapSpriteTextureLoader =
     },
   });
 
-const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_SPRITE_URLS = Object.values(
-  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL
-);
+const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_SPRITE_URLS = [
+  ...new Set([
+    ...Object.values(
+      DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL
+    ),
+    ...Object.values(
+      DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_ACTIVE_WORLD_SPRITE_URL
+    ),
+  ]),
+];
 
 /** Loader for blacksmith utility world sprites keyed by URL. */
 export const registeringWorldPlazaBlacksmithUtilitySpriteTextureLoader =

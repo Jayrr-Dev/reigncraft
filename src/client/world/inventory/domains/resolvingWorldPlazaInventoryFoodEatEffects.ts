@@ -263,6 +263,21 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
     nextHealthState = cookedResult.nextHealthState;
     didRollDisease = didRollDisease || cookedResult.didRollDisease;
     didRollWellFedBuff = cookedResult.didRollWellFedBuff;
+  } else if (
+    foodDefinition.cookedWellFedBuffId ||
+    (foodDefinition.cookedWellFedBuffIds?.length ?? 0) > 0
+  ) {
+    const forageBuffResult = applyingWorldPlazaInventoryCookedMeatEatEffects({
+      foodDefinition,
+      healthState: nextHealthState,
+      worldEpochMs: resolvedWorldEpochMs,
+      simulationNowMs: nowMs,
+      sicknessRoll,
+      wellFedRoll,
+      foodItemMetadata,
+    });
+    nextHealthState = forageBuffResult.nextHealthState;
+    didRollWellFedBuff = forageBuffResult.didRollWellFedBuff;
   }
 
   const isSick =

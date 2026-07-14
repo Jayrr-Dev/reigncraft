@@ -113,10 +113,18 @@ describe('managingWorldPlazaRecipeDiscoveryStore', () => {
       attachedEntries,
       DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.BLACKSMITH
     );
+    const ceramicsOnly = filteringPlazaRecipesGuideDisplayEntriesByCookbook(
+      attachedEntries,
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.CERAMICS
+    );
 
     expect(survivalOnly).toHaveLength(1);
-    expect(blacksmithOnly).toHaveLength(3);
+    expect(blacksmithOnly).toHaveLength(1);
+    expect(ceramicsOnly).toHaveLength(2);
     expect(blacksmithOnly.every((entry) => entry.isAttached === false)).toBe(
+      true
+    );
+    expect(ceramicsOnly.every((entry) => entry.isAttached === false)).toBe(
       true
     );
   });

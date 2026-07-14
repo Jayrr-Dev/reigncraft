@@ -87,7 +87,7 @@ const DEFINING_WORLD_PLAZA_ORE_INVENTORY_ITEM_SEEDS: readonly OreItemSeed[] = [
     name: 'Scarlet ore',
     speciesId: 'scarlet',
     description:
-      'Cinnabar-red mineral in dark stone. Bright pigment and strange chemistry.',
+      'Cinnabar-red mineral in dark stone. Smelts to mercury, not a metal bar.',
   },
   {
     typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_LEAD,

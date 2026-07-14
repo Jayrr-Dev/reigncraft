@@ -32,6 +32,8 @@ import {
   readingWorldPlazaInventoryKingpinTestSeedVersion,
   writingWorldPlazaInventoryKingpinTestSeedVersion,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryKingpinTestSeed';
+import { listingWorldPlazaCraftModeRecipeIngredientSeedItems } from '@/components/world/crafting/domains/listingWorldPlazaCraftModeRecipeIngredientSeedItems';
+import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import { ensuringWorldPlazaInventoryCampfireRecipePage } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryCampfireRecipePage';
 import { movingWorldPlazaInventoryItemToSlot } from '@/components/world/inventory/domains/movingWorldPlazaInventoryItemToSlot';
 import { normalizingWorldPlazaInventoryWeaponToolSlot } from '@/components/world/inventory/domains/normalizingWorldPlazaInventoryWeaponToolSlot';
@@ -123,6 +125,7 @@ export function usingWorldPlazaInventory(
   const hasNormalizedWeaponToolSlotRef = useRef(false);
   const hasEnsuredCampfireRecipePageRef = useRef(false);
   const hasKingpinSeededRef = useRef(false);
+  const hasDevQaCraftSeededRef = useRef(false);
   const isKingpinAccount =
     checkingWorldPlazaInventoryUserIsKingpin(onlineUsername);
 
@@ -235,6 +238,30 @@ export function usingWorldPlazaInventory(
     // Only seed after a confirmed successful load; a transient load error
     // must never overwrite a real save with seed items.
     if (isLoading || !isLoaded || !persistenceOwnerId) {
+      return;
+    }
+
+    if (
+      checkingWorldPlazaDevQaLoadEnabled() &&
+      !hasDevQaCraftSeededRef.current
+    ) {
+      hasDevQaCraftSeededRef.current = true;
+      hasSeededRef.current = true;
+      hasNormalizedWeaponToolSlotRef.current = true;
+      hasEnsuredCampfireRecipePageRef.current = true;
+
+      let seededState = creatingEmptyInventoryState(
+        DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY
+      );
+      seededState = seedingWorldPlazaInventoryItems(
+        seededState,
+        DEFINING_WORLD_PLAZA_INVENTORY_STARTER_ITEMS
+      );
+      seededState = seedingWorldPlazaInventoryItems(
+        seededState,
+        listingWorldPlazaCraftModeRecipeIngredientSeedItems()
+      );
+      setState(seededState);
       return;
     }
 

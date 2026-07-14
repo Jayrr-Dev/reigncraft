@@ -42,6 +42,21 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_LEAD =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_SULFUR =
   'world-plaza-ore-sulfur' as const;
 
+/** Refined metal ingot item type ids (sprite sheet order). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON =
+  'world-plaza-ingot-iron' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_COPPER =
+  'world-plaza-ingot-copper' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_SILVER =
+  'world-plaza-ingot-silver' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_GOLD =
+  'world-plaza-ingot-gold' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_LEAD =
+  'world-plaza-ingot-lead' as const;
+/** Quicksilver refined from scarlet (cinnabar) ore. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_MERCURY =
+  'world-plaza-mercury' as const;
+
 /** Build tool item type id. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL =
   'world-plaza-tool' as const;
@@ -141,6 +156,14 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_BLUE =
   'world-plaza-berry-blue' as const;
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_GOLDEN =
   'world-plaza-berry-golden' as const;
+
+/** Coffee processing chain from coffee cherries. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS =
+  'world-plaza-coffee-beans' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_COFFEE =
+  'world-plaza-brewed-coffee' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP =
+  'world-plaza-empty-clay-cup' as const;
 
 /** Wood-tier swords through gold-tier swords. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD =
