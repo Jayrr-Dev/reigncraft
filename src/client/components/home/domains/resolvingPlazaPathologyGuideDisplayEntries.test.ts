@@ -1,4 +1,4 @@
-import { computingPlazaPathologyStudyPoints } from '@/components/home/domains/computingPlazaPathologyStudyPoints';
+import { computingPlazaPathologyTotalStudyPoints } from '@/components/home/domains/computingPlazaPathologyStudyPoints';
 import { DEFINING_PLAZA_PATHOLOGY_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaPathologyGuideConstants';
 import {
   formattingPlazaPathologyCodexMenuDescription,
@@ -8,9 +8,11 @@ import { describe, expect, it } from 'vitest';
 
 describe('resolvingPlazaPathologyGuideDisplayEntries', () => {
   it('keeps unobtained diseases locked with zero study progress', () => {
-    const entries = resolvingPlazaPathologyGuideDisplayEntries(new Set(), {
-      salmonellosis: 30,
-    });
+    const entries = resolvingPlazaPathologyGuideDisplayEntries(
+      new Set(),
+      { salmonellosis: 30 },
+      { salmonellosis: 10 }
+    );
     const salmonellosis = entries.find(
       (entry) => entry.diseaseId === 'salmonellosis'
     );
@@ -21,18 +23,20 @@ describe('resolvingPlazaPathologyGuideDisplayEntries', () => {
     expect(salmonellosis?.displayName).toBe('???');
   });
 
-  it('applies floor(linked / 3) Pathology points once obtained', () => {
+  it('applies floor(linked / 3) plus infection hours once obtained', () => {
     const entries = resolvingPlazaPathologyGuideDisplayEntries(
       new Set(['salmonellosis']),
-      { salmonellosis: 8 }
+      { salmonellosis: 8 },
+      { salmonellosis: 3 }
     );
     const salmonellosis = entries.find(
       (entry) => entry.diseaseId === 'salmonellosis'
     );
 
-    expect(computingPlazaPathologyStudyPoints(8)).toBe(2);
+    expect(computingPlazaPathologyTotalStudyPoints(8, 3)).toBe(5);
     expect(salmonellosis?.isObtained).toBe(true);
-    expect(salmonellosis?.studyCount).toBe(2);
+    expect(salmonellosis?.studyCount).toBe(5);
+    expect(salmonellosis?.infectionStudyPoints).toBe(3);
     expect(salmonellosis?.discoveryState).toBe('studied');
     expect(salmonellosis?.displayName).toBe('Salmonellosis');
   });
@@ -48,7 +52,8 @@ describe('resolvingPlazaPathologyGuideDisplayEntries', () => {
 
     const unlockedCarriers = resolvingPlazaPathologyGuideDisplayEntries(
       new Set(['trichinellosis']),
-      { trichinellosis: 45 }
+      {},
+      { trichinellosis: 15 }
     ).find((entry) => entry.diseaseId === 'trichinellosis');
 
     expect(unlockedCarriers?.studyCount).toBe(15);

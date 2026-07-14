@@ -1,4 +1,12 @@
-import { computingWorldPlazaInGameDaysToRealMs } from '@/components/world/domains/computingWorldPlazaInGameDurationMs';
+import {
+  COMPUTING_WORLD_PLAZA_IN_GAME_HOUR_MS,
+  computingWorldPlazaInGameDaysToRealMs,
+} from '@/components/world/domains/computingWorldPlazaInGameDurationMs';
+import {
+  gettingWorldPlazaPathologyInfectionStudyPointsSnapshot,
+  initializingWorldPlazaPathologyDiscoveryStore,
+  resettingWorldPlazaPathologyDiscoveryStoreForTests,
+} from '@/components/world/domains/managingWorldPlazaPathologyDiscoveryStore';
 import {
   advancingWorldPlazaEntityHealthDiseaseTick,
   applyingWorldPlazaEntityDisease,
@@ -13,7 +21,7 @@ import {
 } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import { DEFINING_WORLD_PLAZA_ENTITY_IMMUNE_SYSTEM_FACTOR_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityImmuneSystemConstants';
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 /** Box-Muller uniforms that sample z=0 for each bell-curve roll. */
 function creatingWorldPlazaEntityDiseaseMeanBellCurveRandom(): () => number {
@@ -29,6 +37,11 @@ describe('applyingWorldPlazaEntityDisease', () => {
     resolvingWorldPlazaEntityDiseaseDescriptor('trichinellosis');
   const meanBellCurveRandom =
     creatingWorldPlazaEntityDiseaseMeanBellCurveRandom();
+
+  beforeEach(() => {
+    resettingWorldPlazaPathologyDiscoveryStoreForTests();
+    initializingWorldPlazaPathologyDiscoveryStore('test-disease-pathology');
+  });
 
   it('queues all grants during incubation without applying symptoms', () => {
     const nextState = applyingWorldPlazaEntityDisease(
@@ -211,6 +224,35 @@ describe('applyingWorldPlazaEntityDisease', () => {
     );
 
     expect(nextState.confusionEffects).toHaveLength(0);
+  });
+
+  it('awards one Pathology study point per in-game hour while infected', () => {
+    let state = applyingWorldPlazaEntityDisease(
+      creatingWorldPlazaEntityHealthInitialState(),
+      'trichinellosis',
+      nowMs,
+      meanBellCurveRandom
+    );
+
+    state = advancingWorldPlazaEntityHealthDiseaseTick(
+      state,
+      nowMs + COMPUTING_WORLD_PLAZA_IN_GAME_HOUR_MS * 2
+    );
+
+    expect(state.diseaseEffects[0]?.pathologyStudyHoursCredited).toBe(2);
+    expect(
+      gettingWorldPlazaPathologyInfectionStudyPointsSnapshot().trichinellosis
+    ).toBe(2);
+
+    state = advancingWorldPlazaEntityHealthDiseaseTick(
+      state,
+      nowMs + COMPUTING_WORLD_PLAZA_IN_GAME_HOUR_MS * 2
+    );
+
+    expect(state.diseaseEffects[0]?.pathologyStudyHoursCredited).toBe(2);
+    expect(
+      gettingWorldPlazaPathologyInfectionStudyPointsSnapshot().trichinellosis
+    ).toBe(2);
   });
 
   it('blocks contraction when the player already has per-disease immunity', () => {
