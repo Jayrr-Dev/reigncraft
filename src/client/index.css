@@ -298,6 +298,9 @@ body,
   margin: 0;
   height: 100%;
   width: 100%;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 /*
@@ -311,6 +314,24 @@ html {
 
 body {
   font-family: var(--font-body);
+}
+
+/* Keep typing fields selectable; block drag-save on images/canvas. */
+input,
+textarea,
+[contenteditable='true'] {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+img,
+svg,
+canvas,
+video {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 /* --- Game UI --- */

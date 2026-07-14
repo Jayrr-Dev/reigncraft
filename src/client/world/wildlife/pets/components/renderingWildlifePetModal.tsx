@@ -24,6 +24,10 @@ import { checkingWildlifePetItemIsEquippableWeapon } from '@/components/world/wi
 import { checkingWildlifePetNeedsOwnerFeed } from '@/components/world/wildlife/pets/domains/checkingWildlifePetNeedsOwnerFeed';
 import { DEFINING_WILDLIFE_PET_MAX_LOYALTY } from '@/components/world/wildlife/pets/domains/definingWildlifePetLoyaltyTiersRegistry';
 import {
+  LABELING_WILDLIFE_PET_NEGLECTED_BADGE,
+  LABELING_WILDLIFE_PET_NEGLECT_HUNTING_STATUS,
+} from '@/components/world/wildlife/pets/domains/definingWildlifePetHungerLoyaltyNeglectConstants';
+import {
   DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_ACTIVE_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_ADVANCED_STAT_CARD_CLASS_NAME,
@@ -454,6 +458,15 @@ export function RenderingWildlifePetModal({
                 {tier.displayName} · {loyalty}/
                 {DEFINING_WILDLIFE_PET_MAX_LOYALTY}
               </span>
+              {petBond.hasNeglectedBadge ? (
+                <span
+                  className={DEFINING_WILDLIFE_PET_MODAL_TIER_CHIP_CLASS_NAME}
+                >
+                  {petBond.isNeglectHunting
+                    ? `${LABELING_WILDLIFE_PET_NEGLECTED_BADGE} · ${LABELING_WILDLIFE_PET_NEGLECT_HUNTING_STATUS}`
+                    : LABELING_WILDLIFE_PET_NEGLECTED_BADGE}
+                </span>
+              ) : null}
             </div>
           </div>
 
