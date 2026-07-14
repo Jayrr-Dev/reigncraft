@@ -145,6 +145,55 @@ describe('wildlife docile pet proximity selection', () => {
     expect(pending).toBeNull();
   });
 
+  it('keeps Familiar namable companions pending even while Pet is on cooldown', () => {
+    const store = creatingWildlifeInstanceStore();
+    replacingWildlifeInstance(
+      store,
+      creatingWildlifeTestInstance({
+        instanceId: 'dog-familiar',
+        speciesId: 'shepherd-dog',
+        position: { x: 5.1, y: 5.1, layer: 1 },
+        petCooldownUntilMs: 50_000,
+        petBond: {
+          petId: 'pet-1',
+          ownerUserId: 'owner-1',
+          loyalty: 52,
+          command: 'follow',
+          learnedSkillIds: [],
+          equippedSkillId: null,
+          soulsaveConsumed: false,
+          weaponItem: null,
+          armorItem: null,
+          isPersistent: true,
+          stayPoint: null,
+        },
+      })
+    );
+
+    const keys = listingWorldPlazaInteractableSelectionKeysInPlayerProximity({
+      playerPosition: { x: 5.0, y: 5.0, layer: 1 },
+      placedBlocks: [],
+      wildlifeStore: store,
+      nowMs: 10_000,
+    });
+
+    expect(
+      keys.has(formattingWildlifeDocilePetSelectionKey('dog-familiar'))
+    ).toBe(true);
+
+    const pending = resolvingWildlifeDocilePetProximityPending({
+      wildlifeStore: store,
+      selectedKeys: keys,
+      playerPosition: { x: 5.0, y: 5.0, layer: 1 },
+      currentPending: null,
+      activePettingInstanceId: null,
+      nowMs: 10_000,
+    });
+
+    expect(pending?.instanceId).toBe('dog-familiar');
+    expect(pending?.petKind).toBe('dog');
+  });
+
   it('keeps the active petting target even without proximity keys', () => {
     const store = creatingWildlifeInstanceStore();
     replacingWildlifeInstance(

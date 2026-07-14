@@ -11,7 +11,24 @@ description: >-
 
 # Creating sprites
 
-Pipeline: pick grid → pick cell size → generate equal-cell art → remove bg → pack → **inspect** → WebP → optional inventory wire-up.
+Pipeline: pick grid → pick cell size → generate equal-cell art on **key color BG** → remove bg → pack → **inspect** → WebP → optional inventory wire-up.
+
+## Generation background (mandatory)
+
+**Always** generate source art on solid **`#7A7A7A`** (`rgb(122, 122, 122)`).
+
+| Why        | Detail                                                                      |
+| ---------- | --------------------------------------------------------------------------- |
+| Easy key   | Mid gray is far from white petals, dark outlines, and most plant greens     |
+| Consistent | Same key every sheet → one remove path in the pack script                   |
+| Next phase | Downstream tools can chroma-key without guessing checkerboards / pure white |
+
+Rules:
+
+1. Every `GenerateImage` / sheet prompt **must** say: solid flat background exactly `#7A7A7A`, no gradients, no checkerboard, no pure white/black fill behind the icon.
+2. Do **not** ask the model for “transparent background” (models fake it with white fringe). Key `#7A7A7A` instead, then punch it in process.
+3. Pack script defaults to keying `#7A7A7A` (with a small RGB tolerance). Keep `--no-bg-remove` only for already-cleaned inputs.
+4. Icon pixels must not use exactly `#7A7A7A` as fill (nudge grays to `#6E6E6E` / `#868686` if needed).
 
 ## Cell size (quality)
 
@@ -41,7 +58,7 @@ Industry / engine rules this project follows:
 | Spacing           | **0 px** gap between cells (tight grid)                                                                                                                                    |
 | Alignment         | Regular grid, left→right, top→bottom                                                                                                                                       |
 | Filter            | Nearest-neighbor only (no bilinear)                                                                                                                                        |
-| Background        | True RGBA transparency (no checkerboard)                                                                                                                                   |
+| Background        | Source art: solid `#7A7A7A`. Shipped WebP: true RGBA transparency (no checkerboard, no leftover key gray)                                                                  |
 | Uniform footprint | Each icon’s opaque bounds fit inside its cell with similar max height/width (~70–90% of cell). Tier “size” is shown by **silhouette detail**, not by blowing past the cell |
 | No bleed          | No pixel of icon A in cell B                                                                                                                                               |
 
@@ -55,6 +72,7 @@ If generated art has uneven spacing or wildly different bounding boxes, **do not
 | Padding inside cell   | **2 px** (or **4 px** when high quality)      |
 | Export                | lossless WebP (`method=6`)                    |
 | Preferred when N = 12 | **4×3**                                       |
+| Generation BG         | **`#7A7A7A`** (always; keyed out in process)  |
 
 ## Picking a grid
 
@@ -93,6 +111,10 @@ Order is left→right, top→bottom. Record `C`, `R`, `N`, and `S` (32 or 64).
 
 **Preferred for small N (≤8):** generate **one icon per image**, same style, then pack with `--from-images`. Equal cells are much more reliable.
 
+**Every generate prompt must include the key BG**, e.g.:
+
+> Solid flat background exactly `#7A7A7A` (medium gray). No transparency, no checkerboard, no white or black backdrop.
+
 **Sheet mode:** one image with explicit equal cells:
 
 - “Exactly N icons in a clean **C×R** grid”
@@ -100,7 +122,8 @@ Order is left→right, top→bottom. Record `C`, `R`, `N`, and `S` (32 or 64).
 - “Each icon centered in its cell”
 - “All icons share roughly the **same bounding-box height** (~80% of cell)”
 - “Size tiers use detail/straps/pockets, **not** making later icons much taller”
-- “No overlapping, no text, no UI, transparent background”
+- “No overlapping, no text, no UI”
+- “Solid flat background exactly `#7A7A7A` behind every cell”
 - For high quality: ask the generator for **sharper pixel detail** that still reads after nearest-neighbor pack into 64×64 (more silhouette detail, not blur)
 
 Do not ship the raw generator PNG.
@@ -186,6 +209,8 @@ Glyph renderer uses CSS background crop. Keep Iconify as fallback.
 - Assuming every sheet is 4×3
 - Assuming every sheet is 32×32 (check quality mode)
 - Using `--high-quality` then hard-coding inspect as `(C*32, R*32)`
+- Generating on white, black, checkerboard, or “transparent” instead of `#7A7A7A`
+- Leaving `#7A7A7A` fringes in the shipped WebP (inspect corners + gaps)
 
 ## Example
 

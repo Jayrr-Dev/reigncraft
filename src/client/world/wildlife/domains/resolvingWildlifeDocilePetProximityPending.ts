@@ -5,7 +5,7 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { checkingWildlifeDocilePetIsReady } from '@/components/world/wildlife/domains/checkingWildlifeDocilePetIsReady';
+import { checkingWildlifeDocilePetProximityActionAvailable } from '@/components/world/wildlife/domains/checkingWildlifeDocilePetProximityActionAvailable';
 import { resolvingWildlifeDocilePetKind } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsPettable';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { resolvingWildlifeDocilePetInstanceIdFromSelectionKey } from '@/components/world/wildlife/domains/formattingWildlifeDocilePetSelectionKey';
@@ -26,7 +26,7 @@ export type ResolvingWildlifeDocilePetProximityPendingParams = {
 };
 
 /**
- * Resolves which Pet label should stay pending from proximity selection.
+ * Resolves which Pet / Name? label should stay pending from proximity selection.
  * Returns null when no living pettable companion is selected nearby.
  */
 export function resolvingWildlifeDocilePetProximityPending(
@@ -93,7 +93,7 @@ export function resolvingWildlifeDocilePetProximityPending(
       !instance ||
       instance.isDead ||
       !petKind ||
-      !checkingWildlifeDocilePetIsReady(instance, nowMs)
+      !checkingWildlifeDocilePetProximityActionAvailable(instance, nowMs)
     ) {
       continue;
     }

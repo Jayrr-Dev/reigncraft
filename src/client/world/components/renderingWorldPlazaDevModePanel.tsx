@@ -58,6 +58,9 @@ import type {
   DefiningWildlifeAggressionLevel,
   DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { RenderingWorldPlazaDevModePetControls } from '@/components/world/wildlife/pets/components/renderingWorldPlazaDevModePetControls';
+import type { ApplyingWildlifePetDevLoyaltyGrantKind } from '@/components/world/wildlife/pets/domains/applyingWildlifePetDevLoyaltyGrant';
 import { useMemo, useState } from 'react';
 
 export interface RenderingWorldPlazaDevModePanelProps {
@@ -149,6 +152,12 @@ export interface RenderingWorldPlazaDevModePanelProps {
   ) => void;
   onClearSpiritedSpritesBetaSpawns?: () => void;
   onlineUserId?: string | null;
+  /** Wildlife instance store for Pets loyalty QA tools. */
+  wildlifeStoreRef?: React.RefObject<ManagingWildlifeInstanceStore>;
+  /** Grants loyalty to the nearest living dog. */
+  onApplyNearestDogLoyalty?: (
+    grant: ApplyingWildlifePetDevLoyaltyGrantKind
+  ) => void;
   /** Teleports the local player to the nearest region of a biome. */
   onTeleportToBiome?: (biomeKind: DefiningWorldPlazaBiomeKind) => void;
   /**
@@ -379,6 +388,23 @@ export function RenderingWorldPlazaDevModePanel(
 
               {activeViewId === 'wildlife-bestiary' ? (
                 <RenderingWorldPlazaDevModeBestiaryUnlockControls />
+              ) : null}
+
+              {activeViewId === 'wildlife-pets' &&
+              props.wildlifeStoreRef &&
+              props.onApplyNearestDogLoyalty ? (
+                <RenderingWorldPlazaDevModePetControls
+                  wildlifeStoreRef={props.wildlifeStoreRef}
+                  playerPositionRef={playerPositionRef}
+                  onApplyNearestDogLoyalty={props.onApplyNearestDogLoyalty}
+                />
+              ) : null}
+
+              {activeViewId === 'wildlife-pets' &&
+              (!props.wildlifeStoreRef || !props.onApplyNearestDogLoyalty) ? (
+                <div className="text-[10px] text-white/60">
+                  Pets loyalty tools are not wired in this scene.
+                </div>
               ) : null}
 
               {activeViewId === 'beta-spirited-sprites' &&

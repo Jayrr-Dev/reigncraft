@@ -12,6 +12,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWildlifeNameTagShouldReveal } from '@/components/world/wildlife/domains/checkingWildlifeNameTagShouldReveal';
 import { checkingWildlifePointWithinRadiusGrid } from '@/components/world/wildlife/domains/checkingWildlifePointWithinRadiusGrid';
+import { checkingWildlifeSpeciesIsPettable } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsPettable';
 import { DEFINING_WILDLIFE_NAME_TAG_VISIBLE_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife/domains/definingWildlifeNameTagTypes';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -20,12 +21,16 @@ import { resolvingWildlifeInstanceSizeScale } from '@/components/world/wildlife/
 import { resolvingWildlifeInstanceNameTagLabel } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceNameTagLabel';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
 import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
+import { appendingWildlifePetLoyaltyDebugToNameTagLabel } from '@/components/world/wildlife/pets/domains/formattingWildlifePetLoyaltyDebugLabel';
+import { checkingWildlifePetLoyaltyDebugVisible } from '@/components/world/wildlife/pets/domains/managingWildlifePetLoyaltyDebugVisibilityStore';
 
 export type UpdatingWildlifeNameTagLabelCacheEntry = {
   displayLabel: string;
   textColor: string;
   customDisplayName: string | null;
   packAlphaInstanceId: string | null;
+  loyalty: number | null;
+  showLoyaltyDebug: boolean;
 };
 
 export type UpdatingWildlifeNameTagsOverlayRefParams = {
@@ -54,22 +59,36 @@ function resolvingCachedWildlifeNameTagLabel(
 ): UpdatingWildlifeNameTagLabelCacheEntry {
   const customDisplayName = instance.customDisplayName?.trim() || null;
   const packAlphaInstanceId = instance.packAlphaInstanceId ?? null;
+  const loyalty = instance.petBond?.loyalty ?? null;
+  const showLoyaltyDebug =
+    checkingWildlifePetLoyaltyDebugVisible() &&
+    checkingWildlifeSpeciesIsPettable(instance.speciesId);
   const cached = labelCache.get(instance.instanceId);
 
   if (
     cached &&
     cached.customDisplayName === customDisplayName &&
-    cached.packAlphaInstanceId === packAlphaInstanceId
+    cached.packAlphaInstanceId === packAlphaInstanceId &&
+    cached.loyalty === loyalty &&
+    cached.showLoyaltyDebug === showLoyaltyDebug
   ) {
     return cached;
   }
 
   const resolved = resolvingWildlifeInstanceNameTagLabel(instance, species);
+  const displayLabel = showLoyaltyDebug
+    ? appendingWildlifePetLoyaltyDebugToNameTagLabel(
+        resolved.displayLabel,
+        loyalty
+      )
+    : resolved.displayLabel;
   const nextEntry: UpdatingWildlifeNameTagLabelCacheEntry = {
-    displayLabel: resolved.displayLabel,
+    displayLabel,
     textColor: resolved.textColor,
     customDisplayName,
     packAlphaInstanceId,
+    loyalty,
+    showLoyaltyDebug,
   };
 
   labelCache.set(instance.instanceId, nextEntry);
@@ -136,28 +155,37 @@ export function updatingWildlifeNameTagsOverlayRef({
           instance.aiState.jumpState.progress
         )
       : 0;
-    const isRevealed = checkingWildlifeNameTagShouldReveal({
-      instance,
-      playerPosition,
-      playerFacingDirection,
-      playerUserId,
-      nowMs,
-      hoveredInstanceId,
-      wildlifeDamagedPlayerAtMs:
-        wildlifeDamagedPlayerAtMsByInstanceId.get(instance.instanceId) ?? null,
-    });
+    const forceLoyaltyReveal =
+      label.showLoyaltyDebug &&
+      checkingWildlifeSpeciesIsPettable(instance.speciesId);
+    const isRevealed =
+      forceLoyaltyReveal ||
+      checkingWildlifeNameTagShouldReveal({
+        instance,
+        playerPosition,
+        playerFacingDirection,
+        playerUserId,
+        nowMs,
+        hoveredInstanceId,
+        wildlifeDamagedPlayerAtMs:
+          wildlifeDamagedPlayerAtMsByInstanceId.get(instance.instanceId) ??
+          null,
+      });
     const existing = outRef[writeIndex];
 
     if (
       !existing ||
       existing.instanceId !== instance.instanceId ||
       existing.displayLabel !== label.displayLabel ||
-      existing.textColor !== label.textColor
+      existing.textColor !== label.textColor ||
+      existing.isRevealed !== isRevealed
     ) {
       didMountSetChange = true;
     }
 
     if (existing && existing.instanceId === instance.instanceId) {
+      existing.displayLabel = label.displayLabel;
+      existing.textColor = label.textColor;
       existing.gridX = instance.position.x;
       existing.gridY = instance.position.y;
       existing.layer = layer;

@@ -28,6 +28,7 @@ export type DefiningWorldPlazaDevModePanelViewId =
   | 'combat-buffs-utility'
   | 'combat-skills'
   | 'wildlife-spawner'
+  | 'wildlife-pets'
   | 'wildlife-bestiary'
   | 'beta-spirited-sprites'
   | 'debug-overlays'
@@ -145,6 +146,13 @@ export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_VIEWS: readonly DefiningWorldPl
       groupLabel: 'Wildlife',
       label: 'Spawner',
       leafId: 'spawner',
+    },
+    {
+      id: 'wildlife-pets',
+      groupId: 'wildlife',
+      groupLabel: 'Wildlife',
+      label: 'Pets',
+      leafId: 'pets',
     },
     {
       id: 'wildlife-bestiary',

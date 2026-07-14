@@ -29,7 +29,7 @@ import { formattingWorldPlazaInteractableBlockSelectionKey } from '@/components/
 import { formattingWorldPlazaInteractablePebbleSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractablePebbleSelectionKey';
 import { formattingWorldPlazaInteractableRockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableRockSelectionKey';
 import { formattingWorldPlazaInteractableTreeSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableTreeSelectionKey';
-import { checkingWildlifeDocilePetIsReady } from '@/components/world/wildlife/domains/checkingWildlifeDocilePetIsReady';
+import { checkingWildlifeDocilePetProximityActionAvailable } from '@/components/world/wildlife/domains/checkingWildlifeDocilePetProximityActionAvailable';
 import { resolvingWildlifeDocilePetKind } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsPettable';
 import { formattingWildlifeCorpseStudySelectionKey } from '@/components/world/wildlife/domains/formattingWildlifeCorpseStudySelectionKey';
 import { formattingWildlifeDocilePetSelectionKey } from '@/components/world/wildlife/domains/formattingWildlifeDocilePetSelectionKey';
@@ -261,7 +261,7 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
       if (
         instance.isDead ||
         resolvingWildlifeDocilePetKind(instance.speciesId) === null ||
-        !checkingWildlifeDocilePetIsReady(instance, nowMs)
+        !checkingWildlifeDocilePetProximityActionAvailable(instance, nowMs)
       ) {
         continue;
       }

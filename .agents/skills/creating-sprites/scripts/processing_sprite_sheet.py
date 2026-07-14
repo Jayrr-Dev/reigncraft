@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Process a generated sprite sheet into a transparent cell-packed WebP.
 
+Generate source icons on solid #7A7A7A (skill default). This script keys that
+color out before packing equal cells.
+
 Usage (from repo root):
   python .agents/skills/creating-sprites/scripts/processing_sprite_sheet.py \\
     --input path/to/generated.png \\
@@ -27,6 +30,35 @@ from pathlib import Path
 
 from PIL import Image
 
+# Mandatory generate BG from creating-sprites skill (easy chroma key).
+DEFINING_SPRITE_KEY_BACKGROUND_RGB = (122, 122, 122)  # #7A7A7A
+DEFINING_SPRITE_KEY_BACKGROUND_TOLERANCE = 18
+
+
+def removing_key_background(
+    image: Image.Image,
+    *,
+    key_rgb: tuple[int, int, int] = DEFINING_SPRITE_KEY_BACKGROUND_RGB,
+    tolerance: int = DEFINING_SPRITE_KEY_BACKGROUND_TOLERANCE,
+) -> Image.Image:
+    """Punch solid key-color BG (#7A7A7A by default) to alpha 0."""
+    rgba = image.convert("RGBA")
+    key_red, key_green, key_blue = key_rgb
+    pixels: list[tuple[int, int, int, int]] = []
+
+    for red, green, blue, alpha in rgba.getdata():
+        if (
+            abs(red - key_red) <= tolerance
+            and abs(green - key_green) <= tolerance
+            and abs(blue - key_blue) <= tolerance
+        ):
+            pixels.append((red, green, blue, 0))
+        else:
+            pixels.append((red, green, blue, alpha))
+
+    rgba.putdata(pixels)
+    return rgba
+
 
 def removing_checkerboard_background(
     image: Image.Image,
@@ -34,6 +66,7 @@ def removing_checkerboard_background(
     max_channel: int,
     max_saturation: float,
 ) -> Image.Image:
+    """Legacy light/unsaturated punch-out (prefer key BG path)."""
     rgba = image.convert("RGBA")
     pixels: list[tuple[int, int, int, int]] = []
 
@@ -117,6 +150,9 @@ def packing_from_separate_images(
     cell_size: int,
     padding: int,
     remove_bg: bool,
+    key_rgb: tuple[int, int, int],
+    key_tolerance: int,
+    use_legacy_light_bg: bool,
     max_channel: int,
     max_saturation: float,
 ) -> tuple[Image.Image, list[str]]:
@@ -138,11 +174,18 @@ def packing_from_separate_images(
 
         image = Image.open(image_paths[index]).convert("RGBA")
         if remove_bg:
-            image = removing_checkerboard_background(
-                image,
-                max_channel=max_channel,
-                max_saturation=max_saturation,
-            )
+            if use_legacy_light_bg:
+                image = removing_checkerboard_background(
+                    image,
+                    max_channel=max_channel,
+                    max_saturation=max_saturation,
+                )
+            else:
+                image = removing_key_background(
+                    image,
+                    key_rgb=key_rgb,
+                    tolerance=key_tolerance,
+                )
         packed = fitting_sprite_into_cell(
             image, cell_size=cell_size, padding=padding
         )
@@ -220,12 +263,28 @@ def parsing_args() -> argparse.Namespace:
         action="store_true",
         help="Use 64x64 cells and padding 4 (unless --cell-size/--padding set).",
     )
+    parser.add_argument(
+        "--key-bg",
+        default="#7A7A7A",
+        help="Solid generate BG to key out (default #7A7A7A).",
+    )
+    parser.add_argument(
+        "--key-tolerance",
+        type=int,
+        default=DEFINING_SPRITE_KEY_BACKGROUND_TOLERANCE,
+        help="Per-channel RGB tolerance when keying --key-bg.",
+    )
+    parser.add_argument(
+        "--legacy-light-bg",
+        action="store_true",
+        help="Use old light/unsaturated punch instead of --key-bg.",
+    )
     parser.add_argument("--bg-max", type=int, default=200)
     parser.add_argument("--bg-saturation", type=float, default=0.08)
     parser.add_argument(
         "--no-bg-remove",
         action="store_true",
-        help="Skip checkerboard punch-out.",
+        help="Skip background punch-out.",
     )
     parser.add_argument(
         "--keep-png",
@@ -255,6 +314,16 @@ def resolving_cell_size_and_padding(args: argparse.Namespace) -> tuple[int, int]
     return cell_size, padding
 
 
+def parsing_key_background_rgb(value: str) -> tuple[int, int, int]:
+    raw = value.strip().removeprefix("#")
+    if len(raw) != 6:
+        raise SystemExit(f"Invalid --key-bg {value!r}; expected #RRGGBB")
+    try:
+        return (int(raw[0:2], 16), int(raw[2:4], 16), int(raw[4:6], 16))
+    except ValueError as error:
+        raise SystemExit(f"Invalid --key-bg {value!r}") from error
+
+
 def main() -> None:
     args = parsing_args()
     if args.columns < 1 or args.rows < 1:
@@ -276,6 +345,7 @@ def main() -> None:
         raise SystemExit("Provide exactly one of --input or --from-images")
 
     remove_bg = not args.no_bg_remove
+    key_rgb = parsing_key_background_rgb(args.key_bg)
 
     if args.from_images:
         for path in args.from_images:
@@ -288,6 +358,9 @@ def main() -> None:
             cell_size=cell_size,
             padding=padding,
             remove_bg=remove_bg,
+            key_rgb=key_rgb,
+            key_tolerance=args.key_tolerance,
+            use_legacy_light_bg=args.legacy_light_bg,
             max_channel=args.bg_max,
             max_saturation=args.bg_saturation,
         )
@@ -299,11 +372,18 @@ def main() -> None:
             raise SystemExit(f"Input not found: {args.input}")
         image = Image.open(args.input).convert("RGBA")
         if remove_bg:
-            image = removing_checkerboard_background(
-                image,
-                max_channel=args.bg_max,
-                max_saturation=args.bg_saturation,
-            )
+            if args.legacy_light_bg:
+                image = removing_checkerboard_background(
+                    image,
+                    max_channel=args.bg_max,
+                    max_saturation=args.bg_saturation,
+                )
+            else:
+                image = removing_key_background(
+                    image,
+                    key_rgb=key_rgb,
+                    tolerance=args.key_tolerance,
+                )
         sheet, reports = packing_sprite_sheet_cells(
             image,
             columns=args.columns,

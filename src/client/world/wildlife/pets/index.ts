@@ -19,6 +19,13 @@ export {
 } from '@/components/world/wildlife/pets/domains/applyingWildlifePetLoyaltyGrant';
 
 export {
+  applyingWildlifePetDevLoyaltyGrant,
+  type ApplyingWildlifePetDevLoyaltyGrantKind,
+  type ApplyingWildlifePetDevLoyaltyGrantParams,
+  type ApplyingWildlifePetDevLoyaltyGrantResult,
+} from '@/components/world/wildlife/pets/domains/applyingWildlifePetDevLoyaltyGrant';
+
+export {
   applyingWildlifePetOwnerFeed,
   type ApplyingWildlifePetOwnerFeedResult,
 } from '@/components/world/wildlife/pets/domains/applyingWildlifePetOwnerFeed';
@@ -40,8 +47,10 @@ export {
 
 export { checkingWildlifePetAllied } from '@/components/world/wildlife/pets/domains/checkingWildlifePetAllied';
 
-export { checkingWildlifePetItemIsEquippableWeapon } from '@/components/world/wildlife/pets/domains/checkingWildlifePetItemIsEquippableWeapon';
-export { checkingWildlifePetItemTypeIdIsEquippableWeapon } from '@/components/world/wildlife/pets/domains/checkingWildlifePetItemIsEquippableWeapon';
+export {
+  checkingWildlifePetItemIsEquippableWeapon,
+  checkingWildlifePetItemTypeIdIsEquippableWeapon,
+} from '@/components/world/wildlife/pets/domains/checkingWildlifePetItemIsEquippableWeapon';
 
 export {
   checkingWildlifePetMayAcceptCommand,
@@ -65,6 +74,29 @@ export {
   DEFINING_WILDLIFE_PET_PETTING_LOYALTY_GRANT,
   type DefiningWildlifePetLoyaltyTierDefinition,
 } from '@/components/world/wildlife/pets/domains/definingWildlifePetLoyaltyTiersRegistry';
+
+export {
+  DEFINING_WILDLIFE_PET_DEV_LOYALTY_GRANT_LARGE,
+  DEFINING_WILDLIFE_PET_DEV_LOYALTY_GRANT_MEDIUM,
+  DEFINING_WILDLIFE_PET_DEV_LOYALTY_GRANT_PETTING,
+  LABELING_WILDLIFE_PET_DEV_HINT,
+  LABELING_WILDLIFE_PET_DEV_LOYALTY_OVERLAY_TOGGLE,
+  LABELING_WILDLIFE_PET_DEV_SECTION,
+} from '@/components/world/wildlife/pets/domains/definingWildlifePetDevLoyaltyConstants';
+
+export {
+  appendingWildlifePetLoyaltyDebugToNameTagLabel,
+  formattingWildlifePetLoyaltyDebugLabel,
+} from '@/components/world/wildlife/pets/domains/formattingWildlifePetLoyaltyDebugLabel';
+
+export { findingWildlifeNearestPettableInstance } from '@/components/world/wildlife/pets/domains/findingWildlifeNearestPettableInstance';
+
+export {
+  checkingWildlifePetLoyaltyDebugVisible,
+  settingWildlifePetLoyaltyDebugVisible,
+  subscribingWildlifePetLoyaltyDebugVisible,
+  togglingWildlifePetLoyaltyDebugVisible,
+} from '@/components/world/wildlife/pets/domains/managingWildlifePetLoyaltyDebugVisibilityStore';
 
 export {
   DEFINING_WILDLIFE_PET_ROSTER_STORAGE_KEY_PREFIX,
@@ -148,11 +180,18 @@ export {
 
 export { RenderingWildlifePetModal } from '@/components/world/wildlife/pets/components/renderingWildlifePetModal';
 
+export { RenderingWorldPlazaDevModePetControls } from '@/components/world/wildlife/pets/components/renderingWorldPlazaDevModePetControls';
+
 export {
   usingWildlifeActivePetSpawn,
   type UsingWildlifeActivePetSpawnParams,
   type UsingWildlifeActivePetSpawnResult,
 } from '@/components/world/wildlife/pets/hooks/usingWildlifeActivePetSpawn';
+
+export {
+  usingWildlifePetLoyaltyDebugVisibleState,
+  type UsingWildlifePetLoyaltyDebugVisibleStateResult,
+} from '@/components/world/wildlife/pets/hooks/usingWildlifePetLoyaltyDebugVisibleState';
 
 export {
   usingWildlifePetModalState,

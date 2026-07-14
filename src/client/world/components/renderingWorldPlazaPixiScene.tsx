@@ -87,8 +87,8 @@ import { RenderingWorldPlazaBiomeMusic } from '@/components/world/components/ren
 import { RenderingWorldPlazaBiomesOverlay } from '@/components/world/components/renderingWorldPlazaBiomesOverlay';
 import { RenderingWorldPlazaCameraRig } from '@/components/world/components/renderingWorldPlazaCameraRig';
 import { RenderingWorldPlazaClickArrowEffect } from '@/components/world/components/renderingWorldPlazaClickArrowEffect';
-import { RenderingWorldPlazaDayNightOverlay } from '@/components/world/components/renderingWorldPlazaDayNightOverlay';
 import { RenderingWorldPlazaDangerSenseHudOverlay } from '@/components/world/components/renderingWorldPlazaDangerSenseHudOverlay';
+import { RenderingWorldPlazaDayNightOverlay } from '@/components/world/components/renderingWorldPlazaDayNightOverlay';
 import { RenderingWorldPlazaDeclarativeTerrainSync } from '@/components/world/components/renderingWorldPlazaDeclarativeTerrainSync';
 import { RenderingWorldPlazaDevModePanel } from '@/components/world/components/renderingWorldPlazaDevModePanel';
 import { RenderingWorldPlazaFriendsPanel } from '@/components/world/components/renderingWorldPlazaFriendsPanel';
@@ -217,6 +217,7 @@ import {
 import { findingWorldPlazaBiomeTeleportWorldPointForDev } from '@/components/world/domains/findingWorldPlazaBiomeTeleportWorldPointForDev';
 import { recordingWorldPlazaBestiarySpeciesStudied } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
+import { settingWorldPlazaOnlineRoomId } from '@/components/world/domains/managingWorldPlazaOnlineRoomIdStore';
 import {
   attachingWorldPlazaRecipePage,
   checkingWorldPlazaRecipePageAttachedInStore,
@@ -325,6 +326,7 @@ import { trackingWorldPlazaPresenceActivity } from '@/components/world/hooks/tra
 import { trackingWorldPlazaRollInput } from '@/components/world/hooks/trackingWorldPlazaRollInput';
 import { usingWorldPlazaAvatarSkinSelectorVisibleState } from '@/components/world/hooks/usingWorldPlazaAvatarSkinSelectorVisibleState';
 import { usingWorldPlazaCodexPanelVisibleState } from '@/components/world/hooks/usingWorldPlazaCodexPanelVisibleState';
+import { usingWorldPlazaDangerSenseEnabled } from '@/components/world/hooks/usingWorldPlazaDangerSenseEnabled';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
 import { usingWorldPlazaDevEnvironment } from '@/components/world/hooks/usingWorldPlazaDevEnvironment';
 import { usingWorldPlazaDevModePanelVisibleState } from '@/components/world/hooks/usingWorldPlazaDevModePanelVisibleState';
@@ -335,7 +337,6 @@ import { usingWorldPlazaFriendsPanelKeyboardShortcuts } from '@/components/world
 import { usingWorldPlazaFriendsPanelVisibleState } from '@/components/world/hooks/usingWorldPlazaFriendsPanelVisibleState';
 import { usingWorldPlazaFriendTrackingState } from '@/components/world/hooks/usingWorldPlazaFriendTrackingState';
 import { usingWorldPlazaGameplayHudToast } from '@/components/world/hooks/usingWorldPlazaGameplayHudToast';
-import { usingWorldPlazaDangerSenseEnabled } from '@/components/world/hooks/usingWorldPlazaDangerSenseEnabled';
 import { usingWorldPlazaGenerationFeaturesState } from '@/components/world/hooks/usingWorldPlazaGenerationFeaturesState';
 import { usingWorldPlazaHudToolbarMode } from '@/components/world/hooks/usingWorldPlazaHudToolbarMode';
 import { usingWorldPlazaMobileDebug } from '@/components/world/hooks/usingWorldPlazaMobileDebug';
@@ -436,7 +437,6 @@ import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife
 import { RenderingWorldPlazaWildlifeSpeechBubbles } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeSpeechBubbles';
 import { applyingWildlifeDocilePetComplete } from '@/components/world/wildlife/domains/applyingWildlifeDocilePetComplete';
 import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
-import { renamingWildlifeInstanceDisplayName } from '@/components/world/wildlife/domains/renamingWildlifeInstanceDisplayName';
 import { checkingWildlifeDocilePetIsReady } from '@/components/world/wildlife/domains/checkingWildlifeDocilePetIsReady';
 import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile';
 import { resolvingWildlifeDocilePetKind } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsPettable';
@@ -463,6 +463,22 @@ import {
   settingWildlifeDocileAttackConfirmPending,
 } from '@/components/world/wildlife/domains/managingWildlifeDocileAttackConfirmStore';
 import {
+  clearingWildlifeInstanceStore,
+  gettingWildlifeInstance,
+  replacingWildlifeInstance,
+} from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
+import { renamingWildlifeInstanceDisplayName } from '@/components/world/wildlife/domains/renamingWildlifeInstanceDisplayName';
+import { resolvingWildlifeDiseaseTransmissionChance } from '@/components/world/wildlife/domains/resolvingWildlifeDiseaseTransmissionChance';
+import { resolvingWildlifeInstanceCollisionRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
+import { spawningWildlifeDevAggressiveChickensNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevAggressiveChickensNearPoint';
+import { spawningWildlifeDevGreyWolfRandomlyNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevGreyWolfRandomlyNearPoint';
+import { spawningWildlifeDevSpeciesNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevSpeciesNearPoint';
+import { usingWildlifeDocileAttackConfirm } from '@/components/world/wildlife/hooks/usingWildlifeDocileAttackConfirm';
+import { usingWildlifeDocileBetrayProgress } from '@/components/world/wildlife/hooks/usingWildlifeDocileBetrayProgress';
+import { usingWildlifeDocilePetProximitySelection } from '@/components/world/wildlife/hooks/usingWildlifeDocilePetProximitySelection';
+import { usingWorldPlazaWildlifeCorpseStudyProgress } from '@/components/world/wildlife/hooks/usingWorldPlazaWildlifeCorpseStudyProgress';
+import {
   applyingWildlifePetOwnerFeed,
   applyingWildlifePetOwnerHeal,
   checkingWildlifePetHasCapability,
@@ -474,31 +490,20 @@ import {
   type DefiningWildlifePetBondState,
 } from '@/components/world/wildlife/pets';
 import { RenderingWildlifePetModal } from '@/components/world/wildlife/pets/components/renderingWildlifePetModal';
+import {
+  applyingWildlifePetDevLoyaltyGrant,
+  type ApplyingWildlifePetDevLoyaltyGrantKind,
+} from '@/components/world/wildlife/pets/domains/applyingWildlifePetDevLoyaltyGrant';
 import { DEFINING_WILDLIFE_PET_MODAL_HEAL_AMOUNT } from '@/components/world/wildlife/pets/domains/definingWildlifePetModalConstants';
+import { findingWildlifeNearestPettableInstance } from '@/components/world/wildlife/pets/domains/findingWildlifeNearestPettableInstance';
 import { usingWildlifeActivePetSpawn } from '@/components/world/wildlife/pets/hooks/usingWildlifeActivePetSpawn';
 import { usingWildlifePetModalState } from '@/components/world/wildlife/pets/hooks/usingWildlifePetModalState';
-import {
-  clearingWildlifeInstanceStore,
-  gettingWildlifeInstance,
-  replacingWildlifeInstance,
-} from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
-import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
-import { resolvingWildlifeDiseaseTransmissionChance } from '@/components/world/wildlife/domains/resolvingWildlifeDiseaseTransmissionChance';
-import { resolvingWildlifeInstanceCollisionRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
-import { spawningWildlifeDevAggressiveChickensNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevAggressiveChickensNearPoint';
-import { spawningWildlifeDevGreyWolfRandomlyNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevGreyWolfRandomlyNearPoint';
-import { spawningWildlifeDevSpeciesNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevSpeciesNearPoint';
-import { usingWildlifeDocileAttackConfirm } from '@/components/world/wildlife/hooks/usingWildlifeDocileAttackConfirm';
-import { usingWildlifeDocileBetrayProgress } from '@/components/world/wildlife/hooks/usingWildlifeDocileBetrayProgress';
-import { usingWildlifeDocilePetProximitySelection } from '@/components/world/wildlife/hooks/usingWildlifeDocilePetProximitySelection';
-import { usingWorldPlazaWildlifeCorpseStudyProgress } from '@/components/world/wildlife/hooks/usingWorldPlazaWildlifeCorpseStudyProgress';
+import { showToast } from '@devvit/web/client';
 import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
-import { showToast } from '@devvit/web/client';
 import type { Container } from 'pixi.js';
 import { CullerPlugin } from 'pixi.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { settingWorldPlazaOnlineRoomId } from '@/components/world/domains/managingWorldPlazaOnlineRoomIdStore';
 import type {
   PlazaDevvitOnlineOwnedPetSnapshot,
   PlazaDevvitOnlineWildlifeDamageEvent,
@@ -3089,7 +3094,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     isEnabled: isLocalGameplayEnabled && isWildlifeGenerationEnabled,
     storageOwnerId: localPersistenceOwnerId,
     onlineUserId,
-    cloudSaveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
+    cloudSaveSlotIndex: isSinglePlayerSession
+      ? singlePlayerSaveSlotIndex
+      : null,
     wildlifeStoreRef,
     playerPositionRef,
     resolveSpecies: resolvingWildlifeSpeciesDefinition,
@@ -3246,7 +3253,10 @@ function RenderingWorldPlazaPixiSceneConnected({
           hungerRestoreRatio: foodDefinition.hungerRestoreRatio,
           nowMs: Date.now(),
         });
-        replacingWildlifeInstance(wildlifeStoreRef.current, feedResult.instance);
+        replacingWildlifeInstance(
+          wildlifeStoreRef.current,
+          feedResult.instance
+        );
         syncingWildlifePetInstanceVitalsToRoster(feedResult.instance);
 
         return consumeResult.nextState;
@@ -3708,6 +3718,45 @@ function RenderingWorldPlazaPixiSceneConnected({
       });
     },
     [playerPositionRef, wildlifeStoreRef]
+  );
+
+  const handlingDevApplyNearestDogLoyalty = useCallback(
+    (grant: ApplyingWildlifePetDevLoyaltyGrantKind) => {
+      const playerPosition = playerPositionRef.current;
+      const ownerUserId = onlineUserId ?? localPersistenceOwnerId;
+
+      if (!playerPosition || !ownerUserId) {
+        return;
+      }
+
+      const nearestDog = findingWildlifeNearestPettableInstance({
+        store: wildlifeStoreRef.current,
+        origin: playerPosition,
+        petKind: 'dog',
+      });
+
+      if (!nearestDog) {
+        return;
+      }
+
+      const nowMs = Date.now();
+      const { instance: nextInstance, becamePersistent } =
+        applyingWildlifePetDevLoyaltyGrant({
+          instance: nearestDog,
+          ownerUserId,
+          grant,
+        });
+
+      replacingWildlifeInstance(wildlifeStoreRef.current, nextInstance);
+      syncingWildlifePetBondToRoster({
+        instance: nextInstance,
+        ownerUserId,
+        becamePersistent,
+        nowMs,
+      });
+      syncingWildlifePetInstanceVitalsToRoster(nextInstance, nowMs);
+    },
+    [localPersistenceOwnerId, onlineUserId, playerPositionRef, wildlifeStoreRef]
   );
 
   const applyingInteractablePointerHoverCursor = useCallback(
@@ -6227,6 +6276,8 @@ function RenderingWorldPlazaPixiSceneConnected({
               onClearSpiritedSpritesBetaSpawns={
                 handlingDevClearSpiritedSpritesBetaSpawns
               }
+              wildlifeStoreRef={wildlifeStoreRef}
+              onApplyNearestDogLoyalty={handlingDevApplyNearestDogLoyalty}
               onlineUserId={onlineUserId}
               onTeleportToBiome={teleportingPlayerToBiome}
               onExitToHome={!isHudActionBarEnabled ? onExitToHome : undefined}
@@ -6669,6 +6720,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               cameraOffsetRef={cameraOffsetRef}
               cameraWorldZoomRef={cameraWorldZoomRef}
               onBetray={handlingDocileBetrayInteraction}
+              onOpenPetModal={openingPetModal}
             />
           ) : null}
           {isHudStatusEnabled && onlineUserId ? (
