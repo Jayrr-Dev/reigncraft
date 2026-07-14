@@ -14,8 +14,8 @@ export type WorldCloverSearchLootEntry = {
 /** Weighted clover table (total weight 100). */
 export const WORLD_CLOVER_SEARCH_LOOT_REGISTRY: readonly WorldCloverSearchLootEntry[] =
   [
-    { itemKind: 'three_leaf', weight: 85 },
-    { itemKind: 'four_leaf', weight: 15 },
+    { itemKind: 'three_leaf', weight: 95 },
+    { itemKind: 'four_leaf', weight: 5 },
   ];
 
 export const WORLD_CLOVER_SEARCH_LOOT_TOTAL_WEIGHT =

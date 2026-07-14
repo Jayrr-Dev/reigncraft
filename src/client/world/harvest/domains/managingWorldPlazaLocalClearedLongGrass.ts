@@ -244,4 +244,7 @@ export function clearingWorldPlazaLocalLongGrass(
   return result;
 }
 
-export { checkingWorldLongGrassSearchEligibility as checkingWorldLongGrassClearEligibility };
+export {
+  checkingWorldLongGrassSearchEligibility as checkingWorldLongGrassClearEligibility,
+  checkingWorldLongGrassSearchEligibility,
+};

@@ -2,6 +2,7 @@ import { computingWorldPlazaEntityImmuneSystemContractionChanceMultiplier } from
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { resolvingWorldPlazaEntityHealthDiseaseContractionTimedMultiplier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthEffectiveTemperatureResistance';
+import { resolvingWorldPlazaPlayerHeldLuckyDiseaseMultiplier } from '@/components/world/inventory/domains/resolvingWorldPlazaPlayerHeldLuckyDiseaseMultiplier';
 
 /** Whether the player has acquired immunity to one disease id. */
 export function checkingWorldPlazaEntityIsImmuneToDisease(
@@ -53,7 +54,8 @@ export function resolvingWorldPlazaEntityDiseaseContractionChance(
     resolvingWorldPlazaEntityHealthDiseaseContractionTimedMultiplier(
       state,
       Date.now()
-    );
+    ) *
+    resolvingWorldPlazaPlayerHeldLuckyDiseaseMultiplier();
 
   return Math.min(1, Math.max(0, baseChance * multiplier));
 }

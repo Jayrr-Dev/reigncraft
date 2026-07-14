@@ -17,6 +17,8 @@ import {
 } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 import { checkingWorldPlazaEntityHealthDamageRollPresetIsActive } from '@/components/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { DEFINING_WORLD_PLAZA_LUCKY_BUFF_ID } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverConstants';
+import { checkingWorldPlazaHeldLuckyBuffIsActive } from '@/components/world/inventory/domains/managingWorldPlazaHeldLuckyBuffBridge';
 
 /**
  * Whether a registered buff is currently active on the entity or attacker sim.
@@ -63,6 +65,13 @@ function checkingWorldPlazaEntityBuffDescriptorIsActive({
   attackerModifierIds: readonly string[];
 }): boolean {
   const { effect } = descriptor;
+
+  if (effect.kind === 'lucky_while_held') {
+    return (
+      descriptor.id === DEFINING_WORLD_PLAZA_LUCKY_BUFF_ID &&
+      checkingWorldPlazaHeldLuckyBuffIsActive()
+    );
+  }
 
   if (effect.kind === 'damage_roll_modifiers') {
     const modifierIds =

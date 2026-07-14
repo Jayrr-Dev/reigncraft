@@ -39,19 +39,15 @@ describe('definingWorldPlazaOreBiomeRarityConstants', () => {
     );
   });
 
-  it('keeps riverbank clay denser than world stone default', () => {
-    expect(
-      DEFINING_WORLD_PLAZA_ORE_NEAR_WATER_RADIUS_TILES
-    ).toBeGreaterThanOrEqual(5);
-    expect(
-      DEFINING_WORLD_PLAZA_ORE_VEIN_CHANCE_NEAR_WATER
-    ).toBeGreaterThanOrEqual(0.55);
-    expect(
-      DEFINING_WORLD_PLAZA_ORE_NEAR_WATER_COLUMN_STONE_NOISE_MIN
-    ).toBeLessThan(0.72);
+  it('keeps riverbank clay mildly denser than world stone default', () => {
+    expect(DEFINING_WORLD_PLAZA_ORE_NEAR_WATER_RADIUS_TILES).toBe(4);
+    expect(DEFINING_WORLD_PLAZA_ORE_VEIN_CHANCE_NEAR_WATER).toBe(0.5);
+    expect(DEFINING_WORLD_PLAZA_ORE_NEAR_WATER_COLUMN_STONE_NOISE_MIN).toBe(
+      0.64
+    );
     expect(DEFINING_WORLD_PLAZA_ORE_WEIGHTS_NEAR_WATER[0]).toMatchObject({
       speciesId: 'clay',
-      weight: 140,
+      weight: 110,
     });
   });
 

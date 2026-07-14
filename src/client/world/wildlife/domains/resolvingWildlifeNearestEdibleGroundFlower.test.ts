@@ -29,9 +29,12 @@ vi.mock(
   })
 );
 
-vi.mock('../../../../shared/worldFlowerRarity', () => ({
-  resolvingWorldFlowerSpeciesAtTileIndex: vi.fn(() => 'yarrow'),
-}));
+vi.mock(
+  '@/components/world/domains/resolvingWorldPlazaFlowerSpeciesAtTileIndex',
+  () => ({
+    resolvingWorldPlazaFlowerSpeciesAtTileIndex: vi.fn(() => 'yarrow'),
+  })
+);
 
 import { checkingWorldPlazaPickableFlowerDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaPickableFlowerDecorationAtTileIndex';
 import { checkingWorldPlazaRuntimeFlowerIsPicked } from '@/components/world/harvest/domains/registeringWorldPlazaPickedFlowersLookup';
@@ -75,9 +78,7 @@ describe('resolvingWildlifeNearestEdibleGroundFlower', () => {
       (tileX, tileY) =>
         (tileX === 2 && tileY === 1) || (tileX === 4 && tileY === 1)
     );
-    pickedMock.mockImplementation(
-      (tileX, tileY) => tileX === 2 && tileY === 1
-    );
+    pickedMock.mockImplementation((tileX, tileY) => tileX === 2 && tileY === 1);
 
     const nearest = resolvingWildlifeNearestEdibleGroundFlower({
       x: 1.5,

@@ -8,6 +8,7 @@ import { checkingWorldPlazaLandNearSurfaceWaterAtTileIndex } from '@/components/
 import { checkingWorldPlazaTileIsRockyBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsRockyBiomeAtTileIndex';
 import { resolvingWorldPlazaOreBiomePoolResolution } from '@/components/world/domains/definingWorldPlazaOreBiomeRarityConstants';
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
+import { resolvingWorldPlazaPlayerDiscoveryLuckMultiplier } from '@/components/world/inventory/domains/resolvingWorldPlazaPlayerDiscoveryLuckMultiplier';
 import {
   checkingWorldOreVeinAtTileIndex,
   resolvingWorldOreSpeciesFromWeightedEntries,
@@ -36,12 +37,14 @@ export function resolvingWorldPlazaOreSpeciesAtAnchorTileIndex(
     isNearSurfaceWater,
     isRockyBiome,
   });
+  const discoveryLuckMultiplier =
+    resolvingWorldPlazaPlayerDiscoveryLuckMultiplier();
 
   if (
     !checkingWorldOreVeinAtTileIndex(
       anchorTileX,
       anchorTileY,
-      pool.veinChance
+      Math.min(1, pool.veinChance * discoveryLuckMultiplier)
     )
   ) {
     return null;
@@ -50,6 +53,7 @@ export function resolvingWorldPlazaOreSpeciesAtAnchorTileIndex(
   return resolvingWorldOreSpeciesFromWeightedEntries(
     anchorTileX,
     anchorTileY,
-    pool.weights
+    pool.weights,
+    discoveryLuckMultiplier
   );
 }

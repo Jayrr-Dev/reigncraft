@@ -100,8 +100,68 @@ export function resolvingWorldFlowerSpeciesAtTileIndex(
   tileX: number,
   tileY: number
 ): WorldFlowerSpeciesId {
-  const unit = seedingWorldFlowerSpeciesUnitFromTileIndex(tileX, tileY);
-  const target = unit * WORLD_FLOWER_SPECIES_RARITY_TOTAL_WEIGHT;
+  return resolvingWorldFlowerSpeciesFromUnit(
+    seedingWorldFlowerSpeciesUnitFromTileIndex(tileX, tileY)
+  );
+}
+
+/** Flower species weight at or below this value is boosted by discovery luck. */
+export const WORLD_FLOWER_SPECIES_RARE_WEIGHT_THRESHOLD = 12;
+
+/**
+ * Resolves flower species from a unit float with boosted rare weights.
+ */
+export function resolvingWorldFlowerSpeciesFromUnitWithDiscoveryLuck(
+  unitFloat: number,
+  discoveryLuckMultiplier: number
+): WorldFlowerSpeciesId {
+  if (discoveryLuckMultiplier <= 1) {
+    return resolvingWorldFlowerSpeciesFromUnit(unitFloat);
+  }
+
+  const adjustedEntries = WORLD_FLOWER_SPECIES_RARITY_REGISTRY.map((entry) => ({
+    ...entry,
+    weight:
+      entry.weight <= WORLD_FLOWER_SPECIES_RARE_WEIGHT_THRESHOLD
+        ? entry.weight * discoveryLuckMultiplier
+        : entry.weight,
+  }));
+  const adjustedTotalWeight = adjustedEntries.reduce(
+    (sum, entry) => sum + entry.weight,
+    0
+  );
+  const target = unitFloat * adjustedTotalWeight;
+  let cumulative = 0;
+
+  for (const entry of adjustedEntries) {
+    cumulative += entry.weight;
+
+    if (target < cumulative) {
+      return entry.speciesId;
+    }
+  }
+
+  return adjustedEntries.at(-1)?.speciesId ?? 'yarrow';
+}
+
+/**
+ * Resolves flower species for one tile with optional discovery luck.
+ */
+export function resolvingWorldFlowerSpeciesAtTileIndexWithDiscoveryLuck(
+  tileX: number,
+  tileY: number,
+  discoveryLuckMultiplier: number
+): WorldFlowerSpeciesId {
+  return resolvingWorldFlowerSpeciesFromUnitWithDiscoveryLuck(
+    seedingWorldFlowerSpeciesUnitFromTileIndex(tileX, tileY),
+    discoveryLuckMultiplier
+  );
+}
+
+function resolvingWorldFlowerSpeciesFromUnit(
+  unitFloat: number
+): WorldFlowerSpeciesId {
+  const target = unitFloat * WORLD_FLOWER_SPECIES_RARITY_TOTAL_WEIGHT;
   let cumulative = 0;
 
   for (const entry of WORLD_FLOWER_SPECIES_RARITY_REGISTRY) {
@@ -112,10 +172,5 @@ export function resolvingWorldFlowerSpeciesAtTileIndex(
     }
   }
 
-  const lastEntry =
-    WORLD_FLOWER_SPECIES_RARITY_REGISTRY[
-      WORLD_FLOWER_SPECIES_RARITY_REGISTRY.length - 1
-    ];
-
-  return lastEntry?.speciesId ?? 'yarrow';
+  return WORLD_FLOWER_SPECIES_RARITY_REGISTRY.at(-1)?.speciesId ?? 'yarrow';
 }

@@ -1,10 +1,10 @@
+import { describe, expect, it } from 'vitest';
 import {
   resolvingWorldCloverSearchLootKindAtTileIndex,
   resolvingWorldCloverSearchLootKindFromUnit,
   WORLD_CLOVER_SEARCH_LOOT_REGISTRY,
   WORLD_CLOVER_SEARCH_LOOT_TOTAL_WEIGHT,
 } from './worldCloverSearchLoot';
-import { describe, expect, it } from 'vitest';
 
 describe('worldCloverSearchLoot', () => {
   it('weights three-leaf clover for low unit floats', () => {
@@ -13,7 +13,7 @@ describe('worldCloverSearchLoot', () => {
   });
 
   it('weights four-leaf clover for high unit floats', () => {
-    expect(resolvingWorldCloverSearchLootKindFromUnit(0.99)).toBe('four_leaf');
+    expect(resolvingWorldCloverSearchLootKindFromUnit(0.96)).toBe('four_leaf');
   });
 
   it('rolls deterministically per tile index', () => {

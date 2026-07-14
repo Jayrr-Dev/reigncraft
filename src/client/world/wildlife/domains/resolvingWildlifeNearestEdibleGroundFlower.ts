@@ -6,6 +6,7 @@
 
 import { checkingWorldPlazaPickableFlowerDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaPickableFlowerDecorationAtTileIndex';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaFlowerSpeciesAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFlowerSpeciesAtTileIndex';
 import { checkingWorldPlazaRuntimeFlowerIsPicked } from '@/components/world/harvest/domains/registeringWorldPlazaPickedFlowersLookup';
 import { resolvingWorldPlazaFlowerItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFlowerSpriteSheetConstants';
 import {
@@ -14,13 +15,13 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeGroundFlowerIdConstants';
 import { DEFINING_WILDLIFE_GROUND_FLOWER_SCENT_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import { checkingWildlifeGroundFlowerOptimisticIsPicked } from '@/components/world/wildlife/domains/managingWildlifeGroundFlowerBridge';
-import { resolvingWorldFlowerSpeciesAtTileIndex } from '../../../../shared/worldFlowerRarity';
 
-export type ResolvingWildlifeNearestEdibleGroundFlower = DefiningWildlifeGroundFlowerTile & {
-  readonly itemTypeId: string;
-  readonly distanceGrid: number;
-  readonly groundItemId: string;
-};
+export type ResolvingWildlifeNearestEdibleGroundFlower =
+  DefiningWildlifeGroundFlowerTile & {
+    readonly itemTypeId: string;
+    readonly distanceGrid: number;
+    readonly groundItemId: string;
+  };
 
 /** Resolves the closest edible biome flower tile within scent range. */
 export function resolvingWildlifeNearestEdibleGroundFlower(
@@ -33,7 +34,11 @@ export function resolvingWildlifeNearestEdibleGroundFlower(
   let nearest: ResolvingWildlifeNearestEdibleGroundFlower | null = null;
   let nearestDistance = Number.POSITIVE_INFINITY;
 
-  for (let tileY = centerTileY - radius; tileY <= centerTileY + radius; tileY++) {
+  for (
+    let tileY = centerTileY - radius;
+    tileY <= centerTileY + radius;
+    tileY++
+  ) {
     for (
       let tileX = centerTileX - radius;
       tileX <= centerTileX + radius;
@@ -63,7 +68,10 @@ export function resolvingWildlifeNearestEdibleGroundFlower(
         continue;
       }
 
-      const speciesId = resolvingWorldFlowerSpeciesAtTileIndex(tileX, tileY);
+      const speciesId = resolvingWorldPlazaFlowerSpeciesAtTileIndex(
+        tileX,
+        tileY
+      );
       const itemTypeId =
         resolvingWorldPlazaFlowerItemTypeIdFromSpeciesId(speciesId);
 

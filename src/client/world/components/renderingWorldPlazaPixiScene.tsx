@@ -463,6 +463,7 @@ import {
 import { resolvingWorldPlazaInventoryItemRecipePageRecipeId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemRecipePage';
 import { wearingWorldPlazaEquippedInventoryToolDurability } from '@/components/world/inventory/domains/wearingWorldPlazaEquippedInventoryToolDurability';
 import { trackingWorldPlazaInventoryDropPlacement } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
+import { usingWorldPlazaHeldFourLeafCloverCharm } from '@/components/world/inventory/hooks/usingWorldPlazaHeldFourLeafCloverCharm';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
 import {
   usingWorldPlazaInventoryFoodEatProgress,
@@ -3157,6 +3158,15 @@ function RenderingWorldPlazaPixiSceneConnected({
     isRollDodgeActiveRef,
     rollDodgeProgressRef,
     isRollingRef,
+  });
+
+  usingWorldPlazaHeldFourLeafCloverCharm({
+    enabled: isLocalGameplayEnabled,
+    selectedSlotIndex: equipment.selectedSlotIndex,
+    inventoryState,
+    updatingInventoryState,
+    toggleBuffRef,
+    playerPositionRef,
   });
 
   useEffect(() => {

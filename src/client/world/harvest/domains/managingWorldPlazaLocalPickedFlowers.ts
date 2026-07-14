@@ -1,3 +1,4 @@
+import { resolvingWorldPlazaFlowerSpeciesAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFlowerSpeciesAtTileIndex';
 import { DEFINING_WORLD_PLAZA_PICKED_FLOWERS_LOCAL_STORAGE_KEY_PREFIX } from '@/components/world/harvest/domains/definingWorldPlazaFlowerPickConstants';
 import {
   checkingWorldFlowerPickEligibility,
@@ -8,7 +9,6 @@ import {
   type WorldFlowerPickTileState,
 } from '../../../../shared/worldFlowerPick';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
-import { resolvingWorldFlowerSpeciesAtTileIndex } from '../../../../shared/worldFlowerRarity';
 
 /**
  * Per-tile pick persistence for biome flowers.
@@ -224,7 +224,7 @@ export function pickingWorldPlazaLocalFlower(
     request.tileY
   );
   const state = loadingWorldPlazaLocalPickedFlowersState(persistenceOwnerId);
-  const speciesId = resolvingWorldFlowerSpeciesAtTileIndex(
+  const speciesId = resolvingWorldPlazaFlowerSpeciesAtTileIndex(
     request.tileX,
     request.tileY
   );

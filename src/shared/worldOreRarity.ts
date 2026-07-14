@@ -97,9 +97,7 @@ export const WORLD_ORE_SPECIES_RARITY_TOTAL_WEIGHT =
 const WORLD_ORE_SPECIES_RARITY_BY_SPECIES_ID = new Map<
   WorldOreSpeciesId,
   WorldOreSpeciesRarityEntry
->(
-  WORLD_ORE_SPECIES_RARITY_REGISTRY.map((entry) => [entry.speciesId, entry])
-);
+>(WORLD_ORE_SPECIES_RARITY_REGISTRY.map((entry) => [entry.speciesId, entry]));
 
 /**
  * Resolves the rarity entry for one ore species.
@@ -169,16 +167,30 @@ export function checkingWorldOreVeinAtTileIndex(
 export function resolvingWorldOreSpeciesFromWeightedEntries(
   tileX: number,
   tileY: number,
-  entries: readonly WorldOreSpeciesRarityEntry[]
+  entries: readonly WorldOreSpeciesRarityEntry[],
+  discoveryLuckMultiplier: number = 1
 ): WorldOreSpeciesId {
   if (entries.length === 0) {
     return 'clay';
   }
 
-  const totalWeight = entries.reduce((sum, entry) => sum + entry.weight, 0);
+  const adjustedEntries =
+    discoveryLuckMultiplier <= 1
+      ? entries
+      : entries.map((entry) => ({
+          ...entry,
+          weight:
+            entry.rarity === 'rare' || entry.rarity === 'epic'
+              ? entry.weight * discoveryLuckMultiplier
+              : entry.weight,
+        }));
+  const totalWeight = adjustedEntries.reduce(
+    (sum, entry) => sum + entry.weight,
+    0
+  );
 
   if (totalWeight <= 0) {
-    return entries[0]?.speciesId ?? 'clay';
+    return adjustedEntries[0]?.speciesId ?? 'clay';
   }
 
   const unit = seedingWorldOreSpeciesUnitFromTileIndex(
@@ -189,7 +201,7 @@ export function resolvingWorldOreSpeciesFromWeightedEntries(
   const target = unit * totalWeight;
   let cumulative = 0;
 
-  for (const entry of entries) {
+  for (const entry of adjustedEntries) {
     cumulative += entry.weight;
 
     if (target < cumulative) {
@@ -197,7 +209,7 @@ export function resolvingWorldOreSpeciesFromWeightedEntries(
     }
   }
 
-  return entries[entries.length - 1]?.speciesId ?? 'clay';
+  return adjustedEntries[adjustedEntries.length - 1]?.speciesId ?? 'clay';
 }
 
 /**

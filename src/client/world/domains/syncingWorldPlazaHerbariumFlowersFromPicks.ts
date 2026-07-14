@@ -9,12 +9,12 @@
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import { ensuringWorldPlazaHerbariumFlowerStudyAtLeast } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
+import {
+  resolvingWorldPlazaFlowerSpeciesAtTileIndex,
+  type WorldFlowerSpeciesId,
+} from '@/components/world/domains/resolvingWorldPlazaFlowerSpeciesAtTileIndex';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import { parsingWorldPlazaFlowerSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
-import {
-  resolvingWorldFlowerSpeciesAtTileIndex,
-  type WorldFlowerSpeciesId,
-} from '../../../shared/worldFlowerRarity';
 
 function parsingWorldPlazaPickedFlowerTileKey(
   tileKey: string
@@ -73,7 +73,7 @@ export function syncingWorldPlazaHerbariumFlowersFromPicks(
         continue;
       }
 
-      const speciesId = resolvingWorldFlowerSpeciesAtTileIndex(
+      const speciesId = resolvingWorldPlazaFlowerSpeciesAtTileIndex(
         tile.tileX,
         tile.tileY
       );

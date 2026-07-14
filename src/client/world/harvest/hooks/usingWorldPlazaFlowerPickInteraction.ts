@@ -3,6 +3,7 @@
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { recordingWorldPlazaHerbariumFlowerStudied } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
+import { resolvingWorldPlazaFlowerSpeciesAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFlowerSpeciesAtTileIndex';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import {
   checkingWorldPlazaFlowerPickEligibility,
@@ -23,7 +24,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, type RefObject } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 import { WORLD_FLOWER_PICK_QUANTITY } from '../../../../shared/worldFlowerPick';
-import { resolvingWorldFlowerSpeciesAtTileIndex } from '../../../../shared/worldFlowerRarity';
 import { WORLD_HARVEST_DEVVIT_PICK_FLOWER_API_PATH } from '../../../../shared/worldHarvestDevvit';
 
 export type UsingWorldPlazaFlowerPickInteractionParams = {
@@ -120,7 +120,7 @@ export function usingWorldPlazaFlowerPickInteraction({
         entry.tileX,
         entry.tileY
       );
-      const speciesId = resolvingWorldFlowerSpeciesAtTileIndex(
+      const speciesId = resolvingWorldPlazaFlowerSpeciesAtTileIndex(
         entry.tileX,
         entry.tileY
       );
@@ -184,7 +184,7 @@ export function usingWorldPlazaFlowerPickInteraction({
       isCompletionPendingRef.current = true;
 
       try {
-        const speciesId = resolvingWorldFlowerSpeciesAtTileIndex(
+        const speciesId = resolvingWorldPlazaFlowerSpeciesAtTileIndex(
           entry.tileX,
           entry.tileY
         );

@@ -111,16 +111,27 @@ export function resolvingWorldPlazaEntityBuffHudBonusDetailLines(
       return [`Heal ${Math.round(effect.ratio * 100)}% physical taken`];
     case 'damage_roll_modifiers':
       return effect.modifiers.map((modifier) =>
-        formattingWorldPlazaEntityBuffHudDamageRollBonusLine(modifier, effect.side)
+        formattingWorldPlazaEntityBuffHudDamageRollBonusLine(
+          modifier,
+          effect.side
+        )
       );
     case 'heat_resistance':
-      return [`Heat resistance ${formattingWorldPlazaEntityBuffHudSignedValueLabel(effect.amount)}`];
+      return [
+        `Heat resistance ${formattingWorldPlazaEntityBuffHudSignedValueLabel(effect.amount)}`,
+      ];
     case 'cold_resistance':
-      return [`Cold resistance ${formattingWorldPlazaEntityBuffHudSignedValueLabel(effect.amount)}`];
+      return [
+        `Cold resistance ${formattingWorldPlazaEntityBuffHudSignedValueLabel(effect.amount)}`,
+      ];
     case 'heat_weakness':
-      return [`Heat weakness ${formattingWorldPlazaEntityBuffHudSignedValueLabel(effect.amount)}`];
+      return [
+        `Heat weakness ${formattingWorldPlazaEntityBuffHudSignedValueLabel(effect.amount)}`,
+      ];
     case 'cold_weakness':
-      return [`Cold weakness ${formattingWorldPlazaEntityBuffHudSignedValueLabel(effect.amount)}`];
+      return [
+        `Cold weakness ${formattingWorldPlazaEntityBuffHudSignedValueLabel(effect.amount)}`,
+      ];
     case 'heat_tolerance':
       return [
         `Heat tolerance ${formattingWorldPlazaEntityBuffHudSignedValueLabel(effect.amountCelsius)}°C`,
@@ -143,5 +154,12 @@ export function resolvingWorldPlazaEntityBuffHudBonusDetailLines(
       return ['Asleep'];
     case 'incapacitate_stun':
       return ['Stunned'];
+    case 'lucky_while_held':
+      return [
+        'Disease chance halved',
+        'Safer damage rolls',
+        'Stronger damage dealt',
+        'Better rare finds',
+      ];
   }
 }

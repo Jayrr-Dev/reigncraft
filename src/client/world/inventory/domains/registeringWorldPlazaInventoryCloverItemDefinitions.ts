@@ -4,12 +4,13 @@
  * @module components/world/inventory/domains/registeringWorldPlazaInventoryCloverItemDefinitions
  */
 
+import { DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DURABILITY_MAX } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverConstants';
+import { resolvingWorldPlazaInventoryCloverSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverSpriteSheetConstants';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLOVER_3_LEAF,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLOVER_4_LEAF,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
-import { resolvingWorldPlazaInventoryCloverSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverSpriteSheetConstants';
 
 const DEFINING_WORLD_PLAZA_CLOVER_INVENTORY_ITEM_SEEDS = [
   {
@@ -24,7 +25,7 @@ const DEFINING_WORLD_PLAZA_CLOVER_INVENTORY_ITEM_SEEDS = [
     name: 'Four-leaf clover',
     rarity: 'rare' as const,
     description:
-      'A rare fourth leaf tucked in the tangle. Meadow finders swear it turns the day.',
+      'A rare fourth leaf tucked in the tangle. Hold it for luck until the charm fades.',
   },
 ] as const;
 
@@ -34,9 +35,17 @@ export function registeringWorldPlazaInventoryCloverItemDefinitions(): readonly 
     name: seed.name,
     rarity: seed.rarity,
     description: seed.description,
-    maxStack: 99,
+    maxStack:
+      seed.typeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLOVER_4_LEAF
+        ? 1
+        : 99,
     isDroppable: true,
-    isStackable: true,
+    isStackable:
+      seed.typeId !== DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLOVER_4_LEAF,
+    durability:
+      seed.typeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLOVER_4_LEAF
+        ? { max: DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DURABILITY_MAX }
+        : undefined,
     iconSpriteSheet:
       resolvingWorldPlazaInventoryCloverSpriteSheetIcon(seed.typeId) ??
       undefined,

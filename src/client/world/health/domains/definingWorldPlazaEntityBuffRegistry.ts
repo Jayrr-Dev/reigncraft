@@ -33,6 +33,9 @@ export type DefiningWorldPlazaEntityBuffRollModifier = {
 
 export type DefiningWorldPlazaEntityBuffEffect =
   | {
+      kind: 'lucky_while_held';
+    }
+  | {
       kind: 'damage_roll_modifiers';
       side: DefiningWorldPlazaEntityBuffRollSide;
       modifiers: readonly DefiningWorldPlazaEntityBuffRollModifier[];
@@ -176,6 +179,55 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
   DefiningWorldPlazaEntityBuffDescriptor
 > = Object.fromEntries(
   [
+    {
+      id: 'lucky-buff',
+      label: 'Lucky',
+      description:
+        'Four-leaf clover charm. Safer rolls, sharper strikes, and better finds.',
+      polarity: 'buff',
+      category: 'utility',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'lucky_while_held',
+      },
+    },
+    {
+      id: 'lucky-buff-defender',
+      label: 'Lucky Defence',
+      description: 'Skews incoming damage toward safer outcomes.',
+      polarity: 'buff',
+      category: 'defence',
+      durationKind: 'toggle',
+      durationMs: null,
+      hideFromHud: true,
+      effect: {
+        kind: 'damage_roll_modifiers',
+        side: 'defender',
+        modifiers: [
+          { kind: 'luck', value: -0.5 },
+          { kind: 'block_bias', value: 1 },
+        ],
+      },
+    },
+    {
+      id: 'lucky-buff-attacker',
+      label: 'Lucky Strike',
+      description: 'Skews outgoing damage toward stronger outcomes.',
+      polarity: 'buff',
+      category: 'combat',
+      durationKind: 'toggle',
+      durationMs: null,
+      hideFromHud: true,
+      effect: {
+        kind: 'damage_roll_modifiers',
+        side: 'attacker',
+        modifiers: [
+          { kind: 'luck', value: 0.5 },
+          { kind: 'critical_bias', value: 1 },
+        ],
+      },
+    },
     {
       id: 'iron-armor',
       label: 'Iron Armour',
