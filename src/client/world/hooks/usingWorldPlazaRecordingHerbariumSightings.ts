@@ -1,18 +1,18 @@
 'use client';
 
+import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import {
   DEFINING_WORLD_PLAZA_HERBARIUM_DISCOVERY_POLL_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_HERBARIUM_SIGHT_RADIUS_GRID,
 } from '@/components/world/domains/definingWorldPlazaHerbariumDiscoveryConstants';
-import { checkingWorldPlazaFlowerDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaFlowerDecorationAtTileIndex';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { listingWorldPlazaTreesInTileBounds } from '@/components/world/domains/listingWorldPlazaTreesInTileBounds';
 import {
   initializingWorldPlazaHerbariumDiscoveryStore,
-  recordingWorldPlazaHerbariumFlowerSighted,
   recordingWorldPlazaHerbariumTreeSighted,
 } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
-import { listingWorldPlazaTreesInTileBounds } from '@/components/world/domains/listingWorldPlazaTreesInTileBounds';
-import { resolvingWorldFlowerSpeciesAtTileIndex } from '../../../shared/worldFlowerRarity';
+import { syncingWorldPlazaHerbariumFlowersFromPicks } from '@/components/world/domains/syncingWorldPlazaHerbariumFlowersFromPicks';
+import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { RefObject } from 'react';
 import { useEffect } from 'react';
 
@@ -20,15 +20,27 @@ export type UsingWorldPlazaRecordingHerbariumSightingsOptions = {
   isEnabled: boolean;
   storageOwnerId: string | null;
   playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint | null>;
+  /** Inventory used to backfill already-held flower species. */
+  inventoryState?: DefiningInventoryState | null;
+  /** Picked flower tiles used to backfill historical picks. */
+  pickedFlowerStateByTileKey?: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedFlowerTileState
+  > | null;
 };
 
 /**
- * Tracks flower and tree sightings while the local player moves near flora.
+ * Tracks tree sightings near the player, and syncs flower discovery from picks.
+ *
+ * Flowers unlock only when picked (or when already held / previously picked).
+ * Trees still unlock by proximity sighting; chopping awards Study.
  */
 export function usingWorldPlazaRecordingHerbariumSightings({
   isEnabled,
   storageOwnerId,
   playerPositionRef,
+  inventoryState = null,
+  pickedFlowerStateByTileKey = null,
 }: UsingWorldPlazaRecordingHerbariumSightingsOptions): void {
   useEffect(() => {
     initializingWorldPlazaHerbariumDiscoveryStore(storageOwnerId);
@@ -39,10 +51,21 @@ export function usingWorldPlazaRecordingHerbariumSightings({
       return;
     }
 
+    syncingWorldPlazaHerbariumFlowersFromPicks(
+      inventoryState,
+      pickedFlowerStateByTileKey
+    );
+  }, [isEnabled, inventoryState, pickedFlowerStateByTileKey]);
+
+  useEffect(() => {
+    if (!isEnabled) {
+      return;
+    }
+
     const sightRadiusGrid = DEFINING_WORLD_PLAZA_HERBARIUM_SIGHT_RADIUS_GRID;
     const sightRadiusSquared = sightRadiusGrid * sightRadiusGrid;
 
-    const recordingNearbyFloraSightings = (): void => {
+    const recordingNearbyTreeSightings = (): void => {
       const playerPosition = playerPositionRef.current;
 
       if (!playerPosition) {
@@ -51,33 +74,6 @@ export function usingWorldPlazaRecordingHerbariumSightings({
 
       const centerTileX = Math.floor(playerPosition.x);
       const centerTileY = Math.floor(playerPosition.y);
-
-      for (
-        let offsetY = -sightRadiusGrid;
-        offsetY <= sightRadiusGrid;
-        offsetY++
-      ) {
-        for (
-          let offsetX = -sightRadiusGrid;
-          offsetX <= sightRadiusGrid;
-          offsetX++
-        ) {
-          if (offsetX * offsetX + offsetY * offsetY > sightRadiusSquared) {
-            continue;
-          }
-
-          const tileX = centerTileX + offsetX;
-          const tileY = centerTileY + offsetY;
-
-          if (!checkingWorldPlazaFlowerDecorationAtTileIndex(tileX, tileY)) {
-            continue;
-          }
-
-          recordingWorldPlazaHerbariumFlowerSighted(
-            resolvingWorldFlowerSpeciesAtTileIndex(tileX, tileY)
-          );
-        }
-      }
 
       const nearbyTrees = listingWorldPlazaTreesInTileBounds({
         minTileX: centerTileX - sightRadiusGrid,
@@ -102,10 +98,10 @@ export function usingWorldPlazaRecordingHerbariumSightings({
       }
     };
 
-    recordingNearbyFloraSightings();
+    recordingNearbyTreeSightings();
 
     const intervalId = window.setInterval(
-      recordingNearbyFloraSightings,
+      recordingNearbyTreeSightings,
       DEFINING_WORLD_PLAZA_HERBARIUM_DISCOVERY_POLL_INTERVAL_MS
     );
 

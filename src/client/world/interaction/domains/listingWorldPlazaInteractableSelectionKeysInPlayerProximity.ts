@@ -1,6 +1,6 @@
 import { DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
-import { checkingWorldPlazaFlowerDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaFlowerDecorationAtTileIndex';
+import { checkingWorldPlazaPickableFlowerDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaPickableFlowerDecorationAtTileIndex';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from '@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds';
 import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex';
@@ -196,7 +196,7 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
 
       if (
         !params.pickedFlowerStateByTileKey?.get(flowerTileKey)?.isPicked &&
-        checkingWorldPlazaFlowerDecorationAtTileIndex(tileX, tileY)
+        checkingWorldPlazaPickableFlowerDecorationAtTileIndex(tileX, tileY)
       ) {
         keys.add(
           formattingWorldPlazaInteractableFlowerSelectionKey(tileX, tileY)

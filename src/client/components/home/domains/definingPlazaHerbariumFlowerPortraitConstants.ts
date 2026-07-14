@@ -7,11 +7,11 @@
  * @module components/home/domains/definingPlazaHerbariumFlowerPortraitConstants
  */
 
-/** Zoom applied to the cropped cell so petals fill past sheet padding. */
-export const DEFINING_PLAZA_HERBARIUM_FLOWER_PORTRAIT_CARD_ZOOM = 2.4;
+/** Zoom applied to the cropped cell on grid cards (inventory sprites already fill the cell). */
+export const DEFINING_PLAZA_HERBARIUM_FLOWER_PORTRAIT_CARD_ZOOM = 1.05;
 
 /** Zoom applied on the larger detail page hero. */
-export const DEFINING_PLAZA_HERBARIUM_FLOWER_PORTRAIT_DETAIL_ZOOM = 3.2;
+export const DEFINING_PLAZA_HERBARIUM_FLOWER_PORTRAIT_DETAIL_ZOOM = 1.45;
 
 /** CSS filter that flattens the sprite into a locked-entry silhouette. */
 export const DEFINING_PLAZA_HERBARIUM_FLOWER_PORTRAIT_SILHOUETTE_FILTER =

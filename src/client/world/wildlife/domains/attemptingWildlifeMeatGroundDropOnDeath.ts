@@ -1,9 +1,11 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWildlifeInstanceIsOwnedPersistentPet } from '@/components/world/wildlife/domains/checkingWildlifeInstanceIsOwnedPet';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { droppingWildlifeMeatGroundItem } from '@/components/world/wildlife/domains/droppingWildlifeMeatGroundItem';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { replacingWildlifeInstance } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { syncingWildlifePetDeathToRoster } from '@/components/world/wildlife/pets/domains/syncingWildlifePetBondToRoster';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 export type DefiningWildlifeMeatDropContext = {
@@ -21,6 +23,9 @@ export type DefiningWildlifeMeatDropKillContext = {
 /**
  * Marks loot as in-flight and spawns raw meat when an animal dies (leader-only).
  * Clears the mark if persist fails so a later tick can retry.
+ *
+ * Persistent companions stay on the roster (undeployed, HP 0) so a future
+ * revive can restore them, while freeing a living-active slot immediately.
  */
 export function attemptingWildlifeMeatGroundDropOnDeath(
   store: ManagingWildlifeInstanceStore,
@@ -29,6 +34,13 @@ export function attemptingWildlifeMeatGroundDropOnDeath(
   meatDropContext: DefiningWildlifeMeatDropContext | null | undefined,
   killContext?: DefiningWildlifeMeatDropKillContext | null
 ): DefiningWildlifeInstance {
+  if (
+    instance.isDead &&
+    checkingWildlifeInstanceIsOwnedPersistentPet(instance)
+  ) {
+    syncingWildlifePetDeathToRoster(instance, killContext?.nowMs ?? Date.now());
+  }
+
   if (
     !meatDropContext ||
     !instance.isDead ||

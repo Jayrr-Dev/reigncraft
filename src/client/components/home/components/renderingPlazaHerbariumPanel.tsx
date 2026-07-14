@@ -17,9 +17,8 @@ import {
   subscribingWorldPlazaExploredBiomes,
 } from '@/components/world/domains/managingWorldPlazaExploredBiomesStore';
 import {
-  gettingWorldPlazaHerbariumSightedFlowerSpeciesSnapshot,
-  gettingWorldPlazaHerbariumSightedTreeVariantsSnapshot,
   gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
+  gettingWorldPlazaHerbariumSightedTreeVariantsSnapshot,
   gettingWorldPlazaHerbariumTreeStudyCountsSnapshot,
   subscribingWorldPlazaHerbariumDiscovery,
 } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
@@ -87,12 +86,12 @@ function RenderingPlazaHerbariumGuideCard({
             <RenderingPlazaHerbariumFlowerPortrait
               speciesId={entry.speciesId}
               variant="silhouette"
-              className="size-[72%]"
+              className="size-[48%]"
             />
           ) : (
             <Icon
               icon={entry.icon}
-              className="size-[52%] text-ink-soft/40"
+              className="size-[40%] text-ink-soft/40"
               aria-hidden
             />
           )}
@@ -124,12 +123,12 @@ function RenderingPlazaHerbariumGuideCard({
           <RenderingPlazaHerbariumFlowerPortrait
             speciesId={entry.speciesId}
             variant="revealed"
-            className="size-[72%]"
+            className="size-[48%]"
           />
         ) : (
           <Icon
             icon={entry.icon}
-            className="size-[52%] text-poster-teal-deep"
+            className="size-[40%] text-poster-teal-deep"
             aria-hidden
           />
         )}
@@ -165,11 +164,6 @@ export function RenderingPlazaHerbariumPanel({
   const [categoryFilterId, setCategoryFilterId] =
     useState<PlazaHerbariumCategoryFilterId>('all');
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
-  const sightedFlowerSpeciesIds = useSyncExternalStore(
-    subscribingWorldPlazaHerbariumDiscovery,
-    gettingWorldPlazaHerbariumSightedFlowerSpeciesSnapshot,
-    () => []
-  );
   const flowerStudyCountsBySpeciesId = useSyncExternalStore(
     subscribingWorldPlazaHerbariumDiscovery,
     gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
@@ -190,10 +184,6 @@ export function RenderingPlazaHerbariumPanel({
     gettingWorldPlazaExploredBiomesSnapshot,
     () => []
   );
-  const sightedFlowerSet = useMemo(
-    () => new Set(sightedFlowerSpeciesIds),
-    [sightedFlowerSpeciesIds]
-  );
   const sightedTreeSet = useMemo(
     () => new Set(sightedTreeVariants),
     [sightedTreeVariants]
@@ -205,7 +195,6 @@ export function RenderingPlazaHerbariumPanel({
   const guideEntries = useMemo(
     () =>
       resolvingPlazaHerbariumGuideDisplayEntries(
-        sightedFlowerSet,
         flowerStudyCountsBySpeciesId,
         sightedTreeSet,
         treeStudyCountsByVariant,
@@ -214,7 +203,6 @@ export function RenderingPlazaHerbariumPanel({
     [
       exploredKinds,
       flowerStudyCountsBySpeciesId,
-      sightedFlowerSet,
       sightedTreeSet,
       treeStudyCountsByVariant,
     ]
@@ -228,7 +216,9 @@ export function RenderingPlazaHerbariumPanel({
   );
   const resolvingPlazaHerbariumEntryId = useCallback(
     (entry: PlazaHerbariumGuideDisplayEntry): string =>
-      entry.kind === 'flower' ? `flower:${entry.speciesId}` : `tree:${entry.variant}`,
+      entry.kind === 'flower'
+        ? `flower:${entry.speciesId}`
+        : `tree:${entry.variant}`,
     []
   );
   const selectedEntry = useMemo(
@@ -353,7 +343,8 @@ export function RenderingPlazaHerbariumPanel({
               aria-selected={isActive}
               className={cn(
                 PLAZA_HERBARIUM_CATEGORY_TAB_BUTTON_CLASS_NAME,
-                isActive && PLAZA_HERBARIUM_CATEGORY_TAB_BUTTON_ACTIVE_CLASS_NAME
+                isActive &&
+                  PLAZA_HERBARIUM_CATEGORY_TAB_BUTTON_ACTIVE_CLASS_NAME
               )}
               onClick={() => selectingCategoryFilter(filter.id)}
             >

@@ -47,6 +47,14 @@
         "gameplay/mechanics/wildlife/"
       ],
       "notes": "Species summaries, study tiers; gameplay wildlife catalog when species rules change."
+    },
+    {
+      "id": "herbarium",
+      "label": "Herbarium Guide",
+      "paths": [
+        "src/client/components/home/domains/definingPlazaHerbariumGuideConstants.ts"
+      ],
+      "notes": "Flower and tree Guide copy, study tiers; pick/chop unlocks."
     }
   ],
   "triggers": [

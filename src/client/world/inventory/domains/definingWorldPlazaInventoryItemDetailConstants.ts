@@ -196,6 +196,10 @@ export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO =
 export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ATTACH =
   'Attach' as const;
 
+/** Action tower button: study a flower specimen for the Herbarium. */
+export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_STUDY =
+  'Study' as const;
+
 /** Human-readable labels for equipped tool kinds. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS: Readonly<
   Record<DefiningWorldPlazaEquipmentToolKind, string>

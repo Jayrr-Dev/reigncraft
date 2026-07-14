@@ -8,6 +8,10 @@
  */
 
 import { savingPlazaSinglePlayerSaveSlotData } from '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi';
+import {
+  checkingWildlifePetRosterRecordIsLivingActive,
+  resolvingWildlifePetRosterPrimaryActivePetId,
+} from '@/components/world/wildlife/pets/domains/checkingWildlifePetRosterDeployable';
 import { DEFINING_WILDLIFE_PET_MAX_ACTIVE } from '@/components/world/wildlife/pets/domains/definingWildlifePetLoyaltyTiersRegistry';
 import type {
   DefiningWildlifePetPersistedRecord,
@@ -21,11 +25,10 @@ import type { PlazaSaveSlotIndex } from '../../../../../shared/plazaGameSession'
 
 const managingWildlifePetRosterSubscribers = new Set<() => void>();
 
-const MANAGING_WILDLIFE_PET_ROSTER_EMPTY_SNAPSHOT: DefiningWildlifePetRoster =
-  {
-    activePetId: null,
-    pets: [],
-  };
+const MANAGING_WILDLIFE_PET_ROSTER_EMPTY_SNAPSHOT: DefiningWildlifePetRoster = {
+  activePetId: null,
+  pets: [],
+};
 
 let managingWildlifePetRosterStorageOwnerId: string | null = null;
 let managingWildlifePetRosterCloudSaveSlotIndex: PlazaSaveSlotIndex | null =
@@ -190,23 +193,50 @@ function applyingWildlifePetRosterMutation(mutator: () => void): void {
 }
 
 /**
- * Deactivates every roster pet other than `keepActivePetId`, enforcing
- * {@link DEFINING_WILDLIFE_PET_MAX_ACTIVE} bonded companion(s) active at once.
+ * Caps living-active companions at {@link DEFINING_WILDLIFE_PET_MAX_ACTIVE}.
+ * Prefers keeping `preferKeepPetId` deployed; deactivates oldest others first.
  */
-function enforcingWildlifePetSingleActiveInvariant(
+function enforcingWildlifePetMaxActiveInvariant(
   petsById: Map<string, DefiningWildlifePetPersistedRecord>,
-  keepActivePetId: string
+  preferKeepPetId: string
 ): void {
-  for (const [petId, pet] of petsById) {
-    if (petId !== keepActivePetId && pet.isActive) {
-      petsById.set(petId, { ...pet, isActive: false });
+  const livingActive = [...petsById.values()]
+    .filter(checkingWildlifePetRosterRecordIsLivingActive)
+    .sort((left, right) => left.updatedAtMs - right.updatedAtMs);
+
+  let excess = livingActive.length - DEFINING_WILDLIFE_PET_MAX_ACTIVE;
+
+  if (excess <= 0) {
+    return;
+  }
+
+  for (const pet of livingActive) {
+    if (excess <= 0) {
+      break;
     }
+
+    if (pet.petId === preferKeepPetId) {
+      continue;
+    }
+
+    petsById.set(pet.petId, { ...pet, isActive: false });
+    excess -= 1;
   }
 }
 
+function refreshingWildlifePetRosterPrimaryActivePetId(
+  petsById: Map<string, DefiningWildlifePetPersistedRecord>
+): void {
+  managingWildlifePetRosterActivePetId =
+    resolvingWildlifePetRosterPrimaryActivePetId(
+      [...petsById.values()],
+      managingWildlifePetRosterActivePetId
+    );
+}
+
 /**
- * Upserts one pet record. When the record is active, all other pets are
- * deactivated so at most {@link DEFINING_WILDLIFE_PET_MAX_ACTIVE} stay active.
+ * Upserts one pet record. When the record is active, living-active count is
+ * capped at {@link DEFINING_WILDLIFE_PET_MAX_ACTIVE}.
  *
  * @param record - Pet record to insert or replace by `petId`.
  */
@@ -218,12 +248,11 @@ export function upsertingWildlifePetRecord(
     nextPetsById.set(record.petId, record);
 
     if (record.isActive) {
-      enforcingWildlifePetSingleActiveInvariant(nextPetsById, record.petId);
+      enforcingWildlifePetMaxActiveInvariant(nextPetsById, record.petId);
       managingWildlifePetRosterActivePetId = record.petId;
-    } else if (managingWildlifePetRosterActivePetId === record.petId) {
-      managingWildlifePetRosterActivePetId = null;
     }
 
+    refreshingWildlifePetRosterPrimaryActivePetId(nextPetsById);
     managingWildlifePetRosterPetsById = nextPetsById;
   });
 }
@@ -242,17 +271,16 @@ export function removingWildlifePetRecord(petId: string): void {
     const nextPetsById = new Map(managingWildlifePetRosterPetsById);
     nextPetsById.delete(petId);
     managingWildlifePetRosterPetsById = nextPetsById;
-
-    if (managingWildlifePetRosterActivePetId === petId) {
-      managingWildlifePetRosterActivePetId = null;
-    }
+    refreshingWildlifePetRosterPrimaryActivePetId(nextPetsById);
   });
 }
 
 /**
- * Sets the single active companion, deactivating every other roster pet.
+ * Sets one companion active (deployed). Other living-actives stay deployed
+ * until {@link DEFINING_WILDLIFE_PET_MAX_ACTIVE} is exceeded. Pass null to
+ * undeploy every companion.
  *
- * @param petId - Pet id to activate, or null to deactivate the roster.
+ * @param petId - Pet id to activate, or null to deactivate all.
  */
 export function settingWildlifePetActivePetId(petId: string | null): void {
   if (petId !== null && !managingWildlifePetRosterPetsById.has(petId)) {
@@ -262,21 +290,35 @@ export function settingWildlifePetActivePetId(petId: string | null): void {
   applyingWildlifePetRosterMutation(() => {
     const nextPetsById = new Map<string, DefiningWildlifePetPersistedRecord>();
 
+    if (petId === null) {
+      for (const [existingPetId, pet] of managingWildlifePetRosterPetsById) {
+        nextPetsById.set(
+          existingPetId,
+          pet.isActive ? { ...pet, isActive: false } : pet
+        );
+      }
+
+      managingWildlifePetRosterPetsById = nextPetsById;
+      managingWildlifePetRosterActivePetId = null;
+      return;
+    }
+
     for (const [existingPetId, pet] of managingWildlifePetRosterPetsById) {
-      const isActive = existingPetId === petId;
+      if (existingPetId === petId) {
+        nextPetsById.set(
+          existingPetId,
+          pet.isActive ? pet : { ...pet, isActive: true }
+        );
+        continue;
+      }
 
-      nextPetsById.set(
-        existingPetId,
-        pet.isActive === isActive ? pet : { ...pet, isActive }
-      );
+      nextPetsById.set(existingPetId, pet);
     }
 
-    if (petId !== null) {
-      enforcingWildlifePetSingleActiveInvariant(nextPetsById, petId);
-    }
-
-    managingWildlifePetRosterPetsById = nextPetsById;
+    enforcingWildlifePetMaxActiveInvariant(nextPetsById, petId);
     managingWildlifePetRosterActivePetId = petId;
+    refreshingWildlifePetRosterPrimaryActivePetId(nextPetsById);
+    managingWildlifePetRosterPetsById = nextPetsById;
   });
 }
 
@@ -308,12 +350,11 @@ export function updatingWildlifePetRecord(
     nextPetsById.set(petId, nextRecord);
 
     if (nextRecord.isActive) {
-      enforcingWildlifePetSingleActiveInvariant(nextPetsById, petId);
+      enforcingWildlifePetMaxActiveInvariant(nextPetsById, petId);
       managingWildlifePetRosterActivePetId = petId;
-    } else if (managingWildlifePetRosterActivePetId === petId) {
-      managingWildlifePetRosterActivePetId = null;
     }
 
+    refreshingWildlifePetRosterPrimaryActivePetId(nextPetsById);
     managingWildlifePetRosterPetsById = nextPetsById;
   });
 }

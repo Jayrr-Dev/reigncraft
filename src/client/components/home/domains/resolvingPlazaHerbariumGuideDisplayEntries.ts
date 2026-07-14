@@ -1,3 +1,4 @@
+import { LABELING_PLAZA_BIOMES_UNDISCOVERED_NAME } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
 import {
   DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES,
   DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES,
@@ -7,7 +8,6 @@ import {
   type DefiningPlazaHerbariumTreeEntry,
 } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
 import type { PlazaHerbariumStudyTierId } from '@/components/home/domains/definingPlazaHerbariumStudyTier';
-import { LABELING_PLAZA_BIOMES_UNDISCOVERED_NAME } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
 import {
   checkingPlazaHerbariumStudyTierUnlocked,
   resolvingPlazaHerbariumStudyTierId,
@@ -20,7 +20,10 @@ import {
 } from '@/components/world/domains/definingWorldPlazaTreeConstants';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 
-export type PlazaHerbariumGuideDiscoveryState = 'locked' | 'sighted' | 'studied';
+export type PlazaHerbariumGuideDiscoveryState =
+  | 'locked'
+  | 'sighted'
+  | 'studied';
 
 export type PlazaHerbariumGuideBiomeChip = {
   kind: DefiningWorldPlazaBiomeKind;
@@ -123,7 +126,6 @@ function resolvingPlazaHerbariumDiscoveryState(
  * @param exploredBiomeKinds - Biome kinds the player has entered (gates habitat chip names).
  */
 export function resolvingPlazaHerbariumGuideDisplayEntries(
-  sightedFlowerSpeciesIds: ReadonlySet<WorldFlowerSpeciesId>,
   flowerStudyCountsBySpeciesId: Readonly<
     Partial<Record<WorldFlowerSpeciesId, number>>
   >,
@@ -139,10 +141,10 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
     DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES.map(
       (entry: DefiningPlazaHerbariumFlowerEntry) => {
         const studyCount = flowerStudyCountsBySpeciesId[entry.speciesId] ?? 0;
-        const isSighted =
-          studyCount > 0 || sightedFlowerSpeciesIds.has(entry.speciesId);
+        // Flowers unlock only after a pick (study), never by proximity alone.
+        const isSighted = studyCount > 0;
         const discoveryState = resolvingPlazaHerbariumDiscoveryState(
-          sightedFlowerSpeciesIds.has(entry.speciesId),
+          isSighted,
           studyCount
         );
         const isStudied = checkingPlazaHerbariumStudyTierUnlocked(

@@ -6,7 +6,7 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { checkingWildlifePetMayAcceptCommand } from '@/components/world/wildlife/pets/domains/checkingWildlifePetMayAcceptCommand';
+import { checkingWildlifePetAllied } from '@/components/world/wildlife/pets/domains/checkingWildlifePetAllied';
 import { resolvingWildlifePetCommandIntent } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetCommandIntent';
 
 export type ApplyingWildlifePetCommandTickParams = {
@@ -24,10 +24,12 @@ export type ApplyingWildlifePetCommandTickParams = {
 /**
  * Call once per think-tick for the local player's owned pets. Rewrites the
  * instance's AI intent (and follow window / stay anchor) to match the active
- * pet-bond command; no-ops for instances without a bond owned by this player,
- * or below Friendly loyalty (before the `commandsStayFollow` capability
- * unlocks) so early Curious/Familiar bonds keep the natural docile
- * approach-react follow window instead of a forced permanent follow.
+ * pet-bond command.
+ *
+ * Familiar+ (`allied`) companions permanently trail the owner (default follow).
+ * Curious/Comfortable bonds skip this path so they keep temporary docile
+ * approach-react follow windows. Stay / Attack / Defend still require their
+ * higher loyalty capabilities inside {@link resolvingWildlifePetCommandIntent}.
  */
 export function applyingWildlifePetCommandTick({
   instance,
@@ -43,7 +45,7 @@ export function applyingWildlifePetCommandTick({
     !playerPosition ||
     !playerUserId ||
     petBond.ownerUserId !== playerUserId ||
-    !checkingWildlifePetMayAcceptCommand(petBond.loyalty, 'follow')
+    !checkingWildlifePetAllied(instance)
   ) {
     return instance;
   }

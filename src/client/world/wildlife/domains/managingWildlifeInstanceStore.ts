@@ -7,11 +7,11 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaBaseSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
+import { checkingWildlifeInstanceIsOwnedPersistentPet } from '@/components/world/wildlife/domains/checkingWildlifeInstanceIsOwnedPet';
 import { checkingWildlifeSpeciesIsNightOnlySpawn } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsNightOnlySpawn';
 import { creatingWildlifeSpawnHealthState } from '@/components/world/wildlife/domains/creatingWildlifeSpawnHealthState';
 import { DEFINING_WILDLIFE_SPAWN_SPACING_MODULUS } from '@/components/world/wildlife/domains/definingWildlifeBiomeSpawnTable';
 import type { DefiningWildlifeLargeSizeFrame } from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
-import { checkingWildlifeInstanceIsOwnedPersistentPet } from '@/components/world/wildlife/domains/checkingWildlifeInstanceIsOwnedPet';
 import { checkingWildlifeOmegaWolfSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
@@ -24,7 +24,6 @@ import type {
   DefiningWildlifeSpawnAnchor,
   DefiningWildlifeSpeechState,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import type { DefiningWildlifePetBondState } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
 import {
   buildingWildlifeSpatialGrid,
   queryingWildlifeInstancesNearPoint,
@@ -42,6 +41,7 @@ import {
   resolvingWildlifeSpawnPositionFromAnchor,
 } from '@/components/world/wildlife/domains/resolvingWildlifeSpawnAtTileIndex';
 import { seedingWildlifeInitialThinkAtMs } from '@/components/world/wildlife/domains/resolvingWildlifeThinkSchedule';
+import type { DefiningWildlifePetBondState } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
 
 /** Radius around the player where wildlife instances are simulated. */
 export const DEFINING_WILDLIFE_SIM_RADIUS_GRID = 28;
@@ -450,6 +450,12 @@ export function queueingWildlifePendingRespawnFromDeadInstance(
   }
 
   store.pendingRespawns.delete(instance.anchorId);
+
+  // Companions are roster-spawned; never queue a wild random respawn for them.
+  if (checkingWildlifeInstanceIsOwnedPersistentPet(instance)) {
+    store.knownAnchorIds.delete(instance.anchorId);
+    return;
+  }
 
   if (checkingWildlifeSpeciesIsNightOnlySpawn(instance.speciesId)) {
     store.knownAnchorIds.add(instance.anchorId);

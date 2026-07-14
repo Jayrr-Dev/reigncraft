@@ -9,6 +9,7 @@ import { RenderingUserProfileFriendRequestPlazaModal } from '@/components/friend
 import { usingUserProfileFriendPlazaNotifications } from '@/components/friends/hooks/usingUserProfileFriendPlazaNotifications';
 import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/hooks/usingUserProfileFriendRequestPlazaDialogs';
 import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
+import { formattingPlazaHerbariumStudyCountProgress } from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import { sendingWorldPlazaAudioLifecycleEvent } from '@/components/world/audio/lifecycle/managingWorldPlazaAudioLifecycleStore';
@@ -96,6 +97,7 @@ import { RenderingWorldPlazaFriendTrackingDirectionArrowOverlay } from '@/compon
 import { RenderingWorldPlazaGameplayHud } from '@/components/world/components/renderingWorldPlazaGameplayHud';
 import { RenderingWorldPlazaGirlSampleVoiceSfx } from '@/components/world/components/renderingWorldPlazaGirlSampleVoiceSfx';
 import { RenderingWorldPlazaGirlSampleWalkAvatar } from '@/components/world/components/renderingWorldPlazaGirlSampleWalkAvatar';
+import { RenderingWorldPlazaHerbariumOverlay } from '@/components/world/components/renderingWorldPlazaHerbariumOverlay';
 import { RenderingWorldPlazaHudToolbarBottomAnchor } from '@/components/world/components/renderingWorldPlazaHudToolbarBottomAnchor';
 import { RenderingWorldPlazaLoreBookOverlay } from '@/components/world/components/renderingWorldPlazaLoreBookOverlay';
 import { RenderingWorldPlazaMechanicsOverlay } from '@/components/world/components/renderingWorldPlazaMechanicsOverlay';
@@ -217,6 +219,10 @@ import {
 import { findingWorldPlazaBiomeTeleportWorldPointForDev } from '@/components/world/domains/findingWorldPlazaBiomeTeleportWorldPointForDev';
 import { recordingWorldPlazaBestiarySpeciesStudied } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
+import {
+  gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
+  recordingWorldPlazaHerbariumFlowerStudied,
+} from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import { settingWorldPlazaOnlineRoomId } from '@/components/world/domains/managingWorldPlazaOnlineRoomIdStore';
 import {
   attachingWorldPlazaRecipePage,
@@ -354,6 +360,7 @@ import { usingWorldPlazaProfilePanelVisibleState } from '@/components/world/hook
 import { usingWorldPlazaRecordingBestiarySightings } from '@/components/world/hooks/usingWorldPlazaRecordingBestiarySightings';
 import { usingWorldPlazaRecordingDiscoveredNamedRealms } from '@/components/world/hooks/usingWorldPlazaRecordingDiscoveredNamedRealms';
 import { usingWorldPlazaRecordingExploredBiomes } from '@/components/world/hooks/usingWorldPlazaRecordingExploredBiomes';
+import { usingWorldPlazaRecordingHerbariumSightings } from '@/components/world/hooks/usingWorldPlazaRecordingHerbariumSightings';
 import { usingWorldPlazaRunStamina } from '@/components/world/hooks/usingWorldPlazaRunStamina';
 import { usingWorldPlazaSavedCoordsQuery } from '@/components/world/hooks/usingWorldPlazaSavedCoordsQuery';
 import { usingWorldPlazaSavedCoordsTrackingVisibleState } from '@/components/world/hooks/usingWorldPlazaSavedCoordsTrackingVisibleState';
@@ -394,6 +401,7 @@ import { applyingWorldPlazaInventorySlotActiveEnchantmentUse } from '@/component
 import { computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier';
 import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
 import { consumingWorldPlazaInventoryItemFromSlot } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemFromSlot';
+import { parsingWorldPlazaFlowerSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { disarmingWorldPlazaInventorySlotArmedHarvestEnchantments } from '@/components/world/inventory/domains/disarmingWorldPlazaInventorySlotArmedHarvestEnchantments';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
@@ -498,6 +506,7 @@ import {
 } from '@/components/world/wildlife/pets';
 import { RenderingWildlifePetModal } from '@/components/world/wildlife/pets/components/renderingWildlifePetModal';
 import { RenderingWildlifePetNameDialog } from '@/components/world/wildlife/pets/components/renderingWildlifePetNameDialog';
+import { RenderingWildlifePetRosterPanel } from '@/components/world/wildlife/pets/components/renderingWildlifePetRosterPanel';
 import {
   applyingWildlifePetDevLoyaltyGrant,
   type ApplyingWildlifePetDevLoyaltyGrantKind,
@@ -506,6 +515,7 @@ import { DEFINING_WILDLIFE_PET_MODAL_HEAL_AMOUNT } from '@/components/world/wild
 import { findingWildlifeNearestPettableInstance } from '@/components/world/wildlife/pets/domains/findingWildlifeNearestPettableInstance';
 import { usingWildlifeActivePetSpawn } from '@/components/world/wildlife/pets/hooks/usingWildlifeActivePetSpawn';
 import { usingWildlifePetModalState } from '@/components/world/wildlife/pets/hooks/usingWildlifePetModalState';
+import { usingWildlifePetRosterPanelVisibleState } from '@/components/world/wildlife/pets/hooks/usingWildlifePetRosterPanelVisibleState';
 import { showToast } from '@devvit/web/client';
 import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -3218,35 +3228,43 @@ function RenderingWorldPlazaPixiSceneConnected({
 
     const broadcastingOwnedPetSnapshot = (): void => {
       const ownerUserId = onlineUserId ?? localPersistenceOwnerId;
-      const activeRecord = petRosterSnapshot.pets.find(
-        (pet) => pet.petId === petRosterSnapshot.activePetId
-      );
-      const instance = activeRecord
-        ? gettingWildlifeInstance(
-            wildlifeStoreRef.current,
-            formattingWildlifePetInstanceId(activeRecord.petId)
-          )
-        : null;
+      ownedPetSnapshotsOutRef.current.length = 0;
 
-      if (!ownerUserId || !instance?.petBond) {
-        ownedPetSnapshotsOutRef.current.length = 0;
+      if (!ownerUserId) {
         return;
       }
 
-      ownedPetSnapshotsOutRef.current.length = 0;
-      ownedPetSnapshotsOutRef.current.push({
-        petId: instance.petBond.petId,
-        ownerUserId,
-        speciesId: instance.speciesId,
-        displayName: instance.customDisplayName ?? null,
-        x: instance.position.x,
-        y: instance.position.y,
-        facingDirection: instance.facingDirection,
-        motionClip: instance.aiState.motionClip,
-        healthCurrent: instance.healthState.currentHealth,
-        loyalty: instance.petBond.loyalty,
-        command: instance.petBond.command,
-      });
+      for (const record of petRosterSnapshot.pets) {
+        if (
+          !record.isActive ||
+          (record.healthCurrent !== null && record.healthCurrent <= 0)
+        ) {
+          continue;
+        }
+
+        const instance = gettingWildlifeInstance(
+          wildlifeStoreRef.current,
+          formattingWildlifePetInstanceId(record.petId)
+        );
+
+        if (!instance?.petBond) {
+          continue;
+        }
+
+        ownedPetSnapshotsOutRef.current.push({
+          petId: instance.petBond.petId,
+          ownerUserId,
+          speciesId: instance.speciesId,
+          displayName: instance.customDisplayName ?? null,
+          x: instance.position.x,
+          y: instance.position.y,
+          facingDirection: instance.facingDirection,
+          motionClip: instance.aiState.motionClip,
+          healthCurrent: instance.healthState.currentHealth,
+          loyalty: instance.petBond.loyalty,
+          command: instance.petBond.command,
+        });
+      }
     };
 
     broadcastingOwnedPetSnapshot();
@@ -4554,6 +4572,58 @@ function RenderingWorldPlazaPixiSceneConnected({
     ]
   );
 
+  const handlingStudyHotbarSlot = useCallback(
+    (slotIndex: number): void => {
+      if (
+        isPlayerAsleepRef.current ||
+        isPlayerStunnedRef.current ||
+        isPlayerDeadRef.current
+      ) {
+        return;
+      }
+
+      const item = inventoryState.slots[slotIndex];
+
+      if (!item) {
+        return;
+      }
+
+      const speciesId = parsingWorldPlazaFlowerSpeciesIdFromItemTypeId(
+        item.itemTypeId
+      );
+
+      if (!speciesId) {
+        return;
+      }
+
+      let didConsume = false;
+
+      updatingInventoryState((currentState) => {
+        const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
+          currentState,
+          slotIndex,
+          1
+        );
+
+        didConsume = consumeResult.consumed;
+        return consumeResult.consumed ? consumeResult.nextState : null;
+      });
+
+      if (!didConsume) {
+        showingGameplayHudToast('Nothing left to study.');
+        return;
+      }
+
+      recordingWorldPlazaHerbariumFlowerStudied(speciesId);
+      const studyCount =
+        gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot()[speciesId] ?? 1;
+      showingGameplayHudToast(
+        `Studied · Herbarium ${formattingPlazaHerbariumStudyCountProgress(studyCount)}`
+      );
+    },
+    [inventoryState.slots, showingGameplayHudToast, updatingInventoryState]
+  );
+
   const {
     tryConsumingJumpStaminaRef,
     tryConsumingRollStaminaRef,
@@ -4716,6 +4786,14 @@ function RenderingWorldPlazaPixiSceneConnected({
     cloudSaveSlotIndex: discoveryCloudSaveSlotIndex,
     playerPositionRef,
     wildlifeStoreRef,
+  });
+
+  usingWorldPlazaRecordingHerbariumSightings({
+    isEnabled: isLocalGameplayEnabled,
+    storageOwnerId: onlineUserId ?? localPersistenceOwnerId,
+    playerPositionRef,
+    inventoryState,
+    pickedFlowerStateByTileKey,
   });
 
   useEffect(() => {
@@ -4887,6 +4965,11 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const { isProfilePanelOpen, closingProfilePanel, togglingProfilePanel } =
     usingWorldPlazaProfilePanelVisibleState();
+  const {
+    isPetRosterPanelOpen,
+    closingPetRosterPanel,
+    togglingPetRosterPanel,
+  } = usingWildlifePetRosterPanelVisibleState();
 
   const { activeCodexSection, openingCodexSection, closingCodexSection } =
     usingWorldPlazaCodexPanelVisibleState();
@@ -6721,6 +6804,8 @@ function RenderingWorldPlazaPixiSceneConnected({
                   onToggleFriends={togglingFriendsFromActionBar}
                   isProfileOpen={isProfilePanelOpen}
                   onToggleProfile={togglingProfilePanel}
+                  isPetsOpen={isPetRosterPanelOpen}
+                  onTogglePets={togglingPetRosterPanel}
                   onSelectCodexSection={selectingCodexSectionFromActionBar}
                   onToggleFullscreen={() => {
                     void togglingViewportFullscreen({
@@ -6788,6 +6873,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                         selectedSlotIndex={equipment.selectedSlotIndex}
                         onSelectHotbarSlot={equipment.selectingHotbarSlot}
                         onEatHotbarSlot={handlingEatHotbarSlot}
+                        onStudyHotbarSlot={handlingStudyHotbarSlot}
                         onAttachRecipePageHotbarSlot={
                           handlingAttachRecipePageHotbarSlot
                         }
@@ -6888,6 +6974,8 @@ function RenderingWorldPlazaPixiSceneConnected({
                   onToggleFriends={() => undefined}
                   isProfileOpen={isProfilePanelOpen}
                   onToggleProfile={togglingProfilePanel}
+                  isPetsOpen={isPetRosterPanelOpen}
+                  onTogglePets={togglingPetRosterPanel}
                   onSelectCodexSection={selectingCodexSectionFromActionBar}
                   onToggleFullscreen={() => {
                     void togglingViewportFullscreen({
@@ -6942,6 +7030,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                         selectedSlotIndex={equipment.selectedSlotIndex}
                         onSelectHotbarSlot={equipment.selectingHotbarSlot}
                         onEatHotbarSlot={handlingEatHotbarSlot}
+                        onStudyHotbarSlot={handlingStudyHotbarSlot}
                         onAttachRecipePageHotbarSlot={
                           handlingAttachRecipePageHotbarSlot
                         }
@@ -7000,6 +7089,10 @@ function RenderingWorldPlazaPixiSceneConnected({
               isDepleted: isStaminaDepleted,
             }}
             derivedStats={selectedCharacterEngineDerivedStats}
+          />
+          <RenderingWildlifePetRosterPanel
+            isOpen={isPetRosterPanelOpen}
+            onClose={closingPetRosterPanel}
           />
         </RenderingWorldPlazaGameplayHud>
       </div>
@@ -7092,6 +7185,10 @@ function RenderingWorldPlazaPixiSceneConnected({
       />
       <RenderingWorldPlazaBestiaryOverlay
         isOpen={activeCodexSection === 'bestiary'}
+        onClose={closingCodexSection}
+      />
+      <RenderingWorldPlazaHerbariumOverlay
+        isOpen={activeCodexSection === 'herbarium'}
         onClose={closingCodexSection}
       />
       <RenderingWorldPlazaRecipesOverlay

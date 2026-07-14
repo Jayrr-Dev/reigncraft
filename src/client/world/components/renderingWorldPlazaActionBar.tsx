@@ -68,12 +68,14 @@ import { RenderingWorldPlazaHungerIndicator } from '@/components/world/hunger/co
 import { RenderingWorldPlazaHungerPanel } from '@/components/world/hunger/components/renderingWorldPlazaHungerPanel';
 import type { DefiningWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { STYLING_WORLD_PLAZA_ACTION_BAR_HUNGER_ANCHOR_CLASS_NAME } from '@/components/world/hunger/domains/definingWorldPlazaHungerPanelConstants';
+import { LABELING_WORLD_PLAZA_ACTION_BAR_PETS } from '@/components/world/wildlife/pets/domains/definingWildlifePetRosterPanelConstants';
 import { cn } from '@/lib/utils';
 import {
   BookOpen,
   Maximize2,
   MessageCircle,
   Minimize2,
+  PawPrint,
   Settings,
   Shell,
   UserRound,
@@ -95,11 +97,15 @@ export interface RenderingWorldPlazaActionBarProps {
   pendingFriendRequestCount?: number;
   /** True while the character profile panel is open. */
   isProfileOpen?: boolean;
+  /** True while the companions roster panel is open. */
+  isPetsOpen?: boolean;
   isFullscreen: boolean;
   onToggleChat: () => void;
   onToggleFriends: () => void;
   /** Toggles the character profile panel when provided. */
   onToggleProfile?: () => void;
+  /** Toggles the companions roster panel when provided. */
+  onTogglePets?: () => void;
   onToggleFullscreen: () => void;
   /** Opens a codex section overlay when provided. */
   onSelectCodexSection?: (section: WorldPlazaCodexSectionId) => void;
@@ -165,10 +171,12 @@ export function RenderingWorldPlazaActionBar({
   isFriendsOpen,
   pendingFriendRequestCount = 0,
   isProfileOpen = false,
+  isPetsOpen = false,
   isFullscreen,
   onToggleChat,
   onToggleFriends,
   onToggleProfile,
+  onTogglePets,
   onToggleFullscreen,
   onSelectCodexSection,
   onExitToHome,
@@ -432,6 +440,25 @@ export function RenderingWorldPlazaActionBar({
                     style={viewportStyles.buttonStyle}
                   >
                     <UserRound
+                      className={
+                        DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME
+                      }
+                      style={viewportStyles.iconStyle}
+                      aria-hidden="true"
+                    />
+                  </button>
+                ) : null}
+
+                {onTogglePets ? (
+                  <button
+                    type="button"
+                    aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_PETS}
+                    aria-pressed={isPetsOpen}
+                    onClick={onTogglePets}
+                    className={stylingWorldPlazaActionBarButton(isPetsOpen)}
+                    style={viewportStyles.buttonStyle}
+                  >
+                    <PawPrint
                       className={
                         DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME
                       }

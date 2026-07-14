@@ -1,4 +1,4 @@
-import { checkingWorldPlazaFlowerDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaFlowerDecorationAtTileIndex';
+import { checkingWorldPlazaPickableFlowerDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaPickableFlowerDecorationAtTileIndex';
 import { computingWorldPlazaGridChebyshevDistance } from '@/components/world/domains/computingWorldPlazaGridChebyshevDistance';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
@@ -58,7 +58,7 @@ export function resolvingWorldPlazaInteractableFlowerFromPointerGridPoint(
     }
 
     if (
-      !checkingWorldPlazaFlowerDecorationAtTileIndex(
+      !checkingWorldPlazaPickableFlowerDecorationAtTileIndex(
         tilePosition.tileX,
         tilePosition.tileY
       )

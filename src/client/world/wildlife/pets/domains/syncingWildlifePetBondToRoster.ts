@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { checkingWildlifePetRosterHasLivingActiveRoom } from '@/components/world/wildlife/pets/domains/checkingWildlifePetRosterDeployable';
 import { creatingWildlifePetPersistedRecord } from '@/components/world/wildlife/pets/domains/creatingWildlifePetPersistedRecord';
 import {
   readingWildlifePetRosterSnapshot,
@@ -22,8 +23,8 @@ export type SyncingWildlifePetBondToRosterParams = {
 
 /**
  * Upserts the roster record for a persistent pet bond. When the bond just
- * became persistent and no companion is currently active, this activates it
- * (deactivating any other roster pet through the single-active invariant).
+ * became persistent and a living-active slot is free (max 3), this activates
+ * it without dropping other deployed companions.
  */
 export function syncingWildlifePetBondToRoster({
   instance,
@@ -38,12 +39,11 @@ export function syncingWildlifePetBondToRoster({
   }
 
   const roster = readingWildlifePetRosterSnapshot();
-  const existingRecord = roster.pets.find(
-    (pet) => pet.petId === petBond.petId
-  );
+  const existingRecord = roster.pets.find((pet) => pet.petId === petBond.petId);
   const shouldActivate =
-    existingRecord?.isActive ??
-    (becamePersistent && roster.activePetId === null);
+    existingRecord?.isActive === true ||
+    (becamePersistent &&
+      checkingWildlifePetRosterHasLivingActiveRoom(roster.pets));
 
   const record = creatingWildlifePetPersistedRecord({
     instance,
@@ -61,6 +61,9 @@ export function syncingWildlifePetBondToRoster({
  * Periodic vitals-only sync for an already-persisted pet bond (position,
  * health, hunger, stamina, loyalty). No-ops for instances without a
  * persistent bond, or bonds not yet present in the roster.
+ *
+ * Dead companions stay in the roster (for a future revive) but are undeployed
+ * so an active slot frees up and the spawn loop cannot recreate a corpse.
  */
 export function syncingWildlifePetInstanceVitalsToRoster(
   instance: DefiningWildlifeInstance,
@@ -69,6 +72,11 @@ export function syncingWildlifePetInstanceVitalsToRoster(
   const petBond = instance.petBond;
 
   if (!petBond?.isPersistent) {
+    return;
+  }
+
+  if (instance.isDead || instance.healthState.currentHealth <= 0) {
+    syncingWildlifePetDeathToRoster(instance, nowMs);
     return;
   }
 
@@ -86,6 +94,39 @@ export function syncingWildlifePetInstanceVitalsToRoster(
     lastKnownX: instance.position.x,
     lastKnownY: instance.position.y,
     lastKnownLayer: instance.position.layer ?? null,
+    updatedAtMs: nowMs,
+  });
+}
+
+/**
+ * Permanent companion death: keep the roster record (revive later), set HP 0,
+ * undeploy so a living-active slot opens for a new Familiar bond.
+ */
+export function syncingWildlifePetDeathToRoster(
+  instance: DefiningWildlifeInstance,
+  nowMs: number = Date.now()
+): void {
+  const petBond = instance.petBond;
+
+  if (!petBond?.isPersistent) {
+    return;
+  }
+
+  updatingWildlifePetRecord(petBond.petId, {
+    loyalty: petBond.loyalty,
+    command: petBond.command,
+    healthCurrent: 0,
+    hungerRatio: instance.hungerState.hungerRatio,
+    staminaRatio: instance.staminaState.staminaRatio,
+    learnedSkillIds: [...petBond.learnedSkillIds],
+    equippedSkillId: petBond.equippedSkillId,
+    soulsaveConsumed: petBond.soulsaveConsumed,
+    weaponItem: petBond.weaponItem,
+    armorItem: petBond.armorItem,
+    lastKnownX: instance.position.x,
+    lastKnownY: instance.position.y,
+    lastKnownLayer: instance.position.layer ?? null,
+    isActive: false,
     updatedAtMs: nowMs,
   });
 }

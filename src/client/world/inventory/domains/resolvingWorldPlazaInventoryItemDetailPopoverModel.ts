@@ -3,6 +3,7 @@ import { resolvingWorldPlazaEquipmentAttackEvModifier } from '@/components/world
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import { computingWorldPlazaInventoryItemResolvedCost } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemResolvedCost';
+import { checkingWorldPlazaInventoryItemIsFlowerHerb } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
 import { DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_DEFAULT_BREAK_CHANCE_AT_ZERO } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDurabilityConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS,
@@ -53,6 +54,7 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly activeEnhancements: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
   readonly activeEnchantments: readonly ResolvingWorldPlazaInventoryItemEnchantmentRow[];
   readonly canEat: boolean;
+  readonly canStudy: boolean;
   readonly canAttachRecipePage: boolean;
   readonly canDrop: boolean;
   readonly canEquip: boolean;
@@ -413,6 +415,7 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       activeEnhancements: [],
       activeEnchantments: [],
       canEat: checkingWorldPlazaInventoryItemIsFood(item.itemTypeId),
+      canStudy: checkingWorldPlazaInventoryItemIsFlowerHerb(item.itemTypeId),
       canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
         item.itemTypeId
       ),
@@ -460,6 +463,7 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     activeEnhancements,
     activeEnchantments,
     canEat: checkingWorldPlazaInventoryItemIsFood(item.itemTypeId),
+    canStudy: checkingWorldPlazaInventoryItemIsFlowerHerb(item.itemTypeId),
     canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
       item.itemTypeId
     ),

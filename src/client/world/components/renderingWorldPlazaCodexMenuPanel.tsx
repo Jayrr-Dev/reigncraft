@@ -8,9 +8,14 @@
 
 import { DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaBestiaryGuideConstants';
 import { DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
+import {
+  DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES,
+  DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES,
+} from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
 import { DEFINING_PLAZA_RECIPES_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaRecipesGuideConstants';
 import { formattingPlazaBestiaryCodexMenuDescription } from '@/components/home/domains/resolvingPlazaBestiaryGuideDisplayEntries';
 import { formattingPlazaBiomesCodexMenuDescription } from '@/components/home/domains/resolvingPlazaBiomesGuideDisplayEntries';
+import { formattingPlazaHerbariumCodexMenuDescription } from '@/components/home/domains/resolvingPlazaHerbariumGuideDisplayEntries';
 import { formattingPlazaRecipesCodexMenuDescription } from '@/components/home/domains/resolvingPlazaRecipesGuideDisplayEntries';
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
@@ -30,6 +35,11 @@ import {
   gettingWorldPlazaExploredBiomesSnapshot,
   subscribingWorldPlazaExploredBiomes,
 } from '@/components/world/domains/managingWorldPlazaExploredBiomesStore';
+import {
+  gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
+  gettingWorldPlazaHerbariumSightedTreeVariantsSnapshot,
+  subscribingWorldPlazaHerbariumDiscovery,
+} from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import {
   gettingWorldPlazaRecipeAttachedSnapshot,
   subscribingWorldPlazaRecipeDiscovery,
@@ -62,6 +72,16 @@ export function RenderingWorldPlazaCodexMenuPanel({
     gettingWorldPlazaBestiarySightedSpeciesSnapshot,
     () => []
   );
+  const herbariumFlowerStudyCounts = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
+    () => ({})
+  );
+  const sightedHerbariumTreeVariants = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumSightedTreeVariantsSnapshot,
+    () => []
+  );
   const attachedRecipeIds = useSyncExternalStore(
     subscribingWorldPlazaRecipeDiscovery,
     gettingWorldPlazaRecipeAttachedSnapshot,
@@ -87,6 +107,18 @@ export function RenderingWorldPlazaCodexMenuPanel({
       return formattingPlazaBestiaryCodexMenuDescription(
         sightedBestiarySpeciesIds.length,
         DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES.length
+      );
+    }
+
+    if (optionId === 'herbarium') {
+      const discoveredFlowerCount = Object.values(
+        herbariumFlowerStudyCounts
+      ).filter((studyCount) => (studyCount ?? 0) > 0).length;
+
+      return formattingPlazaHerbariumCodexMenuDescription(
+        discoveredFlowerCount + sightedHerbariumTreeVariants.length,
+        DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES.length +
+          DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES.length
       );
     }
 

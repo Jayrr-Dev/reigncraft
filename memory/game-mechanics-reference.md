@@ -350,15 +350,17 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 **Bestiary codex:** Guide → Bestiary; sight within **18** grid; study corpses (**60s** body lifetime, **3–10s** Study channel by mass, hides local name + HP/stamina while channeling, **1–3** study points by mass with rising `+N` float); tiers at **1 / 10 / 20 / 50 / 75 / 100** studies per species (`definingPlazaBestiaryStudyTier.ts`; **100** unlocks playable form). Same dossier tiers gate wildlife meat item-detail reveal (0 title-only → 75 full disease/buff %). Explored Biomes **Region details** list spawn-table **Animals** chips (sighted name / `???`). Progress in `managingWorldPlazaBestiaryDiscoveryStore.ts`; Dev Mode can set sighted/studies or unlock/lock all (`definingWorldPlazaDevModeBestiaryUnlockConstants.ts`).
 
+**Herbarium codex:** Guide → Herbarium; **12** flowers + **10** tree variants; flowers unlock on **pick** only (backfill from inventory + picked tiles); only **chromatic** petal dots are pickable (green / grey / white decorative dots skipped via `checkingWorldPlazaFlowerPetalColorIsPickable`); inventory **Study** on flower stacks consumes **1** and awards **+1** study; trees sight within **12** grid, study **+1** per chop layer; tiers at **1 / 5 / 15 / 25** (`definingPlazaHerbariumStudyTier.ts`). Progress localStorage-only in `managingWorldPlazaHerbariumDiscoveryStore.ts` (no cloud save mirror yet).
+
 | Temperament        | Behavior (high level)                                                                                                                                                             |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | passive / skittish | Flee when hurt; graze when hungry; aggressive (pissed) herbivores warn on territory then fight                                                                                    |
 | retaliator         | Territory warnings then combat (boar, bear, **rhino** home **11** / warn **7** / escalate **3.5**; rhino first charge may **bluff** at **50%** stamina if player left home patch) |
 | predator           | Hunt prey in **14** grid radius; engage within **6**                                                                                                                              |
-| ambusher           | Short-range ambush patterns (crocodile)                                                                                                                                        |
-| pack_hunter        | Pack shadow → surround → rush (wolves, hyena)                                                                                                                                  |
-| stalker            | Solo shadow → rush on weakness or hungry/aggressive patience (tiger, jaguar)                                                                                                   |
-| Pack hunter | Grey-wolf pack pipeline (section 11)                                                                                                                                              |
+| ambusher           | Short-range ambush patterns (crocodile)                                                                                                                                           |
+| pack_hunter        | Pack shadow → surround → rush (wolves, hyena)                                                                                                                                     |
+| stalker            | Solo shadow → rush on weakness or hungry/aggressive patience (tiger, jaguar)                                                                                                      |
+| Pack hunter        | Grey-wolf pack pipeline (section 11)                                                                                                                                              |
 
 **Aggro** (`definingWildlifeAggroConstants.ts`)
 

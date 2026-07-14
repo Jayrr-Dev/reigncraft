@@ -14,7 +14,7 @@ import {
   gettingWildlifeInstance,
   type ManagingWildlifeInstanceStore,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
-import { fetchingPlazaPetsMultiplayerRoster } from '@/components/world/wildlife/pets/repositories/callingPlazaPetsDevvitApi';
+import { checkingWildlifePetRosterRecordIsLivingActive } from '@/components/world/wildlife/pets/domains/checkingWildlifePetRosterDeployable';
 import {
   initializingWildlifePetRosterStore,
   readingWildlifePetRosterSnapshot,
@@ -27,8 +27,9 @@ import {
   spawningWildlifeActivePetNearOwner,
 } from '@/components/world/wildlife/pets/domains/spawningWildlifeActivePetNearOwner';
 import { syncingWildlifePetInstanceVitalsToRoster } from '@/components/world/wildlife/pets/domains/syncingWildlifePetBondToRoster';
+import { fetchingPlazaPetsMultiplayerRoster } from '@/components/world/wildlife/pets/repositories/callingPlazaPetsDevvitApi';
 import type { RefObject } from 'react';
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useSyncExternalStore } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../../shared/plazaGameSession';
 
 /** Interval for re-checking the active pet spawn (idempotent). */
@@ -116,16 +117,25 @@ export function usingWildlifeActivePetSpawn({
     };
   }, [isEnabled, isMultiplayerOnline]);
 
-  const activeRecord =
-    rosterSnapshot.pets.find(
-      (pet) => pet.petId === rosterSnapshot.activePetId
-    ) ?? null;
-  const activePetInstanceId = activeRecord
-    ? formattingWildlifePetInstanceId(activeRecord.petId)
-    : null;
+  const activeLivingRecords = useMemo(
+    () =>
+      rosterSnapshot.pets.filter(checkingWildlifePetRosterRecordIsLivingActive),
+    [rosterSnapshot.pets]
+  );
+  const activePetInstanceId =
+    activeLivingRecords.length > 0
+      ? formattingWildlifePetInstanceId(
+          rosterSnapshot.activePetId &&
+            activeLivingRecords.some(
+              (pet) => pet.petId === rosterSnapshot.activePetId
+            )
+            ? rosterSnapshot.activePetId
+            : activeLivingRecords[0]!.petId
+        )
+      : null;
 
   useEffect(() => {
-    if (!isEnabled || !ownerUserId || !activeRecord) {
+    if (!isEnabled || !ownerUserId || activeLivingRecords.length === 0) {
       return;
     }
 
@@ -136,14 +146,16 @@ export function usingWildlifeActivePetSpawn({
         return;
       }
 
-      spawningWildlifeActivePetNearOwner({
-        store: wildlifeStoreRef.current,
-        ownerUserId,
-        ownerPosition,
-        record: activeRecord,
-        resolveSpecies,
-        nowMs: Date.now(),
-      });
+      for (const record of activeLivingRecords) {
+        spawningWildlifeActivePetNearOwner({
+          store: wildlifeStoreRef.current,
+          ownerUserId,
+          ownerPosition,
+          record,
+          resolveSpecies,
+          nowMs: Date.now(),
+        });
+      }
     };
 
     spawningIfMissing();
@@ -154,7 +166,7 @@ export function usingWildlifeActivePetSpawn({
 
     return () => window.clearInterval(intervalId);
   }, [
-    activeRecord,
+    activeLivingRecords,
     isEnabled,
     ownerUserId,
     playerPositionRef,
@@ -163,21 +175,23 @@ export function usingWildlifeActivePetSpawn({
   ]);
 
   useEffect(() => {
-    if (!isEnabled || !activePetInstanceId) {
+    if (!isEnabled || activeLivingRecords.length === 0) {
       return;
     }
 
     const syncingVitals = (): void => {
-      const instance = gettingWildlifeInstance(
-        wildlifeStoreRef.current,
-        activePetInstanceId
-      );
+      for (const record of activeLivingRecords) {
+        const instance = gettingWildlifeInstance(
+          wildlifeStoreRef.current,
+          formattingWildlifePetInstanceId(record.petId)
+        );
 
-      if (!instance) {
-        return;
+        if (!instance) {
+          continue;
+        }
+
+        syncingWildlifePetInstanceVitalsToRoster(instance, Date.now());
       }
-
-      syncingWildlifePetInstanceVitalsToRoster(instance, Date.now());
     };
 
     const intervalId = window.setInterval(
@@ -186,7 +200,7 @@ export function usingWildlifeActivePetSpawn({
     );
 
     return () => window.clearInterval(intervalId);
-  }, [activePetInstanceId, isEnabled, wildlifeStoreRef]);
+  }, [activeLivingRecords, isEnabled, wildlifeStoreRef]);
 
   return { activePetInstanceId };
 }

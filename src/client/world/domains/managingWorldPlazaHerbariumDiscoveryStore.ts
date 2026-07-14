@@ -6,9 +6,9 @@
  * @module components/world/domains/managingWorldPlazaHerbariumDiscoveryStore
  */
 
+import type { DefiningWorldPlazaTreeVariantKind } from '@/components/world/domains/definingWorldPlazaTreeConstants';
 import { readingWorldPlazaHerbariumDiscoveryFromStorage } from '@/components/world/domains/readingWorldPlazaHerbariumDiscoveryFromStorage';
 import { writingWorldPlazaHerbariumDiscoveryToStorage } from '@/components/world/domains/writingWorldPlazaHerbariumDiscoveryToStorage';
-import type { DefiningWorldPlazaTreeVariantKind } from '@/components/world/domains/definingWorldPlazaTreeConstants';
 import type { WorldFlowerSpeciesId } from '../../../shared/worldFlowerRarity';
 
 const managingWorldPlazaHerbariumDiscoverySubscribers = new Set<() => void>();
@@ -198,6 +198,46 @@ export function recordingWorldPlazaHerbariumFlowerStudied(
   managingWorldPlazaHerbariumDiscoveryFlowerStudyCountsBySpeciesId.set(
     speciesId,
     nextStudyCount
+  );
+
+  persistingWorldPlazaHerbariumDiscovery();
+  notifyingWorldPlazaHerbariumDiscoverySubscribers();
+}
+
+/**
+ * Raises flower study progress to at least `minimumStudyCount` without lowering.
+ * Used when backfilling from inventory holdings or already-picked tiles.
+ *
+ * @param speciesId - Flower species already gathered.
+ * @param minimumStudyCount - Floor for study progress (minimum 1).
+ */
+export function ensuringWorldPlazaHerbariumFlowerStudyAtLeast(
+  speciesId: WorldFlowerSpeciesId,
+  minimumStudyCount: number
+): void {
+  const studyFloor = Math.max(1, Math.floor(minimumStudyCount));
+  const currentStudyCount =
+    managingWorldPlazaHerbariumDiscoveryFlowerStudyCountsBySpeciesId.get(
+      speciesId
+    ) ?? 0;
+
+  if (
+    currentStudyCount >= studyFloor &&
+    managingWorldPlazaHerbariumDiscoverySightedFlowerSpeciesIds.has(speciesId)
+  ) {
+    return;
+  }
+
+  managingWorldPlazaHerbariumDiscoverySightedFlowerSpeciesIds = new Set([
+    ...managingWorldPlazaHerbariumDiscoverySightedFlowerSpeciesIds,
+    speciesId,
+  ]);
+  managingWorldPlazaHerbariumDiscoveryFlowerStudyCountsBySpeciesId = new Map(
+    managingWorldPlazaHerbariumDiscoveryFlowerStudyCountsBySpeciesId
+  );
+  managingWorldPlazaHerbariumDiscoveryFlowerStudyCountsBySpeciesId.set(
+    speciesId,
+    Math.max(currentStudyCount, studyFloor)
   );
 
   persistingWorldPlazaHerbariumDiscovery();

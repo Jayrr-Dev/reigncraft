@@ -18,8 +18,8 @@ export const DEFINING_WILDLIFE_PET_PETTING_LOYALTY_GRANT = 17 as const;
 /** Loyalty granted when a curious companion first chooses to follow. */
 export const DEFINING_WILDLIFE_PET_CURIOUS_FOLLOW_LOYALTY_GRANT = 1 as const;
 
-/** Only one active companion may be deployed at a time. */
-export const DEFINING_WILDLIFE_PET_MAX_ACTIVE = 1 as const;
+/** Up to three living companions may be deployed (active) at once. */
+export const DEFINING_WILDLIFE_PET_MAX_ACTIVE = 3 as const;
 
 /** Idle prompt label when the companion is namable but unnamed. */
 export const DEFINING_WILDLIFE_PET_NAME_PROMPT_LABEL = 'Name?' as const;

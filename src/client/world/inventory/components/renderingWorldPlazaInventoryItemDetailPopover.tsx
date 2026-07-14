@@ -8,6 +8,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_ICONIFY_ICON,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ATTACH,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO,
+  LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_STUDY,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemDetailConstants';
 import type { DefiningWorldPlazaInventoryItemActionTowerClassNames } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemActionTowerClassNames';
 import { resolvingWorldPlazaInventoryItemActionTowerClassNames } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemActionTowerClassNames';
@@ -19,6 +20,7 @@ import { useCallback, useState, type SyntheticEvent } from 'react';
 export type RenderingWorldPlazaInventoryItemDetailPopoverProps = {
   readonly model: ResolvingWorldPlazaInventoryItemDetailPopoverModel;
   readonly onEatItem?: () => void;
+  readonly onStudyItem?: () => void;
   readonly onAttachRecipePage?: () => void;
   readonly onDropItem?: () => void;
   readonly onEquipItem?: () => void;
@@ -32,6 +34,7 @@ export type RenderingWorldPlazaInventoryItemDetailPopoverProps = {
 export function RenderingWorldPlazaInventoryItemDetailPopover({
   model,
   onEatItem,
+  onStudyItem,
   onAttachRecipePage,
   onDropItem,
   onEquipItem,
@@ -119,6 +122,17 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
               onClick={onEatItem}
             >
               Eat
+            </button>
+          ) : null}
+
+          {model.canStudy && onStudyItem ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={actionTowerClassNames.button}
+              onClick={onStudyItem}
+            >
+              {LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_STUDY}
             </button>
           ) : null}
 

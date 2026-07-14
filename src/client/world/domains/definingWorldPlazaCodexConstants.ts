@@ -17,6 +17,7 @@ export type WorldPlazaCodexSectionId =
   | 'mechanics'
   | 'biomes'
   | 'bestiary'
+  | 'herbarium'
   | 'recipes'
   | 'lore';
 
@@ -54,6 +55,12 @@ export const DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS: readonly WorldPlazaCodexMe
       label: 'Bestiary',
       icon: 'mdi:paw',
       description: 'Sighted animals and hidden ones',
+    },
+    {
+      id: 'herbarium',
+      label: 'Herbarium',
+      icon: 'mdi:flower',
+      description: 'Sighted flora and hidden ones',
     },
     {
       id: 'recipes',

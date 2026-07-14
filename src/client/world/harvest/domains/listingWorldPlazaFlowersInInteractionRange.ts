@@ -1,4 +1,4 @@
-import { checkingWorldPlazaFlowerDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaFlowerDecorationAtTileIndex';
+import { checkingWorldPlazaPickableFlowerDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaPickableFlowerDecorationAtTileIndex';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import { formattingWorldPlazaPickedFlowerTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import { parsingWorldPlazaInteractableFlowerSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableFlowerSelectionKey';
@@ -40,7 +40,10 @@ export function listingWorldPlazaFlowersInInteractionRange(
     }
 
     if (
-      !checkingWorldPlazaFlowerDecorationAtTileIndex(tile.tileX, tile.tileY)
+      !checkingWorldPlazaPickableFlowerDecorationAtTileIndex(
+        tile.tileX,
+        tile.tileY
+      )
     ) {
       continue;
     }

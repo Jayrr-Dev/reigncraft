@@ -16,6 +16,7 @@ import {
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { creatingWildlifePetBondStateFromPersistedRecord } from '@/components/world/wildlife/pets/domains/creatingWildlifePetPersistedRecord';
 import type { DefiningWildlifePetPersistedRecord } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
+import { updatingWildlifePetRecord } from '@/components/world/wildlife/pets/domains/managingWildlifePetRosterStore';
 
 /** Offset from the owner where a freshly spawned pet appears (grid units). */
 const DEFINING_WILDLIFE_PET_SPAWN_OFFSET_GRID = 1.5;
@@ -53,6 +54,9 @@ function findingWildlifeInstanceByPetId(
  * Returns the live instance for the roster's active pet, spawning it near
  * the owner (restoring health/hunger/stamina from the record) when it is
  * not already present in the store.
+ *
+ * Dead companions (saved health ≤ 0) are not respawned — that would recreate
+ * a corpse, re-run death loot, and spam meat every spawn interval.
  */
 export function spawningWildlifeActivePetNearOwner({
   store,
@@ -66,6 +70,19 @@ export function spawningWildlifeActivePetNearOwner({
 
   if (existingInstance) {
     return existingInstance;
+  }
+
+  if (record.healthCurrent !== null && record.healthCurrent <= 0) {
+    // Dead record stays for revive; just free the living-active slot.
+    if (record.isActive) {
+      updatingWildlifePetRecord(record.petId, {
+        isActive: false,
+        healthCurrent: 0,
+        updatedAtMs: nowMs,
+      });
+    }
+
+    return null;
   }
 
   const species = resolveSpecies(record.speciesId);
@@ -110,15 +127,20 @@ export function spawningWildlifeActivePetNearOwner({
     customDisplayName: record.displayName,
   });
 
+  const restoredHealth =
+    record.healthCurrent === null
+      ? freshInstance.healthState.currentHealth
+      : Math.min(
+          Math.max(record.healthCurrent, 1),
+          freshInstance.healthState.baseMaxHealth
+        );
+
   const restoredInstance: DefiningWildlifeInstance = {
     ...freshInstance,
-    healthState:
-      record.healthCurrent === null
-        ? freshInstance.healthState
-        : {
-            ...freshInstance.healthState,
-            currentHealth: record.healthCurrent,
-          },
+    healthState: {
+      ...freshInstance.healthState,
+      currentHealth: restoredHealth,
+    },
     hungerState:
       record.hungerRatio === null
         ? freshInstance.hungerState

@@ -33,14 +33,14 @@ export type DefiningPlazaHerbariumTreeEntry = {
 
 /** Subtitle shown under the Herbarium panel title. */
 export const DEFINING_PLAZA_HERBARIUM_PANEL_SUBTITLE =
-  'Get close to log a sighting. Pick or chop to study a specimen.' as const;
+  'Pick flowers to log them. Get close to trees, then chop to study.' as const;
 
 /** Label shown for species the player has not sighted yet. */
 export const LABELING_PLAZA_HERBARIUM_UNDISCOVERED_NAME = '???' as const;
 
 /** Hint shown under undiscovered herbarium cards. */
 export const LABELING_PLAZA_HERBARIUM_UNDISCOVERED_HINT =
-  'Approach a flower patch or a tree to log your first sighting.' as const;
+  'Pick a flower or approach a tree to log your first sighting.' as const;
 
 /** Static codex menu description for the Herbarium section. */
 export const LABELING_PLAZA_HERBARIUM_CODEX_MENU_DESCRIPTION =
@@ -179,7 +179,8 @@ export const DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES: readonly DefiningPlaza
       variant: 'blossom',
       displayName: 'Blossom tree',
       icon: 'mdi:flower',
-      summary: 'A pink-flecked crown that marks a flower forest from a distance.',
+      summary:
+        'A pink-flecked crown that marks a flower forest from a distance.',
       studiedSummary:
         'Blossom trees only take root where the flower forests do. The petals drift for weeks and the wood underneath is ordinary, softer than oak.',
       propertiesSummary: 'Wood: soft, quick to chop, unremarkable grain.',
@@ -245,7 +246,8 @@ export const DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES: readonly DefiningPlaza
       summary: 'A bare, branching husk with no leaves left to lose.',
       studiedSummary:
         'Deadwood already gave up its leaves before you found it. Swamp, savanna, and badlands all keep a share of these standing corpses.',
-      propertiesSummary: 'Wood: dry, brittle, quick to catch and quick to burn out.',
+      propertiesSummary:
+        'Wood: dry, brittle, quick to catch and quick to burn out.',
     },
     {
       variant: 'cactus',

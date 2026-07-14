@@ -2,6 +2,7 @@
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { recordingWorldPlazaHerbariumFlowerStudied } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import {
   checkingWorldPlazaFlowerPickEligibility,
@@ -258,6 +259,8 @@ export function usingWorldPlazaFlowerPickInteraction({
 
           return;
         }
+
+        recordingWorldPlazaHerbariumFlowerStudied(speciesId);
 
         void queryClient.invalidateQueries({
           queryKey: [DEFINING_WORLD_PLAZA_PICKED_FLOWERS_QUERY_KEY_ROOT],

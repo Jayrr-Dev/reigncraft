@@ -54,7 +54,7 @@ export const LABELING_PLAZA_HERBARIUM_STUDY_TIER_TEASERS: Record<
   Exclude<PlazaHerbariumStudyTierId, 'sighted'>,
   string
 > = {
-  fieldNotes: 'Study one specimen to unlock field notes.',
+  fieldNotes: 'Pick one flower or chop one tree layer to unlock field notes.',
   properties: 'Study 5 specimens to reveal what it does when eaten or worked.',
   habitats: 'Study 15 specimens to reveal where it grows.',
   full: 'Study 25 specimens for the full dossier.',

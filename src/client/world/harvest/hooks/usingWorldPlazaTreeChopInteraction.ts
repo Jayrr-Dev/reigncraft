@@ -1,6 +1,7 @@
 'use client';
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { recordingWorldPlazaHerbariumTreeStudied } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import { droppingWorldPlazaTreeChopWoodGroundItem } from '@/components/world/harvest/domains/droppingWorldPlazaTreeChopWoodGroundItem';
 import type { ListingWorldPlazaTreesInInteractionRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaTreesInInteractionRange';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
@@ -185,6 +186,8 @@ export function usingWorldPlazaTreeChopInteraction({
         if (dropResult.outcome === 'failed') {
           showingGameplayHudToast('Could not drop wood from this tree.');
         }
+
+        recordingWorldPlazaHerbariumTreeStudied(entry.tree.variant);
 
         onTreeChopLayerSucceeded?.();
 

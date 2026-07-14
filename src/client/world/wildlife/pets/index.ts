@@ -66,6 +66,13 @@ export {
 } from '@/components/world/wildlife/pets/domains/creatingWildlifePetPersistedRecord';
 
 export {
+  checkingWildlifePetRosterHasLivingActiveRoom,
+  checkingWildlifePetRosterRecordIsLivingActive,
+  countingWildlifePetRosterLivingActive,
+  resolvingWildlifePetRosterPrimaryActivePetId,
+} from '@/components/world/wildlife/pets/domains/checkingWildlifePetRosterDeployable';
+
+export {
   DEFINING_WILDLIFE_PET_CURIOUS_FOLLOW_LOYALTY_GRANT,
   DEFINING_WILDLIFE_PET_LOYALTY_TIER_REGISTRY,
   DEFINING_WILDLIFE_PET_MAX_ACTIVE,
@@ -171,6 +178,7 @@ export {
 
 export {
   syncingWildlifePetBondToRoster,
+  syncingWildlifePetDeathToRoster,
   syncingWildlifePetInstanceVitalsToRoster,
 } from '@/components/world/wildlife/pets/domains/syncingWildlifePetBondToRoster';
 

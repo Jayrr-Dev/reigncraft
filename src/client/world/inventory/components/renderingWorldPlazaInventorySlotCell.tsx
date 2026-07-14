@@ -89,6 +89,8 @@ export type RenderingWorldPlazaInventorySlotCellProps =
     readonly onCloseItemDetailPopover?: () => void;
     /** Eat action surfaced inside the item action popover for food. */
     readonly onEatHotbarSlot?: (slotIndex: number) => void;
+    /** Study a flower specimen for the Herbarium (consumes one). */
+    readonly onStudyHotbarSlot?: (slotIndex: number) => void;
     /** Attach a cookbook recipe page from inventory. */
     readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
     /** Drop action surfaced inside the item action popover. */
@@ -211,6 +213,7 @@ export function RenderingWorldPlazaInventorySlotCell({
   isItemDetailPopoverOpen = false,
   onCloseItemDetailPopover,
   onEatHotbarSlot,
+  onStudyHotbarSlot,
   onAttachRecipePageHotbarSlot,
   onDropHotbarSlot,
   onUseActiveEnchantment,
@@ -321,6 +324,7 @@ export function RenderingWorldPlazaInventorySlotCell({
       isItemDetailPopoverOpen={isItemDetailPopoverOpen}
       onCloseItemDetailPopover={onCloseItemDetailPopover}
       onEatHotbarSlot={onEatHotbarSlot}
+      onStudyHotbarSlot={onStudyHotbarSlot}
       onAttachRecipePageHotbarSlot={onAttachRecipePageHotbarSlot}
       onDropHotbarSlot={onDropHotbarSlot}
       onUseActiveEnchantment={onUseActiveEnchantment}
@@ -349,6 +353,7 @@ type InventoryPlazaSlotItemProps = {
   readonly isItemDetailPopoverOpen?: boolean;
   readonly onCloseItemDetailPopover?: () => void;
   readonly onEatHotbarSlot?: (slotIndex: number) => void;
+  readonly onStudyHotbarSlot?: (slotIndex: number) => void;
   readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
   readonly onDropHotbarSlot?: (slotIndex: number) => void;
   readonly onUseActiveEnchantment?: (
@@ -376,6 +381,7 @@ function InventoryPlazaSlotItem({
   isItemDetailPopoverOpen = false,
   onCloseItemDetailPopover,
   onEatHotbarSlot,
+  onStudyHotbarSlot,
   onAttachRecipePageHotbarSlot,
   onDropHotbarSlot,
   onUseActiveEnchantment,
@@ -450,6 +456,11 @@ function InventoryPlazaSlotItem({
     onEatHotbarSlot?.(slotIndex);
     onCloseItemDetailPopover?.();
   }, [onCloseItemDetailPopover, onEatHotbarSlot, slotIndex]);
+
+  const handlingStudyFromDetailPopover = useCallback((): void => {
+    onStudyHotbarSlot?.(slotIndex);
+    onCloseItemDetailPopover?.();
+  }, [onCloseItemDetailPopover, onStudyHotbarSlot, slotIndex]);
 
   const handlingAttachRecipePageFromDetailPopover = useCallback((): void => {
     onAttachRecipePageHotbarSlot?.(slotIndex);
@@ -773,6 +784,11 @@ function InventoryPlazaSlotItem({
           onEatItem={
             detailPopoverModel.canEat && onEatHotbarSlot
               ? handlingEatFromDetailPopover
+              : undefined
+          }
+          onStudyItem={
+            detailPopoverModel.canStudy && onStudyHotbarSlot
+              ? handlingStudyFromDetailPopover
               : undefined
           }
           onAttachRecipePage={

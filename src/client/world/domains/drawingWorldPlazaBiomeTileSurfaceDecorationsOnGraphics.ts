@@ -22,12 +22,12 @@ import {
 } from '@/components/world/domains/definingWorldPlazaOceanShoreConstants';
 import { drawingWorldPlazaStoneDecorationsOnGraphics } from '@/components/world/domains/drawingWorldPlazaStoneDecorationsOnGraphics';
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
+import { resolvingWorldPlazaFlowerPetalColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFlowerPetalColorAtTileIndex';
 import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
 import { checkingWorldPlazaOceanShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaOceanShoreDepthAtTileIndex';
 import { checkingWorldPlazaPondShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaPondShoreFillColorAtTileIndex';
 import { resolvingWorldPlazaStoneDecorationAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaStoneDecorationAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
-import { seedingWorldPlazaGrassTileDecorationFromTileIndex } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
 import { checkingWorldPlazaRuntimeFlowerIsPicked } from '@/components/world/harvest/domains/registeringWorldPlazaPickedFlowersLookup';
 import type { Graphics } from 'pixi.js';
 
@@ -187,23 +187,20 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
     checkingWorldPlazaFlowerDecorationAtTileIndex(input.tileX, input.tileY) &&
     !checkingWorldPlazaRuntimeFlowerIsPicked(input.tileX, input.tileY)
   ) {
-    const petalColorIndex = Math.floor(
-      seedingWorldPlazaGrassTileDecorationFromTileIndex(
-        input.tileX,
-        input.tileY,
-        62
-      ) * biome.flowerColors.length
+    const flowerColor = resolvingWorldPlazaFlowerPetalColorAtTileIndex(
+      input.tileX,
+      input.tileY
     );
-    const flowerColor =
-      biome.flowerColors[petalColorIndex] ?? biome.flowerColors[0];
 
-    input.graphics
-      .circle(
-        input.centerX,
-        input.centerY - halfHeight * 0.35,
-        DEFINING_WORLD_PLAZA_BIOME_DECORATION_DOT_RADIUS_PX
-      )
-      .fill({ color: flowerColor });
+    if (flowerColor !== null) {
+      input.graphics
+        .circle(
+          input.centerX,
+          input.centerY - halfHeight * 0.35,
+          DEFINING_WORLD_PLAZA_BIOME_DECORATION_DOT_RADIUS_PX
+        )
+        .fill({ color: flowerColor });
+    }
   }
 
   if (
