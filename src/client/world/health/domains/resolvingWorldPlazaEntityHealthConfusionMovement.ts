@@ -1,8 +1,10 @@
+import { resolvingWorldPlazaDayNightCyclePhase } from '@/components/world/domains/resolvingWorldPlazaDayNightCyclePhase';
 import {
   DEFINING_WORLD_PLAZA_CONFUSION_FADE_OUT_MS,
   DEFINING_WORLD_PLAZA_CONFUSION_RAMP_IN_MS,
 } from '@/components/world/health/domains/definingWorldPlazaEntityConfusionConstants';
 import type { DefiningWorldPlazaEntityHealthConfusionEffect } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { checkingWildlifeIsNightCyclePhase } from '@/components/world/wildlife/domains/checkingWildlifeIsNightCyclePhase';
 
 export type ResolvingWorldPlazaEntityHealthConfusionMovementResult = {
   effectiveIntensity: number;
@@ -15,7 +17,10 @@ function computingWorldPlazaConfusionRampEnvelope(
 ): number {
   const rampProgress = Math.max(
     0,
-    Math.min(1, (nowMs - effect.appliedAtMs) / DEFINING_WORLD_PLAZA_CONFUSION_RAMP_IN_MS)
+    Math.min(
+      1,
+      (nowMs - effect.appliedAtMs) / DEFINING_WORLD_PLAZA_CONFUSION_RAMP_IN_MS
+    )
   );
 
   if (effect.expiresAtMs === null) {
@@ -36,19 +41,46 @@ function computingWorldPlazaConfusionRampEnvelope(
   return rampProgress * fadeProgress;
 }
 
+function resolvingWorldPlazaConfusionDayNightIntensityMultiplier(
+  effect: DefiningWorldPlazaEntityHealthConfusionEffect,
+  worldEpochMs: number
+): number {
+  const scale = effect.dayNightIntensityScale;
+
+  if (!scale) {
+    return 1;
+  }
+
+  const cyclePhase = resolvingWorldPlazaDayNightCyclePhase(worldEpochMs);
+  const isNight = checkingWildlifeIsNightCyclePhase(cyclePhase);
+
+  return isNight ? scale.nightMultiplier : scale.dayMultiplier;
+}
+
 function resolvingWorldPlazaEntityHealthConfusionEffectIntensity(
   effect: DefiningWorldPlazaEntityHealthConfusionEffect,
-  nowMs: number
+  nowMs: number,
+  worldEpochMs: number
 ): number {
-  return effect.targetIntensity * computingWorldPlazaConfusionRampEnvelope(effect, nowMs);
+  return (
+    effect.targetIntensity *
+    computingWorldPlazaConfusionRampEnvelope(effect, nowMs) *
+    resolvingWorldPlazaConfusionDayNightIntensityMultiplier(
+      effect,
+      worldEpochMs
+    )
+  );
 }
 
 /**
  * Resolves the strongest active confusion effect into movement parameters.
  */
 export function resolvingWorldPlazaEntityHealthConfusionMovement(
-  state: { confusionEffects: readonly DefiningWorldPlazaEntityHealthConfusionEffect[] } | null,
-  nowMs: number
+  state: {
+    confusionEffects: readonly DefiningWorldPlazaEntityHealthConfusionEffect[];
+  } | null,
+  nowMs: number,
+  worldEpochMs: number = Date.now()
 ): ResolvingWorldPlazaEntityHealthConfusionMovementResult {
   if (!state || state.confusionEffects.length === 0) {
     return {
@@ -57,7 +89,8 @@ export function resolvingWorldPlazaEntityHealthConfusionMovement(
     };
   }
 
-  let strongestEffect: DefiningWorldPlazaEntityHealthConfusionEffect | null = null;
+  let strongestEffect: DefiningWorldPlazaEntityHealthConfusionEffect | null =
+    null;
   let strongestIntensity = 0;
 
   for (const effect of state.confusionEffects) {
@@ -66,7 +99,11 @@ export function resolvingWorldPlazaEntityHealthConfusionMovement(
     }
 
     const effectiveIntensity =
-      resolvingWorldPlazaEntityHealthConfusionEffectIntensity(effect, nowMs);
+      resolvingWorldPlazaEntityHealthConfusionEffectIntensity(
+        effect,
+        nowMs,
+        worldEpochMs
+      );
 
     if (effectiveIntensity > strongestIntensity) {
       strongestIntensity = effectiveIntensity;

@@ -17,8 +17,11 @@ import {
   type WorldOreSpeciesRarityEntry,
 } from '../../../shared/worldOreRarity';
 
-/** Chebyshev radius (tiles) treated as "near river / lake / shore". */
-export const DEFINING_WORLD_PLAZA_ORE_NEAR_WATER_RADIUS_TILES = 3;
+/**
+ * Chebyshev radius (tiles) treated as "near river / lake / shore".
+ * Rivers are thin ribbons, so this stays wide enough to catch both banks.
+ */
+export const DEFINING_WORLD_PLAZA_ORE_NEAR_WATER_RADIUS_TILES = 5;
 
 /** Vein chance for ordinary biomes. */
 export const DEFINING_WORLD_PLAZA_ORE_VEIN_CHANCE_DEFAULT = 0.24;
@@ -27,7 +30,7 @@ export const DEFINING_WORLD_PLAZA_ORE_VEIN_CHANCE_DEFAULT = 0.24;
 export const DEFINING_WORLD_PLAZA_ORE_VEIN_CHANCE_ROCKY = 0.38;
 
 /** Vein chance on land beside surface water (clay banks). */
-export const DEFINING_WORLD_PLAZA_ORE_VEIN_CHANCE_NEAR_WATER = 0.42;
+export const DEFINING_WORLD_PLAZA_ORE_VEIN_CHANCE_NEAR_WATER = 0.62;
 
 /** Vein chance in firelands. Almost every firelands column rock is an ore vein. */
 export const DEFINING_WORLD_PLAZA_ORE_VEIN_CHANCE_FIRELANDS = 0.72;
@@ -37,6 +40,12 @@ export const DEFINING_WORLD_PLAZA_ORE_VEIN_CHANCE_FIRELANDS = 0.72;
  * ~52% of 6×6 anchors when noise is roughly uniform.
  */
 export const DEFINING_WORLD_PLAZA_ORE_FIRELANDS_COLUMN_STONE_NOISE_MIN = 0.48;
+
+/**
+ * Stone-noise bar for shore clay banks (world default 0.72 leaves riverbanks bare).
+ * Densifies column rocks along rivers / lakes so clay veins actually show up.
+ */
+export const DEFINING_WORLD_PLAZA_ORE_NEAR_WATER_COLUMN_STONE_NOISE_MIN = 0.54;
 
 function buildingWorldPlazaOreWeightEntry(
   speciesId: WorldOreSpeciesId,
@@ -56,12 +65,12 @@ function buildingWorldPlazaOreWeightEntry(
  */
 export const DEFINING_WORLD_PLAZA_ORE_WEIGHTS_NEAR_WATER: readonly WorldOreSpeciesRarityEntry[] =
   [
-    buildingWorldPlazaOreWeightEntry('clay', 100),
-    buildingWorldPlazaOreWeightEntry('coal', 12),
-    buildingWorldPlazaOreWeightEntry('iron', 6),
-    buildingWorldPlazaOreWeightEntry('copper', 4),
-    buildingWorldPlazaOreWeightEntry('lead', 2),
-    buildingWorldPlazaOreWeightEntry('niter', 2),
+    buildingWorldPlazaOreWeightEntry('clay', 140),
+    buildingWorldPlazaOreWeightEntry('coal', 8),
+    buildingWorldPlazaOreWeightEntry('iron', 4),
+    buildingWorldPlazaOreWeightEntry('copper', 3),
+    buildingWorldPlazaOreWeightEntry('lead', 1),
+    buildingWorldPlazaOreWeightEntry('niter', 1),
   ];
 
 /**

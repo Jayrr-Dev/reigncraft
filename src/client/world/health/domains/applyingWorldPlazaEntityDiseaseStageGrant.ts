@@ -174,6 +174,7 @@ export function applyingWorldPlazaEntityDiseaseStageGrant({
       appliedAtMs: nowMs,
       expiresAtMs: nowMs + confusionDurationMs,
       phaseSeed: (grantIndex + 1) * 1.7,
+      dayNightIntensityScale: grant.dayNightIntensityScale,
     });
   }
 
@@ -201,8 +202,7 @@ export function applyingWorldPlazaEntityDiseaseStageGrant({
       id: effectId,
       appliedAtMs: nowMs,
       expiresAtMs: nowMs + sleepDurationMs,
-      wakeBonusDamage:
-        grant.canWakeFromDamage === false ? 0 : wakeBonusDamage,
+      wakeBonusDamage: grant.canWakeFromDamage === false ? 0 : wakeBonusDamage,
       canWakeFromDamage: grant.canWakeFromDamage,
     });
   }

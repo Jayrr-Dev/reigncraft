@@ -107,7 +107,12 @@ function listingPlazaHerbariumFlowerEatEffectStatRowsForKind(
         },
       ];
     case 'clearSicknessDebuffs':
-      return [{ label: 'Clears', value: 'Food sickness · nausea slow' }];
+      return [
+        {
+          label: 'Clears',
+          value: 'Food sickness · nausea slow · Petal Sickness',
+        },
+      ];
     case 'shortenDiseaseOrInfectionResist':
       return [
         {

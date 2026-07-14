@@ -15,7 +15,7 @@ export type DefiningWorldPlazaFlowerEatPreparationId = 'raw' | 'brewed';
  * Base chance the species eat-effect fires when chewing a raw flower.
  * Brewing will raise this via preparation + bonuses.
  */
-export const DEFINING_WORLD_PLAZA_FLOWER_RAW_EAT_EFFECT_PROC_CHANCE = 0.25;
+export const DEFINING_WORLD_PLAZA_FLOWER_RAW_EAT_EFFECT_PROC_CHANCE = 0.65;
 
 /**
  * Placeholder base chance for brewed flower preparations.

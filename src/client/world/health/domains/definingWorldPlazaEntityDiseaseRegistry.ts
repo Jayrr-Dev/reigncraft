@@ -23,7 +23,12 @@ export type DefiningWorldPlazaEntityDiseaseId =
   | 'equine-drowse'
   | 'scavenger-rot'
   | 'tusk-fluke'
-  | 'cucco-rage';
+  | 'cucco-rage'
+  | 'pollen-fever'
+  | 'petal-pox'
+  | 'rootgut'
+  | 'moonblight'
+  | 'seedlung';
 
 /** Player-facing threat tier for sorting, UI, and balance review. */
 export type DefiningWorldPlazaEntityDiseaseSeverity =
@@ -66,6 +71,14 @@ export type DefiningWorldPlazaEntityDiseaseStageGrant =
       delayMs: number;
       intensity: number;
       durationMs: number;
+      /**
+       * Optional day/night intensity multipliers (Moonblight).
+       * Applied when resolving live confusion movement.
+       */
+      dayNightIntensityScale?: {
+        readonly nightMultiplier: number;
+        readonly dayMultiplier: number;
+      };
     }
   | {
       kind: 'sleep';
@@ -120,6 +133,14 @@ const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_RAGE_COLOR =
   'text-red-300' as const;
 const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_RAGE_BORDER =
   'border-red-500/70 bg-red-950/90' as const;
+const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FLOWER_COLOR =
+  'text-pink-300' as const;
+const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FLOWER_BORDER =
+  'border-pink-500/70 bg-pink-950/90' as const;
+const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_MOON_COLOR =
+  'text-indigo-300' as const;
+const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_MOON_BORDER =
+  'border-indigo-500/70 bg-indigo-950/90' as const;
 
 export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
   DefiningWorldPlazaEntityDiseaseId,
@@ -634,6 +655,150 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
         delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2),
         potency: 'toxic',
         totalPoisonDamage: 20,
+      },
+    ],
+  },
+  'pollen-fever': {
+    id: 'pollen-fever',
+    label: 'Pollen Fever',
+    description:
+      'Airborne flower dust from raw petals. Mild fever slows you; a light toxic burn follows.',
+    severity: 'mild',
+    icon: 'mdi:flower',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FLOWER_COLOR,
+    hudIconBorderClassName:
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FLOWER_BORDER,
+    incubationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(4),
+    durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
+    grants: [
+      {
+        kind: 'buff',
+        delayMs: 0,
+        buffId: 'disease-nausea-slow-debuff',
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
+      },
+      {
+        kind: 'poison',
+        delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(3),
+        potency: 'toxic',
+        totalPoisonDamage: 18,
+      },
+    ],
+  },
+  'petal-pox': {
+    id: 'petal-pox',
+    label: 'Petal Pox',
+    description:
+      'Itchy petal rash from chewing raw blooms. Skin thins to hits; late bleed seeps through.',
+    severity: 'moderate',
+    icon: 'mdi:flower',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FLOWER_COLOR,
+    hudIconBorderClassName:
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FLOWER_BORDER,
+    incubationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(10),
+    durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(3),
+    grants: [
+      {
+        kind: 'buff',
+        delayMs: 0,
+        buffId: 'disease-weakness-debuff',
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(3),
+      },
+      {
+        kind: 'bleed',
+        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
+        severity: 'bleeding',
+        flatExpectedDamage: 22,
+      },
+    ],
+  },
+  rootgut: {
+    id: 'rootgut',
+    label: 'Rootgut',
+    description:
+      'Bitter root oils from raw flowers twist the gut. Nausea first, then a toxic cramp.',
+    severity: 'mild',
+    icon: 'mdi:stomach',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
+    hudIconBorderClassName:
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_BORDER,
+    incubationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(6),
+    durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2),
+    grants: [
+      {
+        kind: 'buff',
+        delayMs: 0,
+        buffId: 'disease-nausea-slow-debuff',
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2),
+      },
+      {
+        kind: 'poison',
+        delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(5),
+        potency: 'toxic',
+        totalPoisonDamage: 24,
+      },
+    ],
+  },
+  moonblight: {
+    id: 'moonblight',
+    label: 'Moonblight',
+    description:
+      'Night-blooming toxins from raw petals. Confusion and stamina drain swell under moonlight and ease in daylight.',
+    severity: 'moderate',
+    icon: 'mdi:weather-night',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_MOON_COLOR,
+    hudIconBorderClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_MOON_BORDER,
+    incubationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(8),
+    durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(3),
+    grants: [
+      {
+        kind: 'confusion',
+        delayMs: 0,
+        intensity: 35,
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(3),
+        dayNightIntensityScale: {
+          nightMultiplier: 1.55,
+          dayMultiplier: 0.55,
+        },
+      },
+      {
+        kind: 'buff',
+        delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(2),
+        buffId: 'disease-stamina-sick-debuff',
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2.5),
+      },
+    ],
+  },
+  seedlung: {
+    id: 'seedlung',
+    label: 'Seedlung',
+    description:
+      'Seeds sprout in the lungs after raw flower meals. Breathing burns stamina; toxic dust follows.',
+    severity: 'severe',
+    icon: 'mdi:sprout',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_COLOR,
+    hudIconBorderClassName:
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_BORDER,
+    incubationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1),
+    durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(4),
+    grants: [
+      {
+        kind: 'buff',
+        delayMs: 0,
+        buffId: 'disease-stamina-sick-debuff',
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(4),
+      },
+      {
+        kind: 'buff',
+        delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(6),
+        buffId: 'disease-nausea-slow-debuff',
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(3.5),
+      },
+      {
+        kind: 'poison',
+        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
+        potency: 'venomous',
+        totalPoisonDamage: 32,
       },
     ],
   },

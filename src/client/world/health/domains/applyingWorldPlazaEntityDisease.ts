@@ -14,6 +14,7 @@ import {
   computingWorldPlazaEntityImmuneSystemScaledDurationMs,
   computingWorldPlazaEntityImmuneSystemSymptomStrengthMultiplier,
 } from '@/components/world/health/domains/computingWorldPlazaEntityImmuneSystemEffects';
+import { recordingWorldPlazaPathologyDiseaseObtained } from '@/components/world/domains/managingWorldPlazaPathologyDiscoveryStore';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import { resolvingWorldPlazaEntityDiseaseDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
@@ -202,6 +203,9 @@ export function applyingWorldPlazaEntityDisease(
 
     pendingGrants.push({ grantIndex, fireAtMs });
   }
+
+  // Codex Pathology: unlock the entry once the player contracts it.
+  recordingWorldPlazaPathologyDiseaseObtained(diseaseId);
 
   return {
     ...nextState,

@@ -5,8 +5,8 @@
  */
 
 import type { DefiningWorldPlazaEntityHealthDamageRollModifierKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
-import { DEFINING_WILDLIFE_DIFFICULTY_LEVERS } from '@/components/world/wildlife/domains/definingWildlifeDifficultyLevers';
 import { DEFINING_WILDLIFE_TIGER_CHASE_GIVE_UP_WITHOUT_DAMAGE_MS } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
+import { DEFINING_WILDLIFE_DIFFICULTY_LEVERS } from '@/components/world/wildlife/domains/definingWildlifeDifficultyLevers';
 import { DEFINING_WILDLIFE_FAIRY_ALWAYS_FOLLOW_MAX_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeFairyConstants';
 import { resolvingWildlifeMeatCatalogEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import type { DefiningWildlifeSpeciesNameTagConfig } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
@@ -1411,7 +1411,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     preyDenySpeciesIds: ['grey-wolf'],
     favoritePreySpeciesIds: ['sheep'],
     socialBehavior: { socialHunter: true },
-    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
+    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.006 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('grey-wolf'),
     passiveTraitIds: ['adrenaline-rush'],
     hazards: {
@@ -1467,7 +1467,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     preyDenySpeciesIds: ['omega-wolf', 'grey-wolf'],
     favoritePreySpeciesIds: ['sheep'],
     socialBehavior: { socialHunter: true },
-    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
+    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.006 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('omega-wolf'),
     passiveTraitIds: ['adrenaline-rush'],
     hazards: {
@@ -1559,7 +1559,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       packShareRadiusGrid: 12,
     },
     territory: DEFINING_WILDLIFE_LION_TERRITORY_CONFIG,
-    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.0035 },
+    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.007 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('lion'),
     hazards: {
       treatsSwampWaterAsSafe: false,
@@ -1592,7 +1592,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       packShareRadiusGrid: 12,
     },
     territory: DEFINING_WILDLIFE_LION_TERRITORY_CONFIG,
-    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.0035 },
+    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.007 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('lioness'),
     hazards: {
       treatsSwampWaterAsSafe: false,
@@ -1624,7 +1624,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       aggroRadiusGrid: 3.5,
       leashDistanceGrid: 10,
     },
-    hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
+    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.004 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('crocodile'),
     hazards: {
       treatsSwampWaterAsSafe: true,
@@ -1819,7 +1819,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     ],
     preyDenySpeciesIds: ['hyena'],
     favoritePreySpeciesIds: ['antilope'],
-    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.003 },
+    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.006 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('hyena'),
     hazards: {
       treatsSwampWaterAsSafe: false,
@@ -2063,7 +2063,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 7 },
     territory: DEFINING_WILDLIFE_BROWN_BEAR_TERRITORY_CONFIG,
     preyAllowSpeciesIds: ['deer', 'stag', 'sheep', 'boar', 'pinguin'],
-    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.0035 },
+    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.007 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('polar-bear'),
     hazards: {
       treatsSwampWaterAsSafe: false,
@@ -2192,7 +2192,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     },
     territory: DEFINING_WILDLIFE_LION_TERRITORY_CONFIG,
     preyAllowSpeciesIds: ['boar', 'pig', 'deer', 'monkey', 'chimp'],
-    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.0035 },
+    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.007 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('tiger'),
     hazards: {
       treatsSwampWaterAsSafe: true,
@@ -2226,7 +2226,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       packShareRadiusGrid: 0,
     },
     preyAllowSpeciesIds: ['boar', 'pig', 'deer', 'monkey', 'chimp'],
-    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.0035 },
+    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.007 },
     stamina: resolvingWildlifeSpeciesStaminaConfig('jaguar'),
     hazards: {
       treatsSwampWaterAsSafe: true,
@@ -2258,23 +2258,26 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     }),
     socialBehavior: { fleePackOnAnyDeath: true },
   },
-  chimp: definingWildlifeHerbivoreSpecies('chimp', 'Chimp', 'chimp', 50, {
-    diet: 'carnivore',
-    temperamentId: 'retaliator',
-    trophicTier: 2,
-    sizeScale: 0.95,
-    collisionRadiusGrid: 0.32,
-    aggroRadiusGrid: 5,
-    packShareRadiusGrid: 8,
-    territory: DEFINING_WILDLIFE_BOAR_TERRITORY_CONFIG,
-    hazards: { isHeatImmune: true },
-    vitals: {
-      baseMaxHealth: 55,
-      attackPower: 12,
-      defense: 3,
-      attackIntervalMs: 1000,
-    },
-  }),
+  chimp: {
+    ...definingWildlifeHerbivoreSpecies('chimp', 'Chimp', 'chimp', 50, {
+      diet: 'carnivore',
+      temperamentId: 'retaliator',
+      trophicTier: 2,
+      sizeScale: 0.95,
+      collisionRadiusGrid: 0.32,
+      aggroRadiusGrid: 5,
+      packShareRadiusGrid: 8,
+      territory: DEFINING_WILDLIFE_BOAR_TERRITORY_CONFIG,
+      hazards: { isHeatImmune: true },
+      vitals: {
+        baseMaxHealth: 55,
+        attackPower: 12,
+        defense: 3,
+        attackIntervalMs: 1000,
+      },
+    }),
+    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.004 },
+  },
   'shepherd-dog': definingWildlifeHerbivoreSpecies(
     'shepherd-dog',
     'Shepherd Dog',

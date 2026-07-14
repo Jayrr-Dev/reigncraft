@@ -10,6 +10,7 @@
 import { savingPlazaSinglePlayerSaveSlotData } from '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi';
 import { readingWorldPlazaBestiaryDiscoveryFromStorage } from '@/components/world/domains/readingWorldPlazaBestiaryDiscoveryFromStorage';
 import { writingWorldPlazaBestiaryDiscoveryToStorage } from '@/components/world/domains/writingWorldPlazaBestiaryDiscoveryToStorage';
+import { creditingWorldPlazaPathologyFromWildlifeSpeciesStudy } from '@/components/world/domains/managingWorldPlazaPathologyDiscoveryStore';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type { PlazaSaveSlotIndex } from '../../../shared/plazaGameSession';
 
@@ -248,6 +249,10 @@ export function recordingWorldPlazaBestiarySpeciesStudied(
   persistingWorldPlazaBestiaryDiscovery();
   refreshingWorldPlazaBestiaryDiscoverySnapshotCaches();
   notifyingWorldPlazaBestiaryDiscoverySubscribers();
+  creditingWorldPlazaPathologyFromWildlifeSpeciesStudy(
+    speciesId,
+    awardedStudyPoints
+  );
 }
 
 /** @deprecated Use {@link recordingWorldPlazaBestiarySpeciesStudied}. */

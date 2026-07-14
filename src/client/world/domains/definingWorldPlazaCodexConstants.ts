@@ -19,6 +19,7 @@ export type WorldPlazaCodexSectionId =
   | 'bestiary'
   | 'herbarium'
   | 'lapidary'
+  | 'pathology'
   | 'recipes'
   | 'lore';
 
@@ -68,6 +69,12 @@ export const DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS: readonly WorldPlazaCodexMe
       label: 'Lapidary',
       icon: 'game-icons:stone-pile',
       description: 'Sighted ores and hidden ones',
+    },
+    {
+      id: 'pathology',
+      label: 'Pathology',
+      icon: 'mdi:biohazard',
+      description: 'Contracted diseases and hidden ones',
     },
     {
       id: 'recipes',

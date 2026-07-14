@@ -68,4 +68,113 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel flower Study', () =
 
     expect(model?.canStudy).toBe(false);
   });
+
+  it('hides eat details until studied, then unlocks by tier', () => {
+    const unstudied = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'calendula-1',
+        itemTypeId: calendulaItemTypeId,
+        quantity: 5,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        flowerStudyCountsBySpeciesId: { calendula: 0 },
+      }
+    );
+
+    expect(unstudied?.description).toBe('');
+    expect(
+      unstudied?.infoRows.some((row) => row.id === 'herbarium-study')
+    ).toBe(true);
+    expect(
+      unstudied?.infoRows.some((row) => row.id === 'flower-when-eaten')
+    ).toBe(false);
+
+    const fieldNotes = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'calendula-1',
+        itemTypeId: calendulaItemTypeId,
+        quantity: 5,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        flowerStudyCountsBySpeciesId: { calendula: 1 },
+      }
+    );
+
+    expect(fieldNotes?.description.length).toBeGreaterThan(0);
+    expect(
+      fieldNotes?.infoRows.some((row) => row.id === 'flower-when-eaten')
+    ).toBe(false);
+
+    const properties = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'calendula-1',
+        itemTypeId: calendulaItemTypeId,
+        quantity: 5,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        flowerStudyCountsBySpeciesId: { calendula: 5 },
+      }
+    );
+
+    expect(
+      properties?.infoRows.some((row) => row.id === 'flower-when-eaten')
+    ).toBe(true);
+    expect(
+      properties?.infoRows.some((row) => row.id === 'petal-sickness')
+    ).toBe(false);
+
+    const habitats = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'calendula-1',
+        itemTypeId: calendulaItemTypeId,
+        quantity: 5,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        flowerStudyCountsBySpeciesId: { calendula: 15 },
+      }
+    );
+
+    expect(habitats?.infoRows.some((row) => row.id === 'petal-sickness')).toBe(
+      true
+    );
+    expect(habitats?.infoRows.some((row) => row.id === 'flower-diseases')).toBe(
+      true
+    );
+    expect(
+      habitats?.infoRows.find((row) => row.id === 'petal-sickness')?.value
+    ).not.toContain('3%');
+
+    const full = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'calendula-1',
+        itemTypeId: calendulaItemTypeId,
+        quantity: 5,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        flowerStudyCountsBySpeciesId: {
+          calendula: DEFINING_PLAZA_HERBARIUM_STUDY_FULL_COUNT,
+        },
+      }
+    );
+
+    expect(full?.infoRows.some((row) => row.id === 'flower-raw-proc')).toBe(
+      true
+    );
+    expect(
+      full?.infoRows.find((row) => row.id === 'petal-sickness')?.value
+    ).toContain('3%');
+    expect(
+      full?.infoRows.find((row) => row.id === 'flower-diseases')?.value
+    ).toMatch(/%/);
+  });
 });

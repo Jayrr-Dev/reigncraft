@@ -33,6 +33,9 @@ export type MappingWorldPlazaEntityBuffHudIconName =
   | 'mdi:food-drumstick'
   | 'mdi:star-four-points'
   | 'mdi:thermometer'
+  | 'mdi:flower'
+  | 'mdi:sprout'
+  | 'mdi:weather-night'
   | 'ph:heart-half'
   | 'ph:person-simple-run'
   | 'solar:fire-bold'
@@ -106,6 +109,7 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'cold-immunity-buff': 'mdi:snowflake',
   'invincibility-buff': 'solar:heart-pulse-bold',
   'food-sickness-debuff': 'mdi:stomach',
+  'petal-sickness-debuff': 'mdi:flower',
   'confusion-debuff': 'mdi:head-question',
   'sleep-debuff': 'mdi:sleep',
   'deep-sleep-debuff': 'mdi:power-sleep',

@@ -1,10 +1,14 @@
 import { checkingWorldPlazaColumnRockFootprintOverlapsTreeAtAnchorTileIndex } from '@/components/world/domains/checkingWorldPlazaColumnRockFootprintOverlapsTreeAtAnchorTileIndex';
 import { checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex } from '@/components/world/domains/checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex';
+import { checkingWorldPlazaLandNearSurfaceWaterAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLandNearSurfaceWaterAtTileIndex';
 import { checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex';
 import { checkingWorldPlazaTileIsRockyBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsRockyBiomeAtTileIndex';
 import { checkingWorldPlazaTreeBlocksGridTile } from '@/components/world/domains/checkingWorldPlazaTreeBlocksGridTile';
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
-import { DEFINING_WORLD_PLAZA_ORE_FIRELANDS_COLUMN_STONE_NOISE_MIN } from '@/components/world/domains/definingWorldPlazaOreBiomeRarityConstants';
+import {
+  DEFINING_WORLD_PLAZA_ORE_FIRELANDS_COLUMN_STONE_NOISE_MIN,
+  DEFINING_WORLD_PLAZA_ORE_NEAR_WATER_COLUMN_STONE_NOISE_MIN,
+} from '@/components/world/domains/definingWorldPlazaOreBiomeRarityConstants';
 import { resolvingWorldPlazaOreVeinPalette } from '@/components/world/domains/definingWorldPlazaOreRegistry';
 import { DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_OVERRIDE_SEED_SALT } from '@/components/world/domains/definingWorldPlazaRockyBiomeConstants';
 import {
@@ -213,9 +217,15 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     anchorTileY
   );
   const firelandsOreColumnMode = isFirelandsBiome && oreVeinsEnabled;
+  const nearWaterOreColumnMode =
+    oreVeinsEnabled &&
+    !isFirelandsBiome &&
+    checkingWorldPlazaLandNearSurfaceWaterAtTileIndex(anchorTileX, anchorTileY);
   const effectiveStoneNoiseMin = firelandsOreColumnMode
     ? DEFINING_WORLD_PLAZA_ORE_FIRELANDS_COLUMN_STONE_NOISE_MIN
-    : stoneNoiseMin;
+    : nearWaterOreColumnMode
+      ? DEFINING_WORLD_PLAZA_ORE_NEAR_WATER_COLUMN_STONE_NOISE_MIN
+      : stoneNoiseMin;
 
   if (stoneNoise < effectiveStoneNoiseMin) {
     return null;
@@ -239,16 +249,19 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     centrality
   );
 
+  const oreColumnModeAllowsSmallTier =
+    firelandsOreColumnMode || nearWaterOreColumnMode;
+
   if (
     !isRockyBiome &&
-    !firelandsOreColumnMode &&
+    !oreColumnModeAllowsSmallTier &&
     tierIndex < DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_SIZE_TIER_INDEX
   ) {
     return null;
   }
 
   if (
-    firelandsOreColumnMode &&
+    oreColumnModeAllowsSmallTier &&
     tierIndex < DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_SIZE_TIER_INDEX
   ) {
     tierIndex = DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_SIZE_TIER_INDEX;

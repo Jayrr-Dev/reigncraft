@@ -11,11 +11,7 @@ export type PlazaMechanicsTabId =
   | 'badges';
 
 /** Filter for the Badges tab list. */
-export type PlazaMechanicsBuffBadgeFilterId =
-  | 'all'
-  | 'buff'
-  | 'debuff'
-  | 'disease';
+export type PlazaMechanicsBuffBadgeFilterId = 'all' | 'buff' | 'debuff';
 
 /** One damage-type explainer card in the Damage tab. */
 export type PlazaMechanicsDamageSectionId =
@@ -90,7 +86,7 @@ export const DEFINING_PLAZA_MECHANICS_TABS: readonly PlazaMechanicsTabDefinition
 
 /** Intro copy for the Badges tab. */
 export const DEFINING_PLAZA_MECHANICS_BADGES_INTRO =
-  'Buff, debuff, and disease badges appear as small icons below your health bar. Gold borders are buffs; red borders are debuffs; lime or purple borders are diseases from raw meat. Raw meat infections incubate on a bell curve before any badge appears; each disease entry shows the usual incubation and illness time ranges. Surviving diseases raises your immune system factor and can grant permanent immunity to that illness.' as const;
+  'Buff and debuff badges appear as small icons below your health bar. Gold borders are buffs; red borders are debuffs. Disease badges are catalogued in the Pathology guide once you contract them. Surviving diseases raises your immune system factor and can grant permanent immunity to that illness.' as const;
 
 /** Placeholder for the Badges tab search field. */
 export const DEFINING_PLAZA_MECHANICS_BADGES_SEARCH_PLACEHOLDER =
@@ -116,7 +112,6 @@ export const DEFINING_PLAZA_MECHANICS_BUFF_BADGE_FILTERS: readonly {
   { id: 'all', label: 'All' },
   { id: 'buff', label: 'Buffs' },
   { id: 'debuff', label: 'Debuffs' },
-  { id: 'disease', label: 'Diseases' },
 ] as const;
 
 const bleedBleeding =
@@ -326,7 +321,7 @@ export const DEFINING_PLAZA_MECHANICS_STATUS_EFFECT_SECTIONS: readonly PlazaMech
       id: 'meat-disease',
       title: 'Meat Diseases',
       description:
-        'A lime or purple badge below your health bar means symptoms have started from a raw-meat disease. One icon covers the whole illness even as poison, bleed, confusion, sleep, or movement locks kick in later. Some sleep waves can be deep sleep: hits will not wake you until that stage timer ends. Infection can incubate for hours or days before any badge appears. Cook wildlife cuts at a campfire before eating. See Immune System for how recovery builds resistance.',
+        'A lime or purple badge below your health bar means symptoms have started from a raw-meat disease. One icon covers the whole illness even as poison, bleed, confusion, sleep, or movement locks kick in later. Some sleep waves can be deep sleep: hits will not wake you until that stage timer ends. Infection can incubate for hours or days before any badge appears. Cook wildlife cuts at a campfire before eating. Open Pathology in the Guide for each illness once you have contracted it. See Immune System for how recovery builds resistance.',
       icon: 'mdi:biohazard',
     },
     {

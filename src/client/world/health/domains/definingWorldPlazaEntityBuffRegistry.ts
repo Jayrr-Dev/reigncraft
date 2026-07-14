@@ -1225,6 +1225,41 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       },
     },
     {
+      id: 'petal-sickness-debuff',
+      label: 'Petal Sickness',
+      description:
+        'Too many raw flowers. Footing weaves, stamina drains, and a light toxic burn follows.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 60_000,
+      effect: {
+        kind: 'movement_confusion',
+        intensity: 40,
+      },
+    },
+    {
+      id: 'petal-sickness-stamina-debuff',
+      label: 'Petal Sickness',
+      description: 'Raw petals burn stamina and cut regen.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 60_000,
+      hideFromHud: true,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'stamina_drain',
+        multiplier: 1.5,
+        companionModifiers: [
+          {
+            modifierKind: 'stamina_regen',
+            multiplier: 0.65,
+          },
+        ],
+      },
+    },
+    {
       id: 'disease-nausea-slow-debuff',
       label: 'Nausea',
       description: 'Stomach churn slows movement by 30%.',

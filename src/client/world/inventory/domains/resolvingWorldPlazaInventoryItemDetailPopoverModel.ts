@@ -9,10 +9,6 @@ import {
   checkingWorldPlazaInventoryItemIsFlowerHerb,
   parsingWorldPlazaFlowerSpeciesIdFromItemTypeId,
 } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
-import {
-  checkingWorldPlazaInventoryItemIsOre,
-  parsingWorldPlazaOreSpeciesIdFromItemTypeId,
-} from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_DEFAULT_BREAK_CHANCE_AT_ZERO } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDurabilityConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS,
@@ -23,7 +19,15 @@ import {
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_RARITY_LABELS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_SPECIAL_TAG_LABELS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemSpecialTagConstants';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
+import {
+  checkingWorldPlazaInventoryItemIsOre,
+  parsingWorldPlazaOreSpeciesIdFromItemTypeId,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { formattingWorldPlazaInventoryItemDurabilityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemDurabilityLabel';
+import {
+  resolvingWorldPlazaInventoryFlowerDetailContent,
+  resolvingWorldPlazaInventoryFlowerDetailReveal,
+} from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFlowerDetailReveal';
 import { resolvingWorldPlazaInventoryFoodHealAmount } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealAmount';
 import { resolvingWorldPlazaInventoryItemDescription } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDescription';
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
@@ -463,6 +467,25 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     item.itemTypeId
   );
   const isWildlifeMeat = Boolean(foodDefinition?.wildlifeSpeciesId);
+  const flowerSpeciesId = parsingWorldPlazaFlowerSpeciesIdFromItemTypeId(
+    item.itemTypeId
+  );
+  const flowerStudyCount = flowerSpeciesId
+    ? (options.flowerStudyCountsBySpeciesId?.[flowerSpeciesId] ?? 0)
+    : 0;
+  const flowerReveal = flowerSpeciesId
+    ? resolvingWorldPlazaInventoryFlowerDetailReveal(flowerStudyCount)
+    : null;
+  const flowerContent = flowerSpeciesId
+    ? resolvingWorldPlazaInventoryFlowerDetailContent(flowerSpeciesId, {
+        studyCount: flowerStudyCount,
+        fallbackName: definition.name,
+        fallbackDescription: resolvingWorldPlazaInventoryItemDescription(
+          item.itemTypeId,
+          { fallbackName: definition.name }
+        ),
+      })
+    : null;
   const wildlifeStudyCount = resolvingWildlifeMeatStudyCount(
     foodDefinition?.wildlifeSpeciesId,
     options.studyCountsBySpeciesId
@@ -480,7 +503,10 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
         })
       : null;
   const includeGenericMeta =
-    !isWildlifeMeat || Boolean(wildlifeMeatReveal?.showGenericItemMeta);
+    (!isWildlifeMeat || Boolean(wildlifeMeatReveal?.showGenericItemMeta)) &&
+    (!flowerSpeciesId || Boolean(flowerReveal?.showGenericItemMeta));
+  const includeGenericFoodRows = !isWildlifeMeat && !flowerSpeciesId;
+  const includeFoodHungerBadge = !isWildlifeMeat && !flowerSpeciesId;
 
   const durabilitySnapshot = resolvingWorldPlazaInventoryItemDurability(item);
   const enchantmentRows = resolvingWorldPlazaInventoryItemEnchantmentRows(
@@ -527,7 +553,7 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     definition,
     {
       isEquipped: options.isEquipped,
-      includeFoodHungerBadge: !isWildlifeMeat,
+      includeFoodHungerBadge,
       playerEffectiveMaxHealth: options.playerEffectiveMaxHealth,
     }
   );
@@ -535,26 +561,34 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     item,
     definition,
     {
-      includeFoodRows: !isWildlifeMeat,
+      includeFoodRows: includeGenericFoodRows,
     }
   );
+
+  const mergedBadges = [
+    ...genericBadges,
+    ...(wildlifeMeatContent?.badges ?? []),
+    ...(flowerContent?.badges ?? []),
+  ];
+  const mergedInfoRows = [
+    ...(flowerContent?.infoRows ?? []),
+    ...genericInfoRows,
+    ...(wildlifeMeatContent?.infoRows ?? []),
+  ];
 
   return {
     itemTypeId: item.itemTypeId,
     name: definition.name,
-    description:
-      wildlifeMeatContent?.description ??
-      resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
-        fallbackName: definition.name,
-      }),
+    description: flowerSpeciesId
+      ? (flowerContent?.description ?? '')
+      : (wildlifeMeatContent?.description ??
+        resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
+          fallbackName: definition.name,
+        })),
     durabilityLabel: formattingWorldPlazaInventoryItemDurabilityLabel(item),
     durabilityRatio: durabilitySnapshot?.ratio ?? null,
-    badges: wildlifeMeatContent
-      ? [...genericBadges, ...wildlifeMeatContent.badges]
-      : genericBadges,
-    infoRows: wildlifeMeatContent
-      ? [...genericInfoRows, ...wildlifeMeatContent.infoRows]
-      : genericInfoRows,
+    badges: mergedBadges,
+    infoRows: mergedInfoRows,
     passiveEnhancements,
     passiveEnchantments,
     activeEnhancements,

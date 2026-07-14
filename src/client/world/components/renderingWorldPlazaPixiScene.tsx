@@ -109,6 +109,7 @@ import { RenderingWorldPlazaHudToolbarBottomAnchor } from '@/components/world/co
 import { RenderingWorldPlazaLapidaryOverlay } from '@/components/world/components/renderingWorldPlazaLapidaryOverlay';
 import { RenderingWorldPlazaLoreBookOverlay } from '@/components/world/components/renderingWorldPlazaLoreBookOverlay';
 import { RenderingWorldPlazaMechanicsOverlay } from '@/components/world/components/renderingWorldPlazaMechanicsOverlay';
+import { RenderingWorldPlazaPathologyOverlay } from '@/components/world/components/renderingWorldPlazaPathologyOverlay';
 import { RenderingWorldPlazaMobileDebugPanel } from '@/components/world/components/renderingWorldPlazaMobileDebugPanel';
 import { RenderingWorldPlazaMobileLandscapePrompt } from '@/components/world/components/renderingWorldPlazaMobileLandscapePrompt';
 import { RenderingWorldPlazaMobileRollButton } from '@/components/world/components/renderingWorldPlazaMobileRollButton';
@@ -302,11 +303,11 @@ import { DEFINING_WORLD_PLAZA_TREE_STUMP_STUDY_POINTS } from '@/components/world
 import { findingWorldPlazaTreeStumpAtGridPoint } from '@/components/world/harvest/domains/findingWorldPlazaTreeStumpAtGridPoint';
 import type { ListingWorldPlazaTreeStumpsInStudyRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaTreeStumpsInStudyRange';
 import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
-import { formattingWorldPlazaMinedRockTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
 import {
-  formattingWorldPlazaClearedLongGrassTileKey,
   clearingWorldPlazaLocalLongGrass,
+  formattingWorldPlazaClearedLongGrassTileKey,
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
+import { formattingWorldPlazaMinedRockTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
 import {
   formattingWorldPlazaPickedFlowerTileKey,
   pickingWorldPlazaLocalFlower,
@@ -314,32 +315,34 @@ import {
 import { formattingWorldPlazaPickedPebbleTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { markingWorldPlazaLocalTreeStumpStudied } from '@/components/world/harvest/domains/managingWorldPlazaLocalStudiedTreeStumps';
 import { registeringWorldPlazaChoppedTreesVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup';
-import { registeringWorldPlazaMinedRocksVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaMinedRocksVisualLayerLookup';
 import { registeringWorldPlazaClearedLongGrassLookup } from '@/components/world/harvest/domains/registeringWorldPlazaClearedLongGrassLookup';
+import { registeringWorldPlazaMinedRocksVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaMinedRocksVisualLayerLookup';
 import { registeringWorldPlazaPickedFlowersLookup } from '@/components/world/harvest/domains/registeringWorldPlazaPickedFlowersLookup';
 import { registeringWorldPlazaPickedPebblesLookup } from '@/components/world/harvest/domains/registeringWorldPlazaPickedPebblesLookup';
 import { usingWorldPlazaChoppedTrees } from '@/components/world/harvest/hooks/usingWorldPlazaChoppedTrees';
 import { usingWorldPlazaClearedLongGrass } from '@/components/world/harvest/hooks/usingWorldPlazaClearedLongGrass';
 import { usingWorldPlazaFlowerPickInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaFlowerPickInteraction';
 import { usingWorldPlazaFlowerPickProgress } from '@/components/world/harvest/hooks/usingWorldPlazaFlowerPickProgress';
-import { usingWorldPlazaLongGrassSearchInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaLongGrassSearchInteraction';
-import { DEFINING_WORLD_PLAZA_CLEARED_LONG_GRASS_QUERY_KEY_ROOT } from '@/components/world/harvest/hooks/usingWorldPlazaLongGrassSearchInteraction';
+import {
+  DEFINING_WORLD_PLAZA_CLEARED_LONG_GRASS_QUERY_KEY_ROOT,
+  usingWorldPlazaLongGrassSearchInteraction,
+} from '@/components/world/harvest/hooks/usingWorldPlazaLongGrassSearchInteraction';
 import { usingWorldPlazaLongGrassSearchProgress } from '@/components/world/harvest/hooks/usingWorldPlazaLongGrassSearchProgress';
 import { usingWorldPlazaMinedRocks } from '@/components/world/harvest/hooks/usingWorldPlazaMinedRocks';
 import { usingWorldPlazaPebblePickInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaPebblePickInteraction';
 import { usingWorldPlazaPebblePickProgress } from '@/components/world/harvest/hooks/usingWorldPlazaPebblePickProgress';
 import {
-  DEFINING_WORLD_PLAZA_PICKED_FLOWERS_QUERY_KEY_ROOT,
   checkingWorldPlazaPickedFlowersUseLocalPersistence,
+  DEFINING_WORLD_PLAZA_PICKED_FLOWERS_QUERY_KEY_ROOT,
   usingWorldPlazaPickedFlowers,
 } from '@/components/world/harvest/hooks/usingWorldPlazaPickedFlowers';
 import { usingWorldPlazaPickedPebbles } from '@/components/world/harvest/hooks/usingWorldPlazaPickedPebbles';
-import { pickingWorldHarvestDevvitFlower } from '@/components/world/harvest/repositories/callingWorldHarvestDevvitApi';
 import { usingWorldPlazaRockMineInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaRockMineInteraction';
 import { usingWorldPlazaRockMineProgress } from '@/components/world/harvest/hooks/usingWorldPlazaRockMineProgress';
 import { usingWorldPlazaTreeChopInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaTreeChopInteraction';
 import { usingWorldPlazaTreeChopProgress } from '@/components/world/harvest/hooks/usingWorldPlazaTreeChopProgress';
 import { usingWorldPlazaTreeStumpStudyProgress } from '@/components/world/harvest/hooks/usingWorldPlazaTreeStumpStudyProgress';
+import { pickingWorldHarvestDevvitFlower } from '@/components/world/harvest/repositories/callingWorldHarvestDevvitApi';
 import { RenderingWorldPlazaEntityDeathScreenOverlay } from '@/components/world/health/components/renderingWorldPlazaEntityDeathScreenOverlay';
 import {
   RenderingWorldPlazaEntityHealthBars,
@@ -400,6 +403,7 @@ import { usingWorldPlazaRecordingDiscoveredNamedRealms } from '@/components/worl
 import { usingWorldPlazaRecordingExploredBiomes } from '@/components/world/hooks/usingWorldPlazaRecordingExploredBiomes';
 import { usingWorldPlazaRecordingHerbariumSightings } from '@/components/world/hooks/usingWorldPlazaRecordingHerbariumSightings';
 import { usingWorldPlazaRecordingLapidarySightings } from '@/components/world/hooks/usingWorldPlazaRecordingLapidarySightings';
+import { usingWorldPlazaRecordingPathologyDiscovery } from '@/components/world/hooks/usingWorldPlazaRecordingPathologyDiscovery';
 import { usingWorldPlazaRunStamina } from '@/components/world/hooks/usingWorldPlazaRunStamina';
 import { usingWorldPlazaSavedCoordsQuery } from '@/components/world/hooks/usingWorldPlazaSavedCoordsQuery';
 import { usingWorldPlazaSavedCoordsTrackingVisibleState } from '@/components/world/hooks/usingWorldPlazaSavedCoordsTrackingVisibleState';
@@ -443,8 +447,8 @@ import { computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier } fro
 import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
 import { consumingWorldPlazaInventoryItemFromSlot } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemFromSlot';
 import { parsingWorldPlazaFlowerSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
-import { parsingWorldPlazaOreSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { parsingWorldPlazaOreSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { disarmingWorldPlazaInventorySlotArmedHarvestEnchantments } from '@/components/world/inventory/domains/disarmingWorldPlazaInventorySlotArmedHarvestEnchantments';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { resolvingWorldPlazaInventoryFoodEatEffects } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects';
@@ -5260,6 +5264,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     minedRockStateByTileKey,
   });
 
+  usingWorldPlazaRecordingPathologyDiscovery({
+    storageOwnerId: onlineUserId ?? localPersistenceOwnerId,
+  });
+
   useEffect(() => {
     initializingWorldPlazaRecipeDiscoveryStore(
       onlineUserId ?? localPersistenceOwnerId,
@@ -7151,7 +7159,9 @@ function RenderingWorldPlazaPixiSceneConnected({
                   selectedInteractableBlockKeysRef
                 }
                 clearedLongGrassStateByTileKeyRef={clearedLongGrassByTileKeyRef}
-                timedInteractionProgressSnapshot={longGrassSearchProgressSnapshot}
+                timedInteractionProgressSnapshot={
+                  longGrassSearchProgressSnapshot
+                }
                 timedInteractionProgressRatioRef={
                   longGrassSearchProgressRatioRef
                 }
@@ -7730,6 +7740,10 @@ function RenderingWorldPlazaPixiSceneConnected({
       />
       <RenderingWorldPlazaLapidaryOverlay
         isOpen={activeCodexSection === 'lapidary'}
+        onClose={closingCodexSection}
+      />
+      <RenderingWorldPlazaPathologyOverlay
+        isOpen={activeCodexSection === 'pathology'}
         onClose={closingCodexSection}
       />
       <RenderingWorldPlazaRecipesOverlay

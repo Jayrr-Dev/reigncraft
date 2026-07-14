@@ -212,12 +212,23 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
       foxgloveRoll: wellFedRoll ?? Math.random(),
     });
 
+    const isSick =
+      flowerResult.didApplyPetalSickness ||
+      flowerResult.didRollDisease ||
+      checkingWorldPlazaEntityDiseaseIsSymptomatic(
+        flowerResult.nextHealthState,
+        resolvedWorldEpochMs
+      );
+
     return {
-      effectiveHungerRestoreRatio: foodDefinition.hungerRestoreRatio,
+      effectiveHungerRestoreRatio: isSick
+        ? foodDefinition.hungerRestoreRatio *
+          DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER
+        : foodDefinition.hungerRestoreRatio,
       healthHealAmount: 0,
       nextHealthState: flowerResult.nextHealthState,
-      didRollSickness: false,
-      didRollDisease: false,
+      didRollSickness: isSick,
+      didRollDisease: flowerResult.didRollDisease,
       didRollWellFedBuff: false,
     };
   }

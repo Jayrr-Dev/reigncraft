@@ -13,11 +13,13 @@ import {
   DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES,
 } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
 import { DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaLapidaryGuideConstants';
+import { DEFINING_PLAZA_PATHOLOGY_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaPathologyGuideConstants';
 import { DEFINING_PLAZA_RECIPES_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaRecipesGuideConstants';
 import { formattingPlazaBestiaryCodexMenuDescription } from '@/components/home/domains/resolvingPlazaBestiaryGuideDisplayEntries';
 import { formattingPlazaBiomesCodexMenuDescription } from '@/components/home/domains/resolvingPlazaBiomesGuideDisplayEntries';
 import { formattingPlazaHerbariumCodexMenuDescription } from '@/components/home/domains/resolvingPlazaHerbariumGuideDisplayEntries';
 import { formattingPlazaLapidaryCodexMenuDescription } from '@/components/home/domains/resolvingPlazaLapidaryGuideDisplayEntries';
+import { formattingPlazaPathologyCodexMenuDescription } from '@/components/home/domains/resolvingPlazaPathologyGuideDisplayEntries';
 import { formattingPlazaRecipesCodexMenuDescription } from '@/components/home/domains/resolvingPlazaRecipesGuideDisplayEntries';
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
@@ -47,6 +49,10 @@ import {
   gettingWorldPlazaLapidarySightedOreSpeciesSnapshot,
   subscribingWorldPlazaLapidaryDiscovery,
 } from '@/components/world/domains/managingWorldPlazaLapidaryDiscoveryStore';
+import {
+  gettingWorldPlazaPathologyObtainedDiseasesSnapshot,
+  subscribingWorldPlazaPathologyDiscovery,
+} from '@/components/world/domains/managingWorldPlazaPathologyDiscoveryStore';
 import {
   gettingWorldPlazaRecipeAttachedSnapshot,
   subscribingWorldPlazaRecipeDiscovery,
@@ -108,6 +114,11 @@ export function RenderingWorldPlazaCodexMenuPanel({
     gettingWorldPlazaRecipeAttachedSnapshot,
     () => []
   );
+  const obtainedPathologyDiseaseIds = useSyncExternalStore(
+    subscribingWorldPlazaPathologyDiscovery,
+    gettingWorldPlazaPathologyObtainedDiseasesSnapshot,
+    () => []
+  );
 
   if (!isOpen) {
     return null;
@@ -155,6 +166,13 @@ export function RenderingWorldPlazaCodexMenuPanel({
       return formattingPlazaLapidaryCodexMenuDescription(
         discoveredOreCount,
         DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES.length
+      );
+    }
+
+    if (optionId === 'pathology') {
+      return formattingPlazaPathologyCodexMenuDescription(
+        obtainedPathologyDiseaseIds.length,
+        DEFINING_PLAZA_PATHOLOGY_GUIDE_ENTRIES.length
       );
     }
 

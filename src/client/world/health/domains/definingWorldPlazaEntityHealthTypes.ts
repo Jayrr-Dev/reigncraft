@@ -153,6 +153,14 @@ export type DefiningWorldPlazaEntityHealthConfusionEffect = {
   appliedAtMs: number;
   expiresAtMs: number | null;
   phaseSeed: number;
+  /**
+   * Optional day/night intensity scale (e.g. Moonblight).
+   * Multiplies effective intensity from the live day/night cycle.
+   */
+  dayNightIntensityScale?: {
+    readonly nightMultiplier: number;
+    readonly dayMultiplier: number;
+  };
 };
 
 /** Timed sleep effect that incapacitates the entity until expiry (or damage wake). */

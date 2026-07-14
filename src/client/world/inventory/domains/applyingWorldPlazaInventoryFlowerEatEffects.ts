@@ -1,9 +1,14 @@
 import { checkingWorldPlazaEntityConfusionBuffIsActive } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
-import { checkingWorldPlazaEntityDiseaseIsSymptomatic } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
+import {
+  applyingWorldPlazaEntityDisease,
+  checkingWorldPlazaEntityDiseaseIsSymptomatic,
+} from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
 import { applyingWorldPlazaEntityHealthPoisonStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPoisonStack';
+import { resolvingWorldPlazaEntityDiseaseContractionChance } from '@/components/world/health/domains/checkingWorldPlazaEntityImmuneSystem';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
 import { computingWorldPlazaEntityHealthRolledExpectedAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthRolledExpectedAmount';
 import { resolvingWorldPlazaEntityBuffDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
+import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityHealAmplifierConstants';
 import { creatingWorldPlazaEntityHealthDamageRollPresetModifierId } from '@/components/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
@@ -21,6 +26,7 @@ import {
 import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 import { creatingWorldPlazaEntityHealthTimedTemperatureModifier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthEffectiveTemperatureResistance';
 import { shorteningWorldPlazaEntityDiseaseRemainingDuration } from '@/components/world/health/domains/shorteningWorldPlazaEntityDiseaseRemainingDuration';
+import { applyingWorldPlazaFlowerPetalSickness } from '@/components/world/inventory/domains/applyingWorldPlazaFlowerPetalSickness';
 import {
   type DefiningWorldPlazaFlowerEatEffectKind,
   resolvingWorldPlazaFlowerEatEffectKind,
@@ -48,6 +54,12 @@ import {
   DEFINING_WORLD_PLAZA_FLOWER_YARROW_FALLBACK_HEAL_OF_MAX,
   type DefiningWorldPlazaFlowerEatPreparationId,
 } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectTunables';
+import {
+  DEFINING_WORLD_PLAZA_FLOWER_PETAL_SICKNESS_DEBUFF_ID,
+  DEFINING_WORLD_PLAZA_FLOWER_PETAL_SICKNESS_STAMINA_DEBUFF_ID,
+} from '@/components/world/inventory/domains/definingWorldPlazaFlowerPetalSicknessConstants';
+import { DEFINING_WORLD_PLAZA_FLOWER_RAW_DISEASE_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaFlowerRawDiseaseRegistry';
+import { recordingWorldPlazaFlowerPetalConsumption } from '@/components/world/inventory/domains/managingWorldPlazaFlowerPetalConsumptionStore';
 import { resolvingWorldPlazaFlowerEatEffectProcChance } from '@/components/world/inventory/domains/resolvingWorldPlazaFlowerEatEffectProcChance';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 
@@ -100,6 +112,15 @@ export type ApplyingWorldPlazaInventoryFlowerEatEffectsParams = {
    * Defaults to Math.random() when omitted.
    */
   readonly effectProcRoll?: number;
+  /** Uniform [0, 1) roll vs escalated Petal Sickness chance. */
+  readonly petalSicknessRoll?: number;
+  /**
+   * Optional per-disease rolls keyed by disease id.
+   * Missing entries fall back to Math.random().
+   */
+  readonly diseaseRollsById?: Readonly<
+    Partial<Record<DefiningWorldPlazaEntityDiseaseId, number>>
+  >;
   /** Raw chew today; pass `brewed` (+ optional bonus) when brew pipeline lands. */
   readonly preparation?: DefiningWorldPlazaFlowerEatPreparationId;
   readonly effectProcChanceBonus?: number;
@@ -109,6 +130,8 @@ export type ApplyingWorldPlazaInventoryFlowerEatEffectsResult = {
   readonly nextHealthState: DefiningWorldPlazaEntityHealthState;
   readonly didProcEffect: boolean;
   readonly effectProcChance: number;
+  readonly didApplyPetalSickness: boolean;
+  readonly didRollDisease: boolean;
 };
 
 function applyingFlowerTimedColdTolerance(
@@ -279,9 +302,17 @@ function applyingFlowerEatEffectKind(
         state,
         DEFINING_WORLD_PLAZA_FLOWER_FOOD_SICKNESS_DEBUFF_ID
       );
-      return removingWorldPlazaEntityHealthMovementModifier(
+      state = removingWorldPlazaEntityHealthMovementModifier(
         state,
         DEFINING_WORLD_PLAZA_FLOWER_DISEASE_NAUSEA_SLOW_DEBUFF_ID
+      );
+      state = removingWorldPlazaEntityHealthConfusionEffect(
+        state,
+        DEFINING_WORLD_PLAZA_FLOWER_PETAL_SICKNESS_DEBUFF_ID
+      );
+      return removingWorldPlazaEntityHealthMovementModifier(
+        state,
+        DEFINING_WORLD_PLAZA_FLOWER_PETAL_SICKNESS_STAMINA_DEBUFF_ID
       );
     }
     case 'shortenDiseaseOrInfectionResist': {
@@ -360,9 +391,82 @@ function applyingFlowerEatEffectKind(
   }
 }
 
+function applyingWorldPlazaInventoryFlowerRawRiskEffects(
+  params: ApplyingWorldPlazaInventoryFlowerEatEffectsParams,
+  healthState: DefiningWorldPlazaEntityHealthState
+): {
+  readonly nextHealthState: DefiningWorldPlazaEntityHealthState;
+  readonly didApplyPetalSickness: boolean;
+  readonly didRollDisease: boolean;
+} {
+  const preparation = params.preparation ?? 'raw';
+  const worldEpochMs =
+    params.worldEpochMs ?? resolvingWorldPlazaEntityDiseaseWorldEpochMs();
+
+  if (preparation !== 'raw') {
+    return {
+      nextHealthState: healthState,
+      didApplyPetalSickness: false,
+      didRollDisease: false,
+    };
+  }
+
+  let nextHealthState = healthState;
+  let didApplyPetalSickness = false;
+  let didRollDisease = false;
+
+  const { petalSicknessChance } =
+    recordingWorldPlazaFlowerPetalConsumption(worldEpochMs);
+  const petalSicknessRoll = params.petalSicknessRoll ?? Math.random();
+
+  if (petalSicknessRoll < petalSicknessChance) {
+    const petalResult = applyingWorldPlazaFlowerPetalSickness(
+      nextHealthState,
+      params.nowMs,
+      worldEpochMs
+    );
+    nextHealthState = petalResult.nextHealthState;
+    didApplyPetalSickness = petalResult.didApply;
+  }
+
+  for (const entry of DEFINING_WORLD_PLAZA_FLOWER_RAW_DISEASE_REGISTRY) {
+    const diseaseRoll =
+      params.diseaseRollsById?.[entry.diseaseId] ?? Math.random();
+    const effectiveChance = resolvingWorldPlazaEntityDiseaseContractionChance(
+      nextHealthState,
+      entry.chance
+    );
+
+    if (diseaseRoll >= effectiveChance) {
+      continue;
+    }
+
+    const beforeCount = nextHealthState.diseaseEffects.length;
+    nextHealthState = applyingWorldPlazaEntityDisease(
+      nextHealthState,
+      entry.diseaseId,
+      worldEpochMs,
+      Math.random,
+      {},
+      params.nowMs
+    );
+
+    if (nextHealthState.diseaseEffects.length > beforeCount) {
+      didRollDisease = true;
+    }
+  }
+
+  return {
+    nextHealthState,
+    didApplyPetalSickness,
+    didRollDisease,
+  };
+}
+
 /**
  * Applies flower-specific eat effects from the declarative registry.
- * Raw flowers only proc a fraction of the time; brewing can raise that later.
+ * Raw flowers also roll Petal Sickness + flower diseases every chew.
+ * Species eat-effects only proc a fraction of the time; brewing can raise that later.
  */
 export function applyingWorldPlazaInventoryFlowerEatEffects(
   params: ApplyingWorldPlazaInventoryFlowerEatEffectsParams
@@ -373,11 +477,19 @@ export function applyingWorldPlazaInventoryFlowerEatEffects(
     chanceBonus: params.effectProcChanceBonus,
   });
 
+  const riskResult = applyingWorldPlazaInventoryFlowerRawRiskEffects(
+    params,
+    params.healthState
+  );
+  let nextHealthState = riskResult.nextHealthState;
+
   if (!effectKind) {
     return {
-      nextHealthState: params.healthState,
+      nextHealthState,
       didProcEffect: false,
       effectProcChance,
+      didApplyPetalSickness: riskResult.didApplyPetalSickness,
+      didRollDisease: riskResult.didRollDisease,
     };
   }
 
@@ -385,15 +497,24 @@ export function applyingWorldPlazaInventoryFlowerEatEffects(
 
   if (effectProcRoll >= effectProcChance) {
     return {
-      nextHealthState: params.healthState,
+      nextHealthState,
       didProcEffect: false,
       effectProcChance,
+      didApplyPetalSickness: riskResult.didApplyPetalSickness,
+      didRollDisease: riskResult.didRollDisease,
     };
   }
 
+  nextHealthState = applyingFlowerEatEffectKind(effectKind, {
+    ...params,
+    healthState: nextHealthState,
+  });
+
   return {
-    nextHealthState: applyingFlowerEatEffectKind(effectKind, params),
+    nextHealthState,
     didProcEffect: true,
     effectProcChance,
+    didApplyPetalSickness: riskResult.didApplyPetalSickness,
+    didRollDisease: riskResult.didRollDisease,
   };
 }

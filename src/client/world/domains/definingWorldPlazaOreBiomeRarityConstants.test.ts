@@ -1,4 +1,7 @@
 import {
+  DEFINING_WORLD_PLAZA_ORE_NEAR_WATER_COLUMN_STONE_NOISE_MIN,
+  DEFINING_WORLD_PLAZA_ORE_NEAR_WATER_RADIUS_TILES,
+  DEFINING_WORLD_PLAZA_ORE_VEIN_CHANCE_NEAR_WATER,
   DEFINING_WORLD_PLAZA_ORE_WEIGHTS_FIRELANDS,
   DEFINING_WORLD_PLAZA_ORE_WEIGHTS_NEAR_WATER,
   DEFINING_WORLD_PLAZA_ORE_WEIGHTS_ROCKY,
@@ -31,6 +34,25 @@ describe('definingWorldPlazaOreBiomeRarityConstants', () => {
     expect(pool.poolId).toBe('near-water');
     expect(pool.weights).toBe(DEFINING_WORLD_PLAZA_ORE_WEIGHTS_NEAR_WATER);
     expect(pool.weights[0]?.speciesId).toBe('clay');
+    expect(pool.veinChance).toBe(
+      DEFINING_WORLD_PLAZA_ORE_VEIN_CHANCE_NEAR_WATER
+    );
+  });
+
+  it('keeps riverbank clay denser than world stone default', () => {
+    expect(
+      DEFINING_WORLD_PLAZA_ORE_NEAR_WATER_RADIUS_TILES
+    ).toBeGreaterThanOrEqual(5);
+    expect(
+      DEFINING_WORLD_PLAZA_ORE_VEIN_CHANCE_NEAR_WATER
+    ).toBeGreaterThanOrEqual(0.55);
+    expect(
+      DEFINING_WORLD_PLAZA_ORE_NEAR_WATER_COLUMN_STONE_NOISE_MIN
+    ).toBeLessThan(0.72);
+    expect(DEFINING_WORLD_PLAZA_ORE_WEIGHTS_NEAR_WATER[0]).toMatchObject({
+      speciesId: 'clay',
+      weight: 140,
+    });
   });
 
   it('uses rocky metal pool in rocky biomes away from water', () => {

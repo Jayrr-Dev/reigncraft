@@ -264,11 +264,11 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 ## 7. Disease and raw meat
 
-**16 diseases** (`definingWorldPlazaEntityDiseaseRegistry.ts`), scaled by in-game time. Each has a **severity** tier (`mild` → `critical`). Raw meat also carries **per-species intensity** (`definingWildlifeMeatDiseaseIntensityRegistry.ts`) that scales symptom strength and illness duration at contract. Global disease time scale is **1/3** (`DEFINING_WORLD_PLAZA_ENTITY_DISEASE_TIME_SCALE`). Dev tools → Health → Diseases grants any disease at **5×** speed (`DEFINING_WORLD_PLAZA_ENTITY_DISEASE_DEV_PREVIEW_DURATION_SCALE`).
+**21 diseases** (`definingWorldPlazaEntityDiseaseRegistry.ts`), scaled by in-game time. Each has a **severity** tier (`mild` → `critical`). Raw meat also carries **per-species intensity** (`definingWildlifeMeatDiseaseIntensityRegistry.ts`) that scales symptom strength and illness duration at contract. Global disease time scale is **1/3** (`DEFINING_WORLD_PLAZA_ENTITY_DISEASE_TIME_SCALE`). Dev tools → Health → Diseases grants any disease at **5×** speed (`DEFINING_WORLD_PLAZA_ENTITY_DISEASE_DEV_PREVIEW_DURATION_SCALE`).
 
 **DDD docs:** [gameplay/mechanics/disease/](../gameplay/mechanics/disease/) (glossary, mechanics, catalog with per-disease code map).
 
-`salmonellosis`, `chronic-wasting`, `trichinellosis`, `mad-cow`, `liver-fluke`, `sleeping-sickness`, `wolf-fever`, `bear-worm`, `toxoplasmosis`, `vibrio-infection`
+`salmonellosis`, `chronic-wasting`, `trichinellosis`, `mad-cow`, `liver-fluke`, `sleeping-sickness`, `wolf-fever`, `bear-worm`, `toxoplasmosis`, `vibrio-infection`, plus flower-borne `pollen-fever`, `petal-pox`, `rootgut`, `moonblight`, `seedlung`
 
 Examples:
 
@@ -277,14 +277,17 @@ Examples:
 - **Chronic wasting** (deer): prion; confusion waves; **5%** chance even when cooked
 - **Mad cow** (beef): prion; delayed potential damage **35** EV
 - **Sleeping sickness** (zebra): confusion + sleep waves
+- **Moonblight** (raw flowers): confusion scales up at night / down in daylight
+- **Seedlung** (raw flowers): stamina sick + late venomous poison
 
 Incubation / grant fire times use **world epoch** (`Date.now()`). Fired grant effects (movement, poison, bleed) stamp on **simulation clock** (`performance.now()`) so health ticks can see them.
 
 **Eating pipeline** (`resolvingWorldPlazaInventoryFoodEatEffects.ts`)
 
-- Raw: roll species `rawDiseaseChance`; fallback generic poison/sickness
+- Raw meat: roll species `rawDiseaseChance`; fallback generic poison/sickness
+- Raw flowers: species effect proc **65%**; Petal Sickness after **10** petals in 1 in-game day (60s confusion + stamina + **3%** max HP toxic poison, duration stacks, chance escalates past 10, 1-day lockout after clear); small independent flower-disease rolls (`definingWorldPlazaFlowerRawDiseaseRegistry.ts`)
 - Cooked: roll `cookedWellFedBuffId` + residual prion chance where defined
-- Food sickness / active disease: hunger restore × **0.5**
+- Food sickness / active disease / Petal Sickness: hunger restore × **0.5**
 - **HP heal**: each food stamps declarative `healthHeal.baseFlat` + `healthHeal.percentOfMax` at registration (`resolvingWorldPlazaInventoryFoodHealDeclaration.ts`); eat multiplies by kill `sizeTier` / large frame. Inspect UI uses the player’s effective max HP.
 - Disease HUD badge tap shows severity + active/upcoming stages
 
@@ -350,7 +353,7 @@ Mechanics UI badge guide: `resolvingPlazaMechanicsBuffBadgeGuideEntries.ts`, `re
 
 **Bestiary codex:** Guide → Bestiary; sight within **18** grid; study corpses (**60s** body lifetime, **3–10s** Study channel by mass, hides local name + HP/stamina while channeling, **1–3** study points by mass with rising `+N` float); tiers at **1 / 10 / 20 / 50 / 75 / 100** studies per species (`definingPlazaBestiaryStudyTier.ts`; **100** unlocks playable form). Same dossier tiers gate wildlife meat item-detail reveal (0 title-only → 75 full disease/buff %). Explored Biomes **Region details** list spawn-table **Animals** chips (sighted name / `???`). Progress in `managingWorldPlazaBestiaryDiscoveryStore.ts`; Dev Mode can set sighted/studies or unlock/lock all (`definingWorldPlazaDevModeBestiaryUnlockConstants.ts`).
 
-**Herbarium codex:** Guide → Herbarium; **12** flowers + **10** tree variants; flowers unlock on **pick** only (backfill from inventory + picked tiles); pickable petals = chromatic **or bright white** (green / dull grey skipped); surface dots use standard decoration radius (no outline); wildflowers in plains / forest / flower forest / jungle / swamp / savanna (not beach, snow, desert, rocky, badlands, ocean, firelands); inventory **Study** consumes **1** and awards **+1** study; trees sight within **12** grid, stump **Study** (4s channel) awards **+1** per felled stump; tiers at **1 / 5 / 15 / 25**. Progress localStorage-only (no cloud save mirror yet).
+**Herbarium codex:** Guide → Herbarium; **12** flowers + **10** tree variants; flowers unlock on **pick** only (backfill from inventory + picked tiles); pickable petals = chromatic **or bright white** (green / dull grey skipped); surface dots use standard decoration radius (no outline); wildflowers in plains / forest / flower forest / jungle / swamp / savanna (not beach, snow, desert, rocky, badlands, ocean, firelands); inventory **Study** consumes **1** and awards **+1** study; trees sight within **12** grid, stump **Study** (4s channel) awards **+1** per felled stump; tiers at **1 / 5 / 15 / 25**. Flower bag Info dialog unlocks copy and risk rows by the same Study tiers (`resolvingWorldPlazaInventoryFlowerDetailReveal.ts`). Progress localStorage-only (no cloud save mirror yet).
 
 | Temperament        | Behavior (high level)                                                                                                                                                             |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
