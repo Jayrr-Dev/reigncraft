@@ -146,6 +146,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
       },
     ],
     recipeType: 'entity',
+    complexity: 3,
     outcome: {
       kind: 'entity',
       blockDefinitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
@@ -179,6 +180,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
       },
     ],
     recipeType: 'entity',
+    complexity: 10,
     outcome: {
       kind: 'entity',
       blockDefinitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL,
@@ -216,6 +218,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
       },
     ],
     recipeType: 'entity',
+    complexity: 8,
     outcome: {
       kind: 'entity',
       blockDefinitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
@@ -250,6 +253,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
       },
     ],
     recipeType: 'item',
+    complexity: 5,
     requiredNearbyBlockDefinitionId:
       DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL,
     requiredNearbyBlockRangeTiles:
@@ -284,6 +288,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
       },
     ],
     recipeType: 'item',
+    complexity: 3,
     requiredNearbyBlockDefinitionId:
       DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL,
     requiredNearbyBlockRangeTiles:
@@ -321,6 +326,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
       },
     ],
     recipeType: 'entity',
+    complexity: 7,
     outcome: {
       kind: 'entity',
       blockDefinitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
@@ -359,6 +365,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
       },
     ],
     recipeType: 'entity',
+    complexity: 6,
     outcome: {
       kind: 'entity',
       blockDefinitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE,
@@ -391,6 +398,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
       },
     ],
     recipeType: 'item',
+    complexity: 2,
     outcome: {
       kind: 'item',
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CUP,
@@ -423,6 +431,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
       },
     ],
     recipeType: 'item',
+    complexity: 4,
     outcome: {
       kind: 'item',
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT,
@@ -455,6 +464,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
       },
     ],
     recipeType: 'item',
+    complexity: 1,
     outcome: {
       kind: 'item',
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOTTLE,
