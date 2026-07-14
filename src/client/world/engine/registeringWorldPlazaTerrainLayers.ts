@@ -729,6 +729,8 @@ export function registeringWorldPlazaTerrainLayers(
       ],
       invalidateOn: [
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.ELEVATION_BOUNDS,
+        // Shared key includes picked flowers; caps skip grass dots on those tiles.
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_PEBBLES,
       ],
       createRuntimeState: (): RunningWorldPlazaElevationColumnsLayerState => ({
         columnGraphicsByKey: new Map(),

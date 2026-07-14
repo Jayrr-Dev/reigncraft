@@ -146,6 +146,27 @@ describe('advancingWildlifeBehaviorTick', () => {
     expect(intent.mode).toBe('graze');
   });
 
+  it('skittish prefers forage over graze when hungry with edible ground food nearby', () => {
+    const blackboard = buildingBlackboard('deer', {
+      instance: {
+        ...buildingBlackboard('deer').instance,
+        hungerState: {
+          hungerRatio: 0.3,
+          driveLevel: 'hungry',
+          lastFedAtMs: null,
+        },
+      },
+      selectedGroundFoodItemId: 'wildlife-flower:2,2',
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('forageChase');
+    if (intent.mode === 'forageChase') {
+      expect(intent.targetGroundItemId).toBe('wildlife-flower:2,2');
+    }
+  });
+
   it('skittish temperament flees when the running player is too close', () => {
     const blackboard = buildingBlackboard('deer', {
       playerPosition: { x: 2, y: 2, layer: 1 },

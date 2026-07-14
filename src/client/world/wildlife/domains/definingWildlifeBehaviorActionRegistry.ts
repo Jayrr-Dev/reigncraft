@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWorldPlazaRuntimeFlowerIsPicked } from '@/components/world/harvest/domains/registeringWorldPlazaPickedFlowersLookup';
 import { checkingWildlifePackAlphaHasCommittedPreyAttack } from '@/components/world/wildlife/domains/checkingWildlifePackAlphaHasCommittedPreyAttack';
 import {
   checkingWildlifeStalkPhaseIsFleeing,
@@ -22,11 +23,16 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import type { DefiningWildlifeBehaviorActionId } from '@/components/world/wildlife/domains/definingWildlifeBehaviorTreeTypes';
 import {
+  checkingWildlifeGroundFlowerItemId,
+  parsingWildlifeGroundFlowerItemId,
+} from '@/components/world/wildlife/domains/definingWildlifeGroundFlowerIdConstants';
+import {
   DEFINING_WILDLIFE_STALK_DAMAGE_FLEE_DISTANCE_GRID,
   DEFINING_WILDLIFE_STALK_PLAYER_APPROACH_REGROUP_FLEE_DISTANCE_GRID,
 } from '@/components/world/wildlife/domains/definingWildlifeStalkConstants';
 import type { DefiningWildlifeBehaviorIntent } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { listingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
+import { checkingWildlifeGroundFlowerOptimisticIsPicked } from '@/components/world/wildlife/domains/managingWildlifeGroundFlowerBridge';
 import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { resolvingWildlifeDocileApproachReactIntent } from '@/components/world/wildlife/domains/resolvingWildlifeDocileApproachReactIntent';
 import { resolvingWildlifeDocileFollowPlayerIntent } from '@/components/world/wildlife/domains/resolvingWildlifeDocileFollowPlayerIntent';
@@ -130,6 +136,48 @@ function resolvingChaseTarget(
   return resolvingWildlifeWanderIntent(blackboard);
 }
 
+function resolvingForageGroundFlowerIntent(
+  blackboard: DefiningWildlifeBehaviorBlackboard,
+  groundFoodId: string
+): DefiningWildlifeBehaviorIntent {
+  const tile = parsingWildlifeGroundFlowerItemId(groundFoodId);
+
+  if (!tile) {
+    return { mode: 'idle' };
+  }
+
+  if (
+    checkingWorldPlazaRuntimeFlowerIsPicked(tile.tileX, tile.tileY) ||
+    checkingWildlifeGroundFlowerOptimisticIsPicked(tile.tileX, tile.tileY)
+  ) {
+    return { mode: 'idle' };
+  }
+
+  const targetPoint = {
+    x: tile.tileX + 0.5,
+    y: tile.tileY + 0.5,
+    layer: 1,
+  };
+  const distanceToFood = Math.hypot(
+    targetPoint.x - blackboard.instance.position.x,
+    targetPoint.y - blackboard.instance.position.y
+  );
+
+  if (distanceToFood <= DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
+    return {
+      mode: 'forageEat',
+      targetGroundItemId: groundFoodId,
+      targetPoint,
+    };
+  }
+
+  return {
+    mode: 'forageChase',
+    targetGroundItemId: groundFoodId,
+    targetPoint,
+  };
+}
+
 function resolvingForageGroundFoodIntent(
   blackboard: DefiningWildlifeBehaviorBlackboard
 ): DefiningWildlifeBehaviorIntent {
@@ -137,6 +185,10 @@ function resolvingForageGroundFoodIntent(
 
   if (!groundFoodId) {
     return { mode: 'idle' };
+  }
+
+  if (checkingWildlifeGroundFlowerItemId(groundFoodId)) {
+    return resolvingForageGroundFlowerIntent(blackboard, groundFoodId);
   }
 
   const groundItem = listingWildlifeGroundFoodItems(blackboard.nowMs).find(

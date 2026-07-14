@@ -302,7 +302,10 @@ import { findingWorldPlazaTreeStumpAtGridPoint } from '@/components/world/harves
 import type { ListingWorldPlazaTreeStumpsInStudyRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaTreeStumpsInStudyRange';
 import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { formattingWorldPlazaMinedRockTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
-import { formattingWorldPlazaPickedFlowerTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
+import {
+  formattingWorldPlazaPickedFlowerTileKey,
+  pickingWorldPlazaLocalFlower,
+} from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import { formattingWorldPlazaPickedPebbleTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { markingWorldPlazaLocalTreeStumpStudied } from '@/components/world/harvest/domains/managingWorldPlazaLocalStudiedTreeStumps';
 import { registeringWorldPlazaChoppedTreesVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup';
@@ -315,8 +318,13 @@ import { usingWorldPlazaFlowerPickProgress } from '@/components/world/harvest/ho
 import { usingWorldPlazaMinedRocks } from '@/components/world/harvest/hooks/usingWorldPlazaMinedRocks';
 import { usingWorldPlazaPebblePickInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaPebblePickInteraction';
 import { usingWorldPlazaPebblePickProgress } from '@/components/world/harvest/hooks/usingWorldPlazaPebblePickProgress';
-import { usingWorldPlazaPickedFlowers } from '@/components/world/harvest/hooks/usingWorldPlazaPickedFlowers';
+import {
+  DEFINING_WORLD_PLAZA_PICKED_FLOWERS_QUERY_KEY_ROOT,
+  checkingWorldPlazaPickedFlowersUseLocalPersistence,
+  usingWorldPlazaPickedFlowers,
+} from '@/components/world/harvest/hooks/usingWorldPlazaPickedFlowers';
 import { usingWorldPlazaPickedPebbles } from '@/components/world/harvest/hooks/usingWorldPlazaPickedPebbles';
+import { pickingWorldHarvestDevvitFlower } from '@/components/world/harvest/repositories/callingWorldHarvestDevvitApi';
 import { usingWorldPlazaRockMineInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaRockMineInteraction';
 import { usingWorldPlazaRockMineProgress } from '@/components/world/harvest/hooks/usingWorldPlazaRockMineProgress';
 import { usingWorldPlazaTreeChopInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaTreeChopInteraction';
@@ -504,6 +512,10 @@ import {
   settingWildlifeDocileAttackConfirmPending,
 } from '@/components/world/wildlife/domains/managingWildlifeDocileAttackConfirmStore';
 import {
+  checkingWildlifeGroundFlowerOptimisticIsPicked,
+  registeringWildlifeGroundFlowerBridge,
+} from '@/components/world/wildlife/domains/managingWildlifeGroundFlowerBridge';
+import {
   clearingWildlifeInstanceStore,
   gettingWildlifeInstance,
   replacingWildlifeInstance,
@@ -555,6 +567,7 @@ import type {
 } from '../../../shared/plazaDevvitOnline';
 import { PLAZA_DEVVIT_ONLINE_DEFAULT_MAX_PLAYERS } from '../../../shared/plazaDevvitOnline';
 import type { PlazaSaveSlotIndex } from '../../../shared/plazaGameSession';
+import { WORLD_HARVEST_DEVVIT_PICK_FLOWER_API_PATH } from '../../../shared/worldHarvestDevvit';
 
 /** Live online room binding passed into the connected plaza scene. */
 export type RenderingWorldPlazaOnlineRoomBinding = {
@@ -1930,18 +1943,94 @@ function RenderingWorldPlazaPixiSceneConnected({
   pickedFlowersByTileKeyRef.current = pickedFlowerStateByTileKey;
 
   useEffect(() => {
-    registeringWorldPlazaPickedFlowersLookup((tileX, tileY) =>
-      Boolean(
-        pickedFlowerStateByTileKey.get(
-          formattingWorldPlazaPickedFlowerTileKey(tileX, tileY)
-        )?.isPicked
-      )
+    registeringWorldPlazaPickedFlowersLookup(
+      (tileX, tileY) =>
+        Boolean(
+          pickedFlowerStateByTileKey.get(
+            formattingWorldPlazaPickedFlowerTileKey(tileX, tileY)
+          )?.isPicked
+        ) || checkingWildlifeGroundFlowerOptimisticIsPicked(tileX, tileY)
     );
 
     return () => {
       registeringWorldPlazaPickedFlowersLookup(null);
     };
   }, [pickedFlowerStateByTileKey]);
+
+  useEffect(() => {
+    if (!isLocalGameplayEnabled) {
+      registeringWildlifeGroundFlowerBridge(null);
+      return;
+    }
+
+    const useLocalPersistence =
+      checkingWorldPlazaPickedFlowersUseLocalPersistence(
+        localPersistenceOwnerId,
+        redditUserId
+      );
+
+    registeringWildlifeGroundFlowerBridge({
+      consumeGroundFlower: (tileX, tileY, consumerPosition) => {
+        const pickRequest = {
+          tileX,
+          tileY,
+          playerX: consumerPosition.x,
+          playerY: consumerPosition.y,
+        };
+
+        if (useLocalPersistence && localPersistenceOwnerId) {
+          const result = pickingWorldPlazaLocalFlower(
+            localPersistenceOwnerId,
+            pickRequest
+          );
+
+          if (result.outcome !== 'picked') {
+            return false;
+          }
+
+          void queryClient.invalidateQueries({
+            queryKey: [DEFINING_WORLD_PLAZA_PICKED_FLOWERS_QUERY_KEY_ROOT],
+          });
+          return true;
+        }
+
+        if (!redditUserId) {
+          return false;
+        }
+
+        void pickingWorldHarvestDevvitFlower(
+          WORLD_HARVEST_DEVVIT_PICK_FLOWER_API_PATH,
+          {
+            ...pickRequest,
+            saveSlotIndex: isSinglePlayerSession
+              ? singlePlayerSaveSlotIndex
+              : null,
+          }
+        )
+          .then((result) => {
+            if (result.outcome === 'picked') {
+              void queryClient.invalidateQueries({
+                queryKey: [DEFINING_WORLD_PLAZA_PICKED_FLOWERS_QUERY_KEY_ROOT],
+              });
+            }
+          })
+          .catch(() => undefined);
+
+        return true;
+      },
+    });
+
+    return () => {
+      registeringWildlifeGroundFlowerBridge(null);
+    };
+  }, [
+    isLocalGameplayEnabled,
+    isSinglePlayerSession,
+    localPersistenceOwnerId,
+    queryClient,
+    redditUserId,
+    singlePlayerSaveSlotIndex,
+  ]);
 
   const { fireCells, burntGrassTileKeys } = usingWorldPlazaFireCells({
     enabled: isLocalGameplayEnabled,

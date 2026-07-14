@@ -187,6 +187,8 @@ export function drawingWorldPlazaTerrainElevationColumnOnGraphics(
       tileY,
       centerX: center.x,
       centerY: surfaceCenterY,
+      // Flowers live on the dedicated floor overlay; caps must not bake a twin.
+      drawOptions: { drawsFlowerDecorations: false },
     });
 
     return;
@@ -262,5 +264,7 @@ export function drawingWorldPlazaTerrainElevationColumnOnGraphics(
     tileY,
     centerX: center.x,
     centerY: surfaceCenterY,
+    // Flowers live on the dedicated floor overlay; caps must not bake a twin.
+    drawOptions: { drawsFlowerDecorations: false },
   });
 }

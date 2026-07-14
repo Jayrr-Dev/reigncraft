@@ -19,6 +19,19 @@ export const DEFINING_WILDLIFE_PREY_PROXIMITY_ATTACK_RADIUS_GRID = 6;
 /** Max grid distance to smell edible ground food. */
 export const DEFINING_WILDLIFE_GROUND_FOOD_SCENT_RADIUS_GRID = 12;
 
+/**
+ * Max grid distance to notice unpicked biome flower decorations.
+ * Matches ground-food scent so plant-eaters weigh stacks vs flowers fairly.
+ */
+export const DEFINING_WILDLIFE_GROUND_FLOWER_SCENT_RADIUS_GRID =
+  DEFINING_WILDLIFE_GROUND_FOOD_SCENT_RADIUS_GRID;
+
+/**
+ * Hunger restored when wildlife finishes chewing one biome flower tile.
+ * Inventory flowers restore 0 for players; wildlife uses this dedicated bite.
+ */
+export const DEFINING_WILDLIFE_GROUND_FLOWER_HUNGER_REFILL_RATIO = 0.2;
+
 /** Threat per second applied when prey is spotted while motivated to hunt. */
 export const DEFINING_WILDLIFE_PREY_SCENT_THREAT_PER_SECOND = 0.75;
 

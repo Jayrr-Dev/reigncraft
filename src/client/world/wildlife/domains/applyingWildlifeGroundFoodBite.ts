@@ -9,6 +9,10 @@
 
 import { DEFINING_WILDLIFE_MELEE_RANGE_GRID } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import {
+  checkingWildlifeGroundFlowerItemId,
+  parsingWildlifeGroundFlowerItemId,
+} from '@/components/world/wildlife/domains/definingWildlifeGroundFlowerIdConstants';
+import {
   DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MAX_MS,
   DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MIN_MS,
 } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
@@ -18,9 +22,14 @@ import type {
   DefiningWildlifePendingGroundFoodBite,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
+  checkingWildlifeGroundFlowerOptimisticIsPicked,
+  consumingWildlifeGroundFlowerBridge,
+} from '@/components/world/wildlife/domains/managingWildlifeGroundFlowerBridge';
+import {
   consumingWildlifeGroundFoodBridgeUnit,
   findingWildlifeGroundFoodItemById,
 } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
+import { refillingWildlifeHungerAfterGroundFlower } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundFlower';
 import { refillingWildlifeHungerAfterGroundFood } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundFood';
 import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodWorldPoint';
 
@@ -65,13 +74,94 @@ export function clearingWildlifePendingGroundFoodBite(
   };
 }
 
-/** Chews for 5-10s, then consumes one ground-food unit when in range. */
+function applyingWildlifeGroundFlowerBite(
+  instance: DefiningWildlifeInstance,
+  species: DefiningWildlifeSpeciesDefinition,
+  groundItemId: string,
+  nowMs: number
+): DefiningWildlifeInstance {
+  const tile = parsingWildlifeGroundFlowerItemId(groundItemId);
+
+  if (!tile) {
+    return clearingWildlifePendingGroundFoodBite(instance);
+  }
+
+  if (checkingWildlifeGroundFlowerOptimisticIsPicked(tile.tileX, tile.tileY)) {
+    return clearingWildlifePendingGroundFoodBite(instance);
+  }
+
+  const targetPoint = {
+    x: tile.tileX + 0.5,
+    y: tile.tileY + 0.5,
+    layer: 1,
+  };
+  const distance = Math.hypot(
+    instance.position.x - targetPoint.x,
+    instance.position.y - targetPoint.y
+  );
+
+  if (distance > DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
+    return clearingWildlifePendingGroundFoodBite(instance);
+  }
+
+  const pendingBite = instance.aiState.pendingGroundFoodBite;
+  const pendingMatchesFlower =
+    pendingBite !== null && pendingBite.groundItemId === groundItemId;
+
+  if (!pendingMatchesFlower || pendingBite === null) {
+    return applyingWildlifeIdleChewStance(instance, {
+      groundItemId,
+      startedAtMs: nowMs,
+      readyAtMs: nowMs + rollingWildlifeGroundFoodBiteDelayMs(),
+    });
+  }
+
+  if (nowMs < pendingBite.readyAtMs) {
+    return applyingWildlifeIdleChewStance(instance, pendingBite);
+  }
+
+  const consumed = consumingWildlifeGroundFlowerBridge(
+    groundItemId,
+    instance.position
+  );
+
+  if (!consumed) {
+    return clearingWildlifePendingGroundFoodBite(instance);
+  }
+
+  return {
+    ...instance,
+    hungerState: refillingWildlifeHungerAfterGroundFlower(
+      instance.hungerState,
+      species,
+      nowMs
+    ),
+    aiState: {
+      ...instance.aiState,
+      pendingGroundFoodBite: null,
+      isMoving: false,
+      motionClip: 'attack',
+      lastAttackAtMs: nowMs,
+    },
+  };
+}
+
+/** Chews for 5-10s, then consumes one ground-food unit or biome flower. */
 export function applyingWildlifeGroundFoodBite(
   instance: DefiningWildlifeInstance,
   species: DefiningWildlifeSpeciesDefinition,
   groundItemId: string,
   nowMs: number
 ): DefiningWildlifeInstance {
+  if (checkingWildlifeGroundFlowerItemId(groundItemId)) {
+    return applyingWildlifeGroundFlowerBite(
+      instance,
+      species,
+      groundItemId,
+      nowMs
+    );
+  }
+
   const groundItem = findingWildlifeGroundFoodItemById(groundItemId, nowMs);
 
   if (!groundItem || groundItem.quantity <= 0) {

@@ -190,8 +190,17 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
       .fill({ color: DEFINING_WORLD_PLAZA_LAKE_SHORE_BLOCK_HIGHLIGHT_COLOR });
   }
 
+  // Flower tiles own their surface decoration. Skip grass speck / highlight so
+  // picking a flower does not leave a green remnant (or a twin green dot under
+  // the petal while it is still there).
+  const hasFlowerDecoration = checkingWorldPlazaFlowerDecorationAtTileIndex(
+    input.tileX,
+    input.tileY
+  );
+
   if (
     resolvedDrawOptions.drawsGrassDecorations &&
+    !hasFlowerDecoration &&
     biome.speckTileModulus !== null &&
     biome.speckColor !== null &&
     Math.abs(input.tileX * 13 + input.tileY * 29) % biome.speckTileModulus ===
@@ -208,6 +217,7 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
 
   if (
     resolvedDrawOptions.drawsGrassDecorations &&
+    !hasFlowerDecoration &&
     biome.blockHighlightColor !== null &&
     Math.abs(input.tileX * 19 + input.tileY * 7) %
       DEFINING_WORLD_PLAZA_BIOME_BLOCK_HIGHLIGHT_TILE_MODULUS ===
@@ -227,7 +237,7 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
     resolvedDrawOptions.drawsFlowerDecorations &&
     biome.flowerTileModulus !== null &&
     biome.flowerColors !== null &&
-    checkingWorldPlazaFlowerDecorationAtTileIndex(input.tileX, input.tileY) &&
+    hasFlowerDecoration &&
     !checkingWorldPlazaRuntimeFlowerIsPicked(input.tileX, input.tileY)
   ) {
     const flowerColor = resolvingWorldPlazaFlowerPetalColorAtTileIndex(

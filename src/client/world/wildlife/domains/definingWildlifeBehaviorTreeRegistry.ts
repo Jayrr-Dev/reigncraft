@@ -146,6 +146,14 @@ const DEFINING_WILDLIFE_DOCILE_TREE: DefiningWildlifeBehaviorTreeDefinition = {
         kind: 'sequence',
         children: [
           { kind: 'condition', conditionId: 'isHungerAtLeastHungry' },
+          { kind: 'condition', conditionId: 'hasEdibleGroundFoodNearby' },
+          { kind: 'action', actionId: 'forageGroundFood' },
+        ],
+      },
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'isHungerAtLeastHungry' },
           { kind: 'action', actionId: 'graze' },
         ],
       },
@@ -170,6 +178,14 @@ const DEFINING_WILDLIFE_PASSIVE_TREE: DefiningWildlifeBehaviorTreeDefinition = {
         ],
       },
       ...DEFINING_WILDLIFE_SEPARATION_ANXIETY_BRANCHES,
+      {
+        kind: 'sequence',
+        children: [
+          { kind: 'condition', conditionId: 'isHungerAtLeastHungry' },
+          { kind: 'condition', conditionId: 'hasEdibleGroundFoodNearby' },
+          { kind: 'action', actionId: 'forageGroundFood' },
+        ],
+      },
       {
         kind: 'sequence',
         children: [
@@ -206,6 +222,14 @@ const DEFINING_WILDLIFE_SKITTISH_TREE: DefiningWildlifeBehaviorTreeDefinition =
           ],
         },
         ...DEFINING_WILDLIFE_SEPARATION_ANXIETY_BRANCHES,
+        {
+          kind: 'sequence',
+          children: [
+            { kind: 'condition', conditionId: 'isHungerAtLeastHungry' },
+            { kind: 'condition', conditionId: 'hasEdibleGroundFoodNearby' },
+            { kind: 'action', actionId: 'forageGroundFood' },
+          ],
+        },
         {
           kind: 'sequence',
           children: [
