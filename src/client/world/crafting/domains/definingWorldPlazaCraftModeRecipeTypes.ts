@@ -89,6 +89,11 @@ type DefiningWorldPlazaCraftModeRecipeDefinitionBase = {
   readonly recipeVisual: DefiningWorldPlazaCraftModeRecipeVisual;
   readonly ingredients: readonly DefiningWorldPlazaCraftModeRecipeIngredient[];
   /**
+   * Craft difficulty 1 (fast / ~5s) through 10 (slow / ~3min).
+   * Drives the timed craft duration before the outcome applies.
+   */
+  readonly complexity: number;
+  /**
    * When set, craft only succeeds while the player stands near a placed block
    * of this definition (e.g. anvil for smithing items).
    */

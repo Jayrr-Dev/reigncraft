@@ -189,7 +189,7 @@ The plaza hook wires Redis/save-slot persistence and optional demo seed. World f
 | Cookbook UI                              | `building/components/renderingWorldPlazaCraftModeCookbookDialog.tsx`                  |
 | Attach store                             | `domains/managingWorldPlazaRecipeDiscoveryStore.ts` (`attachingWorldPlazaRecipePage`) |
 | Recipe-page items (auto from registry)   | `crafting/domains/registeringWorldPlazaCraftRecipePageInventoryItems.ts`              |
-| Dev QA: attach all + 99× ingredients     | `attachingWorldPlazaAllCraftModeRecipesForDevQa.ts`, `listingWorldPlazaCraftModeRecipeIngredientSeedItems.ts` (wired from Pixi recipe init + `usingWorldPlazaInventory`) |
+| Dev QA: attach all + 99× ingredients/ore | `attachingWorldPlazaAllCraftModeRecipesForDevQa.ts`, `listingWorldPlazaCraftModeRecipeIngredientSeedItems.ts`, `listingWorldPlazaOreItemSeedItems.ts` (wired from Pixi recipe init + `usingWorldPlazaInventory`) |
 | Nearby station gate (anvil smithing)     | `requiredNearbyBlockDefinitionId` on recipe + `checkingWorldPlazaCraftRecipeNearbyStationSatisfied.ts` |
 
 **Extend (new recipe):**
@@ -199,7 +199,7 @@ The plaza hook wires Redis/save-slot persistence and optional demo seed. World f
 3. Optional: set `requiredNearbyBlockDefinitionId` (e.g. anvil) so craft only works within station reach.
 4. Recipe-page inventory item + Recipes guide entry appear automatically.
 5. Player double-clicks the page item to attach (second attach refused). Cookbook only lists attached recipes.
-6. Dev QA load auto-attaches every registry recipe and seeds 99 of each unique ingredient (no extra wiring).
+6. Dev QA load auto-attaches every registry recipe and seeds 99 of each unique craft ingredient plus every ore type (no extra wiring).
 
 ### 4c. Ore smelting stations
 

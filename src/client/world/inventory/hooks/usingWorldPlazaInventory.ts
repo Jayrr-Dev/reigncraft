@@ -37,6 +37,7 @@ import {
   checkingWorldPlazaDevQaLoadEnabled,
   readingWorldPlazaDevQaLoadRevision,
 } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
+import { listingWorldPlazaOreItemSeedItems } from '@/components/world/inventory/domains/listingWorldPlazaOreItemSeedItems';
 import { ensuringWorldPlazaInventoryCampfireRecipePage } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryCampfireRecipePage';
 import { movingWorldPlazaInventoryItemToSlot } from '@/components/world/inventory/domains/movingWorldPlazaInventoryItemToSlot';
 import { normalizingWorldPlazaInventoryWeaponToolSlot } from '@/components/world/inventory/domains/normalizingWorldPlazaInventoryWeaponToolSlot';
@@ -277,6 +278,10 @@ export function usingWorldPlazaInventory(
         seededState = seedingWorldPlazaInventoryItems(
           seededState,
           listingWorldPlazaCraftModeRecipeIngredientSeedItems()
+        );
+        seededState = seedingWorldPlazaInventoryItems(
+          seededState,
+          listingWorldPlazaOreItemSeedItems()
         );
         setState(seededState);
       }

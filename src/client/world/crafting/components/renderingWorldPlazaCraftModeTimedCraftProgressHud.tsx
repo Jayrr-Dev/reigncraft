@@ -2,25 +2,25 @@
 
 import { Icon } from '@/components/ui/icon';
 import {
-  DEFINING_WORLD_PLAZA_ORE_SMELTING_BOOST_PROMPT_ICON,
-  DEFINING_WORLD_PLAZA_ORE_SMELTING_BOOST_PROMPT_LEFT_PERCENT_MAX,
-  DEFINING_WORLD_PLAZA_ORE_SMELTING_BOOST_PROMPT_LEFT_PERCENT_MIN,
-  DEFINING_WORLD_PLAZA_ORE_SMELTING_BOOST_PROMPT_SPAWN_MAX_MS,
-  DEFINING_WORLD_PLAZA_ORE_SMELTING_BOOST_PROMPT_SPAWN_MIN_MS,
-  DEFINING_WORLD_PLAZA_ORE_SMELTING_BOOST_PROMPT_VISIBLE_MS,
-  LABELING_WORLD_PLAZA_ORE_SMELTING_BOOST_PROMPT,
-} from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingBoostConstants';
-import type { DefiningWorldPlazaOreSmeltingActiveCraftHud } from '@/components/world/crafting/hooks/usingWorldPlazaOreSmeltingStations';
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_ICON,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_LEFT_PERCENT_MAX,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_LEFT_PERCENT_MIN,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_SPAWN_MAX_MS,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_SPAWN_MIN_MS,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_VISIBLE_MS,
+  LABELING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT,
+} from '@/components/world/crafting/domains/definingWorldPlazaCraftModeTimedCraftConstants';
+import type { DefiningWorldPlazaCraftModeActiveCraftHud } from '@/components/world/crafting/hooks/usingWorldPlazaCraftModeTimedCraft';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type * as React from 'react';
 import { useEffect, useState } from 'react';
 
-export type RenderingWorldPlazaOreSmeltingCraftProgressHudProps = {
-  readonly activeCraft: DefiningWorldPlazaOreSmeltingActiveCraftHud | null;
+export type RenderingWorldPlazaCraftModeTimedCraftProgressHudProps = {
+  readonly activeCraft: DefiningWorldPlazaCraftModeActiveCraftHud | null;
   readonly onBoostTap: () => boolean;
 };
 
-type DefiningWorldPlazaOreSmeltingBoostPromptState = {
+type DefiningWorldPlazaCraftModeBoostPromptState = {
   readonly promptId: number;
   readonly leftPercent: number;
 };
@@ -45,14 +45,14 @@ function formattingRemainingCraftLabel(remainingMs: number): string {
 }
 
 /**
- * Bottom-of-screen craft progress bar with a random tappable speed-up prompt.
+ * Bottom HUD progress bar for cookbook crafts, with a random tap-to-speed prompt.
  */
-export function RenderingWorldPlazaOreSmeltingCraftProgressHud({
+export function RenderingWorldPlazaCraftModeTimedCraftProgressHud({
   activeCraft,
   onBoostTap,
-}: RenderingWorldPlazaOreSmeltingCraftProgressHudProps): React.JSX.Element | null {
+}: RenderingWorldPlazaCraftModeTimedCraftProgressHudProps): React.JSX.Element | null {
   const [boostPrompt, setBoostPrompt] =
-    useState<DefiningWorldPlazaOreSmeltingBoostPromptState | null>(null);
+    useState<DefiningWorldPlazaCraftModeBoostPromptState | null>(null);
   const [boostFlashKey, setBoostFlashKey] = useState(0);
   const [spawnGeneration, setSpawnGeneration] = useState(0);
 
@@ -85,8 +85,8 @@ export function RenderingWorldPlazaOreSmeltingCraftProgressHud({
       clearingTimeouts();
 
       const delayMs = rollingRandomInRange(
-        DEFINING_WORLD_PLAZA_ORE_SMELTING_BOOST_PROMPT_SPAWN_MIN_MS,
-        DEFINING_WORLD_PLAZA_ORE_SMELTING_BOOST_PROMPT_SPAWN_MAX_MS
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_SPAWN_MIN_MS,
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_SPAWN_MAX_MS
       );
 
       spawnTimeoutId = setTimeout(() => {
@@ -95,8 +95,8 @@ export function RenderingWorldPlazaOreSmeltingCraftProgressHud({
         }
 
         const leftPercent = rollingRandomInRange(
-          DEFINING_WORLD_PLAZA_ORE_SMELTING_BOOST_PROMPT_LEFT_PERCENT_MIN,
-          DEFINING_WORLD_PLAZA_ORE_SMELTING_BOOST_PROMPT_LEFT_PERCENT_MAX
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_LEFT_PERCENT_MIN,
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_LEFT_PERCENT_MAX
         );
 
         setBoostPrompt({
@@ -109,7 +109,7 @@ export function RenderingWorldPlazaOreSmeltingCraftProgressHud({
             setBoostPrompt(null);
             schedulingNextPrompt();
           }
-        }, DEFINING_WORLD_PLAZA_ORE_SMELTING_BOOST_PROMPT_VISIBLE_MS);
+        }, DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_VISIBLE_MS);
       }, delayMs);
     };
 
@@ -119,7 +119,7 @@ export function RenderingWorldPlazaOreSmeltingCraftProgressHud({
       isCancelled = true;
       clearingTimeouts();
     };
-  }, [activeCraft?.blockId, spawnGeneration]);
+  }, [activeCraft?.recipeId, spawnGeneration]);
 
   if (!activeCraft) {
     return null;
@@ -153,7 +153,7 @@ export function RenderingWorldPlazaOreSmeltingCraftProgressHud({
               type="button"
               className="absolute top-1/2 z-10 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-amber-200 bg-amber-500 text-stone-950 shadow-[0_0_18px_rgba(251,191,36,0.95)] animate-bounce"
               style={{ left: `${boostPrompt.leftPercent}%` }}
-              aria-label={LABELING_WORLD_PLAZA_ORE_SMELTING_BOOST_PROMPT}
+              aria-label={LABELING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT}
               onClick={(event) => {
                 event.stopPropagation();
                 const didBoost = onBoostTap();
@@ -165,7 +165,7 @@ export function RenderingWorldPlazaOreSmeltingCraftProgressHud({
               }}
             >
               <Icon
-                icon={DEFINING_WORLD_PLAZA_ORE_SMELTING_BOOST_PROMPT_ICON}
+                icon={DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_ICON}
                 width={22}
                 height={22}
               />
