@@ -143,7 +143,7 @@ export function RenderingWorldPlazaOreSmeltingPopover({
           ? 'Smelting...'
           : stationState.outputItemTypeId
             ? `${stationState.outputDisplayName} waiting`
-            : 'Drop ore and wood or coal'}
+            : 'Drop ore + 1 coal or 3 wood'}
       </p>
       {stationState.outputItemTypeId ? (
         <button

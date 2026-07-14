@@ -10,7 +10,7 @@ import { LABELING_WORLD_PLAZA_LONG_GRASS_SEARCH_ACTION } from '@/components/worl
 import type { ListingWorldPlazaLongGrassInInteractionRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaLongGrassInInteractionRange';
 import { listingWorldPlazaLongGrassInInteractionRange } from '@/components/world/harvest/domains/listingWorldPlazaLongGrassInInteractionRange';
 import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
-import { resolvingWorldPlazaFlowerInteractionLabelScreenPoint } from '@/components/world/harvest/domains/resolvingWorldPlazaFlowerInteractionLabelScreenPoint';
+import { resolvingWorldPlazaLongGrassInteractionLabelScreenPoint } from '@/components/world/harvest/domains/resolvingWorldPlazaLongGrassInteractionLabelScreenPoint';
 import { RenderingWorldPlazaTimedInteractionLabelRow } from '@/components/world/interaction/components/renderingWorldPlazaTimedInteractionLabelRow';
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
 import { formattingWorldPlazaInteractableLongGrassSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableLongGrassSelectionKey';
@@ -126,7 +126,7 @@ export function RenderingWorldPlazaLongGrassInteractionLabels({
         }
 
         const screenPoint =
-          resolvingWorldPlazaFlowerInteractionLabelScreenPoint(
+          resolvingWorldPlazaLongGrassInteractionLabelScreenPoint(
             entry.tileX,
             entry.tileY,
             cameraOffset,

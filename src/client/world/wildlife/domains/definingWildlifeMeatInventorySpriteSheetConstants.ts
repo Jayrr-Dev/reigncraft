@@ -122,6 +122,7 @@ const DEFINING_WILDLIFE_MEAT_INVENTORY_SPRITE_SHEET_GROUPS: readonly DefiningWil
         'world-plaza-raw-brown-beef',
         'world-plaza-raw-cat-orange-meat',
         'world-plaza-raw-grizzly-meat',
+        'world-plaza-raw-sunhead-meat',
       ],
     },
   ];

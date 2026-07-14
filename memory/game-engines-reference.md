@@ -203,7 +203,7 @@ The plaza hook wires Redis/save-slot persistence and optional demo seed. World f
 
 ### 4c. Ore smelting stations
 
-**Purpose:** Bloomery, clay kiln, and clay stove accept one metal ore plus wood or coal, run a four-second timer, then add the matching ingot (scarlet ore produces mercury).
+**Purpose:** Bloomery, clay kiln, and clay stove accept one metal ore plus fuel (1 coal or 3 wood), run a four-second timer, then add the matching ingot (scarlet ore produces mercury).
 
 | Piece | Path |
 | ----- | ---- |

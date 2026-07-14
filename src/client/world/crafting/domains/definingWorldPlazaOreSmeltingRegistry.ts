@@ -36,6 +36,19 @@ export const DEFINING_WORLD_PLAZA_ORE_SMELTING_FUEL_ITEM_TYPE_IDS = [
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COAL,
 ] as const;
 
+/**
+ * Inventory units consumed per smelt by fuel type.
+ * Coal is the baseline (1). Wood is 3× less efficient (needs 3).
+ */
+export const DEFINING_WORLD_PLAZA_ORE_SMELTING_FUEL_UNITS_COST_BY_ITEM_TYPE_ID =
+  {
+    [DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COAL]: 1,
+    [DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD]: 3,
+  } as const satisfies Record<
+    (typeof DEFINING_WORLD_PLAZA_ORE_SMELTING_FUEL_ITEM_TYPE_IDS)[number],
+    number
+  >;
+
 export type DefiningWorldPlazaOreSmeltingRecipe = {
   readonly inputItemTypeId: string;
   readonly outputItemTypeId: string;
@@ -92,6 +105,21 @@ export function checkingWorldPlazaOreSmeltingFuelItemTypeId(
   return DEFINING_WORLD_PLAZA_ORE_SMELTING_FUEL_ITEM_TYPE_IDS.some(
     (fuelItemTypeId) => fuelItemTypeId === itemTypeId
   );
+}
+
+/** Inventory units of this fuel needed for one smelt, or null if not fuel. */
+export function resolvingWorldPlazaOreSmeltingFuelUnitsCost(
+  itemTypeId: string
+): number | null {
+  for (const fuelItemTypeId of DEFINING_WORLD_PLAZA_ORE_SMELTING_FUEL_ITEM_TYPE_IDS) {
+    if (fuelItemTypeId === itemTypeId) {
+      return DEFINING_WORLD_PLAZA_ORE_SMELTING_FUEL_UNITS_COST_BY_ITEM_TYPE_ID[
+        fuelItemTypeId
+      ];
+    }
+  }
+
+  return null;
 }
 
 export function checkingWorldPlazaOreSmeltingStationBlockDefinitionId(

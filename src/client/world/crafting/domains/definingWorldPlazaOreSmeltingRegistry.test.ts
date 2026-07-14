@@ -1,6 +1,7 @@
 import {
   checkingWorldPlazaOreSmeltingFuelItemTypeId,
   DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY,
+  resolvingWorldPlazaOreSmeltingFuelUnitsCost,
   resolvingWorldPlazaOreSmeltingRecipe,
 } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingRegistry';
 import {
@@ -43,6 +44,24 @@ describe('ore smelting registry', () => {
     expect(
       resolvingWorldPlazaOreSmeltingRecipe(
         DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_CLAY
+      )
+    ).toBeNull();
+  });
+
+  it('makes wood 3× less efficient than coal as fuel', () => {
+    expect(
+      resolvingWorldPlazaOreSmeltingFuelUnitsCost(
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COAL
+      )
+    ).toBe(1);
+    expect(
+      resolvingWorldPlazaOreSmeltingFuelUnitsCost(
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD
+      )
+    ).toBe(3);
+    expect(
+      resolvingWorldPlazaOreSmeltingFuelUnitsCost(
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_IRON
       )
     ).toBeNull();
   });

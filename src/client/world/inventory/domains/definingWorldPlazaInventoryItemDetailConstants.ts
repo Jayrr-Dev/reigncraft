@@ -121,13 +121,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_PAINT_BY_VARIANT: 
   'tag-quest-reward': { color: 'orange', shade: 'darker' },
 };
 
-/**
- * Info-row values longer than this (chars) render stacked below the label
- * instead of in the right-hand column, so sentence values never squish.
- */
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_INFO_ROW_STACK_VALUE_MIN_CHARS =
-  40 as const;
-
 /** Item info dialog chrome (centered; scales up on larger viewports). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE = {
   overlay: `${DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE.overlayFixed} z-[70] p-2 sm:p-4`,
@@ -149,9 +142,8 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE = {
   infoSection: 'space-y-1 sm:space-y-1.5',
   infoSectionLabel:
     'font-body text-xs font-semibold uppercase tracking-[0.08em] text-ink/55 sm:text-sm',
-  infoRow:
-    'grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 gap-y-0.5 sm:gap-x-4',
-  infoRowStacked: 'flex flex-col gap-y-0.5',
+  /** Label above value (never side-by-side). */
+  infoRow: 'flex flex-col gap-y-0.5',
   infoRowLabel:
     'font-body text-xs font-medium leading-snug text-ink/60 sm:text-sm',
   infoRowValue:
@@ -160,9 +152,9 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE = {
   infoRowValueWarning: 'text-amber-800',
   infoRowValueFood: 'text-orange-900',
   infoRowValueTool: 'text-sky-900',
-  durabilityRow: 'flex items-center gap-2 sm:gap-2.5',
+  durabilityRow: 'flex flex-col gap-y-1 sm:gap-y-1.5',
   durabilityLabel:
-    'shrink-0 font-body text-xs font-semibold tabular-nums leading-none text-ink/70 sm:text-sm',
+    'font-body text-xs font-semibold tabular-nums leading-none text-ink/70 sm:text-sm',
   itemModBlock: 'space-y-1.5 sm:space-y-2',
   itemModBadgeRow: 'flex flex-wrap gap-1.5 sm:gap-2',
   itemModBadgeShell:

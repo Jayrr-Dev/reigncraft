@@ -5,10 +5,12 @@ import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/buildi
 import {
   checkingWorldPlazaOreSmeltingFuelItemTypeId,
   DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS,
+  resolvingWorldPlazaOreSmeltingFuelUnitsCost,
   resolvingWorldPlazaOreSmeltingRecipe,
 } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingRegistry';
 import type { DefiningWorldPlazaOreSmeltingStationSlotKind } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingDndIds';
 import { consumingWorldPlazaInventoryItemFromSlot } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemFromSlot';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export type DefiningWorldPlazaOreSmeltingStationState = {
@@ -148,6 +150,35 @@ export function usingWorldPlazaOreSmeltingStations({
         return;
       }
 
+      const fuelUnitsCost =
+        slotKind === 'fuel'
+          ? resolvingWorldPlazaOreSmeltingFuelUnitsCost(
+              inventoryItem.itemTypeId
+            )
+          : null;
+
+      if (slotKind === 'fuel' && fuelUnitsCost === null) {
+        showingToast('Fuel must be wood or coal.');
+        return;
+      }
+
+      const consumeQuantity = slotKind === 'fuel' ? (fuelUnitsCost ?? 1) : 1;
+
+      if (
+        slotKind === 'fuel' &&
+        inventoryItem.quantity < consumeQuantity
+      ) {
+        const fuelLabel =
+          inventoryItem.itemTypeId ===
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD
+            ? 'wood'
+            : 'coal';
+        showingToast(
+          `Need ${consumeQuantity} ${fuelLabel} to smelt (wood costs 3× coal).`
+        );
+        return;
+      }
+
       const currentStationState =
         stationStateByBlockId.get(block.blockId) ??
         DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE;
@@ -168,7 +199,7 @@ export function usingWorldPlazaOreSmeltingStations({
         const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
           currentInventoryState,
           inventorySlotIndex,
-          1
+          consumeQuantity
         );
         didConsume = consumeResult.consumed;
         return consumeResult.consumed ? consumeResult.nextState : null;

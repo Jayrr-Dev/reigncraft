@@ -10,7 +10,7 @@ import { LABELING_WORLD_PLAZA_SHRUB_PICK_ACTION } from '@/components/world/harve
 import type { ListingWorldPlazaShrubsInInteractionRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaShrubsInInteractionRange';
 import { listingWorldPlazaShrubsInInteractionRange } from '@/components/world/harvest/domains/listingWorldPlazaShrubsInInteractionRange';
 import type { DefiningWorldPlazaPickedShrubTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
-import { resolvingWorldPlazaFlowerInteractionLabelScreenPoint } from '@/components/world/harvest/domains/resolvingWorldPlazaFlowerInteractionLabelScreenPoint';
+import { resolvingWorldPlazaShrubInteractionLabelScreenPoint } from '@/components/world/harvest/domains/resolvingWorldPlazaShrubInteractionLabelScreenPoint';
 import { RenderingWorldPlazaTimedInteractionLabelRow } from '@/components/world/interaction/components/renderingWorldPlazaTimedInteractionLabelRow';
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
 import { formattingWorldPlazaInteractableShrubSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableShrubSelectionKey';
@@ -126,7 +126,7 @@ export function RenderingWorldPlazaShrubInteractionLabels({
         }
 
         const screenPoint =
-          resolvingWorldPlazaFlowerInteractionLabelScreenPoint(
+          resolvingWorldPlazaShrubInteractionLabelScreenPoint(
             entry.tileX,
             entry.tileY,
             cameraOffset,

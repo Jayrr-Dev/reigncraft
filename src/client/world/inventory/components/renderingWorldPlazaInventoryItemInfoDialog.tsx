@@ -6,7 +6,6 @@ import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/invent
 import { DEFINING_WORLD_PLAZA_INVENTORY_INFO_DIALOG_DATA_ATTRIBUTE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_ROW_CLASS_NAME,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_INFO_ROW_STACK_VALUE_MIN_CHARS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_DISMISS,
@@ -54,17 +53,9 @@ function RenderingWorldPlazaInventoryItemInfoRow({
 }: {
   readonly row: DefiningWorldPlazaInventoryItemDetailInfoRow;
 }): React.JSX.Element {
-  const isStacked =
-    row.value.length >=
-    DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_INFO_ROW_STACK_VALUE_MIN_CHARS;
-
   return (
     <div
-      className={
-        isStacked
-          ? DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.infoRowStacked
-          : DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.infoRow
-      }
+      className={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.infoRow}
     >
       <span
         className={
@@ -372,7 +363,7 @@ export function RenderingWorldPlazaInventoryItemInfoDialog({
               >
                 {model.durabilityLabel}
               </p>
-              <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-black/15 sm:h-2.5">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-black/15 sm:h-2.5">
                 <div
                   className={cn(
                     'h-full rounded-full',
