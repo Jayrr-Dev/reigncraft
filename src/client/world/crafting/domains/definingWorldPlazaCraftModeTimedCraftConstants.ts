@@ -1,5 +1,5 @@
 /**
- * Declarative knobs for cookbook craft duration and the tap-to-speed mini-game.
+ * Declarative knobs for cookbook craft duration and beat-lane boost/halt.
  *
  * @module components/world/crafting/domains/definingWorldPlazaCraftModeTimedCraftConstants
  */
@@ -14,34 +14,14 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_DURATION_MS_MIN = 5_000;
 /** Slowest craft duration (complexity 10). */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_DURATION_MS_MAX = 180_000;
 
-/** Fraction of base craft duration removed per successful tap. */
+/** Fraction of base craft duration removed per successful hammer hit. */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_RATIO_OF_BASE = 0.14;
 
-/** Floor for one tap boost so short crafts still feel snappy. */
+/** Floor for one hammer boost so short crafts still feel snappy. */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_MS_MIN = 2_500;
 
-/** Never finish a craft in the same frame as a tap. */
+/** Never finish a craft in the same frame as a hammer hit. */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_MIN_REMAINING_MS = 250;
-
-/** How long the tappable prompt stays on screen. */
-export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_VISIBLE_MS = 1_800;
-
-/** Random delay before the next prompt appears (inclusive min). */
-export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_SPAWN_MIN_MS = 2_200;
-
-/** Random delay before the next prompt appears (inclusive max). */
-export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_SPAWN_MAX_MS = 5_500;
-
-/** Horizontal spawn band for the tap prompt (percent of bar width). */
-export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_LEFT_PERCENT_MIN = 12;
-export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_LEFT_PERCENT_MAX = 88;
-
-/** Iconify id for the tappable boost prompt (must be bundled). */
-export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT_ICON =
-  'mdi:hammer' as const;
-
-export const LABELING_WORLD_PLAZA_CRAFT_MODE_BOOST_PROMPT =
-  'Tap to speed up crafting' as const;
 
 export const LABELING_WORLD_PLAZA_CRAFT_MODE_ALREADY_CRAFTING_TOAST =
   'Already crafting something.' as const;
@@ -71,17 +51,42 @@ export function computingWorldPlazaCraftModeDurationMsFromComplexity(
   );
 }
 
+export type ComputingWorldPlazaCraftModeRemainingMsParams = {
+  readonly nowMs: number;
+  readonly endsAtMs: number;
+  readonly pausedUntilMs: number | null;
+};
+
+/** Remaining craft time, frozen while a cracked-hammer halt is active. */
+export function computingWorldPlazaCraftModeRemainingMs(
+  params: ComputingWorldPlazaCraftModeRemainingMsParams
+): number {
+  if (
+    params.pausedUntilMs !== null &&
+    params.nowMs < params.pausedUntilMs
+  ) {
+    return Math.max(0, params.endsAtMs - params.pausedUntilMs);
+  }
+
+  return Math.max(0, params.endsAtMs - params.nowMs);
+}
+
 export type ComputingWorldPlazaCraftModeBoostedEndsAtMsParams = {
   readonly nowMs: number;
   readonly endsAtMs: number;
   readonly baseDurationMs: number;
+  readonly pausedUntilMs?: number | null;
 };
 
 /** Pulls craft end time forward by a noticeable chunk of the base duration. */
 export function computingWorldPlazaCraftModeBoostedEndsAtMs(
   params: ComputingWorldPlazaCraftModeBoostedEndsAtMsParams
 ): number {
-  const remainingMs = Math.max(0, params.endsAtMs - params.nowMs);
+  const remainingMs = computingWorldPlazaCraftModeRemainingMs({
+    nowMs: params.nowMs,
+    endsAtMs: params.endsAtMs,
+    pausedUntilMs: params.pausedUntilMs ?? null,
+  });
 
   if (remainingMs <= DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_MIN_REMAINING_MS) {
     return params.endsAtMs;
@@ -96,6 +101,45 @@ export function computingWorldPlazaCraftModeBoostedEndsAtMs(
   const maxBoostMs =
     remainingMs - DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_MIN_REMAINING_MS;
   const boostMs = Math.min(desiredBoostMs, maxBoostMs);
+  const anchorMs =
+    params.pausedUntilMs !== null &&
+    params.pausedUntilMs !== undefined &&
+    params.nowMs < params.pausedUntilMs
+      ? params.pausedUntilMs
+      : params.nowMs;
 
-  return params.endsAtMs - boostMs;
+  return anchorMs + remainingMs - boostMs;
+}
+
+export type ComputingWorldPlazaCraftModeHaltedEndsAtMsParams = {
+  readonly nowMs: number;
+  readonly endsAtMs: number;
+  readonly pausedUntilMs: number | null;
+  readonly haltMs: number;
+};
+
+export type ComputingWorldPlazaCraftModeHaltedSchedule = {
+  readonly endsAtMs: number;
+  readonly pausedUntilMs: number;
+};
+
+/** Freezes craft progress for `haltMs`, then resumes with the same remaining time. */
+export function computingWorldPlazaCraftModeHaltedSchedule(
+  params: ComputingWorldPlazaCraftModeHaltedEndsAtMsParams
+): ComputingWorldPlazaCraftModeHaltedSchedule {
+  const remainingMs = computingWorldPlazaCraftModeRemainingMs({
+    nowMs: params.nowMs,
+    endsAtMs: params.endsAtMs,
+    pausedUntilMs: params.pausedUntilMs,
+  });
+  const pauseAnchorMs =
+    params.pausedUntilMs !== null && params.nowMs < params.pausedUntilMs
+      ? params.pausedUntilMs
+      : params.nowMs;
+  const pausedUntilMs = pauseAnchorMs + params.haltMs;
+
+  return {
+    pausedUntilMs,
+    endsAtMs: pausedUntilMs + remainingMs,
+  };
 }

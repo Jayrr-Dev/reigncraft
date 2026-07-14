@@ -8,9 +8,27 @@ export const COMPUTING_WORLD_PLAZA_IN_GAME_DAY_MS =
 export const COMPUTING_WORLD_PLAZA_IN_GAME_HOUR_MS =
   COMPUTING_WORLD_PLAZA_IN_GAME_DAY_MS / 24;
 
+/** Real milliseconds for one in-game second. */
+export const COMPUTING_WORLD_PLAZA_IN_GAME_SECOND_MS =
+  COMPUTING_WORLD_PLAZA_IN_GAME_HOUR_MS / 3600;
+
 /** Converts in-game hours to real milliseconds. */
 export function computingWorldPlazaInGameHoursToRealMs(hours: number): number {
   return Math.round(hours * COMPUTING_WORLD_PLAZA_IN_GAME_HOUR_MS);
+}
+
+/** Converts real milliseconds to in-game hours (fractional). */
+export function computingWorldPlazaRealMsToInGameHours(
+  durationMs: number
+): number {
+  return durationMs / COMPUTING_WORLD_PLAZA_IN_GAME_HOUR_MS;
+}
+
+/** Converts real milliseconds to in-game seconds (fractional). */
+export function computingWorldPlazaRealMsToInGameSeconds(
+  durationMs: number
+): number {
+  return durationMs / COMPUTING_WORLD_PLAZA_IN_GAME_SECOND_MS;
 }
 
 /** Converts in-game days to real milliseconds. */

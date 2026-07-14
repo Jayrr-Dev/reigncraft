@@ -1,8 +1,5 @@
 import {
   checkingWorldPlazaOreSmeltingFuelItemTypeId,
-  computingWorldPlazaOreSmeltingDurationMsFromComplexity,
-  DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS_MAX,
-  DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS_MIN,
   DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY,
   resolvingWorldPlazaOreSmeltingFuelUnitsCost,
   resolvingWorldPlazaOreSmeltingRecipe,
@@ -116,27 +113,5 @@ describe('ore smelting registry', () => {
         DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_IRON
       )
     ).toBeNull();
-  });
-
-  it('maps recipe complexity 1–10 to craft duration 5s–3min', () => {
-    expect(computingWorldPlazaOreSmeltingDurationMsFromComplexity(1)).toBe(
-      DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS_MIN
-    );
-    expect(computingWorldPlazaOreSmeltingDurationMsFromComplexity(10)).toBe(
-      DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS_MAX
-    );
-    expect(computingWorldPlazaOreSmeltingDurationMsFromComplexity(5)).toBe(
-      82_778
-    );
-    expect(
-      resolvingWorldPlazaOreSmeltingRecipe(
-        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CUP
-      )?.complexity
-    ).toBe(1);
-    expect(
-      resolvingWorldPlazaOreSmeltingRecipe(
-        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_SCARLET
-      )?.complexity
-    ).toBe(10);
   });
 });

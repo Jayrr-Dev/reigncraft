@@ -14,3 +14,9 @@ export const DEFINING_WORLD_PLAZA_ORE_SMELTING_INTERACTION_LABEL_REFINE =
  */
 export const DEFINING_WORLD_PLAZA_ORE_SMELTING_INTERACTION_LABEL_OFFSET_ABOVE_FOOT_PX =
   48 as const;
+
+/**
+ * Chebyshev tiles the player may walk from an open bloomery / kiln / stove UI
+ * before it auto-closes. Wider than interact reach so small repositioning is fine.
+ */
+export const DEFINING_WORLD_PLAZA_ORE_SMELTING_STATION_UI_KEEP_OPEN_RANGE_TILES = 5;

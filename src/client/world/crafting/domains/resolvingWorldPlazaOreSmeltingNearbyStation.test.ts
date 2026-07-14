@@ -7,6 +7,7 @@ import {
 } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import {
   checkingWorldPlazaOreSmeltingStationReachable,
+  checkingWorldPlazaOreSmeltingStationWithinUiKeepOpenRange,
   resolvingWorldPlazaOreSmeltingNearbyStation,
 } from '@/components/world/crafting/domains/resolvingWorldPlazaOreSmeltingNearbyStation';
 import { describe, expect, it } from 'vitest';
@@ -96,5 +97,26 @@ describe('resolvingWorldPlazaOreSmeltingNearbyStation', () => {
         placedBlocks: [farBloomery, nearKiln],
       })?.blockId
     ).toBe('kiln-near');
+  });
+
+  it('keeps the station UI open within five tiles and closes beyond', () => {
+    const bloomery = creatingPlacedStation(
+      DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
+      10,
+      10
+    );
+
+    expect(
+      checkingWorldPlazaOreSmeltingStationWithinUiKeepOpenRange(
+        { x: 15.4, y: 10.5 },
+        bloomery
+      )
+    ).toBe(true);
+    expect(
+      checkingWorldPlazaOreSmeltingStationWithinUiKeepOpenRange(
+        { x: 16.6, y: 10.5 },
+        bloomery
+      )
+    ).toBe(false);
   });
 });

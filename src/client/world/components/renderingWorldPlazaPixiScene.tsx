@@ -199,6 +199,7 @@ import { LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_NEARBY_STATION_REQUIRED_TOAST } 
 import { resolvingWorldPlazaCraftModeRecipeDefinition } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry';
 import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import {
+  LABELING_WORLD_PLAZA_CRAFT_MODE_ALREADY_CRAFTING_TOAST,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INVENTORY_FULL_TOAST,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_MISSING_MATERIALS_TOAST,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_NOT_ATTACHED_TOAST,
@@ -213,6 +214,7 @@ import {
 import { executingWorldPlazaCraftRecipeInventoryOutcome } from '@/components/world/crafting/domains/executingWorldPlazaCraftRecipeInventoryOutcome';
 import { refundingWorldPlazaCraftRecipeIngredients } from '@/components/world/crafting/domains/refundingWorldPlazaCraftRecipeIngredients';
 import { showingWorldPlazaCraftRecipeRefundFloatFeedback } from '@/components/world/crafting/domains/showingWorldPlazaCraftRecipeRefundFloatFeedback';
+import { usingWorldPlazaCraftModeTimedCraft } from '@/components/world/crafting/hooks/usingWorldPlazaCraftModeTimedCraft';
 import { usingWorldPlazaOreSmeltingStations } from '@/components/world/crafting/hooks/usingWorldPlazaOreSmeltingStations';
 import { usingWorldPlazaOreSmeltingStationReachability } from '@/components/world/crafting/hooks/usingWorldPlazaOreSmeltingStationReachability';
 import { updatingWorldPlazaActiveOreSmeltingHeatTilesFromPlacedBlocks } from '@/components/world/crafting/domains/managingWorldPlazaActiveOreSmeltingHeatTilesStore';
@@ -1736,11 +1738,18 @@ function RenderingWorldPlazaPixiSceneConnected({
   });
   const oreSmeltingPlacedBlocksRef = useRef(activeScenePlacedBlocks);
   oreSmeltingPlacedBlocksRef.current = activeScenePlacedBlocks;
+  const selectedOreSmeltingStationBlockRef = useRef(
+    oreSmeltingStations.selectedStationBlock
+  );
+  selectedOreSmeltingStationBlockRef.current =
+    oreSmeltingStations.selectedStationBlock;
   const oreSmeltingStationReachability =
     usingWorldPlazaOreSmeltingStationReachability({
       enabled: true,
       playerPositionRef,
       placedBlocksRef: oreSmeltingPlacedBlocksRef,
+      selectedStationBlockRef: selectedOreSmeltingStationBlockRef,
+      closingSelectedStation: oreSmeltingStations.closingStation,
     });
   useEffect(() => {
     updatingWorldPlazaActiveOreSmeltingHeatTilesFromPlacedBlocks(
@@ -1810,10 +1819,115 @@ function RenderingWorldPlazaPixiSceneConnected({
             oreSmeltingStations.droppingInventorySlotIntoStation,
         }
       : null;
-  const oreSmeltingCraftProgressHud = (
-    <RenderingWorldPlazaOreSmeltingCraftProgressHud
-      activeCraft={oreSmeltingStations.activeCraftHud}
-      onBoostTap={oreSmeltingStations.boostingActiveCraft}
+
+  const completingTimedCraftRecipe = useCallback(
+    (recipeId: DefiningWorldPlazaCraftModeRecipeId): void => {
+      const recipeDefinition =
+        resolvingWorldPlazaCraftModeRecipeDefinition(recipeId);
+
+      if (!recipeDefinition) {
+        return;
+      }
+
+      if (
+        !checkingWorldPlazaCraftRecipeAffordable(
+          inventoryState,
+          recipeDefinition
+        )
+      ) {
+        showingGameplayHudToast(
+          LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_MISSING_MATERIALS_TOAST
+        );
+        return;
+      }
+
+      if (
+        !checkingWorldPlazaCraftRecipeNearbyStationSatisfied({
+          recipeDefinition,
+          playerWorldPoint: playerPositionRef.current,
+          placedBlocks: activeScenePlacedBlocks,
+        })
+      ) {
+        showingGameplayHudToast(
+          LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_NEARBY_STATION_REQUIRED_TOAST
+        );
+        return;
+      }
+
+      if (recipeDefinition.outcome.kind === 'item') {
+        let didCraftIntoInventory = false;
+
+        updatingInventoryState((currentState) => {
+          const craftResult = executingWorldPlazaCraftRecipeInventoryOutcome(
+            currentState,
+            recipeDefinition
+          );
+
+          if (craftResult.outcome === 'crafted') {
+            didCraftIntoInventory = true;
+            notifyingWorldPlazaInventoryItemAdded(
+              recipeDefinition.outcome.quantity
+            );
+            showingGameplayHudToast(
+              `${recipeDefinition.title} added to inventory.`
+            );
+            return craftResult.nextState;
+          }
+
+          if (craftResult.outcome === 'inventory-full') {
+            showingGameplayHudToast(
+              LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INVENTORY_FULL_TOAST
+            );
+          } else {
+            showingGameplayHudToast(
+              LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_MISSING_MATERIALS_TOAST
+            );
+          }
+
+          return null;
+        });
+
+        if (didCraftIntoInventory) {
+          setOpenCraftCookbookId(null);
+          selectingHudToolbarMode(
+            DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS
+          );
+        }
+        return;
+      }
+
+      pendingCraftRecipeIdRef.current = recipeId;
+      setPendingCraftPlacementPreviewDefinitionId(
+        recipeDefinition.outcome.blockDefinitionId
+      );
+      previewDefinitionIdRef.current =
+        recipeDefinition.outcome.blockDefinitionId;
+      setOpenCraftCookbookId(null);
+      activatingBuildMode();
+      enteringBuildPlacementForBlockDefinition(
+        recipeDefinition.outcome.blockDefinitionId,
+        recipeDefinition.outcome.blockHeight
+      );
+    },
+    [
+      activatingBuildMode,
+      activeScenePlacedBlocks,
+      enteringBuildPlacementForBlockDefinition,
+      inventoryState,
+      selectingHudToolbarMode,
+      showingGameplayHudToast,
+      updatingInventoryState,
+    ]
+  );
+
+  const craftModeTimedCraft = usingWorldPlazaCraftModeTimedCraft({
+    onCraftComplete: completingTimedCraftRecipe,
+  });
+  const craftModeTimedCraftProgressHud = (
+    <RenderingWorldPlazaCraftModeTimedCraftProgressHud
+      activeCraft={craftModeTimedCraft.activeCraftHud}
+      onHammerHit={craftModeTimedCraft.boostingActiveCraft}
+      onCrackedHit={craftModeTimedCraft.haltingActiveCraft}
     />
   );
 
@@ -1976,73 +2090,32 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      if (recipeDefinition.outcome.kind === 'item') {
-        let didCraftIntoInventory = false;
-
-        updatingInventoryState((currentState) => {
-          const craftResult = executingWorldPlazaCraftRecipeInventoryOutcome(
-            currentState,
-            recipeDefinition
-          );
-
-          if (craftResult.outcome === 'crafted') {
-            didCraftIntoInventory = true;
-            notifyingWorldPlazaInventoryItemAdded(
-              recipeDefinition.outcome.quantity
-            );
-            showingGameplayHudToast(
-              `${recipeDefinition.title} added to inventory.`
-            );
-            return craftResult.nextState;
-          }
-
-          if (craftResult.outcome === 'inventory-full') {
-            showingGameplayHudToast(
-              LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INVENTORY_FULL_TOAST
-            );
-          } else {
-            showingGameplayHudToast(
-              LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_MISSING_MATERIALS_TOAST
-            );
-          }
-
-          return null;
-        });
-
-        // Craft HUD hides the Items hotbar; flip back so the new stack is visible.
-        if (didCraftIntoInventory) {
-          setOpenCraftCookbookId(null);
-          selectingHudToolbarMode(
-            DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS
-          );
-        }
+      if (craftModeTimedCraft.isCrafting) {
+        showingGameplayHudToast(
+          LABELING_WORLD_PLAZA_CRAFT_MODE_ALREADY_CRAFTING_TOAST
+        );
         return;
       }
 
-      pendingCraftRecipeIdRef.current = recipeId;
-      setPendingCraftPlacementPreviewDefinitionId(
-        recipeDefinition.outcome.blockDefinitionId
-      );
-      previewDefinitionIdRef.current =
-        recipeDefinition.outcome.blockDefinitionId;
+      const didStart = craftModeTimedCraft.startingCraft(recipeId);
+
+      if (!didStart) {
+        showingGameplayHudToast(
+          LABELING_WORLD_PLAZA_CRAFT_MODE_ALREADY_CRAFTING_TOAST
+        );
+        return;
+      }
+
       setOpenCraftCookbookId(null);
-      // Silent build under Craft HUD: ghost + click-place without flipping to Build/Claim.
-      activatingBuildMode();
-      enteringBuildPlacementForBlockDefinition(
-        recipeDefinition.outcome.blockDefinitionId,
-        recipeDefinition.outcome.blockHeight
-      );
     },
     [
-      activatingBuildMode,
       activeScenePlacedBlocks,
-      enteringBuildPlacementForBlockDefinition,
+      craftModeTimedCraft.isCrafting,
+      craftModeTimedCraft.startingCraft,
       inventoryState,
       isBuildModeEnabled,
       isHudCraftingEnabled,
-      selectingHudToolbarMode,
       showingGameplayHudToast,
-      updatingInventoryState,
     ]
   );
 
@@ -8380,7 +8453,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     viewportHudScale={viewportHudScale}
                     isMobile={hudIsMobile}
                     isFullscreen={hudIsFullscreen}
-                    topOverlay={oreSmeltingCraftProgressHud}
+                    topOverlay={craftModeTimedCraftProgressHud}
                   >
                     {hudToolbarMode ===
                     DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS ? (
@@ -8589,7 +8662,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     viewportHudScale={viewportHudScale}
                     isMobile={hudIsMobile}
                     isFullscreen={hudIsFullscreen}
-                    topOverlay={oreSmeltingCraftProgressHud}
+                    topOverlay={craftModeTimedCraftProgressHud}
                   >
                     {hudToolbarMode ===
                     DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS ? (

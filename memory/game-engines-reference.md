@@ -180,7 +180,7 @@ The plaza hook wires Redis/save-slot persistence and optional demo seed. World f
 
 ### 4b. Craft cookbook recipes
 
-**Purpose:** Declarative craft recipes in cookbooks. Pages attach once from inventory; craft only after attach.
+**Purpose:** Declarative craft recipes in cookbooks. Pages attach once from inventory; craft only after attach. Each recipe has `complexity` 1–10 (5s–3min craft timer). Bottom HUD progress + beat lane (notes rush right→left): hammer hits speed craft, cracked hammers halt ~2.5s, misses do nothing. Patterns: single / double / triple / trap mixes.
 
 | Piece                                    | Path                                                                                  |
 | ---------------------------------------- | ------------------------------------------------------------------------------------- |
@@ -203,13 +203,14 @@ The plaza hook wires Redis/save-slot persistence and optional demo seed. World f
 
 ### 4c. Ore smelting stations
 
-**Purpose:** Bloomery, clay kiln, and clay stove accept one item plus fuel (1 coal or 3 wood), run a complexity-scaled timer (complexity 1–10 → 5s–3min), then add the matching output. Bottom HUD shows craft progress; random hammer taps speed the craft (study SFX).
+**Purpose:** Bloomery, clay kiln, and clay stove accept one item plus fuel (1 coal or 3 wood), run a four-second timer, then add the matching output (scarlet ore produces mercury; kiln fires wet clay ware).
 
 | Piece | Path |
 | ----- | ---- |
 | Ore/fuel/output registry | `crafting/domains/definingWorldPlazaOreSmeltingRegistry.ts` |
 | Timed station state hook | `crafting/hooks/usingWorldPlazaOreSmeltingStations.ts` |
 | Inventory DnD popover | `inventory/components/renderingWorldPlazaOreSmeltingPopover.tsx` |
+| Reach + auto-close at 5 tiles | `crafting/hooks/usingWorldPlazaOreSmeltingStationReachability.ts` |
 | Active glow + bloomery smoke | `building/components/renderingWorldPlazaBlacksmithUtilityLayer.tsx` |
 
 ### 4d. Traps (bear + caltrop)

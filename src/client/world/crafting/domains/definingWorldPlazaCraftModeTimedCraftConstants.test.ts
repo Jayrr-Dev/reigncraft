@@ -1,6 +1,8 @@
 import {
   computingWorldPlazaCraftModeBoostedEndsAtMs,
   computingWorldPlazaCraftModeDurationMsFromComplexity,
+  computingWorldPlazaCraftModeHaltedSchedule,
+  computingWorldPlazaCraftModeRemainingMs,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_DURATION_MS_MAX,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_DURATION_MS_MIN,
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeTimedCraftConstants';
@@ -28,5 +30,32 @@ describe('craft mode timed craft constants', () => {
     });
 
     expect(nowMs + 80_000 - nextEndsAtMs).toBe(14_000);
+  });
+
+  it('freezes remaining time while halted, then resumes', () => {
+    const nowMs = 1_000_000;
+    const schedule = computingWorldPlazaCraftModeHaltedSchedule({
+      nowMs,
+      endsAtMs: nowMs + 40_000,
+      pausedUntilMs: null,
+      haltMs: 2_500,
+    });
+
+    expect(schedule.pausedUntilMs).toBe(nowMs + 2_500);
+    expect(schedule.endsAtMs).toBe(nowMs + 2_500 + 40_000);
+    expect(
+      computingWorldPlazaCraftModeRemainingMs({
+        nowMs: nowMs + 1_000,
+        endsAtMs: schedule.endsAtMs,
+        pausedUntilMs: schedule.pausedUntilMs,
+      })
+    ).toBe(40_000);
+    expect(
+      computingWorldPlazaCraftModeRemainingMs({
+        nowMs: schedule.pausedUntilMs,
+        endsAtMs: schedule.endsAtMs,
+        pausedUntilMs: schedule.pausedUntilMs,
+      })
+    ).toBe(40_000);
   });
 });

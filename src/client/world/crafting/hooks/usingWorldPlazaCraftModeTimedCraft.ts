@@ -1,6 +1,12 @@
 'use client';
 
-import { computingWorldPlazaCraftModeBoostedEndsAtMs, computingWorldPlazaCraftModeDurationMsFromComplexity } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeTimedCraftConstants';
+import { DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_HALT_MS } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeBeatLaneConstants';
+import {
+  computingWorldPlazaCraftModeBoostedEndsAtMs,
+  computingWorldPlazaCraftModeDurationMsFromComplexity,
+  computingWorldPlazaCraftModeHaltedSchedule,
+  computingWorldPlazaCraftModeRemainingMs,
+} from '@/components/world/crafting/domains/definingWorldPlazaCraftModeTimedCraftConstants';
 import { resolvingWorldPlazaCraftModeRecipeDefinition } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry';
 import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
@@ -12,6 +18,7 @@ export type DefiningWorldPlazaCraftModeTimedCraftState = {
   readonly startedAtMs: number;
   readonly endsAtMs: number;
   readonly baseDurationMs: number;
+  readonly pausedUntilMs: number | null;
 };
 
 export type DefiningWorldPlazaCraftModeActiveCraftHud = {
@@ -19,6 +26,7 @@ export type DefiningWorldPlazaCraftModeActiveCraftHud = {
   readonly displayName: string;
   readonly progressRatio: number;
   readonly remainingMs: number;
+  readonly isPaused: boolean;
 };
 
 export type UsingWorldPlazaCraftModeTimedCraftParams = {
@@ -31,13 +39,17 @@ function computingProgressRatio(
   craftState: DefiningWorldPlazaCraftModeTimedCraftState,
   nowMs: number
 ): number {
-  const remainingMs = Math.max(0, craftState.endsAtMs - nowMs);
+  const remainingMs = computingWorldPlazaCraftModeRemainingMs({
+    nowMs,
+    endsAtMs: craftState.endsAtMs,
+    pausedUntilMs: craftState.pausedUntilMs,
+  });
   const elapsedMs = Math.max(0, craftState.baseDurationMs - remainingMs);
   return Math.min(1, Math.max(0, elapsedMs / craftState.baseDurationMs));
 }
 
 /**
- * Runs one cookbook craft on a complexity-scaled timer with tap-to-boost.
+ * Runs one cookbook craft on a complexity-scaled timer with beat-lane boost/halt.
  */
 export function usingWorldPlazaCraftModeTimedCraft({
   onCraftComplete,
@@ -49,7 +61,7 @@ export function usingWorldPlazaCraftModeTimedCraft({
   const onCraftCompleteRef = useRef(onCraftComplete);
   onCraftCompleteRef.current = onCraftComplete;
   const isCompletingRef = useRef(false);
-  const [, setClockRevision] = useState(0);
+  const [clockRevision, setClockRevision] = useState(0);
 
   const startingCraft = useCallback(
     (recipeId: DefiningWorldPlazaCraftModeRecipeId): boolean => {
@@ -75,6 +87,7 @@ export function usingWorldPlazaCraftModeTimedCraft({
         startedAtMs: nowMs,
         endsAtMs: nowMs + baseDurationMs,
         baseDurationMs,
+        pausedUntilMs: null,
       });
       isCompletingRef.current = false;
       return true;
@@ -94,6 +107,7 @@ export function usingWorldPlazaCraftModeTimedCraft({
       nowMs,
       endsAtMs: craftState.endsAtMs,
       baseDurationMs: craftState.baseDurationMs,
+      pausedUntilMs: craftState.pausedUntilMs,
     });
 
     if (nextEndsAtMs >= craftState.endsAtMs) {
@@ -104,6 +118,29 @@ export function usingWorldPlazaCraftModeTimedCraft({
     setActiveCraft({
       ...craftState,
       endsAtMs: nextEndsAtMs,
+    });
+    return true;
+  }, []);
+
+  const haltingActiveCraft = useCallback((): boolean => {
+    const craftState = activeCraftRef.current;
+
+    if (!craftState) {
+      return false;
+    }
+
+    const nowMs = Date.now();
+    const nextSchedule = computingWorldPlazaCraftModeHaltedSchedule({
+      nowMs,
+      endsAtMs: craftState.endsAtMs,
+      pausedUntilMs: craftState.pausedUntilMs,
+      haltMs: DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_HALT_MS,
+    });
+
+    setActiveCraft({
+      ...craftState,
+      endsAtMs: nextSchedule.endsAtMs,
+      pausedUntilMs: nextSchedule.pausedUntilMs,
     });
     return true;
   }, []);
@@ -121,11 +158,14 @@ export function usingWorldPlazaCraftModeTimedCraft({
     const intervalId = setInterval(() => {
       setClockRevision((revision) => revision + 1);
       const craftState = activeCraftRef.current;
+      const nowMs = Date.now();
 
       if (
         !craftState ||
         isCompletingRef.current ||
-        Date.now() < craftState.endsAtMs
+        (craftState.pausedUntilMs !== null &&
+          nowMs < craftState.pausedUntilMs) ||
+        nowMs < craftState.endsAtMs
       ) {
         return;
       }
@@ -148,13 +188,22 @@ export function usingWorldPlazaCraftModeTimedCraft({
     }
 
     const nowMs = Date.now();
+    const remainingMs = computingWorldPlazaCraftModeRemainingMs({
+      nowMs,
+      endsAtMs: activeCraft.endsAtMs,
+      pausedUntilMs: activeCraft.pausedUntilMs,
+    });
+
     return {
       recipeId: activeCraft.recipeId,
       displayName: activeCraft.displayName,
       progressRatio: computingProgressRatio(activeCraft, nowMs),
-      remainingMs: Math.max(0, activeCraft.endsAtMs - nowMs),
+      remainingMs,
+      isPaused:
+        activeCraft.pausedUntilMs !== null &&
+        nowMs < activeCraft.pausedUntilMs,
     };
-  }, [activeCraft]);
+  }, [activeCraft, clockRevision]);
 
   return {
     activeCraft,
@@ -162,6 +211,7 @@ export function usingWorldPlazaCraftModeTimedCraft({
     isCrafting: activeCraft !== null,
     startingCraft,
     boostingActiveCraft,
+    haltingActiveCraft,
     cancellingActiveCraft,
   };
 }
