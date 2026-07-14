@@ -452,6 +452,7 @@ import { RenderingWorldPlazaInventoryDropItemOverlay } from '@/components/world/
 import { RenderingWorldPlazaInventoryDropTileOutlinePreview } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropTileOutlinePreview';
 import { RenderingWorldPlazaInventoryFoodEatOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventoryFoodEatOverlay';
 import { RenderingWorldPlazaInventoryHotbar } from '@/components/world/inventory/components/renderingWorldPlazaInventoryHotbar';
+import { RenderingWorldPlazaInventorySpecimenStudyOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventorySpecimenStudyOverlay';
 import { applyingWorldPlazaInventorySlotActiveEnchantmentUse } from '@/components/world/inventory/domains/applyingWorldPlazaInventorySlotActiveEnchantmentUse';
 import { computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier';
 import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
@@ -476,6 +477,10 @@ import {
   usingWorldPlazaInventoryFoodEatProgress,
   type DefiningWorldPlazaInventoryFoodEatProgressContext,
 } from '@/components/world/inventory/hooks/usingWorldPlazaInventoryFoodEatProgress';
+import {
+  usingWorldPlazaInventorySpecimenStudyProgress,
+  type DefiningWorldPlazaInventorySpecimenStudyProgressContext,
+} from '@/components/world/inventory/hooks/usingWorldPlazaInventorySpecimenStudyProgress';
 import { RenderingWorldPlazaLightingDarknessLayer } from '@/components/world/lighting/components/renderingWorldPlazaLightingDarknessLayer';
 import { RenderingWorldPlazaLightSourcesGroundGlow } from '@/components/world/lighting/components/renderingWorldPlazaLightSourcesGroundGlow';
 import { RenderingWorldPlotVisitApprovedPlazaModal } from '@/components/world/plotVisit/components/renderingWorldPlotVisitApprovedPlazaModal';
@@ -5027,6 +5032,78 @@ function RenderingWorldPlazaPixiSceneConnected({
     ]
   );
 
+  const handlingSpecimenStudyComplete = useCallback(
+    (
+      context: DefiningWorldPlazaInventorySpecimenStudyProgressContext
+    ): void => {
+      let didConsume = false;
+
+      updatingInventoryState((currentState) => {
+        const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
+          currentState,
+          context.slotIndex,
+          1
+        );
+
+        didConsume = consumeResult.consumed;
+        return consumeResult.consumed ? consumeResult.nextState : null;
+      });
+
+      if (!didConsume) {
+        showingGameplayHudToast('Nothing left to study.');
+        return;
+      }
+
+      if (context.studyKind === 'flower' && context.flowerSpeciesId) {
+        recordingWorldPlazaHerbariumFlowerStudied(context.flowerSpeciesId);
+        const studyCount =
+          gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot()[
+            context.flowerSpeciesId
+          ] ?? 1;
+        showingGameplayHudToast(
+          `Studied · Herbarium ${formattingPlazaHerbariumStudyCountProgress(studyCount)}`
+        );
+        return;
+      }
+
+      if (context.studyKind === 'ore' && context.oreSpeciesId) {
+        recordingWorldPlazaLapidaryOreStudied(context.oreSpeciesId);
+        const studyCount =
+          gettingWorldPlazaLapidaryOreStudyCountsSnapshot()[
+            context.oreSpeciesId
+          ] ?? 1;
+        showingGameplayHudToast(
+          `Studied · Lapidary ${formattingPlazaLapidaryStudyCountProgress(studyCount)}`
+        );
+        return;
+      }
+
+      if (context.studyKind === 'clover' && context.cloverKind) {
+        recordingWorldPlazaHerbariumCloverStudied(context.cloverKind);
+        const studyCount = gettingWorldPlazaHerbariumCloverStudyCountSnapshot();
+        showingGameplayHudToast(
+          `Studied · Herbarium ${formattingPlazaHerbariumCloverStudyCountProgress(studyCount)}`
+        );
+      }
+    },
+    [showingGameplayHudToast, updatingInventoryState]
+  );
+
+  const {
+    snapshot: specimenStudyProgressSnapshot,
+    progressRatioRef: specimenStudyProgressRatioRef,
+    startingSpecimenStudy,
+    isSpecimenStudyActive,
+  } = usingWorldPlazaInventorySpecimenStudyProgress({
+    playerPositionRef,
+    healthStateRef,
+    keyboardDirectionRef,
+    walkTargetRef,
+    jumpRequestedRef,
+    rollRequestedRef,
+    onStudyComplete: handlingSpecimenStudyComplete,
+  });
+
   const handlingStudyHotbarSlot = useCallback(
     (slotIndex: number): void => {
       if (
@@ -5034,6 +5111,11 @@ function RenderingWorldPlazaPixiSceneConnected({
         isPlayerStunnedRef.current ||
         isPlayerDeadRef.current
       ) {
+        return;
+      }
+
+      if (isSpecimenStudyActive()) {
+        showingGameplayHudToast('Already studying.');
         return;
       }
 
@@ -5066,32 +5148,15 @@ function RenderingWorldPlazaPixiSceneConnected({
           return;
         }
 
-        let didConsume = false;
-
-        updatingInventoryState((currentState) => {
-          const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
-            currentState,
-            slotIndex,
-            1
-          );
-
-          didConsume = consumeResult.consumed;
-          return consumeResult.consumed ? consumeResult.nextState : null;
+        const didStart = startingSpecimenStudy({
+          slotIndex,
+          studyKind: 'flower',
+          flowerSpeciesId,
         });
 
-        if (!didConsume) {
-          showingGameplayHudToast('Nothing left to study.');
-          return;
+        if (!didStart) {
+          showingGameplayHudToast('Already studying.');
         }
-
-        recordingWorldPlazaHerbariumFlowerStudied(flowerSpeciesId);
-        const studyCount =
-          gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot()[
-            flowerSpeciesId
-          ] ?? 1;
-        showingGameplayHudToast(
-          `Studied · Herbarium ${formattingPlazaHerbariumStudyCountProgress(studyCount)}`
-        );
         return;
       }
 
@@ -5104,30 +5169,15 @@ function RenderingWorldPlazaPixiSceneConnected({
           return;
         }
 
-        let didConsume = false;
-
-        updatingInventoryState((currentState) => {
-          const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
-            currentState,
-            slotIndex,
-            1
-          );
-
-          didConsume = consumeResult.consumed;
-          return consumeResult.consumed ? consumeResult.nextState : null;
+        const didStart = startingSpecimenStudy({
+          slotIndex,
+          studyKind: 'ore',
+          oreSpeciesId,
         });
 
-        if (!didConsume) {
-          showingGameplayHudToast('Nothing left to study.');
-          return;
+        if (!didStart) {
+          showingGameplayHudToast('Already studying.');
         }
-
-        recordingWorldPlazaLapidaryOreStudied(oreSpeciesId);
-        const studyCount =
-          gettingWorldPlazaLapidaryOreStudyCountsSnapshot()[oreSpeciesId] ?? 1;
-        showingGameplayHudToast(
-          `Studied · Lapidary ${formattingPlazaLapidaryStudyCountProgress(studyCount)}`
-        );
         return;
       }
 
@@ -5145,32 +5195,23 @@ function RenderingWorldPlazaPixiSceneConnected({
           return;
         }
 
-        let didConsume = false;
-
-        updatingInventoryState((currentState) => {
-          const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
-            currentState,
-            slotIndex,
-            1
-          );
-
-          didConsume = consumeResult.consumed;
-          return consumeResult.consumed ? consumeResult.nextState : null;
+        const didStart = startingSpecimenStudy({
+          slotIndex,
+          studyKind: 'clover',
+          cloverKind,
         });
 
-        if (!didConsume) {
-          showingGameplayHudToast('Nothing left to study.');
-          return;
+        if (!didStart) {
+          showingGameplayHudToast('Already studying.');
         }
-
-        recordingWorldPlazaHerbariumCloverStudied(cloverKind);
-        const studyCount = gettingWorldPlazaHerbariumCloverStudyCountSnapshot();
-        showingGameplayHudToast(
-          `Studied · Herbarium ${formattingPlazaHerbariumCloverStudyCountProgress(studyCount)}`
-        );
       }
     },
-    [inventoryState.slots, showingGameplayHudToast, updatingInventoryState]
+    [
+      inventoryState.slots,
+      isSpecimenStudyActive,
+      showingGameplayHudToast,
+      startingSpecimenStudy,
+    ]
   );
 
   const {
@@ -7148,6 +7189,21 @@ function RenderingWorldPlazaPixiSceneConnected({
                 overlaySnapshot={foodEatOverlaySnapshot}
                 progressSnapshot={foodEatProgressSnapshot}
                 progressRatioRef={foodEatProgressRatioRef}
+                playerPositionRef={playerPositionRef}
+                playerRenderPositionRegistryRef={
+                  playerRenderPositionRegistryRef
+                }
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+              />
+              <RenderingWorldPlazaInventorySpecimenStudyOverlay
+                localUserId={localHealthEntityUserId}
+                isVisible={
+                  specimenStudyProgressSnapshot.isActive ||
+                  specimenStudyProgressSnapshot.isCancelling
+                }
+                progressSnapshot={specimenStudyProgressSnapshot}
+                progressRatioRef={specimenStudyProgressRatioRef}
                 playerPositionRef={playerPositionRef}
                 playerRenderPositionRegistryRef={
                   playerRenderPositionRegistryRef

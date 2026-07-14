@@ -4,28 +4,18 @@
  * @module shared/worldCloverSearchLoot
  */
 
-export type WorldCloverSearchLootKind =
-  | 'three_leaf'
-  | 'four_leaf'
-  | 'five_leaf'
-  | 'six_leaf';
+export type WorldCloverSearchLootKind = 'three_leaf' | 'four_leaf';
 
 export type WorldCloverSearchLootEntry = {
   readonly itemKind: WorldCloverSearchLootKind;
   readonly weight: number;
 };
 
-/**
- * Weighted clover table (total weight 100_000).
- *
- * Odds: three ~98.989%, four 1%, five 0.01%, six 0.001%.
- */
+/** Weighted clover table (total weight 100). */
 export const WORLD_CLOVER_SEARCH_LOOT_REGISTRY: readonly WorldCloverSearchLootEntry[] =
   [
-    { itemKind: 'three_leaf', weight: 98_989 },
-    { itemKind: 'four_leaf', weight: 1_000 },
-    { itemKind: 'five_leaf', weight: 10 },
-    { itemKind: 'six_leaf', weight: 1 },
+    { itemKind: 'three_leaf', weight: 95 },
+    { itemKind: 'four_leaf', weight: 5 },
   ];
 
 export const WORLD_CLOVER_SEARCH_LOOT_TOTAL_WEIGHT =
