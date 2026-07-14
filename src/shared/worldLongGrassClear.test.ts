@@ -30,6 +30,18 @@ describe('worldLongGrassClear', () => {
     ).toEqual({ outcome: 'already-searched' });
   });
 
+  it('rejects search when wildlife already ate the clump', () => {
+    expect(
+      checkingWorldLongGrassSearchEligibility({
+        tileX: 4,
+        tileY: 4,
+        playerX: 4.5,
+        playerY: 4.5,
+        existingTileState: { isEaten: true },
+      })
+    ).toEqual({ outcome: 'already-eaten' });
+  });
+
   it('marks a tile searched while keeping eat state separate', () => {
     expect(
       computingWorldLongGrassSearchMutation({

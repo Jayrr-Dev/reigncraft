@@ -26,7 +26,7 @@ export type DefiningPlazaPathologyGuideEntry = {
 
 /** Subtitle shown under the Pathology panel title. */
 export const DEFINING_PLAZA_PATHOLOGY_PANEL_SUBTITLE =
-  'Contract a disease to unlock its page. Study carrier creatures for Pathology points (1 per 3 studies).' as const;
+  'Contract a disease to unlock its page. Live with it for Pathology points (1 per in-game hour), or study carrier creatures (1 point per 3 studies).' as const;
 
 /** Label shown for diseases the player has not contracted yet. */
 export const LABELING_PLAZA_PATHOLOGY_UNDISCOVERED_NAME = '???' as const;

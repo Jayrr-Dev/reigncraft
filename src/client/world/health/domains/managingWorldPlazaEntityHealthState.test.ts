@@ -91,6 +91,7 @@ describe('revivingWorldPlazaEntityHealthToFull', () => {
           expiresAtMs: nowMs + 60_000,
           symptomStrengthMultiplier: 1,
           durationMultiplier: 1,
+          pathologyStudyHoursCredited: 0,
           pendingGrants: [],
         },
       ],

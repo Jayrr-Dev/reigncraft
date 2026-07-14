@@ -6,6 +6,7 @@ import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/invent
 import { DEFINING_WORLD_PLAZA_INVENTORY_INFO_DIALOG_DATA_ATTRIBUTE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_ROW_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_INFO_ROW_STACK_VALUE_MIN_CHARS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_DISMISS,
@@ -19,8 +20,8 @@ import {
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { resolvingWorldPlazaInventoryItemDetailBadgeShellClassName } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailBadgeShellClassName';
 import { resolvingWorldPlazaInventoryItemDetailInfoRowValueClassName } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailInfoRowValueClassName';
-import { resolvingWorldPlazaInventoryItemEnchantmentBadgeShellClassName } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemEnchantmentBadgeShellClassName';
 import type { ResolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailPopoverModel';
+import { resolvingWorldPlazaInventoryItemEnchantmentBadgeShellClassName } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemEnchantmentBadgeShellClassName';
 import type { ResolvingWorldPlazaInventoryItemEnchantmentRow } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemEnchantments';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
@@ -53,8 +54,18 @@ function RenderingWorldPlazaInventoryItemInfoRow({
 }: {
   readonly row: DefiningWorldPlazaInventoryItemDetailInfoRow;
 }): React.JSX.Element {
+  const isStacked =
+    row.value.length >=
+    DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_INFO_ROW_STACK_VALUE_MIN_CHARS;
+
   return (
-    <div className={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.infoRow}>
+    <div
+      className={
+        isStacked
+          ? DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.infoRowStacked
+          : DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.infoRow
+      }
+    >
       <span
         className={
           DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.infoRowLabel
@@ -247,7 +258,9 @@ export function RenderingWorldPlazaInventoryItemInfoDialog({
         }}
       >
         <div
-          className={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.header}
+          className={
+            DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE.header
+          }
         >
           <p
             className={
@@ -308,7 +321,9 @@ export function RenderingWorldPlazaInventoryItemInfoDialog({
 
           {model.badges.length > 0 ? (
             <div
-              className={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_ROW_CLASS_NAME}
+              className={
+                DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_ROW_CLASS_NAME
+              }
               aria-label="Item badges"
             >
               {model.badges.map((badge) => (

@@ -21,6 +21,8 @@ export type PlazaSinglePlayerSavePersistedDiseaseEffect = {
   expiresAtMs: number;
   symptomStrengthMultiplier?: number;
   durationMultiplier?: number;
+  /** Whole infection hours already credited to Pathology for this instance. */
+  pathologyStudyHoursCredited?: number;
   pendingGrants: readonly {
     grantIndex: number;
     fireAtMs: number;

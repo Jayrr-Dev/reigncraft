@@ -21,7 +21,6 @@ const SCOUT_INTERVAL_MS = 2_000;
 
 export type UsingWorldPlazaHeldFourLeafCloverCharmParams = {
   readonly enabled: boolean;
-  readonly selectedSlotIndex: number | null;
   readonly inventoryState: DefiningInventoryState;
   readonly updatingInventoryState: (
     updater: (
@@ -96,23 +95,21 @@ function agingWorldPlazaFourLeafCloversFromPickupTime(
 }
 
 /**
- * Ages every four-leaf clover from pickup and applies luck while one is held.
+ * Ages every four-leaf clover from pickup and applies luck while one is
+ * carried anywhere in the inventory.
  */
 export function usingWorldPlazaHeldFourLeafCloverCharm({
   enabled,
-  selectedSlotIndex,
   inventoryState,
   updatingInventoryState,
   toggleBuffRef,
   playerPositionRef,
 }: UsingWorldPlazaHeldFourLeafCloverCharmParams): void {
   const inventoryStateRef = useRef(inventoryState);
-  const selectedSlotIndexRef = useRef(selectedSlotIndex);
   const wasLuckyActiveRef = useRef(false);
   const lastScoutAtMsRef = useRef<number | null>(null);
 
   inventoryStateRef.current = inventoryState;
-  selectedSlotIndexRef.current = selectedSlotIndex;
 
   useLayoutEffect(() => {
     if (!enabled) {
@@ -127,25 +124,25 @@ export function usingWorldPlazaHeldFourLeafCloverCharm({
     }
 
     const syncingHeldCharm = (_deltaMs: number, frameTimeMs: number): void => {
-      const slotIndex = selectedSlotIndexRef.current;
       const state = inventoryStateRef.current;
 
       updatingInventoryState((currentState) =>
         agingWorldPlazaFourLeafCloversFromPickupTime(currentState, Date.now())
       );
 
-      const slotItem =
-        slotIndex === null || slotIndex < 0 || slotIndex >= state.capacity
-          ? null
-          : state.slots[slotIndex];
-      const durabilitySnapshot =
-        slotItem &&
-        slotItem.itemTypeId === DEFINING_WORLD_PLAZA_LUCKY_CHARM_ITEM_TYPE_ID
-          ? resolvingWorldPlazaInventoryItemDurability(slotItem)
-          : null;
-      const shouldBeActive = Boolean(
-        durabilitySnapshot && durabilitySnapshot.remaining > 0
-      );
+      const shouldBeActive = state.slots.some((slot) => {
+        if (
+          !slot ||
+          slot.itemTypeId !== DEFINING_WORLD_PLAZA_LUCKY_CHARM_ITEM_TYPE_ID
+        ) {
+          return false;
+        }
+
+        const durabilitySnapshot =
+          resolvingWorldPlazaInventoryItemDurability(slot);
+
+        return Boolean(durabilitySnapshot && durabilitySnapshot.remaining > 0);
+      });
 
       if (shouldBeActive && !wasLuckyActiveRef.current) {
         registeringWorldPlazaHeldLuckyBuffBridge(true);

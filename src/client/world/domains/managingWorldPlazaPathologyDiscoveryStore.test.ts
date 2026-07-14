@@ -1,13 +1,15 @@
+import { computingPlazaPathologyTotalStudyPoints } from '@/components/home/domains/computingPlazaPathologyStudyPoints';
+import { listingPlazaPathologyDiseaseIdsCausedBySpecies } from '@/components/home/domains/resolvingPlazaPathologyCreatureDiseaseLinks';
 import {
+  creditingWorldPlazaPathologyFromInfectionHours,
   creditingWorldPlazaPathologyFromWildlifeSpeciesStudy,
+  gettingWorldPlazaPathologyInfectionStudyPointsSnapshot,
   gettingWorldPlazaPathologyLinkedCreatureStudiesSnapshot,
   gettingWorldPlazaPathologyObtainedDiseasesSnapshot,
   initializingWorldPlazaPathologyDiscoveryStore,
   recordingWorldPlazaPathologyDiseaseObtained,
   resettingWorldPlazaPathologyDiscoveryStoreForTests,
 } from '@/components/world/domains/managingWorldPlazaPathologyDiscoveryStore';
-import { computingPlazaPathologyStudyPoints } from '@/components/home/domains/computingPlazaPathologyStudyPoints';
-import { listingPlazaPathologyDiseaseIdsCausedBySpecies } from '@/components/home/domains/resolvingPlazaPathologyCreatureDiseaseLinks';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('managingWorldPlazaPathologyDiscoveryStore', () => {
@@ -25,24 +27,39 @@ describe('managingWorldPlazaPathologyDiscoveryStore', () => {
     ]);
   });
 
-  it('credits linked creature studies for diseases the species causes', () => {
+  it('credits linked creature studies across carrier diseases', () => {
     creditingWorldPlazaPathologyFromWildlifeSpeciesStudy('chicken', 1);
     creditingWorldPlazaPathologyFromWildlifeSpeciesStudy('chicken', 2);
 
     const linked =
       gettingWorldPlazaPathologyLinkedCreatureStudiesSnapshot().salmonellosis ??
       0;
-    const cuccoLinked =
+    expect(
       gettingWorldPlazaPathologyLinkedCreatureStudiesSnapshot()['cucco-rage'] ??
-      0;
-
+        0
+    ).toBeGreaterThan(0);
     expect(linked).toBe(3);
-    expect(computingPlazaPathologyStudyPoints(linked)).toBe(1);
-    // Aggressive chicken variant disease shares the chicken species id.
-    expect(cuccoLinked).toBe(3);
+    expect(computingPlazaPathologyTotalStudyPoints(linked, 0)).toBe(1);
   });
 
-  it('ignores species with no disease links', () => {
+  it('credits infection-hour Pathology points per disease', () => {
+    recordingWorldPlazaPathologyDiseaseObtained('salmonellosis');
+    creditingWorldPlazaPathologyFromInfectionHours('salmonellosis', 2);
+    creditingWorldPlazaPathologyFromInfectionHours('salmonellosis', 3);
+
+    expect(
+      gettingWorldPlazaPathologyInfectionStudyPointsSnapshot().salmonellosis
+    ).toBe(5);
+    expect(
+      computingPlazaPathologyTotalStudyPoints(
+        0,
+        gettingWorldPlazaPathologyInfectionStudyPointsSnapshot()
+          .salmonellosis ?? 0
+      )
+    ).toBe(5);
+  });
+
+  it('ignores wildlife species with no disease links', () => {
     const unlinkedSpeciesId = 'pathology-test-species-without-meat';
 
     expect(
@@ -53,6 +70,6 @@ describe('managingWorldPlazaPathologyDiscoveryStore', () => {
 
     expect(
       Object.keys(gettingWorldPlazaPathologyLinkedCreatureStudiesSnapshot())
-    ).toHaveLength(0);
+    ).toEqual([]);
   });
 });

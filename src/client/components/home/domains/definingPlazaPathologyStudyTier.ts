@@ -8,8 +8,8 @@ export type PlazaPathologyStudyTierId =
 
 /**
  * Minimum Pathology study points required to reach each tier.
- * Pathology points come from linked creature Study (see
- * `computingPlazaPathologyStudyPoints`): floor(linkedCreatureStudies / 3).
+ * Points come from infection hours (1 per in-game hour) plus linked creature
+ * Study: floor(linkedCreatureStudies / 3).
  */
 export const DEFINING_PLAZA_PATHOLOGY_STUDY_TIER_THRESHOLDS: Record<
   PlazaPathologyStudyTierId,
@@ -59,7 +59,7 @@ export const LABELING_PLAZA_PATHOLOGY_STUDY_TIER_TEASERS: Record<
   string
 > = {
   fieldNotes:
-    'Earn 1 Pathology point (3 linked creature studies) to unlock field notes.',
+    'Earn 1 Pathology point (1 in-game hour infected, or 3 linked creature studies) to unlock field notes.',
   properties:
     'Earn 5 Pathology points to reveal the symptom stages.',
   habitats:

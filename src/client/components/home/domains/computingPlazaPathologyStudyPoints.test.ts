@@ -1,5 +1,6 @@
 import {
   computingPlazaPathologyStudyPoints,
+  computingPlazaPathologyTotalStudyPoints,
   DEFINING_PLAZA_PATHOLOGY_CREATURE_STUDIES_PER_POINT,
 } from '@/components/home/domains/computingPlazaPathologyStudyPoints';
 import { describe, expect, it } from 'vitest';
@@ -21,5 +22,10 @@ describe('computingPlazaPathologyStudyPoints', () => {
   it('ignores negative and fractional inputs', () => {
     expect(computingPlazaPathologyStudyPoints(-9)).toBe(0);
     expect(computingPlazaPathologyStudyPoints(3.9)).toBe(1);
+  });
+
+  it('adds infection hours on top of creature study points', () => {
+    expect(computingPlazaPathologyTotalStudyPoints(6, 4)).toBe(6);
+    expect(computingPlazaPathologyTotalStudyPoints(2, 1)).toBe(1);
   });
 });

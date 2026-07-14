@@ -3175,7 +3175,6 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   usingWorldPlazaHeldFourLeafCloverCharm({
     enabled: isLocalGameplayEnabled,
-    selectedSlotIndex: equipment.selectedSlotIndex,
     inventoryState,
     updatingInventoryState,
     toggleBuffRef,

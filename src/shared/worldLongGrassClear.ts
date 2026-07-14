@@ -48,7 +48,8 @@ export type CheckingWorldLongGrassSearchEligibilityRequest = {
 export type CheckingWorldLongGrassSearchEligibilityResult =
   | { readonly outcome: 'eligible' }
   | { readonly outcome: 'out-of-range' }
-  | { readonly outcome: 'already-searched' };
+  | { readonly outcome: 'already-searched' }
+  | { readonly outcome: 'already-eaten' };
 
 /**
  * Validates whether a long-grass clump can be searched without mutating state.
@@ -67,6 +68,10 @@ export function checkingWorldLongGrassSearchEligibility(
 
   if (playerDistance > WORLD_LONG_GRASS_SEARCH_PLAYER_RANGE_TILES) {
     return { outcome: 'out-of-range' };
+  }
+
+  if (request.existingTileState?.isEaten) {
+    return { outcome: 'already-eaten' };
   }
 
   if (request.existingTileState?.isSearched) {
@@ -191,7 +196,10 @@ export function checkingWorldLongGrassClearEligibility(
   | { outcome: 'already-cleared' } {
   const result = checkingWorldLongGrassSearchEligibility(request);
 
-  if (result.outcome === 'already-searched') {
+  if (
+    result.outcome === 'already-searched' ||
+    result.outcome === 'already-eaten'
+  ) {
     return { outcome: 'already-cleared' };
   }
 

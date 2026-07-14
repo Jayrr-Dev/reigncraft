@@ -52,6 +52,7 @@ export function serializingWorldPlazaPlayerConditionsFromHealthState({
       expiresAtMs: diseaseEffect.expiresAtMs,
       symptomStrengthMultiplier: diseaseEffect.symptomStrengthMultiplier,
       durationMultiplier: diseaseEffect.durationMultiplier,
+      pathologyStudyHoursCredited: diseaseEffect.pathologyStudyHoursCredited,
       pendingGrants: diseaseEffect.pendingGrants.map((pendingGrant) => ({
         grantIndex: pendingGrant.grantIndex,
         fireAtMs: pendingGrant.fireAtMs,
@@ -108,6 +109,8 @@ export function parsingWorldPlazaPlayerConditions(
       expiresAtMs: diseaseEffect.expiresAtMs,
       symptomStrengthMultiplier: diseaseEffect.symptomStrengthMultiplier ?? 1,
       durationMultiplier: diseaseEffect.durationMultiplier ?? 1,
+      pathologyStudyHoursCredited:
+        diseaseEffect.pathologyStudyHoursCredited ?? 0,
       pendingGrants: diseaseEffect.pendingGrants.map((pendingGrant) => ({
         grantIndex: pendingGrant.grantIndex,
         fireAtMs: pendingGrant.fireAtMs,

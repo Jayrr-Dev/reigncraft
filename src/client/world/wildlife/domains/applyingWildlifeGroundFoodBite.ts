@@ -1,8 +1,9 @@
 /**
  * One wildlife bite from a ground-food stack at melee range.
  *
- * A bite is not instant: the animal chews for a rolled 5-10s window
- * (`pendingGroundFoodBite`), then consumes exactly one unit from the stack.
+ * Stacks and flowers chew for a rolled 5-10s window
+ * (`pendingGroundFoodBite`). Long grass uses a fixed 15s chew.
+ * Then consumes exactly one unit / tile.
  *
  * @module components/world/wildlife/domains/applyingWildlifeGroundFoodBite
  */
@@ -19,6 +20,7 @@ import {
 import {
   DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MAX_MS,
   DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MIN_MS,
+  DEFINING_WILDLIFE_GROUND_GRASS_BITE_DELAY_MS,
 } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
@@ -30,16 +32,16 @@ import {
   consumingWildlifeGroundFlowerBridge,
 } from '@/components/world/wildlife/domains/managingWildlifeGroundFlowerBridge';
 import {
-  checkingWildlifeGroundGrassOptimisticIsCleared,
-  consumingWildlifeGroundGrassBridge,
-} from '@/components/world/wildlife/domains/managingWildlifeGroundGrassBridge';
-import {
   consumingWildlifeGroundFoodBridgeUnit,
   findingWildlifeGroundFoodItemById,
 } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
+import {
+  checkingWildlifeGroundGrassOptimisticIsCleared,
+  consumingWildlifeGroundGrassBridge,
+} from '@/components/world/wildlife/domains/managingWildlifeGroundGrassBridge';
 import { refillingWildlifeHungerAfterGroundFlower } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundFlower';
-import { refillingWildlifeHungerAfterGroundGrass } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundGrass';
 import { refillingWildlifeHungerAfterGroundFood } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundFood';
+import { refillingWildlifeHungerAfterGroundGrass } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundGrass';
 import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodWorldPoint';
 
 function rollingWildlifeGroundFoodBiteDelayMs(): number {
@@ -193,7 +195,7 @@ function applyingWildlifeGroundGrassBite(
     return applyingWildlifeIdleChewStance(instance, {
       groundItemId,
       startedAtMs: nowMs,
-      readyAtMs: nowMs + rollingWildlifeGroundFoodBiteDelayMs(),
+      readyAtMs: nowMs + DEFINING_WILDLIFE_GROUND_GRASS_BITE_DELAY_MS,
     });
   }
 
@@ -227,7 +229,7 @@ function applyingWildlifeGroundGrassBite(
   };
 }
 
-/** Chews for 5-10s, then consumes one ground-food unit or biome flower. */
+/** Chews, then consumes one ground-food unit, biome flower, or long-grass tile. */
 export function applyingWildlifeGroundFoodBite(
   instance: DefiningWildlifeInstance,
   species: DefiningWildlifeSpeciesDefinition,

@@ -237,7 +237,10 @@ export function clearingWorldPlazaLocalLongGrass(
     return { outcome: 'cleared' };
   }
 
-  if (result.outcome === 'already-searched') {
+  if (
+    result.outcome === 'already-searched' ||
+    result.outcome === 'already-eaten'
+  ) {
     return { outcome: 'already-cleared' };
   }
 

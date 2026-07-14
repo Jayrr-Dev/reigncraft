@@ -21,7 +21,7 @@ export function resolvingPlazaHerbariumCloverLuckyEffectStatRows(): readonly Pla
   return [
     {
       label: 'Disease risk',
-      value: `×${DEFINING_WORLD_PLAZA_LUCKY_DISEASE_CONTRACTION_MULTIPLIER} while held`,
+      value: `×${DEFINING_WORLD_PLAZA_LUCKY_DISEASE_CONTRACTION_MULTIPLIER} while carried`,
     },
     {
       label: 'Damage taken',
@@ -41,7 +41,7 @@ export function resolvingPlazaHerbariumCloverLuckyEffectStatRows(): readonly Pla
     },
     {
       label: 'Charm wear',
-      value: `${DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DECAY_IN_GAME_DAYS} in-game day while held (~${decayMinutes} min real)`,
+      value: `${DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DECAY_IN_GAME_DAYS} in-game day after picking (~${decayMinutes} min real)`,
     },
   ];
 }

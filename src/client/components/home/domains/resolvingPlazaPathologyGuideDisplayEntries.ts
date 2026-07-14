@@ -1,4 +1,4 @@
-import { computingPlazaPathologyStudyPoints } from '@/components/home/domains/computingPlazaPathologyStudyPoints';
+import { computingPlazaPathologyTotalStudyPoints } from '@/components/home/domains/computingPlazaPathologyStudyPoints';
 import {
   DEFINING_PLAZA_PATHOLOGY_GUIDE_ENTRIES,
   LABELING_PLAZA_PATHOLOGY_FLOWER_SOURCE,
@@ -42,7 +42,12 @@ export type PlazaPathologyGuideDisplayEntry = {
   isFullyStudied: boolean;
   /** Linked creature Study points (pre-floor). */
   linkedCreatureStudies: number;
-  /** Pathology points: floor(linkedCreatureStudies / 3), 0 when not obtained. */
+  /** Pathology points from living with the disease (1 per in-game hour). */
+  infectionStudyPoints: number;
+  /**
+   * Pathology points: floor(linkedCreatureStudies / 3) + infection hours,
+   * 0 when not obtained.
+   */
   studyCount: number;
   studyTierId: PlazaPathologyStudyTierId;
   severity: DefiningWorldPlazaEntityDiseaseSeverity;
@@ -90,7 +95,7 @@ function resolvingPlazaPathologyDiscoveryState(
 }
 
 /**
- * Merges Pathology catalog data with obtained + linked-creature study progress.
+ * Merges Pathology catalog data with obtained + study progress.
  *
  * Entries stay locked until the disease is obtained. Study points only apply
  * for display/tiers once obtained (silent linked totals may already exist).
@@ -99,15 +104,22 @@ export function resolvingPlazaPathologyGuideDisplayEntries(
   obtainedDiseaseIds: ReadonlySet<DefiningWorldPlazaEntityDiseaseId>,
   linkedCreatureStudiesByDiseaseId: Readonly<
     Partial<Record<DefiningWorldPlazaEntityDiseaseId, number>>
-  >
+  >,
+  infectionStudyPointsByDiseaseId: Readonly<
+    Partial<Record<DefiningWorldPlazaEntityDiseaseId, number>>
+  > = {}
 ): PlazaPathologyGuideDisplayEntry[] {
   return DEFINING_PLAZA_PATHOLOGY_GUIDE_ENTRIES.map(
     (entry: DefiningPlazaPathologyGuideEntry) => {
       const isObtained = obtainedDiseaseIds.has(entry.diseaseId);
       const linkedCreatureStudies =
         linkedCreatureStudiesByDiseaseId[entry.diseaseId] ?? 0;
-      const rawStudyCount =
-        computingPlazaPathologyStudyPoints(linkedCreatureStudies);
+      const infectionStudyPoints =
+        infectionStudyPointsByDiseaseId[entry.diseaseId] ?? 0;
+      const rawStudyCount = computingPlazaPathologyTotalStudyPoints(
+        linkedCreatureStudies,
+        infectionStudyPoints
+      );
       // Gate progress behind obtained: locked pages show zero study.
       const studyCount = isObtained ? rawStudyCount : 0;
       const discoveryState = resolvingPlazaPathologyDiscoveryState(
@@ -143,6 +155,7 @@ export function resolvingPlazaPathologyGuideDisplayEntries(
         isStudied,
         isFullyStudied,
         linkedCreatureStudies,
+        infectionStudyPoints,
         studyCount,
         studyTierId: resolvingPlazaPathologyStudyTierId(studyCount),
         severity: entry.severity,

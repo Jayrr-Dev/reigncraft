@@ -1,11 +1,11 @@
 import { resolvingWorldPlazaPathologyDiscoveryStorageKey } from '@/components/world/domains/definingWorldPlazaPathologyDiscoveryConstants';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 
-function formattingWorldPlazaPathologyLinkedStudiesRecord(
-  linkedStudiesById: ReadonlyMap<DefiningWorldPlazaEntityDiseaseId, number>
+function formattingWorldPlazaPathologyCountRecord(
+  countsById: ReadonlyMap<DefiningWorldPlazaEntityDiseaseId, number>
 ): Record<string, number> {
   return Object.fromEntries(
-    [...linkedStudiesById.entries()]
+    [...countsById.entries()]
       .filter(([, count]) => count > 0)
       .sort(([leftId], [rightId]) => leftId.localeCompare(rightId))
   );
@@ -22,6 +22,10 @@ export function writingWorldPlazaPathologyDiscoveryToStorage(
   linkedCreatureStudiesByDiseaseId: ReadonlyMap<
     DefiningWorldPlazaEntityDiseaseId,
     number
+  >,
+  infectionStudyPointsByDiseaseId: ReadonlyMap<
+    DefiningWorldPlazaEntityDiseaseId,
+    number
   >
 ): void {
   if (typeof window === 'undefined') {
@@ -32,8 +36,11 @@ export function writingWorldPlazaPathologyDiscoveryToStorage(
     resolvingWorldPlazaPathologyDiscoveryStorageKey(storageOwnerId),
     JSON.stringify({
       obtainedDiseases: [...obtainedDiseaseIds].sort(),
-      linkedCreatureStudies: formattingWorldPlazaPathologyLinkedStudiesRecord(
+      linkedCreatureStudies: formattingWorldPlazaPathologyCountRecord(
         linkedCreatureStudiesByDiseaseId
+      ),
+      infectionStudyPoints: formattingWorldPlazaPathologyCountRecord(
+        infectionStudyPointsByDiseaseId
       ),
     })
   );

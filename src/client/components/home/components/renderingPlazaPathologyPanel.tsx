@@ -12,6 +12,7 @@ import {
 } from '@/components/home/domains/resolvingPlazaPathologyStudyTier';
 import { Icon } from '@/components/ui/icon';
 import {
+  gettingWorldPlazaPathologyInfectionStudyPointsSnapshot,
   gettingWorldPlazaPathologyLinkedCreatureStudiesSnapshot,
   gettingWorldPlazaPathologyObtainedDiseasesSnapshot,
   subscribingWorldPlazaPathologyDiscovery,
@@ -141,6 +142,11 @@ export function RenderingPlazaPathologyPanel({
     gettingWorldPlazaPathologyLinkedCreatureStudiesSnapshot,
     () => ({})
   );
+  const infectionStudyPointsByDiseaseId = useSyncExternalStore(
+    subscribingWorldPlazaPathologyDiscovery,
+    gettingWorldPlazaPathologyInfectionStudyPointsSnapshot,
+    () => ({})
+  );
   const obtainedSet = useMemo(
     () => new Set(obtainedDiseaseIds),
     [obtainedDiseaseIds]
@@ -149,9 +155,14 @@ export function RenderingPlazaPathologyPanel({
     () =>
       resolvingPlazaPathologyGuideDisplayEntries(
         obtainedSet,
-        linkedCreatureStudiesByDiseaseId
+        linkedCreatureStudiesByDiseaseId,
+        infectionStudyPointsByDiseaseId
       ),
-    [linkedCreatureStudiesByDiseaseId, obtainedSet]
+    [
+      infectionStudyPointsByDiseaseId,
+      linkedCreatureStudiesByDiseaseId,
+      obtainedSet,
+    ]
   );
   const resolvingPlazaPathologyEntryId = useCallback(
     (entry: PlazaPathologyGuideDisplayEntry): string =>

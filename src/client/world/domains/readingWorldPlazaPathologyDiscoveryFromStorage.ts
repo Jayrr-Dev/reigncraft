@@ -14,6 +14,10 @@ export type WorldPlazaPathologyDiscoverySnapshot = {
     DefiningWorldPlazaEntityDiseaseId,
     number
   >;
+  infectionStudyPointsByDiseaseId: ReadonlyMap<
+    DefiningWorldPlazaEntityDiseaseId,
+    number
+  >;
 };
 
 function checkingWorldPlazaPathologyDiseaseId(
@@ -35,14 +39,14 @@ function readingWorldPlazaPathologyDiseaseIdSet(
   return new Set(value.filter(checkingWorldPlazaPathologyDiseaseId));
 }
 
-function readingWorldPlazaPathologyLinkedCreatureStudies(
+function readingWorldPlazaPathologyCountRecord(
   value: unknown
 ): Map<DefiningWorldPlazaEntityDiseaseId, number> {
   if (!value || typeof value !== 'object') {
     return new Map();
   }
 
-  const linkedStudies = new Map<DefiningWorldPlazaEntityDiseaseId, number>();
+  const counts = new Map<DefiningWorldPlazaEntityDiseaseId, number>();
 
   for (const [rawId, rawCount] of Object.entries(value)) {
     if (!checkingWorldPlazaPathologyDiseaseId(rawId)) {
@@ -55,17 +59,18 @@ function readingWorldPlazaPathologyLinkedCreatureStudies(
         : 0;
 
     if (parsedCount > 0) {
-      linkedStudies.set(rawId, parsedCount);
+      counts.set(rawId, parsedCount);
     }
   }
 
-  return linkedStudies;
+  return counts;
 }
 
 const WORLD_PLAZA_PATHOLOGY_DISCOVERY_EMPTY_SNAPSHOT: WorldPlazaPathologyDiscoverySnapshot =
   {
     obtainedDiseaseIds: new Set(),
     linkedCreatureStudiesByDiseaseId: new Map(),
+    infectionStudyPointsByDiseaseId: new Map(),
   };
 
 /**
@@ -99,10 +104,12 @@ export function readingWorldPlazaPathologyDiscoveryFromStorage(
       obtainedDiseaseIds: readingWorldPlazaPathologyDiseaseIdSet(
         Reflect.get(parsedValue, 'obtainedDiseases')
       ),
-      linkedCreatureStudiesByDiseaseId:
-        readingWorldPlazaPathologyLinkedCreatureStudies(
-          Reflect.get(parsedValue, 'linkedCreatureStudies')
-        ),
+      linkedCreatureStudiesByDiseaseId: readingWorldPlazaPathologyCountRecord(
+        Reflect.get(parsedValue, 'linkedCreatureStudies')
+      ),
+      infectionStudyPointsByDiseaseId: readingWorldPlazaPathologyCountRecord(
+        Reflect.get(parsedValue, 'infectionStudyPoints')
+      ),
     };
   } catch {
     return WORLD_PLAZA_PATHOLOGY_DISCOVERY_EMPTY_SNAPSHOT;

@@ -17,6 +17,7 @@ describe('resolvingWorldPlazaEntityDiseaseHudDetailLines', () => {
         expiresAtMs: symptomsStartAtMs + 100_000,
         symptomStrengthMultiplier: 1,
         durationMultiplier: 1,
+        pathologyStudyHoursCredited: 0,
         pendingGrants: [],
       },
       worldEpochMs: symptomsStartAtMs + 1_000,

@@ -1,11 +1,10 @@
 /**
- * Pathology study-point math from linked creature Bestiary studies.
+ * Pathology study-point math.
  *
- * Formula (deterministic): `floor(linkedCreatureStudies / 3)`.
- * Each Bestiary Study point awarded on a species that can cause disease X
- * increments that disease's linkedCreatureStudies by the same amount (large
- * animals may award 1–3 per corpse). Every three linked points become one
- * Pathology study point used for tier unlocks.
+ * Sources (additive):
+ * 1. Linked creature Bestiary studies: `floor(linkedCreatureStudies / 3)`.
+ * 2. Infection hours: 1 Pathology point per completed in-game hour while
+ *    carrying that disease (see computingWorldPlazaPathologyInfectionStudyHours).
  *
  * @module components/home/domains/computingPlazaPathologyStudyPoints
  */
@@ -25,5 +24,21 @@ export function computingPlazaPathologyStudyPoints(
 
   return Math.floor(
     normalized / DEFINING_PLAZA_PATHOLOGY_CREATURE_STUDIES_PER_POINT
+  );
+}
+
+/**
+ * Total Pathology study points from creature studies plus infection hours.
+ *
+ * @param linkedCreatureStudies - Sum of Bestiary study points from carriers.
+ * @param infectionStudyPoints - Points earned while infected with the disease.
+ */
+export function computingPlazaPathologyTotalStudyPoints(
+  linkedCreatureStudies: number,
+  infectionStudyPoints = 0
+): number {
+  return (
+    computingPlazaPathologyStudyPoints(linkedCreatureStudies) +
+    Math.max(0, Math.floor(infectionStudyPoints))
   );
 }

@@ -1,14 +1,15 @@
 'use client';
 
 /**
- * Outlined Pet / Name? / care actions above a companion (campfire-style stack).
+ * Outlined Name? / companion name with care + command badges above.
  *
  * Named Familiar+ pets: name opens the panel. After 5s near or 5s name hover/tap,
- * Pet, Feed, and yellow command labels appear under the name.
+ * Pet, Feed, and command badges appear above the name.
  *
  * @module components/world/wildlife/components/renderingWildlifeDocileBetrayInteractionLabels
  */
 
+import { Icon } from '@/components/ui/icon';
 import {
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
   computingWorldPlazaCameraZoomedDomOverlayPositionTransform,
@@ -16,11 +17,15 @@ import {
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
-import {
-  DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME,
-  DEFINING_WORLD_PLAZA_COMPANION_INTERACTION_LABEL_BUTTON_CLASS_NAME,
-} from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
+import { DEFINING_WORLD_PLAZA_COMPANION_INTERACTION_LABEL_BUTTON_CLASS_NAME } from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
 import { RenderingWorldPlazaTimedInteractionLabelRow } from '@/components/world/interaction/components/renderingWorldPlazaTimedInteractionLabelRow';
+import { RenderingWorldPlazaTimedInteractionProgressRing } from '@/components/world/interaction/components/renderingWorldPlazaTimedInteractionProgressRing';
+import { checkingWorldPlazaTimedInteractionProgressRingVisible } from '@/components/world/interaction/domains/checkingWorldPlazaTimedInteractionProgressMatchesTarget';
+import {
+  DEFINING_WORLD_PLAZA_TIMED_INTERACTION_LABEL_RING_SLOT_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_TIMED_INTERACTION_LABEL_ROW_CLASS_NAME,
+} from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionLabelUiConstants';
+import { DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_LABEL_GAP_PX } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressConstants';
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
 import { DEFINING_WILDLIFE_DOCILE_PET_LABEL_OFFSET_ABOVE_NAME_TAG_PX } from '@/components/world/wildlife/domains/definingWildlifeDocilePetConstants';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -38,11 +43,19 @@ import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/w
 import { resolvingWorldPlazaWildlifeNameTagScreenPoint } from '@/components/world/wildlife/domains/resolvingWorldPlazaWildlifeNameTagScreenPoint';
 import { checkingWildlifePetNeedsOwnerFeed } from '@/components/world/wildlife/pets/domains/checkingWildlifePetNeedsOwnerFeed';
 import {
+  DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED_ICON_ID,
+  DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTION_PET_ICON_ID,
   DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTIONS_REVEAL_MS,
+  DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX,
   LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED,
   LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_PET,
+  LABELING_WILDLIFE_PET_COMPANION_CARE_BADGE_TOOLBAR,
   STYLING_WILDLIFE_PET_COMPANION_CARE_ACTION_STACK_CLASS_NAME,
-  STYLING_WILDLIFE_PET_COMPANION_COMMAND_LABEL_BUTTON_CLASS_NAME,
+  STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_CLASS_NAME,
+  STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_CLASS_NAME,
+  STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_ROW_CLASS_NAME,
+  STYLING_WILDLIFE_PET_COMPANION_COMMAND_BADGE_ACTIVE_CLASS_NAME,
+  STYLING_WILDLIFE_PET_COMPANION_COMMAND_BADGE_CLASS_NAME,
 } from '@/components/world/wildlife/pets/domains/definingWildlifePetCompanionCareActionConstants';
 import { DEFINING_WILDLIFE_PET_MODAL_COMMAND_OPTIONS } from '@/components/world/wildlife/pets/domains/definingWildlifePetModalConstants';
 import type { DefiningWildlifePetCommandId } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
@@ -457,6 +470,15 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
 
   const showNamedCareStack =
     liveLabelSnapshot.hasPermanentName && areCareActionsRevealed;
+  const isPetProgressRingVisible =
+    checkingWorldPlazaTimedInteractionProgressRingVisible(
+      timedInteractionProgressSnapshot,
+      pending.instanceId
+    );
+  const canActivateFeed = canFeedPet && liveLabelSnapshot.needsOwnerFeed;
+  const petBadgeLabel = isPetting
+    ? resolvingWildlifeDocilePettingLabel()
+    : LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_PET;
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-visible">
@@ -474,6 +496,161 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
               STYLING_WILDLIFE_PET_COMPANION_CARE_ACTION_STACK_CLASS_NAME
             }
           >
+            {showNamedCareStack ? (
+              <div
+                role="toolbar"
+                aria-label={LABELING_WILDLIFE_PET_COMPANION_CARE_BADGE_TOOLBAR}
+                className={
+                  STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_ROW_CLASS_NAME
+                }
+              >
+                <div
+                  className={
+                    DEFINING_WORLD_PLAZA_TIMED_INTERACTION_LABEL_ROW_CLASS_NAME
+                  }
+                >
+                  <button
+                    type="button"
+                    {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+                    className={
+                      STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_CLASS_NAME
+                    }
+                    aria-label={petBadgeLabel}
+                    title={petBadgeLabel}
+                    disabled={isPetting}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+
+                      const currentPending = pendingRef.current;
+
+                      if (!currentPending || isPetting) {
+                        return;
+                      }
+
+                      onBetrayRef.current(currentPending);
+                    }}
+                  >
+                    <Icon
+                      icon={
+                        DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTION_PET_ICON_ID
+                      }
+                      width={
+                        DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX
+                      }
+                      height={
+                        DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX
+                      }
+                      className={
+                        STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_CLASS_NAME
+                      }
+                      aria-hidden
+                    />
+                    <span>{petBadgeLabel}</span>
+                  </button>
+                  {isPetProgressRingVisible ? (
+                    <div
+                      className={
+                        DEFINING_WORLD_PLAZA_TIMED_INTERACTION_LABEL_RING_SLOT_CLASS_NAME
+                      }
+                      style={{
+                        marginLeft: `${DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_LABEL_GAP_PX}px`,
+                      }}
+                    >
+                      <RenderingWorldPlazaTimedInteractionProgressRing
+                        snapshot={timedInteractionProgressSnapshot}
+                        progressRatioRef={timedInteractionProgressRatioRef}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+
+                <button
+                  type="button"
+                  {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+                  className={
+                    STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_CLASS_NAME
+                  }
+                  aria-label={LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED}
+                  title={LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED}
+                  disabled={!canActivateFeed}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    if (!canActivateFeed) {
+                      return;
+                    }
+
+                    onFeedPetRef.current(pending.instanceId);
+                  }}
+                >
+                  <Icon
+                    icon={
+                      DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED_ICON_ID
+                    }
+                    width={
+                      DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX
+                    }
+                    height={
+                      DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX
+                    }
+                    className={
+                      STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_CLASS_NAME
+                    }
+                    aria-hidden
+                  />
+                  <span>
+                    {LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED}
+                  </span>
+                </button>
+
+                {availableCommandOptions.map((option) => {
+                  const isActive =
+                    liveLabelSnapshot.activeCommand === option.commandId;
+
+                  return (
+                    <button
+                      key={option.commandId}
+                      type="button"
+                      {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+                      className={
+                        isActive
+                          ? `${STYLING_WILDLIFE_PET_COMPANION_COMMAND_BADGE_CLASS_NAME} ${STYLING_WILDLIFE_PET_COMPANION_COMMAND_BADGE_ACTIVE_CLASS_NAME}`
+                          : STYLING_WILDLIFE_PET_COMPANION_COMMAND_BADGE_CLASS_NAME
+                      }
+                      aria-label={option.label}
+                      aria-pressed={isActive}
+                      title={option.label}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        onSetPetCommandRef.current(
+                          pending.instanceId,
+                          option.commandId
+                        );
+                      }}
+                    >
+                      <Icon
+                        icon={option.iconId}
+                        width={
+                          DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX
+                        }
+                        height={
+                          DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX
+                        }
+                        className={
+                          STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_CLASS_NAME
+                        }
+                        aria-hidden
+                      />
+                      <span>{option.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
+
             <button
               type="button"
               {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
@@ -492,81 +669,6 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
             >
               {liveLabelSnapshot.label}
             </button>
-
-            {showNamedCareStack ? (
-              <>
-                <RenderingWorldPlazaTimedInteractionLabelRow
-                  label={
-                    isPetting
-                      ? resolvingWildlifeDocilePettingLabel()
-                      : LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_PET
-                  }
-                  targetKey={pending.instanceId}
-                  progressSnapshot={timedInteractionProgressSnapshot}
-                  progressRatioRef={timedInteractionProgressRatioRef}
-                  onActivate={() => {
-                    const currentPending = pendingRef.current;
-
-                    if (!currentPending || isPetting) {
-                      return;
-                    }
-
-                    onBetrayRef.current(currentPending);
-                  }}
-                />
-                <button
-                  type="button"
-                  {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-                  className={
-                    DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME
-                  }
-                  disabled={!canFeedPet || !liveLabelSnapshot.needsOwnerFeed}
-                  style={
-                    canFeedPet && liveLabelSnapshot.needsOwnerFeed
-                      ? undefined
-                      : { opacity: 0.45 }
-                  }
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    if (!canFeedPet || !liveLabelSnapshot.needsOwnerFeed) {
-                      return;
-                    }
-
-                    onFeedPetRef.current(pending.instanceId);
-                  }}
-                >
-                  {LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED}
-                </button>
-                {availableCommandOptions.map((option) => {
-                  const isActive =
-                    liveLabelSnapshot.activeCommand === option.commandId;
-
-                  return (
-                    <button
-                      key={option.commandId}
-                      type="button"
-                      {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-                      className={
-                        STYLING_WILDLIFE_PET_COMPANION_COMMAND_LABEL_BUTTON_CLASS_NAME
-                      }
-                      style={isActive ? { opacity: 1 } : { opacity: 0.82 }}
-                      onClick={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        onSetPetCommandRef.current(
-                          pending.instanceId,
-                          option.commandId
-                        );
-                      }}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
-              </>
-            ) : null}
           </div>
         ) : (
           <RenderingWorldPlazaTimedInteractionLabelRow

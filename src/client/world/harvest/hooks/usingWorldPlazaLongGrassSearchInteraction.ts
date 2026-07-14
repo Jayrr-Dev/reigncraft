@@ -9,6 +9,7 @@ import {
   formattingWorldPlazaClearedLongGrassTileKey,
   searchingWorldPlazaLocalLongGrass,
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
+import { checkingWorldPlazaRuntimeLongGrassIsCleared } from '@/components/world/harvest/domains/registeringWorldPlazaClearedLongGrassLookup';
 import type { ListingWorldPlazaLongGrassInInteractionRangeEntry } from '@/components/world/harvest/hooks/usingWorldPlazaLongGrassSearchProgress';
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import { DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_PICKED_AT_MS_METADATA_KEY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverConstants';
@@ -110,6 +111,12 @@ export function usingWorldPlazaLongGrassSearchInteraction({
       const itemTypeId =
         resolvingWorldPlazaCloverItemTypeIdFromLootKind(lootKind);
 
+      if (
+        checkingWorldPlazaRuntimeLongGrassIsCleared(entry.tileX, entry.tileY)
+      ) {
+        return false;
+      }
+
       const rangeCheck = checkingWorldLongGrassSearchEligibility({
         tileX: entry.tileX,
         tileY: entry.tileY,
@@ -123,7 +130,10 @@ export function usingWorldPlazaLongGrassSearchInteraction({
         return false;
       }
 
-      if (rangeCheck.outcome === 'already-searched') {
+      if (
+        rangeCheck.outcome === 'already-searched' ||
+        rangeCheck.outcome === 'already-eaten'
+      ) {
         return false;
       }
 
@@ -165,6 +175,33 @@ export function usingWorldPlazaLongGrassSearchInteraction({
       isCompletionPendingRef.current = true;
 
       try {
+        const tileKey = formattingWorldPlazaClearedLongGrassTileKey(
+          entry.tileX,
+          entry.tileY
+        );
+
+        if (
+          checkingWorldPlazaRuntimeLongGrassIsCleared(entry.tileX, entry.tileY)
+        ) {
+          return;
+        }
+
+        const eligibility = checkingWorldLongGrassSearchEligibility({
+          tileX: entry.tileX,
+          tileY: entry.tileY,
+          playerX: playerPosition.x,
+          playerY: playerPosition.y,
+          existingTileState: clearedLongGrassStateByTileKey.get(tileKey),
+        });
+
+        if (eligibility.outcome !== 'eligible') {
+          if (eligibility.outcome === 'out-of-range') {
+            showingGameplayHudToast('Move closer to search this grass.');
+          }
+
+          return;
+        }
+
         const lootKind = resolvingWorldCloverSearchLootKindAtTileIndex(
           entry.tileX,
           entry.tileY
@@ -241,11 +278,6 @@ export function usingWorldPlazaLongGrassSearchInteraction({
 
         recordingWorldPlazaHerbariumCloverStudied(lootKind);
 
-        const searchedTileKey = formattingWorldPlazaClearedLongGrassTileKey(
-          entry.tileX,
-          entry.tileY
-        );
-
         queryClient.setQueryData(
           [
             DEFINING_WORLD_PLAZA_CLEARED_LONG_GRASS_QUERY_KEY_ROOT,
@@ -257,9 +289,9 @@ export function usingWorldPlazaLongGrassSearchInteraction({
               | undefined
           ) => {
             const next = new Map(previous ?? []);
-            const existing = next.get(searchedTileKey);
+            const existing = next.get(tileKey);
 
-            next.set(searchedTileKey, {
+            next.set(tileKey, {
               ...existing,
               isSearched: true,
             });
@@ -276,6 +308,7 @@ export function usingWorldPlazaLongGrassSearchInteraction({
       }
     },
     [
+      clearedLongGrassStateByTileKey,
       persistenceOwnerId,
       playerPositionRef,
       queryClient,

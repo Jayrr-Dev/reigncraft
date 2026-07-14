@@ -1,11 +1,11 @@
 /**
- * Module-level store for Pathology obtained diseases and linked creature studies.
+ * Module-level store for Pathology obtained diseases and study progress.
  *
  * LocalStorage-only for now; no cloud save mirror.
  *
- * Study formula: each Bestiary Study on a carrier species adds its study points
- * to every disease that species can cause. Pathology points =
- * floor(linkedCreatureStudies / 3) (see computingPlazaPathologyStudyPoints).
+ * Study sources (additive):
+ * - Linked creature Bestiary studies → floor(linked / 3)
+ * - Infection hours → 1 Pathology point per in-game hour while infected
  *
  * @module components/world/domains/managingWorldPlazaPathologyDiscoveryStore
  */
@@ -22,7 +22,7 @@ const managingWorldPlazaPathologyDiscoverySubscribers = new Set<() => void>();
 const MANAGING_WORLD_PLAZA_PATHOLOGY_DISCOVERY_EMPTY_SNAPSHOT: readonly DefiningWorldPlazaEntityDiseaseId[] =
   [];
 
-const MANAGING_WORLD_PLAZA_PATHOLOGY_DISCOVERY_EMPTY_LINKED_STUDIES: Readonly<
+const MANAGING_WORLD_PLAZA_PATHOLOGY_DISCOVERY_EMPTY_COUNTS: Readonly<
   Partial<Record<DefiningWorldPlazaEntityDiseaseId, number>>
 > = {};
 
@@ -31,12 +31,17 @@ let managingWorldPlazaPathologyDiscoveryObtainedDiseaseIds =
   new Set<DefiningWorldPlazaEntityDiseaseId>();
 let managingWorldPlazaPathologyDiscoveryLinkedCreatureStudiesByDiseaseId =
   new Map<DefiningWorldPlazaEntityDiseaseId, number>();
+let managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId =
+  new Map<DefiningWorldPlazaEntityDiseaseId, number>();
 
 let managingWorldPlazaPathologyDiscoveryObtainedSnapshotCache: readonly DefiningWorldPlazaEntityDiseaseId[] =
   MANAGING_WORLD_PLAZA_PATHOLOGY_DISCOVERY_EMPTY_SNAPSHOT;
 let managingWorldPlazaPathologyDiscoveryLinkedStudiesSnapshotCache: Readonly<
   Partial<Record<DefiningWorldPlazaEntityDiseaseId, number>>
-> = MANAGING_WORLD_PLAZA_PATHOLOGY_DISCOVERY_EMPTY_LINKED_STUDIES;
+> = MANAGING_WORLD_PLAZA_PATHOLOGY_DISCOVERY_EMPTY_COUNTS;
+let managingWorldPlazaPathologyDiscoveryInfectionStudiesSnapshotCache: Readonly<
+  Partial<Record<DefiningWorldPlazaEntityDiseaseId, number>>
+> = MANAGING_WORLD_PLAZA_PATHOLOGY_DISCOVERY_EMPTY_COUNTS;
 
 function refreshingWorldPlazaPathologyDiscoverySnapshotCaches(): void {
   managingWorldPlazaPathologyDiscoveryObtainedSnapshotCache =
@@ -47,9 +52,17 @@ function refreshingWorldPlazaPathologyDiscoverySnapshotCaches(): void {
   managingWorldPlazaPathologyDiscoveryLinkedStudiesSnapshotCache =
     managingWorldPlazaPathologyDiscoveryLinkedCreatureStudiesByDiseaseId.size ===
     0
-      ? MANAGING_WORLD_PLAZA_PATHOLOGY_DISCOVERY_EMPTY_LINKED_STUDIES
+      ? MANAGING_WORLD_PLAZA_PATHOLOGY_DISCOVERY_EMPTY_COUNTS
       : Object.fromEntries([
           ...managingWorldPlazaPathologyDiscoveryLinkedCreatureStudiesByDiseaseId.entries(),
+        ]);
+
+  managingWorldPlazaPathologyDiscoveryInfectionStudiesSnapshotCache =
+    managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId.size ===
+    0
+      ? MANAGING_WORLD_PLAZA_PATHOLOGY_DISCOVERY_EMPTY_COUNTS
+      : Object.fromEntries([
+          ...managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId.entries(),
         ]);
 }
 
@@ -64,7 +77,8 @@ function persistingWorldPlazaPathologyDiscovery(): void {
   writingWorldPlazaPathologyDiscoveryToStorage(
     managingWorldPlazaPathologyDiscoveryStorageOwnerId,
     managingWorldPlazaPathologyDiscoveryObtainedDiseaseIds,
-    managingWorldPlazaPathologyDiscoveryLinkedCreatureStudiesByDiseaseId
+    managingWorldPlazaPathologyDiscoveryLinkedCreatureStudiesByDiseaseId,
+    managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId
   );
 }
 
@@ -88,6 +102,8 @@ export function initializingWorldPlazaPathologyDiscoveryStore(
   );
   managingWorldPlazaPathologyDiscoveryLinkedCreatureStudiesByDiseaseId =
     new Map(snapshot.linkedCreatureStudiesByDiseaseId);
+  managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId =
+    new Map(snapshot.infectionStudyPointsByDiseaseId);
   refreshingWorldPlazaPathologyDiscoverySnapshotCaches();
   notifyingWorldPlazaPathologyDiscoverySubscribers();
 }
@@ -102,6 +118,13 @@ export function gettingWorldPlazaPathologyLinkedCreatureStudiesSnapshot(): Reado
   Partial<Record<DefiningWorldPlazaEntityDiseaseId, number>>
 > {
   return managingWorldPlazaPathologyDiscoveryLinkedStudiesSnapshotCache;
+}
+
+/** Returns per-disease Pathology points earned from infection hours. */
+export function gettingWorldPlazaPathologyInfectionStudyPointsSnapshot(): Readonly<
+  Partial<Record<DefiningWorldPlazaEntityDiseaseId, number>>
+> {
+  return managingWorldPlazaPathologyDiscoveryInfectionStudiesSnapshotCache;
 }
 
 /**
@@ -128,8 +151,8 @@ export function recordingWorldPlazaPathologyDiseaseObtained(
  * Credits Pathology linked-creature study totals from a Bestiary Study.
  *
  * Adds `studyPoints` to every disease the species can cause. Pathology UI
- * study points are floor(linked / 3) and only display once the disease is
- * obtained.
+ * study points are floor(linked / 3) plus infection hours, and only display
+ * once the disease is obtained.
  *
  * @param speciesId - Wildlife species studied on a corpse.
  * @param studyPoints - Bestiary study points awarded for this Study.
@@ -167,6 +190,40 @@ export function creditingWorldPlazaPathologyFromWildlifeSpeciesStudy(
 }
 
 /**
+ * Credits Pathology study points earned by living with a disease.
+ *
+ * @param diseaseId - Disease the player is (or was) carrying.
+ * @param studyPoints - Whole infection hours to award (1 point each).
+ */
+export function creditingWorldPlazaPathologyFromInfectionHours(
+  diseaseId: DefiningWorldPlazaEntityDiseaseId,
+  studyPoints: number
+): void {
+  const awardedStudyPoints = Math.max(0, Math.floor(studyPoints));
+
+  if (awardedStudyPoints <= 0) {
+    return;
+  }
+
+  managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId =
+    new Map(
+      managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId
+    );
+
+  const nextInfectionPoints =
+    (managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId.get(
+      diseaseId
+    ) ?? 0) + awardedStudyPoints;
+  managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId.set(
+    diseaseId,
+    nextInfectionPoints
+  );
+
+  persistingWorldPlazaPathologyDiscovery();
+  notifyingWorldPlazaPathologyDiscoverySubscribers();
+}
+
+/**
  * Subscribes to Pathology discovery changes.
  *
  * @param onStoreChange - Callback invoked when discovery state changes.
@@ -198,6 +255,8 @@ export function resettingWorldPlazaPathologyDiscoveryStoreForTests(): void {
   managingWorldPlazaPathologyDiscoveryStorageOwnerId = null;
   managingWorldPlazaPathologyDiscoveryObtainedDiseaseIds = new Set();
   managingWorldPlazaPathologyDiscoveryLinkedCreatureStudiesByDiseaseId =
+    new Map();
+  managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId =
     new Map();
   refreshingWorldPlazaPathologyDiscoverySnapshotCaches();
   managingWorldPlazaPathologyDiscoverySubscribers.clear();

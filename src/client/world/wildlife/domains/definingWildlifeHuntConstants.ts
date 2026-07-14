@@ -52,3 +52,6 @@ export const DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MIN_MS = 5_000;
 
 /** Maximum time an animal chews before one ground-food unit is consumed. */
 export const DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MAX_MS = 10_000;
+
+/** Fixed chew time before wildlife finishes eating one long-grass tile. */
+export const DEFINING_WILDLIFE_GROUND_GRASS_BITE_DELAY_MS = 15_000;

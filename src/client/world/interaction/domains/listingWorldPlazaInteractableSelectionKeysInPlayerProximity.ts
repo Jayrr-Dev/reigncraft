@@ -232,9 +232,12 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
         tileY
       );
 
+      const longGrassTileState =
+        params.clearedLongGrassStateByTileKey?.get(longGrassTileKey);
+
       if (
-        !params.clearedLongGrassStateByTileKey?.get(longGrassTileKey)
-          ?.isSearched &&
+        !longGrassTileState?.isSearched &&
+        !longGrassTileState?.isEaten &&
         !checkingWorldPlazaRuntimeLongGrassIsCleared(tileX, tileY) &&
         checkingWorldPlazaLongGrassDecorationAtTileIndex(tileX, tileY)
       ) {

@@ -25,7 +25,7 @@ const DEFINING_WORLD_PLAZA_CLOVER_INVENTORY_ITEM_SEEDS = [
     name: 'Four-leaf clover',
     rarity: 'rare' as const,
     description:
-      'A rare fourth leaf tucked in the tangle. Hold it for luck until the charm fades.',
+      'A rare fourth leaf tucked in the tangle. Carry it for luck until the charm fades.',
   },
 ] as const;
 

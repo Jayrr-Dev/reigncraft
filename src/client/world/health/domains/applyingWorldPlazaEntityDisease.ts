@@ -14,10 +14,20 @@ import {
   computingWorldPlazaEntityImmuneSystemScaledDurationMs,
   computingWorldPlazaEntityImmuneSystemSymptomStrengthMultiplier,
 } from '@/components/world/health/domains/computingWorldPlazaEntityImmuneSystemEffects';
-import { recordingWorldPlazaPathologyDiseaseObtained } from '@/components/world/domains/managingWorldPlazaPathologyDiscoveryStore';
+import {
+  computingWorldPlazaPathologyInfectionStudyHoursToCredit,
+  DEFINING_WORLD_PLAZA_PATHOLOGY_STUDY_POINTS_PER_INFECTION_HOUR,
+} from '@/components/world/domains/computingWorldPlazaPathologyInfectionStudyHours';
+import {
+  creditingWorldPlazaPathologyFromInfectionHours,
+  recordingWorldPlazaPathologyDiseaseObtained,
+} from '@/components/world/domains/managingWorldPlazaPathologyDiscoveryStore';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import { resolvingWorldPlazaEntityDiseaseDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
-import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import type {
+  DefiningWorldPlazaEntityHealthDiseaseEffect,
+  DefiningWorldPlazaEntityHealthState,
+} from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 
 let applyingWorldPlazaEntityDiseaseNextId = 0;
@@ -39,6 +49,39 @@ export type ApplyingWorldPlazaEntityDiseaseOptions = {
 function creatingWorldPlazaEntityDiseaseUniqueId(): string {
   applyingWorldPlazaEntityDiseaseNextId += 1;
   return `disease-instance-${applyingWorldPlazaEntityDiseaseNextId}`;
+}
+
+/**
+ * Awards Pathology study points for whole in-game hours spent infected.
+ * Mutates the Pathology discovery store when hours are owed.
+ */
+export function creditingWorldPlazaPathologyInfectionStudyHoursForDiseaseEffect(
+  diseaseEffect: DefiningWorldPlazaEntityHealthDiseaseEffect,
+  worldEpochMs: number
+): DefiningWorldPlazaEntityHealthDiseaseEffect {
+  const hoursToCredit = computingWorldPlazaPathologyInfectionStudyHoursToCredit(
+    {
+      contractedAtMs: diseaseEffect.contractedAtMs,
+      expiresAtMs: diseaseEffect.expiresAtMs,
+      worldEpochMs,
+      pathologyStudyHoursCredited: diseaseEffect.pathologyStudyHoursCredited,
+    }
+  );
+
+  if (hoursToCredit <= 0) {
+    return diseaseEffect;
+  }
+
+  creditingWorldPlazaPathologyFromInfectionHours(
+    diseaseEffect.diseaseId as DefiningWorldPlazaEntityDiseaseId,
+    hoursToCredit * DEFINING_WORLD_PLAZA_PATHOLOGY_STUDY_POINTS_PER_INFECTION_HOUR
+  );
+
+  return {
+    ...diseaseEffect,
+    pathologyStudyHoursCredited:
+      diseaseEffect.pathologyStudyHoursCredited + hoursToCredit,
+  };
 }
 
 /** Whether a disease entry is still incubating (no HUD or grants yet). */
@@ -126,6 +169,10 @@ export function applyingWorldPlazaEntityDisease(
       ),
     };
     for (const replacedDiseaseEffect of replacedDiseaseEffects) {
+      creditingWorldPlazaPathologyInfectionStudyHoursForDiseaseEffect(
+        replacedDiseaseEffect,
+        worldEpochMs
+      );
       preparedState = clearingWorldPlazaEntityDiseaseScopedGrantEffects(
         preparedState,
         replacedDiseaseEffect.id
@@ -219,6 +266,7 @@ export function applyingWorldPlazaEntityDisease(
         expiresAtMs,
         symptomStrengthMultiplier,
         durationMultiplier,
+        pathologyStudyHoursCredited: 0,
         pendingGrants,
       },
     ],
@@ -242,14 +290,20 @@ export function advancingWorldPlazaEntityHealthDiseaseTick(
   const nextDiseaseEffects = [];
 
   for (const diseaseEffect of nextState.diseaseEffects) {
-    if (diseaseEffect.expiresAtMs <= worldEpochMs) {
+    const creditedDiseaseEffect =
+      creditingWorldPlazaPathologyInfectionStudyHoursForDiseaseEffect(
+        diseaseEffect,
+        worldEpochMs
+      );
+
+    if (creditedDiseaseEffect.expiresAtMs <= worldEpochMs) {
       nextState = clearingWorldPlazaEntityDiseaseScopedGrantEffects(
         nextState,
-        diseaseEffect.id
+        creditedDiseaseEffect.id
       );
       const recovery = applyingWorldPlazaEntityImmuneSystemPostDiseaseRecovery(
         nextState,
-        diseaseEffect.diseaseId as DefiningWorldPlazaEntityDiseaseId,
+        creditedDiseaseEffect.diseaseId as DefiningWorldPlazaEntityDiseaseId,
         random
       );
       nextState = recovery.state;
@@ -257,18 +311,21 @@ export function advancingWorldPlazaEntityHealthDiseaseTick(
     }
 
     if (
-      checkingWorldPlazaEntityDiseaseIsIncubating(diseaseEffect, worldEpochMs)
+      checkingWorldPlazaEntityDiseaseIsIncubating(
+        creditedDiseaseEffect,
+        worldEpochMs
+      )
     ) {
-      nextDiseaseEffects.push(diseaseEffect);
+      nextDiseaseEffects.push(creditedDiseaseEffect);
       continue;
     }
 
     const descriptor = resolvingWorldPlazaEntityDiseaseDescriptor(
-      diseaseEffect.diseaseId as DefiningWorldPlazaEntityDiseaseId
+      creditedDiseaseEffect.diseaseId as DefiningWorldPlazaEntityDiseaseId
     );
     const remainingPendingGrants = [];
 
-    for (const pendingGrant of diseaseEffect.pendingGrants) {
+    for (const pendingGrant of creditedDiseaseEffect.pendingGrants) {
       if (pendingGrant.fireAtMs > worldEpochMs) {
         remainingPendingGrants.push(pendingGrant);
         continue;
@@ -279,18 +336,19 @@ export function advancingWorldPlazaEntityHealthDiseaseTick(
       if (grant) {
         nextState = applyingWorldPlazaEntityDiseaseStageGrant({
           state: nextState,
-          diseaseInstanceId: diseaseEffect.id,
+          diseaseInstanceId: creditedDiseaseEffect.id,
           grantIndex: pendingGrant.grantIndex,
           grant,
           nowMs: simulationNowMs,
-          durationMultiplier: diseaseEffect.durationMultiplier,
-          symptomStrengthMultiplier: diseaseEffect.symptomStrengthMultiplier,
+          durationMultiplier: creditedDiseaseEffect.durationMultiplier,
+          symptomStrengthMultiplier:
+            creditedDiseaseEffect.symptomStrengthMultiplier,
         });
       }
     }
 
     nextDiseaseEffects.push({
-      ...diseaseEffect,
+      ...creditedDiseaseEffect,
       pendingGrants: remainingPendingGrants,
     });
   }

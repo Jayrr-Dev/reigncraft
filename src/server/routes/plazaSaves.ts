@@ -149,6 +149,11 @@ function parsingPersistedDiseaseEffect(
       Number.isFinite(candidate.durationMultiplier)
         ? candidate.durationMultiplier
         : undefined,
+    pathologyStudyHoursCredited:
+      typeof candidate.pathologyStudyHoursCredited === 'number' &&
+      Number.isFinite(candidate.pathologyStudyHoursCredited)
+        ? Math.max(0, Math.floor(candidate.pathologyStudyHoursCredited))
+        : undefined,
     pendingGrants,
   };
 }

@@ -37,7 +37,9 @@ export function listingWorldPlazaLongGrassInInteractionRange(
       tile.tileY
     );
 
-    if (clearedLongGrassStateByTileKey?.get(tileKey)?.isSearched) {
+    const tileState = clearedLongGrassStateByTileKey?.get(tileKey);
+
+    if (tileState?.isSearched || tileState?.isEaten) {
       continue;
     }
 

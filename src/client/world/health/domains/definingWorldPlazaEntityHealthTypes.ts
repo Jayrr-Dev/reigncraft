@@ -202,6 +202,11 @@ export type DefiningWorldPlazaEntityHealthDiseaseEffect = {
   symptomStrengthMultiplier: number;
   /** Snapshot at contraction: scales staged grant delays and durations. */
   durationMultiplier: number;
+  /**
+   * Whole in-game infection hours already credited to Pathology for this
+   * instance (avoids double-awarding across ticks and save/load).
+   */
+  pathologyStudyHoursCredited: number;
   pendingGrants: readonly {
     grantIndex: number;
     fireAtMs: number;
