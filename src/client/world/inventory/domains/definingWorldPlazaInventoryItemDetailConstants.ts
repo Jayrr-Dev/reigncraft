@@ -123,8 +123,8 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DETAIL_BADGE_PAINT_BY_VARIANT: 
 
 /** Item info dialog chrome (centered; scales up on larger viewports). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE = {
-  overlay: `${DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE.overlayFixed} z-[70]`,
-  panel: `${DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE.panel} w-[min(22rem,calc(100vw-1.5rem))] max-w-none p-0 sm:w-[min(26rem,calc(100vw-2rem))] md:w-[min(30rem,calc(100vw-3rem))]`,
+  overlay: `${DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE.overlayFixed} z-[70] p-2 sm:p-4`,
+  panel: `${DEFINING_WORLD_PLAZA_CONFIRM_DIALOG_STYLE.panel} flex max-h-[calc(100dvh-1rem)] w-[min(22rem,calc(100vw-1rem))] max-w-none flex-col overflow-hidden p-0 sm:max-h-[calc(100dvh-2rem)] sm:w-[min(26rem,calc(100vw-2rem))] md:w-[min(30rem,calc(100vw-3rem))]`,
   header:
     'flex items-start justify-between gap-2 border-b border-ink/10 px-3.5 py-3 sm:gap-3 sm:px-5 sm:py-3.5 md:px-6 md:py-4',
   title:
@@ -132,7 +132,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE = {
   closeButton:
     'flex size-7 shrink-0 items-center justify-center rounded border border-ink/15 text-ink/55 transition hover:border-ink/25 hover:bg-ink/5 hover:text-ink/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/70 sm:size-8',
   closeIcon: 'size-4 sm:size-5' as const,
-  body: 'space-y-2.5 px-3.5 py-3 sm:space-y-3 sm:px-5 sm:py-3.5 md:space-y-3.5 md:px-6 md:py-4',
+  body: 'min-h-0 flex-1 space-y-2.5 overflow-y-auto overscroll-contain px-3.5 py-3 sm:space-y-3 sm:px-5 sm:py-3.5 md:space-y-3.5 md:px-6 md:py-4',
   iconFrame:
     'mx-auto flex size-16 shrink-0 items-center justify-center rounded-md border border-ink/10 bg-ink/[0.04] sm:size-20 md:size-24',
   itemIcon:
@@ -143,7 +143,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_INFO_DIALOG_STYLE = {
   infoSectionLabel:
     'font-body text-xs font-semibold uppercase tracking-[0.08em] text-ink/55 sm:text-sm',
   infoRow:
-    'grid grid-cols-[minmax(0,8.5rem)_minmax(0,1fr)] items-baseline gap-x-3 gap-y-0.5 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)] sm:gap-x-4',
+    'grid grid-cols-[minmax(0,6.5rem)_minmax(0,1fr)] items-start gap-x-2 gap-y-0.5 sm:grid-cols-[minmax(0,9rem)_minmax(0,1fr)] sm:gap-x-4',
   infoRowLabel:
     'font-body text-xs font-medium leading-snug text-ink/60 sm:text-sm',
   infoRowValue:
