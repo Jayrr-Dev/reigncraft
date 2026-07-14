@@ -15,6 +15,7 @@ import { checkingWildlifeHasSeparationAnxiety } from '@/components/world/wildlif
 import { checkingWildlifeHerbivoreIgnoresPlayerNearFood } from '@/components/world/wildlife/domains/checkingWildlifeHerbivoreIgnoresPlayerNearFood';
 import { checkingWildlifeInstanceHasProvokedWildlifeAggro } from '@/components/world/wildlife/domains/checkingWildlifeInstanceHasProvokedWildlifeAggro';
 import { checkingWildlifeInstanceIsDefendingYoung } from '@/components/world/wildlife/domains/checkingWildlifeInstanceMayDefendYoung';
+import { checkingWildlifeIsTakingEnvironmentalHeatDamage } from '@/components/world/wildlife/domains/checkingWildlifeIsTakingEnvironmentalHeatDamage';
 import {
   checkingWildlifeIsMotivatedToForageGroundFood,
   checkingWildlifeIsMotivatedToHunt,
@@ -331,6 +332,13 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
       blackboard.instance
     );
   },
+  isTakingEnvironmentalHeatDamage: (blackboard) =>
+    checkingWildlifeIsTakingEnvironmentalHeatDamage({
+      instance: blackboard.instance,
+      species: blackboard.species,
+      isDaytime: blackboard.hazardSampling.isDaytime,
+      placedBlocksByTile: blackboard.hazardSampling.placedBlocksByTile,
+    }),
   isPlayerTooClose: (blackboard) => {
     if (!blackboard.playerPosition) {
       return false;

@@ -1,4 +1,7 @@
-import { quantizingWildlifeRenderVitalsRatio } from '@/components/world/wildlife/domains/computingWildlifeRenderStructuralFingerprint';
+import {
+  quantizingWildlifeRenderHungerCircleRatio,
+  quantizingWildlifeRenderVitalsRatio,
+} from '@/components/world/wildlife/domains/computingWildlifeRenderStructuralFingerprint';
 import { describe, expect, it } from 'vitest';
 
 describe('quantizingWildlifeRenderVitalsRatio', () => {
@@ -16,5 +19,16 @@ describe('quantizingWildlifeRenderVitalsRatio', () => {
   it('normalizes apex stamina against its raised cap before bucketing', () => {
     expect(quantizingWildlifeRenderVitalsRatio(1.3, 1.3)).toBe(1);
     expect(quantizingWildlifeRenderVitalsRatio(0.65, 1.3)).toBe(0.5);
+  });
+});
+
+describe('quantizingWildlifeRenderHungerCircleRatio', () => {
+  it('uses coarser buckets than the HP bar so tiny hunger ticks do not redraw', () => {
+    expect(quantizingWildlifeRenderHungerCircleRatio(0.5)).toBe(
+      quantizingWildlifeRenderHungerCircleRatio(0.54)
+    );
+    expect(quantizingWildlifeRenderHungerCircleRatio(0.5)).not.toBe(
+      quantizingWildlifeRenderHungerCircleRatio(0.6)
+    );
   });
 });

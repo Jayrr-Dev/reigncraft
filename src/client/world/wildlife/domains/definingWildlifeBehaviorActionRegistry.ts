@@ -50,6 +50,7 @@ import { resolvingWildlifeDocileApproachReactIntent } from '@/components/world/w
 import { resolvingWildlifeDocileFollowPlayerIntent } from '@/components/world/wildlife/domains/resolvingWildlifeDocileFollowPlayerIntent';
 import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodWorldPoint';
 import { resolvingWildlifePackRoamWanderIntent } from '@/components/world/wildlife/domains/resolvingWildlifePackRoamWanderIntent';
+import { resolvingWildlifeFleeToCoolerAreaIntent } from '@/components/world/wildlife/domains/resolvingWildlifeFleeToCoolerAreaIntent';
 import { resolvingWildlifeFleeFromThreatPointIntent } from '@/components/world/wildlife/domains/resolvingWildlifePlayerCollisionStartle';
 import { resolvingWildlifeSeparationAnxietyFollowIntent } from '@/components/world/wildlife/domains/resolvingWildlifeSeparationAnxietyFollowIntent';
 import { resolvingWildlifeSocialHunterSeekPackIntent } from '@/components/world/wildlife/domains/resolvingWildlifeSocialHunterSeekPackIntent';
@@ -368,6 +369,12 @@ const DEFINING_WILDLIFE_ACTION_REGISTRY: Record<
       hazardSampling: blackboard.hazardSampling,
     });
   },
+  fleeToCoolerArea: (blackboard) =>
+    resolvingWildlifeFleeToCoolerAreaIntent({
+      instance: blackboard.instance,
+      species: blackboard.species,
+      hazardSampling: blackboard.hazardSampling,
+    }),
   chaseTarget: resolvingChaseTarget,
   followGuardian: resolvingWildlifeSeparationAnxietyFollowIntent,
   seekPackmate: resolvingWildlifeSocialHunterSeekPackIntent,

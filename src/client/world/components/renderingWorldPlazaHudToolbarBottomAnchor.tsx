@@ -10,6 +10,7 @@ import { ProvidingWorldPlazaViewportHudScale } from '@/components/world/componen
 import { RenderingWorldPlazaHudToolbarModeBadges } from '@/components/world/components/renderingWorldPlazaHudToolbarModeBadges';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
 import {
+  STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_BODY_CLASS_NAME,
   STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_STACK_CLASS_NAME,
   type DefiningWorldPlazaHudToolbarModeId,
 } from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
@@ -92,7 +93,7 @@ export function RenderingWorldPlazaHudToolbarBottomAnchor({
             onSelectMode={onSelectMode}
             isEditEnabled={isEditEnabled}
           />
-          <div className="pointer-events-auto flex w-full flex-col items-stretch">
+          <div className={STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_BODY_CLASS_NAME}>
             {children}
           </div>
         </div>

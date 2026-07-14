@@ -18,6 +18,9 @@ import { checkingWorldShrubPlacementAtTileIndex } from '../../../shared/worldShr
  *
  * Tiles within the cliff-edge clearance stay bare so shrubs do not hang over
  * extruded slope faces.
+ *
+ * Expensive cliff/lava radius scans run only after cheap reject + placement so
+ * the visible-bounds sync path does not pay 5×5 neighbor walks on bare tiles.
  */
 export function checkingWorldPlazaShrubDecorationAtTileIndex(
   tileX: number,
@@ -32,6 +35,30 @@ export function checkingWorldPlazaShrubDecorationAtTileIndex(
   }
 
   if (resolvingWorldPlazaWaterAtTileIndex(tileX, tileY)) {
+    return false;
+  }
+
+  if (
+    checkingWorldPlazaLakeShoreBlockAtTileIndex(tileX, tileY) ||
+    checkingWorldPlazaOceanShoreBlockAtTileIndex(tileX, tileY) ||
+    checkingWorldPlazaPondShoreBlockAtTileIndex(tileX, tileY)
+  ) {
+    return false;
+  }
+
+  const biome = resolvingWorldPlazaBiomeAtTileIndex(tileX, tileY);
+
+  if (biome.shrubTileModulus === null) {
+    return false;
+  }
+
+  if (
+    !checkingWorldShrubPlacementAtTileIndex(
+      tileX,
+      tileY,
+      biome.shrubTileModulus
+    )
+  ) {
     return false;
   }
 
@@ -55,23 +82,5 @@ export function checkingWorldPlazaShrubDecorationAtTileIndex(
     return false;
   }
 
-  if (
-    checkingWorldPlazaLakeShoreBlockAtTileIndex(tileX, tileY) ||
-    checkingWorldPlazaOceanShoreBlockAtTileIndex(tileX, tileY) ||
-    checkingWorldPlazaPondShoreBlockAtTileIndex(tileX, tileY)
-  ) {
-    return false;
-  }
-
-  const biome = resolvingWorldPlazaBiomeAtTileIndex(tileX, tileY);
-
-  if (biome.shrubTileModulus === null) {
-    return false;
-  }
-
-  return checkingWorldShrubPlacementAtTileIndex(
-    tileX,
-    tileY,
-    biome.shrubTileModulus
-  );
+  return true;
 }

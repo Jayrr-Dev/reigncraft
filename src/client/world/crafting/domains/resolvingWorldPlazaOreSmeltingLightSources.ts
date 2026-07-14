@@ -11,6 +11,7 @@ import {
   resolvingWorldBuildingBlockPlacementFootprint,
   resolvingWorldBuildingPlacedBlockFootprintGroupId,
 } from '@/components/world/building/domains/definingWorldBuildingPlacementFootprint';
+import { resolvingWorldPlazaBlacksmithUtilityDepthSortGridPoint } from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
 import {
   DEFINING_WORLD_PLAZA_ORE_SMELTING_LIGHT_BRIGHTNESS,
   DEFINING_WORLD_PLAZA_ORE_SMELTING_LIGHT_RADIUS_SCALE,
@@ -62,15 +63,17 @@ export function resolvingWorldPlazaOreSmeltingLightSources(
     const footprint = definition
       ? resolvingWorldBuildingBlockPlacementFootprint(definition)
       : { tileWidth: 1, tileHeight: 1 };
-    const centerGridX =
-      block.tilePosition.tileX + (footprint.tileWidth - 1) * 0.5;
-    const centerGridY =
-      block.tilePosition.tileY + (footprint.tileHeight - 1) * 0.5;
+    const footCenter = resolvingWorldPlazaBlacksmithUtilityDepthSortGridPoint(
+      block.tilePosition.tileX,
+      block.tilePosition.tileY,
+      footprint.tileWidth,
+      footprint.tileHeight
+    );
 
     lights.push({
       id: `ore-smelting:${block.blockId}`,
-      gridX: centerGridX,
-      gridY: centerGridY,
+      gridX: footCenter.x,
+      gridY: footCenter.y,
       worldLayer: block.worldLayer,
       radiusScale: DEFINING_WORLD_PLAZA_ORE_SMELTING_LIGHT_RADIUS_SCALE,
       brightness: DEFINING_WORLD_PLAZA_ORE_SMELTING_LIGHT_BRIGHTNESS,

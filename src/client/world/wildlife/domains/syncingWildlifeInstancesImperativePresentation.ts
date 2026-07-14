@@ -51,10 +51,17 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeVitalsBarConstants';
 import { drawingWildlifeFairyGlowOrbOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeFairyGlowOrbOnGraphics';
 import { computingWildlifeHungerCircleLocalLayout } from '@/components/world/wildlife/domains/computingWildlifeHungerCircleLocalLayout';
+import {
+  quantizingWildlifeRenderHungerCircleRatio,
+  quantizingWildlifeRenderVitalsRatio,
+} from '@/components/world/wildlife/domains/computingWildlifeRenderStructuralFingerprint';
+import { drawingWildlifeVitalsOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeVitalsOnGraphics';
 import { resolvingWildlifeFairyHoverOffsetPx } from '@/components/world/wildlife/domains/resolvingWildlifeFairyHoverOffsetPx';
 import { resolvingWildlifeInstanceMaxStaminaRatio } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
 import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
+import { resolvingWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
+import { peekingWorldPlazaHungerTierSpriteTexture } from '@/components/world/hunger/domains/loadingWorldPlazaHungerTierSpriteTextures';
 import type { Graphics, Sprite } from 'pixi.js';
 
 export type SyncingWildlifeInstanceImperativePresentationEntry = {
@@ -77,6 +84,11 @@ export type SyncingWildlifeInstanceImperativePresentationEntry = {
   smoothedOrbPointRef: { current: { x: number; y: number } | null };
   /** Timestamp of the last smoothing step, for frame-rate independent easing. */
   smoothedOrbAtMsRef: { current: number };
+  /**
+   * Last drawn vitals fingerprint. Skips Graphics.clear/redraw when HP /
+   * stamina / hunger / visibility have not changed a visible bucket.
+   */
+  lastDrawnVitalsKeyRef: { current: string };
 };
 
 /**
@@ -156,6 +168,7 @@ export function registeringWildlifeInstanceImperativePresentation(
     | 'hungerIconZIndexRef'
     | 'smoothedOrbPointRef'
     | 'smoothedOrbAtMsRef'
+    | 'lastDrawnVitalsKeyRef'
   >
 ): void {
   registry.set(instanceId, {
@@ -167,6 +180,7 @@ export function registeringWildlifeInstanceImperativePresentation(
     hungerIconZIndexRef: { current: Number.NaN },
     smoothedOrbPointRef: { current: null },
     smoothedOrbAtMsRef: { current: 0 },
+    lastDrawnVitalsKeyRef: { current: '' },
   });
 }
 
@@ -265,6 +279,8 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
         if (hungerIconSprite) {
           hungerIconSprite.visible = false;
         }
+
+        entry.lastDrawnVitalsKeyRef.current = '';
 
         continue;
       }
@@ -402,15 +418,16 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
             ? instance.healthState.currentHealth /
               instance.healthState.baseMaxHealth
             : 0;
+        const maxStaminaRatio = resolvingWildlifeInstanceMaxStaminaRatio(
+          instance,
+          species
+        );
         const vitalsVisibility = checkingWildlifeVitalsGraphicsShouldShow({
           isDead: instance.isDead,
           isImmortal: checkingWildlifeSpeciesIsImmortal(species),
           healthRatio,
           staminaRatio: instance.staminaState.staminaRatio,
-          maxStaminaRatio: resolvingWildlifeInstanceMaxStaminaRatio(
-            instance,
-            species
-          ),
+          maxStaminaRatio,
           showHungerCircle:
             checkingWildlifeInstanceShowsHungerUi(instance) &&
             checkingWorldPlazaGenerationFeatureEnabled(
@@ -426,6 +443,41 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
         const vitalsZIndex = sortKey + DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET;
 
         if (vitalsVisibility.showGraphics) {
+          const quantizedHealth =
+            quantizingWildlifeRenderVitalsRatio(healthRatio);
+          const quantizedStamina = quantizingWildlifeRenderVitalsRatio(
+            instance.staminaState.staminaRatio,
+            maxStaminaRatio
+          );
+          const quantizedHunger = quantizingWildlifeRenderHungerCircleRatio(
+            instance.hungerState.hungerRatio
+          );
+          const hungerTier = resolvingWorldPlazaHungerTier(
+            instance.hungerState.hungerRatio
+          );
+          const nextVitalsKey = `${vitalsVisibility.showBars ? 1 : 0}:${vitalsVisibility.showHungerCircle ? 1 : 0}:${quantizedHealth}:${quantizedStamina}:${quantizedHunger}:${hungerTier}`;
+
+          if (entry.lastDrawnVitalsKeyRef.current !== nextVitalsKey) {
+            drawingWildlifeVitalsOnGraphics({
+              graphics: vitalsGraphics,
+              healthRatio: quantizedHealth,
+              staminaRatio: quantizedStamina,
+              hungerRatio: quantizedHunger,
+              showHungerCircle: vitalsVisibility.showHungerCircle,
+              showBars: vitalsVisibility.showBars,
+            });
+            entry.lastDrawnVitalsKeyRef.current = nextVitalsKey;
+
+            if (hungerIconSprite && vitalsVisibility.showHungerCircle) {
+              const hungerIconTexture =
+                peekingWorldPlazaHungerTierSpriteTexture(hungerTier);
+
+              if (hungerIconTexture) {
+                hungerIconSprite.texture = hungerIconTexture;
+              }
+            }
+          }
+
           vitalsGraphics.position.set(screenPoint.x, vitalsY);
           applyingWorldPlazaCachedDisplayObjectZIndex(
             vitalsGraphics,
@@ -435,6 +487,7 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
           vitalsGraphics.visible = true;
         } else {
           vitalsGraphics.visible = false;
+          entry.lastDrawnVitalsKeyRef.current = '';
         }
 
         if (hungerIconSprite) {

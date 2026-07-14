@@ -56,6 +56,21 @@ export type UsingWildlifeActivePetSpawnResult = {
 };
 
 /**
+ * Spawn/deploy identity only. Vitals/position noise must not rebuild this key or
+ * the plaza scene re-renders on every roster vitals write.
+ */
+function readingWildlifePetRosterSpawnIdentityKey(): string {
+  const roster = readingWildlifePetRosterSnapshot();
+  let key = `${roster.activePetId ?? ''}|`;
+
+  for (const pet of roster.pets) {
+    key += `${pet.petId}:${pet.isActive ? 1 : 0}:${pet.healthCurrent ?? ''};`;
+  }
+
+  return key;
+}
+
+/**
  * Initializes the pet roster store for the current owner, keeps the active
  * companion spawned near the owner, and periodically syncs vitals + the
  * multiplayer mirror.
@@ -69,9 +84,9 @@ export function usingWildlifeActivePetSpawn({
   resolveSpecies,
   cloudSaveSlotIndex = null,
 }: UsingWildlifeActivePetSpawnParams): UsingWildlifeActivePetSpawnResult {
-  const rosterSnapshot = useSyncExternalStore(
+  const spawnIdentityKey = useSyncExternalStore(
     subscribingWildlifePetRoster,
-    readingWildlifePetRosterSnapshot
+    readingWildlifePetRosterSpawnIdentityKey
   );
   const isMultiplayerOnline = onlineUserId !== null;
   const ownerUserId = onlineUserId ?? storageOwnerId;
@@ -115,24 +130,28 @@ export function usingWildlifeActivePetSpawn({
     };
   }, [isEnabled, isMultiplayerOnline]);
 
-  const activeLivingRecords = useMemo(
-    () =>
-      rosterSnapshot.pets.filter(checkingWildlifePetRosterRecordIsLivingActive),
-    [rosterSnapshot.pets]
-  );
+  const activeLivingRecords = useMemo(() => {
+    void spawnIdentityKey;
+    return readingWildlifePetRosterSnapshot().pets.filter(
+      checkingWildlifePetRosterRecordIsLivingActive
+    );
+  }, [spawnIdentityKey]);
+
   /** Stable effect key: vitals sync mutates roster and must not re-arm effects. */
   const activeLivingPetIdsKey = useMemo(
     () => activeLivingRecords.map((pet) => pet.petId).join('\0'),
     [activeLivingRecords]
   );
+  const rosterActivePetId = useMemo(() => {
+    void spawnIdentityKey;
+    return readingWildlifePetRosterSnapshot().activePetId;
+  }, [spawnIdentityKey]);
   const activePetInstanceId =
     activeLivingRecords.length > 0
       ? formattingWildlifePetInstanceId(
-          rosterSnapshot.activePetId &&
-            activeLivingRecords.some(
-              (pet) => pet.petId === rosterSnapshot.activePetId
-            )
-            ? rosterSnapshot.activePetId
+          rosterActivePetId &&
+            activeLivingRecords.some((pet) => pet.petId === rosterActivePetId)
+            ? rosterActivePetId
             : activeLivingRecords[0]!.petId
         )
       : null;

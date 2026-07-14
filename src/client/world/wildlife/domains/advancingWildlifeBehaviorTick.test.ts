@@ -3,7 +3,7 @@ import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import { DEFINING_WILDLIFE_SPECIES_REGISTRY } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock(
   '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardAtTileIndex',
@@ -26,6 +26,27 @@ vi.mock(
 vi.mock('@/components/world/collision', () => ({
   checkingWorldCollisionBlockedAtPoint: vi.fn(() => false),
 }));
+
+const heatDamageMock = vi.hoisted(() => vi.fn(() => false));
+
+vi.mock(
+  '@/components/world/wildlife/domains/checkingWildlifeIsTakingEnvironmentalHeatDamage',
+  () => ({
+    checkingWildlifeIsTakingEnvironmentalHeatDamage: (
+      ...args: unknown[]
+    ) => heatDamageMock(...args),
+  })
+);
+
+vi.mock(
+  '@/components/world/wildlife/domains/resolvingWildlifeFleeToCoolerAreaIntent',
+  () => ({
+    resolvingWildlifeFleeToCoolerAreaIntent: () => ({
+      mode: 'flee',
+      targetPoint: { x: 10.5, y: 1.5, layer: 1 },
+    }),
+  })
+);
 
 import { advancingWildlifeBehaviorTick } from '@/components/world/wildlife/domains/advancingWildlifeBehaviorTick';
 
@@ -129,6 +150,11 @@ function buildingBlackboard(
 }
 
 describe('advancingWildlifeBehaviorTick', () => {
+  beforeEach(() => {
+    heatDamageMock.mockReset();
+    heatDamageMock.mockReturnValue(false);
+  });
+
   it('passive temperament grazes when hungry', () => {
     const blackboard = buildingBlackboard('cow', {
       instance: {
@@ -875,5 +901,17 @@ describe('advancingWildlifeBehaviorTick', () => {
     const intent = advancingWildlifeBehaviorTick(blackboard);
 
     expect(intent.mode === 'attack' || intent.mode === 'chase').toBe(true);
+  });
+
+  it('passive animals flee toward cooler ground when taking heat damage', () => {
+    heatDamageMock.mockReturnValue(true);
+    const blackboard = buildingBlackboard('cow');
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('flee');
+    if (intent.mode === 'flee') {
+      expect(intent.targetPoint).toEqual({ x: 10.5, y: 1.5, layer: 1 });
+    }
   });
 });

@@ -91,6 +91,17 @@ const DEFINING_WILDLIFE_SOCIAL_HUNTER_SEEK_PACK_BRANCHES = [
   },
 ] as const satisfies DefiningWildlifeBehaviorTreeSequenceNode['children'];
 
+/** Leave environmental heat for cooler walkable ground (all temperaments). */
+const DEFINING_WILDLIFE_HEAT_FLEE_BRANCHES = [
+  {
+    kind: 'sequence',
+    children: [
+      { kind: 'condition', conditionId: 'isTakingEnvironmentalHeatDamage' },
+      { kind: 'action', actionId: 'fleeToCoolerArea' },
+    ],
+  },
+] as const satisfies DefiningWildlifeBehaviorTreeSequenceNode['children'];
+
 /** Predators strike or chase prey that wanders within close range. */
 const DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES = [
   {
@@ -120,6 +131,7 @@ const DEFINING_WILDLIFE_DOCILE_TREE: DefiningWildlifeBehaviorTreeDefinition = {
     kind: 'selector',
     children: [
       ...DEFINING_WILDLIFE_DEFEND_YOUNG_FIGHT_BRANCHES,
+      ...DEFINING_WILDLIFE_HEAT_FLEE_BRANCHES,
       {
         kind: 'sequence',
         children: [
@@ -170,6 +182,7 @@ const DEFINING_WILDLIFE_PASSIVE_TREE: DefiningWildlifeBehaviorTreeDefinition = {
       ...DEFINING_WILDLIFE_DEFEND_YOUNG_FIGHT_BRANCHES,
       ...DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_FIGHT_BRANCHES,
       ...DEFINING_WILDLIFE_TERRITORY_WARN_BRANCHES,
+      ...DEFINING_WILDLIFE_HEAT_FLEE_BRANCHES,
       {
         kind: 'sequence',
         children: [
@@ -207,6 +220,7 @@ const DEFINING_WILDLIFE_SKITTISH_TREE: DefiningWildlifeBehaviorTreeDefinition =
         ...DEFINING_WILDLIFE_DEFEND_YOUNG_FIGHT_BRANCHES,
         ...DEFINING_WILDLIFE_AGGRESSIVE_HERBIVORE_FIGHT_BRANCHES,
         ...DEFINING_WILDLIFE_TERRITORY_WARN_BRANCHES,
+        ...DEFINING_WILDLIFE_HEAT_FLEE_BRANCHES,
         {
           kind: 'sequence',
           children: [
@@ -257,6 +271,7 @@ const DEFINING_WILDLIFE_RETALIATOR_TREE: DefiningWildlifeBehaviorTreeDefinition 
       kind: 'selector',
       children: [
         ...DEFINING_WILDLIFE_BLUFF_RETURN_BRANCHES,
+        ...DEFINING_WILDLIFE_HEAT_FLEE_BRANCHES,
         ...DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES,
         {
           kind: 'sequence',
@@ -310,6 +325,7 @@ const DEFINING_WILDLIFE_PREDATOR_TREE: DefiningWildlifeBehaviorTreeDefinition =
       children: [
         // Hunt / combat first so a chase past the leash still commits.
         // Leash return only runs when nothing is left to fight or hunt.
+        ...DEFINING_WILDLIFE_HEAT_FLEE_BRANCHES,
         ...DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES,
         {
           kind: 'sequence',
@@ -361,6 +377,7 @@ const DEFINING_WILDLIFE_AMBUSHER_TREE: DefiningWildlifeBehaviorTreeDefinition =
     root: {
       kind: 'selector',
       children: [
+        ...DEFINING_WILDLIFE_HEAT_FLEE_BRANCHES,
         ...DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES,
         {
           kind: 'sequence',
@@ -418,6 +435,7 @@ const DEFINING_WILDLIFE_PACK_HUNTER_TREE: DefiningWildlifeBehaviorTreeDefinition
             { kind: 'action', actionId: 'fleeFromThreat' },
           ],
         },
+        ...DEFINING_WILDLIFE_HEAT_FLEE_BRANCHES,
         {
           kind: 'sequence',
           children: [
@@ -497,6 +515,7 @@ const DEFINING_WILDLIFE_STALKER_TREE: DefiningWildlifeBehaviorTreeDefinition = {
           { kind: 'action', actionId: 'fleeFromThreat' },
         ],
       },
+      ...DEFINING_WILDLIFE_HEAT_FLEE_BRANCHES,
       {
         kind: 'sequence',
         children: [

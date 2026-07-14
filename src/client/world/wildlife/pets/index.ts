@@ -191,6 +191,7 @@ export {
   resolvingWildlifePetRosterPetsWithLiveVitals,
   resolvingWildlifePetRosterPetsWithLiveVitalsFromStore,
   resolvingWildlifePetRosterRecordWithLiveVitals,
+  formattingWildlifePetRosterLiveVitalsFingerprint,
 } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetRosterPetsWithLiveVitals';
 
 export {

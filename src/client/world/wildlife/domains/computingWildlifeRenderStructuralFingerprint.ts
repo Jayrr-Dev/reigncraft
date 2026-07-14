@@ -1,18 +1,23 @@
 /**
  * Compact wildlife presentation fingerprint used to gate React reconciliation.
  *
- * Position, jump progress, and vitals-bar screen placement are intentionally
- * excluded because Pixi consumes them imperatively every tick.
+ * Position, jump progress, and vitals fills are intentionally excluded:
+ * Pixi consumes transforms every tick, and vitals Graphics redraws happen in
+ * `syncingWildlifeInstancesImperativePresentation` from quantized ratios.
  *
  * @module components/world/wildlife/domains/computingWildlifeRenderStructuralFingerprint
  */
 
-import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { resolvingWildlifeInstanceMaxStaminaRatio } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 
 /** Wildlife stamina bars are 24px wide, so finer updates cannot be seen. */
-const COMPUTING_WILDLIFE_RENDER_VITALS_RATIO_BUCKET_COUNT = 24;
+export const COMPUTING_WILDLIFE_RENDER_VITALS_RATIO_BUCKET_COUNT = 24;
+
+/**
+ * Hunger orb inner disc is ~11px across; coarser buckets than the HP bar keep
+ * imperative redraws rare while still matching visible fill steps.
+ */
+export const COMPUTING_WILDLIFE_RENDER_HUNGER_CIRCLE_RATIO_BUCKET_COUNT = 12;
 
 /**
  * Quantizes a vitals ratio to the smallest visible bar-width change.
@@ -20,20 +25,32 @@ const COMPUTING_WILDLIFE_RENDER_VITALS_RATIO_BUCKET_COUNT = 24;
  */
 export function quantizingWildlifeRenderVitalsRatio(
   ratio: number,
-  maxRatio = 1
+  maxRatio = 1,
+  bucketCount: number = COMPUTING_WILDLIFE_RENDER_VITALS_RATIO_BUCKET_COUNT
 ): number {
   const fillRatio = ratio / Math.max(maxRatio, Number.EPSILON);
   const clampedRatio = Math.max(0, Math.min(1, fillRatio));
+  const safeBucketCount = Math.max(1, bucketCount);
 
-  return (
-    Math.round(
-      clampedRatio * COMPUTING_WILDLIFE_RENDER_VITALS_RATIO_BUCKET_COUNT
-    ) / COMPUTING_WILDLIFE_RENDER_VITALS_RATIO_BUCKET_COUNT
+  return Math.round(clampedRatio * safeBucketCount) / safeBucketCount;
+}
+
+/**
+ * Quantizes hunger for the overhead pet orb (coarser than HP/stamina bars).
+ */
+export function quantizingWildlifeRenderHungerCircleRatio(
+  hungerRatio: number
+): number {
+  return quantizingWildlifeRenderVitalsRatio(
+    hungerRatio,
+    1,
+    COMPUTING_WILDLIFE_RENDER_HUNGER_CIRCLE_RATIO_BUCKET_COUNT
   );
 }
 
 /**
  * Returns a stable key for fields that require a React presentation update.
+ * Vitals fills are omitted on purpose (imperative Graphics redraw).
  */
 export function computingWildlifeRenderStructuralFingerprint(
   instances: readonly DefiningWildlifeInstance[]
@@ -41,12 +58,6 @@ export function computingWildlifeRenderStructuralFingerprint(
   let fingerprint = `${instances.length}`;
 
   for (const instance of instances) {
-    const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
-    const maxStaminaRatio = resolvingWildlifeInstanceMaxStaminaRatio(
-      instance,
-      species ?? undefined
-    );
-
     fingerprint +=
       `|${instance.instanceId}` +
       `:${instance.speciesId}` +
@@ -54,21 +65,8 @@ export function computingWildlifeRenderStructuralFingerprint(
       `:${instance.aiState.motionClip}` +
       `:${instance.aiState.isMoving ? 1 : 0}` +
       `:${instance.isDead ? 1 : 0}` +
-      // Quantized like stamina: health bars are 24px wide, so raw damage
-      // ticks below one bucket cannot be seen and must not re-reconcile.
-      `:${quantizingWildlifeRenderVitalsRatio(
-        instance.healthState.baseMaxHealth > 0
-          ? instance.healthState.currentHealth /
-              instance.healthState.baseMaxHealth
-          : 0
-      )}` +
-      `:${quantizingWildlifeRenderVitalsRatio(
-        instance.staminaState.staminaRatio,
-        maxStaminaRatio
-      )}` +
-      `:${quantizingWildlifeRenderVitalsRatio(
-        instance.hungerState.hungerRatio
-      )}`;
+      `:${instance.petBond ? 1 : 0}` +
+      `:${instance.petBond?.loyalty ?? ''}`;
   }
 
   return fingerprint;

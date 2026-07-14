@@ -674,6 +674,7 @@ import {
   checkingWildlifePetItemIsEquippableWeapon,
   checkingWildlifePetNeedsOwnerFeed,
   formattingWildlifePetInstanceId,
+  readingWildlifePetRosterSnapshot,
   syncingWildlifePetBondToRoster,
   syncingWildlifePetInstanceVitalsToRoster,
   updatingWildlifePetRecord,
@@ -4042,7 +4043,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     isModalOpen: isPetModalOpen,
     namingPetInstanceId,
     isNameDialogOpen: isPetNameDialogOpen,
-    rosterSnapshot: petRosterSnapshot,
+    hasAnyPets,
     openingPetModal,
     closingPetModal,
     openingPetNameDialog,
@@ -4074,7 +4075,9 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      for (const record of petRosterSnapshot.pets) {
+      // Read roster inside the tick so vitals writes do not re-arm this effect
+      // or force a full plaza React rebuild every few seconds.
+      for (const record of readingWildlifePetRosterSnapshot().pets) {
         if (
           !record.isActive ||
           (record.healthCurrent !== null && record.healthCurrent <= 0)
@@ -4117,7 +4120,6 @@ function RenderingWorldPlazaPixiSceneConnected({
     localPersistenceOwnerId,
     onlineUserId,
     ownedPetSnapshotsOutRef,
-    petRosterSnapshot,
     wildlifeStoreRef,
   ]);
 
@@ -8206,7 +8208,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   onToggleProfile={togglingProfilePanel}
                   isPetsOpen={isPetRosterPanelOpen}
                   onTogglePets={
-                    petRosterSnapshot.pets.length > 0
+                    hasAnyPets
                       ? togglingPetRosterPanel
                       : undefined
                   }
@@ -8429,7 +8431,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   onToggleProfile={togglingProfilePanel}
                   isPetsOpen={isPetRosterPanelOpen}
                   onTogglePets={
-                    petRosterSnapshot.pets.length > 0
+                    hasAnyPets
                       ? togglingPetRosterPanel
                       : undefined
                   }

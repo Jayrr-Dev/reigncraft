@@ -16,11 +16,17 @@ import {
   syncingWorldPlazaVisibleBlacksmithUtilityLayer,
   type SyncingWorldPlazaBlacksmithUtilitySpriteState,
 } from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
+import { DEFINING_WORLD_PLAZA_ORE_SMELTING_LIGHT_OWNER_KEY } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingLightConstants';
+import { resolvingWorldPlazaOreSmeltingLightSources } from '@/components/world/crafting/domains/resolvingWorldPlazaOreSmeltingLightSources';
 import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/domains/checkingWorldPlazaPixiApplicationIsReady';
 import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
+import {
+  clearingWorldPlazaLightSourcesForOwner,
+  syncingWorldPlazaLightSourcesForOwner,
+} from '@/components/world/lighting/domains/managingWorldPlazaLightSourceStore';
 import { useApplication } from '@pixi/react';
 import { Container, Graphics, Sprite } from 'pixi.js';
-import { useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 export type RenderingWorldPlazaBlacksmithUtilityLayerProps = {
   readonly placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
@@ -51,6 +57,30 @@ export function RenderingWorldPlazaBlacksmithUtilityLayer({
   activeBlockIdsRef.current = activeBlockIds;
   const placementPreviewBlockRef = useRef(placementPreviewBlock);
   placementPreviewBlockRef.current = placementPreviewBlock;
+
+  const oreSmeltingLightSources = useMemo(
+    () =>
+      resolvingWorldPlazaOreSmeltingLightSources(
+        placedBlocks,
+        activeBlockIds ?? new Set()
+      ),
+    [activeBlockIds, placedBlocks]
+  );
+
+  useEffect(() => {
+    syncingWorldPlazaLightSourcesForOwner(
+      DEFINING_WORLD_PLAZA_ORE_SMELTING_LIGHT_OWNER_KEY,
+      oreSmeltingLightSources
+    );
+  }, [oreSmeltingLightSources]);
+
+  useEffect(() => {
+    return () => {
+      clearingWorldPlazaLightSourcesForOwner(
+        DEFINING_WORLD_PLAZA_ORE_SMELTING_LIGHT_OWNER_KEY
+      );
+    };
+  }, []);
 
   usingWorldPlazaSafeTick(() => {
     const entityLayer = entityLayerRef.current;

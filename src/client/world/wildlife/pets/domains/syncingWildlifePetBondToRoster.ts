@@ -74,6 +74,39 @@ function checkingWildlifePetLearnedSkillIdsEqual(
   return true;
 }
 
+/** Ignore sub-tile position jitter so walking pets do not spam roster notifies. */
+const SYNCING_WILDLIFE_PET_VITALS_POSITION_EPSILON = 0.5;
+
+/** Ignore tiny hunger/stamina float noise between vitals sync ticks. */
+const SYNCING_WILDLIFE_PET_VITALS_RATIO_EPSILON = 0.01;
+
+function checkingWildlifePetVitalsRatioNearlyEqual(
+  left: number | null,
+  right: number
+): boolean {
+  if (left === null) {
+    return false;
+  }
+
+  return Math.abs(left - right) < SYNCING_WILDLIFE_PET_VITALS_RATIO_EPSILON;
+}
+
+function checkingWildlifePetVitalsPositionNearlyEqual(
+  leftX: number | null,
+  leftY: number | null,
+  rightX: number,
+  rightY: number
+): boolean {
+  if (leftX === null || leftY === null) {
+    return false;
+  }
+
+  return (
+    Math.abs(leftX - rightX) < SYNCING_WILDLIFE_PET_VITALS_POSITION_EPSILON &&
+    Math.abs(leftY - rightY) < SYNCING_WILDLIFE_PET_VITALS_POSITION_EPSILON
+  );
+}
+
 /**
  * Periodic vitals-only sync for an already-persisted pet bond (position,
  * health, hunger, stamina, loyalty). No-ops for instances without a
@@ -114,8 +147,14 @@ export function syncingWildlifePetInstanceVitalsToRoster(
     existingRecord.loyalty === petBond.loyalty &&
     existingRecord.command === petBond.command &&
     existingRecord.healthCurrent === instance.healthState.currentHealth &&
-    existingRecord.hungerRatio === instance.hungerState.hungerRatio &&
-    existingRecord.staminaRatio === instance.staminaState.staminaRatio &&
+    checkingWildlifePetVitalsRatioNearlyEqual(
+      existingRecord.hungerRatio,
+      instance.hungerState.hungerRatio
+    ) &&
+    checkingWildlifePetVitalsRatioNearlyEqual(
+      existingRecord.staminaRatio,
+      instance.staminaState.staminaRatio
+    ) &&
     checkingWildlifePetLearnedSkillIdsEqual(
       existingRecord.learnedSkillIds,
       nextLearnedSkillIds
@@ -124,8 +163,12 @@ export function syncingWildlifePetInstanceVitalsToRoster(
     existingRecord.soulsaveConsumed === petBond.soulsaveConsumed &&
     existingRecord.weaponItem === petBond.weaponItem &&
     existingRecord.armorItem === petBond.armorItem &&
-    existingRecord.lastKnownX === instance.position.x &&
-    existingRecord.lastKnownY === instance.position.y &&
+    checkingWildlifePetVitalsPositionNearlyEqual(
+      existingRecord.lastKnownX,
+      existingRecord.lastKnownY,
+      instance.position.x,
+      instance.position.y
+    ) &&
     existingRecord.lastKnownLayer === nextLayer &&
     existingRecord.deathCauseKind === null
   ) {
@@ -186,8 +229,14 @@ export function syncingWildlifePetDeathToRoster(
     existingRecord.loyalty === petBond.loyalty &&
     existingRecord.command === petBond.command &&
     existingRecord.healthCurrent === 0 &&
-    existingRecord.hungerRatio === instance.hungerState.hungerRatio &&
-    existingRecord.staminaRatio === instance.staminaState.staminaRatio &&
+    checkingWildlifePetVitalsRatioNearlyEqual(
+      existingRecord.hungerRatio,
+      instance.hungerState.hungerRatio
+    ) &&
+    checkingWildlifePetVitalsRatioNearlyEqual(
+      existingRecord.staminaRatio,
+      instance.staminaState.staminaRatio
+    ) &&
     checkingWildlifePetLearnedSkillIdsEqual(
       existingRecord.learnedSkillIds,
       nextLearnedSkillIds
@@ -196,8 +245,12 @@ export function syncingWildlifePetDeathToRoster(
     existingRecord.soulsaveConsumed === petBond.soulsaveConsumed &&
     existingRecord.weaponItem === petBond.weaponItem &&
     existingRecord.armorItem === petBond.armorItem &&
-    existingRecord.lastKnownX === instance.position.x &&
-    existingRecord.lastKnownY === instance.position.y &&
+    checkingWildlifePetVitalsPositionNearlyEqual(
+      existingRecord.lastKnownX,
+      existingRecord.lastKnownY,
+      instance.position.x,
+      instance.position.y
+    ) &&
     existingRecord.lastKnownLayer === nextLayer &&
     existingRecord.deathCauseKind === deathCauseKind &&
     existingRecord.isActive === false

@@ -18,6 +18,7 @@ export type DefiningWildlifeBehaviorConditionId =
   | 'isWillingToForageSelectedGroundFood'
   | 'hasFavoriteGroundFoodNearby'
   | 'isHealthBelowFleeThreshold'
+  | 'isTakingEnvironmentalHeatDamage'
   | 'isPlayerTooClose'
   | 'isAggressiveHerbivoreMayFight'
   | 'isDefendingYoung'
@@ -38,6 +39,7 @@ export type DefiningWildlifeBehaviorConditionId =
 
 export type DefiningWildlifeBehaviorActionId =
   | 'fleeFromThreat'
+  | 'fleeToCoolerArea'
   | 'chaseTarget'
   | 'followGuardian'
   | 'seekPackmate'

@@ -51,6 +51,10 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
     devPanel: 30,
     controlsHint: 30,
     inventoryHotbar: 50,
+    /** Mode badges under the hotbar body so upward popovers stay on top. */
+    hudToolbarModeBadges: 0,
+    /** Hotbar body + bag/item/Plots/Saves popovers above mode badges. */
+    hudToolbarHotbarBody: 10,
     actionBar: 40,
     mobileJump: 40,
     friendsPanel: 40,

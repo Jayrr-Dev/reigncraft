@@ -96,6 +96,30 @@ import { createPortal } from 'react-dom';
 /** Polling interval for refreshing the live instance snapshot while open. */
 const RENDERING_WILDLIFE_PET_MODAL_REFRESH_INTERVAL_MS = 400;
 
+/**
+ * Display fingerprint so idle companions do not force a full modal React
+ * rebuild every poll when vitals are unchanged.
+ */
+function formattingWildlifePetModalInstanceFingerprint(
+  instance: DefiningWildlifeInstance
+): string {
+  const petBond = instance.petBond;
+
+  return [
+    instance.instanceId,
+    Math.round(instance.healthState.currentHealth),
+    Math.round(instance.staminaState.staminaRatio * 100),
+    Math.round(instance.hungerState.hungerRatio * 100),
+    petBond?.loyalty ?? '',
+    petBond?.command ?? '',
+    petBond?.equippedSkillId ?? '',
+    petBond?.soulsaveConsumed ? 1 : 0,
+    petBond?.weaponItem?.itemTypeId ?? '',
+    petBond?.learnedSkillIds.join(',') ?? '',
+    instance.customDisplayName ?? '',
+  ].join('|');
+}
+
 export type RenderingWildlifePetModalProps = {
   readonly isOpen: boolean;
   readonly instanceId: string | null;
@@ -218,11 +242,29 @@ export function RenderingWildlifePetModal({
     }
 
     setActiveTabId(DEFINING_WILDLIFE_PET_MODAL_DEFAULT_TAB_ID);
+    let lastFingerprint = '';
 
     const refreshingSnapshot = (): void => {
-      setInstanceSnapshot(
-        gettingWildlifeInstance(wildlifeStoreRef.current, instanceId) ?? null
-      );
+      const nextInstance =
+        gettingWildlifeInstance(wildlifeStoreRef.current, instanceId) ?? null;
+
+      if (!nextInstance) {
+        if (lastFingerprint !== '') {
+          lastFingerprint = '';
+          setInstanceSnapshot(null);
+        }
+        return;
+      }
+
+      const nextFingerprint =
+        formattingWildlifePetModalInstanceFingerprint(nextInstance);
+
+      if (nextFingerprint === lastFingerprint) {
+        return;
+      }
+
+      lastFingerprint = nextFingerprint;
+      setInstanceSnapshot(nextInstance);
     };
 
     refreshingSnapshot();

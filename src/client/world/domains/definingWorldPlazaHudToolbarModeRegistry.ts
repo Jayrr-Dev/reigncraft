@@ -178,12 +178,19 @@ export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_STACK_CLASS_NAME =
   'pointer-events-none inline-flex w-full flex-col items-stretch gap-1' as const;
 
 /**
+ * Hotbar / craft / build body under the mode badges.
+ * z-10 keeps slot-anchored popovers above the badge row (z-0).
+ */
+export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_BODY_CLASS_NAME =
+  'pointer-events-auto relative z-10 flex w-full flex-col items-stretch' as const;
+
+/**
  * Header row that hosts the mode badges (pointer-events restored).
- * z-[60] stays above slot popovers (z-50) so Plots/Saves panels cannot cover
- * Items/Craft/Claim and steal the first click.
+ * Stays below the hotbar body stacking context so bag / item / Plots / Saves
+ * popovers paint above Items/Craft/Claim when they open upward.
  */
 export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_HEADER_CLASS_NAME =
-  'pointer-events-auto relative z-[60] flex w-full flex-col' as const;
+  'pointer-events-auto relative z-0 flex w-full flex-col' as const;
 
 /**
  * Label text inside a mode badge.

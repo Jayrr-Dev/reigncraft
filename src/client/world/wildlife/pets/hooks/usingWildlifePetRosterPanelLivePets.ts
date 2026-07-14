@@ -14,11 +14,14 @@ import {
   subscribingWildlifePetRoster,
 } from '@/components/world/wildlife/pets/domains/managingWildlifePetRosterStore';
 import { checkingWildlifePetRosterRecordIsDeceased } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetRosterPanelRows';
-import { resolvingWildlifePetRosterPetsWithLiveVitalsFromStore } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetRosterPetsWithLiveVitals';
+import {
+  formattingWildlifePetRosterLiveVitalsFingerprint,
+  resolvingWildlifePetRosterPetsWithLiveVitalsFromStore,
+} from '@/components/world/wildlife/pets/domains/resolvingWildlifePetRosterPetsWithLiveVitals';
 import { findingWildlifeInstanceByPetId } from '@/components/world/wildlife/pets/domains/spawningWildlifeActivePetNearOwner';
 import { syncingWildlifePetDeathToRoster } from '@/components/world/wildlife/pets/domains/syncingWildlifePetBondToRoster';
 import type { RefObject } from 'react';
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 
 export type UsingWildlifePetRosterPanelLivePetsParams = {
   isOpen: boolean;
@@ -29,6 +32,9 @@ export type UsingWildlifePetRosterPanelLivePetsParams = {
  * Subscribes to the persisted roster and, while the panel is open, overlays
  * live HP / death from the wildlife store. Write-through marks roster death
  * as soon as the live instance is fatal.
+ *
+ * Polls on an interval but only bumps React state when the display fingerprint
+ * changes, so idle companions do not re-render the parchment every tick.
  */
 export function usingWildlifePetRosterPanelLivePets({
   isOpen,
@@ -38,10 +44,14 @@ export function usingWildlifePetRosterPanelLivePets({
     subscribingWildlifePetRoster,
     readingWildlifePetRosterSnapshot
   );
-  const [liveRefreshToken, setLiveRefreshToken] = useState(0);
+  const [livePets, setLivePets] = useState<
+    readonly DefiningWildlifePetPersistedRecord[]
+  >(rosterSnapshot.pets);
+  const lastFingerprintRef = useRef('');
 
   useEffect(() => {
     if (!isOpen) {
+      lastFingerprintRef.current = '';
       return;
     }
 
@@ -65,7 +75,19 @@ export function usingWildlifePetRosterPanelLivePets({
         }
       }
 
-      setLiveRefreshToken((token) => token + 1);
+      const nextLivePets = resolvingWildlifePetRosterPetsWithLiveVitalsFromStore(
+        readingWildlifePetRosterSnapshot().pets,
+        store
+      );
+      const nextFingerprint =
+        formattingWildlifePetRosterLiveVitalsFingerprint(nextLivePets);
+
+      if (nextFingerprint === lastFingerprintRef.current) {
+        return;
+      }
+
+      lastFingerprintRef.current = nextFingerprint;
+      setLivePets(nextLivePets);
     };
 
     refreshingLivePets();
@@ -75,14 +97,11 @@ export function usingWildlifePetRosterPanelLivePets({
     );
 
     return () => window.clearInterval(intervalId);
-  }, [isOpen, wildlifeStoreRef]);
+  }, [isOpen, rosterSnapshot.pets, wildlifeStoreRef]);
 
-  return useMemo(
-    () =>
-      resolvingWildlifePetRosterPetsWithLiveVitalsFromStore(
-        rosterSnapshot.pets,
-        wildlifeStoreRef.current
-      ),
-    [liveRefreshToken, rosterSnapshot.pets, wildlifeStoreRef]
-  );
+  return useMemo(() => (isOpen ? livePets : rosterSnapshot.pets), [
+    isOpen,
+    livePets,
+    rosterSnapshot.pets,
+  ]);
 }

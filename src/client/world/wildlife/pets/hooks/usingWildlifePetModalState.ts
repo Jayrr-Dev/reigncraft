@@ -6,7 +6,6 @@
  * @module components/world/wildlife/pets/hooks/usingWildlifePetModalState
  */
 
-import type { DefiningWildlifePetRoster } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
 import {
   readingWildlifePetRosterSnapshot,
   subscribingWildlifePetRoster,
@@ -20,12 +19,17 @@ export type UsingWildlifePetModalStateResult = {
   /** Wildlife instance id waiting for a permanent name, or null when closed. */
   readonly namingPetInstanceId: string | null;
   readonly isNameDialogOpen: boolean;
-  readonly rosterSnapshot: DefiningWildlifePetRoster;
+  /** True when the roster has at least one companion (alive or deceased). */
+  readonly hasAnyPets: boolean;
   readonly openingPetModal: (instanceId: string) => void;
   readonly closingPetModal: () => void;
   readonly openingPetNameDialog: (instanceId: string) => void;
   readonly closingPetNameDialog: () => void;
 };
+
+function readingWildlifePetRosterPetCount(): number {
+  return readingWildlifePetRosterSnapshot().pets.length;
+}
 
 /** React binding for companion panel + one-shot naming dialog state. */
 export function usingWildlifePetModalState(): UsingWildlifePetModalStateResult {
@@ -36,9 +40,11 @@ export function usingWildlifePetModalState(): UsingWildlifePetModalStateResult {
     null
   );
 
-  const rosterSnapshot = useSyncExternalStore(
+  // Primitive count snapshot: vitals writes that keep the same pet count do not
+  // re-render the plaza scene (Object.is on number).
+  const petCount = useSyncExternalStore(
     subscribingWildlifePetRoster,
-    readingWildlifePetRosterSnapshot
+    readingWildlifePetRosterPetCount
   );
 
   const openingPetModal = useCallback((instanceId: string): void => {
@@ -64,7 +70,7 @@ export function usingWildlifePetModalState(): UsingWildlifePetModalStateResult {
     isModalOpen: selectedPetInstanceId !== null,
     namingPetInstanceId,
     isNameDialogOpen: namingPetInstanceId !== null,
-    rosterSnapshot,
+    hasAnyPets: petCount > 0,
     openingPetModal,
     closingPetModal,
     openingPetNameDialog,

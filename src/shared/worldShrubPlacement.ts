@@ -166,6 +166,19 @@ export function resolvingWorldShrubBunchSizeFromUnit(unitFloat: number): number 
   return WORLD_SHRUB_BUNCH_MAX_TILE_COUNT;
 }
 
+function formattingWorldShrubAnchorCacheKey(
+  anchorX: number,
+  anchorY: number
+): string {
+  return `${anchorX},${anchorY}`;
+}
+
+/** Memoized bunch shapes keyed by anchor (deterministic; safe for session life). */
+const WORLD_SHRUB_BUNCH_MEMBER_OFFSETS_CACHE = new Map<
+  string,
+  readonly (readonly [number, number])[]
+>();
+
 /**
  * Lists world tile offsets for one seeded shrub bunch (size 1 to 5, peak at 3).
  */
@@ -173,6 +186,13 @@ export function listingWorldShrubBunchMemberOffsets(
   anchorX: number,
   anchorY: number
 ): readonly (readonly [number, number])[] {
+  const cacheKey = formattingWorldShrubAnchorCacheKey(anchorX, anchorY);
+  const cachedOffsets = WORLD_SHRUB_BUNCH_MEMBER_OFFSETS_CACHE.get(cacheKey);
+
+  if (cachedOffsets) {
+    return cachedOffsets;
+  }
+
   const unit = seedingWorldShrubUnitFromTileIndex(
     anchorX,
     anchorY,
@@ -201,8 +221,11 @@ export function listingWorldShrubBunchMemberOffsets(
   const otherOffsets = rankedOffsets.filter(
     ([offsetX, offsetY]) => offsetX !== 0 || offsetY !== 0
   );
+  const offsets = [anchorOffset, ...otherOffsets].slice(0, bunchSize);
 
-  return [anchorOffset, ...otherOffsets].slice(0, bunchSize);
+  WORLD_SHRUB_BUNCH_MEMBER_OFFSETS_CACHE.set(cacheKey, offsets);
+
+  return offsets;
 }
 
 /**
@@ -254,6 +277,12 @@ export function checkingWorldShrubBunchHasTallGrassCompanion(
   return unit < 1 / WORLD_SHRUB_TALL_GRASS_COMPANION_MODULUS;
 }
 
+/** Memoized companion thicket shapes keyed by shrub bunch anchor. */
+const WORLD_SHRUB_TALL_GRASS_COMPANION_OFFSETS_CACHE = new Map<
+  string,
+  readonly (readonly [number, number])[]
+>();
+
 /**
  * Lists grass offsets for one rare berry-bunch companion thicket.
  */
@@ -261,6 +290,14 @@ export function listingWorldShrubTallGrassCompanionOffsets(
   anchorX: number,
   anchorY: number
 ): readonly (readonly [number, number])[] {
+  const cacheKey = formattingWorldShrubAnchorCacheKey(anchorX, anchorY);
+  const cachedOffsets =
+    WORLD_SHRUB_TALL_GRASS_COMPANION_OFFSETS_CACHE.get(cacheKey);
+
+  if (cachedOffsets) {
+    return cachedOffsets;
+  }
+
   const unit = seedingWorldShrubUnitFromTileIndex(
     anchorX,
     anchorY,
@@ -290,8 +327,11 @@ export function listingWorldShrubTallGrassCompanionOffsets(
       return seedA - seedB;
     }
   );
+  const offsets = rankedOffsets.slice(0, patchSize);
 
-  return rankedOffsets.slice(0, patchSize);
+  WORLD_SHRUB_TALL_GRASS_COMPANION_OFFSETS_CACHE.set(cacheKey, offsets);
+
+  return offsets;
 }
 
 /**

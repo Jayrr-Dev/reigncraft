@@ -62,6 +62,12 @@ type DefiningWorldPlazaShrubTileInstance = {
   readonly spriteUrl: string;
 };
 
+/** Last applied shrub sprite URL per Sprite; skip rebuild when pick state unchanged. */
+const SYNCING_WORLD_PLAZA_SHRUB_APPLIED_SPRITE_URL_BY_SPRITE = new WeakMap<
+  Sprite,
+  string
+>();
+
 function listingWorldPlazaVisibleShrubCandidatesInBounds(
   bounds: DefiningWorldPlazaVisibleTileBounds,
   burntGrassTileKeys?: ReadonlySet<string>
@@ -146,6 +152,10 @@ function applyingWorldPlazaShrubTileToSprite(
     DEFINING_WORLD_DEPTH_SHRUB_DECORATION_LAYER_Z_INDEX +
     (instance.tileX + instance.tileY) *
       SYNCING_WORLD_PLAZA_SHRUB_TILE_DEPTH_BIAS_SCALE;
+  SYNCING_WORLD_PLAZA_SHRUB_APPLIED_SPRITE_URL_BY_SPRITE.set(
+    sprite,
+    instance.spriteUrl
+  );
 
   return true;
 }
@@ -179,6 +189,15 @@ export function syncingWorldPlazaVisibleShrubDecorationLayer(
     const existingSprite = input.spriteByKey.get(cacheKey);
 
     if (existingSprite) {
+      if (
+        SYNCING_WORLD_PLAZA_SHRUB_APPLIED_SPRITE_URL_BY_SPRITE.get(
+          existingSprite
+        ) === candidate.spriteUrl &&
+        checkingWorldPlazaShrubTextureIsRenderable(existingSprite.texture)
+      ) {
+        continue;
+      }
+
       const previousZIndex = existingSprite.zIndex;
       const previousTexture = existingSprite.texture;
       const didApplyTexture = applyingWorldPlazaShrubTileToSprite(

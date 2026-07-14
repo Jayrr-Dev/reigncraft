@@ -64,6 +64,12 @@ type DefiningWorldPlazaLongGrassTileInstance = {
   readonly spriteUrl: string;
 };
 
+/** Last applied long-grass sprite URL; skip rebuild when variant/facing unchanged. */
+const SYNCING_WORLD_PLAZA_LONG_GRASS_APPLIED_SPRITE_URL_BY_SPRITE = new WeakMap<
+  Sprite,
+  string
+>();
+
 function listingWorldPlazaVisibleLongGrassCandidatesInBounds(
   bounds: DefiningWorldPlazaVisibleTileBounds,
   burntGrassTileKeys?: ReadonlySet<string>
@@ -157,6 +163,10 @@ function applyingWorldPlazaLongGrassTileToSprite(
     DEFINING_WORLD_DEPTH_LONG_GRASS_DECORATION_LAYER_Z_INDEX +
     (instance.tileX + instance.tileY) *
       SYNCING_WORLD_PLAZA_LONG_GRASS_TILE_DEPTH_BIAS_SCALE;
+  SYNCING_WORLD_PLAZA_LONG_GRASS_APPLIED_SPRITE_URL_BY_SPRITE.set(
+    sprite,
+    instance.spriteUrl
+  );
 
   return true;
 }
@@ -190,6 +200,15 @@ export function syncingWorldPlazaVisibleLongGrassDecorationLayer(
     const existingSprite = input.spriteByKey.get(cacheKey);
 
     if (existingSprite) {
+      if (
+        SYNCING_WORLD_PLAZA_LONG_GRASS_APPLIED_SPRITE_URL_BY_SPRITE.get(
+          existingSprite
+        ) === candidate.spriteUrl &&
+        checkingWorldPlazaLongGrassTextureIsRenderable(existingSprite.texture)
+      ) {
+        continue;
+      }
+
       const previousZIndex = existingSprite.zIndex;
       const didApplyTexture = applyingWorldPlazaLongGrassTileToSprite(
         existingSprite,

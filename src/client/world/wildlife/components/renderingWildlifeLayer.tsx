@@ -58,6 +58,7 @@ import {
 } from '@/components/world/wildlife/domains/computingWildlifeGroundShadowLayout';
 import {
   computingWildlifeRenderStructuralFingerprint,
+  quantizingWildlifeRenderHungerCircleRatio,
   quantizingWildlifeRenderVitalsRatio,
 } from '@/components/world/wildlife/domains/computingWildlifeRenderStructuralFingerprint';
 import {
@@ -1089,7 +1090,7 @@ export function RenderingWildlifeLayer({
               instance.staminaState.staminaRatio,
               resolvingWildlifeInstanceMaxStaminaRatio(instance, species)
             )}
-            hungerRatio={quantizingWildlifeRenderVitalsRatio(
+            hungerRatio={quantizingWildlifeRenderHungerCircleRatio(
               instance.hungerState.hungerRatio
             )}
             isDomesticatedPet={checkingWildlifeInstanceShowsHungerUi(instance)}

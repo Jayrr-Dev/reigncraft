@@ -714,10 +714,18 @@ export function registeringWorldPlazaTerrainLayers(
           });
 
         for (const grassSprite of state.spriteByKey.values()) {
-          grassSprite.visible =
-            context.isFloorRenderLayerEnabled &&
+          if (!context.isFloorRenderLayerEnabled) {
+            grassSprite.visible = false;
+            continue;
+          }
+
+          if (
+            !grassSprite.visible &&
             grassSprite.texture.width > 0 &&
-            grassSprite.texture.height > 0;
+            grassSprite.texture.height > 0
+          ) {
+            grassSprite.visible = true;
+          }
         }
 
         return {
@@ -795,10 +803,18 @@ export function registeringWorldPlazaTerrainLayers(
         });
 
         for (const shrubSprite of state.spriteByKey.values()) {
-          shrubSprite.visible =
-            context.isFloorRenderLayerEnabled &&
+          if (!context.isFloorRenderLayerEnabled) {
+            shrubSprite.visible = false;
+            continue;
+          }
+
+          if (
+            !shrubSprite.visible &&
             shrubSprite.texture.width > 0 &&
-            shrubSprite.texture.height > 0;
+            shrubSprite.texture.height > 0
+          ) {
+            shrubSprite.visible = true;
+          }
         }
 
         return {
