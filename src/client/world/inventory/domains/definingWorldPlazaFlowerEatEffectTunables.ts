@@ -9,7 +9,7 @@
 export const DEFINING_WORLD_PLAZA_FLOWER_YARROW_FALLBACK_HEAL_OF_MAX = 0.05;
 
 /** Calendula heal (fraction of effective max HP). */
-export const DEFINING_WORLD_PLAZA_FLOWER_CALENDULA_HEAL_OF_MAX = 0.08;
+export const DEFINING_WORLD_PLAZA_FLOWER_CALENDULA_HEAL_OF_MAX = 0.05;
 
 /** Calendula mending outgoing-heal buff duration. */
 export const DEFINING_WORLD_PLAZA_FLOWER_CALENDULA_MENDING_DURATION_MS = 30_000;
