@@ -27,7 +27,7 @@ export const DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_SLOT_COUNT =
 
 /** localStorage key for all mode-tool board layouts. */
 export const DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_STORAGE_KEY =
-  'reigncraft.plaza.hudModeToolBoards.v1' as const;
+  'reigncraft.plaza.hudModeToolBoards.v2' as const;
 
 /** Accessible labels for each mode board shell. */
 export const LABELING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD = {

@@ -48,32 +48,32 @@ describe('applyingWorldPlazaHudModeToolBoardMove', () => {
 });
 
 describe('resolvingWorldPlazaHudModeToolBoardDefaults', () => {
-  it('left-packs build tools and leaves empty slots', () => {
+  it('left-packs build tools with walk first', () => {
     expect(
       resolvingWorldPlazaHudModeToolBoardDefaults(
         DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.BUILD
       )
     ).toEqual([
+      DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.WALK,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLACE,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.REMOVE,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.MATERIALS,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.BLOCKS,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CUT,
-      null,
     ]);
   });
 
-  it('left-packs claim tools and leaves empty slots', () => {
+  it('left-packs claim tools with walk first and leaves empty slots', () => {
     expect(
       resolvingWorldPlazaHudModeToolBoardDefaults(
         DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.CLAIM
       )
     ).toEqual([
+      DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.WALK,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CLAIM,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.UNCLAIM,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLOTS,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.SAVES,
-      null,
       null,
     ]);
   });
@@ -100,11 +100,11 @@ describe('normalizingWorldPlazaHudModeToolBoardLayout', () => {
       )
     ).toEqual([
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CUT,
+      DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.WALK,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLACE,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.REMOVE,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.MATERIALS,
       DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.BLOCKS,
-      null,
     ]);
   });
 });

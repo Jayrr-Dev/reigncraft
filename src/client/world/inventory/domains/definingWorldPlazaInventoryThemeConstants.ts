@@ -131,9 +131,13 @@ export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_VALID_CLASS =
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_DROP_INVALID_CLASS =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.slot.dropInvalid;
 
-/** Parchment hotbar shell — matches home-screen plaza panel styling. */
+/**
+ * Parchment hotbar shell — matches home-screen plaza panel styling.
+ * pointer-events-none so wood padding / border chrome never eats slot clicks;
+ * {@link STYLING_WORLD_PLAZA_INVENTORY_SHELL_BODY_CLASS_NAME} restores hits.
+ */
 export const STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME =
-  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventoryHotbarShell} pointer-events-auto flex touch-manipulation overscroll-none items-center overflow-visible` as const;
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventoryHotbarShell} pointer-events-none flex touch-manipulation overscroll-none items-center overflow-visible` as const;
 
 /** Darker shell for storage pages (row 2+). */
 export const STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_STORAGE_CLASS_NAME =
@@ -145,7 +149,7 @@ export const STYLING_WORLD_PLAZA_INVENTORY_GRID_WRAPPER_CLASS_NAME =
 
 /** Stacks the slot grid beside the storage page arrows. */
 export const STYLING_WORLD_PLAZA_INVENTORY_SHELL_BODY_CLASS_NAME =
-  'flex touch-manipulation items-stretch gap-1' as const;
+  'pointer-events-auto flex touch-manipulation items-stretch gap-1' as const;
 
 /**
  * Minimum page-arrow tap/drag target edge (px).

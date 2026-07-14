@@ -69,13 +69,10 @@ export function RenderingWorldPlazaHudToolbarModeBadges({
       style={viewportStyles.stackStyle}
     >
       <div
-        {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
         className={STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_SWITCHER_CLASS_NAME}
         style={viewportStyles.switcherStyle}
         role="group"
         aria-label={LABELING_WORLD_PLAZA_HUD_TOOLBAR_MODE_SWITCHER}
-        onPointerDown={stoppingPlazaWalkPointerPropagation}
-        onClick={stoppingPlazaWalkPointerPropagation}
       >
         {DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_REGISTRY.map(
           (badgeDefinition) => {
@@ -90,10 +87,13 @@ export function RenderingWorldPlazaHudToolbarModeBadges({
                 <button
                   key="build-claim-toggle"
                   type="button"
+                  {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
                   aria-label={toggleFace.ariaLabel}
                   aria-pressed={isActive}
                   disabled={isDisabled}
-                  onClick={() => {
+                  onPointerDown={stoppingPlazaWalkPointerPropagation}
+                  onClick={(event) => {
+                    stoppingPlazaWalkPointerPropagation(event);
                     onSelectMode(
                       resolvingWorldPlazaHudToolbarBuildClaimToggleNextMode(
                         activeMode
@@ -150,10 +150,13 @@ export function RenderingWorldPlazaHudToolbarModeBadges({
               <button
                 key={badgeDefinition.id}
                 type="button"
+                {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
                 aria-label={badgeDefinition.ariaLabel}
                 aria-pressed={isActive}
                 disabled={isDisabled}
-                onClick={() => {
+                onPointerDown={stoppingPlazaWalkPointerPropagation}
+                onClick={(event) => {
+                  stoppingPlazaWalkPointerPropagation(event);
                   onSelectMode(badgeDefinition.id);
                 }}
                 className={

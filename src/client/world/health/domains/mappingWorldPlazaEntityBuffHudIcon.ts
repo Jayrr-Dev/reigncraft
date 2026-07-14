@@ -141,6 +141,11 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'well-fed-cucco-fury-buff': 'boxicons:sword-filled',
   'well-fed-cucco-chase-buff': 'mdi:run-fast',
   'well-fed-cucco-vigor-buff': 'mdi:refresh',
+  'tea-leaf-calm-buff': 'mdi:refresh',
+  'coffee-cherry-buzz-buff': 'mdi:run-fast',
+  'coffee-buzz-buff': 'mdi:run-fast',
+  'coffee-cherry-crash-debuff': 'mdi:arrow-down-bold',
+  'coffee-crash-debuff': 'mdi:arrow-down-bold',
 };
 
 /**

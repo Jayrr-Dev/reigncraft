@@ -672,7 +672,7 @@ export function RenderingWorldPlazaInventoryHotbar({
     <ProvidingWorldPlazaViewportHudScale
       viewportHudScale={hotbarViewportHudScale}
     >
-      <div className="pointer-events-auto flex flex-col items-center">
+      <div className="pointer-events-none flex flex-col items-center">
         <RenderingWorldPlazaInventoryHotbarInventoryShell
           state={state}
           isLoading={isLoading}
@@ -709,7 +709,10 @@ export function RenderingWorldPlazaInventoryHotbar({
 
   if (isEmbeddedInHudToolbarStack) {
     return (
-      <div aria-label={LABELING_WORLD_PLAZA_INVENTORY_HOTBAR}>
+      <div
+        className="pointer-events-none"
+        aria-label={LABELING_WORLD_PLAZA_INVENTORY_HOTBAR}
+      >
         {inventoryHotbarBody}
       </div>
     );

@@ -202,11 +202,16 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
     pageArrowEdgePx,
     Math.floor((gridHeightPx - pageArrowGapPx) / 2)
   );
+  // Expand the tap target, but never left into the slot grid (dead spots on
+  // the rightmost tiles). Extra width grows only toward the outer edge.
   const pageArrowHitWidthPx = Math.max(
     pageArrowEdgePx,
     DEFINING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_MIN_HIT_PX
   );
-  const pageArrowHitMarginXPx = (pageArrowEdgePx - pageArrowHitWidthPx) / 2;
+  const pageArrowHitOverflowPx = Math.max(
+    0,
+    pageArrowHitWidthPx - pageArrowEdgePx
+  );
   const emptyFistIconEdgePx = Math.max(
     1,
     Math.round(
@@ -273,8 +278,8 @@ export function resolvingWorldPlazaInventoryHotbarViewportStyles(
     pageArrowHitStyle: {
       width: pageArrowHitWidthPx,
       height: pageArrowHitHeightPx,
-      marginLeft: pageArrowHitMarginXPx,
-      marginRight: pageArrowHitMarginXPx,
+      marginLeft: 0,
+      marginRight: -pageArrowHitOverflowPx,
     },
     pageArrowButtonStyle: {
       width: pageArrowEdgePx,

@@ -36,7 +36,7 @@ describe('ore smelting registry', () => {
         DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_SCARLET
       )?.outputItemTypeId
     ).toBe(DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_MERCURY);
-    expect(DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY).toHaveLength(8);
+    expect(DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY).toHaveLength(9);
   });
 
   it('fires wet clay ware into empty cups and teapots', () => {

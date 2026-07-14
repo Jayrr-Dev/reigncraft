@@ -180,6 +180,12 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT =
 /** Fired empty clay teapot (kiln output from wet teapot). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT =
   'world-plaza-empty-clay-teapot' as const;
+/** Unfired clay bottle shaped from wet clay (fire in kiln). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOTTLE =
+  'world-plaza-wet-clay-bottle' as const;
+/** Fired empty clay bottle (kiln output from wet bottle). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOTTLE =
+  'world-plaza-empty-clay-bottle' as const;
 
 /** Wood-tier swords through gold-tier swords. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD =

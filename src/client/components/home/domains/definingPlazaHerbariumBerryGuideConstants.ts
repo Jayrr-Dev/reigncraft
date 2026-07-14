@@ -57,7 +57,7 @@ export const DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES: readonly DefiningPlaz
       icon: 'mdi:leaf',
       summary: 'Dried leaves mixed in with the berries.',
       studiedSummary:
-        'Tea leaves turn up dried and curled among the berries on the same shrubs, like something already picked and left to dry. Nobody on Corpus has worked out a proper brew yet.',
-      propertiesSummary: 'Gathered: dried leaves, no known use yet.',
+        'Tea leaves turn up dried and curled among the berries on the same shrubs, like something already picked and left to dry. Nobody on Corpus has worked out a proper brew yet, so wanderers chew them raw when the run starts to wear them down.',
+      propertiesSummary: 'Eaten: dry leaves, sprint burns less.',
     },
   ] as const;

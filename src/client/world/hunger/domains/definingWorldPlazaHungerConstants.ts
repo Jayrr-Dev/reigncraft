@@ -105,7 +105,13 @@ export const DEFINING_WORLD_PLAZA_HUNGER_HUD_EPSILON = 0.005;
 export const DEFINING_WORLD_PLAZA_HUNGER_MAX_FRAME_DELTA_SECONDS = 0.125;
 
 /** Hunger ratio restored by eating berries. */
-export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES = 0.15;
+export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES = 0.025;
+
+/** Chance Coffee Cherry eat applies Cherry Buzz (then crash). */
+export const DEFINING_WORLD_PLAZA_COFFEE_CHERRY_BUZZ_CHANCE = 1 / 3;
+
+/** Chance chewing Tea Leaves applies Leaf Calm. */
+export const DEFINING_WORLD_PLAZA_TEA_LEAVES_CALM_CHANCE = 1 / 3;
 
 /** Hunger ratio restored by drinking brewed coffee. */
 export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BREWED_COFFEE = 0.08;

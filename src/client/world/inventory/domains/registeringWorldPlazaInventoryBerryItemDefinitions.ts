@@ -13,8 +13,17 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { resolvingWorldPlazaInventoryTeaLeavesSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryTeaLeavesSpriteSheetConstants';
-import { DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
-import { resolvingWorldPlazaInventoryFoodHealDeclaration } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealDeclaration';
+import {
+  DEFINING_WORLD_PLAZA_COFFEE_CHERRY_BUZZ_CHANCE,
+  DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
+  DEFINING_WORLD_PLAZA_TEA_LEAVES_CALM_CHANCE,
+} from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
+
+/** Berries / tea restore hunger only; no HP heal stamp. */
+const DEFINING_WORLD_PLAZA_BERRY_FOOD_NO_HEALTH_HEAL = {
+  baseFlat: 0,
+  percentOfMax: 0,
+} as const;
 
 const DEFINING_WORLD_PLAZA_BERRY_INVENTORY_ITEM_SEEDS = [
   {
@@ -48,13 +57,11 @@ export function registeringWorldPlazaInventoryBerryItemDefinitions(): readonly D
         undefined,
       food: {
         hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
-        healthHeal: resolvingWorldPlazaInventoryFoodHealDeclaration({
-          hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
-        }),
+        healthHeal: DEFINING_WORLD_PLAZA_BERRY_FOOD_NO_HEALTH_HEAL,
         ...(seed.typeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED
           ? {
               cookedWellFedBuffId: 'coffee-cherry-buzz-buff',
-              cookedWellFedChance: 1,
+              cookedWellFedChance: DEFINING_WORLD_PLAZA_COFFEE_CHERRY_BUZZ_CHANCE,
             }
           : {}),
       },
@@ -70,6 +77,12 @@ export function registeringWorldPlazaInventoryBerryItemDefinitions(): readonly D
         resolvingWorldPlazaInventoryTeaLeavesSpriteSheetIcon(
           DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES
         ) ?? undefined,
+      food: {
+        hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
+        healthHeal: DEFINING_WORLD_PLAZA_BERRY_FOOD_NO_HEALTH_HEAL,
+        cookedWellFedBuffId: 'tea-leaf-calm-buff',
+        cookedWellFedChance: DEFINING_WORLD_PLAZA_TEA_LEAVES_CALM_CHANCE,
+      },
     },
   ];
 }

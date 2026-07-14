@@ -55,6 +55,13 @@ const DEFINING_WORLD_PLAZA_HUD_MODE_COOKBOOK_TOOLS =
 export const DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_REGISTRY = [
   ...DEFINING_WORLD_PLAZA_HUD_MODE_COOKBOOK_TOOLS,
   {
+    id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.WALK,
+    boardId: DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.BUILD,
+    label: 'Walk',
+    ariaLabel: 'Walk without placing or claiming',
+    iconifyIcon: 'mdi:foot-print',
+  },
+  {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLACE,
     boardId: DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.BUILD,
     label: 'Place',
@@ -88,6 +95,13 @@ export const DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_REGISTRY = [
     label: 'Cut',
     ariaLabel: 'Cut footprint',
     iconifyIcon: 'mdi:view-grid-outline',
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.WALK,
+    boardId: DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.CLAIM,
+    label: 'Walk',
+    ariaLabel: 'Walk without placing or claiming',
+    iconifyIcon: 'mdi:foot-print',
   },
   {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CLAIM,

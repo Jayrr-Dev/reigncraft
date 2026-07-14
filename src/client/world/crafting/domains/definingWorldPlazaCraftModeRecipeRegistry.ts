@@ -63,6 +63,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_IRON,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOTTLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CUP,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
@@ -112,6 +113,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CLAY_STOVE_IRON_INGOT_COST =
 /** Wet clay ware shaping costs (Ceramics cookbook). */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_CUP_WET_CLAY_COST = 1;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_TEAPOT_WET_CLAY_COST = 2;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_BOTTLE_WET_CLAY_COST = 1;
 
 /** Bear trap smith recipe ingredient counts (requires nearby anvil). */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BEAR_TRAP_IRON_INGOT_COST = 3;
@@ -420,6 +422,38 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
     outcome: {
       kind: 'item',
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT,
+      quantity: 1,
+    },
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_BOTTLE,
+    cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.CERAMICS,
+    title: 'Wet Clay Bottle',
+    description:
+      'Pull wet clay into a bottle. Fire the greenware in a kiln with coal before it can hold liquid.',
+    recipeVisual: {
+      visualKind: 'sprite-sheet',
+      spriteSheetIcon: {
+        spriteSheetUrl: DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
+        columnCount:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
+        rowCount:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_ROW_COUNT,
+        columnIndex: 3,
+        rowIndex: 0,
+      },
+    },
+    ingredients: [
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_BOTTLE_WET_CLAY_COST,
+      },
+    ],
+    recipeType: 'item',
+    outcome: {
+      kind: 'item',
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOTTLE,
       quantity: 1,
     },
   },

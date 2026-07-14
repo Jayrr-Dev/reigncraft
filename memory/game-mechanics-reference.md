@@ -254,7 +254,7 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 
 **Food restore examples**
 
-- Berries **15%**, apple **25%**, cooked meat **60%** (generic constants)
+- Berries **2.5%**, apple **25%**, cooked meat **60%** (generic constants); Coffee Cherry buzz / Tea Leaves calm **1/3** chance
 - Species meat values in meat catalog
 - Eat also heals HP from stamped food `healthHeal` (**flat + % of your effective max**), × kill size tier; raw stamps already include × **0.5** (`definingWorldPlazaInventoryFoodHealConstants.ts`)
 - Eat channel **1–10 s** by food/species (`definingWorldPlazaInventoryFoodEatDurationRegistry.ts`); damage, walk, jump, or roll cancels (`checkingWorldPlazaInventoryFoodEatShouldContinue.ts`)
@@ -285,7 +285,7 @@ Incubation / grant fire times use **world epoch** (`Date.now()`). Fired grant ef
 **Eating pipeline** (`resolvingWorldPlazaInventoryFoodEatEffects.ts`)
 
 - Raw meat: roll species `rawDiseaseChance`; fallback generic poison/sickness
-- Raw flowers: species effect proc **65%**; Petal Sickness after **10** petals in 1 in-game day (60s confusion + stamina + **3%** max HP toxic poison, duration stacks, chance escalates past 10, 1-day lockout after clear); small independent flower-disease rolls (`definingWorldPlazaFlowerRawDiseaseRegistry.ts`)
+- Raw flowers: species effect proc **1/3**; Petal Sickness after **10** petals in 1 in-game day (60s confusion + stamina + **3%** max HP toxic poison, duration stacks, chance escalates past 10, 1-day lockout after clear); small independent flower-disease rolls (`definingWorldPlazaFlowerRawDiseaseRegistry.ts`)
 - Cooked: roll `cookedWellFedBuffId` + residual prion chance where defined
 - Food sickness / active disease / Petal Sickness: hunger restore × **0.5**
 - **HP heal**: each food stamps declarative `healthHeal.baseFlat` + `healthHeal.percentOfMax` at registration (`resolvingWorldPlazaInventoryFoodHealDeclaration.ts`); eat multiplies by kill `sizeTier` / large frame. Inspect UI uses the player’s effective max HP.

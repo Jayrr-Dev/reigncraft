@@ -61,7 +61,7 @@ export const DEFINING_WORLD_PLAZA_HUD_TOOLBAR_BUILD_CLAIM_TOGGLE_FACES = {
       'Build mode. Use the build/claim switch on the hotbar to change edit mode.',
     iconifyIcon: 'mdi:hammer',
     activeButtonClassName:
-      'inline-flex shrink-0 items-center justify-center rounded-md border border-amber-300/80 bg-[linear-gradient(180deg,#7a4a18_0%,#4a2e0e_100%)] font-bold uppercase text-amber-100 shadow-[0_0_0_1px_rgba(251,191,36,0.35),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-40',
+      'pointer-events-auto inline-flex shrink-0 items-center justify-center rounded-md border border-amber-300/80 bg-[linear-gradient(180deg,#7a4a18_0%,#4a2e0e_100%)] font-bold uppercase text-amber-100 shadow-[0_0_0_1px_rgba(251,191,36,0.35),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-40',
   },
   [DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM]: {
     modeId: DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM,
@@ -70,7 +70,7 @@ export const DEFINING_WORLD_PLAZA_HUD_TOOLBAR_BUILD_CLAIM_TOGGLE_FACES = {
       'Claim mode. Use the build/claim switch on the hotbar to change edit mode.',
     iconifyIcon: 'mdi:land-plots',
     activeButtonClassName:
-      'inline-flex shrink-0 items-center justify-center rounded-md border border-sky-300/80 bg-[linear-gradient(180deg,#1e4a5c_0%,#123040_100%)] font-bold uppercase text-sky-100 shadow-[0_0_0_1px_rgba(125,211,252,0.35),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-40',
+      'pointer-events-auto inline-flex shrink-0 items-center justify-center rounded-md border border-sky-300/80 bg-[linear-gradient(180deg,#1e4a5c_0%,#123040_100%)] font-bold uppercase text-sky-100 shadow-[0_0_0_1px_rgba(125,211,252,0.35),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-40',
   },
 } as const satisfies Record<
   | typeof DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD
@@ -141,21 +141,6 @@ export const DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_LAYOUT = {
 export const LABELING_WORLD_PLAZA_HUD_TOOLBAR_MODE_SWITCHER =
   'Inventory, craft, or build and claim' as const;
 
-/**
- * Badge row spans the inventory hotbar shell width.
- * Content-sized badges sit centered over the hotbar.
- */
-export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_SWITCHER_CLASS_NAME =
-  'flex w-full items-center justify-center' as const;
-
-/** Inactive HUD toolbar mode badge shell — width follows icon+label. */
-export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BUTTON_CLASS_NAME =
-  'inline-flex shrink-0 items-center justify-center rounded-md border border-poster-gold/30 bg-poster-teal-deep/90 font-bold uppercase text-parchment shadow-md shadow-black/35 backdrop-blur-sm transition-[transform,background-color,border-color,box-shadow] hover:border-poster-gold/50 hover:bg-poster-teal-deep hover:text-parchment disabled:cursor-not-allowed disabled:opacity-40' as const;
-
-/** Active HUD toolbar mode badge shell — width follows icon+label. */
-export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BUTTON_ACTIVE_CLASS_NAME =
-  'inline-flex shrink-0 items-center justify-center rounded-md border border-poster-gold/70 bg-[linear-gradient(180deg,#2c4a52_0%,#1a3038_100%)] font-bold uppercase text-[#f4d35e] shadow-[0_0_0_1px_rgba(244,211,94,0.25),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-40' as const;
-
 /** Icon size inside a HUD toolbar mode badge (edge set via inline styles). */
 export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ICON_CLASS_NAME =
   'shrink-0 text-current' as const;
@@ -179,18 +164,38 @@ export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_STACK_CLASS_NAME =
 
 /**
  * Hotbar / craft / build body under the mode badges.
- * z-10 keeps slot-anchored popovers above the badge row (z-0).
+ * z-10 paints slot-anchored popovers above the badge row (z-0).
+ * pointer-events-none so the body wrapper never steals badge / tile hits;
+ * interactive children (shell body, slots, popovers) restore pointer-events.
  */
 export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_BODY_CLASS_NAME =
-  'pointer-events-auto relative z-10 flex w-full flex-col items-stretch' as const;
+  'pointer-events-none relative z-10 flex w-full flex-col items-stretch' as const;
 
 /**
- * Header row that hosts the mode badges (pointer-events restored).
- * Stays below the hotbar body stacking context so bag / item / Plots / Saves
- * popovers paint above Items/Craft/Claim when they open upward.
+ * Header row that hosts the mode badges.
+ * pointer-events-none so empty space beside the centered tabs does not eat
+ * clicks; each badge button restores pointer-events. Stays below the hotbar
+ * body stacking context so bag / item / Plots / Saves popovers paint above
+ * Items/Craft/Claim when they open upward.
  */
 export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_HEADER_CLASS_NAME =
-  'pointer-events-auto relative z-0 flex w-full flex-col' as const;
+  'pointer-events-none relative z-0 flex w-full flex-col' as const;
+
+/**
+ * Badge row spans the inventory hotbar shell width.
+ * Content-sized badges sit centered over the hotbar.
+ * pointer-events-none: only the badge buttons themselves catch hits.
+ */
+export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_SWITCHER_CLASS_NAME =
+  'pointer-events-none flex w-full items-center justify-center' as const;
+
+/** Inactive HUD toolbar mode badge shell — width follows icon+label. */
+export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BUTTON_CLASS_NAME =
+  'pointer-events-auto inline-flex shrink-0 items-center justify-center rounded-md border border-poster-gold/30 bg-poster-teal-deep/90 font-bold uppercase text-parchment shadow-md shadow-black/35 backdrop-blur-sm transition-[transform,background-color,border-color,box-shadow] hover:border-poster-gold/50 hover:bg-poster-teal-deep hover:text-parchment disabled:cursor-not-allowed disabled:opacity-40' as const;
+
+/** Active HUD toolbar mode badge shell — width follows icon+label. */
+export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BUTTON_ACTIVE_CLASS_NAME =
+  'pointer-events-auto inline-flex shrink-0 items-center justify-center rounded-md border border-poster-gold/70 bg-[linear-gradient(180deg,#2c4a52_0%,#1a3038_100%)] font-bold uppercase text-[#f4d35e] shadow-[0_0_0_1px_rgba(244,211,94,0.25),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-40' as const;
 
 /**
  * Label text inside a mode badge.

@@ -200,15 +200,12 @@ export function RenderingWorldPlazaHudModeToolBoard({
 
   return (
     <div
-      {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
       className={cn(
         STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME,
         STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS
       )}
       style={viewportStyles.shellStyle}
       aria-label={LABELING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD[boardId]}
-      onPointerDown={stoppingPlazaWalkPointerPropagation}
-      onClick={stoppingPlazaWalkPointerPropagation}
     >
       <DndContext
         sensors={sensors}
@@ -218,8 +215,11 @@ export function RenderingWorldPlazaHudModeToolBoard({
         onDragEnd={handlingDragEnd}
       >
         <div
+          {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
           className={STYLING_WORLD_PLAZA_INVENTORY_SHELL_BODY_CLASS_NAME}
           style={viewportStyles.shellBodyStyle}
+          onPointerDown={stoppingPlazaWalkPointerPropagation}
+          onClick={stoppingPlazaWalkPointerPropagation}
         >
           <div
             className={STYLING_WORLD_PLAZA_INVENTORY_GRID_WRAPPER_CLASS_NAME}

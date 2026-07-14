@@ -211,9 +211,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       isStackable: true,
       food: {
         hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
-        healthHeal: resolvingWorldPlazaInventoryFoodHealDeclaration({
-          hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
-        }),
+        healthHeal: { baseFlat: 0, percentOfMax: 0 },
       },
     },
     {

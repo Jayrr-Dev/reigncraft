@@ -264,10 +264,10 @@ export function usingWorldPlazaBuildMode({
     editMode === DEFINING_WORLD_BUILDING_EDIT_MODE_CLAIM;
   const [selectedClaimPaintAction, setSelectedClaimPaintAction] = useState<
     'claim' | 'unclaim' | null
-  >('claim');
+  >(null);
   const [selectedBuildPaintAction, setSelectedBuildPaintAction] = useState<
     'place' | 'remove' | null
-  >('place');
+  >(null);
   const [buildDraft, setBuildDraftState] =
     useState<DefiningWorldBuildingBuildDraftState | null>(null);
   /**
@@ -1460,7 +1460,7 @@ export function usingWorldPlazaBuildMode({
           return;
         }
 
-        setBuildErrorMessage('Select Claim or Unclaim first.');
+        // Walk tool: no claim paint armed.
         return;
       }
 
@@ -1492,7 +1492,7 @@ export function usingWorldPlazaBuildMode({
           return;
         }
 
-        setBuildErrorMessage('Select Place or Remove first.');
+        // Walk tool: no build paint armed.
       }
     },
     [

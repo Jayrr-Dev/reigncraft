@@ -161,7 +161,7 @@ export function resolvingWorldPlazaInventoryBerryDetailContent(
   if (reveal.showPropertiesSummary && guideEntry?.propertiesSummary) {
     infoRows.push({
       id: 'berry-when-eaten',
-      label: berryLootKind === 'tea_leaves' ? 'When gathered' : 'When eaten',
+      label: 'When eaten',
       value: guideEntry.propertiesSummary
         .replace(/^Eaten:\s*/i, '')
         .replace(/^Gathered:\s*/i, ''),
@@ -174,7 +174,7 @@ export function resolvingWorldPlazaInventoryBerryDetailContent(
   if (reveal.showWellFedName && wellFedLabels.length > 0) {
     infoRows.push({
       id: 'berry-well-fed',
-      label: 'Buzz chance',
+      label: berryLootKind === 'tea_leaves' ? 'Ease chance' : 'Buzz chance',
       value:
         reveal.showWellFedChance &&
         options.food?.cookedWellFedChance !== undefined

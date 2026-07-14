@@ -1151,9 +1151,8 @@ function RenderingWorldPlazaPixiSceneConnected({
   const isBlockBuildModeActiveRef = useRef(false);
   const isBuildModeActiveRef = useRef(false);
   const isClaimModeActiveRef = useRef(false);
-  const selectedBuildPaintActionRef = useRef<'place' | 'remove' | null>(
-    'place'
-  );
+  const selectedBuildPaintActionRef = useRef<'place' | 'remove' | null>(null);
+  const selectedClaimPaintActionRef = useRef<'claim' | 'unclaim' | null>(null);
   const isSaveCoordsPlacementActiveRef = useRef(false);
   const isEditPaintPointerHeldRef = useRef(false);
   const editPaintActionRef =
@@ -1628,6 +1627,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   isBuildModeActiveRef.current = isEditSessionActive;
   isClaimModeActiveRef.current = isClaimModeActive;
   selectedBuildPaintActionRef.current = selectedBuildPaintAction;
+  selectedClaimPaintActionRef.current = selectedClaimPaintAction;
   isTerrainCollisionDebugVisibleRef.current =
     isDevDebugActive && isTerrainCollisionDebugVisible;
   selectedWorldLayerRef.current = selectedWorldLayer;
@@ -6921,72 +6921,83 @@ function RenderingWorldPlazaPixiSceneConnected({
 
         updatingHoverTilePosition(hoverTile);
 
-        if (
-          isClaimModeActiveRef.current &&
-          event.button ===
-            DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_PRIMARY_POINTER_BUTTON &&
-          hoverTile
-        ) {
-          event.preventDefault();
-          event.stopPropagation();
+        const isEditWalkToolSelected =
+          (isClaimModeActiveRef.current &&
+            selectedClaimPaintActionRef.current === null) ||
+          (isBlockBuildModeActiveRef.current &&
+            selectedBuildPaintActionRef.current === null);
+        const shouldInterceptEditPaintPointer =
+          !isEditWalkToolSelected ||
+          isSaveCoordsPlacementActiveRef.current;
 
-          if (isSaveCoordsPlacementActiveRef.current) {
-            savingCoordsAtTilePosition(hoverTile);
-            setIsSaveCoordsPlacementActive(false);
+        if (shouldInterceptEditPaintPointer) {
+          if (
+            isClaimModeActiveRef.current &&
+            event.button ===
+              DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_PRIMARY_POINTER_BUTTON &&
+            hoverTile
+          ) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (isSaveCoordsPlacementActiveRef.current) {
+              savingCoordsAtTilePosition(hoverTile);
+              setIsSaveCoordsPlacementActive(false);
+              hostRef.current?.focus();
+              return;
+            }
+
+            const paintAction = resolvingEditPaintActionAtTile(hoverTile);
+            if (paintAction) {
+              isEditPaintPointerHeldRef.current = true;
+              editPaintActionRef.current = paintAction;
+              lastEditPaintTileKeyRef.current =
+                formattingWorldBuildingTilePositionKey(hoverTile);
+              paintingEditModeTileAtViewport(hoverTile, paintAction);
+              event.currentTarget.setPointerCapture(event.pointerId);
+            } else {
+              actingOnEditModeTileAtViewport(hoverTile);
+            }
             hostRef.current?.focus();
             return;
           }
 
-          const paintAction = resolvingEditPaintActionAtTile(hoverTile);
-          if (paintAction) {
-            isEditPaintPointerHeldRef.current = true;
-            editPaintActionRef.current = paintAction;
-            lastEditPaintTileKeyRef.current =
-              formattingWorldBuildingTilePositionKey(hoverTile);
-            paintingEditModeTileAtViewport(hoverTile, paintAction);
-            event.currentTarget.setPointerCapture(event.pointerId);
-          } else {
-            actingOnEditModeTileAtViewport(hoverTile);
+          if (
+            isBlockBuildModeActiveRef.current &&
+            event.button ===
+              DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_PRIMARY_POINTER_BUTTON &&
+            hoverTile
+          ) {
+            event.preventDefault();
+            event.stopPropagation();
+            const paintAction = resolvingEditPaintActionAtTile(hoverTile);
+            if (paintAction) {
+              isEditPaintPointerHeldRef.current = true;
+              editPaintActionRef.current = paintAction;
+              lastEditPaintTileKeyRef.current =
+                formattingWorldBuildingTilePositionKey(hoverTile);
+              paintingEditModeTileAtViewport(hoverTile, paintAction);
+              event.currentTarget.setPointerCapture(event.pointerId);
+            } else {
+              actingOnEditModeTileAtViewport(hoverTile);
+            }
+            hostRef.current?.focus();
+            return;
           }
-          hostRef.current?.focus();
-          return;
-        }
 
-        if (
-          isBlockBuildModeActiveRef.current &&
-          event.button ===
-            DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_PRIMARY_POINTER_BUTTON &&
-          hoverTile
-        ) {
-          event.preventDefault();
-          event.stopPropagation();
-          const paintAction = resolvingEditPaintActionAtTile(hoverTile);
-          if (paintAction) {
-            isEditPaintPointerHeldRef.current = true;
-            editPaintActionRef.current = paintAction;
-            lastEditPaintTileKeyRef.current =
-              formattingWorldBuildingTilePositionKey(hoverTile);
-            paintingEditModeTileAtViewport(hoverTile, paintAction);
-            event.currentTarget.setPointerCapture(event.pointerId);
-          } else {
-            actingOnEditModeTileAtViewport(hoverTile);
+          if (
+            isBlockBuildModeActiveRef.current &&
+            selectedBuildPaintActionRef.current === 'remove' &&
+            event.button ===
+              DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_SECONDARY_POINTER_BUTTON &&
+            hoverTile
+          ) {
+            event.preventDefault();
+            event.stopPropagation();
+            removingBlockAtTile(hoverTile);
+            hostRef.current?.focus();
+            return;
           }
-          hostRef.current?.focus();
-          return;
-        }
-
-        if (
-          isBlockBuildModeActiveRef.current &&
-          selectedBuildPaintActionRef.current === 'remove' &&
-          event.button ===
-            DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_SECONDARY_POINTER_BUTTON &&
-          hoverTile
-        ) {
-          event.preventDefault();
-          event.stopPropagation();
-          removingBlockAtTile(hoverTile);
-          hostRef.current?.focus();
-          return;
         }
       }
 

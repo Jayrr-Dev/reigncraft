@@ -28,6 +28,7 @@ import {
   checkingWorldPlazaEditModeFunctionIsBuildPaintTool,
   checkingWorldPlazaEditModeFunctionIsClaimPaintTool,
   checkingWorldPlazaEditModeFunctionIsPaintTool,
+  checkingWorldPlazaEditModeFunctionIsWalkTool,
   DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID,
   DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID,
   LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_HOTBAR,
@@ -297,6 +298,7 @@ function RenderingWorldPlazaEditModeFunctionPopoverBody({
           />
         </div>
       );
+    case DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.WALK:
     case DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CLAIM:
     case DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.UNCLAIM:
     case DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLACE:
@@ -458,10 +460,24 @@ export function RenderingWorldPlazaEditModeHotbar({
     ? selectedClaimPaintFunctionId
     : selectedBuildPaintFunctionId;
 
-  const activeToolId = openFunctionId ?? selectedPaintFunctionId;
+  const activeToolId =
+    openFunctionId ??
+    selectedPaintFunctionId ??
+    DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.WALK;
 
   const togglingFunction = useCallback(
     (functionId: DefiningWorldPlazaEditModeFunctionId): void => {
+      if (checkingWorldPlazaEditModeFunctionIsWalkTool(functionId)) {
+        setOpenFunctionId(null);
+        if (isClaimModeActive) {
+          onSelectClaimPaintAction(null);
+          return;
+        }
+
+        onSelectBuildPaintAction(null);
+        return;
+      }
+
       if (checkingWorldPlazaEditModeFunctionIsClaimPaintTool(functionId)) {
         const paintAction = resolvingWorldPlazaEditModeClaimPaintAction(
           functionId
@@ -506,6 +522,7 @@ export function RenderingWorldPlazaEditModeHotbar({
       onActivateClaimMode();
     },
     [
+      isClaimModeActive,
       onActivateBuildMode,
       onActivateClaimMode,
       onSelectBuildPaintAction,
@@ -719,6 +736,7 @@ export function RenderingWorldPlazaEditModeHotbar({
     return (
       <div
         ref={hotbarRootRef}
+        className="pointer-events-none"
         aria-label={LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_HOTBAR}
       >
         {hotbarBody}

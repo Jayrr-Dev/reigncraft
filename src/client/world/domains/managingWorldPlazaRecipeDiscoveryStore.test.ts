@@ -70,14 +70,20 @@ describe('managingWorldPlazaRecipeDiscoveryStore', () => {
 
     expect(gettingWorldPlazaRecipeAttachedSnapshot()).toEqual([
       DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE,
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_BOTTLE,
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_CUP,
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_TEAPOT,
     ]);
 
     const persisted = readingWorldPlazaRecipeDiscoveryFromStorage(
       'test-recipes-attach'
     );
-    expect([...persisted.attachedRecipeIds]).toEqual([
+    expect([...persisted.attachedRecipeIds].sort()).toEqual([
       DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE,
-    ]);
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_BOTTLE,
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_CUP,
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_TEAPOT,
+    ].sort());
     expect(savingPlazaSinglePlayerSaveSlotData).not.toHaveBeenCalled();
   });
 
@@ -89,9 +95,24 @@ describe('managingWorldPlazaRecipeDiscoveryStore', () => {
       DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE
     );
 
-    expect(savingPlazaSinglePlayerSaveSlotData).toHaveBeenCalledWith(1, {
-      attachedRecipeIds: [DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE],
+    expect(savingPlazaSinglePlayerSaveSlotData).toHaveBeenLastCalledWith(1, {
+      attachedRecipeIds: [
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE,
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_BOTTLE,
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_CUP,
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_TEAPOT,
+      ].sort(),
     });
+  });
+
+  it('auto-attaches ceramics ware recipes on hydrate', () => {
+    initializingWorldPlazaRecipeDiscoveryStore('test-ceramics-ware-start');
+
+    expect(gettingWorldPlazaRecipeAttachedSnapshot()).toEqual([
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_BOTTLE,
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_CUP,
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_TEAPOT,
+    ]);
   });
 
   it('shows mystery names until attached, then filters by cookbook', () => {
@@ -119,8 +140,8 @@ describe('managingWorldPlazaRecipeDiscoveryStore', () => {
     );
 
     expect(survivalOnly).toHaveLength(1);
-    expect(blacksmithOnly).toHaveLength(1);
-    expect(ceramicsOnly).toHaveLength(2);
+    expect(blacksmithOnly).toHaveLength(4);
+    expect(ceramicsOnly).toHaveLength(5);
     expect(blacksmithOnly.every((entry) => entry.isAttached === false)).toBe(
       true
     );

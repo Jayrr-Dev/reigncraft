@@ -1492,6 +1492,21 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       },
     },
     {
+      id: 'tea-leaf-calm-buff',
+      label: 'Leaf Ease',
+      description:
+        'Chewed dry tea leaves settle the nerves. Sprint burns less for a while.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 90_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'stamina_drain',
+        multiplier: 0.75,
+      },
+    },
+    {
       id: 'coffee-cherry-buzz-buff',
       label: 'Cherry Buzz',
       description:

@@ -6,6 +6,7 @@
 
 /** Stable ids for unified edit-mode function slots (left → right). */
 export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID = {
+  WALK: 'walk',
   PLACE: 'place',
   REMOVE: 'remove',
   MATERIALS: 'materials',
@@ -46,6 +47,13 @@ export type DefiningWorldPlazaEditModeFunctionDefinition = {
  */
 export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_REGISTRY = [
   {
+    id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.WALK,
+    sessionModeId: DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
+    label: 'Walk',
+    ariaLabel: 'Walk without placing or claiming',
+    iconifyIcon: 'mdi:foot-print',
+  },
+  {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLACE,
     sessionModeId: DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
     label: 'Place',
@@ -79,6 +87,13 @@ export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_REGISTRY = [
     label: 'Cut',
     ariaLabel: 'Cut footprint',
     iconifyIcon: 'mdi:view-grid-outline',
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.WALK,
+    sessionModeId: DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.CLAIM,
+    label: 'Walk',
+    ariaLabel: 'Walk without placing or claiming',
+    iconifyIcon: 'mdi:foot-print',
   },
   {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.CLAIM,
@@ -115,6 +130,9 @@ export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_REGISTRY = [
  * Opening a slot auto-switches the edit session to that mode.
  */
 export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_SESSION_MODE_BY_ID = {
+  // Walk exists on both boards; session is kept by the hotbar click handler.
+  [DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.WALK]:
+    DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
   [DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.PLACE]:
     DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
   [DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.REMOVE]:
@@ -163,6 +181,7 @@ export const LABELING_WORLD_PLAZA_EDIT_MODE_FUNCTION_POPOVER_TITLE: Record<
   DefiningWorldPlazaEditModeFunctionId,
   string
 > = {
+  walk: 'Walk',
   place: 'Place',
   remove: 'Remove',
   materials: 'Materials',
@@ -216,6 +235,17 @@ export function checkingWorldPlazaEditModeFunctionId(
   );
 
   return functionIds.includes(toolId);
+}
+
+/**
+ * Checks whether a function id is the walk (no-paint) tool.
+ *
+ * @param functionId - Edit-mode function id
+ */
+export function checkingWorldPlazaEditModeFunctionIsWalkTool(
+  functionId: DefiningWorldPlazaEditModeFunctionId
+): boolean {
+  return functionId === DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.WALK;
 }
 
 /**
