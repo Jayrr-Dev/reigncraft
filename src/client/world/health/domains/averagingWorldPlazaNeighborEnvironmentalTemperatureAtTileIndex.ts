@@ -1,4 +1,5 @@
 import { applyingWorldPlazaForestCanopyAmbientCelsius } from '@/components/world/domains/definingWorldPlazaForestTemperatureConstants';
+import { applyingWorldPlazaPlainsAmbientCelsius } from '@/components/world/domains/definingWorldPlazaPlainsTemperatureConstants';
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { readingWorldPlazaEnvironmentalTemperatureSamplingContext } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
 import { checkingWorldPlazaTileHasAssignableEnvironmentalTemperatureSourceAtTileIndex } from '@/components/world/health/domains/checkingWorldPlazaTileHasAssignableEnvironmentalTemperatureSourceAtTileIndex';
@@ -14,9 +15,9 @@ import { DEFINING_WORLD_PLAZA_TEMPERATURE_NEIGHBOR_AVERAGING_RING } from '@/comp
  * warms from nearby sources (including procedural lava). Neighbor averaging
  * always runs for non-source tiles so floor heat tints can red-shift by temp.
  *
- * Woodland biomes then get a temperate ceiling unless the neighborhood holds an
- * assignable heat source (lava / campfire / painted zone), so desert bleed
- * cannot cook forest while lava still radiates.
+ * Woodland and plains biomes then get a temperate ceiling unless the
+ * neighborhood holds an assignable heat source (lava / campfire / painted
+ * zone), so desert bleed cannot cook those biomes while lava still radiates.
  */
 export function averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex(
   params: ComputingWorldPlazaRawEnvironmentalTemperatureAtTileIndexParams
@@ -80,8 +81,13 @@ export function averagingWorldPlazaNeighborEnvironmentalTemperatureAtTileIndex(
     return averagedCelsius;
   }
 
-  return applyingWorldPlazaForestCanopyAmbientCelsius(
-    averagedCelsius,
-    resolvingWorldPlazaBiomeAtTileIndex(params.tileX, params.tileY).kind
+  const biomeKind = resolvingWorldPlazaBiomeAtTileIndex(
+    params.tileX,
+    params.tileY
+  ).kind;
+
+  return applyingWorldPlazaPlainsAmbientCelsius(
+    applyingWorldPlazaForestCanopyAmbientCelsius(averagedCelsius, biomeKind),
+    biomeKind
   );
 }

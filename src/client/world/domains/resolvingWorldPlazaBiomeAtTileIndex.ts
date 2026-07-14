@@ -258,7 +258,20 @@ export function pickingWorldPlazaBiomeKindFromClimate(
     return 'forest';
   }
 
-  if (humidity >= DEFINING_WORLD_PLAZA_BIOME_FLOWER_FOREST_HUMIDITY_MIN) {
+  if (
+    tileX !== undefined &&
+    tileY !== undefined &&
+    humidity >= DEFINING_WORLD_PLAZA_FLOWER_FOREST_HUMIDITY_MIN &&
+    samplingWorldPlazaFractalNoise(
+      tileX,
+      tileY,
+      DEFINING_WORLD_PLAZA_FLOWER_FOREST_BODY_NOISE_SEED,
+      {
+        frequency: DEFINING_WORLD_PLAZA_FLOWER_FOREST_BODY_NOISE_FREQUENCY,
+        octaves: DEFINING_WORLD_PLAZA_FLOWER_FOREST_BODY_NOISE_OCTAVES,
+      }
+    ) >= DEFINING_WORLD_PLAZA_FLOWER_FOREST_BODY_NOISE_THRESHOLD
+  ) {
     return 'flower_forest';
   }
 

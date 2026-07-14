@@ -5,7 +5,7 @@ import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/def
  * Procedural flower forest biome climate band and body-noise rarity gate.
  *
  * Mid-humidity tiles without a body-noise hit fall through to plains so
- * flower forest stays epic (rarer than rare, more common than Firelands).
+ * flower forest stays mythic (rarer than rare, more common than Firelands).
  *
  * @module components/world/domains/definingWorldPlazaFlowerForestBiomeConstants
  */
@@ -34,10 +34,10 @@ export const DEFINING_WORLD_PLAZA_FLOWER_FOREST_BODY_NOISE_OCTAVES = 3;
  * Unit noise at or above which a mid-humidity tile becomes flower forest.
  * Tuned so coverage sits between rare biomes and legendary Firelands.
  */
-export const DEFINING_WORLD_PLAZA_FLOWER_FOREST_BODY_NOISE_THRESHOLD = 0.78;
+export const DEFINING_WORLD_PLAZA_FLOWER_FOREST_BODY_NOISE_THRESHOLD = 0.74;
 
 /** Expected world coverage band for flower forest (percent). */
-export const DEFINING_WORLD_PLAZA_FLOWER_FOREST_COVERAGE_PERCENT_MIN = 2;
+export const DEFINING_WORLD_PLAZA_FLOWER_FOREST_COVERAGE_PERCENT_MIN = 1.2;
 
 /** Expected world coverage band for flower forest (percent). */
-export const DEFINING_WORLD_PLAZA_FLOWER_FOREST_COVERAGE_PERCENT_MAX = 8;
+export const DEFINING_WORLD_PLAZA_FLOWER_FOREST_COVERAGE_PERCENT_MAX = 2.5;

@@ -493,9 +493,9 @@ function InventoryPlazaSlotItem({
   }, [onCloseItemDetailPopover, onEatHotbarSlot, slotIndex]);
 
   const handlingStudyFromDetailPopover = useCallback((): void => {
+    // Keep the action tower open so stacks can be studied with repeated clicks.
     onStudyHotbarSlot?.(slotIndex);
-    onCloseItemDetailPopover?.();
-  }, [onCloseItemDetailPopover, onStudyHotbarSlot, slotIndex]);
+  }, [onStudyHotbarSlot, slotIndex]);
 
   const handlingAttachRecipePageFromDetailPopover = useCallback((): void => {
     onAttachRecipePageHotbarSlot?.(slotIndex);

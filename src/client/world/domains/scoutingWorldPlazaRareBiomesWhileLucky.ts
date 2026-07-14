@@ -9,7 +9,7 @@ const SCOUT_TILE_RADIUS = 6;
 const SCOUT_SAMPLE_COUNT = 2;
 
 /**
- * While lucky, scout nearby tiles for rare/legendary biomes to codex.
+ * While lucky, scout nearby tiles for rare/mythic/legendary biomes to codex.
  */
 export function scoutingWorldPlazaRareBiomesWhileLucky(
   playerPosition: DefiningWorldPlazaWorldPoint
@@ -20,7 +20,10 @@ export function scoutingWorldPlazaRareBiomesWhileLucky(
 
   const rareKinds = new Set(
     DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES.filter(
-      (entry) => entry.rarity === 'rare' || entry.rarity === 'legendary'
+      (entry) =>
+        entry.rarity === 'rare' ||
+        entry.rarity === 'mythic' ||
+        entry.rarity === 'legendary'
     ).map((entry) => entry.kind)
   );
   const centerTileX = Math.floor(playerPosition.x);

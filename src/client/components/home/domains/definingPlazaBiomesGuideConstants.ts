@@ -5,20 +5,20 @@ export type PlazaBiomesRarityId =
   | 'common'
   | 'uncommon'
   | 'rare'
-  | 'epic'
+  | 'mythic'
   | 'legendary';
 
 /** Rarity tab filter, including the full list. */
 export type PlazaBiomesRarityFilterId = 'all' | PlazaBiomesRarityId;
 
 /**
- * Only this biome may use the epic codex tier (just below legendary).
+ * Only this biome may use the mythic codex tier (just below legendary).
  *
  * Validated by:
  * - `src/client/world/domains/checkingPlazaBiomesGuideRarityAgainstWorldFrequencies.ts`
  * - `src/client/world/domains/resolvingWorldPlazaBiomeFrequencySampling.test.ts`
  */
-export const DEFINING_PLAZA_BIOMES_EPIC_KIND: DefiningWorldPlazaBiomeKind =
+export const DEFINING_PLAZA_BIOMES_MYTHIC_KIND: DefiningWorldPlazaBiomeKind =
   'flower_forest';
 
 /**
@@ -49,7 +49,7 @@ export const DEFINING_PLAZA_BIOMES_RARITY_FILTERS: readonly {
   { id: 'common', label: 'Common' },
   { id: 'uncommon', label: 'Uncommon' },
   { id: 'rare', label: 'Rare' },
-  { id: 'epic', label: 'Epic' },
+  { id: 'mythic', label: 'Mythic' },
   { id: 'legendary', label: 'Legendary' },
 ] as const;
 
@@ -81,11 +81,11 @@ export const DEFINING_PLAZA_BIOMES_RARITY_REGISTRY: Record<
     borderClassName: 'border-blue-400/60 bg-blue-950/88',
     iconClassName: 'text-blue-200',
   },
-  epic: {
-    label: 'Epic',
+  mythic: {
+    label: 'Mythic',
     icon: 'ph:sparkle',
-    borderClassName: 'border-fuchsia-400/65 bg-fuchsia-950/88',
-    iconClassName: 'text-fuchsia-200',
+    borderClassName: 'border-orange-400/65 bg-orange-950/88',
+    iconClassName: 'text-orange-200',
   },
   legendary: {
     label: 'Legendary',
@@ -179,7 +179,7 @@ export const DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES: readonly DefiningPlazaBiomesGu
       kind: 'flower_forest',
       icon: 'mdi:flower',
       summary: 'Bright meadows packed with colorful blooms.',
-      rarity: 'epic',
+      rarity: 'mythic',
     },
     {
       kind: 'firelands',

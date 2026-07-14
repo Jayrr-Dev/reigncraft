@@ -1,6 +1,7 @@
 import {
   DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES,
   DEFINING_PLAZA_BIOMES_LEGENDARY_KIND,
+  DEFINING_PLAZA_BIOMES_MYTHIC_KIND,
   type DefiningPlazaBiomesGuideEntry,
   type PlazaBiomesRarityId,
 } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
@@ -13,11 +14,16 @@ import {
   DEFINING_WORLD_PLAZA_FIRELANDS_COVERAGE_PERCENT_MIN,
 } from '@/components/world/domains/definingWorldPlazaBiomeFrequencySamplingConstants';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
+import {
+  DEFINING_WORLD_PLAZA_FLOWER_FOREST_COVERAGE_PERCENT_MAX,
+  DEFINING_WORLD_PLAZA_FLOWER_FOREST_COVERAGE_PERCENT_MIN,
+} from '@/components/world/domains/definingWorldPlazaFlowerForestBiomeConstants';
 
 const PLAZA_BIOMES_RARITY_ORDER: readonly PlazaBiomesRarityId[] = [
   'common',
   'uncommon',
   'rare',
+  'mythic',
   'legendary',
 ] as const;
 
@@ -57,6 +63,22 @@ export function listingPlazaBiomesGuideRarityWorldFrequencyMismatches(
   const percentsByKind = new Map(
     percentRows.map((row) => [row.kind, row.percent] as const)
   );
+  const mythicEntries = guideEntries.filter(
+    (entry) => entry.rarity === 'mythic'
+  );
+
+  if (mythicEntries.length !== 1) {
+    mismatches.push(
+      `Expected exactly one mythic codex biome, found ${mythicEntries.length}.`
+    );
+  }
+
+  if (mythicEntries[0]?.kind !== DEFINING_PLAZA_BIOMES_MYTHIC_KIND) {
+    mismatches.push(
+      `Mythic codex biome must be ${DEFINING_PLAZA_BIOMES_MYTHIC_KIND}.`
+    );
+  }
+
   const legendaryEntries = guideEntries.filter(
     (entry) => entry.rarity === 'legendary'
   );
@@ -80,6 +102,22 @@ export function listingPlazaBiomesGuideRarityWorldFrequencyMismatches(
     );
   }
 
+  const flowerForestPercent = percentsByKind.get(
+    DEFINING_PLAZA_BIOMES_MYTHIC_KIND
+  );
+  if (flowerForestPercent === undefined) {
+    mismatches.push('Flower forest was missing from the frequency sample.');
+  } else if (
+    flowerForestPercent <
+      DEFINING_WORLD_PLAZA_FLOWER_FOREST_COVERAGE_PERCENT_MIN ||
+    flowerForestPercent >
+      DEFINING_WORLD_PLAZA_FLOWER_FOREST_COVERAGE_PERCENT_MAX
+  ) {
+    mismatches.push(
+      `Flower forest coverage ${flowerForestPercent.toFixed(2)}% is outside ${DEFINING_WORLD_PLAZA_FLOWER_FOREST_COVERAGE_PERCENT_MIN}% to ${DEFINING_WORLD_PLAZA_FLOWER_FOREST_COVERAGE_PERCENT_MAX}%.`
+    );
+  }
+
   const firelandsPercent = percentsByKind.get(
     DEFINING_PLAZA_BIOMES_LEGENDARY_KIND
   );
@@ -91,6 +129,16 @@ export function listingPlazaBiomesGuideRarityWorldFrequencyMismatches(
   ) {
     mismatches.push(
       `Firelands coverage ${firelandsPercent.toFixed(2)}% is outside ${DEFINING_WORLD_PLAZA_FIRELANDS_COVERAGE_PERCENT_MIN}% to ${DEFINING_WORLD_PLAZA_FIRELANDS_COVERAGE_PERCENT_MAX}%.`
+    );
+  }
+
+  if (
+    flowerForestPercent !== undefined &&
+    firelandsPercent !== undefined &&
+    flowerForestPercent <= firelandsPercent
+  ) {
+    mismatches.push(
+      `Expected mythic flower forest coverage (${flowerForestPercent.toFixed(2)}%) to exceed legendary Firelands (${firelandsPercent.toFixed(2)}%).`
     );
   }
 
