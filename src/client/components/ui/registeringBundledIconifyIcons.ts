@@ -98,6 +98,7 @@ import mdiChevronRight from '@iconify-icons/mdi/chevron-right';
 import mdiChevronUp from '@iconify-icons/mdi/chevron-up';
 import mdiClockOutline from '@iconify-icons/mdi/clock-outline';
 import mdiClose from '@iconify-icons/mdi/close';
+import mdiClover from '@iconify-icons/mdi/clover';
 import mdiCompass from '@iconify-icons/mdi/compass';
 import mdiContentSave from '@iconify-icons/mdi/content-save';
 import mdiCrosshairsGps from '@iconify-icons/mdi/crosshairs-gps';
@@ -126,9 +127,9 @@ import mdiHeartOutline from '@iconify-icons/mdi/heart-outline';
 import mdiHeartPlus from '@iconify-icons/mdi/heart-plus';
 import mdiHome from '@iconify-icons/mdi/home';
 import mdiHumanMaleHeight from '@iconify-icons/mdi/human-male-height';
-import mdiJump from '@iconify-icons/mdi/jump';
 import mdiImageFilterHdr from '@iconify-icons/mdi/image-filter-hdr';
 import mdiInformationOutline from '@iconify-icons/mdi/information-outline';
+import mdiJump from '@iconify-icons/mdi/jump';
 import mdiLandPlots from '@iconify-icons/mdi/land-plots';
 import mdiLayersTriple from '@iconify-icons/mdi/layers-triple';
 import mdiLock from '@iconify-icons/mdi/lock';
@@ -318,6 +319,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:feather': mdiFeather,
   'mdi:close': mdiClose,
   'mdi:clock-outline': mdiClockOutline,
+  'mdi:clover': mdiClover,
   'mdi:compass': mdiCompass,
   'mdi:content-save': mdiContentSave,
   'mdi:cube-outline': mdiCubeOutline,

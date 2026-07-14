@@ -1,9 +1,11 @@
 import { checkingWorldPlazaEntityBuffIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityBuffIsActive';
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import { DEFINING_WORLD_PLAZA_LUCKY_FOOD_BUFF_CHANCE_MULTIPLIER } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverConstants';
+import { registeringWorldPlazaHeldLuckyBuffBridge } from '@/components/world/inventory/domains/managingWorldPlazaHeldLuckyBuffBridge';
 import { resolvingWorldPlazaInventoryFoodEatEffects } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects';
 import { resolvingWorldPlazaInventoryFoodHealDeclaration } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealDeclaration';
 import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 describe('resolvingWorldPlazaInventoryFoodEatEffects', () => {
   const nowMs = 1_000_000;
@@ -14,6 +16,10 @@ describe('resolvingWorldPlazaInventoryFoodEatEffects', () => {
   if (!boarEntry) {
     throw new Error('Expected boar meat catalog entry');
   }
+
+  afterEach(() => {
+    registeringWorldPlazaHeldLuckyBuffBridge(false);
+  });
 
   const rawBoarHeal = resolvingWorldPlazaInventoryFoodHealDeclaration({
     hungerRestoreRatio: boarEntry.rawHungerRestoreRatio,
@@ -116,6 +122,60 @@ describe('resolvingWorldPlazaInventoryFoodEatEffects', () => {
         attackerModifierIds: [],
       })
     ).toBe(true);
+  });
+
+  it('boosts cooked well-fed chance while lucky charm is held', () => {
+    const baseChance = boarEntry.cookedWellFedChance;
+    const borderlineRoll =
+      (baseChance +
+        Math.min(
+          1,
+          baseChance * DEFINING_WORLD_PLAZA_LUCKY_FOOD_BUFF_CHANCE_MULTIPLIER
+        )) /
+      2;
+
+    expect(borderlineRoll).toBeGreaterThanOrEqual(baseChance);
+    expect(borderlineRoll).toBeLessThan(
+      Math.min(
+        1,
+        baseChance * DEFINING_WORLD_PLAZA_LUCKY_FOOD_BUFF_CHANCE_MULTIPLIER
+      )
+    );
+
+    const withoutLucky = resolvingWorldPlazaInventoryFoodEatEffects({
+      foodDefinition: {
+        itemTypeId: boarEntry.cookedItemTypeId,
+        hungerRestoreRatio: boarEntry.cookedHungerRestoreRatio,
+        healthHeal: cookedBoarHeal,
+        meatKind: 'cooked',
+        cookedWellFedBuffId: boarEntry.cookedWellFedBuffId,
+        cookedWellFedChance: baseChance,
+      },
+      healthState: creatingWorldPlazaEntityHealthInitialState(),
+      nowMs,
+      sicknessRoll: 1,
+      wellFedRoll: borderlineRoll,
+    });
+
+    registeringWorldPlazaHeldLuckyBuffBridge(true);
+
+    const withLucky = resolvingWorldPlazaInventoryFoodEatEffects({
+      foodDefinition: {
+        itemTypeId: boarEntry.cookedItemTypeId,
+        hungerRestoreRatio: boarEntry.cookedHungerRestoreRatio,
+        healthHeal: cookedBoarHeal,
+        meatKind: 'cooked',
+        cookedWellFedBuffId: boarEntry.cookedWellFedBuffId,
+        cookedWellFedChance: baseChance,
+      },
+      healthState: creatingWorldPlazaEntityHealthInitialState(),
+      nowMs,
+      sicknessRoll: 1,
+      wellFedRoll: borderlineRoll,
+    });
+
+    expect(withoutLucky.didRollWellFedBuff).toBe(false);
+    expect(withLucky.didRollWellFedBuff).toBe(true);
   });
 
   it('leaves cooked meat hunger restore unchanged when healthy', () => {

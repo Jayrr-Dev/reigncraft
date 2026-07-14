@@ -61,6 +61,7 @@ import {
 import { DEFINING_WORLD_PLAZA_FLOWER_RAW_DISEASE_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaFlowerRawDiseaseRegistry';
 import { recordingWorldPlazaFlowerPetalConsumption } from '@/components/world/inventory/domains/managingWorldPlazaFlowerPetalConsumptionStore';
 import { resolvingWorldPlazaFlowerEatEffectProcChance } from '@/components/world/inventory/domains/resolvingWorldPlazaFlowerEatEffectProcChance';
+import { resolvingWorldPlazaPlayerHeldLuckyFoodBuffChanceMultiplier } from '@/components/world/inventory/domains/resolvingWorldPlazaPlayerHeldLuckyFoodBuffChanceMultiplier';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 
 const DEFINING_WORLD_PLAZA_FLOWER_FOOD_SICKNESS_DEBUFF_ID =
@@ -475,6 +476,8 @@ export function applyingWorldPlazaInventoryFlowerEatEffects(
   const effectProcChance = resolvingWorldPlazaFlowerEatEffectProcChance({
     preparation: params.preparation,
     chanceBonus: params.effectProcChanceBonus,
+    chanceMultiplier:
+      resolvingWorldPlazaPlayerHeldLuckyFoodBuffChanceMultiplier(),
   });
 
   const riskResult = applyingWorldPlazaInventoryFlowerRawRiskEffects(

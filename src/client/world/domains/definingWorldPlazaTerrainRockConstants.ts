@@ -1,8 +1,8 @@
-import { clampingWorldBuildingWorldLayer } from "@/components/world/building/domains/definingWorldBuildingWorldLayerConstants";
+import { clampingWorldBuildingWorldLayer } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_LARGE_ROCK_SIZE_TIER_INDEX,
   DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_SIZE_TIER_INDEX,
-} from "@/components/world/domains/definingWorldPlazaTerrainObstacleConstants";
+} from '@/components/world/domains/definingWorldPlazaTerrainObstacleConstants';
 
 /**
  * Procedural terrain rock column constants (mega-boulders up to H16).
@@ -22,6 +22,12 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_ROCK_LARGE_SURFACE_WORLD_LAYER = 5;
 
 /** Maximum absolute world layer for seeded mega-boulders. */
 export const DEFINING_WORLD_PLAZA_TERRAIN_ROCK_MAX_SURFACE_WORLD_LAYER = 16;
+
+/** Tallest layer allowed for a one-tile-wide boulder. */
+export const DEFINING_WORLD_PLAZA_TERRAIN_ROCK_NARROW_MAX_SURFACE_WORLD_LAYER = 6;
+
+/** Extra allowed height for each tile in the boulder's narrowest dimension. */
+export const DEFINING_WORLD_PLAZA_TERRAIN_ROCK_SURFACE_LAYER_PER_MIN_FOOTPRINT_TILE = 2;
 
 /** Minimum seeded height span for medium-tier column rocks (layers 4 through 8). */
 export const DEFINING_WORLD_PLAZA_TERRAIN_ROCK_MEDIUM_TIER_SURFACE_LAYER_SPAN = 5;
@@ -169,9 +175,7 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_AVATAR_STANDING_DEPTH_BIAS
 /**
  * Entity-layer depth bias so boulders sort above avatar shadows and floor bleed.
  */
-export {
-  DEFINING_WORLD_DEPTH_TERRAIN_ROCK_COLUMN_ENTITY_DEPTH_BIAS as DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_ENTITY_DEPTH_BIAS,
-} from '@/components/world/depth';
+export { DEFINING_WORLD_DEPTH_TERRAIN_ROCK_COLUMN_ENTITY_DEPTH_BIAS as DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_ENTITY_DEPTH_BIAS } from '@/components/world/depth';
 
 /**
  * How far forward (0 = rear anchor, 1 = front footprint corner) the entity
@@ -210,7 +214,7 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_BASE_DIAMOND_COLLISION_PAD
  */
 export const DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_COLLISION_SEARCH_TILE_RADIUS =
   Math.ceil(
-    DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MAX_FOOTPRINT_TILE_SPAN / 2,
+    DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MAX_FOOTPRINT_TILE_SPAN / 2
   ) + 1;
 
 /**
@@ -252,7 +256,7 @@ export interface DefiningWorldPlazaTerrainRockChunkSpec {
  * @param sizeTierIndex - Stone size tier index from the decoration resolver.
  */
 export function resolvingWorldPlazaTerrainRockSurfaceWorldLayerFromSizeTierIndex(
-  sizeTierIndex: number,
+  sizeTierIndex: number
 ): number | null {
   if (
     sizeTierIndex >= DEFINING_WORLD_PLAZA_TERRAIN_LARGE_ROCK_SIZE_TIER_INDEX
@@ -279,7 +283,7 @@ export function resolvingWorldPlazaTerrainRockSurfaceWorldLayerFromSizeTierIndex
  */
 export function resolvingWorldPlazaTerrainRockColumnSurfaceWorldLayerFromSeeds(
   sizeTierIndex: number,
-  heightUnit: number,
+  heightUnit: number
 ): number | null {
   if (
     sizeTierIndex >= DEFINING_WORLD_PLAZA_TERRAIN_LARGE_ROCK_SIZE_TIER_INDEX
@@ -291,7 +295,7 @@ export function resolvingWorldPlazaTerrainRockColumnSurfaceWorldLayerFromSeeds(
 
     return clampingWorldBuildingWorldLayer(
       DEFINING_WORLD_PLAZA_TERRAIN_ROCK_LARGE_TIER_MIN_SURFACE_WORLD_LAYER +
-        Math.floor(heightUnit * layerSpan),
+        Math.floor(heightUnit * layerSpan)
     );
   }
 
@@ -302,8 +306,8 @@ export function resolvingWorldPlazaTerrainRockColumnSurfaceWorldLayerFromSeeds(
       DEFINING_WORLD_PLAZA_TERRAIN_ROCK_MEDIUM_SURFACE_WORLD_LAYER +
         Math.floor(
           heightUnit *
-            DEFINING_WORLD_PLAZA_TERRAIN_ROCK_MEDIUM_TIER_SURFACE_LAYER_SPAN,
-        ),
+            DEFINING_WORLD_PLAZA_TERRAIN_ROCK_MEDIUM_TIER_SURFACE_LAYER_SPAN
+        )
     );
   }
 
@@ -316,7 +320,7 @@ export function resolvingWorldPlazaTerrainRockColumnSurfaceWorldLayerFromSeeds(
  * @param footprintUnit - Seeded value in [0, 1).
  */
 export function resolvingWorldPlazaTerrainRockColumnFootprintTileSpanFromSeed(
-  footprintUnit: number,
+  footprintUnit: number
 ): number {
   const spanRange =
     DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MAX_FOOTPRINT_TILE_SPAN -
@@ -329,12 +333,36 @@ export function resolvingWorldPlazaTerrainRockColumnFootprintTileSpanFromSeed(
 }
 
 /**
+ * Caps boulder height from its narrowest footprint dimension.
+ *
+ * This prevents one-tile-wide seeds from producing needle-like H8-H16 rocks
+ * while preserving tall mega-boulders when their footprint is broad enough.
+ */
+export function resolvingWorldPlazaTerrainRockColumnSurfaceWorldLayerForFootprint(
+  surfaceWorldLayer: number,
+  footprintTileWidth: number,
+  footprintTileHeight: number
+): number {
+  const minimumFootprintTileSpan = Math.max(
+    DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_FOOTPRINT_TILE_SPAN,
+    Math.min(footprintTileWidth, footprintTileHeight)
+  );
+  const maxSurfaceWorldLayer =
+    DEFINING_WORLD_PLAZA_TERRAIN_ROCK_NARROW_MAX_SURFACE_WORLD_LAYER +
+    (minimumFootprintTileSpan -
+      DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_FOOTPRINT_TILE_SPAN) *
+      DEFINING_WORLD_PLAZA_TERRAIN_ROCK_SURFACE_LAYER_PER_MIN_FOOTPRINT_TILE;
+
+  return Math.min(surfaceWorldLayer, maxSurfaceWorldLayer);
+}
+
+/**
  * Returns true when a stone decoration should render as an extruded column rock.
  *
  * @param sizeTierIndex - Stone size tier index from the decoration resolver.
  */
 export function checkingWorldPlazaStoneDecorationUsesColumnRockRendering(
-  sizeTierIndex: number,
+  sizeTierIndex: number
 ): boolean {
   return (
     sizeTierIndex >=
@@ -353,19 +381,19 @@ export function checkingWorldPlazaStoneDecorationUsesColumnRockRendering(
  */
 export function aligningWorldPlazaTerrainRockChunkSpecToSurfaceLayer(
   chunkSpec: DefiningWorldPlazaTerrainRockChunkSpec,
-  terrainSurfaceLayer: number,
+  terrainSurfaceLayer: number
 ): DefiningWorldPlazaTerrainRockChunkSpec {
   const rockHeightLayers = chunkSpec.topWorldLayer - chunkSpec.bottomWorldLayer;
   const alignedBottomWorldLayer = Math.max(
     chunkSpec.bottomWorldLayer,
-    terrainSurfaceLayer,
+    terrainSurfaceLayer
   );
 
   return {
     ...chunkSpec,
     bottomWorldLayer: alignedBottomWorldLayer,
     topWorldLayer: clampingWorldBuildingWorldLayer(
-      alignedBottomWorldLayer + rockHeightLayers,
+      alignedBottomWorldLayer + rockHeightLayers
     ),
   };
 }
@@ -379,7 +407,7 @@ export function aligningWorldPlazaTerrainRockChunkSpecToSurfaceLayer(
  * @param surfaceWorldLayer - Absolute top world layer of the boulder.
  */
 export function resolvingWorldPlazaTerrainRockColumnFootprintScaleFromSurfaceLayer(
-  surfaceWorldLayer: number,
+  surfaceWorldLayer: number
 ): number {
   const layersAboveReference =
     surfaceWorldLayer -
@@ -391,8 +419,8 @@ export function resolvingWorldPlazaTerrainRockColumnFootprintScaleFromSurfaceLay
       DEFINING_WORLD_PLAZA_TERRAIN_ROCK_FOOTPRINT_MIN_SCALE,
       1 +
         layersAboveReference *
-          DEFINING_WORLD_PLAZA_TERRAIN_ROCK_FOOTPRINT_SCALE_PER_SURFACE_LAYER,
-    ),
+          DEFINING_WORLD_PLAZA_TERRAIN_ROCK_FOOTPRINT_SCALE_PER_SURFACE_LAYER
+    )
   );
 }
 
@@ -404,7 +432,7 @@ export function resolvingWorldPlazaTerrainRockColumnFootprintScaleFromSurfaceLay
  */
 export function resolvingWorldPlazaTerrainRockColumnFootprintVisualScaleFromTileSpan(
   footprintTileWidth: number,
-  footprintTileHeight: number,
+  footprintTileHeight: number
 ): { readonly widthScale: number; readonly heightScale: number } {
   return {
     widthScale:
@@ -428,21 +456,21 @@ export function listingWorldPlazaTerrainRockChunkSpecsForShapeVariant(
   shapeVariantIndex: number,
   topWorldLayer: number,
   footprintTileWidth: number = DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_FOOTPRINT_TILE_SPAN,
-  footprintTileHeight: number = DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_FOOTPRINT_TILE_SPAN,
+  footprintTileHeight: number = DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_FOOTPRINT_TILE_SPAN
 ): readonly DefiningWorldPlazaTerrainRockChunkSpec[] {
   const heightFootprintScale =
     resolvingWorldPlazaTerrainRockColumnFootprintScaleFromSurfaceLayer(
-      topWorldLayer,
+      topWorldLayer
     );
   const tileFootprintScale =
     resolvingWorldPlazaTerrainRockColumnFootprintVisualScaleFromTileSpan(
       footprintTileWidth,
-      footprintTileHeight,
+      footprintTileHeight
     );
 
   return listingWorldPlazaTerrainRockBaseChunkSpecsForShapeVariant(
     shapeVariantIndex,
-    topWorldLayer,
+    topWorldLayer
   ).map((chunkSpec) => ({
     ...chunkSpec,
     halfWidthScale:
@@ -466,7 +494,7 @@ export function listingWorldPlazaTerrainRockChunkSpecsForShapeVariant(
  */
 function listingWorldPlazaTerrainRockBaseChunkSpecsForShapeVariant(
   shapeVariantIndex: number,
-  topWorldLayer: number,
+  topWorldLayer: number
 ): readonly DefiningWorldPlazaTerrainRockChunkSpec[] {
   const normalizedVariant =
     ((shapeVariantIndex %

@@ -37,7 +37,7 @@ export const DEFINING_PLAZA_HERBARIUM_CLOVER_GUIDE_ENTRIES: readonly DefiningPla
       propertiesSummary:
         'Held: something favors you. Field notes are not detailed enough to say how.',
       propertiesSummaryFull:
-        'Held: Lucky charm. Halves disease risk, skews damage taken safer and damage dealt stronger, and improves rare finds until the leaf fades (1 in-game day while held).',
+        'Held: Lucky charm. Halves disease risk, skews damage taken safer and damage dealt stronger, improves rare finds, and raises food buff chances until the leaf fades (1 in-game day while held).',
     },
   ] as const;
 

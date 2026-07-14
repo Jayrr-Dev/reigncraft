@@ -56,6 +56,7 @@ export function usingWorldPlazaHeldFourLeafCloverCharm({
   const selectedSlotIndexRef = useRef(selectedSlotIndex);
   const wasLuckyActiveRef = useRef(false);
   const lastDecayAtMsRef = useRef<number | null>(null);
+  const accumulatedDecayMsByItemIdRef = useRef(new Map<string, number>());
   const lastScoutAtMsRef = useRef<number | null>(null);
 
   inventoryStateRef.current = inventoryState;
@@ -64,9 +65,9 @@ export function usingWorldPlazaHeldFourLeafCloverCharm({
   useLayoutEffect(() => {
     if (!enabled) {
       if (wasLuckyActiveRef.current) {
+        registeringWorldPlazaHeldLuckyBuffBridge(false);
         toggleBuffRef.current?.(DEFINING_WORLD_PLAZA_LUCKY_BUFF_DEFENDER_ID);
         toggleBuffRef.current?.(DEFINING_WORLD_PLAZA_LUCKY_BUFF_ATTACKER_ID);
-        registeringWorldPlazaHeldLuckyBuffBridge(false);
         wasLuckyActiveRef.current = false;
       }
 
@@ -74,7 +75,7 @@ export function usingWorldPlazaHeldFourLeafCloverCharm({
       return;
     }
 
-    const syncingHeldCharm = (frameTimeMs: number): void => {
+    const syncingHeldCharm = (_deltaMs: number, frameTimeMs: number): void => {
       const slotIndex = selectedSlotIndexRef.current;
       const state = inventoryStateRef.current;
       const slotItem =
@@ -91,15 +92,15 @@ export function usingWorldPlazaHeldFourLeafCloverCharm({
       );
 
       if (shouldBeActive && !wasLuckyActiveRef.current) {
+        registeringWorldPlazaHeldLuckyBuffBridge(true);
         toggleBuffRef.current?.(DEFINING_WORLD_PLAZA_LUCKY_BUFF_DEFENDER_ID);
         toggleBuffRef.current?.(DEFINING_WORLD_PLAZA_LUCKY_BUFF_ATTACKER_ID);
-        registeringWorldPlazaHeldLuckyBuffBridge(true);
         wasLuckyActiveRef.current = true;
         lastDecayAtMsRef.current = frameTimeMs;
       } else if (!shouldBeActive && wasLuckyActiveRef.current) {
+        registeringWorldPlazaHeldLuckyBuffBridge(false);
         toggleBuffRef.current?.(DEFINING_WORLD_PLAZA_LUCKY_BUFF_DEFENDER_ID);
         toggleBuffRef.current?.(DEFINING_WORLD_PLAZA_LUCKY_BUFF_ATTACKER_ID);
-        registeringWorldPlazaHeldLuckyBuffBridge(false);
         wasLuckyActiveRef.current = false;
         lastDecayAtMsRef.current = null;
       }
@@ -121,16 +122,20 @@ export function usingWorldPlazaHeldFourLeafCloverCharm({
         return;
       }
 
-      const wearAmount =
-        (elapsedMs /
-          DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DECAY_REAL_MS_WHILE_HELD) *
+      const wearIntervalMs =
+        DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DECAY_REAL_MS_WHILE_HELD /
         DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DURABILITY_MAX;
-      const nextRemaining = Math.max(
-        0,
-        durabilitySnapshot.remaining - wearAmount
+      const accumulatedDecayMs =
+        (accumulatedDecayMsByItemIdRef.current.get(slotItem.id) ?? 0) +
+        elapsedMs;
+      const wearAmount = Math.floor(accumulatedDecayMs / wearIntervalMs);
+
+      accumulatedDecayMsByItemIdRef.current.set(
+        slotItem.id,
+        accumulatedDecayMs - wearAmount * wearIntervalMs
       );
 
-      if (nextRemaining === durabilitySnapshot.remaining) {
+      if (wearAmount <= 0) {
         const playerPosition = playerPositionRef.current;
         const lastScoutAtMs = lastScoutAtMsRef.current ?? 0;
 
@@ -143,6 +148,15 @@ export function usingWorldPlazaHeldFourLeafCloverCharm({
         }
 
         return;
+      }
+
+      const nextRemaining = Math.max(
+        0,
+        durabilitySnapshot.remaining - wearAmount
+      );
+
+      if (nextRemaining <= 0) {
+        accumulatedDecayMsByItemIdRef.current.delete(slotItem.id);
       }
 
       updatingInventoryState((currentState) => {
@@ -194,9 +208,9 @@ export function usingWorldPlazaHeldFourLeafCloverCharm({
       unsubscribe();
 
       if (wasLuckyActiveRef.current) {
+        registeringWorldPlazaHeldLuckyBuffBridge(false);
         toggleBuffRef.current?.(DEFINING_WORLD_PLAZA_LUCKY_BUFF_DEFENDER_ID);
         toggleBuffRef.current?.(DEFINING_WORLD_PLAZA_LUCKY_BUFF_ATTACKER_ID);
-        registeringWorldPlazaHeldLuckyBuffBridge(false);
         wasLuckyActiveRef.current = false;
       }
 

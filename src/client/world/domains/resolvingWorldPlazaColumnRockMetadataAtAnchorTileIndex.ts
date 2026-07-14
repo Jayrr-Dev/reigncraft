@@ -25,6 +25,7 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_ROCK_SEED_SALT_HEIGHT,
   DEFINING_WORLD_PLAZA_TERRAIN_ROCK_SEED_SALT_SHAPE,
   DEFINING_WORLD_PLAZA_TERRAIN_ROCK_SHAPE_VARIANT_COUNT,
+  resolvingWorldPlazaTerrainRockColumnSurfaceWorldLayerForFootprint,
   resolvingWorldPlazaTerrainRockColumnSurfaceWorldLayerFromSeeds,
 } from '@/components/world/domains/definingWorldPlazaTerrainRockConstants';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
@@ -336,14 +337,14 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     anchorTileY,
     DEFINING_WORLD_PLAZA_TERRAIN_ROCK_SEED_SALT_FOOTPRINT_HEIGHT
   );
-  const surfaceWorldLayer = mediumFieldBoulderPlacement
+  const seededSurfaceWorldLayer = mediumFieldBoulderPlacement
     ? mediumFieldBoulderPlacement.surfaceWorldLayer
     : resolvingWorldPlazaTerrainRockColumnSurfaceWorldLayerFromSeeds(
         tierIndex,
         heightUnit
       );
 
-  if (surfaceWorldLayer === null) {
+  if (seededSurfaceWorldLayer === null) {
     return null;
   }
 
@@ -388,6 +389,13 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     footprintTileHeight =
       DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_FOOTPRINT_TILE_SPAN;
   }
+
+  const surfaceWorldLayer =
+    resolvingWorldPlazaTerrainRockColumnSurfaceWorldLayerForFootprint(
+      seededSurfaceWorldLayer,
+      footprintTileWidth,
+      footprintTileHeight
+    );
 
   return {
     anchorTileX,

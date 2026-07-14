@@ -30,6 +30,9 @@ export const DEFINING_WORLD_PLAZA_LUCKY_DISEASE_CONTRACTION_MULTIPLIER = 0.5;
 /** Weight / vein boost for rare flowers, ores, and biome scouting. */
 export const DEFINING_WORLD_PLAZA_LUCKY_DISCOVERY_LUCK_MULTIPLIER = 1.5;
 
+/** Chance boost for cooked well-fed buffs and flower eat-effect procs. */
+export const DEFINING_WORLD_PLAZA_LUCKY_FOOD_BUFF_CHANCE_MULTIPLIER = 1.5;
+
 /** Item type id that grants the lucky charm bundle while selected. */
 export const DEFINING_WORLD_PLAZA_LUCKY_CHARM_ITEM_TYPE_ID =
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLOVER_4_LEAF;

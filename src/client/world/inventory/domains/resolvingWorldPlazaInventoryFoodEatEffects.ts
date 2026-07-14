@@ -16,6 +16,7 @@ import { applyingWorldPlazaInventoryFlowerEatEffects } from '@/components/world/
 import { parsingWorldPlazaFlowerSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
 import { resolvingWorldPlazaInventoryFoodHealAmount } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealAmount';
 import type { DefiningWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
+import { resolvingWorldPlazaPlayerHeldLuckyFoodBuffChanceMultiplier } from '@/components/world/inventory/domains/resolvingWorldPlazaPlayerHeldLuckyFoodBuffChanceMultiplier';
 import { DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import { resolvingWildlifeAggroDeerMeatCookedResidualDiseaseChance } from '@/components/world/wildlife/domains/resolvingWildlifeAggroDeerMeatCookedResidualDiseaseChance';
 
@@ -150,7 +151,11 @@ function applyingWorldPlazaInventoryCookedMeatEatEffects({
     (foodDefinition.cookedWellFedBuffId
       ? [foodDefinition.cookedWellFedBuffId]
       : []);
-  const wellFedChance = foodDefinition.cookedWellFedChance ?? 0;
+  const wellFedChance = Math.min(
+    1,
+    (foodDefinition.cookedWellFedChance ?? 0) *
+      resolvingWorldPlazaPlayerHeldLuckyFoodBuffChanceMultiplier()
+  );
 
   if (wellFedBuffIds.length > 0 && wellFedRoll < wellFedChance) {
     for (const wellFedBuffId of wellFedBuffIds) {

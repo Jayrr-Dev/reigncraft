@@ -8,6 +8,7 @@ export type MappingWorldPlazaEntityBuffHudIconName =
   | 'mdi:arrow-down-bold'
   | 'mdi:arrow-up-bold'
   | 'mdi:compass'
+  | 'mdi:clover'
   | 'mdi:crosshairs-gps'
   | 'mdi:dice-multiple'
   | 'mdi:fire'
@@ -45,6 +46,7 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   string,
   MappingWorldPlazaEntityBuffHudIconName
 > = {
+  'lucky-buff': 'mdi:clover',
   'iron-armor': 'mdi:shield-half-full',
   'heavy-armor': 'mdi:shield',
   'tower-shield': 'mdi:shield-plus',

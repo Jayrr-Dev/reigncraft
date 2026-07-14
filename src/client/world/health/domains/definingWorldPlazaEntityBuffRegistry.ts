@@ -183,7 +183,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       id: 'lucky-buff',
       label: 'Lucky',
       description:
-        'Four-leaf clover charm. Safer rolls, sharper strikes, and better finds.',
+        'Four-leaf clover charm. Safer rolls, sharper strikes, better finds, and better food buff odds.',
       polarity: 'buff',
       category: 'utility',
       durationKind: 'toggle',

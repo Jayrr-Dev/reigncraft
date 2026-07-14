@@ -3,6 +3,7 @@ import {
   DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_DECAY_IN_GAME_DAYS,
   DEFINING_WORLD_PLAZA_LUCKY_DISCOVERY_LUCK_MULTIPLIER,
   DEFINING_WORLD_PLAZA_LUCKY_DISEASE_CONTRACTION_MULTIPLIER,
+  DEFINING_WORLD_PLAZA_LUCKY_FOOD_BUFF_CHANCE_MULTIPLIER,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverConstants';
 
 export type PlazaHerbariumCloverLuckyEffectStatRow = {
@@ -33,6 +34,10 @@ export function resolvingPlazaHerbariumCloverLuckyEffectStatRows(): readonly Pla
     {
       label: 'Rare finds',
       value: `×${DEFINING_WORLD_PLAZA_LUCKY_DISCOVERY_LUCK_MULTIPLIER} flowers, ores, biomes`,
+    },
+    {
+      label: 'Food buffs',
+      value: `×${DEFINING_WORLD_PLAZA_LUCKY_FOOD_BUFF_CHANCE_MULTIPLIER} well-fed and flower effects`,
     },
     {
       label: 'Charm wear',
