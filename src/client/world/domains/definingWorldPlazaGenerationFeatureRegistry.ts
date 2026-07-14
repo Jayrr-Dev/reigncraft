@@ -30,6 +30,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE = {
   WILDLIFE_SPEECH_BUBBLES: 'wildlife-speech-bubbles',
   WILDLIFE_DAMAGE_NUMBERS: 'wildlife-damage-numbers',
   WILDLIFE_NAME_TAGS: 'wildlife-name-tags',
+  WILDLIFE_HUNGER_CIRCLE: 'wildlife-hunger-circle',
   TREES: 'trees',
   COLUMN_ROCKS: 'column-rocks',
   ORE_VEINS: 'ore-veins',
@@ -247,6 +248,13 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
       description: 'Species / name labels above animals.',
     },
     {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_HUNGER_CIRCLE,
+      groupId: 'entities',
+      label: 'Wildlife hunger circle',
+      description:
+        'Mini hunger orb above animals (same fill drain as the player HUD). Off hides the circle.',
+    },
+    {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES,
       groupId: 'terrain',
       label: 'Trees',
@@ -275,7 +283,8 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LONG_GRASS,
       groupId: 'terrain',
       label: 'Long grass',
-      description: 'Sprite long-grass clumps, search loot, and wildlife grazing.',
+      description:
+        'Sprite long-grass clumps, search loot, and wildlife grazing.',
     },
     {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAVA,
@@ -347,6 +356,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS: Readonly<
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_SPEECH_BUBBLES]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_DAMAGE_NUMBERS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_NAME_TAGS]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_HUNGER_CIRCLE]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.COLUMN_ROCKS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.ORE_VEINS]: true,

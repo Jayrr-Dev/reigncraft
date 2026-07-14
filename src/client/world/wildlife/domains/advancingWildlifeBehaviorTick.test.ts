@@ -167,6 +167,45 @@ describe('advancingWildlifeBehaviorTick', () => {
     }
   });
 
+  it('skittish chases edible grass when hungry', () => {
+    const blackboard = buildingBlackboard('deer', {
+      instance: {
+        ...buildingBlackboard('deer').instance,
+        hungerState: {
+          hungerRatio: 0.3,
+          driveLevel: 'hungry',
+          lastFedAtMs: null,
+        },
+      },
+      selectedGroundFoodItemId: 'wildlife-grass:2,2',
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('forageChase');
+    if (intent.mode === 'forageChase') {
+      expect(intent.targetGroundItemId).toBe('wildlife-grass:2,2');
+    }
+  });
+
+  it('retaliator prefers edible plants over abstract grazing when hungry', () => {
+    const blackboard = buildingBlackboard('rhino', {
+      instance: {
+        ...buildingBlackboard('rhino').instance,
+        hungerState: {
+          hungerRatio: 0.3,
+          driveLevel: 'hungry',
+          lastFedAtMs: null,
+        },
+      },
+      selectedGroundFoodItemId: 'wildlife-flower:2,2',
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('forageChase');
+  });
+
   it('skittish temperament flees when the running player is too close', () => {
     const blackboard = buildingBlackboard('deer', {
       playerPosition: { x: 2, y: 2, layer: 1 },

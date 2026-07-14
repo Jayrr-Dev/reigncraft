@@ -115,7 +115,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckColor: null,
     speckTileModulus: null,
     flowerColors: [0xffd966, 0xff8fab, 0xffffff],
-    flowerTileModulus: 46,
+    flowerTileModulus: 80,
     longGrassTileModulus: 32,
     skyBackdropClassName:
       'bg-gradient-to-b from-sky-400 via-sky-200 to-[#7cba3d]',
@@ -131,7 +131,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckColor: 0x3d6634,
     speckTileModulus: 13,
     flowerColors: [0xff8fab, 0xffd966, 0xc77dff, 0xffffff],
-    flowerTileModulus: 74,
+    flowerTileModulus: 130,
     longGrassTileModulus: 58,
     skyBackdropClassName:
       'bg-gradient-to-b from-sky-500 via-emerald-200 to-[#4a7c3f]',
@@ -162,8 +162,8 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     blockHighlightColor: 0x3f9040,
     speckColor: 0x24602a,
     speckTileModulus: 9,
-    flowerColors: [0xff5f8f, 0xffb347, 0xe94fd0, 0xffffff],
-    flowerTileModulus: 62,
+    flowerColors: null,
+    flowerTileModulus: null,
     longGrassTileModulus: 54,
     skyBackdropClassName:
       'bg-gradient-to-b from-emerald-500 via-lime-200 to-[#2f7a33]',
@@ -210,8 +210,8 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     blockHighlightColor: 0x49583a,
     speckColor: 0x2c3a26,
     speckTileModulus: 11,
-    flowerColors: [0xc77dff, 0xffb347, 0xffffff, 0x7ec8e3],
-    flowerTileModulus: 82,
+    flowerColors: null,
+    flowerTileModulus: null,
     longGrassTileModulus: 70,
     skyBackdropClassName:
       'bg-gradient-to-b from-slate-500 via-emerald-100 to-[#3c4a2c]',
@@ -226,8 +226,8 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     blockHighlightColor: 0xcfc265,
     speckColor: 0xa89a45,
     speckTileModulus: 14,
-    flowerColors: [0xffb347, 0xffd966, 0xff8fab, 0xffffff],
-    flowerTileModulus: 86,
+    flowerColors: null,
+    flowerTileModulus: null,
     longGrassTileModulus: 36,
     skyBackdropClassName:
       'bg-gradient-to-b from-sky-400 via-yellow-100 to-[#bfb755]',

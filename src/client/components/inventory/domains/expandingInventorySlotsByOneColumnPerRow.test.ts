@@ -26,6 +26,9 @@ describe('expandingInventorySlotsByOneColumnPerRow', () => {
       expandingInventorySlotsByOneColumnPerRow(Array.from({ length: 18 }), 18)
     ).toBeNull();
     expect(
+      expandingInventorySlotsByOneColumnPerRow(Array.from({ length: 18 }), 24)
+    ).toBeNull();
+    expect(
       expandingInventorySlotsByOneColumnPerRow(Array.from({ length: 15 }), 17)
     ).toBeNull();
   });

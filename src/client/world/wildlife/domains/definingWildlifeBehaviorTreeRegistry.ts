@@ -269,8 +269,9 @@ const DEFINING_WILDLIFE_RETALIATOR_TREE: DefiningWildlifeBehaviorTreeDefinition 
         {
           kind: 'sequence',
           children: [
-            { kind: 'condition', conditionId: 'isHungerAtLeastHungry' },
-            { kind: 'action', actionId: 'graze' },
+            { kind: 'condition', conditionId: 'isMotivatedToForageGroundFood' },
+            { kind: 'condition', conditionId: 'hasEdibleGroundFoodNearby' },
+            { kind: 'action', actionId: 'forageGroundFood' },
           ],
         },
         {
@@ -284,9 +285,8 @@ const DEFINING_WILDLIFE_RETALIATOR_TREE: DefiningWildlifeBehaviorTreeDefinition 
         {
           kind: 'sequence',
           children: [
-            { kind: 'condition', conditionId: 'isMotivatedToForageGroundFood' },
-            { kind: 'condition', conditionId: 'hasEdibleGroundFoodNearby' },
-            { kind: 'action', actionId: 'forageGroundFood' },
+            { kind: 'condition', conditionId: 'isHungerAtLeastHungry' },
+            { kind: 'action', actionId: 'graze' },
           ],
         },
         { kind: 'action', actionId: 'wander' },
@@ -397,83 +397,84 @@ const DEFINING_WILDLIFE_AMBUSHER_TREE: DefiningWildlifeBehaviorTreeDefinition =
     },
   };
 
-const DEFINING_WILDLIFE_PACK_HUNTER_TREE: DefiningWildlifeBehaviorTreeDefinition = {
-  temperamentId: 'pack_hunter',
-  root: {
-    kind: 'selector',
-    children: [
-      {
-        kind: 'sequence',
-        children: [
-          { kind: 'condition', conditionId: 'isStalkPackFleeing' },
-          { kind: 'action', actionId: 'fleeFromThreat' },
-        ],
-      },
-      {
-        kind: 'sequence',
-        children: [
-          { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
-          { kind: 'condition', conditionId: 'isStalkKillWindowOpen' },
-          { kind: 'condition', conditionId: 'isStalkPackSurroundCommit' },
-          { kind: 'action', actionId: 'surroundAndAttackPrey' },
-        ],
-      },
-      {
-        kind: 'sequence',
-        children: [
-          { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
-          { kind: 'condition', conditionId: 'isStalkKillWindowOpen' },
-          { kind: 'condition', conditionId: 'isStalkPackmateMayAttackPrey' },
-          { kind: 'action', actionId: 'meleeAttack' },
-        ],
-      },
-      {
-        kind: 'sequence',
-        children: [
-          { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
-          { kind: 'condition', conditionId: 'isStalkKillWindowOpen' },
-          { kind: 'condition', conditionId: 'isStalkPackmateMayAttackPrey' },
-          { kind: 'action', actionId: 'chaseTarget' },
-        ],
-      },
-      {
-        kind: 'sequence',
-        children: [
-          { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
-          { kind: 'condition', conditionId: 'isStalkConfidentFormingUp' },
-          { kind: 'action', actionId: 'surroundAndAttackPrey' },
-        ],
-      },
-      {
-        kind: 'sequence',
-        children: [
-          { kind: 'condition', conditionId: 'isStalkingPrey' },
-          { kind: 'action', actionId: 'stalkPrey' },
-        ],
-      },
-      ...DEFINING_WILDLIFE_SOCIAL_HUNTER_SEEK_PACK_BRANCHES,
-      ...DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES,
-      {
-        kind: 'sequence',
-        children: [
-          { kind: 'condition', conditionId: 'isMotivatedToHunt' },
-          { kind: 'condition', conditionId: 'hasHuntablePreyNearby' },
-          { kind: 'action', actionId: 'chaseTarget' },
-        ],
-      },
-      {
-        kind: 'sequence',
-        children: [
-          { kind: 'condition', conditionId: 'isMotivatedToForageGroundFood' },
-          { kind: 'condition', conditionId: 'hasEdibleGroundFoodNearby' },
-          { kind: 'action', actionId: 'forageGroundFood' },
-        ],
-      },
-      ...DEFINING_WILDLIFE_SEPARATION_ANXIETY_BRANCHES,
-      { kind: 'action', actionId: 'wander' },
-    ],
-  },
-};
+const DEFINING_WILDLIFE_PACK_HUNTER_TREE: DefiningWildlifeBehaviorTreeDefinition =
+  {
+    temperamentId: 'pack_hunter',
+    root: {
+      kind: 'selector',
+      children: [
+        {
+          kind: 'sequence',
+          children: [
+            { kind: 'condition', conditionId: 'isStalkPackFleeing' },
+            { kind: 'action', actionId: 'fleeFromThreat' },
+          ],
+        },
+        {
+          kind: 'sequence',
+          children: [
+            { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
+            { kind: 'condition', conditionId: 'isStalkKillWindowOpen' },
+            { kind: 'condition', conditionId: 'isStalkPackSurroundCommit' },
+            { kind: 'action', actionId: 'surroundAndAttackPrey' },
+          ],
+        },
+        {
+          kind: 'sequence',
+          children: [
+            { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
+            { kind: 'condition', conditionId: 'isStalkKillWindowOpen' },
+            { kind: 'condition', conditionId: 'isStalkPackmateMayAttackPrey' },
+            { kind: 'action', actionId: 'meleeAttack' },
+          ],
+        },
+        {
+          kind: 'sequence',
+          children: [
+            { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
+            { kind: 'condition', conditionId: 'isStalkKillWindowOpen' },
+            { kind: 'condition', conditionId: 'isStalkPackmateMayAttackPrey' },
+            { kind: 'action', actionId: 'chaseTarget' },
+          ],
+        },
+        {
+          kind: 'sequence',
+          children: [
+            { kind: 'condition', conditionId: 'hasActiveThreatTarget' },
+            { kind: 'condition', conditionId: 'isStalkConfidentFormingUp' },
+            { kind: 'action', actionId: 'surroundAndAttackPrey' },
+          ],
+        },
+        {
+          kind: 'sequence',
+          children: [
+            { kind: 'condition', conditionId: 'isStalkingPrey' },
+            { kind: 'action', actionId: 'stalkPrey' },
+          ],
+        },
+        ...DEFINING_WILDLIFE_SOCIAL_HUNTER_SEEK_PACK_BRANCHES,
+        ...DEFINING_WILDLIFE_PROXIMITY_PREY_ATTACK_BRANCHES,
+        {
+          kind: 'sequence',
+          children: [
+            { kind: 'condition', conditionId: 'isMotivatedToHunt' },
+            { kind: 'condition', conditionId: 'hasHuntablePreyNearby' },
+            { kind: 'action', actionId: 'chaseTarget' },
+          ],
+        },
+        {
+          kind: 'sequence',
+          children: [
+            { kind: 'condition', conditionId: 'isMotivatedToForageGroundFood' },
+            { kind: 'condition', conditionId: 'hasEdibleGroundFoodNearby' },
+            { kind: 'action', actionId: 'forageGroundFood' },
+          ],
+        },
+        ...DEFINING_WILDLIFE_SEPARATION_ANXIETY_BRANCHES,
+        { kind: 'action', actionId: 'wander' },
+      ],
+    },
+  };
 
 /** Solo stalk: shadow, wait for weakness or hungry/aggressive patience, then rush. */
 const DEFINING_WILDLIFE_STALKER_TREE: DefiningWildlifeBehaviorTreeDefinition = {

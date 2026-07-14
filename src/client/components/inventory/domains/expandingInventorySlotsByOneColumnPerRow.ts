@@ -5,8 +5,9 @@
  */
 
 /**
- * When capacity grows by exactly one column per row (e.g. 5×3 → 6×3),
+ * When the legacy five-column layout grows to six columns per row,
  * inserts a trailing empty slot on each row so storage pages keep their items.
+ * Other capacity growth appends empty slots without remapping existing items.
  *
  * @param rawSlots - Persisted slot array (may be shorter than capacity)
  * @param capacity - Target slot count
@@ -37,7 +38,7 @@ export function expandingInventorySlotsByOneColumnPerRow(
     const fromColumns = rawSlots.length / rowCount;
     const toColumns = capacity / rowCount;
 
-    if (toColumns !== fromColumns + 1) {
+    if (fromColumns !== 5 || toColumns !== 6) {
       continue;
     }
 

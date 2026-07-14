@@ -49,6 +49,7 @@ import {
 import { advancingWildlifeSpeciesTextureEviction } from '@/components/world/wildlife/domains/advancingWildlifeSpeciesTextureEviction';
 import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
 import { checkingWildlifeSpeciesUsesGlowOrbPresentation } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesUsesGlowOrbPresentation';
+import { checkingWildlifeVitalsGraphicsShouldShow } from '@/components/world/wildlife/domains/checkingWildlifeVitalsGraphicsShouldShow';
 import { computingWildlifeCorpseFadeAlpha } from '@/components/world/wildlife/domains/computingWildlifeCorpseFadeAlpha';
 import {
   computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
@@ -77,6 +78,7 @@ import {
   DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET,
 } from '@/components/world/wildlife/domains/definingWildlifeVitalsBarConstants';
 import { drawingWildlifeFairyGlowOrbOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeFairyGlowOrbOnGraphics';
+import { drawingWildlifeVitalsOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeVitalsOnGraphics';
 import { electingWildlifeSimulationLeaderUserId } from '@/components/world/wildlife/domains/electingWildlifeSimulationLeaderUserId';
 import { loadingWildlifeSpeciesTextures } from '@/components/world/wildlife/domains/loadingWildlifeSpeciesTextures';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
@@ -115,78 +117,7 @@ export type RenderingWildlifeLayerProps = {
   tickConfigRef: React.RefObject<DefiningWildlifeSimulationTickConfig>;
 };
 
-const RENDERING_WILDLIFE_BAR_WIDTH_PX = 24;
-const RENDERING_WILDLIFE_BAR_HEIGHT_PX = 3;
-const RENDERING_WILDLIFE_STAMINA_BAR_HEIGHT_PX = 2;
-/** Minimum ms between contact disease rolls for the same animal. */
 const RENDERING_WILDLIFE_CONTACT_DISEASE_COOLDOWN_MS = 1000;
-const RENDERING_WILDLIFE_BAR_GAP_PX = 0.5;
-
-/** Player HP bar thresholds reused for animals (green / orange / red). */
-function resolvingWildlifeBarFillColor(healthRatio: number): number {
-  if (healthRatio <= 0.25) {
-    return 0x8f1010;
-  }
-
-  if (healthRatio <= 0.5) {
-    return 0xc45c12;
-  }
-
-  return 0x1f9b3f;
-}
-
-function drawingWildlifeVitalsBars(
-  graphics: Graphics,
-  healthRatio: number,
-  staminaRatio: number
-): void {
-  graphics.clear();
-
-  const barLeft = -RENDERING_WILDLIFE_BAR_WIDTH_PX / 2;
-
-  graphics
-    .rect(
-      barLeft,
-      0,
-      RENDERING_WILDLIFE_BAR_WIDTH_PX,
-      RENDERING_WILDLIFE_BAR_HEIGHT_PX
-    )
-    .fill({ color: 0x1a140f, alpha: 0.9 });
-
-  if (healthRatio > 0) {
-    graphics
-      .rect(
-        barLeft,
-        0,
-        RENDERING_WILDLIFE_BAR_WIDTH_PX * healthRatio,
-        RENDERING_WILDLIFE_BAR_HEIGHT_PX
-      )
-      .fill({ color: resolvingWildlifeBarFillColor(healthRatio) });
-  }
-
-  const staminaTop =
-    RENDERING_WILDLIFE_BAR_HEIGHT_PX + RENDERING_WILDLIFE_BAR_GAP_PX;
-
-  graphics
-    .rect(
-      barLeft,
-      staminaTop,
-      RENDERING_WILDLIFE_BAR_WIDTH_PX,
-      RENDERING_WILDLIFE_STAMINA_BAR_HEIGHT_PX
-    )
-    .fill({ color: 0x1a140f, alpha: 0.9 });
-
-  if (staminaRatio > 0) {
-    graphics
-      .rect(
-        barLeft,
-        staminaTop,
-        RENDERING_WILDLIFE_BAR_WIDTH_PX * staminaRatio,
-        RENDERING_WILDLIFE_STAMINA_BAR_HEIGHT_PX
-      )
-      .fill({ color: 0xd9a521 });
-  }
-}
 
 type RenderingWildlifeInstanceSpriteProps = {
   instanceId: string;
@@ -204,6 +135,7 @@ type RenderingWildlifeInstanceSpriteProps = {
   locomotionAnimationSpeedScale: number;
   healthRatio: number;
   staminaRatio: number;
+  hungerRatio: number;
   isDead: boolean;
   spriteAlpha: number;
   jumpLiftPx: number;
@@ -227,6 +159,7 @@ const RenderingWildlifeInstanceSprite = memo(
     locomotionAnimationSpeedScale,
     healthRatio,
     staminaRatio,
+    hungerRatio,
     isDead,
     spriteAlpha,
     jumpLiftPx,
@@ -298,10 +231,15 @@ const RenderingWildlifeInstanceSprite = memo(
         placedBlocksByTile,
       }
     );
-    const showsVitalsBars =
-      !isDead &&
-      !checkingWildlifeSpeciesIsImmortal(species) &&
-      (healthRatio < 0.999 || staminaRatio < 0.999);
+    const vitalsVisibility = checkingWildlifeVitalsGraphicsShouldShow({
+      isDead,
+      isImmortal: checkingWildlifeSpeciesIsImmortal(species),
+      healthRatio,
+      staminaRatio,
+      showHungerCircle: checkingWorldPlazaGenerationFeatureEnabled(
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_HUNGER_CIRCLE
+      ),
+    });
     const spritePresentation =
       resolvingWildlifeSpeciesSpritePresentation(species);
     const shadowSizeScale = computingWildlifeGroundShadowSizeScale(
@@ -380,7 +318,7 @@ const RenderingWildlifeInstanceSprite = memo(
             alpha={spriteAlpha}
           />
         )}
-        {showsVitalsBars ? (
+        {vitalsVisibility.showGraphics ? (
           <pixiGraphics
             ref={wildlifeVitalsGraphicsRef}
             eventMode="none"
@@ -392,7 +330,14 @@ const RenderingWildlifeInstanceSprite = memo(
               DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX * sizeScale
             }
             draw={(graphics: Graphics) => {
-              drawingWildlifeVitalsBars(graphics, healthRatio, staminaRatio);
+              drawingWildlifeVitalsOnGraphics({
+                graphics,
+                healthRatio,
+                staminaRatio,
+                hungerRatio,
+                showHungerCircle: vitalsVisibility.showHungerCircle,
+                showBars: vitalsVisibility.showBars,
+              });
             }}
           />
         ) : null}
@@ -970,8 +915,13 @@ export function RenderingWildlifeLayer({
       performanceProfile.wildlifePresentationReconcileIntervalMs
     ) {
       lastRenderReconcileAtMsRef.current = nowMs;
-      const nextRenderStructuralFingerprint =
-        computingWildlifeRenderStructuralFingerprint(nextInstances);
+      const nextRenderStructuralFingerprint = `${computingWildlifeRenderStructuralFingerprint(nextInstances)}:${
+        checkingWorldPlazaGenerationFeatureEnabled(
+          DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_HUNGER_CIRCLE
+        )
+          ? 'h1'
+          : 'h0'
+      }`;
 
       if (
         renderStructuralFingerprintRef.current !==
@@ -1060,6 +1010,9 @@ export function RenderingWildlifeLayer({
             healthRatio={healthRatio}
             staminaRatio={quantizingWildlifeRenderVitalsRatio(
               instance.staminaState.staminaRatio
+            )}
+            hungerRatio={quantizingWildlifeRenderVitalsRatio(
+              instance.hungerState.hungerRatio
             )}
             isDead={instance.isDead}
             spriteAlpha={spriteAlpha}

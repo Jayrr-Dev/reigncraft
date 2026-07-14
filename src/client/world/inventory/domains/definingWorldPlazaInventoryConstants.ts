@@ -23,7 +23,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS = 6 as const;
 export const DEFINING_WORLD_PLAZA_INVENTORY_MAIN_ROW_COUNT = 1 as const;
 
 /** Extra storage rows behind the page arrows (paged {@link DEFINING_WORLD_PLAZA_INVENTORY_COLUMNS} at a time). */
-export const DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_ROW_COUNT = 2 as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_ROW_COUNT = 3 as const;
 
 /** Visible rows in the hotbar chrome (one paged row at a time). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_VISIBLE_ROW_COUNT = 1 as const;

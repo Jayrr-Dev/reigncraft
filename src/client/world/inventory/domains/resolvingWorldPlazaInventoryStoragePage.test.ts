@@ -13,10 +13,10 @@ import { describe, expect, it } from 'vitest';
 
 describe('resolvingWorldPlazaInventoryStoragePage', () => {
   it('keeps capacity as main hotbar plus storage pages', () => {
-    expect(DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY).toBe(18);
+    expect(DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY).toBe(24);
     expect(DEFINING_WORLD_PLAZA_INVENTORY_MAIN_HOTBAR_SLOT_COUNT).toBe(6);
-    expect(DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_PAGE_COUNT).toBe(2);
-    expect(DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT).toBe(3);
+    expect(DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_PAGE_COUNT).toBe(3);
+    expect(DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT).toBe(4);
   });
 
   it('clamps hotbar page indices across main and storage', () => {
@@ -24,7 +24,8 @@ describe('resolvingWorldPlazaInventoryStoragePage', () => {
     expect(resolvingWorldPlazaInventoryClampedStoragePageIndex(0)).toBe(0);
     expect(resolvingWorldPlazaInventoryClampedStoragePageIndex(1)).toBe(1);
     expect(resolvingWorldPlazaInventoryClampedStoragePageIndex(2)).toBe(2);
-    expect(resolvingWorldPlazaInventoryClampedStoragePageIndex(99)).toBe(2);
+    expect(resolvingWorldPlazaInventoryClampedStoragePageIndex(3)).toBe(3);
+    expect(resolvingWorldPlazaInventoryClampedStoragePageIndex(99)).toBe(3);
   });
 
   it('pages storage six slots at a time', () => {
@@ -33,6 +34,9 @@ describe('resolvingWorldPlazaInventoryStoragePage', () => {
     ]);
     expect(resolvingWorldPlazaInventoryStoragePageSlotIndices(1)).toEqual([
       12, 13, 14, 15, 16, 17,
+    ]);
+    expect(resolvingWorldPlazaInventoryStoragePageSlotIndices(2)).toEqual([
+      18, 19, 20, 21, 22, 23,
     ]);
   });
 
@@ -45,6 +49,9 @@ describe('resolvingWorldPlazaInventoryStoragePage', () => {
     ]);
     expect(resolvingWorldPlazaInventoryVisibleSlotIndices(2)).toEqual([
       12, 13, 14, 15, 16, 17,
+    ]);
+    expect(resolvingWorldPlazaInventoryVisibleSlotIndices(3)).toEqual([
+      18, 19, 20, 21, 22, 23,
     ]);
   });
 });

@@ -1,4 +1,7 @@
-import { resolvingWorldPlazaHungerFillColors } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerFillColor';
+import {
+  resolvingWorldPlazaHungerFillColors,
+  resolvingWorldPlazaHungerFillMidPixiColor,
+} from '@/components/world/hunger/domains/resolvingWorldPlazaHungerFillColor';
 import { describe, expect, it } from 'vitest';
 
 describe('resolvingWorldPlazaHungerFillColors', () => {
@@ -15,6 +18,11 @@ describe('resolvingWorldPlazaHungerFillColors', () => {
   it('returns charcoal at empty hunger', () => {
     const colors = resolvingWorldPlazaHungerFillColors(0);
     expect(colors.midCss).toBe('rgb(28 24 22)');
+  });
+
+  it('packs mid fill as Pixi 0xRRGGBB', () => {
+    expect(resolvingWorldPlazaHungerFillMidPixiColor(1)).toBe(0x8b5a2b);
+    expect(resolvingWorldPlazaHungerFillMidPixiColor(0)).toBe(0x1c1816);
   });
 
   it('blends between brown and reddish brown', () => {

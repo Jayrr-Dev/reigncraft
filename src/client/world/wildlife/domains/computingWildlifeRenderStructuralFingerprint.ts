@@ -51,6 +51,9 @@ export function computingWildlifeRenderStructuralFingerprint(
       )}` +
       `:${quantizingWildlifeRenderVitalsRatio(
         instance.staminaState.staminaRatio
+      )}` +
+      `:${quantizingWildlifeRenderVitalsRatio(
+        instance.hungerState.hungerRatio
       )}`;
   }
 

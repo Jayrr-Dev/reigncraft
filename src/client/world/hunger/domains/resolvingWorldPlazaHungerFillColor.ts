@@ -82,14 +82,11 @@ function lerpingHungerFillRgb(
   };
 }
 
-/**
- * Interpolates hunger fill colors along the brown → red-brown → charcoal ramp.
- *
- * @param hungerRatio - Current hunger as a 0..1 ratio (1 = full)
- */
-export function resolvingWorldPlazaHungerFillColors(
-  hungerRatio: number
-): ResolvingWorldPlazaHungerFillColors {
+function resolvingWorldPlazaHungerFillStopPair(hungerRatio: number): {
+  upperStop: DefiningWorldPlazaHungerFillColorStop;
+  lowerStop: DefiningWorldPlazaHungerFillColorStop;
+  t: number;
+} {
   const clampedRatio = Math.min(1, Math.max(0, hungerRatio));
   const stops = DEFINING_WORLD_PLAZA_HUNGER_FILL_COLOR_STOPS;
 
@@ -112,6 +109,49 @@ export function resolvingWorldPlazaHungerFillColors(
 
   const span = upperStop.ratio - lowerStop.ratio;
   const t = span <= 0 ? 0 : (upperStop.ratio - clampedRatio) / span;
+
+  return { upperStop, lowerStop, t };
+}
+
+/**
+ * Mid fill RGB for the hunger drain ramp (shared by HUD CSS and Pixi orbs).
+ *
+ * @param hungerRatio - Current hunger as a 0..1 ratio (1 = full)
+ */
+export function resolvingWorldPlazaHungerFillMidRgb(
+  hungerRatio: number
+): DefiningWorldPlazaHungerFillRgb {
+  const { upperStop, lowerStop, t } =
+    resolvingWorldPlazaHungerFillStopPair(hungerRatio);
+
+  return lerpingHungerFillRgb(upperStop.mid, lowerStop.mid, t);
+}
+
+/**
+ * Pixi-packed 0xRRGGBB color from the hunger mid fill ramp.
+ *
+ * @param hungerRatio - Current hunger as a 0..1 ratio (1 = full)
+ */
+export function resolvingWorldPlazaHungerFillMidPixiColor(
+  hungerRatio: number
+): number {
+  const mid = resolvingWorldPlazaHungerFillMidRgb(hungerRatio);
+
+  return (
+    (Math.round(mid.r) << 16) | (Math.round(mid.g) << 8) | Math.round(mid.b)
+  );
+}
+
+/**
+ * Interpolates hunger fill colors along the brown → red-brown → charcoal ramp.
+ *
+ * @param hungerRatio - Current hunger as a 0..1 ratio (1 = full)
+ */
+export function resolvingWorldPlazaHungerFillColors(
+  hungerRatio: number
+): ResolvingWorldPlazaHungerFillColors {
+  const { upperStop, lowerStop, t } =
+    resolvingWorldPlazaHungerFillStopPair(hungerRatio);
 
   const highlight = lerpingHungerFillRgb(
     upperStop.highlight,

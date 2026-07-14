@@ -30,6 +30,7 @@ import {
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
 import { checkingWildlifeSpeciesUsesGlowOrbPresentation } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesUsesGlowOrbPresentation';
+import { checkingWildlifeVitalsGraphicsShouldShow } from '@/components/world/wildlife/domains/checkingWildlifeVitalsGraphicsShouldShow';
 import { computingWildlifeCorpseFadeAlpha } from '@/components/world/wildlife/domains/computingWildlifeCorpseFadeAlpha';
 import {
   computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
@@ -388,12 +389,17 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
             ? instance.healthState.currentHealth /
               instance.healthState.baseMaxHealth
             : 0;
-        const showsVitalsBars =
-          !instance.isDead &&
-          !checkingWildlifeSpeciesIsImmortal(species) &&
-          (healthRatio < 0.999 || instance.staminaState.staminaRatio < 0.999);
+        const vitalsVisibility = checkingWildlifeVitalsGraphicsShouldShow({
+          isDead: instance.isDead,
+          isImmortal: checkingWildlifeSpeciesIsImmortal(species),
+          healthRatio,
+          staminaRatio: instance.staminaState.staminaRatio,
+          showHungerCircle: checkingWorldPlazaGenerationFeatureEnabled(
+            DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_HUNGER_CIRCLE
+          ),
+        });
 
-        if (showsVitalsBars) {
+        if (vitalsVisibility.showGraphics) {
           vitalsGraphics.position.set(
             screenPoint.x,
             anchoredScreenY -

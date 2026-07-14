@@ -167,7 +167,7 @@ Legacy shims under `src/client/world/domains/` re-export collision APIs during m
 
 The plaza hook wires Redis/save-slot persistence and optional demo seed. World features (equipment, consumables) read `DefiningInventoryState` from this hook.
 
-**Layout:** capacity **18** (`DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY`). Row 1 (slots 0–5) is the always-visible main hotbar (equippable). Rows 2–3 are storage (12 slots), shown one page of 6 at a time via solid up/down arrows on the right (`resolvingWorldPlazaInventoryStoragePage.ts`, `renderingWorldPlazaInventoryPageArrowButtons.tsx`).
+**Layout:** capacity **24** (`DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY`). Row 1 (slots 0–5) is the always-visible main hotbar (equippable). Rows 2–4 are storage (18 slots), shown one page of 6 at a time via solid up/down arrows on the right (`resolvingWorldPlazaInventoryStoragePage.ts`, `renderingWorldPlazaInventoryPageArrowButtons.tsx`).
 
 **Extend (new item):**
 
@@ -626,7 +626,7 @@ Use these folders when the task is not covered above:
 | Combat too fast / slow for everyone             | `definingWorldPlazaGlobalCombatAttackSpeedConstants.ts` (`DEFINING_WORLD_PLAZA_GLOBAL_ATTACK_SPEED_SCALE`; 0.7 = 70% speed)                     |
 | Attack-speed buffs (player / wildlife)          | `attack_speed` modifier + `quick-strikes-buff` / `bloodlust-buff` / `blinding-flurry-buff` / `relentless-tempo-buff` in buff registry           |
 | Combat dev tuning                               | Dev panel combat tab, subcategory `engine`                                                                                                      |
-| Wolf pack not stalking / wrong phase            | `definingWildlifePackHunterBehaviourMachine.ts`, `advancingWildlifeStalkAggroTick.ts`                                                              |
+| Wolf pack not stalking / wrong phase            | `definingWildlifePackHunterBehaviourMachine.ts`, `advancingWildlifeStalkAggroTick.ts`                                                           |
 | Pack flees when alpha dies                      | `applyingWildlifePackAlphaDeathScatter.ts`                                                                                                      |
 | Player spotted while wolf shadows prey          | `advancingWildlifeStalkPlayerApproachTick.ts`                                                                                                   |
 | New wildlife species                            | `definingWildlifeSpeciesRegistry.ts` + `definingWildlifeBiomeSpawnTable.ts`                                                                     |
