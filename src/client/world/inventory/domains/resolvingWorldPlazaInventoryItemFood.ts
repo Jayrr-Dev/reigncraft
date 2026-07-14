@@ -8,6 +8,7 @@ export type DefiningWorldPlazaInventoryFoodDefinition = {
   readonly healthHeal: DefiningWorldPlazaInventoryFoodHealDeclaration;
   readonly meatKind?: 'raw' | 'cooked';
   readonly wildlifeSpeciesId?: string;
+  readonly flowerSpeciesId?: string;
   readonly rawPoisonFlatEv?: number;
   readonly rawPoisonDurationMs?: number;
   readonly rawSicknessChance?: number;
@@ -40,6 +41,7 @@ export function resolvingWorldPlazaInventoryFoodDefinition(
     healthHeal: definition.food.healthHeal,
     meatKind: definition.food.meatKind,
     wildlifeSpeciesId: definition.food.wildlifeSpeciesId,
+    flowerSpeciesId: definition.food.flowerSpeciesId,
     rawPoisonFlatEv: definition.food.rawPoisonFlatEv,
     rawPoisonDurationMs: definition.food.rawPoisonDurationMs,
     rawSicknessChance: definition.food.rawSicknessChance,

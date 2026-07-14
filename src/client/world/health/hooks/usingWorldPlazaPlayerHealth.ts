@@ -6,8 +6,8 @@ import { checkingWorldPlazaGirlSampleRollDodgePreventsPhysicalStagger } from '@/
 import type { DefiningWorldPlazaAvatarMotionState } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { pushingWorldPlazaDangerSenseStatusDamagePulse } from '@/components/world/domains/managingWorldPlazaDangerSenseStatusDamagePulseStore';
+import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { notifyingWorldPlazaGirlSampleVoiceSfxEvent } from '@/components/world/domains/notifyingWorldPlazaGirlSampleVoiceSfxEvent';
 import { resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry';
 import { resolvingWorldPlazaGirlSampleRollDodgeDamageOptions } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeDamageOptions';
@@ -102,6 +102,7 @@ import { mappingWorldPlazaDamageOutcomeTierToFloatTextKind } from '@/components/
 import { mappingWorldPlazaEnvironmentalHazardKindToDamageKind } from '@/components/world/health/domains/mappingWorldPlazaEnvironmentalHazardKindToDamageKind';
 import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 import { resolvingWorldPlazaEntityHealthDamageRollParams } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollParams';
+import { resolvingWorldPlazaEntityHealthEffectiveTemperatureResistance } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthEffectiveTemperatureResistance';
 import { resolvingWorldPlazaEntityTemperatureComfortBand } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureComfortBand';
 import { applyingWorldPlazaEntityTemperatureResistanceToEnvironmentalDamageRates } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureResistanceMultiplier';
 import { resolvingWorldPlazaEnvironmentalTemperatureForPlayerAtWorldPoint } from '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPoint';
@@ -111,8 +112,8 @@ import {
   creatingWorldPlazaCharacterEngineInitialHealthState,
   reseedingWorldPlazaCharacterEngineHealthBaseline,
 } from '@/components/world/character/domains/creatingWorldPlazaCharacterEngineInitialHealthState';
-import { applyingWorldPlazaDevQaPlayerHealthOverride } from '@/components/world/domains/applyingWorldPlazaDevQaPlayerHealthOverride';
 import type { DefiningWorldPlazaCharacterEngineDefinition } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
+import { applyingWorldPlazaDevQaPlayerHealthOverride } from '@/components/world/domains/applyingWorldPlazaDevQaPlayerHealthOverride';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_REACTION_DURATION_MS,
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DAMAGED_DURATION_MS,
@@ -327,10 +328,12 @@ function buildingHudSnapshot(
     ? [...activeBuffs, rollDodgeBuffEntry]
     : activeBuffs;
   const activeBuffIds = mergedActiveBuffs.map((buff) => buff.id);
+  const effectiveTemperatureResistance =
+    resolvingWorldPlazaEntityHealthEffectiveTemperatureResistance(state, nowMs);
   const environmentalTemperatureExposure =
     computingWorldPlazaEnvironmentalTemperatureHudExposure(
       localTemperatureCelsius,
-      state.temperatureResistance,
+      effectiveTemperatureResistance,
       state,
       nowMs
     );
@@ -1427,10 +1430,15 @@ export function usingWorldPlazaPlayerHealth({
                 deltaMs,
               });
 
+        const effectiveTemperatureResistance =
+          resolvingWorldPlazaEntityHealthEffectiveTemperatureResistance(
+            healthStateRef.current,
+            frameTimeMs
+          );
         const hazard =
           buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius(
             localTemperatureCelsiusRef.current,
-            healthStateRef.current.temperatureResistance
+            effectiveTemperatureResistance
           );
         const effectiveMaxHealth = computingWorldPlazaEntityHealthEffectiveMax(
           healthStateRef.current,
@@ -1442,7 +1450,7 @@ export function usingWorldPlazaPlayerHealth({
                 damagePerSecond: hazard.damagePerSecond,
                 maxHealthPercentPerSecond: hazard.maxHealthPercentPerSecond,
                 exposureKind: hazard.kind === 'cold' ? 'cold' : 'heat',
-                resistance: healthStateRef.current.temperatureResistance,
+                resistance: effectiveTemperatureResistance,
               }
             )
           : null;
@@ -1477,7 +1485,7 @@ export function usingWorldPlazaPlayerHealth({
               if (hazard.kind === 'cold') {
                 const comfortBand =
                   resolvingWorldPlazaEntityTemperatureComfortBand(
-                    healthStateRef.current.temperatureResistance
+                    effectiveTemperatureResistance
                   );
                 const deficitCelsius = Math.max(
                   0,

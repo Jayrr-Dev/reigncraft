@@ -16,6 +16,7 @@ export type DefiningWorldPlazaInventoryItemFoodBehavior = {
   };
   readonly meatKind?: 'raw' | 'cooked';
   readonly wildlifeSpeciesId?: string;
+  readonly flowerSpeciesId?: string;
   readonly rawPoisonFlatEv?: number;
   readonly rawPoisonDurationMs?: number;
   readonly rawSicknessChance?: number;

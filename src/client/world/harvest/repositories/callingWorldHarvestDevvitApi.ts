@@ -6,13 +6,16 @@ import type {
   WorldHarvestDevvitMinedRocksResponse,
   WorldHarvestDevvitMineRockRequest,
   WorldHarvestDevvitMineRockResponse,
+  WorldHarvestDevvitPickedFlowersResponse,
   WorldHarvestDevvitPickedPebblesResponse,
+  WorldHarvestDevvitPickFlowerRequest,
+  WorldHarvestDevvitPickFlowerResponse,
   WorldHarvestDevvitPickPebbleRequest,
   WorldHarvestDevvitPickPebbleResponse,
 } from '../../../../shared/worldHarvestDevvit';
 
 async function parsingWorldHarvestDevvitJsonResponse(
-  response: Response,
+  response: Response
 ): Promise<unknown> {
   try {
     return await response.json();
@@ -23,7 +26,7 @@ async function parsingWorldHarvestDevvitJsonResponse(
 
 function resolvingWorldHarvestDevvitErrorMessage(
   body: unknown,
-  fallbackMessage: string,
+  fallbackMessage: string
 ): string {
   if (
     body &&
@@ -39,15 +42,18 @@ function resolvingWorldHarvestDevvitErrorMessage(
 
 async function callingWorldHarvestDevvitApi(
   path: string,
-  init?: RequestInit,
+  init?: RequestInit
 ): Promise<unknown> {
-  const response = await fetch(appendingWorldPlazaOnlineRoomQueryToApiPath(path), {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init?.headers ?? {}),
-    },
-  });
+  const response = await fetch(
+    appendingWorldPlazaOnlineRoomQueryToApiPath(path),
+    {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(init?.headers ?? {}),
+      },
+    }
+  );
   const body = await parsingWorldHarvestDevvitJsonResponse(response);
 
   if (
@@ -60,8 +66,8 @@ async function callingWorldHarvestDevvitApi(
     throw new Error(
       resolvingWorldHarvestDevvitErrorMessage(
         body,
-        `Harvest request failed (${response.status}).`,
-      ),
+        `Harvest request failed (${response.status}).`
+      )
     );
   }
 
@@ -73,7 +79,7 @@ async function callingWorldHarvestDevvitApi(
  */
 export async function fetchingWorldHarvestDevvitChoppedTrees(
   path: string,
-  saveSlotIndex?: number | null,
+  saveSlotIndex?: number | null
 ) {
   const requestPath =
     typeof saveSlotIndex === 'number'
@@ -94,7 +100,7 @@ export async function fetchingWorldHarvestDevvitChoppedTrees(
  */
 export async function choppingWorldHarvestDevvitTreeLayer(
   path: string,
-  requestBody: WorldHarvestDevvitChopTreeRequest,
+  requestBody: WorldHarvestDevvitChopTreeRequest
 ) {
   const body = await callingWorldHarvestDevvitApi(path, {
     method: 'POST',
@@ -128,7 +134,7 @@ export async function choppingWorldHarvestDevvitTreeLayer(
  */
 export async function fetchingWorldHarvestDevvitMinedRocks(
   path: string,
-  saveSlotIndex?: number | null,
+  saveSlotIndex?: number | null
 ) {
   const requestPath =
     typeof saveSlotIndex === 'number'
@@ -149,7 +155,7 @@ export async function fetchingWorldHarvestDevvitMinedRocks(
  */
 export async function miningWorldHarvestDevvitRockLayer(
   path: string,
-  requestBody: WorldHarvestDevvitMineRockRequest,
+  requestBody: WorldHarvestDevvitMineRockRequest
 ) {
   const body = await callingWorldHarvestDevvitApi(path, {
     method: 'POST',
@@ -183,7 +189,7 @@ export async function miningWorldHarvestDevvitRockLayer(
  */
 export async function fetchingWorldHarvestDevvitPickedPebbles(
   path: string,
-  saveSlotIndex?: number | null,
+  saveSlotIndex?: number | null
 ) {
   const requestPath =
     typeof saveSlotIndex === 'number'
@@ -204,7 +210,7 @@ export async function fetchingWorldHarvestDevvitPickedPebbles(
  */
 export async function pickingWorldHarvestDevvitPebble(
   path: string,
-  requestBody: WorldHarvestDevvitPickPebbleRequest,
+  requestBody: WorldHarvestDevvitPickPebbleRequest
 ) {
   const body = await callingWorldHarvestDevvitApi(path, {
     method: 'POST',
@@ -228,4 +234,57 @@ export async function pickingWorldHarvestDevvitPebble(
   }
 
   throw new Error('Invalid pebble pick response.');
+}
+
+/**
+ * Polls picked-flower state from the Devvit server.
+ */
+export async function fetchingWorldHarvestDevvitPickedFlowers(
+  path: string,
+  saveSlotIndex?: number | null
+) {
+  const requestPath =
+    typeof saveSlotIndex === 'number'
+      ? `${path}?saveSlotIndex=${saveSlotIndex}`
+      : path;
+  const body = await callingWorldHarvestDevvitApi(requestPath);
+  const payload = body as Partial<WorldHarvestDevvitPickedFlowersResponse>;
+
+  if (payload.type !== 'picked-flowers' || !Array.isArray(payload.tiles)) {
+    throw new Error('Invalid picked flowers response.');
+  }
+
+  return payload.tiles;
+}
+
+/**
+ * Applies one flower pick through the Devvit server.
+ */
+export async function pickingWorldHarvestDevvitFlower(
+  path: string,
+  requestBody: WorldHarvestDevvitPickFlowerRequest
+) {
+  const body = await callingWorldHarvestDevvitApi(path, {
+    method: 'POST',
+    body: JSON.stringify(requestBody),
+  });
+  const payload = body as Partial<WorldHarvestDevvitPickFlowerResponse>;
+
+  if (payload.type === 'picked') {
+    return {
+      outcome: 'picked' as const,
+      speciesId: payload.speciesId,
+      flowerQuantity: payload.flowerQuantity,
+    };
+  }
+
+  if (payload.type === 'out-of-range') {
+    return { outcome: 'out-of-range' as const };
+  }
+
+  if (payload.type === 'already-picked') {
+    return { outcome: 'already-picked' as const };
+  }
+
+  throw new Error('Invalid flower pick response.');
 }

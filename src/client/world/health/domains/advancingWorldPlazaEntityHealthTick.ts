@@ -234,8 +234,21 @@ export function advancingWorldPlazaEntityHealthTick({
       nowMs - nextState.lastDamagedAtMs >= nextState.regen.delayAfterDamageMs);
 
   if (canRegen && nextState.currentHealth < effectiveMax && deltaMs > 0) {
+    const sleepRegenMultiplier = nextState.sleepEffects.reduce(
+      (maxMultiplier, effect) => {
+        if (effect.expiresAtMs <= nowMs) {
+          return maxMultiplier;
+        }
+
+        return Math.max(maxMultiplier, effect.regenMultiplier ?? 1);
+      },
+      1
+    );
     const regenAmount = computingWorldPlazaEntityHealthAmplifiedHealAmount({
-      baseHealAmount: nextState.regen.healthPerSecond * (deltaMs / 1000),
+      baseHealAmount:
+        nextState.regen.healthPerSecond *
+        (deltaMs / 1000) *
+        sleepRegenMultiplier,
       receiverIncomingHealAmplifiers: nextState.incomingHealAmplifiers,
       giverOutgoingHealAmplifiers: nextState.outgoingHealAmplifiers,
       nowMs,
@@ -246,6 +259,45 @@ export function advancingWorldPlazaEntityHealthTick({
       currentHealth: Math.min(
         effectiveMax,
         nextState.currentHealth + regenAmount
+      ),
+    };
+  }
+
+  for (const sleepEffect of nextState.sleepEffects) {
+    if (
+      sleepEffect.expiresAtMs <= nowMs ||
+      sleepEffect.passiveHealPercentOfMaxTotal === undefined ||
+      sleepEffect.passiveHealPercentOfMaxTotal <= 0
+    ) {
+      continue;
+    }
+
+    const sleepDurationMs = Math.max(
+      1,
+      sleepEffect.expiresAtMs - sleepEffect.appliedAtMs
+    );
+    const healPerSecond =
+      (effectiveMax * sleepEffect.passiveHealPercentOfMaxTotal) /
+      (sleepDurationMs / 1000);
+
+    if (healPerSecond <= 0 || deltaMs <= 0) {
+      continue;
+    }
+
+    const passiveHealAmount =
+      computingWorldPlazaEntityHealthAmplifiedHealAmount({
+        baseHealAmount: healPerSecond * (deltaMs / 1000),
+        receiverIncomingHealAmplifiers: nextState.incomingHealAmplifiers,
+        giverOutgoingHealAmplifiers: nextState.outgoingHealAmplifiers,
+        nowMs,
+        applyOutgoingAmplifier: false,
+      });
+
+    nextState = {
+      ...nextState,
+      currentHealth: Math.min(
+        effectiveMax,
+        nextState.currentHealth + passiveHealAmount
       ),
     };
   }

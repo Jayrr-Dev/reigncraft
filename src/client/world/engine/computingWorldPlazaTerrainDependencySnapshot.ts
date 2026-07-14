@@ -8,6 +8,7 @@ import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domain
 import {
   buildingWorldPlazaBurntGrassTileKeysCacheKey,
   buildingWorldPlazaChoppedTreesCacheKey,
+  buildingWorldPlazaPickedFlowersCacheKey,
   buildingWorldPlazaPickedPebblesCacheKey,
   buildingWorldPlazaPlacedTreeBlocksCacheKey,
 } from '@/components/world/engine/buildingWorldPlazaTerrainLayerCacheKeys';
@@ -22,6 +23,7 @@ import {
   registeringWorldPlazaLavaStaticTileTextureLoader,
 } from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
 import { gettingWorldPlazaTemperatureDebugOverrideRevision } from '@/components/world/health/domains/managingWorldPlazaTemperatureDebugOverrideStore';
@@ -44,6 +46,10 @@ export type ComputingWorldPlazaTerrainDependencySnapshotInput = {
   readonly pickedPebblesByTileKey: ReadonlyMap<
     string,
     DefiningWorldPlazaPickedPebbleTileState
+  >;
+  readonly pickedFlowersByTileKey: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedFlowerTileState
   >;
   readonly burntGrassTileKeys: ReadonlySet<string> | undefined;
   readonly islandModeRevision: number;
@@ -83,8 +89,7 @@ export function computingWorldPlazaTerrainDependencySnapshot(
       buildingWorldPlazaPlacedTreeBlocksCacheKey(input.scenePlacedBlocks),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.CHOPPED_TREES]:
       buildingWorldPlazaChoppedTreesCacheKey(input.choppedTreesByTileKey),
-    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_PEBBLES]:
-      buildingWorldPlazaPickedPebblesCacheKey(input.pickedPebblesByTileKey),
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_PEBBLES]: `${buildingWorldPlazaPickedPebblesCacheKey(input.pickedPebblesByTileKey)}|${buildingWorldPlazaPickedFlowersCacheKey(input.pickedFlowersByTileKey)}`,
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS]:
       buildingWorldPlazaBurntGrassTileKeysCacheKey(input.burntGrassTileKeys),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL]:

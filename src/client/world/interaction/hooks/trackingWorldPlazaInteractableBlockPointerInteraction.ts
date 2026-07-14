@@ -5,9 +5,11 @@ import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/buildi
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaMinedRockTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
+import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import type { DefiningWorldPlazaInteractableBlockClickDispatch } from '@/components/world/interaction/domains/definingWorldPlazaInteractableBlockClickAction';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
+import { resolvingWorldPlazaInteractableFlowerFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableFlowerFromPointerGridPoint';
 import { resolvingWorldPlazaInteractablePebbleFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePebbleFromPointerGridPoint';
 import { resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableRockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableRockFromPointerGridPoint';
@@ -65,6 +67,16 @@ export type TrackingWorldPlazaInteractableBlockPointerInteractionParams = {
     tileX: number,
     tileY: number
   ) => void;
+  /** Runtime/persisted pick state keyed by flower tile. */
+  readonly pickedFlowerStateByTileKey?: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedFlowerTileState
+  >;
+  /** Opens the flower pick popover for a biome flower dot. */
+  readonly onProceduralFlowerPopoverSelect?: (
+    tileX: number,
+    tileY: number
+  ) => void;
 };
 
 export type TrackingWorldPlazaInteractableBlockPointerInteractionResult = {
@@ -99,6 +111,7 @@ function resolvingWorldPlazaTreeChopPointerHitContext(
  * `natural:tree:oak` is registered in handlers. Procedural rocks use
  * `onProceduralRockPopoverSelect` independently of the tree handler.
  * Floor pebbles use `onProceduralPebblePopoverSelect` after rock resolution fails.
+ * Biome flowers use `onProceduralFlowerPopoverSelect` after pebble resolution fails.
  */
 export function trackingWorldPlazaInteractableBlockPointerInteraction({
   isEnabled,
@@ -113,6 +126,8 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
   onProceduralRockPopoverSelect,
   pickedPebbleStateByTileKey,
   onProceduralPebblePopoverSelect,
+  pickedFlowerStateByTileKey,
+  onProceduralFlowerPopoverSelect,
 }: TrackingWorldPlazaInteractableBlockPointerInteractionParams): TrackingWorldPlazaInteractableBlockPointerInteractionResult {
   const enabledDefinitionIds = useMemo(
     () => new Set(Object.keys(handlers)),
@@ -214,6 +229,21 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
         }
       }
 
+      if (onProceduralFlowerPopoverSelect) {
+        const flowerMatch =
+          resolvingWorldPlazaInteractableFlowerFromPointerGridPoint(
+            pointerContext.gridPoint,
+            playerPosition,
+            chopPersistenceOwnerId,
+            pickedFlowerStateByTileKey
+          );
+
+        if (flowerMatch) {
+          onProceduralFlowerPopoverSelect(flowerMatch.tileX, flowerMatch.tileY);
+          return true;
+        }
+      }
+
       return false;
     },
     [
@@ -224,9 +254,11 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
       handlers,
       isEnabled,
       minedRockStateByTileKey,
+      onProceduralFlowerPopoverSelect,
       onProceduralPebblePopoverSelect,
       onProceduralRockPopoverSelect,
       onProceduralTreePopoverSelect,
+      pickedFlowerStateByTileKey,
       pickedPebbleStateByTileKey,
       placedBlocks,
       playerPositionRef,

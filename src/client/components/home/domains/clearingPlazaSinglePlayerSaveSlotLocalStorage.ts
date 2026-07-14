@@ -18,6 +18,10 @@ import {
   resolvingWorldPlazaMinedRocksLocalStorageKey,
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
 import {
+  clearingWorldPlazaLocalPickedFlowersMemoryForOwner,
+  resolvingWorldPlazaPickedFlowersLocalStorageKey,
+} from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
+import {
   clearingWorldPlazaLocalPickedPebblesMemoryForOwner,
   resolvingWorldPlazaPickedPebblesLocalStorageKey,
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
@@ -49,6 +53,7 @@ export function clearingPlazaSinglePlayerSaveSlotLocalStorage(
     resolvingWorldPlazaChoppedTreesLocalStorageKey(persistenceOwnerId),
     resolvingWorldPlazaMinedRocksLocalStorageKey(persistenceOwnerId),
     resolvingWorldPlazaPickedPebblesLocalStorageKey(persistenceOwnerId),
+    resolvingWorldPlazaPickedFlowersLocalStorageKey(persistenceOwnerId),
     resolvingWorldPlazaFarmlandLocalStorageKey(persistenceOwnerId),
     resolvingWorldPlazaFireCellsLocalStorageKey(persistenceOwnerId),
     resolvingWorldPlazaPlayerConditionsStorageKey(persistenceOwnerId),
@@ -61,5 +66,6 @@ export function clearingPlazaSinglePlayerSaveSlotLocalStorage(
   clearingWorldPlazaLocalChoppedTreesMemoryForOwner(persistenceOwnerId);
   clearingWorldPlazaLocalMinedRocksMemoryForOwner(persistenceOwnerId);
   clearingWorldPlazaLocalPickedPebblesMemoryForOwner(persistenceOwnerId);
+  clearingWorldPlazaLocalPickedFlowersMemoryForOwner(persistenceOwnerId);
   clearingWorldPlazaLocalFarmlandMemoryForOwner(persistenceOwnerId);
 }

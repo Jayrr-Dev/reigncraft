@@ -10,8 +10,8 @@
  * @module components/world/equipment/domains/definingWorldPlazaHeldItemSwingRegistry
  */
 
-import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import type { DefiningWorldPlazaAvatarToolActionId } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
+import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 
 /** One pinned pose on a swing track. Phases must ascend, 0 and 1 included. */
 export type DefiningWorldPlazaHeldItemSwingKeyframe = {
@@ -42,12 +42,42 @@ export type DefiningWorldPlazaHeldItemSwingProfile = {
  */
 const DEFINING_WORLD_PLAZA_HELD_ITEM_CHOP_SWING_RIGHT_SIDE_KEYFRAMES: readonly DefiningWorldPlazaHeldItemSwingKeyframe[] =
   [
-    { phase: 0, rotationOffsetRadians: 0, driftAvatarFramePxX: 0, driftAvatarFramePxY: 0 },
-    { phase: 0.3, rotationOffsetRadians: -1.15, driftAvatarFramePxX: -3, driftAvatarFramePxY: -5 },
-    { phase: 0.45, rotationOffsetRadians: -1.25, driftAvatarFramePxX: -3, driftAvatarFramePxY: -6 },
-    { phase: 0.58, rotationOffsetRadians: 0.85, driftAvatarFramePxX: 4, driftAvatarFramePxY: 4 },
-    { phase: 0.72, rotationOffsetRadians: 0.6, driftAvatarFramePxX: 3, driftAvatarFramePxY: 3 },
-    { phase: 1, rotationOffsetRadians: 0, driftAvatarFramePxX: 0, driftAvatarFramePxY: 0 },
+    {
+      phase: 0,
+      rotationOffsetRadians: 0,
+      driftAvatarFramePxX: 0,
+      driftAvatarFramePxY: 0,
+    },
+    {
+      phase: 0.3,
+      rotationOffsetRadians: -1.15,
+      driftAvatarFramePxX: -3,
+      driftAvatarFramePxY: -5,
+    },
+    {
+      phase: 0.45,
+      rotationOffsetRadians: -1.25,
+      driftAvatarFramePxX: -3,
+      driftAvatarFramePxY: -6,
+    },
+    {
+      phase: 0.58,
+      rotationOffsetRadians: 0.85,
+      driftAvatarFramePxX: 4,
+      driftAvatarFramePxY: 4,
+    },
+    {
+      phase: 0.72,
+      rotationOffsetRadians: 0.6,
+      driftAvatarFramePxX: 3,
+      driftAvatarFramePxY: 3,
+    },
+    {
+      phase: 1,
+      rotationOffsetRadians: 0,
+      driftAvatarFramePxX: 0,
+      driftAvatarFramePxY: 0,
+    },
   ];
 
 /** Mirror of the right-side chop arc for left-side facings. */
@@ -67,12 +97,42 @@ const DEFINING_WORLD_PLAZA_HELD_ITEM_CHOP_SWING_LEFT_SIDE_KEYFRAMES: readonly De
  */
 const DEFINING_WORLD_PLAZA_HELD_ITEM_CHOP_SWING_VERTICAL_KEYFRAMES: readonly DefiningWorldPlazaHeldItemSwingKeyframe[] =
   [
-    { phase: 0, rotationOffsetRadians: 0, driftAvatarFramePxX: 0, driftAvatarFramePxY: 0 },
-    { phase: 0.3, rotationOffsetRadians: -0.7, driftAvatarFramePxX: 0, driftAvatarFramePxY: -7 },
-    { phase: 0.45, rotationOffsetRadians: -0.8, driftAvatarFramePxX: 0, driftAvatarFramePxY: -8 },
-    { phase: 0.58, rotationOffsetRadians: 0.55, driftAvatarFramePxX: 0, driftAvatarFramePxY: 5 },
-    { phase: 0.72, rotationOffsetRadians: 0.4, driftAvatarFramePxX: 0, driftAvatarFramePxY: 3 },
-    { phase: 1, rotationOffsetRadians: 0, driftAvatarFramePxX: 0, driftAvatarFramePxY: 0 },
+    {
+      phase: 0,
+      rotationOffsetRadians: 0,
+      driftAvatarFramePxX: 0,
+      driftAvatarFramePxY: 0,
+    },
+    {
+      phase: 0.3,
+      rotationOffsetRadians: -0.7,
+      driftAvatarFramePxX: 0,
+      driftAvatarFramePxY: -7,
+    },
+    {
+      phase: 0.45,
+      rotationOffsetRadians: -0.8,
+      driftAvatarFramePxX: 0,
+      driftAvatarFramePxY: -8,
+    },
+    {
+      phase: 0.58,
+      rotationOffsetRadians: 0.55,
+      driftAvatarFramePxX: 0,
+      driftAvatarFramePxY: 5,
+    },
+    {
+      phase: 0.72,
+      rotationOffsetRadians: 0.4,
+      driftAvatarFramePxX: 0,
+      driftAvatarFramePxY: 3,
+    },
+    {
+      phase: 1,
+      rotationOffsetRadians: 0,
+      driftAvatarFramePxX: 0,
+      driftAvatarFramePxY: 0,
+    },
   ];
 
 const DEFINING_WORLD_PLAZA_HELD_ITEM_CHOP_SWING_VERTICAL_MIRRORED_KEYFRAMES: readonly DefiningWorldPlazaHeldItemSwingKeyframe[] =
@@ -132,5 +192,6 @@ export const DEFINING_WORLD_PLAZA_HELD_ITEM_SWING_PROFILE_BY_TOOL_ACTION: Record
   'tree-chop': DEFINING_WORLD_PLAZA_HELD_ITEM_CHOP_SWING_PROFILE,
   'rock-mine': DEFINING_WORLD_PLAZA_HELD_ITEM_CHOP_SWING_PROFILE,
   'pebble-pick': null,
+  'flower-pick': null,
   eat: null,
 };

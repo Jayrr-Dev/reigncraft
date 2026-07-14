@@ -12,6 +12,7 @@ import {
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
 import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import { DEFINING_WORLD_PLAZA_COMPANION_INTERACTION_LABEL_BUTTON_CLASS_NAME } from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
 import { RenderingWorldPlazaTimedInteractionLabelRow } from '@/components/world/interaction/components/renderingWorldPlazaTimedInteractionLabelRow';
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
 import { DEFINING_WILDLIFE_DOCILE_PET_LABEL_OFFSET_ABOVE_NAME_TAG_PX } from '@/components/world/wildlife/domains/definingWildlifeDocilePetConstants';
@@ -51,19 +52,24 @@ export type RenderingWildlifeDocileBetrayInteractionLabelsProps = {
   readonly onBetray: (
     pending: ManagingWildlifeDocileAttackConfirmPending
   ) => void;
-  /** Familiar+ namable: open companion panel instead of Pet windup. */
+  /** Familiar+ unnamed: open the one-shot Name? dialog. */
+  readonly onNamePet: (instanceId: string) => void;
+  /** Named companion: open the companion panel. */
   readonly onOpenPetModal: (instanceId: string) => void;
 };
 
 type RenderingWildlifeDocileBetrayLiveLabelSnapshot = {
   readonly label: string;
-  readonly opensPetModal: boolean;
+  /** Name? / named pet chrome (green hover). */
+  readonly isCompanionNameAction: boolean;
+  /** Named pet already has a permanent name (opens panel). */
+  readonly hasPermanentName: boolean;
 };
 
 function formattingWildlifeDocileBetrayLiveLabelSnapshotKey(
   snapshot: RenderingWildlifeDocileBetrayLiveLabelSnapshot
 ): string {
-  return `${snapshot.label}\0${snapshot.opensPetModal ? '1' : '0'}`;
+  return `${snapshot.label}\0${snapshot.isCompanionNameAction ? '1' : '0'}\0${snapshot.hasPermanentName ? '1' : '0'}`;
 }
 
 function readingWildlifeDocileBetrayLiveLabelSnapshot(
@@ -71,17 +77,11 @@ function readingWildlifeDocileBetrayLiveLabelSnapshot(
   wildlifeStoreRef: React.RefObject<ManagingWildlifeInstanceStore>,
   isPetting: boolean
 ): RenderingWildlifeDocileBetrayLiveLabelSnapshot {
-  if (isPetting) {
-    return {
-      label: resolvingWildlifeDocilePettingLabel(),
-      opensPetModal: false,
-    };
-  }
-
   if (!pending) {
     return {
       label: resolvingWildlifeDocilePettingLabel(),
-      opensPetModal: false,
+      isCompanionNameAction: false,
+      hasPermanentName: false,
     };
   }
 
@@ -90,8 +90,30 @@ function readingWildlifeDocileBetrayLiveLabelSnapshot(
     pending.instanceId
   );
   const loyalty = pendingInstance?.petBond?.loyalty ?? 0;
-  const opensPetModal =
+  const hasPermanentName = Boolean(pendingInstance?.customDisplayName?.trim());
+  const isNamable =
     loyalty > 0 && checkingWildlifePetHasCapability(loyalty, 'namable');
+
+  // Familiar+: overhead is Name? / pet name only. Never show Pet or Petting.
+  if (isNamable) {
+    return {
+      label: resolvingWildlifePetIdleInteractionLabel({
+        speciesId: pendingInstance?.speciesId ?? pending.speciesId,
+        loyalty,
+        displayName: pendingInstance?.customDisplayName ?? null,
+      }),
+      isCompanionNameAction: true,
+      hasPermanentName,
+    };
+  }
+
+  if (isPetting) {
+    return {
+      label: resolvingWildlifeDocilePettingLabel(),
+      isCompanionNameAction: false,
+      hasPermanentName: false,
+    };
+  }
 
   if (pendingInstance?.petBond) {
     return {
@@ -100,13 +122,15 @@ function readingWildlifeDocileBetrayLiveLabelSnapshot(
         loyalty,
         displayName: pendingInstance.customDisplayName ?? null,
       }),
-      opensPetModal,
+      isCompanionNameAction: false,
+      hasPermanentName: false,
     };
   }
 
   return {
     label: resolvingWildlifeDocilePetIdleLabel(pending.petKind),
-    opensPetModal: false,
+    isCompanionNameAction: false,
+    hasPermanentName: false,
   };
 }
 
@@ -121,20 +145,24 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
   cameraOffsetRef,
   cameraWorldZoomRef,
   onBetray,
+  onNamePet,
   onOpenPetModal,
 }: RenderingWildlifeDocileBetrayInteractionLabelsProps): React.JSX.Element {
   const labelElementRef = useRef<HTMLDivElement | null>(null);
   const rowElementRef = useRef<HTMLDivElement | null>(null);
   const onBetrayRef = useRef(onBetray);
+  const onNamePetRef = useRef(onNamePet);
   const onOpenPetModalRef = useRef(onOpenPetModal);
   const pendingRef = useRef(pending);
   const liveLabelCacheRef =
     useRef<RenderingWildlifeDocileBetrayLiveLabelSnapshot>({
       label: resolvingWildlifeDocilePettingLabel(),
-      opensPetModal: false,
+      isCompanionNameAction: false,
+      hasPermanentName: false,
     });
 
   onBetrayRef.current = onBetray;
+  onNamePetRef.current = onNamePet;
   onOpenPetModalRef.current = onOpenPetModal;
   pendingRef.current = pending;
 
@@ -233,12 +261,13 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
         cameraWorldZoom,
         ...(frameHeightPx !== undefined ? { frameHeightPx } : {}),
       });
+      // Named Familiar+ label sits on the name-tag slot (name tag hidden while selected).
+      const labelLiftPx = liveLabelCacheRef.current.hasPermanentName
+        ? 0
+        : DEFINING_WILDLIFE_DOCILE_PET_LABEL_OFFSET_ABOVE_NAME_TAG_PX;
       const screenPoint = {
         x: nameTagScreenPoint.x,
-        y:
-          nameTagScreenPoint.y -
-          DEFINING_WILDLIFE_DOCILE_PET_LABEL_OFFSET_ABOVE_NAME_TAG_PX *
-            cameraWorldZoom,
+        y: nameTagScreenPoint.y - labelLiftPx * cameraWorldZoom,
       };
 
       labelElement.style.transform =
@@ -288,6 +317,11 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
           progressSnapshot={timedInteractionProgressSnapshot}
           progressRatioRef={timedInteractionProgressRatioRef}
           rowRef={rowElementRef}
+          buttonClassName={
+            liveLabelSnapshot.isCompanionNameAction
+              ? DEFINING_WORLD_PLAZA_COMPANION_INTERACTION_LABEL_BUTTON_CLASS_NAME
+              : undefined
+          }
           onActivate={() => {
             const currentPending = pendingRef.current;
 
@@ -300,16 +334,25 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
               currentPending.instanceId
             );
             const liveLoyalty = liveInstance?.petBond?.loyalty ?? 0;
-
-            if (
+            const isNamable =
               liveLoyalty > 0 &&
-              checkingWildlifePetHasCapability(liveLoyalty, 'namable')
-            ) {
-              onOpenPetModalRef.current(currentPending.instanceId);
+              checkingWildlifePetHasCapability(liveLoyalty, 'namable');
+
+            if (!isNamable) {
+              onBetrayRef.current(currentPending);
               return;
             }
 
-            onBetrayRef.current(currentPending);
+            const hasPermanentName = Boolean(
+              liveInstance?.customDisplayName?.trim()
+            );
+
+            if (!hasPermanentName) {
+              onNamePetRef.current(currentPending.instanceId);
+              return;
+            }
+
+            onOpenPetModalRef.current(currentPending.instanceId);
           }}
         />
       </div>

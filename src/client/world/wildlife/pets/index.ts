@@ -130,6 +130,7 @@ export { readingWildlifePetRosterFromStorage } from '@/components/world/wildlife
 
 export {
   resolvingWildlifePetAdvancedStats,
+  type ResolvingWildlifePetAdvancedStatEntry,
   type ResolvingWildlifePetAdvancedStatsParams,
   type ResolvingWildlifePetAdvancedStatsResult,
 } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetAdvancedStats';
@@ -179,6 +180,8 @@ export {
 } from '@/components/world/wildlife/pets/repositories/callingPlazaPetsDevvitApi';
 
 export { RenderingWildlifePetModal } from '@/components/world/wildlife/pets/components/renderingWildlifePetModal';
+
+export { RenderingWildlifePetNameDialog } from '@/components/world/wildlife/pets/components/renderingWildlifePetNameDialog';
 
 export { RenderingWorldPlazaDevModePetControls } from '@/components/world/wildlife/pets/components/renderingWorldPlazaDevModePetControls';
 

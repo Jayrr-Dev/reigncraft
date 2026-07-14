@@ -54,6 +54,9 @@ export function expiringWorldPlazaEntityHealthTimedEffects(
       (modifier) =>
         modifier.expiresAtMs === null || modifier.expiresAtMs > nowMs
     ),
+    timedTemperatureModifiers: state.timedTemperatureModifiers.filter(
+      (modifier) => modifier.expiresAtMs > nowMs
+    ),
     damageOverTimeEffects: state.damageOverTimeEffects.filter(
       (effect) => effect.expiresAtMs > nowMs
     ),

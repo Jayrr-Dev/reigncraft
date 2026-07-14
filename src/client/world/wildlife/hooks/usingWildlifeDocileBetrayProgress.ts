@@ -24,6 +24,7 @@ import {
   gettingWildlifeInstance,
   type ManagingWildlifeInstanceStore,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { checkingWildlifePetHasCapability } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetLoyaltyTier';
 import { useCallback, type RefObject } from 'react';
 
 export type UsingWildlifeDocileBetrayProgressParams = {
@@ -94,6 +95,15 @@ export function usingWildlifeDocileBetrayProgress({
 
       if (!instance || instance.isDead) {
         clearingWildlifeDocileAttackConfirmPending();
+        return false;
+      }
+
+      // Familiar+ namable bonds use Name? → companion panel. Never Pet windup.
+      const loyalty = instance.petBond?.loyalty ?? 0;
+      if (
+        loyalty > 0 &&
+        checkingWildlifePetHasCapability(loyalty, 'namable')
+      ) {
         return false;
       }
 

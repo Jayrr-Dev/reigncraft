@@ -17,12 +17,14 @@ import { DEFINING_WILDLIFE_NAME_TAG_VISIBLE_RADIUS_GRID } from '@/components/wor
 import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife/domains/definingWildlifeNameTagTypes';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { readingWildlifeDocileAttackConfirmPending } from '@/components/world/wildlife/domains/managingWildlifeDocileAttackConfirmStore';
 import { resolvingWildlifeInstanceSizeScale } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { resolvingWildlifeInstanceNameTagLabel } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceNameTagLabel';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
 import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
 import { appendingWildlifePetLoyaltyDebugToNameTagLabel } from '@/components/world/wildlife/pets/domains/formattingWildlifePetLoyaltyDebugLabel';
 import { checkingWildlifePetLoyaltyDebugVisible } from '@/components/world/wildlife/pets/domains/managingWildlifePetLoyaltyDebugVisibilityStore';
+import { checkingWildlifePetHasCapability } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetLoyaltyTier';
 
 export type UpdatingWildlifeNameTagLabelCacheEntry = {
   displayLabel: string;
@@ -114,6 +116,19 @@ export function updatingWildlifeNameTagsOverlayRef({
   let writeIndex = 0;
   let didMountSetChange = false;
   const activeInstanceIds = new Set<string>();
+  const docilePending = readingWildlifeDocileAttackConfirmPending();
+  const docilePendingInstance = docilePending
+    ? instances.find((entry) => entry.instanceId === docilePending.instanceId)
+    : undefined;
+  const suppressedNamedPetInstanceId =
+    docilePendingInstance &&
+    Boolean(docilePendingInstance.customDisplayName?.trim()) &&
+    checkingWildlifePetHasCapability(
+      docilePendingInstance.petBond?.loyalty ?? 0,
+      'namable'
+    )
+      ? docilePendingInstance.instanceId
+      : null;
 
   for (const instance of instances) {
     if (instance.isDead) {
@@ -158,19 +173,22 @@ export function updatingWildlifeNameTagsOverlayRef({
     const forceLoyaltyReveal =
       label.showLoyaltyDebug &&
       checkingWildlifeSpeciesIsPettable(instance.speciesId);
+    const isSuppressedNamedPetLabel =
+      suppressedNamedPetInstanceId === instance.instanceId;
     const isRevealed =
-      forceLoyaltyReveal ||
-      checkingWildlifeNameTagShouldReveal({
-        instance,
-        playerPosition,
-        playerFacingDirection,
-        playerUserId,
-        nowMs,
-        hoveredInstanceId,
-        wildlifeDamagedPlayerAtMs:
-          wildlifeDamagedPlayerAtMsByInstanceId.get(instance.instanceId) ??
-          null,
-      });
+      !isSuppressedNamedPetLabel &&
+      (forceLoyaltyReveal ||
+        checkingWildlifeNameTagShouldReveal({
+          instance,
+          playerPosition,
+          playerFacingDirection,
+          playerUserId,
+          nowMs,
+          hoveredInstanceId,
+          wildlifeDamagedPlayerAtMs:
+            wildlifeDamagedPlayerAtMsByInstanceId.get(instance.instanceId) ??
+            null,
+        }));
     const existing = outRef[writeIndex];
 
     if (

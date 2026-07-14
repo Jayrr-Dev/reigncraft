@@ -195,4 +195,24 @@ describe('resolvingWorldPlazaInventoryFoodEatEffects', () => {
     expect(result.nextHealthState.damageOverTimeEffects).toHaveLength(1);
     expect(result.nextHealthState.damageOverTimeEffects[0]?.kind).toBe('toxic');
   });
+
+  it('skips meat disease rolls for flower herbs', () => {
+    const result = resolvingWorldPlazaInventoryFoodEatEffects({
+      foodDefinition: {
+        itemTypeId: 'world-plaza-flower-yarrow',
+        hungerRestoreRatio: 0,
+        healthHeal: { baseFlat: 0, percentOfMax: 0 },
+        meatKind: 'raw',
+        rawDiseaseId: 'food-poisoning',
+        rawDiseaseChance: 1,
+      },
+      healthState: creatingWorldPlazaEntityHealthInitialState(),
+      nowMs,
+      sicknessRoll: 0,
+    });
+
+    expect(result.didRollDisease).toBe(false);
+    expect(result.nextHealthState.diseaseEffects).toHaveLength(0);
+    expect(result.effectiveHungerRestoreRatio).toBe(0);
+  });
 });

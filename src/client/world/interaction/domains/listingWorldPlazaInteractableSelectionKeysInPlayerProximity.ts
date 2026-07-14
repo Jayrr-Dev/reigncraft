@@ -1,5 +1,6 @@
 import { DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { checkingWorldPlazaFlowerDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaFlowerDecorationAtTileIndex';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from '@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds';
 import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex';
@@ -21,11 +22,14 @@ import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/
 import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaMinedRockTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
 import { formattingWorldPlazaMinedRockTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
+import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
+import { formattingWorldPlazaPickedFlowerTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { formattingWorldPlazaPickedPebbleTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { checkingWorldPlazaInteractionLabelTileInPlayerProximity } from '@/components/world/interaction/domains/checkingWorldPlazaInteractionLabelTileInPlayerProximity';
 import { DEFINING_WORLD_PLAZA_INTERACTION_LABEL_PROXIMITY_RADIUS_TILES } from '@/components/world/interaction/domains/definingWorldPlazaInteractionLabelProximityConstants';
 import { formattingWorldPlazaInteractableBlockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableBlockSelectionKey';
+import { formattingWorldPlazaInteractableFlowerSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableFlowerSelectionKey';
 import { formattingWorldPlazaInteractablePebbleSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractablePebbleSelectionKey';
 import { formattingWorldPlazaInteractableRockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableRockSelectionKey';
 import { formattingWorldPlazaInteractableTreeSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableTreeSelectionKey';
@@ -54,6 +58,10 @@ export type ListingWorldPlazaInteractableSelectionKeysInPlayerProximityParams =
     readonly pickedPebbleStateByTileKey?: ReadonlyMap<
       string,
       DefiningWorldPlazaPickedPebbleTileState
+    >;
+    readonly pickedFlowerStateByTileKey?: ReadonlyMap<
+      string,
+      DefiningWorldPlazaPickedFlowerTileState
     >;
     readonly farmlandByTileKey?: ReadonlyMap<
       string,
@@ -179,6 +187,20 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
             formattingWorldPlazaInteractablePebbleSelectionKey(tileX, tileY)
           );
         }
+      }
+
+      const flowerTileKey = formattingWorldPlazaPickedFlowerTileKey(
+        tileX,
+        tileY
+      );
+
+      if (
+        !params.pickedFlowerStateByTileKey?.get(flowerTileKey)?.isPicked &&
+        checkingWorldPlazaFlowerDecorationAtTileIndex(tileX, tileY)
+      ) {
+        keys.add(
+          formattingWorldPlazaInteractableFlowerSelectionKey(tileX, tileY)
+        );
       }
 
       if (params.hasEquippedFishrod) {

@@ -3,6 +3,7 @@ import { formattingWorldPlazaFarmlandTileSelectionKey } from '@/components/world
 import type { DefiningWorldPlazaFarmlandInteractionKind } from '@/components/world/farming/domains/listingWorldPlazaFarmlandTilesInInteractionRange';
 import { formattingWorldPlazaFishingTileSelectionKey } from '@/components/world/fishing/domains/formattingWorldPlazaFishingTileSelectionKey';
 import { formattingWorldPlazaInteractableBlockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableBlockSelectionKey';
+import { formattingWorldPlazaInteractableFlowerSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableFlowerSelectionKey';
 import { formattingWorldPlazaInteractablePebbleSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractablePebbleSelectionKey';
 import { formattingWorldPlazaInteractableRockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableRockSelectionKey';
 import { formattingWorldPlazaInteractableTreeSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableTreeSelectionKey';
@@ -65,6 +66,23 @@ export function selectingWorldPlazaInteractablePebbleForClickAction(
   tileY: number
 ): void {
   const selectionKey = formattingWorldPlazaInteractablePebbleSelectionKey(
+    tileX,
+    tileY
+  );
+
+  selectedBlockKeysRef.current.clear();
+  selectedBlockKeysRef.current.add(selectionKey);
+}
+
+/**
+ * Selects one biome flower tile for popover-style pick interaction.
+ */
+export function selectingWorldPlazaInteractableFlowerForClickAction(
+  selectedBlockKeysRef: RefObject<Set<string>>,
+  tileX: number,
+  tileY: number
+): void {
+  const selectionKey = formattingWorldPlazaInteractableFlowerSelectionKey(
     tileX,
     tileY
   );

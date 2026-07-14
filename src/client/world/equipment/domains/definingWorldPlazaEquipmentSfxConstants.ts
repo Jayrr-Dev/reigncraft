@@ -15,7 +15,7 @@ export const DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_ASSET_BASE_URL =
 /** Tool actions that play FilmCow impact clips during timed harvest channels. */
 export type DefiningWorldPlazaEquipmentSfxToolActionId = Extract<
   DefiningWorldPlazaAvatarToolActionId,
-  'tree-chop' | 'rock-mine' | 'pebble-pick'
+  'tree-chop' | 'rock-mine' | 'pebble-pick' | 'flower-pick'
 >;
 
 function buildingEquipmentSfxClipIds(
@@ -73,6 +73,10 @@ export const DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_CLIP_POOL_BY_TOOL_ACTION: Record
     ...DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_TINY_HIT_CLIP_IDS,
     ...DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_GROUND_THUMP_CLIP_IDS,
   ],
+  'flower-pick': [
+    ...DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_TINY_HIT_CLIP_IDS,
+    ...DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_FRONDS_HIT_CLIP_IDS,
+  ],
 };
 
 /** Base impact volume before the SFX volume slider is applied. */
@@ -83,6 +87,7 @@ export const DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_TARGET_VOLUME_BY_TOOL_ACTION: Re
   'tree-chop': 0.52,
   'rock-mine': 0.58,
   'pebble-pick': 0.38,
+  'flower-pick': 0.36,
 };
 
 /** Extra gain on the final swing of a harvest channel. */

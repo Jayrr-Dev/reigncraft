@@ -7,6 +7,7 @@ const DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_ROTATION_INDEX_BY_TOOL_ACTION: Record<
   'tree-chop': 0,
   'rock-mine': 0,
   'pebble-pick': 0,
+  'flower-pick': 0,
 };
 
 /**
@@ -41,5 +42,8 @@ export function resettingWorldPlazaEquipmentSfxRotationIndex(): void {
   ] = 0;
   DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_ROTATION_INDEX_BY_TOOL_ACTION[
     'pebble-pick'
+  ] = 0;
+  DEFINING_WORLD_PLAZA_EQUIPMENT_SFX_ROTATION_INDEX_BY_TOOL_ACTION[
+    'flower-pick'
   ] = 0;
 }

@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { checkingPlazaSaveSlotIndex } from '../../shared/plazaGameSession';
 import {
   type WorldHarvestDevvitChoppedTreesResponse,
   type WorldHarvestDevvitChopTreeRequest,
@@ -7,11 +8,13 @@ import {
   type WorldHarvestDevvitMinedRocksResponse,
   type WorldHarvestDevvitMineRockRequest,
   type WorldHarvestDevvitMineRockResponse,
+  type WorldHarvestDevvitPickedFlowersResponse,
   type WorldHarvestDevvitPickedPebblesResponse,
+  type WorldHarvestDevvitPickFlowerRequest,
+  type WorldHarvestDevvitPickFlowerResponse,
   type WorldHarvestDevvitPickPebbleRequest,
   type WorldHarvestDevvitPickPebbleResponse,
 } from '../../shared/worldHarvestDevvit';
-import { checkingPlazaSaveSlotIndex } from '../../shared/plazaGameSession';
 import {
   choppingWorldHarvestDevvitTreeLayer,
   listingWorldHarvestDevvitChoppedTrees,
@@ -20,6 +23,10 @@ import {
   listingWorldHarvestDevvitMinedRocks,
   miningWorldHarvestDevvitRockLayer,
 } from '../domains/managingWorldHarvestDevvitMinedRocks';
+import {
+  listingWorldHarvestDevvitPickedFlowers,
+  pickingWorldHarvestDevvitFlower,
+} from '../domains/managingWorldHarvestDevvitPickedFlowers';
 import {
   listingWorldHarvestDevvitPickedPebbles,
   pickingWorldHarvestDevvitPebble,
@@ -34,7 +41,7 @@ import { resolvingPlazaDevvitOnlineRoomScopeFromRequest } from '../domains/resol
 function resolvingHarvestScope(
   userId: string,
   saveSlotIndex: number | null | undefined,
-  roomScopeFromRequest: string,
+  roomScopeFromRequest: string
 ): string {
   if (
     typeof saveSlotIndex === 'number' &&
@@ -47,7 +54,7 @@ function resolvingHarvestScope(
 }
 
 function parsingWorldHarvestDevvitChopTreeRequest(
-  body: unknown,
+  body: unknown
 ): WorldHarvestDevvitChopTreeRequest | null {
   if (!body || typeof body !== 'object') {
     return null;
@@ -79,7 +86,7 @@ function parsingWorldHarvestDevvitChopTreeRequest(
 }
 
 function parsingWorldHarvestDevvitMineRockRequest(
-  body: unknown,
+  body: unknown
 ): WorldHarvestDevvitMineRockRequest | null {
   if (!body || typeof body !== 'object') {
     return null;
@@ -115,7 +122,7 @@ function parsingWorldHarvestDevvitMineRockRequest(
 }
 
 function parsingWorldHarvestDevvitPickPebbleRequest(
-  body: unknown,
+  body: unknown
 ): WorldHarvestDevvitPickPebbleRequest | null {
   if (!body || typeof body !== 'object') {
     return null;
@@ -153,7 +160,7 @@ worldHarvest.get('/chopped-trees', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to view chopped trees.',
       },
-      401,
+      401
     );
   }
 
@@ -164,7 +171,7 @@ worldHarvest.get('/chopped-trees', async (c) => {
   const harvestScope = resolvingHarvestScope(
     userId,
     parsedSaveSlotIndex,
-    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c),
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c)
   );
   const tiles = await listingWorldHarvestDevvitChoppedTrees(harvestScope);
 
@@ -183,7 +190,7 @@ worldHarvest.post('/chop-tree', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to chop trees.',
       },
-      401,
+      401
     );
   }
 
@@ -196,18 +203,18 @@ worldHarvest.post('/chop-tree', async (c) => {
         type: 'error',
         message: 'Invalid tree chop request.',
       },
-      400,
+      400
     );
   }
 
   const harvestScope = resolvingHarvestScope(
     userId,
     chopRequest.saveSlotIndex,
-    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c),
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c)
   );
   const chopResult = await choppingWorldHarvestDevvitTreeLayer(
     harvestScope,
-    chopRequest,
+    chopRequest
   );
 
   if (chopResult.outcome === 'out-of-range') {
@@ -240,7 +247,7 @@ worldHarvest.get('/mined-rocks', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to view mined rocks.',
       },
-      401,
+      401
     );
   }
 
@@ -251,7 +258,7 @@ worldHarvest.get('/mined-rocks', async (c) => {
   const harvestScope = resolvingHarvestScope(
     userId,
     parsedSaveSlotIndex,
-    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c),
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c)
   );
   const tiles = await listingWorldHarvestDevvitMinedRocks(harvestScope);
 
@@ -270,7 +277,7 @@ worldHarvest.post('/mine-rock', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to mine rocks.',
       },
-      401,
+      401
     );
   }
 
@@ -283,18 +290,18 @@ worldHarvest.post('/mine-rock', async (c) => {
         type: 'error',
         message: 'Invalid rock mine request.',
       },
-      400,
+      400
     );
   }
 
   const harvestScope = resolvingHarvestScope(
     userId,
     mineRequest.saveSlotIndex,
-    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c),
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c)
   );
   const mineResult = await miningWorldHarvestDevvitRockLayer(
     harvestScope,
-    mineRequest,
+    mineRequest
   );
 
   if (mineResult.outcome === 'out-of-range') {
@@ -327,7 +334,7 @@ worldHarvest.get('/picked-pebbles', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to view picked pebbles.',
       },
-      401,
+      401
     );
   }
 
@@ -338,7 +345,7 @@ worldHarvest.get('/picked-pebbles', async (c) => {
   const harvestScope = resolvingHarvestScope(
     userId,
     parsedSaveSlotIndex,
-    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c),
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c)
   );
   const tiles = await listingWorldHarvestDevvitPickedPebbles(harvestScope);
 
@@ -357,7 +364,7 @@ worldHarvest.post('/pick-pebble', async (c) => {
         type: 'error',
         message: 'Sign in to Reddit to pick pebbles.',
       },
-      401,
+      401
     );
   }
 
@@ -370,18 +377,18 @@ worldHarvest.post('/pick-pebble', async (c) => {
         type: 'error',
         message: 'Invalid pebble pick request.',
       },
-      400,
+      400
     );
   }
 
   const harvestScope = resolvingHarvestScope(
     userId,
     pickRequest.saveSlotIndex,
-    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c),
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c)
   );
   const pickResult = await pickingWorldHarvestDevvitPebble(
     harvestScope,
-    pickRequest,
+    pickRequest
   );
 
   if (pickResult.outcome === 'out-of-range') {
@@ -399,5 +406,118 @@ worldHarvest.post('/pick-pebble', async (c) => {
   return c.json<WorldHarvestDevvitPickPebbleResponse>({
     type: 'picked',
     stoneQuantity: pickResult.stoneQuantity,
+  });
+});
+
+function parsingWorldHarvestDevvitPickFlowerRequest(
+  body: unknown
+): WorldHarvestDevvitPickFlowerRequest | null {
+  if (!body || typeof body !== 'object') {
+    return null;
+  }
+
+  const payload = body as Partial<WorldHarvestDevvitPickFlowerRequest>;
+
+  if (
+    typeof payload.tileX !== 'number' ||
+    typeof payload.tileY !== 'number' ||
+    typeof payload.playerX !== 'number' ||
+    typeof payload.playerY !== 'number'
+  ) {
+    return null;
+  }
+
+  return {
+    tileX: payload.tileX,
+    tileY: payload.tileY,
+    playerX: payload.playerX,
+    playerY: payload.playerY,
+    saveSlotIndex:
+      typeof payload.saveSlotIndex === 'number' ? payload.saveSlotIndex : null,
+  };
+}
+
+worldHarvest.get('/picked-flowers', async (c) => {
+  const userId = await resolvingDevvitRedditUserId();
+
+  if (!userId) {
+    return c.json<WorldHarvestDevvitPickedFlowersResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to view picked flowers.',
+      },
+      401
+    );
+  }
+
+  const rawSaveSlotIndex = c.req.query('saveSlotIndex');
+  const parsedSaveSlotIndex = rawSaveSlotIndex
+    ? Number.parseInt(rawSaveSlotIndex, 10)
+    : null;
+  const harvestScope = resolvingHarvestScope(
+    userId,
+    parsedSaveSlotIndex,
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c)
+  );
+  const tiles = await listingWorldHarvestDevvitPickedFlowers(harvestScope);
+
+  return c.json<WorldHarvestDevvitPickedFlowersResponse>({
+    type: 'picked-flowers',
+    tiles,
+  });
+});
+
+worldHarvest.post('/pick-flower', async (c) => {
+  const userId = await resolvingDevvitRedditUserId();
+
+  if (!userId) {
+    return c.json<WorldHarvestDevvitErrorResponse>(
+      {
+        type: 'error',
+        message: 'Sign in to Reddit to pick flowers.',
+      },
+      401
+    );
+  }
+
+  const body: unknown = await c.req.json().catch(() => null);
+  const pickRequest = parsingWorldHarvestDevvitPickFlowerRequest(body);
+
+  if (!pickRequest) {
+    return c.json<WorldHarvestDevvitErrorResponse>(
+      {
+        type: 'error',
+        message: 'Invalid flower pick request.',
+      },
+      400
+    );
+  }
+
+  const harvestScope = resolvingHarvestScope(
+    userId,
+    pickRequest.saveSlotIndex,
+    resolvingPlazaDevvitOnlineRoomScopeFromRequest(c)
+  );
+  const pickResult = await pickingWorldHarvestDevvitFlower(
+    harvestScope,
+    pickRequest
+  );
+
+  if (pickResult.outcome === 'out-of-range') {
+    return c.json<WorldHarvestDevvitPickFlowerResponse>({
+      type: 'out-of-range',
+    });
+  }
+
+  if (pickResult.outcome === 'already-picked') {
+    return c.json<WorldHarvestDevvitPickFlowerResponse>({
+      type: 'already-picked',
+    });
+  }
+
+  return c.json<WorldHarvestDevvitPickFlowerResponse>({
+    type: 'picked',
+    speciesId: pickResult.speciesId,
+    flowerQuantity: pickResult.flowerQuantity,
   });
 });

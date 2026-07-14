@@ -166,6 +166,10 @@ export type DefiningWorldPlazaEntityHealthSleepEffect = {
    * Defaults to true when omitted (normal sleep).
    */
   canWakeFromDamage?: boolean;
+  /** Multiplies passive regen while this sleep is active (valerian). */
+  regenMultiplier?: number;
+  /** Total max-HP percent healed evenly across the sleep duration (chamomile). */
+  passiveHealPercentOfMaxTotal?: number;
 };
 
 /** Timed stun effect that locks the player in a wobbly idle until expiry. */
@@ -229,6 +233,18 @@ export type DefiningWorldPlazaEntityHealthDamageRollModifier = {
   expiresAtMs: number | null;
 };
 
+/** Timed temperature / infection modifiers from consumables (flowers, etc.). */
+export type DefiningWorldPlazaEntityHealthTimedTemperatureModifier = {
+  readonly id: string;
+  readonly heatComfortBonusCelsius: number;
+  readonly coldComfortBonusCelsius: number;
+  readonly heatResistance: number;
+  readonly coldResistance: number;
+  /** Multiplier on disease contraction chance (1 = unchanged). */
+  readonly diseaseContractionChanceMultiplier: number;
+  readonly expiresAtMs: number;
+};
+
 /** Passive health regeneration configuration. */
 export type DefiningWorldPlazaEntityHealthRegenConfig = {
   healthPerSecond: number;
@@ -270,6 +286,8 @@ export type DefiningWorldPlazaEntityHealthState = {
   lastDamageKind: DefiningWorldPlazaEntityDamageKind | null;
   isDead: boolean;
   temperatureResistance: DefiningWorldPlazaEntityTemperatureResistance;
+  /** Expiring comfort/resist bonuses from herbs and similar. */
+  timedTemperatureModifiers: readonly DefiningWorldPlazaEntityHealthTimedTemperatureModifier[];
   /** Damage kinds fully blocked by character immunities or buffs. */
   damageKindImmunities: readonly DefiningWorldPlazaEntityDamageKind[];
 };

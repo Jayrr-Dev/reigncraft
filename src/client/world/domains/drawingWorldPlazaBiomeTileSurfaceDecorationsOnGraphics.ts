@@ -1,3 +1,4 @@
+import { checkingWorldPlazaFlowerDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaFlowerDecorationAtTileIndex';
 import type { CreatingWorldPlazaGrassFloorChunkDrawPassContext } from '@/components/world/domains/creatingWorldPlazaGrassFloorChunkDrawPassContext';
 import {
   DEFINING_WORLD_PLAZA_BIOME_BLOCK_HIGHLIGHT_DOT_RADIUS_PX,
@@ -27,6 +28,7 @@ import { checkingWorldPlazaPondShoreBlockAtTileIndex } from '@/components/world/
 import { resolvingWorldPlazaStoneDecorationAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaStoneDecorationAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { seedingWorldPlazaGrassTileDecorationFromTileIndex } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
+import { checkingWorldPlazaRuntimeFlowerIsPicked } from '@/components/world/harvest/domains/registeringWorldPlazaPickedFlowersLookup';
 import type { Graphics } from 'pixi.js';
 
 /**
@@ -182,8 +184,8 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
     resolvedDrawOptions.drawsGrassDecorations &&
     biome.flowerTileModulus !== null &&
     biome.flowerColors !== null &&
-    Math.abs(input.tileX * 31 + input.tileY * 17) % biome.flowerTileModulus ===
-      DEFINING_WORLD_PLAZA_BIOME_DECORATION_TILE_REMAINDER
+    checkingWorldPlazaFlowerDecorationAtTileIndex(input.tileX, input.tileY) &&
+    !checkingWorldPlazaRuntimeFlowerIsPicked(input.tileX, input.tileY)
   ) {
     const petalColorIndex = Math.floor(
       seedingWorldPlazaGrassTileDecorationFromTileIndex(

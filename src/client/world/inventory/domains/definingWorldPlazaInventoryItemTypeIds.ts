@@ -72,6 +72,32 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISH =
   'world-plaza-fish' as const;
 
+/** Foraged flower herbs (sprite sheet order). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_YARROW =
+  'world-plaza-flower-yarrow' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_CALENDULA =
+  'world-plaza-flower-calendula' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_CHAMOMILE =
+  'world-plaza-flower-chamomile' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_LAVENDER =
+  'world-plaza-flower-lavender' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_ECHINACEA =
+  'world-plaza-flower-echinacea' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_PEPPERMINT =
+  'world-plaza-flower-peppermint' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_ROSE =
+  'world-plaza-flower-rose' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_MEADOWSWEET =
+  'world-plaza-flower-meadowsweet' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_ARNICA =
+  'world-plaza-flower-arnica' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_VALERIAN =
+  'world-plaza-flower-valerian' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_FOXGLOVE =
+  'world-plaza-flower-foxglove' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_BELLADONNA =
+  'world-plaza-flower-belladonna' as const;
+
 /** Wood-tier swords through gold-tier swords. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD =
   'world-plaza-sword-wood' as const;

@@ -14,6 +14,9 @@ import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/doma
 /** Default when an edible item has no species or forage override. */
 export const DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_DEFAULT = 2_000;
 
+/** Herbs from biome picks. */
+export const DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_FLOWER = 1_200;
+
 /** Berries: quick snack. */
 export const DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_BERRIES = 1_000;
 
@@ -85,6 +88,10 @@ export function resolvingWorldPlazaInventoryFoodEatDurationMs(options: {
   readonly wildlifeSpeciesId?: string;
 }): number {
   const { itemTypeId, wildlifeSpeciesId } = options;
+
+  if (itemTypeId.startsWith('world-plaza-flower-')) {
+    return DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_FLOWER;
+  }
 
   if (itemTypeId === 'world-plaza-berries') {
     return DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_BERRIES;

@@ -12,6 +12,8 @@ import {
   healingWorldPlazaEntityHealthWithAmplifiers,
 } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
+import { applyingWorldPlazaInventoryFlowerEatEffects } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryFlowerEatEffects';
+import { parsingWorldPlazaFlowerSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
 import { resolvingWorldPlazaInventoryFoodHealAmount } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealAmount';
 import type { DefiningWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
@@ -194,6 +196,29 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
   let didRollWellFedBuff = false;
   const resolvedWorldEpochMs =
     resolvingWorldPlazaEntityDiseaseWorldEpochMs(worldEpochMs);
+
+  const flowerSpeciesId = parsingWorldPlazaFlowerSpeciesIdFromItemTypeId(
+    foodDefinition.itemTypeId
+  );
+
+  if (flowerSpeciesId) {
+    const flowerResult = applyingWorldPlazaInventoryFlowerEatEffects({
+      speciesId: flowerSpeciesId,
+      healthState,
+      nowMs,
+      worldEpochMs: resolvedWorldEpochMs,
+      foxgloveRoll: sicknessRoll,
+    });
+
+    return {
+      effectiveHungerRestoreRatio: foodDefinition.hungerRestoreRatio,
+      healthHealAmount: 0,
+      nextHealthState: flowerResult.nextHealthState,
+      didRollSickness: false,
+      didRollDisease: false,
+      didRollWellFedBuff: false,
+    };
+  }
 
   if (foodDefinition.meatKind === 'raw') {
     const rawResult = applyingWorldPlazaInventoryRawMeatEatEffects({

@@ -2,6 +2,7 @@ import { checkingWorldBuildingBlockDefinitionIdIsNaturalTree } from '@/component
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { DEFINING_WORLD_PLAZA_TREE_GROWTH_STAGE_METADATA_KEY } from '@/components/world/domains/definingWorldPlazaTreeLayerGrowthConstants';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 
 /**
@@ -20,6 +21,10 @@ const choppedTreesCacheKeys = new WeakMap<
 >();
 const pickedPebblesCacheKeys = new WeakMap<
   ReadonlyMap<string, DefiningWorldPlazaPickedPebbleTileState>,
+  string
+>();
+const pickedFlowersCacheKeys = new WeakMap<
+  ReadonlyMap<string, DefiningWorldPlazaPickedFlowerTileState>,
   string
 >();
 const burntGrassCacheKeys = new WeakMap<ReadonlySet<string>, string>();
@@ -100,6 +105,29 @@ export function buildingWorldPlazaPickedPebblesCacheKey(
     .join('|');
 
   pickedPebblesCacheKeys.set(pickedPebblesByTileKey, cacheKey);
+  return cacheKey;
+}
+
+/**
+ * Builds a cache key for picked-flower state so floor chunks resync after picks.
+ */
+export function buildingWorldPlazaPickedFlowersCacheKey(
+  pickedFlowersByTileKey: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedFlowerTileState
+  >
+): string {
+  const cachedKey = pickedFlowersCacheKeys.get(pickedFlowersByTileKey);
+
+  if (cachedKey !== undefined) {
+    return cachedKey;
+  }
+
+  const cacheKey = Array.from(pickedFlowersByTileKey.keys())
+    .sort((tileKeyA, tileKeyB) => tileKeyA.localeCompare(tileKeyB))
+    .join('|');
+
+  pickedFlowersCacheKeys.set(pickedFlowersByTileKey, cacheKey);
   return cacheKey;
 }
 

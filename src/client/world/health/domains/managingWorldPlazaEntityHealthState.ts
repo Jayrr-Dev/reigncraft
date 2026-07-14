@@ -31,6 +31,7 @@ import type {
   DefiningWorldPlazaEntityHealthState,
   DefiningWorldPlazaEntityHealthStunEffect,
   DefiningWorldPlazaEntityHealthSyncSnapshot,
+  DefiningWorldPlazaEntityHealthTimedTemperatureModifier,
   DefiningWorldPlazaEntityTemperatureResistance,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { DEFINING_WORLD_PLAZA_ENTITY_IMMUNE_SYSTEM_FACTOR_INITIAL } from '@/components/world/health/domains/definingWorldPlazaEntityImmuneSystemConstants';
@@ -72,6 +73,7 @@ export function creatingWorldPlazaEntityHealthInitialState(): DefiningWorldPlaza
     temperatureResistance: {
       ...DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE.temperatureResistance,
     },
+    timedTemperatureModifiers: [],
     damageKindImmunities: [],
   };
 }
@@ -707,6 +709,21 @@ export function removingWorldPlazaEntityHealthDamageRollModifier(
   };
 }
 
+/** Adds or replaces a timed temperature / infection modifier. */
+export function addingWorldPlazaEntityHealthTimedTemperatureModifier(
+  state: DefiningWorldPlazaEntityHealthState,
+  modifier: DefiningWorldPlazaEntityHealthTimedTemperatureModifier
+): DefiningWorldPlazaEntityHealthState {
+  const withoutExisting = state.timedTemperatureModifiers.filter(
+    (existing) => existing.id !== modifier.id
+  );
+
+  return {
+    ...state,
+    timedTemperatureModifiers: [...withoutExisting, modifier],
+  };
+}
+
 /** Toggles a damage-roll modifier on or off by id. */
 export function togglingWorldPlazaEntityHealthDamageRollModifier(
   state: DefiningWorldPlazaEntityHealthState,
@@ -796,6 +813,7 @@ export function revivingWorldPlazaEntityHealthToFull(
     temperatureResistance: {
       ...DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT,
     },
+    timedTemperatureModifiers: [],
     damageKindImmunities: [],
   };
 

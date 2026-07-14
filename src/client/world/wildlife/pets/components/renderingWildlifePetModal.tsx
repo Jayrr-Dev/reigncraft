@@ -12,12 +12,14 @@ import { Icon } from '@/components/ui/icon';
 import { resolvingWorldPlazaCharacterEngineSkillDefinition } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineSkillRegistry';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { checkingWorldPlazaInventoryItemIsFood } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
+import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
   gettingWildlifeInstance,
   type ManagingWildlifeInstanceStore,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import { RenderingWildlifePetSpeciesPortrait } from '@/components/world/wildlife/pets/components/renderingWildlifePetSpeciesPortrait';
 import { checkingWildlifePetItemIsEquippableWeapon } from '@/components/world/wildlife/pets/domains/checkingWildlifePetItemIsEquippableWeapon';
 import { DEFINING_WILDLIFE_PET_MAX_LOYALTY } from '@/components/world/wildlife/pets/domains/definingWildlifePetLoyaltyTiersRegistry';
 import {
@@ -46,8 +48,6 @@ import {
   DEFINING_WILDLIFE_PET_MODAL_INLINE_LINK_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_INVENTORY_ROW_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_NAME_CLASS_NAME,
-  DEFINING_WILDLIFE_PET_MODAL_NAME_INPUT_CLASS_NAME,
-  DEFINING_WILDLIFE_PET_MODAL_NAME_PLACEHOLDER,
   DEFINING_WILDLIFE_PET_MODAL_NO_EQUIPPABLE_WEAPONS_LABEL,
   DEFINING_WILDLIFE_PET_MODAL_NO_TEACHABLE_SKILLS_LABEL,
   DEFINING_WILDLIFE_PET_MODAL_OVERLAY_CLASS_NAME,
@@ -91,7 +91,6 @@ export type RenderingWildlifePetModalProps = {
   readonly inventoryState: DefiningInventoryState;
   readonly characterSkillIds: readonly string[];
   readonly onClose: () => void;
-  readonly onRename: (instanceId: string, name: string | null) => void;
   readonly onSetCommand: (
     instanceId: string,
     command: DefiningWildlifePetCommandId
@@ -176,7 +175,6 @@ export function RenderingWildlifePetModal({
   inventoryState,
   characterSkillIds,
   onClose,
-  onRename,
   onSetCommand,
   onFeed,
   onHeal,
@@ -187,7 +185,6 @@ export function RenderingWildlifePetModal({
 }: RenderingWildlifePetModalProps): React.JSX.Element | null {
   const [instanceSnapshot, setInstanceSnapshot] =
     useState<DefiningWildlifeInstance | null>(null);
-  const [nameDraft, setNameDraft] = useState('');
 
   useEffect(() => {
     if (!isOpen || !instanceId) {
@@ -209,10 +206,6 @@ export function RenderingWildlifePetModal({
 
     return () => window.clearInterval(intervalId);
   }, [isOpen, instanceId, wildlifeStoreRef]);
-
-  useEffect(() => {
-    setNameDraft(instanceSnapshot?.customDisplayName ?? '');
-  }, [instanceSnapshot?.customDisplayName]);
 
   const stoppingPlazaWalkPointerPropagation = useCallback(
     (event: SyntheticEvent<HTMLElement>): void => {
@@ -240,14 +233,6 @@ export function RenderingWildlifePetModal({
       document.removeEventListener('keydown', dismissingModalOnEscape);
   }, [isOpen, onClose]);
 
-  const committingNameDraft = useCallback((): void => {
-    if (!instanceId) {
-      return;
-    }
-
-    onRename(instanceId, nameDraft.trim().length > 0 ? nameDraft.trim() : null);
-  }, [instanceId, nameDraft, onRename]);
-
   if (
     !isOpen ||
     !instanceId ||
@@ -272,7 +257,6 @@ export function RenderingWildlifePetModal({
     capability: Parameters<typeof checkingWildlifePetHasCapability>[1]
   ): boolean => checkingWildlifePetHasCapability(loyalty, capability);
 
-  const isNamable = hasCapability('namable');
   const hasBasicUi = hasCapability('basicUi');
   const hasAdvancedStatsUi = hasCapability('advancedStatsUi');
   const hasEquipment = hasCapability('equipment');
@@ -286,10 +270,7 @@ export function RenderingWildlifePetModal({
 
   const advancedStats = hasAdvancedStatsUi
     ? resolvingWildlifePetAdvancedStats({
-        speciesId: instanceSnapshot.speciesId,
-        sizeScaleSample: instanceSnapshot.sizeScaleSample,
-        largeSizeFrame: instanceSnapshot.largeSizeFrame ?? null,
-        aggressionLevel: instanceSnapshot.aggressionLevel,
+        instance: instanceSnapshot,
         weaponItem: petBond.weaponItem,
       })
     : null;
@@ -367,12 +348,8 @@ export function RenderingWildlifePetModal({
             <div
               className={DEFINING_WILDLIFE_PET_MODAL_PORTRAIT_FRAME_CLASS_NAME}
             >
-              <Icon
-                icon="mdi:paw"
-                width={28}
-                height={28}
-                className="text-poster-teal-deep"
-                aria-hidden
+              <RenderingWildlifePetSpeciesPortrait
+                speciesId={instanceSnapshot.speciesId}
               />
             </div>
             <div className="min-w-0">
@@ -390,32 +367,6 @@ export function RenderingWildlifePetModal({
               </span>
             </div>
           </div>
-
-          {isNamable ? (
-            <div className={DEFINING_WILDLIFE_PET_MODAL_SECTION_CLASS_NAME}>
-              <p
-                className={
-                  DEFINING_WILDLIFE_PET_MODAL_SECTION_HEADING_CLASS_NAME
-                }
-              >
-                Name
-              </p>
-              <input
-                type="text"
-                value={nameDraft}
-                placeholder={DEFINING_WILDLIFE_PET_MODAL_NAME_PLACEHOLDER}
-                maxLength={24}
-                className={DEFINING_WILDLIFE_PET_MODAL_NAME_INPUT_CLASS_NAME}
-                onChange={(event) => setNameDraft(event.target.value)}
-                onBlur={committingNameDraft}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    committingNameDraft();
-                  }
-                }}
-              />
-            </div>
-          ) : null}
 
           {hasBasicUi ? (
             <div className={DEFINING_WILDLIFE_PET_MODAL_SECTION_CLASS_NAME}>
@@ -570,66 +521,29 @@ export function RenderingWildlifePetModal({
                   DEFINING_WILDLIFE_PET_MODAL_ADVANCED_STAT_GRID_CLASS_NAME
                 }
               >
-                <div
-                  className={
-                    DEFINING_WILDLIFE_PET_MODAL_ADVANCED_STAT_CARD_CLASS_NAME
-                  }
-                >
-                  <p
+                {advancedStats.entries.map((entry) => (
+                  <div
+                    key={entry.id}
                     className={
-                      DEFINING_WILDLIFE_PET_MODAL_ADVANCED_STAT_VALUE_CLASS_NAME
+                      DEFINING_WILDLIFE_PET_MODAL_ADVANCED_STAT_CARD_CLASS_NAME
                     }
                   >
-                    {advancedStats.combat}
-                  </p>
-                  <p
-                    className={
-                      DEFINING_WILDLIFE_PET_MODAL_ADVANCED_STAT_LABEL_CLASS_NAME
-                    }
-                  >
-                    Combat
-                  </p>
-                </div>
-                <div
-                  className={
-                    DEFINING_WILDLIFE_PET_MODAL_ADVANCED_STAT_CARD_CLASS_NAME
-                  }
-                >
-                  <p
-                    className={
-                      DEFINING_WILDLIFE_PET_MODAL_ADVANCED_STAT_VALUE_CLASS_NAME
-                    }
-                  >
-                    {advancedStats.agility}
-                  </p>
-                  <p
-                    className={
-                      DEFINING_WILDLIFE_PET_MODAL_ADVANCED_STAT_LABEL_CLASS_NAME
-                    }
-                  >
-                    Agility
-                  </p>
-                </div>
-                <div
-                  className={
-                    DEFINING_WILDLIFE_PET_MODAL_ADVANCED_STAT_CARD_CLASS_NAME
-                  }
-                >
-                  <p
-                    className={
-                      DEFINING_WILDLIFE_PET_MODAL_ADVANCED_STAT_VALUE_CLASS_NAME
-                    }
-                  >
-                    {advancedStats.physicality}
-                  </p>
-                  <p
-                    className={
-                      DEFINING_WILDLIFE_PET_MODAL_ADVANCED_STAT_LABEL_CLASS_NAME
-                    }
-                  >
-                    Physicality
-                  </p>
-                </div>
+                    <p
+                      className={
+                        DEFINING_WILDLIFE_PET_MODAL_ADVANCED_STAT_VALUE_CLASS_NAME
+                      }
+                    >
+                      {entry.valueText}
+                    </p>
+                    <p
+                      className={
+                        DEFINING_WILDLIFE_PET_MODAL_ADVANCED_STAT_LABEL_CLASS_NAME
+                      }
+                    >
+                      {entry.label}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           ) : null}
@@ -655,7 +569,9 @@ export function RenderingWildlifePetModal({
                       className="size-3.5 text-poster-orange-deep"
                       aria-hidden
                     />
-                    {petBond.weaponItem.itemTypeId}
+                    {resolvingWorldPlazaInventoryItemTypeDefinition(
+                      petBond.weaponItem.itemTypeId
+                    )?.name ?? petBond.weaponItem.itemTypeId}
                   </span>
                   <button
                     type="button"
@@ -682,7 +598,9 @@ export function RenderingWildlifePetModal({
                           className="size-3.5 text-poster-orange-deep"
                           aria-hidden
                         />
-                        {slot.itemTypeId}
+                        {resolvingWorldPlazaInventoryItemTypeDefinition(
+                          slot.itemTypeId
+                        )?.name ?? slot.itemTypeId}
                       </span>
                       <button
                         type="button"

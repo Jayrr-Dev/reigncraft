@@ -1,3 +1,4 @@
+import type { WorldFlowerPickTileState } from './worldFlowerPick';
 import type { WorldPebblePickTileState } from './worldPebblePick';
 import type { WorldRockMineTileState } from './worldRockMine';
 import type { WorldTreeChopTileState } from './worldTreeChop';
@@ -11,6 +12,10 @@ export const WORLD_HARVEST_DEVVIT_MINED_ROCKS_POLL_INTERVAL_MS =
 
 /** Client poll interval for shared picked-pebble state (ms). */
 export const WORLD_HARVEST_DEVVIT_PICKED_PEBBLES_POLL_INTERVAL_MS =
+  WORLD_HARVEST_DEVVIT_CHOPPED_TREES_POLL_INTERVAL_MS;
+
+/** Client poll interval for shared picked-flower state (ms). */
+export const WORLD_HARVEST_DEVVIT_PICKED_FLOWERS_POLL_INTERVAL_MS =
   WORLD_HARVEST_DEVVIT_CHOPPED_TREES_POLL_INTERVAL_MS;
 
 export const WORLD_HARVEST_DEVVIT_API_BASE_PATH = '/api/world-harvest' as const;
@@ -32,6 +37,12 @@ export const WORLD_HARVEST_DEVVIT_PICKED_PEBBLES_API_PATH =
 
 export const WORLD_HARVEST_DEVVIT_PICK_PEBBLE_API_PATH =
   `${WORLD_HARVEST_DEVVIT_API_BASE_PATH}/pick-pebble` as const;
+
+export const WORLD_HARVEST_DEVVIT_PICKED_FLOWERS_API_PATH =
+  `${WORLD_HARVEST_DEVVIT_API_BASE_PATH}/picked-flowers` as const;
+
+export const WORLD_HARVEST_DEVVIT_PICK_FLOWER_API_PATH =
+  `${WORLD_HARVEST_DEVVIT_API_BASE_PATH}/pick-flower` as const;
 
 export type WorldHarvestDevvitChoppedTreeRow = WorldTreeChopTileState & {
   readonly tileKey: string;
@@ -150,6 +161,46 @@ export type WorldHarvestDevvitPickPebbleResponse =
   | {
       type: 'picked';
       stoneQuantity: number;
+    }
+  | {
+      type: 'out-of-range';
+    }
+  | {
+      type: 'already-picked';
+    }
+  | {
+      type: 'error';
+      message: string;
+    };
+
+export type WorldHarvestDevvitPickedFlowerRow = WorldFlowerPickTileState & {
+  readonly tileKey: string;
+};
+
+export type WorldHarvestDevvitPickedFlowersResponse =
+  | {
+      type: 'picked-flowers';
+      tiles: WorldHarvestDevvitPickedFlowerRow[];
+    }
+  | {
+      type: 'error';
+      message: string;
+    };
+
+export type WorldHarvestDevvitPickFlowerRequest = {
+  tileX: number;
+  tileY: number;
+  playerX: number;
+  playerY: number;
+  /** Single-player save slot; scopes picked flowers per user instead of the shared room. */
+  saveSlotIndex?: number | null;
+};
+
+export type WorldHarvestDevvitPickFlowerResponse =
+  | {
+      type: 'picked';
+      speciesId: string;
+      flowerQuantity: number;
     }
   | {
       type: 'out-of-range';

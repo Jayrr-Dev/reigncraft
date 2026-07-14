@@ -272,19 +272,25 @@ import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fis
 import { computingWorldPlazaFishingCastDurationMs } from '@/components/world/fishing/domains/computingWorldPlazaFishingCastDurationMs';
 import { usingWorldPlazaFishingInteraction } from '@/components/world/fishing/hooks/usingWorldPlazaFishingInteraction';
 import { usingWorldPlazaFishingProgress } from '@/components/world/fishing/hooks/usingWorldPlazaFishingProgress';
+import { RenderingWorldPlazaFlowerInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaFlowerInteractionLabels';
 import { RenderingWorldPlazaPebbleInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaPebbleInteractionLabels';
 import { RenderingWorldPlazaRockInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaRockInteractionLabels';
 import { RenderingWorldPlazaTreeInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaTreeInteractionLabels';
 import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { formattingWorldPlazaMinedRockTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
+import { formattingWorldPlazaPickedFlowerTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import { formattingWorldPlazaPickedPebbleTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { registeringWorldPlazaChoppedTreesVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup';
 import { registeringWorldPlazaMinedRocksVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaMinedRocksVisualLayerLookup';
+import { registeringWorldPlazaPickedFlowersLookup } from '@/components/world/harvest/domains/registeringWorldPlazaPickedFlowersLookup';
 import { registeringWorldPlazaPickedPebblesLookup } from '@/components/world/harvest/domains/registeringWorldPlazaPickedPebblesLookup';
 import { usingWorldPlazaChoppedTrees } from '@/components/world/harvest/hooks/usingWorldPlazaChoppedTrees';
+import { usingWorldPlazaFlowerPickInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaFlowerPickInteraction';
+import { usingWorldPlazaFlowerPickProgress } from '@/components/world/harvest/hooks/usingWorldPlazaFlowerPickProgress';
 import { usingWorldPlazaMinedRocks } from '@/components/world/harvest/hooks/usingWorldPlazaMinedRocks';
 import { usingWorldPlazaPebblePickInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaPebblePickInteraction';
 import { usingWorldPlazaPebblePickProgress } from '@/components/world/harvest/hooks/usingWorldPlazaPebblePickProgress';
+import { usingWorldPlazaPickedFlowers } from '@/components/world/harvest/hooks/usingWorldPlazaPickedFlowers';
 import { usingWorldPlazaPickedPebbles } from '@/components/world/harvest/hooks/usingWorldPlazaPickedPebbles';
 import { usingWorldPlazaRockMineInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaRockMineInteraction';
 import { usingWorldPlazaRockMineProgress } from '@/components/world/harvest/hooks/usingWorldPlazaRockMineProgress';
@@ -369,6 +375,7 @@ import {
   selectingWorldPlazaFarmlandTileForClickAction,
   selectingWorldPlazaFishingTileForClickAction,
   selectingWorldPlazaInteractableBlockForClickAction,
+  selectingWorldPlazaInteractableFlowerForClickAction,
   selectingWorldPlazaInteractablePebbleForClickAction,
   selectingWorldPlazaInteractableRockForClickAction,
   selectingWorldPlazaInteractableTreeForClickAction,
@@ -490,6 +497,7 @@ import {
   type DefiningWildlifePetBondState,
 } from '@/components/world/wildlife/pets';
 import { RenderingWildlifePetModal } from '@/components/world/wildlife/pets/components/renderingWildlifePetModal';
+import { RenderingWildlifePetNameDialog } from '@/components/world/wildlife/pets/components/renderingWildlifePetNameDialog';
 import {
   applyingWildlifePetDevLoyaltyGrant,
   type ApplyingWildlifePetDevLoyaltyGrantKind,
@@ -1876,6 +1884,29 @@ function RenderingWorldPlazaPixiSceneConnected({
     };
   }, [pickedPebbleStateByTileKey]);
 
+  const { pickedFlowerStateByTileKey } = usingWorldPlazaPickedFlowers({
+    enabled: isLocalGameplayEnabled,
+    localPersistenceOwnerId,
+    redditUserId,
+    saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
+  });
+  const pickedFlowersByTileKeyRef = useRef(pickedFlowerStateByTileKey);
+  pickedFlowersByTileKeyRef.current = pickedFlowerStateByTileKey;
+
+  useEffect(() => {
+    registeringWorldPlazaPickedFlowersLookup((tileX, tileY) =>
+      Boolean(
+        pickedFlowerStateByTileKey.get(
+          formattingWorldPlazaPickedFlowerTileKey(tileX, tileY)
+        )?.isPicked
+      )
+    );
+
+    return () => {
+      registeringWorldPlazaPickedFlowersLookup(null);
+    };
+  }, [pickedFlowerStateByTileKey]);
+
   const { fireCells, burntGrassTileKeys } = usingWorldPlazaFireCells({
     enabled: isLocalGameplayEnabled,
     onlineUserId,
@@ -1995,6 +2026,17 @@ function RenderingWorldPlazaPixiSceneConnected({
     []
   );
 
+  const selectingProceduralFlowerForInteractionLabel = useCallback(
+    (tileX: number, tileY: number): void => {
+      selectingWorldPlazaInteractableFlowerForClickAction(
+        selectedInteractableBlockKeysRef,
+        tileX,
+        tileY
+      );
+    },
+    []
+  );
+
   const clearingInteractableBlockClickSelection = useCallback((): void => {
     // Proximity mode owns the label set each overlay frame; miss-clear would flash.
     // Hide Actions restores click-to-show, so miss should dismiss the popover.
@@ -2021,6 +2063,9 @@ function RenderingWorldPlazaPixiSceneConnected({
       pickedPebbleStateByTileKey,
       onProceduralPebblePopoverSelect:
         selectingProceduralPebbleForInteractionLabel,
+      pickedFlowerStateByTileKey,
+      onProceduralFlowerPopoverSelect:
+        selectingProceduralFlowerForInteractionLabel,
       handlers: {
         [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE]:
           selectingCampfireForInteractionLabel,
@@ -2450,6 +2495,58 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
     },
     [showingGameplayHudToast, startingPebblePick, validatingPebblePickStart]
+  );
+
+  const { validatingFlowerPickStart, completingFlowerPick } =
+    usingWorldPlazaFlowerPickInteraction({
+      localPersistenceOwnerId,
+      redditUserId,
+      saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
+      pickedFlowerStateByTileKey,
+      playerPositionRef,
+      inventoryState,
+      updatingInventoryState,
+      showingGameplayHudToast,
+    });
+
+  const completingFlowerPickRef = useRef(completingFlowerPick);
+  completingFlowerPickRef.current = completingFlowerPick;
+
+  const handlingFlowerPickComplete = useCallback(
+    (entry: Parameters<typeof completingFlowerPick>[0]): void => {
+      void completingFlowerPickRef.current(entry);
+    },
+    []
+  );
+
+  const {
+    snapshot: flowerPickProgressSnapshot,
+    progressRatioRef: flowerPickProgressRatioRef,
+    startingFlowerPick,
+  } = usingWorldPlazaFlowerPickProgress({
+    playerPositionRef,
+    selectedInteractableBlockKeysRef,
+    avatarToolActionRef: localAvatarToolActionRef,
+    onPickComplete: handlingFlowerPickComplete,
+  });
+
+  const handlingFlowerPickInteraction = useCallback(
+    (entry: Parameters<typeof validatingFlowerPickStart>[0]): void => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return;
+      }
+
+      if (!validatingFlowerPickStart(entry)) {
+        return;
+      }
+
+      const didStart = startingFlowerPick(entry);
+
+      if (!didStart) {
+        showingGameplayHudToast('Already picking a flower.');
+      }
+    },
+    [showingGameplayHudToast, startingFlowerPick, validatingFlowerPickStart]
   );
 
   const hasEquippedFishrod =
@@ -3105,9 +3202,13 @@ function RenderingWorldPlazaPixiSceneConnected({
   const {
     selectedPetInstanceId,
     isModalOpen: isPetModalOpen,
+    namingPetInstanceId,
+    isNameDialogOpen: isPetNameDialogOpen,
     rosterSnapshot: petRosterSnapshot,
     openingPetModal,
     closingPetModal,
+    openingPetNameDialog,
+    closingPetNameDialog,
   } = usingWildlifePetModalState();
 
   useEffect(() => {
@@ -3164,13 +3265,9 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const handlingPetRename = useCallback(
     (instanceId: string, name: string | null): void => {
-      const didRename = renamingWildlifeInstanceDisplayName(
-        wildlifeStoreRef.current,
-        instanceId,
-        name
-      );
+      const trimmedName = name?.trim() ?? '';
 
-      if (!didRename) {
+      if (trimmedName.length === 0) {
         return;
       }
 
@@ -3179,13 +3276,45 @@ function RenderingWorldPlazaPixiSceneConnected({
         instanceId
       );
 
-      if (instance?.petBond?.isPersistent) {
-        updatingWildlifePetRecord(instance.petBond.petId, {
-          displayName: name,
+      // Permanent name: refuse if already set.
+      if (!instance || instance.customDisplayName?.trim()) {
+        return;
+      }
+
+      const didRename = renamingWildlifeInstanceDisplayName(
+        wildlifeStoreRef.current,
+        instanceId,
+        trimmedName
+      );
+
+      if (!didRename) {
+        return;
+      }
+
+      const namedInstance = gettingWildlifeInstance(
+        wildlifeStoreRef.current,
+        instanceId
+      );
+
+      if (namedInstance?.petBond?.isPersistent) {
+        updatingWildlifePetRecord(namedInstance.petBond.petId, {
+          displayName: trimmedName,
         });
       }
     },
     [wildlifeStoreRef]
+  );
+
+  const handlingPetNameDialogConfirm = useCallback(
+    (name: string): void => {
+      if (!namingPetInstanceId) {
+        return;
+      }
+
+      handlingPetRename(namingPetInstanceId, name);
+      closingPetNameDialog();
+    },
+    [closingPetNameDialog, handlingPetRename, namingPetInstanceId]
   );
 
   const handlingPetSetCommand = useCallback(
@@ -3416,6 +3545,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     choppedTreeStateByTileKeyRef: choppedTreesByTileKeyRef,
     minedRockStateByTileKeyRef: minedRocksByTileKeyRef,
     pickedPebbleStateByTileKeyRef: pickedPebblesByTileKeyRef,
+    pickedFlowerStateByTileKeyRef: pickedFlowersByTileKeyRef,
     farmlandByTileKeyRef,
     wildlifeStoreRef,
     hasEquippedFishrodRef,
@@ -3880,6 +4010,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           choppedTreeStateByTileKey: choppedTreesByTileKeyRef.current,
           minedRockStateByTileKey: minedRocksByTileKeyRef.current,
           pickedPebbleStateByTileKey: pickedPebblesByTileKeyRef.current,
+          pickedFlowerStateByTileKey: pickedFlowersByTileKeyRef.current,
           wildlifeStore: wildlifeStoreRef.current,
           resolveWildlifeCollisionRadiusGrid:
             resolvingWildlifePointerCollisionRadiusGrid,
@@ -4134,12 +4265,8 @@ function RenderingWorldPlazaPixiSceneConnected({
 
         clearingWalkTarget();
 
-        if (hasNamablePetBond) {
-          clearingWildlifeDocileAttackConfirmPending();
-          openingPetModal(clickedInstance.instanceId);
-          return true;
-        }
-
+        // Familiar+: show Name? overhead action. Rename opens from that button,
+        // never from a Pet windup.
         settingWildlifeDocileAttackConfirmPending({
           instanceId: clickedInstance.instanceId,
           speciesId: clickedInstance.speciesId,
@@ -4161,7 +4288,6 @@ function RenderingWorldPlazaPixiSceneConnected({
       clearingWalkTarget,
       isClickRunIntentRef,
       lockingCombatOnWildlifeInstance,
-      openingPetModal,
       playerPositionRef,
       wildlifeStoreRef,
     ]
@@ -5849,6 +5975,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               burntGrassTileKeysRef={burntGrassTileKeysRef}
               choppedTreesByTileKeyRef={choppedTreesByTileKeyRef}
               pickedPebblesByTileKeyRef={pickedPebblesByTileKeyRef}
+              pickedFlowersByTileKeyRef={pickedFlowersByTileKeyRef}
               floorLayerRef={terrainFloorLayerRef}
               trunkLayerRef={terrainTrunkLayerRef}
               canopyLayerRef={terrainCanopyLayerRef}
@@ -6446,6 +6573,17 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraWorldZoomRef={cameraWorldZoomRef}
                 onPickPebble={handlingPebblePickInteraction}
               />
+              <RenderingWorldPlazaFlowerInteractionLabels
+                selectedInteractableBlockKeysRef={
+                  selectedInteractableBlockKeysRef
+                }
+                pickedFlowerStateByTileKeyRef={pickedFlowersByTileKeyRef}
+                timedInteractionProgressSnapshot={flowerPickProgressSnapshot}
+                timedInteractionProgressRatioRef={flowerPickProgressRatioRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                onPickFlower={handlingFlowerPickInteraction}
+              />
               <RenderingWorldPlazaFishingInteractionLabels
                 playerPositionRef={playerPositionRef}
                 selectedInteractableBlockKeysRef={
@@ -6720,6 +6858,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               cameraOffsetRef={cameraOffsetRef}
               cameraWorldZoomRef={cameraWorldZoomRef}
               onBetray={handlingDocileBetrayInteraction}
+              onNamePet={openingPetNameDialog}
               onOpenPetModal={openingPetModal}
             />
           ) : null}
@@ -6864,6 +7003,19 @@ function RenderingWorldPlazaPixiSceneConnected({
           />
         </RenderingWorldPlazaGameplayHud>
       </div>
+      <RenderingWildlifePetNameDialog
+        isOpen={isPetNameDialogOpen}
+        speciesId={
+          namingPetInstanceId
+            ? (gettingWildlifeInstance(
+                wildlifeStoreRef.current,
+                namingPetInstanceId
+              )?.speciesId ?? null)
+            : null
+        }
+        onCancel={closingPetNameDialog}
+        onConfirm={handlingPetNameDialogConfirm}
+      />
       <RenderingWildlifePetModal
         isOpen={isPetModalOpen}
         instanceId={selectedPetInstanceId}
@@ -6871,7 +7023,6 @@ function RenderingWorldPlazaPixiSceneConnected({
         inventoryState={inventoryState}
         characterSkillIds={selectedCharacterEngineDefinition.skillIds}
         onClose={closingPetModal}
-        onRename={handlingPetRename}
         onSetCommand={handlingPetSetCommand}
         onFeed={handlingPetFeed}
         onHeal={handlingPetHeal}

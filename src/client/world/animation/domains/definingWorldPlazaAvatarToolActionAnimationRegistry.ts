@@ -17,6 +17,7 @@ export type DefiningWorldPlazaAvatarToolActionId =
   | 'tree-chop'
   | 'rock-mine'
   | 'pebble-pick'
+  | 'flower-pick'
   | 'eat';
 
 /** Live tool action the local avatar is performing (null when none). */
@@ -79,6 +80,18 @@ export const DEFINING_WORLD_PLAZA_AVATAR_TOOL_ACTION_ANIMATION_REGISTRY: Record<
     },
   },
   'pebble-pick': {
+    defaultAssignment: {
+      clipSuffix: 'idle',
+      animationFps: 10,
+    },
+    bySkinId: {
+      'girl-sample': {
+        clipSuffix: 'idle',
+        animationFps: 10,
+      },
+    },
+  },
+  'flower-pick': {
     defaultAssignment: {
       clipSuffix: 'idle',
       animationFps: 10,

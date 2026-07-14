@@ -1,4 +1,3 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { clearingPlazaSinglePlayerSaveSlotLocalStorage } from '@/components/home/domains/clearingPlazaSinglePlayerSaveSlotLocalStorage';
 import {
   clearingWorldPlazaLocalFarmlandMemoryForOwner,
@@ -7,8 +6,10 @@ import {
 } from '@/components/world/farming/domains/managingWorldPlazaLocalFarmland';
 import { resolvingWorldPlazaChoppedTreesLocalStorageKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { resolvingWorldPlazaMinedRocksLocalStorageKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
+import { resolvingWorldPlazaPickedFlowersLocalStorageKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import { resolvingWorldPlazaPickedPebblesLocalStorageKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { resolvingWorldPlazaInventoryStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 function creatingTestLocalStorage(): Storage {
   const storage = new Map<string, string>();
@@ -50,12 +51,13 @@ describe('clearingPlazaSinglePlayerSaveSlotLocalStorage', () => {
     vi.unstubAllGlobals();
   });
 
-  it('removes farmland, mined rocks, and picked pebbles keys with the rest', () => {
+  it('removes farmland, mined rocks, picked pebbles, and picked flowers keys with the rest', () => {
     const keys = [
       resolvingWorldPlazaInventoryStorageKey(persistenceOwnerId),
       resolvingWorldPlazaFarmlandLocalStorageKey(persistenceOwnerId),
       resolvingWorldPlazaMinedRocksLocalStorageKey(persistenceOwnerId),
       resolvingWorldPlazaPickedPebblesLocalStorageKey(persistenceOwnerId),
+      resolvingWorldPlazaPickedFlowersLocalStorageKey(persistenceOwnerId),
       resolvingWorldPlazaChoppedTreesLocalStorageKey(persistenceOwnerId),
     ];
 

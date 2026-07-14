@@ -56,6 +56,7 @@ import {
 } from '@/components/world/domains/syncingWorldPlazaVisibleWaterSurfaceGraphicsLayer';
 import {
   buildingWorldPlazaBurntGrassTileKeysCacheKey,
+  buildingWorldPlazaPickedFlowersCacheKey,
   buildingWorldPlazaPickedPebblesCacheKey,
 } from '@/components/world/engine/buildingWorldPlazaTerrainLayerCacheKeys';
 import { DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY } from '@/components/world/engine/definingWorldPlazaTerrainDependencyKeys';
@@ -465,16 +466,23 @@ export function registeringWorldPlazaTerrainLayers(
           state.lastBurntGrassCacheKey = burntGrassCacheKey;
         }
 
-        const pickedPebblesCacheKey = buildingWorldPlazaPickedPebblesCacheKey(
+        const pickedSurfaceDecorationsCacheKey = `${buildingWorldPlazaPickedPebblesCacheKey(
           context.pickedPebblesByTileKey
-        );
+        )}|${buildingWorldPlazaPickedFlowersCacheKey(
+          context.pickedFlowersByTileKey
+        )}`;
+        const pickedSurfaceTileKeys = new Set([
+          ...context.pickedPebblesByTileKey.keys(),
+          ...context.pickedFlowersByTileKey.keys(),
+        ]);
 
         if (
-          pickedPebblesCacheKey !== state.lastPickedPebblesCacheKey &&
-          context.pickedPebblesByTileKey.size > 0
+          pickedSurfaceDecorationsCacheKey !==
+            state.lastPickedPebblesCacheKey &&
+          pickedSurfaceTileKeys.size > 0
         ) {
-          const newlyPickedPebbleTileIndices = Array.from(
-            context.pickedPebblesByTileKey.keys()
+          const newlyPickedSurfaceTileIndices = Array.from(
+            pickedSurfaceTileKeys
           ).flatMap((tileKey) => {
             if (state.lastPickedPebblesTileKeys.has(tileKey)) {
               return [];
@@ -489,26 +497,24 @@ export function registeringWorldPlazaTerrainLayers(
               : [];
           });
 
-          state.lastPickedPebblesCacheKey = pickedPebblesCacheKey;
-          state.lastPickedPebblesTileKeys = new Set(
-            context.pickedPebblesByTileKey.keys()
-          );
+          state.lastPickedPebblesCacheKey = pickedSurfaceDecorationsCacheKey;
+          state.lastPickedPebblesTileKeys = new Set(pickedSurfaceTileKeys);
 
-          if (newlyPickedPebbleTileIndices.length > 0) {
+          if (newlyPickedSurfaceTileIndices.length > 0) {
             refreshingWorldPlazaFloorChunkGraphicsForTileIndices({
               parentContainer: context.floorLayer,
               chunkSizeTiles: context.performanceProfile.floorChunkSizeTiles,
               chunkGraphicsByKey: state.chunkGraphicsByKey,
               pendingChunkBuilds: state.pendingChunkBuilds,
-              tileIndices: newlyPickedPebbleTileIndices,
+              tileIndices: newlyPickedSurfaceTileIndices,
               drawOptions: floorDrawOptions,
             });
           }
-        } else if (pickedPebblesCacheKey !== state.lastPickedPebblesCacheKey) {
-          state.lastPickedPebblesCacheKey = pickedPebblesCacheKey;
-          state.lastPickedPebblesTileKeys = new Set(
-            context.pickedPebblesByTileKey.keys()
-          );
+        } else if (
+          pickedSurfaceDecorationsCacheKey !== state.lastPickedPebblesCacheKey
+        ) {
+          state.lastPickedPebblesCacheKey = pickedSurfaceDecorationsCacheKey;
+          state.lastPickedPebblesTileKeys = new Set(pickedSurfaceTileKeys);
         }
 
         const finishFloorSyncSample = beginningWorldPlazaPerformanceSample(

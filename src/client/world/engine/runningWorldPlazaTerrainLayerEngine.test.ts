@@ -76,6 +76,7 @@ describe('creatingWorldPlazaTerrainLayerEngine', () => {
       scenePlacedBlocks: [],
       choppedTreesByTileKey: new Map(),
       pickedPebblesByTileKey: new Map(),
+      pickedFlowersByTileKey: new Map(),
       burntGrassTileKeys: undefined,
       isFloorRenderLayerEnabled: true,
       isTrunkRenderLayerEnabled: true,

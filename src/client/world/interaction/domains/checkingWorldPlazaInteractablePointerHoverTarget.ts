@@ -6,8 +6,10 @@ import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/buildi
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaMinedRockTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
+import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
+import { resolvingWorldPlazaInteractableFlowerFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableFlowerFromPointerGridPoint';
 import { resolvingWorldPlazaInteractablePebbleFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePebbleFromPointerGridPoint';
 import { resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableRockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableRockFromPointerGridPoint';
@@ -41,6 +43,10 @@ export type CheckingWorldPlazaInteractablePointerHoverTargetInput = {
     string,
     DefiningWorldPlazaPickedPebbleTileState
   >;
+  readonly pickedFlowerStateByTileKey?: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedFlowerTileState
+  >;
   readonly wildlifeStore: ManagingWildlifeInstanceStore;
   readonly resolveWildlifeCollisionRadiusGrid: (
     instance: DefiningWildlifeInstance
@@ -65,6 +71,7 @@ export function checkingWorldPlazaInteractablePointerHoverTarget(
     choppedTreeStateByTileKey,
     minedRockStateByTileKey,
     pickedPebbleStateByTileKey,
+    pickedFlowerStateByTileKey,
     wildlifeStore,
     resolveWildlifeCollisionRadiusGrid,
   } = input;
@@ -137,5 +144,16 @@ export function checkingWorldPlazaInteractablePointerHoverTarget(
     pickedPebbleStateByTileKey
   );
 
-  return pebbleMatch !== null;
+  if (pebbleMatch !== null) {
+    return true;
+  }
+
+  const flowerMatch = resolvingWorldPlazaInteractableFlowerFromPointerGridPoint(
+    pointerContext.gridPoint,
+    playerPosition,
+    chopPersistenceOwnerId,
+    pickedFlowerStateByTileKey
+  );
+
+  return flowerMatch !== null;
 }

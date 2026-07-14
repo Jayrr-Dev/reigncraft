@@ -9,13 +9,12 @@ import {
 import {
   buildingWorldHarvestChoppedTreesRedisKey,
   buildingWorldHarvestMinedRocksRedisKey,
+  buildingWorldHarvestPickedFlowersRedisKey,
   buildingWorldHarvestPickedPebblesRedisKey,
 } from './buildingWorldHarvestDevvitRedisKeys';
 import { buildingWorldInventoryGroundItemsRedisKey } from './buildingWorldInventoryDevvitRedisKeys';
-import {
-  PLAZA_DEVVIT_ONLINE_SINGLE_PLAYER_DEFAULT_ROOM_ID,
-} from './resolvingPlazaDevvitOnlineRoomScopeFromRequest';
 import { resolvingPlazaDevvitOnlineRoomScope } from './resolvingPlazaDevvitOnlineRoomScope';
+import { PLAZA_DEVVIT_ONLINE_SINGLE_PLAYER_DEFAULT_ROOM_ID } from './resolvingPlazaDevvitOnlineRoomScopeFromRequest';
 
 /**
  * Private single-player Redis scope for harvest / ground items (matches
@@ -89,7 +88,10 @@ async function clearingOwnedWorldBuildingPlotsForUser(
   }
 
   for (const plotId of ownedPlotIds) {
-    const blocksKey = buildingWorldBuildingPlotBlocksRedisKey(roomScope, plotId);
+    const blocksKey = buildingWorldBuildingPlotBlocksRedisKey(
+      roomScope,
+      plotId
+    );
     const rawBlocks = await redis.hGetAll(blocksKey);
     const blockIds = Object.keys(rawBlocks);
 
@@ -153,6 +155,7 @@ export async function clearingPlazaSinglePlayerSaveSlotWorldPersistence(
   await redis.del(buildingWorldHarvestChoppedTreesRedisKey(slotScope));
   await redis.del(buildingWorldHarvestMinedRocksRedisKey(slotScope));
   await redis.del(buildingWorldHarvestPickedPebblesRedisKey(slotScope));
+  await redis.del(buildingWorldHarvestPickedFlowersRedisKey(slotScope));
   await redis.del(buildingWorldInventoryGroundItemsRedisKey(slotScope));
 
   const roomScope = resolvingPlazaDevvitOnlineRoomScope(
