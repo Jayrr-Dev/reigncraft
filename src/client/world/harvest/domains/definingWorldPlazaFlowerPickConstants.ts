@@ -4,8 +4,11 @@
  * @module components/world/harvest/domains/definingWorldPlazaFlowerPickConstants
  */
 
-/** Fixed pick duration (ms). */
-export const DEFINING_WORLD_PLAZA_FLOWER_PICK_DURATION_MS = 350;
+/** Shortest biome flower pick channel (ms). */
+export const DEFINING_WORLD_PLAZA_FLOWER_PICK_DURATION_MIN_MS = 600;
+
+/** Longest biome flower pick channel (ms). */
+export const DEFINING_WORLD_PLAZA_FLOWER_PICK_DURATION_MAX_MS = 800;
 
 /** Max Chebyshev distance from player to flower tile center. */
 export const DEFINING_WORLD_PLAZA_FLOWER_PICK_PLAYER_RANGE_TILES = 2;

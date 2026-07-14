@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation
  */
 
+import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
 import { checkingWildlifeIsAggressiveChicken } from '@/components/world/wildlife/domains/checkingWildlifeIsAggressiveChicken';
 import {
   DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_ATTACK_POWER_MULTIPLIER,
@@ -197,7 +198,8 @@ export function resolvingWildlifeInstanceAttackPowerMultiplier(
 /** Resolves walk speed for one wildlife instance. */
 export function resolvingWildlifeInstanceWalkSpeedGridPerSecond(
   species: DefiningWildlifeSpeciesDefinition,
-  instance: DefiningWildlifeInstance
+  instance: DefiningWildlifeInstance,
+  nowMs: number = Number.MAX_SAFE_INTEGER
 ): number {
   const speedMultiplier = resolvingWildlifeInstanceSpeedStatMultiplier(
     species,
@@ -209,13 +211,21 @@ export function resolvingWildlifeInstanceWalkSpeedGridPerSecond(
     walkSpeed *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPEED_MULTIPLIER;
   }
 
+  const healthMovement = resolvingWorldPlazaEntityHealthMovementMultipliers(
+    instance.healthState,
+    nowMs
+  );
+  walkSpeed *=
+    healthMovement.speedMultiplier * healthMovement.walkSpeedMultiplier;
+
   return walkSpeed;
 }
 
 /** Resolves run speed for one wildlife instance. */
 export function resolvingWildlifeInstanceRunSpeedGridPerSecond(
   species: DefiningWildlifeSpeciesDefinition,
-  instance: DefiningWildlifeInstance
+  instance: DefiningWildlifeInstance,
+  nowMs: number = Number.MAX_SAFE_INTEGER
 ): number {
   const speedMultiplier = resolvingWildlifeInstanceSpeedStatMultiplier(
     species,
@@ -227,13 +237,20 @@ export function resolvingWildlifeInstanceRunSpeedGridPerSecond(
     runSpeed *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPEED_MULTIPLIER;
   }
 
+  const healthMovement = resolvingWorldPlazaEntityHealthMovementMultipliers(
+    instance.healthState,
+    nowMs
+  );
+  runSpeed *= healthMovement.speedMultiplier;
+
   return runSpeed;
 }
 
 /** Resolves stamina tuning for one wildlife instance. */
 export function resolvingWildlifeInstanceStaminaConfig(
   species: DefiningWildlifeSpeciesDefinition,
-  instance: DefiningWildlifeInstance
+  instance: DefiningWildlifeInstance,
+  nowMs: number = Number.MAX_SAFE_INTEGER
 ): DefiningWildlifeSpeciesStaminaConfig {
   const combatMultiplier = resolvingWildlifeInstanceCombatStatMultiplier(
     species,
@@ -255,12 +272,21 @@ export function resolvingWildlifeInstanceStaminaConfig(
     regenMultiplier *= DEFINING_WILDLIFE_APEX_STAMINA_REGEN_MULTIPLIER;
   }
 
+  const healthMovement = resolvingWorldPlazaEntityHealthMovementMultipliers(
+    instance.healthState,
+    nowMs
+  );
+  drainMultiplier *= healthMovement.staminaDrainMultiplier;
+  regenMultiplier *= healthMovement.staminaRegenMultiplier;
+
+  const baseMaxStaminaRatio = species.stamina.maxStaminaRatio ?? 1;
+  const maxStaminaRatio =
+    baseMaxStaminaRatio * healthMovement.staminaMaxMultiplier;
+
   return {
     drainMultiplier,
     regenMultiplier,
-    ...(species.stamina.maxStaminaRatio !== undefined
-      ? { maxStaminaRatio: species.stamina.maxStaminaRatio }
-      : {}),
+    ...(maxStaminaRatio !== 1 ? { maxStaminaRatio } : {}),
   };
 }
 

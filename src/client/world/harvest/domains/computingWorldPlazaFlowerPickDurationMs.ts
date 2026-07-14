@@ -1,6 +1,26 @@
-import { DEFINING_WORLD_PLAZA_FLOWER_PICK_DURATION_MS } from '@/components/world/harvest/domains/definingWorldPlazaFlowerPickConstants';
+/**
+ * Rolls biome flower pick channel duration between the configured min and max.
+ *
+ * @module components/world/harvest/domains/computingWorldPlazaFlowerPickDurationMs
+ */
 
-/** Fixed biome flower pick channel duration. */
-export function computingWorldPlazaFlowerPickDurationMs(): number {
-  return DEFINING_WORLD_PLAZA_FLOWER_PICK_DURATION_MS;
+import {
+  DEFINING_WORLD_PLAZA_FLOWER_PICK_DURATION_MAX_MS,
+  DEFINING_WORLD_PLAZA_FLOWER_PICK_DURATION_MIN_MS,
+} from '@/components/world/harvest/domains/definingWorldPlazaFlowerPickConstants';
+
+/**
+ * Maps a unit roll `[0, 1]` onto the flower pick duration range.
+ */
+export function computingWorldPlazaFlowerPickDurationMs(
+  unitRoll: number = Math.random()
+): number {
+  const clampedRoll = Math.min(1, Math.max(0, unitRoll));
+  const spanMs =
+    DEFINING_WORLD_PLAZA_FLOWER_PICK_DURATION_MAX_MS -
+    DEFINING_WORLD_PLAZA_FLOWER_PICK_DURATION_MIN_MS;
+
+  return Math.round(
+    DEFINING_WORLD_PLAZA_FLOWER_PICK_DURATION_MIN_MS + clampedRoll * spanMs
+  );
 }

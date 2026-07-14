@@ -51,4 +51,23 @@ describe('definingWorldPlazaEntityDiseaseRegistry', () => {
       expect(entry.cookedWellFedChance).toBeGreaterThan(0);
     }
   });
+
+  it('authors poison, bleed, and fated grants as percent-of-max-HP with drain windows', () => {
+    for (const descriptor of listingWorldPlazaEntityDiseaseDescriptors()) {
+      for (const grant of descriptor.grants) {
+        if (
+          grant.kind === 'poison' ||
+          grant.kind === 'bleed' ||
+          grant.kind === 'potential_damage'
+        ) {
+          expect(grant.healthPercentDamage).toBeGreaterThan(0);
+          expect(grant.healthPercentDamage).toBeLessThanOrEqual(1);
+        }
+
+        if (grant.kind === 'poison' || grant.kind === 'bleed') {
+          expect(grant.durationMs).toBeGreaterThan(0);
+        }
+      }
+    }
+  });
 });

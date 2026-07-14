@@ -7,8 +7,11 @@
 /** Stone granted when a floor pebble is picked. */
 export const DEFINING_WORLD_PLAZA_PEBBLE_PICK_STONE_QUANTITY = 1;
 
-/** Fixed pick duration (ms); no layer scaling. */
-export const DEFINING_WORLD_PLAZA_PEBBLE_PICK_DURATION_MS = 350;
+/** Shortest pebble pick channel (ms); no layer scaling. */
+export const DEFINING_WORLD_PLAZA_PEBBLE_PICK_DURATION_MIN_MS = 600;
+
+/** Longest pebble pick channel (ms); no layer scaling. */
+export const DEFINING_WORLD_PLAZA_PEBBLE_PICK_DURATION_MAX_MS = 800;
 
 /** Max Chebyshev distance from player to pebble tile center. */
 export const DEFINING_WORLD_PLAZA_PEBBLE_PICK_PLAYER_RANGE_TILES = 2;

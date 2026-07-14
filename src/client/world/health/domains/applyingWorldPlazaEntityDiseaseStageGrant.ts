@@ -1,11 +1,10 @@
 import { applyingWorldPlazaEntityHealthPotentialDamage } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPotentialDamage';
 import { buildingWorldPlazaEntityDiseaseGrantBuffInstanceId } from '@/components/world/health/domains/checkingWorldPlazaEntityActionLocked';
-import { scalingWorldPlazaEntityDiseaseRealMs } from '@/components/world/health/domains/computingWorldPlazaEntityDiseaseDurationMs';
+import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
 import {
   computingWorldPlazaEntityImmuneSystemScaledDurationMs,
   computingWorldPlazaEntityImmuneSystemWeakenedDebuffMultiplier,
 } from '@/components/world/health/domains/computingWorldPlazaEntityImmuneSystemEffects';
-import { resolvingWorldPlazaEntityBleedSeverityDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import { resolvingWorldPlazaEntityBuffDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 import {
   DEFINING_WORLD_PLAZA_CONFUSION_INTENSITY_MAX,
@@ -13,7 +12,6 @@ import {
 } from '@/components/world/health/domains/definingWorldPlazaEntityConfusionConstants';
 import type { DefiningWorldPlazaEntityDiseaseStageGrant } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
-import { resolvingWorldPlazaEntityPoisonPotencyDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import { DEFINING_WORLD_PLAZA_SLEEP_WAKE_BONUS_DAMAGE } from '@/components/world/health/domains/definingWorldPlazaEntitySleepConstants';
 import {
   addingWorldPlazaEntityHealthConfusionEffect,
@@ -81,17 +79,22 @@ export function applyingWorldPlazaEntityDiseaseStageGrant({
     );
 
   if (grant.kind === 'poison') {
+    const effectiveMaxHealth = computingWorldPlazaEntityHealthEffectiveMax(
+      state,
+      nowMs
+    );
     const poisonDurationMs =
       computingWorldPlazaEntityImmuneSystemScaledDurationMs(
-        scalingWorldPlazaEntityDiseaseRealMs(
-          resolvingWorldPlazaEntityPoisonPotencyDescriptor(grant.potency)
-            .durationMs
-        ),
+        grant.durationMs,
         resolvedDurationMultiplier
       );
     const scaledPoisonDamage = Math.max(
       1,
-      Math.round(grant.totalPoisonDamage * resolvedSymptomStrengthMultiplier)
+      Math.round(
+        effectiveMaxHealth *
+          grant.healthPercentDamage *
+          resolvedSymptomStrengthMultiplier
+      )
     );
 
     return applyingWorldPlazaEntityHealthPoison(
@@ -105,17 +108,22 @@ export function applyingWorldPlazaEntityDiseaseStageGrant({
   }
 
   if (grant.kind === 'bleed') {
+    const effectiveMaxHealth = computingWorldPlazaEntityHealthEffectiveMax(
+      state,
+      nowMs
+    );
     const bleedDurationMs =
       computingWorldPlazaEntityImmuneSystemScaledDurationMs(
-        scalingWorldPlazaEntityDiseaseRealMs(
-          resolvingWorldPlazaEntityBleedSeverityDescriptor(grant.severity)
-            .durationMs
-        ),
+        grant.durationMs,
         resolvedDurationMultiplier
       );
     const scaledBleedDamage = Math.max(
       1,
-      Math.round(grant.flatExpectedDamage * resolvedSymptomStrengthMultiplier)
+      Math.round(
+        effectiveMaxHealth *
+          grant.healthPercentDamage *
+          resolvedSymptomStrengthMultiplier
+      )
     );
 
     return applyingWorldPlazaEntityHealthBleed(
@@ -129,10 +137,16 @@ export function applyingWorldPlazaEntityDiseaseStageGrant({
   }
 
   if (grant.kind === 'potential_damage') {
+    const effectiveMaxHealth = computingWorldPlazaEntityHealthEffectiveMax(
+      state,
+      nowMs
+    );
     const scaledPendingDamage = Math.max(
       1,
       Math.round(
-        grant.pendingExpectedDamage * resolvedSymptomStrengthMultiplier
+        effectiveMaxHealth *
+          grant.healthPercentDamage *
+          resolvedSymptomStrengthMultiplier
       )
     );
     const scaledResolveDelayMs =

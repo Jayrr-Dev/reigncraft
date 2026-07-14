@@ -4,8 +4,11 @@
  * @module components/world/harvest/domains/definingWorldPlazaShrubPickConstants
  */
 
-/** Fixed pick duration (ms). Kept short so berry picks respond on the first tap. */
-export const DEFINING_WORLD_PLAZA_SHRUB_PICK_DURATION_MS = 250;
+/** Shortest berry-shrub pick channel (ms). */
+export const DEFINING_WORLD_PLAZA_SHRUB_PICK_DURATION_MIN_MS = 400;
+
+/** Longest berry-shrub pick channel (ms). */
+export const DEFINING_WORLD_PLAZA_SHRUB_PICK_DURATION_MAX_MS = 600;
 
 /** Max Chebyshev distance from player to shrub tile center. */
 export const DEFINING_WORLD_PLAZA_SHRUB_PICK_PLAYER_RANGE_TILES = 2;

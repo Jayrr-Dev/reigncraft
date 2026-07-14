@@ -45,4 +45,15 @@ describe('creatingWildlifeSpawnHealthState', () => {
       )
     ).toBe(true);
   });
+
+  it('seeds sunhead innate cold weakness and firelands comfort band', () => {
+    const sunhead = DEFINING_WILDLIFE_SPECIES_REGISTRY.sunhead;
+    const healthState = creatingWildlifeSpawnHealthState(150, null, sunhead);
+
+    expect(healthState.temperatureResistance.coldWeakness).toBe(0.5);
+    expect(healthState.temperatureResistance.baseComfortLowCelsius).toBe(22);
+    expect(healthState.temperatureResistance.baseComfortHighCelsius).toBe(60);
+    expect(healthState.temperatureResistance.isColdImmune).toBe(false);
+    expect(healthState.temperatureResistance.isHeatImmune).toBe(true);
+  });
 });

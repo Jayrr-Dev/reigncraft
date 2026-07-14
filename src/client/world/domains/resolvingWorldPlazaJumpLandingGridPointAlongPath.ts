@@ -4,13 +4,17 @@ import {
   checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex,
   checkingWorldBuildingPlacedNaturalWaterStreamAtTileIndex,
 } from '@/components/world/building/domains/resolvingWorldBuildingCollision';
-import { resolvingWorldBuildingJumpLandableSurfaceLayerAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
+import {
+  checkingWorldBuildingCanJumpLandOnSurfaceLayer,
+  resolvingWorldBuildingJumpLandableSurfaceLayerAtTileIndex,
+} from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
 import { clampingWorldCollisionPointBeforeGridPointPredicate } from '@/components/world/collision';
 import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaIsometricTileEntryEdgeGridPointAtIndex } from '@/components/world/domains/resolvingWorldPlazaIsometricTileEntryEdgeGridPointAtIndex';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import { checkingWorldPlazaPlayerCircleOverlapsTileSquare } from '@/components/world/domains/resolvingWorldPlazaPlayerCircleTileSquareCollision';
+import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 import {
   checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex,
   checkingWorldPlazaTerrainOccupiesWaterAtTileIndex,
@@ -185,6 +189,44 @@ function checkingWorldPlazaGridPointOccupiesJumpLandingWaterAtGridPoint(
 }
 
 /**
+ * Returns the unified procedural-terrain and placed-block landing surface.
+ */
+function resolvingWorldPlazaJumpLandableSurfaceLayerAtTileIndex(
+  tileX: number,
+  tileY: number,
+  placedBlocks: DefiningWorldBuildingPlacedBlock[],
+  fromLayer: number,
+  jumpLayerReachMax?: number
+): number {
+  return Math.max(
+    resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(tileX, tileY),
+    resolvingWorldBuildingJumpLandableSurfaceLayerAtTileIndex(
+      tileX,
+      tileY,
+      placedBlocks,
+      fromLayer,
+      jumpLayerReachMax
+    )
+  );
+}
+
+/**
+ * Returns true when generated terrain is above this jump's vertical reach.
+ */
+function checkingWorldPlazaTerrainElevationBlocksJumpLandingAtTileIndex(
+  tileX: number,
+  tileY: number,
+  fromLayer: number,
+  jumpLayerReachMax?: number
+): boolean {
+  return !checkingWorldBuildingCanJumpLandOnSurfaceLayer(
+    fromLayer,
+    resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex(tileX, tileY),
+    jumpLayerReachMax
+  );
+}
+
+/**
  * Returns true when a grid point is blocked for jump landing.
  *
  * @param gridPoint - Candidate landing position in grid space.
@@ -205,6 +247,12 @@ function checkingWorldPlazaGridPointBlocksJumpLandingAtGridPoint(
     checkingWorldPlazaTerrainBlocksJumpLandingAtTileIndex(
       standingTile.tileX,
       standingTile.tileY
+    ) ||
+    checkingWorldPlazaTerrainElevationBlocksJumpLandingAtTileIndex(
+      standingTile.tileX,
+      standingTile.tileY,
+      fromLayer,
+      jumpLayerReachMax
     ) ||
     checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex(
       standingTile.tileX,
@@ -243,16 +291,21 @@ function checkingWorldPlazaGridPointBlocksJumpLandingExceptWaterAtGridPoint(
   const standingTile =
     resolvingWorldPlazaIsometricTileIndexAtGridPoint(gridPoint);
 
-  // Column rocks no longer block far-bank landings: their standable top is a
-  // valid landing surface, and unreachable height is rejected by the placed
-  // block surface-layer jump-reach check below.
-  return checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex(
-    standingTile.tileX,
-    standingTile.tileY,
-    placedBlocks,
-    fromLayer,
-    jumpLayerReachMax,
-    playerHeightWorldLayers
+  return (
+    checkingWorldPlazaTerrainElevationBlocksJumpLandingAtTileIndex(
+      standingTile.tileX,
+      standingTile.tileY,
+      fromLayer,
+      jumpLayerReachMax
+    ) ||
+    checkingWorldBuildingPlacedBlockBlocksJumpLandingAtTileIndex(
+      standingTile.tileX,
+      standingTile.tileY,
+      placedBlocks,
+      fromLayer,
+      jumpLayerReachMax,
+      playerHeightWorldLayers
+    )
   );
 }
 
@@ -285,7 +338,7 @@ function buildingWorldPlazaJumpLandingGridPointAlongPathResult(
   return {
     landingGridPoint: clearedLandingGridPoint,
     landingSurfaceLayer:
-      resolvingWorldBuildingJumpLandableSurfaceLayerAtTileIndex(
+      resolvingWorldPlazaJumpLandableSurfaceLayerAtTileIndex(
         landingTile.tileX,
         landingTile.tileY,
         placedBlocks,
@@ -409,7 +462,7 @@ function findingWorldPlazaJumpLandingFarBankCandidateAlongPath(
         forwardGridDistance,
         landingGridPoint,
         landingSurfaceLayer:
-          resolvingWorldBuildingJumpLandableSurfaceLayerAtTileIndex(
+          resolvingWorldPlazaJumpLandableSurfaceLayerAtTileIndex(
             sampleTile.tileX,
             sampleTile.tileY,
             placedBlocks,

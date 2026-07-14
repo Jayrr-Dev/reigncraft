@@ -1163,9 +1163,14 @@ export function advancingWildlifeSimulationTick({
   playerPreviousPosition = null,
   npcPreyTargets = [],
 }: AdvancingWildlifeSimulationTickParams): AdvancingWildlifeSimulationTickResult {
-  // Dev QA load: keep manually spawned animals frozen and hittable. Skip natural
-  // hydration, AI, aggro, and player push-out so combat tests stay controlled.
-  if (checkingWorldPlazaDevQaLoadEnabled()) {
+  // Dev QA blank slate defaults Wildlife AI off: keep manually spawned animals
+  // frozen and hittable. Flip Wildlife AI on (or spawn from Dev) to run combat.
+  const isWildlifeAiEnabledForDevQa =
+    checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_AI
+    );
+
+  if (checkingWorldPlazaDevQaLoadEnabled() && !isWildlifeAiEnabledForDevQa) {
     advancingWildlifeCorpseLifecycle(store, center, nowMs);
     applyingWildlifeStationaryLocomotionPresentationToStore(store);
     syncingAllWildlifeInstanceStandingLayers(
@@ -1198,34 +1203,39 @@ export function advancingWildlifeSimulationTick({
   const finishLifecycleSample = beginningWorldPlazaPerformanceSample(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.WILDLIFE_LIFECYCLE
   );
-  hydratingWildlifeInstancesNearPoint(
-    store,
-    center,
-    resolveSpecies,
-    nowMs,
-    cyclePhase
-  );
-  despawningWildlifeNightOnlyInstancesDuringDaytime(
-    store,
-    hazardSampling.isDaytime
-  );
-  advancingWildlifeNightOnlyWanderAwayDuringDaytime(
-    store,
-    hazardSampling.isDaytime,
-    center,
-    nowMs
-  );
+  // Dev QA stays a blank arena: no natural packs, only manual Dev spawns.
+  if (!checkingWorldPlazaDevQaLoadEnabled()) {
+    hydratingWildlifeInstancesNearPoint(
+      store,
+      center,
+      resolveSpecies,
+      nowMs,
+      cyclePhase
+    );
+    despawningWildlifeNightOnlyInstancesDuringDaytime(
+      store,
+      hazardSampling.isDaytime
+    );
+    advancingWildlifeNightOnlyWanderAwayDuringDaytime(
+      store,
+      hazardSampling.isDaytime,
+      center,
+      nowMs
+    );
+  }
   advancingWildlifeCorpseLifecycle(store, center, nowMs);
-  advancingWildlifePendingRespawns({
-    store,
-    playerCenter: center,
-    resolveSpecies,
-    nowMs,
-    isDaytime: hazardSampling.isDaytime,
-    placedBlocks: hazardSampling.placedBlocks,
-    placedBlocksByTile: hazardSampling.placedBlocksByTile,
-  });
-  despawningWildlifeInstancesBeyondRadius(store, center, nowMs);
+  if (!checkingWorldPlazaDevQaLoadEnabled()) {
+    advancingWildlifePendingRespawns({
+      store,
+      playerCenter: center,
+      resolveSpecies,
+      nowMs,
+      isDaytime: hazardSampling.isDaytime,
+      placedBlocks: hazardSampling.placedBlocks,
+      placedBlocksByTile: hazardSampling.placedBlocksByTile,
+    });
+    despawningWildlifeInstancesBeyondRadius(store, center, nowMs);
+  }
   finishLifecycleSample();
 
   if (!isLeader) {
@@ -1330,6 +1340,7 @@ export function advancingWildlifeSimulationTick({
         isDaytime: hazardSampling.isDaytime,
         placedBlocksByTile: hazardSampling.placedBlocksByTile,
         nowMs,
+        deltaMs: deltaSeconds * 1000,
       });
 
       if (nextInstance.isDead) {
@@ -1534,7 +1545,7 @@ export function advancingWildlifeSimulationTick({
           nextInstance.staminaState,
           false,
           deltaSeconds,
-          resolvingWildlifeInstanceStaminaConfig(species, nextInstance),
+          resolvingWildlifeInstanceStaminaConfig(species, nextInstance, nowMs),
           resolvingWildlifeInstanceMaxStaminaRatio(nextInstance, species)
         );
 
@@ -2002,7 +2013,7 @@ export function advancingWildlifeSimulationTick({
             nextInstance.staminaState,
             wantsToRunForStamina,
             deltaSeconds,
-            resolvingWildlifeInstanceStaminaConfig(species, nextInstance),
+            resolvingWildlifeInstanceStaminaConfig(species, nextInstance, nowMs),
             resolvingWildlifeInstanceMaxStaminaRatio(nextInstance, species)
           );
 
@@ -2046,11 +2057,13 @@ export function advancingWildlifeSimulationTick({
 
       const walkSpeed = resolvingWildlifeInstanceWalkSpeedGridPerSecond(
         species,
-        nextInstance
+        nextInstance,
+        nowMs
       );
       const runSpeed = resolvingWildlifeInstanceRunSpeedGridPerSecond(
         species,
-        nextInstance
+        nextInstance,
+        nowMs
       );
       const acceleratedRunSpeed = isRunning
         ? computingWildlifeAcceleratedRunSpeed(

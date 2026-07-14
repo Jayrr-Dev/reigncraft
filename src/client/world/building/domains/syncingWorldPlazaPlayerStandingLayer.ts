@@ -9,7 +9,6 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import {
-  checkingWorldPlazaTerrainElevationIsWalkableStepForPlayerLayer,
   resolvingWorldPlazaSurfaceLayerAtTileIndex,
 } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
@@ -85,9 +84,11 @@ export function syncingWorldPlazaPlayerStandingLayer(
     placedBlocksByTile
   );
 
-  // Walking up is only allowed onto a single-layer (1H) floor stair. Taller
-  // blocks must be jumped onto, within jump reach. Procedural hills count as
-  // natural 1H steps when the terrain surface is at most one layer above.
+  // Placed blocks only raise the player through a walkable stair. Procedural
+  // terrain is a solid ground-to-surface column, so a player already centered
+  // on one must snap to its top. This repairs stale saved layers and missed jump
+  // landing layers without making cliff faces walkable; collision prevents the
+  // player center from entering an unreachable terrain tile.
   const canWalkUpPlacedStep =
     surfaceBlock !== null &&
     checkingWorldBuildingPlacedBlockIsWalkableStep(surfaceBlock, currentLayer);
@@ -96,15 +97,10 @@ export function syncingWorldPlazaPlayerStandingLayer(
       standingTile.tileX,
       standingTile.tileY
     );
-  const canWalkUpTerrainStep =
-    terrainSurfaceLayer > currentLayer &&
-    checkingWorldPlazaTerrainElevationIsWalkableStepForPlayerLayer(
-      currentLayer,
-      standingTile.tileX,
-      standingTile.tileY
-    );
+  const isPlayerBelowProceduralTerrainSurface =
+    terrainSurfaceLayer > currentLayer;
 
-  if (canWalkUpPlacedStep || canWalkUpTerrainStep) {
+  if (canWalkUpPlacedStep || isPlayerBelowProceduralTerrainSurface) {
     worldPoint.layer = surfaceLayer;
   }
 }

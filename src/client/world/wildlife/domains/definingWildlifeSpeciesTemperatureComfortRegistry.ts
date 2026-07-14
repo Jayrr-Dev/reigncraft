@@ -14,9 +14,14 @@ import {
 import type { DefiningWorldPlazaEntityTemperatureComfortBand } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
-/** Declarative comfort low/high for one species. */
+/** Declarative comfort low/high for one species, plus optional innate weakness. */
 export type DefiningWildlifeSpeciesTemperatureComfortBand =
-  DefiningWorldPlazaEntityTemperatureComfortBand;
+  DefiningWorldPlazaEntityTemperatureComfortBand & {
+    /** Extra cold damage taken (0 = none, 1 = +100%). Seeded at wildlife spawn. */
+    readonly coldWeakness?: number;
+    /** Extra heat damage taken (0 = none, 1 = +100%). Seeded at wildlife spawn. */
+    readonly heatWeakness?: number;
+  };
 
 const TEMPERATE: DefiningWildlifeSpeciesTemperatureComfortBand = {
   comfortLowCelsius: DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_LOW_CELSIUS,
@@ -41,6 +46,13 @@ const HOT_ADAPTED: DefiningWildlifeSpeciesTemperatureComfortBand = {
 const DESERT: DefiningWildlifeSpeciesTemperatureComfortBand = {
   comfortLowCelsius: 12,
   comfortHighCelsius: 55,
+};
+
+/** Firelands apex: thrives in extreme heat, starts freezing early, takes extra cold. */
+const FIRELANDS_APEX: DefiningWildlifeSpeciesTemperatureComfortBand = {
+  comfortLowCelsius: 22,
+  comfortHighCelsius: 60,
+  coldWeakness: 0.5,
 };
 
 const WIDE_RANGE: DefiningWildlifeSpeciesTemperatureComfortBand = {
@@ -111,7 +123,7 @@ export const DEFINING_WILDLIFE_SPECIES_TEMPERATURE_COMFORT_REGISTRY: Record<
   'water-buffalo': { comfortLowCelsius: 10, comfortHighCelsius: 40 },
   tiger: HOT_ADAPTED,
   jaguar: HOT_ADAPTED,
-  sunhead: DESERT,
+  sunhead: FIRELANDS_APEX,
   monkey: HOT_ADAPTED,
   chimp: HOT_ADAPTED,
 

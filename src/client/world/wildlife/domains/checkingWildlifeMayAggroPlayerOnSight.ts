@@ -5,7 +5,6 @@
  */
 
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
-import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
@@ -22,10 +21,6 @@ export function checkingWildlifeMayAggroPlayerOnSight(
   aggressionLevel: DefiningWildlifeAggressionLevel,
   hungerDriveLevel: DefiningWildlifeHungerDriveLevel
 ): boolean {
-  if (checkingWorldPlazaDevQaLoadEnabled()) {
-    return false;
-  }
-
   if (
     !checkingWorldPlazaGenerationFeatureEnabled(
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_AI

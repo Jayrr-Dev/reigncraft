@@ -52,18 +52,25 @@ export type DefiningWorldPlazaEntityDiseaseStageGrant =
       kind: 'poison';
       delayMs: number;
       potency: DefiningWorldPlazaEntityPoisonPotency;
-      totalPoisonDamage: number;
+      /** Fraction of effective max HP drained over `durationMs` (0..1). */
+      healthPercentDamage: number;
+      /** Poison pool drain window (disease-scaled real ms). */
+      durationMs: number;
     }
   | {
       kind: 'bleed';
       delayMs: number;
       severity: DefiningWorldPlazaEntityBleedSeverity;
-      flatExpectedDamage: number;
+      /** Fraction of effective max HP drained over `durationMs` (0..1). */
+      healthPercentDamage: number;
+      /** Bleed pool drain window (disease-scaled real ms). */
+      durationMs: number;
     }
   | {
       kind: 'potential_damage';
       delayMs: number;
-      pendingExpectedDamage: number;
+      /** Fraction of effective max HP dealt when the fated hit resolves (0..1). */
+      healthPercentDamage: number;
       resolveDelayMs: number;
     }
   | {
@@ -169,7 +176,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
         kind: 'poison',
         delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(6),
         potency: 'toxic',
-        totalPoisonDamage: 25,
+        healthPercentDamage: 0.24,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(12),
       },
     ],
   },
@@ -229,7 +237,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
         kind: 'poison',
         delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2),
         potency: 'venomous',
-        totalPoisonDamage: 40,
+        healthPercentDamage: 0.45,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(24),
       },
     ],
   },
@@ -261,7 +270,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
       {
         kind: 'potential_damage',
         delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(4),
-        pendingExpectedDamage: 35,
+        healthPercentDamage: 0.45,
         resolveDelayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(8),
       },
     ],
@@ -380,7 +389,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
         kind: 'bleed',
         delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(3),
         severity: 'bleeding',
-        flatExpectedDamage: 30,
+        healthPercentDamage: 0.36,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(16),
       },
     ],
   },
@@ -428,7 +438,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
         kind: 'poison',
         delayMs: 0,
         potency: 'toxic',
-        totalPoisonDamage: 30,
+        healthPercentDamage: 0.33,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(12),
       },
       {
         kind: 'buff',
@@ -439,7 +450,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
       {
         kind: 'potential_damage',
         delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(8),
-        pendingExpectedDamage: 20,
+        healthPercentDamage: 0.24,
         resolveDelayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(2),
       },
     ],
@@ -467,7 +478,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
         kind: 'poison',
         delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(4),
         potency: 'toxic',
-        totalPoisonDamage: 22,
+        healthPercentDamage: 0.21,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(10),
       },
     ],
   },
@@ -500,7 +512,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
         kind: 'poison',
         delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
         potency: 'toxic',
-        totalPoisonDamage: 30,
+        healthPercentDamage: 0.3,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(16),
       },
     ],
   },
@@ -559,7 +572,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
         kind: 'poison',
         delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(6),
         potency: 'venomous',
-        totalPoisonDamage: 35,
+        healthPercentDamage: 0.39,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(18),
       },
       {
         kind: 'buff',
@@ -598,7 +612,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
         kind: 'poison',
         delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2.5),
         potency: 'toxic',
-        totalPoisonDamage: 28,
+        healthPercentDamage: 0.36,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(24),
       },
     ],
   },
@@ -654,7 +669,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
         kind: 'poison',
         delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2),
         potency: 'toxic',
-        totalPoisonDamage: 20,
+        healthPercentDamage: 0.24,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(10),
       },
     ],
   },
@@ -681,7 +697,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
         kind: 'poison',
         delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(3),
         potency: 'toxic',
-        totalPoisonDamage: 18,
+        healthPercentDamage: 0.15,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(8),
       },
     ],
   },
@@ -708,7 +725,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
         kind: 'bleed',
         delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
         severity: 'bleeding',
-        flatExpectedDamage: 22,
+        healthPercentDamage: 0.24,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(12),
       },
     ],
   },
@@ -735,7 +753,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
         kind: 'poison',
         delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(5),
         potency: 'toxic',
-        totalPoisonDamage: 24,
+        healthPercentDamage: 0.21,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(10),
       },
     ],
   },
@@ -798,7 +817,8 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
         kind: 'poison',
         delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
         potency: 'venomous',
-        totalPoisonDamage: 32,
+        healthPercentDamage: 0.42,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(20),
       },
     ],
   },

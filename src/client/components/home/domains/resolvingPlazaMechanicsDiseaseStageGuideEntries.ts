@@ -20,15 +20,15 @@ export function resolvingPlazaMechanicsDiseaseStageEffectLabel(
   grant: DefiningWorldPlazaEntityDiseaseStageGrant
 ): string {
   if (grant.kind === 'poison') {
-    return `${grant.potency} poison`;
+    return `${grant.potency} poison · ${Math.round(grant.healthPercentDamage * 100)}% max HP`;
   }
 
   if (grant.kind === 'bleed') {
-    return `${grant.severity} bleed`;
+    return `${grant.severity} bleed · ${Math.round(grant.healthPercentDamage * 100)}% max HP`;
   }
 
   if (grant.kind === 'potential_damage') {
-    return 'Fated damage';
+    return `Fated damage · ${Math.round(grant.healthPercentDamage * 100)}% max HP`;
   }
 
   if (grant.kind === 'confusion') {

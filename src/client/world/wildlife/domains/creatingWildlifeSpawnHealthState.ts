@@ -55,6 +55,8 @@ export function creatingWildlifeSpawnHealthState(
     {
       baseComfortLowCelsius: comfortBand.comfortLowCelsius,
       baseComfortHighCelsius: comfortBand.comfortHighCelsius,
+      coldWeakness: comfortBand.coldWeakness ?? 0,
+      heatWeakness: comfortBand.heatWeakness ?? 0,
       isHeatImmune: species.hazards.isHeatImmune,
       isColdImmune: species.hazards.isColdImmune,
     }

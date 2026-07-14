@@ -4,8 +4,8 @@ import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/anim
 import { computingWorldPlazaGridChebyshevDistance } from '@/components/world/domains/computingWorldPlazaGridChebyshevDistance';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { playingWorldPlazaEquipmentSfx } from '@/components/world/equipment/domains/playingWorldPlazaEquipmentSfx';
+import { computingWorldPlazaShrubPickDurationMs } from '@/components/world/harvest/domains/computingWorldPlazaShrubPickDurationMs';
 import {
-  DEFINING_WORLD_PLAZA_SHRUB_PICK_DURATION_MS,
   DEFINING_WORLD_PLAZA_SHRUB_PICK_PLAYER_RANGE_TILES,
   DEFINING_WORLD_PLAZA_SHRUB_PICK_TIMED_INTERACTION_PROGRESS_ICON,
 } from '@/components/world/harvest/domains/definingWorldPlazaShrubPickConstants';
@@ -108,7 +108,7 @@ export function usingWorldPlazaShrubPickProgress({
           entry.tileX,
           entry.tileY
         ),
-        durationMs: DEFINING_WORLD_PLAZA_SHRUB_PICK_DURATION_MS,
+        durationMs: computingWorldPlazaShrubPickDurationMs(),
         context: entry,
         progressIcon:
           DEFINING_WORLD_PLAZA_SHRUB_PICK_TIMED_INTERACTION_PROGRESS_ICON,

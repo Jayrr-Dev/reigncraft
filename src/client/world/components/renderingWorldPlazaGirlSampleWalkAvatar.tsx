@@ -30,7 +30,7 @@ import {
   usingWorldPlazaSelectedCharacterEngineDefinition,
   usingWorldPlazaSelectedCharacterEngineDerivedStats,
 } from '@/components/world/character/hooks/usingWorldPlazaSelectedCharacterEngineDefinition';
-import { resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint } from '@/components/world/collision';
+import { resolvingWorldCollisionSlidingPlayerFromBlockedWorldPoint } from '@/components/world/collision';
 import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
 import { RenderingWorldPlazaAvatarCharacterSwitchEffect } from '@/components/world/components/renderingWorldPlazaAvatarCharacterSwitchEffect';
 import { DEFINING_WORLD_DEPTH_AVATAR_GROUND_SHADOW_BODY_SYNC_Z_INDEX_OFFSET } from '@/components/world/depth';
@@ -2043,7 +2043,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           : activeJumpState.startLayer
         : playerPosition.layer;
       const blockedPosition =
-        resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(
+        resolvingWorldCollisionSlidingPlayerFromBlockedWorldPoint(
           {
             x: playerPosition.x,
             y: playerPosition.y,

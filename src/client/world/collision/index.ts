@@ -55,5 +55,6 @@ export {
   clampingWorldCollisionWalkTargetToWalkableGridPoint,
   resolvingWorldCollisionBlockedWorldPoint,
   resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint,
+  resolvingWorldCollisionSlidingPlayerFromBlockedWorldPoint,
 } from '@/components/world/collision/domains/resolvingWorldCollisionBlockedPoint';
 export type { DefiningWorldCollisionOptions } from '@/components/world/collision/domains/resolvingWorldCollisionBlockedPoint';

@@ -656,6 +656,7 @@ import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/pla
 import { renamingWildlifeInstanceDisplayName } from '@/components/world/wildlife/domains/renamingWildlifeInstanceDisplayName';
 import { resolvingWildlifeDiseaseTransmissionChance } from '@/components/world/wildlife/domains/resolvingWildlifeDiseaseTransmissionChance';
 import { resolvingWildlifeInstanceCollisionRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
+import { enablingWildlifeDevCombatFeatures } from '@/components/world/wildlife/domains/enablingWildlifeDevCombatFeatures';
 import { spawningWildlifeDevAggressiveChickensNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevAggressiveChickensNearPoint';
 import { spawningWildlifeDevGreyWolfRandomlyNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevGreyWolfRandomlyNearPoint';
 import { spawningWildlifeDevSpeciesNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevSpeciesNearPoint';
@@ -4744,6 +4745,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
+      enablingWildlifeDevCombatFeatures();
       spawningWildlifeDevAggressiveChickensNearPoint({
         store: wildlifeStoreRef.current,
         center: playerPosition,
@@ -4762,6 +4764,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       return;
     }
 
+    enablingWildlifeDevCombatFeatures();
     spawningWildlifeDevGreyWolfRandomlyNearPoint({
       store: wildlifeStoreRef.current,
       center: playerPosition,
@@ -4780,6 +4783,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
+      enablingWildlifeDevCombatFeatures();
       spawningWildlifeDevSpeciesNearPoint({
         store: wildlifeStoreRef.current,
         center: playerPosition,

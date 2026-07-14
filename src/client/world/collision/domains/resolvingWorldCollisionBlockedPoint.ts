@@ -76,6 +76,9 @@ import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/
 /** Below this grid distance the push direction is treated as degenerate. */
 const RESOLVING_WORLD_PLAZA_BLOCKED_WORLD_POINT_MIN_PUSH_DISTANCE = 1e-4;
 
+/** Below this movement distance a blocked move may retry one grid axis at a time. */
+const RESOLVING_WORLD_COLLISION_SLIDE_RETRY_MIN_GRID_DISTANCE = 1e-4;
+
 /** Options for collision resolution. */
 export type DefiningWorldCollisionOptions = DefiningWorldCollisionContext;
 
@@ -857,6 +860,83 @@ export function resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(
     );
     return options.fallbackPosition ?? desired;
   }
+}
+
+/**
+ * Resolves movement and retries each grid axis when diagonal input is fully
+ * blocked. This lets the avatar slide out of one-tile channels and tile corners
+ * bounded by different providers, such as a cliff on one side and water on the
+ * other.
+ */
+export function resolvingWorldCollisionSlidingPlayerFromBlockedWorldPoint(
+  desired: DefiningWorldPlazaWorldPoint,
+  options: DefiningWorldCollisionOptions = {}
+): DefiningWorldPlazaWorldPoint {
+  const resolved =
+    resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(desired, options);
+  const fallbackPosition = options.fallbackPosition;
+
+  if (!fallbackPosition) {
+    return resolved;
+  }
+
+  const intendedDeltaX = desired.x - fallbackPosition.x;
+  const intendedDeltaY = desired.y - fallbackPosition.y;
+  const intendedDistance = Math.hypot(intendedDeltaX, intendedDeltaY);
+  const resolvedDistance = Math.hypot(
+    resolved.x - fallbackPosition.x,
+    resolved.y - fallbackPosition.y
+  );
+
+  if (
+    intendedDistance <=
+      RESOLVING_WORLD_COLLISION_SLIDE_RETRY_MIN_GRID_DISTANCE ||
+    resolvedDistance >
+      RESOLVING_WORLD_COLLISION_SLIDE_RETRY_MIN_GRID_DISTANCE
+  ) {
+    return resolved;
+  }
+
+  const axisDeltas = [
+    { x: intendedDeltaX, y: 0 },
+    { x: 0, y: intendedDeltaY },
+  ] as const;
+  let bestPosition = resolved;
+  let bestProgress = 0;
+
+  for (const axisDelta of axisDeltas) {
+    if (
+      Math.hypot(axisDelta.x, axisDelta.y) <=
+      RESOLVING_WORLD_COLLISION_SLIDE_RETRY_MIN_GRID_DISTANCE
+    ) {
+      continue;
+    }
+
+    const candidate =
+      resolvingWorldCollisionEjectingPlayerFromBlockedWorldPoint(
+        {
+          x: fallbackPosition.x + axisDelta.x,
+          y: fallbackPosition.y + axisDelta.y,
+          layer: desired.layer,
+        },
+        {
+          ...options,
+          playerCenter: fallbackPosition,
+          movementDelta: axisDelta,
+        }
+      );
+    const candidateDeltaX = candidate.x - fallbackPosition.x;
+    const candidateDeltaY = candidate.y - fallbackPosition.y;
+    const forwardProgress =
+      candidateDeltaX * intendedDeltaX + candidateDeltaY * intendedDeltaY;
+
+    if (forwardProgress > bestProgress) {
+      bestPosition = candidate;
+      bestProgress = forwardProgress;
+    }
+  }
+
+  return bestPosition;
 }
 
 /**
