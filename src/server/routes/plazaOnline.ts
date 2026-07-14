@@ -17,6 +17,7 @@ import {
   type PlazaDevvitOnlineRoomsResponse,
   type PlazaDevvitOnlineSyncRequest,
   type PlazaDevvitOnlineSyncResponse,
+  type PlazaDevvitOnlineOwnedPetSnapshot,
   type PlazaDevvitOnlineWildlifeDamageEvent,
   type PlazaDevvitOnlineWildlifeSnapshot,
 } from '../../shared/plazaDevvitOnline';
@@ -163,6 +164,46 @@ function parsingPlazaDevvitOnlineWildlifeDamageEvent(
   };
 }
 
+function parsingPlazaDevvitOnlineOwnedPetSnapshot(
+  value: unknown
+): PlazaDevvitOnlineOwnedPetSnapshot | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const snapshot = value as Partial<PlazaDevvitOnlineOwnedPetSnapshot>;
+
+  if (
+    typeof snapshot.petId !== 'string' ||
+    typeof snapshot.ownerUserId !== 'string' ||
+    typeof snapshot.speciesId !== 'string' ||
+    typeof snapshot.x !== 'number' ||
+    typeof snapshot.y !== 'number' ||
+    typeof snapshot.facingDirection !== 'string' ||
+    typeof snapshot.motionClip !== 'string' ||
+    typeof snapshot.healthCurrent !== 'number' ||
+    typeof snapshot.loyalty !== 'number' ||
+    typeof snapshot.command !== 'string'
+  ) {
+    return null;
+  }
+
+  return {
+    petId: snapshot.petId,
+    ownerUserId: snapshot.ownerUserId,
+    speciesId: snapshot.speciesId,
+    displayName:
+      typeof snapshot.displayName === 'string' ? snapshot.displayName : null,
+    x: snapshot.x,
+    y: snapshot.y,
+    facingDirection: snapshot.facingDirection,
+    motionClip: snapshot.motionClip,
+    healthCurrent: snapshot.healthCurrent,
+    loyalty: snapshot.loyalty,
+    command: snapshot.command,
+  };
+}
+
 function parsingPlazaDevvitOnlineProjectileSpawnEvent(
   value: unknown
 ): PlazaDevvitOnlineProjectileSpawnEvent | null {
@@ -273,6 +314,14 @@ function parsingPlazaDevvitOnlineSyncRequest(
           .filter(
             (event): event is PlazaDevvitOnlineWildlifeDamageEvent =>
               event !== null
+          )
+      : undefined,
+    ownedPetSnapshots: Array.isArray(payload.ownedPetSnapshots)
+      ? payload.ownedPetSnapshots
+          .map(parsingPlazaDevvitOnlineOwnedPetSnapshot)
+          .filter(
+            (snapshot): snapshot is PlazaDevvitOnlineOwnedPetSnapshot =>
+              snapshot !== null
           )
       : undefined,
     heldItemVisualId:

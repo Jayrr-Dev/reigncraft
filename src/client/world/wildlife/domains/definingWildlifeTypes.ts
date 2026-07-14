@@ -14,6 +14,7 @@ import type {
   DefiningWildlifeStalkEventKind,
   DefiningWildlifeStalkPhase,
 } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
+import type { DefiningWildlifePetBondState } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
 
 /** Stable species identifier (kebab-case). */
 export type DefiningWildlifeSpeciesId = string;
@@ -400,6 +401,8 @@ export type DefiningWildlifeInstance = {
    * betrayal keeps fleeing until despawn.
    */
   softDepartureReason?: 'daybreak' | 'betrayal' | null;
+  /** Bonded companion state when this instance is an owned pet. */
+  petBond?: DefiningWildlifePetBondState | null;
 };
 
 /** Dead anchor waiting to respawn once the player leaves the kill site. */

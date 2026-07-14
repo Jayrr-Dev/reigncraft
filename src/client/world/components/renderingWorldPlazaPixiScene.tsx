@@ -9,6 +9,7 @@ import { RenderingUserProfileFriendRequestPlazaModal } from '@/components/friend
 import { usingUserProfileFriendPlazaNotifications } from '@/components/friends/hooks/usingUserProfileFriendPlazaNotifications';
 import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/hooks/usingUserProfileFriendRequestPlazaDialogs';
 import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
+import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import { sendingWorldPlazaAudioLifecycleEvent } from '@/components/world/audio/lifecycle/managingWorldPlazaAudioLifecycleStore';
 import { RenderingSpiritedSpritesBetaLayer } from '@/components/world/beta/spirited/components/renderingSpiritedSpritesBetaLayer';
@@ -435,6 +436,7 @@ import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife
 import { RenderingWorldPlazaWildlifeSpeechBubbles } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeSpeechBubbles';
 import { applyingWildlifeDocilePetComplete } from '@/components/world/wildlife/domains/applyingWildlifeDocilePetComplete';
 import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
+import { renamingWildlifeInstanceDisplayName } from '@/components/world/wildlife/domains/renamingWildlifeInstanceDisplayName';
 import { checkingWildlifeDocilePetIsReady } from '@/components/world/wildlife/domains/checkingWildlifeDocilePetIsReady';
 import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile';
 import { resolvingWildlifeDocilePetKind } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsPettable';
@@ -461,6 +463,21 @@ import {
   settingWildlifeDocileAttackConfirmPending,
 } from '@/components/world/wildlife/domains/managingWildlifeDocileAttackConfirmStore';
 import {
+  applyingWildlifePetOwnerFeed,
+  applyingWildlifePetOwnerHeal,
+  checkingWildlifePetHasCapability,
+  checkingWildlifePetItemIsEquippableWeapon,
+  formattingWildlifePetInstanceId,
+  syncingWildlifePetBondToRoster,
+  syncingWildlifePetInstanceVitalsToRoster,
+  updatingWildlifePetRecord,
+  type DefiningWildlifePetBondState,
+} from '@/components/world/wildlife/pets';
+import { RenderingWildlifePetModal } from '@/components/world/wildlife/pets/components/renderingWildlifePetModal';
+import { DEFINING_WILDLIFE_PET_MODAL_HEAL_AMOUNT } from '@/components/world/wildlife/pets/domains/definingWildlifePetModalConstants';
+import { usingWildlifeActivePetSpawn } from '@/components/world/wildlife/pets/hooks/usingWildlifeActivePetSpawn';
+import { usingWildlifePetModalState } from '@/components/world/wildlife/pets/hooks/usingWildlifePetModalState';
+import {
   clearingWildlifeInstanceStore,
   gettingWildlifeInstance,
   replacingWildlifeInstance,
@@ -483,6 +500,7 @@ import { CullerPlugin } from 'pixi.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { settingWorldPlazaOnlineRoomId } from '@/components/world/domains/managingWorldPlazaOnlineRoomIdStore';
 import type {
+  PlazaDevvitOnlineOwnedPetSnapshot,
   PlazaDevvitOnlineWildlifeDamageEvent,
   PlazaDevvitOnlineWildlifeSnapshot,
 } from '../../../shared/plazaDevvitOnline';
@@ -629,6 +647,12 @@ export function RenderingWorldPlazaPixiScene({
   const pendingWildlifeDamageEventsRef = useRef<
     PlazaDevvitOnlineWildlifeDamageEvent[]
   >([]);
+  const ownedPetSnapshotsOutRef = useRef<PlazaDevvitOnlineOwnedPetSnapshot[]>(
+    []
+  );
+  const remoteOwnedPetSnapshotsRef = useRef<
+    PlazaDevvitOnlineOwnedPetSnapshot[]
+  >([]);
 
   const {
     projectileStoreRef,
@@ -656,6 +680,8 @@ export function RenderingWorldPlazaPixiScene({
     wildlifeSnapshotsOutRef,
     pendingWildlifeDamageEventsRef,
     remoteWildlifeSnapshotsRef,
+    ownedPetSnapshotsOutRef,
+    remoteOwnedPetSnapshotsRef,
     onForcedExit: handlingForcedOnlineExit,
   });
 
@@ -699,6 +725,7 @@ export function RenderingWorldPlazaPixiScene({
         wildlifeSnapshotsOutRef={wildlifeSnapshotsOutRef}
         remoteWildlifeSnapshotsRef={remoteWildlifeSnapshotsRef}
         pendingWildlifeDamageEventsRef={pendingWildlifeDamageEventsRef}
+        ownedPetSnapshotsOutRef={ownedPetSnapshotsOutRef}
       />
     </ProvidingWorldPlazaPerformanceProfile>
   );
@@ -739,6 +766,7 @@ interface RenderingWorldPlazaPixiSceneConnectedProps {
   pendingWildlifeDamageEventsRef: React.RefObject<
     PlazaDevvitOnlineWildlifeDamageEvent[]
   >;
+  ownedPetSnapshotsOutRef: React.RefObject<PlazaDevvitOnlineOwnedPetSnapshot[]>;
 }
 
 /**
@@ -773,6 +801,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   wildlifeSnapshotsOutRef,
   remoteWildlifeSnapshotsRef,
   pendingWildlifeDamageEventsRef,
+  ownedPetSnapshotsOutRef,
 }: RenderingWorldPlazaPixiSceneConnectedProps): React.JSX.Element {
   const isSinglePlayerSession =
     onlineUserId === null && localPersistenceOwnerId !== null;
@@ -1419,6 +1448,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const {
     moveItem,
+    addItemWithStacking,
     updateState: updatingInventoryState,
     flushingPersist: flushingInventoryPersist,
     state: inventoryState,
@@ -3055,6 +3085,319 @@ function RenderingWorldPlazaPixiSceneConnected({
     wildlifeStoreRef,
   ]);
 
+  usingWildlifeActivePetSpawn({
+    isEnabled: isLocalGameplayEnabled && isWildlifeGenerationEnabled,
+    storageOwnerId: localPersistenceOwnerId,
+    onlineUserId,
+    cloudSaveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
+    wildlifeStoreRef,
+    playerPositionRef,
+    resolveSpecies: resolvingWildlifeSpeciesDefinition,
+  });
+
+  const {
+    selectedPetInstanceId,
+    isModalOpen: isPetModalOpen,
+    rosterSnapshot: petRosterSnapshot,
+    openingPetModal,
+    closingPetModal,
+  } = usingWildlifePetModalState();
+
+  useEffect(() => {
+    if (!(isLocalGameplayEnabled && isWildlifeGenerationEnabled)) {
+      return;
+    }
+
+    const broadcastingOwnedPetSnapshot = (): void => {
+      const ownerUserId = onlineUserId ?? localPersistenceOwnerId;
+      const activeRecord = petRosterSnapshot.pets.find(
+        (pet) => pet.petId === petRosterSnapshot.activePetId
+      );
+      const instance = activeRecord
+        ? gettingWildlifeInstance(
+            wildlifeStoreRef.current,
+            formattingWildlifePetInstanceId(activeRecord.petId)
+          )
+        : null;
+
+      if (!ownerUserId || !instance?.petBond) {
+        ownedPetSnapshotsOutRef.current.length = 0;
+        return;
+      }
+
+      ownedPetSnapshotsOutRef.current.length = 0;
+      ownedPetSnapshotsOutRef.current.push({
+        petId: instance.petBond.petId,
+        ownerUserId,
+        speciesId: instance.speciesId,
+        displayName: instance.customDisplayName ?? null,
+        x: instance.position.x,
+        y: instance.position.y,
+        facingDirection: instance.facingDirection,
+        motionClip: instance.aiState.motionClip,
+        healthCurrent: instance.healthState.currentHealth,
+        loyalty: instance.petBond.loyalty,
+        command: instance.petBond.command,
+      });
+    };
+
+    broadcastingOwnedPetSnapshot();
+    const intervalId = window.setInterval(broadcastingOwnedPetSnapshot, 500);
+
+    return () => window.clearInterval(intervalId);
+  }, [
+    isLocalGameplayEnabled,
+    isWildlifeGenerationEnabled,
+    localPersistenceOwnerId,
+    onlineUserId,
+    ownedPetSnapshotsOutRef,
+    petRosterSnapshot,
+    wildlifeStoreRef,
+  ]);
+
+  const handlingPetRename = useCallback(
+    (instanceId: string, name: string | null): void => {
+      const didRename = renamingWildlifeInstanceDisplayName(
+        wildlifeStoreRef.current,
+        instanceId,
+        name
+      );
+
+      if (!didRename) {
+        return;
+      }
+
+      const instance = gettingWildlifeInstance(
+        wildlifeStoreRef.current,
+        instanceId
+      );
+
+      if (instance?.petBond?.isPersistent) {
+        updatingWildlifePetRecord(instance.petBond.petId, {
+          displayName: name,
+        });
+      }
+    },
+    [wildlifeStoreRef]
+  );
+
+  const handlingPetSetCommand = useCallback(
+    (
+      instanceId: string,
+      command: DefiningWildlifePetBondState['command']
+    ): void => {
+      const instance = gettingWildlifeInstance(
+        wildlifeStoreRef.current,
+        instanceId
+      );
+      const petBond = instance?.petBond;
+
+      if (!instance || !petBond) {
+        return;
+      }
+
+      replacingWildlifeInstance(wildlifeStoreRef.current, {
+        ...instance,
+        petBond: { ...petBond, command },
+      });
+
+      if (petBond.isPersistent) {
+        updatingWildlifePetRecord(petBond.petId, { command });
+      }
+    },
+    [wildlifeStoreRef]
+  );
+
+  const handlingPetFeed = useCallback(
+    (instanceId: string, inventorySlotIndex: number): void => {
+      const instance = gettingWildlifeInstance(
+        wildlifeStoreRef.current,
+        instanceId
+      );
+      const slotItem = inventoryState.slots[inventorySlotIndex];
+      const foodDefinition = slotItem
+        ? resolvingWorldPlazaInventoryFoodDefinition(slotItem.itemTypeId)
+        : null;
+
+      if (!instance || !instance.petBond || !slotItem || !foodDefinition) {
+        return;
+      }
+
+      const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
+
+      if (!species) {
+        return;
+      }
+
+      updatingInventoryState((currentState) => {
+        const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
+          currentState,
+          inventorySlotIndex,
+          1
+        );
+
+        if (!consumeResult.consumed) {
+          return null;
+        }
+
+        const feedResult = applyingWildlifePetOwnerFeed({
+          instance,
+          species,
+          hungerRestoreRatio: foodDefinition.hungerRestoreRatio,
+          nowMs: Date.now(),
+        });
+        replacingWildlifeInstance(wildlifeStoreRef.current, feedResult.instance);
+        syncingWildlifePetInstanceVitalsToRoster(feedResult.instance);
+
+        return consumeResult.nextState;
+      });
+    },
+    [inventoryState.slots, updatingInventoryState, wildlifeStoreRef]
+  );
+
+  const handlingPetHeal = useCallback(
+    (instanceId: string): void => {
+      const instance = gettingWildlifeInstance(
+        wildlifeStoreRef.current,
+        instanceId
+      );
+
+      if (!instance || !instance.petBond) {
+        return;
+      }
+
+      const healResult = applyingWildlifePetOwnerHeal({
+        instance,
+        healAmount: DEFINING_WILDLIFE_PET_MODAL_HEAL_AMOUNT,
+        nowMs: Date.now(),
+      });
+      replacingWildlifeInstance(wildlifeStoreRef.current, healResult.instance);
+      syncingWildlifePetInstanceVitalsToRoster(healResult.instance);
+    },
+    [wildlifeStoreRef]
+  );
+
+  const handlingPetEquipWeapon = useCallback(
+    (instanceId: string, inventorySlotIndex: number): void => {
+      const instance = gettingWildlifeInstance(
+        wildlifeStoreRef.current,
+        instanceId
+      );
+      const petBond = instance?.petBond;
+      const slotItem = inventoryState.slots[inventorySlotIndex];
+
+      if (
+        !instance ||
+        !petBond ||
+        !checkingWildlifePetItemIsEquippableWeapon(slotItem)
+      ) {
+        return;
+      }
+
+      updatingInventoryState((currentState) => {
+        const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
+          currentState,
+          inventorySlotIndex,
+          1
+        );
+
+        if (!consumeResult.consumed || !slotItem) {
+          return null;
+        }
+
+        const weaponItem: DefiningInventoryItem = { ...slotItem, quantity: 1 };
+        const nextInstance: DefiningWildlifeInstance = {
+          ...instance,
+          petBond: { ...petBond, weaponItem },
+        };
+        replacingWildlifeInstance(wildlifeStoreRef.current, nextInstance);
+
+        if (petBond.isPersistent) {
+          updatingWildlifePetRecord(petBond.petId, { weaponItem });
+        }
+
+        return consumeResult.nextState;
+      });
+    },
+    [inventoryState.slots, updatingInventoryState, wildlifeStoreRef]
+  );
+
+  const handlingPetUnequipWeapon = useCallback(
+    (instanceId: string): void => {
+      const instance = gettingWildlifeInstance(
+        wildlifeStoreRef.current,
+        instanceId
+      );
+      const petBond = instance?.petBond;
+      const weaponItem = petBond?.weaponItem;
+
+      if (!instance || !petBond || !weaponItem) {
+        return;
+      }
+
+      replacingWildlifeInstance(wildlifeStoreRef.current, {
+        ...instance,
+        petBond: { ...petBond, weaponItem: null },
+      });
+
+      if (petBond.isPersistent) {
+        updatingWildlifePetRecord(petBond.petId, { weaponItem: null });
+      }
+
+      addItemWithStacking(weaponItem);
+    },
+    [addItemWithStacking, wildlifeStoreRef]
+  );
+
+  const handlingPetTeachSkill = useCallback(
+    (instanceId: string, skillId: string): void => {
+      const instance = gettingWildlifeInstance(
+        wildlifeStoreRef.current,
+        instanceId
+      );
+      const petBond = instance?.petBond;
+
+      if (!instance || !petBond || petBond.learnedSkillIds.includes(skillId)) {
+        return;
+      }
+
+      const learnedSkillIds = [...petBond.learnedSkillIds, skillId];
+      replacingWildlifeInstance(wildlifeStoreRef.current, {
+        ...instance,
+        petBond: { ...petBond, learnedSkillIds },
+      });
+
+      if (petBond.isPersistent) {
+        updatingWildlifePetRecord(petBond.petId, { learnedSkillIds });
+      }
+    },
+    [wildlifeStoreRef]
+  );
+
+  const handlingPetEquipSkill = useCallback(
+    (instanceId: string, skillId: string | null): void => {
+      const instance = gettingWildlifeInstance(
+        wildlifeStoreRef.current,
+        instanceId
+      );
+      const petBond = instance?.petBond;
+
+      if (!instance || !petBond) {
+        return;
+      }
+
+      replacingWildlifeInstance(wildlifeStoreRef.current, {
+        ...instance,
+        petBond: { ...petBond, equippedSkillId: skillId },
+      });
+
+      if (petBond.isPersistent) {
+        updatingWildlifePetRecord(petBond.petId, { equippedSkillId: skillId });
+      }
+    },
+    [wildlifeStoreRef]
+  );
+
   usingWorldPlazaProximityInteractableBlockSelection({
     enabled: isLocalGameplayEnabled && !isHideActionsEnabled,
     playerPositionRef,
@@ -3115,18 +3458,30 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
 
       const studyPoints = DEFINING_WILDLIFE_DOCILE_PET_STUDY_POINTS;
-      replacingWildlifeInstance(
-        wildlifeStoreRef.current,
+      const ownerUserId = onlineUserId ?? localPersistenceOwnerId;
+      const nowMs = Date.now();
+      const { instance: pettedInstance, becamePersistent } =
         applyingWildlifeDocilePetComplete({
           instance,
           studyPoints,
-          nowMs: Date.now(),
-        })
-      );
+          nowMs,
+          ownerUserId,
+        });
+      replacingWildlifeInstance(wildlifeStoreRef.current, pettedInstance);
+
+      if (ownerUserId) {
+        syncingWildlifePetBondToRoster({
+          instance: pettedInstance,
+          ownerUserId,
+          becamePersistent,
+          nowMs,
+        });
+      }
+
       recordingWorldPlazaBestiarySpeciesStudied(pending.speciesId, studyPoints);
       playingWildlifeStudySfx();
     },
-    [wildlifeStoreRef]
+    [wildlifeStoreRef, onlineUserId, localPersistenceOwnerId]
   );
 
   const {
@@ -3694,7 +4049,18 @@ function RenderingWorldPlazaPixiSceneConnected({
           return false;
         }
 
-        if (!checkingWildlifeDocilePetIsReady(clickedInstance, Date.now())) {
+        const hasNamablePetBond =
+          clickedInstance.petBond !== null &&
+          clickedInstance.petBond !== undefined &&
+          checkingWildlifePetHasCapability(
+            clickedInstance.petBond.loyalty,
+            'namable'
+          );
+
+        if (
+          !hasNamablePetBond &&
+          !checkingWildlifeDocilePetIsReady(clickedInstance, Date.now())
+        ) {
           clearingWildlifeDocileAttackConfirmPending();
           return true;
         }
@@ -3718,6 +4084,13 @@ function RenderingWorldPlazaPixiSceneConnected({
         }
 
         clearingWalkTarget();
+
+        if (hasNamablePetBond) {
+          clearingWildlifeDocileAttackConfirmPending();
+          openingPetModal(clickedInstance.instanceId);
+          return true;
+        }
+
         settingWildlifeDocileAttackConfirmPending({
           instanceId: clickedInstance.instanceId,
           speciesId: clickedInstance.speciesId,
@@ -3739,6 +4112,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       clearingWalkTarget,
       isClickRunIntentRef,
       lockingCombatOnWildlifeInstance,
+      openingPetModal,
       playerPositionRef,
       wildlifeStoreRef,
     ]
@@ -6438,6 +6812,22 @@ function RenderingWorldPlazaPixiSceneConnected({
           />
         </RenderingWorldPlazaGameplayHud>
       </div>
+      <RenderingWildlifePetModal
+        isOpen={isPetModalOpen}
+        instanceId={selectedPetInstanceId}
+        wildlifeStoreRef={wildlifeStoreRef}
+        inventoryState={inventoryState}
+        characterSkillIds={selectedCharacterEngineDefinition.skillIds}
+        onClose={closingPetModal}
+        onRename={handlingPetRename}
+        onSetCommand={handlingPetSetCommand}
+        onFeed={handlingPetFeed}
+        onHeal={handlingPetHeal}
+        onEquipWeapon={handlingPetEquipWeapon}
+        onUnequipWeapon={handlingPetUnequipWeapon}
+        onTeachSkill={handlingPetTeachSkill}
+        onEquipSkill={handlingPetEquipSkill}
+      />
       <RenderingUserProfileFriendRequestPlazaModal
         isOpen={activeFriendRequestDialog !== null}
         request={activeFriendRequestDialog}

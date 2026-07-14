@@ -163,6 +163,7 @@ import mdiStairsUp from '@iconify-icons/mdi/stairs-up';
 import mdiStarFourPoints from '@iconify-icons/mdi/star-four-points';
 import mdiStomach from '@iconify-icons/mdi/stomach';
 import mdiSwapVerticalBold from '@iconify-icons/mdi/swap-vertical-bold';
+import mdiSwordCross from '@iconify-icons/mdi/sword-cross';
 import mdiTerrain from '@iconify-icons/mdi/terrain';
 import mdiThermometer from '@iconify-icons/mdi/thermometer';
 import mdiTreasureChest from '@iconify-icons/mdi/treasure-chest';
@@ -379,6 +380,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:star-four-points': mdiStarFourPoints,
   'mdi:stomach': mdiStomach,
   'mdi:swap-vertical-bold': mdiSwapVerticalBold,
+  'mdi:sword-cross': mdiSwordCross,
   'mdi:thermometer': mdiThermometer,
   'mdi:terrain': mdiTerrain,
   'mdi:treasure-chest': mdiTreasureChest,

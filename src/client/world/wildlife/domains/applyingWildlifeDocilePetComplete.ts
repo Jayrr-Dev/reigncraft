@@ -7,6 +7,7 @@
 import { rollingWildlifeDocilePetCooldownDurationMs } from '@/components/world/wildlife/domains/checkingWildlifeDocilePetIsReady';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { enqueueingWildlifeDocilePetStudyFloatFeedback } from '@/components/world/wildlife/domains/enqueueingWildlifeDocilePetStudyFloatFeedback';
+import { applyingWildlifePetPettingLoyalty } from '@/components/world/wildlife/pets/domains/applyingWildlifePetPettingLoyalty';
 
 export type ApplyingWildlifeDocilePetCompleteParams = {
   readonly instance: DefiningWildlifeInstance;
@@ -14,17 +15,27 @@ export type ApplyingWildlifeDocilePetCompleteParams = {
   readonly nowMs: number;
   /** Optional `[0, 1)` roll for deterministic tests. */
   readonly cooldownRollUnit?: number;
+  /** When set, also grants pet bond loyalty for this completed pet. */
+  readonly ownerUserId?: string | null;
+};
+
+export type ApplyingWildlifeDocilePetCompleteResult = {
+  readonly instance: DefiningWildlifeInstance;
+  /** True the tick this pet's bond just crossed into the Familiar+ tier. */
+  readonly becamePersistent: boolean;
 };
 
 /**
- * Awards the Pet study float and starts the 8–16 in-game-hour cooldown.
+ * Awards the Pet study float, starts the 8–16 in-game-hour cooldown, and
+ * (when an owner is known) grants bonded-companion petting loyalty.
  */
 export function applyingWildlifeDocilePetComplete({
   instance,
   studyPoints,
   nowMs,
   cooldownRollUnit,
-}: ApplyingWildlifeDocilePetCompleteParams): DefiningWildlifeInstance {
+  ownerUserId = null,
+}: ApplyingWildlifeDocilePetCompleteParams): ApplyingWildlifeDocilePetCompleteResult {
   const withFloat = enqueueingWildlifeDocilePetStudyFloatFeedback({
     instance,
     studyPoints,
@@ -35,8 +46,23 @@ export function applyingWildlifeDocilePetComplete({
       ? rollingWildlifeDocilePetCooldownDurationMs()
       : rollingWildlifeDocilePetCooldownDurationMs(cooldownRollUnit);
 
-  return {
+  const withCooldown: DefiningWildlifeInstance = {
     ...withFloat,
     petCooldownUntilMs: nowMs + cooldownDurationMs,
+  };
+
+  if (!ownerUserId) {
+    return { instance: withCooldown, becamePersistent: false };
+  }
+
+  const pettingResult = applyingWildlifePetPettingLoyalty({
+    instance: withCooldown,
+    ownerUserId,
+    nowMs,
+  });
+
+  return {
+    instance: pettingResult.instance,
+    becamePersistent: pettingResult.becamePersistent,
   };
 }

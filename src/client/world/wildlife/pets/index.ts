@@ -1,0 +1,160 @@
+/**
+ * Public pet domain API.
+ *
+ * @module components/world/wildlife/pets
+ */
+
+export { applyingWildlifePetBondAfterDocileFollow } from '@/components/world/wildlife/pets/domains/applyingWildlifePetBondAfterDocileFollow';
+
+export {
+  applyingWildlifePetCommandTick,
+  type ApplyingWildlifePetCommandTickParams,
+} from '@/components/world/wildlife/pets/domains/applyingWildlifePetCommandTick';
+
+export { applyingWildlifePetCuriousFollowGrant } from '@/components/world/wildlife/pets/domains/applyingWildlifePetCuriousFollowGrant';
+
+export {
+  applyingWildlifePetLoyaltyGrant,
+  type ApplyingWildlifePetLoyaltyGrantResult,
+} from '@/components/world/wildlife/pets/domains/applyingWildlifePetLoyaltyGrant';
+
+export {
+  applyingWildlifePetOwnerFeed,
+  type ApplyingWildlifePetOwnerFeedResult,
+} from '@/components/world/wildlife/pets/domains/applyingWildlifePetOwnerFeed';
+
+export {
+  applyingWildlifePetOwnerHeal,
+  type ApplyingWildlifePetOwnerHealResult,
+} from '@/components/world/wildlife/pets/domains/applyingWildlifePetOwnerHeal';
+
+export {
+  applyingWildlifePetPettingLoyalty,
+  type ApplyingWildlifePetPettingLoyaltyResult,
+} from '@/components/world/wildlife/pets/domains/applyingWildlifePetPettingLoyalty';
+
+export {
+  applyingWildlifePetSoulsave,
+  type ApplyingWildlifePetSoulsaveResult,
+} from '@/components/world/wildlife/pets/domains/applyingWildlifePetSoulsave';
+
+export { checkingWildlifePetAllied } from '@/components/world/wildlife/pets/domains/checkingWildlifePetAllied';
+
+export { checkingWildlifePetItemIsEquippableWeapon } from '@/components/world/wildlife/pets/domains/checkingWildlifePetItemIsEquippableWeapon';
+export { checkingWildlifePetItemTypeIdIsEquippableWeapon } from '@/components/world/wildlife/pets/domains/checkingWildlifePetItemIsEquippableWeapon';
+
+export {
+  checkingWildlifePetMayAcceptCommand,
+  listingWildlifePetAvailableCommands,
+} from '@/components/world/wildlife/pets/domains/checkingWildlifePetMayAcceptCommand';
+
+export { computingWildlifePetLoyaltyFromRestoredPoints } from '@/components/world/wildlife/pets/domains/computingWildlifePetLoyaltyFromRestoredPoints';
+
+export {
+  creatingWildlifePetBondStateFromPersistedRecord,
+  creatingWildlifePetPersistedRecord,
+  type CreatingWildlifePetPersistedRecordParams,
+} from '@/components/world/wildlife/pets/domains/creatingWildlifePetPersistedRecord';
+
+export {
+  DEFINING_WILDLIFE_PET_CURIOUS_FOLLOW_LOYALTY_GRANT,
+  DEFINING_WILDLIFE_PET_LOYALTY_TIER_REGISTRY,
+  DEFINING_WILDLIFE_PET_MAX_ACTIVE,
+  DEFINING_WILDLIFE_PET_MAX_LOYALTY,
+  DEFINING_WILDLIFE_PET_NAME_PROMPT_LABEL,
+  DEFINING_WILDLIFE_PET_PETTING_LOYALTY_GRANT,
+  type DefiningWildlifePetLoyaltyTierDefinition,
+} from '@/components/world/wildlife/pets/domains/definingWildlifePetLoyaltyTiersRegistry';
+
+export {
+  DEFINING_WILDLIFE_PET_ROSTER_STORAGE_KEY_PREFIX,
+  resolvingWildlifePetRosterStorageKey,
+} from '@/components/world/wildlife/pets/domains/definingWildlifePetRosterConstants';
+
+export type {
+  DefiningWildlifePetBondState,
+  DefiningWildlifePetCapabilityId,
+  DefiningWildlifePetCommandId,
+  DefiningWildlifePetLoyaltyTierId,
+  DefiningWildlifePetPersistedRecord,
+  DefiningWildlifePetRoster,
+} from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
+
+export {
+  initializingWildlifePetRosterStore,
+  readingWildlifePetRosterSnapshot,
+  removingWildlifePetRecord,
+  replacingWildlifePetRosterFromSnapshot,
+  resettingWildlifePetRosterStoreForTests,
+  settingWildlifePetActivePetId,
+  settingWildlifePetRosterMultiplayerMirrorEnabled,
+  subscribingWildlifePetRoster,
+  updatingWildlifePetRecord,
+  upsertingWildlifePetRecord,
+  type InitializingWildlifePetRosterStoreOptions,
+} from '@/components/world/wildlife/pets/domains/managingWildlifePetRosterStore';
+
+export { readingWildlifePetRosterFromStorage } from '@/components/world/wildlife/pets/domains/readingWildlifePetRosterFromStorage';
+
+export {
+  resolvingWildlifePetAdvancedStats,
+  type ResolvingWildlifePetAdvancedStatsParams,
+  type ResolvingWildlifePetAdvancedStatsResult,
+} from '@/components/world/wildlife/pets/domains/resolvingWildlifePetAdvancedStats';
+
+export {
+  resolvingWildlifePetCommandIntent,
+  type ResolvingWildlifePetCommandIntentParams,
+  type ResolvingWildlifePetCommandIntentResult,
+} from '@/components/world/wildlife/pets/domains/resolvingWildlifePetCommandIntent';
+
+export { resolvingWildlifePetIdleInteractionLabel } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetIdleInteractionLabel';
+
+export {
+  checkingWildlifePetHasCapability,
+  listingWildlifePetUnlockedCapabilities,
+  resolvingWildlifePetLoyaltyTier,
+  resolvingWildlifePetLoyaltyTierId,
+  resolvingWildlifePetLoyaltyTierOrNull,
+  resolvingWildlifePetNextTier,
+  type ResolvingWildlifePetNextTierResult,
+} from '@/components/world/wildlife/pets/domains/resolvingWildlifePetLoyaltyTier';
+
+export {
+  creatingEmptyWildlifePetRoster,
+  parsingWildlifePetPersistedRecord,
+  parsingWildlifePetRoster,
+  serializingWildlifePetPersistedRecord,
+  serializingWildlifePetRoster,
+  type ParsingWildlifePetRosterResult,
+} from '@/components/world/wildlife/pets/domains/serializingWildlifePetRoster';
+
+export { writingWildlifePetRosterToStorage } from '@/components/world/wildlife/pets/domains/writingWildlifePetRosterToStorage';
+
+export {
+  formattingWildlifePetInstanceId,
+  spawningWildlifeActivePetNearOwner,
+} from '@/components/world/wildlife/pets/domains/spawningWildlifeActivePetNearOwner';
+
+export {
+  syncingWildlifePetBondToRoster,
+  syncingWildlifePetInstanceVitalsToRoster,
+} from '@/components/world/wildlife/pets/domains/syncingWildlifePetBondToRoster';
+
+export {
+  fetchingPlazaPetsMultiplayerRoster,
+  savingPlazaPetsMultiplayerRoster,
+} from '@/components/world/wildlife/pets/repositories/callingPlazaPetsDevvitApi';
+
+export { RenderingWildlifePetModal } from '@/components/world/wildlife/pets/components/renderingWildlifePetModal';
+
+export {
+  usingWildlifeActivePetSpawn,
+  type UsingWildlifeActivePetSpawnParams,
+  type UsingWildlifeActivePetSpawnResult,
+} from '@/components/world/wildlife/pets/hooks/usingWildlifeActivePetSpawn';
+
+export {
+  usingWildlifePetModalState,
+  type UsingWildlifePetModalStateResult,
+} from '@/components/world/wildlife/pets/hooks/usingWildlifePetModalState';

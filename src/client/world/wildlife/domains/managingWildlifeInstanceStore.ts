@@ -11,6 +11,7 @@ import { checkingWildlifeSpeciesIsNightOnlySpawn } from '@/components/world/wild
 import { creatingWildlifeSpawnHealthState } from '@/components/world/wildlife/domains/creatingWildlifeSpawnHealthState';
 import { DEFINING_WILDLIFE_SPAWN_SPACING_MODULUS } from '@/components/world/wildlife/domains/definingWildlifeBiomeSpawnTable';
 import type { DefiningWildlifeLargeSizeFrame } from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
+import { checkingWildlifeInstanceIsOwnedPersistentPet } from '@/components/world/wildlife/domains/checkingWildlifeInstanceIsOwnedPet';
 import { checkingWildlifeOmegaWolfSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
@@ -23,6 +24,7 @@ import type {
   DefiningWildlifeSpawnAnchor,
   DefiningWildlifeSpeechState,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import type { DefiningWildlifePetBondState } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
 import {
   buildingWildlifeSpatialGrid,
   queryingWildlifeInstancesNearPoint,
@@ -148,6 +150,10 @@ export type CreatingWildlifeInstanceAtPositionParams = {
   largeSizeFrame: DefiningWildlifeLargeSizeFrame | null;
   thinkScheduleAnchor: DefiningWildlifeSpawnAnchor;
   nowMs: number;
+  /** Bonded companion state to attach at spawn (respawning an owned pet). */
+  petBond?: DefiningWildlifePetBondState | null;
+  /** Player-assigned name override to restore at spawn. */
+  customDisplayName?: string | null;
 };
 
 /** Creates one wildlife instance at an explicit world position. */
@@ -163,6 +169,8 @@ export function creatingWildlifeInstanceAtPosition({
   largeSizeFrame,
   thinkScheduleAnchor,
   nowMs,
+  petBond = null,
+  customDisplayName = null,
 }: CreatingWildlifeInstanceAtPositionParams): DefiningWildlifeInstance {
   const spawnHealthProfile = {
     speciesId: species.speciesId,
@@ -185,7 +193,7 @@ export function creatingWildlifeInstanceAtPosition({
     largeSizeFrame,
     packAlphaInstanceId: null,
     packAlphaDeathScatterUntilMs: null,
-    customDisplayName: null,
+    customDisplayName,
     spawnAnchor,
     position,
     facingDirection: 'Down',
@@ -208,6 +216,7 @@ export function creatingWildlifeInstanceAtPosition({
     petCooldownUntilMs: null,
     softDepartureStartedAtMs: null,
     softDepartureReason: null,
+    petBond,
   };
 }
 
@@ -395,7 +404,9 @@ export function hydratingWildlifeInstancesNearPoint(
 /**
  * Removes live instances beyond the despawn radius from the store.
  * Keeps `knownAnchorIds` so fled animals are not recreated at their spawn
- * while the player is still fighting nearby.
+ * while the player is still fighting nearby. Owned persistent companions
+ * (Familiar+ loyalty) are exempt so they do not vanish when the player
+ * ranges away from where the pet is standing.
  */
 export function despawningWildlifeInstancesBeyondRadius(
   store: ManagingWildlifeInstanceStore,
@@ -404,6 +415,10 @@ export function despawningWildlifeInstancesBeyondRadius(
 ): void {
   for (const [instanceId, instance] of store.instances) {
     if (instance.isDead) {
+      continue;
+    }
+
+    if (checkingWildlifeInstanceIsOwnedPersistentPet(instance)) {
       continue;
     }
 

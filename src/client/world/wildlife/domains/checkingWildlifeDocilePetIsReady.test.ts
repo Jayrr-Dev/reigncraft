@@ -45,7 +45,7 @@ describe('wildlife docile pet cooldown', () => {
 
   it('stamps petCooldownUntilMs on pet complete', () => {
     const nowMs = 10_000;
-    const next = applyingWildlifeDocilePetComplete({
+    const { instance: next, becamePersistent } = applyingWildlifeDocilePetComplete({
       instance: creatingWildlifeTestInstance({
         speciesId: 'cat-orange',
       }),
@@ -61,5 +61,6 @@ describe('wildlife docile pet cooldown', () => {
         )
     );
     expect(next.floatingTexts.length).toBeGreaterThan(0);
+    expect(becamePersistent).toBe(false);
   });
 });

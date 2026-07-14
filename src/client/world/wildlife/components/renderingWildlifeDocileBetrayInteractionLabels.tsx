@@ -28,6 +28,7 @@ import {
 import { resolvingWildlifeInstanceSizeScale } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
 import { resolvingWorldPlazaWildlifeNameTagScreenPoint } from '@/components/world/wildlife/domains/resolvingWorldPlazaWildlifeNameTagScreenPoint';
+import { resolvingWildlifePetIdleInteractionLabel } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetIdleInteractionLabel';
 import { useLayoutEffect, useRef } from 'react';
 
 const RENDERING_WILDLIFE_DOCILE_BETRAY_LABEL_HIDDEN_TRANSFORM =
@@ -71,11 +72,19 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
   const isPetting =
     timedInteractionProgressSnapshot.isActive &&
     timedInteractionProgressSnapshot.activeTargetKey === pending?.instanceId;
-  const label = isPetting
-    ? resolvingWildlifeDocilePettingLabel()
+  const pendingInstance = pending
+    ? gettingWildlifeInstance(wildlifeStoreRef.current, pending.instanceId)
+    : null;
+  const idleLabel = pendingInstance?.petBond
+    ? resolvingWildlifePetIdleInteractionLabel({
+        speciesId: pendingInstance.speciesId,
+        loyalty: pendingInstance.petBond.loyalty,
+        displayName: pendingInstance.customDisplayName ?? null,
+      })
     : pending
       ? resolvingWildlifeDocilePetIdleLabel(pending.petKind)
       : resolvingWildlifeDocilePettingLabel();
+  const label = isPetting ? resolvingWildlifeDocilePettingLabel() : idleLabel;
 
   useLayoutEffect(() => {
     if (!pending) {

@@ -14,6 +14,7 @@ import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domai
 import { notifyingWildlifeOmegaWolfSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeOmegaWolfSfxEvent';
 import { notifyingWildlifeSpeciesSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeSpeciesSfxEvent';
 import { notifyingWildlifeVocalSfxOnDeath } from '@/components/world/wildlife/domains/notifyingWildlifeVocalSfxOnDeath';
+import { applyingWildlifePetSoulsave } from '@/components/world/wildlife/pets/domains/applyingWildlifePetSoulsave';
 import {
   resolvingWildlifeObeseIncomingPhysicalDamageOptions,
   resolvingWildlifeObeseJumpAttackDamageOptions,
@@ -134,6 +135,17 @@ export function applyingWildlifeInstancePhysicalDamage({
         }
       : undefined,
   });
+
+  if (nextInstance.isDead || nextInstance.healthState.currentHealth <= 0) {
+    const soulsaveResult = applyingWildlifePetSoulsave({
+      instance: nextInstance,
+      nowMs,
+    });
+
+    if (soulsaveResult.intercepted) {
+      nextInstance = soulsaveResult.instance;
+    }
+  }
 
   notifyingWildlifeVocalSfxOnDeath({
     instanceId: instance.instanceId,

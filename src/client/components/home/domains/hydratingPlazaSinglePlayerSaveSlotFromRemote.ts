@@ -20,6 +20,9 @@ import {
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { listingWildlifeSpeciesIds } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { readingWildlifePetRosterFromStorage } from '@/components/world/wildlife/pets/domains/readingWildlifePetRosterFromStorage';
+import { parsingWildlifePetRoster } from '@/components/world/wildlife/pets/domains/serializingWildlifePetRoster';
+import { writingWildlifePetRosterToStorage } from '@/components/world/wildlife/pets/domains/writingWildlifePetRosterToStorage';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 const DEFINING_WORLD_PLAZA_BIOME_KIND_SET = new Set<string>(
@@ -186,5 +189,21 @@ export async function hydratingPlazaSinglePlayerSaveSlotFromRemote(
       localPersistenceOwnerId,
       discoveredRealmIds
     );
+  }
+
+  if (remoteData.petRoster) {
+    // Prefer local roster when present so a lagging Redis snapshot cannot
+    // wipe fresher loyalty / equipment progress after a successful local save.
+    const localRoster = readingWildlifePetRosterFromStorage(
+      localPersistenceOwnerId
+    );
+
+    if (localRoster.pets.length === 0) {
+      const { roster: remoteRoster } = parsingWildlifePetRoster(
+        remoteData.petRoster
+      );
+
+      writingWildlifePetRosterToStorage(localPersistenceOwnerId, remoteRoster);
+    }
   }
 }

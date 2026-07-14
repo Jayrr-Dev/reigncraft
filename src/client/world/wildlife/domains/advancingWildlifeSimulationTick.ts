@@ -145,6 +145,8 @@ import { despawningWildlifeNightOnlyInstancesDuringDaytime } from '@/components/
 import { feedingWildlifeHunterFromKill } from '@/components/world/wildlife/domains/feedingWildlifeHunterFromKill';
 import { formattingWildlifeIntentKey } from '@/components/world/wildlife/domains/formattingWildlifeIntentKey';
 import { listingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
+import { applyingWildlifePetBondAfterDocileFollow } from '@/components/world/wildlife/pets/domains/applyingWildlifePetBondAfterDocileFollow';
+import { applyingWildlifePetCommandTick } from '@/components/world/wildlife/pets/domains/applyingWildlifePetCommandTick';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import {
   despawningWildlifeInstancesBeyondRadius,
@@ -1674,6 +1676,20 @@ export function advancingWildlifeSimulationTick({
           species,
           intent: resolvedIntent,
           blackboard,
+          nowMs,
+        });
+
+        // Bonded companions: first-follow grants Curious loyalty, then the
+        // owner's active command (follow/stay/attack/defend) takes over.
+        nextInstance = applyingWildlifePetBondAfterDocileFollow({
+          instance: nextInstance,
+          ownerUserId: playerUserId,
+          nowMs,
+        });
+        nextInstance = applyingWildlifePetCommandTick({
+          instance: nextInstance,
+          playerPosition,
+          playerUserId,
           nowMs,
         });
 

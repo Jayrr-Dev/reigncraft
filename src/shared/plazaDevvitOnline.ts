@@ -45,6 +45,21 @@ export type PlazaDevvitOnlineWildlifeSnapshot = {
   healthCurrent: number;
 };
 
+/** Owner-authoritative snapshot of one bonded companion, broadcast each sync. */
+export type PlazaDevvitOnlineOwnedPetSnapshot = {
+  petId: string;
+  ownerUserId: string;
+  speciesId: string;
+  displayName: string | null;
+  x: number;
+  y: number;
+  facingDirection: string;
+  motionClip: string;
+  healthCurrent: number;
+  loyalty: number;
+  command: string;
+};
+
 export type PlazaDevvitOnlineWildlifeDamageEvent = {
   instanceId: string;
   damageAmount: number;
@@ -89,6 +104,7 @@ export type PlazaDevvitOnlineSyncRequest = {
   projectileSpawnEvents?: readonly PlazaDevvitOnlineProjectileSpawnEvent[];
   wildlifeSnapshots?: readonly PlazaDevvitOnlineWildlifeSnapshot[];
   wildlifeDamageEvents?: readonly PlazaDevvitOnlineWildlifeDamageEvent[];
+  ownedPetSnapshots?: readonly PlazaDevvitOnlineOwnedPetSnapshot[];
   /** Equipped hotbar held-item overlay; null when unarmed or non-visual tool. */
   heldItemVisualId?: string | null;
   heldItemTier?: string | null;

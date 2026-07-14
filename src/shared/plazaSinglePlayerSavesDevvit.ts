@@ -44,6 +44,46 @@ export type PlazaSinglePlayerSaveBestiaryDiscovery = {
   studyCountsBySpeciesId: Readonly<Record<string, number>>;
 };
 
+/** One equipped weapon/armor item on a persisted pet record. */
+export type PlazaSinglePlayerSavePetInventoryItem = {
+  id: string;
+  itemTypeId: string;
+  quantity: number;
+  slotIndex: number;
+  metadata?: Readonly<Record<string, unknown>>;
+};
+
+/** Persisted pet record shape for save slots / multiplayer roster. */
+export type PlazaSinglePlayerSavePetRecord = {
+  petId: string;
+  speciesId: string;
+  displayName: string | null;
+  loyalty: number;
+  isActive: boolean;
+  command: 'follow' | 'stay' | 'attack' | 'defend';
+  healthCurrent: number | null;
+  hungerRatio: number | null;
+  staminaRatio: number | null;
+  sizeScaleSample: number;
+  aggressionLevel: 'tame' | 'normal' | 'aggressive';
+  weaponItem: PlazaSinglePlayerSavePetInventoryItem | null;
+  armorItem: PlazaSinglePlayerSavePetInventoryItem | null;
+  learnedSkillIds: readonly string[];
+  equippedSkillId: string | null;
+  soulsaveConsumed: boolean;
+  lastKnownX: number | null;
+  lastKnownY: number | null;
+  lastKnownLayer: number | null;
+  acquiredAtMs: number;
+  updatedAtMs: number;
+};
+
+/** Saved roster of bonded companions for one player. */
+export type PlazaSinglePlayerSavePetRoster = {
+  activePetId: string | null;
+  pets: readonly PlazaSinglePlayerSavePetRecord[];
+};
+
 /** Full persisted payload for one single-player save slot. */
 export type PlazaSinglePlayerSaveSlotPersistedData = {
   lastPosition: PlazaSinglePlayerSaveLastPosition | null;
@@ -57,6 +97,8 @@ export type PlazaSinglePlayerSaveSlotPersistedData = {
   exploredBiomeKinds: readonly string[] | null;
   /** Named realm ids entered at least once (`latticeX:latticeY`). */
   discoveredNamedRealmIds: readonly string[] | null;
+  /** Bonded companion roster. */
+  petRoster: PlazaSinglePlayerSavePetRoster | null;
   updatedAtMs: number;
 };
 
@@ -69,6 +111,7 @@ export type PlazaSinglePlayerSaveSlotUpdateRequest = {
   bestiaryDiscovery?: PlazaSinglePlayerSaveBestiaryDiscovery | null;
   exploredBiomeKinds?: readonly string[] | null;
   discoveredNamedRealmIds?: readonly string[] | null;
+  petRoster?: PlazaSinglePlayerSavePetRoster | null;
 };
 
 /** Summary shown on the home screen for one save slot. */

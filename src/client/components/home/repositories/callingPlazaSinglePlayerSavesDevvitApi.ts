@@ -121,6 +121,7 @@ export async function deletingPlazaSinglePlayerSaveSlotData(
     bestiaryDiscovery: null,
     exploredBiomeKinds: null,
     discoveredNamedRealmIds: null,
+    petRoster: null,
   });
 }
 

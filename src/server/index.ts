@@ -5,6 +5,7 @@ import { api } from './routes/api';
 import { forms } from './routes/forms';
 import { menu } from './routes/menu';
 import { plazaOnline } from './routes/plazaOnline';
+import { plazaPets } from './routes/plazaPets';
 import { plazaSaves } from './routes/plazaSaves';
 import { triggers } from './routes/triggers';
 import { worldBuilding } from './routes/worldBuilding';
@@ -23,6 +24,7 @@ internal.route('/triggers', triggers);
 
 app.route('/api', api);
 app.route('/api/plaza', plazaOnline);
+app.route('/api/plaza-pets', plazaPets);
 app.route('/api/plaza-saves', plazaSaves);
 app.route('/api/world-building', worldBuilding);
 app.route('/api/world-inventory', worldInventory);

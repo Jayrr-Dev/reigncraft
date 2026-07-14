@@ -46,6 +46,7 @@ import {
   PLAZA_DEVVIT_ONLINE_POLL_INTERVAL_MS,
   PLAZA_DEVVIT_ONLINE_SYNC_API_PATH,
   PLAZA_DEVVIT_ONLINE_SYNC_INTERVAL_MS,
+  type PlazaDevvitOnlineOwnedPetSnapshot,
   type PlazaDevvitOnlinePlayersResponse,
   type PlazaDevvitOnlineProjectileSpawnEvent,
   type PlazaDevvitOnlineSyncRequest,
@@ -90,6 +91,12 @@ export interface UsingWorldPlazaDevvitPollingRoomParams {
   remoteWildlifeSnapshotsRef?: React.RefObject<
     PlazaDevvitOnlineWildlifeSnapshot[]
   >;
+  /** Local owner's active companion, broadcast every sync (owner-authoritative). */
+  ownedPetSnapshotsOutRef?: React.RefObject<PlazaDevvitOnlineOwnedPetSnapshot[]>;
+  /** Every other player's bonded companion(s), replaced whole on each poll. */
+  remoteOwnedPetSnapshotsRef?: React.RefObject<
+    PlazaDevvitOnlineOwnedPetSnapshot[]
+  >;
   /** Called when the local player is kicked or the world is deleted. */
   onForcedExit?: (reason: string) => void;
 }
@@ -121,6 +128,8 @@ export function usingWorldPlazaDevvitPollingRoom({
   wildlifeSnapshotsOutRef,
   pendingWildlifeDamageEventsRef,
   remoteWildlifeSnapshotsRef,
+  ownedPetSnapshotsOutRef,
+  remoteOwnedPetSnapshotsRef,
   onForcedExit,
 }: UsingWorldPlazaDevvitPollingRoomParams): UsingWorldPlazaDevvitPollingRoomResult {
   const queryClient = useQueryClient();
@@ -272,12 +281,16 @@ export function usingWorldPlazaDevvitPollingRoom({
         wildlifeDamageEvents: pendingWildlifeDamageEventsRef?.current?.length
           ? [...pendingWildlifeDamageEventsRef.current]
           : undefined,
+        ownedPetSnapshots: ownedPetSnapshotsOutRef?.current?.length
+          ? [...ownedPetSnapshotsOutRef.current]
+          : undefined,
         heldItemVisualId: motionState.heldItemVisualId,
         heldItemTier: motionState.heldItemTier,
       };
     }, [
       healthSyncSnapshotRef,
       localAvatarMotionStateRef,
+      ownedPetSnapshotsOutRef,
       pendingProjectileSpawnEventsRef,
       pendingWildlifeDamageEventsRef,
       playerPositionRef,
@@ -594,6 +607,16 @@ export function usingWorldPlazaDevvitPollingRoom({
           pendingWildlifeDamageEventsRef.current.push(
             ...remoteWildlifeDamageEvents
           );
+        }
+
+        if (remoteOwnedPetSnapshotsRef?.current) {
+          const remoteOwnedPetSnapshots = data.players.flatMap((player) =>
+            player.userId !== userId && Array.isArray(player.ownedPetSnapshots)
+              ? player.ownedPetSnapshots
+              : []
+          );
+          remoteOwnedPetSnapshotsRef.current.length = 0;
+          remoteOwnedPetSnapshotsRef.current.push(...remoteOwnedPetSnapshots);
         }
 
         syncingRemotePlayersFromPoll(remotePlayers);

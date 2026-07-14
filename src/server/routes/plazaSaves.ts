@@ -9,6 +9,7 @@ import type {
   PlazaSinglePlayerSaveBestiaryDiscovery,
   PlazaSinglePlayerSaveLastPosition,
   PlazaSinglePlayerSavePersistedDiseaseEffect,
+  PlazaSinglePlayerSavePetRoster,
   PlazaSinglePlayerSavePlayerConditions,
   PlazaSinglePlayerSavesListResponse,
   PlazaSinglePlayerSaveSlotPersistedData,
@@ -17,6 +18,7 @@ import type {
   PlazaSinglePlayerSaveSlotSummary,
   PlazaSinglePlayerSaveSlotUpdateRequest,
 } from '../../shared/plazaSinglePlayerSavesDevvit';
+import { parsingPlazaSinglePlayerSavePetRoster } from '../../shared/parsingPlazaSinglePlayerSavePetRoster';
 import type { WorldInventoryDevvitPersistedState } from '../../shared/worldInventoryDevvit';
 import { buildingPlazaSaveSlotsRedisKey } from '../domains/buildingPlazaSaveSlotRedisKeys';
 import { clearingPlazaSinglePlayerSaveSlotWorldPersistence } from '../domains/clearingPlazaSinglePlayerSaveSlotWorldPersistence';
@@ -346,6 +348,26 @@ function parsingDiscoveredNamedRealmIds(
   return realmIds.length > 0 ? realmIds : null;
 }
 
+/**
+ * Parses a persisted pet roster from save JSON. Malformed pet rows are
+ * dropped; an empty roster (no pets) normalizes to null.
+ */
+function parsingPersistedPetRoster(
+  value: unknown
+): PlazaSinglePlayerSavePetRoster | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return null;
+  }
+
+  const { roster } = parsingPlazaSinglePlayerSavePetRoster(value);
+
+  return roster.pets.length > 0 ? roster : null;
+}
+
 function checkingSaveSlotHasPersistedData(
   data: Pick<
     PlazaSinglePlayerSaveSlotPersistedData,
@@ -356,6 +378,7 @@ function checkingSaveSlotHasPersistedData(
     | 'bestiaryDiscovery'
     | 'exploredBiomeKinds'
     | 'discoveredNamedRealmIds'
+    | 'petRoster'
   >
 ): boolean {
   return Boolean(
@@ -365,7 +388,8 @@ function checkingSaveSlotHasPersistedData(
     (data.attachedRecipeIds && data.attachedRecipeIds.length > 0) ||
     data.bestiaryDiscovery ||
     (data.exploredBiomeKinds && data.exploredBiomeKinds.length > 0) ||
-    (data.discoveredNamedRealmIds && data.discoveredNamedRealmIds.length > 0)
+    (data.discoveredNamedRealmIds && data.discoveredNamedRealmIds.length > 0) ||
+    (data.petRoster && data.petRoster.pets.length > 0)
   );
 }
 
@@ -403,6 +427,7 @@ function parsingPersistedSaveSlotData(
     const discoveredNamedRealmIds = parsingDiscoveredNamedRealmIds(
       parsed.discoveredNamedRealmIds
     );
+    const petRoster = parsingPersistedPetRoster(parsed.petRoster);
     const updatedAtMs =
       typeof parsed.updatedAtMs === 'number' &&
       Number.isFinite(parsed.updatedAtMs)
@@ -417,6 +442,7 @@ function parsingPersistedSaveSlotData(
       bestiaryDiscovery,
       exploredBiomeKinds,
       discoveredNamedRealmIds,
+      petRoster,
       updatedAtMs,
     };
 
@@ -536,6 +562,20 @@ function parsingSaveSlotUpdateBody(
     }
   }
 
+  if ('petRoster' in payload) {
+    if (payload.petRoster === null) {
+      update.petRoster = null;
+    } else if (
+      !payload.petRoster ||
+      typeof payload.petRoster !== 'object' ||
+      Array.isArray(payload.petRoster)
+    ) {
+      return null;
+    } else {
+      update.petRoster = parsingPersistedPetRoster(payload.petRoster);
+    }
+  }
+
   if (
     update.lastPosition === undefined &&
     update.inventory === undefined &&
@@ -543,7 +583,8 @@ function parsingSaveSlotUpdateBody(
     update.attachedRecipeIds === undefined &&
     update.bestiaryDiscovery === undefined &&
     update.exploredBiomeKinds === undefined &&
-    update.discoveredNamedRealmIds === undefined
+    update.discoveredNamedRealmIds === undefined &&
+    update.petRoster === undefined
   ) {
     return null;
   }
@@ -592,6 +633,12 @@ function mergingSaveSlotData(
         : (parsingDiscoveredNamedRealmIds(update.discoveredNamedRealmIds) ??
           null)
       : (existing?.discoveredNamedRealmIds ?? null);
+  const nextPetRoster =
+    update.petRoster !== undefined
+      ? update.petRoster === null
+        ? null
+        : parsingPersistedPetRoster(update.petRoster)
+      : (existing?.petRoster ?? null);
 
   const merged = {
     lastPosition: nextLastPosition,
@@ -601,6 +648,7 @@ function mergingSaveSlotData(
     bestiaryDiscovery: nextBestiaryDiscovery,
     exploredBiomeKinds: nextExploredBiomeKinds,
     discoveredNamedRealmIds: nextDiscoveredNamedRealmIds,
+    petRoster: nextPetRoster,
     updatedAtMs: Math.max(
       existing?.updatedAtMs ?? 0,
       nextLastPosition?.updatedAtMs ?? 0,
