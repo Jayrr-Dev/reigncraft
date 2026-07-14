@@ -54,8 +54,8 @@ export const LABELING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_TEASERS: Record<
   Exclude<PlazaHerbariumCloverStudyTierId, 'sighted'>,
   string
 > = {
-  fieldNotes: 'Search long grass once to unlock field notes.',
-  properties: 'Study 5 clovers to reveal what each leaf might do.',
-  habitats: 'Study 15 clovers to reveal where they hide.',
-  full: 'Study 100 clovers for charm effects and raw numbers.',
+  fieldNotes: 'Needs more study....',
+  properties: 'Needs more study....',
+  habitats: 'Needs more study....',
+  full: 'Needs more study....',
 };

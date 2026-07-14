@@ -134,6 +134,7 @@ import mdiInformationOutline from '@iconify-icons/mdi/information-outline';
 import mdiJump from '@iconify-icons/mdi/jump';
 import mdiLandPlots from '@iconify-icons/mdi/land-plots';
 import mdiLayersTriple from '@iconify-icons/mdi/layers-triple';
+import mdiLeaf from '@iconify-icons/mdi/leaf';
 import mdiLock from '@iconify-icons/mdi/lock';
 import mdiMagnify from '@iconify-icons/mdi/magnify';
 import mdiMapLegend from '@iconify-icons/mdi/map-legend';
@@ -354,6 +355,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:information-outline': mdiInformationOutline,
   'mdi:land-plots': mdiLandPlots,
   'mdi:layers-triple': mdiLayersTriple,
+  'mdi:leaf': mdiLeaf,
   'mdi:lock': mdiLock,
   'mdi:magnify': mdiMagnify,
   'mdi:mortar-pestle-plus': mdiMortarPestlePlus,

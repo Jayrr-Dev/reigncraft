@@ -7,12 +7,10 @@
 'use client';
 
 import { RenderingWorldPlazaDeclarativeAnimatedSprite } from '@/components/world/animation/components/renderingWorldPlazaDeclarativeAnimatedSprite';
-import { advancingAllWorldPlazaDeclarativeAnimationPlayback } from '@/components/world/animation/domains/managingWorldPlazaDeclarativeAnimationPlaybackRegistry';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
-import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import { resolvingNpcSpeciesDefinition } from '@/components/world/npc/domains/definingNpcSpeciesRegistry';
 import {
   listingNpcInstances,
@@ -92,14 +90,6 @@ export function RenderingNpcLayer({
       cancelled = true;
     };
   }, [enabled, npcStoreRef, storeRevision]);
-
-  usingWorldPlazaSafeTick(() => {
-    if (!enabled) {
-      return;
-    }
-
-    advancingAllWorldPlazaDeclarativeAnimationPlayback(performance.now());
-  });
 
   if (!enabled || !clipsReady) {
     return null;

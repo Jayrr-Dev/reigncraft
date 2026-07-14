@@ -62,12 +62,12 @@ export const LABELING_PLAZA_BESTIARY_STUDY_TIER_TEASERS: Record<
   Exclude<PlazaBestiaryStudyTierId, 'sighted'>,
   string
 > = {
-  studied: 'Study one corpse to unlock temperament, diet, and fuller notes.',
-  combat: 'Study 10 corpses to reveal combat stats.',
-  procs: 'Study 20 corpses to learn attack effects.',
-  ecology: 'Study 50 corpses to reveal ecology and hunting behavior.',
-  full: 'Study 75 corpses for loot, disease risk, and the full dossier.',
-  playable: 'Study 100 corpses to unlock this species as a playable character.',
+  studied: 'Needs more study....',
+  combat: 'Needs more study....',
+  procs: 'Needs more study....',
+  ecology: 'Needs more study....',
+  full: 'Needs more study....',
+  playable: 'Needs more study....',
 };
 
 /** Unlocked copy for the playable-form section. */

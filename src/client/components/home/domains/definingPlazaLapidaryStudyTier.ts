@@ -54,8 +54,8 @@ export const LABELING_PLAZA_LAPIDARY_STUDY_TIER_TEASERS: Record<
   Exclude<PlazaLapidaryStudyTierId, 'sighted'>,
   string
 > = {
-  fieldNotes: 'Mine one ore chunk or study one specimen to unlock field notes.',
-  properties: 'Study 5 specimens to reveal how the ore is worked.',
-  habitats: 'Study 15 specimens to reveal where veins turn up.',
-  full: 'Study 25 specimens for full vein odds and raw numbers.',
+  fieldNotes: 'Needs more study....',
+  properties: 'Needs more study....',
+  habitats: 'Needs more study....',
+  full: 'Needs more study....',
 };

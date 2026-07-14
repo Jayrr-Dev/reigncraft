@@ -20,8 +20,6 @@ export function registeringWorldPlazaInventoryCoffeeItemDefinitions(): readonly 
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS,
       name: 'Coffee Beans',
       rarity: 'common',
-      description:
-        'Roasted beans pulled from coffee cherries. Ready for a clay-cup brew.',
       maxStack: 99,
       isDroppable: true,
       isStackable: true,
@@ -34,8 +32,6 @@ export function registeringWorldPlazaInventoryCoffeeItemDefinitions(): readonly 
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_COFFEE,
       name: 'Brewed Coffee',
       rarity: 'uncommon',
-      description:
-        'Dark brew in a clay teacup. Hot, bitter, fast, then a hard crash.',
       maxStack: 16,
       isDroppable: true,
       isStackable: true,
@@ -56,8 +52,6 @@ export function registeringWorldPlazaInventoryCoffeeItemDefinitions(): readonly 
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
       name: 'Empty Clay Cup',
       rarity: 'basic',
-      description:
-        'A small handmade clay teacup. Ready for the next pour of coffee.',
       maxStack: 16,
       isDroppable: true,
       isStackable: true,

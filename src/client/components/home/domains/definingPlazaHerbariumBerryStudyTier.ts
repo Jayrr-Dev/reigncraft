@@ -41,8 +41,8 @@ export const LABELING_PLAZA_HERBARIUM_BERRY_STUDY_TIER_TEASERS: Record<
   Exclude<PlazaHerbariumBerryStudyTierId, 'sighted'>,
   string
 > = {
-  fieldNotes: 'Pick one specimen to unlock field notes.',
-  properties: 'Study 5 specimens to reveal what it does when gathered.',
-  habitats: 'Study 15 specimens to reveal where it grows.',
-  full: 'Study 100 specimens for the full dossier.',
+  fieldNotes: 'Needs more study....',
+  properties: 'Needs more study....',
+  habitats: 'Needs more study....',
+  full: 'Needs more study....',
 };

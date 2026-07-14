@@ -2,6 +2,7 @@
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { recordingWorldPlazaHerbariumBerrySighted } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import type { DefiningWorldPlazaPickedShrubTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
 import {
   checkingWorldPlazaShrubPickEligibility,
@@ -211,6 +212,8 @@ export function usingWorldPlazaShrubPickInteraction({
 
           return;
         }
+
+        recordingWorldPlazaHerbariumBerrySighted(lootKind);
 
         if (
           !probingWorldPlazaShrubPickInventoryCapacity(

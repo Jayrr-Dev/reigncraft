@@ -4,7 +4,7 @@ import type { DefiningWorldPlazaAnimationPlaybackRequest } from '@/components/wo
 import { usingWorldPlazaDeclarativeAnimationPlayback } from '@/components/world/animation/hooks/usingWorldPlazaDeclarativeAnimationPlayback';
 import type { Sprite } from 'pixi.js';
 import { Texture } from 'pixi.js';
-import { useCallback, useRef } from 'react';
+import { useCallback, useLayoutEffect, useRef } from 'react';
 
 /**
  * Declarative Pixi sprite bound to one registered animation clip.
@@ -59,7 +59,13 @@ export function RenderingWorldPlazaDeclarativeAnimatedSprite({
 }: RenderingWorldPlazaDeclarativeAnimatedSpriteProps): React.JSX.Element {
   const spriteRef = useRef<Sprite | null>(null);
 
-  usingWorldPlazaDeclarativeAnimationPlayback(playback, spriteRef, tickMode);
+  const { applyToSprite } = usingWorldPlazaDeclarativeAnimationPlayback(
+    playback,
+    spriteRef,
+    tickMode
+  );
+  const positionX = position?.x;
+  const positionY = position?.y;
 
   const attachingSprite = useCallback(
     (sprite: Sprite | null) => {
@@ -77,45 +83,55 @@ export function RenderingWorldPlazaDeclarativeAnimatedSprite({
       }
 
       sprite.eventMode = 'none';
-      sprite.anchor.set(anchor.x, anchor.y);
       sprite.texture = Texture.EMPTY;
-
-      if (position) {
-        sprite.position.set(position.x, position.y);
-      }
-
-      if (scale !== undefined) {
-        sprite.scale.set(scale);
-      }
-
-      if (width !== undefined) {
-        sprite.width = width;
-      }
-
-      if (height !== undefined) {
-        sprite.height = height;
-      }
-
-      if (zIndex !== undefined) {
-        sprite.zIndex = zIndex;
-      }
-
-      sprite.visible = visible;
-      sprite.alpha = alpha;
+      applyToSprite(sprite);
     },
-    [
-      alpha,
-      anchor.x,
-      anchor.y,
-      externalSpriteRef,
-      height,
-      position,
-      scale,
-      visible,
-      width,
-      zIndex,
-    ]
+    [applyToSprite, externalSpriteRef]
   );
+
+  useLayoutEffect(() => {
+    const sprite = spriteRef.current;
+
+    if (!sprite) {
+      return;
+    }
+
+    sprite.anchor.set(anchor.x, anchor.y);
+
+    if (positionX !== undefined && positionY !== undefined) {
+      sprite.position.set(positionX, positionY);
+    }
+
+    if (scale !== undefined) {
+      sprite.scale.set(scale);
+    }
+
+    if (width !== undefined) {
+      sprite.width = width;
+    }
+
+    if (height !== undefined) {
+      sprite.height = height;
+    }
+
+    if (zIndex !== undefined) {
+      sprite.zIndex = zIndex;
+    }
+
+    sprite.visible = visible;
+    sprite.alpha = alpha;
+  }, [
+    alpha,
+    anchor.x,
+    anchor.y,
+    height,
+    positionX,
+    positionY,
+    scale,
+    visible,
+    width,
+    zIndex,
+  ]);
 
   return <pixiSprite ref={attachingSprite} />;
 }

@@ -582,8 +582,6 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     ? resolvingWorldPlazaInventoryBerryDetailContent(berryLootKind, {
         studyCount: berryStudyCount,
         food: foodDefinition,
-        foodItemMetadata: item.metadata,
-        effectiveMaxHealth: options.playerEffectiveMaxHealth,
       })
     : null;
   const oreSpeciesId = parsingWorldPlazaOreSpeciesIdFromItemTypeId(
@@ -630,7 +628,10 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
   const includeGenericFoodRows =
     !isWildlifeMeat && !flowerSpeciesId && !cloverKind && !berryLootKind;
   const includeFoodHungerBadge =
-    !isWildlifeMeat && !flowerSpeciesId && !cloverKind && !berryLootKind;
+    !isWildlifeMeat &&
+    !flowerSpeciesId &&
+    !cloverKind &&
+    (!berryLootKind || Boolean(berryReveal?.showFoodHungerBadge));
 
   const durabilitySnapshot = resolvingWorldPlazaInventoryItemDurability(item);
   const enchantmentRows = resolvingWorldPlazaInventoryItemEnchantmentRows(

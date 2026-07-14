@@ -13,9 +13,16 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_BLUE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_GOLDEN,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_COFFEE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COCONUT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_COCONUT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_RESOURCE_ITEM_DESCRIPTION_ENTRIES } from '@/components/world/inventory/domains/definingWorldPlazaInventoryResourceItemDescriptionCorpus';
@@ -67,6 +74,39 @@ const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DESCRIPTION_STATIC_ENTRIES: readonly D
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
       description: 'Condensed soul energy',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED,
+      description:
+        'A ripe red coffee cherry from a forest shrub. Tart flesh, light buzz, soft crash.',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_BLUE,
+      description: 'A cool blue berry. Sweet enough to stash a handful.',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_GOLDEN,
+      description: 'A rare golden berry. Soft glow, soft hunger.',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES,
+      description:
+        'Dried leaves turned up while searching berry bushes. Nobody on Corpus has brewed a decent cup yet.',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS,
+      description:
+        'Roasted beans pulled from coffee cherries. Ready for a clay-cup brew.',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_COFFEE,
+      description:
+        'Dark brew in a clay teacup. Hot, bitter, fast, then a hard crash.',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
+      description:
+        'A small handmade clay teacup. Ready for the next pour of coffee.',
     },
   ];
 

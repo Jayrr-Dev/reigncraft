@@ -50,12 +50,12 @@ export function resolvingPlazaHerbariumCloverStudyDisplayName(
 }
 
 export function resolvingPlazaHerbariumBerryStudyDisplayName(
-  lootKind: WorldShrubBerryLootKind
+  berryLootKind: WorldShrubBerryLootKind
 ): string {
   return (
     DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES.find(
-      (entry) => entry.berryLootKind === lootKind
-    )?.displayName ?? lootKind
+      (entry) => entry.berryLootKind === berryLootKind
+    )?.displayName ?? berryLootKind
   );
 }
 

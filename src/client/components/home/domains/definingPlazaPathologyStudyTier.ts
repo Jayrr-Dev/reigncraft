@@ -58,11 +58,8 @@ export const LABELING_PLAZA_PATHOLOGY_STUDY_TIER_TEASERS: Record<
   Exclude<PlazaPathologyStudyTierId, 'sighted'>,
   string
 > = {
-  fieldNotes:
-    'Earn 1 Pathology point (1 in-game hour infected, or 3 linked creature studies) to unlock field notes.',
-  properties:
-    'Earn 5 Pathology points to reveal the symptom stages.',
-  habitats:
-    'Earn 15 Pathology points to list the creatures that carry it.',
-  full: 'Earn 25 Pathology points for incubation windows and the full dossier.',
+  fieldNotes: 'Needs more study....',
+  properties: 'Needs more study....',
+  habitats: 'Needs more study....',
+  full: 'Needs more study....',
 };
