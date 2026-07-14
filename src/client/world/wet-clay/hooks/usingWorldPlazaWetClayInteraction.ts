@@ -22,6 +22,11 @@ export type UsingWorldPlazaWetClayInteractionParams = {
   readonly inventoryState: DefiningInventoryState;
   readonly updatingInventoryState: UpdatingWorldPlazaWetClayInventoryState;
   readonly showingGameplayHudToast: (message: string) => void;
+  /**
+   * Kept in sync on complete so queued wet repeats see clay left immediately
+   * (before the next React render).
+   */
+  readonly hasClayInInventoryRef: RefObject<boolean>;
 };
 
 export type UsingWorldPlazaWetClayInteractionResult = {
@@ -41,6 +46,7 @@ export function usingWorldPlazaWetClayInteraction({
   inventoryState,
   updatingInventoryState,
   showingGameplayHudToast,
+  hasClayInInventoryRef,
 }: UsingWorldPlazaWetClayInteractionParams): UsingWorldPlazaWetClayInteractionResult {
   const validatingWetClayStart = useCallback(
     (entry: ListingWorldPlazaWetClayTilesInInteractionRangeEntry): boolean => {
@@ -99,7 +105,14 @@ export function usingWorldPlazaWetClayInteraction({
         outcome = result.outcome;
 
         if (result.outcome === 'wetted') {
+          hasClayInInventoryRef.current = checkingWorldPlazaInventoryHasClay(
+            result.nextState
+          );
           return result.nextState;
+        }
+
+        if (result.outcome === 'no-clay') {
+          hasClayInInventoryRef.current = false;
         }
 
         return null;
@@ -120,7 +133,12 @@ export function usingWorldPlazaWetClayInteraction({
         showingGameplayHudToast('Need clay to wet.');
       }
     },
-    [playerPositionRef, showingGameplayHudToast, updatingInventoryState]
+    [
+      hasClayInInventoryRef,
+      playerPositionRef,
+      showingGameplayHudToast,
+      updatingInventoryState,
+    ]
   );
 
   return {

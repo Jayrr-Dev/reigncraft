@@ -203,7 +203,7 @@ The plaza hook wires Redis/save-slot persistence and optional demo seed. World f
 
 ### 4c. Ore smelting stations
 
-**Purpose:** Bloomery, clay kiln, and clay stove accept one item plus fuel (1 coal or 3 wood), run a complexity-scaled timer (5s–30s), then add the matching output (scarlet ore produces mercury; kiln fires wet clay ware).
+**Purpose:** Bloomery, clay kiln, and clay stove accept one item plus fuel (1 coal or 3 wood), run a complexity-scaled timer (complexity 1–10 → 5s–3min), then add the matching output. Bottom HUD shows craft progress; random hammer taps speed the craft (study SFX).
 
 | Piece | Path |
 | ----- | ---- |

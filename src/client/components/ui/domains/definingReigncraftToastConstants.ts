@@ -57,9 +57,15 @@ export const DEFINING_REIGNCRAFT_TOAST_STYLE = {
   iconClassName: 'mt-0.5 shrink-0 text-black',
   /** Compact gameplay toast: white + black outline, locked to toast column width. */
   gameplayToastClassName: [
-    'pointer-events-auto !box-border !flex !w-[var(--width)] !min-w-[var(--width)] !max-w-[var(--width)] select-none !items-start !rounded-md !border !border-black !bg-white !px-2 !py-1.5 !shadow-none',
+    'pointer-events-auto !box-border !flex !w-[var(--width)] !min-w-[var(--width)] !max-w-[var(--width)] select-none !items-center !rounded-md !border !border-black !bg-white !px-2 !py-1.5 !shadow-none',
     'font-body text-[11px] font-medium leading-snug text-black',
   ].join(' '),
   gameplayTitleClassName:
     'w-full whitespace-normal break-words text-left font-body text-[11px] font-medium leading-snug text-black',
+  /** Pickup toast body: message left, item glyph far right. */
+  gameplayPickupToastRowClassName: 'flex w-full items-center gap-2',
+  gameplayPickupToastMessageClassName:
+    'min-w-0 flex-1 whitespace-normal break-words text-left font-body text-[11px] font-medium leading-snug text-black',
+  gameplayPickupToastIconClassName:
+    'size-4 shrink-0 text-[1rem] leading-none text-black',
 } as const;

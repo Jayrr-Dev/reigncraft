@@ -18,6 +18,7 @@ import {
   type Active,
 } from '@dnd-kit/core';
 import type * as React from 'react';
+import { createPortal } from 'react-dom';
 
 type RenderingWorldPlazaOreSmeltingSlotProps = {
   readonly slotKind: DefiningWorldPlazaOreSmeltingStationSlotKind;
@@ -60,7 +61,7 @@ function RenderingWorldPlazaOreSmeltingSlot({
   return (
     <div className="flex flex-col items-center gap-1">
       <span className="text-[9px] font-bold uppercase tracking-wide text-amber-100">
-        {slotKind === 'ore' ? 'Item' : 'Fuel'}
+        {slotKind === 'ore' ? 'Ore' : 'Fuel'}
       </span>
       <div
         ref={setNodeRef}
@@ -109,10 +110,16 @@ export function RenderingWorldPlazaOreSmeltingPopover({
 }: RenderingWorldPlazaOreSmeltingPopoverProps): React.JSX.Element {
   const isSmelting = stationState.endsAtMs !== null;
 
-  return (
+  if (typeof document === 'undefined') {
+    return <></>;
+  }
+
+  // Portal escapes the hotbar shell: its `transform: translateZ(0)` makes it
+  // the containing block for fixed positioning, which would offset the panel.
+  return createPortal(
     <div
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
-      className="absolute bottom-[calc(100%+8px)] left-1/2 z-50 w-44 -translate-x-1/2 rounded-md border-2 border-amber-900 bg-stone-900/95 p-2 text-amber-50 shadow-xl"
+      className="pointer-events-auto fixed left-1/2 top-1/2 z-50 w-44 -translate-x-1/2 -translate-y-1/2 rounded-md border-2 border-amber-900 bg-stone-900/95 p-2 text-amber-50 shadow-xl"
     >
       <div className="mb-2 flex items-center justify-between gap-2">
         <span className="text-[11px] font-bold">{stationName}</span>
@@ -152,7 +159,7 @@ export function RenderingWorldPlazaOreSmeltingPopover({
           ? 'Smelting...'
           : stationState.outputItemTypeId
             ? `${stationState.outputDisplayName} waiting`
-            : 'Drop item + 1 coal or 3 wood'}
+            : 'Drop ore + 1 coal or 3 wood'}
       </p>
       {stationState.outputItemTypeId ? (
         <button
@@ -163,6 +170,7 @@ export function RenderingWorldPlazaOreSmeltingPopover({
           Collect
         </button>
       ) : null}
-    </div>
+    </div>,
+    document.body
   );
 }

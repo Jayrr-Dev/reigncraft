@@ -15,7 +15,7 @@ import type { ListingWorldPlazaShrubsInInteractionRangeEntry } from '@/component
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import { resolvingWorldPlazaBerryItemTypeIdFromLootKind } from '@/components/world/inventory/domains/definingWorldPlazaInventoryBerrySpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
-import { formattingWorldPlazaInventoryItemPickupToastMessage } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemPickupToastMessage';
+import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, type RefObject } from 'react';
@@ -254,12 +254,10 @@ export function usingWorldPlazaShrubPickInteraction({
         }
 
         notifyingWorldPlazaInventoryItemAdded(quantityAccepted);
-        showingGameplayHudToast(
-          formattingWorldPlazaInventoryItemPickupToastMessage({
-            itemTypeId,
-            quantity: quantityAccepted,
-          })
-        );
+        showingWorldPlazaInventoryItemPickupToast({
+          itemTypeId,
+          quantity: quantityAccepted,
+        });
 
         const pickResult = pickingWorldPlazaLocalShrub(persistenceOwnerId, {
           tileX: entry.tileX,

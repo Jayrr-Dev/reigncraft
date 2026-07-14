@@ -350,6 +350,7 @@ import { usingWorldPlazaFarmingProgress } from '@/components/world/farming/hooks
 import { RenderingWorldPlazaCampfireAmbience } from '@/components/world/fire/components/renderingWorldPlazaCampfireAmbience';
 import { RenderingWorldPlazaCampfireInteractionLabels } from '@/components/world/fire/components/renderingWorldPlazaCampfireInteractionLabels';
 import { RenderingWorldPlazaOreSmeltingInteractionLabels } from '@/components/world/crafting/components/renderingWorldPlazaOreSmeltingInteractionLabels';
+import { RenderingWorldPlazaOreSmeltingCraftProgressHud } from '@/components/world/crafting/components/renderingWorldPlazaOreSmeltingCraftProgressHud';
 import { resolvingWorldPlazaOreSmeltingStationAnchorBlock } from '@/components/world/crafting/domains/resolvingWorldPlazaOreSmeltingStationAnchorBlock';
 import { RenderingWorldPlazaFireLayer } from '@/components/world/fire/components/renderingWorldPlazaFireLayer';
 import { RenderingWorldPlazaLavaAmbience } from '@/components/world/fire/components/renderingWorldPlazaLavaAmbience';
@@ -1809,6 +1810,12 @@ function RenderingWorldPlazaPixiSceneConnected({
             oreSmeltingStations.droppingInventorySlotIntoStation,
         }
       : null;
+  const oreSmeltingCraftProgressHud = (
+    <RenderingWorldPlazaOreSmeltingCraftProgressHud
+      activeCraft={oreSmeltingStations.activeCraftHud}
+      onBoostTap={oreSmeltingStations.boostingActiveCraft}
+    />
+  );
 
   const clearingPendingCraftPlacement = useCallback(
     (options: {
@@ -3443,6 +3450,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       inventoryState,
       updatingInventoryState,
       showingGameplayHudToast,
+      hasClayInInventoryRef,
     });
 
   const completingWetClayRef = useRef(completingWetClay);
@@ -3455,6 +3463,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   } = usingWorldPlazaWetClayProgress({
     playerPositionRef,
     selectedInteractableBlockKeysRef,
+    hasClayInInventoryRef,
     onWetComplete: (entry) => {
       completingWetClayRef.current(entry);
     },
@@ -8371,6 +8380,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     viewportHudScale={viewportHudScale}
                     isMobile={hudIsMobile}
                     isFullscreen={hudIsFullscreen}
+                    topOverlay={oreSmeltingCraftProgressHud}
                   >
                     {hudToolbarMode ===
                     DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS ? (
@@ -8579,6 +8589,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     viewportHudScale={viewportHudScale}
                     isMobile={hudIsMobile}
                     isFullscreen={hudIsFullscreen}
+                    topOverlay={oreSmeltingCraftProgressHud}
                   >
                     {hudToolbarMode ===
                     DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS ? (

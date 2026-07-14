@@ -11,7 +11,6 @@ import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
-import { usingWorldPlazaGameplayHudToast } from '@/components/world/hooks/usingWorldPlazaGameplayHudToast';
 import { RenderingWorldPlazaGroundItemProgressRing } from '@/components/world/inventory/components/renderingWorldPlazaGroundItemProgressRing';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
@@ -33,7 +32,7 @@ import {
   STYLING_WORLD_PLAZA_GROUND_ITEM_TOO_FAR_HINT_CLASS_NAME,
 } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
-import { formattingWorldPlazaInventoryItemPickupToastMessage } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemPickupToastMessage';
+import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
 import {
   checkingWorldPlazaGroundItemAutoPickupEligible,
   syncingWorldPlazaGroundItemAutoPickupEligibility,
@@ -144,8 +143,6 @@ export function RenderingWorldPlazaGroundItems({
       seedDemoItems: false,
     });
 
-  const { showingGameplayHudToast } = usingWorldPlazaGameplayHudToast();
-
   const inventoryStateRef = useRef(inventoryState);
   inventoryStateRef.current = inventoryState;
 
@@ -168,15 +165,13 @@ export function RenderingWorldPlazaGroundItems({
       });
 
       if (quantityAccepted > 0) {
-        showingGameplayHudToast(
-          formattingWorldPlazaInventoryItemPickupToastMessage({
-            itemTypeId: grant.itemTypeId,
-            quantity: quantityAccepted,
-          })
-        );
+        showingWorldPlazaInventoryItemPickupToast({
+          itemTypeId: grant.itemTypeId,
+          quantity: quantityAccepted,
+        });
       }
     },
-    [addItemWithStacking, showingGameplayHudToast]
+    [addItemWithStacking]
   );
 
   // Online and signed-in single-player use Devvit; offline single-player uses

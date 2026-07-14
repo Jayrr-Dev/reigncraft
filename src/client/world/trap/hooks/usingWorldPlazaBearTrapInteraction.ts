@@ -11,7 +11,7 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
-import { formattingWorldPlazaInventoryItemPickupToastMessage } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemPickupToastMessage';
+import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { DEFINING_WORLD_PLAZA_BEAR_TRAP_INTERACT_REACH_GRID } from '@/components/world/trap/domains/definingWorldPlazaBearTrapConstants';
 import type { ListingWorldPlazaBearTrapsInInteractionRangeAction } from '@/components/world/trap/domains/listingWorldPlazaBearTrapsInInteractionRange';
@@ -140,12 +140,10 @@ export function usingWorldPlazaBearTrapInteraction({
         persistingWorldPlazaLocalBearTraps(localPersistenceOwnerId);
       }
 
-      showingGameplayHudToast(
-        formattingWorldPlazaInventoryItemPickupToastMessage({
-          itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP,
-          quantity: 1,
-        })
-      );
+      showingWorldPlazaInventoryItemPickupToast({
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP,
+        quantity: 1,
+      });
     },
     [
       localPersistenceOwnerId,

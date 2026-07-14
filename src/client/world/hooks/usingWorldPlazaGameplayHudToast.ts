@@ -1,10 +1,11 @@
 'use client';
 
 import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
+import type { ReactNode } from 'react';
 import { useCallback } from 'react';
 
 export type UsingWorldPlazaGameplayHudToastResult = {
-  readonly showingGameplayHudToast: (message: string) => void;
+  readonly showingGameplayHudToast: (message: ReactNode) => void;
 };
 
 /**
@@ -12,7 +13,7 @@ export type UsingWorldPlazaGameplayHudToastResult = {
  * stacked under the top action bar.
  */
 export function usingWorldPlazaGameplayHudToast(): UsingWorldPlazaGameplayHudToastResult {
-  const showingGameplayHudToast = useCallback((message: string): void => {
+  const showingGameplayHudToast = useCallback((message: ReactNode): void => {
     showingReigncraftToast(message);
   }, []);
 

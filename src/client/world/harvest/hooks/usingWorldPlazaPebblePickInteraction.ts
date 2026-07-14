@@ -17,7 +17,7 @@ import { pickingWorldHarvestDevvitPebble } from '@/components/world/harvest/repo
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
-import { formattingWorldPlazaInventoryItemPickupToastMessage } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemPickupToastMessage';
+import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, type RefObject } from 'react';
@@ -216,12 +216,10 @@ export function usingWorldPlazaPebblePickInteraction({
         }
 
         notifyingWorldPlazaInventoryItemAdded(quantityAccepted);
-        showingGameplayHudToast(
-          formattingWorldPlazaInventoryItemPickupToastMessage({
-            itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
-            quantity: quantityAccepted,
-          })
-        );
+        showingWorldPlazaInventoryItemPickupToast({
+          itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
+          quantity: quantityAccepted,
+        });
 
         const pickRequest = {
           tileX: entry.tileX,

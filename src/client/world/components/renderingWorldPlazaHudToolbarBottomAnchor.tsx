@@ -28,6 +28,8 @@ export type RenderingWorldPlazaHudToolbarBottomAnchorProps = {
   readonly viewportHudScale?: number;
   readonly isMobile?: boolean;
   readonly isFullscreen?: boolean;
+  /** Optional chrome above mode badges (e.g. active craft progress). */
+  readonly topOverlay?: ReactNode;
   readonly children: ReactNode;
 };
 
@@ -42,6 +44,7 @@ export function RenderingWorldPlazaHudToolbarBottomAnchor({
   viewportHudScale = 1,
   isMobile = false,
   isFullscreen = false,
+  topOverlay = null,
   children,
 }: RenderingWorldPlazaHudToolbarBottomAnchorProps): React.JSX.Element {
   const hotbarViewportHudScale = useMemo(
@@ -88,6 +91,7 @@ export function RenderingWorldPlazaHudToolbarBottomAnchor({
           className={STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_STACK_CLASS_NAME}
           style={bottomStackStyle}
         >
+          {topOverlay}
           <RenderingWorldPlazaHudToolbarModeBadges
             activeMode={activeMode}
             onSelectMode={onSelectMode}

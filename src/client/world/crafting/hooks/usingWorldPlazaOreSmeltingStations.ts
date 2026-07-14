@@ -2,6 +2,7 @@
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { computingWorldPlazaOreSmeltingBoostedEndsAtMs } from '@/components/world/crafting/domains/computingWorldPlazaOreSmeltingBoostedEndsAtMs';
 import {
   checkingWorldPlazaOreSmeltingFuelItemTypeId,
   computingWorldPlazaOreSmeltingDurationMsFromComplexity,
@@ -12,6 +13,7 @@ import {
 import type { DefiningWorldPlazaOreSmeltingStationSlotKind } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingDndIds';
 import { consumingWorldPlazaInventoryItemFromSlot } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemFromSlot';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export type DefiningWorldPlazaOreSmeltingStationState = {
@@ -21,6 +23,8 @@ export type DefiningWorldPlazaOreSmeltingStationState = {
   readonly outputDisplayName: string | null;
   readonly startedAtMs: number | null;
   readonly endsAtMs: number | null;
+  /** Wall-clock duration at craft start (before tap boosts). */
+  readonly baseDurationMs: number | null;
 };
 
 const DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE: DefiningWorldPlazaOreSmeltingStationState =
@@ -31,6 +35,7 @@ const DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE: DefiningWorldPlazaO
     outputDisplayName: null,
     startedAtMs: null,
     endsAtMs: null,
+    baseDurationMs: null,
   };
 
 export type UsingWorldPlazaOreSmeltingStationsParams = {
@@ -51,6 +56,35 @@ export type UsingWorldPlazaOreSmeltingStationsParams = {
   readonly showingToast: (message: string) => void;
 };
 
+export type DefiningWorldPlazaOreSmeltingActiveCraftHud = {
+  readonly blockId: string;
+  readonly displayName: string;
+  readonly progressRatio: number;
+  readonly remainingMs: number;
+};
+
+function computingProgressRatio(
+  stationState: DefiningWorldPlazaOreSmeltingStationState,
+  nowMs: number
+): number {
+  if (
+    stationState.startedAtMs === null ||
+    stationState.endsAtMs === null ||
+    stationState.baseDurationMs === null ||
+    stationState.baseDurationMs <= 0
+  ) {
+    return 0;
+  }
+
+  const remainingMs = Math.max(0, stationState.endsAtMs - nowMs);
+  const elapsedMs = Math.max(
+    0,
+    stationState.baseDurationMs - remainingMs
+  );
+
+  return Math.min(1, Math.max(0, elapsedMs / stationState.baseDurationMs));
+}
+
 export function usingWorldPlazaOreSmeltingStations({
   inventoryState,
   updatingInventoryState,
@@ -64,10 +98,8 @@ export function usingWorldPlazaOreSmeltingStations({
   >(new Map());
   const stationStateByBlockIdRef = useRef(stationStateByBlockId);
   stationStateByBlockIdRef.current = stationStateByBlockId;
+  const completingBlockIdsRef = useRef(new Set<string>());
   const [, setClockRevision] = useState(0);
-  const completionTimeoutByBlockIdRef = useRef(
-    new Map<string, ReturnType<typeof setTimeout>>()
-  );
 
   const selectingStation = useCallback(
     (block: DefiningWorldBuildingPlacedBlock): void => {
@@ -79,6 +111,59 @@ export function usingWorldPlazaOreSmeltingStations({
   const closingStation = useCallback((): void => {
     setSelectedStationBlock(null);
   }, []);
+
+  const completingStationCraft = useCallback(
+    (blockId: string): void => {
+      if (completingBlockIdsRef.current.has(blockId)) {
+        return;
+      }
+
+      const currentState = stationStateByBlockIdRef.current.get(blockId);
+      const recipe = currentState?.inputItemTypeId
+        ? resolvingWorldPlazaOreSmeltingRecipe(currentState.inputItemTypeId)
+        : null;
+
+      if (!currentState || !recipe || currentState.endsAtMs === null) {
+        return;
+      }
+
+      if (Date.now() < currentState.endsAtMs) {
+        return;
+      }
+
+      completingBlockIdsRef.current.add(blockId);
+
+      const addResult = addingItemWithStacking({
+        id: crypto.randomUUID(),
+        itemTypeId: recipe.outputItemTypeId,
+        quantity: 1,
+      });
+
+      setStationStateByBlockId((currentStates) => {
+        const nextStates = new Map(currentStates);
+
+        if (addResult.quantityAccepted > 0) {
+          nextStates.set(
+            blockId,
+            DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE
+          );
+          showingToast(`${recipe.outputDisplayName} smelted.`);
+        } else {
+          nextStates.set(blockId, {
+            ...DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE,
+            outputItemTypeId: recipe.outputItemTypeId,
+            outputDisplayName: recipe.outputDisplayName,
+          });
+          showingToast('Inventory full. Output is waiting in the station.');
+        }
+
+        return nextStates;
+      });
+
+      completingBlockIdsRef.current.delete(blockId);
+    },
+    [addingItemWithStacking, showingToast]
+  );
 
   const collectingSelectedStationOutput = useCallback((): void => {
     if (!selectedStationBlock) {
@@ -253,6 +338,7 @@ export function usingWorldPlazaOreSmeltingStations({
           startedAtMs,
           endsAtMs:
             startedAtMs === null ? null : startedAtMs + durationMs,
+          baseDurationMs: startedAtMs === null ? null : durationMs,
         };
         const nextStates = new Map(currentStates);
         nextStates.set(block.blockId, nextState);
@@ -321,61 +407,79 @@ export function usingWorldPlazaOreSmeltingStations({
     ]
   );
 
-  useEffect(() => {
-    for (const [blockId, stationState] of stationStateByBlockId) {
+  const boostingActiveCraft = useCallback((): boolean => {
+    const nowMs = Date.now();
+    const selectedBlockId = selectedStationBlock?.blockId ?? null;
+    let activeEntry:
+      | readonly [string, DefiningWorldPlazaOreSmeltingStationState]
+      | undefined;
+
+    if (selectedBlockId !== null) {
+      const selectedState =
+        stationStateByBlockIdRef.current.get(selectedBlockId);
       if (
-        stationState.endsAtMs === null ||
-        completionTimeoutByBlockIdRef.current.has(blockId)
+        selectedState &&
+        selectedState.endsAtMs !== null &&
+        selectedState.baseDurationMs !== null
       ) {
-        continue;
+        activeEntry = [selectedBlockId, selectedState];
+      }
+    }
+
+    if (!activeEntry) {
+      activeEntry = [...stationStateByBlockIdRef.current.entries()].find(
+        ([, state]) =>
+          state.endsAtMs !== null && state.baseDurationMs !== null
+      );
+    }
+
+    if (!activeEntry) {
+      return false;
+    }
+
+    const [blockId, stationState] = activeEntry;
+
+    if (stationState.endsAtMs === null || stationState.baseDurationMs === null) {
+      return false;
+    }
+
+    const previewEndsAtMs = computingWorldPlazaOreSmeltingBoostedEndsAtMs({
+      nowMs,
+      endsAtMs: stationState.endsAtMs,
+      baseDurationMs: stationState.baseDurationMs,
+    });
+
+    if (previewEndsAtMs >= stationState.endsAtMs) {
+      return false;
+    }
+
+    playingWildlifeStudySfx();
+
+    setStationStateByBlockId((currentStates) => {
+      const currentState = currentStates.get(blockId);
+
+      if (
+        !currentState ||
+        currentState.endsAtMs === null ||
+        currentState.baseDurationMs === null
+      ) {
+        return currentStates;
       }
 
-      const timeoutId = setTimeout(() => {
-        const currentState =
-          stationStateByBlockIdRef.current.get(blockId);
-        const recipe = currentState?.inputItemTypeId
-          ? resolvingWorldPlazaOreSmeltingRecipe(
-              currentState.inputItemTypeId
-            )
-          : null;
+      const nextStates = new Map(currentStates);
+      nextStates.set(blockId, {
+        ...currentState,
+        endsAtMs: computingWorldPlazaOreSmeltingBoostedEndsAtMs({
+          nowMs: Date.now(),
+          endsAtMs: currentState.endsAtMs,
+          baseDurationMs: currentState.baseDurationMs,
+        }),
+      });
+      return nextStates;
+    });
 
-        if (!currentState || !recipe) {
-          completionTimeoutByBlockIdRef.current.delete(blockId);
-          return;
-        }
-
-        const addResult = addingItemWithStacking({
-          id: crypto.randomUUID(),
-          itemTypeId: recipe.outputItemTypeId,
-          quantity: 1,
-        });
-
-        setStationStateByBlockId((currentStates) => {
-          const nextStates = new Map(currentStates);
-
-          if (addResult.quantityAccepted > 0) {
-            nextStates.set(
-              blockId,
-              DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE
-            );
-            showingToast(`${recipe.outputDisplayName} smelted.`);
-          } else {
-            nextStates.set(blockId, {
-              ...DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE,
-              outputItemTypeId: recipe.outputItemTypeId,
-              outputDisplayName: recipe.outputDisplayName,
-            });
-            showingToast('Inventory full. Output is waiting in the station.');
-          }
-
-          return nextStates;
-        });
-        completionTimeoutByBlockIdRef.current.delete(blockId);
-      }, Math.max(0, stationState.endsAtMs - Date.now()));
-
-      completionTimeoutByBlockIdRef.current.set(blockId, timeoutId);
-    }
-  }, [addingItemWithStacking, showingToast, stationStateByBlockId]);
+    return true;
+  }, [selectedStationBlock]);
 
   const hasActiveStation = [...stationStateByBlockId.values()].some(
     (state) => state.endsAtMs !== null
@@ -388,22 +492,21 @@ export function usingWorldPlazaOreSmeltingStations({
 
     const intervalId = setInterval(() => {
       setClockRevision((revision) => revision + 1);
+
+      for (const [blockId, stationState] of stationStateByBlockIdRef.current) {
+        if (
+          stationState.endsAtMs !== null &&
+          Date.now() >= stationState.endsAtMs
+        ) {
+          completingStationCraft(blockId);
+        }
+      }
     }, 100);
 
     return () => {
       clearInterval(intervalId);
     };
-  }, [hasActiveStation]);
-
-  useEffect(() => {
-    const timeoutMap = completionTimeoutByBlockIdRef.current;
-    return () => {
-      for (const timeoutId of timeoutMap.values()) {
-        clearTimeout(timeoutId);
-      }
-      timeoutMap.clear();
-    };
-  }, []);
+  }, [completingStationCraft, hasActiveStation]);
 
   const activeBlockIds = useMemo(
     () =>
@@ -419,30 +522,54 @@ export function usingWorldPlazaOreSmeltingStations({
     ? (stationStateByBlockId.get(selectedStationBlock.blockId) ??
       DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE)
     : null;
-  const progressRatio =
-    selectedStationState?.startedAtMs !== null &&
-    selectedStationState?.startedAtMs !== undefined &&
-    selectedStationState.endsAtMs !== null
-      ? Math.min(
-          1,
-          Math.max(
-            0,
-            (Date.now() - selectedStationState.startedAtMs) /
-              (selectedStationState.endsAtMs -
-                selectedStationState.startedAtMs)
-          )
-        )
-      : 0;
+
+  const nowMs = Date.now();
+  const progressRatio = selectedStationState
+    ? computingProgressRatio(selectedStationState, nowMs)
+    : 0;
+
+  const activeCraftHud = useMemo((): DefiningWorldPlazaOreSmeltingActiveCraftHud | null => {
+    const selectedBlockId = selectedStationBlock?.blockId ?? null;
+    const selectedState =
+      selectedBlockId === null
+        ? null
+        : (stationStateByBlockId.get(selectedBlockId) ?? null);
+    const activeEntry =
+      selectedState?.endsAtMs !== null && selectedState?.endsAtMs !== undefined
+        ? ([selectedBlockId, selectedState] as const)
+        : [...stationStateByBlockId.entries()].find(
+            ([, state]) => state.endsAtMs !== null
+          );
+
+    if (!activeEntry || !activeEntry[0] || !activeEntry[1]) {
+      return null;
+    }
+
+    const [blockId, stationState] = activeEntry;
+    const recipe = stationState.inputItemTypeId
+      ? resolvingWorldPlazaOreSmeltingRecipe(stationState.inputItemTypeId)
+      : null;
+    const liveNowMs = Date.now();
+
+    return {
+      blockId,
+      displayName: recipe?.outputDisplayName ?? 'Crafting',
+      progressRatio: computingProgressRatio(stationState, liveNowMs),
+      remainingMs: Math.max(0, (stationState.endsAtMs ?? liveNowMs) - liveNowMs),
+    };
+  }, [selectedStationBlock, stationStateByBlockId]);
 
   return {
     selectedStationBlock,
     selectedStationState,
     activeBlockIds,
     progressRatio,
+    activeCraftHud,
     selectingStation,
     closingStation,
     collectingSelectedStationOutput,
     droppingInventorySlotIntoStation,
     depositingInventorySlotIntoReachableStation,
+    boostingActiveCraft,
   };
 }

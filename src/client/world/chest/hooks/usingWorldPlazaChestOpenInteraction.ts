@@ -20,7 +20,7 @@ import type { DefiningInventoryState } from '@/components/inventory/domains/defi
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
-import { formattingWorldPlazaInventoryItemPickupToastMessage } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemPickupToastMessage';
+import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { useCallback, useRef } from 'react';
 
@@ -172,12 +172,10 @@ export function usingWorldPlazaChestOpenInteraction({
           }
 
           notifyingWorldPlazaInventoryItemAdded(quantityAccepted);
-          showingGameplayHudToast(
-            formattingWorldPlazaInventoryItemPickupToastMessage({
-              itemTypeId: grant.itemTypeId,
-              quantity: quantityAccepted,
-            })
-          );
+          showingWorldPlazaInventoryItemPickupToast({
+            itemTypeId: grant.itemTypeId,
+            quantity: quantityAccepted,
+          });
         }
 
         const opened = openingWorldPlazaChest(entry.chestId);

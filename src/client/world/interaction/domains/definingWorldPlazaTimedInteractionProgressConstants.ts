@@ -24,3 +24,9 @@ export const DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_CANCEL_FADE_MS = 20
 
 /** Delay before clearing the ring after a successful completion (ms). */
 export const DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_COMPLETION_RESET_MS = 120;
+
+/**
+ * Max same-target repeats queued while a timed interaction is already running.
+ * Extra clicks beyond this still return false (existing "Already …" toasts).
+ */
+export const DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_MAX_QUEUED = 16;

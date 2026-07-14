@@ -9,6 +9,7 @@ import {
   DEFINING_REIGNCRAFT_TOASTER_ID,
   type DefiningReigncraftToasterId,
 } from '@/components/ui/domains/definingReigncraftToastConstants';
+import type { ReactNode } from 'react';
 import { toast, type ExternalToast } from 'sonner';
 
 export type ShowingReigncraftToastOptions = Omit<ExternalToast, 'toasterId'> & {
@@ -29,7 +30,7 @@ function resolvingReigncraftToastOptions(
  * Shows a default Reigncraft toast (gameplay feedback by default).
  */
 export function showingReigncraftToast(
-  message: string,
+  message: ReactNode,
   options?: ShowingReigncraftToastOptions
 ): string | number {
   return toast(message, resolvingReigncraftToastOptions(options));
@@ -39,7 +40,7 @@ export function showingReigncraftToast(
  * Shows a success Reigncraft toast.
  */
 export function showingReigncraftToastSuccess(
-  message: string,
+  message: ReactNode,
   options?: ShowingReigncraftToastOptions
 ): string | number {
   return toast.success(message, resolvingReigncraftToastOptions(options));
@@ -49,7 +50,7 @@ export function showingReigncraftToastSuccess(
  * Shows an error Reigncraft toast.
  */
 export function showingReigncraftToastError(
-  message: string,
+  message: ReactNode,
   options?: ShowingReigncraftToastOptions
 ): string | number {
   return toast.error(message, resolvingReigncraftToastOptions(options));
@@ -59,7 +60,7 @@ export function showingReigncraftToastError(
  * Shows a warning Reigncraft toast.
  */
 export function showingReigncraftToastWarning(
-  message: string,
+  message: ReactNode,
   options?: ShowingReigncraftToastOptions
 ): string | number {
   return toast.warning(message, resolvingReigncraftToastOptions(options));
@@ -69,7 +70,7 @@ export function showingReigncraftToastWarning(
  * Shows an info Reigncraft toast.
  */
 export function showingReigncraftToastInfo(
-  message: string,
+  message: ReactNode,
   options?: ShowingReigncraftToastOptions
 ): string | number {
   return toast.info(message, resolvingReigncraftToastOptions(options));

@@ -118,15 +118,15 @@ describe('ore smelting registry', () => {
     ).toBeNull();
   });
 
-  it('maps recipe complexity 1–5 to craft duration 5s–30s', () => {
+  it('maps recipe complexity 1–10 to craft duration 5s–3min', () => {
     expect(computingWorldPlazaOreSmeltingDurationMsFromComplexity(1)).toBe(
       DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS_MIN
     );
-    expect(computingWorldPlazaOreSmeltingDurationMsFromComplexity(5)).toBe(
+    expect(computingWorldPlazaOreSmeltingDurationMsFromComplexity(10)).toBe(
       DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS_MAX
     );
-    expect(computingWorldPlazaOreSmeltingDurationMsFromComplexity(3)).toBe(
-      17_500
+    expect(computingWorldPlazaOreSmeltingDurationMsFromComplexity(5)).toBe(
+      82_778
     );
     expect(
       resolvingWorldPlazaOreSmeltingRecipe(
@@ -137,6 +137,6 @@ describe('ore smelting registry', () => {
       resolvingWorldPlazaOreSmeltingRecipe(
         DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_SCARLET
       )?.complexity
-    ).toBe(5);
+    ).toBe(10);
   });
 });

@@ -17,6 +17,8 @@ import { useCallback, type RefObject } from 'react';
 export type UsingWorldPlazaWetClayProgressParams = {
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
   readonly selectedInteractableBlockKeysRef: RefObject<ReadonlySet<string>>;
+  /** Live clay check so queued repeats stop when dry clay runs out. */
+  readonly hasClayInInventoryRef: RefObject<boolean>;
   readonly onWetComplete: (
     entry: ListingWorldPlazaWetClayTilesInInteractionRangeEntry
   ) => void;
@@ -51,6 +53,7 @@ function checkingWorldPlazaWetClayStillInRange(
 export function usingWorldPlazaWetClayProgress({
   playerPositionRef,
   selectedInteractableBlockKeysRef,
+  hasClayInInventoryRef,
   onWetComplete,
 }: UsingWorldPlazaWetClayProgressParams): UsingWorldPlazaWetClayProgressResult {
   const { snapshot, progressRatioRef, startingTimedInteraction } =
@@ -63,6 +66,10 @@ export function usingWorldPlazaWetClayProgress({
       const playerPosition = playerPositionRef.current;
 
       if (!playerPosition) {
+        return false;
+      }
+
+      if (!hasClayInInventoryRef.current) {
         return false;
       }
 
@@ -94,6 +101,10 @@ export function usingWorldPlazaWetClayProgress({
             return false;
           }
 
+          if (!hasClayInInventoryRef.current) {
+            return false;
+          }
+
           if (
             !checkingWorldPlazaWetClayStillInRange(
               livePosition,
@@ -109,6 +120,7 @@ export function usingWorldPlazaWetClayProgress({
       });
     },
     [
+      hasClayInInventoryRef,
       playerPositionRef,
       selectedInteractableBlockKeysRef,
       startingTimedInteraction,
