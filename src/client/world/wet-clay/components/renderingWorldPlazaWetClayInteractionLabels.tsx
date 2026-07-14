@@ -14,6 +14,7 @@ import { DEFINING_WORLD_PLAZA_WET_CLAY_ACTION_LABEL } from '@/components/world/w
 import { formattingWorldPlazaWetClayTileSelectionKey } from '@/components/world/wet-clay/domains/formattingWorldPlazaWetClayTileSelectionKey';
 import type { ListingWorldPlazaWetClayTilesInInteractionRangeEntry } from '@/components/world/wet-clay/domains/listingWorldPlazaWetClayTilesInInteractionRange';
 import { listingWorldPlazaWetClayTilesInInteractionRange } from '@/components/world/wet-clay/domains/listingWorldPlazaWetClayTilesInInteractionRange';
+import { resolvingWorldPlazaClosestWetClayTileInInteractionRange } from '@/components/world/wet-clay/domains/resolvingWorldPlazaClosestWetClayTileInInteractionRange';
 import { useLayoutEffect, useRef, useState } from 'react';
 
 const RENDERING_WORLD_PLAZA_WET_CLAY_INTERACTION_LABEL_HIDDEN_TRANSFORM =
@@ -38,7 +39,7 @@ export type RenderingWorldPlazaWetClayInteractionLabelsProps = {
 };
 
 /**
- * Outlined "Wet Clay" labels above eligible nearby water tiles when carrying clay.
+ * Outlined "Wet Clay" label on the closest eligible water tile when carrying clay.
  */
 export function RenderingWorldPlazaWetClayInteractionLabels({
   playerPositionRef,
@@ -60,9 +61,13 @@ export function RenderingWorldPlazaWetClayInteractionLabels({
   const selectedTilesRef = useRef(selectedTiles);
   const onWetClayRef = useRef(onWetClay);
   const hasClayInInventoryRef = useRef(hasClayInInventory);
+  const activeTargetKeyRef = useRef(
+    timedInteractionProgressSnapshot.activeTargetKey
+  );
   selectedTilesRef.current = selectedTiles;
   onWetClayRef.current = onWetClay;
   hasClayInInventoryRef.current = hasClayInInventory;
+  activeTargetKeyRef.current = timedInteractionProgressSnapshot.activeTargetKey;
 
   useLayoutEffect(() => {
     let isActive = true;
@@ -91,7 +96,7 @@ export function RenderingWorldPlazaWetClayInteractionLabels({
         return;
       }
 
-      const nextSelectedTiles = playerPosition
+      const candidateTiles = playerPosition
         ? listingWorldPlazaWetClayTilesInInteractionRange(
             playerPosition
           ).filter((entry) =>
@@ -103,6 +108,14 @@ export function RenderingWorldPlazaWetClayInteractionLabels({
             )
           )
         : [];
+      const closestTile = playerPosition
+        ? resolvingWorldPlazaClosestWetClayTileInInteractionRange(
+            playerPosition,
+            candidateTiles,
+            activeTargetKeyRef.current
+          )
+        : null;
+      const nextSelectedTiles = closestTile ? [closestTile] : [];
 
       const currentEntries = selectedTilesRef.current;
       const didSelectionChange =

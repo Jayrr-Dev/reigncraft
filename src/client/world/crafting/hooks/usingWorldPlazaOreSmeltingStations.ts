@@ -4,7 +4,8 @@ import type { DefiningInventoryState } from '@/components/inventory/domains/defi
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
   checkingWorldPlazaOreSmeltingFuelItemTypeId,
-  DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS,
+  computingWorldPlazaOreSmeltingDurationMsFromComplexity,
+  DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS_MIN,
   resolvingWorldPlazaOreSmeltingFuelUnitsCost,
   resolvingWorldPlazaOreSmeltingRecipe,
 } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingRegistry';
@@ -234,13 +235,24 @@ export function usingWorldPlazaOreSmeltingStations({
           slottedState.inputItemTypeId !== null &&
           slottedState.fuelItemTypeId !== null;
         const startedAtMs = shouldStart ? Date.now() : null;
+        const inputRecipe =
+          slottedState.inputItemTypeId === null
+            ? null
+            : resolvingWorldPlazaOreSmeltingRecipe(
+                slottedState.inputItemTypeId,
+                block.definitionId
+              );
+        const durationMs =
+          inputRecipe === null
+            ? DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS_MIN
+            : computingWorldPlazaOreSmeltingDurationMsFromComplexity(
+                inputRecipe.complexity
+              );
         const nextState: DefiningWorldPlazaOreSmeltingStationState = {
           ...slottedState,
           startedAtMs,
           endsAtMs:
-            startedAtMs === null
-              ? null
-              : startedAtMs + DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS,
+            startedAtMs === null ? null : startedAtMs + durationMs,
         };
         const nextStates = new Map(currentStates);
         nextStates.set(block.blockId, nextState);

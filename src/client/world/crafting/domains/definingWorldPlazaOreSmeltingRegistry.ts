@@ -26,8 +26,19 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 
-/** Milliseconds required for one ore unit to finish smelting. */
-export const DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS = 4_000;
+/**
+ * Recipe complexity scale (1 = fastest, 5 = slowest).
+ * Duration lerps linearly from {@link DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS_MIN}
+ * to {@link DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS_MAX}.
+ */
+export const DEFINING_WORLD_PLAZA_ORE_SMELTING_COMPLEXITY_MIN = 1;
+export const DEFINING_WORLD_PLAZA_ORE_SMELTING_COMPLEXITY_MAX = 5;
+
+/** Fastest smelt / fire duration (complexity 1). */
+export const DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS_MIN = 5_000;
+
+/** Slowest smelt / fire duration (complexity 5). */
+export const DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS_MAX = 30_000;
 
 /** Placed utility definitions that accept ore and fuel. */
 export const DEFINING_WORLD_PLAZA_ORE_SMELTING_STATION_BLOCK_DEFINITION_IDS = [
@@ -59,6 +70,8 @@ export type DefiningWorldPlazaOreSmeltingRecipe = {
   readonly inputItemTypeId: string;
   readonly outputItemTypeId: string;
   readonly outputDisplayName: string;
+  /** 1 (fast) through 5 (slow). Drives craft duration. */
+  readonly complexity: number;
   /**
    * When set, only these station block definition ids may run the recipe.
    * Omit for every bloomery / kiln / stove.
@@ -72,36 +85,43 @@ export const DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY = [
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_IRON,
     outputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON,
     outputDisplayName: 'Iron ingot',
+    complexity: 3,
   },
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COPPER,
     outputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_COPPER,
     outputDisplayName: 'Copper ingot',
+    complexity: 2,
   },
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_SILVER,
     outputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_SILVER,
     outputDisplayName: 'Silver ingot',
+    complexity: 4,
   },
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_GOLD,
     outputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_GOLD,
     outputDisplayName: 'Gold ingot',
+    complexity: 4,
   },
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_LEAD,
     outputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_LEAD,
     outputDisplayName: 'Lead ingot',
+    complexity: 2,
   },
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_SCARLET,
     outputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_MERCURY,
     outputDisplayName: 'Mercury',
+    complexity: 5,
   },
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CUP,
     outputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
     outputDisplayName: 'Empty Clay Cup',
+    complexity: 1,
     allowedStationBlockDefinitionIds: [
       DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
     ],
@@ -110,6 +130,7 @@ export const DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY = [
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT,
     outputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT,
     outputDisplayName: 'Empty Clay Tea Pot',
+    complexity: 3,
     allowedStationBlockDefinitionIds: [
       DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
     ],
@@ -118,11 +139,38 @@ export const DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY = [
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOTTLE,
     outputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOTTLE,
     outputDisplayName: 'Empty Clay Bottle',
+    complexity: 2,
     allowedStationBlockDefinitionIds: [
       DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
     ],
   },
 ] as const satisfies readonly DefiningWorldPlazaOreSmeltingRecipe[];
+
+/**
+ * Maps recipe complexity (1–5) to craft duration in ms (5s–30s).
+ * Out-of-range values clamp to the nearest bound.
+ */
+export function computingWorldPlazaOreSmeltingDurationMsFromComplexity(
+  complexity: number
+): number {
+  const clampedComplexity = Math.min(
+    DEFINING_WORLD_PLAZA_ORE_SMELTING_COMPLEXITY_MAX,
+    Math.max(DEFINING_WORLD_PLAZA_ORE_SMELTING_COMPLEXITY_MIN, complexity)
+  );
+  const complexitySpan =
+    DEFINING_WORLD_PLAZA_ORE_SMELTING_COMPLEXITY_MAX -
+    DEFINING_WORLD_PLAZA_ORE_SMELTING_COMPLEXITY_MIN;
+  const durationSpan =
+    DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS_MAX -
+    DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS_MIN;
+  const t =
+    (clampedComplexity - DEFINING_WORLD_PLAZA_ORE_SMELTING_COMPLEXITY_MIN) /
+    complexitySpan;
+
+  return Math.round(
+    DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS_MIN + t * durationSpan
+  );
+}
 
 /**
  * Resolves a smelting / firing recipe for an input item.

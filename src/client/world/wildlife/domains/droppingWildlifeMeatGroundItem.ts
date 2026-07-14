@@ -7,6 +7,7 @@ import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inven
 import type { DefiningWildlifeMeatDropKillContext } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { droppingWildlifeSpecialtyGroundItems } from '@/components/world/wildlife/domains/droppingWildlifeSpecialtyGroundItems';
 import { resolvingWildlifeMeatDropQuantity } from '@/components/world/wildlife/domains/resolvingWildlifeLargeSizeFrameMeatDropQuantity';
 import { resolvingWildlifeMeatDropRawItemTypeId } from '@/components/world/wildlife/domains/resolvingWildlifeMeatCatalogEntryForInstance';
 import { resolvingWildlifeMeatDropMetadata } from '@/components/world/wildlife/domains/resolvingWildlifeMeatDropMetadata';
@@ -125,6 +126,14 @@ export async function droppingWildlifeMeatGroundItem({
       groundItem,
       useLocalPersistence
     );
+
+    await droppingWildlifeSpecialtyGroundItems({
+      localPersistenceOwnerId,
+      redditUserId,
+      saveSlotIndex,
+      instance,
+      playerPosition,
+    });
 
     return { outcome: 'dropped', groundItem };
   } catch {

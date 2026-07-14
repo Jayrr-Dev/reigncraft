@@ -60,7 +60,7 @@ function RenderingWorldPlazaOreSmeltingSlot({
   return (
     <div className="flex flex-col items-center gap-1">
       <span className="text-[9px] font-bold uppercase tracking-wide text-amber-100">
-        {slotKind === 'ore' ? 'Ore' : 'Fuel'}
+        {slotKind === 'ore' ? 'Item' : 'Fuel'}
       </span>
       <div
         ref={setNodeRef}
@@ -152,7 +152,7 @@ export function RenderingWorldPlazaOreSmeltingPopover({
           ? 'Smelting...'
           : stationState.outputItemTypeId
             ? `${stationState.outputDisplayName} waiting`
-            : 'Drop ore + 1 coal or 3 wood'}
+            : 'Drop item + 1 coal or 3 wood'}
       </p>
       {stationState.outputItemTypeId ? (
         <button

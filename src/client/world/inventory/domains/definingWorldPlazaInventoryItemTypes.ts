@@ -64,6 +64,7 @@ import { registeringWorldPlazaInventoryWetClayItemDefinitions } from '@/componen
 import { registeringWorldPlazaInventoryIngotItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryIngotItemDefinitions';
 import { registeringWorldPlazaTieredToolInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaTieredToolInventoryItems';
 import { registeringWorldPlazaWildlifeMeatInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems';
+import { registeringWorldPlazaWildlifeSpecialtyLootInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeSpecialtyLootInventoryItems';
 import { resolvingWorldPlazaInventoryFoodHealDeclaration } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealDeclaration';
 import {
   DEFINING_WORLD_PLAZA_SPRITCORE_ITEM_NAME,
@@ -269,6 +270,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       },
     },
     ...registeringWorldPlazaWildlifeMeatInventoryItems(),
+    ...registeringWorldPlazaWildlifeSpecialtyLootInventoryItems(),
     ...registeringWorldPlazaInventoryFlowerItemDefinitions(),
     ...registeringWorldPlazaInventoryCloverItemDefinitions(),
     ...registeringWorldPlazaInventoryBerryItemDefinitions(),
