@@ -199,7 +199,7 @@ export const DEFINING_PLAZA_BIOMES_GUIDE_FORAGING_BY_KIND: Record<
     vegetation: ['oak', 'birch', 'pine', 'tall_grass'],
   },
   forest: {
-    resources: ['wood', 'freshwater', 'berries'],
+    resources: ['wood', 'freshwater', 'wildflowers', 'berries'],
     vegetation: ['oak', 'birch', 'pine', 'scrub'],
   },
   flower_forest: {
@@ -215,7 +215,7 @@ export const DEFINING_PLAZA_BIOMES_GUIDE_FORAGING_BY_KIND: Record<
     vegetation: ['palm', 'dune_grass'],
   },
   savanna: {
-    resources: ['wood', 'freshwater'],
+    resources: ['wood', 'freshwater', 'wildflowers'],
     vegetation: ['acacia', 'deadwood', 'tall_grass'],
   },
   rocky: {
@@ -223,7 +223,7 @@ export const DEFINING_PLAZA_BIOMES_GUIDE_FORAGING_BY_KIND: Record<
     vegetation: ['moss', 'scrub'],
   },
   jungle: {
-    resources: ['wood', 'freshwater', 'berries'],
+    resources: ['wood', 'freshwater', 'berries', 'wildflowers'],
     vegetation: ['kapok', 'strangler_fig', 'palm', 'vines', 'moss'],
   },
   desert: {
@@ -231,7 +231,7 @@ export const DEFINING_PLAZA_BIOMES_GUIDE_FORAGING_BY_KIND: Record<
     vegetation: ['cactus', 'scrub'],
   },
   swamp: {
-    resources: ['wood', 'clay', 'freshwater'],
+    resources: ['wood', 'clay', 'freshwater', 'wildflowers'],
     vegetation: ['willow', 'deadwood', 'reeds', 'lily_pads'],
   },
   badlands: {

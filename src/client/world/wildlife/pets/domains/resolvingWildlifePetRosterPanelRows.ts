@@ -6,6 +6,7 @@
 
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { resolvingWildlifeInstanceBaseMaxHealth } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
+import { DEFINING_WILDLIFE_PET_MAX_ACTIVE } from '@/components/world/wildlife/pets/domains/definingWildlifePetLoyaltyTiersRegistry';
 import {
   LABELING_WILDLIFE_PET_ROSTER_STATUS_ALIVE,
   LABELING_WILDLIFE_PET_ROSTER_STATUS_DECEASED,
@@ -31,6 +32,28 @@ export function checkingWildlifePetRosterRecordIsDeceased(
   record: DefiningWildlifePetPersistedRecord
 ): boolean {
   return record.healthCurrent !== null && record.healthCurrent <= 0;
+}
+
+/** Living companions (not deceased) toward {@link DEFINING_WILDLIFE_PET_MAX_ACTIVE}. */
+export function countingWildlifePetRosterLiving(
+  pets: readonly DefiningWildlifePetPersistedRecord[]
+): number {
+  let count = 0;
+
+  for (const pet of pets) {
+    if (!checkingWildlifePetRosterRecordIsDeceased(pet)) {
+      count += 1;
+    }
+  }
+
+  return count;
+}
+
+/** Compact `current/max` label for the companions header (e.g. `0/3`). */
+export function resolvingWildlifePetRosterPanelCountLabel(
+  pets: readonly DefiningWildlifePetPersistedRecord[]
+): string {
+  return `${countingWildlifePetRosterLiving(pets)}/${DEFINING_WILDLIFE_PET_MAX_ACTIVE}`;
 }
 
 /** Builds compact display rows for every bonded companion on the roster. */

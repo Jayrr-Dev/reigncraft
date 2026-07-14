@@ -3,10 +3,14 @@ import type { CreatingWorldPlazaGrassFloorChunkDrawPassContext } from '@/compone
 import {
   DEFINING_WORLD_PLAZA_BIOME_BLOCK_HIGHLIGHT_DOT_RADIUS_PX,
   DEFINING_WORLD_PLAZA_BIOME_BLOCK_HIGHLIGHT_TILE_MODULUS,
-  DEFINING_WORLD_PLAZA_BIOME_DECORATION_DOT_RADIUS_PX,
   DEFINING_WORLD_PLAZA_BIOME_DECORATION_TILE_REMAINDER,
   DEFINING_WORLD_PLAZA_BIOME_SPECK_DOT_RADIUS_PX,
 } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
+import {
+  DEFINING_WORLD_PLAZA_FLOWER_SURFACE_DOT_RADIUS_PX,
+  DEFINING_WORLD_PLAZA_FLOWER_SURFACE_OUTLINE_COLOR,
+  DEFINING_WORLD_PLAZA_FLOWER_SURFACE_OUTLINE_RADIUS_PX,
+} from '@/components/world/domains/definingWorldPlazaFlowerPetalPickableColorConstants';
 import { DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
 import {
   DEFINING_WORLD_PLAZA_LAKE_SHORE_BLOCK_HIGHLIGHT_COLOR,
@@ -197,7 +201,14 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
         .circle(
           input.centerX,
           input.centerY - halfHeight * 0.35,
-          DEFINING_WORLD_PLAZA_BIOME_DECORATION_DOT_RADIUS_PX
+          DEFINING_WORLD_PLAZA_FLOWER_SURFACE_OUTLINE_RADIUS_PX
+        )
+        .fill({ color: DEFINING_WORLD_PLAZA_FLOWER_SURFACE_OUTLINE_COLOR });
+      input.graphics
+        .circle(
+          input.centerX,
+          input.centerY - halfHeight * 0.35,
+          DEFINING_WORLD_PLAZA_FLOWER_SURFACE_DOT_RADIUS_PX
         )
         .fill({ color: flowerColor });
     }

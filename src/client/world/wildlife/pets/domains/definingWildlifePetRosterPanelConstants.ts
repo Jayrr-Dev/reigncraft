@@ -60,6 +60,14 @@ export const STYLING_WILDLIFE_PET_ROSTER_PANEL_HEADER_CLASS_NAME =
 export const STYLING_WILDLIFE_PET_ROSTER_PANEL_TITLE_CLASS_NAME =
   STYLING_WORLD_PLAZA_PROFILE_PANEL_TITLE_CLASS_NAME;
 
+/** Title + living/max count cluster. */
+export const STYLING_WILDLIFE_PET_ROSTER_PANEL_TITLE_ROW_CLASS_NAME =
+  'flex min-w-0 items-baseline gap-2' as const;
+
+/** Living companion count beside the title (`0/3`). */
+export const STYLING_WILDLIFE_PET_ROSTER_PANEL_COUNT_CLASS_NAME =
+  'shrink-0 font-display text-[11px] font-bold tabular-nums tracking-wide text-ink-soft' as const;
+
 /** Close button. */
 export const STYLING_WILDLIFE_PET_ROSTER_PANEL_CLOSE_BUTTON_CLASS_NAME =
   STYLING_WORLD_PLAZA_PROFILE_PANEL_CLOSE_BUTTON_CLASS_NAME;

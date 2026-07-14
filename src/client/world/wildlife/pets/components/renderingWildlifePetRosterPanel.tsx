@@ -19,6 +19,7 @@ import {
   STYLING_WILDLIFE_PET_ROSTER_PANEL_BACKDROP_CLASS_NAME,
   STYLING_WILDLIFE_PET_ROSTER_PANEL_BODY_CLASS_NAME,
   STYLING_WILDLIFE_PET_ROSTER_PANEL_CLOSE_BUTTON_CLASS_NAME,
+  STYLING_WILDLIFE_PET_ROSTER_PANEL_COUNT_CLASS_NAME,
   STYLING_WILDLIFE_PET_ROSTER_PANEL_EMPTY_CLASS_NAME,
   STYLING_WILDLIFE_PET_ROSTER_PANEL_HEADER_CLASS_NAME,
   STYLING_WILDLIFE_PET_ROSTER_PANEL_LIST_CLASS_NAME,
@@ -31,6 +32,7 @@ import {
   STYLING_WILDLIFE_PET_ROSTER_PANEL_SPECIES_CLASS_NAME,
   STYLING_WILDLIFE_PET_ROSTER_PANEL_STATS_CLASS_NAME,
   STYLING_WILDLIFE_PET_ROSTER_PANEL_TITLE_CLASS_NAME,
+  STYLING_WILDLIFE_PET_ROSTER_PANEL_TITLE_ROW_CLASS_NAME,
   STYLING_WILDLIFE_PET_ROSTER_STATUS_ALIVE_CLASS_NAME,
   STYLING_WILDLIFE_PET_ROSTER_STATUS_DECEASED_CLASS_NAME,
 } from '@/components/world/wildlife/pets/domains/definingWildlifePetRosterPanelConstants';
@@ -38,7 +40,10 @@ import {
   readingWildlifePetRosterSnapshot,
   subscribingWildlifePetRoster,
 } from '@/components/world/wildlife/pets/domains/managingWildlifePetRosterStore';
-import { resolvingWildlifePetRosterPanelRows } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetRosterPanelRows';
+import {
+  resolvingWildlifePetRosterPanelCountLabel,
+  resolvingWildlifePetRosterPanelRows,
+} from '@/components/world/wildlife/pets/domains/resolvingWildlifePetRosterPanelRows';
 import { useMemo, useSyncExternalStore, type SyntheticEvent } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -60,6 +65,10 @@ export function RenderingWildlifePetRosterPanel({
   );
   const rows = useMemo(
     () => resolvingWildlifePetRosterPanelRows(rosterSnapshot.pets),
+    [rosterSnapshot.pets]
+  );
+  const countLabel = useMemo(
+    () => resolvingWildlifePetRosterPanelCountLabel(rosterSnapshot.pets),
     [rosterSnapshot.pets]
   );
 
@@ -96,9 +105,19 @@ export function RenderingWildlifePetRosterPanel({
         onPointerDown={stoppingPlazaWalkPointerPropagation}
       >
         <header className={STYLING_WILDLIFE_PET_ROSTER_PANEL_HEADER_CLASS_NAME}>
-          <h2 className={STYLING_WILDLIFE_PET_ROSTER_PANEL_TITLE_CLASS_NAME}>
-            {LABELING_WILDLIFE_PET_ROSTER_PANEL_TITLE}
-          </h2>
+          <div
+            className={STYLING_WILDLIFE_PET_ROSTER_PANEL_TITLE_ROW_CLASS_NAME}
+          >
+            <h2 className={STYLING_WILDLIFE_PET_ROSTER_PANEL_TITLE_CLASS_NAME}>
+              {LABELING_WILDLIFE_PET_ROSTER_PANEL_TITLE}
+            </h2>
+            <span
+              className={STYLING_WILDLIFE_PET_ROSTER_PANEL_COUNT_CLASS_NAME}
+              aria-label={`${countLabel} companions`}
+            >
+              {countLabel}
+            </span>
+          </div>
           <button
             type="button"
             className={
