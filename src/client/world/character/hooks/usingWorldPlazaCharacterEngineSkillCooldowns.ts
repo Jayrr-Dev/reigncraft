@@ -10,12 +10,19 @@ export type UsingWorldPlazaCharacterEngineSkillCooldownEntry = {
   readonly remainingMs: number;
 };
 
+export type UsingWorldPlazaCharacterEngineSkillCooldownsParams = {
+  healthStateRef: React.RefObject<DefiningWorldPlazaEntityHealthState>;
+  /** Optional heal float enqueue for skill heals (not passive regen). */
+  enqueueHealFloatRef?: React.RefObject<(amount: number) => void>;
+};
+
 /**
  * Tracks per-skill cooldowns and executes skills against health state.
  */
-export function usingWorldPlazaCharacterEngineSkillCooldowns(
-  healthStateRef: React.RefObject<DefiningWorldPlazaEntityHealthState>
-) {
+export function usingWorldPlazaCharacterEngineSkillCooldowns({
+  healthStateRef,
+  enqueueHealFloatRef,
+}: UsingWorldPlazaCharacterEngineSkillCooldownsParams) {
   const cooldownUntilMsBySkillIdRef = useRef<Map<string, number>>(new Map());
 
   const tryUsingSkill = useCallback(
@@ -55,9 +62,13 @@ export function usingWorldPlazaCharacterEngineSkillCooldowns(
         nowMs + skill.cooldownMs
       );
 
+      if (result.healedAmount > 0) {
+        enqueueHealFloatRef?.current?.(result.healedAmount);
+      }
+
       return true;
     },
-    [healthStateRef]
+    [enqueueHealFloatRef, healthStateRef]
   );
 
   const listingSkillCooldowns = useCallback(

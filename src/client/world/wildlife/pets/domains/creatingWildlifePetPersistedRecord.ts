@@ -4,13 +4,13 @@
  * @module components/world/wildlife/pets/domains/creatingWildlifePetPersistedRecord
  */
 
+import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type {
   DefiningWildlifePetBondState,
   DefiningWildlifePetCommandId,
   DefiningWildlifePetPersistedRecord,
 } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
 import { checkingWildlifePetHasCapability } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetLoyaltyTier';
-import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type CreatingWildlifePetPersistedRecordParams = {
   instance: DefiningWildlifeInstance;
@@ -66,6 +66,7 @@ export function creatingWildlifePetPersistedRecord(
     lastKnownX: instance.position.x,
     lastKnownY: instance.position.y,
     lastKnownLayer: instance.position.layer ?? null,
+    deathCauseKind: null,
     acquiredAtMs: nowMs,
     updatedAtMs: nowMs,
   };
@@ -86,6 +87,9 @@ export function creatingWildlifePetBondStateFromPersistedRecord(
     soulsaveConsumed: record.soulsaveConsumed,
     weaponItem: record.weaponItem,
     armorItem: record.armorItem,
-    isPersistent: checkingWildlifePetHasCapability(record.loyalty, 'persistent'),
+    isPersistent: checkingWildlifePetHasCapability(
+      record.loyalty,
+      'persistent'
+    ),
   };
 }

@@ -42,4 +42,36 @@ describe('worldFlowerRarity', () => {
       expect(counts.get(entry.speciesId) ?? 0).toBeGreaterThan(0);
     }
   });
+
+  it('keeps variety on flower-placement tiles (placement hash remainder 0)', () => {
+    const counts = new Map<string, number>();
+    const placementHashX = 31;
+    const placementHashY = 17;
+    const flowerTileModulus = 23;
+
+    for (let tileX = -120; tileX <= 120; tileX += 1) {
+      for (let tileY = -120; tileY <= 120; tileY += 1) {
+        if (
+          Math.abs(tileX * placementHashX + tileY * placementHashY) %
+            flowerTileModulus !==
+          0
+        ) {
+          continue;
+        }
+
+        const speciesId = resolvingWorldFlowerSpeciesAtTileIndex(tileX, tileY);
+        counts.set(speciesId, (counts.get(speciesId) ?? 0) + 1);
+      }
+    }
+
+    const total = [...counts.values()].reduce((sum, count) => sum + count, 0);
+    expect(total).toBeGreaterThan(500);
+
+    for (const entry of WORLD_FLOWER_SPECIES_RARITY_REGISTRY) {
+      expect(counts.get(entry.speciesId) ?? 0).toBeGreaterThan(0);
+    }
+
+    const calendulaShare = (counts.get('calendula') ?? 0) / total;
+    expect(calendulaShare).toBeLessThan(0.25);
+  });
 });

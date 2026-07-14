@@ -62,7 +62,7 @@ export const DEFINING_WILDLIFE_PET_LOYALTY_TIER_REGISTRY: readonly DefiningWildl
       tierId: 'friendly',
       displayName: 'Friendly',
       minLoyalty: 198,
-      capabilities: ['commandsStayFollow'],
+      capabilities: ['commandsStayFollow', 'hungerUi'],
     },
     {
       tierId: 'trusting',

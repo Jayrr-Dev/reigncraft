@@ -2,6 +2,7 @@
 
 import { RenderingPlazaHerbariumFlowerPortrait } from '@/components/home/components/renderingPlazaHerbariumFlowerPortrait';
 import { RenderingPlazaHerbariumGuideDetailView } from '@/components/home/components/renderingPlazaHerbariumGuideDetailView';
+import { RenderingPlazaHerbariumTreePortrait } from '@/components/home/components/renderingPlazaHerbariumTreePortrait';
 import { DEFINING_PLAZA_HERBARIUM_PANEL_SUBTITLE } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
 import {
   resolvingPlazaHerbariumGuideDisplayEntries,
@@ -89,10 +90,10 @@ function RenderingPlazaHerbariumGuideCard({
               className="size-[48%]"
             />
           ) : (
-            <Icon
-              icon={entry.icon}
-              className="size-[40%] text-ink-soft/40"
-              aria-hidden
+            <RenderingPlazaHerbariumTreePortrait
+              treeVariant={entry.variant}
+              variant="silhouette"
+              className="size-[48%]"
             />
           )}
         </div>
@@ -126,10 +127,10 @@ function RenderingPlazaHerbariumGuideCard({
             className="size-[48%]"
           />
         ) : (
-          <Icon
-            icon={entry.icon}
-            className="size-[40%] text-poster-teal-deep"
-            aria-hidden
+          <RenderingPlazaHerbariumTreePortrait
+            treeVariant={entry.variant}
+            variant="revealed"
+            className="size-[48%]"
           />
         )}
         <span className="absolute left-1 top-1 flex items-center gap-0.5 rounded-sm border border-poster-teal/35 bg-poster-teal-deep/90 px-1 py-0.5 shadow">

@@ -1,14 +1,14 @@
-import { describe, expect, it } from 'vitest';
 import { creatingWildlifeTestInstance } from '@/components/world/wildlife/domains/creatingWildlifeTestFixtures';
 import { applyingWildlifePetLoyaltyGrant } from '@/components/world/wildlife/pets/domains/applyingWildlifePetLoyaltyGrant';
+import { applyingWildlifePetSoulsave } from '@/components/world/wildlife/pets/domains/applyingWildlifePetSoulsave';
 import { computingWildlifePetLoyaltyFromRestoredPoints } from '@/components/world/wildlife/pets/domains/computingWildlifePetLoyaltyFromRestoredPoints';
 import {
   DEFINING_WILDLIFE_PET_MAX_LOYALTY,
   DEFINING_WILDLIFE_PET_PETTING_LOYALTY_GRANT,
 } from '@/components/world/wildlife/pets/domains/definingWildlifePetLoyaltyTiersRegistry';
-import { applyingWildlifePetSoulsave } from '@/components/world/wildlife/pets/domains/applyingWildlifePetSoulsave';
 import { checkingWildlifePetHasCapability } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetLoyaltyTier';
 import { parsingWildlifePetRoster } from '@/components/world/wildlife/pets/domains/serializingWildlifePetRoster';
+import { describe, expect, it } from 'vitest';
 
 describe('wildlife pet loyalty', () => {
   it('grants curious on first point and unlocks familiar at 50', () => {
@@ -74,6 +74,7 @@ describe('parsingWildlifePetRoster', () => {
           lastKnownX: 1,
           lastKnownY: 2,
           lastKnownLayer: 1,
+          deathCauseKind: null,
           acquiredAtMs: 1,
           updatedAtMs: 2,
         },

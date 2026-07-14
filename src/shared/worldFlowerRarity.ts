@@ -59,19 +59,19 @@ export const WORLD_FLOWER_SPECIES_RARITY_TOTAL_WEIGHT =
 
 /**
  * Deterministic unit float in [0, 1) from tile coordinates and salt.
+ *
+ * Uses a hash independent of {@link WORLD_FLOWER_PLACEMENT_HASH_X} /
+ * {@link WORLD_FLOWER_PLACEMENT_HASH_Y} so species stays well mixed on the
+ * flower-decoration tile subset (placement already filters by that hash).
  */
 export function seedingWorldFlowerSpeciesUnitFromTileIndex(
   tileX: number,
   tileY: number,
   salt: number = WORLD_FLOWER_SPECIES_SEED_SALT
 ): number {
-  const hash =
-    Math.abs(
-      tileX * WORLD_FLOWER_PLACEMENT_HASH_X +
-        tileY * WORLD_FLOWER_PLACEMENT_HASH_Y +
-        salt
-    ) % 10_000;
-  return hash / 10_000;
+  const seed = tileX * 374761393 + tileY * 668265263 + salt * 1274126177;
+  const normalized = Math.sin(seed) * 10_000;
+  return normalized - Math.floor(normalized);
 }
 
 /**

@@ -24,6 +24,11 @@ import {
   STYLING_WORLD_PLAZA_PROFILE_PANEL_SECTION_HEADING_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_SHELL_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_SKIN_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_TAB_BODY_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_TAB_BUTTON_ACTIVE_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_TAB_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_TAB_LIST_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_TAB_SECTION_STACK_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_TITLE_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_VITAL_DETAIL_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_VITAL_LABEL_ROW_CLASS_NAME,
@@ -95,6 +100,56 @@ export const DEFINING_WILDLIFE_PET_MODAL_SPECIES_CLASS_NAME =
 /** Loyalty tier chip (same chrome as Character level). */
 export const DEFINING_WILDLIFE_PET_MODAL_TIER_CHIP_CLASS_NAME =
   STYLING_WORLD_PLAZA_PROFILE_PANEL_LEVEL_CHIP_CLASS_NAME;
+
+/** Companion loadout tab ids (max 3). */
+export type DefiningWildlifePetModalTabId = 'gear' | 'skills' | 'bond';
+
+/** One tab in the companion loadout strip. */
+export type DefiningWildlifePetModalTabDefinition = {
+  id: DefiningWildlifePetModalTabId;
+  label: string;
+  /** Capability that must unlock before the tab appears. */
+  requiredCapability: 'equipment' | 'teachSpells' | 'soulsave';
+};
+
+/**
+ * Ordered loadout tabs: Equipment / Skills / Soulsave.
+ * Vitals, commands, and combat stats stay above the strip.
+ */
+export const DEFINING_WILDLIFE_PET_MODAL_TAB_REGISTRY: readonly DefiningWildlifePetModalTabDefinition[] =
+  [
+    { id: 'gear', label: 'Gear', requiredCapability: 'equipment' },
+    { id: 'skills', label: 'Skills', requiredCapability: 'teachSpells' },
+    { id: 'bond', label: 'Bond', requiredCapability: 'soulsave' },
+  ];
+
+/** Default loadout tab when several are unlocked. */
+export const DEFINING_WILDLIFE_PET_MODAL_DEFAULT_TAB_ID: DefiningWildlifePetModalTabId =
+  'gear';
+
+/** Accessible label for the companion loadout tab list. */
+export const LABELING_WILDLIFE_PET_MODAL_TAB_LIST =
+  'Companion loadout sections' as const;
+
+/** Segmented tab strip (shared Character chrome). */
+export const DEFINING_WILDLIFE_PET_MODAL_TAB_LIST_CLASS_NAME =
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_TAB_LIST_CLASS_NAME;
+
+/** Inactive tab button. */
+export const DEFINING_WILDLIFE_PET_MODAL_TAB_BUTTON_CLASS_NAME =
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_TAB_BUTTON_CLASS_NAME;
+
+/** Active tab button. */
+export const DEFINING_WILDLIFE_PET_MODAL_TAB_BUTTON_ACTIVE_CLASS_NAME =
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_TAB_BUTTON_ACTIVE_CLASS_NAME;
+
+/** Scrollable tab body under the strip. */
+export const DEFINING_WILDLIFE_PET_MODAL_TAB_BODY_CLASS_NAME =
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_TAB_BODY_CLASS_NAME;
+
+/** Stack of blocks inside one loadout tab. */
+export const DEFINING_WILDLIFE_PET_MODAL_TAB_SECTION_STACK_CLASS_NAME =
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_TAB_SECTION_STACK_CLASS_NAME;
 
 /** Legacy caption alias kept for callers that still expect it. */
 export const DEFINING_WILDLIFE_PET_MODAL_TIER_CAPTION_CLASS_NAME =
@@ -173,6 +228,10 @@ export const DEFINING_WILDLIFE_PET_MODAL_NAME_INPUT_CLASS_NAME =
 /** Base action button (parchment chip chrome). */
 export const DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_CLASS_NAME =
   `flex items-center justify-center gap-1.5 rounded-md border border-poster-wood/35 bg-parchment-dark/30 px-2 py-1.5 font-display text-[10px] font-bold uppercase tracking-[0.08em] text-ink transition hover:bg-parchment-dark/50 disabled:cursor-not-allowed disabled:opacity-45 ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.focusRingGold}` as const;
+
+/** Command chips use yellow label text so they read as orders, not care actions. */
+export const DEFINING_WILDLIFE_PET_MODAL_COMMAND_BUTTON_CLASS_NAME =
+  `flex items-center justify-center gap-1.5 rounded-md border border-poster-gold/40 bg-parchment-dark/30 px-2 py-1.5 font-display text-[10px] font-bold uppercase tracking-[0.08em] text-poster-gold transition hover:bg-parchment-dark/50 disabled:cursor-not-allowed disabled:opacity-45 ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.focusRingGold}` as const;
 
 /** Active / selected action button (teal + gold, matches Character tabs). */
 export const DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_ACTIVE_CLASS_NAME =
@@ -306,11 +365,11 @@ export type DefiningWildlifePetModalVitalDefinition = {
   readonly iconId: string;
 };
 
-/** Ordered vitals shown once basicUi unlocks. */
+/** Ordered vitals shown once basicUi unlocks (hunger waits for Friendly / hungerUi). */
 export const DEFINING_WILDLIFE_PET_MODAL_VITAL_REGISTRY: readonly DefiningWildlifePetModalVitalDefinition[] =
   [
     { id: 'health', label: 'Health', iconId: 'solar:heart-pulse-bold' },
-    { id: 'stamina', label: 'Stamina', iconId: 'ph:person-simple-run' },
     { id: 'hunger', label: 'Hunger', iconId: 'mdi:food-drumstick' },
+    { id: 'stamina', label: 'Stamina', iconId: 'ph:person-simple-run' },
     { id: 'loyalty', label: 'Loyalty', iconId: 'mdi:paw' },
   ];

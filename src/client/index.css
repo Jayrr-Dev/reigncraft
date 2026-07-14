@@ -607,6 +607,33 @@ body {
   opacity: 0.92;
 }
 
+/* Companion command orders: yellow outlined world text. */
+.world-plaza-companion-command-interaction-label-button {
+  color: #f4d35e;
+  font-family: var(--font-body);
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-text-stroke: 0.85px rgba(0, 0, 0, 0.95);
+  paint-order: stroke fill;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.55),
+    0 0 6px rgba(0, 0, 0, 0.35);
+  transition:
+    color 120ms ease,
+    opacity 120ms ease;
+}
+
+.world-plaza-companion-command-interaction-label-button:hover {
+  color: #ffe08a;
+  opacity: 0.95;
+}
+
+.world-plaza-companion-command-interaction-label-button:active {
+  color: #e6c04a;
+  opacity: 0.88;
+}
+
 .plaza-combat-float-heal {
   animation: plaza-combat-float 1s ease-out forwards;
   paint-order: stroke fill;

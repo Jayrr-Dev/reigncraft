@@ -36,9 +36,11 @@ import {
   DEFINING_WILDLIFE_PET_MODAL_CARE_GRID_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_CLOSE_BUTTON_ARIA_LABEL,
   DEFINING_WILDLIFE_PET_MODAL_CLOSE_BUTTON_CLASS_NAME,
+  DEFINING_WILDLIFE_PET_MODAL_COMMAND_BUTTON_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_COMMAND_GRID_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_COMMAND_OPTIONS,
   DEFINING_WILDLIFE_PET_MODAL_DATA_ATTRIBUTE,
+  DEFINING_WILDLIFE_PET_MODAL_DEFAULT_TAB_ID,
   DEFINING_WILDLIFE_PET_MODAL_EMPTY_STATE_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_FEED_LABEL,
   DEFINING_WILDLIFE_PET_MODAL_HEADER_CLASS_NAME,
@@ -65,11 +67,19 @@ import {
   DEFINING_WILDLIFE_PET_MODAL_STAT_LIST_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_STAT_ROW_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_STAT_VALUE_CLASS_NAME,
+  DEFINING_WILDLIFE_PET_MODAL_TAB_BODY_CLASS_NAME,
+  DEFINING_WILDLIFE_PET_MODAL_TAB_BUTTON_ACTIVE_CLASS_NAME,
+  DEFINING_WILDLIFE_PET_MODAL_TAB_BUTTON_CLASS_NAME,
+  DEFINING_WILDLIFE_PET_MODAL_TAB_LIST_CLASS_NAME,
+  DEFINING_WILDLIFE_PET_MODAL_TAB_REGISTRY,
+  DEFINING_WILDLIFE_PET_MODAL_TAB_SECTION_STACK_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_TIER_CHIP_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_TITLE_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_VITAL_REGISTRY,
+  LABELING_WILDLIFE_PET_MODAL_TAB_LIST,
   LABELING_WILDLIFE_PET_MODAL_TITLE,
   resolvingWildlifePetModalVitalFillClassName,
+  type DefiningWildlifePetModalTabId,
   type DefiningWildlifePetModalVitalId,
 } from '@/components/world/wildlife/pets/domains/definingWildlifePetModalConstants';
 import type { DefiningWildlifePetCommandId } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
@@ -129,6 +139,7 @@ function listingWildlifePetModalVitalRows(
       ? instance.healthState.currentHealth / instance.healthState.baseMaxHealth
       : 0;
   const loyaltyRatio = loyalty / DEFINING_WILDLIFE_PET_MAX_LOYALTY;
+  const showsHunger = checkingWildlifePetHasCapability(loyalty, 'hungerUi');
 
   const valuesById: Record<
     DefiningWildlifePetModalVitalId,
@@ -156,7 +167,9 @@ function listingWildlifePetModalVitalRows(
     },
   };
 
-  return DEFINING_WILDLIFE_PET_MODAL_VITAL_REGISTRY.map((vital) => ({
+  return DEFINING_WILDLIFE_PET_MODAL_VITAL_REGISTRY.filter(
+    (vital) => vital.id !== 'hunger' || showsHunger
+  ).map((vital) => ({
     id: vital.id,
     label: vital.label,
     iconId: vital.iconId,
@@ -165,8 +178,8 @@ function listingWildlifePetModalVitalRows(
 }
 
 /**
- * Bonded companion panel: name, vitals, commands, advanced stats, equipment,
- * skills, and soulsave status, each gated by the pet bond's loyalty tier.
+ * Bonded companion panel: name, vitals, commands, and advanced stats above a
+ * max-3 loadout tab strip (Gear / Skills / Bond) gated by loyalty tier.
  */
 export function RenderingWildlifePetModal({
   isOpen,
@@ -185,12 +198,17 @@ export function RenderingWildlifePetModal({
 }: RenderingWildlifePetModalProps): React.JSX.Element | null {
   const [instanceSnapshot, setInstanceSnapshot] =
     useState<DefiningWildlifeInstance | null>(null);
+  const [activeTabId, setActiveTabId] = useState<DefiningWildlifePetModalTabId>(
+    DEFINING_WILDLIFE_PET_MODAL_DEFAULT_TAB_ID
+  );
 
   useEffect(() => {
     if (!isOpen || !instanceId) {
       setInstanceSnapshot(null);
       return;
     }
+
+    setActiveTabId(DEFINING_WILDLIFE_PET_MODAL_DEFAULT_TAB_ID);
 
     const refreshingSnapshot = (): void => {
       setInstanceSnapshot(
@@ -305,6 +323,13 @@ export function RenderingWildlifePetModal({
         tier.displayName
       )
     : [];
+
+  const availableTabs = DEFINING_WILDLIFE_PET_MODAL_TAB_REGISTRY.filter((tab) =>
+    hasCapability(tab.requiredCapability)
+  );
+  const resolvedTabId = availableTabs.some((tab) => tab.id === activeTabId)
+    ? activeTabId
+    : (availableTabs[0]?.id ?? DEFINING_WILDLIFE_PET_MODAL_DEFAULT_TAB_ID);
 
   return createPortal(
     <div
@@ -487,7 +512,7 @@ export function RenderingWildlifePetModal({
                     <button
                       key={option.commandId}
                       type="button"
-                      className={`${DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_CLASS_NAME} ${
+                      className={`${DEFINING_WILDLIFE_PET_MODAL_COMMAND_BUTTON_CLASS_NAME} ${
                         isActive
                           ? DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_ACTIVE_CLASS_NAME
                           : ''
@@ -548,206 +573,302 @@ export function RenderingWildlifePetModal({
             </div>
           ) : null}
 
-          {hasEquipment ? (
-            <div className={DEFINING_WILDLIFE_PET_MODAL_SECTION_CLASS_NAME}>
-              <p
-                className={
-                  DEFINING_WILDLIFE_PET_MODAL_SECTION_HEADING_CLASS_NAME
-                }
-              >
-                Equipment
-              </p>
-              {petBond.weaponItem ? (
+          {availableTabs.length > 0 ? (
+            <>
+              {availableTabs.length > 1 ? (
                 <div
-                  className={
-                    DEFINING_WILDLIFE_PET_MODAL_INVENTORY_ROW_CLASS_NAME
-                  }
+                  className={DEFINING_WILDLIFE_PET_MODAL_TAB_LIST_CLASS_NAME}
+                  role="tablist"
+                  aria-label={LABELING_WILDLIFE_PET_MODAL_TAB_LIST}
                 >
-                  <span className="flex items-center gap-1.5">
-                    <Icon
-                      icon="game-icons:broadsword"
-                      className="size-3.5 text-poster-orange-deep"
-                      aria-hidden
-                    />
-                    {resolvingWorldPlazaInventoryItemTypeDefinition(
-                      petBond.weaponItem.itemTypeId
-                    )?.name ?? petBond.weaponItem.itemTypeId}
-                  </span>
-                  <button
-                    type="button"
-                    className={
-                      DEFINING_WILDLIFE_PET_MODAL_INLINE_LINK_CLASS_NAME
-                    }
-                    onClick={() => onUnequipWeapon(instanceId)}
-                  >
-                    Unequip
-                  </button>
-                </div>
-              ) : equippableWeaponSlots.length > 0 ? (
-                <div className="flex flex-col gap-1.5">
-                  {equippableWeaponSlots.map(({ slot, slotIndex }) => (
-                    <div
-                      key={slotIndex}
-                      className={
-                        DEFINING_WILDLIFE_PET_MODAL_INVENTORY_ROW_CLASS_NAME
-                      }
-                    >
-                      <span className="flex items-center gap-1.5">
-                        <Icon
-                          icon="game-icons:broadsword"
-                          className="size-3.5 text-poster-orange-deep"
-                          aria-hidden
-                        />
-                        {resolvingWorldPlazaInventoryItemTypeDefinition(
-                          slot.itemTypeId
-                        )?.name ?? slot.itemTypeId}
-                      </span>
-                      <button
-                        type="button"
-                        className={
-                          DEFINING_WILDLIFE_PET_MODAL_INLINE_LINK_CLASS_NAME
-                        }
-                        onClick={() => onEquipWeapon(instanceId, slotIndex)}
-                      >
-                        Equip
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p
-                  className={DEFINING_WILDLIFE_PET_MODAL_EMPTY_STATE_CLASS_NAME}
-                >
-                  {DEFINING_WILDLIFE_PET_MODAL_NO_EQUIPPABLE_WEAPONS_LABEL}
-                </p>
-              )}
-              <div
-                className={`${DEFINING_WILDLIFE_PET_MODAL_ARMOR_SLOT_CLASS_NAME} mt-0.5`}
-              >
-                <span className="flex items-center gap-1.5">
-                  <Icon icon="mdi:shield" className="size-3.5" aria-hidden />
-                  {DEFINING_WILDLIFE_PET_MODAL_ARMOR_COMING_SOON_LABEL}
-                </span>
-              </div>
-            </div>
-          ) : null}
-
-          {hasTeachSpells ? (
-            <div className={DEFINING_WILDLIFE_PET_MODAL_SECTION_CLASS_NAME}>
-              <p
-                className={
-                  DEFINING_WILDLIFE_PET_MODAL_SECTION_HEADING_CLASS_NAME
-                }
-              >
-                Skills
-              </p>
-              {petBond.learnedSkillIds.length > 0 ? (
-                <div className="mb-1.5 flex flex-col gap-1.5">
-                  {petBond.learnedSkillIds.map((skillId) => {
-                    const skillDefinition =
-                      resolvingWorldPlazaCharacterEngineSkillDefinition(
-                        skillId
-                      );
-                    const isEquipped = petBond.equippedSkillId === skillId;
+                  {availableTabs.map((tab) => {
+                    const isActive = tab.id === resolvedTabId;
 
                     return (
                       <button
-                        key={skillId}
+                        key={tab.id}
                         type="button"
-                        className={`${DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_CLASS_NAME} w-full justify-start ${
-                          isEquipped
-                            ? DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_ACTIVE_CLASS_NAME
+                        role="tab"
+                        aria-selected={isActive}
+                        id={`plaza-pet-tab-${tab.id}`}
+                        aria-controls={`plaza-pet-tab-panel-${tab.id}`}
+                        className={`${DEFINING_WILDLIFE_PET_MODAL_TAB_BUTTON_CLASS_NAME} ${
+                          isActive
+                            ? DEFINING_WILDLIFE_PET_MODAL_TAB_BUTTON_ACTIVE_CLASS_NAME
                             : ''
                         }`}
-                        onClick={() =>
-                          onEquipSkill(instanceId, isEquipped ? null : skillId)
-                        }
+                        onClick={() => setActiveTabId(tab.id)}
                       >
-                        <Icon
-                          icon={skillDefinition?.iconName ?? 'mdi:book-outline'}
-                          className="size-3.5"
-                          aria-hidden
-                        />
-                        {skillDefinition?.displayName ?? skillId}
+                        {tab.label}
                       </button>
                     );
                   })}
                 </div>
               ) : null}
-              {teachableSkillIds.length > 0 ? (
-                <div className="flex flex-col gap-1.5">
-                  {teachableSkillIds.map((skillId) => {
-                    const skillDefinition =
-                      resolvingWorldPlazaCharacterEngineSkillDefinition(
-                        skillId
-                      );
 
-                    return (
-                      <div
-                        key={skillId}
+              <div className={DEFINING_WILDLIFE_PET_MODAL_TAB_BODY_CLASS_NAME}>
+                {resolvedTabId === 'gear' && hasEquipment ? (
+                  <div
+                    id="plaza-pet-tab-panel-gear"
+                    role="tabpanel"
+                    aria-labelledby="plaza-pet-tab-gear"
+                    className={
+                      DEFINING_WILDLIFE_PET_MODAL_TAB_SECTION_STACK_CLASS_NAME
+                    }
+                  >
+                    <div
+                      className={DEFINING_WILDLIFE_PET_MODAL_SECTION_CLASS_NAME}
+                    >
+                      <p
                         className={
-                          DEFINING_WILDLIFE_PET_MODAL_INVENTORY_ROW_CLASS_NAME
+                          DEFINING_WILDLIFE_PET_MODAL_SECTION_HEADING_CLASS_NAME
                         }
+                      >
+                        Equipment
+                      </p>
+                      {petBond.weaponItem ? (
+                        <div
+                          className={
+                            DEFINING_WILDLIFE_PET_MODAL_INVENTORY_ROW_CLASS_NAME
+                          }
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <Icon
+                              icon="game-icons:broadsword"
+                              className="size-3.5 text-poster-orange-deep"
+                              aria-hidden
+                            />
+                            {resolvingWorldPlazaInventoryItemTypeDefinition(
+                              petBond.weaponItem.itemTypeId
+                            )?.name ?? petBond.weaponItem.itemTypeId}
+                          </span>
+                          <button
+                            type="button"
+                            className={
+                              DEFINING_WILDLIFE_PET_MODAL_INLINE_LINK_CLASS_NAME
+                            }
+                            onClick={() => onUnequipWeapon(instanceId)}
+                          >
+                            Unequip
+                          </button>
+                        </div>
+                      ) : equippableWeaponSlots.length > 0 ? (
+                        <div className="flex flex-col gap-1.5">
+                          {equippableWeaponSlots.map(({ slot, slotIndex }) => (
+                            <div
+                              key={slotIndex}
+                              className={
+                                DEFINING_WILDLIFE_PET_MODAL_INVENTORY_ROW_CLASS_NAME
+                              }
+                            >
+                              <span className="flex items-center gap-1.5">
+                                <Icon
+                                  icon="game-icons:broadsword"
+                                  className="size-3.5 text-poster-orange-deep"
+                                  aria-hidden
+                                />
+                                {resolvingWorldPlazaInventoryItemTypeDefinition(
+                                  slot.itemTypeId
+                                )?.name ?? slot.itemTypeId}
+                              </span>
+                              <button
+                                type="button"
+                                className={
+                                  DEFINING_WILDLIFE_PET_MODAL_INLINE_LINK_CLASS_NAME
+                                }
+                                onClick={() =>
+                                  onEquipWeapon(instanceId, slotIndex)
+                                }
+                              >
+                                Equip
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p
+                          className={
+                            DEFINING_WILDLIFE_PET_MODAL_EMPTY_STATE_CLASS_NAME
+                          }
+                        >
+                          {
+                            DEFINING_WILDLIFE_PET_MODAL_NO_EQUIPPABLE_WEAPONS_LABEL
+                          }
+                        </p>
+                      )}
+                      <div
+                        className={`${DEFINING_WILDLIFE_PET_MODAL_ARMOR_SLOT_CLASS_NAME} mt-0.5`}
                       >
                         <span className="flex items-center gap-1.5">
                           <Icon
-                            icon={
-                              skillDefinition?.iconName ?? 'mdi:book-outline'
-                            }
-                            className="size-3.5 text-poster-orange-deep"
+                            icon="mdi:shield"
+                            className="size-3.5"
                             aria-hidden
                           />
-                          {skillDefinition?.displayName ?? skillId}
+                          {DEFINING_WILDLIFE_PET_MODAL_ARMOR_COMING_SOON_LABEL}
                         </span>
-                        <button
-                          type="button"
-                          className={
-                            DEFINING_WILDLIFE_PET_MODAL_INLINE_LINK_CLASS_NAME
-                          }
-                          onClick={() => onTeachSkill(instanceId, skillId)}
-                        >
-                          Teach
-                        </button>
                       </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p
-                  className={DEFINING_WILDLIFE_PET_MODAL_EMPTY_STATE_CLASS_NAME}
-                >
-                  {DEFINING_WILDLIFE_PET_MODAL_NO_TEACHABLE_SKILLS_LABEL}
-                </p>
-              )}
-            </div>
-          ) : null}
+                    </div>
+                  </div>
+                ) : null}
 
-          {hasSoulsave ? (
-            <div className={DEFINING_WILDLIFE_PET_MODAL_SECTION_CLASS_NAME}>
-              <p
-                className={
-                  DEFINING_WILDLIFE_PET_MODAL_SECTION_HEADING_CLASS_NAME
-                }
-              >
-                Soulsave
-              </p>
-              <p
-                className={DEFINING_WILDLIFE_PET_MODAL_SOULSAVE_TEXT_CLASS_NAME}
-              >
-                <Icon
-                  icon={
-                    petBond.soulsaveConsumed
-                      ? 'mdi:heart-outline'
-                      : 'mdi:heart-plus'
-                  }
-                  className="size-3.5 text-poster-teal-deep"
-                  aria-hidden
-                />
-                {petBond.soulsaveConsumed
-                  ? DEFINING_WILDLIFE_PET_MODAL_SOULSAVE_CONSUMED_LABEL
-                  : DEFINING_WILDLIFE_PET_MODAL_SOULSAVE_READY_LABEL}
-              </p>
-            </div>
+                {resolvedTabId === 'skills' && hasTeachSpells ? (
+                  <div
+                    id="plaza-pet-tab-panel-skills"
+                    role="tabpanel"
+                    aria-labelledby="plaza-pet-tab-skills"
+                    className={
+                      DEFINING_WILDLIFE_PET_MODAL_TAB_SECTION_STACK_CLASS_NAME
+                    }
+                  >
+                    <div
+                      className={DEFINING_WILDLIFE_PET_MODAL_SECTION_CLASS_NAME}
+                    >
+                      <p
+                        className={
+                          DEFINING_WILDLIFE_PET_MODAL_SECTION_HEADING_CLASS_NAME
+                        }
+                      >
+                        Skills
+                      </p>
+                      {petBond.learnedSkillIds.length > 0 ? (
+                        <div className="mb-1.5 flex flex-col gap-1.5">
+                          {petBond.learnedSkillIds.map((skillId) => {
+                            const skillDefinition =
+                              resolvingWorldPlazaCharacterEngineSkillDefinition(
+                                skillId
+                              );
+                            const isEquipped =
+                              petBond.equippedSkillId === skillId;
+
+                            return (
+                              <button
+                                key={skillId}
+                                type="button"
+                                className={`${DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_CLASS_NAME} w-full justify-start ${
+                                  isEquipped
+                                    ? DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_ACTIVE_CLASS_NAME
+                                    : ''
+                                }`}
+                                onClick={() =>
+                                  onEquipSkill(
+                                    instanceId,
+                                    isEquipped ? null : skillId
+                                  )
+                                }
+                              >
+                                <Icon
+                                  icon={
+                                    skillDefinition?.iconName ??
+                                    'mdi:book-outline'
+                                  }
+                                  className="size-3.5"
+                                  aria-hidden
+                                />
+                                {skillDefinition?.displayName ?? skillId}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : null}
+                      {teachableSkillIds.length > 0 ? (
+                        <div className="flex flex-col gap-1.5">
+                          {teachableSkillIds.map((skillId) => {
+                            const skillDefinition =
+                              resolvingWorldPlazaCharacterEngineSkillDefinition(
+                                skillId
+                              );
+
+                            return (
+                              <div
+                                key={skillId}
+                                className={
+                                  DEFINING_WILDLIFE_PET_MODAL_INVENTORY_ROW_CLASS_NAME
+                                }
+                              >
+                                <span className="flex items-center gap-1.5">
+                                  <Icon
+                                    icon={
+                                      skillDefinition?.iconName ??
+                                      'mdi:book-outline'
+                                    }
+                                    className="size-3.5 text-poster-orange-deep"
+                                    aria-hidden
+                                  />
+                                  {skillDefinition?.displayName ?? skillId}
+                                </span>
+                                <button
+                                  type="button"
+                                  className={
+                                    DEFINING_WILDLIFE_PET_MODAL_INLINE_LINK_CLASS_NAME
+                                  }
+                                  onClick={() =>
+                                    onTeachSkill(instanceId, skillId)
+                                  }
+                                >
+                                  Teach
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <p
+                          className={
+                            DEFINING_WILDLIFE_PET_MODAL_EMPTY_STATE_CLASS_NAME
+                          }
+                        >
+                          {
+                            DEFINING_WILDLIFE_PET_MODAL_NO_TEACHABLE_SKILLS_LABEL
+                          }
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+
+                {resolvedTabId === 'bond' && hasSoulsave ? (
+                  <div
+                    id="plaza-pet-tab-panel-bond"
+                    role="tabpanel"
+                    aria-labelledby="plaza-pet-tab-bond"
+                    className={
+                      DEFINING_WILDLIFE_PET_MODAL_TAB_SECTION_STACK_CLASS_NAME
+                    }
+                  >
+                    <div
+                      className={DEFINING_WILDLIFE_PET_MODAL_SECTION_CLASS_NAME}
+                    >
+                      <p
+                        className={
+                          DEFINING_WILDLIFE_PET_MODAL_SECTION_HEADING_CLASS_NAME
+                        }
+                      >
+                        Soulsave
+                      </p>
+                      <p
+                        className={
+                          DEFINING_WILDLIFE_PET_MODAL_SOULSAVE_TEXT_CLASS_NAME
+                        }
+                      >
+                        <Icon
+                          icon={
+                            petBond.soulsaveConsumed
+                              ? 'mdi:heart-outline'
+                              : 'mdi:heart-plus'
+                          }
+                          className="size-3.5 text-poster-teal-deep"
+                          aria-hidden
+                        />
+                        {petBond.soulsaveConsumed
+                          ? DEFINING_WILDLIFE_PET_MODAL_SOULSAVE_CONSUMED_LABEL
+                          : DEFINING_WILDLIFE_PET_MODAL_SOULSAVE_READY_LABEL}
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </>
           ) : null}
         </div>
       </section>

@@ -48,6 +48,7 @@ type ParsingPlazaSinglePlayerSavePetRecordRaw = {
   lastKnownX?: unknown;
   lastKnownY?: unknown;
   lastKnownLayer?: unknown;
+  deathCauseKind?: unknown;
   acquiredAtMs?: unknown;
   updatedAtMs?: unknown;
 };
@@ -267,8 +268,7 @@ export function parsingPlazaSinglePlayerSavePetRecord(
     Math.max(0, Math.round(loyaltyRaw))
   );
   const sizeScaleSample =
-    parsingPlazaSinglePlayerSavePetFiniteNumber(recordRaw.sizeScaleSample) ??
-    0;
+    parsingPlazaSinglePlayerSavePetFiniteNumber(recordRaw.sizeScaleSample) ?? 0;
 
   return {
     petId: recordRaw.petId,
@@ -276,9 +276,7 @@ export function parsingPlazaSinglePlayerSavePetRecord(
     displayName:
       recordRaw.displayName === null
         ? null
-        : parsingPlazaSinglePlayerSavePetNullableString(
-            recordRaw.displayName
-          ),
+        : parsingPlazaSinglePlayerSavePetNullableString(recordRaw.displayName),
     loyalty,
     isActive: recordRaw.isActive === true,
     command: parsingPlazaSinglePlayerSavePetCommandId(recordRaw.command),
@@ -286,9 +284,7 @@ export function parsingPlazaSinglePlayerSavePetRecord(
       recordRaw.healthCurrent
     ),
     hungerRatio: parsingPlazaSinglePlayerSavePetRatio(recordRaw.hungerRatio),
-    staminaRatio: parsingPlazaSinglePlayerSavePetRatio(
-      recordRaw.staminaRatio
-    ),
+    staminaRatio: parsingPlazaSinglePlayerSavePetRatio(recordRaw.staminaRatio),
     sizeScaleSample,
     aggressionLevel: parsingPlazaSinglePlayerSavePetAggressionLevel(
       recordRaw.aggressionLevel
@@ -314,6 +310,9 @@ export function parsingPlazaSinglePlayerSavePetRecord(
     ),
     lastKnownLayer: parsingPlazaSinglePlayerSavePetNullableFiniteNumber(
       recordRaw.lastKnownLayer
+    ),
+    deathCauseKind: parsingPlazaSinglePlayerSavePetNullableString(
+      recordRaw.deathCauseKind
     ),
     acquiredAtMs,
     updatedAtMs,

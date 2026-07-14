@@ -103,6 +103,10 @@ export const STYLING_WILDLIFE_PET_ROSTER_PANEL_NAME_CLASS_NAME =
 export const STYLING_WILDLIFE_PET_ROSTER_PANEL_SPECIES_CLASS_NAME =
   'truncate text-[10px] font-semibold leading-tight text-ink-soft' as const;
 
+/** Death cause note under species for deceased companions. */
+export const STYLING_WILDLIFE_PET_ROSTER_PANEL_DEATH_NOTE_CLASS_NAME =
+  'mt-0.5 truncate text-[10px] font-medium italic leading-tight text-ink-soft/85' as const;
+
 /** Stats line (health / loyalty). */
 export const STYLING_WILDLIFE_PET_ROSTER_PANEL_STATS_CLASS_NAME =
   'mt-0.5 truncate text-[10px] font-semibold tabular-nums text-poster-teal-deep' as const;

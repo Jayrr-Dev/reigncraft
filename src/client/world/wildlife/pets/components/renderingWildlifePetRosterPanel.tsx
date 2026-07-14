@@ -20,6 +20,7 @@ import {
   STYLING_WILDLIFE_PET_ROSTER_PANEL_BODY_CLASS_NAME,
   STYLING_WILDLIFE_PET_ROSTER_PANEL_CLOSE_BUTTON_CLASS_NAME,
   STYLING_WILDLIFE_PET_ROSTER_PANEL_COUNT_CLASS_NAME,
+  STYLING_WILDLIFE_PET_ROSTER_PANEL_DEATH_NOTE_CLASS_NAME,
   STYLING_WILDLIFE_PET_ROSTER_PANEL_EMPTY_CLASS_NAME,
   STYLING_WILDLIFE_PET_ROSTER_PANEL_HEADER_CLASS_NAME,
   STYLING_WILDLIFE_PET_ROSTER_PANEL_LIST_CLASS_NAME,
@@ -185,12 +186,23 @@ export function RenderingWildlifePetRosterPanel({
                     {row.speciesDisplayName}
                     {row.isDeployed ? ' · Deployed' : null}
                   </p>
+                  {row.deathNote ? (
+                    <p
+                      className={
+                        STYLING_WILDLIFE_PET_ROSTER_PANEL_DEATH_NOTE_CLASS_NAME
+                      }
+                    >
+                      {row.deathNote}
+                    </p>
+                  ) : null}
                   <p
                     className={
                       STYLING_WILDLIFE_PET_ROSTER_PANEL_STATS_CLASS_NAME
                     }
                   >
                     {row.healthText} · {row.loyaltyText}
+                    {row.hungerText ? ` · ${row.hungerText}` : null}
+                    {` · ${row.daysText}`}
                   </p>
                 </div>
               </div>

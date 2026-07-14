@@ -212,6 +212,11 @@ export interface UsingWorldPlazaPlayerHealthResult {
   enqueueItemGainFloatRef: React.RefObject<
     (itemTypeId: string, amount: number) => void
   >;
+  /**
+   * Enqueues a green heal float for intentional heals (food, skills, etc.).
+   * Passive regen must not call this; tick regen stays silent.
+   */
+  enqueueHealFloatRef: React.RefObject<(amount: number) => void>;
   healRef: React.RefObject<(amount: number) => void>;
   applyFallDamageRef: React.RefObject<(layerDelta: number) => void>;
   killRef: React.RefObject<() => void>;
@@ -942,6 +947,7 @@ export function usingWorldPlazaPlayerHealth({
   const enqueueItemGainFloatRef = useRef<
     (itemTypeId: string, amount: number) => void
   >(() => undefined);
+  const enqueueHealFloatRef = useRef<(amount: number) => void>(() => undefined);
   const healRef = useRef<(amount: number) => void>(() => undefined);
   const applyFallDamageRef = useRef<(layerDelta: number) => void>(
     () => undefined
@@ -1012,6 +1018,7 @@ export function usingWorldPlazaPlayerHealth({
       applyStarvationDamageRef.current = () => undefined;
       enqueueMissFloatRef.current = () => undefined;
       enqueueItemGainFloatRef.current = () => undefined;
+      enqueueHealFloatRef.current = () => undefined;
       pushingHudSnapshot(performance.now());
       return;
     }
@@ -1036,6 +1043,23 @@ export function usingWorldPlazaPlayerHealth({
           amount,
           damageKind: null,
           itemTypeId,
+        },
+        nowMs
+      );
+      pushingHudSnapshot(nowMs);
+    };
+
+    enqueueHealFloatRef.current = (amount) => {
+      if (amount <= 0) {
+        return;
+      }
+
+      const nowMs = performance.now();
+      enqueueFloatText(
+        {
+          kind: 'heal',
+          amount,
+          damageKind: 'healing',
         },
         nowMs
       );
@@ -1661,6 +1685,7 @@ export function usingWorldPlazaPlayerHealth({
     takeDamageRef,
     enqueueMissFloatRef,
     enqueueItemGainFloatRef,
+    enqueueHealFloatRef,
     healRef,
     applyFallDamageRef,
     killRef,

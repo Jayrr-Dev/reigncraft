@@ -13,6 +13,8 @@ import { healingWorldPlazaEntityHealthWithAmplifiers } from '@/components/world/
 export type ApplyingWorldPlazaCharacterEngineSkillResult = {
   readonly state: DefiningWorldPlazaEntityHealthState;
   readonly didApply: boolean;
+  /** Actual HP restored (0 when the skill is not a heal or already at max). */
+  readonly healedAmount: number;
 };
 
 /**
@@ -26,19 +28,23 @@ export function applyingWorldPlazaCharacterEngineSkill(
   const skill = resolvingWorldPlazaCharacterEngineSkillDefinition(skillId);
 
   if (!skill) {
-    return { state, didApply: false };
+    return { state, didApply: false, healedAmount: 0 };
   }
 
   const { effect } = skill;
 
   if (effect.kind === 'heal') {
+    const previousHealth = state.currentHealth;
+    const nextState = healingWorldPlazaEntityHealthWithAmplifiers({
+      receiverState: state,
+      baseHealAmount: effect.amount,
+      nowMs,
+    }).state;
+
     return {
-      state: healingWorldPlazaEntityHealthWithAmplifiers({
-        receiverState: state,
-        baseHealAmount: effect.amount,
-        nowMs,
-      }).state,
+      state: nextState,
       didApply: true,
+      healedAmount: Math.max(0, nextState.currentHealth - previousHealth),
     };
   }
 
@@ -46,6 +52,7 @@ export function applyingWorldPlazaCharacterEngineSkill(
     return {
       state: applyingWorldPlazaEntityBuff(state, effect.buffId, nowMs),
       didApply: true,
+      healedAmount: 0,
     };
   }
 
@@ -60,5 +67,6 @@ export function applyingWorldPlazaCharacterEngineSkill(
   return {
     state: damageResult.state,
     didApply: true,
+    healedAmount: 0,
   };
 }

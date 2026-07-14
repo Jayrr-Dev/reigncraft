@@ -1,12 +1,14 @@
 'use client';
 
 import { RenderingPlazaHerbariumFlowerPortrait } from '@/components/home/components/renderingPlazaHerbariumFlowerPortrait';
+import { RenderingPlazaHerbariumTreePortrait } from '@/components/home/components/renderingPlazaHerbariumTreePortrait';
 import { DEFINING_PLAZA_HERBARIUM_FLOWER_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumFlowerPortraitConstants';
 import {
   LABELING_PLAZA_HERBARIUM_STUDY_TIER_SECTION_TITLES,
   LABELING_PLAZA_HERBARIUM_STUDY_TIER_TEASERS,
   type PlazaHerbariumStudyTierId,
 } from '@/components/home/domains/definingPlazaHerbariumStudyTier';
+import { DEFINING_PLAZA_HERBARIUM_TREE_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumTreePortraitConstants';
 import type { PlazaHerbariumGuideDisplayEntry } from '@/components/home/domains/resolvingPlazaHerbariumGuideDisplayEntries';
 import {
   checkingPlazaHerbariumStudyTierUnlocked,
@@ -139,10 +141,11 @@ export function RenderingPlazaHerbariumGuideDetailView({
                 className="size-24 sm:size-28"
               />
             ) : (
-              <Icon
-                icon={entry.icon}
-                className="size-16 text-parchment sm:size-20"
-                aria-hidden
+              <RenderingPlazaHerbariumTreePortrait
+                treeVariant={entry.variant}
+                variant="revealed"
+                zoom={DEFINING_PLAZA_HERBARIUM_TREE_PORTRAIT_DETAIL_ZOOM}
+                className="size-24 sm:size-28"
               />
             )}
             <span className="absolute left-3 top-3 flex size-9 items-center justify-center rounded-full border border-poster-gold/50 bg-poster-teal-deep/85 text-parchment shadow-[0_1px_3px_rgba(0,0,0,0.4)]">
@@ -150,7 +153,9 @@ export function RenderingPlazaHerbariumGuideDetailView({
             </span>
             {entry.isFullyStudied ? (
               <div className="absolute right-3 top-3 z-10">
-                <div className={PLAZA_HERBARIUM_DETAIL_STUDIED_BADGE_CLASS_NAME}>
+                <div
+                  className={PLAZA_HERBARIUM_DETAIL_STUDIED_BADGE_CLASS_NAME}
+                >
                   <span
                     className={
                       PLAZA_HERBARIUM_DETAIL_STUDIED_BADGE_SOCKET_CLASS_NAME
@@ -169,7 +174,9 @@ export function RenderingPlazaHerbariumGuideDetailView({
               </div>
             ) : entry.isStudied ? (
               <div className="absolute right-3 top-3 z-10">
-                <div className={PLAZA_HERBARIUM_DETAIL_STUDIED_BADGE_CLASS_NAME}>
+                <div
+                  className={PLAZA_HERBARIUM_DETAIL_STUDIED_BADGE_CLASS_NAME}
+                >
                   <span
                     className={
                       PLAZA_HERBARIUM_DETAIL_STUDIED_BADGE_SOCKET_CLASS_NAME

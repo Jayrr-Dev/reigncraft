@@ -406,7 +406,10 @@ import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED } from '@/component
 import { disarmingWorldPlazaInventorySlotArmedHarvestEnchantments } from '@/components/world/inventory/domains/disarmingWorldPlazaInventorySlotArmedHarvestEnchantments';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { resolvingWorldPlazaInventoryFoodEatEffects } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects';
-import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
+import {
+  checkingWorldPlazaInventoryItemIsFood,
+  resolvingWorldPlazaInventoryFoodDefinition,
+} from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { resolvingWorldPlazaInventoryItemRecipePageRecipeId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemRecipePage';
 import { wearingWorldPlazaEquippedInventoryToolDurability } from '@/components/world/inventory/domains/wearingWorldPlazaEquippedInventoryToolDurability';
 import { trackingWorldPlazaInventoryDropPlacement } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
@@ -2837,6 +2840,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     takeDamageRef,
     enqueueMissFloatRef,
     enqueueItemGainFloatRef,
+    enqueueHealFloatRef,
     healRef,
     applyFallDamageRef,
     killRef,
@@ -4433,8 +4437,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     wildlifeStoreRef,
   ]);
 
-  const { tryUsingSkill } =
-    usingWorldPlazaCharacterEngineSkillCooldowns(healthStateRef);
+  const { tryUsingSkill } = usingWorldPlazaCharacterEngineSkillCooldowns({
+    healthStateRef,
+    enqueueHealFloatRef,
+  });
   const tryUsingCharacterSkillRef = useRef(tryUsingSkill);
   tryUsingCharacterSkillRef.current = tryUsingSkill;
 
@@ -4463,6 +4469,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const handlingFoodEatComplete = useCallback(
     (context: DefiningWorldPlazaInventoryFoodEatProgressContext): void => {
+      const previousHealth = healthStateRef.current.currentHealth;
       const eatEffects = resolvingWorldPlazaInventoryFoodEatEffects({
         foodDefinition: context.foodDefinition,
         healthState: healthStateRef.current,
@@ -4484,6 +4491,15 @@ function RenderingWorldPlazaPixiSceneConnected({
 
       healthStateRef.current = eatEffects.nextHealthState;
 
+      const healedAmount =
+        healthStateRef.current.currentHealth - previousHealth;
+
+      if (healedAmount > 0) {
+        enqueueHealFloatRef.current?.(healedAmount);
+      } else {
+        syncingHealthHudFromStateRef.current();
+      }
+
       updatingInventoryState((currentState) => {
         const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
           currentState,
@@ -4496,8 +4512,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     },
     [
       eatingFoodRef,
+      enqueueHealFloatRef,
       healthStateRef,
       showingGameplayHudToast,
+      syncingHealthHudFromStateRef,
       updatingInventoryState,
     ]
   );
@@ -6805,7 +6823,11 @@ function RenderingWorldPlazaPixiSceneConnected({
                   isProfileOpen={isProfilePanelOpen}
                   onToggleProfile={togglingProfilePanel}
                   isPetsOpen={isPetRosterPanelOpen}
-                  onTogglePets={togglingPetRosterPanel}
+                  onTogglePets={
+                    petRosterSnapshot.pets.length > 0
+                      ? togglingPetRosterPanel
+                      : undefined
+                  }
                   onSelectCodexSection={selectingCodexSectionFromActionBar}
                   onToggleFullscreen={() => {
                     void togglingViewportFullscreen({
@@ -6943,9 +6965,28 @@ function RenderingWorldPlazaPixiSceneConnected({
               timedInteractionProgressRatioRef={docileBetrayProgressRatioRef}
               cameraOffsetRef={cameraOffsetRef}
               cameraWorldZoomRef={cameraWorldZoomRef}
+              canFeedPet={inventoryState.slots.some(
+                (slot) =>
+                  slot !== null &&
+                  checkingWorldPlazaInventoryItemIsFood(slot.itemTypeId)
+              )}
               onBetray={handlingDocileBetrayInteraction}
               onNamePet={openingPetNameDialog}
               onOpenPetModal={openingPetModal}
+              onFeedPet={(instanceId) => {
+                const foodSlotIndex = inventoryState.slots.findIndex(
+                  (slot) =>
+                    slot !== null &&
+                    checkingWorldPlazaInventoryItemIsFood(slot.itemTypeId)
+                );
+
+                if (foodSlotIndex < 0) {
+                  return;
+                }
+
+                handlingPetFeed(instanceId, foodSlotIndex);
+              }}
+              onSetPetCommand={handlingPetSetCommand}
             />
           ) : null}
           {isHudStatusEnabled && onlineUserId ? (
@@ -6975,7 +7016,11 @@ function RenderingWorldPlazaPixiSceneConnected({
                   isProfileOpen={isProfilePanelOpen}
                   onToggleProfile={togglingProfilePanel}
                   isPetsOpen={isPetRosterPanelOpen}
-                  onTogglePets={togglingPetRosterPanel}
+                  onTogglePets={
+                    petRosterSnapshot.pets.length > 0
+                      ? togglingPetRosterPanel
+                      : undefined
+                  }
                   onSelectCodexSection={selectingCodexSectionFromActionBar}
                   onToggleFullscreen={() => {
                     void togglingViewportFullscreen({

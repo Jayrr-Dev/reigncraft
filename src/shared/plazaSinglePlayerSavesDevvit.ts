@@ -74,6 +74,8 @@ export type PlazaSinglePlayerSavePetRecord = {
   lastKnownX: number | null;
   lastKnownY: number | null;
   lastKnownLayer: number | null;
+  /** Last damage kind that killed this companion; null while alive or unknown. */
+  deathCauseKind: string | null;
   acquiredAtMs: number;
   updatedAtMs: number;
 };

@@ -94,6 +94,7 @@ export function syncingWildlifePetInstanceVitalsToRoster(
     lastKnownX: instance.position.x,
     lastKnownY: instance.position.y,
     lastKnownLayer: instance.position.layer ?? null,
+    deathCauseKind: null,
     updatedAtMs: nowMs,
   });
 }
@@ -112,6 +113,13 @@ export function syncingWildlifePetDeathToRoster(
     return;
   }
 
+  const roster = readingWildlifePetRosterSnapshot();
+  const existingRecord = roster.pets.find((pet) => pet.petId === petBond.petId);
+  const deathCauseKind =
+    existingRecord?.deathCauseKind ??
+    instance.healthState.lastDamageKind ??
+    null;
+
   updatingWildlifePetRecord(petBond.petId, {
     loyalty: petBond.loyalty,
     command: petBond.command,
@@ -126,6 +134,7 @@ export function syncingWildlifePetDeathToRoster(
     lastKnownX: instance.position.x,
     lastKnownY: instance.position.y,
     lastKnownLayer: instance.position.layer ?? null,
+    deathCauseKind,
     isActive: false,
     updatedAtMs: nowMs,
   });
