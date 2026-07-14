@@ -225,6 +225,8 @@ The plaza hook wires Redis/save-slot persistence and optional demo seed. World f
 
 **Caltrops:** one-shot walk-over → remove + `sluggish-debuff` + bleed (`bleeding`, 8 dmg). Pick up while still on ground. Item id `world-plaza-caltrops`.
 
+**Victims:** Player tick hooks (`usingWorldPlaza*TriggerTick`) plus wildlife sim (`applyingWildlifeTrapWalkoverTrigger` in `advancingWildlifeSimulationTick`). Bear trap: immobilize + bleed. Caltrop: slow + bleed.
+
 ---
 
 ### 5. Character engine

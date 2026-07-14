@@ -22,6 +22,7 @@ import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/wor
 import {
   checkingWorldBuildingPlacedBlockIsFootprintSatellite,
   resolvingWorldBuildingBlockPlacementFootprint,
+  resolvingWorldBuildingPlacedBlockFootprintGroupId,
 } from '@/components/world/building/domains/definingWorldBuildingPlacementFootprint';
 import {
   resolvingWorldBuildingPlacedBlockBlockHeight,
@@ -243,7 +244,20 @@ export function syncingWorldPlazaVisibleBlacksmithUtilityLayer(input: {
 
   for (const block of blocksToDraw) {
     if (checkingWorldBuildingPlacedBlockIsFootprintSatellite(block)) {
-      continue;
+      // Skip satellites when the anchor is live. If the anchor row was lost
+      // (partial save / single-tile unclaim), draw this satellite so the build
+      // does not vanish while reservation tiles still exist.
+      const footprintGroupId =
+        resolvingWorldBuildingPlacedBlockFootprintGroupId(block);
+      const anchorStillPresent =
+        footprintGroupId !== null &&
+        blocksToDraw.some(
+          (candidate) => candidate.blockId === footprintGroupId
+        );
+
+      if (anchorStillPresent) {
+        continue;
+      }
     }
 
     const utilityKind = resolvingWorldPlazaBlacksmithUtilityKindForBlockDefinitionId(

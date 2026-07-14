@@ -5,12 +5,16 @@ import {
   resolvingWorldPlazaOreSmeltingRecipe,
 } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingRegistry';
 import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_MERCURY,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_CLAY,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COAL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_IRON,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_SCARLET,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CUP,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { describe, expect, it } from 'vitest';
@@ -27,7 +31,20 @@ describe('ore smelting registry', () => {
         DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_SCARLET
       )?.outputItemTypeId
     ).toBe(DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_MERCURY);
-    expect(DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY).toHaveLength(6);
+    expect(DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY).toHaveLength(8);
+  });
+
+  it('fires wet clay ware into empty cups and teapots', () => {
+    expect(
+      resolvingWorldPlazaOreSmeltingRecipe(
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CUP
+      )?.outputItemTypeId
+    ).toBe(DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP);
+    expect(
+      resolvingWorldPlazaOreSmeltingRecipe(
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT
+      )?.outputItemTypeId
+    ).toBe(DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT);
   });
 
   it('accepts wood or coal as fuel and rejects clay as ore', () => {

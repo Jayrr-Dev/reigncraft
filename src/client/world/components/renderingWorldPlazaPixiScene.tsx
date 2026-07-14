@@ -363,6 +363,11 @@ import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fis
 import { computingWorldPlazaFishingCastDurationMs } from '@/components/world/fishing/domains/computingWorldPlazaFishingCastDurationMs';
 import { usingWorldPlazaFishingInteraction } from '@/components/world/fishing/hooks/usingWorldPlazaFishingInteraction';
 import { usingWorldPlazaFishingProgress } from '@/components/world/fishing/hooks/usingWorldPlazaFishingProgress';
+import { RenderingWorldPlazaWetClayInteractionLabels } from '@/components/world/wet-clay/components/renderingWorldPlazaWetClayInteractionLabels';
+import { checkingWorldPlazaWetClayEligibility } from '@/components/world/wet-clay/domains/checkingWorldPlazaWetClayEligibility';
+import { checkingWorldPlazaInventoryHasClay } from '@/components/world/wet-clay/domains/wettingWorldPlazaClayInInventory';
+import { usingWorldPlazaWetClayInteraction } from '@/components/world/wet-clay/hooks/usingWorldPlazaWetClayInteraction';
+import { usingWorldPlazaWetClayProgress } from '@/components/world/wet-clay/hooks/usingWorldPlazaWetClayProgress';
 import { RenderingWorldPlazaFlowerInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaFlowerInteractionLabels';
 import { RenderingWorldPlazaLongGrassInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaLongGrassInteractionLabels';
 import { RenderingWorldPlazaShrubInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaShrubInteractionLabels';
@@ -513,6 +518,7 @@ import {
   clearingWorldPlazaInteractableBlockClickSelection,
   selectingWorldPlazaFarmlandTileForClickAction,
   selectingWorldPlazaFishingTileForClickAction,
+  selectingWorldPlazaWetClayTileForClickAction,
   selectingWorldPlazaInteractableBlockForClickAction,
   selectingWorldPlazaInteractableChestForClickAction,
   selectingWorldPlazaInteractableFlowerForClickAction,
@@ -3332,6 +3338,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const hasEquippedFishrod =
     equipment.checkingEquippedToolKind('fishrod').hasToolKind;
+  const hasClayInInventory = checkingWorldPlazaInventoryHasClay(inventoryState);
   const hasEquippedHoe = equipment.checkingEquippedToolKind('hoe').hasToolKind;
   const hasEquippedScythe =
     equipment.checkingEquippedToolKind('scythe').hasToolKind;
@@ -3342,11 +3349,13 @@ function RenderingWorldPlazaPixiSceneConnected({
       slot.quantity > 0
   );
   const hasEquippedFishrodRef = useRef(hasEquippedFishrod);
+  const hasClayInInventoryRef = useRef(hasClayInInventory);
   const hasEquippedHoeRef = useRef(hasEquippedHoe);
   const hasEquippedScytheRef = useRef(hasEquippedScythe);
   const hasSeedsInInventoryRef = useRef(hasSeedsInInventory);
   const proximityPlacedBlocksRef = useRef(activeScenePlacedBlocks);
   hasEquippedFishrodRef.current = hasEquippedFishrod;
+  hasClayInInventoryRef.current = hasClayInInventory;
   hasEquippedHoeRef.current = hasEquippedHoe;
   hasEquippedScytheRef.current = hasEquippedScythe;
   hasSeedsInInventoryRef.current = hasSeedsInInventory;
@@ -3423,6 +3432,58 @@ function RenderingWorldPlazaPixiSceneConnected({
       showingGameplayHudToast,
       startingFishingCast,
       validatingFishingCastStart,
+    ]
+  );
+
+  const { validatingWetClayStart, completingWetClay } =
+    usingWorldPlazaWetClayInteraction({
+      playerPositionRef,
+      inventoryState,
+      updatingInventoryState,
+      showingGameplayHudToast,
+    });
+
+  const completingWetClayRef = useRef(completingWetClay);
+  completingWetClayRef.current = completingWetClay;
+
+  const {
+    snapshot: wetClayProgressSnapshot,
+    progressRatioRef: wetClayProgressRatioRef,
+    startingWetClay,
+  } = usingWorldPlazaWetClayProgress({
+    playerPositionRef,
+    selectedInteractableBlockKeysRef,
+    onWetComplete: (entry) => {
+      completingWetClayRef.current(entry);
+    },
+  });
+
+  const handlingWetClayInteraction = useCallback(
+    (entry: Parameters<typeof validatingWetClayStart>[0]): void => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return;
+      }
+
+      if (!hasClayInInventory) {
+        showingGameplayHudToast('Need clay to wet.');
+        return;
+      }
+
+      if (!validatingWetClayStart(entry)) {
+        return;
+      }
+
+      const didStart = startingWetClay(entry);
+
+      if (!didStart) {
+        showingGameplayHudToast('Already wetting clay.');
+      }
+    },
+    [
+      hasClayInInventory,
+      showingGameplayHudToast,
+      startingWetClay,
+      validatingWetClayStart,
     ]
   );
 
@@ -3522,6 +3583,23 @@ function RenderingWorldPlazaPixiSceneConnected({
         }
       }
 
+      if (hasClayInInventory) {
+        const wetClayEligibility = checkingWorldPlazaWetClayEligibility(
+          playerPosition,
+          tileX,
+          tileY
+        );
+
+        if (wetClayEligibility.isEligible) {
+          selectingWorldPlazaWetClayTileForClickAction(
+            selectedInteractableBlockKeysRef,
+            tileX,
+            tileY
+          );
+          return true;
+        }
+      }
+
       const farmlandEntries = listingWorldPlazaFarmlandTilesInInteractionRange({
         playerPosition,
         farmlandByTileKey: farmlandByTileKeyRef.current,
@@ -3544,6 +3622,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     },
     [
       hasEquippedFishrod,
+      hasClayInInventory,
       hasEquippedHoe,
       hasEquippedScythe,
       hasSeedsInInventory,
@@ -4418,6 +4497,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     farmlandByTileKeyRef,
     wildlifeStoreRef,
     hasEquippedFishrodRef,
+    hasClayInInventoryRef,
     hasEquippedHoeRef,
     hasEquippedScytheRef,
     hasSeedsInInventoryRef,
@@ -8055,6 +8135,18 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
                 onFish={handlingFishingInteraction}
+              />
+              <RenderingWorldPlazaWetClayInteractionLabels
+                playerPositionRef={playerPositionRef}
+                selectedInteractableBlockKeysRef={
+                  selectedInteractableBlockKeysRef
+                }
+                hasClayInInventory={hasClayInInventory}
+                timedInteractionProgressSnapshot={wetClayProgressSnapshot}
+                timedInteractionProgressRatioRef={wetClayProgressRatioRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                onWetClay={handlingWetClayInteraction}
               />
               <RenderingWorldPlazaFarmingInteractionLabels
                 playerPositionRef={playerPositionRef}

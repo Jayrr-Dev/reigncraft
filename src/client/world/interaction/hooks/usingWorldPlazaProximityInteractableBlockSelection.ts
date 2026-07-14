@@ -45,6 +45,7 @@ export type UsingWorldPlazaProximityInteractableBlockSelectionParams = {
   >;
   readonly wildlifeStoreRef: RefObject<ManagingWildlifeInstanceStore>;
   readonly hasEquippedFishrodRef: RefObject<boolean>;
+  readonly hasClayInInventoryRef: RefObject<boolean>;
   readonly hasEquippedHoeRef: RefObject<boolean>;
   readonly hasEquippedScytheRef: RefObject<boolean>;
   readonly hasSeedsInInventoryRef: RefObject<boolean>;
@@ -68,6 +69,7 @@ export function usingWorldPlazaProximityInteractableBlockSelection({
   farmlandByTileKeyRef,
   wildlifeStoreRef,
   hasEquippedFishrodRef,
+  hasClayInInventoryRef,
   hasEquippedHoeRef,
   hasEquippedScytheRef,
   hasSeedsInInventoryRef,
@@ -114,6 +116,7 @@ export function usingWorldPlazaProximityInteractableBlockSelection({
           farmlandByTileKey: farmlandByTileKeyRef.current,
           wildlifeStore: wildlifeStoreRef.current,
           hasEquippedFishrod: hasEquippedFishrodRef.current,
+          hasClayInInventory: hasClayInInventoryRef.current,
           hasEquippedHoe: hasEquippedHoeRef.current,
           hasEquippedScythe: hasEquippedScytheRef.current,
           hasSeedsInInventory: hasSeedsInInventoryRef.current,
@@ -128,6 +131,7 @@ export function usingWorldPlazaProximityInteractableBlockSelection({
     enabled,
     farmlandByTileKeyRef,
     hasEquippedFishrodRef,
+    hasClayInInventoryRef,
     hasEquippedHoeRef,
     hasEquippedScytheRef,
     hasSeedsInInventoryRef,

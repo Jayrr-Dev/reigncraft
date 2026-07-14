@@ -69,11 +69,15 @@ export interface ApplyingWorldBuildingBuildDraftBlockPlacementInput {
   readonly placedAt: string;
 }
 
+/**
+ * Stable satellite id. Underscores avoid `:` path-param truncation if a delete
+ * URL is ever built without encodeURIComponent.
+ */
 function formattingWorldBuildingFootprintSatelliteBlockId(
   anchorBlockId: string,
   tilePosition: DefiningWorldBuildingTilePosition
 ): string {
-  return `${anchorBlockId}:fp:${tilePosition.tileX}:${tilePosition.tileY}`;
+  return `${anchorBlockId}_fp_${tilePosition.tileX}_${tilePosition.tileY}`;
 }
 
 function upsertingWorldBuildingWorkingPlot(

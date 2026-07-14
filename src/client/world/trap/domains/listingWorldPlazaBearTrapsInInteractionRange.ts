@@ -29,19 +29,16 @@ export type ListingWorldPlazaBearTrapsInInteractionRangeEntry = {
 };
 
 /**
- * Closed traps (sprung / disarmed) expose Arm / Disarm / Pick up.
- * Armed traps stay silent so the open jaws are not labeled.
+ * Actions follow trap state (Arm and Disarm are mutually exclusive):
+ * - armed → Disarm / Pick up
+ * - sprung / disarmed → Arm / Pick up
  */
 export function resolvingWorldPlazaBearTrapInteractionLabelEntry(
   instance: DefiningWorldPlazaBearTrapInstance
-): ListingWorldPlazaBearTrapsInInteractionRangeEntry | null {
-  if (instance.state === 'armed') {
-    return null;
-  }
-
-  const actions: ListingWorldPlazaBearTrapsInInteractionRangeAction[] =
-    instance.state === 'sprung'
-      ? ['arm', 'disarm', 'pick-up']
+): ListingWorldPlazaBearTrapsInInteractionRangeEntry {
+  const actions: readonly ListingWorldPlazaBearTrapsInInteractionRangeAction[] =
+    instance.state === 'armed'
+      ? ['disarm', 'pick-up']
       : ['arm', 'pick-up'];
 
   return {
@@ -76,17 +73,15 @@ export function listingWorldPlazaBearTrapsInInteractionRange(
       continue;
     }
 
-    const entry = resolvingWorldPlazaBearTrapInteractionLabelEntry(instance);
-
-    if (entry) {
-      entries.push(entry);
-    }
+    entries.push(
+      resolvingWorldPlazaBearTrapInteractionLabelEntry(instance)
+    );
   }
 
   return entries;
 }
 
-/** Lists nearby closed traps for proximity selection keys. */
+/** Lists nearby traps for proximity selection keys (any state). */
 export function listingWorldPlazaBearTrapsNearPlayerPosition(
   playerX: number,
   playerY: number,
@@ -97,10 +92,6 @@ export function listingWorldPlazaBearTrapsNearPlayerPosition(
   const nearby: DefiningWorldPlazaBearTrapInstance[] = [];
 
   for (const instance of listingWorldPlazaBearTrapInstances(store)) {
-    if (instance.state === 'armed') {
-      continue;
-    }
-
     const dx = instance.position.x - playerX;
     const dy = instance.position.y - playerY;
 

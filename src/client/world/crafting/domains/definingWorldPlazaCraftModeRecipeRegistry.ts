@@ -62,8 +62,16 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COAL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_IRON,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CUP,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
+  DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_ROW_COUNT,
+  DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryCeramicsSpriteSheetConstants';
 import {
   DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_COLUMN_COUNT,
   DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_ROW_COUNT,
@@ -100,6 +108,10 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CLAY_STOVE_CLAY_COST = 8;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CLAY_STOVE_STONE_COST = 4;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CLAY_STOVE_COAL_COST = 2;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CLAY_STOVE_IRON_INGOT_COST = 2;
+
+/** Wet clay ware shaping costs (Ceramics cookbook). */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_CUP_WET_CLAY_COST = 1;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_TEAPOT_WET_CLAY_COST = 2;
 
 /** Bear trap smith recipe ingredient counts (requires nearby anvil). */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BEAR_TRAP_IRON_INGOT_COST = 3;
@@ -281,7 +293,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
     cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.CERAMICS,
     title: 'Clay Kiln',
     description:
-      'A beehive of packed clay for firing ore and brick. Needs a full 2 by 2 pad of clear ground.',
+      'A beehive of packed clay for firing ore, brick, and wet clay ware. Needs a full 2 by 2 pad of clear ground.',
     recipeVisual: {
       visualKind: 'sprite-sheet',
       spriteSheetIcon: resolvingWorldPlazaBlacksmithUtilitySpriteSheetIcon(
@@ -345,6 +357,70 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
       kind: 'entity',
       blockDefinitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE,
       blockHeight: DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT,
+    },
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_CUP,
+    cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.CERAMICS,
+    title: 'Wet Clay Cup',
+    description:
+      'Press wet clay into a small cup. Soft until you fire it in a kiln with coal.',
+    recipeVisual: {
+      visualKind: 'sprite-sheet',
+      spriteSheetIcon: {
+        spriteSheetUrl: DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
+        columnCount:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
+        rowCount:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_ROW_COUNT,
+        columnIndex: 0,
+        rowIndex: 0,
+      },
+    },
+    ingredients: [
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_CUP_WET_CLAY_COST,
+      },
+    ],
+    recipeType: 'item',
+    outcome: {
+      kind: 'item',
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CUP,
+      quantity: 1,
+    },
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_TEAPOT,
+    cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.CERAMICS,
+    title: 'Wet Clay Tea Pot',
+    description:
+      'Shape wet clay into a teapot. Fire the greenware in a kiln with coal before it can brew.',
+    recipeVisual: {
+      visualKind: 'sprite-sheet',
+      spriteSheetIcon: {
+        spriteSheetUrl: DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
+        columnCount:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
+        rowCount:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_ROW_COUNT,
+        columnIndex: 1,
+        rowIndex: 0,
+      },
+    },
+    ingredients: [
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_TEAPOT_WET_CLAY_COST,
+      },
+    ],
+    recipeType: 'item',
+    outcome: {
+      kind: 'item',
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT,
+      quantity: 1,
     },
   },
 ] as const satisfies readonly DefiningWorldPlazaCraftModeRecipeDefinition[];

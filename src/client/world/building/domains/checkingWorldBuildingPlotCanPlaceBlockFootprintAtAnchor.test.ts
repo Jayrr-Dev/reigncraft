@@ -121,5 +121,10 @@ describe('multi-tile footprint across adjacent 1x1 claims', () => {
     expect(
       new Set(result.placedBlocks.map((block) => block.plotId))
     ).toEqual(new Set(['p-0-0', 'p-1-0', 'p-0-1', 'p-1-1']));
+    expect(result.draft.addedDraftBlockIds.size).toBe(4);
+    expect(result.draft.addedDraftBlockIds.has('bloomery-anchor')).toBe(true);
+    expect(
+      result.draft.addedDraftBlockIds.has('bloomery-anchor_fp_11_20')
+    ).toBe(true);
   });
 });

@@ -91,4 +91,9 @@ export type DefiningWorldPlazaInventoryItemTypeDefinition =
     readonly recipePage?: {
       readonly recipeId: DefiningWorldPlazaCraftModeRecipeId;
     };
+    /**
+     * When true, the hotbar ground action uses Place instead of Drop
+     * (traps and other world-placed gear, not loose ground loot).
+     */
+    readonly placesOnWorldGround?: boolean;
   };

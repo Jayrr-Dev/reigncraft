@@ -67,7 +67,7 @@ function resolvingBearTrapActionLabel(
 }
 
 /**
- * Campfire-style Arm / Disarm / Pick up labels above selected closed traps.
+ * Campfire-style labels above selected traps (Arm or Disarm by state).
  */
 export function RenderingWorldPlazaBearTrapInteractionLabels({
   selectedInteractableBlockKeysRef,

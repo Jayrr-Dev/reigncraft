@@ -56,9 +56,11 @@ import { DEFINING_WORLD_PLAZA_WOOD_AXE_INVENTORY_ICON_URL } from '@/components/w
 import { registeringWorldPlazaInventoryBagItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryBagItemDefinitions';
 import { registeringWorldPlazaInventoryBerryItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryBerryItemDefinitions';
 import { registeringWorldPlazaInventoryCoffeeItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCoffeeItemDefinitions';
+import { registeringWorldPlazaInventoryCeramicsItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCeramicsItemDefinitions';
 import { registeringWorldPlazaInventoryCloverItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCloverItemDefinitions';
 import { registeringWorldPlazaInventoryFlowerItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryFlowerItemDefinitions';
 import { registeringWorldPlazaInventoryOreItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryOreItemDefinitions';
+import { registeringWorldPlazaInventoryWetClayItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryWetClayItemDefinitions';
 import { registeringWorldPlazaInventoryIngotItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryIngotItemDefinitions';
 import { registeringWorldPlazaTieredToolInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaTieredToolInventoryItems';
 import { registeringWorldPlazaWildlifeMeatInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems';
@@ -131,6 +133,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       maxStack: 5,
       isDroppable: true,
       isStackable: true,
+      placesOnWorldGround: true,
       iconSpriteSheet: {
         spriteSheetUrl: DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_URL,
         columnCount: 4,
@@ -146,6 +149,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       maxStack: 20,
       isDroppable: true,
       isStackable: true,
+      placesOnWorldGround: true,
       iconSpriteSheet: {
         spriteSheetUrl: DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_URL,
         columnCount: 2,
@@ -271,7 +275,9 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     ...registeringWorldPlazaInventoryCloverItemDefinitions(),
     ...registeringWorldPlazaInventoryBerryItemDefinitions(),
     ...registeringWorldPlazaInventoryCoffeeItemDefinitions(),
+    ...registeringWorldPlazaInventoryCeramicsItemDefinitions(),
     ...registeringWorldPlazaInventoryOreItemDefinitions(),
+    ...registeringWorldPlazaInventoryWetClayItemDefinitions(),
     ...registeringWorldPlazaInventoryIngotItemDefinitions(),
     ...registeringWorldPlazaTieredToolInventoryItems(),
     {

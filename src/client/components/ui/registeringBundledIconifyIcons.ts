@@ -59,6 +59,7 @@ import gameIconsBrokenHeart from '@iconify-icons/game-icons/broken-heart';
 import gameIconsBrokenTablet from '@iconify-icons/game-icons/broken-tablet';
 import gameIconsCampfire from '@iconify-icons/game-icons/campfire';
 import gameIconsChicken from '@iconify-icons/game-icons/chicken';
+import gameIconsClayBrick from '@iconify-icons/game-icons/clay-brick';
 import gameIconsCrystalBall from '@iconify-icons/game-icons/crystal-ball';
 import gameIconsDeathSkull from '@iconify-icons/game-icons/death-skull';
 import gameIconsDrop from '@iconify-icons/game-icons/drop';
@@ -287,6 +288,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'game-icons:broken-tablet': gameIconsBrokenTablet,
   'game-icons:campfire': gameIconsCampfire,
   'game-icons:chicken': gameIconsChicken,
+  'game-icons:clay-brick': gameIconsClayBrick,
   'game-icons:crystal-ball': gameIconsCrystalBall,
   'game-icons:death-skull': gameIconsDeathSkull,
   'game-icons:drop': gameIconsDrop,

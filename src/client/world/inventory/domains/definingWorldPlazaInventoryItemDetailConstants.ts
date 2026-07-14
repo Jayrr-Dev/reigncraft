@@ -212,6 +212,14 @@ export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_REFINE =
 export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ADD_FUEL =
   'Add Fuel' as const;
 
+/** Action tower button: discard an item as ground loot. */
+export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_DROP =
+  'Drop' as const;
+
+/** Action tower button: arm / set a placeable world item (traps). */
+export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_PLACE =
+  'Place' as const;
+
 /** Human-readable labels for equipped tool kinds. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS: Readonly<
   Record<DefiningWorldPlazaEquipmentToolKind, string>

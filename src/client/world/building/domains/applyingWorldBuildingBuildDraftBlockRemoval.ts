@@ -1,12 +1,11 @@
 import {
   findingWorldBuildingPlotContainingTilePosition,
   findingWorldBuildingPlotRemovableBlockAtTileLayerPosition,
-  listingWorldBuildingPlotPlacedBlocks,
   removingWorldBuildingBlockFromPlot,
+  type DefiningWorldBuildingPlot,
 } from '@/components/world/building/domains/definingWorldBuildingPlot';
 import type { DefiningWorldBuildingBuildDraftState } from '@/components/world/building/domains/definingWorldBuildingBuildDraft';
 import { mergingWorldBuildingViewportPlotsWithBuildDraft } from '@/components/world/building/domains/definingWorldBuildingBuildDraft';
-import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
 import type { DefiningWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import {
   listingWorldBuildingPlacedBlocksInFootprintGroup,
@@ -16,6 +15,7 @@ import {
 } from '@/components/world/building/domains/definingWorldBuildingPlacementFootprint';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { resolvingWorldBuildingPlacedBlockWorldLayer } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { listingWorldBuildingPlacedBlocksFromPlots } from '@/components/world/building/domains/listingWorldBuildingPlacedBlocksFromPlots';
 
 /**
  * Applies a local block removal to the in-memory build draft.
@@ -49,9 +49,27 @@ export interface ApplyingWorldBuildingBuildDraftBlockRemovalInput {
   readonly actorUserId: string;
 }
 
+function upsertingWorldBuildingWorkingPlot(
+  workingPlots: readonly DefiningWorldBuildingPlot[],
+  nextPlot: DefiningWorldBuildingPlot
+): DefiningWorldBuildingPlot[] {
+  const hasWorkingPlot = workingPlots.some(
+    (workingPlotEntry) => workingPlotEntry.plotId === nextPlot.plotId
+  );
+
+  if (hasWorkingPlot) {
+    return workingPlots.map((workingPlotEntry) =>
+      workingPlotEntry.plotId === nextPlot.plotId ? nextPlot : workingPlotEntry
+    );
+  }
+
+  return [...workingPlots, nextPlot];
+}
+
 /**
  * Validates and records a block removal in the draft without touching Supabase.
- * Multi-tile footprints remove every tile in the group in one step.
+ * Multi-tile footprints remove every tile in the group in one step, including
+ * when the 2x2 spans adjacent 1x1 claim plots.
  *
  * @param input - Removal request and current draft snapshot.
  */
@@ -86,8 +104,9 @@ export function applyingWorldBuildingBuildDraftBlockRemoval(
     };
   }
 
+  // Footprints span multiple 1x1 claims; search every owned plot in the merge.
   const groupBlocks = listingWorldBuildingPlacedBlocksInFootprintGroup(
-    listingWorldBuildingPlotPlacedBlocks(plot),
+    listingWorldBuildingPlacedBlocksFromPlots(effectivePlots),
     existingBlock
   );
   const primaryBlock =
@@ -98,13 +117,23 @@ export function applyingWorldBuildingBuildDraftBlockRemoval(
         resolvingWorldBuildingPlacedBlockFootprintGroupId(block) === null
     ) ?? existingBlock;
 
-  let workingPlot = plot;
+  const workingPlotsById = new Map(
+    effectivePlots.map((plotEntry) => [plotEntry.plotId, plotEntry] as const)
+  );
   const nextAddedDraftBlockIds = new Set(input.draft.addedDraftBlockIds);
   const nextRemovedPersistedBlockIds = [...input.draft.removedPersistedBlockIds];
 
   for (const groupBlock of groupBlocks) {
+    const plotForBlock = workingPlotsById.get(groupBlock.plotId);
+
+    if (!plotForBlock) {
+      return {
+        errorMessage: 'Could not remove every tile of that build.',
+      };
+    }
+
     const removalResult = removingWorldBuildingBlockFromPlot(
-      workingPlot,
+      plotForBlock,
       groupBlock.tilePosition,
       input.actorUserId,
       resolvingWorldBuildingPlacedBlockWorldLayer(groupBlock)
@@ -116,7 +145,7 @@ export function applyingWorldBuildingBuildDraftBlockRemoval(
       };
     }
 
-    workingPlot = removalResult.value;
+    workingPlotsById.set(plotForBlock.plotId, removalResult.value);
 
     if (nextAddedDraftBlockIds.has(groupBlock.blockId)) {
       nextAddedDraftBlockIds.delete(groupBlock.blockId);
@@ -125,11 +154,14 @@ export function applyingWorldBuildingBuildDraftBlockRemoval(
     }
   }
 
-  const nextWorkingPlots = input.draft.workingPlots.map((workingPlotEntry) =>
-    workingPlotEntry.plotId === workingPlot.plotId
-      ? workingPlot
-      : workingPlotEntry
-  );
+  let nextWorkingPlots = input.draft.workingPlots;
+
+  for (const nextPlot of workingPlotsById.values()) {
+    nextWorkingPlots = upsertingWorldBuildingWorkingPlot(
+      nextWorkingPlots,
+      nextPlot
+    );
+  }
 
   return {
     draft: {

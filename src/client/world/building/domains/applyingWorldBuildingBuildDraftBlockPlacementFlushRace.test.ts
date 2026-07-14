@@ -8,13 +8,17 @@ import { creatingWorldBuildingPlot } from '@/components/world/building/domains/d
 import { describe, expect, it } from 'vitest';
 
 /**
- * Regression for craft campfire place: success handler flushes/exits in the same
- * synchronous turn as placement. Flush must use the post-placement draft, not
- * the prior React state snapshot (which has no campfire yet).
+ * Regression for craft campfire / kiln place: success handler flushes/exits in
+ * the same synchronous turn as placement. Flush must use the post-placement
+ * draft, not the prior React state snapshot (which has no block yet).
  *
  * Outside-claim session campfires are intentionally not "unsaved" draft state;
  * `placingBlockAtTile` must await session persist + plot refetch before the
  * craft success callback exits edit mode, or the campfire vanishes instantly.
+ *
+ * Claimed multi-tile utilities (kiln / bloomery) have the same race: craft
+ * consumes ingredients then exits edit. Persist must finish before consume, or
+ * a failed flush leaves no station and spends materials.
  */
 describe('craft campfire placement draft flush race', () => {
   it('marks the post-placement draft unsaved so an immediate flush would persist', () => {

@@ -1,5 +1,5 @@
 /**
- * Arm / Disarm / Pick up handlers for closed world bear traps.
+ * Arm / Disarm / Pick up handlers for world bear traps (state-gated).
  *
  * @module components/world/trap/hooks/usingWorldPlazaBearTrapInteraction
  */
@@ -45,7 +45,7 @@ export type UsingWorldPlazaBearTrapInteractionResult = {
 };
 
 /**
- * Validates range and applies Arm / Disarm / Pick up on a closed trap.
+ * Validates range and applies state-gated Arm / Disarm / Pick up.
  */
 export function usingWorldPlazaBearTrapInteraction({
   localPersistenceOwnerId,
@@ -74,7 +74,15 @@ export function usingWorldPlazaBearTrapInteraction({
 
       const instance = gettingWorldPlazaBearTrapInstance(entry.trapId);
 
-      if (!instance || instance.state === 'armed') {
+      if (!instance) {
+        return;
+      }
+
+      if (action === 'arm' && instance.state === 'armed') {
+        return;
+      }
+
+      if (action === 'disarm' && instance.state !== 'armed') {
         return;
       }
 

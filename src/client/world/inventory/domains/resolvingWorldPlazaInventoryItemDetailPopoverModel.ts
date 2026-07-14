@@ -48,6 +48,7 @@ import {
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFlowerDetailReveal';
 import { resolvingWorldPlazaInventoryFoodHealAmount } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealAmount';
 import { resolvingWorldPlazaInventoryItemDescription } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDescription';
+import { resolvingWorldPlazaInventoryItemGroundActionLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemGroundActionLabel';
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
 import {
   partitioningWorldPlazaInventoryItemEnchantmentRows,
@@ -95,6 +96,8 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly canStudy: boolean;
   readonly canAttachRecipePage: boolean;
   readonly canDrop: boolean;
+  /** Drop for loose loot; Place for world-set gear (traps). */
+  readonly dropActionLabel: string;
   readonly canEquip: boolean;
   readonly canOpenBag: boolean;
   readonly canRefine: boolean;
@@ -682,6 +685,8 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
         item.itemTypeId
       ),
       canDrop: definition.isDroppable,
+      dropActionLabel:
+        resolvingWorldPlazaInventoryItemGroundActionLabel(definition),
       canEquip:
         !options.isEquipped &&
         checkingWorldPlazaInventoryItemIsWeaponOrTool(item.itemTypeId),
@@ -764,6 +769,8 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       item.itemTypeId
     ),
     canDrop: definition.isDroppable,
+    dropActionLabel:
+      resolvingWorldPlazaInventoryItemGroundActionLabel(definition),
     canEquip:
       !options.isEquipped &&
       checkingWorldPlazaInventoryItemIsWeaponOrTool(item.itemTypeId),

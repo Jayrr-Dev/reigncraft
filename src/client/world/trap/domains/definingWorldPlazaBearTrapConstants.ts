@@ -7,7 +7,7 @@
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME } from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
 
 /** Default display scale relative to one isometric tile width. */
-export const DEFINING_WORLD_PLAZA_BEAR_TRAP_DISPLAY_SCALE = 1;
+export const DEFINING_WORLD_PLAZA_BEAR_TRAP_DISPLAY_SCALE = 0.55;
 
 /** Max Euclidean distance from player to trap for Arm / Disarm / Pick up. */
 export const DEFINING_WORLD_PLAZA_BEAR_TRAP_INTERACT_REACH_GRID = 2;

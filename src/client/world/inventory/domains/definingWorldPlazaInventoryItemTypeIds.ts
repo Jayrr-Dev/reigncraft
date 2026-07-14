@@ -23,6 +23,9 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT =
 /** Mineable ore resource item type ids (sprite sheet order). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_CLAY =
   'world-plaza-ore-clay' as const;
+/** Shore-wetted clay (dry ore clay + water). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY =
+  'world-plaza-wet-clay' as const;
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_IRON =
   'world-plaza-ore-iron' as const;
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_SILVER =
@@ -168,6 +171,15 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_COFFEE =
   'world-plaza-brewed-coffee' as const;
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP =
   'world-plaza-empty-clay-cup' as const;
+/** Unfired clay cup shaped from wet clay (fire in kiln). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CUP =
+  'world-plaza-wet-clay-cup' as const;
+/** Unfired clay teapot shaped from wet clay (fire in kiln). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT =
+  'world-plaza-wet-clay-teapot' as const;
+/** Fired empty clay teapot (kiln output from wet teapot). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT =
+  'world-plaza-empty-clay-teapot' as const;
 
 /** Wood-tier swords through gold-tier swords. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD =

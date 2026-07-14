@@ -7,9 +7,9 @@
 export type DefiningWorldPlazaBearTrapId = string;
 
 /**
- * `armed` — open jaws, triggers on walk-over.
- * `sprung` — closed after a trigger; Arm / Disarm / Pick up.
- * `disarmed` — closed safe; Arm / Pick up (no Disarm needed).
+ * `armed` — open jaws, triggers on walk-over; Disarm / Pick up.
+ * `sprung` — closed after a trigger; Arm / Pick up.
+ * `disarmed` — closed safe; Arm / Pick up.
  */
 export type DefiningWorldPlazaBearTrapState = 'armed' | 'sprung' | 'disarmed';
 

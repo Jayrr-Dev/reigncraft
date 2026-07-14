@@ -10,6 +10,7 @@ import {
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ATTACH,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_EQUIP,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO,
+  LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_PLACE,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_REFINE,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_STUDY,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemDetailConstants';
@@ -191,10 +192,15 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
             <button
               type="button"
               role="menuitem"
-              className={actionTowerClassNames.destructiveButton}
+              className={
+                model.dropActionLabel ===
+                LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_PLACE
+                  ? actionTowerClassNames.button
+                  : actionTowerClassNames.destructiveButton
+              }
               onClick={onDropItem}
             >
-              Drop
+              {model.dropActionLabel}
             </button>
           ) : null}
         </div>

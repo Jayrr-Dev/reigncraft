@@ -21,6 +21,8 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID = {
   BLOOMERY: 'recipe-bloomery',
   CLAY_KILN: 'recipe-clay-kiln',
   CLAY_STOVE: 'recipe-clay-stove',
+  WET_CLAY_CUP: 'recipe-wet-clay-cup',
+  WET_CLAY_TEAPOT: 'recipe-wet-clay-teapot',
   BEAR_TRAP: 'recipe-bear-trap',
   CALTROPS: 'recipe-caltrops',
 } as const;

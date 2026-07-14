@@ -938,10 +938,13 @@ export function usingWorldPlazaBuildMode({
       assigningBuildDraft(placementResult.draft);
       setBuildErrorMessage(null);
 
-      // Session builds are not "unsaved draft" changes. Craft success exits edit
-      // mode in the same turn, which clears the draft. Persist + refetch must
-      // finish first or the campfire vanishes when the scene drops back to
-      // server `placedBlocks`.
+      // Craft success exits edit in the same turn and clears the draft. Persist
+      // + refetch must finish first or claimed kiln/bloomery (and session
+      // campfires) vanish when the scene drops back to server `placedBlocks`.
+      // Also: do not call onSuccessful (ingredient consume) until Redis has the
+      // rows, or a failed flush eats materials with no build left.
+      const craftSuccessHandler = onSuccessfulBlockPlacementRef?.current;
+
       if (placementResult.isSessionPlacement) {
         const placedSessionBlock = placementResult.draft.sessionBlocks.find(
           (block) => block.blockId === blockId
@@ -966,9 +969,32 @@ export function usingWorldPlazaBuildMode({
             return;
           }
         }
+      } else if (craftSuccessHandler) {
+        try {
+          await persistingWorldBuildingBuildDraft(
+            placementResult.draft,
+            onlineUserId
+          );
+          const freshPlots = await refetchingPlots();
+          assigningBuildDraft(
+            initializingWorldBuildingBuildDraftFromServerPlots(
+              freshPlots.plots,
+              freshPlots.ownedPlots,
+              onlineUserId
+            )
+          );
+        } catch (error) {
+          assigningBuildDraft(buildDraft);
+          setBuildErrorMessage(
+            error instanceof Error
+              ? error.message
+              : 'Could not save that build. Try placing again.'
+          );
+          return;
+        }
       }
 
-      onSuccessfulBlockPlacementRef?.current?.(
+      craftSuccessHandler?.(
         tilePosition,
         blockId,
         placementResult.isSessionPlacement
@@ -1282,7 +1308,7 @@ export function usingWorldPlazaBuildMode({
     closingBuildModeTilePopover();
   }, [closingBuildModeTilePopover, selectedTilePosition, unclaimingPlotAtTile]);
 
-  const savingBuildDraft = useCallback(async (): Promise<void> => {
+  const savingBuildDraft = useCallback(async (): Promise<boolean> => {
     const draftToPersist = buildDraftRef.current;
 
     if (
@@ -1290,7 +1316,7 @@ export function usingWorldPlazaBuildMode({
       !draftToPersist ||
       !checkingWorldBuildingBuildDraftHasUnsavedChanges(draftToPersist)
     ) {
-      return;
+      return true;
     }
 
     setIsSavingBuildDraft(true);
@@ -1306,10 +1332,12 @@ export function usingWorldPlazaBuildMode({
         )
       );
       setBuildErrorMessage(null);
+      return true;
     } catch (error) {
       setBuildErrorMessage(
         error instanceof Error ? error.message : 'Could not save build changes.'
       );
+      return false;
     } finally {
       setIsSavingBuildDraft(false);
     }
@@ -1322,7 +1350,13 @@ export function usingWorldPlazaBuildMode({
       if (
         checkingWorldBuildingBuildDraftHasUnsavedChanges(buildDraftRef.current)
       ) {
-        await savingBuildDraft();
+        const didSave = await savingBuildDraft();
+
+        // Keep the draft (and edit session) if Redis rejected the flush so
+        // kiln/bloomery tiles are not wiped while materials stay spent.
+        if (!didSave) {
+          return;
+        }
       }
 
       exitingBuildMode();

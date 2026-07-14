@@ -219,7 +219,7 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
       onPointerDown={stoppingPlazaWalkPointerPropagation}
       onClick={closingDialogOnBackdropClick}
     >
-      <div className="plaza-pop-in relative flex w-full max-w-[min(94vw,52rem)] flex-col items-center gap-3 font-body sm:gap-4">
+      <div className="plaza-pop-in relative flex max-h-[calc(100dvh-3rem)] w-full max-w-[min(94vw,52rem)] flex-col items-center gap-3 overflow-y-auto font-body sm:gap-4">
         <header className="flex w-full items-center gap-3 px-2 sm:px-4">
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <RenderingWorldPlazaCraftModeCookbookCoverGlyph
@@ -262,7 +262,7 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
 
           <div
             key={`${cookbookDefinition.id}-leaf-${leafIndex}-left`}
-            className="absolute flex flex-col overflow-hidden p-2 sm:p-3"
+            className="scrollbar-none absolute flex flex-col overflow-y-auto overscroll-contain p-2 sm:p-3"
             style={resolvingCookbookPageBoxStyle('left')}
           >
             {activeRecipe ? (
@@ -285,7 +285,7 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
 
           <div
             key={`${cookbookDefinition.id}-leaf-${leafIndex}-right`}
-            className="absolute flex flex-col overflow-hidden p-2 sm:p-3"
+            className="scrollbar-none absolute flex flex-col overflow-y-auto overscroll-contain p-2 sm:p-3"
             style={resolvingCookbookPageBoxStyle('right')}
           >
             {activeRecipe ? (

@@ -115,14 +115,14 @@ export function armingWorldPlazaBearTrap(
   return next;
 }
 
-/** Disarms a sprung trap (sprung → disarmed closed). */
+/** Disarms an armed trap (armed → disarmed closed, no trigger). */
 export function disarmingWorldPlazaBearTrap(
   trapId: DefiningWorldPlazaBearTrapId,
   store: ManagingWorldPlazaBearTrapInstanceStore = bearTrapInstanceStore
 ): DefiningWorldPlazaBearTrapInstance | null {
   const instance = store.instances.get(trapId);
 
-  if (!instance || instance.state !== 'sprung') {
+  if (!instance || instance.state !== 'armed') {
     return null;
   }
 

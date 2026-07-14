@@ -22,6 +22,8 @@ import { formattingWorldPlazaFarmlandTileSelectionKey } from '@/components/world
 import { listingWorldPlazaFarmlandTilesInInteractionRange } from '@/components/world/farming/domains/listingWorldPlazaFarmlandTilesInInteractionRange';
 import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fishing/domains/checkingWorldPlazaFishingCastEligibility';
 import { formattingWorldPlazaFishingTileSelectionKey } from '@/components/world/fishing/domains/formattingWorldPlazaFishingTileSelectionKey';
+import { checkingWorldPlazaWetClayEligibility } from '@/components/world/wet-clay/domains/checkingWorldPlazaWetClayEligibility';
+import { formattingWorldPlazaWetClayTileSelectionKey } from '@/components/world/wet-clay/domains/formattingWorldPlazaWetClayTileSelectionKey';
 import {
   applyingWorldPlazaRockMineStateToColumnRockMetadata,
   computingWorldPlazaRockMineableLayerCount,
@@ -119,6 +121,7 @@ export type ListingWorldPlazaInteractableSelectionKeysInPlayerProximityParams =
     readonly wildlifeStore?: ManagingWildlifeInstanceStore | null;
     readonly npcStore?: ManagingNpcInstanceStore | null;
     readonly hasEquippedFishrod?: boolean;
+    readonly hasClayInInventory?: boolean;
     readonly hasEquippedHoe?: boolean;
     readonly hasEquippedScythe?: boolean;
     readonly hasSeedsInInventory?: boolean;
@@ -341,6 +344,18 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
 
         if (fishingEligibility.isEligible) {
           keys.add(formattingWorldPlazaFishingTileSelectionKey(tileX, tileY));
+        }
+      }
+
+      if (params.hasClayInInventory) {
+        const wetClayEligibility = checkingWorldPlazaWetClayEligibility(
+          params.playerPosition,
+          tileX,
+          tileY
+        );
+
+        if (wetClayEligibility.isEligible) {
+          keys.add(formattingWorldPlazaWetClayTileSelectionKey(tileX, tileY));
         }
       }
     }

@@ -47,6 +47,7 @@ import {
 } from '@/components/world/wildlife/domains/advancingWildlifeChargeWindup';
 import { advancingWildlifeCorpseLifecycle } from '@/components/world/wildlife/domains/advancingWildlifeCorpseLifecycle';
 import { advancingWildlifeEnvironmentalDamageTick } from '@/components/world/wildlife/domains/advancingWildlifeEnvironmentalDamageTick';
+import { applyingWildlifeTrapWalkoverTrigger } from '@/components/world/wildlife/domains/applyingWildlifeTrapWalkoverTrigger';
 import { advancingWildlifeHealthStatusTick } from '@/components/world/wildlife/domains/advancingWildlifeHealthStatusTick';
 import { advancingWildlifeHungerTick } from '@/components/world/wildlife/domains/advancingWildlifeHungerTick';
 import { advancingWildlifeHunterKillFeedingTick } from '@/components/world/wildlife/domains/advancingWildlifeHunterKillFeedingTick';
@@ -1341,6 +1342,23 @@ export function advancingWildlifeSimulationTick({
         placedBlocksByTile: hazardSampling.placedBlocksByTile,
         nowMs,
         deltaMs: deltaSeconds * 1000,
+      });
+
+      if (nextInstance.isDead) {
+        nextInstance = attemptingWildlifeMeatGroundDropOnDeath(
+          store,
+          nextInstance,
+          species,
+          meatDropContext
+        );
+        updatedById.set(nextInstance.instanceId, nextInstance);
+        continue;
+      }
+
+      nextInstance = applyingWildlifeTrapWalkoverTrigger({
+        instance: nextInstance,
+        nowMs,
+        persistOwnerId: playerUserId,
       });
 
       if (nextInstance.isDead) {
