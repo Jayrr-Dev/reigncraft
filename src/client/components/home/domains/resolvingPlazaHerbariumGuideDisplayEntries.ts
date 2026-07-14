@@ -1,5 +1,13 @@
 import { LABELING_PLAZA_BIOMES_UNDISCOVERED_NAME } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
 import {
+  DEFINING_PLAZA_HERBARIUM_CLOVER_GUIDE_ENTRIES,
+  LABELING_PLAZA_HERBARIUM_UNDISCOVERED_CLOVER_HINT,
+  type DefiningPlazaHerbariumCloverEntry,
+} from '@/components/home/domains/definingPlazaHerbariumCloverGuideConstants';
+import type { PlazaHerbariumCloverStudyTierId } from '@/components/home/domains/definingPlazaHerbariumCloverStudyTier';
+import { DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumCloverStudyTier';
+import type { PlazaHerbariumFlowerStudyTierId } from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
+import {
   DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES,
   DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES,
   LABELING_PLAZA_HERBARIUM_UNDISCOVERED_HINT,
@@ -9,9 +17,21 @@ import {
 } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
 import type { PlazaHerbariumStudyTierId } from '@/components/home/domains/definingPlazaHerbariumStudyTier';
 import {
+  resolvingPlazaHerbariumCloverLuckyEffectStatRows,
+  type PlazaHerbariumCloverLuckyEffectStatRow,
+} from '@/components/home/domains/resolvingPlazaHerbariumCloverLuckyEffectStatRows';
+import {
+  checkingPlazaHerbariumCloverStudyTierUnlocked,
+  resolvingPlazaHerbariumCloverStudyTierId,
+} from '@/components/home/domains/resolvingPlazaHerbariumCloverStudyTier';
+import {
   resolvingPlazaHerbariumFlowerEatEffectStatRows,
   type PlazaHerbariumFlowerEatEffectStatRow,
 } from '@/components/home/domains/resolvingPlazaHerbariumFlowerEatEffectStatRows';
+import {
+  checkingPlazaHerbariumFlowerStudyTierUnlocked,
+  resolvingPlazaHerbariumFlowerStudyTierId,
+} from '@/components/home/domains/resolvingPlazaHerbariumFlowerStudyTier';
 import {
   resolvingPlazaHerbariumEntryRarity,
   resolvingPlazaHerbariumEntryRarityLabel,
@@ -27,6 +47,7 @@ import {
   type DefiningWorldPlazaTreeVariantKind,
 } from '@/components/world/domains/definingWorldPlazaTreeConstants';
 import type { DefiningWorldPlazaInventoryItemRarity } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
+import type { WorldCloverSearchLootKind } from '../../../../shared/worldCloverSearchLoot';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 
 export type PlazaHerbariumGuideDiscoveryState =
@@ -46,7 +67,10 @@ export type PlazaHerbariumGuideDisplayEntryBase = {
   isStudied: boolean;
   isFullyStudied: boolean;
   studyCount: number;
-  studyTierId: PlazaHerbariumStudyTierId;
+  studyTierId:
+    | PlazaHerbariumFlowerStudyTierId
+    | PlazaHerbariumStudyTierId
+    | PlazaHerbariumCloverStudyTierId;
   rarity: DefiningWorldPlazaInventoryItemRarity;
   rarityLabel: string;
   icon: string;
@@ -73,9 +97,19 @@ export type PlazaHerbariumGuideTreeDisplayEntry =
     eatEffectStatRows: null;
   };
 
+export type PlazaHerbariumGuideCloverDisplayEntry =
+  PlazaHerbariumGuideDisplayEntryBase & {
+    kind: 'clover';
+    cloverKind: WorldCloverSearchLootKind;
+    luckyEffectStatRows:
+      | readonly PlazaHerbariumCloverLuckyEffectStatRow[]
+      | null;
+  };
+
 export type PlazaHerbariumGuideDisplayEntry =
   | PlazaHerbariumGuideFlowerDisplayEntry
-  | PlazaHerbariumGuideTreeDisplayEntry;
+  | PlazaHerbariumGuideTreeDisplayEntry
+  | PlazaHerbariumGuideCloverDisplayEntry;
 
 /** Biome kinds that ever draw a pickable flower decoration. */
 function listingPlazaHerbariumFlowerBearingBiomeKinds(): readonly DefiningWorldPlazaBiomeKind[] {
@@ -146,7 +180,9 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
   treeStudyCountsByVariant: Readonly<
     Partial<Record<DefiningWorldPlazaTreeVariantKind, number>>
   >,
-  exploredBiomeKinds: ReadonlySet<DefiningWorldPlazaBiomeKind> = new Set()
+  exploredBiomeKinds: ReadonlySet<DefiningWorldPlazaBiomeKind> = new Set(),
+  sightedCloverKinds: ReadonlySet<WorldCloverSearchLootKind> = new Set(),
+  cloverStudyCount = 0
 ): PlazaHerbariumGuideDisplayEntry[] {
   const flowerBiomeKinds = listingPlazaHerbariumFlowerBearingBiomeKinds();
 
@@ -160,15 +196,16 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
           isSighted,
           studyCount
         );
-        const isStudied = checkingPlazaHerbariumStudyTierUnlocked(
+        const isStudied = checkingPlazaHerbariumFlowerStudyTierUnlocked(
           'fieldNotes',
           studyCount
         );
-        const isPropertiesUnlocked = checkingPlazaHerbariumStudyTierUnlocked(
-          'properties',
-          studyCount
-        );
-        const isFullyStudied = checkingPlazaHerbariumStudyTierUnlocked(
+        const isPropertiesUnlocked =
+          checkingPlazaHerbariumFlowerStudyTierUnlocked(
+            'properties',
+            studyCount
+          );
+        const isFullyStudied = checkingPlazaHerbariumFlowerStudyTierUnlocked(
           'full',
           studyCount
         );
@@ -186,7 +223,7 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
           isStudied,
           isFullyStudied,
           studyCount,
-          studyTierId: resolvingPlazaHerbariumStudyTierId(studyCount),
+          studyTierId: resolvingPlazaHerbariumFlowerStudyTierId(studyCount),
           rarity,
           rarityLabel: resolvingPlazaHerbariumEntryRarityLabel(rarity),
           eatEffectStatRows: isFullyStudied
@@ -273,7 +310,76 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
       }
     );
 
-  return [...flowerEntries, ...treeEntries];
+  const cloverBiomeKinds = listingPlazaHerbariumFlowerBearingBiomeKinds();
+
+  const cloverEntries: PlazaHerbariumGuideCloverDisplayEntry[] =
+    DEFINING_PLAZA_HERBARIUM_CLOVER_GUIDE_ENTRIES.map(
+      (entry: DefiningPlazaHerbariumCloverEntry) => {
+        const studyCount = cloverStudyCount;
+        const isSighted = sightedCloverKinds.has(entry.cloverKind);
+        const discoveryState = resolvingPlazaHerbariumDiscoveryState(
+          isSighted,
+          studyCount
+        );
+        const isStudied = checkingPlazaHerbariumCloverStudyTierUnlocked(
+          'fieldNotes',
+          studyCount
+        );
+        const isPropertiesUnlocked =
+          checkingPlazaHerbariumCloverStudyTierUnlocked(
+            'properties',
+            studyCount
+          );
+        const isFullyStudied = checkingPlazaHerbariumCloverStudyTierUnlocked(
+          'full',
+          studyCount
+        );
+        const rarity = resolvingPlazaHerbariumEntryRarity({
+          kind: 'clover',
+          cloverKind: entry.cloverKind,
+        });
+        const propertiesSummary = isPropertiesUnlocked
+          ? entry.cloverKind === 'four_leaf' && isFullyStudied
+            ? (entry.propertiesSummaryFull ?? entry.propertiesSummary)
+            : entry.propertiesSummary
+          : null;
+
+        return {
+          kind: 'clover',
+          cloverKind: entry.cloverKind,
+          icon: entry.icon,
+          discoveryState,
+          isSighted,
+          isStudied,
+          isFullyStudied,
+          studyCount,
+          studyTierId: resolvingPlazaHerbariumCloverStudyTierId(studyCount),
+          rarity,
+          rarityLabel: resolvingPlazaHerbariumEntryRarityLabel(rarity),
+          luckyEffectStatRows:
+            entry.cloverKind === 'four_leaf' &&
+            studyCount >= DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_FULL_COUNT
+              ? resolvingPlazaHerbariumCloverLuckyEffectStatRows()
+              : null,
+          displayName: isSighted
+            ? entry.displayName
+            : LABELING_PLAZA_HERBARIUM_UNDISCOVERED_NAME,
+          summary: isSighted
+            ? entry.summary
+            : LABELING_PLAZA_HERBARIUM_UNDISCOVERED_CLOVER_HINT,
+          studiedSummary: entry.studiedSummary,
+          propertiesSummary,
+          apostleFlavor: null,
+          biomeKinds: cloverBiomeKinds,
+          biomeChips: buildingPlazaHerbariumBiomeChips(
+            cloverBiomeKinds,
+            exploredBiomeKinds
+          ),
+        };
+      }
+    );
+
+  return [...flowerEntries, ...cloverEntries, ...treeEntries];
 }
 
 /**

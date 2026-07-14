@@ -1,7 +1,13 @@
 import { resolvingWorldPlazaHerbariumDiscoveryStorageKey } from '@/components/world/domains/definingWorldPlazaHerbariumDiscoveryConstants';
 import type { DefiningWorldPlazaTreeVariantKind } from '@/components/world/domains/definingWorldPlazaTreeConstants';
-import { WORLD_FLOWER_SPECIES_RARITY_REGISTRY } from '../../../shared/worldFlowerRarity';
+import type { WorldCloverSearchLootKind } from '../../../shared/worldCloverSearchLoot';
 import type { WorldFlowerSpeciesId } from '../../../shared/worldFlowerRarity';
+import { WORLD_FLOWER_SPECIES_RARITY_REGISTRY } from '../../../shared/worldFlowerRarity';
+
+const DEFINING_WORLD_PLAZA_HERBARIUM_CLOVER_KIND_SET = new Set<string>([
+  'three_leaf',
+  'four_leaf',
+]);
 
 const DEFINING_WORLD_PLAZA_HERBARIUM_FLOWER_SPECIES_ID_SET = new Set<string>(
   WORLD_FLOWER_SPECIES_RARITY_REGISTRY.map(
@@ -26,7 +32,12 @@ export type WorldPlazaHerbariumDiscoverySnapshot = {
   sightedFlowerSpeciesIds: ReadonlySet<WorldFlowerSpeciesId>;
   flowerStudyCountsBySpeciesId: ReadonlyMap<WorldFlowerSpeciesId, number>;
   sightedTreeVariants: ReadonlySet<DefiningWorldPlazaTreeVariantKind>;
-  treeStudyCountsByVariant: ReadonlyMap<DefiningWorldPlazaTreeVariantKind, number>;
+  treeStudyCountsByVariant: ReadonlyMap<
+    DefiningWorldPlazaTreeVariantKind,
+    number
+  >;
+  sightedCloverKinds: ReadonlySet<WorldCloverSearchLootKind>;
+  cloverStudyCount: number;
 };
 
 function checkingWorldPlazaHerbariumFlowerSpeciesId(
@@ -86,12 +97,23 @@ function readingWorldPlazaHerbariumStudyCounts<TId extends string>(
   return studyCounts;
 }
 
+function checkingWorldPlazaHerbariumCloverKind(
+  value: unknown
+): value is WorldCloverSearchLootKind {
+  return (
+    typeof value === 'string' &&
+    DEFINING_WORLD_PLAZA_HERBARIUM_CLOVER_KIND_SET.has(value)
+  );
+}
+
 const WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SNAPSHOT: WorldPlazaHerbariumDiscoverySnapshot =
   {
     sightedFlowerSpeciesIds: new Set(),
     flowerStudyCountsBySpeciesId: new Map(),
     sightedTreeVariants: new Set(),
     treeStudyCountsByVariant: new Map(),
+    sightedCloverKinds: new Set(),
+    cloverStudyCount: 0,
   };
 
 /**
@@ -138,6 +160,17 @@ export function readingWorldPlazaHerbariumDiscoveryFromStorage(
         Reflect.get(parsedValue, 'treeStudyCounts'),
         checkingWorldPlazaHerbariumTreeVariant
       ),
+      sightedCloverKinds: readingWorldPlazaHerbariumIdSet(
+        Reflect.get(parsedValue, 'sightedClovers'),
+        checkingWorldPlazaHerbariumCloverKind
+      ),
+      cloverStudyCount: (() => {
+        const rawCount = Reflect.get(parsedValue, 'cloverStudyCount');
+
+        return typeof rawCount === 'number' && Number.isFinite(rawCount)
+          ? Math.max(0, Math.floor(rawCount))
+          : 0;
+      })(),
     };
   } catch {
     return WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SNAPSHOT;

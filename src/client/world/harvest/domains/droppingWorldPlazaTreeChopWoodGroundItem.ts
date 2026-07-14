@@ -1,7 +1,6 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWorldPlazaGroundItemsUseLocalPersistence } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemsUseLocalPersistence';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { insertingWorldPlazaGroundItemOptimistically } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
 import { droppingWorldPlazaLocalGroundItem } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
 import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
@@ -11,18 +10,19 @@ import { WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH } from '../../../../s
 /** Sentinel slot index for world-spawned ground drops (not from inventory). */
 export const DEFINING_WORLD_PLAZA_TREE_CHOP_GROUND_DROP_SLOT_INDEX = -1;
 
-export type DroppingWorldPlazaTreeChopWoodGroundItemParams = {
+export type DroppingWorldPlazaTreeChopGroundItemParams = {
   readonly localPersistenceOwnerId: string | null;
   readonly redditUserId: string | null;
   readonly saveSlotIndex: PlazaSaveSlotIndex | null;
   readonly tileX: number;
   readonly tileY: number;
   readonly layer: number;
-  readonly woodQuantity: number;
+  readonly itemTypeId: string;
+  readonly quantity: number;
   readonly playerPosition: DefiningWorldPlazaWorldPoint;
 };
 
-export type DroppingWorldPlazaTreeChopWoodGroundItemResult =
+export type DroppingWorldPlazaTreeChopGroundItemResult =
   | {
       readonly outcome: 'dropped';
       readonly groundItem: DefiningWorldPlazaGroundItem;
@@ -30,19 +30,20 @@ export type DroppingWorldPlazaTreeChopWoodGroundItemResult =
   | { readonly outcome: 'failed' };
 
 /**
- * Spawns wood from a completed tree chop as a ground item at the tree tile.
+ * Spawns a ground item from a completed tree chop at the tree tile.
  */
-export async function droppingWorldPlazaTreeChopWoodGroundItem({
+export async function droppingWorldPlazaTreeChopGroundItem({
   localPersistenceOwnerId,
   redditUserId,
   saveSlotIndex,
   tileX,
   tileY,
   layer,
-  woodQuantity,
+  itemTypeId,
+  quantity,
   playerPosition,
-}: DroppingWorldPlazaTreeChopWoodGroundItemParams): Promise<DroppingWorldPlazaTreeChopWoodGroundItemResult> {
-  if (woodQuantity <= 0) {
+}: DroppingWorldPlazaTreeChopGroundItemParams): Promise<DroppingWorldPlazaTreeChopGroundItemResult> {
+  if (quantity <= 0 || itemTypeId.length === 0) {
     return { outcome: 'failed' };
   }
 
@@ -52,8 +53,8 @@ export async function droppingWorldPlazaTreeChopWoodGroundItem({
   );
 
   const dropRequest = {
-    itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
-    quantity: woodQuantity,
+    itemTypeId,
+    quantity,
     gridX: tileX,
     gridY: tileY,
     layer,
@@ -85,8 +86,8 @@ export async function droppingWorldPlazaTreeChopWoodGroundItem({
 
     const groundItem: DefiningWorldPlazaGroundItem = {
       id: groundItemId,
-      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
-      quantity: woodQuantity,
+      itemTypeId,
+      quantity,
       gridX: tileX,
       gridY: tileY,
       layer,

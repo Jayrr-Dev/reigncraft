@@ -11,6 +11,7 @@ import {
   initializingWorldPlazaHerbariumDiscoveryStore,
   recordingWorldPlazaHerbariumTreeSighted,
 } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
+import { syncingWorldPlazaHerbariumCloversFromInventory } from '@/components/world/domains/syncingWorldPlazaHerbariumCloversFromInventory';
 import { syncingWorldPlazaHerbariumFlowersFromPicks } from '@/components/world/domains/syncingWorldPlazaHerbariumFlowersFromPicks';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { RefObject } from 'react';
@@ -55,6 +56,10 @@ export function usingWorldPlazaRecordingHerbariumSightings({
       inventoryState,
       pickedFlowerStateByTileKey
     );
+
+    if (inventoryState) {
+      syncingWorldPlazaHerbariumCloversFromInventory(inventoryState);
+    }
   }, [isEnabled, inventoryState, pickedFlowerStateByTileKey]);
 
   useEffect(() => {

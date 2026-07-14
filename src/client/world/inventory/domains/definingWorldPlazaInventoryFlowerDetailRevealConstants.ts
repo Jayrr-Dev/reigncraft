@@ -7,7 +7,7 @@
  * @module components/world/inventory/domains/definingWorldPlazaInventoryFlowerDetailRevealConstants
  */
 
-import type { PlazaHerbariumStudyTierId } from '@/components/home/domains/definingPlazaHerbariumStudyTier';
+import type { PlazaHerbariumFlowerStudyTierId } from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
 
 /** Which flower inspect fields are visible at one knowledge tier. */
 export type DefiningWorldPlazaInventoryFlowerDetailReveal = {
@@ -35,11 +35,11 @@ export type DefiningWorldPlazaInventoryFlowerDetailReveal = {
  * - fieldNotes (1): sighting summary
  * - properties (5): studied notes + vague eat hint
  * - habitats (15): effect labels, Petal Sickness name, disease names
- * - full (25): proc %, effect numbers, Petal Sickness details, disease odds
+ * - full (100): proc %, effect numbers, Petal Sickness details, disease odds
  */
 export const DEFINING_WORLD_PLAZA_INVENTORY_FLOWER_DETAIL_REVEAL_BY_TIER: Readonly<
   Record<
-    PlazaHerbariumStudyTierId,
+    PlazaHerbariumFlowerStudyTierId,
     DefiningWorldPlazaInventoryFlowerDetailReveal
   >
 > = {

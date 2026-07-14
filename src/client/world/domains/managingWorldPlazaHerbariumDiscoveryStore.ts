@@ -9,6 +9,7 @@
 import type { DefiningWorldPlazaTreeVariantKind } from '@/components/world/domains/definingWorldPlazaTreeConstants';
 import { readingWorldPlazaHerbariumDiscoveryFromStorage } from '@/components/world/domains/readingWorldPlazaHerbariumDiscoveryFromStorage';
 import { writingWorldPlazaHerbariumDiscoveryToStorage } from '@/components/world/domains/writingWorldPlazaHerbariumDiscoveryToStorage';
+import type { WorldCloverSearchLootKind } from '../../../shared/worldCloverSearchLoot';
 import type { WorldFlowerSpeciesId } from '../../../shared/worldFlowerRarity';
 
 const managingWorldPlazaHerbariumDiscoverySubscribers = new Set<() => void>();
@@ -27,6 +28,9 @@ const MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_TREE_STUDY_COUNTS: Readonly
   Partial<Record<DefiningWorldPlazaTreeVariantKind, number>>
 > = {};
 
+const MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SIGHTED_CLOVER_KINDS: readonly WorldCloverSearchLootKind[] =
+  [];
+
 let managingWorldPlazaHerbariumDiscoveryStorageOwnerId: string | null = null;
 let managingWorldPlazaHerbariumDiscoverySightedFlowerSpeciesIds =
   new Set<WorldFlowerSpeciesId>();
@@ -40,6 +44,9 @@ let managingWorldPlazaHerbariumDiscoveryTreeStudyCountsByVariant = new Map<
   DefiningWorldPlazaTreeVariantKind,
   number
 >();
+let managingWorldPlazaHerbariumDiscoverySightedCloverKinds =
+  new Set<WorldCloverSearchLootKind>();
+let managingWorldPlazaHerbariumDiscoveryCloverStudyCount = 0;
 
 let managingWorldPlazaHerbariumDiscoverySightedFlowerSnapshotCache: readonly WorldFlowerSpeciesId[] =
   MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_FLOWER_SNAPSHOT;
@@ -51,6 +58,9 @@ let managingWorldPlazaHerbariumDiscoverySightedTreeSnapshotCache: readonly Defin
 let managingWorldPlazaHerbariumDiscoveryTreeStudyCountsSnapshotCache: Readonly<
   Partial<Record<DefiningWorldPlazaTreeVariantKind, number>>
 > = MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_TREE_STUDY_COUNTS;
+let managingWorldPlazaHerbariumDiscoverySightedCloverKindsSnapshotCache: readonly WorldCloverSearchLootKind[] =
+  MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SIGHTED_CLOVER_KINDS;
+let managingWorldPlazaHerbariumDiscoveryCloverStudyCountSnapshotCache = 0;
 
 function refreshingWorldPlazaHerbariumDiscoverySnapshotCaches(): void {
   managingWorldPlazaHerbariumDiscoverySightedFlowerSnapshotCache =
@@ -76,6 +86,14 @@ function refreshingWorldPlazaHerbariumDiscoverySnapshotCaches(): void {
       : Object.fromEntries([
           ...managingWorldPlazaHerbariumDiscoveryTreeStudyCountsByVariant.entries(),
         ]);
+
+  managingWorldPlazaHerbariumDiscoverySightedCloverKindsSnapshotCache =
+    managingWorldPlazaHerbariumDiscoverySightedCloverKinds.size === 0
+      ? MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SIGHTED_CLOVER_KINDS
+      : [...managingWorldPlazaHerbariumDiscoverySightedCloverKinds].sort();
+
+  managingWorldPlazaHerbariumDiscoveryCloverStudyCountSnapshotCache =
+    managingWorldPlazaHerbariumDiscoveryCloverStudyCount;
 }
 
 function notifyingWorldPlazaHerbariumDiscoverySubscribers(): void {
@@ -91,7 +109,9 @@ function persistingWorldPlazaHerbariumDiscovery(): void {
     managingWorldPlazaHerbariumDiscoverySightedFlowerSpeciesIds,
     managingWorldPlazaHerbariumDiscoveryFlowerStudyCountsBySpeciesId,
     managingWorldPlazaHerbariumDiscoverySightedTreeVariants,
-    managingWorldPlazaHerbariumDiscoveryTreeStudyCountsByVariant
+    managingWorldPlazaHerbariumDiscoveryTreeStudyCountsByVariant,
+    managingWorldPlazaHerbariumDiscoverySightedCloverKinds,
+    managingWorldPlazaHerbariumDiscoveryCloverStudyCount
   );
 }
 
@@ -122,6 +142,11 @@ export function initializingWorldPlazaHerbariumDiscoveryStore(
   managingWorldPlazaHerbariumDiscoveryTreeStudyCountsByVariant = new Map(
     snapshot.treeStudyCountsByVariant
   );
+  managingWorldPlazaHerbariumDiscoverySightedCloverKinds = new Set(
+    snapshot.sightedCloverKinds
+  );
+  managingWorldPlazaHerbariumDiscoveryCloverStudyCount =
+    snapshot.cloverStudyCount;
   refreshingWorldPlazaHerbariumDiscoverySnapshotCaches();
   notifyingWorldPlazaHerbariumDiscoverySubscribers();
 }
@@ -148,6 +173,16 @@ export function gettingWorldPlazaHerbariumTreeStudyCountsSnapshot(): Readonly<
   Partial<Record<DefiningWorldPlazaTreeVariantKind, number>>
 > {
   return managingWorldPlazaHerbariumDiscoveryTreeStudyCountsSnapshotCache;
+}
+
+/** Returns sighted clover kinds for herbarium cards. */
+export function gettingWorldPlazaHerbariumSightedCloverKindsSnapshot(): readonly WorldCloverSearchLootKind[] {
+  return managingWorldPlazaHerbariumDiscoverySightedCloverKindsSnapshotCache;
+}
+
+/** Combined clover study total (three-leaf + four-leaf finds). */
+export function gettingWorldPlazaHerbariumCloverStudyCountSnapshot(): number {
+  return managingWorldPlazaHerbariumDiscoveryCloverStudyCountSnapshotCache;
 }
 
 /**
@@ -297,6 +332,51 @@ export function recordingWorldPlazaHerbariumTreeStudied(
 }
 
 /**
+ * Records Study progress for a clover find and ensures that kind is sighted.
+ *
+ * @param cloverKind - Clover kind pulled from long grass.
+ * @param studyPoints - Points awarded for this Study (default 1).
+ */
+export function recordingWorldPlazaHerbariumCloverStudied(
+  cloverKind: WorldCloverSearchLootKind,
+  studyPoints = 1
+): void {
+  const awardedStudyPoints = Math.max(1, Math.floor(studyPoints));
+
+  managingWorldPlazaHerbariumDiscoverySightedCloverKinds = new Set([
+    ...managingWorldPlazaHerbariumDiscoverySightedCloverKinds,
+    cloverKind,
+  ]);
+  managingWorldPlazaHerbariumDiscoveryCloverStudyCount += awardedStudyPoints;
+
+  persistingWorldPlazaHerbariumDiscovery();
+  notifyingWorldPlazaHerbariumDiscoverySubscribers();
+}
+
+/**
+ * Raises combined clover study to at least `minimumStudyCount` without lowering.
+ */
+export function ensuringWorldPlazaHerbariumCloverStudyAtLeast(
+  cloverKind: WorldCloverSearchLootKind,
+  minimumStudyCount: number
+): void {
+  const studyFloor = Math.max(1, Math.floor(minimumStudyCount));
+
+  managingWorldPlazaHerbariumDiscoverySightedCloverKinds = new Set([
+    ...managingWorldPlazaHerbariumDiscoverySightedCloverKinds,
+    cloverKind,
+  ]);
+
+  if (managingWorldPlazaHerbariumDiscoveryCloverStudyCount >= studyFloor) {
+    return;
+  }
+
+  managingWorldPlazaHerbariumDiscoveryCloverStudyCount = studyFloor;
+  persistingWorldPlazaHerbariumDiscovery();
+  notifyingWorldPlazaHerbariumDiscoverySubscribers();
+}
+
+/**
  * Subscribes to herbarium discovery changes.
  *
  * @param onStoreChange - Callback invoked when discovery state changes.
@@ -318,6 +398,8 @@ export function resettingWorldPlazaHerbariumDiscoveryStoreForTests(): void {
   managingWorldPlazaHerbariumDiscoveryFlowerStudyCountsBySpeciesId = new Map();
   managingWorldPlazaHerbariumDiscoverySightedTreeVariants = new Set();
   managingWorldPlazaHerbariumDiscoveryTreeStudyCountsByVariant = new Map();
+  managingWorldPlazaHerbariumDiscoverySightedCloverKinds = new Set();
+  managingWorldPlazaHerbariumDiscoveryCloverStudyCount = 0;
   refreshingWorldPlazaHerbariumDiscoverySnapshotCaches();
   managingWorldPlazaHerbariumDiscoverySubscribers.clear();
 }

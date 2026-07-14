@@ -110,6 +110,12 @@ export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES = 0.15;
 /** Hunger ratio restored by eating an apple. */
 export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE = 0.25;
 
+/** Hunger ratio restored by eating a raw coconut. */
+export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_COCONUT = 0.2;
+
+/** Hunger ratio restored by eating a cooked coconut. */
+export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_COOKED_COCONUT = 0.35;
+
 /** Hunger ratio restored by eating cooked meat. */
 export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_COOKED_MEAT = 0.6;
 

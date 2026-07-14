@@ -1,22 +1,24 @@
 'use client';
 
+import { RenderingPlazaHerbariumCloverPortrait } from '@/components/home/components/renderingPlazaHerbariumCloverPortrait';
 import { RenderingPlazaHerbariumFlowerPortrait } from '@/components/home/components/renderingPlazaHerbariumFlowerPortrait';
 import { RenderingPlazaHerbariumTreePortrait } from '@/components/home/components/renderingPlazaHerbariumTreePortrait';
+import { DEFINING_PLAZA_HERBARIUM_CLOVER_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumCloverPortraitConstants';
+import type { PlazaHerbariumCloverStudyTierId } from '@/components/home/domains/definingPlazaHerbariumCloverStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_FLOWER_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumFlowerPortraitConstants';
-import {
-  LABELING_PLAZA_HERBARIUM_STUDY_TIER_SECTION_TITLES,
-  LABELING_PLAZA_HERBARIUM_STUDY_TIER_TEASERS,
-  type PlazaHerbariumStudyTierId,
-} from '@/components/home/domains/definingPlazaHerbariumStudyTier';
+import type { PlazaHerbariumFlowerStudyTierId } from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
+import type { PlazaHerbariumStudyTierId } from '@/components/home/domains/definingPlazaHerbariumStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_TREE_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumTreePortraitConstants';
+import {
+  checkingPlazaHerbariumEntryStudyTierUnlocked,
+  formattingPlazaHerbariumEntryStudyCountProgress,
+  formattingPlazaHerbariumEntryStudyProgressLabel,
+  labelingPlazaHerbariumEntryStudyTierSectionTitle,
+  labelingPlazaHerbariumEntryStudyTierTeaser,
+  resolvingPlazaHerbariumEntryStudyTierBookIcon,
+} from '@/components/home/domains/resolvingPlazaHerbariumEntryStudyPresentation';
 import type { PlazaHerbariumGuideDisplayEntry } from '@/components/home/domains/resolvingPlazaHerbariumGuideDisplayEntries';
 import { resolvingPlazaHerbariumEntryRarityBadgeVariant } from '@/components/home/domains/resolvingPlazaHerbariumRarity';
-import {
-  checkingPlazaHerbariumStudyTierUnlocked,
-  formattingPlazaHerbariumStudyCountProgress,
-  formattingPlazaHerbariumStudyProgressLabel,
-  resolvingPlazaHerbariumStudyTierBookIcon,
-} from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import { resolvingWorldPlazaFlowerEatEffectProcChance } from '@/components/world/inventory/domains/resolvingWorldPlazaFlowerEatEffectProcChance';
@@ -39,32 +41,37 @@ const PLAZA_HERBARIUM_DETAIL_SECTION_TITLE_CLASS_NAME =
 const PLAZA_HERBARIUM_DETAIL_TEASER_CLASS_NAME =
   'rounded-sm border border-dashed border-poster-teal/25 bg-parchment/35 px-3 py-2 text-[11px] font-medium italic text-ink-soft';
 
+type HerbariumDetailTierId =
+  | Exclude<PlazaHerbariumFlowerStudyTierId, 'sighted'>
+  | Exclude<PlazaHerbariumCloverStudyTierId, 'sighted'>
+  | Exclude<PlazaHerbariumStudyTierId, 'sighted'>;
+
 type RenderingPlazaHerbariumGuideDetailSectionProps = {
-  tierId: Exclude<PlazaHerbariumStudyTierId, 'sighted'>;
-  studyCount: number;
+  entry: PlazaHerbariumGuideDisplayEntry;
+  tierId: HerbariumDetailTierId;
   children: React.ReactNode;
 };
 
 function RenderingPlazaHerbariumGuideDetailSection({
+  entry,
   tierId,
-  studyCount,
   children,
 }: RenderingPlazaHerbariumGuideDetailSectionProps): React.JSX.Element {
-  const isUnlocked = checkingPlazaHerbariumStudyTierUnlocked(
-    tierId,
-    studyCount
+  const isUnlocked = checkingPlazaHerbariumEntryStudyTierUnlocked(
+    entry,
+    tierId
   );
 
   return (
     <section className="mt-4">
       <h3 className={PLAZA_HERBARIUM_DETAIL_SECTION_TITLE_CLASS_NAME}>
-        {LABELING_PLAZA_HERBARIUM_STUDY_TIER_SECTION_TITLES[tierId]}
+        {labelingPlazaHerbariumEntryStudyTierSectionTitle(entry, tierId)}
       </h3>
       {isUnlocked ? (
         <div className="mt-2">{children}</div>
       ) : (
         <p className={cn(PLAZA_HERBARIUM_DETAIL_TEASER_CLASS_NAME, 'mt-2')}>
-          {LABELING_PLAZA_HERBARIUM_STUDY_TIER_TEASERS[tierId]}
+          {labelingPlazaHerbariumEntryStudyTierTeaser(entry, tierId)}
         </p>
       )}
     </section>
@@ -85,9 +92,8 @@ export function RenderingPlazaHerbariumGuideDetailView({
   onClose,
   className = '',
 }: RenderingPlazaHerbariumGuideDetailViewProps): React.JSX.Element {
-  const studyProgressLabel = formattingPlazaHerbariumStudyProgressLabel(
-    entry.studyCount
-  );
+  const studyProgressLabel =
+    formattingPlazaHerbariumEntryStudyProgressLabel(entry);
   const rawFlowerProcChancePercent = Math.round(
     resolvingWorldPlazaFlowerEatEffectProcChance({ preparation: 'raw' }) * 100
   );
@@ -118,12 +124,12 @@ export function RenderingPlazaHerbariumGuideDetailView({
               {entry.rarityLabel}
             </span>
             <Icon
-              icon={resolvingPlazaHerbariumStudyTierBookIcon(entry.studyCount)}
+              icon={resolvingPlazaHerbariumEntryStudyTierBookIcon(entry)}
               className="size-4 shrink-0 text-poster-teal-deep"
               aria-hidden
             />
             <span className="font-mono not-italic tabular-nums text-poster-teal-deep">
-              {formattingPlazaHerbariumStudyCountProgress(entry.studyCount)}
+              {formattingPlazaHerbariumEntryStudyCountProgress(entry)}
             </span>
             <span className="text-ink-soft/80">
               · {entry.isStudied ? studyProgressLabel : 'Sighted entry'}
@@ -151,6 +157,13 @@ export function RenderingPlazaHerbariumGuideDetailView({
                 speciesId={entry.speciesId}
                 variant="revealed"
                 zoom={DEFINING_PLAZA_HERBARIUM_FLOWER_PORTRAIT_DETAIL_ZOOM}
+                className="size-24 sm:size-28"
+              />
+            ) : entry.kind === 'clover' ? (
+              <RenderingPlazaHerbariumCloverPortrait
+                cloverKind={entry.cloverKind}
+                variant="revealed"
+                zoom={DEFINING_PLAZA_HERBARIUM_CLOVER_PORTRAIT_DETAIL_ZOOM}
                 className="size-24 sm:size-28"
               />
             ) : (
@@ -215,8 +228,8 @@ export function RenderingPlazaHerbariumGuideDetailView({
             </p>
 
             <RenderingPlazaHerbariumGuideDetailSection
+              entry={entry}
               tierId="fieldNotes"
-              studyCount={entry.studyCount}
             >
               <p className="text-[11px] font-medium text-ink">
                 {entry.studiedSummary}
@@ -224,14 +237,20 @@ export function RenderingPlazaHerbariumGuideDetailView({
             </RenderingPlazaHerbariumGuideDetailSection>
 
             <RenderingPlazaHerbariumGuideDetailSection
+              entry={entry}
               tierId="properties"
-              studyCount={entry.studyCount}
             >
               {entry.propertiesSummary ? (
                 <div className="space-y-2">
                   <div className={PLAZA_HERBARIUM_DETAIL_STAT_CELL_CLASS_NAME}>
                     <dt className="font-bold uppercase tracking-wide text-ink-soft">
-                      {entry.kind === 'flower' ? 'Eaten' : 'Wood'}
+                      {entry.kind === 'flower'
+                        ? 'Eaten'
+                        : entry.kind === 'clover'
+                          ? entry.cloverKind === 'four_leaf'
+                            ? 'Held'
+                            : 'Forage'
+                          : 'Wood'}
                     </dt>
                     <dd className="mt-0.5 font-medium text-ink">
                       {entry.propertiesSummary}
@@ -254,8 +273,8 @@ export function RenderingPlazaHerbariumGuideDetailView({
             </RenderingPlazaHerbariumGuideDetailSection>
 
             <RenderingPlazaHerbariumGuideDetailSection
+              entry={entry}
               tierId="habitats"
-              studyCount={entry.studyCount}
             >
               {entry.biomeChips.length > 0 ? (
                 <div className="flex flex-wrap gap-1.5">
@@ -283,8 +302,8 @@ export function RenderingPlazaHerbariumGuideDetailView({
             </RenderingPlazaHerbariumGuideDetailSection>
 
             <RenderingPlazaHerbariumGuideDetailSection
+              entry={entry}
               tierId="full"
-              studyCount={entry.studyCount}
             >
               <div className="space-y-3">
                 {entry.apostleFlavor ? (
@@ -292,10 +311,32 @@ export function RenderingPlazaHerbariumGuideDetailView({
                     {entry.apostleFlavor}
                   </p>
                 ) : null}
-                {entry.eatEffectStatRows &&
+                {entry.kind === 'flower' &&
+                entry.eatEffectStatRows &&
                 entry.eatEffectStatRows.length > 0 ? (
                   <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {entry.eatEffectStatRows.map((row) => (
+                      <div
+                        key={`${row.label}:${row.value}`}
+                        className={cn(
+                          PLAZA_HERBARIUM_DETAIL_STAT_CELL_CLASS_NAME,
+                          row.value.length > 42 ? 'sm:col-span-2' : null
+                        )}
+                      >
+                        <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                          {row.label}
+                        </dt>
+                        <dd className="mt-0.5 font-mono text-[11px] tabular-nums font-medium leading-snug text-ink">
+                          {row.value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : entry.kind === 'clover' &&
+                  entry.luckyEffectStatRows &&
+                  entry.luckyEffectStatRows.length > 0 ? (
+                  <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {entry.luckyEffectStatRows.map((row) => (
                       <div
                         key={`${row.label}:${row.value}`}
                         className={cn(

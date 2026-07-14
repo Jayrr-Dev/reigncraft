@@ -4,17 +4,17 @@
  * @module components/world/inventory/domains/resolvingWorldPlazaInventoryFlowerDetailReveal
  */
 
-import { DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
 import {
-  DEFINING_PLAZA_HERBARIUM_STUDY_FULL_COUNT,
-  LABELING_PLAZA_HERBARIUM_STUDY_TIER_TEASERS,
-} from '@/components/home/domains/definingPlazaHerbariumStudyTier';
+  DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_FULL_COUNT,
+  LABELING_PLAZA_HERBARIUM_FLOWER_STUDY_TIER_TEASERS,
+} from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
+import { DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
 import { resolvingPlazaHerbariumFlowerEatEffectStatRows } from '@/components/home/domains/resolvingPlazaHerbariumFlowerEatEffectStatRows';
 import {
-  formattingPlazaHerbariumStudyCountProgress,
-  resolvingPlazaHerbariumNextStudyTierUnlockCount,
-  resolvingPlazaHerbariumStudyTierId,
-} from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
+  formattingPlazaHerbariumFlowerStudyCountProgress,
+  resolvingPlazaHerbariumFlowerNextStudyTierUnlockCount,
+  resolvingPlazaHerbariumFlowerStudyTierId,
+} from '@/components/home/domains/resolvingPlazaHerbariumFlowerStudyTier';
 import { resolvingWorldPlazaEntityDiseaseDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import {
   DEFINING_WORLD_PLAZA_FLOWER_PETAL_SICKNESS_DURATION_MS,
@@ -52,7 +52,7 @@ export function resolvingWorldPlazaInventoryFlowerDetailReveal(
   studyCount: number
 ): DefiningWorldPlazaInventoryFlowerDetailReveal {
   return DEFINING_WORLD_PLAZA_INVENTORY_FLOWER_DETAIL_REVEAL_BY_TIER[
-    resolvingPlazaHerbariumStudyTierId(studyCount)
+    resolvingPlazaHerbariumFlowerStudyTierId(studyCount)
   ];
 }
 
@@ -94,10 +94,10 @@ export function resolvingWorldPlazaInventoryFlowerDetailContent(
   }
 
   if (reveal.showStudyProgress) {
-    const nextUnlock = resolvingPlazaHerbariumNextStudyTierUnlockCount(
+    const nextUnlock = resolvingPlazaHerbariumFlowerNextStudyTierUnlockCount(
       options.studyCount
     );
-    const progressLabel = formattingPlazaHerbariumStudyCountProgress(
+    const progressLabel = formattingPlazaHerbariumFlowerStudyCountProgress(
       options.studyCount
     );
 
@@ -105,7 +105,7 @@ export function resolvingWorldPlazaInventoryFlowerDetailContent(
       id: 'herbarium-study',
       label: 'Herbarium Study',
       value:
-        options.studyCount >= DEFINING_PLAZA_HERBARIUM_STUDY_FULL_COUNT
+        options.studyCount >= DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_FULL_COUNT
           ? `${progressLabel} · Full dossier`
           : nextUnlock !== null
             ? `${progressLabel} · next unlock ${nextUnlock}`
@@ -114,13 +114,13 @@ export function resolvingWorldPlazaInventoryFlowerDetailContent(
     });
 
     if (
-      options.studyCount < DEFINING_PLAZA_HERBARIUM_STUDY_FULL_COUNT &&
+      options.studyCount < DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_FULL_COUNT &&
       reveal.descriptionTier === 0
     ) {
       infoRows.push({
         id: 'herbarium-study-hint',
         label: 'Hint',
-        value: LABELING_PLAZA_HERBARIUM_STUDY_TIER_TEASERS.fieldNotes,
+        value: LABELING_PLAZA_HERBARIUM_FLOWER_STUDY_TIER_TEASERS.fieldNotes,
         tone: 'neutral',
       });
     }

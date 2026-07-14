@@ -23,6 +23,9 @@ export const DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_BERRIES = 1_000;
 /** Apple: slightly longer than berries. */
 export const DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_APPLE = 1_500;
 
+/** Coconut (raw or cooked): denser forage snack. */
+export const DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_COCONUT = 1_800;
+
 /** Aggressive chicken variant: tougher chew than normal chicken. */
 export const DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_AGGRESSIVE_CHICKEN = 2_500;
 
@@ -99,6 +102,13 @@ export function resolvingWorldPlazaInventoryFoodEatDurationMs(options: {
 
   if (itemTypeId === 'world-plaza-apple') {
     return DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_APPLE;
+  }
+
+  if (
+    itemTypeId === 'world-plaza-coconut' ||
+    itemTypeId === 'world-plaza-cooked-coconut'
+  ) {
+    return DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_COCONUT;
   }
 
   if (

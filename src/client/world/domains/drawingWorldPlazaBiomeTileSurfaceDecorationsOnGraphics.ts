@@ -54,8 +54,9 @@ const DRAWING_WORLD_PLAZA_BIOME_TILE_SURFACE_DECORATIONS_DEFAULT_DRAW_OPTIONS: R
   >
 > = {
   drawsGrassDecorations: true,
-  drawsFlowerDecorations: true,
-  drawsStoneDecorations: true,
+  // Flowers + pebbles live on dedicated overlays above floor chunks.
+  drawsFlowerDecorations: false,
+  drawsStoneDecorations: false,
 };
 
 /** Input for {@link drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics}. */

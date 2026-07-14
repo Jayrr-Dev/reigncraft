@@ -58,6 +58,14 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE =
   'world-plaza-apple' as const;
 
+/** Raw coconut from palm chops. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COCONUT =
+  'world-plaza-coconut' as const;
+
+/** Campfire-roasted coconut. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_COCONUT =
+  'world-plaza-cooked-coconut' as const;
+
 /** Spritcore currency item type id. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE =
   'world-plaza-spritcore' as const;

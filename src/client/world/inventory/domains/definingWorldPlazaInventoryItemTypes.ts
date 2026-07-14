@@ -7,9 +7,12 @@ import { registeringWorldPlazaCraftRecipePageInventoryItems } from '@/components
 import {
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE,
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
+  DEFINING_WORLD_PLAZA_HUNGER_RESTORE_COCONUT,
+  DEFINING_WORLD_PLAZA_HUNGER_RESTORE_COOKED_COCONUT,
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_FISH,
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_WHEAT,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
+import { resolvingWorldPlazaInventoryCoconutSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCoconutSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SPRITCORE_SPHERE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
@@ -25,6 +28,8 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COCONUT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_COCONUT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EXPEDITION_BAG,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISH,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_WOOD,
@@ -61,6 +66,8 @@ export {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COCONUT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_COCONUT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EXPEDITION_BAG,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PACK,
@@ -180,6 +187,45 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
         hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE,
         healthHeal: resolvingWorldPlazaInventoryFoodHealDeclaration({
           hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE,
+        }),
+      },
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COCONUT,
+      name: 'Coconut',
+      rarity: 'common',
+      iconEmoji: '🥥',
+      iconSpriteSheet:
+        resolvingWorldPlazaInventoryCoconutSpriteSheetIcon(
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COCONUT
+        ) ?? undefined,
+      maxStack: 99,
+      isDroppable: true,
+      isStackable: true,
+      food: {
+        hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_COCONUT,
+        healthHeal: resolvingWorldPlazaInventoryFoodHealDeclaration({
+          hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_COCONUT,
+        }),
+      },
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_COCONUT,
+      name: 'Cooked Coconut',
+      rarity: 'uncommon',
+      iconEmoji: '🥥',
+      iconSpriteSheet:
+        resolvingWorldPlazaInventoryCoconutSpriteSheetIcon(
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_COCONUT
+        ) ?? undefined,
+      maxStack: 99,
+      isDroppable: true,
+      isStackable: true,
+      food: {
+        hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_COOKED_COCONUT,
+        healthHeal: resolvingWorldPlazaInventoryFoodHealDeclaration({
+          hungerRestoreRatio:
+            DEFINING_WORLD_PLAZA_HUNGER_RESTORE_COOKED_COCONUT,
         }),
       },
     },

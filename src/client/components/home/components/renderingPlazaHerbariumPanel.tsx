@@ -1,25 +1,28 @@
 'use client';
 
+import { RenderingPlazaHerbariumCloverPortrait } from '@/components/home/components/renderingPlazaHerbariumCloverPortrait';
 import { RenderingPlazaHerbariumFlowerPortrait } from '@/components/home/components/renderingPlazaHerbariumFlowerPortrait';
 import { RenderingPlazaHerbariumGuideDetailView } from '@/components/home/components/renderingPlazaHerbariumGuideDetailView';
 import { RenderingPlazaHerbariumTreePortrait } from '@/components/home/components/renderingPlazaHerbariumTreePortrait';
 import { DEFINING_PLAZA_HERBARIUM_PANEL_SUBTITLE } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
 import {
+  formattingPlazaHerbariumEntryStudyCountProgress,
+  resolvingPlazaHerbariumEntryStudyTierBookIcon,
+} from '@/components/home/domains/resolvingPlazaHerbariumEntryStudyPresentation';
+import {
   resolvingPlazaHerbariumGuideDisplayEntries,
   type PlazaHerbariumGuideDisplayEntry,
 } from '@/components/home/domains/resolvingPlazaHerbariumGuideDisplayEntries';
 import { resolvingPlazaHerbariumEntryRarityBadgeVariant } from '@/components/home/domains/resolvingPlazaHerbariumRarity';
-import {
-  formattingPlazaHerbariumStudyCountProgress,
-  resolvingPlazaHerbariumStudyTierBookIcon,
-} from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
 import { Icon } from '@/components/ui/icon';
 import {
   gettingWorldPlazaExploredBiomesSnapshot,
   subscribingWorldPlazaExploredBiomes,
 } from '@/components/world/domains/managingWorldPlazaExploredBiomesStore';
 import {
+  gettingWorldPlazaHerbariumCloverStudyCountSnapshot,
   gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
+  gettingWorldPlazaHerbariumSightedCloverKindsSnapshot,
   gettingWorldPlazaHerbariumSightedTreeVariantsSnapshot,
   gettingWorldPlazaHerbariumTreeStudyCountsSnapshot,
   subscribingWorldPlazaHerbariumDiscovery,
@@ -49,7 +52,11 @@ const PLAZA_HERBARIUM_GUIDE_TILE_STAGE_CLASS_NAME =
 const PLAZA_HERBARIUM_GUIDE_TILE_NAME_CLASS_NAME =
   'block truncate border-t px-1 py-1 text-center font-display text-[10px] font-bold uppercase tracking-wide sm:text-[11px]';
 
-export type PlazaHerbariumCategoryFilterId = 'all' | 'flower' | 'tree';
+export type PlazaHerbariumCategoryFilterId =
+  | 'all'
+  | 'flower'
+  | 'clover'
+  | 'tree';
 
 const PLAZA_HERBARIUM_CATEGORY_FILTERS: readonly {
   id: PlazaHerbariumCategoryFilterId;
@@ -57,6 +64,7 @@ const PLAZA_HERBARIUM_CATEGORY_FILTERS: readonly {
 }[] = [
   { id: 'all', label: 'All' },
   { id: 'flower', label: 'Flowers' },
+  { id: 'clover', label: 'Clovers' },
   { id: 'tree', label: 'Trees' },
 ];
 
@@ -115,6 +123,12 @@ function RenderingPlazaHerbariumGuideCard({
               variant="silhouette"
               className="size-[48%]"
             />
+          ) : entry.kind === 'clover' ? (
+            <RenderingPlazaHerbariumCloverPortrait
+              cloverKind={entry.cloverKind}
+              variant="silhouette"
+              className="size-[48%]"
+            />
           ) : (
             <RenderingPlazaHerbariumTreePortrait
               treeVariant={entry.variant}
@@ -153,6 +167,12 @@ function RenderingPlazaHerbariumGuideCard({
             variant="revealed"
             className="size-[48%]"
           />
+        ) : entry.kind === 'clover' ? (
+          <RenderingPlazaHerbariumCloverPortrait
+            cloverKind={entry.cloverKind}
+            variant="revealed"
+            className="size-[48%]"
+          />
         ) : (
           <RenderingPlazaHerbariumTreePortrait
             treeVariant={entry.variant}
@@ -162,12 +182,12 @@ function RenderingPlazaHerbariumGuideCard({
         )}
         <span className="absolute left-1 top-1 flex items-center gap-0.5 rounded-sm border border-poster-teal/35 bg-poster-teal-deep/90 px-1 py-0.5 shadow">
           <Icon
-            icon={resolvingPlazaHerbariumStudyTierBookIcon(entry.studyCount)}
+            icon={resolvingPlazaHerbariumEntryStudyTierBookIcon(entry)}
             className="size-2.5 text-parchment"
             aria-hidden
           />
           <span className="font-mono text-[8px] font-bold tabular-nums text-parchment">
-            {formattingPlazaHerbariumStudyCountProgress(entry.studyCount)}
+            {formattingPlazaHerbariumEntryStudyCountProgress(entry)}
           </span>
         </span>
         <RenderingPlazaHerbariumGuideCardRarityBadge entry={entry} />
@@ -208,6 +228,16 @@ export function RenderingPlazaHerbariumPanel({
     gettingWorldPlazaHerbariumTreeStudyCountsSnapshot,
     () => ({})
   );
+  const sightedCloverKinds = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumSightedCloverKindsSnapshot,
+    () => []
+  );
+  const cloverStudyCount = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumCloverStudyCountSnapshot,
+    () => 0
+  );
   const exploredBiomeKinds = useSyncExternalStore(
     subscribingWorldPlazaExploredBiomes,
     gettingWorldPlazaExploredBiomesSnapshot,
@@ -216,6 +246,10 @@ export function RenderingPlazaHerbariumPanel({
   const sightedTreeSet = useMemo(
     () => new Set(sightedTreeVariants),
     [sightedTreeVariants]
+  );
+  const sightedCloverSet = useMemo(
+    () => new Set(sightedCloverKinds),
+    [sightedCloverKinds]
   );
   const exploredKinds = useMemo(
     () => new Set(exploredBiomeKinds),
@@ -227,11 +261,15 @@ export function RenderingPlazaHerbariumPanel({
         flowerStudyCountsBySpeciesId,
         sightedTreeSet,
         treeStudyCountsByVariant,
-        exploredKinds
+        exploredKinds,
+        sightedCloverSet,
+        cloverStudyCount
       ),
     [
+      cloverStudyCount,
       exploredKinds,
       flowerStudyCountsBySpeciesId,
+      sightedCloverSet,
       sightedTreeSet,
       treeStudyCountsByVariant,
     ]
@@ -244,10 +282,17 @@ export function RenderingPlazaHerbariumPanel({
     [categoryFilterId, guideEntries]
   );
   const resolvingPlazaHerbariumEntryId = useCallback(
-    (entry: PlazaHerbariumGuideDisplayEntry): string =>
-      entry.kind === 'flower'
-        ? `flower:${entry.speciesId}`
-        : `tree:${entry.variant}`,
+    (entry: PlazaHerbariumGuideDisplayEntry): string => {
+      if (entry.kind === 'flower') {
+        return `flower:${entry.speciesId}`;
+      }
+
+      if (entry.kind === 'clover') {
+        return `clover:${entry.cloverKind}`;
+      }
+
+      return `tree:${entry.variant}`;
+    },
     []
   );
   const selectedEntry = useMemo(

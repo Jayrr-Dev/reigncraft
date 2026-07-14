@@ -1,9 +1,13 @@
 /**
- * Declarative raw-to-cooked meat recipes for campfire cooking.
+ * Declarative raw-to-cooked campfire recipes (wildlife meat + forage).
  *
  * @module components/world/wildlife/domains/definingWildlifeMeatCookRecipes
  */
 
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COCONUT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_COCONUT,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import { DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeVariantMeatRegistry';
 
@@ -14,16 +18,30 @@ export type DefiningWildlifeMeatCookRecipe = {
   cookDurationMs: number;
 };
 
+/** Palm coconut husk → roasted split coconut. */
+const DEFINING_WORLD_PLAZA_FORAGE_COOK_RECIPES: readonly DefiningWildlifeMeatCookRecipe[] =
+  [
+    {
+      rawItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COCONUT,
+      cookedItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_COCONUT,
+      cookedDisplayName: 'Cooked Coconut',
+      cookDurationMs: 2_000,
+    },
+  ];
+
 export const DEFINING_WILDLIFE_MEAT_COOK_RECIPES: readonly DefiningWildlifeMeatCookRecipe[] =
   [
-    ...DEFINING_WILDLIFE_MEAT_CATALOG,
-    ...DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG,
-  ].map((entry) => ({
-    rawItemTypeId: entry.rawItemTypeId,
-    cookedItemTypeId: entry.cookedItemTypeId,
-    cookedDisplayName: entry.cookedDisplayName,
-    cookDurationMs: entry.cookDurationMs,
-  }));
+    ...[
+      ...DEFINING_WILDLIFE_MEAT_CATALOG,
+      ...DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG,
+    ].map((entry) => ({
+      rawItemTypeId: entry.rawItemTypeId,
+      cookedItemTypeId: entry.cookedItemTypeId,
+      cookedDisplayName: entry.cookedDisplayName,
+      cookDurationMs: entry.cookDurationMs,
+    })),
+    ...DEFINING_WORLD_PLAZA_FORAGE_COOK_RECIPES,
+  ];
 
 const DEFINING_WILDLIFE_MEAT_COOK_RECIPE_BY_RAW = Object.fromEntries(
   DEFINING_WILDLIFE_MEAT_COOK_RECIPES.map((recipe) => [

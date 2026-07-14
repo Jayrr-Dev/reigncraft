@@ -8,15 +8,18 @@
 
 import { DEFINING_PLAZA_HERBARIUM_TREE_RARITY_BY_VARIANT } from '@/components/home/domains/definingPlazaHerbariumRarityConstants';
 import type { DefiningWorldPlazaTreeVariantKind } from '@/components/world/domains/definingWorldPlazaTreeConstants';
+import { DEFINING_WORLD_PLAZA_CLOVER_LOOT_KIND_TO_ITEM_TYPE_ID } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverSpriteSheetConstants';
+import { DEFINING_WORLD_PLAZA_FLOWER_SPECIES_TO_ITEM_TYPE_ID } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFlowerSpriteSheetConstants';
 import type { DefiningWorldPlazaInventoryItemRarity } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_RARITY_LABELS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
-import { DEFINING_WORLD_PLAZA_FLOWER_SPECIES_TO_ITEM_TYPE_ID } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFlowerSpriteSheetConstants';
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
+import type { WorldCloverSearchLootKind } from '../../../../shared/worldCloverSearchLoot';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 
 export type ResolvingPlazaHerbariumRarityEntry =
   | { kind: 'flower'; speciesId: WorldFlowerSpeciesId }
-  | { kind: 'tree'; variant: DefiningWorldPlazaTreeVariantKind };
+  | { kind: 'tree'; variant: DefiningWorldPlazaTreeVariantKind }
+  | { kind: 'clover'; cloverKind: WorldCloverSearchLootKind };
 
 /**
  * Resolves the rarity id for one herbarium guide entry.
@@ -27,6 +30,14 @@ export function resolvingPlazaHerbariumEntryRarity(
   if (entry.kind === 'flower') {
     const typeId =
       DEFINING_WORLD_PLAZA_FLOWER_SPECIES_TO_ITEM_TYPE_ID[entry.speciesId];
+    const definition = resolvingWorldPlazaInventoryItemTypeDefinition(typeId);
+
+    return definition?.rarity ?? 'basic';
+  }
+
+  if (entry.kind === 'clover') {
+    const typeId =
+      DEFINING_WORLD_PLAZA_CLOVER_LOOT_KIND_TO_ITEM_TYPE_ID[entry.cloverKind];
     const definition = resolvingWorldPlazaInventoryItemTypeDefinition(typeId);
 
     return definition?.rarity ?? 'basic';

@@ -2,6 +2,7 @@
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { recordingWorldPlazaHerbariumCloverStudied } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import {
   checkingWorldLongGrassSearchEligibility,
@@ -228,6 +229,8 @@ export function usingWorldPlazaLongGrassSearchInteraction({
 
           return;
         }
+
+        recordingWorldPlazaHerbariumCloverStudied(lootKind);
 
         const searchedTileKey = formattingWorldPlazaClearedLongGrassTileKey(
           entry.tileX,

@@ -1,3 +1,7 @@
+import { LABELING_PLAZA_HERBARIUM_CLOVER_LUCKY_EFFECTS_LOCKED_TEASER } from '@/components/home/domains/definingPlazaHerbariumCloverGuideConstants';
+import { DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumCloverStudyTier';
+import { resolvingPlazaHerbariumCloverLuckyEffectStatRows } from '@/components/home/domains/resolvingPlazaHerbariumCloverLuckyEffectStatRows';
+import { gettingWorldPlazaHerbariumCloverStudyCountSnapshot } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import type {
   DefiningWorldPlazaEntityBuffEffect,
   DefiningWorldPlazaEntityBuffRollModifier,
@@ -154,12 +158,19 @@ export function resolvingWorldPlazaEntityBuffHudBonusDetailLines(
       return ['Asleep'];
     case 'incapacitate_stun':
       return ['Stunned'];
-    case 'lucky_while_held':
-      return [
-        'Disease chance halved',
-        'Safer damage rolls',
-        'Stronger damage dealt',
-        'Better rare finds',
-      ];
+    case 'lucky_while_held': {
+      const cloverStudyCount =
+        gettingWorldPlazaHerbariumCloverStudyCountSnapshot();
+
+      if (
+        cloverStudyCount >= DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_FULL_COUNT
+      ) {
+        return resolvingPlazaHerbariumCloverLuckyEffectStatRows().map(
+          (row) => `${row.label}: ${row.value}`
+        );
+      }
+
+      return [LABELING_PLAZA_HERBARIUM_CLOVER_LUCKY_EFFECTS_LOCKED_TEASER];
+    }
   }
 }

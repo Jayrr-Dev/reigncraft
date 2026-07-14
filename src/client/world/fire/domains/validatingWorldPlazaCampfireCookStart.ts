@@ -44,7 +44,7 @@ export function validatingWorldPlazaCampfireCookStart({
     );
 
   if (!recipe) {
-    return { ok: false, message: 'You need raw meat to cook.' };
+    return { ok: false, message: 'You need something to cook.' };
   }
 
   const capacityProbe = addingInventoryItemWithStacking(

@@ -1,4 +1,4 @@
-import { DEFINING_PLAZA_HERBARIUM_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumStudyTier';
+import { DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
 import { DEFINING_PLAZA_LAPIDARY_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaLapidaryStudyTier';
 import { resolvingWorldPlazaFlowerItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFlowerSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
@@ -63,7 +63,7 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel flower Study', () =
       {
         isEquipped: false,
         flowerStudyCountsBySpeciesId: {
-          calendula: DEFINING_PLAZA_HERBARIUM_STUDY_FULL_COUNT,
+          calendula: DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_FULL_COUNT,
         },
       }
     );
@@ -164,7 +164,7 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel flower Study', () =
       {
         isEquipped: false,
         flowerStudyCountsBySpeciesId: {
-          calendula: DEFINING_PLAZA_HERBARIUM_STUDY_FULL_COUNT,
+          calendula: DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_FULL_COUNT,
         },
       }
     );

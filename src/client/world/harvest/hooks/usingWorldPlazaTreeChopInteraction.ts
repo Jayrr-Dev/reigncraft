@@ -1,7 +1,7 @@
 'use client';
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { droppingWorldPlazaTreeChopWoodGroundItem } from '@/components/world/harvest/domains/droppingWorldPlazaTreeChopWoodGroundItem';
+import { droppingWorldPlazaTreeChopGroundItem } from '@/components/world/harvest/domains/droppingWorldPlazaTreeChopWoodGroundItem';
 import type { ListingWorldPlazaTreesInInteractionRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaTreesInInteractionRange';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import {
@@ -9,11 +9,13 @@ import {
   choppingWorldPlazaLocalTreeLayer,
   formattingWorldPlazaChoppedTreeTileKey,
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import { resolvingWorldPlazaTreeChopBonusDrop } from '@/components/world/harvest/domains/resolvingWorldPlazaTreeChopBonusDrop';
 import {
   checkingWorldPlazaChoppedTreesUseLocalPersistence,
   DEFINING_WORLD_PLAZA_CHOPPED_TREES_QUERY_KEY_ROOT,
 } from '@/components/world/harvest/hooks/usingWorldPlazaChoppedTrees';
 import { choppingWorldHarvestDevvitTreeLayer } from '@/components/world/harvest/repositories/callingWorldHarvestDevvitApi';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, type RefObject } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
@@ -171,19 +173,42 @@ export function usingWorldPlazaTreeChopInteraction({
           return;
         }
 
-        const dropResult = await droppingWorldPlazaTreeChopWoodGroundItem({
+        const dropResult = await droppingWorldPlazaTreeChopGroundItem({
           localPersistenceOwnerId,
           redditUserId,
           saveSlotIndex,
           tileX: entry.tileX,
           tileY: entry.tileY,
           layer: standingSurfaceLayer,
-          woodQuantity: chopResult.woodQuantity ?? 0,
+          itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+          quantity: chopResult.woodQuantity ?? 0,
           playerPosition,
         });
 
         if (dropResult.outcome === 'failed') {
           showingGameplayHudToast('Could not drop wood from this tree.');
+        }
+
+        const bonusDrop = resolvingWorldPlazaTreeChopBonusDrop(
+          entry.tree.variant
+        );
+
+        if (bonusDrop) {
+          const bonusDropResult = await droppingWorldPlazaTreeChopGroundItem({
+            localPersistenceOwnerId,
+            redditUserId,
+            saveSlotIndex,
+            tileX: entry.tileX,
+            tileY: entry.tileY,
+            layer: standingSurfaceLayer,
+            itemTypeId: bonusDrop.itemTypeId,
+            quantity: bonusDrop.quantity,
+            playerPosition,
+          });
+
+          if (bonusDropResult.outcome === 'failed') {
+            showingGameplayHudToast('Could not drop loot from this tree.');
+          }
         }
 
         onTreeChopLayerSucceeded?.();
