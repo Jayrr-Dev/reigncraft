@@ -1,13 +1,17 @@
+import { describe, expect, it } from 'vitest';
 import {
+  checkingWorldLongGrassBunchAnchorSpawnsAtTileIndex,
   checkingWorldLongGrassPlacementAtTileIndex,
   formattingWorldLongGrassSpriteUrl,
+  listingWorldLongGrassBunchMemberOffsets,
+  resolvingWorldLongGrassBunchAnchorAtTileIndex,
   resolvingWorldLongGrassFacingAtTileIndex,
   resolvingWorldLongGrassSizeVariantAtTileIndex,
   seedingWorldLongGrassUnitFromTileIndex,
+  WORLD_LONG_GRASS_BUNCH_MIN_TILE_COUNT,
   WORLD_LONG_GRASS_PLACEMENT_SEED_SALT,
   WORLD_LONG_GRASS_VARIANT_SEED_SALT,
 } from './worldLongGrassPlacement';
-import { describe, expect, it } from 'vitest';
 
 describe('worldLongGrassPlacement', () => {
   it('returns stable unit floats for the same tile', () => {
@@ -38,8 +42,8 @@ describe('worldLongGrassPlacement', () => {
     const modulus = 32;
     const placements = new Map<string, boolean>();
 
-    for (let tileY = 0; tileY < 20; tileY += 1) {
-      for (let tileX = 0; tileX < 20; tileX += 1) {
+    for (let tileY = 0; tileY < 40; tileY += 1) {
+      for (let tileX = 0; tileX < 40; tileX += 1) {
         const key = `${tileX},${tileY}`;
         placements.set(
           key,
@@ -48,8 +52,8 @@ describe('worldLongGrassPlacement', () => {
       }
     }
 
-    for (let tileY = 0; tileY < 20; tileY += 1) {
-      for (let tileX = 0; tileX < 20; tileX += 1) {
+    for (let tileY = 0; tileY < 40; tileY += 1) {
+      for (let tileX = 0; tileX < 40; tileX += 1) {
         const key = `${tileX},${tileY}`;
         expect(
           checkingWorldLongGrassPlacementAtTileIndex(tileX, tileY, modulus)
@@ -59,7 +63,61 @@ describe('worldLongGrassPlacement', () => {
 
     const placedCount = [...placements.values()].filter(Boolean).length;
     expect(placedCount).toBeGreaterThan(0);
-    expect(placedCount).toBeLessThan(400);
+    expect(placedCount).toBeLessThan(1600);
+  });
+
+  it('spawns grass in multi-tile bunches, never isolated singles', () => {
+    const modulus = 32;
+
+    for (let tileY = 0; tileY < 48; tileY += 1) {
+      for (let tileX = 0; tileX < 48; tileX += 1) {
+        if (
+          !checkingWorldLongGrassPlacementAtTileIndex(tileX, tileY, modulus)
+        ) {
+          continue;
+        }
+
+        const hasGrassNeighbor = [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+        ].some(([dx, dy]) =>
+          checkingWorldLongGrassPlacementAtTileIndex(
+            tileX + dx,
+            tileY + dy,
+            modulus
+          )
+        );
+
+        expect(hasGrassNeighbor).toBe(true);
+      }
+    }
+  });
+
+  it('uses bunch sizes of at least the configured minimum', () => {
+    const modulus = 32;
+
+    for (let tileY = 0; tileY < 48; tileY += 8) {
+      for (let tileX = 0; tileX < 48; tileX += 8) {
+        const { anchorX, anchorY } =
+          resolvingWorldLongGrassBunchAnchorAtTileIndex(tileX, tileY, modulus);
+
+        if (
+          !checkingWorldLongGrassBunchAnchorSpawnsAtTileIndex(
+            anchorX,
+            anchorY,
+            modulus
+          )
+        ) {
+          continue;
+        }
+
+        expect(
+          listingWorldLongGrassBunchMemberOffsets(anchorX, anchorY).length
+        ).toBeGreaterThanOrEqual(WORLD_LONG_GRASS_BUNCH_MIN_TILE_COUNT);
+      }
+    }
   });
 
   it('resolves size and facing variants from tile seed', () => {

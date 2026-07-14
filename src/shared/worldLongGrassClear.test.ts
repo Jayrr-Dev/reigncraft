@@ -1,13 +1,15 @@
-import {
-  checkingWorldLongGrassClearEligibility,
-  computingWorldLongGrassClearMutation,
-} from './worldLongGrassClear';
 import { describe, expect, it } from 'vitest';
+import {
+  checkingWorldLongGrassSearchEligibility,
+  computingWorldLongGrassEatMutation,
+  computingWorldLongGrassSearchMutation,
+  parsingWorldLongGrassTileState,
+} from './worldLongGrassClear';
 
 describe('worldLongGrassClear', () => {
   it('rejects search when the player is out of range', () => {
     expect(
-      checkingWorldLongGrassClearEligibility({
+      checkingWorldLongGrassSearchEligibility({
         tileX: 10,
         tileY: 10,
         playerX: 0,
@@ -16,29 +18,48 @@ describe('worldLongGrassClear', () => {
     ).toEqual({ outcome: 'out-of-range' });
   });
 
-  it('rejects search when the tile is already cleared', () => {
+  it('rejects repeat search without removing the grass clump', () => {
     expect(
-      checkingWorldLongGrassClearEligibility({
+      checkingWorldLongGrassSearchEligibility({
         tileX: 4,
         tileY: 4,
         playerX: 4.5,
         playerY: 4.5,
-        existingTileState: { isCleared: true },
+        existingTileState: { isSearched: true },
       })
-    ).toEqual({ outcome: 'already-cleared' });
+    ).toEqual({ outcome: 'already-searched' });
   });
 
-  it('marks a tile cleared when search is eligible', () => {
+  it('marks a tile searched while keeping eat state separate', () => {
     expect(
-      computingWorldLongGrassClearMutation({
+      computingWorldLongGrassSearchMutation({
         tileX: 4,
         tileY: 4,
         playerX: 4.5,
         playerY: 4.5,
       })
     ).toEqual({
-      outcome: 'cleared',
-      nextTileState: { isCleared: true },
+      outcome: 'searched',
+      nextTileState: { isSearched: true },
     });
+  });
+
+  it('marks a tile eaten for wildlife removal', () => {
+    expect(
+      computingWorldLongGrassEatMutation({
+        tileX: 4,
+        tileY: 4,
+        existingTileState: { isSearched: true },
+      })
+    ).toEqual({
+      outcome: 'eaten',
+      nextTileState: { isSearched: true, isEaten: true },
+    });
+  });
+
+  it('migrates legacy cleared saves to searched state', () => {
+    expect(
+      parsingWorldLongGrassTileState(JSON.stringify({ isCleared: true }))
+    ).toEqual({ isSearched: true });
   });
 });

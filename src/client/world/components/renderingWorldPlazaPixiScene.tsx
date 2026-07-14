@@ -109,10 +109,10 @@ import { RenderingWorldPlazaHudToolbarBottomAnchor } from '@/components/world/co
 import { RenderingWorldPlazaLapidaryOverlay } from '@/components/world/components/renderingWorldPlazaLapidaryOverlay';
 import { RenderingWorldPlazaLoreBookOverlay } from '@/components/world/components/renderingWorldPlazaLoreBookOverlay';
 import { RenderingWorldPlazaMechanicsOverlay } from '@/components/world/components/renderingWorldPlazaMechanicsOverlay';
-import { RenderingWorldPlazaPathologyOverlay } from '@/components/world/components/renderingWorldPlazaPathologyOverlay';
 import { RenderingWorldPlazaMobileDebugPanel } from '@/components/world/components/renderingWorldPlazaMobileDebugPanel';
 import { RenderingWorldPlazaMobileLandscapePrompt } from '@/components/world/components/renderingWorldPlazaMobileLandscapePrompt';
 import { RenderingWorldPlazaMobileRollButton } from '@/components/world/components/renderingWorldPlazaMobileRollButton';
+import { RenderingWorldPlazaPathologyOverlay } from '@/components/world/components/renderingWorldPlazaPathologyOverlay';
 import { RenderingWorldPlazaPlayerCombatLockCrosshair } from '@/components/world/components/renderingWorldPlazaPlayerCombatLockCrosshair';
 import type { RenderingWorldPlazaPlayerNameLabelEntry } from '@/components/world/components/renderingWorldPlazaPlayerNameLabels';
 import { RenderingWorldPlazaPlayerNameLabels } from '@/components/world/components/renderingWorldPlazaPlayerNameLabels';
@@ -304,7 +304,7 @@ import { findingWorldPlazaTreeStumpAtGridPoint } from '@/components/world/harves
 import type { ListingWorldPlazaTreeStumpsInStudyRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaTreeStumpsInStudyRange';
 import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import {
-  clearingWorldPlazaLocalLongGrass,
+  eatingWorldPlazaLocalLongGrass,
   formattingWorldPlazaClearedLongGrassTileKey,
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import { formattingWorldPlazaMinedRockTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
@@ -315,7 +315,10 @@ import {
 import { formattingWorldPlazaPickedPebbleTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { markingWorldPlazaLocalTreeStumpStudied } from '@/components/world/harvest/domains/managingWorldPlazaLocalStudiedTreeStumps';
 import { registeringWorldPlazaChoppedTreesVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup';
-import { registeringWorldPlazaClearedLongGrassLookup } from '@/components/world/harvest/domains/registeringWorldPlazaClearedLongGrassLookup';
+import {
+  registeringWorldPlazaClearedLongGrassLookup,
+  registeringWorldPlazaSearchedLongGrassLookup,
+} from '@/components/world/harvest/domains/registeringWorldPlazaClearedLongGrassLookup';
 import { registeringWorldPlazaMinedRocksVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaMinedRocksVisualLayerLookup';
 import { registeringWorldPlazaPickedFlowersLookup } from '@/components/world/harvest/domains/registeringWorldPlazaPickedFlowersLookup';
 import { registeringWorldPlazaPickedPebblesLookup } from '@/components/world/harvest/domains/registeringWorldPlazaPickedPebblesLookup';
@@ -420,6 +423,7 @@ import {
   DEFINING_WORLD_PLAZA_INTERACTABLE_POINTER_HOVER_CURSOR,
 } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerCursorConstants';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
+import { formattingWorldPlazaInteractableLongGrassSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableLongGrassSelectionKey';
 import {
   clearingWorldPlazaInteractableBlockClickSelection,
   selectingWorldPlazaFarmlandTileForClickAction,
@@ -1989,12 +1993,26 @@ function RenderingWorldPlazaPixiSceneConnected({
         Boolean(
           clearedLongGrassStateByTileKey.get(
             formattingWorldPlazaClearedLongGrassTileKey(tileX, tileY)
-          )?.isCleared
+          )?.isEaten
         ) || checkingWildlifeGroundGrassOptimisticIsCleared(tileX, tileY)
     );
 
     return () => {
       registeringWorldPlazaClearedLongGrassLookup(null);
+    };
+  }, [clearedLongGrassStateByTileKey]);
+
+  useEffect(() => {
+    registeringWorldPlazaSearchedLongGrassLookup((tileX, tileY) =>
+      Boolean(
+        clearedLongGrassStateByTileKey.get(
+          formattingWorldPlazaClearedLongGrassTileKey(tileX, tileY)
+        )?.isSearched
+      )
+    );
+
+    return () => {
+      registeringWorldPlazaSearchedLongGrassLookup(null);
     };
   }, [clearedLongGrassStateByTileKey]);
 
@@ -2081,17 +2099,15 @@ function RenderingWorldPlazaPixiSceneConnected({
 
     registeringWildlifeGroundGrassBridge({
       consumeGroundGrass: (tileX, tileY, consumerPosition) => {
-        const clearResult = clearingWorldPlazaLocalLongGrass(
+        const eatResult = eatingWorldPlazaLocalLongGrass(
           localPersistenceOwnerId,
           {
             tileX,
             tileY,
-            playerX: consumerPosition.x,
-            playerY: consumerPosition.y,
           }
         );
 
-        if (clearResult.outcome !== 'cleared') {
+        if (eatResult.outcome !== 'eaten') {
           return false;
         }
 
@@ -2777,6 +2793,12 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const handlingLongGrassSearchComplete = useCallback(
     (entry: Parameters<typeof completingLongGrassSearch>[0]): void => {
+      selectedInteractableBlockKeysRef.current.delete(
+        formattingWorldPlazaInteractableLongGrassSelectionKey(
+          entry.tileX,
+          entry.tileY
+        )
+      );
       void completingLongGrassSearchRef.current(entry);
     },
     []

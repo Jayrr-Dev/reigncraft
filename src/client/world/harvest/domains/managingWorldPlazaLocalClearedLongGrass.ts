@@ -1,11 +1,12 @@
 import { DEFINING_WORLD_PLAZA_CLEARED_LONG_GRASS_LOCAL_STORAGE_KEY_PREFIX } from '@/components/world/harvest/domains/definingWorldPlazaLongGrassSearchConstants';
 import {
-  checkingWorldLongGrassClearEligibility,
-  computingWorldLongGrassClearMutation,
+  checkingWorldLongGrassSearchEligibility,
+  computingWorldLongGrassEatMutation,
+  computingWorldLongGrassSearchMutation,
   formattingWorldLongGrassClearTileKey,
-  parsingWorldLongGrassClearTileState,
-  type CheckingWorldLongGrassClearEligibilityResult,
-  type WorldLongGrassClearTileState,
+  parsingWorldLongGrassTileState,
+  type CheckingWorldLongGrassSearchEligibilityResult,
+  type WorldLongGrassTileState,
 } from '../../../../shared/worldLongGrassClear';
 
 /**
@@ -15,7 +16,7 @@ import {
  */
 
 export type DefiningWorldPlazaClearedLongGrassTileState =
-  WorldLongGrassClearTileState;
+  WorldLongGrassTileState;
 
 type ManagingWorldPlazaLocalClearedLongGrassState = {
   readonly byTileKey: Map<string, DefiningWorldPlazaClearedLongGrassTileState>;
@@ -82,9 +83,7 @@ function loadingWorldPlazaLocalClearedLongGrassState(
 
     for (const [tileKey, state] of Object.entries(parsed)) {
       if (state && typeof state === 'object') {
-        const tileState = parsingWorldLongGrassClearTileState(
-          JSON.stringify(state)
-        );
+        const tileState = parsingWorldLongGrassTileState(JSON.stringify(state));
 
         if (tileState) {
           byTileKey.set(tileKey, tileState);
@@ -133,27 +132,30 @@ export function listingWorldPlazaLocalClearedLongGrassByOwner(
     .byTileKey;
 }
 
-export type ClearingWorldPlazaLocalLongGrassRequest = {
+export type SearchingWorldPlazaLocalLongGrassRequest = {
   readonly tileX: number;
   readonly tileY: number;
   readonly playerX: number;
   readonly playerY: number;
 };
 
-export type ClearingWorldPlazaLocalLongGrassResult =
-  | { readonly outcome: 'cleared' }
-  | Exclude<CheckingWorldLongGrassClearEligibilityResult, { outcome: 'eligible' }>;
+export type SearchingWorldPlazaLocalLongGrassResult =
+  | { readonly outcome: 'searched' }
+  | Exclude<
+      CheckingWorldLongGrassSearchEligibilityResult,
+      { outcome: 'eligible' }
+    >;
 
-export function clearingWorldPlazaLocalLongGrass(
+export function searchingWorldPlazaLocalLongGrass(
   persistenceOwnerId: string,
-  request: ClearingWorldPlazaLocalLongGrassRequest
-): ClearingWorldPlazaLocalLongGrassResult {
+  request: SearchingWorldPlazaLocalLongGrassRequest
+): SearchingWorldPlazaLocalLongGrassResult {
   const state = loadingWorldPlazaLocalClearedLongGrassState(persistenceOwnerId);
   const tileKey = formattingWorldPlazaClearedLongGrassTileKey(
     request.tileX,
     request.tileY
   );
-  const mutation = computingWorldLongGrassClearMutation({
+  const mutation = computingWorldLongGrassSearchMutation({
     tileX: request.tileX,
     tileY: request.tileY,
     playerX: request.playerX,
@@ -161,7 +163,7 @@ export function clearingWorldPlazaLocalLongGrass(
     existingTileState: state.byTileKey.get(tileKey),
   });
 
-  if (mutation.outcome !== 'cleared') {
+  if (mutation.outcome !== 'searched') {
     return mutation;
   }
 
@@ -171,7 +173,75 @@ export function clearingWorldPlazaLocalLongGrass(
     byTileKey: nextByTileKey,
   });
 
-  return { outcome: 'cleared' };
+  return { outcome: 'searched' };
 }
 
-export { checkingWorldLongGrassClearEligibility };
+export type EatingWorldPlazaLocalLongGrassRequest = {
+  readonly tileX: number;
+  readonly tileY: number;
+};
+
+export type EatingWorldPlazaLocalLongGrassResult =
+  | { readonly outcome: 'eaten' }
+  | Exclude<
+      ReturnType<typeof computingWorldLongGrassEatMutation>,
+      { outcome: 'eaten' }
+    >;
+
+export function eatingWorldPlazaLocalLongGrass(
+  persistenceOwnerId: string,
+  request: EatingWorldPlazaLocalLongGrassRequest
+): EatingWorldPlazaLocalLongGrassResult {
+  const state = loadingWorldPlazaLocalClearedLongGrassState(persistenceOwnerId);
+  const tileKey = formattingWorldPlazaClearedLongGrassTileKey(
+    request.tileX,
+    request.tileY
+  );
+  const mutation = computingWorldLongGrassEatMutation({
+    tileX: request.tileX,
+    tileY: request.tileY,
+    existingTileState: state.byTileKey.get(tileKey),
+  });
+
+  if (mutation.outcome !== 'eaten') {
+    return mutation;
+  }
+
+  const nextByTileKey = new Map(state.byTileKey);
+  nextByTileKey.set(tileKey, mutation.nextTileState);
+  persistingWorldPlazaLocalClearedLongGrassState(persistenceOwnerId, {
+    byTileKey: nextByTileKey,
+  });
+
+  return { outcome: 'eaten' };
+}
+
+/** @deprecated Use {@link searchingWorldPlazaLocalLongGrass}. */
+export type ClearingWorldPlazaLocalLongGrassRequest =
+  SearchingWorldPlazaLocalLongGrassRequest;
+
+/** @deprecated Use {@link SearchingWorldPlazaLocalLongGrassResult}. */
+export type ClearingWorldPlazaLocalLongGrassResult =
+  | { readonly outcome: 'cleared' }
+  | Exclude<SearchingWorldPlazaLocalLongGrassResult, { outcome: 'searched' }>
+  | { readonly outcome: 'already-cleared' };
+
+/** @deprecated Use {@link searchingWorldPlazaLocalLongGrass}. */
+export function clearingWorldPlazaLocalLongGrass(
+  persistenceOwnerId: string,
+  request: ClearingWorldPlazaLocalLongGrassRequest
+): ClearingWorldPlazaLocalLongGrassResult {
+  const result = searchingWorldPlazaLocalLongGrass(persistenceOwnerId, request);
+
+  if (result.outcome === 'searched') {
+    return { outcome: 'cleared' };
+  }
+
+  if (result.outcome === 'already-searched') {
+    return { outcome: 'already-cleared' };
+  }
+
+  return result;
+}
+
+export { checkingWorldLongGrassSearchEligibility as checkingWorldLongGrassClearEligibility };

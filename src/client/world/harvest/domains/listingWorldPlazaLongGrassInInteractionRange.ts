@@ -24,7 +24,8 @@ export function listingWorldPlazaLongGrassInInteractionRange(
   const entries: ListingWorldPlazaLongGrassInInteractionRangeEntry[] = [];
 
   for (const selectionKey of selectedInteractableKeys) {
-    const tile = parsingWorldPlazaInteractableLongGrassSelectionKey(selectionKey);
+    const tile =
+      parsingWorldPlazaInteractableLongGrassSelectionKey(selectionKey);
 
     if (!tile) {
       continue;
@@ -35,7 +36,7 @@ export function listingWorldPlazaLongGrassInInteractionRange(
       tile.tileY
     );
 
-    if (clearedLongGrassStateByTileKey?.get(tileKey)?.isCleared) {
+    if (clearedLongGrassStateByTileKey?.get(tileKey)?.isSearched) {
       continue;
     }
 

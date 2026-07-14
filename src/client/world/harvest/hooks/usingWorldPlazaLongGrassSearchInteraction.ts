@@ -4,9 +4,9 @@ import type { DefiningInventoryState } from '@/components/inventory/domains/defi
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import {
-  checkingWorldLongGrassClearEligibility,
-  clearingWorldPlazaLocalLongGrass,
+  checkingWorldLongGrassSearchEligibility,
   formattingWorldPlazaClearedLongGrassTileKey,
+  searchingWorldPlazaLocalLongGrass,
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import type { ListingWorldPlazaLongGrassInInteractionRangeEntry } from '@/components/world/harvest/hooks/usingWorldPlazaLongGrassSearchProgress';
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
@@ -87,9 +87,7 @@ export function usingWorldPlazaLongGrassSearchInteraction({
   const validatingLongGrassSearchStart = useCallback(
     (entry: ListingWorldPlazaLongGrassInInteractionRangeEntry): boolean => {
       if (!persistenceOwnerId) {
-        showingGameplayHudToast(
-          'Grass search is unavailable in this session.'
-        );
+        showingGameplayHudToast('Grass search is unavailable in this session.');
         return false;
       }
 
@@ -107,11 +105,10 @@ export function usingWorldPlazaLongGrassSearchInteraction({
         entry.tileX,
         entry.tileY
       );
-      const itemTypeId = resolvingWorldPlazaCloverItemTypeIdFromLootKind(
-        lootKind
-      );
+      const itemTypeId =
+        resolvingWorldPlazaCloverItemTypeIdFromLootKind(lootKind);
 
-      const rangeCheck = checkingWorldLongGrassClearEligibility({
+      const rangeCheck = checkingWorldLongGrassSearchEligibility({
         tileX: entry.tileX,
         tileY: entry.tileY,
         playerX: playerPosition.x,
@@ -124,8 +121,7 @@ export function usingWorldPlazaLongGrassSearchInteraction({
         return false;
       }
 
-      if (rangeCheck.outcome === 'already-cleared') {
-        showingGameplayHudToast('This grass patch is already cleared.');
+      if (rangeCheck.outcome === 'already-searched') {
         return false;
       }
 
@@ -215,7 +211,7 @@ export function usingWorldPlazaLongGrassSearchInteraction({
 
         notifyingWorldPlazaInventoryItemAdded(quantityAccepted);
 
-        const clearResult = clearingWorldPlazaLocalLongGrass(
+        const searchResult = searchingWorldPlazaLocalLongGrass(
           persistenceOwnerId,
           {
             tileX: entry.tileX,
@@ -225,15 +221,40 @@ export function usingWorldPlazaLongGrassSearchInteraction({
           }
         );
 
-        if (clearResult.outcome !== 'cleared') {
-          if (clearResult.outcome === 'out-of-range') {
+        if (searchResult.outcome !== 'searched') {
+          if (searchResult.outcome === 'out-of-range') {
             showingGameplayHudToast('Move closer to search this grass.');
-          } else if (clearResult.outcome === 'already-cleared') {
-            showingGameplayHudToast('This grass patch is already cleared.');
           }
 
           return;
         }
+
+        const searchedTileKey = formattingWorldPlazaClearedLongGrassTileKey(
+          entry.tileX,
+          entry.tileY
+        );
+
+        queryClient.setQueryData(
+          [
+            DEFINING_WORLD_PLAZA_CLEARED_LONG_GRASS_QUERY_KEY_ROOT,
+            persistenceOwnerId,
+          ],
+          (
+            previous:
+              | ReadonlyMap<string, DefiningWorldPlazaClearedLongGrassTileState>
+              | undefined
+          ) => {
+            const next = new Map(previous ?? []);
+            const existing = next.get(searchedTileKey);
+
+            next.set(searchedTileKey, {
+              ...existing,
+              isSearched: true,
+            });
+
+            return next;
+          }
+        );
 
         void queryClient.invalidateQueries({
           queryKey: [DEFINING_WORLD_PLAZA_CLEARED_LONG_GRASS_QUERY_KEY_ROOT],

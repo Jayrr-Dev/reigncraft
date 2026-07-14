@@ -47,6 +47,10 @@ import {
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemInstanceInspectFields';
 import { checkingWorldPlazaInventoryItemIsRecipePage } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemRecipePage';
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
+import {
+  resolvingWorldPlazaInventoryOreDetailContent,
+  resolvingWorldPlazaInventoryOreDetailReveal,
+} from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryOreDetailReveal';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 import {
   resolvingWorldPlazaInventoryWildlifeMeatDetailContent,
@@ -486,6 +490,25 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
         ),
       })
     : null;
+  const oreSpeciesId = parsingWorldPlazaOreSpeciesIdFromItemTypeId(
+    item.itemTypeId
+  );
+  const oreStudyCount = oreSpeciesId
+    ? (options.oreStudyCountsBySpeciesId?.[oreSpeciesId] ?? 0)
+    : 0;
+  const oreReveal = oreSpeciesId
+    ? resolvingWorldPlazaInventoryOreDetailReveal(oreStudyCount)
+    : null;
+  const oreContent = oreSpeciesId
+    ? resolvingWorldPlazaInventoryOreDetailContent(oreSpeciesId, {
+        studyCount: oreStudyCount,
+        fallbackName: definition.name,
+        fallbackDescription: resolvingWorldPlazaInventoryItemDescription(
+          item.itemTypeId,
+          { fallbackName: definition.name }
+        ),
+      })
+    : null;
   const wildlifeStudyCount = resolvingWildlifeMeatStudyCount(
     foodDefinition?.wildlifeSpeciesId,
     options.studyCountsBySpeciesId
@@ -504,7 +527,8 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       : null;
   const includeGenericMeta =
     (!isWildlifeMeat || Boolean(wildlifeMeatReveal?.showGenericItemMeta)) &&
-    (!flowerSpeciesId || Boolean(flowerReveal?.showGenericItemMeta));
+    (!flowerSpeciesId || Boolean(flowerReveal?.showGenericItemMeta)) &&
+    (!oreSpeciesId || Boolean(oreReveal?.showGenericItemMeta));
   const includeGenericFoodRows = !isWildlifeMeat && !flowerSpeciesId;
   const includeFoodHungerBadge = !isWildlifeMeat && !flowerSpeciesId;
 
@@ -569,9 +593,11 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     ...genericBadges,
     ...(wildlifeMeatContent?.badges ?? []),
     ...(flowerContent?.badges ?? []),
+    ...(oreContent?.badges ?? []),
   ];
   const mergedInfoRows = [
     ...(flowerContent?.infoRows ?? []),
+    ...(oreContent?.infoRows ?? []),
     ...genericInfoRows,
     ...(wildlifeMeatContent?.infoRows ?? []),
   ];
@@ -581,10 +607,12 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     name: definition.name,
     description: flowerSpeciesId
       ? (flowerContent?.description ?? '')
-      : (wildlifeMeatContent?.description ??
-        resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
-          fallbackName: definition.name,
-        })),
+      : oreSpeciesId
+        ? (oreContent?.description ?? '')
+        : (wildlifeMeatContent?.description ??
+          resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
+            fallbackName: definition.name,
+          })),
     durabilityLabel: formattingWorldPlazaInventoryItemDurabilityLabel(item),
     durabilityRatio: durabilitySnapshot?.ratio ?? null,
     badges: mergedBadges,

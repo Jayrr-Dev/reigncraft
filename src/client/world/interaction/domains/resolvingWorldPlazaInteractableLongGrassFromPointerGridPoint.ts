@@ -1,13 +1,17 @@
 import { checkingWorldPlazaLongGrassDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLongGrassDecorationAtTileIndex';
 import { computingWorldPlazaGridChebyshevDistance } from '@/components/world/domains/computingWorldPlazaGridChebyshevDistance';
 import { DEFINING_WORLD_PLAZA_LONG_GRASS_SEARCH_POINTER_CANDIDATE_TILE_SEARCH_RADIUS_TILES } from '@/components/world/harvest/domains/definingWorldPlazaLongGrassSearchConstants';
-import { checkingWorldPlazaRuntimeLongGrassIsCleared } from '@/components/world/harvest/domains/registeringWorldPlazaClearedLongGrassLookup';
+import {
+  checkingWorldPlazaRuntimeLongGrassIsCleared,
+  checkingWorldPlazaRuntimeLongGrassIsSearched,
+} from '@/components/world/harvest/domains/registeringWorldPlazaClearedLongGrassLookup';
 
-export type ResolvingWorldPlazaInteractableLongGrassFromPointerGridPointResult = {
-  readonly tileX: number;
-  readonly tileY: number;
-  readonly distanceTiles: number;
-};
+export type ResolvingWorldPlazaInteractableLongGrassFromPointerGridPointResult =
+  {
+    readonly tileX: number;
+    readonly tileY: number;
+    readonly distanceTiles: number;
+  };
 
 /**
  * Resolves the nearest searchable long-grass clump under the pointer.
@@ -39,6 +43,7 @@ export function resolvingWorldPlazaInteractableLongGrassFromPointerGridPoint(
     ) {
       if (
         checkingWorldPlazaRuntimeLongGrassIsCleared(tileX, tileY) ||
+        checkingWorldPlazaRuntimeLongGrassIsSearched(tileX, tileY) ||
         !checkingWorldPlazaLongGrassDecorationAtTileIndex(tileX, tileY)
       ) {
         continue;

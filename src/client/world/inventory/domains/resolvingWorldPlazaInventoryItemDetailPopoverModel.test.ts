@@ -1,6 +1,8 @@
 import { DEFINING_PLAZA_HERBARIUM_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumStudyTier';
+import { DEFINING_PLAZA_LAPIDARY_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaLapidaryStudyTier';
 import { resolvingWorldPlazaFlowerItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFlowerSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { resolvingWorldPlazaOreItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { resolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailPopoverModel';
 import { describe, expect, it } from 'vitest';
 
@@ -176,5 +178,113 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel flower Study', () =
     expect(
       full?.infoRows.find((row) => row.id === 'flower-diseases')?.value
     ).toMatch(/%/);
+  });
+});
+
+describe('resolvingWorldPlazaInventoryItemDetailPopoverModel ore Study', () => {
+  const ironItemTypeId = resolvingWorldPlazaOreItemTypeIdFromSpeciesId('iron');
+
+  it('hides vein details until studied, then unlocks by tier', () => {
+    const unstudied = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'iron-1',
+        itemTypeId: ironItemTypeId,
+        quantity: 5,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        oreStudyCountsBySpeciesId: { iron: 0 },
+      }
+    );
+
+    expect(unstudied?.description).toBe('');
+    expect(unstudied?.infoRows.some((row) => row.id === 'lapidary-study')).toBe(
+      true
+    );
+    expect(
+      unstudied?.infoRows.some((row) => row.id === 'ore-when-worked')
+    ).toBe(false);
+
+    const fieldNotes = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'iron-1',
+        itemTypeId: ironItemTypeId,
+        quantity: 5,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        oreStudyCountsBySpeciesId: { iron: 1 },
+      }
+    );
+
+    expect(fieldNotes?.description.length).toBeGreaterThan(0);
+    expect(
+      fieldNotes?.infoRows.some((row) => row.id === 'ore-when-worked')
+    ).toBe(false);
+
+    const properties = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'iron-1',
+        itemTypeId: ironItemTypeId,
+        quantity: 5,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        oreStudyCountsBySpeciesId: { iron: 5 },
+      }
+    );
+
+    expect(
+      properties?.infoRows.some((row) => row.id === 'ore-when-worked')
+    ).toBe(true);
+    expect(properties?.infoRows.some((row) => row.id === 'ore-habitat')).toBe(
+      false
+    );
+
+    const habitats = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'iron-1',
+        itemTypeId: ironItemTypeId,
+        quantity: 5,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        oreStudyCountsBySpeciesId: { iron: 15 },
+      }
+    );
+
+    expect(habitats?.infoRows.some((row) => row.id === 'ore-habitat')).toBe(
+      true
+    );
+    expect(
+      habitats?.infoRows.some((row) => row.id.startsWith('ore-vein-label-'))
+    ).toBe(true);
+    expect(
+      habitats?.infoRows.some((row) => row.value.includes('ladder reference'))
+    ).toBe(false);
+
+    const full = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'iron-1',
+        itemTypeId: ironItemTypeId,
+        quantity: 5,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        oreStudyCountsBySpeciesId: {
+          iron: DEFINING_PLAZA_LAPIDARY_STUDY_FULL_COUNT,
+        },
+      }
+    );
+
+    expect(full?.canStudy).toBe(false);
+    expect(
+      full?.infoRows.some((row) => row.value.includes('ladder reference'))
+    ).toBe(true);
   });
 });

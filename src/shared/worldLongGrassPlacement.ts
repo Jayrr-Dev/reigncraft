@@ -19,11 +19,36 @@ export const WORLD_LONG_GRASS_PLACEMENT_SEED_SALT = 1207;
 /** Seed salt for size + facing variant roll. */
 export const WORLD_LONG_GRASS_VARIANT_SEED_SALT = 1208;
 
+/** Seed salt for bunch shape membership. */
+export const WORLD_LONG_GRASS_BUNCH_SHAPE_SEED_SALT = 1210;
+
+/** Minimum tiles per grass bunch (never spawn isolated singles). */
+export const WORLD_LONG_GRASS_BUNCH_MIN_TILE_COUNT = 3;
+
+/** Maximum tiles per grass bunch. */
+export const WORLD_LONG_GRASS_BUNCH_MAX_TILE_COUNT = 6;
+
 const WORLD_LONG_GRASS_FACING_ORDER: readonly WorldLongGrassFacing[] = [
   'n',
   's',
   'e',
   'w',
+];
+
+/** Candidate offsets grown from a bunch anchor (anchor tile always included). */
+const WORLD_LONG_GRASS_BUNCH_CANDIDATE_OFFSETS: readonly (readonly [
+  number,
+  number,
+])[] = [
+  [0, 0],
+  [1, 0],
+  [-1, 0],
+  [0, 1],
+  [0, -1],
+  [1, 1],
+  [-1, -1],
+  [1, -1],
+  [-1, 1],
 ];
 
 /**
@@ -40,7 +65,111 @@ export function seedingWorldLongGrassUnitFromTileIndex(
 }
 
 /**
- * True when a tile passes the long-grass density gate (~1 / modulus of tiles).
+ * Anchor grid step for bunch placement derived from biome density.
+ */
+export function resolvingWorldLongGrassBunchAnchorStep(
+  tileModulus: number
+): number {
+  return Math.max(5, Math.min(8, Math.floor(tileModulus / 4)));
+}
+
+/**
+ * Density gate for bunch anchors (more frequent than legacy per-tile modulus).
+ */
+export function resolvingWorldLongGrassBunchAnchorDensityModulus(
+  tileModulus: number
+): number {
+  return Math.max(4, Math.floor(tileModulus / 4));
+}
+
+/**
+ * Resolves the seeded bunch anchor for any tile coordinate.
+ */
+export function resolvingWorldLongGrassBunchAnchorAtTileIndex(
+  tileX: number,
+  tileY: number,
+  tileModulus: number
+): { readonly anchorX: number; readonly anchorY: number } {
+  const anchorStep = resolvingWorldLongGrassBunchAnchorStep(tileModulus);
+
+  return {
+    anchorX:
+      Math.floor(tileX / anchorStep) * anchorStep + Math.floor(anchorStep / 2),
+    anchorY:
+      Math.floor(tileY / anchorStep) * anchorStep + Math.floor(anchorStep / 2),
+  };
+}
+
+/**
+ * True when a bunch anchor passes the density gate (~1 / modulus of anchors).
+ */
+export function checkingWorldLongGrassBunchAnchorSpawnsAtTileIndex(
+  anchorX: number,
+  anchorY: number,
+  tileModulus: number
+): boolean {
+  const anchorDensityModulus =
+    resolvingWorldLongGrassBunchAnchorDensityModulus(tileModulus);
+
+  if (anchorDensityModulus <= 0) {
+    return false;
+  }
+
+  const unit = seedingWorldLongGrassUnitFromTileIndex(anchorX, anchorY);
+  const scrambled = unit * 9973 + anchorX * 0.017 + anchorY * 0.031;
+  const normalized = scrambled - Math.floor(scrambled);
+
+  return Math.floor(normalized * anchorDensityModulus) === 0;
+}
+
+/**
+ * Lists world tile offsets that belong to one seeded grass bunch.
+ */
+export function listingWorldLongGrassBunchMemberOffsets(
+  anchorX: number,
+  anchorY: number
+): readonly (readonly [number, number])[] {
+  const unit = seedingWorldLongGrassUnitFromTileIndex(
+    anchorX,
+    anchorY,
+    WORLD_LONG_GRASS_BUNCH_SHAPE_SEED_SALT
+  );
+  const bunchSize =
+    WORLD_LONG_GRASS_BUNCH_MIN_TILE_COUNT +
+    Math.floor(
+      unit *
+        (WORLD_LONG_GRASS_BUNCH_MAX_TILE_COUNT -
+          WORLD_LONG_GRASS_BUNCH_MIN_TILE_COUNT +
+          1)
+    );
+
+  const rankedOffsets = [...WORLD_LONG_GRASS_BUNCH_CANDIDATE_OFFSETS].sort(
+    (offsetA, offsetB) => {
+      const seedA = seedingWorldLongGrassUnitFromTileIndex(
+        anchorX + offsetA[0],
+        anchorY + offsetA[1],
+        WORLD_LONG_GRASS_BUNCH_SHAPE_SEED_SALT + 1
+      );
+      const seedB = seedingWorldLongGrassUnitFromTileIndex(
+        anchorX + offsetB[0],
+        anchorY + offsetB[1],
+        WORLD_LONG_GRASS_BUNCH_SHAPE_SEED_SALT + 1
+      );
+
+      return seedA - seedB;
+    }
+  );
+
+  const anchorOffset = rankedOffsets.find(
+    ([dx, dy]) => dx === 0 && dy === 0
+  ) ?? [0, 0];
+  const otherOffsets = rankedOffsets.filter(([dx, dy]) => dx !== 0 || dy !== 0);
+
+  return [anchorOffset, ...otherOffsets].slice(0, bunchSize);
+}
+
+/**
+ * True when a tile belongs to a seeded long-grass bunch.
  */
 export function checkingWorldLongGrassPlacementAtTileIndex(
   tileX: number,
@@ -51,11 +180,26 @@ export function checkingWorldLongGrassPlacementAtTileIndex(
     return false;
   }
 
-  const unit = seedingWorldLongGrassUnitFromTileIndex(tileX, tileY);
-  const scrambled = unit * 9973 + tileX * 0.017 + tileY * 0.031;
-  const normalized = scrambled - Math.floor(scrambled);
+  const { anchorX, anchorY } = resolvingWorldLongGrassBunchAnchorAtTileIndex(
+    tileX,
+    tileY,
+    tileModulus
+  );
 
-  return Math.floor(normalized * tileModulus) === 0;
+  if (
+    !checkingWorldLongGrassBunchAnchorSpawnsAtTileIndex(
+      anchorX,
+      anchorY,
+      tileModulus
+    )
+  ) {
+    return false;
+  }
+
+  return listingWorldLongGrassBunchMemberOffsets(anchorX, anchorY).some(
+    ([offsetX, offsetY]) =>
+      anchorX + offsetX === tileX && anchorY + offsetY === tileY
+  );
 }
 
 /**
