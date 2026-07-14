@@ -51,6 +51,7 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeVitalsBarConstants';
 import { drawingWildlifeFairyGlowOrbOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeFairyGlowOrbOnGraphics';
 import { resolvingWildlifeFairyHoverOffsetPx } from '@/components/world/wildlife/domains/resolvingWildlifeFairyHoverOffsetPx';
+import { resolvingWildlifeInstanceMaxStaminaRatio } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
 import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
 import type { Graphics, Sprite } from 'pixi.js';
@@ -395,6 +396,10 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
           isImmortal: checkingWildlifeSpeciesIsImmortal(species),
           healthRatio,
           staminaRatio: instance.staminaState.staminaRatio,
+          maxStaminaRatio: resolvingWildlifeInstanceMaxStaminaRatio(
+            instance,
+            species
+          ),
           showHungerCircle:
             checkingWildlifeInstanceIsOwnedPet(instance) &&
             checkingWorldPlazaGenerationFeatureEnabled(

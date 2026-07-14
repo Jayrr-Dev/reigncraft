@@ -93,6 +93,7 @@ import {
 import { resolvingWildlifeFairyLightSources } from '@/components/world/wildlife/domains/resolvingWildlifeFairyLightSources';
 import {
   resolvingWildlifeInstanceCollisionRadiusGrid,
+  resolvingWildlifeInstanceMaxStaminaRatio,
   resolvingWildlifeInstanceSizeScale,
 } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
@@ -1015,7 +1016,8 @@ export function RenderingWildlifeLayer({
             )}
             healthRatio={healthRatio}
             staminaRatio={quantizingWildlifeRenderVitalsRatio(
-              instance.staminaState.staminaRatio
+              instance.staminaState.staminaRatio,
+              resolvingWildlifeInstanceMaxStaminaRatio(instance, species)
             )}
             hungerRatio={quantizingWildlifeRenderVitalsRatio(
               instance.hungerState.hungerRatio

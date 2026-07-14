@@ -36,6 +36,12 @@ export const LABELING_WILDLIFE_PET_ROSTER_STATUS_DECEASED = 'Deceased' as const;
 /** Fallback name when the companion was never named. */
 export const LABELING_WILDLIFE_PET_ROSTER_UNNAMED = 'Unnamed' as const;
 
+/**
+ * Poll cadence while the companions panel is open so Alive/Deceased and HP
+ * track the live wildlife instance (same ballpark as the companion modal).
+ */
+export const DEFINING_WILDLIFE_PET_ROSTER_PANEL_LIVE_REFRESH_INTERVAL_MS = 400;
+
 /** Data attribute on the portaled roster root. */
 export const DEFINING_WILDLIFE_PET_ROSTER_PANEL_DATA_ATTRIBUTE =
   'data-plaza-pet-roster-panel' as const;

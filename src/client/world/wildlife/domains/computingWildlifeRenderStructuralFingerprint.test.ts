@@ -12,4 +12,9 @@ describe('quantizingWildlifeRenderVitalsRatio', () => {
     expect(quantizingWildlifeRenderVitalsRatio(-0.5)).toBe(0);
     expect(quantizingWildlifeRenderVitalsRatio(1.5)).toBe(1);
   });
+
+  it('normalizes apex stamina against its raised cap before bucketing', () => {
+    expect(quantizingWildlifeRenderVitalsRatio(1.3, 1.3)).toBe(1);
+    expect(quantizingWildlifeRenderVitalsRatio(0.65, 1.3)).toBe(0.5);
+  });
 });

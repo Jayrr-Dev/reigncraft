@@ -1,6 +1,7 @@
 import { checkingWorldPlazaLongGrassDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLongGrassDecorationAtTileIndex';
 import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import { formattingWorldPlazaClearedLongGrassTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
+import { checkingWorldPlazaRuntimeLongGrassIsCleared } from '@/components/world/harvest/domains/registeringWorldPlazaClearedLongGrassLookup';
 import { parsingWorldPlazaInteractableLongGrassSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableLongGrassSelectionKey';
 
 /** One long-grass clump whose search popover was opened by a click. */
@@ -37,6 +38,10 @@ export function listingWorldPlazaLongGrassInInteractionRange(
     );
 
     if (clearedLongGrassStateByTileKey?.get(tileKey)?.isSearched) {
+      continue;
+    }
+
+    if (checkingWorldPlazaRuntimeLongGrassIsCleared(tile.tileX, tile.tileY)) {
       continue;
     }
 

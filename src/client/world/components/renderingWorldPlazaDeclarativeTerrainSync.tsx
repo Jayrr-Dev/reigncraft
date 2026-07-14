@@ -500,9 +500,38 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
   ]);
 
   useEffect(() => {
-    void preloadingWorldPlazaTerrainTextureAssetManifest().then(() => {
-      initializingWorldPlazaBuiltinAnimationClips();
-    });
+    let isCancelled = false;
+    let retryTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    const preloadingTerrainTexturesWithRetry = async (
+      attempt: number
+    ): Promise<void> => {
+      try {
+        await preloadingWorldPlazaTerrainTextureAssetManifest();
+
+        if (!isCancelled) {
+          initializingWorldPlazaBuiltinAnimationClips();
+        }
+      } catch {
+        if (isCancelled || attempt >= 5) {
+          return;
+        }
+
+        retryTimeoutId = setTimeout(() => {
+          void preloadingTerrainTexturesWithRetry(attempt + 1);
+        }, 400 * attempt);
+      }
+    };
+
+    void preloadingTerrainTexturesWithRetry(1);
+
+    return () => {
+      isCancelled = true;
+
+      if (retryTimeoutId !== null) {
+        clearTimeout(retryTimeoutId);
+      }
+    };
   }, []);
 
   useEffect(() => {

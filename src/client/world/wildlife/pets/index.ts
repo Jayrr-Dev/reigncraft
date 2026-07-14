@@ -176,6 +176,7 @@ export {
 export { writingWildlifePetRosterToStorage } from '@/components/world/wildlife/pets/domains/writingWildlifePetRosterToStorage';
 
 export {
+  findingWildlifeInstanceByPetId,
   formattingWildlifePetInstanceId,
   spawningWildlifeActivePetNearOwner,
 } from '@/components/world/wildlife/pets/domains/spawningWildlifeActivePetNearOwner';
@@ -187,6 +188,12 @@ export {
 } from '@/components/world/wildlife/pets/domains/syncingWildlifePetBondToRoster';
 
 export {
+  resolvingWildlifePetRosterPetsWithLiveVitals,
+  resolvingWildlifePetRosterPetsWithLiveVitalsFromStore,
+  resolvingWildlifePetRosterRecordWithLiveVitals,
+} from '@/components/world/wildlife/pets/domains/resolvingWildlifePetRosterPetsWithLiveVitals';
+
+export {
   fetchingPlazaPetsMultiplayerRoster,
   savingPlazaPetsMultiplayerRoster,
 } from '@/components/world/wildlife/pets/repositories/callingPlazaPetsDevvitApi';
@@ -194,6 +201,8 @@ export {
 export { RenderingWildlifePetModal } from '@/components/world/wildlife/pets/components/renderingWildlifePetModal';
 
 export { RenderingWildlifePetNameDialog } from '@/components/world/wildlife/pets/components/renderingWildlifePetNameDialog';
+
+export { RenderingWildlifePetRosterPanel } from '@/components/world/wildlife/pets/components/renderingWildlifePetRosterPanel';
 
 export { RenderingWorldPlazaDevModePetControls } from '@/components/world/wildlife/pets/components/renderingWorldPlazaDevModePetControls';
 
@@ -212,3 +221,13 @@ export {
   usingWildlifePetModalState,
   type UsingWildlifePetModalStateResult,
 } from '@/components/world/wildlife/pets/hooks/usingWildlifePetModalState';
+
+export {
+  usingWildlifePetRosterPanelLivePets,
+  type UsingWildlifePetRosterPanelLivePetsParams,
+} from '@/components/world/wildlife/pets/hooks/usingWildlifePetRosterPanelLivePets';
+
+export {
+  usingWildlifePetRosterPanelVisibleState,
+  type UsingWildlifePetRosterPanelVisibleStateResult,
+} from '@/components/world/wildlife/pets/hooks/usingWildlifePetRosterPanelVisibleState';

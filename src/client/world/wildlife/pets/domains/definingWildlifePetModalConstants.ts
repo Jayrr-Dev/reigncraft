@@ -245,6 +245,10 @@ export const DEFINING_WILDLIFE_PET_MODAL_COMMAND_GRID_CLASS_NAME =
 export const DEFINING_WILDLIFE_PET_MODAL_CARE_GRID_CLASS_NAME =
   'grid grid-cols-2 gap-1.5' as const;
 
+/** Feed-only care row before Accepting unlocks Heal beside it. */
+export const DEFINING_WILDLIFE_PET_MODAL_CARE_GRID_FEED_ONLY_CLASS_NAME =
+  'grid grid-cols-1 gap-1.5' as const;
+
 /** Advanced stat chip grid (shared attribute grid chrome). */
 export const DEFINING_WILDLIFE_PET_MODAL_ADVANCED_STAT_GRID_CLASS_NAME =
   STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_GRID_CLASS_NAME;
@@ -365,7 +369,7 @@ export type DefiningWildlifePetModalVitalDefinition = {
   readonly iconId: string;
 };
 
-/** Ordered vitals shown once basicUi unlocks (hunger waits for Friendly / hungerUi). */
+/** Ordered vitals: full set at Accepting / basicUi; hunger alone at named Familiar / hungerUi. */
 export const DEFINING_WILDLIFE_PET_MODAL_VITAL_REGISTRY: readonly DefiningWildlifePetModalVitalDefinition[] =
   [
     { id: 'health', label: 'Health', iconId: 'solar:heart-pulse-bold' },

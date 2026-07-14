@@ -29,7 +29,7 @@ export type ResolvingWildlifePetRosterPanelRow = {
   statusLabel: string;
   healthText: string;
   loyaltyText: string;
-  /** Compact hunger label once Friendly (`hungerUi`); null when locked or unknown. */
+  /** Compact hunger label once Familiar (`hungerUi`); null when locked or unknown. */
   hungerText: string | null;
   /** In-game days since the companion was acquired. */
   daysText: string;

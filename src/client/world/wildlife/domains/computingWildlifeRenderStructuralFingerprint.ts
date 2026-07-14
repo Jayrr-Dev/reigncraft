@@ -7,16 +7,23 @@
  * @module components/world/wildlife/domains/computingWildlifeRenderStructuralFingerprint
  */
 
+import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeInstanceMaxStaminaRatio } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 
 /** Wildlife stamina bars are 24px wide, so finer updates cannot be seen. */
 const COMPUTING_WILDLIFE_RENDER_VITALS_RATIO_BUCKET_COUNT = 24;
 
 /**
  * Quantizes a vitals ratio to the smallest visible bar-width change.
+ * Pass `maxRatio` when the raw value can exceed 1 (apex / fleet stamina caps).
  */
-export function quantizingWildlifeRenderVitalsRatio(ratio: number): number {
-  const clampedRatio = Math.max(0, Math.min(1, ratio));
+export function quantizingWildlifeRenderVitalsRatio(
+  ratio: number,
+  maxRatio = 1
+): number {
+  const fillRatio = ratio / Math.max(maxRatio, Number.EPSILON);
+  const clampedRatio = Math.max(0, Math.min(1, fillRatio));
 
   return (
     Math.round(
@@ -34,6 +41,12 @@ export function computingWildlifeRenderStructuralFingerprint(
   let fingerprint = `${instances.length}`;
 
   for (const instance of instances) {
+    const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
+    const maxStaminaRatio = resolvingWildlifeInstanceMaxStaminaRatio(
+      instance,
+      species ?? undefined
+    );
+
     fingerprint +=
       `|${instance.instanceId}` +
       `:${instance.speciesId}` +
@@ -50,7 +63,8 @@ export function computingWildlifeRenderStructuralFingerprint(
           : 0
       )}` +
       `:${quantizingWildlifeRenderVitalsRatio(
-        instance.staminaState.staminaRatio
+        instance.staminaState.staminaRatio,
+        maxStaminaRatio
       )}` +
       `:${quantizingWildlifeRenderVitalsRatio(
         instance.hungerState.hungerRatio

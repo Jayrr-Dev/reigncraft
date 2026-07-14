@@ -162,8 +162,8 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     blockHighlightColor: 0x3f9040,
     speckColor: 0x24602a,
     speckTileModulus: 9,
-    flowerColors: null,
-    flowerTileModulus: null,
+    flowerColors: [0xff6b9d, 0xffb347, 0xc77dff, 0xffffff, 0xffd966],
+    flowerTileModulus: 100,
     longGrassTileModulus: 54,
     skyBackdropClassName:
       'bg-gradient-to-b from-emerald-500 via-lime-200 to-[#2f7a33]',

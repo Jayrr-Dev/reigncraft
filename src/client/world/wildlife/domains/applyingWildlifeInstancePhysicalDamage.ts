@@ -14,7 +14,6 @@ import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domai
 import { notifyingWildlifeOmegaWolfSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeOmegaWolfSfxEvent';
 import { notifyingWildlifeSpeciesSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeSpeciesSfxEvent';
 import { notifyingWildlifeVocalSfxOnDeath } from '@/components/world/wildlife/domains/notifyingWildlifeVocalSfxOnDeath';
-import { applyingWildlifePetSoulsave } from '@/components/world/wildlife/pets/domains/applyingWildlifePetSoulsave';
 import {
   resolvingWildlifeObeseIncomingPhysicalDamageOptions,
   resolvingWildlifeObeseJumpAttackDamageOptions,
@@ -24,6 +23,8 @@ import { resolvingWildlifePlayerOutgoingPhysicalDamageOptions } from '@/componen
 import { resolvingWildlifeSleepAmbushHealthDamageOptions } from '@/components/world/wildlife/domains/resolvingWildlifeSleepAmbushHealthDamageOptions';
 import type { ResolvingWildlifeSteeringHazardSampling } from '@/components/world/wildlife/domains/resolvingWildlifeSteeringStep';
 import { wakingWildlifeFromSleepHit } from '@/components/world/wildlife/domains/wakingWildlifeFromSleepHit';
+import { applyingWildlifePetSoulsave } from '@/components/world/wildlife/pets/domains/applyingWildlifePetSoulsave';
+import { syncingWildlifePetDeathToRoster } from '@/components/world/wildlife/pets/domains/syncingWildlifePetBondToRoster';
 
 export type ApplyingWildlifeInstancePhysicalDamageWakeContext = {
   threatPoint: DefiningWorldPlazaWorldPoint;
@@ -144,6 +145,8 @@ export function applyingWildlifeInstancePhysicalDamage({
 
     if (soulsaveResult.intercepted) {
       nextInstance = soulsaveResult.instance;
+    } else {
+      syncingWildlifePetDeathToRoster(nextInstance, nowMs);
     }
   }
 

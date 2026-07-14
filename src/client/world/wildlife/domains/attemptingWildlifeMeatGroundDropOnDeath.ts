@@ -1,5 +1,4 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import { checkingWildlifeInstanceIsOwnedPersistentPet } from '@/components/world/wildlife/domains/checkingWildlifeInstanceIsOwnedPet';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { droppingWildlifeMeatGroundItem } from '@/components/world/wildlife/domains/droppingWildlifeMeatGroundItem';
@@ -34,10 +33,7 @@ export function attemptingWildlifeMeatGroundDropOnDeath(
   meatDropContext: DefiningWildlifeMeatDropContext | null | undefined,
   killContext?: DefiningWildlifeMeatDropKillContext | null
 ): DefiningWildlifeInstance {
-  if (
-    instance.isDead &&
-    checkingWildlifeInstanceIsOwnedPersistentPet(instance)
-  ) {
+  if (instance.isDead && instance.petBond) {
     syncingWildlifePetDeathToRoster(instance, killContext?.nowMs ?? Date.now());
   }
 

@@ -10,10 +10,7 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import {
-  gettingWildlifeInstance,
-  type ManagingWildlifeInstanceStore,
-} from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
+import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { checkingWildlifePetRosterRecordIsLivingActive } from '@/components/world/wildlife/pets/domains/checkingWildlifePetRosterDeployable';
 import {
   initializingWildlifePetRosterStore,
@@ -23,6 +20,7 @@ import {
   subscribingWildlifePetRoster,
 } from '@/components/world/wildlife/pets/domains/managingWildlifePetRosterStore';
 import {
+  findingWildlifeInstanceByPetId,
   formattingWildlifePetInstanceId,
   spawningWildlifeActivePetNearOwner,
 } from '@/components/world/wildlife/pets/domains/spawningWildlifeActivePetNearOwner';
@@ -181,9 +179,9 @@ export function usingWildlifeActivePetSpawn({
 
     const syncingVitals = (): void => {
       for (const record of activeLivingRecords) {
-        const instance = gettingWildlifeInstance(
+        const instance = findingWildlifeInstanceByPetId(
           wildlifeStoreRef.current,
-          formattingWildlifePetInstanceId(record.petId)
+          record.petId
         );
 
         if (!instance) {
@@ -194,6 +192,7 @@ export function usingWildlifeActivePetSpawn({
       }
     };
 
+    syncingVitals();
     const intervalId = window.setInterval(
       syncingVitals,
       USING_WILDLIFE_ACTIVE_PET_VITALS_SYNC_INTERVAL_MS

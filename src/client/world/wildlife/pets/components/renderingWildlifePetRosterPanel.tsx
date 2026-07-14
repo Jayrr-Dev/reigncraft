@@ -9,6 +9,7 @@
 
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { RenderingWildlifePetSpeciesPortrait } from '@/components/world/wildlife/pets/components/renderingWildlifePetSpeciesPortrait';
 import {
   DEFINING_WILDLIFE_PET_ROSTER_PANEL_DATA_ATTRIBUTE,
@@ -38,39 +39,39 @@ import {
   STYLING_WILDLIFE_PET_ROSTER_STATUS_DECEASED_CLASS_NAME,
 } from '@/components/world/wildlife/pets/domains/definingWildlifePetRosterPanelConstants';
 import {
-  readingWildlifePetRosterSnapshot,
-  subscribingWildlifePetRoster,
-} from '@/components/world/wildlife/pets/domains/managingWildlifePetRosterStore';
-import {
   resolvingWildlifePetRosterPanelCountLabel,
   resolvingWildlifePetRosterPanelRows,
 } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetRosterPanelRows';
-import { useMemo, useSyncExternalStore, type SyntheticEvent } from 'react';
+import { usingWildlifePetRosterPanelLivePets } from '@/components/world/wildlife/pets/hooks/usingWildlifePetRosterPanelLivePets';
+import { useMemo, type RefObject, type SyntheticEvent } from 'react';
 import { createPortal } from 'react-dom';
 
 export type RenderingWildlifePetRosterPanelProps = {
   readonly isOpen: boolean;
   readonly onClose: () => void;
+  readonly wildlifeStoreRef: RefObject<ManagingWildlifeInstanceStore>;
 };
 
 /**
  * Centered companions list: portrait, Alive/Deceased, name, species, HP, loyalty.
+ * While open, rows track live wildlife vitals so death flips without a reopen.
  */
 export function RenderingWildlifePetRosterPanel({
   isOpen,
   onClose,
+  wildlifeStoreRef,
 }: RenderingWildlifePetRosterPanelProps): React.JSX.Element | null {
-  const rosterSnapshot = useSyncExternalStore(
-    subscribingWildlifePetRoster,
-    readingWildlifePetRosterSnapshot
-  );
+  const livePets = usingWildlifePetRosterPanelLivePets({
+    isOpen,
+    wildlifeStoreRef,
+  });
   const rows = useMemo(
-    () => resolvingWildlifePetRosterPanelRows(rosterSnapshot.pets),
-    [rosterSnapshot.pets]
+    () => resolvingWildlifePetRosterPanelRows(livePets),
+    [livePets]
   );
   const countLabel = useMemo(
-    () => resolvingWildlifePetRosterPanelCountLabel(rosterSnapshot.pets),
-    [rosterSnapshot.pets]
+    () => resolvingWildlifePetRosterPanelCountLabel(livePets),
+    [livePets]
   );
 
   const stoppingPlazaWalkPointerPropagation = (

@@ -31,6 +31,7 @@ import { formattingWorldPlazaPickedFlowerTileKey } from '@/components/world/harv
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { formattingWorldPlazaPickedPebbleTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { checkingWorldPlazaLocalTreeStumpStudied } from '@/components/world/harvest/domains/managingWorldPlazaLocalStudiedTreeStumps';
+import { checkingWorldPlazaRuntimeLongGrassIsCleared } from '@/components/world/harvest/domains/registeringWorldPlazaClearedLongGrassLookup';
 import { checkingWorldPlazaInteractionLabelTileInPlayerProximity } from '@/components/world/interaction/domains/checkingWorldPlazaInteractionLabelTileInPlayerProximity';
 import { DEFINING_WORLD_PLAZA_INTERACTION_LABEL_PROXIMITY_RADIUS_TILES } from '@/components/world/interaction/domains/definingWorldPlazaInteractionLabelProximityConstants';
 import { formattingWorldPlazaInteractableBlockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableBlockSelectionKey';
@@ -234,6 +235,7 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
       if (
         !params.clearedLongGrassStateByTileKey?.get(longGrassTileKey)
           ?.isSearched &&
+        !checkingWorldPlazaRuntimeLongGrassIsCleared(tileX, tileY) &&
         checkingWorldPlazaLongGrassDecorationAtTileIndex(tileX, tileY)
       ) {
         keys.add(

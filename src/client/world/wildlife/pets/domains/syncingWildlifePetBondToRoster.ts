@@ -71,7 +71,14 @@ export function syncingWildlifePetInstanceVitalsToRoster(
 ): void {
   const petBond = instance.petBond;
 
-  if (!petBond?.isPersistent) {
+  if (!petBond) {
+    return;
+  }
+
+  const roster = readingWildlifePetRosterSnapshot();
+  const existingRecord = roster.pets.find((pet) => pet.petId === petBond.petId);
+
+  if (!existingRecord) {
     return;
   }
 
@@ -102,6 +109,9 @@ export function syncingWildlifePetInstanceVitalsToRoster(
 /**
  * Permanent companion death: keep the roster record (revive later), set HP 0,
  * undeploy so a living-active slot opens for a new Familiar bond.
+ *
+ * Requires an existing roster row so a stale live `isPersistent` flag cannot
+ * leave the Companions panel stuck on Alive.
  */
 export function syncingWildlifePetDeathToRoster(
   instance: DefiningWildlifeInstance,
@@ -109,14 +119,19 @@ export function syncingWildlifePetDeathToRoster(
 ): void {
   const petBond = instance.petBond;
 
-  if (!petBond?.isPersistent) {
+  if (!petBond) {
     return;
   }
 
   const roster = readingWildlifePetRosterSnapshot();
   const existingRecord = roster.pets.find((pet) => pet.petId === petBond.petId);
+
+  if (!existingRecord) {
+    return;
+  }
+
   const deathCauseKind =
-    existingRecord?.deathCauseKind ??
+    existingRecord.deathCauseKind ??
     instance.healthState.lastDamageKind ??
     null;
 

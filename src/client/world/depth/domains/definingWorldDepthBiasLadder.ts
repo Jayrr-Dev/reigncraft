@@ -128,6 +128,13 @@ export const DEFINING_WORLD_DEPTH_FLOWER_DECORATION_LAYER_Z_INDEX =
 export const DEFINING_WORLD_DEPTH_STONE_DECORATION_LAYER_Z_INDEX =
   DEFINING_WORLD_DEPTH_WATER_SURFACE_LAYER_Z_INDEX - 4;
 
+/**
+ * Long-grass clumps sit above all floor chunks, below stone/flower overlays.
+ * Per-tile depth bias is added on top so clumps still sort among themselves.
+ */
+export const DEFINING_WORLD_DEPTH_LONG_GRASS_DECORATION_LAYER_Z_INDEX =
+  DEFINING_WORLD_DEPTH_WATER_SURFACE_LAYER_Z_INDEX - 5;
+
 /** Claim-mode plot overlay on the floor layer. */
 export const DEFINING_WORLD_DEPTH_CLAIM_MODE_PLOT_OVERLAY_FLOOR_Z_INDEX = 1_000_000;
 

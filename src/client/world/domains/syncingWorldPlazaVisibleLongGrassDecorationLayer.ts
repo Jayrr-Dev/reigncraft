@@ -1,12 +1,12 @@
-import { computingWorldDepthSortKey } from '@/components/world/depth';
+import { DEFINING_WORLD_DEPTH_LONG_GRASS_DECORATION_LAYER_Z_INDEX } from '@/components/world/depth';
 import { checkingWorldPlazaLongGrassDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLongGrassDecorationAtTileIndex';
 import { computingWorldPlazaTerrainElevationScreenOffsetPxAtTileIndex } from '@/components/world/domains/computingWorldPlazaTerrainElevationScreenOffsetPxAtTileIndex';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
-import { DEFINING_WORLD_PLAZA_LONG_GRASS_DISPLAY_SCALE } from '@/components/world/domains/definingWorldPlazaLongGrassConstants';
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX,
 } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
+import { DEFINING_WORLD_PLAZA_LONG_GRASS_DISPLAY_SCALE } from '@/components/world/domains/definingWorldPlazaLongGrassConstants';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domains/formattingWorldPlazaTileIndexCacheKey';
 import { listingWorldPlazaTileIndicesInBounds } from '@/components/world/domains/listingWorldPlazaTileIndicesInBounds';
@@ -14,13 +14,13 @@ import { peekingWorldPlazaLongGrassSpriteTextureForUrl } from '@/components/worl
 import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
 import { checkingWorldPlazaGrassFloorTileIsBurntAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBurntGrassFloorTileFillColorAtTileIndex';
 import { checkingWorldPlazaRuntimeLongGrassIsCleared } from '@/components/world/harvest/domains/registeringWorldPlazaClearedLongGrassLookup';
+import type { Container } from 'pixi.js';
+import { Sprite, Texture } from 'pixi.js';
 import {
   formattingWorldLongGrassSpriteUrl,
   resolvingWorldLongGrassFacingAtTileIndex,
   resolvingWorldLongGrassSizeVariantAtTileIndex,
 } from '../../../shared/worldLongGrassPlacement';
-import type { Container } from 'pixi.js';
-import { Sprite } from 'pixi.js';
 
 /**
  * Incrementally syncs depth-sorted long-grass sprite clumps for a visible window.
@@ -30,6 +30,12 @@ import { Sprite } from 'pixi.js';
 
 /** Default build budget per sync call. */
 export const SYNCING_WORLD_PLAZA_LONG_GRASS_DECORATION_DEFAULT_BUILD_BUDGET = 24;
+
+/**
+ * Tiny per-tile bias so neighboring clumps keep relative iso order while staying
+ * inside the floor-decoration z band above batched floor chunks.
+ */
+const SYNCING_WORLD_PLAZA_LONG_GRASS_TILE_DEPTH_BIAS_SCALE = 0.001;
 
 export type SyncingWorldPlazaVisibleLongGrassDecorationLayerInput = {
   readonly parentContainer: Container;
@@ -89,17 +95,28 @@ function listingWorldPlazaVisibleLongGrassCandidatesInBounds(
   return candidates;
 }
 
+function checkingWorldPlazaLongGrassTextureIsRenderable(
+  texture: Texture | null
+): texture is Texture {
+  return (
+    texture !== null &&
+    texture !== Texture.EMPTY &&
+    texture.width > 0 &&
+    texture.height > 0
+  );
+}
+
 function applyingWorldPlazaLongGrassTileToSprite(
   sprite: Sprite,
   instance: DefiningWorldPlazaLongGrassTileInstance
-): void {
+): boolean {
   const texture = peekingWorldPlazaLongGrassSpriteTextureForUrl(
     instance.spriteUrl
   );
 
-  if (!texture) {
+  if (!checkingWorldPlazaLongGrassTextureIsRenderable(texture)) {
     sprite.visible = false;
-    return;
+    return false;
   }
 
   sprite.texture = texture;
@@ -130,10 +147,11 @@ function applyingWorldPlazaLongGrassTileToSprite(
   sprite.scale.set(textureScale);
   sprite.position.set(screenPoint.x, screenPoint.y + surfaceLiftY);
   sprite.zIndex =
-    computingWorldDepthSortKey({
-      x: instance.tileX,
-      y: instance.tileY,
-    }) + 0.15;
+    DEFINING_WORLD_DEPTH_LONG_GRASS_DECORATION_LAYER_Z_INDEX +
+    (instance.tileX + instance.tileY) *
+      SYNCING_WORLD_PLAZA_LONG_GRASS_TILE_DEPTH_BIAS_SCALE;
+
+  return true;
 }
 
 export function syncingWorldPlazaVisibleLongGrassDecorationLayer(
@@ -153,6 +171,7 @@ export function syncingWorldPlazaVisibleLongGrassDecorationLayer(
   const neededKeys = new Set<string>();
   const missingCandidates: DefiningWorldPlazaLongGrassTileInstance[] = [];
   let didMutateChildren = false;
+  let hasPendingTexture = false;
 
   for (const candidate of candidates) {
     const cacheKey = formattingWorldPlazaTileIndexCacheKey(
@@ -165,7 +184,14 @@ export function syncingWorldPlazaVisibleLongGrassDecorationLayer(
 
     if (existingSprite) {
       const previousZIndex = existingSprite.zIndex;
-      applyingWorldPlazaLongGrassTileToSprite(existingSprite, candidate);
+      const didApplyTexture = applyingWorldPlazaLongGrassTileToSprite(
+        existingSprite,
+        candidate
+      );
+
+      if (!didApplyTexture) {
+        hasPendingTexture = true;
+      }
 
       if (existingSprite.zIndex !== previousZIndex) {
         didMutateChildren = true;
@@ -189,8 +215,19 @@ export function syncingWorldPlazaVisibleLongGrassDecorationLayer(
   });
 
   const propsToBuild = missingCandidates.slice(0, buildBudget);
+  let propsBuilt = 0;
 
   for (const candidate of propsToBuild) {
+    const texture = peekingWorldPlazaLongGrassSpriteTextureForUrl(
+      candidate.spriteUrl
+    );
+
+    if (!checkingWorldPlazaLongGrassTextureIsRenderable(texture)) {
+      // Do not create invisible placeholders. Stay incomplete until textures load.
+      hasPendingTexture = true;
+      continue;
+    }
+
     const cacheKey = formattingWorldPlazaTileIndexCacheKey(
       candidate.tileX,
       candidate.tileY
@@ -202,6 +239,7 @@ export function syncingWorldPlazaVisibleLongGrassDecorationLayer(
     input.parentContainer.addChild(sprite);
     input.spriteByKey.set(cacheKey, sprite);
     didMutateChildren = true;
+    propsBuilt += 1;
   }
 
   for (const [cacheKey, sprite] of input.spriteByKey.entries()) {
@@ -218,8 +256,8 @@ export function syncingWorldPlazaVisibleLongGrassDecorationLayer(
   }
 
   return {
-    isComplete: missingCandidates.length <= buildBudget,
-    propsBuilt: propsToBuild.length,
+    isComplete: !hasPendingTexture && missingCandidates.length <= buildBudget,
+    propsBuilt,
     needsChildSort: didMutateChildren,
   };
 }

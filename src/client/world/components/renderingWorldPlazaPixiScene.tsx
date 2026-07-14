@@ -7785,6 +7785,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           <RenderingWildlifePetRosterPanel
             isOpen={isPetRosterPanelOpen}
             onClose={closingPetRosterPanel}
+            wildlifeStoreRef={wildlifeStoreRef}
           />
         </RenderingWorldPlazaGameplayHud>
       </div>

@@ -31,7 +31,6 @@ import {
   ensuringWorldPlazaVisibleFlowerDecorationLayer,
   updatingWorldPlazaVisibleFlowerDecorationLayer,
 } from '@/components/world/domains/syncingWorldPlazaVisibleFlowerDecorationLayer';
-import { syncingWorldPlazaVisibleLongGrassDecorationLayer } from '@/components/world/domains/syncingWorldPlazaVisibleLongGrassDecorationLayer';
 import {
   advancingWorldPlazaVisibleLavaOverlayAnimation,
   clearingWorldPlazaLavaPoolLightSources,
@@ -40,6 +39,7 @@ import {
   updatingWorldPlazaVisibleLavaOverlayLayer,
   type SyncingWorldPlazaVisibleLavaOverlayLayerState,
 } from '@/components/world/domains/syncingWorldPlazaVisibleLavaOverlayLayer';
+import { syncingWorldPlazaVisibleLongGrassDecorationLayer } from '@/components/world/domains/syncingWorldPlazaVisibleLongGrassDecorationLayer';
 import {
   ensuringWorldPlazaVisibleStoneDecorationLayer,
   updatingWorldPlazaVisibleStoneDecorationLayer,
@@ -709,7 +709,10 @@ export function registeringWorldPlazaTerrainLayers(
           });
 
         for (const grassSprite of state.spriteByKey.values()) {
-          grassSprite.visible = context.isFloorRenderLayerEnabled;
+          grassSprite.visible =
+            context.isFloorRenderLayerEnabled &&
+            grassSprite.texture.width > 0 &&
+            grassSprite.texture.height > 0;
         }
 
         return {

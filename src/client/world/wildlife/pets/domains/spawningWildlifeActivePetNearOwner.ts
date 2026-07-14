@@ -37,10 +37,22 @@ export function formattingWildlifePetInstanceId(petId: string): string {
   return `wildlife:pet:${petId}`;
 }
 
-function findingWildlifeInstanceByPetId(
+/**
+ * Finds a live wildlife instance by bonded pet id. Tamed-in-world companions
+ * keep their wild spawn instance id, so callers must not assume
+ * {@link formattingWildlifePetInstanceId}.
+ */
+export function findingWildlifeInstanceByPetId(
   store: ManagingWildlifeInstanceStore,
   petId: string
 ): DefiningWildlifeInstance | null {
+  const formattedId = formattingWildlifePetInstanceId(petId);
+  const byFormattedId = store.instances.get(formattedId);
+
+  if (byFormattedId?.petBond?.petId === petId) {
+    return byFormattedId;
+  }
+
   for (const instance of store.instances.values()) {
     if (instance.petBond?.petId === petId) {
       return instance;

@@ -50,7 +50,8 @@ export const DEFINING_WILDLIFE_PET_LOYALTY_TIER_REGISTRY: readonly DefiningWildl
       tierId: 'familiar',
       displayName: 'Familiar',
       minLoyalty: 50,
-      capabilities: ['namable', 'persistent', 'allied'],
+      // hungerUi: Companion panel Feed + hunger bar after the pet is named.
+      capabilities: ['namable', 'persistent', 'allied', 'hungerUi'],
     },
     {
       tierId: 'accepting',
@@ -62,7 +63,7 @@ export const DEFINING_WILDLIFE_PET_LOYALTY_TIER_REGISTRY: readonly DefiningWildl
       tierId: 'friendly',
       displayName: 'Friendly',
       minLoyalty: 198,
-      capabilities: ['commandsStayFollow', 'hungerUi'],
+      capabilities: ['commandsStayFollow'],
     },
     {
       tierId: 'trusting',

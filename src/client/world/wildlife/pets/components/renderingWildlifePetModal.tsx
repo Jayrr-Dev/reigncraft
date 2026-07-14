@@ -35,6 +35,7 @@ import {
   DEFINING_WILDLIFE_PET_MODAL_BACKDROP_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_BODY_STACK_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_CARE_GRID_CLASS_NAME,
+  DEFINING_WILDLIFE_PET_MODAL_CARE_GRID_FEED_ONLY_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_CLOSE_BUTTON_ARIA_LABEL,
   DEFINING_WILDLIFE_PET_MODAL_CLOSE_BUTTON_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_COMMAND_BUTTON_CLASS_NAME,
@@ -133,14 +134,17 @@ function computingStatBarWidthPercent(ratio: number): string {
 function listingWildlifePetModalVitalRows(
   instance: DefiningWildlifeInstance,
   loyalty: number,
-  tierDisplayName: string
+  tierDisplayName: string,
+  options: {
+    readonly includeFullVitals: boolean;
+    readonly includeHunger: boolean;
+  }
 ): readonly RenderingWildlifePetModalVitalRow[] {
   const healthRatio =
     instance.healthState.baseMaxHealth > 0
       ? instance.healthState.currentHealth / instance.healthState.baseMaxHealth
       : 0;
   const loyaltyRatio = loyalty / DEFINING_WILDLIFE_PET_MAX_LOYALTY;
-  const showsHunger = checkingWildlifePetHasCapability(loyalty, 'hungerUi');
 
   const valuesById: Record<
     DefiningWildlifePetModalVitalId,
@@ -168,9 +172,13 @@ function listingWildlifePetModalVitalRows(
     },
   };
 
-  return DEFINING_WILDLIFE_PET_MODAL_VITAL_REGISTRY.filter(
-    (vital) => vital.id !== 'hunger' || showsHunger
-  ).map((vital) => ({
+  return DEFINING_WILDLIFE_PET_MODAL_VITAL_REGISTRY.filter((vital) => {
+    if (vital.id === 'hunger') {
+      return options.includeHunger;
+    }
+
+    return options.includeFullVitals;
+  }).map((vital) => ({
     id: vital.id,
     label: vital.label,
     iconId: vital.iconId,
@@ -276,11 +284,16 @@ export function RenderingWildlifePetModal({
     capability: Parameters<typeof checkingWildlifePetHasCapability>[1]
   ): boolean => checkingWildlifePetHasCapability(loyalty, capability);
 
+  const hasPermanentName = Boolean(
+    instanceSnapshot.customDisplayName?.trim()
+  );
+  const hasHungerUi = hasCapability('hungerUi') && hasPermanentName;
   const hasBasicUi = hasCapability('basicUi');
   const hasAdvancedStatsUi = hasCapability('advancedStatsUi');
   const hasEquipment = hasCapability('equipment');
   const hasTeachSpells = hasCapability('teachSpells');
   const hasSoulsave = hasCapability('soulsave');
+  const showsCareSection = hasBasicUi || hasHungerUi;
 
   const availableCommandOptions =
     DEFINING_WILDLIFE_PET_MODAL_COMMAND_OPTIONS.filter((option) =>
@@ -317,14 +330,19 @@ export function RenderingWildlifePetModal({
       slot !== null && checkingWorldPlazaInventoryItemIsFood(slot.itemTypeId)
   );
   const canFeedPet =
+    hasHungerUi &&
     feedableFoodSlotIndex >= 0 &&
     checkingWildlifePetNeedsOwnerFeed(instanceSnapshot.hungerState.hungerRatio);
 
-  const vitalRows = hasBasicUi
+  const vitalRows = showsCareSection
     ? listingWildlifePetModalVitalRows(
         instanceSnapshot,
         loyalty,
-        tier.displayName
+        tier.displayName,
+        {
+          includeFullVitals: hasBasicUi,
+          includeHunger: hasHungerUi,
+        }
       )
     : [];
 
@@ -397,7 +415,7 @@ export function RenderingWildlifePetModal({
             </div>
           </div>
 
-          {hasBasicUi ? (
+          {showsCareSection ? (
             <div className={DEFINING_WILDLIFE_PET_MODAL_SECTION_CLASS_NAME}>
               <p
                 className={
@@ -463,36 +481,46 @@ export function RenderingWildlifePetModal({
                 ))}
               </div>
 
-              <div className={DEFINING_WILDLIFE_PET_MODAL_CARE_GRID_CLASS_NAME}>
-                <button
-                  type="button"
-                  className={
-                    DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_CLASS_NAME
-                  }
-                  disabled={!canFeedPet}
-                  onClick={() => onFeed(instanceId, feedableFoodSlotIndex)}
-                >
-                  <Icon
-                    icon="mdi:food-drumstick"
-                    className="size-3.5"
-                    aria-hidden
-                  />
-                  {DEFINING_WILDLIFE_PET_MODAL_FEED_LABEL}
-                </button>
-                <button
-                  type="button"
-                  className={
-                    DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_CLASS_NAME
-                  }
-                  onClick={() => onHeal(instanceId)}
-                >
-                  <Icon
-                    icon="mdi:heart-plus"
-                    className="size-3.5"
-                    aria-hidden
-                  />
-                  {DEFINING_WILDLIFE_PET_MODAL_HEAL_LABEL}
-                </button>
+              <div
+                className={
+                  hasBasicUi
+                    ? DEFINING_WILDLIFE_PET_MODAL_CARE_GRID_CLASS_NAME
+                    : DEFINING_WILDLIFE_PET_MODAL_CARE_GRID_FEED_ONLY_CLASS_NAME
+                }
+              >
+                {hasHungerUi ? (
+                  <button
+                    type="button"
+                    className={
+                      DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_CLASS_NAME
+                    }
+                    disabled={!canFeedPet}
+                    onClick={() => onFeed(instanceId, feedableFoodSlotIndex)}
+                  >
+                    <Icon
+                      icon="mdi:food-drumstick"
+                      className="size-3.5"
+                      aria-hidden
+                    />
+                    {DEFINING_WILDLIFE_PET_MODAL_FEED_LABEL}
+                  </button>
+                ) : null}
+                {hasBasicUi ? (
+                  <button
+                    type="button"
+                    className={
+                      DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_CLASS_NAME
+                    }
+                    onClick={() => onHeal(instanceId)}
+                  >
+                    <Icon
+                      icon="mdi:heart-plus"
+                      className="size-3.5"
+                      aria-hidden
+                    />
+                    {DEFINING_WILDLIFE_PET_MODAL_HEAL_LABEL}
+                  </button>
+                ) : null}
               </div>
             </div>
           ) : null}
