@@ -30,8 +30,12 @@ export function resolvingWildlifeInstancePlayerAggroRadiusGrid(
     instance.aggressionLevel,
     instance.hungerState.driveLevel
   );
+  const usesExpandedOnSightRadius =
+    mayBuildOnSightThreat &&
+    (profile.proximityThreatMode === 'onSight' ||
+      species.aggressionSpawn.alwaysAttacksPlayerOnSight === true);
 
-  if (profile.proximityThreatMode !== 'onSight' || !mayBuildOnSightThreat) {
+  if (!usesExpandedOnSightRadius) {
     return resolvingWildlifeSpeciesAggroRadiusGrid(species);
   }
 

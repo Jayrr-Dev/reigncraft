@@ -27,7 +27,7 @@ export function resolvingWorldPlazaHudToolbarModeBadgesViewportStyles(
   const designScale = DEFINING_WORLD_PLAZA_INVENTORY_HOTBAR_SCALE;
   const layout = DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_LAYOUT;
   const paddingYPx = computingWorldPlazaViewportHudScaledPx(
-    layout.paddingYBasePx,
+    isMobile ? layout.mobilePaddingYBasePx : layout.paddingYBasePx,
     viewportHudScale,
     designScale
   );
@@ -42,7 +42,7 @@ export function resolvingWorldPlazaHudToolbarModeBadgesViewportStyles(
     designScale
   );
   const buttonGapPx = computingWorldPlazaViewportHudScaledPx(
-    layout.buttonGapBasePx,
+    isMobile ? layout.mobileButtonGapBasePx : layout.buttonGapBasePx,
     viewportHudScale,
     designScale
   );

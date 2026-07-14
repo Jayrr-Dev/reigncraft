@@ -6,6 +6,7 @@ import type { DefiningInventoryItem } from '@/components/inventory/domains/defin
 import { resolvingWorldPlazaEquipmentAttackEvModifier } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
+import { checkingWorldPlazaInventoryItemIsWeaponOrTool } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsWeaponOrTool';
 import { computingWorldPlazaInventoryItemResolvedCost } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemResolvedCost';
 import {
   checkingWorldPlazaInventoryItemIsFlowerHerb,
@@ -670,7 +671,9 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
         item.itemTypeId
       ),
       canDrop: definition.isDroppable,
-      canEquip: false,
+      canEquip:
+        !options.isEquipped &&
+        checkingWorldPlazaInventoryItemIsWeaponOrTool(item.itemTypeId),
       canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),
     };
   }
@@ -744,7 +747,9 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       item.itemTypeId
     ),
     canDrop: definition.isDroppable,
-    canEquip: false,
+    canEquip:
+      !options.isEquipped &&
+      checkingWorldPlazaInventoryItemIsWeaponOrTool(item.itemTypeId),
     canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),
   };
 }

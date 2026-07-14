@@ -12,6 +12,7 @@ import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/hea
 import type { DefiningWorldPlazaProjectileTarget } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import type { DefiningWildlifeMeatDropContext } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
+import type { DefiningWildlifeForageEatOverlay } from '@/components/world/wildlife/domains/definingWildlifeForageEatOverlayTypes';
 import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife/domains/definingWildlifeNameTagTypes';
 import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wildlife/domains/definingWildlifeSpeechBubbleTypes';
 import type {
@@ -54,6 +55,10 @@ export type DefiningWildlifeSimulationTickConfig = {
     DefiningWildlifeSpeechBubbleOverlay[]
   >;
   wildlifeNameTagsOutRef?: React.RefObject<DefiningWildlifeNameTagOverlay[]>;
+  /** Live forage / graze eat rings above animals. */
+  wildlifeForageEatOverlaysOutRef?: React.RefObject<
+    DefiningWildlifeForageEatOverlay[]
+  >;
   /** Bumped when visible wildlife name-tag mounts or label metadata changes. */
   wildlifeNameTagsMountRevisionRef?: React.RefObject<number>;
   /** Wildlife instance id under the viewport pointer, if any. */

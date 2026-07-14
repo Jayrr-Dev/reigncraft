@@ -241,6 +241,9 @@ export function RenderingWorldPlazaInventoryBagSlotCell({
         style={{ ...viewportStyles.dragSurfaceStyle, touchAction: 'none' }}
         aria-label={LABELING_INVENTORY_DRAG_ITEM}
         title={slotTitle}
+        onContextMenu={(event) => {
+          event.preventDefault();
+        }}
         {...attributes}
         {...listeners}
       >

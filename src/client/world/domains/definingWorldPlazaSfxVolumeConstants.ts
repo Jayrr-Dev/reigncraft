@@ -16,4 +16,4 @@ export const LABELING_WORLD_PLAZA_SFX_VOLUME_SLIDER = 'SFX volume' as const;
 
 /** SFX volume range input styling (matches music slider). */
 export const STYLING_WORLD_PLAZA_SFX_VOLUME_MIXER_SLIDER_CLASS_NAME =
-  'h-1.5 w-full cursor-pointer appearance-none rounded-full bg-poster-teal/20 accent-poster-gold' as const;
+  'h-1.5 w-full cursor-pointer appearance-none rounded-full bg-poster-teal/20 accent-poster-gold max-md:h-3' as const;

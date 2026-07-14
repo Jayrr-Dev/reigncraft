@@ -7,6 +7,7 @@ import { RenderingWorldPlazaInventoryItemInfoDialog } from '@/components/world/i
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_ICONIFY_ICON,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ATTACH,
+  LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_EQUIP,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_STUDY,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemDetailConstants';
@@ -99,7 +100,7 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
               className={actionTowerClassNames.button}
               onClick={onEquipItem}
             >
-              Equip
+              {LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_EQUIP}
             </button>
           ) : null}
 

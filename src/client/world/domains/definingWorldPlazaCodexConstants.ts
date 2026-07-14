@@ -5,6 +5,7 @@
  */
 
 import {
+  STYLING_WORLD_PLAZA_ACTION_BAR_DROPDOWN_LEFT_ANCHOR_CLASS_NAME,
   STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_ACTIVE_CLASS_NAME,
   STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_BASE_CLASS_NAME,
   STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_INACTIVE_CLASS_NAME,
@@ -102,11 +103,11 @@ export const STYLING_WORLD_PLAZA_ACTION_BAR_CODEX_ANCHOR_CLASS_NAME =
 
 /** Dropdown panel listing codex sections below the action bar. */
 export const STYLING_WORLD_PLAZA_CODEX_MENU_PANEL_CLASS_NAME =
-  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarDropdown} pointer-events-auto absolute left-1/2 top-full z-50 mt-2 flex w-max min-w-[11rem] -translate-x-1/2 flex-col gap-1 p-1.5 font-body` as const;
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarDropdown} ${STYLING_WORLD_PLAZA_ACTION_BAR_DROPDOWN_LEFT_ANCHOR_CLASS_NAME} flex w-max min-w-[11rem] flex-col gap-1 p-1.5 font-body max-md:w-[min(17rem,calc(100vw-0.75rem))] max-md:max-w-[calc(100vw-0.75rem)] max-md:gap-1.5 max-md:p-2` as const;
 
 /** Base classes shared by every codex menu option button. */
 export const STYLING_WORLD_PLAZA_CODEX_MENU_OPTION_BASE_CLASS_NAME =
-  `${STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_BASE_CLASS_NAME} flex items-center gap-2` as const;
+  `${STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_BASE_CLASS_NAME} flex items-center gap-2 max-md:min-h-11 max-md:gap-2.5 max-md:px-3 max-md:py-2` as const;
 
 /** Classes applied to the active codex menu option (none selected in dropdown). */
 export const STYLING_WORLD_PLAZA_CODEX_MENU_OPTION_ACTIVE_CLASS_NAME =

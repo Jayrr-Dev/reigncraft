@@ -8,6 +8,10 @@ import type { DefiningWorldPlazaEntityHealthDamageRollModifierKind } from '@/com
 import { DEFINING_WILDLIFE_TIGER_CHASE_GIVE_UP_WITHOUT_DAMAGE_MS } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import { DEFINING_WILDLIFE_DIFFICULTY_LEVERS } from '@/components/world/wildlife/domains/definingWildlifeDifficultyLevers';
 import { DEFINING_WILDLIFE_FAIRY_ALWAYS_FOLLOW_MAX_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeFairyConstants';
+import {
+  DEFINING_WILDLIFE_DEFAULT_BERRY_FAVORITE_FOOD_ITEM_TYPE_IDS,
+  DEFINING_WILDLIFE_DEFAULT_GRASS_FAVORITE_FOOD_ITEM_TYPE_IDS,
+} from '@/components/world/wildlife/domains/definingWildlifeFavoriteFoodConstants';
 import { resolvingWildlifeMeatCatalogEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import type { DefiningWildlifeSpeciesNameTagConfig } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import { DEFINING_WILDLIFE_OMEGA_WOLF_NAME_TAG_COLOR } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
@@ -51,6 +55,12 @@ export type DefiningWildlifeSpeciesAggressionSpawnConfig = {
    * Default false: they retaliate only after taking damage.
    */
   aggressiveAttacksOnSight?: boolean;
+  /**
+   * Carnivore apex that opens combat as soon as the player enters aggro
+   * radius, even on a normal (non-aggressive) spawn while sated. Tame spawns
+   * still never open combat on sight.
+   */
+  alwaysAttacksPlayerOnSight?: boolean;
 };
 
 /** Per-species bell-curve shift for spawn sleep schedule rolls. */
@@ -1040,6 +1050,12 @@ export type DefiningWildlifeSpeciesDefinition = {
   preyAllowSpeciesIds?: readonly DefiningWildlifeSpeciesId[];
   /** Prey species this predator abandons other targets to hunt on sight. */
   favoritePreySpeciesIds?: readonly DefiningWildlifeSpeciesId[];
+  /**
+   * Ground-food / flora item types this plant-eater rushes even with the
+   * player nearby (berries, grass clumps, dropped stacks). Prefer inventory
+   * type ids; long grass uses `DEFINING_WILDLIFE_GROUND_GRASS_FOOD_ITEM_TYPE_ID`.
+   */
+  favoriteFoodItemTypeIds?: readonly string[];
   /** When set, the animal warns intruders near its spawn anchor before fighting. */
   territory?: DefiningWildlifeSpeciesTerritoryConfig;
   /**
@@ -1163,6 +1179,8 @@ function definingWildlifePassiveFarmSpecies(
     activityPattern,
     aggressionSpawn: { bellCurveMeanShift: -0.45 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 2 },
+    favoriteFoodItemTypeIds:
+      DEFINING_WILDLIFE_DEFAULT_GRASS_FAVORITE_FOOD_ITEM_TYPE_IDS,
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
     stamina: resolvingWildlifeSpeciesStaminaConfig(speciesId),
     hazards: {
@@ -1192,6 +1210,7 @@ type DefiningWildlifeHerbivoreSpeciesOptions = {
   aggroRadiusGrid?: number;
   packShareRadiusGrid?: number;
   territory?: DefiningWildlifeSpeciesTerritoryConfig;
+  favoriteFoodItemTypeIds?: readonly string[];
   hazards?: Partial<DefiningWildlifeSpeciesHazardConfig>;
   vitals: {
     baseMaxHealth: number;
@@ -1238,6 +1257,11 @@ function definingWildlifeHerbivoreSpecies(
         : {}),
     },
     ...(options.territory ? { territory: options.territory } : {}),
+    favoriteFoodItemTypeIds:
+      options.favoriteFoodItemTypeIds ??
+      (options.diet === 'omnivore' || options.diet === 'carnivore'
+        ? undefined
+        : DEFINING_WILDLIFE_DEFAULT_BERRY_FAVORITE_FOOD_ITEM_TYPE_IDS),
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
     stamina: resolvingWildlifeSpeciesStaminaConfig(speciesId),
     hazards: {
@@ -1311,6 +1335,8 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     activityPattern: 'crepuscular',
     aggressionSpawn: { bellCurveMeanShift: -0.35 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 6 },
+    favoriteFoodItemTypeIds:
+      DEFINING_WILDLIFE_DEFAULT_BERRY_FAVORITE_FOOD_ITEM_TYPE_IDS,
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
     stamina: resolvingWildlifeSpeciesStaminaConfig('deer'),
     hazards: {
@@ -1339,6 +1365,8 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     activityPattern: 'diurnal',
     aggressionSpawn: { bellCurveMeanShift: -0.3 },
     aggro: { ...DEFINING_WILDLIFE_DEFAULT_AGGRO, aggroRadiusGrid: 7 },
+    favoriteFoodItemTypeIds:
+      DEFINING_WILDLIFE_DEFAULT_GRASS_FAVORITE_FOOD_ITEM_TYPE_IDS,
     hunger: DEFINING_WILDLIFE_DEFAULT_HUNGER,
     stamina: resolvingWildlifeSpeciesStaminaConfig('zebra'),
     hazards: {
@@ -1860,6 +1888,8 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     aggroRadiusGrid: 5,
     packShareRadiusGrid: 10,
     territory: DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG,
+    favoriteFoodItemTypeIds:
+      DEFINING_WILDLIFE_DEFAULT_GRASS_FAVORITE_FOOD_ITEM_TYPE_IDS,
     hazards: { isColdImmune: true },
     vitals: {
       baseMaxHealth: 110,
@@ -1876,6 +1906,8 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     aggroRadiusGrid: 5,
     aggressionSpawn: { bellCurveMeanShift: 0.3 },
     territory: DEFINING_WILDLIFE_HEAVY_GRAZER_TERRITORY_CONFIG,
+    favoriteFoodItemTypeIds:
+      DEFINING_WILDLIFE_DEFAULT_GRASS_FAVORITE_FOOD_ITEM_TYPE_IDS,
     vitals: {
       baseMaxHealth: 90,
       attackPower: 18,
@@ -1904,6 +1936,8 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       sizeScale: 1.1,
       aggroRadiusGrid: 7,
       packShareRadiusGrid: 10,
+      favoriteFoodItemTypeIds:
+        DEFINING_WILDLIFE_DEFAULT_GRASS_FAVORITE_FOOD_ITEM_TYPE_IDS,
       vitals: {
         baseMaxHealth: 55,
         attackPower: 6,
@@ -1922,6 +1956,8 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       collisionRadiusGrid: 0.42,
       aggroRadiusGrid: 6,
       packShareRadiusGrid: 10,
+      favoriteFoodItemTypeIds:
+        DEFINING_WILDLIFE_DEFAULT_GRASS_FAVORITE_FOOD_ITEM_TYPE_IDS,
       vitals: {
         baseMaxHealth: 65,
         attackPower: 8,
@@ -1939,6 +1975,8 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       sizeScale: 1.08,
       aggroRadiusGrid: 8,
       packShareRadiusGrid: 10,
+      favoriteFoodItemTypeIds:
+        DEFINING_WILDLIFE_DEFAULT_GRASS_FAVORITE_FOOD_ITEM_TYPE_IDS,
       hazards: { isHeatImmune: true },
       vitals: {
         baseMaxHealth: 52,
@@ -1951,6 +1989,8 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   donkey: definingWildlifeHerbivoreSpecies('donkey', 'Donkey', 'donkey', 250, {
     sizeScale: 0.95,
     aggroRadiusGrid: 5,
+    favoriteFoodItemTypeIds:
+      DEFINING_WILDLIFE_DEFAULT_GRASS_FAVORITE_FOOD_ITEM_TYPE_IDS,
     vitals: {
       baseMaxHealth: 45,
       attackPower: 7,
@@ -2455,7 +2495,10 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     massKg: 220,
     temperamentId: 'predator',
     activityPattern: 'diurnal',
-    aggressionSpawn: { bellCurveMeanShift: 0.4 },
+    aggressionSpawn: {
+      bellCurveMeanShift: 0.4,
+      alwaysAttacksPlayerOnSight: true,
+    },
     aggro: {
       ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
       aggroRadiusGrid: 10,

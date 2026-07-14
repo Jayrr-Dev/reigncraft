@@ -34,6 +34,35 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel rarity metadata', (
       'Forgehand Mira'
     );
     expect(model?.infoRows.some((row) => row.id === 'rarity')).toBe(false);
+    expect(model?.canEquip).toBe(true);
+  });
+
+  it('hides Equip when the weapon/tool is already in the reserved slot', () => {
+    const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'axe-1',
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
+        quantity: 1,
+        slotIndex: 0,
+      },
+      { isEquipped: true }
+    );
+
+    expect(model?.canEquip).toBe(false);
+  });
+
+  it('hides Equip for non-equipment items', () => {
+    const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'berry-1',
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED,
+        quantity: 1,
+        slotIndex: 2,
+      },
+      { isEquipped: false }
+    );
+
+    expect(model?.canEquip).toBe(false);
   });
 });
 

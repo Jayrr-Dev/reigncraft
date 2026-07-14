@@ -145,8 +145,8 @@ const DEFINING_WILDLIFE_DOCILE_TREE: DefiningWildlifeBehaviorTreeDefinition = {
       {
         kind: 'sequence',
         children: [
-          { kind: 'condition', conditionId: 'isHungerAtLeastHungry' },
           { kind: 'condition', conditionId: 'hasEdibleGroundFoodNearby' },
+          { kind: 'condition', conditionId: 'isWillingToForageSelectedGroundFood' },
           { kind: 'action', actionId: 'forageGroundFood' },
         ],
       },
@@ -181,8 +181,8 @@ const DEFINING_WILDLIFE_PASSIVE_TREE: DefiningWildlifeBehaviorTreeDefinition = {
       {
         kind: 'sequence',
         children: [
-          { kind: 'condition', conditionId: 'isHungerAtLeastHungry' },
           { kind: 'condition', conditionId: 'hasEdibleGroundFoodNearby' },
+          { kind: 'condition', conditionId: 'isWillingToForageSelectedGroundFood' },
           { kind: 'action', actionId: 'forageGroundFood' },
         ],
       },
@@ -210,6 +210,14 @@ const DEFINING_WILDLIFE_SKITTISH_TREE: DefiningWildlifeBehaviorTreeDefinition =
         {
           kind: 'sequence',
           children: [
+            { kind: 'condition', conditionId: 'hasFavoriteGroundFoodNearby' },
+            { kind: 'condition', conditionId: 'isWillingToForageSelectedGroundFood' },
+            { kind: 'action', actionId: 'forageGroundFood' },
+          ],
+        },
+        {
+          kind: 'sequence',
+          children: [
             { kind: 'condition', conditionId: 'isPlayerTooClose' },
             { kind: 'action', actionId: 'fleeFromThreat' },
           ],
@@ -225,8 +233,8 @@ const DEFINING_WILDLIFE_SKITTISH_TREE: DefiningWildlifeBehaviorTreeDefinition =
         {
           kind: 'sequence',
           children: [
-            { kind: 'condition', conditionId: 'isHungerAtLeastHungry' },
             { kind: 'condition', conditionId: 'hasEdibleGroundFoodNearby' },
+            { kind: 'condition', conditionId: 'isWillingToForageSelectedGroundFood' },
             { kind: 'action', actionId: 'forageGroundFood' },
           ],
         },

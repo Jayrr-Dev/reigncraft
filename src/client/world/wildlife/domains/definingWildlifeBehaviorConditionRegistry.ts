@@ -12,6 +12,7 @@ import { checkingWildlifeAlwaysFollowPlayerWithinRange } from '@/components/worl
 import { checkingWildlifeDocileFollowIsActive } from '@/components/world/wildlife/domains/checkingWildlifeDocileFollowIsActive';
 import { checkingWildlifeHasSeekPack } from '@/components/world/wildlife/domains/checkingWildlifeHasSeekPack';
 import { checkingWildlifeHasSeparationAnxiety } from '@/components/world/wildlife/domains/checkingWildlifeHasSeparationAnxiety';
+import { checkingWildlifeHerbivoreIgnoresPlayerNearFood } from '@/components/world/wildlife/domains/checkingWildlifeHerbivoreIgnoresPlayerNearFood';
 import { checkingWildlifeInstanceHasProvokedWildlifeAggro } from '@/components/world/wildlife/domains/checkingWildlifeInstanceHasProvokedWildlifeAggro';
 import { checkingWildlifeInstanceIsDefendingYoung } from '@/components/world/wildlife/domains/checkingWildlifeInstanceMayDefendYoung';
 import {
@@ -21,8 +22,10 @@ import {
 import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight';
 import { checkingWildlifePlayerOccludedByColumnRock } from '@/components/world/wildlife/domains/checkingWildlifePlayerOccludedByColumnRock';
 import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
+import { checkingWildlifeSelectedGroundFoodIsFavorite } from '@/components/world/wildlife/domains/checkingWildlifeSelectedGroundFoodIsFavorite';
 import { checkingWildlifeShouldDocileApproachReact } from '@/components/world/wildlife/domains/checkingWildlifeShouldDocileApproachReact';
 import { checkingWildlifeSocialHunterMayHunt } from '@/components/world/wildlife/domains/checkingWildlifeSocialHunterMayHunt';
+import { checkingWildlifeSpeciesFavoriteFood } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesFavoriteFood';
 import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
 import { checkingWildlifeIsStalkHuntTemperament } from '@/components/world/wildlife/domains/checkingWildlifeIsStalkHuntTemperament';
 import { checkingWildlifeStalkPackmateMayAttackPrey } from '@/components/world/wildlife/domains/checkingWildlifeStalkPackmateMayAttackPrey';
@@ -43,6 +46,10 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeBehaviorHysteresisConstants';
 import type { DefiningWildlifeBehaviorConditionId } from '@/components/world/wildlife/domains/definingWildlifeBehaviorTreeTypes';
 import {
+  DEFINING_WILDLIFE_FAVORITE_FOOD_DISTANCE_BIAS,
+  DEFINING_WILDLIFE_GROUND_GRASS_FOOD_ITEM_TYPE_ID,
+} from '@/components/world/wildlife/domains/definingWildlifeFavoriteFoodConstants';
+import {
   checkingWildlifePredatorMayAttackPlayer,
   checkingWildlifePredatorMayHuntPrey,
 } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
@@ -52,7 +59,10 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/definingWildlifeStalkPreyTypes';
-import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import type {
+  DefiningWildlifeHungerDriveLevel,
+  DefiningWildlifeInstance,
+} from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import { resolvingWildlifeNearestEdibleGroundFlower } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundFlower';
@@ -261,6 +271,44 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     blackboard.selectedProximityPreyInstanceId !== null,
   hasEdibleGroundFoodNearby: (blackboard) =>
     blackboard.selectedGroundFoodItemId !== null,
+  hasFavoriteGroundFoodNearby: (blackboard) =>
+    checkingWildlifeSelectedGroundFoodIsFavorite(
+      blackboard.species,
+      blackboard.selectedGroundFoodItemId,
+      blackboard.nowMs
+    ),
+  isWillingToForageSelectedGroundFood: (blackboard) => {
+    if (blackboard.selectedGroundFoodItemId === null) {
+      return false;
+    }
+
+    if (
+      checkingWildlifeDriveIsAtLeastHungry(
+        blackboard.instance.hungerState.driveLevel
+      )
+    ) {
+      return true;
+    }
+
+    if (
+      checkingWildlifeSelectedGroundFoodIsFavorite(
+        blackboard.species,
+        blackboard.selectedGroundFoodItemId,
+        blackboard.nowMs
+      )
+    ) {
+      return true;
+    }
+
+    // Peckish plant-eaters finish flora / stacks they already locked onto.
+    return (
+      checkingWildlifeDriveIsAtLeastPeckish(
+        blackboard.instance.hungerState.driveLevel
+      ) &&
+      (blackboard.species.diet === 'herbivore' ||
+        blackboard.species.diet === 'omnivore')
+    );
+  },
   isHealthBelowFleeThreshold: (blackboard) => {
     if (checkingWildlifeSpeciesIsImmortal(blackboard.species)) {
       return false;
@@ -298,6 +346,24 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     if (
       blackboard.species.diet === 'herbivore' &&
       blackboard.instance.aggressionLevel === 'aggressive'
+    ) {
+      return false;
+    }
+
+    // Plant-eaters sometimes stay on berries / dropped food when the player
+    // sprints through. Favorites always hold; other edibles are ~50/50 sticky.
+    // Bump startle above still flees.
+    if (
+      checkingWildlifeHerbivoreIgnoresPlayerNearFood({
+        species: blackboard.species,
+        instanceId: blackboard.instance.instanceId,
+        selectedGroundFoodItemId: blackboard.selectedGroundFoodItemId,
+        isFavoriteFood: checkingWildlifeSelectedGroundFoodIsFavorite(
+          blackboard.species,
+          blackboard.selectedGroundFoodItemId,
+          blackboard.nowMs
+        ),
+      })
     ) {
       return false;
     }
@@ -499,9 +565,19 @@ export function resolvingWildlifeProximityPreyInstanceId(
 }
 
 function checkingWildlifeDriveIsAtLeastHungry(
-  driveLevel: DefiningWildlifeBehaviorBlackboard['instance']['hungerState']['driveLevel']
+  driveLevel: DefiningWildlifeHungerDriveLevel
 ): boolean {
   return driveLevel === 'hungry' || driveLevel === 'starving';
+}
+
+function checkingWildlifeDriveIsAtLeastPeckish(
+  driveLevel: DefiningWildlifeHungerDriveLevel
+): boolean {
+  return (
+    driveLevel === 'peckish' ||
+    driveLevel === 'hungry' ||
+    driveLevel === 'starving'
+  );
 }
 
 function checkingWildlifeSpeciesMayForageGroundFlowers(
@@ -522,35 +598,55 @@ function checkingWildlifeSpeciesMayForageGroundShrubs(
   return species.diet === 'herbivore' || species.diet === 'omnivore';
 }
 
+function applyingWildlifeGroundFoodFavoriteDistanceBias(
+  species: DefiningWildlifeSpeciesDefinition,
+  itemTypeId: string,
+  distanceGrid: number
+): number {
+  if (!checkingWildlifeSpeciesFavoriteFood(species, itemTypeId)) {
+    return distanceGrid;
+  }
+
+  return distanceGrid * DEFINING_WILDLIFE_FAVORITE_FOOD_DISTANCE_BIAS;
+}
+
+function checkingWildlifeMayNoticeGroundFlora(
+  species: DefiningWildlifeSpeciesDefinition,
+  driveLevel: DefiningWildlifeHungerDriveLevel
+): boolean {
+  if (checkingWildlifeDriveIsAtLeastHungry(driveLevel)) {
+    return true;
+  }
+
+  // Peckish plant-eaters still notice flora so they chew grass / shrubs instead
+  // of only abstract-grazing. Favorites keep the stronger distance bias.
+  return (
+    checkingWildlifeDriveIsAtLeastPeckish(driveLevel) &&
+    (species.diet === 'herbivore' || species.diet === 'omnivore')
+  );
+}
+
 function resolvingWildlifeNearestGroundFloraTarget(
   blackboard: DefiningWildlifeBehaviorBlackboard
 ): { readonly groundItemId: string; readonly distanceGrid: number } | null {
-  const mayForagePlant =
-    checkingWildlifeSpeciesMayForageGroundFlowers(blackboard.species) &&
-    checkingWildlifeDriveIsAtLeastHungry(
-      blackboard.instance.hungerState.driveLevel
-    );
-
+  const driveLevel = blackboard.instance.hungerState.driveLevel;
+  const mayForagePlant = checkingWildlifeSpeciesMayForageGroundFlowers(
+    blackboard.species
+  );
   const nearestFlower = mayForagePlant
     ? resolvingWildlifeNearestEdibleGroundFlower(blackboard.instance.position)
     : null;
 
-  const mayForageGrass =
-    checkingWildlifeSpeciesMayForageGroundGrass(blackboard.species) &&
-    checkingWildlifeDriveIsAtLeastHungry(
-      blackboard.instance.hungerState.driveLevel
-    );
-
+  const mayForageGrass = checkingWildlifeSpeciesMayForageGroundGrass(
+    blackboard.species
+  );
   const nearestGrass = mayForageGrass
     ? resolvingWildlifeNearestEdibleGroundGrass(blackboard.instance.position)
     : null;
 
-  const mayForageShrub =
-    checkingWildlifeSpeciesMayForageGroundShrubs(blackboard.species) &&
-    checkingWildlifeDriveIsAtLeastHungry(
-      blackboard.instance.hungerState.driveLevel
-    );
-
+  const mayForageShrub = checkingWildlifeSpeciesMayForageGroundShrubs(
+    blackboard.species
+  );
   const nearestShrub = mayForageShrub
     ? resolvingWildlifeNearestEdibleGroundShrub(blackboard.instance.position)
     : null;
@@ -562,26 +658,46 @@ function resolvingWildlifeNearestGroundFloraTarget(
 
   const candidates: GroundFloraCandidate[] = [];
 
-  if (nearestFlower) {
+  if (
+    nearestFlower &&
+    checkingWildlifeMayNoticeGroundFlora(blackboard.species, driveLevel)
+  ) {
     candidates.push({
       groundItemId: nearestFlower.groundItemId,
-      distanceGrid: nearestFlower.distanceGrid,
+      distanceGrid: applyingWildlifeGroundFoodFavoriteDistanceBias(
+        blackboard.species,
+        nearestFlower.itemTypeId,
+        nearestFlower.distanceGrid
+      ),
     });
   }
 
-  if (nearestGrass) {
+  if (
+    nearestGrass &&
+    checkingWildlifeMayNoticeGroundFlora(blackboard.species, driveLevel)
+  ) {
     candidates.push({
       groundItemId: nearestGrass.groundItemId,
-      distanceGrid: nearestGrass.distanceGrid,
+      distanceGrid: applyingWildlifeGroundFoodFavoriteDistanceBias(
+        blackboard.species,
+        DEFINING_WILDLIFE_GROUND_GRASS_FOOD_ITEM_TYPE_ID,
+        nearestGrass.distanceGrid
+      ),
     });
   }
 
-  if (nearestShrub) {
+  if (
+    nearestShrub &&
+    checkingWildlifeMayNoticeGroundFlora(blackboard.species, driveLevel)
+  ) {
     candidates.push({
       groundItemId: nearestShrub.groundItemId,
-      distanceGrid:
+      distanceGrid: applyingWildlifeGroundFoodFavoriteDistanceBias(
+        blackboard.species,
+        nearestShrub.itemTypeId,
         nearestShrub.distanceGrid *
-        DEFINING_WILDLIFE_GROUND_SHRUB_FLORA_DISTANCE_BIAS,
+          DEFINING_WILDLIFE_GROUND_SHRUB_FLORA_DISTANCE_BIAS
+      ),
     });
   }
 
@@ -622,24 +738,51 @@ export function computingWildlifeSelectedGroundFoodItemId(
 
   const nearestFlora = resolvingWildlifeNearestGroundFloraTarget(blackboard);
 
-  if (!nearestFlora) {
-    return nearestStack?.id ?? null;
+  type GroundFoodCandidate = {
+    readonly groundItemId: string;
+    readonly distanceGrid: number;
+  };
+
+  const candidates: GroundFoodCandidate[] = [];
+
+  if (nearestStack) {
+    const stackDistance = Math.hypot(
+      blackboard.instance.position.x - (nearestStack.gridX + 0.5),
+      blackboard.instance.position.y - (nearestStack.gridY + 0.5)
+    );
+
+    candidates.push({
+      groundItemId: nearestStack.id,
+      distanceGrid: applyingWildlifeGroundFoodFavoriteDistanceBias(
+        blackboard.species,
+        nearestStack.itemTypeId,
+        stackDistance
+      ),
+    });
   }
 
-  if (!nearestStack) {
-    return nearestFlora.groundItemId;
+  if (nearestFlora) {
+    candidates.push({
+      groundItemId: nearestFlora.groundItemId,
+      distanceGrid: nearestFlora.distanceGrid,
+    });
   }
 
-  const stackDistance = Math.hypot(
-    blackboard.instance.position.x - (nearestStack.gridX + 0.5),
-    blackboard.instance.position.y - (nearestStack.gridY + 0.5)
-  );
-
-  if (nearestFlora.distanceGrid < stackDistance) {
-    return nearestFlora.groundItemId;
+  if (candidates.length === 0) {
+    return null;
   }
 
-  return nearestStack.id;
+  let nearest = candidates[0];
+
+  for (let index = 1; index < candidates.length; index += 1) {
+    const candidate = candidates[index];
+
+    if (candidate.distanceGrid < nearest.distanceGrid) {
+      nearest = candidate;
+    }
+  }
+
+  return nearest.groundItemId;
 }
 
 export function resolvingWildlifeNearestHuntablePreyInstanceId(

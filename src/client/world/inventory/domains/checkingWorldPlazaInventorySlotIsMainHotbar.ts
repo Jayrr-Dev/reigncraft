@@ -5,7 +5,6 @@ import {
 
 /**
  * Returns true when the slot belongs to the always-visible main hotbar row.
- * Storage slots (row 2+) cannot be equipped as the active tool.
  *
  * @param slotIndex - Absolute inventory slot index
  */

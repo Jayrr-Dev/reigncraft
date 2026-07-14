@@ -4,6 +4,7 @@
  * @module components/world/domains/definingWorldPlazaMasterVolumeConstants
  */
 
+import { STYLING_WORLD_PLAZA_ACTION_BAR_DROPDOWN_LEFT_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaActionBarConstants';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 
 /** localStorage key for the master volume preference (0–1). */
@@ -29,19 +30,19 @@ export const STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME =
 
 /** Dropdown panel for the master volume mixer below the action bar. */
 export const STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_PANEL_CLASS_NAME =
-  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarDropdown} pointer-events-auto absolute left-1/2 top-full z-50 mt-2 flex w-max min-w-[10rem] max-w-[13rem] -translate-x-1/2 flex-col gap-2 p-3 font-body` as const;
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarDropdown} ${STYLING_WORLD_PLAZA_ACTION_BAR_DROPDOWN_LEFT_ANCHOR_CLASS_NAME} flex w-max min-w-[10rem] max-w-[13rem] flex-col gap-2 p-3 font-body max-md:w-[min(16.5rem,calc(100vw-0.75rem))] max-md:max-w-[calc(100vw-0.75rem)] max-md:gap-2.5 max-md:p-3.5` as const;
 
 /** Label text above the master volume slider. */
 export const STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_LABEL_CLASS_NAME =
-  'text-xs font-semibold text-ink' as const;
+  'text-xs font-semibold text-ink max-md:text-sm' as const;
 
 /** Master volume range input styling. */
 export const STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_SLIDER_CLASS_NAME =
-  'h-1.5 w-full cursor-pointer appearance-none rounded-full bg-poster-teal/20 accent-poster-gold' as const;
+  'h-1.5 w-full cursor-pointer appearance-none rounded-full bg-poster-teal/20 accent-poster-gold max-md:h-3' as const;
 
 /** Settings row label for return-to-home. */
 export const LABELING_WORLD_PLAZA_SETTINGS_EXIT_HOME = 'Home' as const;
 
 /** Settings mixer top row: simple full-width exit-to-home control. */
 export const STYLING_WORLD_PLAZA_SETTINGS_EXIT_HOME_BUTTON_CLASS_NAME =
-  'mb-1 w-full rounded border border-ink/25 bg-parchment px-2 py-2 text-center text-sm font-bold text-ink' as const;
+  'mb-1 w-full rounded border border-ink/25 bg-parchment px-2 py-2 text-center text-sm font-bold text-ink max-md:min-h-11 max-md:py-2.5 max-md:text-base' as const;

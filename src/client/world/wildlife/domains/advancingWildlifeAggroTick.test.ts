@@ -130,6 +130,35 @@ describe('advancingWildlifeAggroTick', () => {
     expect(nextAggro.threats[0]?.threat ?? 0).toBeGreaterThan(0);
   });
 
+  it('locks the player immediately for sunheads on sight while normal and sated', () => {
+    const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.sunhead;
+    const instance = buildingTestWildlifeInstance({
+      speciesId: 'sunhead',
+      aggressionLevel: 'normal',
+      hungerState: {
+        hungerRatio: 0.9,
+        driveLevel: 'sated',
+        lastFedAtMs: null,
+      },
+      // Far from spawn so territory threat is not the engagement path.
+      spawnAnchor: { x: 0.5, y: 0.5, layer: 1 },
+      position: { x: 40, y: 40, layer: 1 },
+    });
+
+    const nextAggro = advancingWildlifeAggroTick({
+      instance,
+      species,
+      nearbyInstances: [],
+      playerPosition: { x: 41, y: 40, layer: 1 },
+      playerUserId: 'player-1',
+      deltaSeconds: 0.05,
+      nowMs: 1000,
+    });
+
+    expect(nextAggro.activeTargetId).toBe('player-1');
+    expect(nextAggro.threats[0]?.threat ?? 0).toBeGreaterThanOrEqual(1.5);
+  });
+
   it('builds on-sight player threat for aggressive chickens beyond tiny species radius', () => {
     const species = DEFINING_WILDLIFE_SPECIES_REGISTRY.chicken;
     const instance = buildingTestWildlifeInstance({

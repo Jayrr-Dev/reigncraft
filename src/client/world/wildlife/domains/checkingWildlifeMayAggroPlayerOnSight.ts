@@ -40,6 +40,15 @@ export function checkingWildlifeMayAggroPlayerOnSight(
     return false;
   }
 
+  if (species.aggressionSpawn.alwaysAttacksPlayerOnSight === true) {
+    return (
+      species.temperamentId === 'predator' ||
+      species.temperamentId === 'ambusher' ||
+      species.temperamentId === 'pack_hunter' ||
+      species.temperamentId === 'stalker'
+    );
+  }
+
   if (!profile.mayAttackPlayerOnSight) {
     return hungerDriveLevel === 'hungry' || hungerDriveLevel === 'starving';
   }

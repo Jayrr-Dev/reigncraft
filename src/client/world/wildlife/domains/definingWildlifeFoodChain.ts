@@ -118,6 +118,10 @@ export function checkingWildlifePredatorMayAttackPlayer(
     return false;
   }
 
+  if (predator.aggressionSpawn.alwaysAttacksPlayerOnSight === true) {
+    return true;
+  }
+
   if (aggressionProfile.mayAttackPlayerOnSight) {
     return true;
   }

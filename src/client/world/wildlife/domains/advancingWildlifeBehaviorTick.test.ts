@@ -217,6 +217,71 @@ describe('advancingWildlifeBehaviorTick', () => {
     expect(intent.mode).toBe('flee');
   });
 
+  it('skittish herbivores keep foraging favorite berries when the player runs', () => {
+    const hungryDeer = buildingBlackboard('deer').instance;
+    const blackboard = buildingBlackboard('deer', {
+      playerPosition: { x: 2, y: 2, layer: 1 },
+      isPlayerRunning: true,
+      instance: {
+        ...hungryDeer,
+        hungerState: {
+          hungerRatio: 0.3,
+          driveLevel: 'hungry',
+          lastFedAtMs: null,
+        },
+      },
+      selectedGroundFoodItemId: 'wildlife-shrub:3,3',
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('forageChase');
+  });
+
+  it('skittish herbivores may still flee from a running player over non-favorite food', () => {
+    const hungryDeer = buildingBlackboard('deer').instance;
+    const blackboard = buildingBlackboard('deer', {
+      playerPosition: { x: 2, y: 2, layer: 1 },
+      isPlayerRunning: true,
+      instance: {
+        ...hungryDeer,
+        // Seeded bravery for this id + grass target lands at/above 0.5.
+        instanceId: 'wildlife:x:0',
+        hungerState: {
+          hungerRatio: 0.3,
+          driveLevel: 'hungry',
+          lastFedAtMs: null,
+        },
+      },
+      selectedGroundFoodItemId: 'wildlife-grass:3,3',
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('flee');
+  });
+
+  it('skittish herbivores rush favorite berries even when only peckish and the player runs', () => {
+    const peckishDeer = buildingBlackboard('deer').instance;
+    const blackboard = buildingBlackboard('deer', {
+      playerPosition: { x: 2, y: 2, layer: 1 },
+      isPlayerRunning: true,
+      instance: {
+        ...peckishDeer,
+        hungerState: {
+          hungerRatio: 0.55,
+          driveLevel: 'peckish',
+          lastFedAtMs: null,
+        },
+      },
+      selectedGroundFoodItemId: 'wildlife-shrub:3,3',
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('forageChase');
+  });
+
   it('skittish temperament ignores a walking player at close range', () => {
     const blackboard = buildingBlackboard('deer', {
       playerPosition: { x: 2, y: 2, layer: 1 },
@@ -262,6 +327,35 @@ describe('advancingWildlifeBehaviorTick', () => {
     const intent = advancingWildlifeBehaviorTick(blackboard);
 
     expect(intent.mode).toBe('territoryWarn');
+  });
+
+  it('sunhead attacks when aggroed on the player while sated', () => {
+    const blackboard = buildingBlackboard('sunhead', {
+      playerPosition: { x: 2, y: 2, layer: 1 },
+      instance: {
+        ...buildingBlackboard('sunhead').instance,
+        aggressionLevel: 'normal',
+        hungerState: {
+          hungerRatio: 0.9,
+          driveLevel: 'sated',
+          lastFedAtMs: null,
+        },
+        aggroState: {
+          threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
+          activeTargetId: 'player-1',
+          lastDamagedAtMs: null,
+          stalkingPreySinceMs: null,
+        },
+      },
+    });
+
+    const intent = advancingWildlifeBehaviorTick(blackboard);
+
+    expect(intent.mode).toBe('attack');
+
+    if (intent.mode === 'attack') {
+      expect(intent.targetInstanceId).toBe('player-1');
+    }
   });
 
   it('retaliator temperament attacks when aggroed on the player', () => {

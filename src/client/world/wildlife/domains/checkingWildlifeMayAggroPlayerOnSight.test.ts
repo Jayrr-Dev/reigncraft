@@ -26,4 +26,20 @@ describe('checkingWildlifeMayAggroPlayerOnSight', () => {
       checkingWildlifeMayAggroPlayerOnSight(wolf, 'aggressive', 'sated')
     ).toBe(true);
   });
+
+  it('allows sunheads to aggro on sight while normal and sated', () => {
+    const sunhead = DEFINING_WILDLIFE_SPECIES_REGISTRY.sunhead;
+
+    expect(
+      checkingWildlifeMayAggroPlayerOnSight(sunhead, 'normal', 'sated')
+    ).toBe(true);
+  });
+
+  it('still blocks tame sunheads from on-sight combat', () => {
+    const sunhead = DEFINING_WILDLIFE_SPECIES_REGISTRY.sunhead;
+
+    expect(
+      checkingWildlifeMayAggroPlayerOnSight(sunhead, 'tame', 'sated')
+    ).toBe(false);
+  });
 });

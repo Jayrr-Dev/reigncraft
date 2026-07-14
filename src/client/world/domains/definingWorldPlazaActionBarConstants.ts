@@ -30,8 +30,16 @@ export const DEFINING_WORLD_PLAZA_ACTION_BAR_ANCHOR_TOP_BASE_PX =
 /** Scale applied to the plaza action bar (1 = legacy size). */
 export const DEFINING_WORLD_PLAZA_ACTION_BAR_SCALE = 1.5 as const;
 
-/** Extra shrink on mobile so the bar clears the status-effect HUD. */
-export const DEFINING_WORLD_PLAZA_ACTION_BAR_MOBILE_SCALE = 1 as const;
+/** Extra scale on mobile for usable finger targets (status HUD still clears). */
+export const DEFINING_WORLD_PLAZA_ACTION_BAR_MOBILE_SCALE = 1.15 as const;
+
+/**
+ * Absolute position shared by left-side action-bar dropdowns (Settings, Guide).
+ * Desktop centers under the button; mobile left-aligns and scrolls so panels
+ * stay inside the narrow Reddit simulator / phone viewport.
+ */
+export const STYLING_WORLD_PLAZA_ACTION_BAR_DROPDOWN_LEFT_ANCHOR_CLASS_NAME =
+  'pointer-events-auto absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2 max-md:left-0 max-md:translate-x-0 max-md:max-h-[min(70dvh,calc(100dvh-7rem))] max-md:overflow-y-auto max-md:overscroll-contain' as const;
 
 /** Base action button edge length in px (Tailwind size-8). */
 export const DEFINING_WORLD_PLAZA_ACTION_BAR_BUTTON_BASE_PX = 32 as const;

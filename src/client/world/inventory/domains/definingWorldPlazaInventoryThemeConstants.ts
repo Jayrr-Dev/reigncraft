@@ -229,7 +229,7 @@ export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_WEAPON_TOOL_CLASS =
 
 /** Drag surface fills the fixed slot. */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_DRAG_SURFACE_CLASS =
-  'relative z-10 flex touch-manipulation items-center justify-center' as const;
+  'relative z-10 flex touch-none select-none items-center justify-center [-webkit-touch-callout:none]' as const;
 
 /** Lucide icon layout inside a hotbar slot (size via viewport styles). */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_ICON_CLASS =
@@ -237,7 +237,7 @@ export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_ICON_CLASS =
 
 /** Pixel PNG inventory icons (nearest-neighbor upscale). */
 export const STYLING_WORLD_PLAZA_INVENTORY_SLOT_IMAGE_ICON_CLASS =
-  'shrink-0 object-contain [image-rendering:pixelated]' as const;
+  'pointer-events-none shrink-0 select-none object-contain [image-rendering:pixelated] [-webkit-touch-callout:none]' as const;
 
 /**
  * Slot durability track: thin centered bar near the bottom edge.

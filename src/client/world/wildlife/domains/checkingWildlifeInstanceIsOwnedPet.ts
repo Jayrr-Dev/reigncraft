@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { checkingWildlifePetHasCapability } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetLoyaltyTier';
 
 /** True when this instance carries any pet bond (curious through bonded). */
 export function checkingWildlifeInstanceIsOwnedPet(
@@ -21,6 +22,21 @@ export function checkingWildlifeInstanceIsOwnedPersistentPet(
   instance: Pick<DefiningWildlifeInstance, 'petBond'>
 ): boolean {
   return Boolean(instance.petBond?.isPersistent);
+}
+
+/**
+ * True when overhead hunger UI should render (Familiar+ `hungerUi`).
+ * Wild animals and pre-Familiar bonds never show the hunger orb.
+ */
+export function checkingWildlifeInstanceShowsHungerUi(
+  instance: Pick<DefiningWildlifeInstance, 'petBond'>
+): boolean {
+  const loyalty = instance.petBond?.loyalty;
+  if (loyalty === undefined) {
+    return false;
+  }
+
+  return checkingWildlifePetHasCapability(loyalty, 'hungerUi');
 }
 
 /**

@@ -121,6 +121,12 @@ export const RenderingWorldPlazaInventoryItemGlyph = memo(
           )}
           style={iconStyle}
           aria-hidden
+          onContextMenu={(event) => {
+            event.preventDefault();
+          }}
+          onDragStart={(event) => {
+            event.preventDefault();
+          }}
         />
       );
     }

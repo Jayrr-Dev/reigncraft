@@ -37,6 +37,7 @@ import {
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT,
+  DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX,
   LABELING_WORLD_PLAZA_INVENTORY_HOTBAR,
   STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
@@ -348,7 +349,7 @@ export function RenderingWorldPlazaInventoryHotbar({
   isFullscreen = false,
   inventoryDropPlacement,
   selectedSlotIndex = null,
-  onSelectHotbarSlot,
+  onSelectHotbarSlot: _onSelectHotbarSlot,
   onEatHotbarSlot,
   onStudyHotbarSlot,
   onAttachRecipePageHotbarSlot,
@@ -572,6 +573,19 @@ export function RenderingWorldPlazaInventoryHotbar({
     [inventoryDropPlacement, state]
   );
 
+  const handlingEquipHotbarSlot = useCallback(
+    (slotIndex: number): void => {
+      if (slotIndex === DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX) {
+        return;
+      }
+
+      moveItem(slotIndex, DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX);
+      setOpenItemDetailSlotIndex(null);
+      setOpenBagHotbarSlotIndex(null);
+    },
+    [moveItem]
+  );
+
   useEffect(() => {
     if (openBagHotbarSlotIndex === null) {
       return;
@@ -615,7 +629,7 @@ export function RenderingWorldPlazaInventoryHotbar({
           selectedSlotIndex={selectedSlotIndex}
           storagePageIndex={storagePageIndex}
           onStoragePageIndexChange={handlingStoragePageIndexChange}
-          onSelectHotbarSlot={onSelectHotbarSlot}
+          onSelectHotbarSlot={handlingEquipHotbarSlot}
           onEatHotbarSlot={onEatHotbarSlot}
           onStudyHotbarSlot={onStudyHotbarSlot}
           onAttachRecipePageHotbarSlot={onAttachRecipePageHotbarSlot}

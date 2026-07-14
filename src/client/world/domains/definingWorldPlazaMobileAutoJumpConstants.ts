@@ -43,8 +43,8 @@ export const DEFINING_WORLD_PLAZA_MOBILE_AUTO_JUMP_COOLDOWN_MS = 450;
 
 /** Checkbox row styling inside the settings mixer panel. */
 export const STYLING_WORLD_PLAZA_MOBILE_AUTO_JUMP_TOGGLE_ROW_CLASS_NAME =
-  'flex cursor-pointer items-center gap-2 text-xs font-semibold text-ink' as const;
+  'flex min-h-8 cursor-pointer items-center gap-2 text-xs font-semibold text-ink max-md:min-h-11 max-md:gap-2.5 max-md:text-sm' as const;
 
 /** Checkbox input styling for the auto-jump toggle. */
 export const STYLING_WORLD_PLAZA_MOBILE_AUTO_JUMP_CHECKBOX_CLASS_NAME =
-  'size-3.5 shrink-0 cursor-pointer rounded border border-poster-teal/40 bg-white/80 accent-poster-gold' as const;
+  'size-3.5 shrink-0 cursor-pointer rounded border border-poster-teal/40 bg-white/80 accent-poster-gold max-md:size-4' as const;

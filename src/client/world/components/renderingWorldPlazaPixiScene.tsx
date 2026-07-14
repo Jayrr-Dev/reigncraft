@@ -599,6 +599,7 @@ import { RenderingWildlifeOmegaWolfSfx } from '@/components/world/wildlife/compo
 import { RenderingWildlifeSpeciesSfx } from '@/components/world/wildlife/components/renderingWildlifeSpeciesSfx';
 import { RenderingWildlifeStudySfx } from '@/components/world/wildlife/components/renderingWildlifeStudySfx';
 import { RenderingWorldPlazaWildlifeCorpseStudyLabels } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeCorpseStudyLabels';
+import { RenderingWorldPlazaWildlifeForageEatOverlays } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeForageEatOverlays';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
 import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeNameTags';
 import { RenderingWorldPlazaWildlifeSpeechBubbles } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeSpeechBubbles';
@@ -613,6 +614,7 @@ import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domai
 import { resolvingWildlifeDiseaseTransmissionProfile } from '@/components/world/wildlife/domains/definingWildlifeDiseaseTransmissionRegistry';
 import { DEFINING_WILDLIFE_DOCILE_PET_STUDY_POINTS } from '@/components/world/wildlife/domains/definingWildlifeDocilePetConstants';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
+import type { DefiningWildlifeForageEatOverlay } from '@/components/world/wildlife/domains/definingWildlifeForageEatOverlayTypes';
 import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife/domains/definingWildlifeNameTagTypes';
 import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wildlife/domains/definingWildlifeSpeechBubbleTypes';
 import type {
@@ -3632,6 +3634,13 @@ function RenderingWorldPlazaPixiSceneConnected({
   const [wildlifeSpeechBubbles, setWildlifeSpeechBubbles] = useState<
     readonly DefiningWildlifeSpeechBubbleOverlay[]
   >([]);
+  const wildlifeForageEatOverlaysRef = useRef<DefiningWildlifeForageEatOverlay[]>(
+    []
+  );
+  const wildlifeForageEatOverlayKeysRef = useRef<readonly string[]>([]);
+  const [wildlifeForageEatOverlays, setWildlifeForageEatOverlays] = useState<
+    readonly DefiningWildlifeForageEatOverlay[]
+  >([]);
   const wildlifeNameTagsRef = useRef<DefiningWildlifeNameTagOverlay[]>([]);
   const wildlifeNameTagsMountRevisionRef = useRef(0);
   const lastSyncedWildlifeNameTagsMountRevisionRef = useRef(0);
@@ -3654,6 +3663,9 @@ function RenderingWorldPlazaPixiSceneConnected({
       wildlifeSpeechBubblesRef.current.length = 0;
       wildlifeSpeechBubbleKeysRef.current = [];
       setWildlifeSpeechBubbles([]);
+      wildlifeForageEatOverlaysRef.current.length = 0;
+      wildlifeForageEatOverlayKeysRef.current = [];
+      setWildlifeForageEatOverlays([]);
       wildlifeNameTagsRef.current.length = 0;
       wildlifeNameTagsMountRevisionRef.current = 0;
       lastSyncedWildlifeNameTagsMountRevisionRef.current = 0;
@@ -3708,6 +3720,24 @@ function RenderingWorldPlazaPixiSceneConnected({
           (entry) => `${entry.instanceId}:${entry.message}`
         );
         setWildlifeSpeechBubbles([...nextSpeechBubbles]);
+      }
+
+      const nextForageEatOverlays = wildlifeForageEatOverlaysRef.current;
+      const previousForageEatOverlayKeys =
+        wildlifeForageEatOverlayKeysRef.current;
+      const didForageEatOverlayMountSetChange =
+        previousForageEatOverlayKeys.length !== nextForageEatOverlays.length ||
+        nextForageEatOverlays.some(
+          (entry, index) =>
+            `${entry.instanceId}:${entry.progressIcon}` !==
+            previousForageEatOverlayKeys[index]
+        );
+
+      if (didForageEatOverlayMountSetChange) {
+        wildlifeForageEatOverlayKeysRef.current = nextForageEatOverlays.map(
+          (entry) => `${entry.instanceId}:${entry.progressIcon}`
+        );
+        setWildlifeForageEatOverlays([...nextForageEatOverlays]);
       }
 
       const nextNameTags = wildlifeNameTagsRef.current;
@@ -3773,6 +3803,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       projectileTargetsOutRef: wildlifeProjectileTargetsRef,
       wildlifeFloatingCombatTextsOutRef: wildlifeFloatingCombatTextsRef,
       wildlifeSpeechBubblesOutRef: wildlifeSpeechBubblesRef,
+      wildlifeForageEatOverlaysOutRef: wildlifeForageEatOverlaysRef,
       wildlifeNameTagsOutRef: wildlifeNameTagsRef,
       wildlifeNameTagsMountRevisionRef,
       wildlifeHoveredInstanceIdRef,
@@ -3853,12 +3884,14 @@ function RenderingWorldPlazaPixiSceneConnected({
     wildlifeProjectileTargetsRef.current.length = 0;
     wildlifeFloatingCombatTextsRef.current.length = 0;
     wildlifeSpeechBubblesRef.current.length = 0;
+    wildlifeForageEatOverlaysRef.current.length = 0;
     wildlifeNameTagsRef.current.length = 0;
     wildlifeNameTagsMountRevisionRef.current += 1;
     wildlifeHoveredInstanceIdRef.current = null;
     wildlifeDamagedPlayerAtMsByInstanceIdRef.current.clear();
     setWildlifeFloatingCombatTexts([]);
     setWildlifeSpeechBubbles([]);
+    setWildlifeForageEatOverlays([]);
     setWildlifeNameTags([]);
   }, [
     isWildlifeGenerationEnabled,
@@ -7946,6 +7979,12 @@ function RenderingWorldPlazaPixiSceneConnected({
                   cameraWorldZoomRef={cameraWorldZoomRef}
                 />
               ) : null}
+              <RenderingWorldPlazaWildlifeForageEatOverlays
+                overlays={wildlifeForageEatOverlays}
+                overlaysOutRef={wildlifeForageEatOverlaysRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+              />
             </>
           ) : null}
           {isHudWorldAnchorsEnabled && onlineUserId ? (

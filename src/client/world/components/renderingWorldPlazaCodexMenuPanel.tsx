@@ -206,12 +206,12 @@ export function RenderingWorldPlazaCodexMenuPanel({
             STYLING_WORLD_PLAZA_CODEX_MENU_OPTION_INACTIVE_CLASS_NAME
           )}
         >
-          <Icon icon={option.icon} className="size-3.5 shrink-0" aria-hidden />
+          <Icon icon={option.icon} className="size-3.5 shrink-0 max-md:size-4" aria-hidden />
           <span className="min-w-0">
-            <span className="block text-xs font-semibold leading-tight">
+            <span className="block text-xs font-semibold leading-tight max-md:text-sm">
               {option.label}
             </span>
-            <span className="block text-[10px] font-medium leading-tight opacity-70">
+            <span className="block text-[10px] font-medium leading-tight opacity-70 max-md:text-[11px]">
               {resolvingCodexMenuOptionDescription(
                 option.id,
                 option.description

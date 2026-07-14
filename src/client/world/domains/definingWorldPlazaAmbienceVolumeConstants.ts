@@ -23,4 +23,4 @@ export const LABELING_WORLD_PLAZA_AMBIENCE_VOLUME_SLIDER =
 
 /** Ambience volume range input styling (matches music and SFX sliders). */
 export const STYLING_WORLD_PLAZA_AMBIENCE_VOLUME_MIXER_SLIDER_CLASS_NAME =
-  'h-1.5 w-full cursor-pointer appearance-none rounded-full bg-poster-teal/20 accent-poster-gold' as const;
+  'h-1.5 w-full cursor-pointer appearance-none rounded-full bg-poster-teal/20 accent-poster-gold max-md:h-3' as const;

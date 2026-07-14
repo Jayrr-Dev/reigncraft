@@ -620,6 +620,13 @@ function InventoryPlazaSlotItem({
     [dragPointerDown]
   );
 
+  const preventingSlotContextMenu = useCallback(
+    (event: React.MouseEvent<HTMLElement>): void => {
+      event.preventDefault();
+    },
+    []
+  );
+
   const handlingSlotContainerClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>): void => {
       if (isBagPopoverOpen) {
@@ -769,6 +776,7 @@ function InventoryPlazaSlotItem({
         {...dragListeners}
         aria-pressed={isItemDetailPopoverOpen}
         onPointerDown={handlingSlotPointerDown}
+        onContextMenu={preventingSlotContextMenu}
         onClick={handlingSlotButtonClick}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {

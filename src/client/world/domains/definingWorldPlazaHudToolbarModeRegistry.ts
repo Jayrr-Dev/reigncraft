@@ -107,28 +107,32 @@ export const DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_REGISTRY = [
 export const DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_LAYOUT = {
   /** Vertical padding inside each badge. */
   paddingYBasePx: 3,
+  /** Extra vertical padding on narrow viewports for finger targets. */
+  mobilePaddingYBasePx: 6,
   /** Horizontal padding inside each badge. */
   paddingXBasePx: 6,
-  /** Tighter horizontal padding on narrow viewports. */
-  mobilePaddingXBasePx: 4,
+  /** Wider horizontal padding on narrow viewports. */
+  mobilePaddingXBasePx: 9,
   /** Gap between icon and label. */
   iconLabelGapBasePx: 3,
-  /** Tighter icon/label gap on narrow viewports. */
-  mobileIconLabelGapBasePx: 2,
+  /** Icon/label gap on narrow viewports. */
+  mobileIconLabelGapBasePx: 3,
   /** Gap between badge buttons. */
   buttonGapBasePx: 6,
+  /** Wider gap between badges on narrow viewports. */
+  mobileButtonGapBasePx: 8,
   /** Label font size (desktop). */
   labelTextBasePx: 10,
-  /** Label font on narrow viewports. */
-  mobileLabelTextBasePx: 8,
+  /** Larger label font on narrow viewports for readability. */
+  mobileLabelTextBasePx: 11,
   /** Icon edge length. */
   iconBasePx: 11,
-  /** Slightly smaller icon on narrow viewports. */
-  mobileIconBasePx: 10,
+  /** Larger icon on narrow viewports. */
+  mobileIconBasePx: 13,
   /** Letter-spacing for uppercase labels (em). */
   labelTrackingEm: 0.08,
-  /** Tighter tracking on narrow viewports. */
-  mobileLabelTrackingEm: 0.04,
+  /** Tracking on narrow viewports. */
+  mobileLabelTrackingEm: 0.05,
 } as const;
 
 /** Accessible label for the HUD toolbar mode badge row. */

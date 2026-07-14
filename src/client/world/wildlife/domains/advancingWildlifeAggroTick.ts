@@ -317,36 +317,61 @@ export function advancingWildlifeAggroTick({
 
     if (aggressionProfile.proximityThreatMode !== 'none') {
       if (distanceToPlayer <= playerAggroRadiusGrid) {
+        const alwaysAttacksPlayerOnSight =
+          species.aggressionSpawn.alwaysAttacksPlayerOnSight === true;
+        const mayAggroPlayerOnSight = checkingWildlifeMayAggroPlayerOnSight(
+          species,
+          instance.aggressionLevel,
+          instance.hungerState.driveLevel
+        );
         const shouldBuildProximityThreat =
           !chaseGiveUpUntilPlayerExitsAggro &&
-          (aggressionProfile.proximityThreatMode === 'starving'
-            ? instance.hungerState.driveLevel === 'starving'
-            : checkingWildlifeMayAggroPlayerOnSight(
-                species,
-                instance.aggressionLevel,
-                instance.hungerState.driveLevel
-              ) &&
-              (species.temperamentId !== 'pack_hunter' || mayInitiatePreyStalk));
+          (alwaysAttacksPlayerOnSight
+            ? mayAggroPlayerOnSight
+            : aggressionProfile.proximityThreatMode === 'starving'
+              ? instance.hungerState.driveLevel === 'starving'
+              : mayAggroPlayerOnSight &&
+                (species.temperamentId !== 'pack_hunter' ||
+                  mayInitiatePreyStalk));
 
         if (
           shouldBuildProximityThreat &&
           mayBuildThreatToTarget(playerUserId)
         ) {
-          const starvingMultiplier =
-            aggressionProfile.proximityThreatMode === 'onSight'
-              ? 1
-              : species.aggro.proximityThreatAtStarving;
+          if (alwaysAttacksPlayerOnSight) {
+            const existingThreat =
+              threats.find((entry) => entry.targetId === playerUserId)
+                ?.threat ?? 0;
+            const proximityThreatBoost = Math.max(
+              0,
+              DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD - existingThreat
+            );
 
-          threats = updatingThreatEntry(
-            threats,
-            playerUserId,
-            DEFINING_WILDLIFE_PROXIMITY_THREAT_PER_SECOND *
-              starvingMultiplier *
-              aggressionProfile.proximityThreatMultiplier *
-              boulderCoverDetectionMultiplier *
-              deltaSeconds,
-            nowMs
-          );
+            if (proximityThreatBoost > 0) {
+              threats = updatingThreatEntry(
+                threats,
+                playerUserId,
+                proximityThreatBoost,
+                nowMs
+              );
+            }
+          } else {
+            const starvingMultiplier =
+              aggressionProfile.proximityThreatMode === 'onSight'
+                ? 1
+                : species.aggro.proximityThreatAtStarving;
+
+            threats = updatingThreatEntry(
+              threats,
+              playerUserId,
+              DEFINING_WILDLIFE_PROXIMITY_THREAT_PER_SECOND *
+                starvingMultiplier *
+                aggressionProfile.proximityThreatMultiplier *
+                boulderCoverDetectionMultiplier *
+                deltaSeconds,
+              nowMs
+            );
+          }
         }
       }
     }

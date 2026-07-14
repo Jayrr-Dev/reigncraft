@@ -47,7 +47,7 @@ import {
   applyingWildlifeInstanceDamage,
 } from '@/components/world/wildlife/domains/advancingWildlifeSimulationTick';
 import { advancingWildlifeSpeciesTextureEviction } from '@/components/world/wildlife/domains/advancingWildlifeSpeciesTextureEviction';
-import { checkingWildlifeInstanceIsOwnedPet } from '@/components/world/wildlife/domains/checkingWildlifeInstanceIsOwnedPet';
+import { checkingWildlifeInstanceShowsHungerUi } from '@/components/world/wildlife/domains/checkingWildlifeInstanceIsOwnedPet';
 import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
 import { checkingWildlifeSpeciesUsesGlowOrbPresentation } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesUsesGlowOrbPresentation';
 import { checkingWildlifeVitalsGraphicsShouldShow } from '@/components/world/wildlife/domains/checkingWildlifeVitalsGraphicsShouldShow';
@@ -117,6 +117,7 @@ import {
   updatingWildlifeNameTagsOverlayRef,
   type UpdatingWildlifeNameTagLabelCacheEntry,
 } from '@/components/world/wildlife/domains/updatingWildlifeNameTagsOverlayRef';
+import { updatingWildlifeForageEatOverlaysRef } from '@/components/world/wildlife/domains/updatingWildlifeForageEatOverlaysRef';
 import type { Graphics, Sprite } from 'pixi.js';
 import { memo, useEffect, useRef, useState } from 'react';
 
@@ -144,7 +145,7 @@ type RenderingWildlifeInstanceSpriteProps = {
   healthRatio: number;
   staminaRatio: number;
   hungerRatio: number;
-  /** Bonded / domesticated companion; wild animals never show hunger orbs. */
+  /** Familiar+ companion (`hungerUi`); wild / pre-Familiar never show hunger orbs. */
   isDomesticatedPet: boolean;
   isDead: boolean;
   spriteAlpha: number;
@@ -792,6 +793,15 @@ export function RenderingWildlifeLayer({
       }
     }
 
+    if (config.wildlifeForageEatOverlaysOutRef?.current) {
+      updatingWildlifeForageEatOverlaysRef({
+        outRef: config.wildlifeForageEatOverlaysOutRef.current,
+        instances: nextInstances,
+        nowMs,
+        resolveSpecies: resolvingWildlifeSpeciesDefinition,
+      });
+    }
+
     if (config.wildlifeNameTagsOutRef?.current) {
       if (
         !checkingWorldPlazaGenerationFeatureEnabled(
@@ -1082,7 +1092,7 @@ export function RenderingWildlifeLayer({
             hungerRatio={quantizingWildlifeRenderVitalsRatio(
               instance.hungerState.hungerRatio
             )}
-            isDomesticatedPet={checkingWildlifeInstanceIsOwnedPet(instance)}
+            isDomesticatedPet={checkingWildlifeInstanceShowsHungerUi(instance)}
             isDead={instance.isDead}
             spriteAlpha={spriteAlpha}
             jumpLiftPx={jumpLiftPx}

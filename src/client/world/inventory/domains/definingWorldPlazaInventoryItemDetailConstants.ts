@@ -208,6 +208,10 @@ export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ATTACH =
 export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_STUDY =
   'Study' as const;
 
+/** Action tower button: move a weapon/tool into the reserved equip slot. */
+export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_EQUIP =
+  'Equip' as const;
+
 /** Human-readable labels for equipped tool kinds. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS: Readonly<
   Record<DefiningWorldPlazaEquipmentToolKind, string>
