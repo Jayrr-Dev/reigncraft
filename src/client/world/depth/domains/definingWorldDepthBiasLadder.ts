@@ -73,6 +73,14 @@ export const DEFINING_WORLD_DEPTH_ENTITY_ON_BLOCK_DEPTH_BIAS = Math.round(
     DEFINING_WORLD_DEPTH_ENTITY_Z_INDEX_SCALE
 );
 
+/**
+ * Pulls blacksmith utility sprites behind coplanar avatar feet.
+ * Avatar painted feet sit south of the grid foot; without this bias the anvil
+ * wins same-tile / south-rim ties and covers the player.
+ */
+export const DEFINING_WORLD_DEPTH_BLACKSMITH_UTILITY_ENTITY_DEPTH_BIAS =
+  -12 as const;
+
 /** Floor-layer warm glow bias above coplanar floor chunks. */
 export const DEFINING_WORLD_DEPTH_LIGHT_GLOW_FLOOR_DEPTH_BIAS = 1 as const;
 

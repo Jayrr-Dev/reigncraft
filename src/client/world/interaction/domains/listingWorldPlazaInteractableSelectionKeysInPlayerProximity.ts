@@ -1,5 +1,15 @@
-import { DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import {
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
+  resolvingWorldBuildingBlockDefinition,
+} from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import {
+  checkingWorldBuildingPlacedBlockIsFootprintSatellite,
+  listingWorldBuildingPlacementFootprintTilePositions,
+  resolvingWorldBuildingBlockPlacementFootprint,
+} from '@/components/world/building/domains/definingWorldBuildingPlacementFootprint';
+import { checkingWorldPlazaOreSmeltingStationBlockDefinitionId } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingRegistry';
+import { resolvingWorldPlazaOreSmeltingStationAnchorBlock } from '@/components/world/crafting/domains/resolvingWorldPlazaOreSmeltingStationAnchorBlock';
 import { checkingWorldPlazaLongGrassDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLongGrassDecorationAtTileIndex';
 import { checkingWorldPlazaPickableFlowerDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaPickableFlowerDecorationAtTileIndex';
 import { checkingWorldPlazaShrubDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaShrubDecorationAtTileIndex';
@@ -153,6 +163,43 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
     }
 
     keys.add(formattingWorldPlazaInteractableBlockSelectionKey(block));
+  }
+
+  for (const block of params.placedBlocks) {
+    if (!checkingWorldPlazaOreSmeltingStationBlockDefinitionId(block.definitionId)) {
+      continue;
+    }
+
+    if (checkingWorldBuildingPlacedBlockIsFootprintSatellite(block)) {
+      continue;
+    }
+
+    const definition = resolvingWorldBuildingBlockDefinition(block.definitionId);
+    const footprint = definition
+      ? resolvingWorldBuildingBlockPlacementFootprint(definition)
+      : { tileWidth: 1, tileHeight: 1 };
+    const footprintTiles = listingWorldBuildingPlacementFootprintTilePositions(
+      block.tilePosition,
+      footprint
+    );
+    const isInProximity = footprintTiles.some((footprintTile) =>
+      checkingWorldPlazaInteractionLabelTileInPlayerProximity(
+        params.playerPosition,
+        footprintTile.tileX,
+        footprintTile.tileY,
+        radius
+      )
+    );
+
+    if (!isInProximity) {
+      continue;
+    }
+
+    const anchorBlock = resolvingWorldPlazaOreSmeltingStationAnchorBlock(
+      params.placedBlocks,
+      block
+    );
+    keys.add(formattingWorldPlazaInteractableBlockSelectionKey(anchorBlock));
   }
 
   for (let offsetY = -radius; offsetY <= radius; offsetY += 1) {

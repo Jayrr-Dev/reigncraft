@@ -33,7 +33,10 @@ import {
   writingWorldPlazaInventoryKingpinTestSeedVersion,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryKingpinTestSeed';
 import { listingWorldPlazaCraftModeRecipeIngredientSeedItems } from '@/components/world/crafting/domains/listingWorldPlazaCraftModeRecipeIngredientSeedItems';
-import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
+import {
+  checkingWorldPlazaDevQaLoadEnabled,
+  readingWorldPlazaDevQaLoadRevision,
+} from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import { ensuringWorldPlazaInventoryCampfireRecipePage } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryCampfireRecipePage';
 import { movingWorldPlazaInventoryItemToSlot } from '@/components/world/inventory/domains/movingWorldPlazaInventoryItemToSlot';
 import { normalizingWorldPlazaInventoryWeaponToolSlot } from '@/components/world/inventory/domains/normalizingWorldPlazaInventoryWeaponToolSlot';
@@ -43,6 +46,18 @@ import { creatingInventoryDevvitAdapter } from '@/components/world/inventory/rep
 import { creatingInventoryPlazaSinglePlayerSaveAdapter } from '@/components/world/inventory/repositories/creatingInventoryPlazaSinglePlayerSaveAdapter';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
+
+/**
+ * Dev QA craft-ingredient seed is once per owner+revision.
+ * Scene + remounted ITEMS hotbar both call this hook; a per-instance ref would
+ * wipe crafted items every CRAFT -> ITEMS switch.
+ */
+const seededDevQaCraftInventoryKeys = new Set<string>();
+
+/** Test helper: allow Dev QA inventory seed to run again. */
+export function resettingWorldPlazaInventoryDevQaCraftSeedGuardForTests(): void {
+  seededDevQaCraftInventoryKeys.clear();
+}
 
 /** Options for {@link usingWorldPlazaInventory}. */
 export interface UsingWorldPlazaInventoryOptions {
@@ -241,27 +256,31 @@ export function usingWorldPlazaInventory(
       return;
     }
 
-    if (
-      checkingWorldPlazaDevQaLoadEnabled() &&
-      !hasDevQaCraftSeededRef.current
-    ) {
+    if (checkingWorldPlazaDevQaLoadEnabled()) {
       hasDevQaCraftSeededRef.current = true;
       hasSeededRef.current = true;
       hasNormalizedWeaponToolSlotRef.current = true;
       hasEnsuredCampfireRecipePageRef.current = true;
 
-      let seededState = creatingEmptyInventoryState(
-        DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY
-      );
-      seededState = seedingWorldPlazaInventoryItems(
-        seededState,
-        DEFINING_WORLD_PLAZA_INVENTORY_STARTER_ITEMS
-      );
-      seededState = seedingWorldPlazaInventoryItems(
-        seededState,
-        listingWorldPlazaCraftModeRecipeIngredientSeedItems()
-      );
-      setState(seededState);
+      const devQaSeedKey = `${persistenceOwnerId}:${readingWorldPlazaDevQaLoadRevision()}`;
+
+      if (!seededDevQaCraftInventoryKeys.has(devQaSeedKey)) {
+        seededDevQaCraftInventoryKeys.add(devQaSeedKey);
+
+        let seededState = creatingEmptyInventoryState(
+          DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY
+        );
+        seededState = seedingWorldPlazaInventoryItems(
+          seededState,
+          DEFINING_WORLD_PLAZA_INVENTORY_STARTER_ITEMS
+        );
+        seededState = seedingWorldPlazaInventoryItems(
+          seededState,
+          listingWorldPlazaCraftModeRecipeIngredientSeedItems()
+        );
+        setState(seededState);
+      }
+
       return;
     }
 

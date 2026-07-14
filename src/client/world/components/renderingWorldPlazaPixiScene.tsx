@@ -214,6 +214,7 @@ import { executingWorldPlazaCraftRecipeInventoryOutcome } from '@/components/wor
 import { refundingWorldPlazaCraftRecipeIngredients } from '@/components/world/crafting/domains/refundingWorldPlazaCraftRecipeIngredients';
 import { showingWorldPlazaCraftRecipeRefundFloatFeedback } from '@/components/world/crafting/domains/showingWorldPlazaCraftRecipeRefundFloatFeedback';
 import { usingWorldPlazaOreSmeltingStations } from '@/components/world/crafting/hooks/usingWorldPlazaOreSmeltingStations';
+import { usingWorldPlazaOreSmeltingStationReachability } from '@/components/world/crafting/hooks/usingWorldPlazaOreSmeltingStationReachability';
 import { updatingWorldPlazaActiveOreSmeltingHeatTilesFromPlacedBlocks } from '@/components/world/crafting/domains/managingWorldPlazaActiveOreSmeltingHeatTilesStore';
 import {
   DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_AVATAR_SUB_LAYER_Z_INDEX,
@@ -348,6 +349,8 @@ import { usingWorldPlazaFarmingInteraction } from '@/components/world/farming/ho
 import { usingWorldPlazaFarmingProgress } from '@/components/world/farming/hooks/usingWorldPlazaFarmingProgress';
 import { RenderingWorldPlazaCampfireAmbience } from '@/components/world/fire/components/renderingWorldPlazaCampfireAmbience';
 import { RenderingWorldPlazaCampfireInteractionLabels } from '@/components/world/fire/components/renderingWorldPlazaCampfireInteractionLabels';
+import { RenderingWorldPlazaOreSmeltingInteractionLabels } from '@/components/world/crafting/components/renderingWorldPlazaOreSmeltingInteractionLabels';
+import { resolvingWorldPlazaOreSmeltingStationAnchorBlock } from '@/components/world/crafting/domains/resolvingWorldPlazaOreSmeltingStationAnchorBlock';
 import { RenderingWorldPlazaFireLayer } from '@/components/world/fire/components/renderingWorldPlazaFireLayer';
 import { RenderingWorldPlazaLavaAmbience } from '@/components/world/fire/components/renderingWorldPlazaLavaAmbience';
 import { validatingWorldPlazaCampfireCookStart } from '@/components/world/fire/domains/validatingWorldPlazaCampfireCookStart';
@@ -1723,6 +1726,14 @@ function RenderingWorldPlazaPixiSceneConnected({
     addingItemWithStacking: addItemWithStacking,
     showingToast: showingGameplayHudToast,
   });
+  const oreSmeltingPlacedBlocksRef = useRef(activeScenePlacedBlocks);
+  oreSmeltingPlacedBlocksRef.current = activeScenePlacedBlocks;
+  const oreSmeltingStationReachability =
+    usingWorldPlazaOreSmeltingStationReachability({
+      enabled: true,
+      playerPositionRef,
+      placedBlocksRef: oreSmeltingPlacedBlocksRef,
+    });
   useEffect(() => {
     updatingWorldPlazaActiveOreSmeltingHeatTilesFromPlacedBlocks(
       activeScenePlacedBlocks,
@@ -1741,6 +1752,36 @@ function RenderingWorldPlazaPixiSceneConnected({
       );
     },
     [oreSmeltingStations.selectingStation, selectingHudToolbarMode]
+  );
+  const handlingRefineHotbarSlot = useCallback(
+    (slotIndex: number): void => {
+      oreSmeltingStations.depositingInventorySlotIntoReachableStation(
+        slotIndex,
+        'ore',
+        oreSmeltingStationReachability.resolvingNearbyOreSmeltingStation()
+      );
+      selectingHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS);
+    },
+    [
+      oreSmeltingStationReachability.resolvingNearbyOreSmeltingStation,
+      oreSmeltingStations.depositingInventorySlotIntoReachableStation,
+      selectingHudToolbarMode,
+    ]
+  );
+  const handlingAddFuelHotbarSlot = useCallback(
+    (slotIndex: number): void => {
+      oreSmeltingStations.depositingInventorySlotIntoReachableStation(
+        slotIndex,
+        'fuel',
+        oreSmeltingStationReachability.resolvingNearbyOreSmeltingStation()
+      );
+      selectingHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS);
+    },
+    [
+      oreSmeltingStationReachability.resolvingNearbyOreSmeltingStation,
+      oreSmeltingStations.depositingInventorySlotIntoReachableStation,
+      selectingHudToolbarMode,
+    ]
   );
   const oreSmeltingStationHotbar =
     oreSmeltingStations.selectedStationBlock &&
@@ -2523,6 +2564,20 @@ function RenderingWorldPlazaPixiSceneConnected({
     []
   );
 
+  const selectingOreSmeltingStationForInteractionLabel = useCallback(
+    (block: DefiningWorldBuildingPlacedBlock): void => {
+      const anchorBlock = resolvingWorldPlazaOreSmeltingStationAnchorBlock(
+        activeScenePlacedBlocks,
+        block
+      );
+      selectingWorldPlazaInteractableBlockForClickAction(
+        selectedInteractableBlockKeysRef,
+        anchorBlock
+      );
+    },
+    [activeScenePlacedBlocks]
+  );
+
   const selectingTreeForInteractionLabel = useCallback(
     (block: DefiningWorldBuildingPlacedBlock): void => {
       selectingWorldPlazaInteractableTreeForClickAction(
@@ -2649,11 +2704,11 @@ function RenderingWorldPlazaPixiSceneConnected({
         [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE]:
           selectingCampfireForInteractionLabel,
         [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY]:
-          selectingOreSmeltingStation,
+          selectingOreSmeltingStationForInteractionLabel,
         [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN]:
-          selectingOreSmeltingStation,
+          selectingOreSmeltingStationForInteractionLabel,
         [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE]:
-          selectingOreSmeltingStation,
+          selectingOreSmeltingStationForInteractionLabel,
         [DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK]:
           selectingTreeForInteractionLabel,
       },
@@ -7421,6 +7476,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     placementPreviewBlock={
                       blacksmithUtilityPlacementPreviewBlock
                     }
+                    entityLayerRef={terrainTrunkLayerRef}
                   />
                   <RenderingWorldPlazaClaimModePlotOwnershipOverlay
                     isVisible={isClaimModeActive}
@@ -7877,6 +7933,15 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraWorldZoomRef={cameraWorldZoomRef}
                 onCampfireAction={handlingCampfireAction}
               />
+              <RenderingWorldPlazaOreSmeltingInteractionLabels
+                placedBlocks={activeScenePlacedBlocks}
+                selectedInteractableBlockKeysRef={
+                  selectedInteractableBlockKeysRef
+                }
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                onRefineStation={selectingOreSmeltingStation}
+              />
               <RenderingWorldPlazaTreeInteractionLabels
                 placedBlocks={activeScenePlacedBlocks}
                 selectedInteractableBlockKeysRef={
@@ -8216,11 +8281,16 @@ function RenderingWorldPlazaPixiSceneConnected({
                         onAttachRecipePageHotbarSlot={
                           handlingAttachRecipePageHotbarSlot
                         }
+                        onRefineHotbarSlot={handlingRefineHotbarSlot}
+                        onAddFuelHotbarSlot={handlingAddFuelHotbarSlot}
                         onUseActiveEnchantment={handlingUseActiveEnchantment}
                         playerEffectiveMaxHealth={
                           playerHealthHudSnapshot.effectiveMaxHealth
                         }
                         oreSmeltingStation={oreSmeltingStationHotbar}
+                        isNearOreSmeltingStation={
+                          oreSmeltingStationReachability.isNearOreSmeltingStation
+                        }
                       />
                     ) : null}
                     {hudToolbarMode ===
@@ -8421,11 +8491,16 @@ function RenderingWorldPlazaPixiSceneConnected({
                         onAttachRecipePageHotbarSlot={
                           handlingAttachRecipePageHotbarSlot
                         }
+                        onRefineHotbarSlot={handlingRefineHotbarSlot}
+                        onAddFuelHotbarSlot={handlingAddFuelHotbarSlot}
                         onUseActiveEnchantment={handlingUseActiveEnchantment}
                         playerEffectiveMaxHealth={
                           playerHealthHudSnapshot.effectiveMaxHealth
                         }
                         oreSmeltingStation={oreSmeltingStationHotbar}
+                        isNearOreSmeltingStation={
+                          oreSmeltingStationReachability.isNearOreSmeltingStation
+                        }
                       />
                     ) : null}
                     {hudToolbarMode ===

@@ -9,6 +9,10 @@ import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/invento
 import { checkingWorldPlazaInventoryItemIsWeaponOrTool } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsWeaponOrTool';
 import { computingWorldPlazaInventoryItemResolvedCost } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemResolvedCost';
 import {
+  checkingWorldPlazaOreSmeltingFuelItemTypeId,
+  resolvingWorldPlazaOreSmeltingRecipe,
+} from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingRegistry';
+import {
   checkingWorldPlazaInventoryItemIsFlowerHerb,
   parsingWorldPlazaFlowerSpeciesIdFromItemTypeId,
 } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
@@ -93,6 +97,8 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly canDrop: boolean;
   readonly canEquip: boolean;
   readonly canOpenBag: boolean;
+  readonly canRefine: boolean;
+  readonly canAddFuel: boolean;
 };
 
 export type ResolvingWorldPlazaInventoryItemDetailPopoverModelOptions = {
@@ -118,6 +124,11 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModelOptions = {
   >;
   /** Local player effective max HP for food heal preview. */
   readonly playerEffectiveMaxHealth?: number;
+  /**
+   * True when a bloomery / kiln / stove UI is open, or the player stands near
+   * one. Gates Refine / Add Fuel on ores and fuel.
+   */
+  readonly isOreSmeltingStationReachable?: boolean;
 };
 
 /**
@@ -675,6 +686,12 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
         !options.isEquipped &&
         checkingWorldPlazaInventoryItemIsWeaponOrTool(item.itemTypeId),
       canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),
+      canRefine:
+        Boolean(options.isOreSmeltingStationReachable) &&
+        resolvingWorldPlazaOreSmeltingRecipe(item.itemTypeId) !== null,
+      canAddFuel:
+        Boolean(options.isOreSmeltingStationReachable) &&
+        checkingWorldPlazaOreSmeltingFuelItemTypeId(item.itemTypeId),
     };
   }
 
@@ -751,5 +768,11 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       !options.isEquipped &&
       checkingWorldPlazaInventoryItemIsWeaponOrTool(item.itemTypeId),
     canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),
+    canRefine:
+      Boolean(options.isOreSmeltingStationReachable) &&
+      resolvingWorldPlazaOreSmeltingRecipe(item.itemTypeId) !== null,
+    canAddFuel:
+      Boolean(options.isOreSmeltingStationReachable) &&
+      checkingWorldPlazaOreSmeltingFuelItemTypeId(item.itemTypeId),
   };
 }

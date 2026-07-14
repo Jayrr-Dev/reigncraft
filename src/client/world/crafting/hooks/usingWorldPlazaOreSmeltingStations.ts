@@ -119,15 +119,15 @@ export function usingWorldPlazaOreSmeltingStations({
     stationStateByBlockId,
   ]);
 
-  const droppingInventorySlotIntoStation = useCallback(
+  const droppingInventorySlotIntoStationBlock = useCallback(
     (
+      block: DefiningWorldBuildingPlacedBlock,
       inventorySlotIndex: number,
       slotKind: DefiningWorldPlazaOreSmeltingStationSlotKind
     ): void => {
-      const block = selectedStationBlock;
       const inventoryItem = inventoryState.slots[inventorySlotIndex];
 
-      if (!block || !inventoryItem) {
+      if (!inventoryItem) {
         return;
       }
 
@@ -243,10 +243,63 @@ export function usingWorldPlazaOreSmeltingStations({
     },
     [
       inventoryState.slots,
-      selectedStationBlock,
       showingToast,
       stationStateByBlockId,
       updatingInventoryState,
+    ]
+  );
+
+  const droppingInventorySlotIntoStation = useCallback(
+    (
+      inventorySlotIndex: number,
+      slotKind: DefiningWorldPlazaOreSmeltingStationSlotKind
+    ): void => {
+      if (!selectedStationBlock) {
+        return;
+      }
+
+      droppingInventorySlotIntoStationBlock(
+        selectedStationBlock,
+        inventorySlotIndex,
+        slotKind
+      );
+    },
+    [droppingInventorySlotIntoStationBlock, selectedStationBlock]
+  );
+
+  /**
+   * Deposits into the open station, or opens + fills the nearest reachable one.
+   */
+  const depositingInventorySlotIntoReachableStation = useCallback(
+    (
+      inventorySlotIndex: number,
+      slotKind: DefiningWorldPlazaOreSmeltingStationSlotKind,
+      nearbyStation: DefiningWorldBuildingPlacedBlock | null
+    ): void => {
+      const targetStation = selectedStationBlock ?? nearbyStation;
+
+      if (!targetStation) {
+        showingToast('Stand near a bloomery, kiln, or stove.');
+        return;
+      }
+
+      if (
+        !selectedStationBlock ||
+        selectedStationBlock.blockId !== targetStation.blockId
+      ) {
+        setSelectedStationBlock(targetStation);
+      }
+
+      droppingInventorySlotIntoStationBlock(
+        targetStation,
+        inventorySlotIndex,
+        slotKind
+      );
+    },
+    [
+      droppingInventorySlotIntoStationBlock,
+      selectedStationBlock,
+      showingToast,
     ]
   );
 
@@ -372,5 +425,6 @@ export function usingWorldPlazaOreSmeltingStations({
     closingStation,
     collectingSelectedStationOutput,
     droppingInventorySlotIntoStation,
+    depositingInventorySlotIntoReachableStation,
   };
 }

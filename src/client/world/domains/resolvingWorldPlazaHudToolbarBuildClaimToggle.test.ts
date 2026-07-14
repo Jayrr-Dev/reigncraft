@@ -63,20 +63,25 @@ describe('resolvingWorldPlazaHudToolbarBuildClaimToggle', () => {
     ).toContain('sky');
   });
 
-  it('toggles claim ↔ build and enters claim from other modes', () => {
+  it('keeps the active edit mode sticky and enters claim from other modes', () => {
     expect(
       resolvingWorldPlazaHudToolbarBuildClaimToggleNextMode(
         DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD
       )
-    ).toBe(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM);
+    ).toBe(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD);
     expect(
       resolvingWorldPlazaHudToolbarBuildClaimToggleNextMode(
         DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM
       )
-    ).toBe(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD);
+    ).toBe(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM);
     expect(
       resolvingWorldPlazaHudToolbarBuildClaimToggleNextMode(
         DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS
+      )
+    ).toBe(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM);
+    expect(
+      resolvingWorldPlazaHudToolbarBuildClaimToggleNextMode(
+        DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CRAFT
       )
     ).toBe(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM);
   });

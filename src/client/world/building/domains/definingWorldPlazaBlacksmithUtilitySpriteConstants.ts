@@ -82,6 +82,17 @@ export const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_DISPLAY_SCALE = {
   [DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.CLAY_STOVE]: 0.95,
 } as const satisfies Record<DefiningWorldPlazaBlacksmithUtilityKind, number>;
 
+/**
+ * Extra screen-Y sink (positive = down) so sprite feet meet the tile top.
+ * Compensates cropped WebP padding that still reads as floating.
+ */
+export const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_FOOT_SINK_PX = {
+  [DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.ANVIL]: 6,
+  [DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.BLOOMERY]: 4,
+  [DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.CLAY_KILN]: 4,
+  [DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.CLAY_STOVE]: 4,
+} as const satisfies Record<DefiningWorldPlazaBlacksmithUtilityKind, number>;
+
 /** Ghost alpha while dragging a blacksmith utility in craft/build placement. */
 export const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_ALPHA =
   0.72 as const;

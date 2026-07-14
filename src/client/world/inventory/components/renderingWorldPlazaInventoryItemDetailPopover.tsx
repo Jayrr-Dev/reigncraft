@@ -6,9 +6,11 @@ import { usingWorldPlazaAnchoredPopoverViewportShiftX } from '@/components/world
 import { RenderingWorldPlazaInventoryItemInfoDialog } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemInfoDialog';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_ICONIFY_ICON,
+  LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ADD_FUEL,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ATTACH,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_EQUIP,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO,
+  LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_REFINE,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_STUDY,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemDetailConstants';
 import type { DefiningWorldPlazaInventoryItemActionTowerClassNames } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemActionTowerClassNames';
@@ -26,6 +28,8 @@ export type RenderingWorldPlazaInventoryItemDetailPopoverProps = {
   readonly onDropItem?: () => void;
   readonly onEquipItem?: () => void;
   readonly onOpenBag?: () => void;
+  readonly onRefineItem?: () => void;
+  readonly onAddFuelItem?: () => void;
   readonly onUseActiveEnchantment?: (enchantmentId: string) => void;
 };
 
@@ -40,6 +44,8 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
   onDropItem,
   onEquipItem,
   onOpenBag,
+  onRefineItem,
+  onAddFuelItem,
   onUseActiveEnchantment,
 }: RenderingWorldPlazaInventoryItemDetailPopoverProps): React.JSX.Element {
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
@@ -145,6 +151,28 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
               onClick={onAttachRecipePage}
             >
               {LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ATTACH}
+            </button>
+          ) : null}
+
+          {model.canRefine && onRefineItem ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={actionTowerClassNames.button}
+              onClick={onRefineItem}
+            >
+              {LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_REFINE}
+            </button>
+          ) : null}
+
+          {model.canAddFuel && onAddFuelItem ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={actionTowerClassNames.button}
+              onClick={onAddFuelItem}
+            >
+              {LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ADD_FUEL}
             </button>
           ) : null}
 

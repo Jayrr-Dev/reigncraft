@@ -204,6 +204,14 @@ export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_STUDY =
 export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_EQUIP =
   'Equip' as const;
 
+/** Action tower button: deposit ore into a nearby bloomery / kiln / stove. */
+export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_REFINE =
+  'Refine' as const;
+
+/** Action tower button: deposit wood or coal as smelting fuel. */
+export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ADD_FUEL =
+  'Add Fuel' as const;
+
 /** Human-readable labels for equipped tool kinds. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS: Readonly<
   Record<DefiningWorldPlazaEquipmentToolKind, string>

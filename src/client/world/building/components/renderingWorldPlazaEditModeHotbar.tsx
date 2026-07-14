@@ -466,11 +466,10 @@ export function RenderingWorldPlazaEditModeHotbar({
         const paintAction = resolvingWorldPlazaEditModeClaimPaintAction(
           functionId
         );
-        const nextPaintAction =
-          selectedClaimPaintAction === paintAction ? null : paintAction;
 
         setOpenFunctionId(null);
-        onSelectClaimPaintAction(nextPaintAction);
+        // Sticky select: re-click keeps the tool armed (no accidental clear).
+        onSelectClaimPaintAction(paintAction);
         onActivateClaimMode();
         return;
       }
@@ -479,11 +478,10 @@ export function RenderingWorldPlazaEditModeHotbar({
         const paintAction = resolvingWorldPlazaEditModeBuildPaintAction(
           functionId
         );
-        const nextPaintAction =
-          selectedBuildPaintAction === paintAction ? null : paintAction;
 
         setOpenFunctionId(null);
-        onSelectBuildPaintAction(nextPaintAction);
+        // Sticky select: re-click keeps the tool armed (no accidental clear).
+        onSelectBuildPaintAction(paintAction);
         onActivateBuildMode();
         return;
       }
@@ -513,8 +511,6 @@ export function RenderingWorldPlazaEditModeHotbar({
       onSelectBuildPaintAction,
       onSelectClaimPaintAction,
       openFunctionId,
-      selectedBuildPaintAction,
-      selectedClaimPaintAction,
     ]
   );
 

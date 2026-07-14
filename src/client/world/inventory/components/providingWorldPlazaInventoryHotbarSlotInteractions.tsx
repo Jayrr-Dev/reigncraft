@@ -26,6 +26,8 @@ export type WorldPlazaInventoryHotbarSlotInteractions = {
   readonly onStudyHotbarSlot?: (slotIndex: number) => void;
   readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
   readonly onDropHotbarSlot?: (slotIndex: number) => void;
+  readonly onRefineHotbarSlot?: (slotIndex: number) => void;
+  readonly onAddFuelHotbarSlot?: (slotIndex: number) => void;
   readonly onUseActiveEnchantment?: (
     slotIndex: number,
     enchantmentId: string
@@ -36,6 +38,8 @@ export type WorldPlazaInventoryHotbarSlotInteractions = {
   readonly closingBagPopover: () => void;
   /** Local player effective max HP for food heal preview in item detail. */
   readonly playerEffectiveMaxHealth?: number;
+  /** Gates Refine / Add Fuel when near or using a smelting station. */
+  readonly isOreSmeltingStationReachable?: boolean;
 };
 
 const WorldPlazaInventoryHotbarSlotInteractionsContext =
@@ -90,12 +94,15 @@ export const RenderingWorldPlazaInventoryHotbarSlotCell = memo(
       onStudyHotbarSlot,
       onAttachRecipePageHotbarSlot,
       onDropHotbarSlot,
+      onRefineHotbarSlot,
+      onAddFuelHotbarSlot,
       onUseActiveEnchantment,
       togglingItemActionPopover,
       closingItemActionPopover,
       openingBagPopover,
       closingBagPopover,
       playerEffectiveMaxHealth,
+      isOreSmeltingStationReachable,
     } = usingWorldPlazaInventoryHotbarSlotInteractions();
 
     return (
@@ -110,11 +117,14 @@ export const RenderingWorldPlazaInventoryHotbarSlotCell = memo(
         onStudyHotbarSlot={onStudyHotbarSlot}
         onAttachRecipePageHotbarSlot={onAttachRecipePageHotbarSlot}
         onDropHotbarSlot={onDropHotbarSlot}
+        onRefineHotbarSlot={onRefineHotbarSlot}
+        onAddFuelHotbarSlot={onAddFuelHotbarSlot}
         onUseActiveEnchantment={onUseActiveEnchantment}
         onOpenBagPopover={openingBagPopover}
         isBagPopoverOpen={openBagHotbarSlotIndex === props.slotIndex}
         onCloseBagPopover={closingBagPopover}
         playerEffectiveMaxHealth={playerEffectiveMaxHealth}
+        isOreSmeltingStationReachable={isOreSmeltingStationReachable}
       />
     );
   }
@@ -132,6 +142,8 @@ export function usingWorldPlazaInventoryHotbarSlotInteractionsValue(
       input.onAttachRecipePageHotbarSlot,
       input.onDropHotbarSlot,
       input.onEatHotbarSlot,
+      input.onRefineHotbarSlot,
+      input.onAddFuelHotbarSlot,
       input.onStudyHotbarSlot,
       input.onSelectHotbarSlot,
       input.onUseActiveEnchantment,
@@ -139,6 +151,7 @@ export function usingWorldPlazaInventoryHotbarSlotInteractionsValue(
       input.openItemDetailSlotIndex,
       input.openingBagPopover,
       input.playerEffectiveMaxHealth,
+      input.isOreSmeltingStationReachable,
       input.selectedSlotIndex,
       input.togglingItemActionPopover,
     ]

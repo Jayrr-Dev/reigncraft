@@ -46,8 +46,10 @@ export function resolvingWorldPlazaHudToolbarBuildClaimToggleFace(
 }
 
 /**
- * Next edit mode when the Build↔Claim toggle is clicked.
- * Claim → Build → Claim. From Items/Craft, enters Claim.
+ * Next edit mode when the Build↔Claim badge is clicked.
+ * Sticky like Items/Craft: re-click keeps the current edit mode.
+ * From Items/Craft, enters Claim. Build↔Claim switching stays on the hotbar
+ * session toggle arrows.
  *
  * @param activeMode - Current HUD toolbar mode
  */
@@ -56,12 +58,8 @@ export function resolvingWorldPlazaHudToolbarBuildClaimToggleNextMode(
 ):
   | typeof DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD
   | typeof DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM {
-  if (activeMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM) {
-    return DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD;
-  }
-
   if (activeMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD) {
-    return DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM;
+    return DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD;
   }
 
   return DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM;

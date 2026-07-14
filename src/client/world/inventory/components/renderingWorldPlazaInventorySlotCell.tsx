@@ -105,6 +105,10 @@ export type RenderingWorldPlazaInventorySlotCellProps =
     readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
     /** Drop action surfaced inside the item action popover. */
     readonly onDropHotbarSlot?: (slotIndex: number) => void;
+    /** Deposit ore into a reachable bloomery / kiln / stove. */
+    readonly onRefineHotbarSlot?: (slotIndex: number) => void;
+    /** Deposit wood or coal as fuel into a reachable smelting station. */
+    readonly onAddFuelHotbarSlot?: (slotIndex: number) => void;
     /** Active enchantment use from the item action popover. */
     readonly onUseActiveEnchantment?: (
       slotIndex: number,
@@ -116,6 +120,11 @@ export type RenderingWorldPlazaInventorySlotCellProps =
     readonly onCloseBagPopover?: () => void;
     /** Local player effective max HP for food heal preview. */
     readonly playerEffectiveMaxHealth?: number;
+    /**
+     * True when a bloomery / kiln / stove UI is open, or the player stands near
+     * one. Gates Refine / Add Fuel in the item action tower.
+     */
+    readonly isOreSmeltingStationReachable?: boolean;
   };
 
 /** Props for {@link RenderingWorldPlazaInventoryItemIcon}. */
@@ -226,11 +235,14 @@ export function RenderingWorldPlazaInventorySlotCell({
   onStudyHotbarSlot,
   onAttachRecipePageHotbarSlot,
   onDropHotbarSlot,
+  onRefineHotbarSlot,
+  onAddFuelHotbarSlot,
   onUseActiveEnchantment,
   onOpenBagPopover,
   isBagPopoverOpen = false,
   onCloseBagPopover,
   playerEffectiveMaxHealth,
+  isOreSmeltingStationReachable = false,
 }: RenderingWorldPlazaInventorySlotCellProps): React.JSX.Element {
   const viewportStyles = usingWorldPlazaInventoryHotbarViewportStylesResolved();
   const { active } = useDndContext();
@@ -337,11 +349,14 @@ export function RenderingWorldPlazaInventorySlotCell({
       onStudyHotbarSlot={onStudyHotbarSlot}
       onAttachRecipePageHotbarSlot={onAttachRecipePageHotbarSlot}
       onDropHotbarSlot={onDropHotbarSlot}
+      onRefineHotbarSlot={onRefineHotbarSlot}
+      onAddFuelHotbarSlot={onAddFuelHotbarSlot}
       onUseActiveEnchantment={onUseActiveEnchantment}
       onOpenBagPopover={onOpenBagPopover}
       isBagPopoverOpen={isBagPopoverOpen}
       onCloseBagPopover={onCloseBagPopover}
       playerEffectiveMaxHealth={playerEffectiveMaxHealth}
+      isOreSmeltingStationReachable={isOreSmeltingStationReachable}
       slotIndex={slotIndex}
     />
   );
@@ -366,6 +381,8 @@ type InventoryPlazaSlotItemProps = {
   readonly onStudyHotbarSlot?: (slotIndex: number) => void;
   readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
   readonly onDropHotbarSlot?: (slotIndex: number) => void;
+  readonly onRefineHotbarSlot?: (slotIndex: number) => void;
+  readonly onAddFuelHotbarSlot?: (slotIndex: number) => void;
   readonly onUseActiveEnchantment?: (
     slotIndex: number,
     enchantmentId: string
@@ -374,6 +391,7 @@ type InventoryPlazaSlotItemProps = {
   readonly isBagPopoverOpen?: boolean;
   readonly onCloseBagPopover?: () => void;
   readonly playerEffectiveMaxHealth?: number;
+  readonly isOreSmeltingStationReachable?: boolean;
   readonly slotIndex: number;
 };
 
@@ -394,11 +412,14 @@ function InventoryPlazaSlotItem({
   onStudyHotbarSlot,
   onAttachRecipePageHotbarSlot,
   onDropHotbarSlot,
+  onRefineHotbarSlot,
+  onAddFuelHotbarSlot,
   onUseActiveEnchantment,
   onOpenBagPopover,
   isBagPopoverOpen = false,
   onCloseBagPopover,
   playerEffectiveMaxHealth,
+  isOreSmeltingStationReachable = false,
   slotIndex,
 }: InventoryPlazaSlotItemProps): React.JSX.Element {
   const isReservedWeaponToolSlot =
@@ -462,12 +483,14 @@ function InventoryPlazaSlotItem({
         berryStudyCountsByLootKind,
         oreStudyCountsBySpeciesId,
         playerEffectiveMaxHealth,
+        isOreSmeltingStationReachable,
       }),
     [
       berryStudyCountsByLootKind,
       cloverStudyCount,
       flowerStudyCountsBySpeciesId,
       isEquipped,
+      isOreSmeltingStationReachable,
       item,
       oreStudyCountsBySpeciesId,
       playerEffectiveMaxHealth,
@@ -514,6 +537,16 @@ function InventoryPlazaSlotItem({
     onDropHotbarSlot?.(slotIndex);
     onCloseItemDetailPopover?.();
   }, [onCloseItemDetailPopover, onDropHotbarSlot, slotIndex]);
+
+  const handlingRefineFromDetailPopover = useCallback((): void => {
+    onRefineHotbarSlot?.(slotIndex);
+    onCloseItemDetailPopover?.();
+  }, [onCloseItemDetailPopover, onRefineHotbarSlot, slotIndex]);
+
+  const handlingAddFuelFromDetailPopover = useCallback((): void => {
+    onAddFuelHotbarSlot?.(slotIndex);
+    onCloseItemDetailPopover?.();
+  }, [onAddFuelHotbarSlot, onCloseItemDetailPopover, slotIndex]);
 
   const handlingEquipFromDetailPopover = useCallback((): void => {
     onEquipSlot?.(slotIndex);
@@ -846,6 +879,16 @@ function InventoryPlazaSlotItem({
             detailPopoverModel.canAttachRecipePage &&
             onAttachRecipePageHotbarSlot
               ? handlingAttachRecipePageFromDetailPopover
+              : undefined
+          }
+          onRefineItem={
+            detailPopoverModel.canRefine && onRefineHotbarSlot
+              ? handlingRefineFromDetailPopover
+              : undefined
+          }
+          onAddFuelItem={
+            detailPopoverModel.canAddFuel && onAddFuelHotbarSlot
+              ? handlingAddFuelFromDetailPopover
               : undefined
           }
           onDropItem={

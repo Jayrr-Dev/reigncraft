@@ -53,7 +53,7 @@ import {
   STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { handlingWorldPlazaInventoryBagAwareDragEnd } from '@/components/world/inventory/domains/handlingWorldPlazaInventoryBagAwareDragEnd';
-import { findingWorldPlazaInventoryFirstBagHotbarSlotIndex } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagContents';
+import { resolvingWorldPlazaInventoryBagHotbarSlotIndexFromOverId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagHotbarSlotIndexFromOverId';
 import { resolvingWorldPlazaInventoryHotbarDeviceScale } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarDeviceScale';
 import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
 import { resolvingWorldPlazaInventoryRetainedDragSlotIndices } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryRetainedDragSlotIndices';
@@ -62,7 +62,7 @@ import type { TrackingWorldPlazaInventoryDropPlacementResult } from '@/component
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
 import { usingWorldPlazaInventoryStoragePageDragHover } from '@/components/world/inventory/hooks/usingWorldPlazaInventoryStoragePageDragHover';
 import { cn } from '@/lib/utils';
-import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core';
 import type * as React from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
@@ -112,6 +112,10 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
   readonly onStudyHotbarSlot?: (slotIndex: number) => void;
   /** Attach cookbook recipe page from a hotbar/storage slot. */
   readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
+  /** Deposit ore into a reachable bloomery / kiln / stove. */
+  readonly onRefineHotbarSlot?: (slotIndex: number) => void;
+  /** Deposit wood or coal as fuel into a reachable smelting station. */
+  readonly onAddFuelHotbarSlot?: (slotIndex: number) => void;
   /** Active enchantment use from the item action popover. */
   readonly onUseActiveEnchantment?: (
     slotIndex: number,
@@ -123,6 +127,11 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
   readonly playerEffectiveMaxHealth?: number;
   /** Selected ore-smelting station rendered inside the inventory DnD context. */
   readonly oreSmeltingStation?: RenderingWorldPlazaInventoryOreSmeltingStation | null;
+  /**
+   * True when standing near a bloomery / kiln / stove (UI open also counts via
+   * oreSmeltingStation). Gates Refine / Add Fuel action tower buttons.
+   */
+  readonly isNearOreSmeltingStation?: boolean;
 }
 
 type RenderingWorldPlazaInventoryHotbarInventoryShellProps = {
@@ -137,6 +146,8 @@ type RenderingWorldPlazaInventoryHotbarInventoryShellProps = {
   readonly onStudyHotbarSlot?: (slotIndex: number) => void;
   readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
   readonly onDropHotbarSlot?: (slotIndex: number) => void;
+  readonly onRefineHotbarSlot?: (slotIndex: number) => void;
+  readonly onAddFuelHotbarSlot?: (slotIndex: number) => void;
   readonly onUseActiveEnchantment?: (
     slotIndex: number,
     enchantmentId: string
@@ -155,6 +166,7 @@ type RenderingWorldPlazaInventoryHotbarInventoryShellProps = {
   ) => DefiningInventoryItem | null;
   readonly playerEffectiveMaxHealth?: number;
   readonly oreSmeltingStation?: RenderingWorldPlazaInventoryOreSmeltingStation | null;
+  readonly isOreSmeltingStationReachable?: boolean;
 };
 
 /**
@@ -173,6 +185,8 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
     onStudyHotbarSlot,
     onAttachRecipePageHotbarSlot,
     onDropHotbarSlot,
+    onRefineHotbarSlot,
+    onAddFuelHotbarSlot,
     onUseActiveEnchantment,
     openBagHotbarSlotIndex,
     openItemDetailSlotIndex,
@@ -185,6 +199,7 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
     resolvingDraggedItemById,
     playerEffectiveMaxHealth,
     oreSmeltingStation,
+    isOreSmeltingStationReachable = false,
   }: RenderingWorldPlazaInventoryHotbarInventoryShellProps): React.JSX.Element {
     const viewportStyles = useMemo(
       () => resolvingWorldPlazaInventoryHotbarViewportStyles(viewportHudScale),
@@ -209,12 +224,60 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
       [draggingFromSlotIndex, storagePageIndex]
     );
 
-    const { onDragOver, clearingDragHoverPaging } =
+    const { onDragOver: onStoragePageDragOver, clearingDragHoverPaging } =
       usingWorldPlazaInventoryStoragePageDragHover({
         storagePageIndex,
         storagePageCount: DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT,
         onStoragePageIndexChange,
       });
+
+    const handlingInventoryDragOver = useCallback(
+      (event: DragOverEvent): void => {
+        onStoragePageDragOver(event);
+
+        const overId = event.over ? String(event.over.id) : null;
+
+        if (overId === null) {
+          return;
+        }
+
+        const activeItemId = parsingInventoryItemDraggableId(
+          String(event.active.id)
+        );
+        const draggedItem =
+          activeItemId !== null
+            ? resolvingDraggedItemById(activeItemId, state)
+            : null;
+
+        if (
+          draggedItem &&
+          checkingWorldPlazaInventoryItemIsBag(draggedItem.itemTypeId)
+        ) {
+          return;
+        }
+
+        const bagHotbarSlotIndex =
+          resolvingWorldPlazaInventoryBagHotbarSlotIndexFromOverId(
+            overId,
+            state,
+            DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+          );
+
+        if (
+          bagHotbarSlotIndex !== null &&
+          bagHotbarSlotIndex !== openBagHotbarSlotIndex
+        ) {
+          openingBagPopover(bagHotbarSlotIndex);
+        }
+      },
+      [
+        onStoragePageDragOver,
+        openBagHotbarSlotIndex,
+        openingBagPopover,
+        resolvingDraggedItemById,
+        state,
+      ]
+    );
 
     const handlingInventoryDragStartWithSourcePin = useCallback(
       (event: DragStartEvent): void => {
@@ -253,12 +316,15 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
         onStudyHotbarSlot,
         onAttachRecipePageHotbarSlot,
         onDropHotbarSlot,
+        onRefineHotbarSlot,
+        onAddFuelHotbarSlot,
         onUseActiveEnchantment,
         togglingItemActionPopover,
         closingItemActionPopover,
         openingBagPopover,
         closingBagPopover,
         playerEffectiveMaxHealth,
+        isOreSmeltingStationReachable,
       });
 
     return (
@@ -292,7 +358,7 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
               state={state}
               registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
               onDragStart={handlingInventoryDragStartWithSourcePin}
-              onDragOver={onDragOver}
+              onDragOver={handlingInventoryDragOver}
               onDragEnd={handlingInventoryDragEndWithPagingClear}
               onDragCancel={handlingInventoryDragCancel}
               resolvingDraggedItemById={resolvingDraggedItemById}
@@ -353,10 +419,13 @@ export function RenderingWorldPlazaInventoryHotbar({
   onEatHotbarSlot,
   onStudyHotbarSlot,
   onAttachRecipePageHotbarSlot,
+  onRefineHotbarSlot,
+  onAddFuelHotbarSlot,
   onUseActiveEnchantment,
   isEmbeddedInHudToolbarStack = false,
   playerEffectiveMaxHealth,
   oreSmeltingStation = null,
+  isNearOreSmeltingStation = false,
 }: RenderingWorldPlazaInventoryHotbarProps): React.JSX.Element {
   const { state, isLoading, handleDragEnd, moveItem, removeItem, updateState } =
     usingWorldPlazaInventory({
@@ -440,29 +509,7 @@ export function RenderingWorldPlazaInventoryHotbar({
         checkingWorldPlazaInventoryItemIsBag(draggedItem.itemTypeId)
       ) {
         setOpenBagHotbarSlotIndex(null);
-        return;
       }
-
-      if (!draggedItem) {
-        return;
-      }
-
-      setOpenBagHotbarSlotIndex((currentOpen) => {
-        if (currentOpen !== null) {
-          const openBagItem = inventoryState.slots[currentOpen];
-
-          if (
-            openBagItem &&
-            checkingWorldPlazaInventoryItemIsBag(openBagItem.itemTypeId)
-          ) {
-            return currentOpen;
-          }
-        }
-
-        return findingWorldPlazaInventoryFirstBagHotbarSlotIndex(
-          inventoryState
-        );
-      });
     },
     []
   );
@@ -634,6 +681,8 @@ export function RenderingWorldPlazaInventoryHotbar({
           onStudyHotbarSlot={onStudyHotbarSlot}
           onAttachRecipePageHotbarSlot={onAttachRecipePageHotbarSlot}
           onDropHotbarSlot={handlingDropHotbarSlot}
+          onRefineHotbarSlot={onRefineHotbarSlot}
+          onAddFuelHotbarSlot={onAddFuelHotbarSlot}
           onUseActiveEnchantment={onUseActiveEnchantment}
           openBagHotbarSlotIndex={openBagHotbarSlotIndex}
           openItemDetailSlotIndex={openItemDetailSlotIndex}
@@ -646,6 +695,9 @@ export function RenderingWorldPlazaInventoryHotbar({
           resolvingDraggedItemById={resolvingDraggedItemById}
           playerEffectiveMaxHealth={playerEffectiveMaxHealth}
           oreSmeltingStation={oreSmeltingStation}
+          isOreSmeltingStationReachable={
+            Boolean(oreSmeltingStation) || isNearOreSmeltingStation
+          }
         />
       </div>
     </ProvidingWorldPlazaViewportHudScale>

@@ -10,6 +10,7 @@ import {
   type GroupingWorldBuildingPlacedBlocksTileColumn,
 } from '@/components/world/building/domains/groupingWorldBuildingPlacedBlocksByTileColumn';
 import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
+import { checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility } from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
 import {
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore,
@@ -104,7 +105,10 @@ export function RenderingWorldPlazaPlacedBlocks({
     () =>
       placedBlocks.filter(
         (block) =>
-          !checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering(block)
+          !checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering(block) &&
+          !checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility(
+            block.definitionId
+          )
       ),
     [placedBlocks]
   );

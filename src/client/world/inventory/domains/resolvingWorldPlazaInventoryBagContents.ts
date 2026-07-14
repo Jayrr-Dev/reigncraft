@@ -199,22 +199,3 @@ export function findingWorldPlazaInventoryHotbarSlotForBagInstanceId(
 
   return null;
 }
-
-/**
- * Returns the first hotbar slot index containing a bag item, if any.
- *
- * @param state - Hotbar inventory state
- */
-export function findingWorldPlazaInventoryFirstBagHotbarSlotIndex(
-  state: DefiningInventoryState
-): number | null {
-  for (let slotIndex = 0; slotIndex < state.capacity; slotIndex += 1) {
-    const slotItem = state.slots[slotIndex];
-
-    if (slotItem && checkingWorldPlazaInventoryItemIsBag(slotItem.itemTypeId)) {
-      return slotIndex;
-    }
-  }
-
-  return null;
-}

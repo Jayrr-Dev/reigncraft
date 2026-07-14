@@ -6,6 +6,7 @@ import { checkingWorldBuildingBlockUsesTileColumnExtrusion } from '@/components/
 import { listingWorldBuildingPlacedBlocksAtTileFromIndex } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
 import { resolvingWorldBuildingSurfaceLayerAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingSurfaceLayerAtTileIndex';
+import { checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility } from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
 import type {
   DefiningWorldDepthProvider,
   DefiningWorldDepthProviderContext,
@@ -52,6 +53,11 @@ function checkingWorldDepthPlacedBlockColumnAtTileIndex(
     }
 
     if (checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering(block)) {
+      continue;
+    }
+
+    // Sprite utilities sort as entity siblings; not extruded column occluders.
+    if (checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility(block.definitionId)) {
       continue;
     }
 

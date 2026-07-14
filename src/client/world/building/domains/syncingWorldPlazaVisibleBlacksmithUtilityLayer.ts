@@ -3,28 +3,37 @@ import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE,
+  resolvingWorldBuildingBlockDefinition,
 } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import {
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_ACTIVE_WORLD_SPRITE_URL,
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_DISPLAY_SCALE,
+  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_FOOT_SINK_PX,
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND,
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_ALPHA,
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL,
   type DefiningWorldPlazaBlacksmithUtilityKind,
 } from '@/components/world/building/domains/definingWorldPlazaBlacksmithUtilitySpriteConstants';
-import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX } from '@/components/world/building/domains/definingWorldBuildingBuildModeConstants';
+import { checkingWorldBuildingPlacedBlockIsPassableTile } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import { resolvingWorldBuildingPlacedBlockExtrusionBottomLayer } from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
+import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
 import {
   checkingWorldBuildingPlacedBlockIsFootprintSatellite,
   resolvingWorldBuildingBlockPlacementFootprint,
 } from '@/components/world/building/domains/definingWorldBuildingPlacementFootprint';
-import { resolvingWorldBuildingBlockDefinition } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
-import { resolvingWorldBuildingPlacedBlockWorldLayer } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
-import { DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX } from '@/components/world/building/domains/definingWorldBuildingBuildModeConstants';
-import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
-import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
+import {
+  resolvingWorldBuildingPlacedBlockBlockHeight,
+  resolvingWorldBuildingPlacedBlockWorldLayer,
+  type DefiningWorldBuildingPlacedBlock,
+} from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { peekingWorldPlazaBlacksmithUtilitySpriteTextureForUrl } from '@/components/world/building/domains/loadingWorldPlazaBlacksmithUtilitySpriteTextures';
+import { DEFINING_WORLD_DEPTH_BLACKSMITH_UTILITY_ENTITY_DEPTH_BIAS } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
+import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import { DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX } from '@/components/world/domains/definingWorldPlazaIsometricTileLayoutConstants';
-import { peekingWorldPlazaBlacksmithUtilitySpriteTextureForUrl } from '@/components/world/building/domains/loadingWorldPlazaBlacksmithUtilitySpriteTextures';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { Sprite, Texture } from 'pixi.js';
 
 /** Synthetic block id for the craft/build utility placement ghost. */
@@ -68,6 +77,68 @@ export function checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility(
 }
 
 /**
+ * Screen-Y offset for utility sprite feet on the support surface top face.
+ *
+ * Matches extruded column bases: top anchor L sits above the platform when
+ * stacked (L = S + H), so feet use bottomLayer - 1, not L.
+ */
+export function computingWorldPlazaBlacksmithUtilityFootLayerOffsetPx(
+  worldLayer: number,
+  blockHeight: number
+): number {
+  if (checkingWorldBuildingPlacedBlockIsPassableTile(blockHeight)) {
+    return computingWorldBuildingWorldLayerScreenOffsetPx(worldLayer);
+  }
+
+  const bottomLayer = resolvingWorldBuildingPlacedBlockExtrusionBottomLayer(
+    worldLayer,
+    blockHeight
+  );
+
+  if (bottomLayer <= DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND) {
+    return 0;
+  }
+
+  return computingWorldBuildingWorldLayerScreenOffsetPx(bottomLayer - 1);
+}
+
+/**
+ * Grid foot for utility depth sorting (matches sprite foot at footprint center).
+ */
+export function resolvingWorldPlazaBlacksmithUtilityDepthSortGridPoint(
+  tileX: number,
+  tileY: number,
+  footprintTileWidth: number,
+  footprintTileHeight: number
+): DefiningWorldPlazaWorldPoint {
+  return {
+    x: tileX + Math.max(0, footprintTileWidth - 1) * 0.5,
+    y: tileY + Math.max(0, footprintTileHeight - 1) * 0.5,
+  };
+}
+
+/**
+ * Entity-layer z-index so utilities interleave with avatars (sibling sprites).
+ */
+export function resolvingWorldPlazaBlacksmithUtilityEntityZIndex(
+  tileX: number,
+  tileY: number,
+  footprintTileWidth: number,
+  footprintTileHeight: number
+): number {
+  return (
+    computingWorldDepthSortKey(
+      resolvingWorldPlazaBlacksmithUtilityDepthSortGridPoint(
+        tileX,
+        tileY,
+        footprintTileWidth,
+        footprintTileHeight
+      )
+    ) + DEFINING_WORLD_DEPTH_BLACKSMITH_UTILITY_ENTITY_DEPTH_BIAS
+  );
+}
+
+/**
  * Positions and scales a blacksmith utility sprite at an anchor tile.
  */
 export function applyingWorldPlazaBlacksmithUtilitySpriteAtAnchorTile(input: {
@@ -77,21 +148,27 @@ export function applyingWorldPlazaBlacksmithUtilitySpriteAtAnchorTile(input: {
   readonly tileX: number;
   readonly tileY: number;
   readonly worldLayer: number;
+  readonly blockHeight: number;
   readonly footprintTileWidth: number;
   readonly footprintTileHeight: number;
   readonly alpha?: number;
 }): void {
-  const centerTileX =
-    input.tileX + (input.footprintTileWidth - 1) * 0.5;
-  const centerTileY =
-    input.tileY + (input.footprintTileHeight - 1) * 0.5;
-  const screenPoint = convertingWorldPlazaGridPointToIsometricScreenPoint({
-    x: centerTileX,
-    y: centerTileY,
-  });
-  const layerOffsetY = computingWorldBuildingWorldLayerScreenOffsetPx(
-    input.worldLayer
+  const depthSortGridPoint =
+    resolvingWorldPlazaBlacksmithUtilityDepthSortGridPoint(
+      input.tileX,
+      input.tileY,
+      input.footprintTileWidth,
+      input.footprintTileHeight
+    );
+  const screenPoint = convertingWorldPlazaGridPointToIsometricScreenPoint(
+    depthSortGridPoint
   );
+  const layerOffsetY = computingWorldPlazaBlacksmithUtilityFootLayerOffsetPx(
+    input.worldLayer,
+    input.blockHeight
+  );
+  const footSinkPx =
+    DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_FOOT_SINK_PX[input.utilityKind];
   const displayScale =
     DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_DISPLAY_SCALE[input.utilityKind];
   const targetWidth =
@@ -103,11 +180,15 @@ export function applyingWorldPlazaBlacksmithUtilitySpriteAtAnchorTile(input: {
   input.sprite.alpha = input.alpha ?? 1;
   input.sprite.anchor.set(0.5, 1);
   input.sprite.scale.set(textureScale);
-  input.sprite.position.set(screenPoint.x, screenPoint.y + layerOffsetY);
-  input.sprite.zIndex = resolvingWorldBuildingPlacedBlockColumnEntityZIndex(
+  input.sprite.position.set(
+    screenPoint.x,
+    screenPoint.y + layerOffsetY + footSinkPx
+  );
+  input.sprite.zIndex = resolvingWorldPlazaBlacksmithUtilityEntityZIndex(
     input.tileX,
     input.tileY,
-    input.worldLayer
+    input.footprintTileWidth,
+    input.footprintTileHeight
   );
 }
 
@@ -122,6 +203,7 @@ function applyingWorldPlazaBlacksmithUtilityToSprite(
     ? resolvingWorldBuildingBlockPlacementFootprint(definition)
     : { tileWidth: 1, tileHeight: 1 };
   const worldLayer = resolvingWorldBuildingPlacedBlockWorldLayer(block);
+  const blockHeight = resolvingWorldBuildingPlacedBlockBlockHeight(block);
 
   applyingWorldPlazaBlacksmithUtilitySpriteAtAnchorTile({
     sprite,
@@ -130,6 +212,7 @@ function applyingWorldPlazaBlacksmithUtilityToSprite(
     tileX: block.tilePosition.tileX,
     tileY: block.tilePosition.tileY,
     worldLayer,
+    blockHeight,
     footprintTileWidth: footprint.tileWidth,
     footprintTileHeight: footprint.tileHeight,
   });

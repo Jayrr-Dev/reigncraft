@@ -3,6 +3,9 @@
 /**
  * Pixi sprite layer for placed blacksmith utilities.
  *
+ * Sprites parent to the entity trunk layer (siblings of the avatar) so depth
+ * sort keys interleave correctly. Nested containers break that interleaving.
+ *
  * @module components/world/building/components/renderingWorldPlazaBlacksmithUtilityLayer
  */
 
@@ -17,13 +20,15 @@ import { checkingWorldPlazaPixiApplicationIsReady } from '@/components/world/dom
 import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
 import { useApplication } from '@pixi/react';
 import { Container, Graphics, Sprite } from 'pixi.js';
-import { useCallback, useRef } from 'react';
+import { useRef } from 'react';
 
 export type RenderingWorldPlazaBlacksmithUtilityLayerProps = {
   readonly placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
   readonly activeBlockIds?: ReadonlySet<string>;
   /** Craft/build ghost while placing anvil / kiln / bloomery / stove. */
   readonly placementPreviewBlock?: DefiningWorldBuildingPlacedBlock | null;
+  /** Entity trunk layer; utilities must be siblings of the avatar for z-sort. */
+  readonly entityLayerRef: React.RefObject<Container | null>;
 };
 
 /**
@@ -33,9 +38,9 @@ export function RenderingWorldPlazaBlacksmithUtilityLayer({
   placedBlocks,
   activeBlockIds,
   placementPreviewBlock = null,
-}: RenderingWorldPlazaBlacksmithUtilityLayerProps): React.JSX.Element | null {
+  entityLayerRef,
+}: RenderingWorldPlazaBlacksmithUtilityLayerProps): null {
   const applicationContext = useApplication();
-  const containerRef = useRef<Container | null>(null);
   const stateRef = useRef<SyncingWorldPlazaBlacksmithUtilitySpriteState>({
     spriteByBlockId: new Map(),
   });
@@ -47,15 +52,11 @@ export function RenderingWorldPlazaBlacksmithUtilityLayer({
   const placementPreviewBlockRef = useRef(placementPreviewBlock);
   placementPreviewBlockRef.current = placementPreviewBlock;
 
-  const attachingContainer = useCallback((container: Container | null): void => {
-    containerRef.current = container;
-  }, []);
-
   usingWorldPlazaSafeTick(() => {
-    const container = containerRef.current;
+    const entityLayer = entityLayerRef.current;
 
     if (
-      !container ||
+      !entityLayer ||
       !checkingWorldPlazaPixiApplicationIsReady(applicationContext)
     ) {
       return;
@@ -69,18 +70,24 @@ export function RenderingWorldPlazaBlacksmithUtilityLayer({
       creatingSprite: () => {
         const sprite = new Sprite();
         sprite.eventMode = 'none';
-        container.addChild(sprite);
+        entityLayer.addChild(sprite);
         return sprite;
       },
       destroyingSprite: (sprite) => {
-        container.removeChild(sprite);
+        if (sprite.parent === entityLayer) {
+          entityLayer.removeChild(sprite);
+        }
         sprite.destroy();
       },
     });
 
-    if (syncResult.needsChildSort) {
-      container.sortableChildren = true;
-      container.sortChildren();
+    let didMutateEntityLayerOrder = syncResult.needsChildSort;
+
+    for (const sprite of stateRef.current.spriteByBlockId.values()) {
+      if (sprite.parent !== entityLayer) {
+        entityLayer.addChild(sprite);
+        didMutateEntityLayerOrder = true;
+      }
     }
 
     const liveSmokeBlockIds = new Set<string>();
@@ -108,8 +115,9 @@ export function RenderingWorldPlazaBlacksmithUtilityLayer({
       if (!smokeGraphics) {
         smokeGraphics = new Graphics();
         smokeGraphics.eventMode = 'none';
-        container.addChild(smokeGraphics);
+        entityLayer.addChild(smokeGraphics);
         smokeGraphicsByBlockIdRef.current.set(block.blockId, smokeGraphics);
+        didMutateEntityLayerOrder = true;
       }
 
       smokeGraphics.clear();
@@ -117,7 +125,10 @@ export function RenderingWorldPlazaBlacksmithUtilityLayer({
         utilitySprite.position.x,
         utilitySprite.position.y - utilitySprite.height + 4
       );
-      smokeGraphics.zIndex = utilitySprite.zIndex + 0.1;
+      if (smokeGraphics.zIndex !== utilitySprite.zIndex + 0.1) {
+        smokeGraphics.zIndex = utilitySprite.zIndex + 0.1;
+        didMutateEntityLayerOrder = true;
+      }
 
       for (let puffIndex = 0; puffIndex < 4; puffIndex += 1) {
         const phase = (nowMs * 0.00035 + puffIndex * 0.24) % 1;
@@ -136,17 +147,18 @@ export function RenderingWorldPlazaBlacksmithUtilityLayer({
         continue;
       }
 
-      container.removeChild(smokeGraphics);
+      if (smokeGraphics.parent === entityLayer) {
+        entityLayer.removeChild(smokeGraphics);
+      }
       smokeGraphics.destroy();
       smokeGraphicsByBlockIdRef.current.delete(blockId);
+      didMutateEntityLayerOrder = true;
+    }
+
+    if (didMutateEntityLayerOrder && entityLayer.sortableChildren) {
+      entityLayer.sortChildren();
     }
   }, 'tick:blacksmith-utility-sprites');
 
-  return (
-    <pixiContainer
-      ref={attachingContainer}
-      sortableChildren
-      eventMode="none"
-    />
-  );
+  return null;
 }

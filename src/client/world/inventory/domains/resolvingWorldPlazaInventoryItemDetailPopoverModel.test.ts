@@ -7,6 +7,7 @@ import { resolvingWorldPlazaFlowerItemTypeIdFromSpeciesId } from '@/components/w
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { resolvingWorldPlazaOreItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { resolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailPopoverModel';
@@ -519,5 +520,61 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel berry Study', () =>
     expect(
       full?.infoRows.find((row) => row.id === 'berry-well-fed')?.value
     ).toMatch(/%/);
+  });
+});
+
+describe('resolvingWorldPlazaInventoryItemDetailPopoverModel ore smelting actions', () => {
+  const ironOreItemTypeId = resolvingWorldPlazaOreItemTypeIdFromSpeciesId('iron');
+
+  it('hides Refine and Add Fuel when no smelting station is reachable', () => {
+    const oreModel = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'ore-1',
+        itemTypeId: ironOreItemTypeId,
+        quantity: 3,
+        slotIndex: 0,
+      },
+      { isEquipped: false, isOreSmeltingStationReachable: false }
+    );
+    const woodModel = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'wood-1',
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+        quantity: 5,
+        slotIndex: 1,
+      },
+      { isEquipped: false, isOreSmeltingStationReachable: false }
+    );
+
+    expect(oreModel?.canRefine).toBe(false);
+    expect(oreModel?.canAddFuel).toBe(false);
+    expect(woodModel?.canRefine).toBe(false);
+    expect(woodModel?.canAddFuel).toBe(false);
+  });
+
+  it('shows Refine on smeltable ore and Add Fuel on wood when reachable', () => {
+    const oreModel = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'ore-1',
+        itemTypeId: ironOreItemTypeId,
+        quantity: 3,
+        slotIndex: 0,
+      },
+      { isEquipped: false, isOreSmeltingStationReachable: true }
+    );
+    const woodModel = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'wood-1',
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+        quantity: 5,
+        slotIndex: 1,
+      },
+      { isEquipped: false, isOreSmeltingStationReachable: true }
+    );
+
+    expect(oreModel?.canRefine).toBe(true);
+    expect(oreModel?.canAddFuel).toBe(false);
+    expect(woodModel?.canRefine).toBe(false);
+    expect(woodModel?.canAddFuel).toBe(true);
   });
 });

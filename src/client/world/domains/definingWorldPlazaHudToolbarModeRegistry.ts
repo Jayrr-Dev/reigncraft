@@ -57,7 +57,8 @@ export const DEFINING_WORLD_PLAZA_HUD_TOOLBAR_BUILD_CLAIM_TOGGLE_FACES = {
   [DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD]: {
     modeId: DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD,
     label: 'Build',
-    ariaLabel: 'Build mode. Click again to switch to claim.',
+    ariaLabel:
+      'Build mode. Use the build/claim switch on the hotbar to change edit mode.',
     iconifyIcon: 'mdi:hammer',
     activeButtonClassName:
       'inline-flex shrink-0 items-center justify-center rounded-md border border-amber-300/80 bg-[linear-gradient(180deg,#7a4a18_0%,#4a2e0e_100%)] font-bold uppercase text-amber-100 shadow-[0_0_0_1px_rgba(251,191,36,0.35),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-40',
@@ -65,7 +66,8 @@ export const DEFINING_WORLD_PLAZA_HUD_TOOLBAR_BUILD_CLAIM_TOGGLE_FACES = {
   [DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM]: {
     modeId: DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM,
     label: 'Claim',
-    ariaLabel: 'Claim mode. Click again to switch to build.',
+    ariaLabel:
+      'Claim mode. Use the build/claim switch on the hotbar to change edit mode.',
     iconifyIcon: 'mdi:land-plots',
     activeButtonClassName:
       'inline-flex shrink-0 items-center justify-center rounded-md border border-sky-300/80 bg-[linear-gradient(180deg,#1e4a5c_0%,#123040_100%)] font-bold uppercase text-sky-100 shadow-[0_0_0_1px_rgba(125,211,252,0.35),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm disabled:cursor-not-allowed disabled:opacity-40',
@@ -175,9 +177,13 @@ export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_CONTENT_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_STACK_CLASS_NAME =
   'pointer-events-none inline-flex w-full flex-col items-stretch gap-1' as const;
 
-/** Header row that hosts the mode badges (pointer-events restored). */
+/**
+ * Header row that hosts the mode badges (pointer-events restored).
+ * z-[60] stays above slot popovers (z-50) so Plots/Saves panels cannot cover
+ * Items/Craft/Claim and steal the first click.
+ */
 export const STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_HEADER_CLASS_NAME =
-  'pointer-events-auto flex w-full flex-col' as const;
+  'pointer-events-auto relative z-[60] flex w-full flex-col' as const;
 
 /**
  * Label text inside a mode badge.
