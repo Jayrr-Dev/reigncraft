@@ -11,6 +11,8 @@ import {
   DEFINING_WILDLIFE_HUNGER_CIRCLE_FILL_ARC_STEPS,
   DEFINING_WILDLIFE_HUNGER_CIRCLE_GAP_FROM_BARS_PX,
   DEFINING_WILDLIFE_HUNGER_CIRCLE_INNER_RADIUS_PX,
+  DEFINING_WILDLIFE_HUNGER_CIRCLE_MEAT_BONE_COLOR,
+  DEFINING_WILDLIFE_HUNGER_CIRCLE_MEAT_COLOR,
   DEFINING_WILDLIFE_HUNGER_CIRCLE_OUTER_RADIUS_PX,
   DEFINING_WILDLIFE_HUNGER_CIRCLE_RING_COLOR,
   DEFINING_WILDLIFE_VITALS_BAR_GAP_PX,
@@ -102,6 +104,40 @@ function drawingWildlifeHungerCircleFill(
   graphics.poly(points).fill({ color: fillColor });
 }
 
+/**
+ * Compact drumstick glyph centered in the hunger orb (HUD-readable at orb size).
+ */
+function drawingWildlifeHungerMeatIcon(
+  graphics: Graphics,
+  centerX: number,
+  centerY: number
+): void {
+  const scale = DEFINING_WILDLIFE_HUNGER_CIRCLE_INNER_RADIUS_PX / 5.5;
+
+  // Meat body (lower-left blob).
+  graphics
+    .ellipse(centerX - 0.6 * scale, centerY + 0.5 * scale, 2.4 * scale, 1.7 * scale)
+    .fill({ color: DEFINING_WILDLIFE_HUNGER_CIRCLE_MEAT_COLOR });
+
+  // Bone shaft toward upper-right.
+  graphics
+    .rect(
+      centerX + 0.2 * scale,
+      centerY - 2.2 * scale,
+      0.85 * scale,
+      2.8 * scale
+    )
+    .fill({ color: DEFINING_WILDLIFE_HUNGER_CIRCLE_MEAT_BONE_COLOR });
+
+  // Bone knobs.
+  graphics
+    .circle(centerX + 0.35 * scale, centerY - 2.4 * scale, 0.75 * scale)
+    .fill({ color: DEFINING_WILDLIFE_HUNGER_CIRCLE_MEAT_BONE_COLOR });
+  graphics
+    .circle(centerX + 1.15 * scale, centerY - 2.4 * scale, 0.75 * scale)
+    .fill({ color: DEFINING_WILDLIFE_HUNGER_CIRCLE_MEAT_BONE_COLOR });
+}
+
 function drawingWildlifeHungerCircle(
   graphics: Graphics,
   hungerRatio: number,
@@ -127,6 +163,7 @@ function drawingWildlifeHungerCircle(
     hungerRatio,
     resolvingWorldPlazaHungerFillMidPixiColor(hungerRatio)
   );
+  drawingWildlifeHungerMeatIcon(graphics, centerX, centerY);
 }
 
 function drawingWildlifeHealthAndStaminaBars(

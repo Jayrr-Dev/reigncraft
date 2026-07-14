@@ -19,6 +19,7 @@ import { pickingWorldHarvestDevvitFlower } from '@/components/world/harvest/repo
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import { resolvingWorldPlazaFlowerItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFlowerSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
+import { formattingWorldPlazaInventoryItemPickupToastMessage } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemPickupToastMessage';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, type RefObject } from 'react';
@@ -231,6 +232,12 @@ export function usingWorldPlazaFlowerPickInteraction({
         }
 
         notifyingWorldPlazaInventoryItemAdded(quantityAccepted);
+        showingGameplayHudToast(
+          formattingWorldPlazaInventoryItemPickupToastMessage({
+            itemTypeId,
+            quantity: quantityAccepted,
+          })
+        );
 
         const pickRequest = {
           tileX: entry.tileX,

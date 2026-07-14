@@ -9,10 +9,12 @@ import { RenderingUserProfileFriendRequestPlazaModal } from '@/components/friend
 import { usingUserProfileFriendPlazaNotifications } from '@/components/friends/hooks/usingUserProfileFriendPlazaNotifications';
 import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/hooks/usingUserProfileFriendRequestPlazaDialogs';
 import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
+import { formattingPlazaStudyCompleteToastMessage } from '@/components/home/domains/formattingPlazaStudyCompleteToastMessage';
 import {
   checkingPlazaHerbariumCloverStudyTierUnlocked,
   formattingPlazaHerbariumCloverStudyCountProgress,
 } from '@/components/home/domains/resolvingPlazaHerbariumCloverStudyTier';
+import { formattingPlazaHerbariumFlowerStudyCountProgress } from '@/components/home/domains/resolvingPlazaHerbariumFlowerStudyTier';
 import {
   checkingPlazaHerbariumStudyTierUnlocked,
   formattingPlazaHerbariumStudyCountProgress,
@@ -21,6 +23,14 @@ import {
   checkingPlazaLapidaryStudyTierUnlocked,
   formattingPlazaLapidaryStudyCountProgress,
 } from '@/components/home/domains/resolvingPlazaLapidaryStudyTier';
+import { formattingPlazaBestiaryStudyCountProgress } from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
+import {
+  resolvingPlazaBestiarySpeciesStudyDisplayName,
+  resolvingPlazaHerbariumCloverStudyDisplayName,
+  resolvingPlazaHerbariumFlowerStudyDisplayName,
+  resolvingPlazaHerbariumTreeStudyDisplayName,
+  resolvingPlazaLapidaryOreStudyDisplayName,
+} from '@/components/home/domains/resolvingPlazaStudySubjectDisplayName';
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import { sendingWorldPlazaAudioLifecycleEvent } from '@/components/world/audio/lifecycle/managingWorldPlazaAudioLifecycleStore';
@@ -230,7 +240,10 @@ import {
   DEFINING_WORLD_PLAZA_VIEWPORT_FRAME_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaViewportFullscreenConstants';
 import { findingWorldPlazaBiomeTeleportWorldPointForDev } from '@/components/world/domains/findingWorldPlazaBiomeTeleportWorldPointForDev';
-import { recordingWorldPlazaBestiarySpeciesStudied } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
+import {
+  gettingWorldPlazaBestiaryStudyCountsSnapshot,
+  recordingWorldPlazaBestiarySpeciesStudied,
+} from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
   gettingWorldPlazaHerbariumCloverStudyCountSnapshot,
@@ -2337,7 +2350,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         );
 
         if (cookResult.outcome === 'cooked') {
-          showingGameplayHudToast(`Cooked ${cookResult.cookedDisplayName}.`);
+          showingGameplayHudToast(`${cookResult.cookedDisplayName}.`);
           notifyingWorldPlazaInventoryItemAdded(1);
           return cookResult.nextState;
         }
@@ -4053,9 +4066,25 @@ function RenderingWorldPlazaPixiSceneConnected({
       );
       recordingWorldPlazaBestiarySpeciesStudied(entry.speciesId, studyPoints);
       playingWildlifeStudySfx();
+      const studyCount =
+        gettingWorldPlazaBestiaryStudyCountsSnapshot()[entry.speciesId] ??
+        studyPoints;
+      showingGameplayHudToast(
+        formattingPlazaStudyCompleteToastMessage({
+          subjectDisplayName: resolvingPlazaBestiarySpeciesStudyDisplayName(
+            entry.speciesId
+          ),
+          codexLabel: 'Bestiary',
+          progressLabel: formattingPlazaBestiaryStudyCountProgress(studyCount),
+        })
+      );
       clearingInteractableBlockClickSelection();
     },
-    [clearingInteractableBlockClickSelection, wildlifeStoreRef]
+    [
+      clearingInteractableBlockClickSelection,
+      showingGameplayHudToast,
+      wildlifeStoreRef,
+    ]
   );
 
   const {
@@ -4143,7 +4172,14 @@ function RenderingWorldPlazaPixiSceneConnected({
         gettingWorldPlazaHerbariumTreeStudyCountsSnapshot()[entry.variant] ??
         DEFINING_WORLD_PLAZA_TREE_STUMP_STUDY_POINTS;
       showingGameplayHudToast(
-        `Studied · Herbarium ${formattingPlazaHerbariumStudyCountProgress(studyCount)}`
+        formattingPlazaStudyCompleteToastMessage({
+          subjectDisplayName: resolvingPlazaHerbariumTreeStudyDisplayName(
+            entry.variant
+          ),
+          codexLabel: 'Herbarium',
+          progressLabel:
+            formattingPlazaHerbariumStudyCountProgress(studyCount),
+        })
       );
       playingWildlifeStudySfx();
       clearingInteractableBlockClickSelection();
@@ -5060,7 +5096,14 @@ function RenderingWorldPlazaPixiSceneConnected({
             context.flowerSpeciesId
           ] ?? 1;
         showingGameplayHudToast(
-          `Studied · Herbarium ${formattingPlazaHerbariumStudyCountProgress(studyCount)}`
+          formattingPlazaStudyCompleteToastMessage({
+            subjectDisplayName: resolvingPlazaHerbariumFlowerStudyDisplayName(
+              context.flowerSpeciesId
+            ),
+            codexLabel: 'Herbarium',
+            progressLabel:
+              formattingPlazaHerbariumFlowerStudyCountProgress(studyCount),
+          })
         );
         return;
       }
@@ -5072,7 +5115,14 @@ function RenderingWorldPlazaPixiSceneConnected({
             context.oreSpeciesId
           ] ?? 1;
         showingGameplayHudToast(
-          `Studied · Lapidary ${formattingPlazaLapidaryStudyCountProgress(studyCount)}`
+          formattingPlazaStudyCompleteToastMessage({
+            subjectDisplayName: resolvingPlazaLapidaryOreStudyDisplayName(
+              context.oreSpeciesId
+            ),
+            codexLabel: 'Lapidary',
+            progressLabel:
+              formattingPlazaLapidaryStudyCountProgress(studyCount),
+          })
         );
         return;
       }
@@ -5081,7 +5131,14 @@ function RenderingWorldPlazaPixiSceneConnected({
         recordingWorldPlazaHerbariumCloverStudied(context.cloverKind);
         const studyCount = gettingWorldPlazaHerbariumCloverStudyCountSnapshot();
         showingGameplayHudToast(
-          `Studied · Herbarium ${formattingPlazaHerbariumCloverStudyCountProgress(studyCount)}`
+          formattingPlazaStudyCompleteToastMessage({
+            subjectDisplayName: resolvingPlazaHerbariumCloverStudyDisplayName(
+              context.cloverKind
+            ),
+            codexLabel: 'Herbarium',
+            progressLabel:
+              formattingPlazaHerbariumCloverStudyCountProgress(studyCount),
+          })
         );
       }
     },

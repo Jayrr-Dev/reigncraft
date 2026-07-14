@@ -1,6 +1,6 @@
 /**
  * Care / command overhead badges for named Familiar+ companions.
- * Badges sit in a row above the companion name after the reveal dwell.
+ * Pet / Feed circle icons appear immediately when near and triggerable.
  *
  * @module components/world/wildlife/pets/domains/definingWildlifePetCompanionCareActionConstants
  */
@@ -11,9 +11,10 @@
  */
 export const DEFINING_WILDLIFE_PET_FEED_HUNGER_RATIO_THRESHOLD = 0.75 as const;
 
-/** Hover / near dwell before care + command badges appear above the name. */
-export const DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTIONS_REVEAL_MS =
-  5_000 as const;
+/**
+ * @deprecated Care icons show immediately when near; kept for older imports.
+ */
+export const DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTIONS_REVEAL_MS = 0 as const;
 
 /** Overhead Pet action label. */
 export const LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_PET = 'Pet' as const;
@@ -29,8 +30,12 @@ export const DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTION_PET_ICON_ID =
 export const DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED_ICON_ID =
   'mdi:food-drumstick' as const;
 
-/** Glyph edge length inside care / command badges. */
+/** Glyph edge length inside Pet / Feed circle triggers. */
 export const DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX =
+  12 as const;
+
+/** Glyph edge length inside command badges. */
+export const DEFINING_WILDLIFE_PET_COMPANION_COMMAND_BADGE_ICON_SIZE_PX =
   10 as const;
 
 /** Accessible label for the overhead companion action badge strip. */
@@ -47,9 +52,9 @@ export const STYLING_WILDLIFE_PET_COMPANION_CARE_ACTION_STACK_CLASS_NAME =
 export const STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_ROW_CLASS_NAME =
   'pointer-events-auto flex max-w-[min(100vw,220px)] flex-wrap items-center justify-center gap-1' as const;
 
-/** Shared shell for Pet / Feed care badges. */
+/** Circular Pet / Feed trigger (icon only). */
 export const STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_CLASS_NAME =
-  'world-plaza-companion-care-badge pointer-events-auto inline-flex shrink-0 cursor-pointer select-none items-center justify-center gap-0.5 rounded-md border border-white/35 bg-black/60 px-1.5 py-0.5 font-display text-[9px] font-bold uppercase tracking-[0.06em] text-white shadow-sm shadow-black/40 backdrop-blur-[2px] transition-[transform,background-color,border-color,opacity] hover:border-white/55 hover:bg-black/75 disabled:cursor-not-allowed disabled:opacity-45' as const;
+  'world-plaza-companion-care-badge pointer-events-auto inline-flex size-5 shrink-0 cursor-pointer select-none items-center justify-center rounded-full border border-white/35 bg-black/60 text-white shadow-sm shadow-black/40 backdrop-blur-[2px] transition-[transform,background-color,border-color,opacity] hover:border-white/55 hover:bg-black/75 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-45' as const;
 
 /** Follow / Stay / Attack / Defend command badges (gold order chrome). */
 export const STYLING_WILDLIFE_PET_COMPANION_COMMAND_BADGE_CLASS_NAME =

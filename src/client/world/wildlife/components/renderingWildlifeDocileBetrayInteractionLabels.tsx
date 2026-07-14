@@ -3,8 +3,9 @@
 /**
  * Outlined Name? / companion name with care + command badges above.
  *
- * Named Familiar+ pets: name opens the panel. After 5s near or 5s name hover/tap,
- * Pet, Feed, and command badges appear above the name.
+ * Named Familiar+ pets: name opens the panel. When near, Pet and Feed circle
+ * icons appear immediately when those actions are triggerable. Command badges
+ * stay in the same strip when unlocked.
  *
  * @module components/world/wildlife/components/renderingWildlifeDocileBetrayInteractionLabels
  */
@@ -27,6 +28,7 @@ import {
 } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionLabelUiConstants';
 import { DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_LABEL_GAP_PX } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressConstants';
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
+import { checkingWildlifeDocilePetIsReady } from '@/components/world/wildlife/domains/checkingWildlifeDocilePetIsReady';
 import { DEFINING_WILDLIFE_DOCILE_PET_LABEL_OFFSET_ABOVE_NAME_TAG_PX } from '@/components/world/wildlife/domains/definingWildlifeDocilePetConstants';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { ManagingWildlifeDocileAttackConfirmPending } from '@/components/world/wildlife/domains/managingWildlifeDocileAttackConfirmStore';
@@ -45,8 +47,8 @@ import { checkingWildlifePetNeedsOwnerFeed } from '@/components/world/wildlife/p
 import {
   DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED_ICON_ID,
   DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTION_PET_ICON_ID,
-  DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTIONS_REVEAL_MS,
   DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX,
+  DEFINING_WILDLIFE_PET_COMPANION_COMMAND_BADGE_ICON_SIZE_PX,
   LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED,
   LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_PET,
   LABELING_WILDLIFE_PET_COMPANION_CARE_BADGE_TOOLBAR,
@@ -106,18 +108,21 @@ type RenderingWildlifeDocileBetrayLiveLabelSnapshot = {
   readonly activeCommand: DefiningWildlifePetCommandId | null;
   /** True when hunger is below the owner-feed threshold. */
   readonly needsOwnerFeed: boolean;
+  /** True when Pet cooldown has elapsed. */
+  readonly isPetReady: boolean;
 };
 
 function formattingWildlifeDocileBetrayLiveLabelSnapshotKey(
   snapshot: RenderingWildlifeDocileBetrayLiveLabelSnapshot
 ): string {
-  return `${snapshot.label}\0${snapshot.isCompanionNameAction ? '1' : '0'}\0${snapshot.hasPermanentName ? '1' : '0'}\0${Math.round(snapshot.loyalty)}\0${snapshot.activeCommand ?? ''}\0${snapshot.needsOwnerFeed ? '1' : '0'}`;
+  return `${snapshot.label}\0${snapshot.isCompanionNameAction ? '1' : '0'}\0${snapshot.hasPermanentName ? '1' : '0'}\0${Math.round(snapshot.loyalty)}\0${snapshot.activeCommand ?? ''}\0${snapshot.needsOwnerFeed ? '1' : '0'}\0${snapshot.isPetReady ? '1' : '0'}`;
 }
 
 function readingWildlifeDocileBetrayLiveLabelSnapshot(
   pending: ManagingWildlifeDocileAttackConfirmPending | null,
   wildlifeStoreRef: React.RefObject<ManagingWildlifeInstanceStore>,
-  isPetting: boolean
+  isPetting: boolean,
+  nowMs: number
 ): RenderingWildlifeDocileBetrayLiveLabelSnapshot {
   if (!pending) {
     return {
@@ -127,6 +132,7 @@ function readingWildlifeDocileBetrayLiveLabelSnapshot(
       loyalty: 0,
       activeCommand: null,
       needsOwnerFeed: false,
+      isPetReady: false,
     };
   }
 
@@ -142,8 +148,9 @@ function readingWildlifeDocileBetrayLiveLabelSnapshot(
   const needsOwnerFeed = checkingWildlifePetNeedsOwnerFeed(
     pendingInstance?.hungerState.hungerRatio ?? 1
   );
+  const isPetReady = checkingWildlifeDocilePetIsReady(pendingInstance, nowMs);
 
-  // Familiar+: overhead is Name? / pet name (+ delayed care stack when named).
+  // Familiar+: overhead is Name? / pet name (+ care stack when named).
   if (isNamable) {
     return {
       label: resolvingWildlifePetIdleInteractionLabel({
@@ -156,6 +163,7 @@ function readingWildlifeDocileBetrayLiveLabelSnapshot(
       loyalty,
       activeCommand,
       needsOwnerFeed,
+      isPetReady,
     };
   }
 
@@ -167,6 +175,7 @@ function readingWildlifeDocileBetrayLiveLabelSnapshot(
       loyalty,
       activeCommand,
       needsOwnerFeed,
+      isPetReady,
     };
   }
 
@@ -182,6 +191,7 @@ function readingWildlifeDocileBetrayLiveLabelSnapshot(
       loyalty,
       activeCommand,
       needsOwnerFeed,
+      isPetReady,
     };
   }
 
@@ -192,6 +202,7 @@ function readingWildlifeDocileBetrayLiveLabelSnapshot(
     loyalty,
     activeCommand,
     needsOwnerFeed,
+    isPetReady,
   };
 }
 
@@ -228,13 +239,12 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
       loyalty: 0,
       activeCommand: null,
       needsOwnerFeed: false,
+      isPetReady: false,
     });
   const [liveLabelSnapshot, setLiveLabelSnapshot] =
     useState<RenderingWildlifeDocileBetrayLiveLabelSnapshot>(
       liveLabelCacheRef.current
     );
-  const [areCareActionsRevealed, setAreCareActionsRevealed] = useState(false);
-  const nameHoverRevealTimeoutRef = useRef<number | null>(null);
 
   onBetrayRef.current = onBetray;
   onNamePetRef.current = onNamePet;
@@ -248,57 +258,12 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
     timedInteractionProgressSnapshot.activeTargetKey === pending?.instanceId;
 
   useEffect(() => {
-    setAreCareActionsRevealed(false);
-
-    if (nameHoverRevealTimeoutRef.current !== null) {
-      window.clearTimeout(nameHoverRevealTimeoutRef.current);
-      nameHoverRevealTimeoutRef.current = null;
-    }
-
-    if (!pending) {
-      return;
-    }
-
-    const nearRevealTimeoutId = window.setTimeout(() => {
-      setAreCareActionsRevealed(true);
-    }, DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTIONS_REVEAL_MS);
-
-    return () => {
-      window.clearTimeout(nearRevealTimeoutId);
-
-      if (nameHoverRevealTimeoutRef.current !== null) {
-        window.clearTimeout(nameHoverRevealTimeoutRef.current);
-        nameHoverRevealTimeoutRef.current = null;
-      }
-    };
-  }, [pending?.instanceId]);
-
-  const startingNameHoverReveal = (): void => {
-    if (areCareActionsRevealed || nameHoverRevealTimeoutRef.current !== null) {
-      return;
-    }
-
-    nameHoverRevealTimeoutRef.current = window.setTimeout(() => {
-      nameHoverRevealTimeoutRef.current = null;
-      setAreCareActionsRevealed(true);
-    }, DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTIONS_REVEAL_MS);
-  };
-
-  const cancellingNameHoverReveal = (): void => {
-    if (nameHoverRevealTimeoutRef.current === null) {
-      return;
-    }
-
-    window.clearTimeout(nameHoverRevealTimeoutRef.current);
-    nameHoverRevealTimeoutRef.current = null;
-  };
-
-  useEffect(() => {
     const syncingLiveLabelSnapshot = (): void => {
       const nextSnapshot = readingWildlifeDocileBetrayLiveLabelSnapshot(
         pendingRef.current,
         wildlifeStoreRef,
-        isPetting
+        isPetting,
+        Date.now()
       );
       const nextKey =
         formattingWildlifeDocileBetrayLiveLabelSnapshotKey(nextSnapshot);
@@ -330,15 +295,14 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
     };
   }, [isPetting, pending, wildlifeStoreRef]);
 
-  const availableCommandOptions =
-    liveLabelSnapshot.hasPermanentName && areCareActionsRevealed
-      ? DEFINING_WILDLIFE_PET_MODAL_COMMAND_OPTIONS.filter((option) =>
-          checkingWildlifePetHasCapability(
-            liveLabelSnapshot.loyalty,
-            option.requiredCapability
-          )
+  const availableCommandOptions = liveLabelSnapshot.hasPermanentName
+    ? DEFINING_WILDLIFE_PET_MODAL_COMMAND_OPTIONS.filter((option) =>
+        checkingWildlifePetHasCapability(
+          liveLabelSnapshot.loyalty,
+          option.requiredCapability
         )
-      : [];
+      )
+    : [];
 
   useLayoutEffect(() => {
     if (!pending) {
@@ -459,14 +423,17 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
     onOpenPetModalRef.current(currentPending.instanceId);
   };
 
+  const canActivateFeed = canFeedPet && liveLabelSnapshot.needsOwnerFeed;
+  const showPetAction = isPetting || liveLabelSnapshot.isPetReady;
+  const showFeedAction = canActivateFeed;
   const showNamedCareStack =
-    liveLabelSnapshot.hasPermanentName && areCareActionsRevealed;
+    liveLabelSnapshot.hasPermanentName &&
+    (showPetAction || showFeedAction || availableCommandOptions.length > 0);
   const isPetProgressRingVisible =
     checkingWorldPlazaTimedInteractionProgressRingVisible(
       timedInteractionProgressSnapshot,
       pending.instanceId
     );
-  const canActivateFeed = canFeedPet && liveLabelSnapshot.needsOwnerFeed;
   const petBadgeLabel = isPetting
     ? resolvingWildlifeDocilePettingLabel()
     : LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_PET;
@@ -495,36 +462,86 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
                   STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_ROW_CLASS_NAME
                 }
               >
-                <div
-                  className={
-                    DEFINING_WORLD_PLAZA_TIMED_INTERACTION_LABEL_ROW_CLASS_NAME
-                  }
-                >
+                {showPetAction ? (
+                  <div
+                    className={
+                      DEFINING_WORLD_PLAZA_TIMED_INTERACTION_LABEL_ROW_CLASS_NAME
+                    }
+                  >
+                    <button
+                      type="button"
+                      {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+                      className={
+                        STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_CLASS_NAME
+                      }
+                      aria-label={petBadgeLabel}
+                      title={petBadgeLabel}
+                      disabled={isPetting}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        const currentPending = pendingRef.current;
+
+                        if (!currentPending || isPetting) {
+                          return;
+                        }
+
+                        onBetrayRef.current(currentPending);
+                      }}
+                    >
+                      <Icon
+                        icon={
+                          DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTION_PET_ICON_ID
+                        }
+                        width={
+                          DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX
+                        }
+                        height={
+                          DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX
+                        }
+                        className={
+                          STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_CLASS_NAME
+                        }
+                        aria-hidden
+                      />
+                    </button>
+                    {isPetProgressRingVisible ? (
+                      <div
+                        className={
+                          DEFINING_WORLD_PLAZA_TIMED_INTERACTION_LABEL_RING_SLOT_CLASS_NAME
+                        }
+                        style={{
+                          marginLeft: `${DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_LABEL_GAP_PX}px`,
+                        }}
+                      >
+                        <RenderingWorldPlazaTimedInteractionProgressRing
+                          snapshot={timedInteractionProgressSnapshot}
+                          progressRatioRef={timedInteractionProgressRatioRef}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {showFeedAction ? (
                   <button
                     type="button"
                     {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
                     className={
                       STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_CLASS_NAME
                     }
-                    aria-label={petBadgeLabel}
-                    title={petBadgeLabel}
-                    disabled={isPetting}
+                    aria-label={LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED}
+                    title={LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED}
                     onClick={(event) => {
                       event.preventDefault();
                       event.stopPropagation();
-
-                      const currentPending = pendingRef.current;
-
-                      if (!currentPending || isPetting) {
-                        return;
-                      }
-
-                      onBetrayRef.current(currentPending);
+                      onFeedPetRef.current(pending.instanceId);
                     }}
                   >
                     <Icon
                       icon={
-                        DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTION_PET_ICON_ID
+                        DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED_ICON_ID
                       }
                       width={
                         DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX
@@ -537,64 +554,8 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
                       }
                       aria-hidden
                     />
-                    <span>{petBadgeLabel}</span>
                   </button>
-                  {isPetProgressRingVisible ? (
-                    <div
-                      className={
-                        DEFINING_WORLD_PLAZA_TIMED_INTERACTION_LABEL_RING_SLOT_CLASS_NAME
-                      }
-                      style={{
-                        marginLeft: `${DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_LABEL_GAP_PX}px`,
-                      }}
-                    >
-                      <RenderingWorldPlazaTimedInteractionProgressRing
-                        snapshot={timedInteractionProgressSnapshot}
-                        progressRatioRef={timedInteractionProgressRatioRef}
-                      />
-                    </div>
-                  ) : null}
-                </div>
-
-                <button
-                  type="button"
-                  {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
-                  className={
-                    STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_CLASS_NAME
-                  }
-                  aria-label={LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED}
-                  title={LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED}
-                  disabled={!canActivateFeed}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    if (!canActivateFeed) {
-                      return;
-                    }
-
-                    onFeedPetRef.current(pending.instanceId);
-                  }}
-                >
-                  <Icon
-                    icon={
-                      DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED_ICON_ID
-                    }
-                    width={
-                      DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX
-                    }
-                    height={
-                      DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX
-                    }
-                    className={
-                      STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_CLASS_NAME
-                    }
-                    aria-hidden
-                  />
-                  <span>
-                    {LABELING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED}
-                  </span>
-                </button>
+                ) : null}
 
                 {availableCommandOptions.map((option) => {
                   const isActive =
@@ -625,10 +586,10 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
                       <Icon
                         icon={option.iconId}
                         width={
-                          DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX
+                          DEFINING_WILDLIFE_PET_COMPANION_COMMAND_BADGE_ICON_SIZE_PX
                         }
                         height={
-                          DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX
+                          DEFINING_WILDLIFE_PET_COMPANION_COMMAND_BADGE_ICON_SIZE_PX
                         }
                         className={
                           STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_CLASS_NAME
@@ -648,10 +609,6 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
               className={
                 DEFINING_WORLD_PLAZA_COMPANION_INTERACTION_LABEL_BUTTON_CLASS_NAME
               }
-              onPointerEnter={startingNameHoverReveal}
-              onPointerLeave={cancellingNameHoverReveal}
-              onPointerDown={startingNameHoverReveal}
-              onPointerUp={cancellingNameHoverReveal}
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();

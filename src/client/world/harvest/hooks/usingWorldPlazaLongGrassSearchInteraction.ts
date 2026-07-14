@@ -15,6 +15,7 @@ import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/in
 import { DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_PICKED_AT_MS_METADATA_KEY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverConstants';
 import { resolvingWorldPlazaCloverItemTypeIdFromLootKind } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
+import { formattingWorldPlazaInventoryItemPickupToastMessage } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemPickupToastMessage';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, type RefObject } from 'react';
@@ -257,6 +258,12 @@ export function usingWorldPlazaLongGrassSearchInteraction({
         }
 
         notifyingWorldPlazaInventoryItemAdded(quantityAccepted);
+        showingGameplayHudToast(
+          formattingWorldPlazaInventoryItemPickupToastMessage({
+            itemTypeId,
+            quantity: quantityAccepted,
+          })
+        );
 
         const searchResult = searchingWorldPlazaLocalLongGrass(
           persistenceOwnerId,

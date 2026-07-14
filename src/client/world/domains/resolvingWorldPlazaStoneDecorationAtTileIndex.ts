@@ -1,4 +1,5 @@
 import { checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex } from '@/components/world/domains/checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex';
+import { checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex';
 import { checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainRockColumnSpacingAnchorAtTileIndex';
 import { checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex';
 import { checkingWorldPlazaTileIsRockyBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsRockyBiomeAtTileIndex';
@@ -235,6 +236,11 @@ function computingWorldPlazaStoneDecorationAtTileIndex(
   }
 
   if (checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex(tileX, tileY)) {
+    return null;
+  }
+
+  // Slope rims stay bare so pebbles and boulders do not hang over cliff faces.
+  if (checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex(tileX, tileY)) {
     return null;
   }
 

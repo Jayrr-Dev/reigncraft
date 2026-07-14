@@ -1,6 +1,8 @@
+import { checkingWorldPlazaColumnRockFootprintOverlapsCliffEdgeAtAnchorTileIndex } from '@/components/world/domains/checkingWorldPlazaColumnRockFootprintOverlapsCliffEdgeAtAnchorTileIndex';
 import { checkingWorldPlazaColumnRockFootprintOverlapsTreeAtAnchorTileIndex } from '@/components/world/domains/checkingWorldPlazaColumnRockFootprintOverlapsTreeAtAnchorTileIndex';
 import { checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex } from '@/components/world/domains/checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex';
 import { checkingWorldPlazaLandNearSurfaceWaterAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLandNearSurfaceWaterAtTileIndex';
+import { checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex';
 import { checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex';
 import { checkingWorldPlazaTileIsRockyBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsRockyBiomeAtTileIndex';
 import { checkingWorldPlazaTreeBlocksGridTile } from '@/components/world/domains/checkingWorldPlazaTreeBlocksGridTile';
@@ -208,6 +210,16 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     return null;
   }
 
+  // Slope rims stay bare so extruded boulders do not hang over cliff faces.
+  if (
+    checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex(
+      anchorTileX,
+      anchorTileY
+    )
+  ) {
+    return null;
+  }
+
   const stoneNoise = samplingWorldPlazaVegetationStoneNoiseAtTile(
     anchorTileX,
     anchorTileY
@@ -377,17 +389,36 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
       DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_FOOTPRINT_TILE_SPAN ||
       footprintTileHeight >
         DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_FOOTPRINT_TILE_SPAN) &&
-    checkingWorldPlazaColumnRockFootprintOverlapsTreeAtAnchorTileIndex(
+    (checkingWorldPlazaColumnRockFootprintOverlapsTreeAtAnchorTileIndex(
+      anchorTileX,
+      anchorTileY,
+      footprintTileWidth,
+      footprintTileHeight
+    ) ||
+      checkingWorldPlazaColumnRockFootprintOverlapsCliffEdgeAtAnchorTileIndex(
+        anchorTileX,
+        anchorTileY,
+        footprintTileWidth,
+        footprintTileHeight
+      ))
+  ) {
+    footprintTileWidth =
+      DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_FOOTPRINT_TILE_SPAN;
+    footprintTileHeight =
+      DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_FOOTPRINT_TILE_SPAN;
+  }
+
+  // Medium-field (and any remaining) footprints that still touch a slope rim
+  // are rejected so boulders never hang over extruded cliff faces.
+  if (
+    checkingWorldPlazaColumnRockFootprintOverlapsCliffEdgeAtAnchorTileIndex(
       anchorTileX,
       anchorTileY,
       footprintTileWidth,
       footprintTileHeight
     )
   ) {
-    footprintTileWidth =
-      DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_FOOTPRINT_TILE_SPAN;
-    footprintTileHeight =
-      DEFINING_WORLD_PLAZA_TERRAIN_ROCK_COLUMN_MIN_FOOTPRINT_TILE_SPAN;
+    return null;
   }
 
   const surfaceWorldLayer =

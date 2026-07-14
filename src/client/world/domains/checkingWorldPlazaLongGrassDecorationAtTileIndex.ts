@@ -1,4 +1,5 @@
 import { checkingWorldPlazaLandNearLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLandNearLavaAtTileIndex';
+import { checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex';
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import { DEFINING_WORLD_PLAZA_LONG_GRASS_LAVA_CLEARANCE_RADIUS_TILES } from '@/components/world/domains/definingWorldPlazaLongGrassConstants';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
@@ -11,6 +12,9 @@ import { checkingWorldLongGrassPlacementAtTileIndex } from '../../../shared/worl
 
 /**
  * True when a tile would draw a long-grass sprite clump.
+ *
+ * Cliff-edge tiles (raised surface with a lower cardinal neighbor) stay bare so
+ * clumps do not hang over extruded slope faces.
  */
 export function checkingWorldPlazaLongGrassDecorationAtTileIndex(
   tileX: number,
@@ -25,6 +29,10 @@ export function checkingWorldPlazaLongGrassDecorationAtTileIndex(
   }
 
   if (resolvingWorldPlazaWaterAtTileIndex(tileX, tileY)) {
+    return false;
+  }
+
+  if (checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex(tileX, tileY)) {
     return false;
   }
 
