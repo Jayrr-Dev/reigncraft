@@ -25,6 +25,10 @@ import {
   gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
   subscribingWorldPlazaHerbariumDiscovery,
 } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
+import {
+  gettingWorldPlazaLapidaryOreStudyCountsSnapshot,
+  subscribingWorldPlazaLapidaryDiscovery,
+} from '@/components/world/domains/managingWorldPlazaLapidaryDiscoveryStore';
 import { RenderingWorldPlazaInventoryBagPopover } from '@/components/world/inventory/components/renderingWorldPlazaInventoryBagPopover';
 import { RenderingWorldPlazaInventoryItemDetailPopover } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemDetailPopover';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
@@ -431,18 +435,25 @@ function InventoryPlazaSlotItem({
     gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
     () => ({})
   );
+  const oreStudyCountsBySpeciesId = useSyncExternalStore(
+    subscribingWorldPlazaLapidaryDiscovery,
+    gettingWorldPlazaLapidaryOreStudyCountsSnapshot,
+    () => ({})
+  );
   const detailPopoverModel = useMemo(
     () =>
       resolvingWorldPlazaInventoryItemDetailPopoverModel(item, {
         isEquipped,
         studyCountsBySpeciesId,
         flowerStudyCountsBySpeciesId,
+        oreStudyCountsBySpeciesId,
         playerEffectiveMaxHealth,
       }),
     [
       flowerStudyCountsBySpeciesId,
       isEquipped,
       item,
+      oreStudyCountsBySpeciesId,
       playerEffectiveMaxHealth,
       studyCountsBySpeciesId,
     ]

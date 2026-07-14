@@ -12,10 +12,12 @@ import {
   DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES,
   DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES,
 } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
+import { DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaLapidaryGuideConstants';
 import { DEFINING_PLAZA_RECIPES_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaRecipesGuideConstants';
 import { formattingPlazaBestiaryCodexMenuDescription } from '@/components/home/domains/resolvingPlazaBestiaryGuideDisplayEntries';
 import { formattingPlazaBiomesCodexMenuDescription } from '@/components/home/domains/resolvingPlazaBiomesGuideDisplayEntries';
 import { formattingPlazaHerbariumCodexMenuDescription } from '@/components/home/domains/resolvingPlazaHerbariumGuideDisplayEntries';
+import { formattingPlazaLapidaryCodexMenuDescription } from '@/components/home/domains/resolvingPlazaLapidaryGuideDisplayEntries';
 import { formattingPlazaRecipesCodexMenuDescription } from '@/components/home/domains/resolvingPlazaRecipesGuideDisplayEntries';
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
@@ -40,6 +42,11 @@ import {
   gettingWorldPlazaHerbariumSightedTreeVariantsSnapshot,
   subscribingWorldPlazaHerbariumDiscovery,
 } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
+import {
+  gettingWorldPlazaLapidaryOreStudyCountsSnapshot,
+  gettingWorldPlazaLapidarySightedOreSpeciesSnapshot,
+  subscribingWorldPlazaLapidaryDiscovery,
+} from '@/components/world/domains/managingWorldPlazaLapidaryDiscoveryStore';
 import {
   gettingWorldPlazaRecipeAttachedSnapshot,
   subscribingWorldPlazaRecipeDiscovery,
@@ -72,7 +79,9 @@ export function RenderingWorldPlazaCodexMenuPanel({
     gettingWorldPlazaBestiarySightedSpeciesSnapshot,
     () => []
   );
-  const herbariumFlowerStudyCounts = useSyncExternalStore(
+  const herbariumFlowerStudyCounts = useSyncExternalStore<
+    ReturnType<typeof gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot>
+  >(
     subscribingWorldPlazaHerbariumDiscovery,
     gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
     () => ({})
@@ -80,6 +89,18 @@ export function RenderingWorldPlazaCodexMenuPanel({
   const sightedHerbariumTreeVariants = useSyncExternalStore(
     subscribingWorldPlazaHerbariumDiscovery,
     gettingWorldPlazaHerbariumSightedTreeVariantsSnapshot,
+    () => []
+  );
+  const lapidaryOreStudyCounts = useSyncExternalStore<
+    ReturnType<typeof gettingWorldPlazaLapidaryOreStudyCountsSnapshot>
+  >(
+    subscribingWorldPlazaLapidaryDiscovery,
+    gettingWorldPlazaLapidaryOreStudyCountsSnapshot,
+    () => ({})
+  );
+  const sightedLapidaryOreSpeciesIds = useSyncExternalStore(
+    subscribingWorldPlazaLapidaryDiscovery,
+    gettingWorldPlazaLapidarySightedOreSpeciesSnapshot,
     () => []
   );
   const attachedRecipeIds = useSyncExternalStore(
@@ -111,14 +132,29 @@ export function RenderingWorldPlazaCodexMenuPanel({
     }
 
     if (optionId === 'herbarium') {
-      const discoveredFlowerCount = Object.values(
-        herbariumFlowerStudyCounts
-      ).filter((studyCount) => (studyCount ?? 0) > 0).length;
+      const discoveredFlowerCount =
+        DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES.filter(
+          (entry) => (herbariumFlowerStudyCounts[entry.speciesId] ?? 0) > 0
+        ).length;
 
       return formattingPlazaHerbariumCodexMenuDescription(
         discoveredFlowerCount + sightedHerbariumTreeVariants.length,
         DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES.length +
           DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES.length
+      );
+    }
+
+    if (optionId === 'lapidary') {
+      const discoveredOreCount =
+        DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES.filter(
+          (entry) =>
+            (lapidaryOreStudyCounts[entry.speciesId] ?? 0) > 0 ||
+            sightedLapidaryOreSpeciesIds.includes(entry.speciesId)
+        ).length;
+
+      return formattingPlazaLapidaryCodexMenuDescription(
+        discoveredOreCount,
+        DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES.length
       );
     }
 

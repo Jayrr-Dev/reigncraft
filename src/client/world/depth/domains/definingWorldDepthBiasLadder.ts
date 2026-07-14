@@ -120,6 +120,14 @@ export const DEFINING_WORLD_DEPTH_WATER_SHIMMER_LAYER_Z_INDEX =
 export const DEFINING_WORLD_DEPTH_LAVA_OVERLAY_LAYER_Z_INDEX =
   DEFINING_WORLD_DEPTH_WATER_SURFACE_LAYER_Z_INDEX - 2;
 
+/** Flower dots sit above all floor chunks, below liquid overlays. */
+export const DEFINING_WORLD_DEPTH_FLOWER_DECORATION_LAYER_Z_INDEX =
+  DEFINING_WORLD_DEPTH_WATER_SURFACE_LAYER_Z_INDEX - 3;
+
+/** Surface pebbles sit above all floor chunks, below flower dots. */
+export const DEFINING_WORLD_DEPTH_STONE_DECORATION_LAYER_Z_INDEX =
+  DEFINING_WORLD_DEPTH_WATER_SURFACE_LAYER_Z_INDEX - 4;
+
 /** Claim-mode plot overlay on the floor layer. */
 export const DEFINING_WORLD_DEPTH_CLAIM_MODE_PLOT_OVERLAY_FLOOR_Z_INDEX = 1_000_000;
 

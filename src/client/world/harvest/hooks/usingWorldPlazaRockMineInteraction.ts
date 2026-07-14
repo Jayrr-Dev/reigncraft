@@ -2,6 +2,7 @@
 
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { recordingWorldPlazaLapidaryOreStudied } from '@/components/world/domains/managingWorldPlazaLapidaryDiscoveryStore';
 import { droppingWorldPlazaRockMineStoneGroundItem } from '@/components/world/harvest/domains/droppingWorldPlazaRockMineStoneGroundItem';
 import type { DefiningWorldPlazaMinedRockTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
 import {
@@ -15,6 +16,8 @@ import {
 } from '@/components/world/harvest/hooks/usingWorldPlazaMinedRocks';
 import type { ListingWorldPlazaRocksInInteractionRangeEntry } from '@/components/world/harvest/hooks/usingWorldPlazaRockMineProgress';
 import { miningWorldHarvestDevvitRockLayer } from '@/components/world/harvest/repositories/callingWorldHarvestDevvitApi';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { resolvingWorldPlazaOreItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, type RefObject } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
@@ -68,9 +71,7 @@ export function usingWorldPlazaRockMineInteraction({
   const validatingRockMineStart = useCallback(
     (entry: ListingWorldPlazaRocksInInteractionRangeEntry): boolean => {
       if (!persistenceOwnerId) {
-        showingGameplayHudToast(
-          'Rock mining is unavailable in this session.'
-        );
+        showingGameplayHudToast('Rock mining is unavailable in this session.');
         return false;
       }
 
@@ -174,6 +175,16 @@ export function usingWorldPlazaRockMineInteraction({
           return;
         }
 
+        const dropItemTypeId = entry.metadata.oreSpeciesId
+          ? resolvingWorldPlazaOreItemTypeIdFromSpeciesId(
+              entry.metadata.oreSpeciesId
+            )
+          : DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE;
+
+        if (entry.metadata.oreSpeciesId) {
+          recordingWorldPlazaLapidaryOreStudied(entry.metadata.oreSpeciesId);
+        }
+
         const dropResult = await droppingWorldPlazaRockMineStoneGroundItem({
           localPersistenceOwnerId,
           redditUserId,
@@ -183,10 +194,15 @@ export function usingWorldPlazaRockMineInteraction({
           layer: standingSurfaceLayer,
           stoneQuantity: mineResult.stoneQuantity ?? 0,
           playerPosition,
+          itemTypeId: dropItemTypeId,
         });
 
         if (dropResult.outcome === 'failed') {
-          showingGameplayHudToast('Could not drop stone from this rock.');
+          showingGameplayHudToast(
+            dropItemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE
+              ? 'Could not drop stone from this rock.'
+              : 'Could not drop ore from this rock.'
+          );
         }
 
         onRockMineLayerSucceeded?.();

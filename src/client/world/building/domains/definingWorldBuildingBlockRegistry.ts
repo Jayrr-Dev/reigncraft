@@ -13,6 +13,7 @@ import {
   DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK,
   DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_JUMP_OVER,
 } from '@/components/world/building/domains/definingWorldBuildingCollisionShape';
+import { registeringWorldPlazaOreWallBlockDefinitions } from '@/components/world/building/domains/definingWorldPlazaOreWallBlockRegistry';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_LARGE_ROCK_COLLISION_RADIUS_GRID,
   DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_COLLISION_RADIUS_GRID,
@@ -241,6 +242,7 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
       strokeColor: 0x4a7c9b,
     },
   },
+  ...registeringWorldPlazaOreWallBlockDefinitions(),
 };
 
 /** Default block selected when entering build mode. */

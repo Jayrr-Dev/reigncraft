@@ -1,4 +1,5 @@
 import { checkingPlazaHerbariumStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
+import { checkingPlazaLapidaryStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaLapidaryStudyTier';
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
 import { resolvingWorldPlazaEquipmentAttackEvModifier } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
@@ -8,6 +9,10 @@ import {
   checkingWorldPlazaInventoryItemIsFlowerHerb,
   parsingWorldPlazaFlowerSpeciesIdFromItemTypeId,
 } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
+import {
+  checkingWorldPlazaInventoryItemIsOre,
+  parsingWorldPlazaOreSpeciesIdFromItemTypeId,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_DEFAULT_BREAK_CHANCE_AT_ZERO } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDurabilityConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS,
@@ -45,6 +50,7 @@ import {
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryWildlifeMeatDetailReveal';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
+import type { WorldOreSpeciesId } from '../../../../shared/worldOreRarity';
 
 export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly itemTypeId: string;
@@ -77,6 +83,10 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModelOptions = {
   readonly flowerStudyCountsBySpeciesId?: Readonly<
     Partial<Record<WorldFlowerSpeciesId, number>>
   >;
+  /** Per-ore Study totals; hides Study once the lapidary dossier is full. */
+  readonly oreStudyCountsBySpeciesId?: Readonly<
+    Partial<Record<WorldOreSpeciesId, number>>
+  >;
   /** Local player effective max HP for food heal preview. */
   readonly playerEffectiveMaxHealth?: number;
 };
@@ -103,6 +113,54 @@ function checkingWorldPlazaInventoryItemCanStudyFlower(
   const studyCount = flowerStudyCountsBySpeciesId?.[speciesId] ?? 0;
 
   return !checkingPlazaHerbariumStudyTierUnlocked('full', studyCount);
+}
+
+/**
+ * True when an ore specimen still has lapidary Study progress left.
+ */
+function checkingWorldPlazaInventoryItemCanStudyOre(
+  itemTypeId: string,
+  oreStudyCountsBySpeciesId:
+    | Readonly<Partial<Record<WorldOreSpeciesId, number>>>
+    | undefined
+): boolean {
+  if (!checkingWorldPlazaInventoryItemIsOre(itemTypeId)) {
+    return false;
+  }
+
+  const speciesId = parsingWorldPlazaOreSpeciesIdFromItemTypeId(itemTypeId);
+
+  if (!speciesId) {
+    return false;
+  }
+
+  const studyCount = oreStudyCountsBySpeciesId?.[speciesId] ?? 0;
+
+  return !checkingPlazaLapidaryStudyTierUnlocked('full', studyCount);
+}
+
+/**
+ * True when the item can be Studied for Herbarium or Lapidary progress.
+ */
+function checkingWorldPlazaInventoryItemCanStudy(
+  itemTypeId: string,
+  flowerStudyCountsBySpeciesId:
+    | Readonly<Partial<Record<WorldFlowerSpeciesId, number>>>
+    | undefined,
+  oreStudyCountsBySpeciesId:
+    | Readonly<Partial<Record<WorldOreSpeciesId, number>>>
+    | undefined
+): boolean {
+  return (
+    checkingWorldPlazaInventoryItemCanStudyFlower(
+      itemTypeId,
+      flowerStudyCountsBySpeciesId
+    ) ||
+    checkingWorldPlazaInventoryItemCanStudyOre(
+      itemTypeId,
+      oreStudyCountsBySpeciesId
+    )
+  );
 }
 
 function resolvingWorldPlazaInventoryItemRarityBadgeVariant(
@@ -450,9 +508,10 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       activeEnhancements: [],
       activeEnchantments: [],
       canEat: checkingWorldPlazaInventoryItemIsFood(item.itemTypeId),
-      canStudy: checkingWorldPlazaInventoryItemCanStudyFlower(
+      canStudy: checkingWorldPlazaInventoryItemCanStudy(
         item.itemTypeId,
-        options.flowerStudyCountsBySpeciesId
+        options.flowerStudyCountsBySpeciesId,
+        options.oreStudyCountsBySpeciesId
       ),
       canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
         item.itemTypeId
@@ -501,9 +560,10 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     activeEnhancements,
     activeEnchantments,
     canEat: checkingWorldPlazaInventoryItemIsFood(item.itemTypeId),
-    canStudy: checkingWorldPlazaInventoryItemCanStudyFlower(
+    canStudy: checkingWorldPlazaInventoryItemCanStudy(
       item.itemTypeId,
-      options.flowerStudyCountsBySpeciesId
+      options.flowerStudyCountsBySpeciesId,
+      options.oreStudyCountsBySpeciesId
     ),
     canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
       item.itemTypeId

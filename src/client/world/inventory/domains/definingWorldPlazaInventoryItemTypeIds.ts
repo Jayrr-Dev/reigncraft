@@ -20,6 +20,28 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT =
   'world-plaza-flint' as const;
 
+/** Mineable ore resource item type ids (sprite sheet order). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_CLAY =
+  'world-plaza-ore-clay' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_IRON =
+  'world-plaza-ore-iron' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_SILVER =
+  'world-plaza-ore-silver' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_GOLD =
+  'world-plaza-ore-gold' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COPPER =
+  'world-plaza-ore-copper' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COAL =
+  'world-plaza-ore-coal' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_NITER =
+  'world-plaza-ore-niter' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_SCARLET =
+  'world-plaza-ore-scarlet' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_LEAD =
+  'world-plaza-ore-lead' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_SULFUR =
+  'world-plaza-ore-sulfur' as const;
+
 /** Build tool item type id. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL =
   'world-plaza-tool' as const;

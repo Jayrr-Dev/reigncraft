@@ -3,7 +3,6 @@ import type { CreatingWorldPlazaGrassFloorChunkDrawPassContext } from '@/compone
 import {
   DEFINING_WORLD_PLAZA_BIOME_BLOCK_HIGHLIGHT_DOT_RADIUS_PX,
   DEFINING_WORLD_PLAZA_BIOME_BLOCK_HIGHLIGHT_TILE_MODULUS,
-  DEFINING_WORLD_PLAZA_BIOME_DECORATION_DOT_RADIUS_PX,
   DEFINING_WORLD_PLAZA_BIOME_DECORATION_TILE_REMAINDER,
   DEFINING_WORLD_PLAZA_BIOME_SPECK_DOT_RADIUS_PX,
 } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
@@ -22,6 +21,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaOceanShoreConstants';
 import { drawingWorldPlazaStoneDecorationsOnGraphics } from '@/components/world/domains/drawingWorldPlazaStoneDecorationsOnGraphics';
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
+import { resolvingWorldPlazaFlowerDecorationRadiusAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFlowerDecorationRadiusAtTileIndex';
 import { resolvingWorldPlazaFlowerPetalColorAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFlowerPetalColorAtTileIndex';
 import { checkingWorldPlazaLakeShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
 import { checkingWorldPlazaOceanShoreBlockAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaOceanShoreDepthAtTileIndex';
@@ -240,7 +240,10 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
         .circle(
           input.centerX,
           input.centerY - halfHeight * 0.35,
-          DEFINING_WORLD_PLAZA_BIOME_DECORATION_DOT_RADIUS_PX
+          resolvingWorldPlazaFlowerDecorationRadiusAtTileIndex(
+            input.tileX,
+            input.tileY
+          )
         )
         .fill({ color: flowerColor });
     }

@@ -39,8 +39,14 @@ export function definingWorldPlazaBiomeWorldNoiseFrequency(
   return 1 / scalingWorldPlazaBiomeWorldFeatureSpanTiles(baseFeatureSpanTiles);
 }
 
-/** Decoration dot radius shared by biome specks and flowers. */
+/** Base flower decoration radius before deterministic per-tile scaling. */
 export const DEFINING_WORLD_PLAZA_BIOME_DECORATION_DOT_RADIUS_PX = 2.25;
+
+/** Smallest deterministic flower radius multiplier. */
+export const DEFINING_WORLD_PLAZA_FLOWER_DECORATION_RADIUS_SCALE_MIN = 0.7;
+
+/** Largest deterministic flower radius multiplier. */
+export const DEFINING_WORLD_PLAZA_FLOWER_DECORATION_RADIUS_SCALE_MAX = 1.3;
 
 /** Speck dot radius for subtle ground texture. */
 export const DEFINING_WORLD_PLAZA_BIOME_SPECK_DOT_RADIUS_PX = 1.5;
@@ -107,7 +113,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckColor: null,
     speckTileModulus: null,
     flowerColors: [0xffd966, 0xff8fab, 0xffffff],
-    flowerTileModulus: 23,
+    flowerTileModulus: 46,
     skyBackdropClassName:
       'bg-gradient-to-b from-sky-400 via-sky-200 to-[#7cba3d]',
   },
@@ -122,7 +128,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckColor: 0x3d6634,
     speckTileModulus: 13,
     flowerColors: [0xff8fab, 0xffd966, 0xc77dff, 0xffffff],
-    flowerTileModulus: 37,
+    flowerTileModulus: 74,
     skyBackdropClassName:
       'bg-gradient-to-b from-sky-500 via-emerald-200 to-[#4a7c3f]',
   },
@@ -137,7 +143,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckColor: 0x5a9438,
     speckTileModulus: 17,
     flowerColors: [0xff6b9d, 0xffb347, 0xf8f4ff, 0xc77dff, 0x7ec8e3],
-    flowerTileModulus: 9,
+    flowerTileModulus: 18,
     skyBackdropClassName:
       'bg-gradient-to-b from-sky-400 via-lime-200 to-[#6faa42]',
   },
@@ -152,7 +158,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckColor: 0x24602a,
     speckTileModulus: 9,
     flowerColors: [0xff5f8f, 0xffb347, 0xe94fd0, 0xffffff],
-    flowerTileModulus: 31,
+    flowerTileModulus: 62,
     skyBackdropClassName:
       'bg-gradient-to-b from-emerald-500 via-lime-200 to-[#2f7a33]',
   },
@@ -197,7 +203,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckColor: 0x2c3a26,
     speckTileModulus: 11,
     flowerColors: [0xc77dff, 0xffb347, 0xffffff, 0x7ec8e3],
-    flowerTileModulus: 41,
+    flowerTileModulus: 82,
     skyBackdropClassName:
       'bg-gradient-to-b from-slate-500 via-emerald-100 to-[#3c4a2c]',
   },
@@ -212,7 +218,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckColor: 0xa89a45,
     speckTileModulus: 14,
     flowerColors: [0xffb347, 0xffd966, 0xff8fab, 0xffffff],
-    flowerTileModulus: 43,
+    flowerTileModulus: 86,
     skyBackdropClassName:
       'bg-gradient-to-b from-sky-400 via-yellow-100 to-[#bfb755]',
   },

@@ -13,6 +13,10 @@ import {
   checkingPlazaHerbariumStudyTierUnlocked,
   formattingPlazaHerbariumStudyCountProgress,
 } from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
+import {
+  checkingPlazaLapidaryStudyTierUnlocked,
+  formattingPlazaLapidaryStudyCountProgress,
+} from '@/components/home/domains/resolvingPlazaLapidaryStudyTier';
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import { sendingWorldPlazaAudioLifecycleEvent } from '@/components/world/audio/lifecycle/managingWorldPlazaAudioLifecycleStore';
@@ -102,6 +106,7 @@ import { RenderingWorldPlazaGirlSampleVoiceSfx } from '@/components/world/compon
 import { RenderingWorldPlazaGirlSampleWalkAvatar } from '@/components/world/components/renderingWorldPlazaGirlSampleWalkAvatar';
 import { RenderingWorldPlazaHerbariumOverlay } from '@/components/world/components/renderingWorldPlazaHerbariumOverlay';
 import { RenderingWorldPlazaHudToolbarBottomAnchor } from '@/components/world/components/renderingWorldPlazaHudToolbarBottomAnchor';
+import { RenderingWorldPlazaLapidaryOverlay } from '@/components/world/components/renderingWorldPlazaLapidaryOverlay';
 import { RenderingWorldPlazaLoreBookOverlay } from '@/components/world/components/renderingWorldPlazaLoreBookOverlay';
 import { RenderingWorldPlazaMechanicsOverlay } from '@/components/world/components/renderingWorldPlazaMechanicsOverlay';
 import { RenderingWorldPlazaMobileDebugPanel } from '@/components/world/components/renderingWorldPlazaMobileDebugPanel';
@@ -228,6 +233,10 @@ import {
   recordingWorldPlazaHerbariumFlowerStudied,
   recordingWorldPlazaHerbariumTreeStudied,
 } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
+import {
+  gettingWorldPlazaLapidaryOreStudyCountsSnapshot,
+  recordingWorldPlazaLapidaryOreStudied,
+} from '@/components/world/domains/managingWorldPlazaLapidaryDiscoveryStore';
 import { settingWorldPlazaOnlineRoomId } from '@/components/world/domains/managingWorldPlazaOnlineRoomIdStore';
 import {
   attachingWorldPlazaRecipePage,
@@ -372,6 +381,7 @@ import { usingWorldPlazaRecordingBestiarySightings } from '@/components/world/ho
 import { usingWorldPlazaRecordingDiscoveredNamedRealms } from '@/components/world/hooks/usingWorldPlazaRecordingDiscoveredNamedRealms';
 import { usingWorldPlazaRecordingExploredBiomes } from '@/components/world/hooks/usingWorldPlazaRecordingExploredBiomes';
 import { usingWorldPlazaRecordingHerbariumSightings } from '@/components/world/hooks/usingWorldPlazaRecordingHerbariumSightings';
+import { usingWorldPlazaRecordingLapidarySightings } from '@/components/world/hooks/usingWorldPlazaRecordingLapidarySightings';
 import { usingWorldPlazaRunStamina } from '@/components/world/hooks/usingWorldPlazaRunStamina';
 import { usingWorldPlazaSavedCoordsQuery } from '@/components/world/hooks/usingWorldPlazaSavedCoordsQuery';
 import { usingWorldPlazaSavedCoordsTrackingVisibleState } from '@/components/world/hooks/usingWorldPlazaSavedCoordsTrackingVisibleState';
@@ -414,6 +424,7 @@ import { computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier } fro
 import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
 import { consumingWorldPlazaInventoryItemFromSlot } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemFromSlot';
 import { parsingWorldPlazaFlowerSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
+import { parsingWorldPlazaOreSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { disarmingWorldPlazaInventorySlotArmedHarvestEnchantments } from '@/components/world/inventory/domains/disarmingWorldPlazaInventorySlotArmedHarvestEnchantments';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
@@ -4754,46 +4765,89 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      const speciesId = parsingWorldPlazaFlowerSpeciesIdFromItemTypeId(
+      const flowerSpeciesId = parsingWorldPlazaFlowerSpeciesIdFromItemTypeId(
+        item.itemTypeId
+      );
+      const oreSpeciesId = parsingWorldPlazaOreSpeciesIdFromItemTypeId(
         item.itemTypeId
       );
 
-      if (!speciesId) {
-        return;
-      }
+      if (flowerSpeciesId) {
+        const currentStudyCount =
+          gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot()[
+            flowerSpeciesId
+          ] ?? 0;
 
-      const currentStudyCount =
-        gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot()[speciesId] ?? 0;
+        if (
+          checkingPlazaHerbariumStudyTierUnlocked('full', currentStudyCount)
+        ) {
+          showingGameplayHudToast('Already fully studied.');
+          return;
+        }
 
-      if (checkingPlazaHerbariumStudyTierUnlocked('full', currentStudyCount)) {
-        showingGameplayHudToast('Already fully studied.');
-        return;
-      }
+        let didConsume = false;
 
-      let didConsume = false;
+        updatingInventoryState((currentState) => {
+          const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
+            currentState,
+            slotIndex,
+            1
+          );
 
-      updatingInventoryState((currentState) => {
-        const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
-          currentState,
-          slotIndex,
-          1
+          didConsume = consumeResult.consumed;
+          return consumeResult.consumed ? consumeResult.nextState : null;
+        });
+
+        if (!didConsume) {
+          showingGameplayHudToast('Nothing left to study.');
+          return;
+        }
+
+        recordingWorldPlazaHerbariumFlowerStudied(flowerSpeciesId);
+        const studyCount =
+          gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot()[
+            flowerSpeciesId
+          ] ?? 1;
+        showingGameplayHudToast(
+          `Studied · Herbarium ${formattingPlazaHerbariumStudyCountProgress(studyCount)}`
         );
-
-        didConsume = consumeResult.consumed;
-        return consumeResult.consumed ? consumeResult.nextState : null;
-      });
-
-      if (!didConsume) {
-        showingGameplayHudToast('Nothing left to study.');
         return;
       }
 
-      recordingWorldPlazaHerbariumFlowerStudied(speciesId);
-      const studyCount =
-        gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot()[speciesId] ?? 1;
-      showingGameplayHudToast(
-        `Studied · Herbarium ${formattingPlazaHerbariumStudyCountProgress(studyCount)}`
-      );
+      if (oreSpeciesId) {
+        const currentStudyCount =
+          gettingWorldPlazaLapidaryOreStudyCountsSnapshot()[oreSpeciesId] ?? 0;
+
+        if (checkingPlazaLapidaryStudyTierUnlocked('full', currentStudyCount)) {
+          showingGameplayHudToast('Already fully studied.');
+          return;
+        }
+
+        let didConsume = false;
+
+        updatingInventoryState((currentState) => {
+          const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
+            currentState,
+            slotIndex,
+            1
+          );
+
+          didConsume = consumeResult.consumed;
+          return consumeResult.consumed ? consumeResult.nextState : null;
+        });
+
+        if (!didConsume) {
+          showingGameplayHudToast('Nothing left to study.');
+          return;
+        }
+
+        recordingWorldPlazaLapidaryOreStudied(oreSpeciesId);
+        const studyCount =
+          gettingWorldPlazaLapidaryOreStudyCountsSnapshot()[oreSpeciesId] ?? 1;
+        showingGameplayHudToast(
+          `Studied · Lapidary ${formattingPlazaLapidaryStudyCountProgress(studyCount)}`
+        );
+      }
     },
     [inventoryState.slots, showingGameplayHudToast, updatingInventoryState]
   );
@@ -4968,6 +5022,14 @@ function RenderingWorldPlazaPixiSceneConnected({
     playerPositionRef,
     inventoryState,
     pickedFlowerStateByTileKey,
+  });
+
+  usingWorldPlazaRecordingLapidarySightings({
+    isEnabled: isLocalGameplayEnabled,
+    storageOwnerId: onlineUserId ?? localPersistenceOwnerId,
+    playerPositionRef,
+    inventoryState,
+    minedRockStateByTileKey,
   });
 
   useEffect(() => {
@@ -7422,6 +7484,10 @@ function RenderingWorldPlazaPixiSceneConnected({
       />
       <RenderingWorldPlazaHerbariumOverlay
         isOpen={activeCodexSection === 'herbarium'}
+        onClose={closingCodexSection}
+      />
+      <RenderingWorldPlazaLapidaryOverlay
+        isOpen={activeCodexSection === 'lapidary'}
         onClose={closingCodexSection}
       />
       <RenderingWorldPlazaRecipesOverlay

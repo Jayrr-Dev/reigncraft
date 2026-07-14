@@ -28,6 +28,10 @@ import { resolvingWorldPlazaWaterShimmerViewportTileBounds } from '@/components/
 import { resolvingWorldPlazaWaterViewportTileBounds } from '@/components/world/domains/resolvingWorldPlazaWaterViewportTileBounds';
 import { syncingWorldPlazaVisibleFirelandsDecorationLayer } from '@/components/world/domains/syncingWorldPlazaVisibleFirelandsDecorationLayer';
 import {
+  ensuringWorldPlazaVisibleFlowerDecorationLayer,
+  updatingWorldPlazaVisibleFlowerDecorationLayer,
+} from '@/components/world/domains/syncingWorldPlazaVisibleFlowerDecorationLayer';
+import {
   advancingWorldPlazaVisibleLavaOverlayAnimation,
   clearingWorldPlazaLavaPoolLightSources,
   clearingWorldPlazaVisibleLavaOverlayGroundSprite,
@@ -35,6 +39,10 @@ import {
   updatingWorldPlazaVisibleLavaOverlayLayer,
   type SyncingWorldPlazaVisibleLavaOverlayLayerState,
 } from '@/components/world/domains/syncingWorldPlazaVisibleLavaOverlayLayer';
+import {
+  ensuringWorldPlazaVisibleStoneDecorationLayer,
+  updatingWorldPlazaVisibleStoneDecorationLayer,
+} from '@/components/world/domains/syncingWorldPlazaVisibleStoneDecorationLayer';
 import { syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer } from '@/components/world/domains/syncingWorldPlazaVisibleTerrainElevationTileColumnGraphicsLayer';
 import { syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer } from '@/components/world/domains/syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer';
 import type { SyncingWorldPlazaVisibleTileChunkPendingBuild } from '@/components/world/domains/syncingWorldPlazaVisibleTileChunkGraphicsLayer';
@@ -98,6 +106,14 @@ type RunningWorldPlazaFloorChunksLayerState = {
   lastBurntGrassCacheKey: string;
   lastPickedPebblesCacheKey: string;
   lastPickedPebblesTileKeys: Set<string>;
+};
+
+type RunningWorldPlazaFlowerDecorationsLayerState = {
+  graphics: Graphics | null;
+};
+
+type RunningWorldPlazaStoneDecorationsLayerState = {
+  graphics: Graphics | null;
 };
 
 type RunningWorldPlazaElevationColumnsLayerState = {
@@ -274,15 +290,8 @@ export function registeringWorldPlazaTerrainLayers(
               checkingWorldPlazaGenerationFeatureEnabled(
                 DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES
               ),
-            drawsFlowerDecorations:
-              checkingWorldPlazaGenerationFeatureEnabled(
-                DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES
-              ),
-            drawsStoneDecorations:
-              context.performanceProfile.drawsStoneDecorations &&
-              checkingWorldPlazaGenerationFeatureEnabled(
-                DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STONE_DECORATIONS
-              ),
+            drawsFlowerDecorations: false,
+            drawsStoneDecorations: false,
             drawsEnvironmentalHazardFloorTint:
               context.performanceProfile.drawsEnvironmentalHazardFloorTint,
             burntGrassTileKeys: context.burntGrassTileKeys,
@@ -426,15 +435,8 @@ export function registeringWorldPlazaTerrainLayers(
             checkingWorldPlazaGenerationFeatureEnabled(
               DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES
             ),
-          drawsFlowerDecorations:
-            checkingWorldPlazaGenerationFeatureEnabled(
-              DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES
-            ),
-          drawsStoneDecorations:
-            context.performanceProfile.drawsStoneDecorations &&
-            checkingWorldPlazaGenerationFeatureEnabled(
-              DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STONE_DECORATIONS
-            ),
+          drawsFlowerDecorations: false,
+          drawsStoneDecorations: false,
           drawsEnvironmentalHazardFloorTint:
             context.performanceProfile.drawsEnvironmentalHazardFloorTint,
           burntGrassTileKeys: context.burntGrassTileKeys,
@@ -597,6 +599,122 @@ export function registeringWorldPlazaTerrainLayers(
         state.lastBurntGrassCacheKey = '';
         state.lastPickedPebblesCacheKey = '';
         state.lastPickedPebblesTileKeys.clear();
+      },
+    },
+    {
+      kind: 'redraw',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.FLOWER_DECORATIONS,
+      parentLayer: 'floor',
+      boundsProfile: 'floor',
+      renderLayerToggle: 'floor',
+      requiresAnyGenerationFeature: [
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES,
+      ],
+      invalidateOn: [
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS,
+        // Shared key includes both picked pebbles and picked flowers.
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_PEBBLES,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS,
+      ],
+      createRuntimeState: (): RunningWorldPlazaFlowerDecorationsLayerState => ({
+        graphics: null,
+      }),
+      ensure: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaFlowerDecorationsLayerState;
+        state.graphics = ensuringWorldPlazaVisibleFlowerDecorationLayer(
+          context.floorLayer,
+          state.graphics
+        );
+        state.graphics.visible = true;
+        return state;
+      },
+      update: (context, runtimeState, bounds) => {
+        const state =
+          runtimeState as RunningWorldPlazaFlowerDecorationsLayerState;
+
+        if (!state.graphics) {
+          return;
+        }
+
+        updatingWorldPlazaVisibleFlowerDecorationLayer({
+          graphics: state.graphics,
+          bounds,
+          burntGrassTileKeys: context.burntGrassTileKeys,
+        });
+      },
+      resetRuntimeState: (_context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaFlowerDecorationsLayerState;
+        state.graphics?.clear();
+      },
+      destroyRuntimeState: (_context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaFlowerDecorationsLayerState;
+        state.graphics?.parent?.removeChild(state.graphics);
+        state.graphics?.destroy();
+        state.graphics = null;
+      },
+    },
+    {
+      kind: 'redraw',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.STONE_DECORATIONS,
+      parentLayer: 'floor',
+      boundsProfile: 'floor',
+      renderLayerToggle: 'floor',
+      requiresAnyGenerationFeature: [
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STONE_DECORATIONS,
+      ],
+      invalidateOn: [
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_PEBBLES,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.ISLAND_MODE_REVISION,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PROCEDURAL_TREES_AND_ROCKS_REVISION,
+      ],
+      createRuntimeState: (): RunningWorldPlazaStoneDecorationsLayerState => ({
+        graphics: null,
+      }),
+      ensure: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaStoneDecorationsLayerState;
+        state.graphics = ensuringWorldPlazaVisibleStoneDecorationLayer(
+          context.floorLayer,
+          state.graphics
+        );
+        state.graphics.visible =
+          context.performanceProfile.drawsStoneDecorations;
+        return state;
+      },
+      update: (context, runtimeState, bounds) => {
+        const state =
+          runtimeState as RunningWorldPlazaStoneDecorationsLayerState;
+
+        if (
+          !state.graphics ||
+          !context.performanceProfile.drawsStoneDecorations
+        ) {
+          state.graphics?.clear();
+          return;
+        }
+
+        updatingWorldPlazaVisibleStoneDecorationLayer({
+          graphics: state.graphics,
+          bounds,
+          burntGrassTileKeys: context.burntGrassTileKeys,
+        });
+      },
+      resetRuntimeState: (_context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaStoneDecorationsLayerState;
+        state.graphics?.clear();
+      },
+      destroyRuntimeState: (_context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaStoneDecorationsLayerState;
+        state.graphics?.parent?.removeChild(state.graphics);
+        state.graphics?.destroy();
+        state.graphics = null;
       },
     },
     {

@@ -66,6 +66,30 @@ export type RenderingPlazaHerbariumPanelProps = {
   className?: string;
 };
 
+const PLAZA_HERBARIUM_GUIDE_TILE_RARITY_BADGE_CLASS_NAME =
+  'h-4! max-w-18 px-1 text-[7px] sm:h-4! sm:px-1 sm:text-[7px]';
+
+function RenderingPlazaHerbariumGuideCardRarityBadge({
+  entry,
+}: {
+  entry: PlazaHerbariumGuideDisplayEntry;
+}): React.JSX.Element {
+  return (
+    <div className="absolute right-1 top-1 z-1">
+      <span
+        className={cn(
+          resolvingWorldPlazaInventoryItemDetailBadgeShellClassName(
+            resolvingPlazaHerbariumEntryRarityBadgeVariant(entry.rarity)
+          ),
+          PLAZA_HERBARIUM_GUIDE_TILE_RARITY_BADGE_CLASS_NAME
+        )}
+      >
+        {entry.rarityLabel}
+      </span>
+    </div>
+  );
+}
+
 function RenderingPlazaHerbariumGuideCard({
   entry,
   onSelect,
@@ -98,6 +122,7 @@ function RenderingPlazaHerbariumGuideCard({
               className="size-[48%]"
             />
           )}
+          <RenderingPlazaHerbariumGuideCardRarityBadge entry={entry} />
         </div>
         <span
           className={cn(
@@ -145,16 +170,7 @@ function RenderingPlazaHerbariumGuideCard({
             {formattingPlazaHerbariumStudyCountProgress(entry.studyCount)}
           </span>
         </span>
-        <span
-          className={cn(
-            resolvingWorldPlazaInventoryItemDetailBadgeShellClassName(
-              resolvingPlazaHerbariumEntryRarityBadgeVariant(entry.rarity)
-            ),
-            'absolute right-1 top-1 z-1 h-4! max-w-18 px-1 text-[7px] sm:h-4! sm:px-1 sm:text-[7px]'
-          )}
-        >
-          {entry.rarityLabel}
-        </span>
+        <RenderingPlazaHerbariumGuideCardRarityBadge entry={entry} />
       </div>
       <span
         className={cn(

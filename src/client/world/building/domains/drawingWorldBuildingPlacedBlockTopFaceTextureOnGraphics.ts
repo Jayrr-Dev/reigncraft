@@ -11,15 +11,19 @@ import {
   resolvingWorldBuildingPlacedBlockWorldLayer,
 } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
+  DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_ORE_WALL,
   DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_PINE_WOOD,
   DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_WATER_STREAM,
 } from '@/components/world/building/domains/definingWorldBuildingPlacedBlockTopFaceTextureKind';
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import { resolvingWorldPlazaOreSpeciesIdFromWallBlockDefinitionId } from '@/components/world/building/domains/definingWorldPlazaOreWallBlockRegistry';
+import { resolvingWorldPlazaOreWallSurfaceEntry } from '@/components/world/building/domains/definingWorldPlazaOreWallSurfaceRegistry';
 import {
   drawingWorldBuildingCutFootprintExtrusionTexturesOnGraphics,
   drawingWorldBuildingCutFootprintFlatTileTexturesOnGraphics,
 } from '@/components/world/building/domains/drawingWorldBuildingCutFootprintColumnsOnGraphics';
 import { checkingWorldBuildingPlacedBlockUsesFlatTileRendering } from '@/components/world/building/domains/drawingWorldBuildingIsometricTileColumnExtrusionOnGraphics';
+import { drawingWorldBuildingOreWallTopFaceTextureOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingOreWallTopFaceTextureOnGraphics';
 import { drawingWorldBuildingPineWoodSideFaceTextureOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingPineWoodSideFaceTextureOnGraphics';
 import { drawingWorldBuildingPineWoodTopFaceTextureOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingPineWoodTopFaceTextureOnGraphics';
 import { drawingWorldBuildingWaterStreamTopFaceTextureOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingWaterStreamTopFaceTextureOnGraphics';
@@ -208,6 +212,28 @@ export function drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics(
       center.x,
       topCenterY,
       baseFillColor
+    );
+    return;
+  }
+
+  if (
+    textureKind ===
+    DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_ORE_WALL
+  ) {
+    const oreSpeciesId =
+      resolvingWorldPlazaOreSpeciesIdFromWallBlockDefinitionId(definition.id);
+
+    if (!oreSpeciesId) {
+      return;
+    }
+
+    drawingWorldBuildingOreWallTopFaceTextureOnGraphics(
+      graphics,
+      tileX,
+      tileY,
+      center.x,
+      topCenterY,
+      resolvingWorldPlazaOreWallSurfaceEntry(oreSpeciesId)
     );
   }
 }

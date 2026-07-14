@@ -32,6 +32,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE = {
   WILDLIFE_NAME_TAGS: 'wildlife-name-tags',
   TREES: 'trees',
   COLUMN_ROCKS: 'column-rocks',
+  ORE_VEINS: 'ore-veins',
   STONE_DECORATIONS: 'stone-decorations',
   LAVA: 'lava',
   OCEAN: 'ocean',
@@ -257,6 +258,13 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
       description: 'Large rocky-biome and open-world rock formations.',
     },
     {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.ORE_VEINS,
+      groupId: 'terrain',
+      label: 'Ore veins',
+      description:
+        'Tinted ore-bearing column rocks and ore drops when mined. Off keeps plain stone only.',
+    },
+    {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STONE_DECORATIONS,
       groupId: 'terrain',
       label: 'Stone decorations',
@@ -334,6 +342,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS: Readonly<
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_NAME_TAGS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.COLUMN_ROCKS]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.ORE_VEINS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STONE_DECORATIONS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAVA]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.OCEAN]: true,

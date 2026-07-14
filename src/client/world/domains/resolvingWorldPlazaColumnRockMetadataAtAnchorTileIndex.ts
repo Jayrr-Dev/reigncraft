@@ -4,6 +4,7 @@ import { checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex } from '@/components/
 import { checkingWorldPlazaTileIsRockyBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsRockyBiomeAtTileIndex';
 import { checkingWorldPlazaTreeBlocksGridTile } from '@/components/world/domains/checkingWorldPlazaTreeBlocksGridTile';
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
+import { resolvingWorldPlazaOreVeinPalette } from '@/components/world/domains/definingWorldPlazaOreRegistry';
 import { DEFINING_WORLD_PLAZA_ROCKY_BIOME_MEDIUM_FIELD_OVERRIDE_SEED_SALT } from '@/components/world/domains/definingWorldPlazaRockyBiomeConstants';
 import {
   DEFINING_WORLD_PLAZA_STONE_SEED_SALT_PALETTE,
@@ -36,6 +37,8 @@ import {
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { samplingWorldPlazaVegetationStoneNoiseAtTile } from '@/components/world/domains/samplingWorldPlazaVegetationDensityAtTile';
 import { seedingWorldPlazaGrassTileDecorationFromTileIndex } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
+import { resolvingWorldPlazaOreSpeciesAtAnchorTileIndex } from '@/components/world/domains/resolvingWorldPlazaOreSpeciesAtAnchorTileIndex';
+import type { WorldOreSpeciesId } from '../../../shared/worldOreRarity';
 
 /**
  * Deterministic column-rock metadata for spacing-cell anchor tiles.
@@ -44,7 +47,7 @@ import { seedingWorldPlazaGrassTileDecorationFromTileIndex } from '@/components/
  */
 
 /** Resolved mega-boulder metadata anchored on one spacing cell. */
-export interface DefiningWorldPlazaColumnRockMetadata {
+export type DefiningWorldPlazaColumnRockMetadata = {
   readonly anchorTileX: number;
   readonly anchorTileY: number;
   readonly footprintTileWidth: number;
@@ -56,7 +59,9 @@ export interface DefiningWorldPlazaColumnRockMetadata {
   readonly bodyHalfHeightPx: number;
   readonly bodyColor: number;
   readonly highlightColor: number;
-}
+  /** Ore vein species when this boulder carries ore; null for plain stone. */
+  readonly oreSpeciesId: WorldOreSpeciesId | null;
+};
 
 /** Hard cap on memoized anchor columns before the whole cache is reset. */
 const RESOLVING_WORLD_PLAZA_COLUMN_ROCK_METADATA_CACHE_MAX_COLUMNS = 4000;
@@ -154,9 +159,16 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     return null;
   }
 
-  if (
-    checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex(anchorTileX, anchorTileY)
-  ) {
+  const isFirelandsBiome = checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex(
+    anchorTileX,
+    anchorTileY
+  );
+  const oreVeinsEnabled = checkingWorldPlazaGenerationFeatureEnabled(
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.ORE_VEINS
+  );
+
+  // Firelands stays rockless unless ore veins are on (volcanic ore boulders).
+  if (isFirelandsBiome && !oreVeinsEnabled) {
     return null;
   }
 
@@ -263,10 +275,21 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     anchorTileY,
     DEFINING_WORLD_PLAZA_STONE_SEED_SALT_PALETTE
   );
-  const palette = resolvingWorldPlazaRockyBiomeStonePaletteAtTileIndex(
+  const oreSpeciesId = oreVeinsEnabled
+    ? resolvingWorldPlazaOreSpeciesAtAnchorTileIndex(anchorTileX, anchorTileY)
+    : null;
+
+  // Firelands only spawns ore-bearing columns (no plain grey stone there).
+  if (isFirelandsBiome && oreSpeciesId === null) {
+    return null;
+  }
+  const stonePalette = resolvingWorldPlazaRockyBiomeStonePaletteAtTileIndex(
     paletteUnit,
     isRockyBiome
   );
+  const palette = oreSpeciesId
+    ? resolvingWorldPlazaOreVeinPalette(oreSpeciesId)
+    : stonePalette;
 
   const heightUnit = resolvingWorldPlazaRockyBiomeColumnHeightUnit(
     seedingWorldPlazaGrassTileDecorationFromTileIndex(
@@ -352,5 +375,6 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     bodyHalfHeightPx: sizeTier.bodyHalfHeightPx,
     bodyColor: palette.bodyColor,
     highlightColor: palette.highlightColor,
+    oreSpeciesId,
   };
 }

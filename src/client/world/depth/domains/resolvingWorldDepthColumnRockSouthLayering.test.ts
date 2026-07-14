@@ -15,6 +15,7 @@ const MOCK_FIELD_BOULDER: DefiningWorldPlazaColumnRockMetadata = {
   bodyHalfHeightPx: 22,
   bodyColor: 0x6b5b4a,
   highlightColor: 0x8a7a68,
+  oreSpeciesId: null,
 };
 
 vi.mock(

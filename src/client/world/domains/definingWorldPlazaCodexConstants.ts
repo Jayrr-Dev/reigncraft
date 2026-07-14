@@ -18,6 +18,7 @@ export type WorldPlazaCodexSectionId =
   | 'biomes'
   | 'bestiary'
   | 'herbarium'
+  | 'lapidary'
   | 'recipes'
   | 'lore';
 
@@ -61,6 +62,12 @@ export const DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS: readonly WorldPlazaCodexMe
       label: 'Herbarium',
       icon: 'mdi:flower',
       description: 'Sighted flora and hidden ones',
+    },
+    {
+      id: 'lapidary',
+      label: 'Lapidary',
+      icon: 'game-icons:stone-pile',
+      description: 'Sighted ores and hidden ones',
     },
     {
       id: 'recipes',

@@ -14,9 +14,9 @@ import {
   Signpost as SignpostIcon,
   TreeDeciduous as TreeDeciduousIcon,
   type LucideIcon,
-} from "lucide-react";
+} from 'lucide-react';
 
-import type { DefiningWorldBuildingBlockDefinitionId } from "@/components/world/building/domains/definingWorldBuildingBlockDefinition";
+import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_WOOD,
   DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE,
@@ -27,11 +27,12 @@ import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_ROCK_LARGE,
   DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK,
   DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_WATER_STREAM,
-} from "@/components/world/building/domains/definingWorldBuildingBlockRegistry";
+} from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import { checkingWorldBuildingBlockDefinitionIdIsOreWall } from '@/components/world/building/domains/definingWorldPlazaOreWallBlockRegistry';
 
 /** Custom inline SVG ids for blocks without a clear Lucide match. */
 export const DEFINING_WORLD_BUILDING_BLOCK_PALETTE_MATERIAL_ICON_CUSTOM_CHEST =
-  "custom:chest" as const;
+  'custom:chest' as const;
 
 /** Custom inline SVG ids rendered by the palette material icon component. */
 export type DefiningWorldBuildingBlockPaletteMaterialCustomIconId =
@@ -40,11 +41,11 @@ export type DefiningWorldBuildingBlockPaletteMaterialCustomIconId =
 /** Resolved palette material icon source. */
 export type DefiningWorldBuildingBlockPaletteMaterialIconSource =
   | {
-      readonly kind: "lucide";
+      readonly kind: 'lucide';
       readonly icon: LucideIcon;
     }
   | {
-      readonly kind: "custom";
+      readonly kind: 'custom';
       readonly customIconId: DefiningWorldBuildingBlockPaletteMaterialCustomIconId;
     };
 
@@ -83,7 +84,7 @@ const RESOLVING_WORLD_BUILDING_BLOCK_PALETTE_MATERIAL_CUSTOM_ICON_BY_ID: Partial
  * @param definitionId - Persisted block type id.
  */
 export function resolvingWorldBuildingBlockPaletteMaterialIcon(
-  definitionId: DefiningWorldBuildingBlockDefinitionId,
+  definitionId: DefiningWorldBuildingBlockDefinitionId
 ): DefiningWorldBuildingBlockPaletteMaterialIconSource {
   const customIconId =
     RESOLVING_WORLD_BUILDING_BLOCK_PALETTE_MATERIAL_CUSTOM_ICON_BY_ID[
@@ -92,13 +93,23 @@ export function resolvingWorldBuildingBlockPaletteMaterialIcon(
 
   if (customIconId) {
     return {
-      kind: "custom",
+      kind: 'custom',
       customIconId,
     };
   }
 
+  if (
+    definitionId === DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE ||
+    checkingWorldBuildingBlockDefinitionIdIsOreWall(definitionId)
+  ) {
+    return {
+      kind: 'lucide',
+      icon: BrickWallIcon,
+    };
+  }
+
   return {
-    kind: "lucide",
+    kind: 'lucide',
     icon:
       RESOLVING_WORLD_BUILDING_BLOCK_PALETTE_MATERIAL_LUCIDE_ICON_BY_ID[
         definitionId

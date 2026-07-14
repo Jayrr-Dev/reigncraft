@@ -1,7 +1,7 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWorldPlazaGroundItemsUseLocalPersistence } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemsUseLocalPersistence';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { insertingWorldPlazaGroundItemOptimistically } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
 import { droppingWorldPlazaLocalGroundItem } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
 import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
@@ -20,6 +20,8 @@ export type DroppingWorldPlazaRockMineStoneGroundItemParams = {
   readonly layer: number;
   readonly stoneQuantity: number;
   readonly playerPosition: DefiningWorldPlazaWorldPoint;
+  /** Defaults to plain stone when omitted. */
+  readonly itemTypeId?: string;
 };
 
 export type DroppingWorldPlazaRockMineStoneGroundItemResult =
@@ -30,7 +32,7 @@ export type DroppingWorldPlazaRockMineStoneGroundItemResult =
   | { readonly outcome: 'failed' };
 
 /**
- * Spawns stone from a completed rock mine as a ground item at the rock tile.
+ * Spawns stone or ore from a completed rock mine as a ground item at the rock tile.
  */
 export async function droppingWorldPlazaRockMineStoneGroundItem({
   localPersistenceOwnerId,
@@ -41,6 +43,7 @@ export async function droppingWorldPlazaRockMineStoneGroundItem({
   layer,
   stoneQuantity,
   playerPosition,
+  itemTypeId = DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
 }: DroppingWorldPlazaRockMineStoneGroundItemParams): Promise<DroppingWorldPlazaRockMineStoneGroundItemResult> {
   if (stoneQuantity <= 0) {
     return { outcome: 'failed' };
@@ -52,7 +55,7 @@ export async function droppingWorldPlazaRockMineStoneGroundItem({
   );
 
   const dropRequest = {
-    itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
+    itemTypeId,
     quantity: stoneQuantity,
     gridX: tileX,
     gridY: tileY,
@@ -85,7 +88,7 @@ export async function droppingWorldPlazaRockMineStoneGroundItem({
 
     const groundItem: DefiningWorldPlazaGroundItem = {
       id: groundItemId,
-      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
+      itemTypeId,
       quantity: stoneQuantity,
       gridX: tileX,
       gridY: tileY,

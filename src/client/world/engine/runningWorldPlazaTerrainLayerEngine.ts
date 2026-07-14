@@ -36,6 +36,8 @@ export const RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID = {
   ROCK_COLUMNS: 'rock-columns',
   FIRELANDS_DECORATIONS: 'firelands-decorations',
   FLOOR_CHUNKS: 'floor-chunks',
+  FLOWER_DECORATIONS: 'flower-decorations',
+  STONE_DECORATIONS: 'stone-decorations',
   ELEVATION_COLUMNS: 'elevation-columns',
   TREE_TRUNKS: 'tree-trunks',
   TREE_SHADOWS: 'tree-shadows',

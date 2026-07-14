@@ -1,13 +1,15 @@
-import type { DefiningWorldBuildingBlockDefinitionId } from "@/components/world/building/domains/definingWorldBuildingBlockDefinition";
-import {
-  DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_PINE_WOOD,
-  DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_WATER_STREAM,
-  type DefiningWorldBuildingPlacedBlockTopFaceTextureKind,
-} from "@/components/world/building/domains/definingWorldBuildingPlacedBlockTopFaceTextureKind";
+import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_WOOD,
   DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_WATER_STREAM,
-} from "@/components/world/building/domains/definingWorldBuildingBlockRegistry";
+} from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import {
+  DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_ORE_WALL,
+  DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_PINE_WOOD,
+  DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_WATER_STREAM,
+  type DefiningWorldBuildingPlacedBlockTopFaceTextureKind,
+} from '@/components/world/building/domains/definingWorldBuildingPlacedBlockTopFaceTextureKind';
+import { checkingWorldBuildingBlockDefinitionIdIsOreWall } from '@/components/world/building/domains/definingWorldPlazaOreWallBlockRegistry';
 
 /**
  * Maps block definition ids to procedural top-face texture kinds.
@@ -34,8 +36,12 @@ const RESOLVING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_BY_DEFINITION_
  * @param definitionId - Persisted block type id.
  */
 export function resolvingWorldBuildingPlacedBlockTopFaceTextureKind(
-  definitionId: DefiningWorldBuildingBlockDefinitionId,
+  definitionId: DefiningWorldBuildingBlockDefinitionId
 ): DefiningWorldBuildingPlacedBlockTopFaceTextureKind | null {
+  if (checkingWorldBuildingBlockDefinitionIdIsOreWall(definitionId)) {
+    return DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_ORE_WALL;
+  }
+
   return (
     RESOLVING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_BY_DEFINITION_ID[
       definitionId
