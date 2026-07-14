@@ -47,7 +47,7 @@ export const LABELING_PLAZA_HERBARIUM_UNDISCOVERED_CLOVER_HINT =
 
 /** Vague four-leaf inspect copy while Lucky is active and study is below full. */
 export const LABELING_PLAZA_HERBARIUM_CLOVER_LUCKY_ACTIVE_VAGUE_DESCRIPTION =
-  'The leaf hums in your grip. Fortune feels closer, but your notes cannot pin down why.' as const;
+  "You're feeling really lucky today." as const;
 
 /** Teaser on four-leaf inspect before full clover study. */
 export const LABELING_PLAZA_HERBARIUM_CLOVER_LUCKY_EFFECTS_LOCKED_TEASER =
