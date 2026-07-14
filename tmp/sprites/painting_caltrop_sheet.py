@@ -77,30 +77,23 @@ def paint_scatter(
 
 def make_armed() -> Image.Image:
     cell = Image.new("RGBA", (CELL, CELL), (0, 0, 0, 0))
-    # Dense but readable scatter of many tiny spikes (pad ~2)
+    # Loose scatter: wide tile cover, clear gaps between jacks
     positions = [
-        (8, 10, 1),
-        (12, 8, 1),
-        (16, 9, 2),
-        (20, 8, 1),
-        (24, 11, 1),
-        (7, 14, 1),
-        (11, 13, 2),
-        (15, 14, 1),
-        (19, 13, 2),
-        (23, 15, 1),
-        (9, 18, 1),
-        (13, 17, 1),
-        (17, 18, 2),
-        (21, 17, 1),
-        (25, 19, 1),
-        (10, 21, 1),
-        (14, 22, 1),
-        (18, 21, 1),
-        (22, 22, 1),
-        (15, 11, 1),
-        (12, 20, 1),
-        (20, 20, 1),
+        (5, 6, 1),
+        (14, 5, 1),
+        (24, 6, 1),
+        (9, 11, 1),
+        (19, 10, 2),
+        (27, 12, 1),
+        (4, 16, 1),
+        (13, 15, 1),
+        (22, 17, 1),
+        (8, 21, 1),
+        (17, 22, 2),
+        (26, 21, 1),
+        (6, 26, 1),
+        (15, 27, 1),
+        (25, 26, 1),
     ]
     paint_scatter(cell, positions, muted=False)
     return cell
@@ -108,25 +101,20 @@ def make_armed() -> Image.Image:
 
 def make_spent() -> Image.Image:
     cell = Image.new("RGBA", (CELL, CELL), (0, 0, 0, 0))
-    # Same footprint, fewer upright tips, flatter / muted
+    # Same loose footprint, muted / fewer tips
     positions = [
-        (9, 11, 1),
-        (13, 10, 1),
-        (17, 11, 1),
-        (21, 10, 1),
-        (24, 13, 1),
-        (8, 15, 1),
-        (12, 15, 1),
-        (16, 16, 1),
-        (20, 15, 1),
-        (23, 17, 1),
-        (10, 19, 1),
-        (14, 20, 1),
-        (18, 19, 1),
-        (22, 20, 1),
-        (12, 22, 1),
-        (16, 22, 1),
-        (20, 22, 1),
+        (6, 7, 1),
+        (16, 6, 1),
+        (25, 8, 1),
+        (10, 13, 1),
+        (21, 12, 1),
+        (5, 18, 1),
+        (14, 17, 1),
+        (24, 19, 1),
+        (9, 23, 1),
+        (18, 24, 1),
+        (27, 23, 1),
+        (12, 27, 1),
     ]
     paint_scatter(cell, positions, muted=True)
     return cell

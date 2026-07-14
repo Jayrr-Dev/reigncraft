@@ -25,11 +25,19 @@ const managingWorldPlazaLocalPickedShrubsByOwner = new Map<
   ManagingWorldPlazaLocalPickedShrubsState
 >();
 
+/** Bumps when any shrub pick mutates local state so terrain can resync same frame. */
+let managingWorldPlazaLocalPickedShrubsRevision = 0;
+
 export function formattingWorldPlazaPickedShrubTileKey(
   tileX: number,
   tileY: number
 ): string {
   return formattingWorldShrubPickTileKey(tileX, tileY);
+}
+
+/** Revision for shrub-decoration invalidation after local picks. */
+export function gettingWorldPlazaLocalPickedShrubsRevision(): number {
+  return managingWorldPlazaLocalPickedShrubsRevision;
 }
 
 export function resolvingWorldPlazaPickedShrubsLocalStorageKey(
@@ -244,6 +252,7 @@ export function pickingWorldPlazaLocalShrub(
   persistingWorldPlazaLocalPickedShrubsState(persistenceOwnerId, {
     byTileKey: new Map(state.byTileKey).set(tileKey, mutation.nextTileState),
   });
+  managingWorldPlazaLocalPickedShrubsRevision += 1;
 
   return {
     outcome: 'picked',

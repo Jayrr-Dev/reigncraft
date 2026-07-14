@@ -15,11 +15,13 @@ import { useCallback, type RefObject } from 'react';
 import type { WorldCloverSearchLootKind } from '../../../../shared/worldCloverSearchLoot';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 import type { WorldOreSpeciesId } from '../../../../shared/worldOreRarity';
+import type { WorldShrubBerryLootKind } from '../../../../shared/worldShrubBerryLoot';
 
 export type DefiningWorldPlazaInventorySpecimenStudyKind =
   | 'flower'
   | 'ore'
-  | 'clover';
+  | 'clover'
+  | 'berry';
 
 export type DefiningWorldPlazaInventorySpecimenStudyProgressContext = {
   readonly slotIndex: number;
@@ -27,6 +29,7 @@ export type DefiningWorldPlazaInventorySpecimenStudyProgressContext = {
   readonly flowerSpeciesId?: WorldFlowerSpeciesId;
   readonly oreSpeciesId?: WorldOreSpeciesId;
   readonly cloverKind?: WorldCloverSearchLootKind;
+  readonly berryLootKind?: WorldShrubBerryLootKind;
   readonly damageBaselineMs: number | null;
 };
 

@@ -22,6 +22,7 @@ import {
   subscribingWorldPlazaBestiaryDiscovery,
 } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import {
+  gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
   gettingWorldPlazaHerbariumCloverStudyCountSnapshot,
   gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
   subscribingWorldPlazaHerbariumDiscovery,
@@ -441,6 +442,11 @@ function InventoryPlazaSlotItem({
     gettingWorldPlazaHerbariumCloverStudyCountSnapshot,
     () => 0
   );
+  const berryStudyCountsByLootKind = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
+    () => ({})
+  );
   const oreStudyCountsBySpeciesId = useSyncExternalStore(
     subscribingWorldPlazaLapidaryDiscovery,
     gettingWorldPlazaLapidaryOreStudyCountsSnapshot,
@@ -453,10 +459,12 @@ function InventoryPlazaSlotItem({
         studyCountsBySpeciesId,
         flowerStudyCountsBySpeciesId,
         cloverStudyCount,
+        berryStudyCountsByLootKind,
         oreStudyCountsBySpeciesId,
         playerEffectiveMaxHealth,
       }),
     [
+      berryStudyCountsByLootKind,
       cloverStudyCount,
       flowerStudyCountsBySpeciesId,
       isEquipped,

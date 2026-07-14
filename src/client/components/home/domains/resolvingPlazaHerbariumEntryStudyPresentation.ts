@@ -1,4 +1,9 @@
 import {
+  LABELING_PLAZA_HERBARIUM_BERRY_STUDY_TIER_SECTION_TITLES,
+  LABELING_PLAZA_HERBARIUM_BERRY_STUDY_TIER_TEASERS,
+  type PlazaHerbariumBerryStudyTierId,
+} from '@/components/home/domains/definingPlazaHerbariumBerryStudyTier';
+import {
   LABELING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_SECTION_TITLES,
   LABELING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_TEASERS,
   type PlazaHerbariumCloverStudyTierId,
@@ -27,6 +32,12 @@ import {
 } from '@/components/home/domains/resolvingPlazaHerbariumFlowerStudyTier';
 import type { PlazaHerbariumGuideDisplayEntry } from '@/components/home/domains/resolvingPlazaHerbariumGuideDisplayEntries';
 import {
+  checkingPlazaHerbariumBerryStudyTierUnlocked,
+  formattingPlazaHerbariumBerryStudyCountProgress,
+  formattingPlazaHerbariumBerryStudyProgressLabel,
+  resolvingPlazaHerbariumBerryStudyTierBookIcon,
+} from '@/components/home/domains/resolvingPlazaHerbariumBerryStudyTier';
+import {
   checkingPlazaHerbariumStudyTierUnlocked,
   formattingPlazaHerbariumStudyCountProgress,
   formattingPlazaHerbariumStudyProgressLabel,
@@ -36,7 +47,8 @@ import {
 type HerbariumDetailTierId =
   | Exclude<PlazaHerbariumFlowerStudyTierId, 'sighted'>
   | Exclude<PlazaHerbariumStudyTierId, 'sighted'>
-  | Exclude<PlazaHerbariumCloverStudyTierId, 'sighted'>;
+  | Exclude<PlazaHerbariumCloverStudyTierId, 'sighted'>
+  | Exclude<PlazaHerbariumBerryStudyTierId, 'sighted'>;
 
 export function formattingPlazaHerbariumEntryStudyCountProgress(
   entry: PlazaHerbariumGuideDisplayEntry
@@ -46,6 +58,8 @@ export function formattingPlazaHerbariumEntryStudyCountProgress(
       return formattingPlazaHerbariumFlowerStudyCountProgress(entry.studyCount);
     case 'clover':
       return formattingPlazaHerbariumCloverStudyCountProgress(entry.studyCount);
+    case 'berry':
+      return formattingPlazaHerbariumBerryStudyCountProgress(entry.studyCount);
     case 'tree':
       return formattingPlazaHerbariumStudyCountProgress(entry.studyCount);
   }
@@ -59,6 +73,8 @@ export function resolvingPlazaHerbariumEntryStudyTierBookIcon(
       return resolvingPlazaHerbariumFlowerStudyTierBookIcon(entry.studyCount);
     case 'clover':
       return resolvingPlazaHerbariumCloverStudyTierBookIcon(entry.studyCount);
+    case 'berry':
+      return resolvingPlazaHerbariumBerryStudyTierBookIcon(entry.studyCount);
     case 'tree':
       return resolvingPlazaHerbariumStudyTierBookIcon(entry.studyCount);
   }
@@ -72,6 +88,8 @@ export function formattingPlazaHerbariumEntryStudyProgressLabel(
       return formattingPlazaHerbariumFlowerStudyProgressLabel(entry.studyCount);
     case 'clover':
       return formattingPlazaHerbariumCloverStudyProgressLabel(entry.studyCount);
+    case 'berry':
+      return formattingPlazaHerbariumBerryStudyProgressLabel(entry.studyCount);
     case 'tree':
       return formattingPlazaHerbariumStudyProgressLabel(entry.studyCount);
   }
@@ -89,6 +107,10 @@ export function labelingPlazaHerbariumEntryStudyTierSectionTitle(
     case 'clover':
       return LABELING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_SECTION_TITLES[
         tierId as Exclude<PlazaHerbariumCloverStudyTierId, 'sighted'>
+      ];
+    case 'berry':
+      return LABELING_PLAZA_HERBARIUM_BERRY_STUDY_TIER_SECTION_TITLES[
+        tierId as Exclude<PlazaHerbariumBerryStudyTierId, 'sighted'>
       ];
     case 'tree':
       return LABELING_PLAZA_HERBARIUM_STUDY_TIER_SECTION_TITLES[
@@ -110,6 +132,10 @@ export function labelingPlazaHerbariumEntryStudyTierTeaser(
       return LABELING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_TEASERS[
         tierId as Exclude<PlazaHerbariumCloverStudyTierId, 'sighted'>
       ];
+    case 'berry':
+      return LABELING_PLAZA_HERBARIUM_BERRY_STUDY_TIER_TEASERS[
+        tierId as Exclude<PlazaHerbariumBerryStudyTierId, 'sighted'>
+      ];
     case 'tree':
       return LABELING_PLAZA_HERBARIUM_STUDY_TIER_TEASERS[
         tierId as Exclude<PlazaHerbariumStudyTierId, 'sighted'>
@@ -130,6 +156,11 @@ export function checkingPlazaHerbariumEntryStudyTierUnlocked(
     case 'clover':
       return checkingPlazaHerbariumCloverStudyTierUnlocked(
         tierId as PlazaHerbariumCloverStudyTierId,
+        entry.studyCount
+      );
+    case 'berry':
+      return checkingPlazaHerbariumBerryStudyTierUnlocked(
+        tierId as PlazaHerbariumBerryStudyTierId,
         entry.studyCount
       );
     case 'tree':

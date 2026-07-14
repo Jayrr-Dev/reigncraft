@@ -11,6 +11,10 @@ import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/
 import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
 import { formattingPlazaStudyCompleteToastMessage } from '@/components/home/domains/formattingPlazaStudyCompleteToastMessage';
 import {
+  checkingPlazaHerbariumBerryStudyTierUnlocked,
+  formattingPlazaHerbariumBerryStudyCountProgress,
+} from '@/components/home/domains/resolvingPlazaHerbariumBerryStudyTier';
+import {
   checkingPlazaHerbariumCloverStudyTierUnlocked,
   formattingPlazaHerbariumCloverStudyCountProgress,
 } from '@/components/home/domains/resolvingPlazaHerbariumCloverStudyTier';
@@ -26,6 +30,7 @@ import {
 import { formattingPlazaBestiaryStudyCountProgress } from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
 import {
   resolvingPlazaBestiarySpeciesStudyDisplayName,
+  resolvingPlazaHerbariumBerryStudyDisplayName,
   resolvingPlazaHerbariumCloverStudyDisplayName,
   resolvingPlazaHerbariumFlowerStudyDisplayName,
   resolvingPlazaHerbariumTreeStudyDisplayName,
@@ -283,9 +288,11 @@ import {
 import { attachingWorldPlazaAllCraftModeRecipesForDevQa } from '@/components/world/domains/attachingWorldPlazaAllCraftModeRecipesForDevQa';
 import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
+  gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
   gettingWorldPlazaHerbariumCloverStudyCountSnapshot,
   gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
   gettingWorldPlazaHerbariumTreeStudyCountsSnapshot,
+  recordingWorldPlazaHerbariumBerryStudied,
   recordingWorldPlazaHerbariumCloverStudied,
   recordingWorldPlazaHerbariumFlowerStudied,
   recordingWorldPlazaHerbariumTreeStudied,
@@ -372,7 +379,9 @@ import {
 import { formattingWorldPlazaPickedPebbleTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import {
   formattingWorldPlazaPickedShrubTileKey,
+  listingWorldPlazaLocalPickedShrubs,
   pickingWorldPlazaLocalShrub,
+  readingWorldPlazaPickedShrubState,
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
 import { markingWorldPlazaLocalTreeStumpStudied } from '@/components/world/harvest/domains/managingWorldPlazaLocalStudiedTreeStumps';
 import { registeringWorldPlazaChoppedTreesVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup';
@@ -527,6 +536,7 @@ import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED } from '@/component
 import { parsingWorldPlazaOreSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { disarmingWorldPlazaInventorySlotArmedHarvestEnchantments } from '@/components/world/inventory/domains/disarmingWorldPlazaInventorySlotArmedHarvestEnchantments';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
+import { parsingWorldPlazaBerryLootKindFromItemTypeId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBerryDetailReveal';
 import { parsingWorldPlazaCloverKindFromItemTypeId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryCloverDetailReveal';
 import { resolvingWorldPlazaInventoryFoodEatEffects } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodEatEffects';
 import {
@@ -2201,19 +2211,25 @@ function RenderingWorldPlazaPixiSceneConnected({
   }, [clearedLongGrassStateByTileKey]);
 
   useEffect(() => {
-    registeringWorldPlazaPickedShrubsLookup((tileX, tileY) =>
-      Boolean(
-        pickedShrubStateByTileKey.get(
-          formattingWorldPlazaPickedShrubTileKey(tileX, tileY)
-        )?.isPicked ||
-          checkingWildlifeGroundShrubOptimisticIsPicked(tileX, tileY)
-      )
+    registeringWorldPlazaPickedShrubsLookup(
+      (tileX, tileY) =>
+        Boolean(
+          readingWorldPlazaPickedShrubState(
+            localPersistenceOwnerId,
+            tileX,
+            tileY
+          )?.isPicked ||
+            pickedShrubStateByTileKey.get(
+              formattingWorldPlazaPickedShrubTileKey(tileX, tileY)
+            )?.isPicked ||
+            checkingWildlifeGroundShrubOptimisticIsPicked(tileX, tileY)
+        )
     );
 
     return () => {
       registeringWorldPlazaPickedShrubsLookup(null);
     };
-  }, [pickedShrubStateByTileKey]);
+  }, [localPersistenceOwnerId, pickedShrubStateByTileKey]);
 
   useEffect(() => {
     if (!isLocalGameplayEnabled) {
@@ -2341,6 +2357,13 @@ function RenderingWorldPlazaPixiSceneConnected({
           return false;
         }
 
+        queryClient.setQueryData(
+          [
+            DEFINING_WORLD_PLAZA_PICKED_SHRUBS_QUERY_KEY_ROOT,
+            localPersistenceOwnerId,
+          ],
+          listingWorldPlazaLocalPickedShrubs(localPersistenceOwnerId)
+        );
         void queryClient.invalidateQueries({
           queryKey: [DEFINING_WORLD_PLAZA_PICKED_SHRUBS_QUERY_KEY_ROOT],
         });
@@ -5485,6 +5508,25 @@ function RenderingWorldPlazaPixiSceneConnected({
               formattingPlazaHerbariumCloverStudyCountProgress(studyCount),
           })
         );
+        return;
+      }
+
+      if (context.studyKind === 'berry' && context.berryLootKind) {
+        recordingWorldPlazaHerbariumBerryStudied(context.berryLootKind);
+        const studyCount =
+          gettingWorldPlazaHerbariumBerryStudyCountsSnapshot()[
+            context.berryLootKind
+          ] ?? 1;
+        showingGameplayHudToast(
+          formattingPlazaStudyCompleteToastMessage({
+            subjectDisplayName: resolvingPlazaHerbariumBerryStudyDisplayName(
+              context.berryLootKind
+            ),
+            codexLabel: 'Herbarium',
+            progressLabel:
+              formattingPlazaHerbariumBerryStudyCountProgress(studyCount),
+          })
+        );
       }
     },
     [showingGameplayHudToast, updatingInventoryState]
@@ -5533,6 +5575,9 @@ function RenderingWorldPlazaPixiSceneConnected({
         item.itemTypeId
       );
       const cloverKind = parsingWorldPlazaCloverKindFromItemTypeId(
+        item.itemTypeId
+      );
+      const berryLootKind = parsingWorldPlazaBerryLootKindFromItemTypeId(
         item.itemTypeId
       );
 
@@ -5603,6 +5648,33 @@ function RenderingWorldPlazaPixiSceneConnected({
           slotIndex,
           studyKind: 'clover',
           cloverKind,
+        });
+
+        if (!didStart) {
+          showingGameplayHudToast('Already studying.');
+        }
+        return;
+      }
+
+      if (berryLootKind) {
+        const currentStudyCount =
+          gettingWorldPlazaHerbariumBerryStudyCountsSnapshot()[berryLootKind] ??
+          0;
+
+        if (
+          checkingPlazaHerbariumBerryStudyTierUnlocked(
+            'full',
+            currentStudyCount
+          )
+        ) {
+          showingGameplayHudToast('Already fully studied.');
+          return;
+        }
+
+        const didStart = startingSpecimenStudy({
+          slotIndex,
+          studyKind: 'berry',
+          berryLootKind,
         });
 
         if (!didStart) {

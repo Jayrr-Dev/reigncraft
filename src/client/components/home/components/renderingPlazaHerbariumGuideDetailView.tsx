@@ -1,8 +1,11 @@
 'use client';
 
+import { RenderingPlazaHerbariumBerryPortrait } from '@/components/home/components/renderingPlazaHerbariumBerryPortrait';
 import { RenderingPlazaHerbariumCloverPortrait } from '@/components/home/components/renderingPlazaHerbariumCloverPortrait';
 import { RenderingPlazaHerbariumFlowerPortrait } from '@/components/home/components/renderingPlazaHerbariumFlowerPortrait';
 import { RenderingPlazaHerbariumTreePortrait } from '@/components/home/components/renderingPlazaHerbariumTreePortrait';
+import { DEFINING_PLAZA_HERBARIUM_BERRY_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumBerryPortraitConstants';
+import type { PlazaHerbariumBerryStudyTierId } from '@/components/home/domains/definingPlazaHerbariumBerryStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_CLOVER_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumCloverPortraitConstants';
 import type { PlazaHerbariumCloverStudyTierId } from '@/components/home/domains/definingPlazaHerbariumCloverStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_FLOWER_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumFlowerPortraitConstants';
@@ -44,6 +47,7 @@ const PLAZA_HERBARIUM_DETAIL_TEASER_CLASS_NAME =
 type HerbariumDetailTierId =
   | Exclude<PlazaHerbariumFlowerStudyTierId, 'sighted'>
   | Exclude<PlazaHerbariumCloverStudyTierId, 'sighted'>
+  | Exclude<PlazaHerbariumBerryStudyTierId, 'sighted'>
   | Exclude<PlazaHerbariumStudyTierId, 'sighted'>;
 
 type RenderingPlazaHerbariumGuideDetailSectionProps = {
@@ -166,6 +170,13 @@ export function RenderingPlazaHerbariumGuideDetailView({
                 zoom={DEFINING_PLAZA_HERBARIUM_CLOVER_PORTRAIT_DETAIL_ZOOM}
                 className="size-24 sm:size-28"
               />
+            ) : entry.kind === 'berry' ? (
+              <RenderingPlazaHerbariumBerryPortrait
+                berryLootKind={entry.berryLootKind}
+                variant="revealed"
+                zoom={DEFINING_PLAZA_HERBARIUM_BERRY_PORTRAIT_DETAIL_ZOOM}
+                className="size-24 sm:size-28"
+              />
             ) : (
               <RenderingPlazaHerbariumTreePortrait
                 treeVariant={entry.variant}
@@ -250,7 +261,11 @@ export function RenderingPlazaHerbariumGuideDetailView({
                           ? entry.cloverKind === 'four_leaf'
                             ? 'Held'
                             : 'Forage'
-                          : 'Wood'}
+                          : entry.kind === 'berry'
+                            ? entry.berryLootKind === 'tea_leaves'
+                              ? 'Gathered'
+                              : 'Eaten'
+                            : 'Wood'}
                     </dt>
                     <dd className="mt-0.5 font-medium text-ink">
                       {entry.propertiesSummary}

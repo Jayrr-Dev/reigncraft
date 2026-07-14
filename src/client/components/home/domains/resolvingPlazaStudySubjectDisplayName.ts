@@ -4,6 +4,7 @@
  * @module components/home/domains/resolvingPlazaStudySubjectDisplayName
  */
 
+import { DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaHerbariumBerryGuideConstants';
 import { DEFINING_PLAZA_HERBARIUM_CLOVER_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaHerbariumCloverGuideConstants';
 import {
   DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES,
@@ -16,6 +17,7 @@ import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/doma
 import type { WorldCloverSearchLootKind } from '../../../../shared/worldCloverSearchLoot';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 import type { WorldOreSpeciesId } from '../../../../shared/worldOreRarity';
+import type { WorldShrubBerryLootKind } from '../../../../shared/worldShrubBerryLoot';
 
 export function resolvingPlazaHerbariumFlowerStudyDisplayName(
   speciesId: WorldFlowerSpeciesId
@@ -44,6 +46,16 @@ export function resolvingPlazaHerbariumCloverStudyDisplayName(
     DEFINING_PLAZA_HERBARIUM_CLOVER_GUIDE_ENTRIES.find(
       (entry) => entry.cloverKind === cloverKind
     )?.displayName ?? cloverKind
+  );
+}
+
+export function resolvingPlazaHerbariumBerryStudyDisplayName(
+  lootKind: WorldShrubBerryLootKind
+): string {
+  return (
+    DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES.find(
+      (entry) => entry.berryLootKind === lootKind
+    )?.displayName ?? lootKind
   );
 }
 

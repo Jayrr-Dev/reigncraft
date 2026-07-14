@@ -1,5 +1,6 @@
 'use client';
 
+import { RenderingPlazaHerbariumBerryPortrait } from '@/components/home/components/renderingPlazaHerbariumBerryPortrait';
 import { RenderingPlazaHerbariumCloverPortrait } from '@/components/home/components/renderingPlazaHerbariumCloverPortrait';
 import { RenderingPlazaHerbariumFlowerPortrait } from '@/components/home/components/renderingPlazaHerbariumFlowerPortrait';
 import { RenderingPlazaHerbariumGuideDetailView } from '@/components/home/components/renderingPlazaHerbariumGuideDetailView';
@@ -20,8 +21,10 @@ import {
   subscribingWorldPlazaExploredBiomes,
 } from '@/components/world/domains/managingWorldPlazaExploredBiomesStore';
 import {
+  gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
   gettingWorldPlazaHerbariumCloverStudyCountSnapshot,
   gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
+  gettingWorldPlazaHerbariumSightedBerryLootKindsSnapshot,
   gettingWorldPlazaHerbariumSightedCloverKindsSnapshot,
   gettingWorldPlazaHerbariumSightedTreeVariantsSnapshot,
   gettingWorldPlazaHerbariumTreeStudyCountsSnapshot,
@@ -56,6 +59,7 @@ export type PlazaHerbariumCategoryFilterId =
   | 'all'
   | 'flower'
   | 'clover'
+  | 'berry'
   | 'tree';
 
 const PLAZA_HERBARIUM_CATEGORY_FILTERS: readonly {
@@ -65,6 +69,7 @@ const PLAZA_HERBARIUM_CATEGORY_FILTERS: readonly {
   { id: 'all', label: 'All' },
   { id: 'flower', label: 'Flowers' },
   { id: 'clover', label: 'Clovers' },
+  { id: 'berry', label: 'Berries' },
   { id: 'tree', label: 'Trees' },
 ];
 
@@ -129,6 +134,12 @@ function RenderingPlazaHerbariumGuideCard({
               variant="silhouette"
               className="size-[48%]"
             />
+          ) : entry.kind === 'berry' ? (
+            <RenderingPlazaHerbariumBerryPortrait
+              berryLootKind={entry.berryLootKind}
+              variant="silhouette"
+              className="size-[48%]"
+            />
           ) : (
             <RenderingPlazaHerbariumTreePortrait
               treeVariant={entry.variant}
@@ -170,6 +181,12 @@ function RenderingPlazaHerbariumGuideCard({
         ) : entry.kind === 'clover' ? (
           <RenderingPlazaHerbariumCloverPortrait
             cloverKind={entry.cloverKind}
+            variant="revealed"
+            className="size-[48%]"
+          />
+        ) : entry.kind === 'berry' ? (
+          <RenderingPlazaHerbariumBerryPortrait
+            berryLootKind={entry.berryLootKind}
             variant="revealed"
             className="size-[48%]"
           />
@@ -238,6 +255,16 @@ export function RenderingPlazaHerbariumPanel({
     gettingWorldPlazaHerbariumCloverStudyCountSnapshot,
     () => 0
   );
+  const sightedBerryLootKinds = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumSightedBerryLootKindsSnapshot,
+    () => []
+  );
+  const berryStudyCountsByLootKind = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
+    () => ({})
+  );
   const exploredBiomeKinds = useSyncExternalStore(
     subscribingWorldPlazaExploredBiomes,
     gettingWorldPlazaExploredBiomesSnapshot,
@@ -251,6 +278,10 @@ export function RenderingPlazaHerbariumPanel({
     () => new Set(sightedCloverKinds),
     [sightedCloverKinds]
   );
+  const sightedBerryLootSet = useMemo(
+    () => new Set(sightedBerryLootKinds),
+    [sightedBerryLootKinds]
+  );
   const exploredKinds = useMemo(
     () => new Set(exploredBiomeKinds),
     [exploredBiomeKinds]
@@ -263,12 +294,16 @@ export function RenderingPlazaHerbariumPanel({
         treeStudyCountsByVariant,
         exploredKinds,
         sightedCloverSet,
-        cloverStudyCount
+        cloverStudyCount,
+        sightedBerryLootSet,
+        berryStudyCountsByLootKind
       ),
     [
+      berryStudyCountsByLootKind,
       cloverStudyCount,
       exploredKinds,
       flowerStudyCountsBySpeciesId,
+      sightedBerryLootSet,
       sightedCloverSet,
       sightedTreeSet,
       treeStudyCountsByVariant,
@@ -289,6 +324,10 @@ export function RenderingPlazaHerbariumPanel({
 
       if (entry.kind === 'clover') {
         return `clover:${entry.cloverKind}`;
+      }
+
+      if (entry.kind === 'berry') {
+        return `berry:${entry.berryLootKind}`;
       }
 
       return `tree:${entry.variant}`;

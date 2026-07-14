@@ -1,3 +1,4 @@
+import { checkingPlazaHerbariumBerryStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaHerbariumBerryStudyTier';
 import { checkingPlazaHerbariumCloverStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaHerbariumCloverStudyTier';
 import { checkingPlazaHerbariumFlowerStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaHerbariumFlowerStudyTier';
 import { checkingPlazaLapidaryStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaLapidaryStudyTier';
@@ -26,6 +27,11 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { formattingWorldPlazaInventoryItemDurabilityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryItemDurabilityLabel';
 import { checkingWorldPlazaHeldLuckyBuffIsActive } from '@/components/world/inventory/domains/managingWorldPlazaHeldLuckyBuffBridge';
+import {
+  parsingWorldPlazaBerryLootKindFromItemTypeId,
+  resolvingWorldPlazaInventoryBerryDetailContent,
+  resolvingWorldPlazaInventoryBerryDetailReveal,
+} from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBerryDetailReveal';
 import {
   parsingWorldPlazaCloverKindFromItemTypeId,
   resolvingWorldPlazaInventoryCloverDetailContent,
@@ -66,6 +72,7 @@ import {
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 import type { WorldOreSpeciesId } from '../../../../shared/worldOreRarity';
+import type { WorldShrubBerryLootKind } from '../../../../shared/worldShrubBerryLoot';
 
 export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly itemTypeId: string;
@@ -104,6 +111,10 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModelOptions = {
   >;
   /** Combined clover Study total for lucky-charm inspect gating. */
   readonly cloverStudyCount?: number;
+  /** Per-berry/tea Study totals; gates forage inspect detail. */
+  readonly berryStudyCountsByLootKind?: Readonly<
+    Partial<Record<WorldShrubBerryLootKind, number>>
+  >;
   /** Local player effective max HP for food heal preview. */
   readonly playerEffectiveMaxHealth?: number;
 };
@@ -174,6 +185,26 @@ function checkingWorldPlazaInventoryItemCanStudyClover(
 }
 
 /**
+ * True when a berry/tea specimen still has herbarium Study progress left.
+ */
+function checkingWorldPlazaInventoryItemCanStudyBerry(
+  itemTypeId: string,
+  berryStudyCountsByLootKind:
+    | Readonly<Partial<Record<WorldShrubBerryLootKind, number>>>
+    | undefined
+): boolean {
+  const lootKind = parsingWorldPlazaBerryLootKindFromItemTypeId(itemTypeId);
+
+  if (!lootKind) {
+    return false;
+  }
+
+  const studyCount = berryStudyCountsByLootKind?.[lootKind] ?? 0;
+
+  return !checkingPlazaHerbariumBerryStudyTierUnlocked('full', studyCount);
+}
+
+/**
  * True when the item can be Studied for Herbarium or Lapidary progress.
  */
 function checkingWorldPlazaInventoryItemCanStudy(
@@ -184,7 +215,10 @@ function checkingWorldPlazaInventoryItemCanStudy(
   oreStudyCountsBySpeciesId:
     | Readonly<Partial<Record<WorldOreSpeciesId, number>>>
     | undefined,
-  cloverStudyCount: number | undefined
+  cloverStudyCount: number | undefined,
+  berryStudyCountsByLootKind:
+    | Readonly<Partial<Record<WorldShrubBerryLootKind, number>>>
+    | undefined
 ): boolean {
   return (
     checkingWorldPlazaInventoryItemCanStudyFlower(
@@ -195,7 +229,11 @@ function checkingWorldPlazaInventoryItemCanStudy(
       itemTypeId,
       oreStudyCountsBySpeciesId
     ) ||
-    checkingWorldPlazaInventoryItemCanStudyClover(itemTypeId, cloverStudyCount)
+    checkingWorldPlazaInventoryItemCanStudyClover(itemTypeId, cloverStudyCount) ||
+    checkingWorldPlazaInventoryItemCanStudyBerry(
+      itemTypeId,
+      berryStudyCountsByLootKind
+    )
   );
 }
 
@@ -531,6 +569,23 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
           checkingWorldPlazaHeldLuckyBuffIsActive(),
       })
     : null;
+  const berryLootKind = parsingWorldPlazaBerryLootKindFromItemTypeId(
+    item.itemTypeId
+  );
+  const berryStudyCount = berryLootKind
+    ? (options.berryStudyCountsByLootKind?.[berryLootKind] ?? 0)
+    : 0;
+  const berryReveal = berryLootKind
+    ? resolvingWorldPlazaInventoryBerryDetailReveal(berryStudyCount)
+    : null;
+  const berryContent = berryLootKind
+    ? resolvingWorldPlazaInventoryBerryDetailContent(berryLootKind, {
+        studyCount: berryStudyCount,
+        food: foodDefinition,
+        foodItemMetadata: item.metadata,
+        effectiveMaxHealth: options.playerEffectiveMaxHealth,
+      })
+    : null;
   const oreSpeciesId = parsingWorldPlazaOreSpeciesIdFromItemTypeId(
     item.itemTypeId
   );
@@ -570,11 +625,12 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     (!isWildlifeMeat || Boolean(wildlifeMeatReveal?.showGenericItemMeta)) &&
     (!flowerSpeciesId || Boolean(flowerReveal?.showGenericItemMeta)) &&
     (!cloverKind || Boolean(cloverReveal?.showGenericItemMeta)) &&
+    (!berryLootKind || Boolean(berryReveal?.showGenericItemMeta)) &&
     (!oreSpeciesId || Boolean(oreReveal?.showGenericItemMeta));
   const includeGenericFoodRows =
-    !isWildlifeMeat && !flowerSpeciesId && !cloverKind;
+    !isWildlifeMeat && !flowerSpeciesId && !cloverKind && !berryLootKind;
   const includeFoodHungerBadge =
-    !isWildlifeMeat && !flowerSpeciesId && !cloverKind;
+    !isWildlifeMeat && !flowerSpeciesId && !cloverKind && !berryLootKind;
 
   const durabilitySnapshot = resolvingWorldPlazaInventoryItemDurability(item);
   const enchantmentRows = resolvingWorldPlazaInventoryItemEnchantmentRows(
@@ -606,7 +662,8 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
         item.itemTypeId,
         options.flowerStudyCountsBySpeciesId,
         options.oreStudyCountsBySpeciesId,
-        options.cloverStudyCount
+        options.cloverStudyCount,
+        options.berryStudyCountsByLootKind
       ),
       canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
         item.itemTypeId
@@ -639,11 +696,13 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     ...(wildlifeMeatContent?.badges ?? []),
     ...(flowerContent?.badges ?? []),
     ...(cloverContent?.badges ?? []),
+    ...(berryContent?.badges ?? []),
     ...(oreContent?.badges ?? []),
   ];
   const mergedInfoRows = [
     ...(flowerContent?.infoRows ?? []),
     ...(cloverContent?.infoRows ?? []),
+    ...(berryContent?.infoRows ?? []),
     ...(oreContent?.infoRows ?? []),
     ...genericInfoRows,
     ...(wildlifeMeatContent?.infoRows ?? []),
@@ -656,12 +715,14 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       ? (flowerContent?.description ?? '')
       : cloverKind
         ? (cloverContent?.description ?? '')
-        : oreSpeciesId
-          ? (oreContent?.description ?? '')
-          : (wildlifeMeatContent?.description ??
-            resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
-              fallbackName: definition.name,
-            })),
+        : berryLootKind
+          ? (berryContent?.description ?? '')
+          : oreSpeciesId
+            ? (oreContent?.description ?? '')
+            : (wildlifeMeatContent?.description ??
+              resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
+                fallbackName: definition.name,
+              })),
     durabilityLabel: formattingWorldPlazaInventoryItemDurabilityLabel(item),
     durabilityRatio: durabilitySnapshot?.ratio ?? null,
     badges: mergedBadges,
@@ -675,7 +736,8 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       item.itemTypeId,
       options.flowerStudyCountsBySpeciesId,
       options.oreStudyCountsBySpeciesId,
-      options.cloverStudyCount
+      options.cloverStudyCount,
+      options.berryStudyCountsByLootKind
     ),
     canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
       item.itemTypeId

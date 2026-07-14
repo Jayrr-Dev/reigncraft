@@ -34,7 +34,10 @@ import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/
 import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
-import type { DefiningWorldPlazaPickedShrubTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
+import {
+  gettingWorldPlazaLocalPickedShrubsRevision,
+  type DefiningWorldPlazaPickedShrubTileState,
+} from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
 import { buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
 import { gettingWorldPlazaTemperatureDebugOverrideRevision } from '@/components/world/health/domains/managingWorldPlazaTemperatureDebugOverrideStore';
 
@@ -111,7 +114,7 @@ export function computingWorldPlazaTerrainDependencySnapshot(
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_LONG_GRASS]:
       buildingWorldPlazaClearedLongGrassCacheKey(input.clearedLongGrassByTileKey),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_SHRUBS]:
-      buildingWorldPlazaPickedShrubsCacheKey(input.pickedShrubsByTileKey),
+      `${buildingWorldPlazaPickedShrubsCacheKey(input.pickedShrubsByTileKey)}|${gettingWorldPlazaLocalPickedShrubsRevision()}`,
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS]:
       buildingWorldPlazaBurntGrassTileKeysCacheKey(input.burntGrassTileKeys),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL]:

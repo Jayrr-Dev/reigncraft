@@ -6,6 +6,7 @@ import type { DefiningWorldPlazaPickedShrubTileState } from '@/components/world/
 import {
   checkingWorldPlazaShrubPickEligibility,
   formattingWorldPlazaPickedShrubTileKey,
+  listingWorldPlazaLocalPickedShrubs,
   pickingWorldPlazaLocalShrub,
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
 import { checkingWorldPlazaRuntimeShrubIsPicked } from '@/components/world/harvest/domains/registeringWorldPlazaPickedShrubsLookup';
@@ -274,6 +275,13 @@ export function usingWorldPlazaShrubPickInteraction({
           return;
         }
 
+        queryClient.setQueryData(
+          [
+            DEFINING_WORLD_PLAZA_PICKED_SHRUBS_QUERY_KEY_ROOT,
+            persistenceOwnerId,
+          ],
+          listingWorldPlazaLocalPickedShrubs(persistenceOwnerId)
+        );
         void queryClient.invalidateQueries({
           queryKey: [DEFINING_WORLD_PLAZA_PICKED_SHRUBS_QUERY_KEY_ROOT],
         });

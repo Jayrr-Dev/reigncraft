@@ -1,5 +1,11 @@
 import { LABELING_PLAZA_BIOMES_UNDISCOVERED_NAME } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
 import {
+  DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES,
+  LABELING_PLAZA_HERBARIUM_UNDISCOVERED_BERRY_HINT,
+  type DefiningPlazaHerbariumBerryEntry,
+} from '@/components/home/domains/definingPlazaHerbariumBerryGuideConstants';
+import type { PlazaHerbariumBerryStudyTierId } from '@/components/home/domains/definingPlazaHerbariumBerryStudyTier';
+import {
   DEFINING_PLAZA_HERBARIUM_CLOVER_GUIDE_ENTRIES,
   LABELING_PLAZA_HERBARIUM_UNDISCOVERED_CLOVER_HINT,
   type DefiningPlazaHerbariumCloverEntry,
@@ -16,6 +22,10 @@ import {
   type DefiningPlazaHerbariumTreeEntry,
 } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
 import type { PlazaHerbariumStudyTierId } from '@/components/home/domains/definingPlazaHerbariumStudyTier';
+import {
+  checkingPlazaHerbariumBerryStudyTierUnlocked,
+  resolvingPlazaHerbariumBerryStudyTierId,
+} from '@/components/home/domains/resolvingPlazaHerbariumBerryStudyTier';
 import {
   resolvingPlazaHerbariumCloverLuckyEffectStatRows,
   type PlazaHerbariumCloverLuckyEffectStatRow,
@@ -49,6 +59,7 @@ import {
 import type { DefiningWorldPlazaInventoryItemRarity } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
 import type { WorldCloverSearchLootKind } from '../../../../shared/worldCloverSearchLoot';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
+import type { WorldShrubBerryLootKind } from '../../../../shared/worldShrubBerryLoot';
 
 export type PlazaHerbariumGuideDiscoveryState =
   | 'locked'
@@ -70,7 +81,8 @@ export type PlazaHerbariumGuideDisplayEntryBase = {
   studyTierId:
     | PlazaHerbariumFlowerStudyTierId
     | PlazaHerbariumStudyTierId
-    | PlazaHerbariumCloverStudyTierId;
+    | PlazaHerbariumCloverStudyTierId
+    | PlazaHerbariumBerryStudyTierId;
   rarity: DefiningWorldPlazaInventoryItemRarity;
   rarityLabel: string;
   icon: string;
@@ -106,10 +118,18 @@ export type PlazaHerbariumGuideCloverDisplayEntry =
       | null;
   };
 
+export type PlazaHerbariumGuideBerryDisplayEntry =
+  PlazaHerbariumGuideDisplayEntryBase & {
+    kind: 'berry';
+    berryLootKind: WorldShrubBerryLootKind;
+    eatEffectStatRows: null;
+  };
+
 export type PlazaHerbariumGuideDisplayEntry =
   | PlazaHerbariumGuideFlowerDisplayEntry
   | PlazaHerbariumGuideTreeDisplayEntry
-  | PlazaHerbariumGuideCloverDisplayEntry;
+  | PlazaHerbariumGuideCloverDisplayEntry
+  | PlazaHerbariumGuideBerryDisplayEntry;
 
 /** Biome kinds that ever draw a pickable flower decoration. */
 function listingPlazaHerbariumFlowerBearingBiomeKinds(): readonly DefiningWorldPlazaBiomeKind[] {
@@ -182,7 +202,11 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
   >,
   exploredBiomeKinds: ReadonlySet<DefiningWorldPlazaBiomeKind> = new Set(),
   sightedCloverKinds: ReadonlySet<WorldCloverSearchLootKind> = new Set(),
-  cloverStudyCount = 0
+  cloverStudyCount = 0,
+  sightedBerryLootKinds: ReadonlySet<WorldShrubBerryLootKind> = new Set(),
+  berryStudyCountsByLootKind: Readonly<
+    Partial<Record<WorldShrubBerryLootKind, number>>
+  > = {}
 ): PlazaHerbariumGuideDisplayEntry[] {
   const flowerBiomeKinds = listingPlazaHerbariumFlowerBearingBiomeKinds();
 
@@ -379,7 +403,70 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
       }
     );
 
-  return [...flowerEntries, ...cloverEntries, ...treeEntries];
+  const berryBiomeKinds = listingPlazaHerbariumFlowerBearingBiomeKinds();
+
+  const berryEntries: PlazaHerbariumGuideBerryDisplayEntry[] =
+    DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES.map(
+      (entry: DefiningPlazaHerbariumBerryEntry) => {
+        const studyCount =
+          berryStudyCountsByLootKind[entry.berryLootKind] ?? 0;
+        const isSighted =
+          studyCount > 0 || sightedBerryLootKinds.has(entry.berryLootKind);
+        const discoveryState = resolvingPlazaHerbariumDiscoveryState(
+          sightedBerryLootKinds.has(entry.berryLootKind),
+          studyCount
+        );
+        const isStudied = checkingPlazaHerbariumBerryStudyTierUnlocked(
+          'fieldNotes',
+          studyCount
+        );
+        const isPropertiesUnlocked = checkingPlazaHerbariumBerryStudyTierUnlocked(
+          'properties',
+          studyCount
+        );
+        const isFullyStudied = checkingPlazaHerbariumBerryStudyTierUnlocked(
+          'full',
+          studyCount
+        );
+        const rarity = resolvingPlazaHerbariumEntryRarity({
+          kind: 'berry',
+          berryLootKind: entry.berryLootKind,
+        });
+
+        return {
+          kind: 'berry',
+          berryLootKind: entry.berryLootKind,
+          icon: entry.icon,
+          discoveryState,
+          isSighted,
+          isStudied,
+          isFullyStudied,
+          studyCount,
+          studyTierId: resolvingPlazaHerbariumBerryStudyTierId(studyCount),
+          rarity,
+          rarityLabel: resolvingPlazaHerbariumEntryRarityLabel(rarity),
+          eatEffectStatRows: null,
+          displayName: isSighted
+            ? entry.displayName
+            : LABELING_PLAZA_HERBARIUM_UNDISCOVERED_NAME,
+          summary: isSighted
+            ? entry.summary
+            : LABELING_PLAZA_HERBARIUM_UNDISCOVERED_BERRY_HINT,
+          studiedSummary: entry.studiedSummary,
+          propertiesSummary: isPropertiesUnlocked
+            ? entry.propertiesSummary
+            : null,
+          apostleFlavor: isFullyStudied ? (entry.apostleFlavor ?? null) : null,
+          biomeKinds: berryBiomeKinds,
+          biomeChips: buildingPlazaHerbariumBiomeChips(
+            berryBiomeKinds,
+            exploredBiomeKinds
+          ),
+        };
+      }
+    );
+
+  return [...flowerEntries, ...cloverEntries, ...berryEntries, ...treeEntries];
 }
 
 /**

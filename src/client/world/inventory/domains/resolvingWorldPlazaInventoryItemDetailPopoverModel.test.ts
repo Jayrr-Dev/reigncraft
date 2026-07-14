@@ -1,9 +1,13 @@
+import { DEFINING_PLAZA_HERBARIUM_BERRY_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumBerryStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumCloverStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
 import { DEFINING_PLAZA_LAPIDARY_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaLapidaryStudyTier';
 import { resolvingWorldPlazaCloverItemTypeIdFromLootKind } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverSpriteSheetConstants';
 import { resolvingWorldPlazaFlowerItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFlowerSpriteSheetConstants';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { resolvingWorldPlazaOreItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { resolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailPopoverModel';
 import { describe, expect, it } from 'vitest';
@@ -342,5 +346,149 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel clover Study', () =
     );
 
     expect(model?.canStudy).toBe(false);
+  });
+});
+
+describe('resolvingWorldPlazaInventoryItemDetailPopoverModel berry Study', () => {
+  const coffeeCherryItemTypeId =
+    DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED;
+
+  it('offers Study while berry progress is incomplete', () => {
+    const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'coffee-cherry-1',
+        itemTypeId: coffeeCherryItemTypeId,
+        quantity: 4,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        berryStudyCountsByLootKind: { red_berry: 1 },
+      }
+    );
+
+    expect(model?.canStudy).toBe(true);
+  });
+
+  it('hides Study once the berry dossier is full', () => {
+    const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'coffee-cherry-1',
+        itemTypeId: coffeeCherryItemTypeId,
+        quantity: 4,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        berryStudyCountsByLootKind: {
+          red_berry: DEFINING_PLAZA_HERBARIUM_BERRY_STUDY_FULL_COUNT,
+        },
+      }
+    );
+
+    expect(model?.canStudy).toBe(false);
+  });
+
+  it('hides hunger and heal until habitats, then unlocks by tier', () => {
+    const unstudied = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'coffee-cherry-1',
+        itemTypeId: coffeeCherryItemTypeId,
+        quantity: 4,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        berryStudyCountsByLootKind: { red_berry: 0 },
+      }
+    );
+
+    expect(unstudied?.description).toBe('');
+    expect(
+      unstudied?.infoRows.some((row) => row.id === 'herbarium-study')
+    ).toBe(true);
+    expect(unstudied?.badges.some((badge) => badge.id === 'food')).toBe(false);
+    expect(unstudied?.badges.some((badge) => badge.id === 'food-heal')).toBe(
+      false
+    );
+
+    const fieldNotes = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'coffee-cherry-1',
+        itemTypeId: coffeeCherryItemTypeId,
+        quantity: 4,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        berryStudyCountsByLootKind: { red_berry: 1 },
+      }
+    );
+
+    expect(fieldNotes?.description.length).toBeGreaterThan(0);
+    expect(fieldNotes?.badges.some((badge) => badge.id === 'food')).toBe(false);
+
+    const properties = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'coffee-cherry-1',
+        itemTypeId: coffeeCherryItemTypeId,
+        quantity: 4,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        berryStudyCountsByLootKind: { red_berry: 5 },
+      }
+    );
+
+    expect(
+      properties?.infoRows.some((row) => row.id === 'berry-when-eaten')
+    ).toBe(true);
+    expect(properties?.badges.some((badge) => badge.id === 'food')).toBe(false);
+
+    const habitats = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'coffee-cherry-1',
+        itemTypeId: coffeeCherryItemTypeId,
+        quantity: 4,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        berryStudyCountsByLootKind: { red_berry: 15 },
+        playerEffectiveMaxHealth: 100,
+      }
+    );
+
+    expect(habitats?.badges.some((badge) => badge.id === 'food')).toBe(true);
+    expect(habitats?.badges.some((badge) => badge.id === 'food-heal')).toBe(
+      true
+    );
+    expect(
+      habitats?.infoRows.some((row) => row.id === 'berry-well-fed')
+    ).toBe(true);
+    expect(
+      habitats?.infoRows.find((row) => row.id === 'berry-well-fed')?.value
+    ).not.toMatch(/%/);
+
+    const full = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'coffee-cherry-1',
+        itemTypeId: coffeeCherryItemTypeId,
+        quantity: 4,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        berryStudyCountsByLootKind: {
+          red_berry: DEFINING_PLAZA_HERBARIUM_BERRY_STUDY_FULL_COUNT,
+        },
+        playerEffectiveMaxHealth: 100,
+      }
+    );
+
+    expect(
+      full?.infoRows.find((row) => row.id === 'berry-well-fed')?.value
+    ).toMatch(/%/);
   });
 });
