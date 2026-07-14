@@ -53,6 +53,7 @@ import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domai
 import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import { resolvingWildlifeNearestEdibleGroundFlower } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundFlower';
+import { resolvingWildlifeNearestEdibleGroundGrass } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundGrass';
 import { resolvingWildlifeNearestEdibleGroundFood } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundFood';
 import { resolvingWildlifePreyProximityAttackRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifePreyProximityAttackRadiusGrid';
 import { resolvingWildlifeSpeciesAggroRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesAggroRadiusGrid';
@@ -505,6 +506,48 @@ function checkingWildlifeSpeciesMayForageGroundFlowers(
   return species.diet === 'herbivore' || species.diet === 'omnivore';
 }
 
+function checkingWildlifeSpeciesMayForageGroundGrass(
+  species: DefiningWildlifeSpeciesDefinition
+): boolean {
+  return species.diet === 'herbivore' || species.diet === 'omnivore';
+}
+
+function resolvingWildlifeNearestGroundFloraTarget(
+  blackboard: DefiningWildlifeBehaviorBlackboard
+): { readonly groundItemId: string; readonly distanceGrid: number } | null {
+  const mayForagePlant =
+    checkingWildlifeSpeciesMayForageGroundFlowers(blackboard.species) &&
+    checkingWildlifeDriveIsAtLeastHungry(
+      blackboard.instance.hungerState.driveLevel
+    );
+
+  const nearestFlower = mayForagePlant
+    ? resolvingWildlifeNearestEdibleGroundFlower(blackboard.instance.position)
+    : null;
+
+  const mayForageGrass =
+    checkingWildlifeSpeciesMayForageGroundGrass(blackboard.species) &&
+    checkingWildlifeDriveIsAtLeastHungry(
+      blackboard.instance.hungerState.driveLevel
+    );
+
+  const nearestGrass = mayForageGrass
+    ? resolvingWildlifeNearestEdibleGroundGrass(blackboard.instance.position)
+    : null;
+
+  if (!nearestFlower) {
+    return nearestGrass;
+  }
+
+  if (!nearestGrass) {
+    return nearestFlower;
+  }
+
+  return nearestGrass.distanceGrid < nearestFlower.distanceGrid
+    ? nearestGrass
+    : nearestFlower;
+}
+
 export function computingWildlifeSelectedGroundFoodItemId(
   blackboard: DefiningWildlifeBehaviorBlackboard
 ): string | null {
@@ -523,22 +566,14 @@ export function computingWildlifeSelectedGroundFoodItemId(
     listingWildlifeGroundFoodItems(blackboard.nowMs)
   );
 
-  const mayForageFlower =
-    checkingWildlifeSpeciesMayForageGroundFlowers(blackboard.species) &&
-    checkingWildlifeDriveIsAtLeastHungry(
-      blackboard.instance.hungerState.driveLevel
-    );
+  const nearestFlora = resolvingWildlifeNearestGroundFloraTarget(blackboard);
 
-  const nearestFlower = mayForageFlower
-    ? resolvingWildlifeNearestEdibleGroundFlower(blackboard.instance.position)
-    : null;
-
-  if (!nearestFlower) {
+  if (!nearestFlora) {
     return nearestStack?.id ?? null;
   }
 
   if (!nearestStack) {
-    return nearestFlower.groundItemId;
+    return nearestFlora.groundItemId;
   }
 
   const stackDistance = Math.hypot(
@@ -546,8 +581,8 @@ export function computingWildlifeSelectedGroundFoodItemId(
     blackboard.instance.position.y - (nearestStack.gridY + 0.5)
   );
 
-  if (nearestFlower.distanceGrid < stackDistance) {
-    return nearestFlower.groundItemId;
+  if (nearestFlora.distanceGrid < stackDistance) {
+    return nearestFlora.groundItemId;
   }
 
   return nearestStack.id;

@@ -7,6 +7,7 @@ import type { DefiningWorldPlazaFarmlandTileState } from '@/components/world/far
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaMinedRockTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
+import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { syncingWorldPlazaProximityInteractableBlockSelection } from '@/components/world/interaction/domains/syncingWorldPlazaProximityInteractableBlockSelection';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
@@ -32,6 +33,9 @@ export type UsingWorldPlazaProximityInteractableBlockSelectionParams = {
   readonly pickedFlowerStateByTileKeyRef: RefObject<
     ReadonlyMap<string, DefiningWorldPlazaPickedFlowerTileState>
   >;
+  readonly clearedLongGrassStateByTileKeyRef?: RefObject<
+    ReadonlyMap<string, DefiningWorldPlazaClearedLongGrassTileState>
+  >;
   readonly farmlandByTileKeyRef: RefObject<
     ReadonlyMap<string, DefiningWorldPlazaFarmlandTileState>
   >;
@@ -55,6 +59,7 @@ export function usingWorldPlazaProximityInteractableBlockSelection({
   minedRockStateByTileKeyRef,
   pickedPebbleStateByTileKeyRef,
   pickedFlowerStateByTileKeyRef,
+  clearedLongGrassStateByTileKeyRef,
   farmlandByTileKeyRef,
   wildlifeStoreRef,
   hasEquippedFishrodRef,
@@ -98,6 +103,8 @@ export function usingWorldPlazaProximityInteractableBlockSelection({
           minedRockStateByTileKey: minedRockStateByTileKeyRef.current,
           pickedPebbleStateByTileKey: pickedPebbleStateByTileKeyRef.current,
           pickedFlowerStateByTileKey: pickedFlowerStateByTileKeyRef.current,
+          clearedLongGrassStateByTileKey:
+            clearedLongGrassStateByTileKeyRef?.current,
           farmlandByTileKey: farmlandByTileKeyRef.current,
           wildlifeStore: wildlifeStoreRef.current,
           hasEquippedFishrod: hasEquippedFishrodRef.current,
@@ -111,6 +118,7 @@ export function usingWorldPlazaProximityInteractableBlockSelection({
   }, [
     chopPersistenceOwnerId,
     choppedTreeStateByTileKeyRef,
+    clearedLongGrassStateByTileKeyRef,
     enabled,
     farmlandByTileKeyRef,
     hasEquippedFishrodRef,

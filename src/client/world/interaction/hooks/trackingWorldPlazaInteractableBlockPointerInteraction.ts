@@ -10,6 +10,8 @@ import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world
 import type { DefiningWorldPlazaInteractableBlockClickDispatch } from '@/components/world/interaction/domains/definingWorldPlazaInteractableBlockClickAction';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
 import { resolvingWorldPlazaInteractableFlowerFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableFlowerFromPointerGridPoint';
+import { resolvingWorldPlazaInteractableLongGrassFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableLongGrassFromPointerGridPoint';
+import { DEFINING_WORLD_PLAZA_LONG_GRASS_SEARCH_POINTER_HIT_RADIUS_TILES } from '@/components/world/harvest/domains/definingWorldPlazaLongGrassSearchConstants';
 import { resolvingWorldPlazaInteractablePebbleFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePebbleFromPointerGridPoint';
 import { resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableRockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableRockFromPointerGridPoint';
@@ -77,6 +79,11 @@ export type TrackingWorldPlazaInteractableBlockPointerInteractionParams = {
     tileX: number,
     tileY: number
   ) => void;
+  /** Opens the long-grass search popover for a sprite clump. */
+  readonly onProceduralLongGrassPopoverSelect?: (
+    tileX: number,
+    tileY: number
+  ) => void;
 };
 
 export type TrackingWorldPlazaInteractableBlockPointerInteractionResult = {
@@ -128,6 +135,7 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
   onProceduralPebblePopoverSelect,
   pickedFlowerStateByTileKey,
   onProceduralFlowerPopoverSelect,
+  onProceduralLongGrassPopoverSelect,
 }: TrackingWorldPlazaInteractableBlockPointerInteractionParams): TrackingWorldPlazaInteractableBlockPointerInteractionResult {
   const enabledDefinitionIds = useMemo(
     () => new Set(Object.keys(handlers)),
@@ -244,6 +252,23 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
         }
       }
 
+      if (onProceduralLongGrassPopoverSelect) {
+        const longGrassMatch =
+          resolvingWorldPlazaInteractableLongGrassFromPointerGridPoint(
+            pointerContext.gridPoint.x,
+            pointerContext.gridPoint.y,
+            DEFINING_WORLD_PLAZA_LONG_GRASS_SEARCH_POINTER_HIT_RADIUS_TILES
+          );
+
+        if (longGrassMatch) {
+          onProceduralLongGrassPopoverSelect(
+            longGrassMatch.tileX,
+            longGrassMatch.tileY
+          );
+          return true;
+        }
+      }
+
       return false;
     },
     [
@@ -255,6 +280,7 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
       isEnabled,
       minedRockStateByTileKey,
       onProceduralFlowerPopoverSelect,
+      onProceduralLongGrassPopoverSelect,
       onProceduralPebblePopoverSelect,
       onProceduralRockPopoverSelect,
       onProceduralTreePopoverSelect,

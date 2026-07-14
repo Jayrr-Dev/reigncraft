@@ -77,6 +77,7 @@ describe('creatingWorldPlazaTerrainLayerEngine', () => {
       choppedTreesByTileKey: new Map(),
       pickedPebblesByTileKey: new Map(),
       pickedFlowersByTileKey: new Map(),
+      clearedLongGrassByTileKey: new Map(),
       burntGrassTileKeys: undefined,
       isFloorRenderLayerEnabled: true,
       isTrunkRenderLayerEnabled: true,
@@ -136,6 +137,9 @@ describe('creatingWorldPlazaTerrainLayerEngine', () => {
       [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FIRELANDS_TEXTURES_READY]:
         '1',
       [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LAVA_TEXTURES_READY]: '1',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_LONG_GRASS]: '',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LONG_GRASS_TEXTURES_READY]:
+        '1',
     };
 
     engine.tick({
@@ -202,6 +206,9 @@ describe('creatingWorldPlazaTerrainLayerEngine', () => {
       [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FIRELANDS_TEXTURES_READY]:
         '1',
       [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LAVA_TEXTURES_READY]: '1',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_LONG_GRASS]: '',
+      [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LONG_GRASS_TEXTURES_READY]:
+        '1',
     };
 
     const tickInput = {

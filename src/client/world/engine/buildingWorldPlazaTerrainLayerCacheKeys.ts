@@ -3,6 +3,7 @@ import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/buildi
 import { DEFINING_WORLD_PLAZA_TREE_GROWTH_STAGE_METADATA_KEY } from '@/components/world/domains/definingWorldPlazaTreeLayerGrowthConstants';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
+import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 
 /**
@@ -25,6 +26,10 @@ const pickedPebblesCacheKeys = new WeakMap<
 >();
 const pickedFlowersCacheKeys = new WeakMap<
   ReadonlyMap<string, DefiningWorldPlazaPickedFlowerTileState>,
+  string
+>();
+const clearedLongGrassCacheKeys = new WeakMap<
+  ReadonlyMap<string, DefiningWorldPlazaClearedLongGrassTileState>,
   string
 >();
 const burntGrassCacheKeys = new WeakMap<ReadonlySet<string>, string>();
@@ -128,6 +133,29 @@ export function buildingWorldPlazaPickedFlowersCacheKey(
     .join('|');
 
   pickedFlowersCacheKeys.set(pickedFlowersByTileKey, cacheKey);
+  return cacheKey;
+}
+
+/**
+ * Builds a cache key for cleared long-grass state so grass layers resync after search/eat.
+ */
+export function buildingWorldPlazaClearedLongGrassCacheKey(
+  clearedLongGrassByTileKey: ReadonlyMap<
+    string,
+    DefiningWorldPlazaClearedLongGrassTileState
+  >
+): string {
+  const cachedKey = clearedLongGrassCacheKeys.get(clearedLongGrassByTileKey);
+
+  if (cachedKey !== undefined) {
+    return cachedKey;
+  }
+
+  const cacheKey = Array.from(clearedLongGrassByTileKey.keys())
+    .sort((tileKeyA, tileKeyB) => tileKeyA.localeCompare(tileKeyB))
+    .join('|');
+
+  clearedLongGrassCacheKeys.set(clearedLongGrassByTileKey, cacheKey);
   return cacheKey;
 }
 

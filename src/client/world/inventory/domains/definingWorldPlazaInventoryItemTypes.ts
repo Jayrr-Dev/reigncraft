@@ -45,6 +45,7 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_WOOD_AXE_INVENTORY_ICON_URL } from '@/components/world/inventory/domains/definingWorldPlazaToolInventoryIconConstants';
 import { registeringWorldPlazaInventoryBagItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryBagItemDefinitions';
+import { registeringWorldPlazaInventoryCloverItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCloverItemDefinitions';
 import { registeringWorldPlazaInventoryFlowerItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryFlowerItemDefinitions';
 import { registeringWorldPlazaInventoryOreItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryOreItemDefinitions';
 import { registeringWorldPlazaTieredToolInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaTieredToolInventoryItems';
@@ -184,6 +185,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     },
     ...registeringWorldPlazaWildlifeMeatInventoryItems(),
     ...registeringWorldPlazaInventoryFlowerItemDefinitions(),
+    ...registeringWorldPlazaInventoryCloverItemDefinitions(),
     ...registeringWorldPlazaInventoryOreItemDefinitions(),
     ...registeringWorldPlazaTieredToolInventoryItems(),
     {

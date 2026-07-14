@@ -31,6 +31,7 @@ import {
   ensuringWorldPlazaVisibleFlowerDecorationLayer,
   updatingWorldPlazaVisibleFlowerDecorationLayer,
 } from '@/components/world/domains/syncingWorldPlazaVisibleFlowerDecorationLayer';
+import { syncingWorldPlazaVisibleLongGrassDecorationLayer } from '@/components/world/domains/syncingWorldPlazaVisibleLongGrassDecorationLayer';
 import {
   advancingWorldPlazaVisibleLavaOverlayAnimation,
   clearingWorldPlazaLavaPoolLightSources,
@@ -110,6 +111,10 @@ type RunningWorldPlazaFloorChunksLayerState = {
 
 type RunningWorldPlazaFlowerDecorationsLayerState = {
   graphics: Graphics | null;
+};
+
+type RunningWorldPlazaLongGrassDecorationsLayerState = {
+  spriteByKey: Map<string, Sprite>;
 };
 
 type RunningWorldPlazaStoneDecorationsLayerState = {
@@ -654,6 +659,86 @@ export function registeringWorldPlazaTerrainLayers(
         state.graphics?.parent?.removeChild(state.graphics);
         state.graphics?.destroy();
         state.graphics = null;
+      },
+    },
+    {
+      kind: 'incremental',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.LONG_GRASS_DECORATIONS,
+      parentLayer: 'floor',
+      boundsProfile: 'floor',
+      participatesInHeavyIdleSkip: true,
+      renderLayerToggle: 'floor',
+      requiresAnyGenerationFeature: [
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LONG_GRASS,
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES,
+      ],
+      requiresTextures: [
+        REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.LONG_GRASS_SPRITES,
+      ],
+      invalidateOn: [
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_LONG_GRASS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LONG_GRASS_TEXTURES_READY,
+      ],
+      createRuntimeState:
+        (): RunningWorldPlazaLongGrassDecorationsLayerState => ({
+          spriteByKey: new Map(),
+        }),
+      sync: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaLongGrassDecorationsLayerState;
+
+        if (!context.floorBounds) {
+          return { isComplete: true, needsChildSort: false };
+        }
+
+        const longGrassSyncResult =
+          syncingWorldPlazaVisibleLongGrassDecorationLayer({
+            parentContainer: context.floorLayer,
+            bounds: context.floorBounds,
+            spriteByKey: state.spriteByKey,
+            centerTileX: Math.round(context.playerPosition.x),
+            centerTileY: Math.round(context.playerPosition.y),
+            burntGrassTileKeys: context.burntGrassTileKeys,
+            maxBuildsPerCall:
+              context.performanceProfile
+                .terrainElevationChunkBuildBudgetPerFrame *
+              context.performanceProfile.floorChunkSizeTiles,
+            shouldSortChildrenImmediately: false,
+          });
+
+        for (const grassSprite of state.spriteByKey.values()) {
+          grassSprite.visible = context.isFloorRenderLayerEnabled;
+        }
+
+        return {
+          isComplete: longGrassSyncResult.isComplete,
+          needsChildSort: longGrassSyncResult.needsChildSort,
+          builtCount: longGrassSyncResult.propsBuilt,
+        };
+      },
+      resetRuntimeState: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaLongGrassDecorationsLayerState;
+
+        for (const sprite of state.spriteByKey.values()) {
+          context.floorLayer.removeChild(sprite);
+          sprite.destroy();
+        }
+
+        state.spriteByKey.clear();
+      },
+      destroyRuntimeState: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaLongGrassDecorationsLayerState;
+
+        for (const sprite of state.spriteByKey.values()) {
+          sprite.parent?.removeChild(sprite);
+          sprite.destroy();
+        }
+
+        state.spriteByKey.clear();
       },
     },
     {

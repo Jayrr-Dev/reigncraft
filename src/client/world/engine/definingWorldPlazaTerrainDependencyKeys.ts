@@ -16,6 +16,7 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY = {
   PLACED_TREE_BLOCKS: 'placedTreeBlocks',
   CHOPPED_TREES: 'choppedTrees',
   PICKED_PEBBLES: 'pickedPebbles',
+  PICKED_LONG_GRASS: 'pickedLongGrass',
   BURNT_GRASS: 'burntGrass',
   THAW_VISUAL: 'thawVisual',
   SUN_BUCKET: 'sunBucket',
@@ -23,6 +24,7 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY = {
   ISLAND_MODE_REVISION: 'islandModeRevision',
   PROCEDURAL_TREES_AND_ROCKS_REVISION: 'proceduralTreesAndRocksRevision',
   FIRELANDS_TEXTURES_READY: 'firelandsTexturesReady',
+  LONG_GRASS_TEXTURES_READY: 'longGrassTexturesReady',
   LAVA_TEXTURES_READY: 'lavaTexturesReady',
 } as const;
 

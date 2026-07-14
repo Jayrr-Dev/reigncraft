@@ -120,6 +120,12 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_FOXGLOVE =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_BELLADONNA =
   'world-plaza-flower-belladonna' as const;
 
+/** Clover loot from searching long-grass clumps. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLOVER_3_LEAF =
+  'world-plaza-clover-3-leaf' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLOVER_4_LEAF =
+  'world-plaza-clover-4-leaf' as const;
+
 /** Wood-tier swords through gold-tier swords. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD =
   'world-plaza-sword-wood' as const;

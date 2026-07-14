@@ -8,6 +8,7 @@ import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domain
 import {
   buildingWorldPlazaBurntGrassTileKeysCacheKey,
   buildingWorldPlazaChoppedTreesCacheKey,
+  buildingWorldPlazaClearedLongGrassCacheKey,
   buildingWorldPlazaPickedFlowersCacheKey,
   buildingWorldPlazaPickedPebblesCacheKey,
   buildingWorldPlazaPlacedTreeBlocksCacheKey,
@@ -20,9 +21,11 @@ import {
 import {
   checkingWorldPlazaTerrainTextureAssetManifestIsReady,
   registeringWorldPlazaFirelandsSpriteTextureLoader,
+  registeringWorldPlazaLongGrassSpriteTextureLoader,
   registeringWorldPlazaLavaStaticTileTextureLoader,
 } from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
+import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
@@ -50,6 +53,10 @@ export type ComputingWorldPlazaTerrainDependencySnapshotInput = {
   readonly pickedFlowersByTileKey: ReadonlyMap<
     string,
     DefiningWorldPlazaPickedFlowerTileState
+  >;
+  readonly clearedLongGrassByTileKey: ReadonlyMap<
+    string,
+    DefiningWorldPlazaClearedLongGrassTileState
   >;
   readonly burntGrassTileKeys: ReadonlySet<string> | undefined;
   readonly islandModeRevision: number;
@@ -90,6 +97,8 @@ export function computingWorldPlazaTerrainDependencySnapshot(
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.CHOPPED_TREES]:
       buildingWorldPlazaChoppedTreesCacheKey(input.choppedTreesByTileKey),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_PEBBLES]: `${buildingWorldPlazaPickedPebblesCacheKey(input.pickedPebblesByTileKey)}|${buildingWorldPlazaPickedFlowersCacheKey(input.pickedFlowersByTileKey)}`,
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_LONG_GRASS]:
+      buildingWorldPlazaClearedLongGrassCacheKey(input.clearedLongGrassByTileKey),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS]:
       buildingWorldPlazaBurntGrassTileKeysCacheKey(input.burntGrassTileKeys),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL]:
@@ -105,6 +114,8 @@ export function computingWorldPlazaTerrainDependencySnapshot(
       String(input.proceduralTreesAndRocksRevision),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FIRELANDS_TEXTURES_READY]:
       registeringWorldPlazaFirelandsSpriteTextureLoader.isReady() ? '1' : '0',
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LONG_GRASS_TEXTURES_READY]:
+      registeringWorldPlazaLongGrassSpriteTextureLoader.isReady() ? '1' : '0',
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LAVA_TEXTURES_READY]:
       registeringWorldPlazaLavaStaticTileTextureLoader.isReady() ? '1' : '0',
   };

@@ -32,6 +32,18 @@ export const DEFINING_WILDLIFE_GROUND_FLOWER_SCENT_RADIUS_GRID =
  */
 export const DEFINING_WILDLIFE_GROUND_FLOWER_HUNGER_REFILL_RATIO = 0.2;
 
+/**
+ * Max grid distance to notice uncleared long-grass clumps.
+ * Matches ground-food scent so plant-eaters weigh stacks vs flora fairly.
+ */
+export const DEFINING_WILDLIFE_GROUND_GRASS_SCENT_RADIUS_GRID =
+  DEFINING_WILDLIFE_GROUND_FOOD_SCENT_RADIUS_GRID;
+
+/**
+ * Hunger restored when wildlife finishes chewing one long-grass tile.
+ */
+export const DEFINING_WILDLIFE_GROUND_GRASS_HUNGER_REFILL_RATIO = 0.18;
+
 /** Threat per second applied when prey is spotted while motivated to hunt. */
 export const DEFINING_WILDLIFE_PREY_SCENT_THREAT_PER_SECOND = 0.75;
 

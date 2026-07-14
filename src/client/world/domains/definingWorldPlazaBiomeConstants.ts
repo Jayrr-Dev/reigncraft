@@ -89,6 +89,8 @@ export interface DefiningWorldPlazaBiomeDefinition {
   flowerColors: readonly number[] | null;
   /** Modulus for flower placement; null disables flowers. */
   flowerTileModulus: number | null;
+  /** Modulus for long-grass sprite clumps; null disables long grass. */
+  longGrassTileModulus: number | null;
   /** Tailwind classes for the host sky gradient. */
   skyBackdropClassName: string;
 }
@@ -114,6 +116,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckTileModulus: null,
     flowerColors: [0xffd966, 0xff8fab, 0xffffff],
     flowerTileModulus: 46,
+    longGrassTileModulus: 32,
     skyBackdropClassName:
       'bg-gradient-to-b from-sky-400 via-sky-200 to-[#7cba3d]',
   },
@@ -129,6 +132,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckTileModulus: 13,
     flowerColors: [0xff8fab, 0xffd966, 0xc77dff, 0xffffff],
     flowerTileModulus: 74,
+    longGrassTileModulus: 58,
     skyBackdropClassName:
       'bg-gradient-to-b from-sky-500 via-emerald-200 to-[#4a7c3f]',
   },
@@ -144,6 +148,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckTileModulus: 17,
     flowerColors: [0xff6b9d, 0xffb347, 0xf8f4ff, 0xc77dff, 0x7ec8e3],
     flowerTileModulus: 18,
+    longGrassTileModulus: 40,
     skyBackdropClassName:
       'bg-gradient-to-b from-sky-400 via-lime-200 to-[#6faa42]',
   },
@@ -159,6 +164,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckTileModulus: 9,
     flowerColors: [0xff5f8f, 0xffb347, 0xe94fd0, 0xffffff],
     flowerTileModulus: 62,
+    longGrassTileModulus: 54,
     skyBackdropClassName:
       'bg-gradient-to-b from-emerald-500 via-lime-200 to-[#2f7a33]',
   },
@@ -174,6 +180,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckTileModulus: 15,
     flowerColors: null,
     flowerTileModulus: null,
+    longGrassTileModulus: null,
     skyBackdropClassName:
       'bg-gradient-to-b from-sky-300 via-amber-100 to-[#dbc083]',
   },
@@ -189,6 +196,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckTileModulus: 9,
     flowerColors: null,
     flowerTileModulus: null,
+    longGrassTileModulus: null,
     skyBackdropClassName:
       'bg-gradient-to-b from-slate-300 via-slate-100 to-[#e8f0f4]',
   },
@@ -204,6 +212,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckTileModulus: 11,
     flowerColors: [0xc77dff, 0xffb347, 0xffffff, 0x7ec8e3],
     flowerTileModulus: 82,
+    longGrassTileModulus: 70,
     skyBackdropClassName:
       'bg-gradient-to-b from-slate-500 via-emerald-100 to-[#3c4a2c]',
   },
@@ -219,6 +228,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckTileModulus: 14,
     flowerColors: [0xffb347, 0xffd966, 0xff8fab, 0xffffff],
     flowerTileModulus: 86,
+    longGrassTileModulus: 36,
     skyBackdropClassName:
       'bg-gradient-to-b from-sky-400 via-yellow-100 to-[#bfb755]',
   },
@@ -234,6 +244,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckTileModulus: 12,
     flowerColors: null,
     flowerTileModulus: null,
+    longGrassTileModulus: null,
     skyBackdropClassName:
       'bg-gradient-to-b from-orange-300 via-amber-200 to-[#bf6b4a]',
   },
@@ -249,6 +260,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckTileModulus: 16,
     flowerColors: null,
     flowerTileModulus: null,
+    longGrassTileModulus: null,
     skyBackdropClassName:
       'bg-gradient-to-b from-sky-400 via-cyan-100 to-[#f2e9a7]',
   },
@@ -264,6 +276,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckTileModulus: null,
     flowerColors: null,
     flowerTileModulus: null,
+    longGrassTileModulus: null,
     skyBackdropClassName:
       'bg-gradient-to-b from-sky-500 via-blue-300 to-blue-600',
   },
@@ -279,6 +292,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckTileModulus: 8,
     flowerColors: null,
     flowerTileModulus: null,
+    longGrassTileModulus: null,
     skyBackdropClassName:
       'bg-gradient-to-b from-slate-400 via-slate-200 to-[#a8adb5]',
   },
@@ -294,6 +308,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     speckTileModulus: 11,
     flowerColors: null,
     flowerTileModulus: null,
+    longGrassTileModulus: null,
     skyBackdropClassName:
       'bg-gradient-to-b from-red-950 via-orange-900 to-[#3a2420]',
   },

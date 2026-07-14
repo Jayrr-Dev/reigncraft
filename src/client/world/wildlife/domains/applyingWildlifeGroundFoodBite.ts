@@ -13,6 +13,10 @@ import {
   parsingWildlifeGroundFlowerItemId,
 } from '@/components/world/wildlife/domains/definingWildlifeGroundFlowerIdConstants';
 import {
+  checkingWildlifeGroundGrassItemId,
+  parsingWildlifeGroundGrassItemId,
+} from '@/components/world/wildlife/domains/definingWildlifeGroundGrassIdConstants';
+import {
   DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MAX_MS,
   DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MIN_MS,
 } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
@@ -26,10 +30,15 @@ import {
   consumingWildlifeGroundFlowerBridge,
 } from '@/components/world/wildlife/domains/managingWildlifeGroundFlowerBridge';
 import {
+  checkingWildlifeGroundGrassOptimisticIsCleared,
+  consumingWildlifeGroundGrassBridge,
+} from '@/components/world/wildlife/domains/managingWildlifeGroundGrassBridge';
+import {
   consumingWildlifeGroundFoodBridgeUnit,
   findingWildlifeGroundFoodItemById,
 } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { refillingWildlifeHungerAfterGroundFlower } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundFlower';
+import { refillingWildlifeHungerAfterGroundGrass } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundGrass';
 import { refillingWildlifeHungerAfterGroundFood } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundFood';
 import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodWorldPoint';
 
@@ -146,6 +155,78 @@ function applyingWildlifeGroundFlowerBite(
   };
 }
 
+function applyingWildlifeGroundGrassBite(
+  instance: DefiningWildlifeInstance,
+  species: DefiningWildlifeSpeciesDefinition,
+  groundItemId: string,
+  nowMs: number
+): DefiningWildlifeInstance {
+  const tile = parsingWildlifeGroundGrassItemId(groundItemId);
+
+  if (!tile) {
+    return clearingWildlifePendingGroundFoodBite(instance);
+  }
+
+  if (checkingWildlifeGroundGrassOptimisticIsCleared(tile.tileX, tile.tileY)) {
+    return clearingWildlifePendingGroundFoodBite(instance);
+  }
+
+  const targetPoint = {
+    x: tile.tileX + 0.5,
+    y: tile.tileY + 0.5,
+    layer: 1,
+  };
+  const distance = Math.hypot(
+    instance.position.x - targetPoint.x,
+    instance.position.y - targetPoint.y
+  );
+
+  if (distance > DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
+    return clearingWildlifePendingGroundFoodBite(instance);
+  }
+
+  const pendingBite = instance.aiState.pendingGroundFoodBite;
+  const pendingMatchesGrass =
+    pendingBite !== null && pendingBite.groundItemId === groundItemId;
+
+  if (!pendingMatchesGrass || pendingBite === null) {
+    return applyingWildlifeIdleChewStance(instance, {
+      groundItemId,
+      startedAtMs: nowMs,
+      readyAtMs: nowMs + rollingWildlifeGroundFoodBiteDelayMs(),
+    });
+  }
+
+  if (nowMs < pendingBite.readyAtMs) {
+    return applyingWildlifeIdleChewStance(instance, pendingBite);
+  }
+
+  const consumed = consumingWildlifeGroundGrassBridge(
+    groundItemId,
+    instance.position
+  );
+
+  if (!consumed) {
+    return clearingWildlifePendingGroundFoodBite(instance);
+  }
+
+  return {
+    ...instance,
+    hungerState: refillingWildlifeHungerAfterGroundGrass(
+      instance.hungerState,
+      species,
+      nowMs
+    ),
+    aiState: {
+      ...instance.aiState,
+      pendingGroundFoodBite: null,
+      isMoving: false,
+      motionClip: 'attack',
+      lastAttackAtMs: nowMs,
+    },
+  };
+}
+
 /** Chews for 5-10s, then consumes one ground-food unit or biome flower. */
 export function applyingWildlifeGroundFoodBite(
   instance: DefiningWildlifeInstance,
@@ -155,6 +236,15 @@ export function applyingWildlifeGroundFoodBite(
 ): DefiningWildlifeInstance {
   if (checkingWildlifeGroundFlowerItemId(groundItemId)) {
     return applyingWildlifeGroundFlowerBite(
+      instance,
+      species,
+      groundItemId,
+      nowMs
+    );
+  }
+
+  if (checkingWildlifeGroundGrassItemId(groundItemId)) {
+    return applyingWildlifeGroundGrassBite(
       instance,
       species,
       groundItemId,

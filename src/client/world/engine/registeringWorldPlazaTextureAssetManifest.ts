@@ -1,4 +1,5 @@
 ﻿import type { DefiningWorldPlazaFirelandsPropKind } from '@/components/world/domains/definingWorldPlazaFirelandsRuinBlueprintConstants';
+import { DEFINING_WORLD_PLAZA_LONG_GRASS_SPRITE_URLS } from '@/components/world/domains/definingWorldPlazaLongGrassConstants';
 import { creatingWorldPlazaTextureAssetLoader } from '@/components/world/engine/creatingWorldPlazaTextureAssetLoader';
 import { Assets, Texture } from 'pixi.js';
 
@@ -12,6 +13,7 @@ import { Assets, Texture } from 'pixi.js';
 export const REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID = {
   LAVA_STATIC_TILE: 'lava-static-tile',
   FIRELANDS_SPRITES: 'firelands-sprites',
+  LONG_GRASS_SPRITES: 'long-grass-sprites',
 } as const;
 
 /** Public URL for the static lava surface texture. */
@@ -194,10 +196,31 @@ export const registeringWorldPlazaFirelandsSpriteTextureLoader =
     },
   });
 
+/** Loader for long-grass sprite textures keyed by URL. */
+export const registeringWorldPlazaLongGrassSpriteTextureLoader =
+  creatingWorldPlazaTextureAssetLoader({
+    id: REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.LONG_GRASS_SPRITES,
+    load: async () => {
+      const loadedTextures = await Promise.all(
+        DEFINING_WORLD_PLAZA_LONG_GRASS_SPRITE_URLS.map((url) =>
+          loadingWorldPlazaFirelandsTextureWithRetry(url)
+        )
+      );
+
+      return Object.fromEntries(
+        DEFINING_WORLD_PLAZA_LONG_GRASS_SPRITE_URLS.map((url, index) => [
+          url,
+          loadedTextures[index],
+        ])
+      ) as Record<string, Texture>;
+    },
+  });
+
 /** All terrain texture assets preloaded before the declarative terrain engine runs. */
 export const REGISTERING_WORLD_PLAZA_TERRAIN_TEXTURE_ASSET_MANIFEST = [
   registeringWorldPlazaLavaStaticTileTextureLoader,
   registeringWorldPlazaFirelandsSpriteTextureLoader,
+  registeringWorldPlazaLongGrassSpriteTextureLoader,
 ] as const;
 
 /**
@@ -241,4 +264,20 @@ export function peekingWorldPlazaFirelandsSpriteTextureForPropFromManifest(
   }
 
   return textures[variantIndex % textures.length] ?? textures[0] ?? null;
+}
+
+/**
+ * Resolves one cached long-grass texture by public URL.
+ */
+export function peekingWorldPlazaLongGrassSpriteTextureForUrlFromManifest(
+  spriteUrl: string
+): Texture | null {
+  const texturesByUrl =
+    registeringWorldPlazaLongGrassSpriteTextureLoader.peek();
+
+  if (!texturesByUrl) {
+    return null;
+  }
+
+  return texturesByUrl[spriteUrl] ?? null;
 }

@@ -34,6 +34,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE = {
   COLUMN_ROCKS: 'column-rocks',
   ORE_VEINS: 'ore-veins',
   STONE_DECORATIONS: 'stone-decorations',
+  LONG_GRASS: 'long-grass',
   LAVA: 'lava',
   OCEAN: 'ocean',
   LAKES: 'lakes',
@@ -271,6 +272,12 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
       description: 'Small stones, pebbles, and their harvest collision.',
     },
     {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LONG_GRASS,
+      groupId: 'terrain',
+      label: 'Long grass',
+      description: 'Sprite long-grass clumps, search loot, and wildlife grazing.',
+    },
+    {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAVA,
       groupId: 'hazards',
       label: 'Lava',
@@ -344,6 +351,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS: Readonly<
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.COLUMN_ROCKS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.ORE_VEINS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STONE_DECORATIONS]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LONG_GRASS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAVA]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.OCEAN]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAKES]: true,

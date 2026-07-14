@@ -293,6 +293,7 @@ import { computingWorldPlazaFishingCastDurationMs } from '@/components/world/fis
 import { usingWorldPlazaFishingInteraction } from '@/components/world/fishing/hooks/usingWorldPlazaFishingInteraction';
 import { usingWorldPlazaFishingProgress } from '@/components/world/fishing/hooks/usingWorldPlazaFishingProgress';
 import { RenderingWorldPlazaFlowerInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaFlowerInteractionLabels';
+import { RenderingWorldPlazaLongGrassInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaLongGrassInteractionLabels';
 import { RenderingWorldPlazaPebbleInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaPebbleInteractionLabels';
 import { RenderingWorldPlazaRockInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaRockInteractionLabels';
 import { RenderingWorldPlazaTreeInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaTreeInteractionLabels';
@@ -303,6 +304,10 @@ import type { ListingWorldPlazaTreeStumpsInStudyRangeEntry } from '@/components/
 import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { formattingWorldPlazaMinedRockTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
 import {
+  formattingWorldPlazaClearedLongGrassTileKey,
+  clearingWorldPlazaLocalLongGrass,
+} from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
+import {
   formattingWorldPlazaPickedFlowerTileKey,
   pickingWorldPlazaLocalFlower,
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
@@ -310,11 +315,16 @@ import { formattingWorldPlazaPickedPebbleTileKey } from '@/components/world/harv
 import { markingWorldPlazaLocalTreeStumpStudied } from '@/components/world/harvest/domains/managingWorldPlazaLocalStudiedTreeStumps';
 import { registeringWorldPlazaChoppedTreesVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup';
 import { registeringWorldPlazaMinedRocksVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaMinedRocksVisualLayerLookup';
+import { registeringWorldPlazaClearedLongGrassLookup } from '@/components/world/harvest/domains/registeringWorldPlazaClearedLongGrassLookup';
 import { registeringWorldPlazaPickedFlowersLookup } from '@/components/world/harvest/domains/registeringWorldPlazaPickedFlowersLookup';
 import { registeringWorldPlazaPickedPebblesLookup } from '@/components/world/harvest/domains/registeringWorldPlazaPickedPebblesLookup';
 import { usingWorldPlazaChoppedTrees } from '@/components/world/harvest/hooks/usingWorldPlazaChoppedTrees';
+import { usingWorldPlazaClearedLongGrass } from '@/components/world/harvest/hooks/usingWorldPlazaClearedLongGrass';
 import { usingWorldPlazaFlowerPickInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaFlowerPickInteraction';
 import { usingWorldPlazaFlowerPickProgress } from '@/components/world/harvest/hooks/usingWorldPlazaFlowerPickProgress';
+import { usingWorldPlazaLongGrassSearchInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaLongGrassSearchInteraction';
+import { DEFINING_WORLD_PLAZA_CLEARED_LONG_GRASS_QUERY_KEY_ROOT } from '@/components/world/harvest/hooks/usingWorldPlazaLongGrassSearchInteraction';
+import { usingWorldPlazaLongGrassSearchProgress } from '@/components/world/harvest/hooks/usingWorldPlazaLongGrassSearchProgress';
 import { usingWorldPlazaMinedRocks } from '@/components/world/harvest/hooks/usingWorldPlazaMinedRocks';
 import { usingWorldPlazaPebblePickInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaPebblePickInteraction';
 import { usingWorldPlazaPebblePickProgress } from '@/components/world/harvest/hooks/usingWorldPlazaPebblePickProgress';
@@ -412,6 +422,7 @@ import {
   selectingWorldPlazaFishingTileForClickAction,
   selectingWorldPlazaInteractableBlockForClickAction,
   selectingWorldPlazaInteractableFlowerForClickAction,
+  selectingWorldPlazaInteractableLongGrassForClickAction,
   selectingWorldPlazaInteractablePebbleForClickAction,
   selectingWorldPlazaInteractableRockForClickAction,
   selectingWorldPlazaInteractableTreeForClickAction,
@@ -515,6 +526,10 @@ import {
   checkingWildlifeGroundFlowerOptimisticIsPicked,
   registeringWildlifeGroundFlowerBridge,
 } from '@/components/world/wildlife/domains/managingWildlifeGroundFlowerBridge';
+import {
+  checkingWildlifeGroundGrassOptimisticIsCleared,
+  registeringWildlifeGroundGrassBridge,
+} from '@/components/world/wildlife/domains/managingWildlifeGroundGrassBridge';
 import {
   clearingWildlifeInstanceStore,
   gettingWildlifeInstance,
@@ -1942,6 +1957,13 @@ function RenderingWorldPlazaPixiSceneConnected({
   const pickedFlowersByTileKeyRef = useRef(pickedFlowerStateByTileKey);
   pickedFlowersByTileKeyRef.current = pickedFlowerStateByTileKey;
 
+  const { clearedLongGrassStateByTileKey } = usingWorldPlazaClearedLongGrass({
+    enabled: isLocalGameplayEnabled,
+    localPersistenceOwnerId,
+  });
+  const clearedLongGrassByTileKeyRef = useRef(clearedLongGrassStateByTileKey);
+  clearedLongGrassByTileKeyRef.current = clearedLongGrassStateByTileKey;
+
   useEffect(() => {
     registeringWorldPlazaPickedFlowersLookup(
       (tileX, tileY) =>
@@ -1956,6 +1978,21 @@ function RenderingWorldPlazaPixiSceneConnected({
       registeringWorldPlazaPickedFlowersLookup(null);
     };
   }, [pickedFlowerStateByTileKey]);
+
+  useEffect(() => {
+    registeringWorldPlazaClearedLongGrassLookup(
+      (tileX, tileY) =>
+        Boolean(
+          clearedLongGrassStateByTileKey.get(
+            formattingWorldPlazaClearedLongGrassTileKey(tileX, tileY)
+          )?.isCleared
+        ) || checkingWildlifeGroundGrassOptimisticIsCleared(tileX, tileY)
+    );
+
+    return () => {
+      registeringWorldPlazaClearedLongGrassLookup(null);
+    };
+  }, [clearedLongGrassStateByTileKey]);
 
   useEffect(() => {
     if (!isLocalGameplayEnabled) {
@@ -2031,6 +2068,40 @@ function RenderingWorldPlazaPixiSceneConnected({
     redditUserId,
     singlePlayerSaveSlotIndex,
   ]);
+
+  useEffect(() => {
+    if (!isLocalGameplayEnabled || !localPersistenceOwnerId) {
+      registeringWildlifeGroundGrassBridge(null);
+      return;
+    }
+
+    registeringWildlifeGroundGrassBridge({
+      consumeGroundGrass: (tileX, tileY, consumerPosition) => {
+        const clearResult = clearingWorldPlazaLocalLongGrass(
+          localPersistenceOwnerId,
+          {
+            tileX,
+            tileY,
+            playerX: consumerPosition.x,
+            playerY: consumerPosition.y,
+          }
+        );
+
+        if (clearResult.outcome !== 'cleared') {
+          return false;
+        }
+
+        void queryClient.invalidateQueries({
+          queryKey: [DEFINING_WORLD_PLAZA_CLEARED_LONG_GRASS_QUERY_KEY_ROOT],
+        });
+        return true;
+      },
+    });
+
+    return () => {
+      registeringWildlifeGroundGrassBridge(null);
+    };
+  }, [isLocalGameplayEnabled, localPersistenceOwnerId, queryClient]);
 
   const { fireCells, burntGrassTileKeys } = usingWorldPlazaFireCells({
     enabled: isLocalGameplayEnabled,
@@ -2162,6 +2233,17 @@ function RenderingWorldPlazaPixiSceneConnected({
     []
   );
 
+  const selectingProceduralLongGrassForInteractionLabel = useCallback(
+    (tileX: number, tileY: number): void => {
+      selectingWorldPlazaInteractableLongGrassForClickAction(
+        selectedInteractableBlockKeysRef,
+        tileX,
+        tileY
+      );
+    },
+    []
+  );
+
   const clearingInteractableBlockClickSelection = useCallback((): void => {
     // Proximity mode owns the label set each overlay frame; miss-clear would flash.
     // Hide Actions restores click-to-show, so miss should dismiss the popover.
@@ -2191,6 +2273,8 @@ function RenderingWorldPlazaPixiSceneConnected({
       pickedFlowerStateByTileKey,
       onProceduralFlowerPopoverSelect:
         selectingProceduralFlowerForInteractionLabel,
+      onProceduralLongGrassPopoverSelect:
+        selectingProceduralLongGrassForInteractionLabel,
       handlers: {
         [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE]:
           selectingCampfireForInteractionLabel,
@@ -2672,6 +2756,60 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
     },
     [showingGameplayHudToast, startingFlowerPick, validatingFlowerPickStart]
+  );
+
+  const { validatingLongGrassSearchStart, completingLongGrassSearch } =
+    usingWorldPlazaLongGrassSearchInteraction({
+      localPersistenceOwnerId,
+      clearedLongGrassStateByTileKey,
+      playerPositionRef,
+      inventoryState,
+      updatingInventoryState,
+      showingGameplayHudToast,
+    });
+
+  const completingLongGrassSearchRef = useRef(completingLongGrassSearch);
+  completingLongGrassSearchRef.current = completingLongGrassSearch;
+
+  const handlingLongGrassSearchComplete = useCallback(
+    (entry: Parameters<typeof completingLongGrassSearch>[0]): void => {
+      void completingLongGrassSearchRef.current(entry);
+    },
+    []
+  );
+
+  const {
+    snapshot: longGrassSearchProgressSnapshot,
+    progressRatioRef: longGrassSearchProgressRatioRef,
+    startingLongGrassSearch,
+  } = usingWorldPlazaLongGrassSearchProgress({
+    playerPositionRef,
+    selectedInteractableBlockKeysRef,
+    avatarToolActionRef: localAvatarToolActionRef,
+    onSearchComplete: handlingLongGrassSearchComplete,
+  });
+
+  const handlingLongGrassSearchInteraction = useCallback(
+    (entry: Parameters<typeof validatingLongGrassSearchStart>[0]): void => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return;
+      }
+
+      if (!validatingLongGrassSearchStart(entry)) {
+        return;
+      }
+
+      const didStart = startingLongGrassSearch(entry);
+
+      if (!didStart) {
+        showingGameplayHudToast('Already searching this grass.');
+      }
+    },
+    [
+      showingGameplayHudToast,
+      startingLongGrassSearch,
+      validatingLongGrassSearchStart,
+    ]
   );
 
   const hasEquippedFishrod =
@@ -3681,6 +3819,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     minedRockStateByTileKeyRef: minedRocksByTileKeyRef,
     pickedPebbleStateByTileKeyRef: pickedPebblesByTileKeyRef,
     pickedFlowerStateByTileKeyRef: pickedFlowersByTileKeyRef,
+    clearedLongGrassStateByTileKeyRef: clearedLongGrassByTileKeyRef,
     farmlandByTileKeyRef,
     wildlifeStoreRef,
     hasEquippedFishrodRef,
@@ -6398,6 +6537,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               choppedTreesByTileKeyRef={choppedTreesByTileKeyRef}
               pickedPebblesByTileKeyRef={pickedPebblesByTileKeyRef}
               pickedFlowersByTileKeyRef={pickedFlowersByTileKeyRef}
+              clearedLongGrassByTileKeyRef={clearedLongGrassByTileKeyRef}
               floorLayerRef={terrainFloorLayerRef}
               trunkLayerRef={terrainTrunkLayerRef}
               canopyLayerRef={terrainCanopyLayerRef}
@@ -7005,6 +7145,19 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
                 onPickFlower={handlingFlowerPickInteraction}
+              />
+              <RenderingWorldPlazaLongGrassInteractionLabels
+                selectedInteractableBlockKeysRef={
+                  selectedInteractableBlockKeysRef
+                }
+                clearedLongGrassStateByTileKeyRef={clearedLongGrassByTileKeyRef}
+                timedInteractionProgressSnapshot={longGrassSearchProgressSnapshot}
+                timedInteractionProgressRatioRef={
+                  longGrassSearchProgressRatioRef
+                }
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                onSearchLongGrass={handlingLongGrassSearchInteraction}
               />
               <RenderingWorldPlazaFishingInteractionLabels
                 playerPositionRef={playerPositionRef}

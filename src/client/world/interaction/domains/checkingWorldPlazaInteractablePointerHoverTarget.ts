@@ -11,6 +11,8 @@ import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
 import { resolvingWorldPlazaInteractableFlowerFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableFlowerFromPointerGridPoint';
+import { resolvingWorldPlazaInteractableLongGrassFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableLongGrassFromPointerGridPoint';
+import { DEFINING_WORLD_PLAZA_LONG_GRASS_SEARCH_POINTER_HIT_RADIUS_TILES } from '@/components/world/harvest/domains/definingWorldPlazaLongGrassSearchConstants';
 import { resolvingWorldPlazaInteractablePebbleFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePebbleFromPointerGridPoint';
 import { resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableRockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableRockFromPointerGridPoint';
@@ -170,5 +172,16 @@ export function checkingWorldPlazaInteractablePointerHoverTarget(
     pickedFlowerStateByTileKey
   );
 
-  return flowerMatch !== null;
+  if (flowerMatch !== null) {
+    return true;
+  }
+
+  const longGrassMatch =
+    resolvingWorldPlazaInteractableLongGrassFromPointerGridPoint(
+      pointerContext.gridPoint.x,
+      pointerContext.gridPoint.y,
+      DEFINING_WORLD_PLAZA_LONG_GRASS_SEARCH_POINTER_HIT_RADIUS_TILES
+    );
+
+  return longGrassMatch !== null;
 }

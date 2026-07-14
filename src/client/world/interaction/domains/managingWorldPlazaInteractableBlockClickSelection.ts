@@ -5,6 +5,7 @@ import { formattingWorldPlazaFishingTileSelectionKey } from '@/components/world/
 import { formattingWorldPlazaTreeStumpStudySelectionKey } from '@/components/world/harvest/domains/formattingWorldPlazaTreeStumpStudySelectionKey';
 import { formattingWorldPlazaInteractableBlockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableBlockSelectionKey';
 import { formattingWorldPlazaInteractableFlowerSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableFlowerSelectionKey';
+import { formattingWorldPlazaInteractableLongGrassSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableLongGrassSelectionKey';
 import { formattingWorldPlazaInteractablePebbleSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractablePebbleSelectionKey';
 import { formattingWorldPlazaInteractableRockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableRockSelectionKey';
 import { formattingWorldPlazaInteractableTreeSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableTreeSelectionKey';
@@ -84,6 +85,23 @@ export function selectingWorldPlazaInteractableFlowerForClickAction(
   tileY: number
 ): void {
   const selectionKey = formattingWorldPlazaInteractableFlowerSelectionKey(
+    tileX,
+    tileY
+  );
+
+  selectedBlockKeysRef.current.clear();
+  selectedBlockKeysRef.current.add(selectionKey);
+}
+
+/**
+ * Selects one long-grass tile for popover-style search interaction.
+ */
+export function selectingWorldPlazaInteractableLongGrassForClickAction(
+  selectedBlockKeysRef: RefObject<Set<string>>,
+  tileX: number,
+  tileY: number
+): void {
+  const selectionKey = formattingWorldPlazaInteractableLongGrassSelectionKey(
     tileX,
     tileY
   );
