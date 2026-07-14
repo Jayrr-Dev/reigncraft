@@ -1707,6 +1707,22 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
         kind: 'incapacitate_stun',
       },
     },
+    {
+      id: 'immobilized-debuff',
+      label: 'Immobilized',
+      description:
+        'Snared in place. Movement speed is 0; cannot jump, roll, or sprint.',
+      polarity: 'debuff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 8_000,
+      actionLocks: ['jump', 'roll', 'sprint'],
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 0,
+      },
+    },
   ].map((descriptor) => [descriptor.id, descriptor])
 ) as Record<string, DefiningWorldPlazaEntityBuffDescriptor>;
 

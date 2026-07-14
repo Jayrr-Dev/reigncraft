@@ -19,6 +19,7 @@ import {
   creatingWorldBuildingPlacedBlock,
   resolvingWorldBuildingPlacedBlockWorldLayer,
   type DefiningWorldBuildingPlacedBlock,
+  type DefiningWorldBuildingPlacedBlockMetadata,
 } from "@/components/world/building/domains/definingWorldBuildingPlacedBlock";
 import {
   DEFINING_WORLD_BUILDING_PLACEMENT_ERROR_BLOCK_HEIGHT_EXCEEDS_LAYER,
@@ -361,6 +362,8 @@ export interface PlacingWorldBuildingBlockOnPlotInput {
   readonly actorUserId: string;
   readonly blockId: string;
   readonly placedAt: string;
+  /** Extra metadata merged onto the placed block (footprint group, etc.). */
+  readonly extraMetadata?: DefiningWorldBuildingPlacedBlockMetadata;
 }
 
 /**
@@ -522,16 +525,19 @@ export function placingWorldBuildingBlockOnPlot(
     cutGridAxisCellCount,
     ownerId: input.actorUserId,
     placedAt: input.placedAt,
-    metadata: usesSurfaceOverlay
-      ? {
-          [DEFINING_WORLD_BUILDING_PASSABLE_TILE_SURFACE_OVERLAY_METADATA_KEY]:
-            true,
-        }
-      : checkingWorldBuildingBlockDefinitionIdIsNaturalTree(input.definitionId)
+    metadata: {
+      ...(usesSurfaceOverlay
         ? {
-            [DEFINING_WORLD_PLAZA_TREE_GROWTH_STAGE_METADATA_KEY]: 0,
+            [DEFINING_WORLD_BUILDING_PASSABLE_TILE_SURFACE_OVERLAY_METADATA_KEY]:
+              true,
           }
-        : undefined,
+        : checkingWorldBuildingBlockDefinitionIdIsNaturalTree(input.definitionId)
+          ? {
+              [DEFINING_WORLD_PLAZA_TREE_GROWTH_STAGE_METADATA_KEY]: 0,
+            }
+          : {}),
+      ...(input.extraMetadata ?? {}),
+    },
   });
 
   const nextBlocksByTileKey = new Map(input.plot.blocksByTileKey);

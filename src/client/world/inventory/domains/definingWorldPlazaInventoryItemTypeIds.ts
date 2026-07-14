@@ -134,6 +134,14 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLOVER_3_LEAF =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLOVER_4_LEAF =
   'world-plaza-clover-4-leaf' as const;
 
+/** Berry loot from picking berry shrubs. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED =
+  'world-plaza-berry-red' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_BLUE =
+  'world-plaza-berry-blue' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_GOLDEN =
+  'world-plaza-berry-golden' as const;
+
 /** Wood-tier swords through gold-tier swords. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD =
   'world-plaza-sword-wood' as const;
@@ -187,3 +195,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_STEEL =
   'world-plaza-fishrod-steel' as const;
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_GOLD =
   'world-plaza-fishrod-gold' as const;
+
+/** Placeable bear trap (drops as armed world trap). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP =
+  'world-plaza-bear-trap' as const;

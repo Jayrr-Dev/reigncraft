@@ -11,6 +11,7 @@ import {
   buildingWorldPlazaClearedLongGrassCacheKey,
   buildingWorldPlazaPickedFlowersCacheKey,
   buildingWorldPlazaPickedPebblesCacheKey,
+  buildingWorldPlazaPickedShrubsCacheKey,
   buildingWorldPlazaPlacedTreeBlocksCacheKey,
 } from '@/components/world/engine/buildingWorldPlazaTerrainLayerCacheKeys';
 import {
@@ -20,14 +21,18 @@ import {
 } from '@/components/world/engine/definingWorldPlazaTerrainDependencyKeys';
 import {
   checkingWorldPlazaTerrainTextureAssetManifestIsReady,
+  registeringWorldPlazaBlacksmithUtilitySpriteTextureLoader,
+  registeringWorldPlazaChestSpriteTextureLoader,
   registeringWorldPlazaFirelandsSpriteTextureLoader,
   registeringWorldPlazaLongGrassSpriteTextureLoader,
   registeringWorldPlazaLavaStaticTileTextureLoader,
+  registeringWorldPlazaShrubSpriteTextureLoader,
 } from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
+import type { DefiningWorldPlazaPickedShrubTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
 import { buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
 import { gettingWorldPlazaTemperatureDebugOverrideRevision } from '@/components/world/health/domains/managingWorldPlazaTemperatureDebugOverrideStore';
 
@@ -57,6 +62,10 @@ export type ComputingWorldPlazaTerrainDependencySnapshotInput = {
   readonly clearedLongGrassByTileKey: ReadonlyMap<
     string,
     DefiningWorldPlazaClearedLongGrassTileState
+  >;
+  readonly pickedShrubsByTileKey: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedShrubTileState
   >;
   readonly burntGrassTileKeys: ReadonlySet<string> | undefined;
   readonly islandModeRevision: number;
@@ -99,6 +108,8 @@ export function computingWorldPlazaTerrainDependencySnapshot(
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_PEBBLES]: `${buildingWorldPlazaPickedPebblesCacheKey(input.pickedPebblesByTileKey)}|${buildingWorldPlazaPickedFlowersCacheKey(input.pickedFlowersByTileKey)}`,
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_LONG_GRASS]:
       buildingWorldPlazaClearedLongGrassCacheKey(input.clearedLongGrassByTileKey),
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_SHRUBS]:
+      buildingWorldPlazaPickedShrubsCacheKey(input.pickedShrubsByTileKey),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS]:
       buildingWorldPlazaBurntGrassTileKeysCacheKey(input.burntGrassTileKeys),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL]:
@@ -116,6 +127,14 @@ export function computingWorldPlazaTerrainDependencySnapshot(
       registeringWorldPlazaFirelandsSpriteTextureLoader.isReady() ? '1' : '0',
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LONG_GRASS_TEXTURES_READY]:
       registeringWorldPlazaLongGrassSpriteTextureLoader.isReady() ? '1' : '0',
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.SHRUB_TEXTURES_READY]:
+      registeringWorldPlazaShrubSpriteTextureLoader.isReady() ? '1' : '0',
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.CHEST_TEXTURES_READY]:
+      registeringWorldPlazaChestSpriteTextureLoader.isReady() ? '1' : '0',
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BLACKSMITH_UTILITY_TEXTURES_READY]:
+      registeringWorldPlazaBlacksmithUtilitySpriteTextureLoader.isReady()
+        ? '1'
+        : '0',
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LAVA_TEXTURES_READY]:
       registeringWorldPlazaLavaStaticTileTextureLoader.isReady() ? '1' : '0',
   };

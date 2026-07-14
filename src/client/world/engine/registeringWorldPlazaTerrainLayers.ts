@@ -40,6 +40,7 @@ import {
   type SyncingWorldPlazaVisibleLavaOverlayLayerState,
 } from '@/components/world/domains/syncingWorldPlazaVisibleLavaOverlayLayer';
 import { syncingWorldPlazaVisibleLongGrassDecorationLayer } from '@/components/world/domains/syncingWorldPlazaVisibleLongGrassDecorationLayer';
+import { syncingWorldPlazaVisibleShrubDecorationLayer } from '@/components/world/domains/syncingWorldPlazaVisibleShrubDecorationLayer';
 import {
   ensuringWorldPlazaVisibleStoneDecorationLayer,
   updatingWorldPlazaVisibleStoneDecorationLayer,
@@ -114,6 +115,10 @@ type RunningWorldPlazaFlowerDecorationsLayerState = {
 };
 
 type RunningWorldPlazaLongGrassDecorationsLayerState = {
+  spriteByKey: Map<string, Sprite>;
+};
+
+type RunningWorldPlazaShrubDecorationsLayerState = {
   spriteByKey: Map<string, Sprite>;
 };
 
@@ -735,6 +740,87 @@ export function registeringWorldPlazaTerrainLayers(
       destroyRuntimeState: (context, runtimeState) => {
         const state =
           runtimeState as RunningWorldPlazaLongGrassDecorationsLayerState;
+
+        for (const sprite of state.spriteByKey.values()) {
+          sprite.parent?.removeChild(sprite);
+          sprite.destroy();
+        }
+
+        state.spriteByKey.clear();
+      },
+    },
+    {
+      kind: 'incremental',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.SHRUB_DECORATIONS,
+      parentLayer: 'floor',
+      boundsProfile: 'floor',
+      participatesInHeavyIdleSkip: true,
+      renderLayerToggle: 'floor',
+      requiresAnyGenerationFeature: [
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SHRUBS,
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES,
+      ],
+      requiresTextures: [
+        REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.SHRUB_SPRITES,
+      ],
+      invalidateOn: [
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_SHRUBS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.SHRUB_TEXTURES_READY,
+      ],
+      createRuntimeState: (): RunningWorldPlazaShrubDecorationsLayerState => ({
+        spriteByKey: new Map(),
+      }),
+      sync: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaShrubDecorationsLayerState;
+
+        if (!context.floorBounds) {
+          return { isComplete: true, needsChildSort: false };
+        }
+
+        const shrubSyncResult = syncingWorldPlazaVisibleShrubDecorationLayer({
+          parentContainer: context.floorLayer,
+          bounds: context.floorBounds,
+          spriteByKey: state.spriteByKey,
+          centerTileX: Math.round(context.playerPosition.x),
+          centerTileY: Math.round(context.playerPosition.y),
+          burntGrassTileKeys: context.burntGrassTileKeys,
+          maxBuildsPerCall:
+            context.performanceProfile
+              .terrainElevationChunkBuildBudgetPerFrame *
+            context.performanceProfile.floorChunkSizeTiles,
+          shouldSortChildrenImmediately: false,
+        });
+
+        for (const shrubSprite of state.spriteByKey.values()) {
+          shrubSprite.visible =
+            context.isFloorRenderLayerEnabled &&
+            shrubSprite.texture.width > 0 &&
+            shrubSprite.texture.height > 0;
+        }
+
+        return {
+          isComplete: shrubSyncResult.isComplete,
+          needsChildSort: shrubSyncResult.needsChildSort,
+          builtCount: shrubSyncResult.propsBuilt,
+        };
+      },
+      resetRuntimeState: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaShrubDecorationsLayerState;
+
+        for (const sprite of state.spriteByKey.values()) {
+          context.floorLayer.removeChild(sprite);
+          sprite.destroy();
+        }
+
+        state.spriteByKey.clear();
+      },
+      destroyRuntimeState: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaShrubDecorationsLayerState;
 
         for (const sprite of state.spriteByKey.values()) {
           sprite.parent?.removeChild(sprite);

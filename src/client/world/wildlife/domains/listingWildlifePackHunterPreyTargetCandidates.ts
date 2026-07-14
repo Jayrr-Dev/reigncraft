@@ -5,6 +5,8 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWildlifeMayHuntNpcPrey } from '@/components/world/npc/domains/checkingWildlifeMayHuntNpcPrey';
+import type { DefiningNpcPreyTarget } from '@/components/world/npc/domains/definingNpcTypes';
 import { checkingWildlifeInstanceHasProvokedWildlifeAggro } from '@/components/world/wildlife/domains/checkingWildlifeInstanceHasProvokedWildlifeAggro';
 import { checkingWildlifeIsMotivatedToHunt } from '@/components/world/wildlife/domains/checkingWildlifeIsMotivatedToHunt';
 import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight';
@@ -32,6 +34,8 @@ export type ListingWildlifePackHunterPreyTargetCandidatesParams = {
   ) => DefiningWildlifeSpeciesDefinition | null;
   /** Defaults to 0 in tests that do not exercise Unnoticed provoke windows. */
   nowMs?: number;
+  /** Optional living NPC prey (sibling store). */
+  npcPreyTargets?: readonly DefiningNpcPreyTarget[];
 };
 
 /** Returns every prey target currently in scent or proximity range for stalking. */
@@ -43,6 +47,7 @@ export function listingWildlifePackHunterPreyTargetCandidates({
   playerUserId,
   resolveSpecies,
   nowMs = 0,
+  npcPreyTargets = [],
 }: ListingWildlifePackHunterPreyTargetCandidatesParams): DefiningWildlifeStalkPreyPickCandidate[] {
   const candidates: DefiningWildlifeStalkPreyPickCandidate[] = [];
   const proximityAttackRadiusGrid =
@@ -137,6 +142,31 @@ export function listingWildlifePackHunterPreyTargetCandidates({
         targetId: neighbor.instanceId,
         massKg: effectiveMassKg,
         isFavoritePrey,
+      });
+    }
+  }
+
+  for (const npcPrey of npcPreyTargets) {
+    if (!checkingWildlifeMayHuntNpcPrey(species, npcPrey, hungerDriveLevel)) {
+      continue;
+    }
+
+    const distance = Math.hypot(
+      instance.position.x - npcPrey.position.x,
+      instance.position.y - npcPrey.position.y
+    );
+    const inProximityRange = distance <= proximityAttackRadiusGrid;
+    const inScentRange = distance <= DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID;
+
+    if (!inProximityRange && !inScentRange) {
+      continue;
+    }
+
+    if (inProximityRange || motivatedToHunt) {
+      candidates.push({
+        targetId: npcPrey.targetId,
+        massKg: npcPrey.massKg,
+        isFavoritePrey: false,
       });
     }
   }

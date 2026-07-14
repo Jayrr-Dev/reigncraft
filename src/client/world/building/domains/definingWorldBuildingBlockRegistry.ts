@@ -76,6 +76,18 @@ export const DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_SIGN_WOODEN =
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE =
   'utility:campfire' as const;
 
+/** Blacksmith anvil block id. */
+export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL =
+  'utility:anvil' as const;
+
+/** Clay kiln block id (2x2 footprint). */
+export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN =
+  'utility:clay-kiln' as const;
+
+/** Clay stove block id. */
+export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE =
+  'utility:clay-stove' as const;
+
 /** Ice block id. Emits cold that freezes nearby surface water. */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ICE_BLOCK =
   'utility:ice-block' as const;
@@ -225,6 +237,47 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
       label: 'Campfire',
       fillColor: 0x6c584c,
       strokeColor: 0x3d2c29,
+    },
+  },
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL]: {
+    id: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL,
+    name: 'Anvil',
+    category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
+    isPaletteVisible: false,
+    collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK,
+    isInteractive: false,
+    visualConfig: {
+      label: 'Anvil',
+      fillColor: 0x6b6b6b,
+      strokeColor: 0x3a3a3a,
+    },
+  },
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN]: {
+    id: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
+    name: 'Clay kiln',
+    category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
+    isPaletteVisible: false,
+    collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK,
+    isInteractive: false,
+    placementFootprintTileWidth: 2,
+    placementFootprintTileHeight: 2,
+    visualConfig: {
+      label: 'Kiln',
+      fillColor: 0xc4a574,
+      strokeColor: 0x8a6a3e,
+    },
+  },
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE]: {
+    id: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE,
+    name: 'Clay stove',
+    category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
+    isPaletteVisible: false,
+    collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK,
+    isInteractive: false,
+    visualConfig: {
+      label: 'Stove',
+      fillColor: 0xb8956a,
+      strokeColor: 0x7a5a38,
     },
   },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ICE_BLOCK]: {

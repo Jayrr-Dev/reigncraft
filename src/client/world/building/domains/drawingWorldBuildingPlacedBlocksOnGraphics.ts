@@ -8,6 +8,12 @@ import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
   resolvingWorldBuildingBlockDefinition,
 } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import {
+  checkingWorldBuildingPlacedBlockIsFootprintSatellite,
+  listingWorldBuildingPlacementFootprintTilePositions,
+  resolvingWorldBuildingBlockPlacementFootprint,
+} from '@/components/world/building/domains/definingWorldBuildingPlacementFootprint';
+import { checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility } from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
 import { DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE } from '@/components/world/building/domains/definingWorldBuildingCollisionShape';
 import {
   checkingWorldBuildingCutFootprintIsFull,
@@ -187,6 +193,14 @@ export function drawingWorldBuildingPlacedBlockColumnOnGraphics(
       block.definitionId === DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE
     ) {
       drawingWorldPlazaCampfirePlacedBlockOnGraphics(graphics, block);
+      continue;
+    }
+
+    if (
+      checkingWorldBuildingPlacedBlockIsFootprintSatellite(block) ||
+      checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility(block.definitionId)
+    ) {
+      // Sprites drawn by RenderingWorldPlazaBlacksmithUtilityLayer.
       continue;
     }
 
@@ -675,6 +689,38 @@ export function drawingWorldBuildingPlacementPreviewOnGraphics(
       DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_STROKE_ALPHA
     );
     drawingWorldPlazaCampfirePlacedBlockOnGraphics(graphics, previewBlock);
+    drawingWorldBuildingPlacementGuideToFloorOnGraphics({
+      graphics,
+      tileX,
+      tileY,
+      worldLayer,
+    });
+    return;
+  }
+
+  if (checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility(definition.id)) {
+    const footprint = resolvingWorldBuildingBlockPlacementFootprint(definition);
+    const footprintTiles = listingWorldBuildingPlacementFootprintTilePositions(
+      { tileX, tileY },
+      footprint
+    );
+    const utilityWashRadiusPx =
+      0.42 * DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
+
+    for (const footprintTile of footprintTiles) {
+      drawingWorldBuildingPlacementPreviewFlatSpriteOnGraphics(
+        graphics,
+        footprintTile.tileX,
+        footprintTile.tileY,
+        worldLayer,
+        validityTintColor,
+        validityTintColor,
+        utilityWashRadiusPx,
+        DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_WASH_ALPHA,
+        DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_STROKE_ALPHA
+      );
+    }
+
     drawingWorldBuildingPlacementGuideToFloorOnGraphics({
       graphics,
       tileX,

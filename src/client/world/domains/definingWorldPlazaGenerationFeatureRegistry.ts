@@ -32,11 +32,14 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE = {
   WILDLIFE_NAME_TAGS: 'wildlife-name-tags',
   WILDLIFE_HUNGER_CIRCLE: 'wildlife-hunger-circle',
   NPCS: 'npcs',
+  CHESTS: 'chests',
+  TRAPS: 'traps',
   TREES: 'trees',
   COLUMN_ROCKS: 'column-rocks',
   ORE_VEINS: 'ore-veins',
   STONE_DECORATIONS: 'stone-decorations',
   LONG_GRASS: 'long-grass',
+  SHRUBS: 'shrubs',
   LAVA: 'lava',
   OCEAN: 'ocean',
   LAKES: 'lakes',
@@ -262,6 +265,20 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
       description: 'Placed villagers, interaction badges, and Talk/Shop/Quest panels.',
     },
     {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.CHESTS,
+      groupId: 'entities',
+      label: 'Chests',
+      description:
+        'Hand-placed world chests, Open/Locked labels, loot grants, and collision.',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TRAPS,
+      groupId: 'entities',
+      label: 'Traps',
+      description:
+        'Player-placed bear traps, snap animation, snare/bleed, Arm/Disarm/Pick up.',
+    },
+    {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES,
       groupId: 'terrain',
       label: 'Trees',
@@ -292,6 +309,13 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
       label: 'Long grass',
       description:
         'Sprite long-grass clumps, search loot, and wildlife grazing.',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SHRUBS,
+      groupId: 'terrain',
+      label: 'Berry shrubs',
+      description:
+        'Berry shrubs, pick loot, and wildlife browsing unpicked bushes.',
     },
     {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAVA,
@@ -365,11 +389,14 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS: Readonly<
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_NAME_TAGS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_HUNGER_CIRCLE]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.NPCS]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.CHESTS]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TRAPS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.COLUMN_ROCKS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.ORE_VEINS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STONE_DECORATIONS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LONG_GRASS]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SHRUBS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAVA]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.OCEAN]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAKES]: true,

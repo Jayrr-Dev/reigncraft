@@ -115,6 +115,9 @@ describe('managingWorldPlazaRecipeDiscoveryStore', () => {
     );
 
     expect(survivalOnly).toHaveLength(1);
-    expect(blacksmithOnly).toHaveLength(0);
+    expect(blacksmithOnly).toHaveLength(3);
+    expect(blacksmithOnly.every((entry) => entry.isAttached === false)).toBe(
+      true
+    );
   });
 });

@@ -68,4 +68,11 @@ export interface DefiningWorldBuildingBlockDefinition {
   readonly allowsSessionPlacementOutsideClaim?: boolean;
   /** Optional heat/cold level assigned to this block type (°C). */
   readonly environmentalTemperature?: DefiningWorldPlazaEnvironmentalTemperatureLevel;
+  /**
+   * Placement footprint width in tiles (default 1). Multi-tile crafts (e.g. kiln)
+   * reserve every tile in the span; only the anchor tile draws the sprite.
+   */
+  readonly placementFootprintTileWidth?: number;
+  /** Placement footprint height in tiles (default 1). */
+  readonly placementFootprintTileHeight?: number;
 }

@@ -6,6 +6,7 @@ import { applyingWorldBuildingBuildDraftPlotUnclaim } from '@/components/world/b
 import { applyingWorldBuildingBuildDraftStarterPlotProvision } from '@/components/world/building/domains/applyingWorldBuildingBuildDraftStarterPlotProvision';
 import { applyingWorldBuildingBuildDraftTemporaryPlotProvision } from '@/components/world/building/domains/applyingWorldBuildingBuildDraftTemporaryPlotProvision';
 import { applyingWorldBuildingBuildModeBlockHeightSelection } from '@/components/world/building/domains/applyingWorldBuildingBuildModeBlockHeightSelection';
+import { checkingWorldBuildingPlotCanPlaceBlockFootprintAtAnchor } from '@/components/world/building/domains/checkingWorldBuildingPlotCanPlaceBlockFootprintAtAnchor';
 import { checkingWorldBuildingSessionBlockCanPlaceAtTilePosition } from '@/components/world/building/domains/checkingWorldBuildingSessionBlockCanPlaceAtTilePosition';
 import {
   checkingWorldBuildingTemporaryTileClaimableForOwner,
@@ -61,7 +62,6 @@ import {
   type DefiningWorldBuildingPlacedBlock,
 } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
-  checkingWorldBuildingPlotCanPlaceBlockAtTilePosition,
   findingWorldBuildingPlotBlockAtTilePosition,
   findingWorldBuildingPlotContainingTilePosition,
   findingWorldBuildingPlotRemovableBlockAtTileLayerPosition,
@@ -643,6 +643,14 @@ export function usingWorldPlazaBuildMode({
         return false;
       }
 
+      const definition = resolvingWorldBuildingBlockDefinition(
+        selectedDefinitionId
+      );
+
+      if (!definition) {
+        return false;
+      }
+
       const plot = findingWorldBuildingPlotContainingTilePosition(
         activeViewportPlots,
         tilePosition
@@ -655,12 +663,13 @@ export function usingWorldPlazaBuildMode({
       );
 
       if (plot) {
-        return checkingWorldBuildingPlotCanPlaceBlockAtTilePosition(
+        return checkingWorldBuildingPlotCanPlaceBlockFootprintAtAnchor(
           plot,
           tilePosition,
           onlineUserId,
           placementWorldLayer,
           placementBlockHeight,
+          definition,
           effectiveSelectedCutFootprintMask
         );
       }
@@ -979,19 +988,6 @@ export function usingWorldPlazaBuildMode({
         return;
       }
 
-      const plot = findingWorldBuildingPlotContainingTilePosition(
-        activeViewportPlots,
-        tilePosition
-      );
-      const removedBlock =
-        plot === null
-          ? null
-          : findingWorldBuildingPlotRemovableBlockAtTileLayerPosition(
-              plot,
-              tilePosition,
-              removalWorldLayer
-            );
-
       const removalResult = applyingWorldBuildingBuildDraftBlockRemoval({
         draft: buildDraft,
         viewportPlots: plots,
@@ -1008,9 +1004,7 @@ export function usingWorldPlazaBuildMode({
       assigningBuildDraft(removalResult.draft);
       setBuildErrorMessage(null);
 
-      if (removedBlock) {
-        onBlockRemovedRef?.current?.(removedBlock);
-      }
+      onBlockRemovedRef?.current?.(removalResult.removedPrimaryBlock);
     },
     [
       activeViewportPlots,

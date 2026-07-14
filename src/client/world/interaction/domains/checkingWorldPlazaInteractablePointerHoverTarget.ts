@@ -13,6 +13,10 @@ import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/componen
 import { resolvingWorldPlazaInteractableFlowerFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableFlowerFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableLongGrassFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableLongGrassFromPointerGridPoint';
 import { DEFINING_WORLD_PLAZA_LONG_GRASS_SEARCH_POINTER_HIT_RADIUS_TILES } from '@/components/world/harvest/domains/definingWorldPlazaLongGrassSearchConstants';
+import { DEFINING_WORLD_PLAZA_SHRUB_PICK_POINTER_HIT_RADIUS_TILES } from '@/components/world/harvest/domains/definingWorldPlazaShrubPickConstants';
+import { resolvingWorldPlazaInteractableShrubFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableShrubFromPointerGridPoint';
+import { DEFINING_WORLD_PLAZA_CHEST_POINTER_HIT_RADIUS_TILES } from '@/components/world/chest/domains/definingWorldPlazaChestConstants';
+import { resolvingWorldPlazaInteractableChestFromPointerGridPoint } from '@/components/world/chest/domains/resolvingWorldPlazaInteractableChestFromPointerGridPoint';
 import { resolvingWorldPlazaInteractablePebbleFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePebbleFromPointerGridPoint';
 import { resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableRockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableRockFromPointerGridPoint';
@@ -183,5 +187,25 @@ export function checkingWorldPlazaInteractablePointerHoverTarget(
       DEFINING_WORLD_PLAZA_LONG_GRASS_SEARCH_POINTER_HIT_RADIUS_TILES
     );
 
-  return longGrassMatch !== null;
+  if (longGrassMatch !== null) {
+    return true;
+  }
+
+  const shrubMatch = resolvingWorldPlazaInteractableShrubFromPointerGridPoint(
+    pointerContext.gridPoint.x,
+    pointerContext.gridPoint.y,
+    DEFINING_WORLD_PLAZA_SHRUB_PICK_POINTER_HIT_RADIUS_TILES
+  );
+
+  if (shrubMatch !== null) {
+    return true;
+  }
+
+  const chestMatch = resolvingWorldPlazaInteractableChestFromPointerGridPoint(
+    pointerContext.gridPoint.x,
+    pointerContext.gridPoint.y,
+    DEFINING_WORLD_PLAZA_CHEST_POINTER_HIT_RADIUS_TILES
+  );
+
+  return chestMatch !== null;
 }

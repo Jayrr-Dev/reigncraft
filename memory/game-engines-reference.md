@@ -18,6 +18,7 @@ Player-facing numbers and behavior rules: [game-mechanics-reference.md](./game-m
 | Avatar boot texture gate                   | `preloadingWorldPlazaBootAvatarTextures.ts`                          |
 | Import alias                               | `@/components/world/...`, `@/components/inventory/...`               |
 | Wildlife public API                        | `@/components/world/wildlife` → `src/client/world/wildlife/index.ts` |
+| NPC public API                             | `@/components/world/npc` → `src/client/world/npc/index.ts`           |
 | Howler audio engine                        | `src/client/world/audio/engine/`                                     |
 | Exclusive BGM bus (no overlapping tracks)  | `managingWorldPlazaMusicBus.ts` (home / loading / biome hooks)       |
 | Declarative style rules                    | `.cursor/rules/declarative-code.mdc`                                 |

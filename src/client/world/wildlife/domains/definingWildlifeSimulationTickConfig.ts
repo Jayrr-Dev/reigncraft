@@ -21,6 +21,7 @@ import type {
   DefiningWildlifePlayerMeleeHit,
   DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import type { DefiningNpcPreyTarget } from '@/components/world/npc/domains/definingNpcTypes';
 
 export type DefiningWildlifeSimulationTickConfig = {
   enabled: boolean;
@@ -73,4 +74,8 @@ export type DefiningWildlifeSimulationTickConfig = {
    * Used to inherit on-hit passives (bleed on bite, etc.) when melee hits land.
    */
   playerTransformWildlifeSpeciesIdRef?: React.RefObject<DefiningWildlifeSpeciesId | null>;
+  /**
+   * Live NPC prey descriptors for wildlife hunt / melee (sibling entity store).
+   */
+  npcPreyTargetsRef?: React.RefObject<readonly DefiningNpcPreyTarget[]>;
 };

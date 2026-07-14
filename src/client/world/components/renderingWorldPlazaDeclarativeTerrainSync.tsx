@@ -113,6 +113,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
   pickedPebblesByTileKeyRef,
   pickedFlowersByTileKeyRef,
   clearedLongGrassByTileKeyRef,
+  pickedShrubsByTileKeyRef,
   floorLayerRef,
   trunkLayerRef,
   canopyLayerRef,
@@ -210,6 +211,8 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       pickedFlowersByTileKeyRef?.current ?? new Map();
     const clearedLongGrassByTileKey =
       clearedLongGrassByTileKeyRef?.current ?? new Map();
+    const pickedShrubsByTileKey =
+      pickedShrubsByTileKeyRef?.current ?? new Map();
     const burntGrassTileKeys = burntGrassTileKeysRef?.current;
     const placedTreeBlocksKey =
       buildingWorldPlazaPlacedTreeBlocksCacheKey(scenePlacedBlocks);
@@ -375,6 +378,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       pickedPebblesByTileKey,
       pickedFlowersByTileKey,
       clearedLongGrassByTileKey,
+      pickedShrubsByTileKey,
       burntGrassTileKeys,
       islandModeRevision,
       proceduralTreesAndRocksRevision: proceduralGenerationRevision,
@@ -419,6 +423,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       pickedPebblesByTileKey,
       pickedFlowersByTileKey,
       clearedLongGrassByTileKey,
+      pickedShrubsByTileKey,
       burntGrassTileKeys,
       isFloorRenderLayerEnabled,
       isTrunkRenderLayerEnabled,
@@ -495,6 +500,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     pickedPebblesByTileKeyRef,
     pickedFlowersByTileKeyRef,
     clearedLongGrassByTileKeyRef,
+    pickedShrubsByTileKeyRef,
     playerPositionRef,
     trunkLayerRef,
   ]);
@@ -583,6 +589,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
       pickedFlowersByTileKey: pickedFlowersByTileKeyRef?.current ?? new Map(),
       clearedLongGrassByTileKey:
         clearedLongGrassByTileKeyRef?.current ?? new Map(),
+      pickedShrubsByTileKey: pickedShrubsByTileKeyRef?.current ?? new Map(),
       burntGrassTileKeys: burntGrassTileKeysRef?.current,
       isFloorRenderLayerEnabled: true,
       isTrunkRenderLayerEnabled: true,
@@ -611,6 +618,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
     pickedPebblesByTileKeyRef,
     pickedFlowersByTileKeyRef,
     clearedLongGrassByTileKeyRef,
+    pickedShrubsByTileKeyRef,
     playerPositionRef,
     proceduralGenerationRevision,
     trunkLayerRef,
@@ -647,6 +655,7 @@ export function RenderingWorldPlazaDeclarativeTerrainSync({
         pickedPebblesByTileKey: new Map(),
         pickedFlowersByTileKey: new Map(),
         clearedLongGrassByTileKey: new Map(),
+        pickedShrubsByTileKey: new Map(),
         burntGrassTileKeys: undefined,
         isFloorRenderLayerEnabled: true,
         isTrunkRenderLayerEnabled: true,

@@ -7,6 +7,7 @@ import {
 } from '@/components/world/building/domains/resolvingWorldBuildingCollision';
 import { DEFINING_WORLD_PLAZA_PLAYER_HEIGHT_WORLD_LAYERS } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { listingWorldPlazaChestInstances } from '@/components/world/chest/domains/managingWorldPlazaChestInstanceStore';
 import { pushingWorldCollisionPointOutsideCircularCollider } from '@/components/world/collision/domains/computingWorldCollisionShapeGeometry';
 import type { DefiningWorldCollisionContext } from '@/components/world/collision/domains/definingWorldCollisionContext';
 import { checkingWorldPlazaNearbyColumnRockBaseDiamondBlocksPlayerAtGridPoint } from '@/components/world/domains/checkingWorldPlazaNearbyColumnRockBaseDiamondBlocksPlayerAtGridPoint';
@@ -18,6 +19,8 @@ import {
 } from '@/components/world/domains/checkingWorldPlazaTileIsWithinColumnRockFootprintAtTileIndex';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import { convertingWorldPlazaIsometricScreenPointToGridPoint } from '@/components/world/domains/convertingWorldPlazaIsometricScreenPointToGridPoint';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { DEFINING_WORLD_PLAZA_PLAYER_BLOCK_EJECT_TILE_SEARCH_MAX_RADIUS } from '@/components/world/domains/definingWorldPlazaPlayerBlockEjectConstants';
 import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
@@ -1137,6 +1140,30 @@ export function resolvingWorldCollisionBlockedWorldPoint(
       );
       resolvedX = pushedWaterPosition.x;
       resolvedY = pushedWaterPosition.y;
+    }
+  }
+
+  if (
+    applyBlockCollision &&
+    checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.CHESTS
+    )
+  ) {
+    for (const chest of listingWorldPlazaChestInstances()) {
+      if (chest.collisionRadiusGrid <= 0) {
+        continue;
+      }
+
+      const pushedChestPosition = pushingWorldPlazaPointOutsideCircularCollider(
+        resolvedX,
+        resolvedY,
+        chest.position.x,
+        chest.position.y,
+        chest.collisionRadiusGrid,
+        playerRadiusGrid
+      );
+      resolvedX = pushedChestPosition.x;
+      resolvedY = pushedChestPosition.y;
     }
   }
 

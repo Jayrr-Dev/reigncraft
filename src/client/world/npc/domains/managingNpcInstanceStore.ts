@@ -127,7 +127,7 @@ export function applyingNpcInstanceDamage(
     },
     isDead,
     diedAtMs: isDead ? nowMs : instance.diedAtMs,
-    motionClip: isDead ? 'die' : 'takeDamage',
+    motionClip: isDead ? 'die' : 'idle',
   };
 
   store.instances.set(npcId, next);

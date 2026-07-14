@@ -18,6 +18,7 @@ const { FAKE_DRAW_PASS_CONTEXT } = vi.hoisted(() => {
     flowerColors: [0xffd966, 0xff8fab, 0xffffff],
     flowerTileModulus: 23,
     longGrassTileModulus: null,
+    shrubTileModulus: null,
     skyBackdropClassName:
       'bg-gradient-to-b from-sky-400 via-sky-200 to-[#7cba3d]',
   };

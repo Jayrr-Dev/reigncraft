@@ -129,6 +129,20 @@ export const DEFINING_WORLD_DEPTH_STONE_DECORATION_LAYER_Z_INDEX =
   DEFINING_WORLD_DEPTH_WATER_SURFACE_LAYER_Z_INDEX - 4;
 
 /**
+ * Berry shrubs sit slightly above long grass, below stone/flower overlays.
+ * Per-tile depth bias is added on top so shrubs still sort among themselves.
+ */
+export const DEFINING_WORLD_DEPTH_SHRUB_DECORATION_LAYER_Z_INDEX =
+  DEFINING_WORLD_DEPTH_WATER_SURFACE_LAYER_Z_INDEX - 4.5;
+
+/**
+ * Hand-placed chest props sit in the floor props band near shrubs.
+ * Runtime sprites still use entity sort keys for avatar/tree occlusion.
+ */
+export const DEFINING_WORLD_DEPTH_CHEST_PROP_LAYER_Z_INDEX =
+  DEFINING_WORLD_DEPTH_WATER_SURFACE_LAYER_Z_INDEX - 4.25;
+
+/**
  * Long-grass clumps sit above all floor chunks, below stone/flower overlays.
  * Per-tile depth bias is added on top so clumps still sort among themselves.
  */

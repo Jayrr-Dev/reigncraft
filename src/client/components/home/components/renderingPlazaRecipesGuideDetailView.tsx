@@ -7,6 +7,7 @@
  */
 
 import { RenderingWorldPlazaCampfireRecipePreview } from '@/components/world/building/components/renderingWorldPlazaCampfireRecipePreview';
+import { RenderingWorldPlazaCraftModeRecipeSpriteSheetPreview } from '@/components/world/building/components/renderingWorldPlazaCraftModeRecipeSpriteSheetPreview';
 import type { PlazaRecipesGuideDisplayEntry } from '@/components/home/domains/resolvingPlazaRecipesGuideDisplayEntries';
 import { resolvingPlazaRecipesGuideCookbookTitle } from '@/components/home/domains/definingPlazaRecipesGuideConstants';
 import { Icon } from '@/components/ui/icon';
@@ -77,6 +78,11 @@ export function RenderingPlazaRecipesGuideDetailView({
           {entry.recipeDefinition.recipeVisual.visualKind ===
           'world-plaza-campfire' ? (
             <RenderingWorldPlazaCampfireRecipePreview />
+          ) : entry.recipeDefinition.recipeVisual.visualKind ===
+            'sprite-sheet' ? (
+            <RenderingWorldPlazaCraftModeRecipeSpriteSheetPreview
+              spriteSheetIcon={entry.recipeDefinition.recipeVisual.spriteSheetIcon}
+            />
           ) : (
             <Icon
               icon={entry.silhouetteIconifyIcon}

@@ -605,6 +605,7 @@ export function RenderingWildlifeLayer({
                     playerPosition,
                   }
                 : null,
+              npcPreyTargets: config.npcPreyTargetsRef?.current ?? [],
             })
         );
 

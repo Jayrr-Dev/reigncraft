@@ -29,6 +29,7 @@ export const DEFINING_WORLD_COLLISION_PUSH_OUT_PROVIDER_ORDER = [
   'columnRockDiamond',
   'treeTrunkCircle',
   'firelandsPropCircle',
+  'chestPropCircle',
   'pebbleRockCircle',
   'waterTileSquare',
 ] as const;
@@ -48,6 +49,7 @@ export const DEFINING_WORLD_COLLISION_DEBUG_STATIC_PROVIDER_ORDER = [
   'pebbleRockCircle',
   'treeTrunkCircle',
   'firelandsPropCircle',
+  'chestPropCircle',
 ] as const;
 
 /** Registered collision providers (metadata for debug + future declarative hooks). */
@@ -103,6 +105,17 @@ export const DEFINING_WORLD_COLLISION_PROVIDERS: readonly DefiningWorldCollision
         kind: 'gridCircle',
         strokeColor:
           DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_FIRELANDS_PROP_COLLIDER_STROKE_COLOR,
+      },
+    },
+    {
+      id: 'chestPropCircle',
+      blockerKind:
+        DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_BLOCKER_KIND.PEBBLE_ROCK_CIRCLE,
+      label: 'Chest prop',
+      debugStroke: {
+        kind: 'gridCircle',
+        strokeColor:
+          DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_PLACED_BLOCK_CIRCLE_STROKE_COLOR,
       },
     },
     {

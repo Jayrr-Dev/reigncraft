@@ -50,6 +50,10 @@ function resolvingPlazaRecipesGuideSilhouetteIcon(
     return recipeDefinition.recipeVisual.recipeEmblemIconifyIcon;
   }
 
+  if (recipeDefinition.recipeVisual.visualKind === 'sprite-sheet') {
+    return 'mdi:anvil';
+  }
+
   return 'mdi:campfire';
 }
 

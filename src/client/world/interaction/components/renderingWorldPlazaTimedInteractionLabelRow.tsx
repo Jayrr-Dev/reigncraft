@@ -20,6 +20,8 @@ export type RenderingWorldPlazaTimedInteractionLabelRowProps = {
   readonly rowRef?: React.Ref<HTMLDivElement>;
   /** Overrides the default campfire outlined button chrome. */
   readonly buttonClassName?: string;
+  /** When true, button is non-interactive (e.g. Locked chests). */
+  readonly disabled?: boolean;
   readonly onActivate: () => void;
 };
 
@@ -34,6 +36,7 @@ export const RenderingWorldPlazaTimedInteractionLabelRow = memo(
     progressRatioRef,
     rowRef,
     buttonClassName = DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME,
+    disabled = false,
     onActivate,
   }: RenderingWorldPlazaTimedInteractionLabelRowProps): React.JSX.Element {
     const isProgressRingVisible =
@@ -49,11 +52,15 @@ export const RenderingWorldPlazaTimedInteractionLabelRow = memo(
       >
         <button
           type="button"
+          disabled={disabled}
           {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
           className={buttonClassName}
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
+            if (disabled) {
+              return;
+            }
             onActivate();
           }}
         >

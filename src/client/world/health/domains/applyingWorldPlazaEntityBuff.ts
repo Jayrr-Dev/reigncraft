@@ -446,17 +446,23 @@ function applyingWorldPlazaEntityBuffDescriptor(
       nowMs
     );
 
-    if (isActive) {
+    const expiresAtMs =
+      descriptor.durationKind === 'timed' && descriptor.durationMs !== null
+        ? nowMs + descriptor.durationMs
+        : null;
+
+    // Timed movement debuffs refresh duration when re-applied (bear trap snare).
+    // Toggle / instant still toggle off when already active.
+    if (isActive && descriptor.durationKind !== 'timed') {
       return removingWorldPlazaEntityHealthMovementModifier(
         state,
         descriptor.id
       );
     }
 
-    const expiresAtMs =
-      descriptor.durationKind === 'timed' && descriptor.durationMs !== null
-        ? nowMs + descriptor.durationMs
-        : null;
+    const stateAfterClear = isActive
+      ? removingWorldPlazaEntityHealthMovementModifier(state, descriptor.id)
+      : state;
 
     const modifiersToApply = [
       {
@@ -476,7 +482,7 @@ function applyingWorldPlazaEntityBuffDescriptor(
     return modifiersToApply.reduce(
       (nextState, modifier) =>
         addingWorldPlazaEntityHealthMovementModifier(nextState, modifier),
-      state
+      stateAfterClear
     );
   }
 

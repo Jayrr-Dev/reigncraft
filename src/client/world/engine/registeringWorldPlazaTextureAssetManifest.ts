@@ -1,7 +1,15 @@
 ﻿import type { DefiningWorldPlazaFirelandsPropKind } from '@/components/world/domains/definingWorldPlazaFirelandsRuinBlueprintConstants';
 import { DEFINING_WORLD_PLAZA_LONG_GRASS_SPRITE_URLS } from '@/components/world/domains/definingWorldPlazaLongGrassConstants';
+import { DEFINING_WORLD_PLAZA_SHRUB_SPRITE_URLS } from '@/components/world/domains/definingWorldPlazaShrubConstants';
+import { DEFINING_WORLD_PLAZA_CHEST_SPRITE_URLS } from '@/components/world/chest/domains/definingWorldPlazaChestConstants';
+import {
+  DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_CELL_PX,
+  DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_COLUMN_COUNT,
+  DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_URL,
+} from '@/components/world/trap/domains/definingWorldPlazaBearTrapConstants';
+import { DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL } from '@/components/world/building/domains/definingWorldPlazaBlacksmithUtilitySpriteConstants';
 import { creatingWorldPlazaTextureAssetLoader } from '@/components/world/engine/creatingWorldPlazaTextureAssetLoader';
-import { Assets, Texture } from 'pixi.js';
+import { Assets, Rectangle, Texture } from 'pixi.js';
 
 /**
  * Declarative texture asset manifest for terrain overlay layers.
@@ -14,6 +22,10 @@ export const REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID = {
   LAVA_STATIC_TILE: 'lava-static-tile',
   FIRELANDS_SPRITES: 'firelands-sprites',
   LONG_GRASS_SPRITES: 'long-grass-sprites',
+  SHRUB_SPRITES: 'shrub-sprites',
+  CHEST_SPRITES: 'chest-sprites',
+  BEAR_TRAP_SPRITES: 'bear-trap-sprites',
+  BLACKSMITH_UTILITY_SPRITES: 'blacksmith-utility-sprites',
 } as const;
 
 /** One registered terrain texture asset id. */
@@ -220,11 +232,107 @@ export const registeringWorldPlazaLongGrassSpriteTextureLoader =
     },
   });
 
+/** Loader for berry-shrub sprite textures keyed by URL. */
+export const registeringWorldPlazaShrubSpriteTextureLoader =
+  creatingWorldPlazaTextureAssetLoader({
+    id: REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.SHRUB_SPRITES,
+    load: async () => {
+      const loadedTextures = await Promise.all(
+        DEFINING_WORLD_PLAZA_SHRUB_SPRITE_URLS.map((url) =>
+          loadingWorldPlazaFirelandsTextureWithRetry(url)
+        )
+      );
+
+      return Object.fromEntries(
+        DEFINING_WORLD_PLAZA_SHRUB_SPRITE_URLS.map((url, index) => [
+          url,
+          loadedTextures[index],
+        ])
+      ) as Record<string, Texture>;
+    },
+  });
+
+/** Loader for world chest prop sprite textures keyed by URL. */
+export const registeringWorldPlazaChestSpriteTextureLoader =
+  creatingWorldPlazaTextureAssetLoader({
+    id: REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.CHEST_SPRITES,
+    load: async () => {
+      const loadedTextures = await Promise.all(
+        DEFINING_WORLD_PLAZA_CHEST_SPRITE_URLS.map((url) =>
+          loadingWorldPlazaFirelandsTextureWithRetry(url)
+        )
+      );
+
+      return Object.fromEntries(
+        DEFINING_WORLD_PLAZA_CHEST_SPRITE_URLS.map((url, index) => [
+          url,
+          loadedTextures[index],
+        ])
+      ) as Record<string, Texture>;
+    },
+  });
+
+/** Loader for bear trap sprite sheet frames (4x1 @ 32px). */
+export const registeringWorldPlazaBearTrapSpriteTextureLoader =
+  creatingWorldPlazaTextureAssetLoader({
+    id: REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.BEAR_TRAP_SPRITES,
+    load: async () => {
+      const sheet = await loadingWorldPlazaFirelandsTextureWithRetry(
+        DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_URL
+      );
+      const cellPx = DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_CELL_PX;
+      const frames: Texture[] = [];
+
+      for (
+        let column = 0;
+        column < DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_COLUMN_COUNT;
+        column += 1
+      ) {
+        frames.push(
+          new Texture({
+            source: sheet.source,
+            frame: new Rectangle(column * cellPx, 0, cellPx, cellPx),
+          })
+        );
+      }
+
+      return frames;
+    },
+  });
+
+const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_SPRITE_URLS = Object.values(
+  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL
+);
+
+/** Loader for blacksmith utility world sprites keyed by URL. */
+export const registeringWorldPlazaBlacksmithUtilitySpriteTextureLoader =
+  creatingWorldPlazaTextureAssetLoader({
+    id: REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.BLACKSMITH_UTILITY_SPRITES,
+    load: async () => {
+      const loadedTextures = await Promise.all(
+        DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_SPRITE_URLS.map((url) =>
+          loadingWorldPlazaFirelandsTextureWithRetry(url)
+        )
+      );
+
+      return Object.fromEntries(
+        DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_SPRITE_URLS.map((url, index) => [
+          url,
+          loadedTextures[index],
+        ])
+      ) as Record<string, Texture>;
+    },
+  });
+
 /** All terrain texture assets preloaded before the declarative terrain engine runs. */
 export const REGISTERING_WORLD_PLAZA_TERRAIN_TEXTURE_ASSET_MANIFEST = [
   registeringWorldPlazaLavaStaticTileTextureLoader,
   registeringWorldPlazaFirelandsSpriteTextureLoader,
   registeringWorldPlazaLongGrassSpriteTextureLoader,
+  registeringWorldPlazaShrubSpriteTextureLoader,
+  registeringWorldPlazaChestSpriteTextureLoader,
+  registeringWorldPlazaBearTrapSpriteTextureLoader,
+  registeringWorldPlazaBlacksmithUtilitySpriteTextureLoader,
 ] as const;
 
 /**
@@ -278,6 +386,70 @@ export function peekingWorldPlazaLongGrassSpriteTextureForUrlFromManifest(
 ): Texture | null {
   const texturesByUrl =
     registeringWorldPlazaLongGrassSpriteTextureLoader.peek();
+
+  if (!texturesByUrl) {
+    return null;
+  }
+
+  return texturesByUrl[spriteUrl] ?? null;
+}
+
+/**
+ * Resolves one cached berry-shrub texture by public URL.
+ */
+export function peekingWorldPlazaShrubSpriteTextureForUrlFromManifest(
+  spriteUrl: string
+): Texture | null {
+  const texturesByUrl = registeringWorldPlazaShrubSpriteTextureLoader.peek();
+
+  if (!texturesByUrl) {
+    return null;
+  }
+
+  return texturesByUrl[spriteUrl] ?? null;
+}
+
+/**
+ * Resolves one cached world chest texture by public URL.
+ */
+export function peekingWorldPlazaChestSpriteTextureForUrlFromManifest(
+  spriteUrl: string
+): Texture | null {
+  const texturesByUrl = registeringWorldPlazaChestSpriteTextureLoader.peek();
+
+  if (!texturesByUrl) {
+    return null;
+  }
+
+  return texturesByUrl[spriteUrl] ?? null;
+}
+
+/**
+ * Resolves one cropped bear trap frame texture by column index.
+ */
+export function peekingWorldPlazaBearTrapSpriteTextureForFrameFromManifest(
+  frameIndex: number
+): Texture | null {
+  const frames = registeringWorldPlazaBearTrapSpriteTextureLoader.peek();
+
+  if (!frames || frames.length === 0) {
+    return null;
+  }
+
+  const safeIndex =
+    ((frameIndex % frames.length) + frames.length) % frames.length;
+
+  return frames[safeIndex] ?? null;
+}
+
+/**
+ * Resolves one cached blacksmith utility texture by public URL.
+ */
+export function peekingWorldPlazaBlacksmithUtilitySpriteTextureForUrlFromManifest(
+  spriteUrl: string
+): Texture | null {
+  const texturesByUrl =
+    registeringWorldPlazaBlacksmithUtilitySpriteTextureLoader.peek();
 
   if (!texturesByUrl) {
     return null;

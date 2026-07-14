@@ -12,10 +12,14 @@
 
 import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import type { DefiningWorldPlazaCraftModeCookbookId } from '@/components/world/building/domains/definingWorldPlazaCraftModeCookbookRegistry';
+import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 
 /** Stable ids for craft-mode recipes. */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID = {
   CAMPFIRE: 'recipe-campfire',
+  ANVIL: 'recipe-anvil',
+  CLAY_KILN: 'recipe-clay-kiln',
+  CLAY_STOVE: 'recipe-clay-stove',
 } as const;
 
 /** One craft-mode recipe id. */
@@ -64,6 +68,10 @@ export type DefiningWorldPlazaCraftModeRecipeVisual =
     }
   | {
       readonly visualKind: 'world-plaza-campfire';
+    }
+  | {
+      readonly visualKind: 'sprite-sheet';
+      readonly spriteSheetIcon: DefiningWorldPlazaInventorySpriteSheetIcon;
     };
 
 /** Shared display fields for every recipe. */

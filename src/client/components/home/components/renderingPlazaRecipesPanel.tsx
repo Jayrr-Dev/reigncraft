@@ -25,6 +25,7 @@ import {
 import { DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER } from '@/components/home/domains/definingPlazaBestiarySpritePortraitConstants';
 import { Icon } from '@/components/ui/icon';
 import { RenderingWorldPlazaCampfireRecipePreview } from '@/components/world/building/components/renderingWorldPlazaCampfireRecipePreview';
+import { RenderingWorldPlazaCraftModeRecipeSpriteSheetPreview } from '@/components/world/building/components/renderingWorldPlazaCraftModeRecipeSpriteSheetPreview';
 import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import {
   gettingWorldPlazaRecipeAttachedSnapshot,
@@ -66,6 +67,20 @@ function RenderingPlazaRecipesGuideCardArt({
       <RenderingWorldPlazaCampfireRecipePreview
         presentation="card"
         isSilhouette={!entry.isAttached}
+      />
+    );
+  }
+
+  if (entry.recipeDefinition.recipeVisual.visualKind === 'sprite-sheet') {
+    return (
+      <RenderingWorldPlazaCraftModeRecipeSpriteSheetPreview
+        spriteSheetIcon={entry.recipeDefinition.recipeVisual.spriteSheetIcon}
+        className={cn('size-[72%]', !entry.isAttached && 'opacity-90')}
+        style={
+          entry.isAttached
+            ? undefined
+            : { filter: DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER }
+        }
       />
     );
   }

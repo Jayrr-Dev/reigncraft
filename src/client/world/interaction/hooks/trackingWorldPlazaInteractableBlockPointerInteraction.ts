@@ -12,6 +12,10 @@ import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/componen
 import { resolvingWorldPlazaInteractableFlowerFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableFlowerFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableLongGrassFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableLongGrassFromPointerGridPoint';
 import { DEFINING_WORLD_PLAZA_LONG_GRASS_SEARCH_POINTER_HIT_RADIUS_TILES } from '@/components/world/harvest/domains/definingWorldPlazaLongGrassSearchConstants';
+import { DEFINING_WORLD_PLAZA_SHRUB_PICK_POINTER_HIT_RADIUS_TILES } from '@/components/world/harvest/domains/definingWorldPlazaShrubPickConstants';
+import { resolvingWorldPlazaInteractableShrubFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableShrubFromPointerGridPoint';
+import { DEFINING_WORLD_PLAZA_CHEST_POINTER_HIT_RADIUS_TILES } from '@/components/world/chest/domains/definingWorldPlazaChestConstants';
+import { resolvingWorldPlazaInteractableChestFromPointerGridPoint } from '@/components/world/chest/domains/resolvingWorldPlazaInteractableChestFromPointerGridPoint';
 import { resolvingWorldPlazaInteractablePebbleFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePebbleFromPointerGridPoint';
 import { resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractablePlacedBlockFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableRockFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableRockFromPointerGridPoint';
@@ -84,6 +88,13 @@ export type TrackingWorldPlazaInteractableBlockPointerInteractionParams = {
     tileX: number,
     tileY: number
   ) => void;
+  /** Opens the berry-shrub pick popover for a sprite bush. */
+  readonly onProceduralShrubPopoverSelect?: (
+    tileX: number,
+    tileY: number
+  ) => void;
+  /** Opens the chest Open/Locked popover for a hand-placed chest. */
+  readonly onWorldChestPopoverSelect?: (chestId: string) => void;
 };
 
 export type TrackingWorldPlazaInteractableBlockPointerInteractionResult = {
@@ -136,6 +147,8 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
   pickedFlowerStateByTileKey,
   onProceduralFlowerPopoverSelect,
   onProceduralLongGrassPopoverSelect,
+  onProceduralShrubPopoverSelect,
+  onWorldChestPopoverSelect,
 }: TrackingWorldPlazaInteractableBlockPointerInteractionParams): TrackingWorldPlazaInteractableBlockPointerInteractionResult {
   const enabledDefinitionIds = useMemo(
     () => new Set(Object.keys(handlers)),
@@ -269,6 +282,34 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
         }
       }
 
+      if (onProceduralShrubPopoverSelect) {
+        const shrubMatch =
+          resolvingWorldPlazaInteractableShrubFromPointerGridPoint(
+            pointerContext.gridPoint.x,
+            pointerContext.gridPoint.y,
+            DEFINING_WORLD_PLAZA_SHRUB_PICK_POINTER_HIT_RADIUS_TILES
+          );
+
+        if (shrubMatch) {
+          onProceduralShrubPopoverSelect(shrubMatch.tileX, shrubMatch.tileY);
+          return true;
+        }
+      }
+
+      if (onWorldChestPopoverSelect) {
+        const chestMatch =
+          resolvingWorldPlazaInteractableChestFromPointerGridPoint(
+            pointerContext.gridPoint.x,
+            pointerContext.gridPoint.y,
+            DEFINING_WORLD_PLAZA_CHEST_POINTER_HIT_RADIUS_TILES
+          );
+
+        if (chestMatch) {
+          onWorldChestPopoverSelect(chestMatch.chestId);
+          return true;
+        }
+      }
+
       return false;
     },
     [
@@ -281,6 +322,8 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
       minedRockStateByTileKey,
       onProceduralFlowerPopoverSelect,
       onProceduralLongGrassPopoverSelect,
+      onProceduralShrubPopoverSelect,
+      onWorldChestPopoverSelect,
       onProceduralPebblePopoverSelect,
       onProceduralRockPopoverSelect,
       onProceduralTreePopoverSelect,

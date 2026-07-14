@@ -8,6 +8,9 @@ import { formattingWorldPlazaInteractableFlowerSelectionKey } from '@/components
 import { formattingWorldPlazaInteractableLongGrassSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableLongGrassSelectionKey';
 import { formattingWorldPlazaInteractablePebbleSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractablePebbleSelectionKey';
 import { formattingWorldPlazaInteractableRockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableRockSelectionKey';
+import { formattingWorldPlazaInteractableShrubSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableShrubSelectionKey';
+import { formattingWorldPlazaInteractableChestSelectionKey } from '@/components/world/chest/domains/formattingWorldPlazaInteractableChestSelectionKey';
+import type { DefiningWorldPlazaChestId } from '@/components/world/chest/domains/definingWorldPlazaChestTypes';
 import { formattingWorldPlazaInteractableTreeSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableTreeSelectionKey';
 import { formattingWildlifeCorpseStudySelectionKey } from '@/components/world/wildlife/domains/formattingWildlifeCorpseStudySelectionKey';
 import type { RefObject } from 'react';
@@ -105,6 +108,37 @@ export function selectingWorldPlazaInteractableLongGrassForClickAction(
     tileX,
     tileY
   );
+
+  selectedBlockKeysRef.current.clear();
+  selectedBlockKeysRef.current.add(selectionKey);
+}
+
+/**
+ * Selects one berry-shrub tile for popover-style pick interaction.
+ */
+export function selectingWorldPlazaInteractableShrubForClickAction(
+  selectedBlockKeysRef: RefObject<Set<string>>,
+  tileX: number,
+  tileY: number
+): void {
+  const selectionKey = formattingWorldPlazaInteractableShrubSelectionKey(
+    tileX,
+    tileY
+  );
+
+  selectedBlockKeysRef.current.clear();
+  selectedBlockKeysRef.current.add(selectionKey);
+}
+
+/**
+ * Selects one world chest for Open / Locked interaction labels.
+ */
+export function selectingWorldPlazaInteractableChestForClickAction(
+  selectedBlockKeysRef: RefObject<Set<string>>,
+  chestId: DefiningWorldPlazaChestId
+): void {
+  const selectionKey =
+    formattingWorldPlazaInteractableChestSelectionKey(chestId);
 
   selectedBlockKeysRef.current.clear();
   selectedBlockKeysRef.current.add(selectionKey);

@@ -5,6 +5,8 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWildlifeMayHuntNpcPrey } from '@/components/world/npc/domains/checkingWildlifeMayHuntNpcPrey';
+import type { DefiningNpcPreyTarget } from '@/components/world/npc/domains/definingNpcTypes';
 import { advancingWildlifeStalkAggroTick } from '@/components/world/wildlife/domains/advancingWildlifeStalkAggroTick';
 import { advancingWildlifePackHunterBehaviour } from '@/components/world/wildlife/domains/advancingWildlifePackHunterBehaviour';
 import { advancingWildlifeStalkerBehaviour } from '@/components/world/wildlife/domains/advancingWildlifeStalkerBehaviour';
@@ -71,6 +73,7 @@ export type AdvancingWildlifeAggroTickParams = {
   playerStillDurationMs?: number;
   deltaSeconds: number;
   nowMs: number;
+  npcPreyTargets?: readonly DefiningNpcPreyTarget[];
 };
 
 function updatingThreatEntry(
@@ -159,6 +162,7 @@ export function advancingWildlifeAggroTick({
   playerStillDurationMs = 0,
   deltaSeconds,
   nowMs,
+  npcPreyTargets = [],
 }: AdvancingWildlifeAggroTickParams): DefiningWildlifeAggroState {
   let stalkLockedPreyTargetId =
     instance.aggroState.stalkLockedPreyTargetId ?? null;
@@ -231,6 +235,7 @@ export function advancingWildlifeAggroTick({
         playerUserId,
         resolveSpecies: resolvingWildlifeSpeciesDefinition,
         nowMs,
+        npcPreyTargets,
       })
     : [];
 
@@ -541,6 +546,59 @@ export function advancingWildlifeAggroTick({
     threats = updatingThreatEntry(
       threats,
       neighbor.instanceId,
+      DEFINING_WILDLIFE_PREY_SCENT_THREAT_PER_SECOND * deltaSeconds,
+      nowMs
+    );
+  }
+
+  for (const npcPrey of npcPreyTargets) {
+    if (
+      !checkingWildlifeMayHuntNpcPrey(species, npcPrey, hungerDriveLevel) ||
+      (species.temperamentId === 'pack_hunter' && !mayInitiatePreyStalk) ||
+      !mayBuildThreatToTarget(npcPrey.targetId)
+    ) {
+      continue;
+    }
+
+    const distance = Math.hypot(
+      instance.position.x - npcPrey.position.x,
+      instance.position.y - npcPrey.position.y
+    );
+
+    if (distance <= proximityAttackRadiusGrid) {
+      const existingThreat = threats.find(
+        (entry) => entry.targetId === npcPrey.targetId
+      );
+      const proximityThreatBoost = Math.max(
+        0,
+        DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD - (existingThreat?.threat ?? 0)
+      );
+
+      if (proximityThreatBoost > 0) {
+        threats = updatingThreatEntry(
+          threats,
+          npcPrey.targetId,
+          proximityThreatBoost,
+          nowMs
+        );
+      }
+
+      continue;
+    }
+
+    if (
+      !checkingWildlifeIsMotivatedToHunt(
+        species,
+        instance.hungerState.driveLevel
+      ) ||
+      distance > DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID
+    ) {
+      continue;
+    }
+
+    threats = updatingThreatEntry(
+      threats,
+      npcPrey.targetId,
       DEFINING_WILDLIFE_PREY_SCENT_THREAT_PER_SECOND * deltaSeconds,
       nowMs
     );

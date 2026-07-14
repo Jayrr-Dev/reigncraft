@@ -18,6 +18,10 @@ import {
   parsingWildlifeGroundGrassItemId,
 } from '@/components/world/wildlife/domains/definingWildlifeGroundGrassIdConstants';
 import {
+  checkingWildlifeGroundShrubItemId,
+  parsingWildlifeGroundShrubItemId,
+} from '@/components/world/wildlife/domains/definingWildlifeGroundShrubIdConstants';
+import {
   DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MAX_MS,
   DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MIN_MS,
   DEFINING_WILDLIFE_GROUND_GRASS_BITE_DELAY_MS,
@@ -39,9 +43,14 @@ import {
   checkingWildlifeGroundGrassOptimisticIsCleared,
   consumingWildlifeGroundGrassBridge,
 } from '@/components/world/wildlife/domains/managingWildlifeGroundGrassBridge';
+import {
+  checkingWildlifeGroundShrubOptimisticIsPicked,
+  consumingWildlifeGroundShrubBridge,
+} from '@/components/world/wildlife/domains/managingWildlifeGroundShrubBridge';
 import { refillingWildlifeHungerAfterGroundFlower } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundFlower';
 import { refillingWildlifeHungerAfterGroundFood } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundFood';
 import { refillingWildlifeHungerAfterGroundGrass } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundGrass';
+import { refillingWildlifeHungerAfterGroundShrub } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundShrub';
 import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodWorldPoint';
 
 function rollingWildlifeGroundFoodBiteDelayMs(): number {
@@ -229,7 +238,79 @@ function applyingWildlifeGroundGrassBite(
   };
 }
 
-/** Chews, then consumes one ground-food unit, biome flower, or long-grass tile. */
+function applyingWildlifeGroundShrubBite(
+  instance: DefiningWildlifeInstance,
+  species: DefiningWildlifeSpeciesDefinition,
+  groundItemId: string,
+  nowMs: number
+): DefiningWildlifeInstance {
+  const tile = parsingWildlifeGroundShrubItemId(groundItemId);
+
+  if (!tile) {
+    return clearingWildlifePendingGroundFoodBite(instance);
+  }
+
+  if (checkingWildlifeGroundShrubOptimisticIsPicked(tile.tileX, tile.tileY)) {
+    return clearingWildlifePendingGroundFoodBite(instance);
+  }
+
+  const targetPoint = {
+    x: tile.tileX + 0.5,
+    y: tile.tileY + 0.5,
+    layer: 1,
+  };
+  const distance = Math.hypot(
+    instance.position.x - targetPoint.x,
+    instance.position.y - targetPoint.y
+  );
+
+  if (distance > DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
+    return clearingWildlifePendingGroundFoodBite(instance);
+  }
+
+  const pendingBite = instance.aiState.pendingGroundFoodBite;
+  const pendingMatchesShrub =
+    pendingBite !== null && pendingBite.groundItemId === groundItemId;
+
+  if (!pendingMatchesShrub || pendingBite === null) {
+    return applyingWildlifeIdleChewStance(instance, {
+      groundItemId,
+      startedAtMs: nowMs,
+      readyAtMs: nowMs + rollingWildlifeGroundFoodBiteDelayMs(),
+    });
+  }
+
+  if (nowMs < pendingBite.readyAtMs) {
+    return applyingWildlifeIdleChewStance(instance, pendingBite);
+  }
+
+  const consumed = consumingWildlifeGroundShrubBridge(
+    groundItemId,
+    instance.position
+  );
+
+  if (!consumed) {
+    return clearingWildlifePendingGroundFoodBite(instance);
+  }
+
+  return {
+    ...instance,
+    hungerState: refillingWildlifeHungerAfterGroundShrub(
+      instance.hungerState,
+      species,
+      nowMs
+    ),
+    aiState: {
+      ...instance.aiState,
+      pendingGroundFoodBite: null,
+      isMoving: false,
+      motionClip: 'attack',
+      lastAttackAtMs: nowMs,
+    },
+  };
+}
+
+/** Chews, then consumes one ground-food unit, biome flower, long-grass, or shrub tile. */
 export function applyingWildlifeGroundFoodBite(
   instance: DefiningWildlifeInstance,
   species: DefiningWildlifeSpeciesDefinition,
@@ -247,6 +328,15 @@ export function applyingWildlifeGroundFoodBite(
 
   if (checkingWildlifeGroundGrassItemId(groundItemId)) {
     return applyingWildlifeGroundGrassBite(
+      instance,
+      species,
+      groundItemId,
+      nowMs
+    );
+  }
+
+  if (checkingWildlifeGroundShrubItemId(groundItemId)) {
+    return applyingWildlifeGroundShrubBite(
       instance,
       species,
       groundItemId,

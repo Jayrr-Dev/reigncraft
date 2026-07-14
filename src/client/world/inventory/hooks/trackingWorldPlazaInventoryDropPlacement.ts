@@ -33,6 +33,9 @@ import { playingWorldPlazaInventoryBagSfx } from '@/components/world/inventory/d
 import { checkingWorldPlazaInventoryBagHasContents } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagContents';
 import { resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer';
 import { resolvingWorldPlazaInventoryDropWalkTargetGridPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropWalkTargetGridPoint';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { placingWorldPlazaBearTrap } from '@/components/world/trap/domains/managingWorldPlazaBearTrapInstanceStore';
+import { persistingWorldPlazaLocalBearTraps } from '@/components/world/trap/domains/managingWorldPlazaLocalBearTraps';
 import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
 import { useCallback, useMemo, useRef } from 'react';
 import { WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH } from '../../../../shared/worldInventoryDevvit';
@@ -261,6 +264,34 @@ export function trackingWorldPlazaInventoryDropPlacement({
       }
 
       try {
+        if (
+          pendingDrop.itemTypeId ===
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP
+        ) {
+          const placeCount = Math.max(1, pendingDrop.quantity);
+
+          for (let index = 0; index < placeCount; index += 1) {
+            placingWorldPlazaBearTrap({
+              worldX: pendingDrop.gridX + 0.5,
+              worldY: pendingDrop.gridY + 0.5,
+              ownerId: localPersistenceOwnerId ?? null,
+              state: 'armed',
+            });
+          }
+
+          if (localPersistenceOwnerId) {
+            persistingWorldPlazaLocalBearTraps(localPersistenceOwnerId);
+          }
+
+          showingReigncraftToast(
+            placeCount === 1
+              ? 'Bear trap armed on the ground.'
+              : `${placeCount} bear traps armed on the ground.`
+          );
+          clearingDropMarker();
+          return;
+        }
+
         const dropRequest = {
           itemTypeId: pendingDrop.itemTypeId,
           quantity: pendingDrop.quantity,

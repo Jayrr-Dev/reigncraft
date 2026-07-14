@@ -10,6 +10,13 @@ import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/doma
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
+  applyingNpcInstanceDamage,
+  gettingNpcInstance,
+} from '@/components/world/npc/domains/managingNpcInstanceStore';
+import { checkingWildlifeMayHuntNpcPrey } from '@/components/world/npc/domains/checkingWildlifeMayHuntNpcPrey';
+import type { DefiningNpcPreyTarget } from '@/components/world/npc/domains/definingNpcTypes';
+import { resolvingNpcSpeciesDefinition } from '@/components/world/npc/domains/definingNpcSpeciesRegistry';
+import {
   formattingWorldPlazaClientCapturedError,
   loggingWorldPlazaClientError,
 } from '@/components/world/domains/loggingWorldPlazaClientErrors';
@@ -259,6 +266,7 @@ export type AdvancingWildlifeSimulationTickParams = {
   isLeader: boolean;
   remoteSnapshots?: readonly DefiningWildlifeNetworkSnapshot[];
   meatDropContext?: DefiningWildlifeMeatDropContext | null;
+  npcPreyTargets?: readonly DefiningNpcPreyTarget[];
 };
 
 export type AdvancingWildlifeSimulationTickResult = {
@@ -455,7 +463,8 @@ function resolvingWildlifeMeleeTargetPosition(
   playerUserId: string | null,
   nearbyInstances: readonly DefiningWildlifeInstance[],
   updatedById: Map<string, DefiningWildlifeInstance>,
-  instances: readonly DefiningWildlifeInstance[]
+  instances: readonly DefiningWildlifeInstance[],
+  npcPreyTargets: readonly DefiningNpcPreyTarget[] = []
 ): DefiningWorldPlazaWorldPoint | null {
   if (intent.mode !== 'chase' && intent.mode !== 'attack') {
     return null;
@@ -479,6 +488,20 @@ function resolvingWildlifeMeleeTargetPosition(
 
     if (target) {
       return target.position;
+    }
+
+    const npcPrey = npcPreyTargets.find(
+      (entry) => entry.targetId === intent.targetInstanceId
+    );
+
+    if (npcPrey) {
+      return npcPrey.position;
+    }
+
+    const npcInstance = gettingNpcInstance(intent.targetInstanceId);
+
+    if (npcInstance && !npcInstance.isDead) {
+      return npcInstance.position;
     }
   }
 
@@ -718,6 +741,10 @@ function applyingWildlifeMeleeAttack(
     playerStaminaRatio: number | null;
     playerStaminaIsDepleted: boolean;
     playerStillDurationMs: number;
+  },
+  npcMelee?: {
+    targetPosition: DefiningWorldPlazaWorldPoint;
+    onHit: (damageAmount: number) => void;
   }
 ): {
   attacker: DefiningWildlifeInstance;
@@ -847,6 +874,18 @@ function applyingWildlifeMeleeAttack(
         }
       }
 
+      swingLanded = true;
+    }
+  }
+
+  if (npcMelee) {
+    const npcDistance = Math.hypot(
+      attacker.position.x - npcMelee.targetPosition.x,
+      attacker.position.y - npcMelee.targetPosition.y
+    );
+
+    if (npcDistance <= DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
+      npcMelee.onHit(attackPower);
       swingLanded = true;
     }
   }
@@ -1122,6 +1161,7 @@ export function advancingWildlifeSimulationTick({
   isPlayerJumping = false,
   isPlayerWalking = false,
   playerPreviousPosition = null,
+  npcPreyTargets = [],
 }: AdvancingWildlifeSimulationTickParams): AdvancingWildlifeSimulationTickResult {
   // Dev QA load: keep manually spawned animals frozen and hittable. Skip natural
   // hydration, AI, aggro, and player push-out so combat tests stay controlled.
@@ -1549,6 +1589,7 @@ export function advancingWildlifeSimulationTick({
             playerStillDurationMs,
             deltaSeconds: thinkElapsedSeconds,
             nowMs,
+            npcPreyTargets,
           }),
         };
 
@@ -1860,7 +1901,8 @@ export function advancingWildlifeSimulationTick({
         playerUserId,
         behaviorNeighbors,
         updatedById,
-        instances
+        instances,
+        npcPreyTargets
       );
 
       if (
@@ -2183,7 +2225,8 @@ export function advancingWildlifeSimulationTick({
         playerUserId,
         behaviorNeighbors,
         updatedById,
-        instances
+        instances,
+        npcPreyTargets
       );
       const engagementIntent = resolvingWildlifeMeleeEngagementIntent({
         intent,
@@ -2292,6 +2335,79 @@ export function advancingWildlifeSimulationTick({
                 nowMs,
               });
             }
+          }
+        } else if (
+          intent.targetInstanceId &&
+          intent.targetInstanceId !== playerUserId
+        ) {
+          const npcInstance = gettingNpcInstance(intent.targetInstanceId);
+          const npcSpecies = npcInstance
+            ? resolvingNpcSpeciesDefinition(npcInstance.speciesId)
+            : null;
+          const npcPreyTarget =
+            npcPreyTargets.find(
+              (entry) => entry.targetId === intent.targetInstanceId
+            ) ??
+            (npcInstance && npcSpecies && !npcInstance.isDead
+              ? {
+                  targetId: npcInstance.npcId,
+                  position: npcInstance.position,
+                  massKg: npcSpecies.massKg,
+                  trophicTier: npcSpecies.trophicTier,
+                }
+              : null);
+          const mayMeleeNpc =
+            npcPreyTarget !== null &&
+            (nextInstance.aggroState.activeTargetId ===
+              intent.targetInstanceId ||
+              checkingWildlifeMayHuntNpcPrey(
+                species,
+                npcPreyTarget,
+                nextInstance.hungerState.driveLevel === 'starving'
+                  ? 'starving'
+                  : 'hungry'
+              ));
+
+          if (mayMeleeNpc && npcPreyTarget) {
+            const attackResult = applyingWildlifeMeleeAttack(
+              nextInstance,
+              species,
+              null,
+              null,
+              playerPosition,
+              intent,
+              nowMs,
+              isRunning,
+              hazardSampling,
+              onPlayerHitByWildlife,
+              stalkMeleeContext,
+              {
+                targetPosition: npcPreyTarget.position,
+                onHit: (damageAmount) => {
+                  applyingNpcInstanceDamage(
+                    npcPreyTarget.targetId,
+                    damageAmount,
+                    nowMs
+                  );
+                },
+              }
+            );
+            nextInstance = attackResult.attacker;
+          } else if (playerPosition && onPlayerHitByWildlife) {
+            const attackResult = applyingWildlifeMeleeAttack(
+              nextInstance,
+              species,
+              null,
+              null,
+              playerPosition,
+              intent,
+              nowMs,
+              isRunning,
+              hazardSampling,
+              onPlayerHitByWildlife,
+              stalkMeleeContext
+            );
+            nextInstance = attackResult.attacker;
           }
         } else if (playerPosition && onPlayerHitByWildlife) {
           const attackResult = applyingWildlifeMeleeAttack(

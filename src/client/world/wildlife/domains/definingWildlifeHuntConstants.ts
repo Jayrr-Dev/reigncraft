@@ -44,6 +44,23 @@ export const DEFINING_WILDLIFE_GROUND_GRASS_SCENT_RADIUS_GRID =
  */
 export const DEFINING_WILDLIFE_GROUND_GRASS_HUNGER_REFILL_RATIO = 0.18;
 
+/**
+ * Max grid distance to notice unpicked berry shrubs.
+ * Matches ground-food scent so plant-eaters weigh stacks vs flora fairly.
+ */
+export const DEFINING_WILDLIFE_GROUND_SHRUB_SCENT_RADIUS_GRID =
+  DEFINING_WILDLIFE_GROUND_FOOD_SCENT_RADIUS_GRID;
+
+/**
+ * Hunger restored when wildlife finishes chewing one berry-shrub tile.
+ */
+export const DEFINING_WILDLIFE_GROUND_SHRUB_HUNGER_REFILL_RATIO = 0.22;
+
+/**
+ * Distance scale when ranking shrubs vs grass/flowers (lower = more attractive).
+ */
+export const DEFINING_WILDLIFE_GROUND_SHRUB_FLORA_DISTANCE_BIAS = 0.8;
+
 /** Threat per second applied when prey is spotted while motivated to hunt. */
 export const DEFINING_WILDLIFE_PREY_SCENT_THREAT_PER_SECOND = 0.75;
 

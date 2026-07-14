@@ -1,9 +1,12 @@
 import type { DefiningWorldCollisionProvider } from '@/components/world/collision/domains/definingWorldCollisionProvider';
 import { findingWorldCollisionProviderById } from '@/components/world/collision/domains/definingWorldCollisionProviderRegistry';
+import { listingWorldPlazaChestInstances } from '@/components/world/chest/domains/managingWorldPlazaChestInstanceStore';
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
 } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK,
@@ -373,4 +376,44 @@ export function drawingWorldCollisionProviderDebugStaticTilesOnGraphics(
     new Set<string>(),
     new Set<string>()
   );
+
+  if (
+    !checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.CHESTS
+    )
+  ) {
+    return;
+  }
+
+  const chestProvider = findingWorldCollisionProviderById('chestPropCircle');
+
+  if (!chestProvider || chestProvider.debugStroke.kind !== 'gridCircle') {
+    return;
+  }
+
+  for (const chest of listingWorldPlazaChestInstances()) {
+    if (chest.collisionRadiusGrid <= 0) {
+      continue;
+    }
+
+    const tileX = Math.floor(chest.position.x);
+    const tileY = Math.floor(chest.position.y);
+
+    if (
+      tileX < bounds.minTileX ||
+      tileX > bounds.maxTileX ||
+      tileY < bounds.minTileY ||
+      tileY > bounds.maxTileY
+    ) {
+      continue;
+    }
+
+    drawingWorldPlazaDashedGridCircleColliderStrokeOnGraphics(
+      graphics,
+      chest.position.x,
+      chest.position.y,
+      chest.collisionRadiusGrid,
+      chestProvider.debugStroke.strokeColor
+    );
+  }
 }

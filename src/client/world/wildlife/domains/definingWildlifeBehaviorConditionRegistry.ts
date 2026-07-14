@@ -46,7 +46,10 @@ import {
   checkingWildlifePredatorMayAttackPlayer,
   checkingWildlifePredatorMayHuntPrey,
 } from '@/components/world/wildlife/domains/definingWildlifeFoodChain';
-import { DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
+import {
+  DEFINING_WILDLIFE_GROUND_SHRUB_FLORA_DISTANCE_BIAS,
+  DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID,
+} from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/definingWildlifeStalkPreyTypes';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -54,6 +57,7 @@ import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/doma
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 import { resolvingWildlifeNearestEdibleGroundFlower } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundFlower';
 import { resolvingWildlifeNearestEdibleGroundGrass } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundGrass';
+import { resolvingWildlifeNearestEdibleGroundShrub } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundShrub';
 import { resolvingWildlifeNearestEdibleGroundFood } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundFood';
 import { resolvingWildlifePreyProximityAttackRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifePreyProximityAttackRadiusGrid';
 import { resolvingWildlifeSpeciesAggroRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesAggroRadiusGrid';
@@ -512,6 +516,12 @@ function checkingWildlifeSpeciesMayForageGroundGrass(
   return species.diet === 'herbivore' || species.diet === 'omnivore';
 }
 
+function checkingWildlifeSpeciesMayForageGroundShrubs(
+  species: DefiningWildlifeSpeciesDefinition
+): boolean {
+  return species.diet === 'herbivore' || species.diet === 'omnivore';
+}
+
 function resolvingWildlifeNearestGroundFloraTarget(
   blackboard: DefiningWildlifeBehaviorBlackboard
 ): { readonly groundItemId: string; readonly distanceGrid: number } | null {
@@ -535,17 +545,61 @@ function resolvingWildlifeNearestGroundFloraTarget(
     ? resolvingWildlifeNearestEdibleGroundGrass(blackboard.instance.position)
     : null;
 
-  if (!nearestFlower) {
-    return nearestGrass;
+  const mayForageShrub =
+    checkingWildlifeSpeciesMayForageGroundShrubs(blackboard.species) &&
+    checkingWildlifeDriveIsAtLeastHungry(
+      blackboard.instance.hungerState.driveLevel
+    );
+
+  const nearestShrub = mayForageShrub
+    ? resolvingWildlifeNearestEdibleGroundShrub(blackboard.instance.position)
+    : null;
+
+  type GroundFloraCandidate = {
+    readonly groundItemId: string;
+    readonly distanceGrid: number;
+  };
+
+  const candidates: GroundFloraCandidate[] = [];
+
+  if (nearestFlower) {
+    candidates.push({
+      groundItemId: nearestFlower.groundItemId,
+      distanceGrid: nearestFlower.distanceGrid,
+    });
   }
 
-  if (!nearestGrass) {
-    return nearestFlower;
+  if (nearestGrass) {
+    candidates.push({
+      groundItemId: nearestGrass.groundItemId,
+      distanceGrid: nearestGrass.distanceGrid,
+    });
   }
 
-  return nearestGrass.distanceGrid < nearestFlower.distanceGrid
-    ? nearestGrass
-    : nearestFlower;
+  if (nearestShrub) {
+    candidates.push({
+      groundItemId: nearestShrub.groundItemId,
+      distanceGrid:
+        nearestShrub.distanceGrid *
+        DEFINING_WILDLIFE_GROUND_SHRUB_FLORA_DISTANCE_BIAS,
+    });
+  }
+
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  let nearest = candidates[0];
+
+  for (let index = 1; index < candidates.length; index += 1) {
+    const candidate = candidates[index];
+
+    if (candidate.distanceGrid < nearest.distanceGrid) {
+      nearest = candidate;
+    }
+  }
+
+  return nearest;
 }
 
 export function computingWildlifeSelectedGroundFoodItemId(

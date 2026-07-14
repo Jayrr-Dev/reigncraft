@@ -50,6 +50,24 @@ import { RenderingWorldPlazaEditModePlotCapacityMetric } from '@/components/worl
 import { RenderingWorldPlazaHudToolbarCraftModePanel } from '@/components/world/building/components/renderingWorldPlazaHudToolbarCraftModePanel';
 import { RenderingWorldPlazaPlacedBlockGroundShadows } from '@/components/world/building/components/renderingWorldPlazaPlacedBlockGroundShadows';
 import { RenderingWorldPlazaPlacedBlocks } from '@/components/world/building/components/renderingWorldPlazaPlacedBlocks';
+import { RenderingWorldPlazaBlacksmithUtilityLayer } from '@/components/world/building/components/renderingWorldPlazaBlacksmithUtilityLayer';
+import { RenderingWorldPlazaChestInteractionLabels } from '@/components/world/chest/components/renderingWorldPlazaChestInteractionLabels';
+import { RenderingWorldPlazaChestLayer } from '@/components/world/chest/components/renderingWorldPlazaChestLayer';
+import { usingWorldPlazaChestOpenInteraction } from '@/components/world/chest/hooks/usingWorldPlazaChestOpenInteraction';
+import {
+  hydratingWorldPlazaChestInstanceStore,
+  readingWorldPlazaChestInstanceStore,
+} from '@/components/world/chest/domains/managingWorldPlazaChestInstanceStore';
+import { RenderingWorldPlazaBearTrapInteractionLabels } from '@/components/world/trap/components/renderingWorldPlazaBearTrapInteractionLabels';
+import { RenderingWorldPlazaBearTrapLayer } from '@/components/world/trap/components/renderingWorldPlazaBearTrapLayer';
+import { usingWorldPlazaBearTrapInteraction } from '@/components/world/trap/hooks/usingWorldPlazaBearTrapInteraction';
+import { usingWorldPlazaBearTrapTriggerTick } from '@/components/world/trap/hooks/usingWorldPlazaBearTrapTriggerTick';
+import {
+  hydratingWorldPlazaLocalBearTraps,
+} from '@/components/world/trap/domains/managingWorldPlazaLocalBearTraps';
+import {
+  readingWorldPlazaBearTrapInstanceStore,
+} from '@/components/world/trap/domains/managingWorldPlazaBearTrapInstanceStore';
 import { RenderingWorldPlazaPlotBoundaries } from '@/components/world/building/components/renderingWorldPlazaPlotBoundaries';
 import {
   countingWorldBuildingOwnerOwnedPlotCount,
@@ -314,6 +332,7 @@ import { usingWorldPlazaFishingInteraction } from '@/components/world/fishing/ho
 import { usingWorldPlazaFishingProgress } from '@/components/world/fishing/hooks/usingWorldPlazaFishingProgress';
 import { RenderingWorldPlazaFlowerInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaFlowerInteractionLabels';
 import { RenderingWorldPlazaLongGrassInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaLongGrassInteractionLabels';
+import { RenderingWorldPlazaShrubInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaShrubInteractionLabels';
 import { RenderingWorldPlazaPebbleInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaPebbleInteractionLabels';
 import { RenderingWorldPlazaRockInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaRockInteractionLabels';
 import { RenderingWorldPlazaTreeInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaTreeInteractionLabels';
@@ -332,6 +351,10 @@ import {
   pickingWorldPlazaLocalFlower,
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import { formattingWorldPlazaPickedPebbleTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
+import {
+  formattingWorldPlazaPickedShrubTileKey,
+  pickingWorldPlazaLocalShrub,
+} from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
 import { markingWorldPlazaLocalTreeStumpStudied } from '@/components/world/harvest/domains/managingWorldPlazaLocalStudiedTreeStumps';
 import { registeringWorldPlazaChoppedTreesVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup';
 import {
@@ -341,6 +364,7 @@ import {
 import { registeringWorldPlazaMinedRocksVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaMinedRocksVisualLayerLookup';
 import { registeringWorldPlazaPickedFlowersLookup } from '@/components/world/harvest/domains/registeringWorldPlazaPickedFlowersLookup';
 import { registeringWorldPlazaPickedPebblesLookup } from '@/components/world/harvest/domains/registeringWorldPlazaPickedPebblesLookup';
+import { registeringWorldPlazaPickedShrubsLookup } from '@/components/world/harvest/domains/registeringWorldPlazaPickedShrubsLookup';
 import { usingWorldPlazaChoppedTrees } from '@/components/world/harvest/hooks/usingWorldPlazaChoppedTrees';
 import { usingWorldPlazaClearedLongGrass } from '@/components/world/harvest/hooks/usingWorldPlazaClearedLongGrass';
 import { usingWorldPlazaFlowerPickInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaFlowerPickInteraction';
@@ -359,8 +383,14 @@ import {
   usingWorldPlazaPickedFlowers,
 } from '@/components/world/harvest/hooks/usingWorldPlazaPickedFlowers';
 import { usingWorldPlazaPickedPebbles } from '@/components/world/harvest/hooks/usingWorldPlazaPickedPebbles';
+import { usingWorldPlazaPickedShrubs } from '@/components/world/harvest/hooks/usingWorldPlazaPickedShrubs';
 import { usingWorldPlazaRockMineInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaRockMineInteraction';
 import { usingWorldPlazaRockMineProgress } from '@/components/world/harvest/hooks/usingWorldPlazaRockMineProgress';
+import {
+  DEFINING_WORLD_PLAZA_PICKED_SHRUBS_QUERY_KEY_ROOT,
+  usingWorldPlazaShrubPickInteraction,
+} from '@/components/world/harvest/hooks/usingWorldPlazaShrubPickInteraction';
+import { usingWorldPlazaShrubPickProgress } from '@/components/world/harvest/hooks/usingWorldPlazaShrubPickProgress';
 import { usingWorldPlazaTreeChopInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaTreeChopInteraction';
 import { usingWorldPlazaTreeChopProgress } from '@/components/world/harvest/hooks/usingWorldPlazaTreeChopProgress';
 import { usingWorldPlazaTreeStumpStudyProgress } from '@/components/world/harvest/hooks/usingWorldPlazaTreeStumpStudyProgress';
@@ -443,13 +473,16 @@ import {
 } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerCursorConstants';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
 import { formattingWorldPlazaInteractableLongGrassSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableLongGrassSelectionKey';
+import { formattingWorldPlazaInteractableShrubSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableShrubSelectionKey';
 import {
   clearingWorldPlazaInteractableBlockClickSelection,
   selectingWorldPlazaFarmlandTileForClickAction,
   selectingWorldPlazaFishingTileForClickAction,
   selectingWorldPlazaInteractableBlockForClickAction,
+  selectingWorldPlazaInteractableChestForClickAction,
   selectingWorldPlazaInteractableFlowerForClickAction,
   selectingWorldPlazaInteractableLongGrassForClickAction,
+  selectingWorldPlazaInteractableShrubForClickAction,
   selectingWorldPlazaInteractablePebbleForClickAction,
   selectingWorldPlazaInteractableRockForClickAction,
   selectingWorldPlazaInteractableTreeForClickAction,
@@ -521,6 +554,7 @@ import {
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
 import {
+  listingNpcPreyTargets,
   readingNpcInstanceStore,
   RenderingNpcInteractionLabels,
   RenderingNpcLayer,
@@ -574,6 +608,10 @@ import {
   checkingWildlifeGroundGrassOptimisticIsCleared,
   registeringWildlifeGroundGrassBridge,
 } from '@/components/world/wildlife/domains/managingWildlifeGroundGrassBridge';
+import {
+  checkingWildlifeGroundShrubOptimisticIsPicked,
+  registeringWildlifeGroundShrubBridge,
+} from '@/components/world/wildlife/domains/managingWildlifeGroundShrubBridge';
 import {
   clearingWildlifeInstanceStore,
   gettingWildlifeInstance,
@@ -1116,6 +1154,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE];
   const isNpcGenerationEnabled =
     generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.NPCS];
+  const isChestGenerationEnabled =
+    generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.CHESTS];
+  const isTrapGenerationEnabled =
+    generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TRAPS];
   const isWildlifeSpeechBubblesEnabled =
     generationFeatureFlags[
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_SPEECH_BUBBLES
@@ -2011,6 +2053,31 @@ function RenderingWorldPlazaPixiSceneConnected({
   const clearedLongGrassByTileKeyRef = useRef(clearedLongGrassStateByTileKey);
   clearedLongGrassByTileKeyRef.current = clearedLongGrassStateByTileKey;
 
+  const { pickedShrubStateByTileKey } = usingWorldPlazaPickedShrubs({
+    enabled: isLocalGameplayEnabled,
+    localPersistenceOwnerId,
+  });
+  const pickedShrubsByTileKeyRef = useRef(pickedShrubStateByTileKey);
+  pickedShrubsByTileKeyRef.current = pickedShrubStateByTileKey;
+
+  const chestStoreRef = useRef(readingWorldPlazaChestInstanceStore());
+  const bearTrapStoreRef = useRef(readingWorldPlazaBearTrapInstanceStore());
+
+  useEffect(() => {
+    chestStoreRef.current = hydratingWorldPlazaChestInstanceStore(
+      localPersistenceOwnerId
+    );
+  }, [localPersistenceOwnerId]);
+
+  useEffect(() => {
+    if (!localPersistenceOwnerId) {
+      return;
+    }
+
+    hydratingWorldPlazaLocalBearTraps(localPersistenceOwnerId);
+    bearTrapStoreRef.current = readingWorldPlazaBearTrapInstanceStore();
+  }, [localPersistenceOwnerId]);
+
   useEffect(() => {
     registeringWorldPlazaPickedFlowersLookup(
       (tileX, tileY) =>
@@ -2054,6 +2121,21 @@ function RenderingWorldPlazaPixiSceneConnected({
       registeringWorldPlazaSearchedLongGrassLookup(null);
     };
   }, [clearedLongGrassStateByTileKey]);
+
+  useEffect(() => {
+    registeringWorldPlazaPickedShrubsLookup((tileX, tileY) =>
+      Boolean(
+        pickedShrubStateByTileKey.get(
+          formattingWorldPlazaPickedShrubTileKey(tileX, tileY)
+        )?.isPicked ||
+          checkingWildlifeGroundShrubOptimisticIsPicked(tileX, tileY)
+      )
+    );
+
+    return () => {
+      registeringWorldPlazaPickedShrubsLookup(null);
+    };
+  }, [pickedShrubStateByTileKey]);
 
   useEffect(() => {
     if (!isLocalGameplayEnabled) {
@@ -2159,6 +2241,37 @@ function RenderingWorldPlazaPixiSceneConnected({
 
     return () => {
       registeringWildlifeGroundGrassBridge(null);
+    };
+  }, [isLocalGameplayEnabled, localPersistenceOwnerId, queryClient]);
+
+  useEffect(() => {
+    if (!isLocalGameplayEnabled || !localPersistenceOwnerId) {
+      registeringWildlifeGroundShrubBridge(null);
+      return;
+    }
+
+    registeringWildlifeGroundShrubBridge({
+      consumeGroundShrub: (tileX, tileY, consumerPosition) => {
+        const pickResult = pickingWorldPlazaLocalShrub(localPersistenceOwnerId, {
+          tileX,
+          tileY,
+          playerX: consumerPosition.x,
+          playerY: consumerPosition.y,
+        });
+
+        if (pickResult.outcome !== 'picked') {
+          return false;
+        }
+
+        void queryClient.invalidateQueries({
+          queryKey: [DEFINING_WORLD_PLAZA_PICKED_SHRUBS_QUERY_KEY_ROOT],
+        });
+        return true;
+      },
+    });
+
+    return () => {
+      registeringWildlifeGroundShrubBridge(null);
     };
   }, [isLocalGameplayEnabled, localPersistenceOwnerId, queryClient]);
 
@@ -2303,6 +2416,27 @@ function RenderingWorldPlazaPixiSceneConnected({
     []
   );
 
+  const selectingProceduralShrubForInteractionLabel = useCallback(
+    (tileX: number, tileY: number): void => {
+      selectingWorldPlazaInteractableShrubForClickAction(
+        selectedInteractableBlockKeysRef,
+        tileX,
+        tileY
+      );
+    },
+    []
+  );
+
+  const selectingWorldChestForInteractionLabel = useCallback(
+    (chestId: string): void => {
+      selectingWorldPlazaInteractableChestForClickAction(
+        selectedInteractableBlockKeysRef,
+        chestId
+      );
+    },
+    []
+  );
+
   const clearingInteractableBlockClickSelection = useCallback((): void => {
     // Proximity mode owns the label set each overlay frame; miss-clear would flash.
     // Hide Actions restores click-to-show, so miss should dismiss the popover.
@@ -2334,6 +2468,10 @@ function RenderingWorldPlazaPixiSceneConnected({
         selectingProceduralFlowerForInteractionLabel,
       onProceduralLongGrassPopoverSelect:
         selectingProceduralLongGrassForInteractionLabel,
+      onProceduralShrubPopoverSelect: selectingProceduralShrubForInteractionLabel,
+      onWorldChestPopoverSelect: isChestGenerationEnabled
+        ? selectingWorldChestForInteractionLabel
+        : undefined,
       handlers: {
         [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE]:
           selectingCampfireForInteractionLabel,
@@ -2877,6 +3015,78 @@ function RenderingWorldPlazaPixiSceneConnected({
     ]
   );
 
+  const { validatingShrubPickStart, completingShrubPick } =
+    usingWorldPlazaShrubPickInteraction({
+      localPersistenceOwnerId,
+      pickedShrubStateByTileKey,
+      playerPositionRef,
+      inventoryState,
+      updatingInventoryState,
+      showingGameplayHudToast,
+    });
+
+  const { openingChest } = usingWorldPlazaChestOpenInteraction({
+    localPersistenceOwnerId,
+    playerPositionRef,
+    inventoryState,
+    updatingInventoryState,
+    showingGameplayHudToast,
+  });
+
+  const { handlingBearTrapAction } = usingWorldPlazaBearTrapInteraction({
+    localPersistenceOwnerId,
+    playerPositionRef,
+    inventoryState,
+    updatingInventoryState,
+    showingGameplayHudToast,
+  });
+
+  const completingShrubPickRef = useRef(completingShrubPick);
+  completingShrubPickRef.current = completingShrubPick;
+
+  const handlingShrubPickComplete = useCallback(
+    (entry: Parameters<typeof completingShrubPick>[0]): void => {
+      selectedInteractableBlockKeysRef.current.delete(
+        formattingWorldPlazaInteractableShrubSelectionKey(
+          entry.tileX,
+          entry.tileY
+        )
+      );
+      void completingShrubPickRef.current(entry);
+    },
+    []
+  );
+
+  const {
+    snapshot: shrubPickProgressSnapshot,
+    progressRatioRef: shrubPickProgressRatioRef,
+    startingShrubPick,
+  } = usingWorldPlazaShrubPickProgress({
+    playerPositionRef,
+    selectedInteractableBlockKeysRef,
+    avatarToolActionRef: localAvatarToolActionRef,
+    onPickComplete: handlingShrubPickComplete,
+  });
+
+  const handlingShrubPickInteraction = useCallback(
+    (entry: Parameters<typeof validatingShrubPickStart>[0]): void => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return;
+      }
+
+      if (!validatingShrubPickStart(entry)) {
+        return;
+      }
+
+      const didStart = startingShrubPick(entry);
+
+      if (!didStart) {
+        showingGameplayHudToast('Already picking this shrub.');
+      }
+    },
+    [showingGameplayHudToast, startingShrubPick, validatingShrubPickStart]
+  );
+
   const hasEquippedFishrod =
     equipment.checkingEquippedToolKind('fishrod').hasToolKind;
   const hasEquippedHoe = equipment.checkingEquippedToolKind('hoe').hasToolKind;
@@ -3206,6 +3416,13 @@ function RenderingWorldPlazaPixiSceneConnected({
     playerPositionRef,
   });
 
+  usingWorldPlazaBearTrapTriggerTick({
+    playerPositionRef,
+    localPersistenceOwnerId,
+    applyBleedRef,
+    toggleBuffRef,
+  });
+
   useEffect(() => {
     showingCraftRefundFloatsRef.current = (recipeDefinition) => {
       showingWorldPlazaCraftRecipeRefundFloatFeedback(
@@ -3218,13 +3435,6 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const handlingRemovedCraftedBlock = useCallback(
     (removedBlock: DefiningWorldBuildingPlacedBlock): void => {
-      if (
-        removedBlock.definitionId !==
-        DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE
-      ) {
-        return;
-      }
-
       const recipeId = craftedCommittedBlockRecipeByBlockIdRef.current.get(
         removedBlock.blockId
       );
@@ -3417,6 +3627,10 @@ function RenderingWorldPlazaPixiSceneConnected({
       selectedCharacterEngineDefinition.presentation.skinId
     );
 
+  const npcStoreRef = useRef(readingNpcInstanceStore());
+  const npcPreyTargetsRef = useRef(listingNpcPreyTargets());
+  npcPreyTargetsRef.current = listingNpcPreyTargets(npcStoreRef.current);
+
   const { wildlifeStoreRef, tickConfigRef, applyWildlifeDamageRef } =
     usingWildlifeSimulation({
       enabled: isLocalGameplayEnabled && isWildlifeGenerationEnabled,
@@ -3443,6 +3657,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       wildlifeDamagedPlayerAtMsByInstanceIdRef,
       meatDropContextRef: wildlifeMeatDropContextRef,
       playerTransformWildlifeSpeciesIdRef,
+      npcPreyTargetsRef,
       onPlayerHitByWildlife: (hit) => {
         wildlifeDamagedPlayerAtMsByInstanceIdRef.current.set(
           hit.instanceId,
@@ -3554,7 +3769,6 @@ function RenderingWorldPlazaPixiSceneConnected({
     closingPetNameDialog,
   } = usingWildlifePetModalState();
 
-  const npcStoreRef = useRef(readingNpcInstanceStore());
   const {
     activeNpcId,
     activePanel,
@@ -3918,6 +4132,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     pickedPebbleStateByTileKeyRef: pickedPebblesByTileKeyRef,
     pickedFlowerStateByTileKeyRef: pickedFlowersByTileKeyRef,
     clearedLongGrassStateByTileKeyRef: clearedLongGrassByTileKeyRef,
+    pickedShrubStateByTileKeyRef: pickedShrubsByTileKeyRef,
     farmlandByTileKeyRef,
     wildlifeStoreRef,
     hasEquippedFishrodRef,
@@ -6763,6 +6978,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               pickedPebblesByTileKeyRef={pickedPebblesByTileKeyRef}
               pickedFlowersByTileKeyRef={pickedFlowersByTileKeyRef}
               clearedLongGrassByTileKeyRef={clearedLongGrassByTileKeyRef}
+              pickedShrubsByTileKeyRef={pickedShrubsByTileKeyRef}
               floorLayerRef={terrainFloorLayerRef}
               trunkLayerRef={terrainTrunkLayerRef}
               canopyLayerRef={terrainCanopyLayerRef}
@@ -6883,6 +7099,16 @@ function RenderingWorldPlazaPixiSceneConnected({
                       playerPositionRef={playerPositionRef}
                     />
                   ) : null}
+                  {isChestGenerationEnabled ? (
+                    <RenderingWorldPlazaChestLayer
+                      chestStoreRef={chestStoreRef}
+                    />
+                  ) : null}
+                  {isTrapGenerationEnabled ? (
+                    <RenderingWorldPlazaBearTrapLayer
+                      trapStoreRef={bearTrapStoreRef}
+                    />
+                  ) : null}
                   <RenderingSpiritedSpritesBetaLayer
                     storeRef={spiritedSpritesBetaStoreRef}
                   />
@@ -6893,6 +7119,9 @@ function RenderingWorldPlazaPixiSceneConnected({
                         ? DEFINING_WORLD_BUILDING_CLAIM_MODE_PLACED_BLOCK_ALPHA
                         : 1
                     }
+                  />
+                  <RenderingWorldPlazaBlacksmithUtilityLayer
+                    placedBlocks={activeScenePlacedBlocks}
                   />
                   <RenderingWorldPlazaClaimModePlotOwnershipOverlay
                     isVisible={isClaimModeActive}
@@ -7407,6 +7636,37 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraWorldZoomRef={cameraWorldZoomRef}
                 onSearchLongGrass={handlingLongGrassSearchInteraction}
               />
+              <RenderingWorldPlazaShrubInteractionLabels
+                selectedInteractableBlockKeysRef={
+                  selectedInteractableBlockKeysRef
+                }
+                pickedShrubStateByTileKeyRef={pickedShrubsByTileKeyRef}
+                timedInteractionProgressSnapshot={shrubPickProgressSnapshot}
+                timedInteractionProgressRatioRef={shrubPickProgressRatioRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                onPickShrub={handlingShrubPickInteraction}
+              />
+              {isChestGenerationEnabled ? (
+                <RenderingWorldPlazaChestInteractionLabels
+                  selectedInteractableBlockKeysRef={
+                    selectedInteractableBlockKeysRef
+                  }
+                  cameraOffsetRef={cameraOffsetRef}
+                  cameraWorldZoomRef={cameraWorldZoomRef}
+                  onOpenChest={openingChest}
+                />
+              ) : null}
+              {isTrapGenerationEnabled ? (
+                <RenderingWorldPlazaBearTrapInteractionLabels
+                  selectedInteractableBlockKeysRef={
+                    selectedInteractableBlockKeysRef
+                  }
+                  cameraOffsetRef={cameraOffsetRef}
+                  cameraWorldZoomRef={cameraWorldZoomRef}
+                  onTrapAction={handlingBearTrapAction}
+                />
+              ) : null}
               <RenderingWorldPlazaFishingInteractionLabels
                 playerPositionRef={playerPositionRef}
                 selectedInteractableBlockKeysRef={

@@ -8,6 +8,7 @@
 
 import { Icon } from '@/components/ui/icon';
 import { RenderingWorldPlazaCampfireRecipePreview } from '@/components/world/building/components/renderingWorldPlazaCampfireRecipePreview';
+import { RenderingWorldPlazaCraftModeRecipeSpriteSheetPreview } from '@/components/world/building/components/renderingWorldPlazaCraftModeRecipeSpriteSheetPreview';
 import type { DefiningWorldPlazaCraftModeRecipeDefinition } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 
 export type RenderingWorldPlazaCraftModeRecipeSpreadLeftPageProps = {
@@ -27,6 +28,10 @@ export function RenderingWorldPlazaCraftModeRecipeSpreadLeftPage({
       </h3>
       {recipeDefinition.recipeVisual.visualKind === 'world-plaza-campfire' ? (
         <RenderingWorldPlazaCampfireRecipePreview />
+      ) : recipeDefinition.recipeVisual.visualKind === 'sprite-sheet' ? (
+        <RenderingWorldPlazaCraftModeRecipeSpriteSheetPreview
+          spriteSheetIcon={recipeDefinition.recipeVisual.spriteSheetIcon}
+        />
       ) : (
         <Icon
           icon={recipeDefinition.recipeVisual.recipeEmblemIconifyIcon}
