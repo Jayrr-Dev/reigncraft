@@ -62,3 +62,7 @@ export const LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PAGE_ATTACHED_TOAST =
 /** Toast when the player tries to attach a page they already have. */
 export const LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PAGE_ALREADY_ATTACHED_TOAST =
   'That recipe is already in your cookbook.' as const;
+
+/** Toast when Craft is pressed while another cookbook craft is still running. */
+export const LABELING_WORLD_PLAZA_CRAFT_MODE_ALREADY_CRAFTING_TOAST =
+  'Already crafting something.' as const;

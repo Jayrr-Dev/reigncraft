@@ -350,7 +350,7 @@ import { usingWorldPlazaFarmingProgress } from '@/components/world/farming/hooks
 import { RenderingWorldPlazaCampfireAmbience } from '@/components/world/fire/components/renderingWorldPlazaCampfireAmbience';
 import { RenderingWorldPlazaCampfireInteractionLabels } from '@/components/world/fire/components/renderingWorldPlazaCampfireInteractionLabels';
 import { RenderingWorldPlazaOreSmeltingInteractionLabels } from '@/components/world/crafting/components/renderingWorldPlazaOreSmeltingInteractionLabels';
-import { RenderingWorldPlazaOreSmeltingCraftProgressHud } from '@/components/world/crafting/components/renderingWorldPlazaOreSmeltingCraftProgressHud';
+import { RenderingWorldPlazaCraftModeTimedCraftProgressHud } from '@/components/world/crafting/components/renderingWorldPlazaCraftModeTimedCraftProgressHud';
 import { resolvingWorldPlazaOreSmeltingStationAnchorBlock } from '@/components/world/crafting/domains/resolvingWorldPlazaOreSmeltingStationAnchorBlock';
 import { RenderingWorldPlazaFireLayer } from '@/components/world/fire/components/renderingWorldPlazaFireLayer';
 import { RenderingWorldPlazaLavaAmbience } from '@/components/world/fire/components/renderingWorldPlazaLavaAmbience';
