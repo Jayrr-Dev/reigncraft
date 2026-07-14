@@ -161,6 +161,9 @@ export function syncingWildlifePetInstanceVitalsToRoster(
     ) &&
     existingRecord.equippedSkillId === petBond.equippedSkillId &&
     existingRecord.soulsaveConsumed === petBond.soulsaveConsumed &&
+    existingRecord.hasNeglectedBadge ===
+      (petBond.hasNeglectedBadge === true) &&
+    existingRecord.isNeglectHunting === (petBond.isNeglectHunting === true) &&
     existingRecord.weaponItem === petBond.weaponItem &&
     existingRecord.armorItem === petBond.armorItem &&
     checkingWildlifePetVitalsPositionNearlyEqual(
@@ -184,6 +187,8 @@ export function syncingWildlifePetInstanceVitalsToRoster(
     learnedSkillIds: nextLearnedSkillIds,
     equippedSkillId: petBond.equippedSkillId,
     soulsaveConsumed: petBond.soulsaveConsumed,
+    hasNeglectedBadge: petBond.hasNeglectedBadge === true,
+    isNeglectHunting: petBond.isNeglectHunting === true,
     weaponItem: petBond.weaponItem,
     armorItem: petBond.armorItem,
     lastKnownX: instance.position.x,

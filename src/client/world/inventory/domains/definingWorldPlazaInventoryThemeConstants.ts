@@ -159,16 +159,17 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_MIN_HIT_PX = 44 as const;
 
 /** Vertical stack of compact page arrows beside the single inventory row. */
 export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_STACK_CLASS_NAME =
-  'relative flex shrink-0 flex-col items-center justify-center overflow-visible' as const;
+  'relative flex shrink-0 flex-col items-start justify-center overflow-visible' as const;
 
 /**
  * Expanded hit wrapper for page arrows (transparent; size via viewport styles).
  * Keeps layout footprint via negative margin while the tap box meets min hit px.
+ * Face is start-aligned so overflow grows only past the shell's outer edge.
  */
 export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_CLASS_NAME =
-  'group relative flex shrink-0 touch-manipulation items-center justify-center border-0 bg-transparent p-0 text-poster-orange-deep disabled:cursor-not-allowed disabled:opacity-35' as const;
+  'group relative flex shrink-0 touch-manipulation items-center justify-start border-0 bg-transparent p-0 text-poster-orange-deep disabled:cursor-not-allowed disabled:opacity-35' as const;
 
-/** Solid wood-framed parchment face centered inside the hit wrapper. */
+/** Solid wood-framed parchment face start-aligned inside the hit wrapper. */
 export const STYLING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_BUTTON_FACE_CLASS_NAME =
   `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventorySlot} pointer-events-none flex items-center justify-center transition-[filter,box-shadow,opacity] group-hover:brightness-105 group-disabled:group-hover:brightness-100` as const;
 

@@ -58,7 +58,8 @@ export function applyingWildlifePetPettingLoyalty({
     instance.petBond ?? creatingWildlifePetProvisionalBond(ownerUserId);
   const loyaltyResult = applyingWildlifePetLoyaltyGrant(
     currentPetBond.loyalty,
-    DEFINING_WILDLIFE_PET_PETTING_LOYALTY_GRANT
+    DEFINING_WILDLIFE_PET_PETTING_LOYALTY_GRANT,
+    { hasNeglectedBadge: currentPetBond.hasNeglectedBadge === true }
   );
   const wasPersistent = currentPetBond.isPersistent;
   const isPersistentNow =

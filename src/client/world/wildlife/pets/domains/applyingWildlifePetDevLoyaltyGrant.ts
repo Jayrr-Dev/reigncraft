@@ -91,7 +91,8 @@ export function applyingWildlifePetDevLoyaltyGrant({
   );
   const loyaltyResult = applyingWildlifePetLoyaltyGrant(
     currentPetBond.loyalty,
-    delta
+    delta,
+    { hasNeglectedBadge: currentPetBond.hasNeglectedBadge === true }
   );
   const wasPersistent = currentPetBond.isPersistent;
   const isPersistentNow =

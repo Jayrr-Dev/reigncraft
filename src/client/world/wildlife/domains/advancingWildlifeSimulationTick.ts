@@ -173,6 +173,7 @@ import { formattingWildlifeIntentKey } from '@/components/world/wildlife/domains
 import { listingWildlifeStalkPackmatesTargetingPrey } from '@/components/world/wildlife/domains/listingWildlifeStalkPackmatesTargetingPrey';
 import { applyingWildlifePetBondAfterDocileFollow } from '@/components/world/wildlife/pets/domains/applyingWildlifePetBondAfterDocileFollow';
 import { applyingWildlifePetCommandTick } from '@/components/world/wildlife/pets/domains/applyingWildlifePetCommandTick';
+import { applyingWildlifePetHungerLoyaltyNeglectTick } from '@/components/world/wildlife/pets/domains/applyingWildlifePetHungerLoyaltyNeglectTick';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import {
   despawningWildlifeInstancesBeyondRadius,
@@ -1806,6 +1807,12 @@ export function advancingWildlifeSimulationTick({
           ownerUserId: playerUserId,
           nowMs,
         });
+        nextInstance = applyingWildlifePetHungerLoyaltyNeglectTick({
+          instance: nextInstance,
+          ownerUserId: playerUserId,
+          deltaSeconds: thinkElapsedSeconds,
+          nowMs,
+        }).instance;
         nextInstance = applyingWildlifePetCommandTick({
           instance: nextInstance,
           playerPosition,

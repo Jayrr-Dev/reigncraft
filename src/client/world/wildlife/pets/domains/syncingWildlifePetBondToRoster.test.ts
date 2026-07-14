@@ -28,6 +28,8 @@ function buildingRosterRecord(
     learnedSkillIds: [],
     equippedSkillId: null,
     soulsaveConsumed: false,
+    hasNeglectedBadge: false,
+    isNeglectHunting: false,
     lastKnownX: 10,
     lastKnownY: 20,
     lastKnownLayer: 1,

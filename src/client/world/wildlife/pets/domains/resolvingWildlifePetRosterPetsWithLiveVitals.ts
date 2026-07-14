@@ -46,7 +46,7 @@ export function formattingWildlifePetRosterLiveVitalsFingerprint(
     const staminaPercent =
       pet.staminaRatio === null ? '' : Math.round(pet.staminaRatio * 100);
 
-    fingerprint += `${pet.petId}:${pet.healthCurrent ?? ''}:${pet.isActive ? 1 : 0}:${pet.loyalty}:${hungerPercent}:${staminaPercent}:${pet.deathCauseKind ?? ''};`;
+    fingerprint += `${pet.petId}:${pet.healthCurrent ?? ''}:${pet.isActive ? 1 : 0}:${pet.loyalty}:${hungerPercent}:${staminaPercent}:${pet.hasNeglectedBadge ? 1 : 0}:${pet.isNeglectHunting ? 1 : 0}:${pet.deathCauseKind ?? ''};`;
   }
 
   return fingerprint;
@@ -108,6 +108,11 @@ export function resolvingWildlifePetRosterRecordWithLiveVitals(
       record.staminaRatio,
       instance.staminaState.staminaRatio
     ) &&
+    record.loyalty === (instance.petBond?.loyalty ?? record.loyalty) &&
+    record.hasNeglectedBadge ===
+      (instance.petBond?.hasNeglectedBadge === true) &&
+    record.isNeglectHunting ===
+      (instance.petBond?.isNeglectHunting === true) &&
     record.deathCauseKind === null
   ) {
     return record;
@@ -118,6 +123,9 @@ export function resolvingWildlifePetRosterRecordWithLiveVitals(
     healthCurrent: instance.healthState.currentHealth,
     hungerRatio: instance.hungerState.hungerRatio,
     staminaRatio: instance.staminaState.staminaRatio,
+    loyalty: instance.petBond?.loyalty ?? record.loyalty,
+    hasNeglectedBadge: instance.petBond?.hasNeglectedBadge === true,
+    isNeglectHunting: instance.petBond?.isNeglectHunting === true,
     lastKnownX: instance.position.x,
     lastKnownY: instance.position.y,
     lastKnownLayer: instance.position.layer ?? null,

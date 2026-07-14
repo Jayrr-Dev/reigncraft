@@ -45,6 +45,8 @@ type ParsingPlazaSinglePlayerSavePetRecordRaw = {
   learnedSkillIds?: unknown;
   equippedSkillId?: unknown;
   soulsaveConsumed?: unknown;
+  hasNeglectedBadge?: unknown;
+  isNeglectHunting?: unknown;
   lastKnownX?: unknown;
   lastKnownY?: unknown;
   lastKnownLayer?: unknown;
@@ -302,6 +304,8 @@ export function parsingPlazaSinglePlayerSavePetRecord(
       recordRaw.equippedSkillId
     ),
     soulsaveConsumed: recordRaw.soulsaveConsumed === true,
+    hasNeglectedBadge: recordRaw.hasNeglectedBadge === true,
+    isNeglectHunting: recordRaw.isNeglectHunting === true,
     lastKnownX: parsingPlazaSinglePlayerSavePetNullableFiniteNumber(
       recordRaw.lastKnownX
     ),

@@ -87,12 +87,21 @@ export function applyingWildlifePetOwnerFeed({
     computingWildlifePetLoyaltyFromRestoredPoints(restoredPoints);
   const loyaltyGrant = applyingWildlifePetLoyaltyGrant(
     petBond.loyalty,
-    loyaltyPoints
+    loyaltyPoints,
+    { hasNeglectedBadge: petBond.hasNeglectedBadge === true }
   );
 
   const withBond: DefiningWildlifeInstance = {
     ...nextInstance,
-    petBond: { ...petBond, loyalty: loyaltyGrant.loyalty },
+    petBond: {
+      ...petBond,
+      loyalty: loyaltyGrant.loyalty,
+      // Owner feed clears the lasting Neglected stigma.
+      hasNeglectedBadge: false,
+      // Fed pets stop the forage abandon and can resume commands next tick.
+      isNeglectHunting: false,
+      neglectAbandonAtMs: null,
+    },
   };
 
   return {

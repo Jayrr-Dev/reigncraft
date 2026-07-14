@@ -45,7 +45,8 @@ export function applyingWildlifePetCommandTick({
     !playerPosition ||
     !playerUserId ||
     petBond.ownerUserId !== playerUserId ||
-    !checkingWildlifePetAllied(instance)
+    !checkingWildlifePetAllied(instance) ||
+    petBond.isNeglectHunting === true
   ) {
     return instance;
   }

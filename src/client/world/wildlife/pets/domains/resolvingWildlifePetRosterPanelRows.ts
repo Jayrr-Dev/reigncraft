@@ -14,6 +14,10 @@ import {
   LABELING_WILDLIFE_PET_ROSTER_STATUS_DECEASED,
   LABELING_WILDLIFE_PET_ROSTER_UNNAMED,
 } from '@/components/world/wildlife/pets/domains/definingWildlifePetRosterPanelConstants';
+import {
+  LABELING_WILDLIFE_PET_NEGLECTED_BADGE,
+  LABELING_WILDLIFE_PET_NEGLECT_HUNTING_STATUS,
+} from '@/components/world/wildlife/pets/domains/definingWildlifePetHungerLoyaltyNeglectConstants';
 import type { DefiningWildlifePetPersistedRecord } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
 import {
   checkingWildlifePetHasCapability,
@@ -31,6 +35,8 @@ export type ResolvingWildlifePetRosterPanelRow = {
   loyaltyText: string;
   /** Compact hunger label once Familiar (`hungerUi`); null when locked or unknown. */
   hungerText: string | null;
+  /** Neglected stigma label; null when the companion has no badge. */
+  neglectedBadgeText: string | null;
   /** In-game days since the companion was acquired. */
   daysText: string;
   /** How they died; only set for deceased companions. */
@@ -135,6 +141,14 @@ export function resolvingWildlifePetRosterPanelRows(
         : showsHunger
           ? 'Hunger —'
           : null;
+    const neglectedBadgeText =
+      !isDeceased && record.hasNeglectedBadge
+        ? record.isNeglectHunting
+          ? `${LABELING_WILDLIFE_PET_NEGLECTED_BADGE} · ${LABELING_WILDLIFE_PET_NEGLECT_HUNTING_STATUS}`
+          : LABELING_WILDLIFE_PET_NEGLECTED_BADGE
+        : !isDeceased && record.isNeglectHunting
+          ? LABELING_WILDLIFE_PET_NEGLECT_HUNTING_STATUS
+          : null;
 
     rows.push({
       petId: record.petId,
@@ -149,6 +163,7 @@ export function resolvingWildlifePetRosterPanelRows(
       healthText,
       loyaltyText: `${tier.displayName} · ${record.loyalty}`,
       hungerText,
+      neglectedBadgeText,
       daysText: resolvingWildlifePetRosterPanelDaysText(
         record.acquiredAtMs,
         nowMs

@@ -73,6 +73,10 @@ export type PlazaSinglePlayerSavePetRecord = {
   learnedSkillIds: readonly string[];
   equippedSkillId: string | null;
   soulsaveConsumed: boolean;
+  /** Lasting stigma after prolonged hunger abandon; halves gains, worsens losses. */
+  hasNeglectedBadge: boolean;
+  /** True while the companion left the owner trail to forage after neglect. */
+  isNeglectHunting: boolean;
   lastKnownX: number | null;
   lastKnownY: number | null;
   lastKnownLayer: number | null;

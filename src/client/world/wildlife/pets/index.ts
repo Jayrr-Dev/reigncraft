@@ -15,8 +15,15 @@ export { applyingWildlifePetCuriousFollowGrant } from '@/components/world/wildli
 
 export {
   applyingWildlifePetLoyaltyGrant,
+  type ApplyingWildlifePetLoyaltyGrantOptions,
   type ApplyingWildlifePetLoyaltyGrantResult,
 } from '@/components/world/wildlife/pets/domains/applyingWildlifePetLoyaltyGrant';
+
+export {
+  applyingWildlifePetHungerLoyaltyNeglectTick,
+  type ApplyingWildlifePetHungerLoyaltyNeglectTickParams,
+  type ApplyingWildlifePetHungerLoyaltyNeglectTickResult,
+} from '@/components/world/wildlife/pets/domains/applyingWildlifePetHungerLoyaltyNeglectTick';
 
 export { enqueueingWildlifePetLoyaltyFloatFeedback } from '@/components/world/wildlife/pets/domains/enqueueingWildlifePetLoyaltyFloatFeedback';
 
@@ -85,6 +92,22 @@ export {
   DEFINING_WILDLIFE_PET_PETTING_LOYALTY_GRANT,
   type DefiningWildlifePetLoyaltyTierDefinition,
 } from '@/components/world/wildlife/pets/domains/definingWildlifePetLoyaltyTiersRegistry';
+
+export {
+  DEFINING_WILDLIFE_PET_HUNGER_LOYALTY_LOSS_PER_IN_GAME_HOUR,
+  DEFINING_WILDLIFE_PET_NEGLECTED_LOYALTY_GAIN_MULTIPLIER,
+  DEFINING_WILDLIFE_PET_NEGLECTED_LOYALTY_LOSS_MULTIPLIER,
+  DEFINING_WILDLIFE_PET_NEGLECT_ABANDON_MAX_IN_GAME_HOURS,
+  DEFINING_WILDLIFE_PET_NEGLECT_ABANDON_MIN_IN_GAME_HOURS,
+  LABELING_WILDLIFE_PET_NEGLECTED_BADGE,
+  LABELING_WILDLIFE_PET_NEGLECT_HUNTING_STATUS,
+} from '@/components/world/wildlife/pets/domains/definingWildlifePetHungerLoyaltyNeglectConstants';
+
+export { resolvingWildlifePetLoyaltyDeltaWithNeglectedBadge } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetLoyaltyDeltaWithNeglectedBadge';
+
+export { computingWildlifePetNeglectAbandonDeadlineMs } from '@/components/world/wildlife/pets/domains/computingWildlifePetNeglectAbandonDeadlineMs';
+
+export { checkingWildlifePetNeglectAbandonDrive } from '@/components/world/wildlife/pets/domains/checkingWildlifePetNeglectAbandonDrive';
 
 export {
   DEFINING_WILDLIFE_PET_DEV_LOYALTY_GRANT_LARGE,

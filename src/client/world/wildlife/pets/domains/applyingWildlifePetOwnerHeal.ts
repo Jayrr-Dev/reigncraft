@@ -60,7 +60,8 @@ export function applyingWildlifePetOwnerHeal({
     computingWildlifePetLoyaltyFromRestoredPoints(restoredHealth);
   const loyaltyGrant = applyingWildlifePetLoyaltyGrant(
     petBond.loyalty,
-    loyaltyPoints
+    loyaltyPoints,
+    { hasNeglectedBadge: petBond.hasNeglectedBadge === true }
   );
 
   const withBond: DefiningWildlifeInstance = {

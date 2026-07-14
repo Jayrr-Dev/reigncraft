@@ -61,6 +61,10 @@ export type DefiningWildlifePetPersistedRecord = {
   learnedSkillIds: readonly string[];
   equippedSkillId: string | null;
   soulsaveConsumed: boolean;
+  /** Lasting stigma after prolonged hunger abandon; halves gains, worsens losses. */
+  hasNeglectedBadge: boolean;
+  /** True while the companion left the owner trail to forage after neglect. */
+  isNeglectHunting: boolean;
   lastKnownX: number | null;
   lastKnownY: number | null;
   lastKnownLayer: number | null;
@@ -90,4 +94,12 @@ export type DefiningWildlifePetBondState = {
   isPersistent: boolean;
   /** Anchor point for the "stay" command; null while never issued. */
   stayPoint?: DefiningWorldPlazaWorldPoint | null;
+  /** Lasting stigma after prolonged hunger abandon; halves gains, worsens losses. */
+  hasNeglectedBadge?: boolean;
+  /** True while the companion left the owner trail to forage after neglect. */
+  isNeglectHunting?: boolean;
+  /** Wall-clock ms when hungry+ abandon fires; null while not on the leave clock. */
+  neglectAbandonAtMs?: number | null;
+  /** Fractional hunger loyalty loss not yet applied as a whole point. */
+  hungerLoyaltyLossAccumulator?: number;
 };

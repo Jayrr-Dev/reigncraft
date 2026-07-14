@@ -70,7 +70,8 @@ export function applyingWildlifePetCuriousFollowGrant({
 
   const grant = applyingWildlifePetLoyaltyGrant(
     currentLoyalty,
-    DEFINING_WILDLIFE_PET_CURIOUS_FOLLOW_LOYALTY_GRANT
+    DEFINING_WILDLIFE_PET_CURIOUS_FOLLOW_LOYALTY_GRANT,
+    { hasNeglectedBadge: instance.petBond?.hasNeglectedBadge === true }
   );
 
   const nextPetBond =

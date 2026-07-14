@@ -81,6 +81,8 @@ describe('parsingWildlifePetRoster', () => {
           learnedSkillIds: [],
           equippedSkillId: null,
           soulsaveConsumed: false,
+          hasNeglectedBadge: false,
+          isNeglectHunting: false,
           lastKnownX: 1,
           lastKnownY: 2,
           lastKnownLayer: 1,

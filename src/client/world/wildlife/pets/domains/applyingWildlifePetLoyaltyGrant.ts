@@ -6,11 +6,17 @@
 
 import { DEFINING_WILDLIFE_PET_MAX_LOYALTY } from '@/components/world/wildlife/pets/domains/definingWildlifePetLoyaltyTiersRegistry';
 import type { DefiningWildlifePetLoyaltyTierId } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
+import { resolvingWildlifePetLoyaltyDeltaWithNeglectedBadge } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetLoyaltyDeltaWithNeglectedBadge';
 import { resolvingWildlifePetLoyaltyTierOrNull } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetLoyaltyTier';
+
+export type ApplyingWildlifePetLoyaltyGrantOptions = {
+  /** When true, gains are halved and losses are increased by half. */
+  hasNeglectedBadge?: boolean;
+};
 
 export type ApplyingWildlifePetLoyaltyGrantResult = {
   loyalty: number;
-  /** Actual points added after clamp (0 when already at max). */
+  /** Actual points added after clamp (negative when loyalty fell). */
   granted: number;
   previousTierId: DefiningWildlifePetLoyaltyTierId;
   nextTierId: DefiningWildlifePetLoyaltyTierId;
@@ -31,11 +37,16 @@ function clampingWildlifePetLoyalty(loyalty: number): number {
 /** Adds loyalty, clamps to 0..1000, and detects tier unlocks. */
 export function applyingWildlifePetLoyaltyGrant(
   currentLoyalty: number,
-  grant: number
+  grant: number,
+  options?: ApplyingWildlifePetLoyaltyGrantOptions
 ): ApplyingWildlifePetLoyaltyGrantResult {
   const previousLoyalty = clampingWildlifePetLoyalty(currentLoyalty);
   const previousTier = resolvingWildlifePetLoyaltyTierOrNull(previousLoyalty);
-  const loyalty = clampingWildlifePetLoyalty(previousLoyalty + grant);
+  const adjustedGrant = resolvingWildlifePetLoyaltyDeltaWithNeglectedBadge(
+    grant,
+    options?.hasNeglectedBadge === true
+  );
+  const loyalty = clampingWildlifePetLoyalty(previousLoyalty + adjustedGrant);
   const nextTier = resolvingWildlifePetLoyaltyTierOrNull(loyalty);
   const previousTierId = previousTier?.tierId ?? 'curious';
   const nextTierId = nextTier?.tierId ?? 'curious';

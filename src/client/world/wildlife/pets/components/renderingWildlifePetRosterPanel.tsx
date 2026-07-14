@@ -203,6 +203,9 @@ export function RenderingWildlifePetRosterPanel({
                   >
                     {row.healthText} · {row.loyaltyText}
                     {row.hungerText ? ` · ${row.hungerText}` : null}
+                    {row.neglectedBadgeText
+                      ? ` · ${row.neglectedBadgeText}`
+                      : null}
                     {` · ${row.daysText}`}
                   </p>
                 </div>

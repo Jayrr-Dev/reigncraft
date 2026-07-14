@@ -45,6 +45,8 @@ export function creatingWildlifePetPersistedRecord(
   const learnedSkillIds = bondState?.learnedSkillIds ?? [];
   const equippedSkillId = bondState?.equippedSkillId ?? null;
   const soulsaveConsumed = bondState?.soulsaveConsumed ?? false;
+  const hasNeglectedBadge = bondState?.hasNeglectedBadge === true;
+  const isNeglectHunting = bondState?.isNeglectHunting === true;
 
   return {
     petId: creatingWildlifePetId(bondState?.petId ?? params.petId),
@@ -63,6 +65,8 @@ export function creatingWildlifePetPersistedRecord(
     learnedSkillIds: [...learnedSkillIds],
     equippedSkillId,
     soulsaveConsumed,
+    hasNeglectedBadge,
+    isNeglectHunting,
     lastKnownX: instance.position.x,
     lastKnownY: instance.position.y,
     lastKnownLayer: instance.position.layer ?? null,
@@ -91,5 +95,9 @@ export function creatingWildlifePetBondStateFromPersistedRecord(
       record.loyalty,
       'persistent'
     ),
+    hasNeglectedBadge: record.hasNeglectedBadge === true,
+    isNeglectHunting: record.isNeglectHunting === true,
+    neglectAbandonAtMs: null,
+    hungerLoyaltyLossAccumulator: 0,
   };
 }
