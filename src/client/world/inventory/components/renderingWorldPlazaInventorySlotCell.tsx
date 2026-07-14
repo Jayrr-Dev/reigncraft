@@ -21,6 +21,10 @@ import {
   gettingWorldPlazaBestiaryStudyCountsSnapshot,
   subscribingWorldPlazaBestiaryDiscovery,
 } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
+import {
+  gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
+  subscribingWorldPlazaHerbariumDiscovery,
+} from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import { RenderingWorldPlazaInventoryBagPopover } from '@/components/world/inventory/components/renderingWorldPlazaInventoryBagPopover';
 import { RenderingWorldPlazaInventoryItemDetailPopover } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemDetailPopover';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
@@ -422,14 +426,26 @@ function InventoryPlazaSlotItem({
     gettingWorldPlazaBestiaryStudyCountsSnapshot,
     () => ({})
   );
+  const flowerStudyCountsBySpeciesId = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
+    () => ({})
+  );
   const detailPopoverModel = useMemo(
     () =>
       resolvingWorldPlazaInventoryItemDetailPopoverModel(item, {
         isEquipped,
         studyCountsBySpeciesId,
+        flowerStudyCountsBySpeciesId,
         playerEffectiveMaxHealth,
       }),
-    [isEquipped, item, playerEffectiveMaxHealth, studyCountsBySpeciesId]
+    [
+      flowerStudyCountsBySpeciesId,
+      isEquipped,
+      item,
+      playerEffectiveMaxHealth,
+      studyCountsBySpeciesId,
+    ]
   );
 
   const clearingDeferredSingleClick = useCallback((): void => {

@@ -1,7 +1,8 @@
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 
-const DEFINING_WORLD_PLAZA_DISEASE_SHORTEN_REMAINING_FACTOR = 0.6;
+/** Remaining disease time kept after one shorten (40% cut). */
+export const DEFINING_WORLD_PLAZA_DISEASE_SHORTEN_REMAINING_FACTOR = 0.6;
 
 /**
  * Cuts remaining disease time by 40% (symptoms and expiry).

@@ -11,6 +11,7 @@ import {
 } from '@/components/world/wildlife/pets/domains/applyingWildlifePetLoyaltyGrant';
 import { DEFINING_WILDLIFE_PET_MAX_LOYALTY } from '@/components/world/wildlife/pets/domains/definingWildlifePetLoyaltyTiersRegistry';
 import type { DefiningWildlifePetBondState } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
+import { enqueueingWildlifePetLoyaltyFloatFeedback } from '@/components/world/wildlife/pets/domains/enqueueingWildlifePetLoyaltyFloatFeedback';
 import {
   checkingWildlifePetHasCapability,
   resolvingWildlifePetNextTier,
@@ -25,6 +26,7 @@ export type ApplyingWildlifePetDevLoyaltyGrantParams = {
   instance: DefiningWildlifeInstance;
   ownerUserId: string;
   grant: ApplyingWildlifePetDevLoyaltyGrantKind;
+  nowMs: number;
 };
 
 export type ApplyingWildlifePetDevLoyaltyGrantResult = {
@@ -79,6 +81,7 @@ export function applyingWildlifePetDevLoyaltyGrant({
   instance,
   ownerUserId,
   grant,
+  nowMs,
 }: ApplyingWildlifePetDevLoyaltyGrantParams): ApplyingWildlifePetDevLoyaltyGrantResult {
   const currentPetBond =
     instance.petBond ?? creatingWildlifePetProvisionalBond(ownerUserId);
@@ -96,16 +99,22 @@ export function applyingWildlifePetDevLoyaltyGrant({
     checkingWildlifePetHasCapability(loyaltyResult.loyalty, 'persistent');
   const becamePersistent = !wasPersistent && isPersistentNow;
 
-  return {
-    instance: {
-      ...instance,
-      petBond: {
-        ...currentPetBond,
-        ownerUserId,
-        loyalty: loyaltyResult.loyalty,
-        isPersistent: isPersistentNow,
-      },
+  const withBond: DefiningWildlifeInstance = {
+    ...instance,
+    petBond: {
+      ...currentPetBond,
+      ownerUserId,
+      loyalty: loyaltyResult.loyalty,
+      isPersistent: isPersistentNow,
     },
+  };
+
+  return {
+    instance: enqueueingWildlifePetLoyaltyFloatFeedback({
+      instance: withBond,
+      loyaltyPoints: loyaltyResult.granted,
+      nowMs,
+    }),
     loyaltyResult,
     becamePersistent,
   };

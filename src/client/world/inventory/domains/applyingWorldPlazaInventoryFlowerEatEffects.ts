@@ -25,15 +25,29 @@ import {
   type DefiningWorldPlazaFlowerEatEffectKind,
   resolvingWorldPlazaFlowerEatEffectKind,
 } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
+import {
+  DEFINING_WORLD_PLAZA_FLOWER_ARNICA_BRACED_DURATION_MS,
+  DEFINING_WORLD_PLAZA_FLOWER_BELLADONNA_POISON_DURATION_MS,
+  DEFINING_WORLD_PLAZA_FLOWER_BELLADONNA_POISON_OF_MAX,
+  DEFINING_WORLD_PLAZA_FLOWER_CALENDULA_HEAL_OF_MAX,
+  DEFINING_WORLD_PLAZA_FLOWER_CALENDULA_MENDING_DURATION_MS,
+  DEFINING_WORLD_PLAZA_FLOWER_CHAMOMILE_SLEEP_HEAL_OF_MAX,
+  DEFINING_WORLD_PLAZA_FLOWER_CHAMOMILE_SLEEP_MS,
+  DEFINING_WORLD_PLAZA_FLOWER_FOXGLOVE_HEAL_OF_MAX,
+  DEFINING_WORLD_PLAZA_FLOWER_FOXGLOVE_SUCCESS_CHANCE,
+  DEFINING_WORLD_PLAZA_FLOWER_FOXGLOVE_TEMP_MAX_BASE_EV,
+  DEFINING_WORLD_PLAZA_FLOWER_FOXGLOVE_TEMP_MAX_MS,
+  DEFINING_WORLD_PLAZA_FLOWER_INFECTION_RESIST_CHANCE_MULTIPLIER,
+  DEFINING_WORLD_PLAZA_FLOWER_INFECTION_RESIST_MS,
+  DEFINING_WORLD_PLAZA_FLOWER_ROSE_COLD_RESISTANCE,
+  DEFINING_WORLD_PLAZA_FLOWER_ROSE_COLD_RESIST_MS,
+  DEFINING_WORLD_PLAZA_FLOWER_TIMED_TOLERANCE_CELSIUS,
+  DEFINING_WORLD_PLAZA_FLOWER_TIMED_TOLERANCE_MS,
+  DEFINING_WORLD_PLAZA_FLOWER_VALERIAN_SLEEP_MS,
+  DEFINING_WORLD_PLAZA_FLOWER_VALERIAN_SLEEP_REGEN_MULTIPLIER,
+  DEFINING_WORLD_PLAZA_FLOWER_YARROW_FALLBACK_HEAL_OF_MAX,
+} from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectTunables';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
-
-const DEFINING_WORLD_PLAZA_FLOWER_CHAMOMILE_SLEEP_MS = 4_000;
-const DEFINING_WORLD_PLAZA_FLOWER_VALERIAN_SLEEP_MS = 8_000;
-const DEFINING_WORLD_PLAZA_FLOWER_TIMED_TOLERANCE_MS = 60_000;
-const DEFINING_WORLD_PLAZA_FLOWER_ROSE_COLD_RESIST_MS = 30_000;
-const DEFINING_WORLD_PLAZA_FLOWER_INFECTION_RESIST_MS = 60_000;
-const DEFINING_WORLD_PLAZA_FLOWER_FOXGLOVE_TEMP_MAX_MS = 45_000;
-const DEFINING_WORLD_PLAZA_FLOWER_BELLADONNA_POISON_DURATION_MS = 30_000;
 
 const DEFINING_WORLD_PLAZA_FLOWER_FOOD_SICKNESS_DEBUFF_ID =
   'food-sickness-debuff' as const;
@@ -65,7 +79,8 @@ function applyingFlowerTimedBracedBuff(
       ),
       kind: modifier.kind,
       value: modifier.value,
-      expiresAtMs: nowMs + 20_000,
+      expiresAtMs:
+        nowMs + DEFINING_WORLD_PLAZA_FLOWER_ARNICA_BRACED_DURATION_MS,
     });
   }
 
@@ -95,7 +110,8 @@ function applyingFlowerTimedColdTolerance(
       `flower-cold-tolerance:${speciesId}`,
       {
         heatComfortBonusCelsius: 0,
-        coldComfortBonusCelsius: 10,
+        coldComfortBonusCelsius:
+          DEFINING_WORLD_PLAZA_FLOWER_TIMED_TOLERANCE_CELSIUS,
         heatResistance: 0,
         coldResistance: 0,
         diseaseContractionChanceMultiplier: 1,
@@ -115,7 +131,8 @@ function applyingFlowerTimedHeatTolerance(
     creatingWorldPlazaEntityHealthTimedTemperatureModifier(
       `flower-heat-tolerance:${speciesId}`,
       {
-        heatComfortBonusCelsius: 10,
+        heatComfortBonusCelsius:
+          DEFINING_WORLD_PLAZA_FLOWER_TIMED_TOLERANCE_CELSIUS,
         coldComfortBonusCelsius: 0,
         heatResistance: 0,
         coldResistance: 0,
@@ -139,7 +156,7 @@ function applyingFlowerTimedColdResistance(
         heatComfortBonusCelsius: 0,
         coldComfortBonusCelsius: 0,
         heatResistance: 0,
-        coldResistance: 0.25,
+        coldResistance: DEFINING_WORLD_PLAZA_FLOWER_ROSE_COLD_RESISTANCE,
         diseaseContractionChanceMultiplier: 1,
         expiresAtMs: nowMs + DEFINING_WORLD_PLAZA_FLOWER_ROSE_COLD_RESIST_MS,
       }
@@ -161,7 +178,8 @@ function applyingFlowerInfectionResist(
         coldComfortBonusCelsius: 0,
         heatResistance: 0,
         coldResistance: 0,
-        diseaseContractionChanceMultiplier: 0.5,
+        diseaseContractionChanceMultiplier:
+          DEFINING_WORLD_PLAZA_FLOWER_INFECTION_RESIST_CHANCE_MULTIPLIER,
         expiresAtMs: nowMs + DEFINING_WORLD_PLAZA_FLOWER_INFECTION_RESIST_MS,
       }
     )
@@ -197,7 +215,9 @@ function applyingFlowerEatEffectKind(
       if (beforeBleedCount === afterBleedCount) {
         state = healingWorldPlazaEntityHealthWithAmplifiers({
           receiverState: state,
-          baseHealAmount: effectiveMax * 0.05,
+          baseHealAmount:
+            effectiveMax *
+            DEFINING_WORLD_PLAZA_FLOWER_YARROW_FALLBACK_HEAL_OF_MAX,
           nowMs,
         }).state;
       }
@@ -207,13 +227,15 @@ function applyingFlowerEatEffectKind(
     case 'healAndMending': {
       state = healingWorldPlazaEntityHealthWithAmplifiers({
         receiverState: state,
-        baseHealAmount: effectiveMax * 0.08,
+        baseHealAmount:
+          effectiveMax * DEFINING_WORLD_PLAZA_FLOWER_CALENDULA_HEAL_OF_MAX,
         nowMs,
       }).state;
       return addingWorldPlazaEntityHealthOutgoingHealAmplifier(state, {
         id: 'mending-buff',
         ratio: DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO,
-        expiresAtMs: nowMs + 30_000,
+        expiresAtMs:
+          nowMs + DEFINING_WORLD_PLAZA_FLOWER_CALENDULA_MENDING_DURATION_MS,
       });
     }
     case 'chamomile': {
@@ -236,7 +258,8 @@ function applyingFlowerEatEffectKind(
         expiresAtMs: nowMs + DEFINING_WORLD_PLAZA_FLOWER_CHAMOMILE_SLEEP_MS,
         wakeBonusDamage: 0,
         canWakeFromDamage: true,
-        passiveHealPercentOfMaxTotal: 0.01,
+        passiveHealPercentOfMaxTotal:
+          DEFINING_WORLD_PLAZA_FLOWER_CHAMOMILE_SLEEP_HEAL_OF_MAX,
       });
     }
     case 'clearSicknessDebuffs': {
@@ -277,18 +300,21 @@ function applyingFlowerEatEffectKind(
         expiresAtMs: nowMs + DEFINING_WORLD_PLAZA_FLOWER_VALERIAN_SLEEP_MS,
         wakeBonusDamage: 0,
         canWakeFromDamage: true,
-        regenMultiplier: 3,
+        regenMultiplier:
+          DEFINING_WORLD_PLAZA_FLOWER_VALERIAN_SLEEP_REGEN_MULTIPLIER,
       });
     case 'foxgloveGamble': {
-      if (foxgloveRoll < 0.6) {
+      if (foxgloveRoll < DEFINING_WORLD_PLAZA_FLOWER_FOXGLOVE_SUCCESS_CHANCE) {
         state = healingWorldPlazaEntityHealthWithAmplifiers({
           receiverState: state,
-          baseHealAmount: effectiveMax * 0.25,
+          baseHealAmount:
+            effectiveMax * DEFINING_WORLD_PLAZA_FLOWER_FOXGLOVE_HEAL_OF_MAX,
           nowMs,
         }).state;
         const rollResult = computingWorldPlazaEntityHealthRolledExpectedAmount({
           state,
-          baseExpectedAmount: 50,
+          baseExpectedAmount:
+            DEFINING_WORLD_PLAZA_FLOWER_FOXGLOVE_TEMP_MAX_BASE_EV,
           attackerModifiers: [],
           nowMs,
         });
@@ -312,7 +338,7 @@ function applyingFlowerEatEffectKind(
       return applyingWorldPlazaEntityHealthPoisonStack(
         state,
         'venomous',
-        effectiveMax * 0.3,
+        effectiveMax * DEFINING_WORLD_PLAZA_FLOWER_BELLADONNA_POISON_OF_MAX,
         nowMs,
         undefined,
         DEFINING_WORLD_PLAZA_FLOWER_BELLADONNA_POISON_DURATION_MS

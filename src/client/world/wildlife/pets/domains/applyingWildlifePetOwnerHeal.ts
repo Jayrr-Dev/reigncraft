@@ -11,6 +11,7 @@ import {
   type ApplyingWildlifePetLoyaltyGrantResult,
 } from '@/components/world/wildlife/pets/domains/applyingWildlifePetLoyaltyGrant';
 import { computingWildlifePetLoyaltyFromRestoredPoints } from '@/components/world/wildlife/pets/domains/computingWildlifePetLoyaltyFromRestoredPoints';
+import { enqueueingWildlifePetLoyaltyFloatFeedback } from '@/components/world/wildlife/pets/domains/enqueueingWildlifePetLoyaltyFloatFeedback';
 
 export type ApplyingWildlifePetOwnerHealParams = {
   instance: DefiningWildlifeInstance;
@@ -34,11 +35,12 @@ export function applyingWildlifePetOwnerHeal({
   nowMs,
 }: ApplyingWildlifePetOwnerHealParams): ApplyingWildlifePetOwnerHealResult {
   const beforeHealth = instance.healthState.currentHealth;
-  const { state: healedHealthState } = healingWorldPlazaEntityHealthWithAmplifiers({
-    receiverState: instance.healthState,
-    baseHealAmount: healAmount,
-    nowMs,
-  });
+  const { state: healedHealthState } =
+    healingWorldPlazaEntityHealthWithAmplifiers({
+      receiverState: instance.healthState,
+      baseHealAmount: healAmount,
+      nowMs,
+    });
   const restoredHealth = Math.max(
     0,
     healedHealthState.currentHealth - beforeHealth
@@ -61,11 +63,17 @@ export function applyingWildlifePetOwnerHeal({
     loyaltyPoints
   );
 
+  const withBond: DefiningWildlifeInstance = {
+    ...nextInstance,
+    petBond: { ...petBond, loyalty: loyaltyGrant.loyalty },
+  };
+
   return {
-    instance: {
-      ...nextInstance,
-      petBond: { ...petBond, loyalty: loyaltyGrant.loyalty },
-    },
+    instance: enqueueingWildlifePetLoyaltyFloatFeedback({
+      instance: withBond,
+      loyaltyPoints: loyaltyGrant.granted,
+      nowMs,
+    }),
     restoredHealth,
     loyaltyGrant,
   };

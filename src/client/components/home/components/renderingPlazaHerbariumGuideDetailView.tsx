@@ -10,6 +10,7 @@ import {
 } from '@/components/home/domains/definingPlazaHerbariumStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_TREE_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumTreePortraitConstants';
 import type { PlazaHerbariumGuideDisplayEntry } from '@/components/home/domains/resolvingPlazaHerbariumGuideDisplayEntries';
+import { resolvingPlazaHerbariumEntryRarityBadgeVariant } from '@/components/home/domains/resolvingPlazaHerbariumRarity';
 import {
   checkingPlazaHerbariumStudyTierUnlocked,
   formattingPlazaHerbariumStudyCountProgress,
@@ -18,6 +19,7 @@ import {
 } from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
+import { resolvingWorldPlazaInventoryItemDetailBadgeShellClassName } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailBadgeShellClassName';
 import { cn } from '@/lib/utils';
 
 const PLAZA_HERBARIUM_DETAIL_HEADER_BUTTON_CLASS_NAME =
@@ -103,7 +105,14 @@ export function RenderingPlazaHerbariumGuideDetailView({
           <h2 className="truncate font-display text-xl font-bold tracking-wide text-poster-teal-deep">
             {entry.displayName}
           </h2>
-          <p className="flex items-center gap-1.5 text-sm font-medium italic text-ink-soft">
+          <p className="mt-1 flex flex-wrap items-center gap-1.5 text-sm font-medium italic text-ink-soft">
+            <span
+              className={resolvingWorldPlazaInventoryItemDetailBadgeShellClassName(
+                resolvingPlazaHerbariumEntryRarityBadgeVariant(entry.rarity)
+              )}
+            >
+              {entry.rarityLabel}
+            </span>
             <Icon
               icon={resolvingPlazaHerbariumStudyTierBookIcon(entry.studyCount)}
               className="size-4 shrink-0 text-poster-teal-deep"
@@ -259,15 +268,38 @@ export function RenderingPlazaHerbariumGuideDetailView({
               tierId="full"
               studyCount={entry.studyCount}
             >
-              {entry.apostleFlavor ? (
-                <p className="border-l-2 border-poster-gold/50 pl-3 text-xs font-medium italic leading-snug text-ink-soft">
-                  {entry.apostleFlavor}
-                </p>
-              ) : (
-                <p className="text-[11px] font-medium text-ink">
-                  {entry.studiedSummary}
-                </p>
-              )}
+              <div className="space-y-3">
+                {entry.apostleFlavor ? (
+                  <p className="border-l-2 border-poster-gold/50 pl-3 text-xs font-medium italic leading-snug text-ink-soft">
+                    {entry.apostleFlavor}
+                  </p>
+                ) : null}
+                {entry.eatEffectStatRows &&
+                entry.eatEffectStatRows.length > 0 ? (
+                  <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {entry.eatEffectStatRows.map((row) => (
+                      <div
+                        key={`${row.label}:${row.value}`}
+                        className={cn(
+                          PLAZA_HERBARIUM_DETAIL_STAT_CELL_CLASS_NAME,
+                          row.value.length > 42 ? 'sm:col-span-2' : null
+                        )}
+                      >
+                        <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                          {row.label}
+                        </dt>
+                        <dd className="mt-0.5 font-mono text-[11px] tabular-nums font-medium leading-snug text-ink">
+                          {row.value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : entry.apostleFlavor ? null : (
+                  <p className="text-[11px] font-medium text-ink">
+                    {entry.studiedSummary}
+                  </p>
+                )}
+              </div>
             </RenderingPlazaHerbariumGuideDetailSection>
           </div>
         </article>

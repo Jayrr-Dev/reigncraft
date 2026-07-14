@@ -34,6 +34,14 @@ describe('mappingWorldPlazaEntityHealthFloatTextIcon', () => {
         outcomeTier: null,
       })
     ).toBe('mdi:book-open-page-variant');
+
+    expect(
+      mappingWorldPlazaEntityHealthFloatTextIcon({
+        kind: 'loyalty',
+        damageKind: null,
+        outcomeTier: null,
+      })
+    ).toBe('mdi:paw');
   });
 
   it('uses tier-specific heal and shield icons for rolled beneficial amounts', () => {

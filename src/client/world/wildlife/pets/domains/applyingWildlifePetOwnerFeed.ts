@@ -14,6 +14,7 @@ import {
   type ApplyingWildlifePetLoyaltyGrantResult,
 } from '@/components/world/wildlife/pets/domains/applyingWildlifePetLoyaltyGrant';
 import { computingWildlifePetLoyaltyFromRestoredPoints } from '@/components/world/wildlife/pets/domains/computingWildlifePetLoyaltyFromRestoredPoints';
+import { enqueueingWildlifePetLoyaltyFloatFeedback } from '@/components/world/wildlife/pets/domains/enqueueingWildlifePetLoyaltyFloatFeedback';
 
 export type ApplyingWildlifePetOwnerFeedParams = {
   instance: DefiningWildlifeInstance;
@@ -89,11 +90,17 @@ export function applyingWildlifePetOwnerFeed({
     loyaltyPoints
   );
 
+  const withBond: DefiningWildlifeInstance = {
+    ...nextInstance,
+    petBond: { ...petBond, loyalty: loyaltyGrant.loyalty },
+  };
+
   return {
-    instance: {
-      ...nextInstance,
-      petBond: { ...petBond, loyalty: loyaltyGrant.loyalty },
-    },
+    instance: enqueueingWildlifePetLoyaltyFloatFeedback({
+      instance: withBond,
+      loyaltyPoints: loyaltyGrant.granted,
+      nowMs,
+    }),
     loyaltyGrant,
   };
 }

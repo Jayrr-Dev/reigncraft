@@ -1,9 +1,13 @@
+import { checkingPlazaHerbariumStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
 import { resolvingWorldPlazaEquipmentAttackEvModifier } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import { computingWorldPlazaInventoryItemResolvedCost } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemResolvedCost';
-import { checkingWorldPlazaInventoryItemIsFlowerHerb } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
+import {
+  checkingWorldPlazaInventoryItemIsFlowerHerb,
+  parsingWorldPlazaFlowerSpeciesIdFromItemTypeId,
+} from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
 import { DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_DEFAULT_BREAK_CHANCE_AT_ZERO } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDurabilityConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_EQUIPMENT_TOOL_KIND_BADGE_LABELS,
@@ -40,6 +44,7 @@ import {
   resolvingWorldPlazaInventoryWildlifeMeatDetailReveal,
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryWildlifeMeatDetailReveal';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 
 export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly itemTypeId: string;
@@ -68,9 +73,37 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModelOptions = {
   readonly studyCountsBySpeciesId?: Readonly<
     Partial<Record<DefiningWildlifeSpeciesId, number>>
   >;
+  /** Per-flower Study totals; hides Study once the herbarium dossier is full. */
+  readonly flowerStudyCountsBySpeciesId?: Readonly<
+    Partial<Record<WorldFlowerSpeciesId, number>>
+  >;
   /** Local player effective max HP for food heal preview. */
   readonly playerEffectiveMaxHealth?: number;
 };
+
+/**
+ * True when a flower herb still has herbarium Study progress left.
+ */
+function checkingWorldPlazaInventoryItemCanStudyFlower(
+  itemTypeId: string,
+  flowerStudyCountsBySpeciesId:
+    | Readonly<Partial<Record<WorldFlowerSpeciesId, number>>>
+    | undefined
+): boolean {
+  if (!checkingWorldPlazaInventoryItemIsFlowerHerb(itemTypeId)) {
+    return false;
+  }
+
+  const speciesId = parsingWorldPlazaFlowerSpeciesIdFromItemTypeId(itemTypeId);
+
+  if (!speciesId) {
+    return false;
+  }
+
+  const studyCount = flowerStudyCountsBySpeciesId?.[speciesId] ?? 0;
+
+  return !checkingPlazaHerbariumStudyTierUnlocked('full', studyCount);
+}
 
 function resolvingWorldPlazaInventoryItemRarityBadgeVariant(
   rarity: DefiningWorldPlazaInventoryItemTypeDefinition['rarity']
@@ -415,7 +448,10 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       activeEnhancements: [],
       activeEnchantments: [],
       canEat: checkingWorldPlazaInventoryItemIsFood(item.itemTypeId),
-      canStudy: checkingWorldPlazaInventoryItemIsFlowerHerb(item.itemTypeId),
+      canStudy: checkingWorldPlazaInventoryItemCanStudyFlower(
+        item.itemTypeId,
+        options.flowerStudyCountsBySpeciesId
+      ),
       canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
         item.itemTypeId
       ),
@@ -463,7 +499,10 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     activeEnhancements,
     activeEnchantments,
     canEat: checkingWorldPlazaInventoryItemIsFood(item.itemTypeId),
-    canStudy: checkingWorldPlazaInventoryItemIsFlowerHerb(item.itemTypeId),
+    canStudy: checkingWorldPlazaInventoryItemCanStudyFlower(
+      item.itemTypeId,
+      options.flowerStudyCountsBySpeciesId
+    ),
     canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
       item.itemTypeId
     ),

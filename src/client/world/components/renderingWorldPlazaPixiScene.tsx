@@ -9,7 +9,10 @@ import { RenderingUserProfileFriendRequestPlazaModal } from '@/components/friend
 import { usingUserProfileFriendPlazaNotifications } from '@/components/friends/hooks/usingUserProfileFriendPlazaNotifications';
 import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/hooks/usingUserProfileFriendRequestPlazaDialogs';
 import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
-import { formattingPlazaHerbariumStudyCountProgress } from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
+import {
+  checkingPlazaHerbariumStudyTierUnlocked,
+  formattingPlazaHerbariumStudyCountProgress,
+} from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import { sendingWorldPlazaAudioLifecycleEvent } from '@/components/world/audio/lifecycle/managingWorldPlazaAudioLifecycleStore';
@@ -3897,6 +3900,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           instance: nearestDog,
           ownerUserId,
           grant,
+          nowMs,
         });
 
       replacingWildlifeInstance(wildlifeStoreRef.current, nextInstance);
@@ -4611,6 +4615,14 @@ function RenderingWorldPlazaPixiSceneConnected({
       );
 
       if (!speciesId) {
+        return;
+      }
+
+      const currentStudyCount =
+        gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot()[speciesId] ?? 0;
+
+      if (checkingPlazaHerbariumStudyTierUnlocked('full', currentStudyCount)) {
+        showingGameplayHudToast('Already fully studied.');
         return;
       }
 

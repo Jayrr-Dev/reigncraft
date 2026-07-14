@@ -9,6 +9,14 @@ import {
 } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
 import type { PlazaHerbariumStudyTierId } from '@/components/home/domains/definingPlazaHerbariumStudyTier';
 import {
+  resolvingPlazaHerbariumFlowerEatEffectStatRows,
+  type PlazaHerbariumFlowerEatEffectStatRow,
+} from '@/components/home/domains/resolvingPlazaHerbariumFlowerEatEffectStatRows';
+import {
+  resolvingPlazaHerbariumEntryRarity,
+  resolvingPlazaHerbariumEntryRarityLabel,
+} from '@/components/home/domains/resolvingPlazaHerbariumRarity';
+import {
   checkingPlazaHerbariumStudyTierUnlocked,
   resolvingPlazaHerbariumStudyTierId,
 } from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
@@ -18,6 +26,7 @@ import {
   DEFINING_WORLD_PLAZA_TREE_BIOME_CONFIG,
   type DefiningWorldPlazaTreeVariantKind,
 } from '@/components/world/domains/definingWorldPlazaTreeConstants';
+import type { DefiningWorldPlazaInventoryItemRarity } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 
 export type PlazaHerbariumGuideDiscoveryState =
@@ -38,6 +47,8 @@ export type PlazaHerbariumGuideDisplayEntryBase = {
   isFullyStudied: boolean;
   studyCount: number;
   studyTierId: PlazaHerbariumStudyTierId;
+  rarity: DefiningWorldPlazaInventoryItemRarity;
+  rarityLabel: string;
   icon: string;
   displayName: string;
   summary: string;
@@ -52,12 +63,14 @@ export type PlazaHerbariumGuideFlowerDisplayEntry =
   PlazaHerbariumGuideDisplayEntryBase & {
     kind: 'flower';
     speciesId: WorldFlowerSpeciesId;
+    eatEffectStatRows: readonly PlazaHerbariumFlowerEatEffectStatRow[] | null;
   };
 
 export type PlazaHerbariumGuideTreeDisplayEntry =
   PlazaHerbariumGuideDisplayEntryBase & {
     kind: 'tree';
     variant: DefiningWorldPlazaTreeVariantKind;
+    eatEffectStatRows: null;
   };
 
 export type PlazaHerbariumGuideDisplayEntry =
@@ -159,6 +172,10 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
           'full',
           studyCount
         );
+        const rarity = resolvingPlazaHerbariumEntryRarity({
+          kind: 'flower',
+          speciesId: entry.speciesId,
+        });
 
         return {
           kind: 'flower',
@@ -170,6 +187,11 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
           isFullyStudied,
           studyCount,
           studyTierId: resolvingPlazaHerbariumStudyTierId(studyCount),
+          rarity,
+          rarityLabel: resolvingPlazaHerbariumEntryRarityLabel(rarity),
+          eatEffectStatRows: isFullyStudied
+            ? resolvingPlazaHerbariumFlowerEatEffectStatRows(entry.speciesId)
+            : null,
           displayName: isSighted
             ? entry.displayName
             : LABELING_PLAZA_HERBARIUM_UNDISCOVERED_NAME,
@@ -213,6 +235,10 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
           studyCount
         );
         const biomeKinds = listingPlazaHerbariumTreeBiomeKinds(entry.variant);
+        const rarity = resolvingPlazaHerbariumEntryRarity({
+          kind: 'tree',
+          variant: entry.variant,
+        });
 
         return {
           kind: 'tree',
@@ -224,6 +250,9 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
           isFullyStudied,
           studyCount,
           studyTierId: resolvingPlazaHerbariumStudyTierId(studyCount),
+          rarity,
+          rarityLabel: resolvingPlazaHerbariumEntryRarityLabel(rarity),
+          eatEffectStatRows: null,
           displayName: isSighted
             ? entry.displayName
             : LABELING_PLAZA_HERBARIUM_UNDISCOVERED_NAME,

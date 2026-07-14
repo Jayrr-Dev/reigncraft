@@ -76,6 +76,7 @@ export function formattingWorldPlazaEntityHealthFloatTextAmount({
     kind === 'heal_regen' ||
     kind === 'shield_gain' ||
     kind === 'study' ||
+    kind === 'loyalty' ||
     kind === 'item_gain'
   ) {
     return `+${roundedAmount}`;
@@ -122,6 +123,7 @@ export function formattingWorldPlazaEntityHealthFloatTextLabel({
     kind === 'heal_regen' ||
     kind === 'shield_gain' ||
     kind === 'study' ||
+    kind === 'loyalty' ||
     kind === 'item_gain'
   ) {
     const tierLabel =
@@ -237,6 +239,10 @@ export function resolvingWorldPlazaEntityHealthFloatTextClassName(
 
   if (kind === 'study') {
     return 'plaza-combat-float-study text-poster-gold';
+  }
+
+  if (kind === 'loyalty') {
+    return 'plaza-combat-float-loyalty text-poster-orange';
   }
 
   if (kind === 'item_gain') {

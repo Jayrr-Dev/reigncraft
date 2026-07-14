@@ -18,6 +18,8 @@ export {
   type ApplyingWildlifePetLoyaltyGrantResult,
 } from '@/components/world/wildlife/pets/domains/applyingWildlifePetLoyaltyGrant';
 
+export { enqueueingWildlifePetLoyaltyFloatFeedback } from '@/components/world/wildlife/pets/domains/enqueueingWildlifePetLoyaltyFloatFeedback';
+
 export {
   applyingWildlifePetDevLoyaltyGrant,
   type ApplyingWildlifePetDevLoyaltyGrantKind,

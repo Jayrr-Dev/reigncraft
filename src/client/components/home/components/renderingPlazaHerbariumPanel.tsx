@@ -8,6 +8,7 @@ import {
   resolvingPlazaHerbariumGuideDisplayEntries,
   type PlazaHerbariumGuideDisplayEntry,
 } from '@/components/home/domains/resolvingPlazaHerbariumGuideDisplayEntries';
+import { resolvingPlazaHerbariumEntryRarityBadgeVariant } from '@/components/home/domains/resolvingPlazaHerbariumRarity';
 import {
   formattingPlazaHerbariumStudyCountProgress,
   resolvingPlazaHerbariumStudyTierBookIcon,
@@ -23,6 +24,7 @@ import {
   gettingWorldPlazaHerbariumTreeStudyCountsSnapshot,
   subscribingWorldPlazaHerbariumDiscovery,
 } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
+import { resolvingWorldPlazaInventoryItemDetailBadgeShellClassName } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailBadgeShellClassName';
 import { cn } from '@/lib/utils';
 import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
 
@@ -142,6 +144,16 @@ function RenderingPlazaHerbariumGuideCard({
           <span className="font-mono text-[8px] font-bold tabular-nums text-parchment">
             {formattingPlazaHerbariumStudyCountProgress(entry.studyCount)}
           </span>
+        </span>
+        <span
+          className={cn(
+            resolvingWorldPlazaInventoryItemDetailBadgeShellClassName(
+              resolvingPlazaHerbariumEntryRarityBadgeVariant(entry.rarity)
+            ),
+            'absolute right-1 top-1 z-1 h-4! max-w-18 px-1 text-[7px] sm:h-4! sm:px-1 sm:text-[7px]'
+          )}
+        >
+          {entry.rarityLabel}
         </span>
       </div>
       <span

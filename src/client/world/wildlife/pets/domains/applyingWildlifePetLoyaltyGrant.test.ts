@@ -45,7 +45,17 @@ describe('wildlife pet loyalty', () => {
       50
     );
     expect(result.loyalty).toBe(DEFINING_WILDLIFE_PET_MAX_LOYALTY);
+    expect(result.granted).toBe(1);
     expect(result.nextTierId).toBe('bonded');
+  });
+
+  it('reports zero granted when already at max', () => {
+    const result = applyingWildlifePetLoyaltyGrant(
+      DEFINING_WILDLIFE_PET_MAX_LOYALTY,
+      17
+    );
+    expect(result.loyalty).toBe(DEFINING_WILDLIFE_PET_MAX_LOYALTY);
+    expect(result.granted).toBe(0);
   });
 });
 

@@ -10,6 +10,7 @@ import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domai
 import { applyingWildlifePetLoyaltyGrant } from '@/components/world/wildlife/pets/domains/applyingWildlifePetLoyaltyGrant';
 import { DEFINING_WILDLIFE_PET_CURIOUS_FOLLOW_LOYALTY_GRANT } from '@/components/world/wildlife/pets/domains/definingWildlifePetLoyaltyTiersRegistry';
 import type { DefiningWildlifePetBondState } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
+import { enqueueingWildlifePetLoyaltyFloatFeedback } from '@/components/world/wildlife/pets/domains/enqueueingWildlifePetLoyaltyFloatFeedback';
 
 export type ApplyingWildlifePetCuriousFollowGrantParams = {
   instance: DefiningWildlifeInstance;
@@ -46,7 +47,10 @@ export function applyingWildlifePetCuriousFollowGrant({
   ownerUserId,
   nowMs,
 }: ApplyingWildlifePetCuriousFollowGrantParams): DefiningWildlifeInstance {
-  if (instance.isDead || !checkingWildlifeSpeciesIsPettable(instance.speciesId)) {
+  if (
+    instance.isDead ||
+    !checkingWildlifeSpeciesIsPettable(instance.speciesId)
+  ) {
     return instance;
   }
 
@@ -73,7 +77,7 @@ export function applyingWildlifePetCuriousFollowGrant({
     instance.petBond ??
     creatingWildlifePetProvisionalBond(ownerUserId, grant.loyalty);
 
-  return {
+  const withBond: DefiningWildlifeInstance = {
     ...instance,
     petBond: {
       ...nextPetBond,
@@ -81,4 +85,10 @@ export function applyingWildlifePetCuriousFollowGrant({
       loyalty: grant.loyalty,
     },
   };
+
+  return enqueueingWildlifePetLoyaltyFloatFeedback({
+    instance: withBond,
+    loyaltyPoints: grant.granted,
+    nowMs,
+  });
 }
