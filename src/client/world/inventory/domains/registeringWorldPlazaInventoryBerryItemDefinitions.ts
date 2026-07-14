@@ -10,7 +10,9 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_BLUE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_GOLDEN,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { resolvingWorldPlazaInventoryTeaLeavesSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryTeaLeavesSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { resolvingWorldPlazaInventoryFoodHealDeclaration } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealDeclaration';
 
@@ -37,28 +39,44 @@ const DEFINING_WORLD_PLAZA_BERRY_INVENTORY_ITEM_SEEDS = [
 ] as const;
 
 export function registeringWorldPlazaInventoryBerryItemDefinitions(): readonly DefiningWorldPlazaInventoryItemTypeDefinition[] {
-  return DEFINING_WORLD_PLAZA_BERRY_INVENTORY_ITEM_SEEDS.map((seed) => ({
-    typeId: seed.typeId,
-    name: seed.name,
-    rarity: seed.rarity,
-    description: seed.description,
-    maxStack: 99,
-    isDroppable: true,
-    isStackable: true,
-    iconSpriteSheet:
-      resolvingWorldPlazaInventoryBerrySpriteSheetIcon(seed.typeId) ??
-      undefined,
-    food: {
-      hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
-      healthHeal: resolvingWorldPlazaInventoryFoodHealDeclaration({
+  return [
+    ...DEFINING_WORLD_PLAZA_BERRY_INVENTORY_ITEM_SEEDS.map((seed) => ({
+      typeId: seed.typeId,
+      name: seed.name,
+      rarity: seed.rarity,
+      description: seed.description,
+      maxStack: 99,
+      isDroppable: true,
+      isStackable: true,
+      iconSpriteSheet:
+        resolvingWorldPlazaInventoryBerrySpriteSheetIcon(seed.typeId) ??
+        undefined,
+      food: {
         hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
-      }),
-      ...(seed.typeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED
-        ? {
-            cookedWellFedBuffId: 'coffee-cherry-buzz-buff',
-            cookedWellFedChance: 1,
-          }
-        : {}),
+        healthHeal: resolvingWorldPlazaInventoryFoodHealDeclaration({
+          hungerRestoreRatio: DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
+        }),
+        ...(seed.typeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED
+          ? {
+              cookedWellFedBuffId: 'coffee-cherry-buzz-buff',
+              cookedWellFedChance: 1,
+            }
+          : {}),
+      },
+    })),
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES,
+      name: 'Tea Leaves',
+      rarity: 'common',
+      description:
+        'Dried leaves turned up while searching berry bushes. Nobody on Corpus has brewed a decent cup yet.',
+      maxStack: 99,
+      isDroppable: true,
+      isStackable: true,
+      iconSpriteSheet:
+        resolvingWorldPlazaInventoryTeaLeavesSpriteSheetIcon(
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES
+        ) ?? undefined,
     },
-  }));
+  ];
 }

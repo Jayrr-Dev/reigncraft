@@ -224,7 +224,7 @@ export function RenderingPlazaHerbariumGuideDetailView({
 
           <div className="border-t border-poster-teal/20 px-3 py-3 sm:px-4 sm:py-4">
             <p className="text-sm font-medium leading-snug text-ink-soft">
-              {entry.isStudied ? entry.studiedSummary : entry.summary}
+              {entry.summary}
             </p>
 
             <RenderingPlazaHerbariumGuideDetailSection

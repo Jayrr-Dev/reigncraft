@@ -8,7 +8,7 @@ export type DefiningPlazaHerbariumFlowerEntry = {
   icon: string;
   /** Shown after the player sights the species nearby. */
   summary: string;
-  /** Shown after the player picks the first specimen. */
+  /** Field notes unlocked after picking the first specimen. */
   studiedSummary: string;
   /** Short eaten-effect note shown in the Properties tier. */
   propertiesSummary: string;
@@ -23,7 +23,7 @@ export type DefiningPlazaHerbariumTreeEntry = {
   icon: string;
   /** Shown after the player sights the species nearby. */
   summary: string;
-  /** Shown after the player studies a felled stump. */
+  /** Field notes unlocked after studying a felled stump. */
   studiedSummary: string;
   /** Short wood-note shown in the Properties tier. */
   propertiesSummary: string;
@@ -55,7 +55,7 @@ export const DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES: readonly DefiningPla
       icon: 'mdi:flower',
       summary: 'Bitter white heads growing low in open ground.',
       studiedSummary:
-        'Yarrow grows almost everywhere there is open sky. Chewed or packed into a wound, it stanches a bleed and knits small cuts closed.',
+        'Chewed white heads packed into a gash; bleeding eased within a minute. Bitter, everywhere open sky meets dirt.',
       propertiesSummary: 'Eaten: stanches bleeding, mends small wounds.',
     },
     {
@@ -64,7 +64,7 @@ export const DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES: readonly DefiningPla
       icon: 'mdi:flower',
       summary: 'Bright orange petals that catch the eye first.',
       studiedSummary:
-        'Calendula is the wanderer flower of choice for scrapes that will not close. Soothes raw flesh and quickens mending.',
+        'Orange petals mashed to paste on abraded knuckle; raw flesh stopped complaining. My first field dressing after calendula never failed the shallow cuts.',
       propertiesSummary: 'Eaten: soothes flesh, speeds mending.',
     },
     {
@@ -73,7 +73,7 @@ export const DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES: readonly DefiningPla
       icon: 'mdi:flower',
       summary: 'Small daisy heads nodding in a breeze.',
       studiedSummary:
-        'Chamomile clears a foggy head and buys a short, honest rest. Old hands keep a pouch of it for the nights the road will not let them sleep.',
+        'Dried daisy heads steeped in cup water clear a woolly skull for one honest hour of rest. Not sleep, just a cleared head.',
       propertiesSummary: 'Eaten: clears a foggy head, grants a short rest.',
     },
     {
@@ -82,7 +82,7 @@ export const DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES: readonly DefiningPla
       icon: 'mdi:flower',
       summary: 'Purple spikes with a scent that carries on the wind.',
       studiedSummary:
-        'Lavender cuts through nausea fast. Wanderers chew a sprig before eating anything they are not sure about.',
+        'Purple spike chewed before questionable meat; nausea never rose. Scent marks the patch from fifty paces downwind.',
       propertiesSummary: 'Eaten: cuts nausea and food sickness.',
     },
     {
@@ -91,7 +91,7 @@ export const DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES: readonly DefiningPla
       icon: 'mdi:flower',
       summary: 'A spiny cone flower, tougher than it looks.',
       studiedSummary:
-        'Echinacea shortens a fever and steels the body against whatever caused it. Not a cure, but it buys time.',
+        'Spiny cone chewed at fever onset; heat broke a day early. Does not cure, only shortens the sickness window.',
       propertiesSummary: 'Eaten: shortens sickness, steels against infection.',
     },
     {
@@ -100,7 +100,7 @@ export const DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES: readonly DefiningPla
       icon: 'mdi:flower',
       summary: 'Cool-scented leaves that mark the air around them.',
       studiedSummary:
-        'Peppermint leaves widen the cold you can stand without complaint. Popular with anyone about to walk into snow.',
+        'Cool leaf under tongue before snow pass; cold tolerance widened for the march. Scent is the first sign of a patch.',
       propertiesSummary: 'Eaten: briefly widens cold comfort band.',
     },
     {
@@ -109,7 +109,7 @@ export const DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES: readonly DefiningPla
       icon: 'mdi:flower',
       summary: 'Perfumed petals wanderers pick as much for the scent.',
       studiedSummary:
-        'Rose petals give a brief resistance to cold when chewed. The perfume is a bonus nobody asked for and everybody takes.',
+        'Perfumed petals chewed on ice trail; cold bit less for the hour. Pretty, yes, but the warmth in the chest is the useful part.',
       propertiesSummary: 'Eaten: brief cold resistance.',
     },
     {
@@ -118,7 +118,7 @@ export const DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES: readonly DefiningPla
       icon: 'mdi:flower',
       summary: 'Creamy flower clusters that thicken meadow air with scent.',
       studiedSummary:
-        'Meadowsweet widens the heat a body can shrug off. Desert and savanna crews keep it close for the worst of the day.',
+        'Cream clusters eaten before savanna noon; heat tolerance widened noticeably. Thick meadow scent, harder to spot than calendula.',
       propertiesSummary: 'Eaten: briefly widens heat comfort band.',
     },
     {
@@ -127,7 +127,7 @@ export const DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES: readonly DefiningPla
       icon: 'mdi:flower',
       summary: 'Yellow star-shaped bloom on a short stem.',
       studiedSummary:
-        'Arnica braces the body before harm lands. Wanderers chew it right before a fight they cannot avoid.',
+        'Yellow star chewed before ambush; body braced against the first blows. Timing matters; too early and the effect fades before the fight.',
       propertiesSummary: 'Eaten: braces the body against incoming harm.',
     },
     {
@@ -136,7 +136,7 @@ export const DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES: readonly DefiningPla
       icon: 'mdi:flower',
       summary: 'A plain bloom with a root scent that lingers.',
       studiedSummary:
-        'Valerian root drops the body into a deep sleep and pays it back with fierce recovery. Only safe to take when nothing is chasing you.',
+        'Root scent like wet socks; one dose and sleep hits like a dropped stone. Recovery on waking is fierce, but only safe when nothing hunts you.',
       propertiesSummary: 'Eaten: deep sleep with fierce recovery.',
     },
     {
@@ -145,7 +145,7 @@ export const DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES: readonly DefiningPla
       icon: 'mdi:flower',
       summary: 'Tall bell-shaped blooms, striking and best left alone.',
       studiedSummary:
-        'Foxglove is a tonic that helps as often as it hurts. Veterans respect it and eat it rarely, on purpose, and never twice in a row.',
+        'Tall bells; tonic effect uneven. Helped once, hurt the next chew. Veterans mark the patch and touch it on purpose, never by accident.',
       propertiesSummary: 'Eaten: dangerous tonic, uneven mercy.',
     },
     {
@@ -154,7 +154,7 @@ export const DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES: readonly DefiningPla
       icon: 'mdi:flower',
       summary: 'A dark, glossy berry flower. The prettiest warning on Corpus.',
       studiedSummary:
-        'Belladonna is nightshade by another name: beautiful and venomous. Most wanderers learn to identify it before they learn to eat it, and stop there.',
+        'Nightshade with glossy berries. Beautiful, venomous. I learned this flower before I learned most edible ones and stopped at identification.',
       propertiesSummary: 'Eaten: venomous nightshade.',
       apostleFlavor:
         'Rockless Fellus catalogs every root and bloom on his ledger. Belladonna gets its own page, underlined twice.',
@@ -170,7 +170,7 @@ export const DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES: readonly DefiningPlaza
       icon: 'mdi:tree-outline',
       summary: 'Broad-crowned hardwood common to plains and forest.',
       studiedSummary:
-        'Oak is the workhorse tree of Corpus. Slow to fell, but the wood holds an edge and a nail better than almost anything else standing.',
+        'Felled oak trunk; axe bit slow, grain tight and stubborn. Holds nail and edge better than anything I have worked on the plains.',
       propertiesSummary: 'Wood: dense hardwood, slow to chop, holds well.',
       apostleFlavor:
         'Rockless Fellus counts oak stands like coin. Every claim wall on the plains started as one of these.',
@@ -182,7 +182,7 @@ export const DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES: readonly DefiningPlaza
       summary:
         'A pink-flecked crown that marks a flower forest from a distance.',
       studiedSummary:
-        'Blossom trees only take root where the flower forests do. The petals drift for weeks and the wood underneath is ordinary, softer than oak.',
+        'Pink-flecked crown in flower forest only. Petals drift weeks; wood beneath is soft, quick to chop, unremarkable grain.',
       propertiesSummary: 'Wood: soft, quick to chop, unremarkable grain.',
     },
     {
@@ -191,7 +191,7 @@ export const DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES: readonly DefiningPlaza
       icon: 'mdi:tree-outline',
       summary: 'A drooping canopy that favors swamp water over dry ground.',
       studiedSummary:
-        'Willows grow where the ground never fully dries. The wood bends before it breaks, which makes it useless for walls and fine for handles.',
+        'Swamp margin stand; wood bent under weight before it split. Useless for walls, serviceable for tool handles.',
       propertiesSummary: 'Wood: flexible, bends before breaking.',
     },
     {
@@ -200,7 +200,7 @@ export const DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES: readonly DefiningPlaza
       icon: 'mdi:weather-sunny',
       summary: 'A flat-topped savanna tree, built for shade over shelter.',
       studiedSummary:
-        'Acacia spreads flat instead of tall, chasing horizontal shade across the savanna. Herds gather under it before wanderers ever do.',
+        'Flat-top savanna shade; herds gather before wanderers. Fibrous trunk, fair strength, burns eager.',
       propertiesSummary: 'Wood: fibrous, fair strength, fire-friendly.',
     },
     {
@@ -209,7 +209,7 @@ export const DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES: readonly DefiningPlaza
       icon: 'mdi:pine-tree',
       summary: 'A snow-dusted conifer that shrugs off cold winters.',
       studiedSummary:
-        'Spruce holds its needles through the worst snowy plains have to offer. The flat canopy is wide enough to stand on if you can reach it.',
+        'Needles hold through snow season; canopy flat enough to stand on if you can climb. Light straight grain, splits clean.',
       propertiesSummary: 'Wood: light, straight grain, splits clean.',
     },
     {
@@ -218,7 +218,7 @@ export const DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES: readonly DefiningPlaza
       icon: 'mdi:tree-outline',
       summary: 'A slender, pale-barked tree found across several biomes.',
       studiedSummary:
-        'Birch bark peels white and clean, easy to spot at a distance. It grows everywhere from plains to snow, never dominant, always present.',
+        'Pale bark peels white, visible at distance. Grows from plains to snow, never dominant, always there.',
       propertiesSummary: 'Wood: light, pale, burns fast and hot.',
     },
     {
@@ -227,7 +227,7 @@ export const DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES: readonly DefiningPlaza
       icon: 'mdi:pine-tree',
       summary: 'A tall dark conifer, taller than most trees around it.',
       studiedSummary:
-        'Pine grows tall and dark, favoring plains, forest, and the edges of snow. Sap-heavy wood that burns eager once it catches.',
+        'Tall dark stand on plain and forest edge; resin sticky on the hands. Burns eager once it catches.',
       propertiesSummary: 'Wood: resinous, catches fire eager and burns long.',
     },
     {
@@ -236,7 +236,7 @@ export const DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES: readonly DefiningPlaza
       icon: 'mdi:beach',
       summary: 'A tilted trunk crowned with fronds along the shoreline.',
       studiedSummary:
-        'Palms lean toward the water on every beach they take root in. The trunk fibers make poor lumber but decent rope once stripped.',
+        'Beach lean toward water; trunk fibers strip to decent rope, poor lumber.',
       propertiesSummary: 'Wood: fibrous, weak as lumber, decent as rope.',
     },
     {
@@ -245,7 +245,7 @@ export const DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES: readonly DefiningPlaza
       icon: 'mdi:tree-outline',
       summary: 'A bare, branching husk with no leaves left to lose.',
       studiedSummary:
-        'Deadwood already gave up its leaves before you found it. Swamp, savanna, and badlands all keep a share of these standing corpses.',
+        'Bare husk before I arrived. Swamp, savanna, badlands all keep a share standing. Dry, brittle, quick flame.',
       propertiesSummary:
         'Wood: dry, brittle, quick to catch and quick to burn out.',
     },
@@ -255,7 +255,7 @@ export const DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES: readonly DefiningPlaza
       icon: 'mdi:cactus',
       summary: 'A spined desert column crowned with yellow flowers.',
       studiedSummary:
-        'The saguaro stores its own water and wears the flowers like a dare. Chop carefully; the spines do not care that you are thirsty too.',
+        'Saguaro column stores water under spined skin. Yellow flowers read like a dare. Chop slow; spines do not care about thirst.',
       propertiesSummary: 'Wood: fibrous pulp core, mostly water, poor lumber.',
     },
   ] as const;

@@ -511,11 +511,6 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
   const flowerContent = flowerSpeciesId
     ? resolvingWorldPlazaInventoryFlowerDetailContent(flowerSpeciesId, {
         studyCount: flowerStudyCount,
-        fallbackName: definition.name,
-        fallbackDescription: resolvingWorldPlazaInventoryItemDescription(
-          item.itemTypeId,
-          { fallbackName: definition.name }
-        ),
       })
     : null;
   const cloverKind = parsingWorldPlazaCloverKindFromItemTypeId(item.itemTypeId);

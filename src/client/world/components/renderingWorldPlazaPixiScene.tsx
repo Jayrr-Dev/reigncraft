@@ -14,11 +14,11 @@ import {
   checkingPlazaHerbariumCloverStudyTierUnlocked,
   formattingPlazaHerbariumCloverStudyCountProgress,
 } from '@/components/home/domains/resolvingPlazaHerbariumCloverStudyTier';
-import { formattingPlazaHerbariumFlowerStudyCountProgress } from '@/components/home/domains/resolvingPlazaHerbariumFlowerStudyTier';
 import {
-  checkingPlazaHerbariumStudyTierUnlocked,
-  formattingPlazaHerbariumStudyCountProgress,
-} from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
+  checkingPlazaHerbariumFlowerStudyTierUnlocked,
+  formattingPlazaHerbariumFlowerStudyCountProgress,
+} from '@/components/home/domains/resolvingPlazaHerbariumFlowerStudyTier';
+import { formattingPlazaHerbariumStudyCountProgress } from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
 import {
   checkingPlazaLapidaryStudyTierUnlocked,
   formattingPlazaLapidaryStudyCountProgress,
@@ -60,14 +60,24 @@ import {
 } from '@/components/world/chest/domains/managingWorldPlazaChestInstanceStore';
 import { RenderingWorldPlazaBearTrapInteractionLabels } from '@/components/world/trap/components/renderingWorldPlazaBearTrapInteractionLabels';
 import { RenderingWorldPlazaBearTrapLayer } from '@/components/world/trap/components/renderingWorldPlazaBearTrapLayer';
+import { RenderingWorldPlazaCaltropInteractionLabels } from '@/components/world/trap/components/renderingWorldPlazaCaltropInteractionLabels';
+import { RenderingWorldPlazaCaltropLayer } from '@/components/world/trap/components/renderingWorldPlazaCaltropLayer';
 import { usingWorldPlazaBearTrapInteraction } from '@/components/world/trap/hooks/usingWorldPlazaBearTrapInteraction';
 import { usingWorldPlazaBearTrapTriggerTick } from '@/components/world/trap/hooks/usingWorldPlazaBearTrapTriggerTick';
+import { usingWorldPlazaCaltropInteraction } from '@/components/world/trap/hooks/usingWorldPlazaCaltropInteraction';
+import { usingWorldPlazaCaltropTriggerTick } from '@/components/world/trap/hooks/usingWorldPlazaCaltropTriggerTick';
 import {
   hydratingWorldPlazaLocalBearTraps,
 } from '@/components/world/trap/domains/managingWorldPlazaLocalBearTraps';
 import {
+  hydratingWorldPlazaLocalCaltrops,
+} from '@/components/world/trap/domains/managingWorldPlazaLocalCaltrops';
+import {
   readingWorldPlazaBearTrapInstanceStore,
 } from '@/components/world/trap/domains/managingWorldPlazaBearTrapInstanceStore';
+import {
+  readingWorldPlazaCaltropInstanceStore,
+} from '@/components/world/trap/domains/managingWorldPlazaCaltropInstanceStore';
 import { RenderingWorldPlazaPlotBoundaries } from '@/components/world/building/components/renderingWorldPlazaPlotBoundaries';
 import {
   countingWorldBuildingOwnerOwnedPlotCount,
@@ -174,6 +184,8 @@ import {
 } from '@/components/world/components/syncingWorldPlazaPixiViewportFrameResize';
 import { checkingWorldPlazaCraftRecipeAffordable } from '@/components/world/crafting/domains/checkingWorldPlazaCraftRecipeAffordable';
 import { committingWorldPlazaCraftRecipePlaceablePlacement } from '@/components/world/crafting/domains/committingWorldPlazaCraftRecipePlaceablePlacement';
+import { checkingWorldPlazaCraftRecipeNearbyStationSatisfied } from '@/components/world/crafting/domains/checkingWorldPlazaCraftRecipeNearbyStationSatisfied';
+import { LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_NEARBY_STATION_REQUIRED_TOAST } from '@/components/world/crafting/domains/definingWorldPlazaCraftRecipeNearbyStationConstants';
 import { resolvingWorldPlazaCraftModeRecipeDefinition } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry';
 import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import {
@@ -1827,6 +1839,19 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
+      if (
+        !checkingWorldPlazaCraftRecipeNearbyStationSatisfied({
+          recipeDefinition,
+          playerWorldPoint: playerPositionRef.current,
+          placedBlocks: activeScenePlacedBlocks,
+        })
+      ) {
+        showingGameplayHudToast(
+          LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_NEARBY_STATION_REQUIRED_TOAST
+        );
+        return;
+      }
+
       if (recipeDefinition.outcome.kind === 'item') {
         updatingInventoryState((currentState) => {
           const craftResult = executingWorldPlazaCraftRecipeInventoryOutcome(
@@ -1872,6 +1897,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     },
     [
       activatingBuildMode,
+      activeScenePlacedBlocks,
       enteringBuildPlacementForBlockDefinition,
       inventoryState,
       isBuildModeEnabled,
@@ -2111,6 +2137,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const chestStoreRef = useRef(readingWorldPlazaChestInstanceStore());
   const bearTrapStoreRef = useRef(readingWorldPlazaBearTrapInstanceStore());
+  const caltropStoreRef = useRef(readingWorldPlazaCaltropInstanceStore());
 
   useEffect(() => {
     chestStoreRef.current = hydratingWorldPlazaChestInstanceStore(
@@ -2125,6 +2152,8 @@ function RenderingWorldPlazaPixiSceneConnected({
 
     hydratingWorldPlazaLocalBearTraps(localPersistenceOwnerId);
     bearTrapStoreRef.current = readingWorldPlazaBearTrapInstanceStore();
+    hydratingWorldPlazaLocalCaltrops(localPersistenceOwnerId);
+    caltropStoreRef.current = readingWorldPlazaCaltropInstanceStore();
   }, [localPersistenceOwnerId]);
 
   useEffect(() => {
@@ -3096,6 +3125,14 @@ function RenderingWorldPlazaPixiSceneConnected({
     showingGameplayHudToast,
   });
 
+  const { handlingCaltropAction } = usingWorldPlazaCaltropInteraction({
+    localPersistenceOwnerId,
+    playerPositionRef,
+    inventoryState,
+    updatingInventoryState,
+    showingGameplayHudToast,
+  });
+
   const completingShrubPickRef = useRef(completingShrubPick);
   completingShrubPickRef.current = completingShrubPick;
 
@@ -3472,6 +3509,13 @@ function RenderingWorldPlazaPixiSceneConnected({
   });
 
   usingWorldPlazaBearTrapTriggerTick({
+    playerPositionRef,
+    localPersistenceOwnerId,
+    applyBleedRef,
+    toggleBuffRef,
+  });
+
+  usingWorldPlazaCaltropTriggerTick({
     playerPositionRef,
     localPersistenceOwnerId,
     applyBleedRef,
@@ -5499,7 +5543,10 @@ function RenderingWorldPlazaPixiSceneConnected({
           ] ?? 0;
 
         if (
-          checkingPlazaHerbariumStudyTierUnlocked('full', currentStudyCount)
+          checkingPlazaHerbariumFlowerStudyTierUnlocked(
+            'full',
+            currentStudyCount
+          )
         ) {
           showingGameplayHudToast('Already fully studied.');
           return;
@@ -7161,9 +7208,14 @@ function RenderingWorldPlazaPixiSceneConnected({
                     />
                   ) : null}
                   {isTrapGenerationEnabled ? (
-                    <RenderingWorldPlazaBearTrapLayer
-                      trapStoreRef={bearTrapStoreRef}
-                    />
+                    <>
+                      <RenderingWorldPlazaBearTrapLayer
+                        trapStoreRef={bearTrapStoreRef}
+                      />
+                      <RenderingWorldPlazaCaltropLayer
+                        trapStoreRef={caltropStoreRef}
+                      />
+                    </>
                   ) : null}
                   <RenderingSpiritedSpritesBetaLayer
                     storeRef={spiritedSpritesBetaStoreRef}
@@ -7715,14 +7767,24 @@ function RenderingWorldPlazaPixiSceneConnected({
                 />
               ) : null}
               {isTrapGenerationEnabled ? (
-                <RenderingWorldPlazaBearTrapInteractionLabels
-                  selectedInteractableBlockKeysRef={
-                    selectedInteractableBlockKeysRef
-                  }
-                  cameraOffsetRef={cameraOffsetRef}
-                  cameraWorldZoomRef={cameraWorldZoomRef}
-                  onTrapAction={handlingBearTrapAction}
-                />
+                <>
+                  <RenderingWorldPlazaBearTrapInteractionLabels
+                    selectedInteractableBlockKeysRef={
+                      selectedInteractableBlockKeysRef
+                    }
+                    cameraOffsetRef={cameraOffsetRef}
+                    cameraWorldZoomRef={cameraWorldZoomRef}
+                    onTrapAction={handlingBearTrapAction}
+                  />
+                  <RenderingWorldPlazaCaltropInteractionLabels
+                    selectedInteractableBlockKeysRef={
+                      selectedInteractableBlockKeysRef
+                    }
+                    cameraOffsetRef={cameraOffsetRef}
+                    cameraWorldZoomRef={cameraWorldZoomRef}
+                    onTrapAction={handlingCaltropAction}
+                  />
+                </>
               ) : null}
               <RenderingWorldPlazaFishingInteractionLabels
                 playerPositionRef={playerPositionRef}

@@ -2,7 +2,7 @@
 
 |                  |            |
 | ---------------- | ---------- |
-| **Version**      | 1.3.23     |
+| **Version**      | 1.3.24     |
 | **Last updated** | 2026-07-14 |
 
 Read this when working on plaza world gameplay, combat, rendering sync, or inventory. There is **no central engine registry**; engines are folders and naming conventions scattered under `src/client/world/` and `src/client/components/inventory/`.
@@ -190,14 +190,16 @@ The plaza hook wires Redis/save-slot persistence and optional demo seed. World f
 | Attach store                             | `domains/managingWorldPlazaRecipeDiscoveryStore.ts` (`attachingWorldPlazaRecipePage`) |
 | Recipe-page items (auto from registry)   | `crafting/domains/registeringWorldPlazaCraftRecipePageInventoryItems.ts`              |
 | Dev QA: attach all + 99× ingredients     | `attachingWorldPlazaAllCraftModeRecipesForDevQa.ts`, `listingWorldPlazaCraftModeRecipeIngredientSeedItems.ts` (wired from Pixi recipe init + `usingWorldPlazaInventory`) |
+| Nearby station gate (anvil smithing)     | `requiredNearbyBlockDefinitionId` on recipe + `checkingWorldPlazaCraftRecipeNearbyStationSatisfied.ts` |
 
 **Extend (new recipe):**
 
 1. Add id to `DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID`.
 2. Append one row to `DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY` with `title`, `description`, `ingredients`, `recipeType`, and matching `outcome.kind` (`entity` = place block, `item` = inventory grant).
-3. Recipe-page inventory item + Recipes guide entry appear automatically.
-4. Player double-clicks the page item to attach (second attach refused). Cookbook only lists attached recipes.
-5. Dev QA load auto-attaches every registry recipe and seeds 99 of each unique ingredient (no extra wiring).
+3. Optional: set `requiredNearbyBlockDefinitionId` (e.g. anvil) so craft only works within station reach.
+4. Recipe-page inventory item + Recipes guide entry appear automatically.
+5. Player double-clicks the page item to attach (second attach refused). Cookbook only lists attached recipes.
+6. Dev QA load auto-attaches every registry recipe and seeds 99 of each unique ingredient (no extra wiring).
 
 ### 4c. Ore smelting stations
 
@@ -209,6 +211,19 @@ The plaza hook wires Redis/save-slot persistence and optional demo seed. World f
 | Timed station state hook | `crafting/hooks/usingWorldPlazaOreSmeltingStations.ts` |
 | Inventory DnD popover | `inventory/components/renderingWorldPlazaOreSmeltingPopover.tsx` |
 | Active glow + bloomery smoke | `building/components/renderingWorldPlazaBlacksmithUtilityLayer.tsx` |
+
+### 4d. Traps (bear + caltrop)
+
+**Purpose:** Player-placed ground traps under generation feature `TRAPS`.
+
+| Piece | Path |
+| ----- | ---- |
+| Bear trap store / trigger / layer | `trap/domains/*BearTrap*`, `trap/hooks/usingWorldPlazaBearTrap*`, `trap/components/renderingWorldPlazaBearTrap*` |
+| Caltrop store / trigger / layer | `trap/domains/*Caltrop*`, `trap/hooks/usingWorldPlazaCaltrop*`, `trap/components/renderingWorldPlazaCaltrop*` |
+| Drop placement | `inventory/hooks/trackingWorldPlazaInventoryDropPlacement.ts` (special-case item type ids) |
+| Craft (anvil) | `recipe-bear-trap`, `recipe-caltrops` in craft registry |
+
+**Caltrops:** one-shot walk-over → remove + `sluggish-debuff` + bleed (`bleeding`, 8 dmg). Pick up while still on ground. Item id `world-plaza-caltrops`.
 
 ---
 

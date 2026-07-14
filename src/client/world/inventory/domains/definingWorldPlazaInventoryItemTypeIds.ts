@@ -157,6 +157,10 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_BLUE =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_GOLDEN =
   'world-plaza-berry-golden' as const;
 
+/** Tea leaves loot from picking berry shrubs. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES =
+  'world-plaza-tea-leaves' as const;
+
 /** Coffee processing chain from coffee cherries. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS =
   'world-plaza-coffee-beans' as const;
@@ -222,3 +226,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_GOLD =
 /** Placeable bear trap (drops as armed world trap). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP =
   'world-plaza-bear-trap' as const;
+
+/** Placeable caltrops (one-shot walk-over slow + bleed). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CALTROPS =
+  'world-plaza-caltrops' as const;

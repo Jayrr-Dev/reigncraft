@@ -29,6 +29,8 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY = {
   SHRUB_TEXTURES_READY: 'shrubTexturesReady',
   CHEST_TEXTURES_READY: 'chestTexturesReady',
   BLACKSMITH_UTILITY_TEXTURES_READY: 'blacksmithUtilityTexturesReady',
+  BEAR_TRAP_TEXTURES_READY: 'bearTrapTexturesReady',
+  CALTROP_TEXTURES_READY: 'caltropTexturesReady',
   LAVA_TEXTURES_READY: 'lavaTexturesReady',
 } as const;
 

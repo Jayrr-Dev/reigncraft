@@ -7,12 +7,14 @@
  */
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
+import { resolvingWorldBuildingBlockDefinition } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import type { DefiningWorldPlazaCraftModeRecipeDefinition } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import {
   DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INGREDIENT_ICON_PX,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CRAFT_ACTION,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REQUIRED_ITEMS,
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeUiConstants';
+import { labelingWorldPlazaCraftRecipeNearbyStationRequirement } from '@/components/world/crafting/domains/definingWorldPlazaCraftRecipeNearbyStationConstants';
 import { resolvingWorldPlazaCraftRecipeIngredientRows } from '@/components/world/crafting/domains/resolvingWorldPlazaCraftRecipeIngredientRows';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
@@ -53,6 +55,19 @@ export function RenderingWorldPlazaCraftModeRecipeSpreadRightPage({
     [inventoryState, recipeDefinition]
   );
   const isAffordable = ingredientRows.every((row) => !row.isShort);
+  const nearbyStationRequirementLabel = useMemo(() => {
+    const requiredBlockDefinitionId =
+      recipeDefinition.requiredNearbyBlockDefinitionId;
+
+    if (!requiredBlockDefinitionId) {
+      return null;
+    }
+
+    const stationName =
+      resolvingWorldBuildingBlockDefinition(requiredBlockDefinitionId)?.name ??
+      'station';
+    return labelingWorldPlazaCraftRecipeNearbyStationRequirement(stationName);
+  }, [recipeDefinition.requiredNearbyBlockDefinitionId]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
@@ -91,6 +106,11 @@ export function RenderingWorldPlazaCraftModeRecipeSpreadRightPage({
           </li>
         ))}
       </ul>
+      {nearbyStationRequirementLabel ? (
+        <p className="text-[10px] font-semibold leading-snug text-[#7a4a1e] sm:text-[11px]">
+          {nearbyStationRequirementLabel}
+        </p>
+      ) : null}
       <button
         type="button"
         disabled={!isCraftingEnabled || !isAffordable}

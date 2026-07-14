@@ -11,6 +11,7 @@ import { readingWorldPlazaHerbariumDiscoveryFromStorage } from '@/components/wor
 import { writingWorldPlazaHerbariumDiscoveryToStorage } from '@/components/world/domains/writingWorldPlazaHerbariumDiscoveryToStorage';
 import type { WorldCloverSearchLootKind } from '../../../shared/worldCloverSearchLoot';
 import type { WorldFlowerSpeciesId } from '../../../shared/worldFlowerRarity';
+import type { WorldShrubBerryLootKind } from '../../../shared/worldShrubBerryLoot';
 
 const managingWorldPlazaHerbariumDiscoverySubscribers = new Set<() => void>();
 
@@ -31,6 +32,13 @@ const MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_TREE_STUDY_COUNTS: Readonly
 const MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SIGHTED_CLOVER_KINDS: readonly WorldCloverSearchLootKind[] =
   [];
 
+const MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SIGHTED_BERRY_LOOT_KINDS: readonly WorldShrubBerryLootKind[] =
+  [];
+
+const MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_BERRY_STUDY_COUNTS: Readonly<
+  Partial<Record<WorldShrubBerryLootKind, number>>
+> = {};
+
 let managingWorldPlazaHerbariumDiscoveryStorageOwnerId: string | null = null;
 let managingWorldPlazaHerbariumDiscoverySightedFlowerSpeciesIds =
   new Set<WorldFlowerSpeciesId>();
@@ -47,6 +55,12 @@ let managingWorldPlazaHerbariumDiscoveryTreeStudyCountsByVariant = new Map<
 let managingWorldPlazaHerbariumDiscoverySightedCloverKinds =
   new Set<WorldCloverSearchLootKind>();
 let managingWorldPlazaHerbariumDiscoveryCloverStudyCount = 0;
+let managingWorldPlazaHerbariumDiscoverySightedBerryLootKinds =
+  new Set<WorldShrubBerryLootKind>();
+let managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind = new Map<
+  WorldShrubBerryLootKind,
+  number
+>();
 
 let managingWorldPlazaHerbariumDiscoverySightedFlowerSnapshotCache: readonly WorldFlowerSpeciesId[] =
   MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_FLOWER_SNAPSHOT;
@@ -61,6 +75,11 @@ let managingWorldPlazaHerbariumDiscoveryTreeStudyCountsSnapshotCache: Readonly<
 let managingWorldPlazaHerbariumDiscoverySightedCloverKindsSnapshotCache: readonly WorldCloverSearchLootKind[] =
   MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SIGHTED_CLOVER_KINDS;
 let managingWorldPlazaHerbariumDiscoveryCloverStudyCountSnapshotCache = 0;
+let managingWorldPlazaHerbariumDiscoverySightedBerryLootKindsSnapshotCache: readonly WorldShrubBerryLootKind[] =
+  MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SIGHTED_BERRY_LOOT_KINDS;
+let managingWorldPlazaHerbariumDiscoveryBerryStudyCountsSnapshotCache: Readonly<
+  Partial<Record<WorldShrubBerryLootKind, number>>
+> = MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_BERRY_STUDY_COUNTS;
 
 function refreshingWorldPlazaHerbariumDiscoverySnapshotCaches(): void {
   managingWorldPlazaHerbariumDiscoverySightedFlowerSnapshotCache =
@@ -94,6 +113,18 @@ function refreshingWorldPlazaHerbariumDiscoverySnapshotCaches(): void {
 
   managingWorldPlazaHerbariumDiscoveryCloverStudyCountSnapshotCache =
     managingWorldPlazaHerbariumDiscoveryCloverStudyCount;
+
+  managingWorldPlazaHerbariumDiscoverySightedBerryLootKindsSnapshotCache =
+    managingWorldPlazaHerbariumDiscoverySightedBerryLootKinds.size === 0
+      ? MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SIGHTED_BERRY_LOOT_KINDS
+      : [...managingWorldPlazaHerbariumDiscoverySightedBerryLootKinds].sort();
+
+  managingWorldPlazaHerbariumDiscoveryBerryStudyCountsSnapshotCache =
+    managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind.size === 0
+      ? MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_BERRY_STUDY_COUNTS
+      : Object.fromEntries([
+          ...managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind.entries(),
+        ]);
 }
 
 function notifyingWorldPlazaHerbariumDiscoverySubscribers(): void {
@@ -111,7 +142,9 @@ function persistingWorldPlazaHerbariumDiscovery(): void {
     managingWorldPlazaHerbariumDiscoverySightedTreeVariants,
     managingWorldPlazaHerbariumDiscoveryTreeStudyCountsByVariant,
     managingWorldPlazaHerbariumDiscoverySightedCloverKinds,
-    managingWorldPlazaHerbariumDiscoveryCloverStudyCount
+    managingWorldPlazaHerbariumDiscoveryCloverStudyCount,
+    managingWorldPlazaHerbariumDiscoverySightedBerryLootKinds,
+    managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind
   );
 }
 
@@ -147,6 +180,12 @@ export function initializingWorldPlazaHerbariumDiscoveryStore(
   );
   managingWorldPlazaHerbariumDiscoveryCloverStudyCount =
     snapshot.cloverStudyCount;
+  managingWorldPlazaHerbariumDiscoverySightedBerryLootKinds = new Set(
+    snapshot.sightedBerryLootKinds
+  );
+  managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind = new Map(
+    snapshot.berryStudyCountsByLootKind
+  );
   refreshingWorldPlazaHerbariumDiscoverySnapshotCaches();
   notifyingWorldPlazaHerbariumDiscoverySubscribers();
 }
@@ -183,6 +222,18 @@ export function gettingWorldPlazaHerbariumSightedCloverKindsSnapshot(): readonly
 /** Combined clover study total (three-leaf + four-leaf finds). */
 export function gettingWorldPlazaHerbariumCloverStudyCountSnapshot(): number {
   return managingWorldPlazaHerbariumDiscoveryCloverStudyCountSnapshotCache;
+}
+
+/** Returns a stable snapshot of sighted berry/tea loot kinds for React subscriptions. */
+export function gettingWorldPlazaHerbariumSightedBerryLootKindsSnapshot(): readonly WorldShrubBerryLootKind[] {
+  return managingWorldPlazaHerbariumDiscoverySightedBerryLootKindsSnapshotCache;
+}
+
+/** Returns per-loot-kind berry/tea Study totals for tiered herbarium detail. */
+export function gettingWorldPlazaHerbariumBerryStudyCountsSnapshot(): Readonly<
+  Partial<Record<WorldShrubBerryLootKind, number>>
+> {
+  return managingWorldPlazaHerbariumDiscoveryBerryStudyCountsSnapshotCache;
 }
 
 /**
@@ -377,6 +428,99 @@ export function ensuringWorldPlazaHerbariumCloverStudyAtLeast(
 }
 
 /**
+ * Records one berry/tea loot kind as sighted if the player has not logged it yet.
+ *
+ * @param lootKind - Shrub loot kind encountered or picked.
+ */
+export function recordingWorldPlazaHerbariumBerrySighted(
+  lootKind: WorldShrubBerryLootKind
+): void {
+  if (managingWorldPlazaHerbariumDiscoverySightedBerryLootKinds.has(lootKind)) {
+    return;
+  }
+
+  managingWorldPlazaHerbariumDiscoverySightedBerryLootKinds = new Set([
+    ...managingWorldPlazaHerbariumDiscoverySightedBerryLootKinds,
+    lootKind,
+  ]);
+  persistingWorldPlazaHerbariumDiscovery();
+  notifyingWorldPlazaHerbariumDiscoverySubscribers();
+}
+
+/**
+ * Records Study progress for a berry/tea loot kind and ensures it is sighted.
+ *
+ * @param lootKind - Shrub loot kind the local player picked or studied.
+ * @param studyPoints - Points awarded for this Study (default 1).
+ */
+export function recordingWorldPlazaHerbariumBerryStudied(
+  lootKind: WorldShrubBerryLootKind,
+  studyPoints = 1
+): void {
+  const awardedStudyPoints = Math.max(1, Math.floor(studyPoints));
+  const nextStudyCount =
+    (managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind.get(
+      lootKind
+    ) ?? 0) + awardedStudyPoints;
+
+  managingWorldPlazaHerbariumDiscoverySightedBerryLootKinds = new Set([
+    ...managingWorldPlazaHerbariumDiscoverySightedBerryLootKinds,
+    lootKind,
+  ]);
+  managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind = new Map(
+    managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind
+  );
+  managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind.set(
+    lootKind,
+    nextStudyCount
+  );
+
+  persistingWorldPlazaHerbariumDiscovery();
+  notifyingWorldPlazaHerbariumDiscoverySubscribers();
+}
+
+/**
+ * Raises berry/tea study progress to at least `minimumStudyCount` without lowering.
+ * Used when backfilling from inventory holdings already gathered before the
+ * herbarium tracked shrub loot.
+ *
+ * @param lootKind - Shrub loot kind already gathered.
+ * @param minimumStudyCount - Floor for study progress (minimum 1).
+ */
+export function ensuringWorldPlazaHerbariumBerryStudyAtLeast(
+  lootKind: WorldShrubBerryLootKind,
+  minimumStudyCount: number
+): void {
+  const studyFloor = Math.max(1, Math.floor(minimumStudyCount));
+  const currentStudyCount =
+    managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind.get(
+      lootKind
+    ) ?? 0;
+
+  if (
+    currentStudyCount >= studyFloor &&
+    managingWorldPlazaHerbariumDiscoverySightedBerryLootKinds.has(lootKind)
+  ) {
+    return;
+  }
+
+  managingWorldPlazaHerbariumDiscoverySightedBerryLootKinds = new Set([
+    ...managingWorldPlazaHerbariumDiscoverySightedBerryLootKinds,
+    lootKind,
+  ]);
+  managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind = new Map(
+    managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind
+  );
+  managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind.set(
+    lootKind,
+    Math.max(currentStudyCount, studyFloor)
+  );
+
+  persistingWorldPlazaHerbariumDiscovery();
+  notifyingWorldPlazaHerbariumDiscoverySubscribers();
+}
+
+/**
  * Subscribes to herbarium discovery changes.
  *
  * @param onStoreChange - Callback invoked when discovery state changes.
@@ -400,6 +544,8 @@ export function resettingWorldPlazaHerbariumDiscoveryStoreForTests(): void {
   managingWorldPlazaHerbariumDiscoveryTreeStudyCountsByVariant = new Map();
   managingWorldPlazaHerbariumDiscoverySightedCloverKinds = new Set();
   managingWorldPlazaHerbariumDiscoveryCloverStudyCount = 0;
+  managingWorldPlazaHerbariumDiscoverySightedBerryLootKinds = new Set();
+  managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind = new Map();
   refreshingWorldPlazaHerbariumDiscoverySnapshotCaches();
   managingWorldPlazaHerbariumDiscoverySubscribers.clear();
 }

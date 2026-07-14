@@ -7,7 +7,7 @@ export type DefiningPlazaHerbariumCloverEntry = {
   icon: string;
   /** Shown after the player finds this clover kind once. */
   summary: string;
-  /** Shown after the first Study point on the shared clover track. */
+  /** Field notes unlocked after the first Study point on the shared clover track. */
   studiedSummary: string;
   /** Properties tier copy (four-leaf stays vague until full combined study). */
   propertiesSummary: string;
@@ -24,7 +24,7 @@ export const DEFINING_PLAZA_HERBARIUM_CLOVER_GUIDE_ENTRIES: readonly DefiningPla
       icon: 'mdi:clover',
       summary: 'A common shamrock tangled in long grass.',
       studiedSummary:
-        'Three-leaf clovers turn up in almost every long-grass search. Wanderers pocket them for luck that never quite arrives.',
+        'Three-leaf shamrock in every long-grass search. Pocket for luck that never shows its work.',
       propertiesSummary: 'Common forage. No studied effect when held.',
     },
     {
@@ -33,7 +33,7 @@ export const DEFINING_PLAZA_HERBARIUM_CLOVER_GUIDE_ENTRIES: readonly DefiningPla
       icon: 'mdi:clover',
       summary: 'A rare fourth leaf tucked in the tangle.',
       studiedSummary:
-        'Four-leaf clovers are scarce enough that most field notes stop at superstition. Carry one and something shifts, but the books disagree on what.',
+        'Fourth leaf scarce enough that notes stop at superstition. Carried one week; rare finds seemed easier, hits landed softer. Books disagree on mechanism.',
       propertiesSummary:
         'Carried: something favors you. Field notes are not detailed enough to say how.',
       propertiesSummaryFull:

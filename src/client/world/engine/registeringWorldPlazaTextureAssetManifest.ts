@@ -8,6 +8,11 @@ import {
   DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_URL,
 } from '@/components/world/trap/domains/definingWorldPlazaBearTrapConstants';
 import {
+  DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_CELL_PX,
+  DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_COLUMN_COUNT,
+  DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_URL,
+} from '@/components/world/trap/domains/definingWorldPlazaCaltropConstants';
+import {
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_ACTIVE_WORLD_SPRITE_URL,
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL,
 } from '@/components/world/building/domains/definingWorldPlazaBlacksmithUtilitySpriteConstants';
@@ -28,6 +33,7 @@ export const REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID = {
   SHRUB_SPRITES: 'shrub-sprites',
   CHEST_SPRITES: 'chest-sprites',
   BEAR_TRAP_SPRITES: 'bear-trap-sprites',
+  CALTROP_SPRITES: 'caltrop-sprites',
   BLACKSMITH_UTILITY_SPRITES: 'blacksmith-utility-sprites',
 } as const;
 
@@ -303,6 +309,34 @@ export const registeringWorldPlazaBearTrapSpriteTextureLoader =
     },
   });
 
+/** Loader for caltrop sprite sheet frames (2x1 @ 32px). */
+export const registeringWorldPlazaCaltropSpriteTextureLoader =
+  creatingWorldPlazaTextureAssetLoader({
+    id: REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.CALTROP_SPRITES,
+    load: async () => {
+      const sheet = await loadingWorldPlazaFirelandsTextureWithRetry(
+        DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_URL
+      );
+      const cellPx = DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_CELL_PX;
+      const frames: Texture[] = [];
+
+      for (
+        let column = 0;
+        column < DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_COLUMN_COUNT;
+        column += 1
+      ) {
+        frames.push(
+          new Texture({
+            source: sheet.source,
+            frame: new Rectangle(column * cellPx, 0, cellPx, cellPx),
+          })
+        );
+      }
+
+      return frames;
+    },
+  });
+
 const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_SPRITE_URLS = [
   ...new Set([
     ...Object.values(
@@ -342,6 +376,7 @@ export const REGISTERING_WORLD_PLAZA_TERRAIN_TEXTURE_ASSET_MANIFEST = [
   registeringWorldPlazaShrubSpriteTextureLoader,
   registeringWorldPlazaChestSpriteTextureLoader,
   registeringWorldPlazaBearTrapSpriteTextureLoader,
+  registeringWorldPlazaCaltropSpriteTextureLoader,
   registeringWorldPlazaBlacksmithUtilitySpriteTextureLoader,
 ] as const;
 
@@ -441,6 +476,24 @@ export function peekingWorldPlazaBearTrapSpriteTextureForFrameFromManifest(
   frameIndex: number
 ): Texture | null {
   const frames = registeringWorldPlazaBearTrapSpriteTextureLoader.peek();
+
+  if (!frames || frames.length === 0) {
+    return null;
+  }
+
+  const safeIndex =
+    ((frameIndex % frames.length) + frames.length) % frames.length;
+
+  return frames[safeIndex] ?? null;
+}
+
+/**
+ * Resolves one cropped caltrop frame texture by column index.
+ */
+export function peekingWorldPlazaCaltropSpriteTextureForFrameFromManifest(
+  frameIndex: number
+): Texture | null {
+  const frames = registeringWorldPlazaCaltropSpriteTextureLoader.peek();
 
   if (!frames || frames.length === 0) {
     return null;

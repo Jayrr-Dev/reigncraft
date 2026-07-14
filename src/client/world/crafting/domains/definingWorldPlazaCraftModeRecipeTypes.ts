@@ -21,6 +21,8 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID = {
   BLOOMERY: 'recipe-bloomery',
   CLAY_KILN: 'recipe-clay-kiln',
   CLAY_STOVE: 'recipe-clay-stove',
+  BEAR_TRAP: 'recipe-bear-trap',
+  CALTROPS: 'recipe-caltrops',
 } as const;
 
 /** One craft-mode recipe id. */
@@ -83,6 +85,13 @@ type DefiningWorldPlazaCraftModeRecipeDefinitionBase = {
   readonly description: string;
   readonly recipeVisual: DefiningWorldPlazaCraftModeRecipeVisual;
   readonly ingredients: readonly DefiningWorldPlazaCraftModeRecipeIngredient[];
+  /**
+   * When set, craft only succeeds while the player stands near a placed block
+   * of this definition (e.g. anvil for smithing items).
+   */
+  readonly requiredNearbyBlockDefinitionId?: DefiningWorldBuildingBlockDefinitionId;
+  /** Chebyshev tile reach for {@link requiredNearbyBlockDefinitionId}. */
+  readonly requiredNearbyBlockRangeTiles?: number;
 };
 
 /** Entity-output recipe (arms build placement). */

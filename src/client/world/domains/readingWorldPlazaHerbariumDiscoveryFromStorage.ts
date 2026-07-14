@@ -3,10 +3,18 @@ import type { DefiningWorldPlazaTreeVariantKind } from '@/components/world/domai
 import type { WorldCloverSearchLootKind } from '../../../shared/worldCloverSearchLoot';
 import type { WorldFlowerSpeciesId } from '../../../shared/worldFlowerRarity';
 import { WORLD_FLOWER_SPECIES_RARITY_REGISTRY } from '../../../shared/worldFlowerRarity';
+import type { WorldShrubBerryLootKind } from '../../../shared/worldShrubBerryLoot';
 
 const DEFINING_WORLD_PLAZA_HERBARIUM_CLOVER_KIND_SET = new Set<string>([
   'three_leaf',
   'four_leaf',
+]);
+
+const DEFINING_WORLD_PLAZA_HERBARIUM_BERRY_LOOT_KIND_SET = new Set<string>([
+  'red_berry',
+  'blue_berry',
+  'golden_berry',
+  'tea_leaves',
 ]);
 
 const DEFINING_WORLD_PLAZA_HERBARIUM_FLOWER_SPECIES_ID_SET = new Set<string>(
@@ -38,6 +46,8 @@ export type WorldPlazaHerbariumDiscoverySnapshot = {
   >;
   sightedCloverKinds: ReadonlySet<WorldCloverSearchLootKind>;
   cloverStudyCount: number;
+  sightedBerryLootKinds: ReadonlySet<WorldShrubBerryLootKind>;
+  berryStudyCountsByLootKind: ReadonlyMap<WorldShrubBerryLootKind, number>;
 };
 
 function checkingWorldPlazaHerbariumFlowerSpeciesId(
@@ -106,6 +116,15 @@ function checkingWorldPlazaHerbariumCloverKind(
   );
 }
 
+function checkingWorldPlazaHerbariumBerryLootKind(
+  value: unknown
+): value is WorldShrubBerryLootKind {
+  return (
+    typeof value === 'string' &&
+    DEFINING_WORLD_PLAZA_HERBARIUM_BERRY_LOOT_KIND_SET.has(value)
+  );
+}
+
 const WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SNAPSHOT: WorldPlazaHerbariumDiscoverySnapshot =
   {
     sightedFlowerSpeciesIds: new Set(),
@@ -114,6 +133,8 @@ const WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SNAPSHOT: WorldPlazaHerbariumDiscove
     treeStudyCountsByVariant: new Map(),
     sightedCloverKinds: new Set(),
     cloverStudyCount: 0,
+    sightedBerryLootKinds: new Set(),
+    berryStudyCountsByLootKind: new Map(),
   };
 
 /**
@@ -171,6 +192,14 @@ export function readingWorldPlazaHerbariumDiscoveryFromStorage(
           ? Math.max(0, Math.floor(rawCount))
           : 0;
       })(),
+      sightedBerryLootKinds: readingWorldPlazaHerbariumIdSet(
+        Reflect.get(parsedValue, 'sightedBerries'),
+        checkingWorldPlazaHerbariumBerryLootKind
+      ),
+      berryStudyCountsByLootKind: readingWorldPlazaHerbariumStudyCounts(
+        Reflect.get(parsedValue, 'berryStudyCounts'),
+        checkingWorldPlazaHerbariumBerryLootKind
+      ),
     };
   } catch {
     return WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SNAPSHOT;

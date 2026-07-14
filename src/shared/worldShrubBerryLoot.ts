@@ -4,7 +4,11 @@
  * @module shared/worldShrubBerryLoot
  */
 
-export type WorldShrubBerryLootKind = 'red_berry' | 'blue_berry' | 'golden_berry';
+export type WorldShrubBerryLootKind =
+  | 'red_berry'
+  | 'blue_berry'
+  | 'golden_berry'
+  | 'tea_leaves';
 
 export type WorldShrubBerryLootEntry = {
   readonly itemKind: WorldShrubBerryLootKind;
@@ -14,9 +18,10 @@ export type WorldShrubBerryLootEntry = {
 /** Weighted berry table (total weight 100). */
 export const WORLD_SHRUB_BERRY_LOOT_REGISTRY: readonly WorldShrubBerryLootEntry[] =
   [
-    { itemKind: 'red_berry', weight: 70 },
-    { itemKind: 'blue_berry', weight: 25 },
+    { itemKind: 'red_berry', weight: 58 },
+    { itemKind: 'blue_berry', weight: 22 },
     { itemKind: 'golden_berry', weight: 5 },
+    { itemKind: 'tea_leaves', weight: 15 },
   ];
 
 export const WORLD_SHRUB_BERRY_LOOT_TOTAL_WEIGHT =

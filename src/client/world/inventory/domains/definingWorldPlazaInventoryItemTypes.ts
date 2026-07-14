@@ -25,10 +25,12 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryEnchantmentTypeIds';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import { DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_URL } from '@/components/world/trap/domains/definingWorldPlazaBearTrapConstants';
+import { DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_URL } from '@/components/world/trap/domains/definingWorldPlazaCaltropConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CALTROPS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COCONUT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_COCONUT,
@@ -132,6 +134,21 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       iconSpriteSheet: {
         spriteSheetUrl: DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_URL,
         columnCount: 4,
+        rowCount: 1,
+        columnIndex: 0,
+        rowIndex: 0,
+      },
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CALTROPS,
+      name: 'Caltrops',
+      rarity: 'common',
+      maxStack: 20,
+      isDroppable: true,
+      isStackable: true,
+      iconSpriteSheet: {
+        spriteSheetUrl: DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_URL,
+        columnCount: 2,
         rowCount: 1,
         columnIndex: 0,
         rowIndex: 0,
@@ -369,6 +386,10 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS: readonly DefiningWo
     {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP,
       quantity: 2,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CALTROPS,
+      quantity: 6,
     },
     {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED,

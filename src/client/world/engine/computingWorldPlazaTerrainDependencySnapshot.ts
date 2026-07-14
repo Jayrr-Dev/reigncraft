@@ -27,6 +27,8 @@ import {
   registeringWorldPlazaLongGrassSpriteTextureLoader,
   registeringWorldPlazaLavaStaticTileTextureLoader,
   registeringWorldPlazaShrubSpriteTextureLoader,
+  registeringWorldPlazaBearTrapSpriteTextureLoader,
+  registeringWorldPlazaCaltropSpriteTextureLoader,
 } from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
@@ -135,6 +137,10 @@ export function computingWorldPlazaTerrainDependencySnapshot(
       registeringWorldPlazaBlacksmithUtilitySpriteTextureLoader.isReady()
         ? '1'
         : '0',
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BEAR_TRAP_TEXTURES_READY]:
+      registeringWorldPlazaBearTrapSpriteTextureLoader.isReady() ? '1' : '0',
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.CALTROP_TEXTURES_READY]:
+      registeringWorldPlazaCaltropSpriteTextureLoader.isReady() ? '1' : '0',
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LAVA_TEXTURES_READY]:
       registeringWorldPlazaLavaStaticTileTextureLoader.isReady() ? '1' : '0',
   };

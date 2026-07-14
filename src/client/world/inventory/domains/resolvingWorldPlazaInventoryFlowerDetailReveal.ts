@@ -69,8 +69,6 @@ export function resolvingWorldPlazaInventoryFlowerDetailContent(
   speciesId: WorldFlowerSpeciesId,
   options: {
     readonly studyCount: number;
-    readonly fallbackName: string;
-    readonly fallbackDescription: string;
   }
 ): ResolvingWorldPlazaInventoryFlowerDetailContent {
   const reveal = resolvingWorldPlazaInventoryFlowerDetailReveal(
@@ -83,14 +81,10 @@ export function resolvingWorldPlazaInventoryFlowerDetailContent(
   let description = '';
 
   if (reveal.descriptionTier === 1) {
-    description = guideEntry?.summary ?? options.fallbackDescription;
-  } else if (reveal.descriptionTier === 2) {
-    description = guideEntry?.studiedSummary ?? options.fallbackDescription;
-  } else if (reveal.descriptionTier === 3) {
-    const studied = guideEntry?.studiedSummary ?? options.fallbackDescription;
-    const properties = guideEntry?.propertiesSummary;
-
-    description = properties ? `${studied} ${properties}` : studied;
+    description = guideEntry?.summary ?? '';
+  } else if (reveal.descriptionTier >= 2) {
+    // Field notes only. Effect spoilers live in gated info rows.
+    description = guideEntry?.studiedSummary ?? '';
   }
 
   if (reveal.showStudyProgress) {

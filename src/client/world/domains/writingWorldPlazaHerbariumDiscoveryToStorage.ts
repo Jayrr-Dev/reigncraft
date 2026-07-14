@@ -2,6 +2,7 @@ import { resolvingWorldPlazaHerbariumDiscoveryStorageKey } from '@/components/wo
 import type { DefiningWorldPlazaTreeVariantKind } from '@/components/world/domains/definingWorldPlazaTreeConstants';
 import type { WorldCloverSearchLootKind } from '../../../shared/worldCloverSearchLoot';
 import type { WorldFlowerSpeciesId } from '../../../shared/worldFlowerRarity';
+import type { WorldShrubBerryLootKind } from '../../../shared/worldShrubBerryLoot';
 
 function formattingWorldPlazaHerbariumStudyCountsRecord<TId extends string>(
   studyCountsById: ReadonlyMap<TId, number>
@@ -28,7 +29,9 @@ export function writingWorldPlazaHerbariumDiscoveryToStorage(
     number
   >,
   sightedCloverKinds: ReadonlySet<WorldCloverSearchLootKind>,
-  cloverStudyCount: number
+  cloverStudyCount: number,
+  sightedBerryLootKinds: ReadonlySet<WorldShrubBerryLootKind>,
+  berryStudyCountsByLootKind: ReadonlyMap<WorldShrubBerryLootKind, number>
 ): void {
   if (typeof window === 'undefined') {
     return;
@@ -47,6 +50,10 @@ export function writingWorldPlazaHerbariumDiscoveryToStorage(
       ),
       sightedClovers: [...sightedCloverKinds].sort(),
       cloverStudyCount: cloverStudyCount > 0 ? cloverStudyCount : undefined,
+      sightedBerries: [...sightedBerryLootKinds].sort(),
+      berryStudyCounts: formattingWorldPlazaHerbariumStudyCountsRecord(
+        berryStudyCountsByLootKind
+      ),
     })
   );
 }

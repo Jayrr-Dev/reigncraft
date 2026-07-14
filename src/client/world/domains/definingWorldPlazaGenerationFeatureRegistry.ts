@@ -276,7 +276,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
       groupId: 'entities',
       label: 'Traps',
       description:
-        'Player-placed bear traps, snap animation, snare/bleed, Arm/Disarm/Pick up.',
+        'Player-placed bear traps and caltrops. Bear traps snare/bleed with Arm/Disarm/Pick up; caltrops are one-shot slow + bleed.',
     },
     {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES,

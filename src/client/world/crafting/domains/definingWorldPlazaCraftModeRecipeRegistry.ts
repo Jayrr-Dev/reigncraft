@@ -55,12 +55,26 @@ import {
   type DefiningWorldPlazaCraftModeRecipeId,
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CALTROPS,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_CLAY,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COAL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_IRON,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import {
+  DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_COLUMN_COUNT,
+  DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_ROW_COUNT,
+  DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_URL,
+} from '@/components/world/trap/domains/definingWorldPlazaBearTrapConstants';
+import {
+  DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_COLUMN_COUNT,
+  DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_ROW_COUNT,
+  DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_URL,
+} from '@/components/world/trap/domains/definingWorldPlazaCaltropConstants';
+import { DEFINING_WORLD_PLAZA_CRAFT_RECIPE_NEARBY_STATION_RANGE_TILES } from '@/components/world/crafting/domains/definingWorldPlazaCraftRecipeNearbyStationConstants';
 
 /** Campfire recipe ingredient counts. */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_STONE_COST = 8;
@@ -85,6 +99,14 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CLAY_KILN_WOOD_COST = 4;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CLAY_STOVE_CLAY_COST = 8;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CLAY_STOVE_STONE_COST = 4;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CLAY_STOVE_COAL_COST = 2;
+
+/** Bear trap smith recipe ingredient counts (requires nearby anvil). */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BEAR_TRAP_IRON_INGOT_COST = 3;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BEAR_TRAP_WOOD_COST = 2;
+
+/** Caltrops smith recipe ingredient counts (requires nearby anvil). */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CALTROPS_IRON_INGOT_COST = 1;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CALTROPS_OUTPUT_QUANTITY = 3;
 
 /**
  * All registered craft recipes in cookbook pager order.
@@ -179,6 +201,78 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
       kind: 'entity',
       blockDefinitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
       blockHeight: DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT,
+    },
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.BEAR_TRAP,
+    cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.BLACKSMITH,
+    title: 'Bear Trap',
+    description:
+      'A sprung iron jaw for ground snares. Hammer it at an anvil; it will not take shape in the open field.',
+    recipeVisual: {
+      visualKind: 'sprite-sheet',
+      spriteSheetIcon: {
+        spriteSheetUrl: DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_URL,
+        columnCount: DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_COLUMN_COUNT,
+        rowCount: DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_ROW_COUNT,
+        columnIndex: 0,
+        rowIndex: 0,
+      },
+    },
+    ingredients: [
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BEAR_TRAP_IRON_INGOT_COST,
+      },
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+        quantity: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BEAR_TRAP_WOOD_COST,
+      },
+    ],
+    recipeType: 'item',
+    requiredNearbyBlockDefinitionId:
+      DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL,
+    requiredNearbyBlockRangeTiles:
+      DEFINING_WORLD_PLAZA_CRAFT_RECIPE_NEARBY_STATION_RANGE_TILES,
+    outcome: {
+      kind: 'item',
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP,
+      quantity: 1,
+    },
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CALTROPS,
+    cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.BLACKSMITH,
+    title: 'Caltrops',
+    description:
+      'Scattered iron spikes. Hammer a handful at an anvil; walking onto them slows and bleeds, then the cluster is spent.',
+    recipeVisual: {
+      visualKind: 'sprite-sheet',
+      spriteSheetIcon: {
+        spriteSheetUrl: DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_URL,
+        columnCount: DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_COLUMN_COUNT,
+        rowCount: DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_ROW_COUNT,
+        columnIndex: 0,
+        rowIndex: 0,
+      },
+    },
+    ingredients: [
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CALTROPS_IRON_INGOT_COST,
+      },
+    ],
+    recipeType: 'item',
+    requiredNearbyBlockDefinitionId:
+      DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL,
+    requiredNearbyBlockRangeTiles:
+      DEFINING_WORLD_PLAZA_CRAFT_RECIPE_NEARBY_STATION_RANGE_TILES,
+    outcome: {
+      kind: 'item',
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CALTROPS,
+      quantity: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CALTROPS_OUTPUT_QUANTITY,
     },
   },
   {

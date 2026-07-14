@@ -16,7 +16,7 @@ export type DefiningPlazaPathologyGuideEntry = {
   hudIconBorderClassName: string;
   /** Shown after the player first contracts the disease. */
   summary: string;
-  /** Shown after the first Pathology study point. */
+  /** Field notes unlocked after the first Pathology study point. */
   studiedSummary: string;
   /** Short symptom note shown in the Symptoms tier. */
   propertiesSummary: string;
@@ -54,15 +54,122 @@ export const LABELING_PLAZA_PATHOLOGY_SEVERITY: Record<
 export const LABELING_PLAZA_PATHOLOGY_FLOWER_SOURCE =
   'Raw flowers (chewing petals)' as const;
 
-function resolvingPlazaPathologyGuideSummary(description: string): string {
-  const firstSentence = description.split(/(?<=\.)\s+/)[0]?.trim();
+type DefiningPlazaPathologyGuideCopy = {
+  summary: string;
+  studiedSummary: string;
+};
 
-  if (firstSentence && firstSentence.length > 0) {
-    return firstSentence;
-  }
-
-  return description;
-}
+/** Codex sighting line and field notes per disease (independent of HUD description). */
+const DEFINING_PLAZA_PATHOLOGY_GUIDE_COPY: Record<
+  DefiningWorldPlazaEntityDiseaseId,
+  DefiningPlazaPathologyGuideCopy
+> = {
+  salmonellosis: {
+    summary: 'Gut heaves after half-cooked fowl; legs feel poured full of sand.',
+    studiedSummary:
+      'Specimen: undercooked poultry, pink at the bone. Belly clenches first, then a slow poison burns through. Cook until the juices run clear.',
+  },
+  'chronic-wasting': {
+    summary: 'The mind drifts sideways; legs refuse to keep pace.',
+    studiedSummary:
+      'Cervid meat, barely seared. Thoughts scatter mid-step and the weakness does not lift when the fever breaks. Worst sickness I have watched linger.',
+  },
+  trichinellosis: {
+    summary: 'Joints lock after raw pork; muscles feel threaded with wire.',
+    studiedSummary:
+      'Larvae in raw swine flesh. First the limbs stiffen, then poison climbs as the worms wake. No shortcut through the cook fire.',
+  },
+  'mad-cow': {
+    summary: 'Beef meal, then the world tilts and names slip loose.',
+    studiedSummary:
+      'Tainted ox meat. Confusion comes in layers and the nerves keep taking damage after you think the worst is past.',
+  },
+  'liver-fluke': {
+    summary: 'Ovine offal left the gait short and breath thin.',
+    studiedSummary:
+      'Flukes from sheep liver, eaten raw or half done. Walk slows first; any sprint drains stamina hard and recovery crawls.',
+  },
+  'sleeping-sickness': {
+    summary: 'Zebra flesh, then heavy sleep and wrong turns in open ground.',
+    studiedSummary:
+      'Trypanosomes from striped ungulate meat. Drowsiness hits in waves between spells of not knowing which way is forward.',
+  },
+  'wolf-fever': {
+    summary: 'Predator meat cost me my jump and my footing in the same hour.',
+    studiedSummary:
+      'Carried in wolf and kin flesh. Cannot jump or roll; the ground seems to tilt when you try. Eat cooked or stay off cliffs.',
+  },
+  'bear-worm': {
+    summary: 'Bear meat left the arms weak; blood came later.',
+    studiedSummary:
+      'Worms from ursine carcass, same family as swine sickness but slower. Weakness stacks first; bleeding opens in the late stage.',
+  },
+  toxoplasmosis: {
+    summary: 'Big-cat meat dulled my hands and scrambled my heading.',
+    studiedSummary:
+      'Parasite from panther and lion flesh. Reflexes drag; direction sense frays. Cook through or do not touch the kill.',
+  },
+  'vibrio-infection': {
+    summary: 'Reptile meat brought fast poison, then a heavier blow later.',
+    studiedSummary:
+      'Vibrio in cold-blooded flesh. Poison strikes quick; delayed shock damage lands after you think you are standing again.',
+  },
+  'feline-gut': {
+    summary: 'Cat or camp dog meat; gut cramps faster than bad fowl ever did.',
+    studiedSummary:
+      'Campylobacter from domestic cat and camp dog meat. Same rot family as poultry sickness but the belly turns inside out quicker.',
+  },
+  'primate-fever': {
+    summary: 'Primate meat dulled edge and hand before the fever poison rose.',
+    studiedSummary:
+      'Parasites in tree-dweller flesh, monkey and chimp. Reflexes slip; fever poison follows. Rare prey, common regret.',
+  },
+  'equine-drowse': {
+    summary: 'Horse flesh brought sleep between bouts of not knowing north from south.',
+    studiedSummary:
+      'From horse and donkey meat. Drowsiness and confusion trade places in waves. Cook long or nap in a dangerous place.',
+  },
+  'scavenger-rot': {
+    summary: 'Hyena kill left the body weak; venomous burn followed.',
+    studiedSummary:
+      'Hyena carcass, rank even cold. Weakness stacks; a venomous poison trails behind. Scavenger meat is never worth the gamble.',
+  },
+  'tusk-fluke': {
+    summary: 'Tusked giant meat drained stamina at a run; poison would not shake loose.',
+    studiedSummary:
+      'Flukes from elephant, rhino, and mammoth flesh. Sprint stamina collapses; toxic poison lingers past the first rest. Heavy cook, long rest.',
+  },
+  'cucco-rage': {
+    summary: 'Raw bird meat: hotter blood, harder hits, then the flock thinks for me.',
+    studiedSummary:
+      'Aggressive bird flesh eaten raw. Body runs hot and strikes hard first; later the flock seems to steer the hands. Strange blessing, stranger curse.',
+  },
+  'pollen-fever': {
+    summary: 'Chewed petals left the throat dusty; fever and a light burn followed.',
+    studiedSummary:
+      'Airborne dust from raw flower petals. Mild fever slows the gait; a light toxic burn trails. Dry petals are worse than wet.',
+  },
+  'petal-pox': {
+    summary: 'Petal rash itched until the skin took hits easier; blood seeped late.',
+    studiedSummary:
+      'Itchy rash from petal contact, raw or chewed. Skin thins to blows first; bleeding seeps through in the late stage. Wash hands after picking.',
+  },
+  rootgut: {
+    summary: 'Bitter root oils from raw blooms; belly cramps followed the nausea.',
+    studiedSummary:
+      'Bitter oils in raw flower roots and stems, not just petals. Nausea first, then toxic cramp. Boil or avoid the whole plant.',
+  },
+  moonblight: {
+    summary: 'Night bloom toxins: confusion thickens under moon, eases at dawn.',
+    studiedSummary:
+      'Toxins from night-blooming flowers eaten raw. Confusion and stamina drain swell under moonlight; daylight pulls the edge off. Travel by day if you slip.',
+  },
+  seedlung: {
+    summary: 'Raw flower seeds left each breath shaving stamina; dust burned after.',
+    studiedSummary:
+      'Seeds in raw flower meals lodge in the lungs. Every breath costs stamina; toxic dust follows. Spit seeds out before you chew.',
+  },
+};
 
 function buildingPlazaPathologyGuideEntries(): readonly DefiningPlazaPathologyGuideEntry[] {
   return listingWorldPlazaEntityDiseaseDescriptors()
@@ -78,17 +185,21 @@ function buildingPlazaPathologyGuideEntries(): readonly DefiningPlazaPathologyGu
 
       return left.label.localeCompare(right.label);
     })
-    .map((descriptor) => ({
-      diseaseId: descriptor.id,
-      displayName: descriptor.label,
-      icon: descriptor.icon,
-      severity: descriptor.severity,
-      hudIconColorClassName: descriptor.hudIconColorClassName,
-      hudIconBorderClassName: descriptor.hudIconBorderClassName,
-      summary: resolvingPlazaPathologyGuideSummary(descriptor.description),
-      studiedSummary: descriptor.description,
-      propertiesSummary: `${LABELING_PLAZA_PATHOLOGY_SEVERITY[descriptor.severity]} illness. Stages fire after incubation ends.`,
-    }));
+    .map((descriptor) => {
+      const copy = DEFINING_PLAZA_PATHOLOGY_GUIDE_COPY[descriptor.id];
+
+      return {
+        diseaseId: descriptor.id,
+        displayName: descriptor.label,
+        icon: descriptor.icon,
+        severity: descriptor.severity,
+        hudIconColorClassName: descriptor.hudIconColorClassName,
+        hudIconBorderClassName: descriptor.hudIconBorderClassName,
+        summary: copy.summary,
+        studiedSummary: copy.studiedSummary,
+        propertiesSummary: `${LABELING_PLAZA_PATHOLOGY_SEVERITY[descriptor.severity]} illness. Stages fire after incubation ends.`,
+      };
+    });
 }
 
 /** Ordered Pathology guide entries (severe first, then name). */

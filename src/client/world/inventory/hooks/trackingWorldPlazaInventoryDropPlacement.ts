@@ -34,8 +34,11 @@ import { checkingWorldPlazaInventoryBagHasContents } from '@/components/world/in
 import { resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropPreviewTileFromClientPointer';
 import { resolvingWorldPlazaInventoryDropWalkTargetGridPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropWalkTargetGridPoint';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CALTROPS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { placingWorldPlazaBearTrap } from '@/components/world/trap/domains/managingWorldPlazaBearTrapInstanceStore';
 import { persistingWorldPlazaLocalBearTraps } from '@/components/world/trap/domains/managingWorldPlazaLocalBearTraps';
+import { placingWorldPlazaCaltrop } from '@/components/world/trap/domains/managingWorldPlazaCaltropInstanceStore';
+import { persistingWorldPlazaLocalCaltrops } from '@/components/world/trap/domains/managingWorldPlazaLocalCaltrops';
 import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
 import { useCallback, useMemo, useRef } from 'react';
 import { WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH } from '../../../../shared/worldInventoryDevvit';
@@ -287,6 +290,33 @@ export function trackingWorldPlazaInventoryDropPlacement({
             placeCount === 1
               ? 'Bear trap armed on the ground.'
               : `${placeCount} bear traps armed on the ground.`
+          );
+          clearingDropMarker();
+          return;
+        }
+
+        if (
+          pendingDrop.itemTypeId ===
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CALTROPS
+        ) {
+          const placeCount = Math.max(1, pendingDrop.quantity);
+
+          for (let index = 0; index < placeCount; index += 1) {
+            placingWorldPlazaCaltrop({
+              worldX: pendingDrop.gridX + 0.5,
+              worldY: pendingDrop.gridY + 0.5,
+              ownerId: localPersistenceOwnerId ?? null,
+            });
+          }
+
+          if (localPersistenceOwnerId) {
+            persistingWorldPlazaLocalCaltrops(localPersistenceOwnerId);
+          }
+
+          showingReigncraftToast(
+            placeCount === 1
+              ? 'Caltrops scattered on the ground.'
+              : `${placeCount} caltrop clusters scattered on the ground.`
           );
           clearingDropMarker();
           return;

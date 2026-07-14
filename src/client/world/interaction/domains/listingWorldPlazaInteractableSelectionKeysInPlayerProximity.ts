@@ -66,6 +66,9 @@ import { listingWorldPlazaChestsNearPlayerPosition } from '@/components/world/ch
 import { DEFINING_WORLD_PLAZA_BEAR_TRAP_INTERACT_REACH_GRID } from '@/components/world/trap/domains/definingWorldPlazaBearTrapConstants';
 import { formattingWorldPlazaInteractableBearTrapSelectionKey } from '@/components/world/trap/domains/formattingWorldPlazaInteractableBearTrapSelectionKey';
 import { listingWorldPlazaBearTrapsNearPlayerPosition } from '@/components/world/trap/domains/listingWorldPlazaBearTrapsInInteractionRange';
+import { DEFINING_WORLD_PLAZA_CALTROP_INTERACT_REACH_GRID } from '@/components/world/trap/domains/definingWorldPlazaCaltropConstants';
+import { formattingWorldPlazaInteractableCaltropSelectionKey } from '@/components/world/trap/domains/formattingWorldPlazaInteractableCaltropSelectionKey';
+import { listingWorldPlazaCaltropsNearPlayerPosition } from '@/components/world/trap/domains/listingWorldPlazaCaltropsInInteractionRange';
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 
@@ -431,6 +434,16 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
     )) {
       keys.add(
         formattingWorldPlazaInteractableBearTrapSelectionKey(trap.trapId)
+      );
+    }
+
+    for (const trap of listingWorldPlazaCaltropsNearPlayerPosition(
+      params.playerPosition.x,
+      params.playerPosition.y,
+      DEFINING_WORLD_PLAZA_CALTROP_INTERACT_REACH_GRID
+    )) {
+      keys.add(
+        formattingWorldPlazaInteractableCaltropSelectionKey(trap.trapId)
       );
     }
   }

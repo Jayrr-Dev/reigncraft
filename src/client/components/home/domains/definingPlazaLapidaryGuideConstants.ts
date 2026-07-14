@@ -7,7 +7,7 @@ export type DefiningPlazaLapidaryOreEntry = {
   icon: string;
   /** Shown after the player sights the vein nearby. */
   summary: string;
-  /** Shown after the player mines or studies the first specimen. */
+  /** Field notes unlocked after mining or studying the first specimen. */
   studiedSummary: string;
   /** Short use-note shown in the Properties tier. */
   propertiesSummary: string;
@@ -32,7 +32,7 @@ export const LABELING_PLAZA_LAPIDARY_CODEX_MENU_DESCRIPTION =
 
 /**
  * Ordered ore guide entries, roughly rarest last.
- * Copy matches inventory ore descriptions; Apostle notes stay sparse.
+ * Field notes are codex-only copy; Apostle notes stay sparse.
  */
 export const DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES: readonly DefiningPlazaLapidaryOreEntry[] =
   [
@@ -42,7 +42,7 @@ export const DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES: readonly DefiningPlazaLa
       icon: 'game-icons:stone-pile',
       summary: 'Soft terracotta earth showing through grey stone.',
       studiedSummary:
-        'Clay veins chip easy and stack high. Bricks, kiln work, and cheap seals all start with a handful of this.',
+        'Soft terracotta vein, chips in broad flakes. Wet it and it takes a mold; dry it and it holds a brick. Packed three sacks from one shallow cut.',
       propertiesSummary: 'Work: bricks, kiln clay, soft seals.',
     },
     {
@@ -51,7 +51,7 @@ export const DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES: readonly DefiningPlazaLa
       icon: 'game-icons:stone-pile',
       summary: 'A black seam that dulls the rock around it.',
       studiedSummary:
-        'Coal burns hot once it catches. Forges and long camp nights lean on these seams more than fancy wood.',
+        'Black seam dulls surrounding stone. Burns hotter than camp wood once it catches; forge crews fight over these veins.',
       propertiesSummary: 'Fuel: hot burn for forges and camps.',
     },
     {
@@ -60,7 +60,7 @@ export const DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES: readonly DefiningPlazaLa
       icon: 'game-icons:stone-pile',
       summary: 'Rusty grit packed into dark stone.',
       studiedSummary:
-        'Iron ore smelts into the bones of tools and nails. Most claim walls on Corpus started as one of these veins.',
+        'Rusty grit packed in dark stone. Took a full day of fire before the first bead of metal ran. Most nails I own started as a seam like this.',
       propertiesSummary: 'Smelt: tools, nails, structural metal.',
       apostleFlavor:
         'Carnegus keeps iron on every ledger page. Soft wealth is nice; hard iron keeps a claim standing.',
@@ -71,7 +71,7 @@ export const DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES: readonly DefiningPlazaLa
       icon: 'game-icons:stone-pile',
       summary: 'Green-stained rock with orange metal flecks.',
       studiedSummary:
-        'Copper takes a hammer early and alloys later. Wire, early tools, and green roofs all owe a debt to these veins.',
+        'Green stain, orange flecks. Hammers soft early; alloys and wire come later in the work.',
       propertiesSummary: 'Smelt: early alloys, wire, soft tools.',
     },
     {
@@ -80,7 +80,7 @@ export const DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES: readonly DefiningPlazaLa
       icon: 'game-icons:stone-pile',
       summary: 'Heavy rock shot with dull grey cubes.',
       studiedSummary:
-        'Lead ore (galena) is soft once smelted. Weights, seals, and quiet plumbing jobs prefer it over brighter metals.',
+        'Heavy grey cubes in dull rock (galena). Soft after smelt; weights and quiet seals prefer it.',
       propertiesSummary: 'Smelt: weights, seals, soft grey metal.',
     },
     {
@@ -89,7 +89,7 @@ export const DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES: readonly DefiningPlazaLa
       icon: 'game-icons:stone-pile',
       summary: 'Chalky white crust on grey rock.',
       studiedSummary:
-        'Niter is saltpeter by another name. Sparks, powder recipes, and anything that wants to jump need a pinch of it.',
+        'Chalky white crust (saltpeter). Pinch for sparks and powder recipes that want jump.',
       propertiesSummary: 'Reagent: sparks, powder, reactive salts.',
     },
     {
@@ -98,7 +98,7 @@ export const DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES: readonly DefiningPlazaLa
       icon: 'game-icons:stone-pile',
       summary: 'Cool grey rock shot with pale metal.',
       studiedSummary:
-        'Silver ore brightens under hammer and fire. Soft enough for fine work, hard enough that wanderers still chase it.',
+        'Pale flecks in cool grey rock. Brightens under hammer; fine enough for delicate work.',
       propertiesSummary: 'Smelt: bright metal for fine work.',
     },
     {
@@ -107,7 +107,7 @@ export const DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES: readonly DefiningPlazaLa
       icon: 'game-icons:stone-pile',
       summary: 'Cinnabar-red mineral locked in dark stone.',
       studiedSummary:
-        'Scarlet ore stains fingers and dye pots alike. Bright pigment first; the strange chemistry comes after you stop coughing.',
+        'Cinnabar-red stains fingers and dye pots. Pigment first; strange chemistry after, worth a cough and a mask.',
       propertiesSummary: 'Reagent: pigment and odd chemistry.',
       apostleFlavor:
         'Rockless Fellus marks scarlet veins in red ink. Pretty, scarce, and worth a second look before you walk past.',
@@ -118,7 +118,7 @@ export const DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES: readonly DefiningPlazaLa
       icon: 'game-icons:stone-pile',
       summary: 'Heavy stone with warm yellow flecks.',
       studiedSummary:
-        'Gold ore is soft metal wrapped in stubborn rock. Wealth, seals of office, and fine inlay all start here when you can find it.',
+        'Warm yellow flecks in stubborn stone. Soft metal once smelt; wealth and fine inlay when you can haul it out.',
       propertiesSummary: 'Smelt: soft wealth metal, fine work.',
       apostleFlavor:
         'Carnegus smiles when gold hits the ledger. Soft metal, hard to dig, harder still to keep.',
@@ -129,7 +129,7 @@ export const DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES: readonly DefiningPlazaLa
       icon: 'game-icons:stone-pile',
       summary: 'Bright yellow crystals in volcanic stone.',
       studiedSummary:
-        'Sulfur ore stinks of the Firelands. Forge reagents, powder recipes, and anything that wants to burn hotter lean on these veins.',
+        'Yellow crystals in volcanic stone. Smells of the Firelands; forge heat and powder both lean on it.',
       propertiesSummary: 'Reagent: forge heat, powder, volcanic salts.',
       apostleFlavor:
         'Rockless Fellus holds his breath near sulfur vents. Pretty yellow, ugly air, and a claim worth marking twice.',

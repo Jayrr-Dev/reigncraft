@@ -33,7 +33,7 @@ export type DefiningWorldPlazaInventoryFlowerDetailReveal = {
  *
  * - sighted (0): rarity + stack; study tease
  * - fieldNotes (1): sighting summary
- * - properties (5): studied notes + vague eat hint
+ * - properties (5): field notes + vague eat hint
  * - habitats (15): effect labels, Petal Sickness name, disease names
  * - full (100): proc %, effect numbers, Petal Sickness details, disease odds
  */
