@@ -2,7 +2,7 @@
  * Tunables for the lapidary codex ore portraits.
  *
  * Portraits crop a single cell out of the ore inventory sprite sheet
- * (3 columns x 3 rows @ 32px) using CSS background positioning.
+ * (4 columns x 3 rows @ 32px) using CSS background positioning.
  *
  * @module components/home/domains/definingPlazaLapidaryOrePortraitConstants
  */

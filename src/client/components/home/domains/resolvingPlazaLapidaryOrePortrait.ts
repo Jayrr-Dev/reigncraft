@@ -1,6 +1,6 @@
 /**
  * Resolves the CSS crop for an ore's lapidary portrait from the shared
- * ore inventory sprite sheet (3 columns x 3 rows @ 32px).
+ * ore inventory sprite sheet (4 columns x 3 rows @ 32px).
  *
  * @module components/home/domains/resolvingPlazaLapidaryOrePortrait
  */
@@ -30,7 +30,8 @@ export type PlazaLapidaryOrePortrait = {
 export function resolvingPlazaLapidaryOrePortrait(
   speciesId: WorldOreSpeciesId
 ): PlazaLapidaryOrePortrait | null {
-  const itemTypeId = DEFINING_WORLD_PLAZA_ORE_SPECIES_TO_ITEM_TYPE_ID[speciesId];
+  const itemTypeId =
+    DEFINING_WORLD_PLAZA_ORE_SPECIES_TO_ITEM_TYPE_ID[speciesId];
   const icon = resolvingWorldPlazaInventoryOreSpriteSheetIcon(itemTypeId);
 
   if (!icon) {

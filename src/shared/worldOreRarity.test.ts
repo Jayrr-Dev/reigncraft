@@ -93,4 +93,35 @@ describe('worldOreRarity', () => {
 
     const clayCount = counts.get('clay') ?? 0;
     const goldCount = counts.get('gold') ?? 0;
-    expect(clayCoun
+    expect(clayCount).toBeGreaterThan(goldCount);
+  });
+
+  it('vein gate is stable and keeps most anchors as plain stone', () => {
+    let veinCount = 0;
+    const sampleSize = 10_000;
+
+    for (let i = 0; i < sampleSize; i += 1) {
+      const tileX = i % 100;
+      const tileY = Math.floor(i / 100);
+      const first = checkingWorldOreVeinAtTileIndex(tileX, tileY);
+      const second = checkingWorldOreVeinAtTileIndex(tileX, tileY);
+
+      expect(first).toBe(second);
+
+      if (first) {
+        veinCount += 1;
+        expect(
+          resolvingWorldOreSpeciesIfVeinAtTileIndex(tileX, tileY)
+        ).not.toBe(null);
+      } else {
+        expect(resolvingWorldOreSpeciesIfVeinAtTileIndex(tileX, tileY)).toBe(
+          null
+        );
+      }
+    }
+
+    const veinShare = veinCount / sampleSize;
+    expect(veinShare).toBeGreaterThan(0.2);
+    expect(veinShare).toBeLessThan(0.36);
+  });
+});
