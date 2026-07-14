@@ -46,7 +46,9 @@ import {
   DEFINING_WORLD_PLAZA_FLOWER_VALERIAN_SLEEP_MS,
   DEFINING_WORLD_PLAZA_FLOWER_VALERIAN_SLEEP_REGEN_MULTIPLIER,
   DEFINING_WORLD_PLAZA_FLOWER_YARROW_FALLBACK_HEAL_OF_MAX,
+  type DefiningWorldPlazaFlowerEatPreparationId,
 } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectTunables';
+import { resolvingWorldPlazaFlowerEatEffectProcChance } from '@/components/world/inventory/domains/resolvingWorldPlazaFlowerEatEffectProcChance';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 
 const DEFINING_WORLD_PLAZA_FLOWER_FOOD_SICKNESS_DEBUFF_ID =
@@ -93,10 +95,20 @@ export type ApplyingWorldPlazaInventoryFlowerEatEffectsParams = {
   readonly nowMs: number;
   readonly worldEpochMs?: number;
   readonly foxgloveRoll?: number;
+  /**
+   * Uniform [0, 1) roll vs {@link resolvingWorldPlazaFlowerEatEffectProcChance}.
+   * Defaults to Math.random() when omitted.
+   */
+  readonly effectProcRoll?: number;
+  /** Raw chew today; pass `brewed` (+ optional bonus) when brew pipeline lands. */
+  readonly preparation?: DefiningWorldPlazaFlowerEatPreparationId;
+  readonly effectProcChanceBonus?: number;
 };
 
 export type ApplyingWorldPlazaInventoryFlowerEatEffectsResult = {
   readonly nextHealthState: DefiningWorldPlazaEntityHealthState;
+  readonly didProcEffect: boolean;
+  readonly effectProcChance: number;
 };
 
 function applyingFlowerTimedColdTolerance(
@@ -257,7 +269,7 @@ function applyingFlowerEatEffectKind(
         appliedAtMs: nowMs,
         expiresAtMs: nowMs + DEFINING_WORLD_PLAZA_FLOWER_CHAMOMILE_SLEEP_MS,
         wakeBonusDamage: 0,
-        canWakeFromDamage: true,
+        canWakeFromDamage: false,
         passiveHealPercentOfMaxTotal:
           DEFINING_WORLD_PLAZA_FLOWER_CHAMOMILE_SLEEP_HEAL_OF_MAX,
       });
@@ -350,17 +362,38 @@ function applyingFlowerEatEffectKind(
 
 /**
  * Applies flower-specific eat effects from the declarative registry.
+ * Raw flowers only proc a fraction of the time; brewing can raise that later.
  */
 export function applyingWorldPlazaInventoryFlowerEatEffects(
   params: ApplyingWorldPlazaInventoryFlowerEatEffectsParams
 ): ApplyingWorldPlazaInventoryFlowerEatEffectsResult {
   const effectKind = resolvingWorldPlazaFlowerEatEffectKind(params.speciesId);
+  const effectProcChance = resolvingWorldPlazaFlowerEatEffectProcChance({
+    preparation: params.preparation,
+    chanceBonus: params.effectProcChanceBonus,
+  });
 
   if (!effectKind) {
-    return { nextHealthState: params.healthState };
+    return {
+      nextHealthState: params.healthState,
+      didProcEffect: false,
+      effectProcChance,
+    };
+  }
+
+  const effectProcRoll = params.effectProcRoll ?? Math.random();
+
+  if (effectProcRoll >= effectProcChance) {
+    return {
+      nextHealthState: params.healthState,
+      didProcEffect: false,
+      effectProcChance,
+    };
   }
 
   return {
     nextHealthState: applyingFlowerEatEffectKind(effectKind, params),
+    didProcEffect: true,
+    effectProcChance,
   };
 }

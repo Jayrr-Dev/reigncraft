@@ -87,13 +87,16 @@ describe('listingWorldPlazaInteractableSelectionKeysInPlayerProximity', () => {
       playerPosition: { x: 1.1, y: 1.2, layer: 0 },
       placedBlocks: [campfire],
     };
+    const campfireKey =
+      formattingWorldPlazaInteractableBlockSelectionKey(campfire);
 
     expect(
       syncingWorldPlazaProximityInteractableBlockSelection(selectedKeys, params)
     ).toBe(true);
+    expect(selectedKeys.has(campfireKey)).toBe(true);
     expect(
       syncingWorldPlazaProximityInteractableBlockSelection(selectedKeys, params)
     ).toBe(false);
-    expect(selectedKeys.size).toBe(1);
+    expect(selectedKeys.has(campfireKey)).toBe(true);
   });
 });

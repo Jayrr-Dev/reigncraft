@@ -207,7 +207,9 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
       healthState,
       nowMs,
       worldEpochMs: resolvedWorldEpochMs,
-      foxgloveRoll: sicknessRoll,
+      preparation: 'raw',
+      effectProcRoll: sicknessRoll,
+      foxgloveRoll: wellFedRoll ?? Math.random(),
     });
 
     return {

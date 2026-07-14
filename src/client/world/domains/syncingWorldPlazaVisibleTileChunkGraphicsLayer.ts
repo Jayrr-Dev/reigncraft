@@ -4,6 +4,7 @@ import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/dom
 import {
   drawingWorldPlazaGrassFloorChunkOnGraphics,
   drawingWorldPlazaGrassFloorChunkTilesOnGraphics,
+  type DrawingWorldPlazaGrassFloorChunkDrawPhase,
 } from '@/components/world/domains/drawingWorldPlazaGrassFloorChunkOnGraphics';
 import type { DrawingWorldPlazaGrassFloorTileDrawOptions } from '@/components/world/domains/drawingWorldPlazaGrassFloorTileOnGraphics';
 import { formattingWorldPlazaTileChunkCacheKey } from '@/components/world/domains/formattingWorldPlazaTileChunkCacheKey';
@@ -44,6 +45,8 @@ export type SyncingWorldPlazaVisibleTileChunkPendingBuild = {
   readonly chunkOriginTileX: number;
   readonly chunkOriginTileY: number;
   nextTileOffset: number;
+  /** Fills first so decorations (flowers) paint above every neighbor diamond. */
+  drawPhase: DrawingWorldPlazaGrassFloorChunkDrawPhase;
   drawPassContext: CreatingWorldPlazaGrassFloorChunkDrawPassContext | null;
 };
 
@@ -130,42 +133,62 @@ function advancingWorldPlazaVisibleTileChunkPendingBuild(input: {
     | undefined;
 }): boolean {
   const tileCount = input.chunkSizeTiles * input.chunkSizeTiles;
-  const startedOffset = input.pendingBuild.nextTileOffset;
+  let tilesDrawnThisCall = 0;
 
-  while (input.pendingBuild.nextTileOffset < tileCount) {
-    const tilesDrawnSoFar = input.pendingBuild.nextTileOffset - startedOffset;
+  while (true) {
+    while (input.pendingBuild.nextTileOffset < tileCount) {
+      if (
+        tilesDrawnThisCall >=
+          SYNCING_WORLD_PLAZA_VISIBLE_TILE_CHUNK_MIN_TILES_PER_CALL &&
+        input.terrainFrameWorkBudget &&
+        checkingWorldPlazaTerrainFrameWorkBudgetExpired(
+          input.terrainFrameWorkBudget
+        )
+      ) {
+        return false;
+      }
 
-    if (
-      tilesDrawnSoFar >=
-        SYNCING_WORLD_PLAZA_VISIBLE_TILE_CHUNK_MIN_TILES_PER_CALL &&
-      input.terrainFrameWorkBudget &&
-      checkingWorldPlazaTerrainFrameWorkBudgetExpired(
-        input.terrainFrameWorkBudget
-      )
-    ) {
-      return false;
-    }
+      const previousOffset = input.pendingBuild.nextTileOffset;
+      const drawResult = drawingWorldPlazaGrassFloorChunkTilesOnGraphics({
+        graphics: input.pendingBuild.graphics,
+        chunkOriginTileX: input.pendingBuild.chunkOriginTileX,
+        chunkOriginTileY: input.pendingBuild.chunkOriginTileY,
+        chunkSizeTiles: input.chunkSizeTiles,
+        drawOptions: input.drawOptions,
+        startTileOffset: input.pendingBuild.nextTileOffset,
+        maxTiles:
+          SYNCING_WORLD_PLAZA_VISIBLE_TILE_CHUNK_BUDGET_CHECK_TILE_STRIDE,
+        drawPassContext: input.pendingBuild.drawPassContext ?? undefined,
+        drawPhase: input.pendingBuild.drawPhase,
+      });
 
-    const drawResult = drawingWorldPlazaGrassFloorChunkTilesOnGraphics({
-      graphics: input.pendingBuild.graphics,
-      chunkOriginTileX: input.pendingBuild.chunkOriginTileX,
-      chunkOriginTileY: input.pendingBuild.chunkOriginTileY,
-      chunkSizeTiles: input.chunkSizeTiles,
-      drawOptions: input.drawOptions,
-      startTileOffset: input.pendingBuild.nextTileOffset,
-      maxTiles: SYNCING_WORLD_PLAZA_VISIBLE_TILE_CHUNK_BUDGET_CHECK_TILE_STRIDE,
-      drawPassContext: input.pendingBuild.drawPassContext ?? undefined,
-    });
+      input.pendingBuild.drawPassContext = drawResult.drawPassContext;
+      input.pendingBuild.nextTileOffset = drawResult.nextTileOffset;
+      tilesDrawnThisCall += Math.max(
+        0,
+        drawResult.nextTileOffset - previousOffset
+      );
 
-    input.pendingBuild.drawPassContext = drawResult.drawPassContext;
-    input.pendingBuild.nextTileOffset = drawResult.nextTileOffset;
+      if (!drawResult.isComplete) {
+        continue;
+      }
 
-    if (drawResult.isComplete) {
+      if (input.pendingBuild.drawPhase === 'fill') {
+        input.pendingBuild.drawPhase = 'decoration';
+        input.pendingBuild.nextTileOffset = 0;
+        break;
+      }
+
       return true;
     }
-  }
 
-  return true;
+    if (input.pendingBuild.drawPhase === 'decoration') {
+      return true;
+    }
+
+    input.pendingBuild.drawPhase = 'decoration';
+    input.pendingBuild.nextTileOffset = 0;
+  }
 }
 
 /**
@@ -441,6 +464,7 @@ export function syncingWorldPlazaVisibleTileChunkGraphicsLayer(
         chunkOriginTileX,
         chunkOriginTileY,
         nextTileOffset: 0,
+        drawPhase: 'fill',
         drawPassContext: null,
       };
       pendingChunkBuilds.set(cacheKey, pendingBuild);

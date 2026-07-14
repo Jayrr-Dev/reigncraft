@@ -5,7 +5,11 @@ import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { resolvingWorldPlazaEntityHealthDiseaseContractionTimedMultiplier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthEffectiveTemperatureResistance';
 import { applyingWorldPlazaInventoryFlowerEatEffects } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryFlowerEatEffects';
+import { DEFINING_WORLD_PLAZA_FLOWER_RAW_EAT_EFFECT_PROC_CHANCE } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectTunables';
 import { describe, expect, it } from 'vitest';
+
+/** Force the outer effect-proc gate open in unit tests. */
+const FORCE_EFFECT_PROC_ROLL = 0;
 
 describe('applyingWorldPlazaInventoryFlowerEatEffects', () => {
   const nowMs = 1_000_000;
@@ -23,8 +27,10 @@ describe('applyingWorldPlazaInventoryFlowerEatEffects', () => {
       speciesId: 'yarrow',
       healthState: state,
       nowMs,
+      effectProcRoll: FORCE_EFFECT_PROC_ROLL,
     });
 
+    expect(result.didProcEffect).toBe(true);
     expect(
       result.nextHealthState.bleedEffects.some(
         (effect) => effect.severity === 'exsanguinating'
@@ -47,6 +53,7 @@ describe('applyingWorldPlazaInventoryFlowerEatEffects', () => {
       speciesId: 'yarrow',
       healthState: damaged,
       nowMs,
+      effectProcRoll: FORCE_EFFECT_PROC_ROLL,
     });
 
     expect(result.nextHealthState.currentHealth).toBeGreaterThan(
@@ -62,6 +69,7 @@ describe('applyingWorldPlazaInventoryFlowerEatEffects', () => {
       speciesId: 'chamomile',
       healthState: state,
       nowMs,
+      effectProcRoll: FORCE_EFFECT_PROC_ROLL,
     });
 
     expect(result.nextHealthState.confusionEffects).toHaveLength(0);
@@ -73,12 +81,19 @@ describe('applyingWorldPlazaInventoryFlowerEatEffects', () => {
       speciesId: 'chamomile',
       healthState: creatingWorldPlazaEntityHealthInitialState(),
       nowMs,
+      effectProcRoll: FORCE_EFFECT_PROC_ROLL,
     });
 
     expect(result.nextHealthState.sleepEffects).toHaveLength(1);
     expect(
       result.nextHealthState.sleepEffects[0]?.passiveHealPercentOfMaxTotal
     ).toBe(0.01);
+    expect(result.nextHealthState.sleepEffects[0]?.canWakeFromDamage).toBe(
+      false
+    );
+    expect(result.nextHealthState.sleepEffects[0]?.expiresAtMs).toBe(
+      nowMs + 10_000
+    );
   });
 
   it('shortens echinacea disease when diseased', () => {
@@ -99,6 +114,7 @@ describe('applyingWorldPlazaInventoryFlowerEatEffects', () => {
       healthState: state,
       nowMs,
       worldEpochMs,
+      effectProcRoll: FORCE_EFFECT_PROC_ROLL,
     });
 
     const afterExpiry =
@@ -115,6 +131,7 @@ describe('applyingWorldPlazaInventoryFlowerEatEffects', () => {
       speciesId: 'echinacea',
       healthState: creatingWorldPlazaEntityHealthInitialState(),
       nowMs,
+      effectProcRoll: FORCE_EFFECT_PROC_ROLL,
     });
 
     expect(
@@ -135,6 +152,7 @@ describe('applyingWorldPlazaInventoryFlowerEatEffects', () => {
       speciesId: 'foxglove',
       healthState: damaged,
       nowMs,
+      effectProcRoll: FORCE_EFFECT_PROC_ROLL,
       foxgloveRoll: 0.1,
     });
 
@@ -149,6 +167,7 @@ describe('applyingWorldPlazaInventoryFlowerEatEffects', () => {
       speciesId: 'foxglove',
       healthState: creatingWorldPlazaEntityHealthInitialState(),
       nowMs,
+      effectProcRoll: FORCE_EFFECT_PROC_ROLL,
       foxgloveRoll: 0.9,
     });
 
@@ -166,6 +185,7 @@ describe('applyingWorldPlazaInventoryFlowerEatEffects', () => {
       speciesId: 'belladonna',
       healthState: state,
       nowMs,
+      effectProcRoll: FORCE_EFFECT_PROC_ROLL,
     });
 
     const poisonPool = result.nextHealthState.poisonEffects.reduce(
@@ -174,5 +194,40 @@ describe('applyingWorldPlazaInventoryFlowerEatEffects', () => {
     );
 
     expect(poisonPool).toBeCloseTo(effectiveMax * 0.3, 0);
+  });
+
+  it('skips the species effect when the raw proc roll misses', () => {
+    const damaged = {
+      ...creatingWorldPlazaEntityHealthInitialState(),
+      currentHealth: 400,
+    };
+
+    const result = applyingWorldPlazaInventoryFlowerEatEffects({
+      speciesId: 'yarrow',
+      healthState: damaged,
+      nowMs,
+      effectProcRoll: DEFINING_WORLD_PLAZA_FLOWER_RAW_EAT_EFFECT_PROC_CHANCE,
+    });
+
+    expect(result.didProcEffect).toBe(false);
+    expect(result.effectProcChance).toBe(
+      DEFINING_WORLD_PLAZA_FLOWER_RAW_EAT_EFFECT_PROC_CHANCE
+    );
+    expect(result.nextHealthState.currentHealth).toBe(damaged.currentHealth);
+  });
+
+  it('accepts brewed preparation for a higher proc chance', () => {
+    const result = applyingWorldPlazaInventoryFlowerEatEffects({
+      speciesId: 'yarrow',
+      healthState: creatingWorldPlazaEntityHealthInitialState(),
+      nowMs,
+      preparation: 'brewed',
+      effectProcRoll: 0.5,
+    });
+
+    expect(result.didProcEffect).toBe(true);
+    expect(result.effectProcChance).toBeGreaterThan(
+      DEFINING_WORLD_PLAZA_FLOWER_RAW_EAT_EFFECT_PROC_CHANCE
+    );
   });
 });

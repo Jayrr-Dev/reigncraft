@@ -5,6 +5,32 @@
  * @module components/world/inventory/domains/definingWorldPlazaFlowerEatEffectTunables
  */
 
+/**
+ * How the flower was prepared before eating.
+ * Brewed recipes can raise proc chance later.
+ */
+export type DefiningWorldPlazaFlowerEatPreparationId = 'raw' | 'brewed';
+
+/**
+ * Base chance the species eat-effect fires when chewing a raw flower.
+ * Brewing will raise this via preparation + bonuses.
+ */
+export const DEFINING_WORLD_PLAZA_FLOWER_RAW_EAT_EFFECT_PROC_CHANCE = 0.25;
+
+/**
+ * Placeholder base chance for brewed flower preparations.
+ * Unused until the brew pipeline lands; keep in sync then.
+ */
+export const DEFINING_WORLD_PLAZA_FLOWER_BREWED_EAT_EFFECT_PROC_CHANCE = 0.75;
+
+/** Base effect-proc chance by preparation form. */
+export const DEFINING_WORLD_PLAZA_FLOWER_EAT_EFFECT_PROC_CHANCE_BY_PREPARATION: Readonly<
+  Record<DefiningWorldPlazaFlowerEatPreparationId, number>
+> = {
+  raw: DEFINING_WORLD_PLAZA_FLOWER_RAW_EAT_EFFECT_PROC_CHANCE,
+  brewed: DEFINING_WORLD_PLAZA_FLOWER_BREWED_EAT_EFFECT_PROC_CHANCE,
+};
+
 /** Yarrow heal when no bleed tier was downgraded (fraction of effective max HP). */
 export const DEFINING_WORLD_PLAZA_FLOWER_YARROW_FALLBACK_HEAL_OF_MAX = 0.05;
 
@@ -14,8 +40,8 @@ export const DEFINING_WORLD_PLAZA_FLOWER_CALENDULA_HEAL_OF_MAX = 0.05;
 /** Calendula mending outgoing-heal buff duration. */
 export const DEFINING_WORLD_PLAZA_FLOWER_CALENDULA_MENDING_DURATION_MS = 30_000;
 
-/** Chamomile short sleep duration. */
-export const DEFINING_WORLD_PLAZA_FLOWER_CHAMOMILE_SLEEP_MS = 4_000;
+/** Chamomile deep sleep duration (cannot wake from damage). */
+export const DEFINING_WORLD_PLAZA_FLOWER_CHAMOMILE_SLEEP_MS = 10_000;
 
 /** Chamomile passive heal over sleep (fraction of max HP total). */
 export const DEFINING_WORLD_PLAZA_FLOWER_CHAMOMILE_SLEEP_HEAL_OF_MAX = 0.01;

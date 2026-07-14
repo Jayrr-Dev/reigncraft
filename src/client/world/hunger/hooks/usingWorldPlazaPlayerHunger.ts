@@ -194,6 +194,11 @@ export function usingWorldPlazaPlayerHunger({
     };
 
     eatingFoodRef.current = (hungerRestoreRatio: number): boolean => {
+      // Herbs / zero-hunger consumables still apply eat effects when full.
+      if (hungerRestoreRatio <= 0) {
+        return true;
+      }
+
       if (hungerStateRef.current.hungerRatio >= 1) {
         return false;
       }

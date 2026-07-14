@@ -19,6 +19,7 @@ import {
 } from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
+import { resolvingWorldPlazaFlowerEatEffectProcChance } from '@/components/world/inventory/domains/resolvingWorldPlazaFlowerEatEffectProcChance';
 import { resolvingWorldPlazaInventoryItemDetailBadgeShellClassName } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailBadgeShellClassName';
 import { cn } from '@/lib/utils';
 
@@ -86,6 +87,9 @@ export function RenderingPlazaHerbariumGuideDetailView({
 }: RenderingPlazaHerbariumGuideDetailViewProps): React.JSX.Element {
   const studyProgressLabel = formattingPlazaHerbariumStudyProgressLabel(
     entry.studyCount
+  );
+  const rawFlowerProcChancePercent = Math.round(
+    resolvingWorldPlazaFlowerEatEffectProcChance({ preparation: 'raw' }) * 100
   );
 
   return (
@@ -224,13 +228,27 @@ export function RenderingPlazaHerbariumGuideDetailView({
               studyCount={entry.studyCount}
             >
               {entry.propertiesSummary ? (
-                <div className={PLAZA_HERBARIUM_DETAIL_STAT_CELL_CLASS_NAME}>
-                  <dt className="font-bold uppercase tracking-wide text-ink-soft">
-                    {entry.kind === 'flower' ? 'Eaten' : 'Wood'}
-                  </dt>
-                  <dd className="mt-0.5 font-medium text-ink">
-                    {entry.propertiesSummary}
-                  </dd>
+                <div className="space-y-2">
+                  <div className={PLAZA_HERBARIUM_DETAIL_STAT_CELL_CLASS_NAME}>
+                    <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                      {entry.kind === 'flower' ? 'Eaten' : 'Wood'}
+                    </dt>
+                    <dd className="mt-0.5 font-medium text-ink">
+                      {entry.propertiesSummary}
+                    </dd>
+                  </div>
+                  {entry.kind === 'flower' ? (
+                    <div
+                      className={PLAZA_HERBARIUM_DETAIL_STAT_CELL_CLASS_NAME}
+                    >
+                      <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                        Proc (raw)
+                      </dt>
+                      <dd className="mt-0.5 font-mono tabular-nums font-medium text-ink">
+                        {rawFlowerProcChancePercent}% when eaten raw
+                      </dd>
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </RenderingPlazaHerbariumGuideDetailSection>

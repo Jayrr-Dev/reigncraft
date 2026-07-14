@@ -40,6 +40,8 @@ import type { Graphics } from 'pixi.js';
 /** Optional decoration toggles for adaptive performance tiers. */
 export interface DrawingWorldPlazaBiomeTileSurfaceDecorationsDrawOptions {
   readonly drawsGrassDecorations?: boolean;
+  /** Gameplay flowers remain visible even when cosmetic grass dots are culled. */
+  readonly drawsFlowerDecorations?: boolean;
   readonly drawsStoneDecorations?: boolean;
   readonly drawPassContext?: CreatingWorldPlazaGrassFloorChunkDrawPassContext;
 }
@@ -52,6 +54,7 @@ const DRAWING_WORLD_PLAZA_BIOME_TILE_SURFACE_DECORATIONS_DEFAULT_DRAW_OPTIONS: R
   >
 > = {
   drawsGrassDecorations: true,
+  drawsFlowerDecorations: true,
   drawsStoneDecorations: true,
 };
 
@@ -103,6 +106,13 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
     drawsGrassDecorations:
       (input.drawOptions?.drawsGrassDecorations ??
         DRAWING_WORLD_PLAZA_BIOME_TILE_SURFACE_DECORATIONS_DEFAULT_DRAW_OPTIONS.drawsGrassDecorations) &&
+      !isWaterTile &&
+      !isLakeShoreTile &&
+      !isOceanShoreTile &&
+      !isPondShoreTile,
+    drawsFlowerDecorations:
+      (input.drawOptions?.drawsFlowerDecorations ??
+        DRAWING_WORLD_PLAZA_BIOME_TILE_SURFACE_DECORATIONS_DEFAULT_DRAW_OPTIONS.drawsFlowerDecorations) &&
       !isWaterTile &&
       !isLakeShoreTile &&
       !isOceanShoreTile &&
@@ -182,29 +192,6 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
 
   if (
     resolvedDrawOptions.drawsGrassDecorations &&
-    biome.flowerTileModulus !== null &&
-    biome.flowerColors !== null &&
-    checkingWorldPlazaFlowerDecorationAtTileIndex(input.tileX, input.tileY) &&
-    !checkingWorldPlazaRuntimeFlowerIsPicked(input.tileX, input.tileY)
-  ) {
-    const flowerColor = resolvingWorldPlazaFlowerPetalColorAtTileIndex(
-      input.tileX,
-      input.tileY
-    );
-
-    if (flowerColor !== null) {
-      input.graphics
-        .circle(
-          input.centerX,
-          input.centerY - halfHeight * 0.35,
-          DEFINING_WORLD_PLAZA_BIOME_DECORATION_DOT_RADIUS_PX
-        )
-        .fill({ color: flowerColor });
-    }
-  }
-
-  if (
-    resolvedDrawOptions.drawsGrassDecorations &&
     biome.speckTileModulus !== null &&
     biome.speckColor !== null &&
     Math.abs(input.tileX * 13 + input.tileY * 29) % biome.speckTileModulus ===
@@ -233,6 +220,30 @@ export function drawingWorldPlazaBiomeTileSurfaceDecorationsOnGraphics(
         DEFINING_WORLD_PLAZA_BIOME_BLOCK_HIGHLIGHT_DOT_RADIUS_PX
       )
       .fill({ color: biome.blockHighlightColor });
+  }
+
+  // Flowers last on the tile so local speck/highlight dots cannot cover them.
+  if (
+    resolvedDrawOptions.drawsFlowerDecorations &&
+    biome.flowerTileModulus !== null &&
+    biome.flowerColors !== null &&
+    checkingWorldPlazaFlowerDecorationAtTileIndex(input.tileX, input.tileY) &&
+    !checkingWorldPlazaRuntimeFlowerIsPicked(input.tileX, input.tileY)
+  ) {
+    const flowerColor = resolvingWorldPlazaFlowerPetalColorAtTileIndex(
+      input.tileX,
+      input.tileY
+    );
+
+    if (flowerColor !== null) {
+      input.graphics
+        .circle(
+          input.centerX,
+          input.centerY - halfHeight * 0.35,
+          DEFINING_WORLD_PLAZA_BIOME_DECORATION_DOT_RADIUS_PX
+        )
+        .fill({ color: flowerColor });
+    }
   }
 
   if (!resolvedDrawOptions.drawsStoneDecorations) {

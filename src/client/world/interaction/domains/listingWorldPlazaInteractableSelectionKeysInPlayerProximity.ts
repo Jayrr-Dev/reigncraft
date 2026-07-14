@@ -18,6 +18,7 @@ import {
   applyingWorldPlazaTreeChopStateToInstance,
   computingWorldPlazaTreeChoppableLayerCount,
 } from '@/components/world/harvest/domains/applyingWorldPlazaTreeChopStateToInstance';
+import { formattingWorldPlazaTreeStumpStudySelectionKey } from '@/components/world/harvest/domains/formattingWorldPlazaTreeStumpStudySelectionKey';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaMinedRockTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
@@ -26,6 +27,7 @@ import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world
 import { formattingWorldPlazaPickedFlowerTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { formattingWorldPlazaPickedPebbleTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
+import { checkingWorldPlazaLocalTreeStumpStudied } from '@/components/world/harvest/domains/managingWorldPlazaLocalStudiedTreeStumps';
 import { checkingWorldPlazaInteractionLabelTileInPlayerProximity } from '@/components/world/interaction/domains/checkingWorldPlazaInteractionLabelTileInPlayerProximity';
 import { DEFINING_WORLD_PLAZA_INTERACTION_LABEL_PROXIMITY_RADIUS_TILES } from '@/components/world/interaction/domains/definingWorldPlazaInteractionLabelProximityConstants';
 import { formattingWorldPlazaInteractableBlockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableBlockSelectionKey';
@@ -51,6 +53,8 @@ export type ListingWorldPlazaInteractableSelectionKeysInPlayerProximityParams =
       string,
       DefiningWorldPlazaChoppedTreeTileState
     >;
+    /** Local herbarium owner used to skip already-studied stumps. */
+    readonly chopPersistenceOwnerId?: string | null;
     readonly minedRockStateByTileKey?: ReadonlyMap<
       string,
       DefiningWorldPlazaMinedRockTileState
@@ -137,6 +141,17 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
         if (tree && computingWorldPlazaTreeChoppableLayerCount(tree) > 0) {
           keys.add(
             formattingWorldPlazaInteractableTreeSelectionKey(tileX, tileY)
+          );
+        } else if (
+          tree?.isStump &&
+          !checkingWorldPlazaLocalTreeStumpStudied(
+            params.chopPersistenceOwnerId ?? null,
+            tileX,
+            tileY
+          )
+        ) {
+          keys.add(
+            formattingWorldPlazaTreeStumpStudySelectionKey(tileX, tileY)
           );
         }
       }

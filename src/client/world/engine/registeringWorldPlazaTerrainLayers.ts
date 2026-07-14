@@ -274,6 +274,10 @@ export function registeringWorldPlazaTerrainLayers(
               checkingWorldPlazaGenerationFeatureEnabled(
                 DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES
               ),
+            drawsFlowerDecorations:
+              checkingWorldPlazaGenerationFeatureEnabled(
+                DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES
+              ),
             drawsStoneDecorations:
               context.performanceProfile.drawsStoneDecorations &&
               checkingWorldPlazaGenerationFeatureEnabled(
@@ -419,6 +423,10 @@ export function registeringWorldPlazaTerrainLayers(
         const floorDrawOptions = {
           drawsGrassDecorations:
             context.performanceProfile.drawsGrassDecorations &&
+            checkingWorldPlazaGenerationFeatureEnabled(
+              DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES
+            ),
+          drawsFlowerDecorations:
             checkingWorldPlazaGenerationFeatureEnabled(
               DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES
             ),

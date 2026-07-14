@@ -27,9 +27,8 @@ export type WorldFlowerSpeciesRarityEntry = {
 /** Seed salt for species roll (distinct from biome petal color salt). */
 export const WORLD_FLOWER_SPECIES_SEED_SALT = 419;
 
-/** Placement hash multipliers (match biome flower dot gate). */
-export const WORLD_FLOWER_PLACEMENT_HASH_X = 31;
-export const WORLD_FLOWER_PLACEMENT_HASH_Y = 17;
+/** Seed salt for flower placement density (distinct from species salt). */
+export const WORLD_FLOWER_PLACEMENT_SEED_SALT = 911;
 
 /**
  * Weighted species table (total weight 234).
@@ -59,10 +58,6 @@ export const WORLD_FLOWER_SPECIES_RARITY_TOTAL_WEIGHT =
 
 /**
  * Deterministic unit float in [0, 1) from tile coordinates and salt.
- *
- * Uses a hash independent of {@link WORLD_FLOWER_PLACEMENT_HASH_X} /
- * {@link WORLD_FLOWER_PLACEMENT_HASH_Y} so species stays well mixed on the
- * flower-decoration tile subset (placement already filters by that hash).
  */
 export function seedingWorldFlowerSpeciesUnitFromTileIndex(
   tileX: number,
@@ -72,6 +67,30 @@ export function seedingWorldFlowerSpeciesUnitFromTileIndex(
   const seed = tileX * 374761393 + tileY * 668265263 + salt * 1274126177;
   const normalized = Math.sin(seed) * 10_000;
   return normalized - Math.floor(normalized);
+}
+
+/**
+ * True when a tile passes the flower density gate (~1 / modulus of tiles).
+ *
+ * Uses a scrambled unit hash so placement does not form linear stripes
+ * (unlike `ax + by % modulus === 0`, which draws diagonal pearl-strings).
+ */
+export function checkingWorldFlowerPlacementAtTileIndex(
+  tileX: number,
+  tileY: number,
+  flowerTileModulus: number
+): boolean {
+  if (flowerTileModulus <= 0) {
+    return false;
+  }
+
+  const unit = seedingWorldFlowerSpeciesUnitFromTileIndex(
+    tileX,
+    tileY,
+    WORLD_FLOWER_PLACEMENT_SEED_SALT
+  );
+
+  return unit < 1 / flowerTileModulus;
 }
 
 /**

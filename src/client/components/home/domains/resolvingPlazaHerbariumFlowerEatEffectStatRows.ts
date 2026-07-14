@@ -32,6 +32,7 @@ import {
   DEFINING_WORLD_PLAZA_FLOWER_VALERIAN_SLEEP_REGEN_MULTIPLIER,
   DEFINING_WORLD_PLAZA_FLOWER_YARROW_FALLBACK_HEAL_OF_MAX,
 } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectTunables';
+import { resolvingWorldPlazaFlowerEatEffectProcChance } from '@/components/world/inventory/domains/resolvingWorldPlazaFlowerEatEffectProcChance';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 
 export type PlazaHerbariumFlowerEatEffectStatRow = {
@@ -101,8 +102,8 @@ function listingPlazaHerbariumFlowerEatEffectStatRowsForKind(
       return [
         { label: 'If confused', value: 'Clears confusion' },
         {
-          label: 'Else sleep',
-          value: `${formattingPlazaHerbariumDurationSeconds(DEFINING_WORLD_PLAZA_FLOWER_CHAMOMILE_SLEEP_MS)} · +${Math.round(DEFINING_WORLD_PLAZA_FLOWER_CHAMOMILE_SLEEP_HEAL_OF_MAX * 100)}% max HP`,
+          label: 'Else deep sleep',
+          value: `${formattingPlazaHerbariumDurationSeconds(DEFINING_WORLD_PLAZA_FLOWER_CHAMOMILE_SLEEP_MS)} · +${Math.round(DEFINING_WORLD_PLAZA_FLOWER_CHAMOMILE_SLEEP_HEAL_OF_MAX * 100)}% max HP · cannot wake from damage`,
         },
       ];
     case 'clearSicknessDebuffs':
@@ -196,5 +197,19 @@ export function resolvingPlazaHerbariumFlowerEatEffectStatRows(
 
   const rows = listingPlazaHerbariumFlowerEatEffectStatRowsForKind(effectKind);
 
-  return rows.length > 0 ? rows : null;
+  if (rows.length === 0) {
+    return null;
+  }
+
+  const rawProcChance = resolvingWorldPlazaFlowerEatEffectProcChance({
+    preparation: 'raw',
+  });
+
+  return [
+    {
+      label: 'Proc (raw)',
+      value: `${Math.round(rawProcChance * 100)}% when eaten raw`,
+    },
+    ...rows,
+  ];
 }

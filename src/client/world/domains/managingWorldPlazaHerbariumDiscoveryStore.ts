@@ -267,7 +267,7 @@ export function recordingWorldPlazaHerbariumTreeSighted(
 /**
  * Records Study progress for a tree variant and ensures it is sighted.
  *
- * @param variant - Tree silhouette the local player finished chopping a layer on.
+ * @param variant - Tree silhouette the local player finished studying a stump of.
  * @param studyPoints - Points awarded for this Study (default 1).
  */
 export function recordingWorldPlazaHerbariumTreeStudied(

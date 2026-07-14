@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  checkingWorldFlowerPlacementAtTileIndex,
   resolvingWorldFlowerSpeciesAtTileIndex,
   WORLD_FLOWER_SPECIES_RARITY_REGISTRY,
   WORLD_FLOWER_SPECIES_RARITY_TOTAL_WEIGHT,
@@ -43,18 +44,18 @@ describe('worldFlowerRarity', () => {
     }
   });
 
-  it('keeps variety on flower-placement tiles (placement hash remainder 0)', () => {
+  it('keeps variety on flower-placement tiles', () => {
     const counts = new Map<string, number>();
-    const placementHashX = 31;
-    const placementHashY = 17;
     const flowerTileModulus = 23;
 
     for (let tileX = -120; tileX <= 120; tileX += 1) {
       for (let tileY = -120; tileY <= 120; tileY += 1) {
         if (
-          Math.abs(tileX * placementHashX + tileY * placementHashY) %
-            flowerTileModulus !==
-          0
+          !checkingWorldFlowerPlacementAtTileIndex(
+            tileX,
+            tileY,
+            flowerTileModulus
+          )
         ) {
           continue;
         }
@@ -73,5 +74,38 @@ describe('worldFlowerRarity', () => {
 
     const calendulaShare = (counts.get('calendula') ?? 0) / total;
     expect(calendulaShare).toBeLessThan(0.25);
+  });
+
+  it('scatters flowers instead of lining one diagonal stripe', () => {
+    const flowerTileModulus = 9;
+    const size = 180;
+    const stripeCounts = new Array(flowerTileModulus).fill(0);
+    let total = 0;
+
+    for (let tileX = 0; tileX < size; tileX += 1) {
+      for (let tileY = 0; tileY < size; tileY += 1) {
+        if (
+          !checkingWorldFlowerPlacementAtTileIndex(
+            tileX,
+            tileY,
+            flowerTileModulus
+          )
+        ) {
+          continue;
+        }
+
+        total += 1;
+        // Old linear gate (31x+17y)%9==0 collapsed onto y≡4x (mod 9).
+        const stripe =
+          (((tileY - 4 * tileX) % flowerTileModulus) + flowerTileModulus) %
+          flowerTileModulus;
+        stripeCounts[stripe] += 1;
+      }
+    }
+
+    expect(total).toBeGreaterThan((size * size) / flowerTileModulus / 2);
+
+    const maxShare = Math.max(...stripeCounts) / total;
+    expect(maxShare).toBeLessThan(0.3);
   });
 });

@@ -224,7 +224,9 @@ import { recordingWorldPlazaBestiarySpeciesStudied } from '@/components/world/do
 import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
   gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
+  gettingWorldPlazaHerbariumTreeStudyCountsSnapshot,
   recordingWorldPlazaHerbariumFlowerStudied,
+  recordingWorldPlazaHerbariumTreeStudied,
 } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import { settingWorldPlazaOnlineRoomId } from '@/components/world/domains/managingWorldPlazaOnlineRoomIdStore';
 import {
@@ -285,10 +287,15 @@ import { RenderingWorldPlazaFlowerInteractionLabels } from '@/components/world/h
 import { RenderingWorldPlazaPebbleInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaPebbleInteractionLabels';
 import { RenderingWorldPlazaRockInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaRockInteractionLabels';
 import { RenderingWorldPlazaTreeInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaTreeInteractionLabels';
+import { RenderingWorldPlazaTreeStumpStudyLabels } from '@/components/world/harvest/components/renderingWorldPlazaTreeStumpStudyLabels';
+import { DEFINING_WORLD_PLAZA_TREE_STUMP_STUDY_POINTS } from '@/components/world/harvest/domains/definingWorldPlazaTreeStumpStudyConstants';
+import { findingWorldPlazaTreeStumpAtGridPoint } from '@/components/world/harvest/domains/findingWorldPlazaTreeStumpAtGridPoint';
+import type { ListingWorldPlazaTreeStumpsInStudyRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaTreeStumpsInStudyRange';
 import { formattingWorldPlazaChoppedTreeTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import { formattingWorldPlazaMinedRockTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
 import { formattingWorldPlazaPickedFlowerTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import { formattingWorldPlazaPickedPebbleTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
+import { markingWorldPlazaLocalTreeStumpStudied } from '@/components/world/harvest/domains/managingWorldPlazaLocalStudiedTreeStumps';
 import { registeringWorldPlazaChoppedTreesVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaChoppedTreesVisualLayerLookup';
 import { registeringWorldPlazaMinedRocksVisualLayerLookup } from '@/components/world/harvest/domains/registeringWorldPlazaMinedRocksVisualLayerLookup';
 import { registeringWorldPlazaPickedFlowersLookup } from '@/components/world/harvest/domains/registeringWorldPlazaPickedFlowersLookup';
@@ -305,6 +312,7 @@ import { usingWorldPlazaRockMineInteraction } from '@/components/world/harvest/h
 import { usingWorldPlazaRockMineProgress } from '@/components/world/harvest/hooks/usingWorldPlazaRockMineProgress';
 import { usingWorldPlazaTreeChopInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaTreeChopInteraction';
 import { usingWorldPlazaTreeChopProgress } from '@/components/world/harvest/hooks/usingWorldPlazaTreeChopProgress';
+import { usingWorldPlazaTreeStumpStudyProgress } from '@/components/world/harvest/hooks/usingWorldPlazaTreeStumpStudyProgress';
 import { RenderingWorldPlazaEntityDeathScreenOverlay } from '@/components/world/health/components/renderingWorldPlazaEntityDeathScreenOverlay';
 import {
   RenderingWorldPlazaEntityHealthBars,
@@ -389,6 +397,7 @@ import {
   selectingWorldPlazaInteractablePebbleForClickAction,
   selectingWorldPlazaInteractableRockForClickAction,
   selectingWorldPlazaInteractableTreeForClickAction,
+  selectingWorldPlazaTreeStumpForClickAction,
   selectingWorldPlazaWildlifeCorpseForClickAction,
 } from '@/components/world/interaction/domains/managingWorldPlazaInteractableBlockClickSelection';
 import { trackingWorldPlazaInteractableBlockPointerInteraction } from '@/components/world/interaction/hooks/trackingWorldPlazaInteractableBlockPointerInteraction';
@@ -3568,6 +3577,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     selectedInteractableBlockKeysRef,
     placedBlocksRef: proximityPlacedBlocksRef,
     choppedTreeStateByTileKeyRef: choppedTreesByTileKeyRef,
+    chopPersistenceOwnerId,
     minedRockStateByTileKeyRef: minedRocksByTileKeyRef,
     pickedPebbleStateByTileKeyRef: pickedPebblesByTileKeyRef,
     pickedFlowerStateByTileKeyRef: pickedFlowersByTileKeyRef,
@@ -3820,6 +3830,113 @@ function RenderingWorldPlazaPixiSceneConnected({
     [wildlifeStoreRef]
   );
 
+  const handlingTreeStumpStudyComplete = useCallback(
+    (entry: ListingWorldPlazaTreeStumpsInStudyRangeEntry): void => {
+      const didMark = markingWorldPlazaLocalTreeStumpStudied(
+        chopPersistenceOwnerId,
+        entry.tileX,
+        entry.tileY
+      );
+
+      if (!didMark) {
+        return;
+      }
+
+      recordingWorldPlazaHerbariumTreeStudied(
+        entry.variant,
+        DEFINING_WORLD_PLAZA_TREE_STUMP_STUDY_POINTS
+      );
+      const studyCount =
+        gettingWorldPlazaHerbariumTreeStudyCountsSnapshot()[entry.variant] ??
+        DEFINING_WORLD_PLAZA_TREE_STUMP_STUDY_POINTS;
+      showingGameplayHudToast(
+        `Studied · Herbarium ${formattingPlazaHerbariumStudyCountProgress(studyCount)}`
+      );
+      playingWildlifeStudySfx();
+      clearingInteractableBlockClickSelection();
+    },
+    [
+      chopPersistenceOwnerId,
+      clearingInteractableBlockClickSelection,
+      showingGameplayHudToast,
+    ]
+  );
+
+  const {
+    snapshot: treeStumpStudyProgressSnapshot,
+    progressRatioRef: treeStumpStudyProgressRatioRef,
+    startingStumpStudy,
+  } = usingWorldPlazaTreeStumpStudyProgress({
+    playerPositionRef,
+    selectedInteractableBlockKeysRef,
+    placedBlocksRef: proximityPlacedBlocksRef,
+    choppedTreeStateByTileKeyRef: choppedTreesByTileKeyRef,
+    persistenceOwnerId: chopPersistenceOwnerId,
+    onStudyComplete: handlingTreeStumpStudyComplete,
+  });
+
+  const handlingTreeStumpStudyInteraction = useCallback(
+    (entry: ListingWorldPlazaTreeStumpsInStudyRangeEntry): void => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return;
+      }
+
+      const didStart = startingStumpStudy(entry);
+
+      if (!didStart) {
+        showingGameplayHudToast('Already studying a stump.');
+      }
+    },
+    [showingGameplayHudToast, startingStumpStudy]
+  );
+
+  const handlingTreeStumpClick = useCallback(
+    (
+      pointerContext: DefiningWorldPlazaInteractablePointerHitContext
+    ): boolean => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return false;
+      }
+
+      const playerPosition = playerPositionRef.current;
+
+      if (
+        !playerPosition ||
+        pointerContext.viewportScreenPoint === undefined ||
+        pointerContext.cameraOffset === undefined ||
+        pointerContext.cameraWorldZoom === undefined
+      ) {
+        return false;
+      }
+
+      const clickedStump = findingWorldPlazaTreeStumpAtGridPoint(
+        {
+          gridPoint: pointerContext.gridPoint,
+          viewportScreenPoint: pointerContext.viewportScreenPoint,
+          cameraOffset: pointerContext.cameraOffset,
+          cameraWorldZoom: pointerContext.cameraWorldZoom,
+        },
+        playerPosition,
+        proximityPlacedBlocksRef.current,
+        chopPersistenceOwnerId,
+        choppedTreesByTileKeyRef.current
+      );
+
+      if (!clickedStump) {
+        return false;
+      }
+
+      selectingWorldPlazaTreeStumpForClickAction(
+        selectedInteractableBlockKeysRef,
+        clickedStump.tileX,
+        clickedStump.tileY
+      );
+
+      return true;
+    },
+    [chopPersistenceOwnerId, playerPositionRef]
+  );
+
   const handlingDevSpawnAggressiveChickens = useCallback(
     (count: number) => {
       const playerPosition = playerPositionRef.current;
@@ -4014,6 +4131,33 @@ function RenderingWorldPlazaPixiSceneConnected({
           viewportFrameRef.current,
           pixiViewportSizeRef.current
         );
+
+      if (
+        viewportScreenPoint &&
+        playerPositionRef.current &&
+        !isPlayerAsleepRef.current &&
+        !isPlayerStunnedRef.current
+      ) {
+        const hoveredStump = findingWorldPlazaTreeStumpAtGridPoint(
+          {
+            gridPoint,
+            viewportScreenPoint,
+            cameraOffset: cameraOffsetRef.current,
+            cameraWorldZoom: cameraWorldZoomRef.current,
+          },
+          playerPositionRef.current,
+          proximityPlacedBlocksRef.current,
+          chopPersistenceOwnerId,
+          choppedTreesByTileKeyRef.current
+        );
+
+        if (hoveredStump) {
+          applyingInteractablePointerHoverCursor(
+            DEFINING_WORLD_PLAZA_CORPSE_POINTER_HOVER_CURSOR
+          );
+          return;
+        }
+      }
 
       const pointerContext: DefiningWorldPlazaInteractablePointerHitContext = {
         gridPoint,
@@ -5309,7 +5453,9 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const isLocalPlayerHudHiddenForCorpseStudy =
     wildlifeCorpseStudyProgressSnapshot.isActive ||
-    wildlifeCorpseStudyProgressSnapshot.isCancelling;
+    wildlifeCorpseStudyProgressSnapshot.isCancelling ||
+    treeStumpStudyProgressSnapshot.isActive ||
+    treeStumpStudyProgressSnapshot.isCancelling;
 
   const playerNameLabelEntries =
     useMemo((): RenderingWorldPlazaPlayerNameLabelEntry[] => {
@@ -5797,24 +5943,35 @@ function RenderingWorldPlazaPixiSceneConnected({
             hostRef.current?.focus();
             return;
           }
-        }
 
-        clearingInteractableBlockClickSelection();
+          clearingInteractableBlockClickSelection();
 
-        if (gridPoint && handlingWildlifeCorpseClick(gridPoint)) {
-          clearingCombatLock();
-          clearingDocileBetraySelection();
-          event.preventDefault();
-          event.stopPropagation();
-          hostRef.current?.focus();
-          return;
-        }
+          if (handlingWildlifeCorpseClick(gridPoint)) {
+            clearingCombatLock();
+            clearingDocileBetraySelection();
+            event.preventDefault();
+            event.stopPropagation();
+            hostRef.current?.focus();
+            return;
+          }
 
-        if (gridPoint && handlingWildlifeMeleeClick(gridPoint)) {
-          event.preventDefault();
-          event.stopPropagation();
-          hostRef.current?.focus();
-          return;
+          if (handlingTreeStumpClick(pointerContext)) {
+            clearingCombatLock();
+            clearingDocileBetraySelection();
+            event.preventDefault();
+            event.stopPropagation();
+            hostRef.current?.focus();
+            return;
+          }
+
+          if (handlingWildlifeMeleeClick(gridPoint)) {
+            event.preventDefault();
+            event.stopPropagation();
+            hostRef.current?.focus();
+            return;
+          }
+        } else {
+          clearingInteractableBlockClickSelection();
         }
       }
 
@@ -5841,6 +5998,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       handlingInteractableBlockPointerDown,
       handlingPlazaPointerDown,
       handlingWildlifeCorpseClick,
+      handlingTreeStumpClick,
       handlingToolGroundPointerSelection,
       handlingWildlifeMeleeClick,
       actingOnEditModeTileAtViewport,
@@ -6738,6 +6896,24 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
                 onStudyCorpse={handlingWildlifeCorpseStudyInteraction}
+              />
+              <RenderingWorldPlazaTreeStumpStudyLabels
+                placedBlocksRef={proximityPlacedBlocksRef}
+                playerPositionRef={playerPositionRef}
+                selectedInteractableBlockKeysRef={
+                  selectedInteractableBlockKeysRef
+                }
+                choppedTreeStateByTileKeyRef={choppedTreesByTileKeyRef}
+                persistenceOwnerId={chopPersistenceOwnerId}
+                timedInteractionProgressSnapshot={
+                  treeStumpStudyProgressSnapshot
+                }
+                timedInteractionProgressRatioRef={
+                  treeStumpStudyProgressRatioRef
+                }
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                onStudyStump={handlingTreeStumpStudyInteraction}
               />
             </>
           ) : null}

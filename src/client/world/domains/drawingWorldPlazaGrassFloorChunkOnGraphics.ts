@@ -14,6 +14,9 @@ import type { Graphics } from 'pixi.js';
  * @module components/world/domains/drawingWorldPlazaGrassFloorChunkOnGraphics
  */
 
+/** Bake phase for resumeable chunk draws (fills first, decorations last). */
+export type DrawingWorldPlazaGrassFloorChunkDrawPhase = 'fill' | 'decoration';
+
 /** Input for {@link drawingWorldPlazaGrassFloorChunkOnGraphics}. */
 export interface DrawingWorldPlazaGrassFloorChunkOnGraphicsInput {
   readonly graphics: Graphics;
@@ -36,36 +39,57 @@ export interface DrawingWorldPlazaGrassFloorChunkTilesOnGraphicsInput {
   readonly maxTiles?: number;
   /** Reused across resumes so per-chunk lookup Maps stay warm. */
   readonly drawPassContext?: CreatingWorldPlazaGrassFloorChunkDrawPassContext;
+  /**
+   * Fill pass draws grass diamonds only. Decoration pass draws flowers/stones
+   * on top so neighbor fills cannot bury them.
+   */
+  readonly drawPhase?: DrawingWorldPlazaGrassFloorChunkDrawPhase;
 }
 
 /** Result from a resumeable chunk tile draw. */
 export interface DrawingWorldPlazaGrassFloorChunkTilesOnGraphicsResult {
   /** Next flat tile offset to resume from (equals tileCount when done). */
   readonly nextTileOffset: number;
-  /** True when every tile in the chunk has been drawn. */
+  /** True when every tile in the chunk has been drawn for this phase. */
   readonly isComplete: boolean;
   /** Draw-pass caches to pass back on the next resume. */
   readonly drawPassContext: CreatingWorldPlazaGrassFloorChunkDrawPassContext;
 }
 
 /**
- * Resolves draw options with a shared per-chunk lookup cache.
+ * Resolves draw options for one chunk bake phase.
  */
-function resolvingWorldPlazaGrassFloorChunkDrawOptions(
+function resolvingWorldPlazaGrassFloorChunkPhaseDrawOptions(
   drawOptions: DrawingWorldPlazaGrassFloorTileDrawOptions,
-  drawPassContext: CreatingWorldPlazaGrassFloorChunkDrawPassContext
+  drawPassContext: CreatingWorldPlazaGrassFloorChunkDrawPassContext,
+  drawPhase: DrawingWorldPlazaGrassFloorChunkDrawPhase
 ): DrawingWorldPlazaGrassFloorTileDrawOptions {
-  return {
+  const sharedOptions: DrawingWorldPlazaGrassFloorTileDrawOptions = {
     ...drawOptions,
     isDaytime: drawPassContext.isDaytime,
     drawsEnvironmentalHazardFloorTint:
       drawPassContext.drawsEnvironmentalHazardFloorTint,
     drawPassContext,
   };
+
+  if (drawPhase === 'fill') {
+    return {
+      ...sharedOptions,
+      drawsFloorFill: true,
+      drawsGrassDecorations: false,
+      drawsFlowerDecorations: false,
+      drawsStoneDecorations: false,
+    };
+  }
+
+  return {
+    ...sharedOptions,
+    drawsFloorFill: false,
+  };
 }
 
 /**
- * Draws a contiguous tile range inside one floor chunk.
+ * Draws a contiguous tile range inside one floor chunk for one bake phase.
  *
  * Flat offsets are row-major: `tileOffsetY * chunkSize + tileOffsetX`.
  *
@@ -88,9 +112,11 @@ export function drawingWorldPlazaGrassFloorChunkTilesOnGraphics(
   const drawPassContext =
     input.drawPassContext ??
     creatingWorldPlazaGrassFloorChunkDrawPassContext(input.drawOptions);
-  const drawOptions = resolvingWorldPlazaGrassFloorChunkDrawOptions(
+  const drawPhase = input.drawPhase ?? 'fill';
+  const drawOptions = resolvingWorldPlazaGrassFloorChunkPhaseDrawOptions(
     input.drawOptions,
-    drawPassContext
+    drawPassContext,
+    drawPhase
   );
 
   for (
@@ -117,7 +143,7 @@ export function drawingWorldPlazaGrassFloorChunkTilesOnGraphics(
 }
 
 /**
- * Draws every tile in a chunk's fixed region.
+ * Draws every tile in a chunk's fixed region (fills first, decorations second).
  *
  * A chunk covers a stable world region, so it always renders its full tile
  * grid. Clipping to a transient visible window would bake gaps into the cached
@@ -128,6 +154,16 @@ export function drawingWorldPlazaGrassFloorChunkTilesOnGraphics(
 export function drawingWorldPlazaGrassFloorChunkOnGraphics(
   input: DrawingWorldPlazaGrassFloorChunkOnGraphicsInput
 ): void {
+  const fillPass = drawingWorldPlazaGrassFloorChunkTilesOnGraphics({
+    graphics: input.graphics,
+    chunkOriginTileX: input.chunkOriginTileX,
+    chunkOriginTileY: input.chunkOriginTileY,
+    chunkSizeTiles: input.chunkSizeTiles,
+    drawOptions: input.drawOptions,
+    startTileOffset: 0,
+    drawPhase: 'fill',
+  });
+
   drawingWorldPlazaGrassFloorChunkTilesOnGraphics({
     graphics: input.graphics,
     chunkOriginTileX: input.chunkOriginTileX,
@@ -135,5 +171,7 @@ export function drawingWorldPlazaGrassFloorChunkOnGraphics(
     chunkSizeTiles: input.chunkSizeTiles,
     drawOptions: input.drawOptions,
     startTileOffset: 0,
+    drawPhase: 'decoration',
+    drawPassContext: fillPass.drawPassContext,
   });
 }

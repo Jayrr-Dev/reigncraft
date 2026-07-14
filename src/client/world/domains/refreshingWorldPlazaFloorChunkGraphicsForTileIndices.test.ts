@@ -45,6 +45,7 @@ describe('refreshingWorldPlazaFloorChunkGraphicsForTileIndices', () => {
       chunkOriginTileX: 0,
       chunkOriginTileY: 0,
       nextTileOffset: 8,
+      drawPhase: 'fill',
       drawPassContext: null,
     });
 

@@ -2,6 +2,7 @@ import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/buildi
 import { formattingWorldPlazaFarmlandTileSelectionKey } from '@/components/world/farming/domains/formattingWorldPlazaFarmlandTileSelectionKey';
 import type { DefiningWorldPlazaFarmlandInteractionKind } from '@/components/world/farming/domains/listingWorldPlazaFarmlandTilesInInteractionRange';
 import { formattingWorldPlazaFishingTileSelectionKey } from '@/components/world/fishing/domains/formattingWorldPlazaFishingTileSelectionKey';
+import { formattingWorldPlazaTreeStumpStudySelectionKey } from '@/components/world/harvest/domains/formattingWorldPlazaTreeStumpStudySelectionKey';
 import { formattingWorldPlazaInteractableBlockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableBlockSelectionKey';
 import { formattingWorldPlazaInteractableFlowerSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableFlowerSelectionKey';
 import { formattingWorldPlazaInteractablePebbleSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractablePebbleSelectionKey';
@@ -99,6 +100,23 @@ export function selectingWorldPlazaWildlifeCorpseForClickAction(
   instanceId: string
 ): void {
   const selectionKey = formattingWildlifeCorpseStudySelectionKey(instanceId);
+
+  selectedBlockKeysRef.current.clear();
+  selectedBlockKeysRef.current.add(selectionKey);
+}
+
+/**
+ * Selects one felled-tree stump for the Study timed interaction.
+ */
+export function selectingWorldPlazaTreeStumpForClickAction(
+  selectedBlockKeysRef: RefObject<Set<string>>,
+  tileX: number,
+  tileY: number
+): void {
+  const selectionKey = formattingWorldPlazaTreeStumpStudySelectionKey(
+    tileX,
+    tileY
+  );
 
   selectedBlockKeysRef.current.clear();
   selectedBlockKeysRef.current.add(selectionKey);

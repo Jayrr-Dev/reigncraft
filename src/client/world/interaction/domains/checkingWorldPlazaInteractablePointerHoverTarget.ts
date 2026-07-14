@@ -4,6 +4,7 @@ import {
 } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { findingWorldPlazaTreeStumpAtGridPoint } from '@/components/world/harvest/domains/findingWorldPlazaTreeStumpAtGridPoint';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaMinedRockTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
@@ -54,10 +55,10 @@ export type CheckingWorldPlazaInteractablePointerHoverTargetInput = {
 };
 
 /**
- * True when the pointer is over a clickable corpse, campfire, choppable tree,
- * mineable rock, or pickable pebble. Corpse hover uses a dedicated cursor in
- * the plaza scene; this still returns true so callers can treat corpses as
- * interactable.
+ * True when the pointer is over a clickable corpse, studiable stump, campfire,
+ * choppable tree, mineable rock, or pickable pebble. Corpse hover uses a
+ * dedicated cursor in the plaza scene; this still returns true so callers can
+ * treat corpses as interactable.
  */
 export function checkingWorldPlazaInteractablePointerHoverTarget(
   input: CheckingWorldPlazaInteractablePointerHoverTargetInput
@@ -108,13 +109,27 @@ export function checkingWorldPlazaInteractablePointerHoverTarget(
     pointerContext.cameraOffset !== undefined &&
     pointerContext.cameraWorldZoom !== undefined
   ) {
+    const stumpPointerContext = {
+      gridPoint: pointerContext.gridPoint,
+      viewportScreenPoint: pointerContext.viewportScreenPoint,
+      cameraOffset: pointerContext.cameraOffset,
+      cameraWorldZoom: pointerContext.cameraWorldZoom,
+    };
+
+    const stumpMatch = findingWorldPlazaTreeStumpAtGridPoint(
+      stumpPointerContext,
+      playerPosition,
+      placedBlocks,
+      chopPersistenceOwnerId,
+      choppedTreeStateByTileKey
+    );
+
+    if (stumpMatch !== null) {
+      return true;
+    }
+
     const treeMatch = resolvingWorldPlazaInteractableTreeFromPointerGridPoint(
-      {
-        gridPoint: pointerContext.gridPoint,
-        viewportScreenPoint: pointerContext.viewportScreenPoint,
-        cameraOffset: pointerContext.cameraOffset,
-        cameraWorldZoom: pointerContext.cameraWorldZoom,
-      },
+      stumpPointerContext,
       playerPosition,
       placedBlocks,
       chopPersistenceOwnerId,

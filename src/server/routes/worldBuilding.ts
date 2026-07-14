@@ -22,14 +22,15 @@ import {
   type WorldBuildingDevvitPlotRow,
   type WorldBuildingDevvitPlotsPayload,
 } from '../../shared/worldBuildingDevvit';
+import { buildingPlazaDevvitOnlinePlayerRedisKey } from '../domains/buildingPlazaDevvitOnlineRedisKeys';
 import {
   buildingWorldBuildingBlockIndexRedisKey,
   buildingWorldBuildingPlotBlocksRedisKey,
   buildingWorldBuildingPlotsRosterRedisKey,
   buildingWorldBuildingSessionBlocksRedisKey,
 } from '../domains/buildingWorldBuildingDevvitRedisKeys';
+import { checkingWorldBuildingDevvitSessionBlockVisibleToRequester } from '../domains/checkingWorldBuildingDevvitSessionBlockVisibleToRequester';
 import { checkingWorldBuildingDevvitSessionPlacementDefinitionId } from '../domains/checkingWorldBuildingDevvitSessionPlacementDefinitionId';
-import { buildingPlazaDevvitOnlinePlayerRedisKey } from '../domains/buildingPlazaDevvitOnlineRedisKeys';
 import { resolvingDevvitRedditUserId } from '../domains/resolvingDevvitRedditUserId';
 import { resolvingPlazaDevvitOnlineRoomScopeFromRequest } from '../domains/resolvingPlazaDevvitOnlineRoomScopeFromRequest';
 
@@ -400,28 +401,37 @@ async function checkingPlazaDevvitPlayerIsLive(
 
 async function listingWorldBuildingDevvitSessionBlocks(
   roomScope: string,
-  bounds: TileBounds | null
+  bounds: TileBounds | null,
+  requestingUserId: string
 ): Promise<WorldBuildingDevvitBlockRow[]> {
-  const sessionBlocksKey = buildingWorldBuildingSessionBlocksRedisKey(roomScope);
+  const sessionBlocksKey =
+    buildingWorldBuildingSessionBlocksRedisKey(roomScope);
   const rawBlocks = await redis.hGetAll(sessionBlocksKey);
   const blocks: WorldBuildingDevvitBlockRow[] = [];
-  const staleBlockIds: string[] = [];
+  const corruptBlockIds: string[] = [];
 
   for (const [blockId, rawBlock] of Object.entries(rawBlocks)) {
     const parsedBlock = parsingWorldBuildingDevvitBlockRow(rawBlock);
 
     if (!parsedBlock) {
-      staleBlockIds.push(blockId);
+      corruptBlockIds.push(blockId);
       continue;
     }
 
+    // Single-player never writes plaza:online:player keys. Treating "not live"
+    // as stale used to hDel the campfire on the first plots refetch after place.
     const ownerIsLive = await checkingPlazaDevvitPlayerIsLive(
       roomScope,
       parsedBlock.owner_id
     );
 
-    if (!ownerIsLive) {
-      staleBlockIds.push(blockId);
+    if (
+      !checkingWorldBuildingDevvitSessionBlockVisibleToRequester(
+        parsedBlock.owner_id,
+        requestingUserId,
+        ownerIsLive
+      )
+    ) {
       continue;
     }
 
@@ -439,8 +449,8 @@ async function listingWorldBuildingDevvitSessionBlocks(
     blocks.push(parsedBlock);
   }
 
-  if (staleBlockIds.length > 0) {
-    await redis.hDel(sessionBlocksKey, staleBlockIds);
+  if (corruptBlockIds.length > 0) {
+    await redis.hDel(sessionBlocksKey, corruptBlockIds);
   }
 
   return blocks;
@@ -450,7 +460,8 @@ async function deletingWorldBuildingDevvitSessionBlocksForOwner(
   roomScope: string,
   ownerUserId: string
 ): Promise<number> {
-  const sessionBlocksKey = buildingWorldBuildingSessionBlocksRedisKey(roomScope);
+  const sessionBlocksKey =
+    buildingWorldBuildingSessionBlocksRedisKey(roomScope);
   const rawBlocks = await redis.hGetAll(sessionBlocksKey);
   const blockIdsToDelete: string[] = [];
 
@@ -563,7 +574,8 @@ worldBuilding.get('/plots/bounds', async (c) => {
   );
   const sessionBlocks = await listingWorldBuildingDevvitSessionBlocks(
     roomScope,
-    bounds
+    bounds,
+    userId
   );
 
   return c.json(
@@ -961,7 +973,9 @@ worldBuilding.post('/session-blocks', async (c) => {
   const roomScope = resolvingPlazaDevvitOnlineRoomScopeFromRequest(c);
   const plots = await listingWorldBuildingDevvitPlots(roomScope);
 
-  if (checkingTileAlreadyClaimed(plots, placeRequest.tileX, placeRequest.tileY)) {
+  if (
+    checkingTileAlreadyClaimed(plots, placeRequest.tileX, placeRequest.tileY)
+  ) {
     return c.json<WorldBuildingDevvitPlaceSessionBlockResponse>(
       {
         type: 'error',
@@ -971,7 +985,8 @@ worldBuilding.post('/session-blocks', async (c) => {
     );
   }
 
-  const sessionBlocksKey = buildingWorldBuildingSessionBlocksRedisKey(roomScope);
+  const sessionBlocksKey =
+    buildingWorldBuildingSessionBlocksRedisKey(roomScope);
   const metadata: Record<string, string | number | boolean | null> = {
     ...(placeRequest.metadata ?? {}),
     worldLayer: placeRequest.worldLayer,
@@ -1014,10 +1029,8 @@ worldBuilding.delete('/session-blocks', async (c) => {
   }
 
   const roomScope = resolvingPlazaDevvitOnlineRoomScopeFromRequest(c);
-  const deletedBlockCount = await deletingWorldBuildingDevvitSessionBlocksForOwner(
-    roomScope,
-    userId
-  );
+  const deletedBlockCount =
+    await deletingWorldBuildingDevvitSessionBlocksForOwner(roomScope, userId);
 
   return c.json<WorldBuildingDevvitDeleteSessionBlocksResponse>({
     type: 'deleted',

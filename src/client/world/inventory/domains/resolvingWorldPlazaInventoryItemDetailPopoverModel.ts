@@ -178,11 +178,13 @@ function listingWorldPlazaInventoryItemDetailBadges(
   }
 
   if (definition.food && options.includeFoodHungerBadge !== false) {
-    badges.push({
-      id: 'food',
-      label: `Restores ${Math.round(definition.food.hungerRestoreRatio * 100)}% hunger`,
-      variant: 'food',
-    });
+    if (definition.food.hungerRestoreRatio > 0) {
+      badges.push({
+        id: 'food',
+        label: `Restores ${Math.round(definition.food.hungerRestoreRatio * 100)}% hunger`,
+        variant: 'food',
+      });
+    }
 
     const healthHealAmount = resolvingWorldPlazaInventoryFoodHealAmount({
       healthHeal: definition.food.healthHeal,

@@ -43,6 +43,11 @@ export interface DrawingWorldPlazaGrassFloorTileDrawOptions extends DrawingWorld
   readonly isDaytime?: boolean;
   /** When false, skip cold/heat floor tints while baking chunks. */
   readonly drawsEnvironmentalHazardFloorTint?: boolean;
+  /**
+   * When false, skip the grass/water diamond fill (decoration-only pass).
+   * Chunks bake fills first, then decorations, so neighbor tiles cannot bury flowers.
+   */
+  readonly drawsFloorFill?: boolean;
   /** Per-chunk memoization for frozen water and hazard tints. */
   readonly drawPassContext?: CreatingWorldPlazaGrassFloorChunkDrawPassContext;
 }
@@ -101,6 +106,7 @@ export function drawingWorldPlazaGrassFloorTileOnGraphics(
 
   const halfWidth = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
   const halfHeight = DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX;
+  const drawsFloorFill = drawOptions.drawsFloorFill !== false;
   const baseFillColor = drawOptions.drawPassContext
     ? drawOptions.drawPassContext.resolvingGrassFloorTileFillColorAtTileIndex(
         tileX,
@@ -131,37 +137,7 @@ export function drawingWorldPlazaGrassFloorTileOnGraphics(
     y: groundCenter.y + surfaceLiftY,
   };
 
-  graphics
-    .poly([
-      center.x,
-      center.y - halfHeight,
-      center.x + halfWidth,
-      center.y,
-      center.x,
-      center.y + halfHeight,
-      center.x - halfWidth,
-      center.y,
-    ])
-    .fill({ color: fillColor });
-
-  const isDaytime =
-    drawOptions.drawPassContext?.isDaytime ??
-    drawOptions.isDaytime ??
-    computingWorldPlazaDayNightSunState().isDaytime;
-  const hazardTint = drawOptions.drawPassContext
-    ? drawOptions.drawPassContext.resolvingEnvironmentalHazardFloorTintAtTileIndex(
-        tileX,
-        tileY
-      )
-    : drawOptions.drawsEnvironmentalHazardFloorTint === false
-      ? null
-      : resolvingWorldPlazaEnvironmentalHazardFloorTintAtTileIndex(
-          tileX,
-          tileY,
-          isDaytime
-        );
-
-  if (hazardTint) {
+  if (drawsFloorFill) {
     graphics
       .poly([
         center.x,
@@ -173,29 +149,63 @@ export function drawingWorldPlazaGrassFloorTileOnGraphics(
         center.x - halfWidth,
         center.y,
       ])
-      .fill({ color: hazardTint.color, alpha: hazardTint.alpha });
-  }
+      .fill({ color: fillColor });
 
-  const waterTile = drawOptions.drawPassContext
-    ? drawOptions.drawPassContext.resolvingWaterAtTileIndex(tileX, tileY)
-    : resolvingWorldPlazaWaterAtTileIndex(tileX, tileY);
-
-  if (
-    waterTile &&
-    (drawOptions.drawPassContext
-      ? drawOptions.drawPassContext.checkingWaterIsFrozenAtTileIndex(
+    const isDaytime =
+      drawOptions.drawPassContext?.isDaytime ??
+      drawOptions.isDaytime ??
+      computingWorldPlazaDayNightSunState().isDaytime;
+    const hazardTint = drawOptions.drawPassContext
+      ? drawOptions.drawPassContext.resolvingEnvironmentalHazardFloorTintAtTileIndex(
           tileX,
           tileY
         )
-      : checkingWorldPlazaWaterIsFrozenAtTileIndex(tileX, tileY, { isDaytime }))
-  ) {
-    drawingWorldPlazaFrozenWaterIceTextureOnGraphics(
-      graphics,
-      tileX,
-      tileY,
-      center.x,
-      center.y
-    );
+      : drawOptions.drawsEnvironmentalHazardFloorTint === false
+        ? null
+        : resolvingWorldPlazaEnvironmentalHazardFloorTintAtTileIndex(
+            tileX,
+            tileY,
+            isDaytime
+          );
+
+    if (hazardTint) {
+      graphics
+        .poly([
+          center.x,
+          center.y - halfHeight,
+          center.x + halfWidth,
+          center.y,
+          center.x,
+          center.y + halfHeight,
+          center.x - halfWidth,
+          center.y,
+        ])
+        .fill({ color: hazardTint.color, alpha: hazardTint.alpha });
+    }
+
+    const waterTile = drawOptions.drawPassContext
+      ? drawOptions.drawPassContext.resolvingWaterAtTileIndex(tileX, tileY)
+      : resolvingWorldPlazaWaterAtTileIndex(tileX, tileY);
+
+    if (
+      waterTile &&
+      (drawOptions.drawPassContext
+        ? drawOptions.drawPassContext.checkingWaterIsFrozenAtTileIndex(
+            tileX,
+            tileY
+          )
+        : checkingWorldPlazaWaterIsFrozenAtTileIndex(tileX, tileY, {
+            isDaytime,
+          }))
+    ) {
+      drawingWorldPlazaFrozenWaterIceTextureOnGraphics(
+        graphics,
+        tileX,
+        tileY,
+        center.x,
+        center.y
+      );
+    }
   }
 
   if (!isBurntGrassTile) {

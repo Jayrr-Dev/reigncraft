@@ -33,7 +33,7 @@ export type UsingWorldPlazaRecordingHerbariumSightingsOptions = {
  * Tracks tree sightings near the player, and syncs flower discovery from picks.
  *
  * Flowers unlock only when picked (or when already held / previously picked).
- * Trees still unlock by proximity sighting; chopping awards Study.
+ * Trees still unlock by proximity sighting; stump Study awards Herbarium progress.
  */
 export function usingWorldPlazaRecordingHerbariumSightings({
   isEnabled,

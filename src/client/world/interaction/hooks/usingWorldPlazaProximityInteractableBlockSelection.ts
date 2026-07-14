@@ -22,6 +22,7 @@ export type UsingWorldPlazaProximityInteractableBlockSelectionParams = {
   readonly choppedTreeStateByTileKeyRef: RefObject<
     ReadonlyMap<string, DefiningWorldPlazaChoppedTreeTileState>
   >;
+  readonly chopPersistenceOwnerId: string | null;
   readonly minedRockStateByTileKeyRef: RefObject<
     ReadonlyMap<string, DefiningWorldPlazaMinedRockTileState>
   >;
@@ -50,6 +51,7 @@ export function usingWorldPlazaProximityInteractableBlockSelection({
   selectedInteractableBlockKeysRef,
   placedBlocksRef,
   choppedTreeStateByTileKeyRef,
+  chopPersistenceOwnerId,
   minedRockStateByTileKeyRef,
   pickedPebbleStateByTileKeyRef,
   pickedFlowerStateByTileKeyRef,
@@ -92,6 +94,7 @@ export function usingWorldPlazaProximityInteractableBlockSelection({
           playerPosition,
           placedBlocks: placedBlocksRef.current,
           choppedTreeStateByTileKey: choppedTreeStateByTileKeyRef.current,
+          chopPersistenceOwnerId,
           minedRockStateByTileKey: minedRockStateByTileKeyRef.current,
           pickedPebbleStateByTileKey: pickedPebbleStateByTileKeyRef.current,
           pickedFlowerStateByTileKey: pickedFlowerStateByTileKeyRef.current,
@@ -106,6 +109,7 @@ export function usingWorldPlazaProximityInteractableBlockSelection({
       );
     });
   }, [
+    chopPersistenceOwnerId,
     choppedTreeStateByTileKeyRef,
     enabled,
     farmlandByTileKeyRef,

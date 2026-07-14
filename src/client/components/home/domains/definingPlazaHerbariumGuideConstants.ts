@@ -23,7 +23,7 @@ export type DefiningPlazaHerbariumTreeEntry = {
   icon: string;
   /** Shown after the player sights the species nearby. */
   summary: string;
-  /** Shown after the player completes a chop layer. */
+  /** Shown after the player studies a felled stump. */
   studiedSummary: string;
   /** Short wood-note shown in the Properties tier. */
   propertiesSummary: string;
@@ -33,7 +33,7 @@ export type DefiningPlazaHerbariumTreeEntry = {
 
 /** Subtitle shown under the Herbarium panel title. */
 export const DEFINING_PLAZA_HERBARIUM_PANEL_SUBTITLE =
-  'Pick flowers to log them. Get close to trees, then chop to study.' as const;
+  'Pick flowers to log them. Fell a tree, then study the stump.' as const;
 
 /** Label shown for species the player has not sighted yet. */
 export const LABELING_PLAZA_HERBARIUM_UNDISCOVERED_NAME = '???' as const;
