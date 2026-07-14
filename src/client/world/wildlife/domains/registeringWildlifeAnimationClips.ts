@@ -31,10 +31,10 @@ export function formattingWildlifeAnimationClipId(
 }
 
 const DEFINING_WILDLIFE_ONE_SHOT_MOTIONS: ReadonlySet<DefiningWildlifeMotionClipKind> =
-  new Set(['attack', 'attack2', 'attack3', 'howl', 'takeDamage', 'die']);
+  new Set(['attack', 'attack2', 'attack3', 'howl', 'taunt', 'takeDamage', 'die']);
 
 const DEFINING_WILDLIFE_EXTENDED_MOTION_CLIP_KINDS: readonly DefiningWildlifeExtendedMotionClipKind[] =
-  ['howl', 'attack2', 'attack3'];
+  ['howl', 'taunt', 'runBackwards', 'attack2', 'attack3'];
 
 /**
  * Registers all motion clips for one loaded species texture set.

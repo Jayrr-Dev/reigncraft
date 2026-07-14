@@ -91,6 +91,7 @@ import mdiBookOutline from '@iconify-icons/mdi/book-outline';
 import mdiBookmark from '@iconify-icons/mdi/bookmark';
 import mdiCactus from '@iconify-icons/mdi/cactus';
 import mdiCampfire from '@iconify-icons/mdi/campfire';
+import mdiChat from '@iconify-icons/mdi/chat';
 import mdiCheckBold from '@iconify-icons/mdi/check-bold';
 import mdiChevronDown from '@iconify-icons/mdi/chevron-down';
 import mdiChevronLeft from '@iconify-icons/mdi/chevron-left';
@@ -309,6 +310,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:anvil': mdiAnvil,
   'mdi:cactus': mdiCactus,
   'mdi:campfire': mdiCampfire,
+  'mdi:chat': mdiChat,
   'mdi:check-bold': mdiCheckBold,
   'mdi:chevron-down': mdiChevronDown,
   'mdi:chevron-left': mdiChevronLeft,

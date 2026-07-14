@@ -52,14 +52,34 @@ function resolvingWildlifeIntentLookAtPoint(
  *
  * While the body is actually moving, facing follows movement so retreat and
  * shadow-wander legs do not play walk/run clips backwards.
+ *
+ * Pouncer retreat is the exception: the animal faces prey while playing the
+ * dedicated runBackwards clip.
  */
 export function resolvingWildlifeInstanceFacingDirection(
   position: DefiningWorldPlazaWorldPoint,
   intent: DefiningWildlifeBehaviorIntent,
   movedX: number,
   movedY: number,
-  fallbackDirection: DefiningWorldPlazaGirlSampleWalkDirection
+  fallbackDirection: DefiningWorldPlazaGirlSampleWalkDirection,
+  options?: {
+    preferFacingPointWhileMoving?: boolean;
+  }
 ): DefiningWorldPlazaGirlSampleWalkDirection {
+  const lookAtPoint = resolvingWildlifeIntentLookAtPoint(intent);
+
+  if (
+    options?.preferFacingPointWhileMoving &&
+    lookAtPoint &&
+    checkingWildlifeFacingHasMovementDelta(movedX, movedY)
+  ) {
+    return resolvingWorldPlazaGirlSampleWalkDirectionTowardGridPoint(
+      position,
+      lookAtPoint,
+      fallbackDirection
+    );
+  }
+
   if (checkingWildlifeFacingHasMovementDelta(movedX, movedY)) {
     return resolvingWorldPlazaGirlSampleWalkDirection(
       movedX,
@@ -67,8 +87,6 @@ export function resolvingWildlifeInstanceFacingDirection(
       fallbackDirection
     );
   }
-
-  const lookAtPoint = resolvingWildlifeIntentLookAtPoint(intent);
 
   if (lookAtPoint) {
     return resolvingWorldPlazaGirlSampleWalkDirectionTowardGridPoint(

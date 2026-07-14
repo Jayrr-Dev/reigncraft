@@ -205,7 +205,14 @@ export interface UsingWorldPlazaPlayerHealthResult {
   /** Forces the HUD to re-read healthStateRef (e.g. after save hydrate). */
   syncingHealthHudFromStateRef: React.RefObject<() => void>;
   takeDamageRef: React.RefObject<
-    (amount: number, kind?: DefiningWorldPlazaEntityDamageKind) => void
+    (
+      amount: number,
+      kind?: DefiningWorldPlazaEntityDamageKind,
+      options?: Pick<
+        DefiningWorldPlazaEntityHealthDamageOptions,
+        'forcedDeviationScore' | 'forcedRollMode' | 'skipDamageRoll'
+      >
+    ) => void
   >;
   /** Enqueues a gray spatial Miss float above the local player (jump dodge, etc.). */
   enqueueMissFloatRef: React.RefObject<() => void>;
@@ -1072,10 +1079,10 @@ export function usingWorldPlazaPlayerHealth({
       pushingHudSnapshot(nowMs);
     };
 
-    takeDamageRef.current = (amount, kind = 'physical') => {
+    takeDamageRef.current = (amount, kind = 'physical', options) => {
       mutatingHealthState(
         (state, nowMs) =>
-          applyingDamageWithFloatFeedback(state, amount, kind, nowMs),
+          applyingDamageWithFloatFeedback(state, amount, kind, nowMs, options),
         { flashDamage: true }
       );
     };

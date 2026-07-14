@@ -413,6 +413,8 @@ export type ResolvingWildlifePounceJumpPlanParams = {
   targetPoint: DefiningWorldPlazaWorldPoint;
   hazardSampling: ResolvingWildlifeSteeringHazardSampling;
   nowMs: number;
+  /** Optional override for max pounce distance (jump scare doubles range). */
+  maxJumpDistanceGridOverride?: number;
 };
 
 /**
@@ -424,6 +426,7 @@ export function resolvingWildlifePounceJumpPlan({
   targetPoint,
   hazardSampling,
   nowMs,
+  maxJumpDistanceGridOverride,
 }: ResolvingWildlifePounceJumpPlanParams): DefiningWildlifeJumpState | null {
   if (
     !species.jump.canPounce ||
@@ -440,10 +443,12 @@ export function resolvingWildlifePounceJumpPlan({
   const deltaX = targetPoint.x - origin.x;
   const deltaY = targetPoint.y - origin.y;
   const distance = Math.hypot(deltaX, deltaY);
+  const maxJumpDistanceGrid =
+    maxJumpDistanceGridOverride ?? species.jump.maxJumpDistanceGrid;
 
   if (
     distance < DEFINING_WILDLIFE_POUNCE_MIN_DISTANCE_GRID ||
-    distance > species.jump.maxJumpDistanceGrid
+    distance > maxJumpDistanceGrid
   ) {
     return null;
   }

@@ -154,12 +154,14 @@ export const DEFINING_WILDLIFE_MOTION_FPS: Record<
   idle: 8,
   walk: 14,
   run: 18,
+  runBackwards: 18,
   attack: 16,
   attack2: 16,
   attack3: 14,
   takeDamage: 12,
   die: 10,
   howl: 10,
+  taunt: 12,
   sleep: 1,
 };
 

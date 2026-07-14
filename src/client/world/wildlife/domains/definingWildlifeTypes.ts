@@ -169,10 +169,12 @@ export type DefiningWildlifeAiState = {
     | 'idle'
     | 'walk'
     | 'run'
+    | 'runBackwards'
     | 'attack'
     | 'attack2'
     | 'attack3'
     | 'howl'
+    | 'taunt'
     | 'takeDamage'
     | 'die'
     | 'sleep';
@@ -237,6 +239,23 @@ export type DefiningWildlifeAiState = {
   docileFollowUntilMs: number | null;
   /** Last time this docile animal rolled follow vs flee on approach. */
   docileLastReactAtMs: number | null;
+  /**
+   * Pouncer pattern phase (`sunhead`). `idle` when not mid-cycle.
+   * Optional for older fixtures / network snapshots.
+   */
+  pouncerPhase?: 'retreat' | 'cast' | 'pounce' | 'idle';
+  /** World X where the current pouncer retreat started. */
+  pouncerRetreatFromX?: number | null;
+  /** World Y where the current pouncer retreat started. */
+  pouncerRetreatFromY?: number | null;
+  /** While set and in the future, plays the jump-scare taunt cast. */
+  jumpScareUntilMs?: number | null;
+  /** Timestamp of the last jump-scare cast for cooldown gating. */
+  lastJumpScareAtMs?: number | null;
+  /** True after jump-scare cast until the armed pounce lands. */
+  jumpScareArmed?: boolean;
+  /** While set and in the future, the next melee forces fatal EV tier. */
+  jumpScareFatalUntilMs?: number | null;
 };
 
 /** Threat entry keyed by target id (player userId or wildlife instanceId). */
@@ -446,6 +465,8 @@ export type DefiningWildlifePlayerMeleeHit = {
   speciesId: DefiningWildlifeSpeciesId;
   damageAmount: number;
   aggressionLevel: DefiningWildlifeAggressionLevel;
+  /** When set, forces this EV outcome tier on the player damage roll. */
+  forcedDeviationScore?: number;
 };
 
 /** Payload when the player is overlapping a live animal body. */

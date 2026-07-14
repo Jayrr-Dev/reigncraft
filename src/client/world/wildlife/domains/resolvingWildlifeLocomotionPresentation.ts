@@ -112,6 +112,13 @@ export function resolvingWildlifeLocomotionPresentation({
     };
   }
 
+  if (aiState.motionClip === 'taunt') {
+    return {
+      isMoving: false,
+      motionClip: 'taunt',
+    };
+  }
+
   // Zero-delta frames carry no movement information; keep the current clip
   // instead of flashing to idle.
   if (deltaSeconds <= 0) {
@@ -135,6 +142,13 @@ export function resolvingWildlifeLocomotionPresentation({
   }
 
   if (intent.mode === 'stalk') {
+    if (aiState.pouncerPhase === 'retreat') {
+      return {
+        isMoving: true,
+        motionClip: 'runBackwards',
+      };
+    }
+
     return {
       isMoving: true,
       motionClip: intent.pace === 'run' ? 'run' : 'walk',

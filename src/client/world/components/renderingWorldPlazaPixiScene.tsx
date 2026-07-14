@@ -520,6 +520,16 @@ import {
   resolvingWildlifeSpeciesDefinition,
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
+import {
+  readingNpcInstanceStore,
+  RenderingNpcInteractionLabels,
+  RenderingNpcLayer,
+  RenderingNpcQuestPanel,
+  RenderingNpcShopPanel,
+  RenderingNpcTalkPanel,
+  usingNpcPanelState,
+  usingNpcProximitySelection,
+} from '@/components/world/npc';
 import { RenderingWildlifeDocileBetrayInteractionLabels } from '@/components/world/wildlife/components/renderingWildlifeDocileBetrayInteractionLabels';
 import { RenderingWildlifeFootsteps } from '@/components/world/wildlife/components/renderingWildlifeFootsteps';
 import { RenderingWildlifeOmegaWolfSfx } from '@/components/world/wildlife/components/renderingWildlifeOmegaWolfSfx';
@@ -1104,6 +1114,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     usingWorldPlazaGenerationFeaturesState();
   const isWildlifeGenerationEnabled =
     generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE];
+  const isNpcGenerationEnabled =
+    generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.NPCS];
   const isWildlifeSpeechBubblesEnabled =
     generationFeatureFlags[
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_SPEECH_BUBBLES
@@ -3436,7 +3448,13 @@ function RenderingWorldPlazaPixiSceneConnected({
           hit.instanceId,
           performance.now()
         );
-        takeDamageRef.current?.(hit.damageAmount, 'physical');
+        takeDamageRef.current?.(
+          hit.damageAmount,
+          'physical',
+          hit.forcedDeviationScore === undefined
+            ? undefined
+            : { forcedDeviationScore: hit.forcedDeviationScore }
+        );
         applyingWildlifePlayerMeleeHitSideEffects(hit, {
           applyBleed: (severity, flatExpectedDamage) =>
             applyBleedRef.current?.(severity, flatExpectedDamage),
@@ -3535,6 +3553,19 @@ function RenderingWorldPlazaPixiSceneConnected({
     openingPetNameDialog,
     closingPetNameDialog,
   } = usingWildlifePetModalState();
+
+  const npcStoreRef = useRef(readingNpcInstanceStore());
+  const {
+    activeNpcId,
+    activePanel,
+    openingNpcPanel,
+    closingNpcPanel,
+  } = usingNpcPanelState();
+  const npcProximityPending = usingNpcProximitySelection({
+    npcStoreRef,
+    playerPositionRef,
+    enabled: isLocalGameplayEnabled && isNpcGenerationEnabled,
+  });
 
   useEffect(() => {
     if (!(isLocalGameplayEnabled && isWildlifeGenerationEnabled)) {
@@ -6846,6 +6877,12 @@ function RenderingWorldPlazaPixiSceneConnected({
                       tickConfigRef={tickConfigRef}
                     />
                   ) : null}
+                  {isNpcGenerationEnabled ? (
+                    <RenderingNpcLayer
+                      npcStoreRef={npcStoreRef}
+                      playerPositionRef={playerPositionRef}
+                    />
+                  ) : null}
                   <RenderingSpiritedSpritesBetaLayer
                     storeRef={spiritedSpritesBetaStoreRef}
                   />
@@ -7692,6 +7729,30 @@ function RenderingWorldPlazaPixiSceneConnected({
               onSetPetCommand={handlingPetSetCommand}
             />
           ) : null}
+          {isHudWorldAnchorsEnabled && isNpcGenerationEnabled ? (
+            <RenderingNpcInteractionLabels
+              pending={npcProximityPending}
+              npcStoreRef={npcStoreRef}
+              cameraOffsetRef={cameraOffsetRef}
+              cameraWorldZoomRef={cameraWorldZoomRef}
+              onOpenPanel={openingNpcPanel}
+            />
+          ) : null}
+          <RenderingNpcTalkPanel
+            isOpen={activePanel === 'talk'}
+            npcId={activePanel === 'talk' ? activeNpcId : null}
+            onClose={closingNpcPanel}
+          />
+          <RenderingNpcShopPanel
+            isOpen={activePanel === 'shop'}
+            npcId={activePanel === 'shop' ? activeNpcId : null}
+            onClose={closingNpcPanel}
+          />
+          <RenderingNpcQuestPanel
+            isOpen={activePanel === 'quest'}
+            npcId={activePanel === 'quest' ? activeNpcId : null}
+            onClose={closingNpcPanel}
+          />
           {isHudStatusEnabled && onlineUserId ? (
             <RenderingWorldPlazaRoomStatusHud
               roomSnapshot={roomSnapshot}

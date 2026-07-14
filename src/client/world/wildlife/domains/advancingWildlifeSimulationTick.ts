@@ -53,6 +53,21 @@ import {
   applyingWildlifeWolfHowlPresentation,
   checkingWildlifeInstanceIsHowling,
 } from '@/components/world/wildlife/domains/advancingWildlifeWolfHowlTick';
+import {
+  advancingWildlifePouncerThink,
+  applyingWildlifeJumpScareCastPresentation,
+  armingWildlifeJumpScareFatalOnPounceLanding,
+  checkingWildlifeInstanceIsJumpScareCasting,
+  checkingWildlifeJumpScareFatalMeleeArmed,
+  clearingWildlifeJumpScareFatalArm,
+  resolvingWildlifeJumpScareFatalDamageOptions,
+  resolvingWildlifePouncerJumpRangeMultiplier,
+} from '@/components/world/wildlife/domains/advancingWildlifePouncerTick';
+import { resolvingWildlifeSpeciesPouncerConfig } from '@/components/world/wildlife/domains/definingWildlifeSpeciesPouncerRegistry';
+import {
+  checkingWildlifePouncerRetreatComplete,
+  resolvingWildlifePouncerRetreatIntent,
+} from '@/components/world/wildlife/domains/resolvingWildlifePouncerRetreatIntent';
 import { applyingWildlifeAdrenalineRushOnFleeEntry } from '@/components/world/wildlife/domains/applyingWildlifeAdrenalineRushOnFleeEntry';
 import { applyingWildlifeDefendYoungDamageResponse } from '@/components/world/wildlife/domains/applyingWildlifeDefendYoungDamageResponse';
 import {
@@ -854,13 +869,24 @@ function applyingWildlifeMeleeAttack(
               (1 + DEFINING_WILDLIFE_OMEGA_WOLF_OUTGOING_CRITICAL_BIAS * 0.5)
           )
         : attackPower;
+      const jumpScareFatal = checkingWildlifeJumpScareFatalMeleeArmed(
+        attacker,
+        nowMs
+      );
 
       onPlayerHitByWildlife({
         instanceId: attacker.instanceId,
         speciesId: attackerSpecies.speciesId,
         damageAmount: playerDamageAmount,
         aggressionLevel: attacker.aggressionLevel,
+        ...(jumpScareFatal
+          ? resolvingWildlifeJumpScareFatalDamageOptions()
+          : {}),
       });
+
+      if (jumpScareFatal) {
+        attacker = clearingWildlifeJumpScareFatalArm(attacker);
+      }
 
       if (
         isOmegaWolf &&
@@ -1671,6 +1697,23 @@ export function advancingWildlifeSimulationTick({
         );
         nextInstance = clearingWildlifeBluffReturnOnArrival(nextInstance);
 
+        const pouncerThink = advancingWildlifePouncerThink({
+          instance: nextInstance,
+          intent: resolvedIntent,
+          playerPosition,
+          playerUserId,
+          nowMs,
+        });
+        nextInstance = pouncerThink.instance;
+        resolvedIntent = pouncerThink.intent;
+        nextInstance = {
+          ...nextInstance,
+          aiState: {
+            ...nextInstance.aiState,
+            intent: resolvedIntent,
+          },
+        };
+
         nextInstance = applyingWildlifeDocileApproachReactOutcome({
           instance: nextInstance,
           species,
@@ -1730,8 +1773,15 @@ export function advancingWildlifeSimulationTick({
       }
 
       nextInstance = applyingWildlifeWolfHowlPresentation(nextInstance, nowMs);
+      nextInstance = applyingWildlifeJumpScareCastPresentation(
+        nextInstance,
+        nowMs
+      );
 
-      if (checkingWildlifeInstanceIsHowling(nextInstance, nowMs)) {
+      if (
+        checkingWildlifeInstanceIsHowling(nextInstance, nowMs) ||
+        checkingWildlifeInstanceIsJumpScareCasting(nextInstance, nowMs)
+      ) {
         nextInstance = {
           ...nextInstance,
           speechState: applyingWildlifeSpeechTickWithSpeciesSfx({
@@ -1789,6 +1839,13 @@ export function advancingWildlifeSimulationTick({
           },
         };
 
+        if (jumpStep.isComplete) {
+          nextInstance = armingWildlifeJumpScareFatalOnPounceLanding(
+            nextInstance,
+            nowMs
+          );
+        }
+
         // Mid-air only: landing falls through so melee / chase resume same tick.
         if (!jumpStep.isComplete) {
           updatedById.set(nextInstance.instanceId, nextInstance);
@@ -1822,6 +1879,46 @@ export function advancingWildlifeSimulationTick({
           },
         };
       }
+
+      if (
+        nextInstance.aiState.pouncerPhase === 'retreat' &&
+        playerPosition &&
+        playerUserId &&
+        nextInstance.aiState.pouncerRetreatFromX != null &&
+        nextInstance.aiState.pouncerRetreatFromY != null
+      ) {
+        const pouncerConfig = resolvingWildlifeSpeciesPouncerConfig(
+          nextInstance.speciesId
+        );
+
+        if (pouncerConfig) {
+          const retreatComplete = checkingWildlifePouncerRetreatComplete({
+            position: nextInstance.position,
+            retreatFromX: nextInstance.aiState.pouncerRetreatFromX,
+            retreatFromY: nextInstance.aiState.pouncerRetreatFromY,
+            retreatDistanceGrid: pouncerConfig.retreatDistanceGrid,
+          });
+
+          if (!retreatComplete) {
+            intent = resolvingWildlifePouncerRetreatIntent({
+              position: nextInstance.position,
+              preyTargetId: playerUserId,
+              preyPosition: playerPosition,
+              retreatFromX: nextInstance.aiState.pouncerRetreatFromX,
+              retreatFromY: nextInstance.aiState.pouncerRetreatFromY,
+              retreatDistanceGrid: pouncerConfig.retreatDistanceGrid,
+            });
+            nextInstance = {
+              ...nextInstance,
+              aiState: {
+                ...nextInstance.aiState,
+                intent,
+              },
+            };
+          }
+        }
+      }
+
       // Stamina drain uses pre-bluff intent so an active charge still burns stamina
       // before the abort check below.
       const preBluffDesiredDirection = resolvingDesiredDirection(
@@ -1947,6 +2044,9 @@ export function advancingWildlifeSimulationTick({
                 targetPoint: intent.targetPoint,
                 hazardSampling,
                 nowMs,
+                maxJumpDistanceGridOverride:
+                  species.jump.maxJumpDistanceGrid *
+                  resolvingWildlifePouncerJumpRangeMultiplier(nextInstance),
               })
             : null;
         const jumpPlan =
@@ -2029,7 +2129,11 @@ export function advancingWildlifeSimulationTick({
             intent,
             didMove ? nextPosition.x - nextInstance.position.x : movedX,
             didMove ? nextPosition.y - nextInstance.position.y : movedY,
-            nextInstance.facingDirection
+            nextInstance.facingDirection,
+            {
+              preferFacingPointWhileMoving:
+                nextInstance.aiState.pouncerPhase === 'retreat',
+            }
           ),
           aiState: {
             ...nextInstance.aiState,

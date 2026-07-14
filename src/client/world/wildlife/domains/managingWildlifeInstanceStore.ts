@@ -109,6 +109,13 @@ function creatingWildlifeInitialAiState(
     hasPlayerSleepBumpContact: false,
     docileFollowUntilMs: null,
     docileLastReactAtMs: null,
+    pouncerPhase: 'idle',
+    pouncerRetreatFromX: null,
+    pouncerRetreatFromY: null,
+    jumpScareUntilMs: null,
+    lastJumpScareAtMs: null,
+    jumpScareArmed: false,
+    jumpScareFatalUntilMs: null,
   };
 }
 

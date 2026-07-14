@@ -9,6 +9,8 @@ import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/doma
 /** Extra motion clips loaded only for species that ship the sheets. */
 export type DefiningWildlifeExtendedMotionClipKind =
   | 'howl'
+  | 'taunt'
+  | 'runBackwards'
   | 'attack2'
   | 'attack3';
 
@@ -30,6 +32,8 @@ export const DEFINING_WILDLIFE_SPECIES_EXTENDED_MOTION_CLIP_SHEETS: Partial<
     attack3: ['Attack3_Shadowless.webp'],
   },
   sunhead: {
+    taunt: ['Taunt_Shadowless.webp'],
+    runBackwards: ['RunBackwards_Shadowless.webp'],
     attack2: ['Attack2_Shadowless.webp'],
     attack3: ['Attack3_Shadowless.webp'],
   },

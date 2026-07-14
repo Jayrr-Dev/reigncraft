@@ -39,6 +39,13 @@ export function creatingWildlifeTestAiState(
     hasPlayerSleepBumpContact: false,
     docileFollowUntilMs: null,
     docileLastReactAtMs: null,
+    pouncerPhase: 'idle',
+    pouncerRetreatFromX: null,
+    pouncerRetreatFromY: null,
+    jumpScareUntilMs: null,
+    lastJumpScareAtMs: null,
+    jumpScareArmed: false,
+    jumpScareFatalUntilMs: null,
     ...overrides,
   };
 }
