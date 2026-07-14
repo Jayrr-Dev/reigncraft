@@ -480,6 +480,15 @@ const DEFINING_WILDLIFE_SPECIES_SPEECH_REGISTRY: Record<
     eatingAggressive: ['GRRRROWL', 'gnaw gnaw', 'KRRRKK', 'slrrrp'],
     wake: ['Rrrr?!', 'Huff?!'],
   }),
+  sunhead: buildingWildlifeSpeciesSpeechLines({
+    neutral: ['Hssss', 'Fwoom'],
+    eating: ['crrnch', 'sssszzz', 'glrp~'],
+    chase: ['SHHRRAA!', 'GRRRRR!', 'FWOOOM!'],
+    attack: ['SHHRRAA!', 'KRRRKK!', 'FWOOOM!', 'GRRRRR!'],
+    warn: ['SHHRRAA!', 'Hsssss!', 'FWOOOM!'],
+    eatingAggressive: ['sssszzz', 'gnaw gnaw', 'KRRRKK', 'FWOOM'],
+    wake: ['Hssss?!', 'Fwoom?!'],
+  }),
   lioness: buildingWildlifeSpeciesSpeechLines({
     neutral: ['Huff'],
     eating: ['crrnch', 'glrp~', 'mnch mnch'],

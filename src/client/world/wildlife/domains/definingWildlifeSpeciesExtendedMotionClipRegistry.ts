@@ -29,4 +29,8 @@ export const DEFINING_WILDLIFE_SPECIES_EXTENDED_MOTION_CLIP_SHEETS: Partial<
     attack2: ['Attack2_Shadowless.webp'],
     attack3: ['Attack3_Shadowless.webp'],
   },
+  sunhead: {
+    attack2: ['Attack2_Shadowless.webp'],
+    attack3: ['Attack3_Shadowless.webp'],
+  },
 };

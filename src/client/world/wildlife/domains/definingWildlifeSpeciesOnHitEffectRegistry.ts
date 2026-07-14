@@ -169,6 +169,24 @@ export const DEFINING_WILDLIFE_SPECIES_ON_HIT_EFFECTS: Partial<
       procChance: 0.2,
     },
   ],
+  sunhead: [
+    {
+      kind: 'bleed',
+      severity: 'hemorrhaging',
+      procChance: 0.5,
+      damageScale: 0.4,
+    },
+    {
+      kind: 'buff',
+      buffId: 'heat-weakness-debuff',
+      procChance: 0.35,
+    },
+    {
+      kind: 'buff',
+      buffId: 'exhausted-debuff',
+      procChance: 0.22,
+    },
+  ],
   jaguar: [
     {
       kind: 'bleed',

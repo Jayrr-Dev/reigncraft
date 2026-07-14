@@ -50,6 +50,7 @@ import {
   DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET,
 } from '@/components/world/wildlife/domains/definingWildlifeVitalsBarConstants';
 import { drawingWildlifeFairyGlowOrbOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeFairyGlowOrbOnGraphics';
+import { computingWildlifeHungerCircleLocalLayout } from '@/components/world/wildlife/domains/computingWildlifeHungerCircleLocalLayout';
 import { resolvingWildlifeFairyHoverOffsetPx } from '@/components/world/wildlife/domains/resolvingWildlifeFairyHoverOffsetPx';
 import { resolvingWildlifeInstanceMaxStaminaRatio } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
@@ -61,6 +62,8 @@ export type SyncingWildlifeInstanceImperativePresentationEntry = {
   orbGraphicsRef: { current: Graphics | null };
   shadowGraphicsRef: { current: Graphics | null };
   vitalsGraphicsRef: { current: Graphics | null };
+  /** Pet hunger-tier drumstick sprite centered in the hunger orb. */
+  hungerIconSpriteRef: { current: Sprite | null };
   speciesId: string;
   sizeScale: number;
   facingDirection: DefiningWorldPlazaGirlSampleWalkDirection;
@@ -69,6 +72,7 @@ export type SyncingWildlifeInstanceImperativePresentationEntry = {
   bodyZIndexRef: { current: number };
   shadowZIndexRef: { current: number };
   vitalsZIndexRef: { current: number };
+  hungerIconZIndexRef: { current: number };
   /** Eased grid point for glow-orb bodies (null until first frame). */
   smoothedOrbPointRef: { current: { x: number; y: number } | null };
   /** Timestamp of the last smoothing step, for frame-rate independent easing. */
@@ -149,6 +153,7 @@ export function registeringWildlifeInstanceImperativePresentation(
     | 'bodyZIndexRef'
     | 'shadowZIndexRef'
     | 'vitalsZIndexRef'
+    | 'hungerIconZIndexRef'
     | 'smoothedOrbPointRef'
     | 'smoothedOrbAtMsRef'
   >
@@ -159,6 +164,7 @@ export function registeringWildlifeInstanceImperativePresentation(
     bodyZIndexRef: { current: Number.NaN },
     shadowZIndexRef: { current: Number.NaN },
     vitalsZIndexRef: { current: Number.NaN },
+    hungerIconZIndexRef: { current: Number.NaN },
     smoothedOrbPointRef: { current: null },
     smoothedOrbAtMsRef: { current: 0 },
   });
@@ -237,6 +243,7 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
       const orbGraphics = entry.orbGraphicsRef.current;
       const shadowGraphics = entry.shadowGraphicsRef.current;
       const vitalsGraphics = entry.vitalsGraphicsRef.current;
+      const hungerIconSprite = entry.hungerIconSpriteRef.current;
 
       if (!isWithinPresentationRing) {
         if (sprite) {
@@ -253,6 +260,10 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
 
         if (vitalsGraphics) {
           vitalsGraphics.visible = false;
+        }
+
+        if (hungerIconSprite) {
+          hungerIconSprite.visible = false;
         }
 
         continue;
@@ -406,26 +417,50 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
               DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_HUNGER_CIRCLE
             ),
         });
+        const vitalsLiftPx =
+          (usesGlowOrb && !instance.isDead
+            ? DEFINING_WILDLIFE_FAIRY_HOVER_LIFT_PX
+            : 0) +
+          DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX * entry.sizeScale;
+        const vitalsY = anchoredScreenY - jumpLiftPx - vitalsLiftPx;
+        const vitalsZIndex = sortKey + DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET;
 
         if (vitalsVisibility.showGraphics) {
-          vitalsGraphics.position.set(
-            screenPoint.x,
-            anchoredScreenY -
-              jumpLiftPx -
-              (usesGlowOrb && !instance.isDead
-                ? DEFINING_WILDLIFE_FAIRY_HOVER_LIFT_PX
-                : 0) -
-              DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX * entry.sizeScale
-          );
+          vitalsGraphics.position.set(screenPoint.x, vitalsY);
           applyingWorldPlazaCachedDisplayObjectZIndex(
             vitalsGraphics,
-            sortKey + DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET,
+            vitalsZIndex,
             entry.vitalsZIndexRef
           );
           vitalsGraphics.visible = true;
         } else {
           vitalsGraphics.visible = false;
         }
+
+        if (hungerIconSprite) {
+          if (
+            vitalsVisibility.showGraphics &&
+            vitalsVisibility.showHungerCircle
+          ) {
+            const hungerLayout = computingWildlifeHungerCircleLocalLayout(
+              vitalsVisibility.showBars
+            );
+            hungerIconSprite.position.set(
+              screenPoint.x + hungerLayout.centerX,
+              vitalsY + hungerLayout.centerY
+            );
+            applyingWorldPlazaCachedDisplayObjectZIndex(
+              hungerIconSprite,
+              vitalsZIndex + 1,
+              entry.hungerIconZIndexRef
+            );
+            hungerIconSprite.visible = true;
+          } else {
+            hungerIconSprite.visible = false;
+          }
+        }
+      } else if (hungerIconSprite) {
+        hungerIconSprite.visible = false;
       }
     } catch (error) {
       loggingWorldPlazaClientError(

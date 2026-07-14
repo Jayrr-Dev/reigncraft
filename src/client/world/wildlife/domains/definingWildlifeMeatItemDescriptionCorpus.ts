@@ -394,6 +394,13 @@ export const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_ENTRIES: readonly DefiningW
         'Filling, and best not thought about too hard. Safe; may amplify healing from other sources.',
     },
     {
+      speciesId: 'sunhead',
+      rawDescription:
+        'Still warm. Cut from a Firelands apex that burned before it bled. Raw sunhead risks toxoplasmosis: nausea and scrambled footing.',
+      cookedDescription:
+        'Dense meat with a scorched edge. Safe when cooked; may grant a strong predator strength buff.',
+    },
+    {
       speciesId: 'fairy',
       rawDescription:
         'A pinch of cold glitter that used to float. Raw fairy dust rarely sickens, but the stomach still argues.',

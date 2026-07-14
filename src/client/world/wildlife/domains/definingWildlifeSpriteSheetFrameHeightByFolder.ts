@@ -67,6 +67,7 @@ export const DEFINING_WILDLIFE_SPRITE_SHEET_FRAME_HEIGHT_BY_FOLDER: Readonly<
   sheep: 64,
   'shepherd-dog': 64,
   stag: 96,
+  sunhead: 128,
   tiger: 96,
   toirtois: 84,
   turtle: 64,

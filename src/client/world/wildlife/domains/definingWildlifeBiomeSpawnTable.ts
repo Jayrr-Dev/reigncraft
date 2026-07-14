@@ -234,8 +234,11 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
     ],
   },
   firelands: {
-    densityThreshold: 0.78,
-    entries: [{ speciesId: 'grey-wolf', weight: 1, packSizeRange: [1, 2] }],
+    densityThreshold: 0.72,
+    entries: [
+      { speciesId: 'sunhead', weight: 3, packSizeRange: [1, 1] },
+      { speciesId: 'grey-wolf', weight: 1, packSizeRange: [1, 2] },
+    ],
   },
 };
 

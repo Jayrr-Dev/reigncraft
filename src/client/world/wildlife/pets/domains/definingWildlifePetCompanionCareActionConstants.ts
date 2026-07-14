@@ -30,13 +30,13 @@ export const DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTION_PET_ICON_ID =
 export const DEFINING_WILDLIFE_PET_COMPANION_CARE_ACTION_FEED_ICON_ID =
   'mdi:food-drumstick' as const;
 
-/** Glyph edge length inside Pet / Feed circle triggers. */
+/** Glyph edge length inside Pet / Feed / command circle triggers. */
 export const DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX =
   12 as const;
 
-/** Glyph edge length inside command badges. */
+/** @deprecated Prefer {@link DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX}. */
 export const DEFINING_WILDLIFE_PET_COMPANION_COMMAND_BADGE_ICON_SIZE_PX =
-  10 as const;
+  DEFINING_WILDLIFE_PET_COMPANION_CARE_BADGE_ICON_SIZE_PX;
 
 /** Accessible label for the overhead companion action badge strip. */
 export const LABELING_WILDLIFE_PET_COMPANION_CARE_BADGE_TOOLBAR =
@@ -56,9 +56,9 @@ export const STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_ROW_CLASS_NAME =
 export const STYLING_WILDLIFE_PET_COMPANION_CARE_BADGE_CLASS_NAME =
   'world-plaza-companion-care-badge pointer-events-auto inline-flex size-5 shrink-0 cursor-pointer select-none items-center justify-center rounded-full border border-white/35 bg-black/60 text-white shadow-sm shadow-black/40 backdrop-blur-[2px] transition-[transform,background-color,border-color,opacity] hover:border-white/55 hover:bg-black/75 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-45' as const;
 
-/** Follow / Stay / Attack / Defend command badges (gold order chrome). */
+/** Circular Follow / Stay / Attack / Defend command trigger (icon only, gold). */
 export const STYLING_WILDLIFE_PET_COMPANION_COMMAND_BADGE_CLASS_NAME =
-  'world-plaza-companion-command-badge pointer-events-auto inline-flex shrink-0 cursor-pointer select-none items-center justify-center gap-0.5 rounded-md border border-poster-gold/45 bg-black/60 px-1.5 py-0.5 font-display text-[9px] font-bold uppercase tracking-[0.06em] text-poster-gold shadow-sm shadow-black/40 backdrop-blur-[2px] transition-[transform,background-color,border-color,opacity] hover:border-poster-gold/70 hover:bg-black/75 hover:text-[#ffe08a] disabled:cursor-not-allowed disabled:opacity-45' as const;
+  'world-plaza-companion-command-badge pointer-events-auto inline-flex size-5 shrink-0 cursor-pointer select-none items-center justify-center rounded-full border border-poster-gold/45 bg-black/60 text-poster-gold shadow-sm shadow-black/40 backdrop-blur-[2px] transition-[transform,background-color,border-color,opacity] hover:border-poster-gold/70 hover:bg-black/75 hover:text-[#ffe08a] hover:scale-105 disabled:cursor-not-allowed disabled:opacity-45' as const;
 
 /** Active command badge (current Follow / Stay / etc.). */
 export const STYLING_WILDLIFE_PET_COMPANION_COMMAND_BADGE_ACTIVE_CLASS_NAME =

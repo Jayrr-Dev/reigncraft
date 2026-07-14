@@ -74,6 +74,12 @@ import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/
 import type { DefiningWildlifeMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
 import { DEFINING_WILDLIFE_TEXTURE_EVICTION_CHECK_INTERVAL_MS } from '@/components/world/wildlife/domains/definingWildlifeTextureEvictionConstants';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
+import {
+  ensuringWorldPlazaHungerTierSpriteTexturesLoaded,
+  peekingWorldPlazaHungerTierSpriteTexture,
+} from '@/components/world/hunger/domains/loadingWorldPlazaHungerTierSpriteTextures';
+import { computingWildlifeHungerCircleLocalLayout } from '@/components/world/wildlife/domains/computingWildlifeHungerCircleLocalLayout';
 import {
   DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX,
   DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET,
@@ -175,6 +181,9 @@ const RenderingWildlifeInstanceSprite = memo(
     const wildlifeOrbGraphicsRef = useRef<Graphics | null>(null);
     const wildlifeShadowGraphicsRef = useRef<Graphics | null>(null);
     const wildlifeVitalsGraphicsRef = useRef<Graphics | null>(null);
+    const wildlifeHungerIconSpriteRef = useRef<Sprite | null>(null);
+    const [hungerIconTextureRevision, setHungerIconTextureRevision] =
+      useState(0);
     const usesGlowOrb =
       species !== null &&
       checkingWildlifeSpeciesUsesGlowOrbPresentation(species);
@@ -191,6 +200,7 @@ const RenderingWildlifeInstanceSprite = memo(
         orbGraphicsRef: wildlifeOrbGraphicsRef,
         shadowGraphicsRef: wildlifeShadowGraphicsRef,
         vitalsGraphicsRef: wildlifeVitalsGraphicsRef,
+        hungerIconSpriteRef: wildlifeHungerIconSpriteRef,
         speciesId,
         sizeScale,
         facingDirection,
@@ -211,6 +221,34 @@ const RenderingWildlifeInstanceSprite = memo(
       sizeScale,
       speciesId,
     ]);
+
+    const showHungerCircleFeature =
+      isDomesticatedPet &&
+      checkingWorldPlazaGenerationFeatureEnabled(
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_HUNGER_CIRCLE
+      );
+
+    useEffect(() => {
+      if (!showHungerCircleFeature) {
+        return;
+      }
+
+      let isCancelled = false;
+
+      void ensuringWorldPlazaHungerTierSpriteTexturesLoaded()
+        .then(() => {
+          if (!isCancelled) {
+            setHungerIconTextureRevision((revision) => revision + 1);
+          }
+        })
+        .catch(() => {
+          // Hunger icon stays hidden if the HUD sheet fails to decode.
+        });
+
+      return () => {
+        isCancelled = true;
+      };
+    }, [showHungerCircleFeature]);
 
     if (!species) {
       return null;
@@ -241,12 +279,22 @@ const RenderingWildlifeInstanceSprite = memo(
       isImmortal: checkingWildlifeSpeciesIsImmortal(species),
       healthRatio,
       staminaRatio,
-      showHungerCircle:
-        isDomesticatedPet &&
-        checkingWorldPlazaGenerationFeatureEnabled(
-          DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_HUNGER_CIRCLE
-        ),
+      showHungerCircle: showHungerCircleFeature,
     });
+    const hungerCircleLayout = computingWildlifeHungerCircleLocalLayout(
+      vitalsVisibility.showBars
+    );
+    const hungerTier = resolvingWorldPlazaHungerTier(hungerRatio);
+    // `hungerIconTextureRevision` forces a re-render after the tier sheet loads.
+    const hungerIconTexture =
+      vitalsVisibility.showHungerCircle && hungerIconTextureRevision >= 0
+        ? peekingWorldPlazaHungerTierSpriteTexture(hungerTier)
+        : null;
+    const vitalsY =
+      anchoredScreenY -
+      jumpLiftPx -
+      DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX * sizeScale;
+    const vitalsZIndex = sortKey + DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET;
     const spritePresentation =
       resolvingWildlifeSpeciesSpritePresentation(species);
     const shadowSizeScale = computingWildlifeGroundShadowSizeScale(
@@ -329,13 +377,9 @@ const RenderingWildlifeInstanceSprite = memo(
           <pixiGraphics
             ref={wildlifeVitalsGraphicsRef}
             eventMode="none"
-            zIndex={sortKey + DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET}
+            zIndex={vitalsZIndex}
             x={screenPoint.x}
-            y={
-              anchoredScreenY -
-              jumpLiftPx -
-              DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX * sizeScale
-            }
+            y={vitalsY}
             draw={(graphics: Graphics) => {
               drawingWildlifeVitalsOnGraphics({
                 graphics,
@@ -346,6 +390,21 @@ const RenderingWildlifeInstanceSprite = memo(
                 showBars: vitalsVisibility.showBars,
               });
             }}
+          />
+        ) : null}
+        {vitalsVisibility.showGraphics &&
+        vitalsVisibility.showHungerCircle &&
+        hungerIconTexture ? (
+          <pixiSprite
+            ref={wildlifeHungerIconSpriteRef}
+            eventMode="none"
+            texture={hungerIconTexture}
+            anchor={0.5}
+            width={hungerCircleLayout.iconSizePx}
+            height={hungerCircleLayout.iconSizePx}
+            x={screenPoint.x + hungerCircleLayout.centerX}
+            y={vitalsY + hungerCircleLayout.centerY}
+            zIndex={vitalsZIndex + 1}
           />
         ) : null}
       </>

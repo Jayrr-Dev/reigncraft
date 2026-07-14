@@ -75,6 +75,7 @@ export const DEFINING_WILDLIFE_MEAT_DISEASE_INTENSITY_BY_SPECIES: Partial<
   yak: { symptomIntensity: 1.1, durationIntensity: 1.1 },
   tiger: { symptomIntensity: 1.2, durationIntensity: 1.1 },
   jaguar: { symptomIntensity: 1.18, durationIntensity: 1.1 },
+  sunhead: { symptomIntensity: 1.25, durationIntensity: 1.15 },
   monkey: { symptomIntensity: 1.15, durationIntensity: 1.1 },
   chimp: { symptomIntensity: 1.25, durationIntensity: 1.15 },
 };

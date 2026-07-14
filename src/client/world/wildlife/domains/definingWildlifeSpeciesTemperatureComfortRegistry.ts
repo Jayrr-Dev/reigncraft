@@ -111,6 +111,7 @@ export const DEFINING_WILDLIFE_SPECIES_TEMPERATURE_COMFORT_REGISTRY: Record<
   'water-buffalo': { comfortLowCelsius: 10, comfortHighCelsius: 40 },
   tiger: HOT_ADAPTED,
   jaguar: HOT_ADAPTED,
+  sunhead: DESERT,
   monkey: HOT_ADAPTED,
   chimp: HOT_ADAPTED,
 

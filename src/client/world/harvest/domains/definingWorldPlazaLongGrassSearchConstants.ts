@@ -23,6 +23,6 @@ export const DEFINING_WORLD_PLAZA_CLEARED_LONG_GRASS_LOCAL_STORAGE_KEY_PREFIX =
 /** Player-facing verb for the timed interaction label. */
 export const LABELING_WORLD_PLAZA_LONG_GRASS_SEARCH_ACTION = 'Search' as const;
 
-/** Timed interaction progress icon (Iconify id). */
+/** Timed interaction progress icon (Iconify id). Generic grass: loot is not clover-only. */
 export const DEFINING_WORLD_PLAZA_LONG_GRASS_SEARCH_TIMED_INTERACTION_PROGRESS_ICON =
-  'mdi:clover' as const;
+  'mdi:grass' as const;

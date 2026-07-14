@@ -596,7 +596,6 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
                         }
                         aria-hidden
                       />
-                      <span>{option.label}</span>
                     </button>
                   );
                 })}

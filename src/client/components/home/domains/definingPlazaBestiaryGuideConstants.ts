@@ -366,6 +366,15 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
         'Tigers trail through heat and canopy. They wait for a stumble, then close fast.',
     },
     {
+      speciesId: 'sunhead',
+      icon: 'mdi:fire',
+      summary: 'Firelands apex. Heat-hardened predator that fights alone and hits hard.',
+      studiedSummary:
+        'Sunheads patrol volcanic ground by day. Expect heavy swings, heat weakness on hit, and no pack to distract them.',
+      apostleFlavor:
+        'The Apostles say the crown is a star that learned to walk. The plaza says it learned to bite first.',
+    },
+    {
       speciesId: 'jaguar',
       icon: 'mdi:paw',
       summary: 'Night stalker. Shadows you until weakness or hunger opens the rush.',

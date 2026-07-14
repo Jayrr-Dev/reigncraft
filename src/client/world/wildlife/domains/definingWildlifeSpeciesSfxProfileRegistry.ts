@@ -305,6 +305,13 @@ export const DEFINING_WILDLIFE_SPECIES_SFX_PROFILE_BY_SPECIES_ID: Record<
       ...DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_COMBAT_EVENTS,
     ],
   },
+  sunhead: {
+    poolId: 'beast_growl',
+    sizeClass: 'predator',
+    enabledEventKinds: [
+      ...DEFINING_WILDLIFE_SPECIES_SFX_PREDATOR_COMBAT_EVENTS,
+    ],
+  },
   elephant: {
     poolId: 'elephant_trumpet',
     sizeClass: 'megafauna',

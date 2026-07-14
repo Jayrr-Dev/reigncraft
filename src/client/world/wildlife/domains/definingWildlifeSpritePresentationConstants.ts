@@ -81,6 +81,11 @@ export const DEFINING_WILDLIFE_SPECIES_SPRITE_PRESENTATION_OVERRIDES: Partial<
     anchorYNormalized: 0.68,
     footYNormalized: 0.68,
   },
+  // Character-creator 128px biped; empty margin under painted feet.
+  sunhead: {
+    anchorYNormalized: 0.72,
+    footYNormalized: 0.78,
+  },
   fairy: {
     anchorYNormalized: 0.5,
     footYNormalized: 0.5,

@@ -284,6 +284,9 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   jaguar: { drainMultiplier: 1.6, regenMultiplier: 0.8 },
   monkey: { drainMultiplier: 0.9, regenMultiplier: 1.3 },
   chimp: { drainMultiplier: 1, regenMultiplier: 1.2 },
+
+  // Firelands apex — heavy bursts, slow recovery.
+  sunhead: { drainMultiplier: 1.4, regenMultiplier: 0.85 },
 };
 
 /**
@@ -865,6 +868,19 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
       jumpSpeedGridPerSecond: 8.5,
       jumpArcPeakPx: 24,
       jumpCooldownMs: 1800,
+    },
+  },
+  sunhead: {
+    walkSpeedGridPerSecond: 1.35,
+    runSpeedGridPerSecond: 4.2,
+    jump: {
+      canJump: true,
+      canPounce: true,
+      maxJumpLayerReach: 4,
+      maxJumpDistanceGrid: 4.5,
+      jumpSpeedGridPerSecond: 7.5,
+      jumpArcPeakPx: 20,
+      jumpCooldownMs: 2000,
     },
   },
   monkey: {
@@ -2427,6 +2443,41 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       },
     }
   ),
+  // --- Firelands ---
+  sunhead: {
+    speciesId: 'sunhead',
+    displayName: 'Sunhead',
+    spriteFolder: 'sunhead',
+    sizeScale: 1.2,
+    collisionRadiusGrid: 0.44,
+    diet: 'carnivore',
+    trophicTier: 3,
+    massKg: 220,
+    temperamentId: 'predator',
+    activityPattern: 'diurnal',
+    aggressionSpawn: { bellCurveMeanShift: 0.4 },
+    aggro: {
+      ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
+      aggroRadiusGrid: 10,
+      packShareRadiusGrid: 0,
+      leashDistanceGrid: 20,
+    },
+    territory: DEFINING_WILDLIFE_LION_TERRITORY_CONFIG,
+    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.006 },
+    stamina: resolvingWildlifeSpeciesStaminaConfig('sunhead'),
+    hazards: {
+      treatsSwampWaterAsSafe: false,
+      treatsLavaAsLethal: true,
+      isHeatImmune: true,
+      isColdImmune: false,
+    },
+    vitals: {
+      baseMaxHealth: 150,
+      attackPower: 40,
+      defense: 9,
+      attackIntervalMs: 1100,
+    },
+  },
   fairy: {
     speciesId: 'fairy',
     displayName: 'Fairy',

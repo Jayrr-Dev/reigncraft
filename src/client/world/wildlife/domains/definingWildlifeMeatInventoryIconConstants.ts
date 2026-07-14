@@ -236,6 +236,10 @@ export const DEFINING_WILDLIFE_MEAT_INVENTORY_ICONS_BY_RAW_ITEM_TYPE_ID: Record<
     rawIconifyIcon: 'fluent-emoji:monkey-face',
     cookedIconifyIcon: 'fluent-emoji:bowl-with-spoon',
   },
+  'world-plaza-raw-sunhead-meat': {
+    rawIconifyIcon: 'solar:fire-bold',
+    cookedIconifyIcon: 'fluent-emoji:meat-on-bone',
+  },
 };
 
 /** Resolves the icon pair for one meat catalog entry, with generic fallback. */
