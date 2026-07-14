@@ -31,6 +31,7 @@ function buildingHerbivoreInstance(
     staminaState: {
       staminaRatio: 1,
       isExhausted: false,
+      fatigueTier: 'fresh',
       runningForSeconds: 0,
     },
     aiState: {
@@ -53,14 +54,14 @@ function buildingHerbivoreInstance(
       bluffChargePlayerExitedTerritory: false,
       bluffReturnPoint: null,
       fleeTargetPoint: null,
-    pendingGroundFoodBite: null,
-    feedingOnKillUntilMs: null,
-    feedingOnKillGroundItemId: null,
-    isSleeping: false,
-    hasSleepBeenDisturbed: false,
-    hasPlayerSleepBumpContact: false,
-    docileFollowUntilMs: null,
-    docileLastReactAtMs: null,
+      pendingGroundFoodBite: null,
+      feedingOnKillUntilMs: null,
+      feedingOnKillGroundItemId: null,
+      isSleeping: false,
+      hasSleepBeenDisturbed: false,
+      hasPlayerSleepBumpContact: false,
+      docileFollowUntilMs: null,
+      docileLastReactAtMs: null,
     },
     aggroState: {
       threats: activeTargetId
@@ -76,13 +77,11 @@ function buildingHerbivoreInstance(
     floatingTexts: [],
 
     speechState: {
-
       activeBubble: null,
 
       lastEmittedAtMs: null,
 
       lastContextKey: null,
-
     },
     environmentalDamageLastTickAtMs: null,
   };

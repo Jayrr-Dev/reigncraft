@@ -1,3 +1,11 @@
+import {
+  computingWorldPlazaPathologyInfectionStudyHoursToCredit,
+  DEFINING_WORLD_PLAZA_PATHOLOGY_STUDY_POINTS_PER_INFECTION_HOUR,
+} from '@/components/world/domains/computingWorldPlazaPathologyInfectionStudyHours';
+import {
+  creditingWorldPlazaPathologyFromInfectionHours,
+  recordingWorldPlazaPathologyDiseaseObtained,
+} from '@/components/world/domains/managingWorldPlazaPathologyDiscoveryStore';
 import { applyingWorldPlazaEntityDiseaseStageGrant } from '@/components/world/health/domains/applyingWorldPlazaEntityDiseaseStageGrant';
 import { applyingWorldPlazaEntityImmuneSystemPostDiseaseRecovery } from '@/components/world/health/domains/applyingWorldPlazaEntityImmuneSystemPostDiseaseRecovery';
 import { checkingWorldPlazaEntityCanContractDisease } from '@/components/world/health/domains/checkingWorldPlazaEntityImmuneSystem';
@@ -14,14 +22,6 @@ import {
   computingWorldPlazaEntityImmuneSystemScaledDurationMs,
   computingWorldPlazaEntityImmuneSystemSymptomStrengthMultiplier,
 } from '@/components/world/health/domains/computingWorldPlazaEntityImmuneSystemEffects';
-import {
-  computingWorldPlazaPathologyInfectionStudyHoursToCredit,
-  DEFINING_WORLD_PLAZA_PATHOLOGY_STUDY_POINTS_PER_INFECTION_HOUR,
-} from '@/components/world/domains/computingWorldPlazaPathologyInfectionStudyHours';
-import {
-  creditingWorldPlazaPathologyFromInfectionHours,
-  recordingWorldPlazaPathologyDiseaseObtained,
-} from '@/components/world/domains/managingWorldPlazaPathologyDiscoveryStore';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import { resolvingWorldPlazaEntityDiseaseDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type {
@@ -59,28 +59,42 @@ export function creditingWorldPlazaPathologyInfectionStudyHoursForDiseaseEffect(
   diseaseEffect: DefiningWorldPlazaEntityHealthDiseaseEffect,
   worldEpochMs: number
 ): DefiningWorldPlazaEntityHealthDiseaseEffect {
+  const pathologyStudyHoursCredited = Number.isFinite(
+    diseaseEffect.pathologyStudyHoursCredited
+  )
+    ? Math.max(0, Math.floor(diseaseEffect.pathologyStudyHoursCredited))
+    : 0;
   const hoursToCredit = computingWorldPlazaPathologyInfectionStudyHoursToCredit(
     {
       contractedAtMs: diseaseEffect.contractedAtMs,
       expiresAtMs: diseaseEffect.expiresAtMs,
       worldEpochMs,
-      pathologyStudyHoursCredited: diseaseEffect.pathologyStudyHoursCredited,
+      pathologyStudyHoursCredited,
     }
   );
 
-  if (hoursToCredit <= 0) {
-    return diseaseEffect;
+  if (!Number.isFinite(hoursToCredit) || hoursToCredit <= 0) {
+    if (
+      diseaseEffect.pathologyStudyHoursCredited === pathologyStudyHoursCredited
+    ) {
+      return diseaseEffect;
+    }
+
+    return {
+      ...diseaseEffect,
+      pathologyStudyHoursCredited,
+    };
   }
 
   creditingWorldPlazaPathologyFromInfectionHours(
     diseaseEffect.diseaseId as DefiningWorldPlazaEntityDiseaseId,
-    hoursToCredit * DEFINING_WORLD_PLAZA_PATHOLOGY_STUDY_POINTS_PER_INFECTION_HOUR
+    hoursToCredit *
+      DEFINING_WORLD_PLAZA_PATHOLOGY_STUDY_POINTS_PER_INFECTION_HOUR
   );
 
   return {
     ...diseaseEffect,
-    pathologyStudyHoursCredited:
-      diseaseEffect.pathologyStudyHoursCredited + hoursToCredit,
+    pathologyStudyHoursCredited: pathologyStudyHoursCredited + hoursToCredit,
   };
 }
 

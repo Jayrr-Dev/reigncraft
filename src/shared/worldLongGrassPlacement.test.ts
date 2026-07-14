@@ -77,12 +77,14 @@ describe('worldLongGrassPlacement', () => {
           continue;
         }
 
-        const hasGrassNeighbor = [
-          [1, 0],
-          [-1, 0],
-          [0, 1],
-          [0, -1],
-        ].some(([dx, dy]) =>
+        const hasGrassNeighbor = (
+          [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1],
+          ] as const
+        ).some(([dx, dy]) =>
           checkingWorldLongGrassPlacementAtTileIndex(
             tileX + dx,
             tileY + dy,

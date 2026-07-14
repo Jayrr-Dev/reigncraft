@@ -27,6 +27,11 @@ export type UsingWorldPlazaPickedFlowersResult = {
   readonly isReady: boolean;
 };
 
+const EMPTY_PICKED_FLOWER_STATE_BY_TILE_KEY: ReadonlyMap<
+  string,
+  DefiningWorldPlazaPickedFlowerTileState
+> = new Map();
+
 /**
  * Returns true when picked flowers should persist locally instead of via Devvit.
  */
@@ -115,7 +120,8 @@ export function usingWorldPlazaPickedFlowers({
   if (useLocalPersistence) {
     return {
       pickedFlowerStateByTileKey:
-        localPickedFlowersQuery.data?.pickedFlowerStateByTileKey ?? new Map(),
+        localPickedFlowersQuery.data?.pickedFlowerStateByTileKey ??
+        EMPTY_PICKED_FLOWER_STATE_BY_TILE_KEY,
       isReady:
         !enabled ||
         !localPersistenceOwnerId ||
@@ -125,7 +131,8 @@ export function usingWorldPlazaPickedFlowers({
 
   return {
     pickedFlowerStateByTileKey:
-      devvitPickedFlowersQuery.data?.pickedFlowerStateByTileKey ?? new Map(),
+      devvitPickedFlowersQuery.data?.pickedFlowerStateByTileKey ??
+      EMPTY_PICKED_FLOWER_STATE_BY_TILE_KEY,
     isReady: !enabled || !redditUserId || devvitPickedFlowersQuery.isSuccess,
   };
 }

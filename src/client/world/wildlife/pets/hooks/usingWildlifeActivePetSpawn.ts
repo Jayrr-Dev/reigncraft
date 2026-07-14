@@ -120,6 +120,11 @@ export function usingWildlifeActivePetSpawn({
       rosterSnapshot.pets.filter(checkingWildlifePetRosterRecordIsLivingActive),
     [rosterSnapshot.pets]
   );
+  /** Stable effect key: vitals sync mutates roster and must not re-arm effects. */
+  const activeLivingPetIdsKey = useMemo(
+    () => activeLivingRecords.map((pet) => pet.petId).join('\0'),
+    [activeLivingRecords]
+  );
   const activePetInstanceId =
     activeLivingRecords.length > 0
       ? formattingWildlifePetInstanceId(
@@ -133,7 +138,7 @@ export function usingWildlifeActivePetSpawn({
       : null;
 
   useEffect(() => {
-    if (!isEnabled || !ownerUserId || activeLivingRecords.length === 0) {
+    if (!isEnabled || !ownerUserId || activeLivingPetIdsKey.length === 0) {
       return;
     }
 
@@ -144,7 +149,11 @@ export function usingWildlifeActivePetSpawn({
         return;
       }
 
-      for (const record of activeLivingRecords) {
+      const livingActivePets = readingWildlifePetRosterSnapshot().pets.filter(
+        checkingWildlifePetRosterRecordIsLivingActive
+      );
+
+      for (const record of livingActivePets) {
         spawningWildlifeActivePetNearOwner({
           store: wildlifeStoreRef.current,
           ownerUserId,
@@ -164,7 +173,7 @@ export function usingWildlifeActivePetSpawn({
 
     return () => window.clearInterval(intervalId);
   }, [
-    activeLivingRecords,
+    activeLivingPetIdsKey,
     isEnabled,
     ownerUserId,
     playerPositionRef,
@@ -173,12 +182,16 @@ export function usingWildlifeActivePetSpawn({
   ]);
 
   useEffect(() => {
-    if (!isEnabled || activeLivingRecords.length === 0) {
+    if (!isEnabled || activeLivingPetIdsKey.length === 0) {
       return;
     }
 
     const syncingVitals = (): void => {
-      for (const record of activeLivingRecords) {
+      const livingActivePets = readingWildlifePetRosterSnapshot().pets.filter(
+        checkingWildlifePetRosterRecordIsLivingActive
+      );
+
+      for (const record of livingActivePets) {
         const instance = findingWildlifeInstanceByPetId(
           wildlifeStoreRef.current,
           record.petId
@@ -199,7 +212,7 @@ export function usingWildlifeActivePetSpawn({
     );
 
     return () => window.clearInterval(intervalId);
-  }, [activeLivingRecords, isEnabled, wildlifeStoreRef]);
+  }, [activeLivingPetIdsKey, isEnabled, wildlifeStoreRef]);
 
   return { activePetInstanceId };
 }

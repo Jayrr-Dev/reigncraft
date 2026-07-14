@@ -21,6 +21,11 @@ import { RenderingWorldPlazaEntityDiseaseIconGlyph } from '@/components/world/he
 import { cn } from '@/lib/utils';
 import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
 
+const PLAZA_PATHOLOGY_PANEL_EMPTY_OBTAINED_DISEASES: readonly never[] = [];
+const PLAZA_PATHOLOGY_PANEL_EMPTY_STUDY_COUNTS: Readonly<
+  Partial<Record<string, number>>
+> = {};
+
 const PLAZA_PATHOLOGY_PANEL_HEADER_BUTTON_CLASS_NAME =
   'plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]';
 
@@ -135,17 +140,17 @@ export function RenderingPlazaPathologyPanel({
   const obtainedDiseaseIds = useSyncExternalStore(
     subscribingWorldPlazaPathologyDiscovery,
     gettingWorldPlazaPathologyObtainedDiseasesSnapshot,
-    () => []
+    () => PLAZA_PATHOLOGY_PANEL_EMPTY_OBTAINED_DISEASES
   );
   const linkedCreatureStudiesByDiseaseId = useSyncExternalStore(
     subscribingWorldPlazaPathologyDiscovery,
     gettingWorldPlazaPathologyLinkedCreatureStudiesSnapshot,
-    () => ({})
+    () => PLAZA_PATHOLOGY_PANEL_EMPTY_STUDY_COUNTS
   );
   const infectionStudyPointsByDiseaseId = useSyncExternalStore(
     subscribingWorldPlazaPathologyDiscovery,
     gettingWorldPlazaPathologyInfectionStudyPointsSnapshot,
-    () => ({})
+    () => PLAZA_PATHOLOGY_PANEL_EMPTY_STUDY_COUNTS
   );
   const obtainedSet = useMemo(
     () => new Set(obtainedDiseaseIds),

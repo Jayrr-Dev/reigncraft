@@ -36,6 +36,7 @@ function buildingChickenInstance(
     staminaState: {
       staminaRatio: 1,
       isExhausted: false,
+      fatigueTier: 'fresh',
       runningForSeconds: 0,
     },
     aiState: {
@@ -63,9 +64,9 @@ function buildingChickenInstance(
       feedingOnKillGroundItemId: null,
       isSleeping: false,
       hasSleepBeenDisturbed: false,
-    hasPlayerSleepBumpContact: false,
-    docileFollowUntilMs: null,
-    docileLastReactAtMs: null,
+      hasPlayerSleepBumpContact: false,
+      docileFollowUntilMs: null,
+      docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [],

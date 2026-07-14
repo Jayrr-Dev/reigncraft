@@ -102,8 +102,9 @@ export function initializingWorldPlazaPathologyDiscoveryStore(
   );
   managingWorldPlazaPathologyDiscoveryLinkedCreatureStudiesByDiseaseId =
     new Map(snapshot.linkedCreatureStudiesByDiseaseId);
-  managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId =
-    new Map(snapshot.infectionStudyPointsByDiseaseId);
+  managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId = new Map(
+    snapshot.infectionStudyPointsByDiseaseId
+  );
   refreshingWorldPlazaPathologyDiscoverySnapshotCaches();
   notifyingWorldPlazaPathologyDiscoverySubscribers();
 }
@@ -162,8 +163,7 @@ export function creditingWorldPlazaPathologyFromWildlifeSpeciesStudy(
   studyPoints = 1
 ): void {
   const awardedStudyPoints = Math.max(1, Math.floor(studyPoints));
-  const diseaseIds =
-    listingPlazaPathologyDiseaseIdsCausedBySpecies(speciesId);
+  const diseaseIds = listingPlazaPathologyDiseaseIdsCausedBySpecies(speciesId);
 
   if (diseaseIds.length === 0) {
     return;
@@ -199,16 +199,17 @@ export function creditingWorldPlazaPathologyFromInfectionHours(
   diseaseId: DefiningWorldPlazaEntityDiseaseId,
   studyPoints: number
 ): void {
-  const awardedStudyPoints = Math.max(0, Math.floor(studyPoints));
+  const awardedStudyPoints = Number.isFinite(studyPoints)
+    ? Math.max(0, Math.floor(studyPoints))
+    : 0;
 
   if (awardedStudyPoints <= 0) {
     return;
   }
 
-  managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId =
-    new Map(
-      managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId
-    );
+  managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId = new Map(
+    managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId
+  );
 
   const nextInfectionPoints =
     (managingWorldPlazaPathologyDiscoveryInfectionStudyPointsByDiseaseId.get(

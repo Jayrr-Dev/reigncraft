@@ -134,6 +134,8 @@ export function usingInventoryEngine(
       await adapter.save(nextState);
     },
   });
+  const persistMutateRef = useRef(persistMutation.mutate);
+  persistMutateRef.current = persistMutation.mutate;
 
   /**
    * Reads the freshest committed state from the shared query cache so
@@ -181,10 +183,10 @@ export function usingInventoryEngine(
         // Persist the freshest cache state so a stale debounce never wins.
         const latestState =
           queryClient.getQueryData<DefiningInventoryState>(queryKey);
-        persistMutation.mutate(latestState ?? nextState);
+        persistMutateRef.current(latestState ?? nextState);
       }, DEFINING_INVENTORY_PERSIST_DEBOUNCE_MS);
     },
-    [queryClient, queryKey, persistMutation]
+    [queryClient, queryKey]
   );
 
   // Flush (never drop) any pending debounced save when the consumer unmounts

@@ -1,9 +1,14 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import { listingWorldPlazaLocalClearedLongGrassByOwner } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import { DEFINING_WORLD_PLAZA_CLEARED_LONG_GRASS_QUERY_KEY_ROOT } from '@/components/world/harvest/hooks/usingWorldPlazaLongGrassSearchInteraction';
+import { useQuery } from '@tanstack/react-query';
+
+const EMPTY_CLEARED_LONG_GRASS_STATE_BY_TILE_KEY: ReadonlyMap<
+  string,
+  DefiningWorldPlazaClearedLongGrassTileState
+> = new Map();
 
 export type UsingWorldPlazaClearedLongGrassParams = {
   readonly enabled: boolean;
@@ -28,7 +33,9 @@ export function usingWorldPlazaClearedLongGrass({
       localPersistenceOwnerId,
     ],
     queryFn: () =>
-      listingWorldPlazaLocalClearedLongGrassByOwner(localPersistenceOwnerId ?? ''),
+      listingWorldPlazaLocalClearedLongGrassByOwner(
+        localPersistenceOwnerId ?? ''
+      ),
     enabled: enabled && Boolean(localPersistenceOwnerId),
     staleTime: 500,
     refetchInterval: 2_000,
@@ -36,10 +43,8 @@ export function usingWorldPlazaClearedLongGrass({
 
   return {
     clearedLongGrassStateByTileKey:
-      clearedLongGrassQuery.data ?? new Map(),
+      clearedLongGrassQuery.data ?? EMPTY_CLEARED_LONG_GRASS_STATE_BY_TILE_KEY,
     isReady:
-      !enabled ||
-      !localPersistenceOwnerId ||
-      clearedLongGrassQuery.isSuccess,
+      !enabled || !localPersistenceOwnerId || clearedLongGrassQuery.isSuccess,
   };
 }

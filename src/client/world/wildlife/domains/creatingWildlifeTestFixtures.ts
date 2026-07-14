@@ -3,6 +3,7 @@ import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife
 import type {
   DefiningWildlifeAiState,
   DefiningWildlifeInstance,
+  DefiningWildlifeStaminaState,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 /** Default AI state for wildlife unit tests. */
@@ -42,10 +43,20 @@ export function creatingWildlifeTestAiState(
   };
 }
 
+export type CreatingWildlifeTestInstanceOverrides = Omit<
+  Partial<DefiningWildlifeInstance>,
+  'staminaState' | 'aiState'
+> & {
+  staminaState?: Partial<DefiningWildlifeStaminaState>;
+  aiState?: Partial<DefiningWildlifeAiState>;
+};
+
 /** Default wildlife instance for unit tests. */
 export function creatingWildlifeTestInstance(
-  overrides: Partial<DefiningWildlifeInstance> = {}
+  overrides: CreatingWildlifeTestInstanceOverrides = {}
 ): DefiningWildlifeInstance {
+  const { staminaState, aiState, ...rest } = overrides;
+
   return {
     instanceId: 'wildlife:0:0:0',
     speciesId: 'grey-wolf',
@@ -66,8 +77,11 @@ export function creatingWildlifeTestInstance(
       driveLevel: 'sated',
       lastFedAtMs: null,
     },
-    staminaState: creatingWildlifeInitialStaminaState(),
-    aiState: creatingWildlifeTestAiState(),
+    staminaState: {
+      ...creatingWildlifeInitialStaminaState(),
+      ...staminaState,
+    },
+    aiState: creatingWildlifeTestAiState(aiState),
     aggroState: {
       threats: [],
       activeTargetId: null,
@@ -90,6 +104,6 @@ export function creatingWildlifeTestInstance(
     hasDroppedLoot: false,
     hasBeenStudied: false,
     petCooldownUntilMs: null,
-    ...overrides,
+    ...rest,
   };
 }

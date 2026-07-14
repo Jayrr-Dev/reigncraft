@@ -13,6 +13,8 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventorySpecimenStudyConstants';
 import { useCallback, type RefObject } from 'react';
 import type { WorldCloverSearchLootKind } from '../../../../shared/worldCloverSearchLoot';
+import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
+import type { WorldOreSpeciesId } from '../../../../shared/worldOreRarity';
 
 export type DefiningWorldPlazaInventorySpecimenStudyKind =
   | 'flower'
@@ -22,8 +24,8 @@ export type DefiningWorldPlazaInventorySpecimenStudyKind =
 export type DefiningWorldPlazaInventorySpecimenStudyProgressContext = {
   readonly slotIndex: number;
   readonly studyKind: DefiningWorldPlazaInventorySpecimenStudyKind;
-  readonly flowerSpeciesId?: string;
-  readonly oreSpeciesId?: string;
+  readonly flowerSpeciesId?: WorldFlowerSpeciesId;
+  readonly oreSpeciesId?: WorldOreSpeciesId;
   readonly cloverKind?: WorldCloverSearchLootKind;
   readonly damageBaselineMs: number | null;
 };

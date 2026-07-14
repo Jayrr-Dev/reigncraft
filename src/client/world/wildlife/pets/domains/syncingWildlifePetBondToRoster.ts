@@ -57,10 +57,30 @@ export function syncingWildlifePetBondToRoster({
   upsertingWildlifePetRecord(record);
 }
 
+function checkingWildlifePetLearnedSkillIdsEqual(
+  left: readonly string[],
+  right: readonly string[]
+): boolean {
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  for (let index = 0; index < left.length; index += 1) {
+    if (left[index] !== right[index]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 /**
  * Periodic vitals-only sync for an already-persisted pet bond (position,
  * health, hunger, stamina, loyalty). No-ops for instances without a
  * persistent bond, or bonds not yet present in the roster.
+ *
+ * Skips `updatingWildlifePetRecord` when nothing meaningful changed so a
+ * React effect that depends on the roster snapshot cannot re-enter forever.
  *
  * Dead companions stay in the roster (for a future revive) but are undeployed
  * so an active slot frees up and the spawn loop cannot recreate a corpse.
@@ -87,20 +107,45 @@ export function syncingWildlifePetInstanceVitalsToRoster(
     return;
   }
 
+  const nextLearnedSkillIds = [...petBond.learnedSkillIds];
+  const nextLayer = instance.position.layer ?? null;
+
+  if (
+    existingRecord.loyalty === petBond.loyalty &&
+    existingRecord.command === petBond.command &&
+    existingRecord.healthCurrent === instance.healthState.currentHealth &&
+    existingRecord.hungerRatio === instance.hungerState.hungerRatio &&
+    existingRecord.staminaRatio === instance.staminaState.staminaRatio &&
+    checkingWildlifePetLearnedSkillIdsEqual(
+      existingRecord.learnedSkillIds,
+      nextLearnedSkillIds
+    ) &&
+    existingRecord.equippedSkillId === petBond.equippedSkillId &&
+    existingRecord.soulsaveConsumed === petBond.soulsaveConsumed &&
+    existingRecord.weaponItem === petBond.weaponItem &&
+    existingRecord.armorItem === petBond.armorItem &&
+    existingRecord.lastKnownX === instance.position.x &&
+    existingRecord.lastKnownY === instance.position.y &&
+    existingRecord.lastKnownLayer === nextLayer &&
+    existingRecord.deathCauseKind === null
+  ) {
+    return;
+  }
+
   updatingWildlifePetRecord(petBond.petId, {
     loyalty: petBond.loyalty,
     command: petBond.command,
     healthCurrent: instance.healthState.currentHealth,
     hungerRatio: instance.hungerState.hungerRatio,
     staminaRatio: instance.staminaState.staminaRatio,
-    learnedSkillIds: [...petBond.learnedSkillIds],
+    learnedSkillIds: nextLearnedSkillIds,
     equippedSkillId: petBond.equippedSkillId,
     soulsaveConsumed: petBond.soulsaveConsumed,
     weaponItem: petBond.weaponItem,
     armorItem: petBond.armorItem,
     lastKnownX: instance.position.x,
     lastKnownY: instance.position.y,
-    lastKnownLayer: instance.position.layer ?? null,
+    lastKnownLayer: nextLayer,
     deathCauseKind: null,
     updatedAtMs: nowMs,
   });
@@ -134,6 +179,31 @@ export function syncingWildlifePetDeathToRoster(
     existingRecord.deathCauseKind ??
     instance.healthState.lastDamageKind ??
     null;
+  const nextLearnedSkillIds = [...petBond.learnedSkillIds];
+  const nextLayer = instance.position.layer ?? null;
+
+  if (
+    existingRecord.loyalty === petBond.loyalty &&
+    existingRecord.command === petBond.command &&
+    existingRecord.healthCurrent === 0 &&
+    existingRecord.hungerRatio === instance.hungerState.hungerRatio &&
+    existingRecord.staminaRatio === instance.staminaState.staminaRatio &&
+    checkingWildlifePetLearnedSkillIdsEqual(
+      existingRecord.learnedSkillIds,
+      nextLearnedSkillIds
+    ) &&
+    existingRecord.equippedSkillId === petBond.equippedSkillId &&
+    existingRecord.soulsaveConsumed === petBond.soulsaveConsumed &&
+    existingRecord.weaponItem === petBond.weaponItem &&
+    existingRecord.armorItem === petBond.armorItem &&
+    existingRecord.lastKnownX === instance.position.x &&
+    existingRecord.lastKnownY === instance.position.y &&
+    existingRecord.lastKnownLayer === nextLayer &&
+    existingRecord.deathCauseKind === deathCauseKind &&
+    existingRecord.isActive === false
+  ) {
+    return;
+  }
 
   updatingWildlifePetRecord(petBond.petId, {
     loyalty: petBond.loyalty,
@@ -141,14 +211,14 @@ export function syncingWildlifePetDeathToRoster(
     healthCurrent: 0,
     hungerRatio: instance.hungerState.hungerRatio,
     staminaRatio: instance.staminaState.staminaRatio,
-    learnedSkillIds: [...petBond.learnedSkillIds],
+    learnedSkillIds: nextLearnedSkillIds,
     equippedSkillId: petBond.equippedSkillId,
     soulsaveConsumed: petBond.soulsaveConsumed,
     weaponItem: petBond.weaponItem,
     armorItem: petBond.armorItem,
     lastKnownX: instance.position.x,
     lastKnownY: instance.position.y,
-    lastKnownLayer: instance.position.layer ?? null,
+    lastKnownLayer: nextLayer,
     deathCauseKind,
     isActive: false,
     updatedAtMs: nowMs,

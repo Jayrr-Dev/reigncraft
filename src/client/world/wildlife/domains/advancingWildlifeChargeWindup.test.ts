@@ -8,8 +8,12 @@ import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domai
 import { describe, expect, it } from 'vitest';
 
 function buildingBoarInstance(
-  overrides: Partial<DefiningWildlifeInstance> = {}
+  overrides: Partial<Omit<DefiningWildlifeInstance, 'staminaState'>> & {
+    staminaState?: Partial<DefiningWildlifeInstance['staminaState']>;
+  } = {}
 ): DefiningWildlifeInstance {
+  const { staminaState, ...rest } = overrides;
+
   return {
     instanceId: 'wildlife:1:1:0',
     speciesId: 'boar',
@@ -26,7 +30,10 @@ function buildingBoarInstance(
       driveLevel: 'sated',
       lastFedAtMs: null,
     },
-    staminaState: creatingWildlifeInitialStaminaState(),
+    staminaState: {
+      ...creatingWildlifeInitialStaminaState(),
+      ...staminaState,
+    },
     aiState: {
       intent: { mode: 'idle' },
       facingDirection: 'Down',
@@ -47,14 +54,14 @@ function buildingBoarInstance(
       bluffChargePlayerExitedTerritory: false,
       bluffReturnPoint: null,
       fleeTargetPoint: null,
-    pendingGroundFoodBite: null,
-    feedingOnKillUntilMs: null,
-    feedingOnKillGroundItemId: null,
-    isSleeping: false,
-    hasSleepBeenDisturbed: false,
-    hasPlayerSleepBumpContact: false,
-    docileFollowUntilMs: null,
-    docileLastReactAtMs: null,
+      pendingGroundFoodBite: null,
+      feedingOnKillUntilMs: null,
+      feedingOnKillGroundItemId: null,
+      isSleeping: false,
+      hasSleepBeenDisturbed: false,
+      hasPlayerSleepBumpContact: false,
+      docileFollowUntilMs: null,
+      docileLastReactAtMs: null,
     },
     aggroState: {
       threats: [{ targetId: 'player-1', threat: 5, lastUpdatedAtMs: 1000 }],
@@ -68,16 +75,14 @@ function buildingBoarInstance(
     floatingTexts: [],
 
     speechState: {
-
       activeBubble: null,
 
       lastEmittedAtMs: null,
 
       lastContextKey: null,
-
     },
     environmentalDamageLastTickAtMs: null,
-    ...overrides,
+    ...rest,
   };
 }
 
@@ -176,6 +181,7 @@ describe('advancingWildlifeChargeWindup', () => {
       clearingWildlifeChargeWindupAfterStamina('boar', 1000, {
         staminaRatio: 0.2,
         isExhausted: true,
+        fatigueTier: 'fresh',
         runningForSeconds: 0,
       })
     ).toBeNull();

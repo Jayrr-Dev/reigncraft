@@ -61,13 +61,7 @@ import { DEFINING_WILDLIFE_PET_MODAL_COMMAND_OPTIONS } from '@/components/world/
 import type { DefiningWildlifePetCommandId } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
 import { resolvingWildlifePetIdleInteractionLabel } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetIdleInteractionLabel';
 import { checkingWildlifePetHasCapability } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetLoyaltyTier';
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 const RENDERING_WILDLIFE_DOCILE_BETRAY_LABEL_HIDDEN_TRANSFORM =
   'translate(-9999px, -9999px)' as const;
@@ -117,7 +111,7 @@ type RenderingWildlifeDocileBetrayLiveLabelSnapshot = {
 function formattingWildlifeDocileBetrayLiveLabelSnapshotKey(
   snapshot: RenderingWildlifeDocileBetrayLiveLabelSnapshot
 ): string {
-  return `${snapshot.label}\0${snapshot.isCompanionNameAction ? '1' : '0'}\0${snapshot.hasPermanentName ? '1' : '0'}\0${snapshot.loyalty}\0${snapshot.activeCommand ?? ''}\0${snapshot.needsOwnerFeed ? '1' : '0'}`;
+  return `${snapshot.label}\0${snapshot.isCompanionNameAction ? '1' : '0'}\0${snapshot.hasPermanentName ? '1' : '0'}\0${Math.round(snapshot.loyalty)}\0${snapshot.activeCommand ?? ''}\0${snapshot.needsOwnerFeed ? '1' : '0'}`;
 }
 
 function readingWildlifeDocileBetrayLiveLabelSnapshot(
@@ -235,6 +229,10 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
       activeCommand: null,
       needsOwnerFeed: false,
     });
+  const [liveLabelSnapshot, setLiveLabelSnapshot] =
+    useState<RenderingWildlifeDocileBetrayLiveLabelSnapshot>(
+      liveLabelCacheRef.current
+    );
   const [areCareActionsRevealed, setAreCareActionsRevealed] = useState(false);
   const nameHoverRevealTimeoutRef = useRef<number | null>(null);
 
@@ -295,24 +293,10 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
     nameHoverRevealTimeoutRef.current = null;
   };
 
-  const liveLabelSnapshotKey = useSyncExternalStore(
-    (onStoreChange) => {
-      if (!pending) {
-        return () => undefined;
-      }
-
-      const intervalId = window.setInterval(
-        onStoreChange,
-        RENDERING_WILDLIFE_DOCILE_BETRAY_LABEL_REFRESH_MS
-      );
-
-      return () => {
-        window.clearInterval(intervalId);
-      };
-    },
-    () => {
+  useEffect(() => {
+    const syncingLiveLabelSnapshot = (): void => {
       const nextSnapshot = readingWildlifeDocileBetrayLiveLabelSnapshot(
-        pending,
+        pendingRef.current,
         wildlifeStoreRef,
         isPetting
       );
@@ -322,22 +306,29 @@ export function RenderingWildlifeDocileBetrayInteractionLabels({
         liveLabelCacheRef.current
       );
 
-      if (nextKey !== cachedKey) {
-        liveLabelCacheRef.current = nextSnapshot;
+      if (nextKey === cachedKey) {
+        return;
       }
 
-      return formattingWildlifeDocileBetrayLiveLabelSnapshotKey(
-        liveLabelCacheRef.current
-      );
-    },
-    () =>
-      formattingWildlifeDocileBetrayLiveLabelSnapshotKey(
-        liveLabelCacheRef.current
-      )
-  );
+      liveLabelCacheRef.current = nextSnapshot;
+      setLiveLabelSnapshot(nextSnapshot);
+    };
 
-  const liveLabelSnapshot = liveLabelCacheRef.current;
-  void liveLabelSnapshotKey;
+    syncingLiveLabelSnapshot();
+
+    if (!pending) {
+      return;
+    }
+
+    const intervalId = window.setInterval(
+      syncingLiveLabelSnapshot,
+      RENDERING_WILDLIFE_DOCILE_BETRAY_LABEL_REFRESH_MS
+    );
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [isPetting, pending, wildlifeStoreRef]);
 
   const availableCommandOptions =
     liveLabelSnapshot.hasPermanentName && areCareActionsRevealed

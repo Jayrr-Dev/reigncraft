@@ -42,7 +42,9 @@ export function computingWorldPlazaPathologyInfectionStudyHoursToCredit({
     expiresAtMs,
     worldEpochMs,
   });
-  const alreadyCredited = Math.max(0, Math.floor(pathologyStudyHoursCredited));
+  const alreadyCredited = Number.isFinite(pathologyStudyHoursCredited)
+    ? Math.max(0, Math.floor(pathologyStudyHoursCredited))
+    : 0;
 
   return Math.max(0, eligibleHours - alreadyCredited);
 }
