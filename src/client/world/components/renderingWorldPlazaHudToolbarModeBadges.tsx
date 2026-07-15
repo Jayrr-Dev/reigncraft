@@ -10,6 +10,13 @@ import { Icon } from '@/components/ui/icon';
 import { usingWorldPlazaViewportHudScaleContext } from '@/components/world/components/providingWorldPlazaViewportHudScale';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
+  DEFINING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BADGE_ICONIFY_ICON,
+  LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER,
+  LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BADGE,
+  STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_ACTIVE_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME,
+} from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
+import {
   DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_REGISTRY,
   DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID,
   LABELING_WORLD_PLAZA_HUD_TOOLBAR_MODE_SWITCHER,
@@ -33,11 +40,19 @@ import { DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE } from '@/components/w
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCallback, useMemo, type SyntheticEvent } from 'react';
 
+/** Optional Creative tools badge (creative load only), left of Items. */
+export type RenderingWorldPlazaHudToolbarCreativeToolsLauncher = {
+  readonly isOpen: boolean;
+  readonly onToggle: () => void;
+};
+
 export type RenderingWorldPlazaHudToolbarModeBadgesProps = {
   readonly activeMode: DefiningWorldPlazaHudToolbarModeId;
   readonly onSelectMode: (mode: DefiningWorldPlazaHudToolbarModeId) => void;
   /** When false, the Build↔Claim toggle is disabled. */
   readonly isEditEnabled: boolean;
+  /** When set, shows the orange Creative badge left of Items. */
+  readonly creativeToolsLauncher?: RenderingWorldPlazaHudToolbarCreativeToolsLauncher | null;
 };
 
 /**
@@ -47,6 +62,7 @@ export function RenderingWorldPlazaHudToolbarModeBadges({
   activeMode,
   onSelectMode,
   isEditEnabled,
+  creativeToolsLauncher = null,
 }: RenderingWorldPlazaHudToolbarModeBadgesProps): React.JSX.Element {
   const viewportHudScale = usingWorldPlazaViewportHudScaleContext();
   const isMobile = useIsMobile();
@@ -76,6 +92,51 @@ export function RenderingWorldPlazaHudToolbarModeBadges({
         role="group"
         aria-label={LABELING_WORLD_PLAZA_HUD_TOOLBAR_MODE_SWITCHER}
       >
+        {creativeToolsLauncher ? (
+          <button
+            type="button"
+            {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+            aria-label={LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER}
+            aria-expanded={creativeToolsLauncher.isOpen}
+            onPointerDown={stoppingPlazaWalkPointerPropagation}
+            onClick={(event) => {
+              stoppingPlazaWalkPointerPropagation(event);
+              creativeToolsLauncher.onToggle();
+            }}
+            className={
+              creativeToolsLauncher.isOpen
+                ? STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_ACTIVE_CLASS_NAME
+                : STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME
+            }
+            style={viewportStyles.buttonStyle}
+          >
+            <span
+              className={STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_CONTENT_CLASS_NAME}
+              style={viewportStyles.contentStyle}
+            >
+              <span
+                className={
+                  STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ICON_SLOT_CLASS_NAME
+                }
+                style={viewportStyles.iconSlotStyle}
+                aria-hidden
+              >
+                <Icon
+                  icon={DEFINING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BADGE_ICONIFY_ICON}
+                  className={STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ICON_CLASS_NAME}
+                  style={viewportStyles.iconStyle}
+                  aria-hidden
+                />
+              </span>
+              <span
+                className={STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_LABEL_CLASS_NAME}
+                style={viewportStyles.labelStyle}
+              >
+                {LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BADGE}
+              </span>
+            </span>
+          </button>
+        ) : null}
         {DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_REGISTRY.map(
           (badgeDefinition) => {
             if (badgeDefinition.kind === 'buildClaimToggle') {

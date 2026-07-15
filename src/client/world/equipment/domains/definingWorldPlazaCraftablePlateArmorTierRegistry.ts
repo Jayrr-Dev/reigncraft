@@ -65,7 +65,7 @@ export type DefiningWorldPlazaCraftablePlateArmorTierDefinition = {
   readonly primaryCostByPiece: Readonly<
     Record<DefiningWorldPlazaCraftablePlateArmorPieceKey, number>
   >;
-  /** Extra wildlife leather straps (0 for leather tier). */
+  /** Extra wildlife hide straps (0 for leather tier). */
   readonly strapLeatherCostByPiece: Readonly<
     Record<DefiningWorldPlazaCraftablePlateArmorPieceKey, number>
   >;
@@ -180,7 +180,7 @@ export const DEFINING_WORLD_PLAZA_CRAFTABLE_PLATE_ARMOR_TIER_REGISTRY: readonly 
       spriteSheetUrl:
         '/inventory/sprites/inventory-leather-plate-armor-sprites.webp',
       packColumnIndex: 0,
-      primaryIngredientItemTypeId: 'world-plaza-wildlife-leather',
+      primaryIngredientItemTypeId: 'world-plaza-wildlife-hide',
       complexityByPiece: {
         casque: 2,
         gauntlets: 2,

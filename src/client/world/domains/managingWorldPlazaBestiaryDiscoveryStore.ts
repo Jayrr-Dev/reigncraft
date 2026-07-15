@@ -8,9 +8,10 @@
  */
 
 import { savingPlazaSinglePlayerSaveSlotData } from '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi';
+import { recordingWorldPlazaLoreBookUnlockEvent } from '@/components/world/domains/managingWorldPlazaLoreBookDiscoveryStore';
+import { creditingWorldPlazaPathologyFromWildlifeSpeciesStudy } from '@/components/world/domains/managingWorldPlazaPathologyDiscoveryStore';
 import { readingWorldPlazaBestiaryDiscoveryFromStorage } from '@/components/world/domains/readingWorldPlazaBestiaryDiscoveryFromStorage';
 import { writingWorldPlazaBestiaryDiscoveryToStorage } from '@/components/world/domains/writingWorldPlazaBestiaryDiscoveryToStorage';
-import { creditingWorldPlazaPathologyFromWildlifeSpeciesStudy } from '@/components/world/domains/managingWorldPlazaPathologyDiscoveryStore';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type { PlazaSaveSlotIndex } from '../../../shared/plazaGameSession';
 
@@ -212,6 +213,7 @@ export function recordingWorldPlazaBestiarySpeciesSighted(
   persistingWorldPlazaBestiaryDiscovery();
   refreshingWorldPlazaBestiaryDiscoverySnapshotCaches();
   notifyingWorldPlazaBestiaryDiscoverySubscribers();
+  recordingWorldPlazaLoreBookUnlockEvent('first-wildlife-sighted');
 }
 
 /**
@@ -253,6 +255,10 @@ export function recordingWorldPlazaBestiarySpeciesStudied(
     speciesId,
     awardedStudyPoints
   );
+  recordingWorldPlazaLoreBookUnlockEvent('first-wildlife-studied');
+  if (!hadSighted) {
+    recordingWorldPlazaLoreBookUnlockEvent('first-wildlife-sighted');
+  }
 }
 
 /** @deprecated Use {@link recordingWorldPlazaBestiarySpeciesStudied}. */

@@ -7,6 +7,7 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWorldPlazaInventoryItemIsFishingCatchCreatureFood } from '@/components/world/fishing/domains/checkingWorldPlazaInventoryItemIsFishingCatchCreatureFood';
+import { resolvingWorldPlazaFishingCastEncounterStalkIntent } from '@/components/world/fishing/domains/resolvingWorldPlazaFishingCastEncounterStalkIntent';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeFishingCastEncounterState,
@@ -14,7 +15,6 @@ import type {
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { type ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
-import { resolvingWorldPlazaFishingCastEncounterStalkIntent } from '@/components/world/fishing/domains/resolvingWorldPlazaFishingCastEncounterStalkIntent';
 import { resolvingWildlifeFollowPlayerIntentFromPlayer } from '@/components/world/wildlife/domains/resolvingWildlifeDocileFollowPlayerIntent';
 import { resolvingWildlifeNearestEdibleGroundFood } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundFood';
 import { applyingWildlifePetCuriousFollowGrant } from '@/components/world/wildlife/pets/domains/applyingWildlifePetCuriousFollowGrant';
@@ -227,7 +227,7 @@ export function advancingWildlifeFishingCastEncounterTick({
       continue;
     }
 
-    if (encounter.kind === 'pinguin') {
+    if (encounter.kind === 'pinguin' || encounter.kind === 'curious') {
       let nextInstance = instance;
 
       if (
@@ -298,6 +298,28 @@ export function advancingWildlifeFishingCastEncounterTick({
 
       if (nextInstance !== instance) {
         store.instances.set(instanceId, nextInstance);
+      }
+
+      continue;
+    }
+
+    if (encounter.kind === 'herd') {
+      if (encounter.expiresAtMs != null && nowMs >= encounter.expiresAtMs) {
+        store.instances.delete(instanceId);
+        continue;
+      }
+
+      if (playerPosition && playerUserId) {
+        store.instances.set(instanceId, {
+          ...instance,
+          aiState: {
+            ...instance.aiState,
+            intent: resolvingWildlifeFollowPlayerIntentFromPlayer({
+              playerUserId,
+              playerPosition,
+            }),
+          },
+        });
       }
 
       continue;

@@ -45,7 +45,7 @@ export function registeringWorldPlazaCraftablePlateArmorCraftModeRecipes(): read
 
       if (strapLeatherCost > 0) {
         ingredients.push({
-          itemTypeId: 'world-plaza-wildlife-leather',
+          itemTypeId: 'world-plaza-wildlife-hide',
           quantity: strapLeatherCost,
         });
       }

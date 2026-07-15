@@ -13,6 +13,7 @@ describe('checkingWildlifeSpeciesIsPettable', () => {
     expect(checkingWildlifeSpeciesIsPettable('cat-black')).toBe(true);
     expect(checkingWildlifeSpeciesIsPettable('husky')).toBe(true);
     expect(checkingWildlifeSpeciesIsPettable('pinguin')).toBe(true);
+    expect(checkingWildlifeSpeciesIsPettable('monkey')).toBe(true);
     expect(checkingWildlifeSpeciesIsPettable('fairy')).toBe(false);
     expect(checkingWildlifeSpeciesIsPettable('grey-wolf')).toBe(false);
   });
@@ -21,10 +22,14 @@ describe('checkingWildlifeSpeciesIsPettable', () => {
     expect(resolvingWildlifeDocilePetKind('cat-orange')).toBe('cat');
     expect(resolvingWildlifeDocilePetKind('golden-retriever')).toBe('dog');
     expect(resolvingWildlifeDocilePetKind('pinguin')).toBe('pinguin');
+    expect(resolvingWildlifeDocilePetKind('monkey')).toBe('monkey');
     expect(resolvingWildlifeDocilePetIdleLabel('cat')).toBe('Pet the Cat');
     expect(resolvingWildlifeDocilePetIdleLabel('dog')).toBe('Pet the Dog');
     expect(resolvingWildlifeDocilePetIdleLabel('pinguin')).toBe(
       'Pet the Pinguin'
+    );
+    expect(resolvingWildlifeDocilePetIdleLabel('monkey')).toBe(
+      'Pet the Monkey'
     );
     expect(resolvingWildlifeDocilePettingLabel()).toBe('Petting....');
   });

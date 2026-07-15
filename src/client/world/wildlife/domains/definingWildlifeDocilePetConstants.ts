@@ -63,8 +63,21 @@ export const DEFINING_WILDLIFE_DOCILE_PET_PINGUIN_SPECIES_IDS = [
   'pinguin',
 ] as const;
 
-export type DefiningWildlifeDocilePetKind = 'cat' | 'dog' | 'pinguin';
+/** Species ids that use the monkey pet label. */
+export const DEFINING_WILDLIFE_DOCILE_PET_MONKEY_SPECIES_IDS = [
+  'monkey',
+] as const;
+
+export type DefiningWildlifeDocilePetKind =
+  | 'cat'
+  | 'dog'
+  | 'pinguin'
+  | 'monkey';
 
 /** Outlined label while waiting to start a pet. */
 export const LABELING_WILDLIFE_DOCILE_PET_PINGUIN_TITLE =
   'Pet the Pinguin' as const;
+
+/** Outlined label while waiting to start a pet. */
+export const LABELING_WILDLIFE_DOCILE_PET_MONKEY_TITLE =
+  'Pet the Monkey' as const;

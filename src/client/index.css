@@ -2810,6 +2810,98 @@ video {
   animation: plaza-tutorial-study-count-pop 3.6s ease-in-out infinite;
 }
 
+@keyframes plaza-tutorial-fishing-label-fish {
+  0%,
+  42% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes plaza-tutorial-fishing-label-reel {
+  0%,
+  42% {
+    opacity: 0;
+  }
+  50%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes plaza-tutorial-fishing-ring-pulse {
+  0%,
+  40% {
+    transform: translateX(-50%) scale(0.85);
+    opacity: 0.35;
+    border-color: rgba(239, 68, 68, 0.55);
+  }
+  70%,
+  100% {
+    transform: translateX(-50%) scale(1.05);
+    opacity: 1;
+    border-color: rgba(74, 222, 128, 0.85);
+  }
+}
+
+@keyframes plaza-tutorial-profile-tab-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(44, 74, 82, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(44, 74, 82, 0.25);
+  }
+}
+
+@keyframes plaza-tutorial-upgrade-commit-pulse {
+  0%,
+  55% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  70% {
+    transform: scale(1.06);
+    filter: brightness(1.15);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+.plaza-tutorial-fishing-label {
+  animation: plaza-tutorial-study-button-glow 3.8s ease-in-out infinite;
+}
+
+.plaza-tutorial-fishing-label-fish {
+  animation: plaza-tutorial-fishing-label-fish 3.8s ease-in-out infinite;
+}
+
+.plaza-tutorial-fishing-label-reel {
+  animation: plaza-tutorial-fishing-label-reel 3.8s ease-in-out infinite;
+}
+
+.plaza-tutorial-fishing-ring {
+  animation: plaza-tutorial-fishing-ring-pulse 3.8s ease-in-out infinite;
+}
+
+.plaza-tutorial-profile-tab-active {
+  animation: plaza-tutorial-profile-tab-glow 2.8s ease-in-out infinite;
+}
+
+.plaza-tutorial-upgrade-lane-active {
+  border-color: rgba(217, 164, 65, 0.55) !important;
+  background: rgba(217, 164, 65, 0.12);
+}
+
+.plaza-tutorial-upgrade-commit {
+  animation: plaza-tutorial-upgrade-commit-pulse 2.8s ease-in-out infinite;
+}
+
 .plaza-tutorial-key-shift {
   animation: plaza-tutorial-key-glow 3.2s ease-in-out infinite;
   animation-delay: 0.2s;
@@ -3216,7 +3308,23 @@ video {
   .plaza-tutorial-track-star,
   .plaza-tutorial-track-arrow,
   .plaza-tutorial-teleport-fade,
-  .plaza-tutorial-teleport-button {
+  .plaza-tutorial-teleport-button,
+  .plaza-tutorial-roll-dodge-avatar,
+  .plaza-tutorial-roll-dodge-shield,
+  .plaza-tutorial-key-r,
+  .plaza-tutorial-melee-target,
+  .plaza-tutorial-melee-strike,
+  .plaza-tutorial-melee-click-cursor,
+  .plaza-tutorial-study-corpse,
+  .plaza-tutorial-study-button,
+  .plaza-tutorial-study-progress,
+  .plaza-tutorial-study-count,
+  .plaza-tutorial-fishing-label,
+  .plaza-tutorial-fishing-label-fish,
+  .plaza-tutorial-fishing-label-reel,
+  .plaza-tutorial-fishing-ring,
+  .plaza-tutorial-profile-tab-active,
+  .plaza-tutorial-upgrade-commit {
     animation: none;
   }
   .plaza-btn-3d,

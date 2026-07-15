@@ -7,11 +7,17 @@
  * @module components/world/domains/managingWorldPlazaExploredBiomesStore
  */
 
+import { DEFINING_PLAZA_BIOMES_LEGENDARY_KINDS } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
 import { savingPlazaSinglePlayerSaveSlotData } from '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
+import { recordingWorldPlazaLoreBookUnlockEvent } from '@/components/world/domains/managingWorldPlazaLoreBookDiscoveryStore';
 import { readingWorldPlazaExploredBiomesFromStorage } from '@/components/world/domains/readingWorldPlazaExploredBiomesFromStorage';
 import { writingWorldPlazaExploredBiomesToStorage } from '@/components/world/domains/writingWorldPlazaExploredBiomesToStorage';
 import type { PlazaSaveSlotIndex } from '../../../shared/plazaGameSession';
+
+const DEFINING_PLAZA_BIOMES_LEGENDARY_KIND_SET = new Set<string>(
+  DEFINING_PLAZA_BIOMES_LEGENDARY_KINDS
+);
 
 const managingWorldPlazaExploredBiomesSubscribers = new Set<() => void>();
 
@@ -126,6 +132,10 @@ export function recordingWorldPlazaExploredBiomeKind(
   refreshingWorldPlazaExploredBiomesSnapshotCache();
   persistingWorldPlazaExploredBiomes();
   notifyingWorldPlazaExploredBiomesSubscribers();
+
+  if (DEFINING_PLAZA_BIOMES_LEGENDARY_KIND_SET.has(biomeKind)) {
+    recordingWorldPlazaLoreBookUnlockEvent('legendary-biome-entered');
+  }
 }
 
 /**

@@ -46,5 +46,21 @@ describe('registeringWorldPlazaCraftablePlateArmorCraftModeRecipes', () => {
       itemTypeId: 'world-plaza-leather-plate-casque',
       quantity: 1,
     });
+    expect(recipe?.ingredients).toEqual([
+      { itemTypeId: 'world-plaza-wildlife-hide', quantity: 2 },
+    ]);
+  });
+
+  it('uses wildlife hide for metal plate straps', () => {
+    const recipe = resolvingWorldPlazaCraftModeRecipeDefinition(
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.COPPER_PLATE_BREASTPLATE
+    );
+
+    expect(recipe?.title).toBe('Copper Breastplate');
+    expect(recipe?.ingredients).toEqual(
+      expect.arrayContaining([
+        { itemTypeId: 'world-plaza-wildlife-hide', quantity: 1 },
+      ])
+    );
   });
 });

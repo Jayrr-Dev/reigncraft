@@ -40,11 +40,12 @@ import { DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_MAX_CAPACITY } from '@
 import { ensuringWorldPlazaInventoryBestiarySightedRecipeRewards } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryBestiarySightedRecipeRewards';
 import { ensuringWorldPlazaInventoryCampfireRecipePage } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryCampfireRecipePage';
 import { ensuringWorldPlazaInventoryLapidaryOreStudyRecipeRewards } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryLapidaryOreStudyRecipeRewards';
-import { listingWorldPlazaOreItemSeedItems } from '@/components/world/inventory/domains/listingWorldPlazaOreItemSeedItems';
+import { listingWorldPlazaBuildingResourceSeedItems } from '@/components/world/inventory/domains/listingWorldPlazaBuildingResourceSeedItems';
 import { acquiringWorldPlazaInventoryLiveGrantHandler } from '@/components/world/inventory/domains/managingWorldPlazaInventoryLiveGrantStore';
 import {
   gettingWorldPlazaInventoryBonusStorageRows,
   subscribingWorldPlazaInventoryStorageExpansion,
+  unlockingWorldPlazaInventoryStorageRow,
 } from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
 import { movingWorldPlazaInventoryItemToSlot } from '@/components/world/inventory/domains/movingWorldPlazaInventoryItemToSlot';
 import { normalizingWorldPlazaInventoryWeaponToolSlot } from '@/components/world/inventory/domains/normalizingWorldPlazaInventoryWeaponToolSlot';
@@ -353,18 +354,33 @@ export function usingWorldPlazaInventory(
       if (!seededDevQaCraftInventoryKeys.has(devQaSeedKey)) {
         seededDevQaCraftInventoryKeys.add(devQaSeedKey);
 
-        let seededState = creatingEmptyInventoryState(unlockedCapacity);
+        while (unlockingWorldPlazaInventoryStorageRow() === 'unlocked') {
+          // Fill every bonus storage page so organized resources fit.
+        }
+
+        const buildingResourceSeedItems =
+          listingWorldPlazaBuildingResourceSeedItems();
+        const buildingResourceItemTypeIds = new Set(
+          buildingResourceSeedItems.map((item) => item.itemTypeId)
+        );
+
+        let seededState = creatingEmptyInventoryState(
+          DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_MAX_CAPACITY
+        );
         seededState = seedingWorldPlazaInventoryItems(
           seededState,
           DEFINING_WORLD_PLAZA_INVENTORY_STARTER_ITEMS
         );
         seededState = seedingWorldPlazaInventoryItems(
           seededState,
-          listingWorldPlazaCraftModeRecipeIngredientSeedItems()
+          buildingResourceSeedItems
         );
         seededState = seedingWorldPlazaInventoryItems(
           seededState,
-          listingWorldPlazaOreItemSeedItems()
+          listingWorldPlazaCraftModeRecipeIngredientSeedItems(
+            undefined,
+            buildingResourceItemTypeIds
+          )
         );
         setState(seededState);
       }

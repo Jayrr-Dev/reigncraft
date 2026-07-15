@@ -12,6 +12,7 @@
 
 import { listingPlazaPathologyDiseaseIdsCausedBySpecies } from '@/components/home/domains/resolvingPlazaPathologyCreatureDiseaseLinks';
 import { resolvingWorldPlazaPathologyDiscoveryStorageKey } from '@/components/world/domains/definingWorldPlazaPathologyDiscoveryConstants';
+import { recordingWorldPlazaLoreBookUnlockEvent } from '@/components/world/domains/managingWorldPlazaLoreBookDiscoveryStore';
 import { readingWorldPlazaPathologyDiscoveryFromStorage } from '@/components/world/domains/readingWorldPlazaPathologyDiscoveryFromStorage';
 import { writingWorldPlazaPathologyDiscoveryToStorage } from '@/components/world/domains/writingWorldPlazaPathologyDiscoveryToStorage';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
@@ -146,6 +147,7 @@ export function recordingWorldPlazaPathologyDiseaseObtained(
   ]);
   persistingWorldPlazaPathologyDiscovery();
   notifyingWorldPlazaPathologyDiscoverySubscribers();
+  recordingWorldPlazaLoreBookUnlockEvent('first-disease-obtained');
 }
 
 /**

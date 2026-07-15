@@ -1,5 +1,5 @@
 /**
- * Spawns one fishing cast wildlife encounter instance into the wildlife store.
+ * Spawns fishing cast wildlife encounter instances into the wildlife store.
  *
  * @module components/world/fishing/domains/spawningWorldPlazaFishingCastEncounter
  */
@@ -11,12 +11,12 @@ import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/doma
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import {
-  LABELING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_FAIRY_TOAST,
-  LABELING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_PINGUIN_TOAST,
-  LABELING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_PREDATOR_TOAST,
-} from '@/components/world/fishing/domains/definingWorldPlazaFishingCastEncounterConstants';
+  readingWorldPlazaFishingCastEncounterLastAtMs,
+  recordingWorldPlazaFishingCastEncounterAtMs,
+} from '@/components/world/fishing/domains/managingWorldPlazaFishingCastEncounterCooldown';
 import {
   resolvingWorldPlazaFishingCastEncounterRoll,
+  type ResolvingWorldPlazaFishingCastEncounterMemberPlan,
   type ResolvingWorldPlazaFishingCastEncounterPlan,
 } from '@/components/world/fishing/domains/resolvingWorldPlazaFishingCastEncounterRoll';
 import { resolvingWorldPlazaFishingCastEncounterSpawnPosition } from '@/components/world/fishing/domains/resolvingWorldPlazaFishingCastEncounterSpawnPosition';
@@ -51,42 +51,147 @@ export type SpawningWorldPlazaFishingCastEncounterResult =
   | {
       readonly outcome: 'spawned';
       readonly plan: ResolvingWorldPlazaFishingCastEncounterPlan;
-      readonly instanceId: string;
+      readonly instanceIds: readonly string[];
     }
   | { readonly outcome: 'failed' };
 
 function buildingFishingCastEncounterThinkAnchor(
-  instanceId: string,
+  packAnchorId: string,
   position: DefiningWorldPlazaWorldPoint,
-  speciesId: ResolvingWorldPlazaFishingCastEncounterPlan['speciesId']
+  speciesId: ResolvingWorldPlazaFishingCastEncounterMemberPlan['speciesId'],
+  packIndex: number,
+  packSize: number
 ): DefiningWildlifeSpawnAnchor {
   return {
-    anchorId: instanceId,
+    anchorId: packAnchorId,
     tileX: Math.floor(position.x),
     tileY: Math.floor(position.y),
     speciesId,
-    packIndex: 0,
-    packSize: 1,
-    seed: 0.37,
+    packIndex,
+    packSize,
+    seed: 0.37 + packIndex * 0.11,
   };
 }
 
-function resolvingFishingCastEncounterToast(
-  plan: ResolvingWorldPlazaFishingCastEncounterPlan
-): string {
-  if (plan.fishingCastEncounter.kind === 'predator') {
-    return LABELING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_PREDATOR_TOAST;
+function resolvingFishingCastEncounterPackMemberPosition(
+  basePosition: DefiningWorldPlazaWorldPoint,
+  packIndex: number,
+  packSize: number
+): DefiningWorldPlazaWorldPoint {
+  if (packIndex === 0) {
+    return basePosition;
   }
 
-  if (plan.fishingCastEncounter.kind === 'pinguin') {
-    return LABELING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_PINGUIN_TOAST;
+  const angle = (packIndex / packSize) * Math.PI * 2 + 0.5;
+  const distance = 1.5 + (packIndex % 2) * 0.8;
+
+  return {
+    x: basePosition.x + Math.cos(angle) * distance,
+    y: basePosition.y + Math.sin(angle) * distance,
+    layer: basePosition.layer,
+  };
+}
+
+function applyingDocileFollowWindow(
+  instance: DefiningWildlifeInstance,
+  member: ResolvingWorldPlazaFishingCastEncounterMemberPlan
+): DefiningWildlifeInstance {
+  const followUntilMs = member.fishingCastEncounter.expiresAtMs;
+  const encounterKind = member.fishingCastEncounter.kind;
+
+  if (
+    followUntilMs == null ||
+    (encounterKind !== 'pinguin' &&
+      encounterKind !== 'curious' &&
+      !member.isTameableBondCandidate)
+  ) {
+    return instance;
   }
 
-  return LABELING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_FAIRY_TOAST;
+  return {
+    ...instance,
+    aiState: {
+      ...instance.aiState,
+      docileFollowUntilMs: followUntilMs,
+    },
+  };
+}
+
+function spawningFishingCastEncounterMember({
+  store,
+  plan,
+  member,
+  packIndex,
+  packSize,
+  leaderPosition,
+  nowMs,
+  isDaytime,
+  placedBlocks,
+  placedBlocksByTile,
+}: {
+  readonly store: ManagingWildlifeInstanceStore;
+  readonly plan: ResolvingWorldPlazaFishingCastEncounterPlan;
+  readonly member: ResolvingWorldPlazaFishingCastEncounterMemberPlan;
+  readonly packIndex: number;
+  readonly packSize: number;
+  readonly leaderPosition: DefiningWorldPlazaWorldPoint;
+  readonly nowMs: number;
+  readonly isDaytime: boolean;
+  readonly placedBlocks: readonly DefiningWorldBuildingPlacedBlock[];
+  readonly placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile;
+}): string | null {
+  const species = resolvingWildlifeSpeciesDefinition(member.speciesId);
+
+  if (!species) {
+    return null;
+  }
+
+  const position = resolvingFishingCastEncounterPackMemberPosition(
+    leaderPosition,
+    packIndex,
+    packSize
+  );
+  const instanceId = `wildlife:${plan.packAnchorId}:${packIndex}`;
+  const thinkScheduleAnchor = buildingFishingCastEncounterThinkAnchor(
+    plan.packAnchorId,
+    position,
+    member.speciesId,
+    packIndex,
+    packSize
+  );
+  const sizeScaleSample =
+    resolvingWildlifeSizeBellCurveSampleFromAnchor(thinkScheduleAnchor);
+  const sizeTiers = resolvingWildlifeInstanceSizeTierFromSample(
+    sizeScaleSample,
+    species
+  );
+  const instance = creatingWildlifeInstanceAtPosition({
+    instanceId,
+    anchorId: plan.packAnchorId,
+    species,
+    position,
+    spawnAnchor: position,
+    aggressionLevel: member.aggressionLevel,
+    sleepScheduleSample:
+      resolvingWildlifeSleepBellCurveSampleFromAnchor(thinkScheduleAnchor),
+    sizeScaleSample,
+    largeSizeFrame: resolvingWildlifeLargeSizeFrameFromAnchor(
+      thinkScheduleAnchor,
+      sizeTiers
+    ),
+    thinkScheduleAnchor,
+    nowMs,
+    temperamentOverrideId: member.temperamentOverrideId,
+    fishingCastEncounter: member.fishingCastEncounter,
+  });
+
+  store.instances.set(instanceId, applyingDocileFollowWindow(instance, member));
+
+  return instanceId;
 }
 
 /**
- * Rolls and, on hit, spawns one off-screen fishing cast encounter animal.
+ * Rolls and, on hit, spawns off-screen fishing cast encounter animals.
  */
 export function spawningWorldPlazaFishingCastEncounter({
   store,
@@ -110,6 +215,7 @@ export function spawningWorldPlazaFishingCastEncounter({
   const plan = resolvingWorldPlazaFishingCastEncounterRoll({
     biomeKind,
     nowMs,
+    lastEncounterAtMs: readingWorldPlazaFishingCastEncounterLastAtMs(),
     rollUnit,
   });
 
@@ -117,71 +223,56 @@ export function spawningWorldPlazaFishingCastEncounter({
     return { outcome: 'skipped' };
   }
 
-  const species = resolvingWildlifeSpeciesDefinition(plan.speciesId);
+  const leaderSpecies = resolvingWildlifeSpeciesDefinition(
+    plan.members[0]!.speciesId
+  );
 
-  if (!species) {
+  if (!leaderSpecies) {
     return { outcome: 'failed' };
   }
 
-  const position = resolvingWorldPlazaFishingCastEncounterSpawnPosition({
+  const leaderPosition = resolvingWorldPlazaFishingCastEncounterSpawnPosition({
     playerCenter,
-    species,
+    species: leaderSpecies,
     placementSeed: Math.floor(nowMs),
     isDaytime,
     placedBlocks,
     placedBlocksByTile,
   });
 
-  if (!position) {
+  if (!leaderPosition) {
     return { outcome: 'failed' };
   }
 
-  const instanceId = `wildlife:fishing-cast:${plan.speciesId}:${nowMs}`;
-  const thinkScheduleAnchor = buildingFishingCastEncounterThinkAnchor(
-    instanceId,
-    position,
-    plan.speciesId
-  );
-  const sizeScaleSample =
-    resolvingWildlifeSizeBellCurveSampleFromAnchor(thinkScheduleAnchor);
-  const sizeTiers = resolvingWildlifeInstanceSizeTierFromSample(
-    sizeScaleSample,
-    species
-  );
-  const followUntilMs = plan.fishingCastEncounter.expiresAtMs;
-  const instance = creatingWildlifeInstanceAtPosition({
-    instanceId,
-    anchorId: instanceId,
-    species,
-    position,
-    spawnAnchor: position,
-    aggressionLevel: plan.aggressionLevel,
-    sleepScheduleSample:
-      resolvingWildlifeSleepBellCurveSampleFromAnchor(thinkScheduleAnchor),
-    sizeScaleSample,
-    largeSizeFrame: resolvingWildlifeLargeSizeFrameFromAnchor(
-      thinkScheduleAnchor,
-      sizeTiers
-    ),
-    thinkScheduleAnchor,
-    nowMs,
-    temperamentOverrideId: plan.temperamentOverrideId,
-    fishingCastEncounter: plan.fishingCastEncounter,
-  });
+  const instanceIds: string[] = [];
 
-  const withFollow: DefiningWildlifeInstance =
-    plan.fishingCastEncounter.kind === 'pinguin' && followUntilMs != null
-      ? {
-          ...instance,
-          aiState: {
-            ...instance.aiState,
-            docileFollowUntilMs: followUntilMs,
-          },
-        }
-      : instance;
+  for (let packIndex = 0; packIndex < plan.members.length; packIndex += 1) {
+    const member = plan.members[packIndex]!;
 
-  store.instances.set(instanceId, withFollow);
-  showingToast?.(resolvingFishingCastEncounterToast(plan));
+    const instanceId = spawningFishingCastEncounterMember({
+      store,
+      plan,
+      member,
+      packIndex,
+      packSize: plan.members.length,
+      leaderPosition,
+      nowMs,
+      isDaytime,
+      placedBlocks,
+      placedBlocksByTile,
+    });
 
-  return { outcome: 'spawned', plan, instanceId };
+    if (instanceId) {
+      instanceIds.push(instanceId);
+    }
+  }
+
+  if (instanceIds.length === 0) {
+    return { outcome: 'failed' };
+  }
+
+  recordingWorldPlazaFishingCastEncounterAtMs(nowMs);
+  showingToast?.(plan.toast);
+
+  return { outcome: 'spawned', plan, instanceIds };
 }

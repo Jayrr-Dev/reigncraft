@@ -26,14 +26,10 @@ import { RenderingWorldPlazaTerrainCollisionDebugToggleButton } from '@/componen
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
-  DEFINING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_VISIBLE,
   LABELING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER,
-  LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER,
   LABELING_WORLD_PLAZA_DEV_MODE_PANEL_CLOSE,
   LABELING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE,
   STYLING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER_BUTTON_CLASS_NAME,
-  STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_ACTIVE_CLASS_NAME,
-  STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HEADER_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SHELL_CLASS_NAME,
@@ -230,7 +226,6 @@ export function RenderingWorldPlazaDevModePanel(
 ): React.JSX.Element {
   const {
     isOpen,
-    onToggle,
     onClose,
     viewportHudScale = 1,
     isMobile = false,
@@ -281,13 +276,11 @@ export function RenderingWorldPlazaDevModePanel(
   const hasHealthControls = hasWorldPlazaDevModeHealthControls(props);
   const playerHealthSubcategoryId =
     activeViewId === 'player-climate' ? playerClimateTabId : activeView.leafId;
-  const showDevLauncher = DEFINING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_VISIBLE;
   const showPerfLauncher =
     isPerformanceDiagnosticsFeatureAvailable &&
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_PERF_LAUNCHER_VISIBLE;
-  const showToolbar =
-    Boolean(onExitToHome) || showDevLauncher || showPerfLauncher;
-  const showDevPanel = showDevLauncher && isOpen;
+  const showToolbar = Boolean(onExitToHome) || showPerfLauncher;
+  const showDevPanel = isOpen;
 
   return (
     <>
@@ -311,21 +304,6 @@ export function RenderingWorldPlazaDevModePanel(
                 onClick={onExitToHome}
               >
                 {LABELING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER}
-              </button>
-            ) : null}
-            {showDevLauncher ? (
-              <button
-                type="button"
-                aria-label={LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER}
-                aria-expanded={isOpen}
-                className={
-                  isOpen
-                    ? STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_ACTIVE_CLASS_NAME
-                    : STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME
-                }
-                onClick={onToggle}
-              >
-                Dev
               </button>
             ) : null}
             {showPerfLauncher ? (

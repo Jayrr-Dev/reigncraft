@@ -16,6 +16,7 @@ import {
 } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
 import { DEFINING_PLAZA_HERBARIUM_MUSHROOM_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaHerbariumMushroomGuideConstants';
 import { DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaLapidaryGuideConstants';
+import { DEFINING_PLAZA_LORE_BOOKS } from '@/components/home/domains/definingPlazaLoreBookConstants';
 import { DEFINING_PLAZA_PATHOLOGY_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaPathologyGuideConstants';
 import { attachingWorldPlazaAllCraftModeRecipesForDevQa } from '@/components/world/domains/attachingWorldPlazaAllCraftModeRecipesForDevQa';
 import {
@@ -36,6 +37,7 @@ import {
   recordingWorldPlazaHerbariumTreeStudied,
 } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import { ensuringWorldPlazaLapidaryOreStudyAtLeast } from '@/components/world/domains/managingWorldPlazaLapidaryDiscoveryStore';
+import { unlockingWorldPlazaLoreBookDiscoveryAllForDev } from '@/components/world/domains/managingWorldPlazaLoreBookDiscoveryStore';
 import {
   creditingWorldPlazaPathologyFromInfectionHours,
   recordingWorldPlazaPathologyDiseaseObtained,
@@ -50,8 +52,8 @@ export function resettingWorldPlazaCodexDiscoveryDevQaSeedGuardForTests(): void 
 }
 
 /**
- * Unlocks Biomes, Bestiary, Herbarium, Lapidary, Pathology, and Recipes for
- * the active Dev QA session. No-op when Dev QA is off or already seeded for
+ * Unlocks Biomes, Bestiary, Herbarium, Lapidary, Pathology, Recipes, and Lore
+ * for the active Dev QA session. No-op when Dev QA is off or already seeded for
  * this revision.
  */
 export function seedingWorldPlazaCodexDiscoveryAllForDevQa(): void {
@@ -126,4 +128,8 @@ export function seedingWorldPlazaCodexDiscoveryAllForDevQa(): void {
   }
 
   attachingWorldPlazaAllCraftModeRecipesForDevQa();
+
+  unlockingWorldPlazaLoreBookDiscoveryAllForDev(
+    DEFINING_PLAZA_LORE_BOOKS.map((book) => book.id)
+  );
 }

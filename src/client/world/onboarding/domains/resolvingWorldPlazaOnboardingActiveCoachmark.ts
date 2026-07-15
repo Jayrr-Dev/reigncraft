@@ -115,6 +115,8 @@ function checkingWorldPlazaOnboardingContextualStepEligible(
         liveSignals.isEditEnabled &&
         !liveSignals.sessionSignals.hasClaimModeSelected
       );
+    case 'profile':
+      return true;
     case 'spritcore':
       return liveSignals.spritcoreInventoryQuantity > 0;
     case 'pets':
@@ -210,8 +212,11 @@ export function checkingWorldPlazaOnboardingCoachmarkAdvanceSatisfied(
       return liveSignals.sessionSignals.hasBuildModeSelected;
     case 'claim-mode-select':
       return liveSignals.sessionSignals.hasClaimModeSelected;
-    case 'spritcore-view':
+    case 'profile-open':
       return liveSignals.sessionSignals.hasProfileOpened;
+    case 'spritcore-view':
+      // Dismiss-only: profile may already be open from the earlier Character tip.
+      return false;
     case 'pets-open':
       return liveSignals.sessionSignals.hasPetsOpened;
     default:

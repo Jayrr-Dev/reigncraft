@@ -5,8 +5,10 @@ import { RenderingPlazaTutorialTabBar } from '@/components/home/components/rende
 import {
   RenderingPlazaTutorialBuffBadgesDemo,
   RenderingPlazaTutorialBuildDemo,
+  RenderingPlazaTutorialCharacterProfileDemo,
   RenderingPlazaTutorialClimbBlocksDemo,
   RenderingPlazaTutorialCookWildMeatDemo,
+  RenderingPlazaTutorialFishingDemo,
   RenderingPlazaTutorialHealthDemo,
   RenderingPlazaTutorialHungerDemo,
   RenderingPlazaTutorialInventoryDemo,
@@ -22,6 +24,7 @@ import {
   RenderingPlazaTutorialStudyWildlifeDemo,
   RenderingPlazaTutorialTeleportPlotsDemo,
   RenderingPlazaTutorialTrackCoordsDemo,
+  RenderingPlazaTutorialUpgradeSpritcoreDemo,
   RenderingPlazaTutorialWorldLayersDemo,
   type RenderingPlazaTutorialDemoProps,
 } from '@/components/home/components/renderingPlazaTutorialVisualDemos';
@@ -61,10 +64,13 @@ const PLAZA_TUTORIAL_SECTION_DEMOS: Record<
   'manage-hunger': RenderingPlazaTutorialHungerDemo,
   'cook-wild-meat': RenderingPlazaTutorialCookWildMeatDemo,
   'study-wildlife': RenderingPlazaTutorialStudyWildlifeDemo,
+  'fish-waters': RenderingPlazaTutorialFishingDemo,
   'read-minimap': RenderingPlazaTutorialMiniMapDemo,
   'use-inventory': RenderingPlazaTutorialInventoryDemo,
   'track-status-effects': RenderingPlazaTutorialStatusEffectsDemo,
   'track-buff-badges': RenderingPlazaTutorialBuffBadgesDemo,
+  'open-character-profile': RenderingPlazaTutorialCharacterProfileDemo,
+  'upgrade-with-spritcore': RenderingPlazaTutorialUpgradeSpritcoreDemo,
 };
 
 const PLAZA_HOW_TO_PLAY_PANEL_HEADER_BUTTON_CLASS_NAME =
@@ -149,7 +155,10 @@ export function RenderingPlazaHowToPlayPanel({
           </button>
         ) : null}
         <div className="min-w-0 flex-1">
-          <h2 className="font-display text-xl font-bold tracking-wide text-poster-teal-deep">
+          <h2
+            id="plaza-howto-title"
+            className="font-display text-xl font-bold tracking-wide text-poster-teal-deep"
+          >
             How to Play
           </h2>
           <p className="text-sm font-medium italic text-ink-soft">
@@ -159,6 +168,7 @@ export function RenderingPlazaHowToPlayPanel({
         {onClose ? (
           <button
             type="button"
+            autoFocus
             {...definingPlazaButtonSfxDataAttributes(
               DEFINING_PLAZA_BUTTON_SFX_KIND.none
             )}
@@ -183,8 +193,9 @@ export function RenderingPlazaHowToPlayPanel({
       />
 
       <div
+        id={`plaza-howto-panel-${activeTab.id}`}
         role="tabpanel"
-        aria-label={`${activeTab.label} tutorial`}
+        aria-labelledby={`plaza-howto-tab-${activeTab.id}`}
         className="scrollbar-none flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1"
       >
         {activeTab.sections.map((section, sectionIndex) => {

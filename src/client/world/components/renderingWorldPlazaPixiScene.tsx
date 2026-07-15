@@ -280,6 +280,7 @@ import {
   DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE,
 } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import type { WorldPlazaCodexSectionId } from '@/components/world/domains/definingWorldPlazaCodexConstants';
+import { DEFINING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_VISIBLE } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import { DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID } from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
@@ -348,6 +349,10 @@ import {
   gettingWorldPlazaLapidaryOreStudyCountsSnapshot,
   recordingWorldPlazaLapidaryOreStudied,
 } from '@/components/world/domains/managingWorldPlazaLapidaryDiscoveryStore';
+import {
+  initializingWorldPlazaLoreBookDiscoveryStore,
+  recordingWorldPlazaLoreBookUnlockEvent,
+} from '@/components/world/domains/managingWorldPlazaLoreBookDiscoveryStore';
 import { settingWorldPlazaOnlineRoomId } from '@/components/world/domains/managingWorldPlazaOnlineRoomIdStore';
 import { checkingWorldPlazaPermaDeathLoadEnabled } from '@/components/world/domains/managingWorldPlazaPermaDeathLoadStore';
 import { checkingWorldPlazaRandomAnimalLoadEnabled } from '@/components/world/domains/managingWorldPlazaRandomAnimalLoadStore';
@@ -384,6 +389,7 @@ import {
 } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { seedingWorldPlazaCodexDiscoveryAllForDevQa } from '@/components/world/domains/seedingWorldPlazaCodexDiscoveryAllForDevQa';
 import { settlingWorldPlazaMeleeSwingDamage } from '@/components/world/domains/settlingWorldPlazaMeleeSwingDamage';
+import { syncingWorldPlazaLoreBookUnlocksFromExistingDiscovery } from '@/components/world/domains/syncingWorldPlazaLoreBookUnlocksFromExistingDiscovery';
 import { RenderingWorldPlazaEquipmentSfx } from '@/components/world/equipment/components/renderingWorldPlazaEquipmentSfx';
 import type { DefiningWorldPlazaArmorSlotId } from '@/components/world/equipment/domains/definingWorldPlazaArmorSlotRegistry';
 import type { DefiningWorldPlazaHeldItemPresentation } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemPresentationRegistry';
@@ -1364,10 +1370,18 @@ function RenderingWorldPlazaPixiSceneConnected({
   );
 
   const isLocalhostDevEnvironment = usingWorldPlazaLocalhostDevEnvironment();
-  const isDevEnvironment = usingWorldPlazaDevEnvironment();
+  const isCreativeToolsAvailable =
+    usingWorldPlazaDevEnvironment() &&
+    DEFINING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_VISIBLE;
   const { isDevModePanelOpen, togglingDevModePanel, closingDevModePanel } =
-    usingWorldPlazaDevModePanelVisibleState(isDevEnvironment);
-  const isDevDebugActive = isDevEnvironment && isDevModePanelOpen;
+    usingWorldPlazaDevModePanelVisibleState(isCreativeToolsAvailable);
+  const isDevDebugActive = isCreativeToolsAvailable && isDevModePanelOpen;
+  const creativeToolsLauncher = isCreativeToolsAvailable
+    ? {
+        isOpen: isDevModePanelOpen,
+        onToggle: togglingDevModePanel,
+      }
+    : null;
 
   const {
     isTerrainCollisionDebugVisible,
@@ -7950,6 +7964,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     initializingWorldPlazaRecipeDiscoveryStore(storageOwnerId, {
       cloudSaveSlotIndex: discoveryCloudSaveSlotIndex,
     });
+    initializingWorldPlazaLoreBookDiscoveryStore(storageOwnerId);
+    syncingWorldPlazaLoreBookUnlocksFromExistingDiscovery();
     initializingWorldPlazaInventoryStorageExpansionStore(storageOwnerId, {
       cloudSaveSlotIndex: discoveryCloudSaveSlotIndex,
     });
@@ -8177,6 +8193,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     }
 
     wasPlayerDeadRef.current = true;
+    recordingWorldPlazaLoreBookUnlockEvent('player-first-death');
     const isPermaDeathRun = checkingWorldPlazaPermaDeathLoadEnabled();
 
     if (isPermaDeathRun && !hasWipedPermaDeathSaveRef.current) {
@@ -9770,7 +9787,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               viewportHudScale={viewportHudScale}
             />
           ) : null}
-          {isDevEnvironment ? (
+          {isCreativeToolsAvailable ? (
             <RenderingWorldPlazaDevModePanel
               isOpen={isDevModePanelOpen}
               onToggle={togglingDevModePanel}
@@ -10397,6 +10414,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     isMobile={hudIsMobile}
                     isFullscreen={hudIsFullscreen}
                     topOverlay={craftModeTimedCraftProgressHud}
+                    creativeToolsLauncher={creativeToolsLauncher}
                     onCancelPlacement={
                       pendingCraftPlacementPreviewDefinitionId !== null
                         ? cancelingArmedCraftPlacement
@@ -10623,6 +10641,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     isMobile={hudIsMobile}
                     isFullscreen={hudIsFullscreen}
                     topOverlay={craftModeTimedCraftProgressHud}
+                    creativeToolsLauncher={creativeToolsLauncher}
                     onCancelPlacement={
                       pendingCraftPlacementPreviewDefinitionId !== null
                         ? cancelingArmedCraftPlacement

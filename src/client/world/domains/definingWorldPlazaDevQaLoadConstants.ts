@@ -1,5 +1,5 @@
 /**
- * Declarative layout for the single-player "This a dev load" QA world.
+ * Declarative layout for the single-player Creative QA world.
  *
  * Default unlock-all testing session: every generation feature on. Use Perf
  * Flags (All off / per-layer toggles) to bisect while profiling.
@@ -14,7 +14,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 
 /** Home-screen label for the QA load option. */
-export const LABELING_WORLD_PLAZA_DEV_QA_LOAD_BUTTON = 'This a dev load';
+export const LABELING_WORLD_PLAZA_DEV_QA_LOAD_BUTTON = 'Creative';
 
 /** Short subtitle under the QA load button. */
 export const LABELING_WORLD_PLAZA_DEV_QA_LOAD_SUBTITLE =

@@ -1,5 +1,5 @@
 /**
- * Session-scoped store for the single-player "This a dev load" QA world.
+ * Session-scoped store for the single-player Creative QA world.
  *
  * When enabled: Dev QA session with every generation feature on (session
  * override). Compact biome grid + frozen wildlife AI / no aggro unless

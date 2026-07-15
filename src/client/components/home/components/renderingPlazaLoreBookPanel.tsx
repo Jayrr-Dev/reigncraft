@@ -204,14 +204,17 @@ export function RenderingPlazaLoreBookPanel({
   className = '',
 }: RenderingPlazaLoreBookPanelProps): React.JSX.Element {
   const chapters = book.chapters;
-  const pages = useMemo(() => listingPlazaLoreBookPages(chapters), [chapters]);
-  const [activeEntryId, setActiveEntryId] = useState<string>(
-    pages[0]?.entry.id ?? ''
+  // Resolvers return fresh chapter arrays; memo by book id so page state stays put.
+  const pages = useMemo(
+    () => listingPlazaLoreBookPages(book.chapters),
+    [book.id, book.chapters]
   );
+  const firstEntryId = pages[0]?.entry.id ?? '';
+  const [activeEntryId, setActiveEntryId] = useState(firstEntryId);
 
   useEffect(() => {
-    setActiveEntryId(pages[0]?.entry.id ?? '');
-  }, [book.id, pages]);
+    setActiveEntryId(firstEntryId);
+  }, [book.id, firstEntryId]);
 
   const activePage: PlazaLoreBookPage | null =
     resolvingPlazaLoreBookPageByEntryId(activeEntryId, chapters) ??

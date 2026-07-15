@@ -12,11 +12,13 @@ import { playingPlazaBookSfx } from '@/components/home/domains/playingPlazaBookS
 import { resolvingPlazaLoreBookById } from '@/components/home/domains/resolvingPlazaLoreBookDefinition';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_CODEX_OVERLAY_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaCodexConstants';
+import { checkingWorldPlazaLoreBookUnlocked } from '@/components/world/domains/managingWorldPlazaLoreBookDiscoveryStore';
 import {
   lazy,
   Suspense,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type SyntheticEvent,
@@ -52,9 +54,10 @@ export function RenderingWorldPlazaLoreBookOverlay({
 }: RenderingWorldPlazaLoreBookOverlayProps): React.JSX.Element | null {
   const wasOpenRef = useRef(false);
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
-  const selectedBook = selectedBookId
-    ? resolvingPlazaLoreBookById(selectedBookId)
-    : null;
+  const selectedBook = useMemo(
+    () => (selectedBookId ? resolvingPlazaLoreBookById(selectedBookId) : null),
+    [selectedBookId]
+  );
 
   const stoppingPlazaWalkPointerPropagation = useCallback(
     (event: SyntheticEvent<HTMLElement>): void => {
@@ -80,6 +83,10 @@ export function RenderingWorldPlazaLoreBookOverlay({
   }, []);
 
   const openingBook = useCallback((bookId: string) => {
+    if (!checkingWorldPlazaLoreBookUnlocked(bookId)) {
+      return;
+    }
+
     playingPlazaBookSfx({ actionId: 'page_turn' });
     setSelectedBookId(bookId);
   }, []);

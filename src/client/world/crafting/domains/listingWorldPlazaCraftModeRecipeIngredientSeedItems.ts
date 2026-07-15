@@ -11,12 +11,16 @@ import type { DefiningWorldPlazaInventoryDemoSeedItem } from '@/components/world
 /**
  * Returns one seed row per distinct craft ingredient item type.
  * Quantity comes from Dev QA craft seed constants.
+ *
+ * @param quantity - Stack size per ingredient.
+ * @param excludingItemTypeIds - Skip ids already granted (e.g. building resources).
  */
 export function listingWorldPlazaCraftModeRecipeIngredientSeedItems(
-  quantity: number = DEFINING_WORLD_PLAZA_DEV_QA_CRAFT_INGREDIENT_SEED_QUANTITY
+  quantity: number = DEFINING_WORLD_PLAZA_DEV_QA_CRAFT_INGREDIENT_SEED_QUANTITY,
+  excludingItemTypeIds: ReadonlySet<string> = new Set()
 ): readonly DefiningWorldPlazaInventoryDemoSeedItem[] {
   const seedQuantity = Math.max(1, Math.floor(quantity));
-  const seenItemTypeIds = new Set<string>();
+  const seenItemTypeIds = new Set<string>(excludingItemTypeIds);
   const seedItems: DefiningWorldPlazaInventoryDemoSeedItem[] = [];
 
   for (const recipeDefinition of DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY) {

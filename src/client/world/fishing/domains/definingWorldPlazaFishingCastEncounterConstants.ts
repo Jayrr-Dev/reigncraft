@@ -70,8 +70,7 @@ export type DefiningWorldPlazaFishingCastEncounterRegistryEntry = {
 };
 
 /** Predator stalks / follows before it may attack (ms). */
-export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_STALK_DURATION_MS =
-  10_000;
+export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_STALK_DURATION_MS = 10_000;
 
 /**
  * If the player gets this far from the predator during the stalk window, the
@@ -83,57 +82,46 @@ export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_FLEE_DISTANCE_GRID = 26
  * Spawn ring: min grid distance from the player (off-screen on typical viewports).
  * Must stay under wildlife sim radius so the instance is not instantly culled.
  */
-export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_SPAWN_MIN_DISTANCE_GRID =
-  18;
+export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_SPAWN_MIN_DISTANCE_GRID = 18;
 
 /** Spawn ring max grid distance from the player. */
-export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_SPAWN_MAX_DISTANCE_GRID =
-  24;
+export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_SPAWN_MAX_DISTANCE_GRID = 24;
 
 /**
  * Ideal shadow distance while the predator stalks before attacking (grid).
  * Larger than docile follow comfort so the animal does not glue to the player.
  */
-export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_STALK_FOLLOW_DISTANCE_GRID =
-  10;
+export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_STALK_FOLLOW_DISTANCE_GRID = 10;
 
 /** Back away when closer than this while fishing-cast stalking. */
-export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_STALK_FOLLOW_MIN_DISTANCE_GRID =
-  8;
+export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_STALK_FOLLOW_MIN_DISTANCE_GRID = 8;
 
 /** Catch up when farther than this while fishing-cast stalking. */
-export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_STALK_FOLLOW_MAX_DISTANCE_GRID =
-  12;
+export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_STALK_FOLLOW_MAX_DISTANCE_GRID = 12;
 
 /** Placement attempts for an off-screen encounter spawn. */
 export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_SPAWN_ATTEMPT_COUNT = 24;
 
 /** Salt mixed into seeded encounter placement rolls. */
-export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_SPAWN_PLACEMENT_SALT =
-  77_421;
+export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_SPAWN_PLACEMENT_SALT = 77_421;
 
 /** How long a cast-spawned fairy trails before departing (ms). */
 export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_FAIRY_FOLLOW_MS = 45_000;
 
 /** How long a cast-spawned pinguin stays curious / followable (ms). */
-export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_PINGUIN_FOLLOW_MS =
-  90_000;
+export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_PINGUIN_FOLLOW_MS = 90_000;
 
 /** How long the tameable monkey in a troop may follow / bond (ms). */
-export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_MONKEY_TAME_FOLLOW_MS =
-  90_000;
+export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_MONKEY_TAME_FOLLOW_MS = 90_000;
 
 /** How long skittish monkeys linger near a fishing spot (ms). */
-export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_MONKEY_SKITTISH_LINGER_MS =
-  45_000;
+export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_MONKEY_SKITTISH_LINGER_MS = 45_000;
 
 /** How long a curious herbivore herd visits the shore (ms). */
-export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_CURIOUS_HERD_LINGER_MS =
-  45_000;
+export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_CURIOUS_HERD_LINGER_MS = 45_000;
 
 /** How long an elephant herd approaches before wandering off (ms). */
-export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_ELEPHANT_HERD_LINGER_MS =
-  60_000;
+export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_ELEPHANT_HERD_LINGER_MS = 60_000;
 
 /** Toast when a predator begins stalking from off-screen. */
 export const LABELING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_PREDATOR_TOAST =
@@ -206,8 +194,8 @@ export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_CURIOUS_HERD_BY_BIOME: 
   swamp: ['deer', 'boar', 'water-buffalo'],
   rocky: ['deer', 'ram', 'llama'],
   desert: ['zebra', 'oryx', 'ostrich', 'camel'],
-  snowy_plains: ['deer', 'reindeer'],
-  frostsink: ['deer', 'reindeer'],
+  snowy_plains: ['deer', 'stag'],
+  frostsink: ['deer', 'stag'],
 };
 
 export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_DEFAULT_CURIOUS_HERD_SPECIES_ID: DefiningWildlifeSpeciesId =
@@ -230,7 +218,13 @@ export const DEFINING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_REGISTRY: readonly Defi
     {
       eventId: 'wolf',
       weight: 3,
-      biomeKinds: ['forest', 'plains', 'snowy_plains', 'flower_forest', 'rocky'],
+      biomeKinds: [
+        'forest',
+        'plains',
+        'snowy_plains',
+        'flower_forest',
+        'rocky',
+      ],
       packSizeRange: [1, 1],
       behavior: 'predator',
       toast: LABELING_WORLD_PLAZA_FISHING_CAST_ENCOUNTER_PREDATOR_TOAST,

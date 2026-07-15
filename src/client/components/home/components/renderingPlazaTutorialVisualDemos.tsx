@@ -776,14 +776,14 @@ export function RenderingPlazaTutorialMeleeAttackDemo({
         <div className="flex flex-wrap items-center justify-center gap-2">
           <RenderingPlazaTutorialTouchHint label="Tap enemy" />
           <span className="text-[10px] font-medium italic text-ink-soft">
-            when you are in melee range
+            to lock on and auto-swing
           </span>
         </div>
       ) : (
         <div className="flex flex-wrap items-center justify-center gap-2">
           <RenderingPlazaTutorialTouchHint label="Click enemy" />
           <span className="text-[10px] font-medium italic text-ink-soft">
-            when you are in melee range
+            to lock on and auto-swing
           </span>
         </div>
       )}
@@ -791,7 +791,7 @@ export function RenderingPlazaTutorialMeleeAttackDemo({
   );
 }
 
-/** Claim-mode demo with a tile pulsing then turning gold. */
+/** Claim-mode demo with a tile pulsing then turning orange. */
 export function RenderingPlazaTutorialClaimDemo({
   isMobile = false,
 }: RenderingPlazaTutorialDemoProps): React.JSX.Element {
@@ -987,6 +987,7 @@ export function RenderingPlazaTutorialTrackCoordsDemo(): React.JSX.Element {
         </Badge>
         <button
           type="button"
+          tabIndex={-1}
           {...definingPlazaButtonSfxDataAttributes(
             DEFINING_PLAZA_BUTTON_SFX_KIND.none
           )}
@@ -1018,6 +1019,7 @@ export function RenderingPlazaTutorialTeleportPlotsDemo(): React.JSX.Element {
           </span>
           <button
             type="button"
+            tabIndex={-1}
             {...definingPlazaButtonSfxDataAttributes(
               DEFINING_PLAZA_BUTTON_SFX_KIND.none
             )}
@@ -1225,7 +1227,7 @@ const PLAZA_TUTORIAL_MINI_MAP_DEMO_TILES = [
   '#3d5c34',
   '#3d5c34',
   '#3d5c34',
-  '#d9a441',
+  '#f97316',
   '#3d5c34',
   '#3d5c34',
   '#3d5c34',
@@ -1650,9 +1652,8 @@ export function RenderingPlazaTutorialBuffBadgesDemo(): React.JSX.Element {
       </div>
 
       <p className="text-center text-xs font-medium text-ink-soft">
-        Debuffs and diseases sit beside each other under your health bar. Gold
-        borders are buffs. Check the Mechanics guide Badges tab for full
-        details.
+        Badges sit under your health bar. Gold borders are buffs; red borders
+        are debuffs.
       </p>
     </div>
   );
@@ -1786,7 +1787,7 @@ export function RenderingPlazaTutorialStudyWildlifeDemo({
               className="size-3.5 text-parchment"
             />
             <span className="plaza-tutorial-study-count font-mono text-[11px] font-bold tabular-nums text-parchment">
-              2/200
+              2/100
             </span>
           </div>
         </div>
@@ -1804,6 +1805,213 @@ export function RenderingPlazaTutorialStudyWildlifeDemo({
           <RenderingPlazaTutorialTouchHint label="Click corpse" />
           <span className="text-[10px] font-medium italic text-ink-soft">
             then Study before it fades
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Fishing cast demo: rod near water, Fish then Reel. */
+export function RenderingPlazaTutorialFishingDemo({
+  isMobile = false,
+}: RenderingPlazaTutorialDemoProps): React.JSX.Element {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <RenderingPlazaTutorialIsoSceneShell className="h-40">
+        <RenderingPlazaTutorialIsoTile gridX={1} gridY={2} />
+        <RenderingPlazaTutorialIsoTile gridX={2} gridY={2} />
+        <RenderingPlazaTutorialIsoTile
+          gridX={3}
+          gridY={2}
+          className="bg-[linear-gradient(180deg,#3b82f6_0%,#1d4ed8_100%)]"
+        />
+        <RenderingPlazaTutorialIsoTile
+          gridX={2}
+          gridY={3}
+          className="bg-[linear-gradient(180deg,#3b82f6_0%,#1d4ed8_100%)]"
+        />
+        <RenderingPlazaTutorialIsoTile
+          gridX={3}
+          gridY={3}
+          className="bg-[linear-gradient(180deg,#2563eb_0%,#1e40af_100%)]"
+        />
+        <RenderingPlazaTutorialIsoAvatar gridX={2} gridY={2} />
+        <div
+          aria-hidden
+          className="plaza-tutorial-fishing-label absolute left-1/2 top-3 z-30 -translate-x-1/2 rounded-sm border border-poster-gold/60 bg-poster-teal-deep/95 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-parchment shadow"
+        >
+          <span className="inline-flex items-center gap-1">
+            <Icon icon="mdi:fishing" className="size-3" />
+            <span className="relative inline-grid place-items-center">
+              <span className="plaza-tutorial-fishing-label-fish col-start-1 row-start-1">
+                Fish
+              </span>
+              <span className="plaza-tutorial-fishing-label-reel col-start-1 row-start-1">
+                Reel
+              </span>
+            </span>
+          </span>
+        </div>
+        <div
+          aria-hidden
+          className="plaza-tutorial-fishing-ring absolute left-1/2 top-12 z-30 size-10 -translate-x-1/2 rounded-full border-2 border-poster-gold/70"
+        />
+      </RenderingPlazaTutorialIsoSceneShell>
+
+      {isMobile ? (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <RenderingPlazaTutorialTouchHint label="Tap Fish" />
+          <span className="text-[10px] font-medium italic text-ink-soft">
+            then Reel when it flashes
+          </span>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <RenderingPlazaTutorialTouchHint label="Click Fish" />
+          <span className="text-[10px] font-medium italic text-ink-soft">
+            then Reel when it flashes
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Character profile sheet demo: Status / Stats / Upgrade tabs. */
+export function RenderingPlazaTutorialCharacterProfileDemo({
+  isMobile = false,
+}: RenderingPlazaTutorialDemoProps): React.JSX.Element {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-full max-w-[18rem] rounded-md border border-poster-teal/25 bg-[linear-gradient(180deg,#f5ead6_0%,#e8d7b8_100%)] p-3 shadow-[inset_0_0_16px_rgba(0,0,0,0.12)]">
+        <div className="mb-2 flex items-center gap-2">
+          <span className="flex size-8 items-center justify-center rounded-full border border-poster-teal/40 bg-poster-teal/15">
+            <Icon
+              icon="mdi:shield-account"
+              className="size-4 text-poster-teal-deep"
+              aria-hidden
+            />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-sm font-bold text-poster-teal-deep">
+              Character
+            </p>
+            <p className="text-[10px] font-medium italic text-ink-soft">
+              Action bar person icon
+            </p>
+          </div>
+        </div>
+        <div
+          aria-hidden
+          className="mb-2 flex gap-1 rounded-sm border border-poster-teal/20 bg-parchment/50 p-0.5"
+        >
+          {(['Status', 'Stats', 'Upgrade'] as const).map((tabLabel, index) => (
+            <span
+              key={tabLabel}
+              className={cn(
+                'flex-1 rounded-sm px-1 py-1 text-center text-[9px] font-bold uppercase tracking-wide',
+                index === 0
+                  ? 'plaza-tutorial-profile-tab-active border border-poster-teal/30 bg-poster-teal/15 text-poster-teal-deep'
+                  : 'text-ink-soft'
+              )}
+            >
+              {tabLabel}
+            </span>
+          ))}
+        </div>
+        <div className="space-y-1.5 rounded-sm border border-poster-teal/15 bg-white/40 px-2 py-2">
+          <div className="flex items-center justify-between text-[10px] font-semibold text-ink">
+            <span>Health</span>
+            <span className="font-mono tabular-nums">120 / 120</span>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-sm bg-black/15">
+            <div className="h-full w-full bg-[linear-gradient(90deg,#ef4444_0%,#b91c1c_100%)]" />
+          </div>
+          <div className="flex items-center justify-between text-[10px] font-semibold text-ink">
+            <span>Stamina</span>
+            <span className="font-mono tabular-nums">100%</span>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-sm bg-black/15">
+            <div className="h-full w-[85%] bg-[linear-gradient(90deg,#eab308_0%,#a16207_100%)]" />
+          </div>
+        </div>
+      </div>
+
+      {isMobile ? (
+        <RenderingPlazaTutorialTouchHint label="Tap Character" />
+      ) : (
+        <RenderingPlazaTutorialTouchHint label="Open Character" />
+      )}
+    </div>
+  );
+}
+
+/** Spritcore upgrade lanes demo: Commit spend on a power-up. */
+export function RenderingPlazaTutorialUpgradeSpritcoreDemo({
+  isMobile = false,
+}: RenderingPlazaTutorialDemoProps): React.JSX.Element {
+  const upgradeLanes = [
+    { label: 'Health', icon: 'mdi:heart-plus' },
+    { label: 'Damage', icon: 'mdi:sword-cross' },
+    { label: 'Speed', icon: 'mdi:run-fast' },
+  ] as const;
+
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-full max-w-[18rem] rounded-md border border-poster-teal/25 bg-[linear-gradient(180deg,#1c333c_0%,#14252b_100%)] p-3 shadow-[inset_0_0_20px_rgba(0,0,0,0.35)]">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[10px] font-bold uppercase tracking-wide text-parchment/80">
+            Upgrade
+          </span>
+          <span className="rounded-sm border border-poster-gold/45 bg-poster-gold/15 px-1.5 py-0.5 font-mono text-[10px] font-bold tabular-nums text-poster-gold">
+            12 SC
+          </span>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          {upgradeLanes.map((lane, index) => (
+            <div
+              key={lane.label}
+              className={cn(
+                'flex items-center gap-2 rounded-sm border border-parchment/15 bg-black/25 px-2 py-1.5',
+                index === 0 && 'plaza-tutorial-upgrade-lane-active'
+              )}
+            >
+              <Icon
+                icon={lane.icon}
+                className="size-3.5 shrink-0 text-poster-gold"
+                aria-hidden
+              />
+              <span className="min-w-0 flex-1 text-[11px] font-semibold text-parchment">
+                {lane.label}
+              </span>
+              <span
+                className={cn(
+                  'rounded-sm border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide',
+                  index === 0
+                    ? 'plaza-tutorial-upgrade-commit border-poster-gold/60 bg-poster-gold/25 text-parchment'
+                    : 'border-parchment/20 text-parchment/55'
+                )}
+              >
+                Commit
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {isMobile ? (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <RenderingPlazaTutorialTouchHint label="Tap Upgrade" />
+          <span className="text-[10px] font-medium italic text-ink-soft">
+            then Commit a lane
+          </span>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <RenderingPlazaTutorialTouchHint label="Open Upgrade" />
+          <span className="text-[10px] font-medium italic text-ink-soft">
+            then Commit a lane
           </span>
         </div>
       )}

@@ -36,5 +36,5 @@ export const DEFINING_PLAZA_BOOK_SFX_TARGET_VOLUME_BY_ACTION: Record<
 > = {
   open: 0.65,
   close: 0.55,
-  page_turn: 0.5,
+  page_turn: 0.28,
 };

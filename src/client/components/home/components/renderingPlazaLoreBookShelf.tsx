@@ -2,6 +2,7 @@
 
 /**
  * Library shelf of Corpus volumes: click a cover tome to open that book.
+ * Locked volumes render as black silhouettes until their unlock event fires.
  *
  * @module components/home/components/renderingPlazaLoreBookShelf
  */
@@ -16,21 +17,66 @@ import {
   DEFINING_PLAZA_LORE_BOOK_TITLE,
   LABELING_PLAZA_LORE_BOOK_SHELF,
 } from '@/components/home/domains/definingPlazaLoreBookConstants';
+import {
+  DEFINING_PLAZA_LORE_BOOK_LOCKED_TITLE,
+  resolvingPlazaLoreBookUnlockDefinition,
+} from '@/components/home/domains/definingPlazaLoreBookUnlockConstants';
 import { DEFINING_PLAZA_OPEN_BOOK_CLOSE_BUTTON_CLASS_NAME } from '@/components/home/domains/definingPlazaOpenBookUiConstants';
 import {
   listingPlazaLoreBooks,
   type PlazaLoreBookResolved,
 } from '@/components/home/domains/resolvingPlazaLoreBookDefinition';
 import { Icon } from '@/components/ui/icon';
-import { useMemo } from 'react';
+import {
+  gettingWorldPlazaLoreBookDiscoverySnapshot,
+  subscribingWorldPlazaLoreBookDiscovery,
+} from '@/components/world/domains/managingWorldPlazaLoreBookDiscoveryStore';
+import { useMemo, useSyncExternalStore } from 'react';
 
 function RenderingPlazaLoreBookLibraryVolume({
   book,
+  isUnlocked,
   onSelectBookId,
 }: {
   readonly book: PlazaLoreBookResolved;
+  readonly isUnlocked: boolean;
   readonly onSelectBookId: (bookId: string) => void;
 }): React.JSX.Element {
+  const unlockDefinition = resolvingPlazaLoreBookUnlockDefinition(book.id);
+  const lockedHint =
+    unlockDefinition?.lockedHint ?? 'This volume is still sealed.';
+
+  if (!isUnlocked) {
+    return (
+      <li className="min-w-0">
+        <div
+          data-theme={book.themeId}
+          aria-label={`${book.volumeLabel}: locked`}
+          className="lore-book-library-volume lore-book-library-volume--locked flex w-full flex-col items-center gap-2 rounded-md px-1.5 py-2 text-center"
+        >
+          <span className="lore-book-library-volume__cover relative flex items-end justify-center">
+            <RenderingPlazaLoreBookCoverGlyph
+              bookId={book.id}
+              variant="silhouette"
+              className="size-16 opacity-80 drop-shadow-[0_6px_0_rgba(0,0,0,0.45)] sm:size-20 md:size-24"
+            />
+          </span>
+          <span className="min-w-0 px-0.5">
+            <span className="block font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-parchment/40 sm:text-[10px]">
+              {book.volumeLabel}
+            </span>
+            <span className="mt-0.5 block font-display text-xs font-bold leading-tight tracking-[0.22em] text-parchment/45 sm:text-sm">
+              {DEFINING_PLAZA_LORE_BOOK_LOCKED_TITLE}
+            </span>
+            <span className="mt-1 block text-[10px] font-medium italic leading-snug text-parchment/40 sm:text-[11px]">
+              {lockedHint}
+            </span>
+          </span>
+        </div>
+      </li>
+    );
+  }
+
   return (
     <li className="min-w-0">
       <button
@@ -81,6 +127,15 @@ export function RenderingPlazaLoreBookShelf({
   className = '',
 }: RenderingPlazaLoreBookShelfProps): React.JSX.Element {
   const books = useMemo(() => listingPlazaLoreBooks(), []);
+  const unlockedBookIds = useSyncExternalStore(
+    subscribingWorldPlazaLoreBookDiscovery,
+    gettingWorldPlazaLoreBookDiscoverySnapshot,
+    () => []
+  );
+  const unlockedBookIdSet = useMemo(
+    () => new Set(unlockedBookIds),
+    [unlockedBookIds]
+  );
 
   return (
     <div
@@ -128,6 +183,7 @@ export function RenderingPlazaLoreBookShelf({
             <RenderingPlazaLoreBookLibraryVolume
               key={book.id}
               book={book}
+              isUnlocked={unlockedBookIdSet.has(book.id)}
               onSelectBookId={onSelectBookId}
             />
           ))}

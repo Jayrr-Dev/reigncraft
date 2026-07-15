@@ -461,7 +461,7 @@ export type DefiningWildlifeInstance = {
 
 /** Cast-spawned wildlife surprise state attached at spawn. */
 export type DefiningWildlifeFishingCastEncounterState = {
-  readonly kind: 'predator' | 'pinguin' | 'fairy';
+  readonly kind: 'predator' | 'pinguin' | 'fairy' | 'curious' | 'herd';
   /** Predators may attack at/after this wall-clock time. */
   readonly armedAtMs: number;
   /** Player distance that cancels a predator stalk (grid). */

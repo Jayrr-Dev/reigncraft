@@ -22,6 +22,8 @@ export type RenderingPlazaTutorialTabBarProps = {
   tabs: PlazaTutorialTabDefinition[];
   activeTabId: PlazaTutorialTabId;
   onSelectTab: (tabId: PlazaTutorialTabId) => void;
+  /** Prefix for tab / tabpanel ids (e.g. plaza-howto). */
+  idPrefix?: string;
 };
 
 /**
@@ -31,6 +33,7 @@ export function RenderingPlazaTutorialTabBar({
   tabs,
   activeTabId,
   onSelectTab,
+  idPrefix = 'plaza-howto',
 }: RenderingPlazaTutorialTabBarProps): React.JSX.Element {
   return (
     <div
@@ -40,13 +43,18 @@ export function RenderingPlazaTutorialTabBar({
     >
       {tabs.map((tab) => {
         const isActive = tab.id === activeTabId;
+        const tabId = `${idPrefix}-tab-${tab.id}`;
+        const panelId = `${idPrefix}-panel-${tab.id}`;
 
         return (
           <button
             key={tab.id}
+            id={tabId}
             type="button"
             role="tab"
             aria-selected={isActive}
+            aria-controls={panelId}
+            tabIndex={isActive ? 0 : -1}
             {...definingPlazaButtonSfxDataAttributes(
               DEFINING_PLAZA_BUTTON_SFX_KIND.none
             )}

@@ -7,6 +7,7 @@
 import {
   DEFINING_WILDLIFE_DOCILE_PET_CAT_SPECIES_IDS,
   DEFINING_WILDLIFE_DOCILE_PET_DOG_SPECIES_IDS,
+  DEFINING_WILDLIFE_DOCILE_PET_MONKEY_SPECIES_IDS,
   DEFINING_WILDLIFE_DOCILE_PET_PINGUIN_SPECIES_IDS,
   type DefiningWildlifeDocilePetKind,
 } from '@/components/world/wildlife/domains/definingWildlifeDocilePetConstants';
@@ -24,6 +25,9 @@ const DEFINING_WILDLIFE_DOCILE_PET_KIND_BY_SPECIES_ID: ReadonlyMap<
   ),
   ...DEFINING_WILDLIFE_DOCILE_PET_PINGUIN_SPECIES_IDS.map(
     (speciesId) => [speciesId, 'pinguin'] as const
+  ),
+  ...DEFINING_WILDLIFE_DOCILE_PET_MONKEY_SPECIES_IDS.map(
+    (speciesId) => [speciesId, 'monkey'] as const
   ),
 ]);
 

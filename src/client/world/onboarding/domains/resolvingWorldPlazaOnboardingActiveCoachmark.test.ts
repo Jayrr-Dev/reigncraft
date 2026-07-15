@@ -79,9 +79,20 @@ describe('resolvingWorldPlazaOnboardingActiveCoachmark', () => {
     expect(activeCoachmark?.id).toBe('hotbar');
   });
 
-  it('shows contextual chop only after core steps are complete', () => {
+  it('shows character profile guidance first after core steps', () => {
     const activeCoachmark = resolvingWorldPlazaOnboardingActiveCoachmark(
       new Set(['move', 'hotbar', 'action-bar']),
+      buildingWorldPlazaOnboardingTestLiveSignals({
+        isChopLabelVisible: true,
+      })
+    );
+
+    expect(activeCoachmark?.id).toBe('profile');
+  });
+
+  it('shows contextual chop after profile when a tree label is visible', () => {
+    const activeCoachmark = resolvingWorldPlazaOnboardingActiveCoachmark(
+      new Set(['move', 'hotbar', 'action-bar', 'profile']),
       buildingWorldPlazaOnboardingTestLiveSignals({
         isChopLabelVisible: true,
       })
@@ -96,6 +107,7 @@ describe('resolvingWorldPlazaOnboardingActiveCoachmark', () => {
         'move',
         'hotbar',
         'action-bar',
+        'profile',
         'chop',
         'forage',
         'mine',
@@ -120,7 +132,7 @@ describe('resolvingWorldPlazaOnboardingActiveCoachmark', () => {
 
   it('shows mine guidance when a rock label is visible and a pickaxe is equipped', () => {
     const activeCoachmark = resolvingWorldPlazaOnboardingActiveCoachmark(
-      new Set(['move', 'hotbar', 'action-bar', 'chop', 'forage']),
+      new Set(['move', 'hotbar', 'action-bar', 'profile', 'chop', 'forage']),
       buildingWorldPlazaOnboardingTestLiveSignals({
         isMineLabelVisible: true,
         hasEquippedPickaxe: true,
@@ -136,6 +148,7 @@ describe('resolvingWorldPlazaOnboardingActiveCoachmark', () => {
         'move',
         'hotbar',
         'action-bar',
+        'profile',
         'chop',
         'forage',
         'mine',
@@ -167,6 +180,7 @@ describe('resolvingWorldPlazaOnboardingActiveCoachmark', () => {
         'move',
         'hotbar',
         'action-bar',
+        'profile',
         'chop',
         'forage',
         'mine',
@@ -197,6 +211,7 @@ describe('resolvingWorldPlazaOnboardingActiveCoachmark', () => {
         'move',
         'hotbar',
         'action-bar',
+        'profile',
         'chop',
         'forage',
         'mine',
@@ -288,6 +303,23 @@ describe('checkingWorldPlazaOnboardingCoachmarkAdvanceSatisfied', () => {
           sessionSignals: {
             ...RESOLVING_WORLD_PLAZA_ONBOARDING_TEST_EMPTY_SESSION_SIGNALS,
             hasSprinted: true,
+          },
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('completes profile when the character panel was opened', () => {
+    const definition =
+      resolvingWorldPlazaOnboardingCoachmarkDefinition('profile');
+
+    expect(
+      checkingWorldPlazaOnboardingCoachmarkAdvanceSatisfied(
+        definition,
+        buildingWorldPlazaOnboardingTestLiveSignals({
+          sessionSignals: {
+            ...RESOLVING_WORLD_PLAZA_ONBOARDING_TEST_EMPTY_SESSION_SIGNALS,
+            hasProfileOpened: true,
           },
         })
       )

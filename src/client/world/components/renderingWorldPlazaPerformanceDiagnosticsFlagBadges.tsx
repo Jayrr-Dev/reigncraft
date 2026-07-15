@@ -115,7 +115,7 @@ export function RenderingWorldPlazaPerformanceDiagnosticsFlagBadges(): React.JSX
     <div>
       {isDevQaLoadEnabled ? (
         <div className="mb-1.5 rounded border border-lime-300/30 bg-lime-500/10 px-1.5 py-1 text-[9px] text-lime-100/90">
-          Dev QA session: system toggles write session override only (no
+          Creative session: system toggles write session override only (no
           localStorage).
         </div>
       ) : null}

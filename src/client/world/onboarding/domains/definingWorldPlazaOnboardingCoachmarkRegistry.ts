@@ -10,6 +10,7 @@ export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_CORE_ORDER: readonly Worl
 /** Contextual steps; first eligible step wins when core is complete. */
 export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_CONTEXTUAL_ORDER: readonly WorldPlazaOnboardingCoachmarkStepId[] =
   [
+    'profile',
     'chop',
     'forage',
     'mine',
@@ -64,9 +65,9 @@ export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_REGISTRY: readonly WorldP
       phase: 'core',
       title: 'Plaza tools',
       descriptionDesktop:
-        'The top bar opens settings, the Codex, hunger, and the minimap. Explore when you are ready.',
+        'The top bar opens settings, the Codex, Character, hunger, and the minimap. Explore when you are ready.',
       descriptionMobile:
-        'The top bar opens settings, the Codex, hunger, and the map. Tap any icon to try it.',
+        'The top bar opens settings, the Codex, Character, hunger, and the map. Tap any icon to try it.',
       targetAnchorId: 'action-bar',
       advanceEvent: 'action-bar-click',
       tipPlacement: 'below',
@@ -300,13 +301,25 @@ export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_REGISTRY: readonly WorldP
       tipPlacement: 'above',
     },
     {
+      id: 'profile',
+      phase: 'contextual',
+      title: 'Your character',
+      descriptionDesktop:
+        'Open Character (person icon) for Status, Stats, and Upgrade. Check vitals and spend Spritcore on the Upgrade tab when you earn orbs.',
+      descriptionMobile:
+        'Open Character (person icon) for Status, Stats, and Upgrade. Check vitals and spend Spritcore on the Upgrade tab when you earn orbs.',
+      targetAnchorId: 'profile-panel',
+      advanceEvent: 'profile-open',
+      tipPlacement: 'below',
+    },
+    {
       id: 'spritcore',
       phase: 'contextual',
       title: 'Spritcore',
       descriptionDesktop:
-        'Spritcore orbs are currency from wildlife. Open your profile and spend them on health, damage, defense, and speed upgrades.',
+        'You have Spritcore orbs. Open Character, then Upgrade, and Commit a lane: health, damage, attack speed, defense, or move speed.',
       descriptionMobile:
-        'Spritcore orbs are currency from wildlife. Open your profile and spend them on health, damage, defense, and speed upgrades.',
+        'You have Spritcore orbs. Open Character, then Upgrade, and Commit a lane: health, damage, attack speed, defense, or move speed.',
       targetAnchorId: 'profile-panel',
       advanceEvent: 'spritcore-view',
       tipPlacement: 'below',

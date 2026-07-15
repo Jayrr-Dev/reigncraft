@@ -15,38 +15,47 @@ import { DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT } from '@/components/world/d
 export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_ENABLED = true as const;
 
 /**
- * When false, hides the Dev launcher button. Panel stays closed unless opened
- * through another path; set false before shipping if the in-world Dev control
- * should stay hidden.
+ * When false, hides the Creative tools badge (left of Items). Panel stays
+ * closed unless opened through another path.
  */
 export const DEFINING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_VISIBLE =
   true as const;
 
-/** sessionStorage key for dev panel open state. */
+/** sessionStorage key for creative tools panel open state. */
 export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_OPEN_STORAGE_KEY =
   'world-plaza-dev-mode-panel-open' as const;
 
-/** Left-side anchor for the dev mode launcher and panel. */
+/** Left-side anchor for the creative tools panel (and Home / Perf row). */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topLeft.devModePanel
     .anchorClassName;
 
-/** Home / Dev / Perf toolbar row above the open panel. */
+/** Home / Perf toolbar row above the open panel. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TOOLBAR_ROW_CLASS_NAME =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topLeft.devModePanel
     .toolbarRowClassName;
 
-/** Gap between the action bar shell and the Dev tools row. */
+/** Gap between the action bar shell and the creative tools row. */
 export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_BELOW_ACTION_BAR_GAP_BASE_PX =
   DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.belowMinimapGapBasePx;
 
-/** Collapsed dev launcher button. */
+/**
+ * Creative tools badge beside Items (inactive). Orange chrome matches the
+ * bottom HUD mode badge footprint.
+ */
 export const STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME =
-  'pointer-events-auto min-w-0 flex-1 rounded border border-violet-800 bg-violet-700 px-1 py-0.5 text-[8px] font-bold uppercase leading-none tracking-wide text-white shadow-sm transition hover:bg-violet-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-300' as const;
+  'pointer-events-auto inline-flex shrink-0 items-center justify-center rounded-md border border-orange-300/80 bg-[linear-gradient(180deg,#9a4a12_0%,#5c2e0a_100%)] font-bold uppercase text-orange-100 shadow-[0_0_0_1px_rgba(251,146,60,0.35),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm transition-[transform,background-color,border-color,box-shadow] hover:border-orange-200 hover:brightness-110' as const;
 
-/** Dev launcher when the tools panel is open. */
+/** Creative tools badge when the tools panel is open. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_ACTIVE_CLASS_NAME =
-  'pointer-events-auto min-w-0 flex-1 rounded border border-violet-900 bg-violet-600 px-1 py-0.5 text-[8px] font-bold uppercase leading-none tracking-wide text-white shadow-sm transition hover:bg-violet-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-300' as const;
+  'pointer-events-auto inline-flex shrink-0 items-center justify-center rounded-md border border-orange-200 bg-[linear-gradient(180deg,#c45e18_0%,#7a3510_100%)] font-bold uppercase text-orange-50 shadow-[0_0_0_1px_rgba(253,186,116,0.45),0_2px_8px_rgba(0,0,0,0.45)] backdrop-blur-sm' as const;
+
+/** Short label on the Creative tools badge. */
+export const LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BADGE = 'Creative' as const;
+
+/** Iconify id for the Creative tools badge glyph. */
+export const DEFINING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BADGE_ICONIFY_ICON =
+  'mdi:star-four-points' as const;
 
 /** Compact Home exit next to Dev / Perf when the action-bar Home is hidden. */
 export const STYLING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER_BUTTON_CLASS_NAME =
@@ -133,19 +142,21 @@ export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT_OPTION_ACTIVE_CLASS_
 export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_STATUS_READOUT_CLASS_NAME =
   'rounded-md border border-amber-300/25 bg-black/50 px-2 py-1.5 font-mono text-[10px] leading-snug text-amber-100/90' as const;
 
-/** Accessible label for the dev launcher. */
-export const LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER = 'Open dev tools' as const;
+/** Accessible label for the Creative tools badge. */
+export const LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER =
+  'Open creative tools' as const;
 
-/** Accessible label for closing the dev panel. */
+/** Accessible label for closing the creative tools panel. */
 export const LABELING_WORLD_PLAZA_DEV_MODE_PANEL_CLOSE =
-  'Close dev tools' as const;
+  'Close creative tools' as const;
 
-/** Dev panel title. */
-export const LABELING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE = 'Dev tools' as const;
+/** Creative tools panel title. */
+export const LABELING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE =
+  'Creative tools' as const;
 
 /** Accessible label prefix for a section view picker (`${prefix}: ${groupLabel}`). */
 export const LABELING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT =
-  'Dev tools section' as const;
+  'Creative tools section' as const;
 
 /**
  * Resolves top offset class for the dev panel (inline top is used instead).

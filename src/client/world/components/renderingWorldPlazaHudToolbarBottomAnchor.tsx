@@ -8,7 +8,10 @@
 
 import { RenderingWorldPlazaBuildPlacementCancelButton } from '@/components/world/building/components/renderingWorldPlazaBuildPlacementCancelButton';
 import { ProvidingWorldPlazaViewportHudScale } from '@/components/world/components/providingWorldPlazaViewportHudScale';
-import { RenderingWorldPlazaHudToolbarModeBadges } from '@/components/world/components/renderingWorldPlazaHudToolbarModeBadges';
+import {
+  RenderingWorldPlazaHudToolbarModeBadges,
+  type RenderingWorldPlazaHudToolbarCreativeToolsLauncher,
+} from '@/components/world/components/renderingWorldPlazaHudToolbarModeBadges';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
 import {
   STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_BODY_CLASS_NAME,
@@ -37,6 +40,8 @@ export type RenderingWorldPlazaHudToolbarBottomAnchorProps = {
    * Used while a craft placeable ghost is armed.
    */
   readonly onCancelPlacement?: (() => void) | null;
+  /** Creative-load-only tools badge left of Items. */
+  readonly creativeToolsLauncher?: RenderingWorldPlazaHudToolbarCreativeToolsLauncher | null;
   readonly children: ReactNode;
 };
 
@@ -53,6 +58,7 @@ export function RenderingWorldPlazaHudToolbarBottomAnchor({
   isFullscreen = false,
   topOverlay = null,
   onCancelPlacement = null,
+  creativeToolsLauncher = null,
   children,
 }: RenderingWorldPlazaHudToolbarBottomAnchorProps): React.JSX.Element {
   const hotbarViewportHudScale = useMemo(
@@ -113,6 +119,7 @@ export function RenderingWorldPlazaHudToolbarBottomAnchor({
                 activeMode={activeMode}
                 onSelectMode={onSelectMode}
                 isEditEnabled={isEditEnabled}
+                creativeToolsLauncher={creativeToolsLauncher}
               />
               <div
                 className={

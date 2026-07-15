@@ -84,16 +84,13 @@ export function RenderingWorldPlazaTutorialOverlay({
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
       role="dialog"
       aria-modal="true"
+      aria-labelledby="plaza-howto-title"
       aria-label={LABELING_WORLD_PLAZA_TUTORIAL_OVERLAY_DIALOG}
       className={DEFINING_WORLD_PLAZA_TUTORIAL_OVERLAY_CLASS_NAME}
       onPointerDown={stoppingPlazaWalkPointerPropagation}
       onClick={closingOverlayOnBackdropClick}
     >
-      <RenderingPlazaHowToPlayPanel
-        onBack={onClose}
-        onClose={onClose}
-        isMobile={isMobile}
-      />
+      <RenderingPlazaHowToPlayPanel onClose={onClose} isMobile={isMobile} />
     </div>,
     document.body
   );

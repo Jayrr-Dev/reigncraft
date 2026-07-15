@@ -101,7 +101,7 @@ const DEFINING_WORLD_PLAZA_SURVIVAL_WEAR_RECIPE_SEEDS: readonly DefiningWorldPla
       complexity: 2,
       ingredients: [
         { itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE, quantity: 1 },
-        { itemTypeId: 'world-plaza-wildlife-leather', quantity: 1 },
+        { itemTypeId: 'world-plaza-wildlife-hide', quantity: 1 },
       ],
     },
     {
@@ -122,7 +122,7 @@ const DEFINING_WORLD_PLAZA_SURVIVAL_WEAR_RECIPE_SEEDS: readonly DefiningWorldPla
       description: 'Cured hide vest for cold comfort.',
       complexity: 3,
       ingredients: [
-        { itemTypeId: 'world-plaza-wildlife-leather', quantity: 2 },
+        { itemTypeId: 'world-plaza-wildlife-hide', quantity: 2 },
         { itemTypeId: 'world-plaza-lost-stitch-scrap', quantity: 2 },
       ],
     },
@@ -134,7 +134,7 @@ const DEFINING_WORLD_PLAZA_SURVIVAL_WEAR_RECIPE_SEEDS: readonly DefiningWorldPla
       complexity: 4,
       ingredients: [
         { itemTypeId: 'world-plaza-wildlife-wool', quantity: 4 },
-        { itemTypeId: 'world-plaza-wildlife-leather', quantity: 2 },
+        { itemTypeId: 'world-plaza-wildlife-hide', quantity: 2 },
         { itemTypeId: 'world-plaza-burrow-fluff', quantity: 2 },
       ],
     },
@@ -189,7 +189,7 @@ const DEFINING_WORLD_PLAZA_SURVIVAL_WEAR_RECIPE_SEEDS: readonly DefiningWorldPla
       description: 'Soft hide boots for long walks.',
       complexity: 3,
       ingredients: [
-        { itemTypeId: 'world-plaza-wildlife-leather', quantity: 3 },
+        { itemTypeId: 'world-plaza-wildlife-hide', quantity: 3 },
         { itemTypeId: 'world-plaza-lost-stitch-scrap', quantity: 2 },
       ],
     },

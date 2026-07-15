@@ -43,6 +43,7 @@ export type WorldPlazaOnboardingCoachmarkStepId =
   | 'minimap'
   | 'build'
   | 'claim'
+  | 'profile'
   | 'spritcore'
   | 'pets';
 
@@ -94,6 +95,7 @@ export type WorldPlazaOnboardingCoachmarkAdvanceEvent =
   | 'minimap-open'
   | 'build-mode-select'
   | 'claim-mode-select'
+  | 'profile-open'
   | 'spritcore-view'
   | 'pets-open';
 
