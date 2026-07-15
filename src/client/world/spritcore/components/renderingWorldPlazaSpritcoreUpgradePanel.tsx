@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Spritcore upgrade panel for spending kill drops on permanent stat gains.
+ * Compact Spritcore spend rows for the Character panel Upgrade tab.
  *
  * @module components/world/spritcore/components/renderingWorldPlazaSpritcoreUpgradePanel
  */
@@ -9,9 +9,18 @@
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import { Icon } from '@/components/ui/icon';
 import {
-  LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_PANEL_SUBTITLE,
-  LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_PANEL_TITLE,
-} from '@/components/world/domains/definingWorldPlazaSpritcoreUpgradeOverlayConstants';
+  DEFINING_WORLD_PLAZA_PROFILE_PANEL_ICON_SIZE_PX,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_HINT,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SECTION,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_SECTION_HEADING_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_BUY_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_ROW_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SUMMARY_CHIP_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SUMMARY_GRID_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SUMMARY_LABEL_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SUMMARY_VALUE_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_VITAL_DETAIL_CLASS_NAME,
+} from '@/components/world/domains/definingWorldPlazaProfilePanelConstants';
 import { formattingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryStackQuantityLabel';
 import { computingWorldPlazaSpritcoreCombatPower } from '@/components/world/spritcore/domains/computingWorldPlazaSpritcoreCombatPower';
 import {
@@ -22,25 +31,25 @@ import {
   DEFINING_WORLD_PLAZA_SPRITCORE_ITEM_NAME,
   DEFINING_WORLD_PLAZA_SPRITCORE_STACK_QUANTITY_DISPLAY,
 } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreConstants';
-import { DEFINING_WORLD_PLAZA_INVENTORY_SPRITCORE_SPRITE_SHEET_ICON } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreSpriteSheetConstants';
 import type { WorldPlazaSpritcoreUpgradeLaneId } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
+import {
+  DEFINING_WORLD_PLAZA_SPRITCORE_UPGRADE_LANE_REGISTRY,
+  LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_ALREADY_CAPPED,
+  LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_BALANCE,
+  LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_BUY,
+  LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_CAPPED,
+  LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_COMBAT_POWER,
+  LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_NOT_ENOUGH,
+  LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_SPEND_FAILED,
+  LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_UNAVAILABLE,
+} from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeUiConstants';
 import {
   applyingWorldPlazaSpritcoreUpgradePurchase,
   gettingWorldPlazaSpritcoreUpgradeSnapshot,
   subscribingWorldPlazaSpritcoreUpgrade,
 } from '@/components/world/spritcore/domains/managingWorldPlazaSpritcoreUpgradeStore';
 import { resolvingWorldPlazaSpritcoreUpgradeOffers } from '@/components/world/spritcore/domains/resolvingWorldPlazaSpritcoreUpgradeOffers';
-import { cn } from '@/lib/utils';
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
-
-const STYLING_WORLD_PLAZA_SPRITCORE_UPGRADE_PANEL_CLASS_NAME =
-  'flex max-h-[min(34rem,calc(100vh-3rem))] w-full max-w-lg flex-col overflow-hidden rounded-lg border-2 border-poster-gold/50 bg-[linear-gradient(180deg,#f4e8c8_0%,#e8d4a8_100%)] shadow-[0_8px_0_0_#14252b]';
-
-const STYLING_WORLD_PLAZA_SPRITCORE_UPGRADE_ROW_CLASS_NAME =
-  'flex items-center justify-between gap-3 rounded-md border border-poster-teal/20 bg-parchment/70 px-3 py-2.5';
-
-const STYLING_WORLD_PLAZA_SPRITCORE_UPGRADE_BUTTON_CLASS_NAME =
-  'plaza-btn-3d shrink-0 rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-parchment disabled:cursor-not-allowed disabled:opacity-50';
 
 export type RenderingWorldPlazaSpritcoreUpgradePanelProps = {
   readonly inventoryState: DefiningInventoryState;
@@ -51,7 +60,6 @@ export type RenderingWorldPlazaSpritcoreUpgradePanelProps = {
   readonly naturalRunSpeed: number;
   readonly onInventoryStateChange: (nextState: DefiningInventoryState) => void;
   readonly onShowToast: (message: string) => void;
-  readonly onClose: () => void;
 };
 
 function formattingWorldPlazaSpritcoreUpgradePrice(price: number): string {
@@ -70,7 +78,7 @@ function formattingWorldPlazaSpritcoreUpgradeStatValue(
 }
 
 /**
- * Renders the Spritcore spend panel with live prices and balances.
+ * Renders compact Spritcore balance + buy rows for the Character Upgrade tab.
  */
 export function RenderingWorldPlazaSpritcoreUpgradePanel({
   inventoryState,
@@ -81,7 +89,6 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
   naturalRunSpeed,
   onInventoryStateChange,
   onShowToast,
-  onClose,
 }: RenderingWorldPlazaSpritcoreUpgradePanelProps): React.JSX.Element {
   const bonuses = useSyncExternalStore(
     subscribingWorldPlazaSpritcoreUpgrade,
@@ -90,14 +97,6 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
   );
   const spiritcoreBalance =
     countingWorldPlazaSpritcoreInventoryQuantity(inventoryState);
-  const spiritcoreHeaderIcon =
-    DEFINING_WORLD_PLAZA_INVENTORY_SPRITCORE_SPRITE_SHEET_ICON;
-  const spiritcoreHeaderIconPositionX =
-    spiritcoreHeaderIcon.columnCount <= 1
-      ? 0
-      : (spiritcoreHeaderIcon.columnIndex /
-          (spiritcoreHeaderIcon.columnCount - 1)) *
-        100;
   const offers = useMemo(
     () =>
       resolvingWorldPlazaSpritcoreUpgradeOffers({
@@ -128,14 +127,14 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
       const offer = offers[laneId];
 
       if (offer.isCapped) {
-        onShowToast('Power-up is already capped.');
+        onShowToast(LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_ALREADY_CAPPED);
         return;
       }
 
       const price = Math.ceil(offer.price);
 
       if (spiritcoreBalance < price) {
-        onShowToast('Not enough Spritcore.');
+        onShowToast(LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_NOT_ENOUGH);
         return;
       }
 
@@ -145,7 +144,7 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
       );
 
       if (!consumeResult.consumed) {
-        onShowToast('Could not spend Spritcore.');
+        onShowToast(LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_SPEND_FAILED);
         return;
       }
 
@@ -160,7 +159,7 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
       );
 
       if (purchaseResult !== 'applied') {
-        onShowToast('Upgrade unavailable.');
+        onShowToast(LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_UNAVAILABLE);
         return;
       }
 
@@ -179,74 +178,76 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
     ]
   );
 
-  const upgradeRows: readonly {
-    readonly laneId: WorldPlazaSpritcoreUpgradeLaneId;
-    readonly label: string;
-    readonly icon: string;
-  }[] = [
-    { laneId: 'health', label: 'Health', icon: 'mdi:heart-plus' },
-    { laneId: 'damage', label: 'Damage', icon: 'mdi:sword-cross' },
-    { laneId: 'attackSpeed', label: 'Attack speed', icon: 'mdi:speedometer' },
-    { laneId: 'defense', label: 'Defense', icon: 'mdi:shield-half-full' },
-    { laneId: 'moveSpeed', label: 'Speed', icon: 'mdi:run-fast' },
-  ];
-
   return (
-    <div className={STYLING_WORLD_PLAZA_SPRITCORE_UPGRADE_PANEL_CLASS_NAME}>
-      <div className="flex items-start justify-between gap-3 border-b border-poster-teal/20 px-4 py-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span
-              className="size-8 shrink-0 bg-no-repeat [image-rendering:pixelated]"
-              style={{
-                backgroundImage: `url("${spiritcoreHeaderIcon.spriteSheetUrl}")`,
-                backgroundPosition: `${spiritcoreHeaderIconPositionX}% 0%`,
-                backgroundSize: `${spiritcoreHeaderIcon.columnCount * 100}% ${spiritcoreHeaderIcon.rowCount * 100}%`,
-              }}
-              aria-hidden
-            />
-            <h2 className="font-display text-lg font-bold uppercase tracking-wide text-ink">
-              {LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_PANEL_TITLE}
-            </h2>
-          </div>
-          <p className="mt-1 text-sm text-ink-soft">
-            {LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_PANEL_SUBTITLE}
-          </p>
-        </div>
-        <button
-          type="button"
-          className="plaza-btn-3d rounded-md border-2 border-poster-gold/60 px-2 py-1 text-xs font-bold uppercase text-parchment"
-          onClick={onClose}
+    <div className="flex flex-col gap-1.5">
+      <div>
+        <h3
+          className={
+            STYLING_WORLD_PLAZA_PROFILE_PANEL_SECTION_HEADING_CLASS_NAME
+          }
         >
-          Close
-        </button>
+          {LABELING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SECTION}
+        </h3>
+        <p
+          className={STYLING_WORLD_PLAZA_PROFILE_PANEL_VITAL_DETAIL_CLASS_NAME}
+        >
+          {LABELING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_HINT}
+        </p>
       </div>
 
-      <div className="space-y-3 overflow-y-auto px-4 py-3">
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div className="rounded-md border border-poster-teal/20 bg-parchment/60 px-3 py-2">
-            <div className="text-[10px] font-bold uppercase tracking-wide text-ink-soft">
-              Balance
-            </div>
-            <div className="font-display text-base font-bold text-ink">
-              {formattingWorldPlazaInventoryStackQuantityLabel(
-                spiritcoreBalance,
-                DEFINING_WORLD_PLAZA_SPRITCORE_STACK_QUANTITY_DISPLAY
-              )}{' '}
-              {DEFINING_WORLD_PLAZA_SPRITCORE_ITEM_NAME}
-            </div>
+      <div
+        className={
+          STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SUMMARY_GRID_CLASS_NAME
+        }
+      >
+        <div
+          className={
+            STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SUMMARY_CHIP_CLASS_NAME
+          }
+        >
+          <div
+            className={
+              STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SUMMARY_LABEL_CLASS_NAME
+            }
+          >
+            {LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_BALANCE}
           </div>
-          <div className="rounded-md border border-poster-teal/20 bg-parchment/60 px-3 py-2">
-            <div className="text-[10px] font-bold uppercase tracking-wide text-ink-soft">
-              Combat power
-            </div>
-            <div className="font-display text-base font-bold text-ink">
-              {combatPower.toFixed(2)}
-            </div>
+          <div
+            className={
+              STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SUMMARY_VALUE_CLASS_NAME
+            }
+          >
+            {formattingWorldPlazaInventoryStackQuantityLabel(
+              spiritcoreBalance,
+              DEFINING_WORLD_PLAZA_SPRITCORE_STACK_QUANTITY_DISPLAY
+            )}{' '}
+            {DEFINING_WORLD_PLAZA_SPRITCORE_ITEM_NAME}
           </div>
         </div>
+        <div
+          className={
+            STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SUMMARY_CHIP_CLASS_NAME
+          }
+        >
+          <div
+            className={
+              STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SUMMARY_LABEL_CLASS_NAME
+            }
+          >
+            {LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_COMBAT_POWER}
+          </div>
+          <div
+            className={
+              STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SUMMARY_VALUE_CLASS_NAME
+            }
+          >
+            {combatPower.toFixed(2)}
+          </div>
+        </div>
+      </div>
 
-        {upgradeRows.map((row) => {
+      <div className="flex flex-col gap-1">
+        {DEFINING_WORLD_PLAZA_SPRITCORE_UPGRADE_LANE_REGISTRY.map((row) => {
           const offer = offers[row.laneId];
           const price = Math.ceil(offer.price);
           const canAfford = spiritcoreBalance >= price;
@@ -254,14 +255,22 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
           return (
             <div
               key={row.laneId}
-              className={STYLING_WORLD_PLAZA_SPRITCORE_UPGRADE_ROW_CLASS_NAME}
+              className={
+                STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_ROW_CLASS_NAME
+              }
             >
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 font-display text-sm font-bold uppercase tracking-wide text-ink">
-                  <Icon icon={row.icon} className="size-4" aria-hidden />
+              <Icon
+                icon={row.iconId}
+                width={DEFINING_WORLD_PLAZA_PROFILE_PANEL_ICON_SIZE_PX}
+                height={DEFINING_WORLD_PLAZA_PROFILE_PANEL_ICON_SIZE_PX}
+                className="shrink-0 text-poster-teal-deep"
+                aria-hidden
+              />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[11px] font-semibold text-ink">
                   {row.label}
                 </div>
-                <div className="mt-1 text-xs text-ink-soft">
+                <div className="truncate text-[9px] tabular-nums text-ink-soft">
                   {formattingWorldPlazaSpritcoreUpgradeStatValue(
                     row.laneId,
                     offer.currentValue
@@ -271,22 +280,24 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
                     row.laneId,
                     offer.nextValue
                   )}
-                </div>
-                <div className="text-xs font-semibold text-poster-teal-deep">
-                  {formattingWorldPlazaSpritcoreUpgradePrice(offer.price)}
+                  <span className="ml-1 font-semibold text-poster-teal-deep">
+                    {formattingWorldPlazaSpritcoreUpgradePrice(offer.price)}
+                  </span>
                 </div>
               </div>
               <button
                 type="button"
-                className={cn(
-                  STYLING_WORLD_PLAZA_SPRITCORE_UPGRADE_BUTTON_CLASS_NAME
-                )}
+                className={
+                  STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_BUY_BUTTON_CLASS_NAME
+                }
                 disabled={offer.isCapped || !canAfford}
                 onClick={() => {
                   purchasingUpgrade(row.laneId);
                 }}
               >
-                {offer.isCapped ? 'Capped' : 'Buy'}
+                {offer.isCapped
+                  ? LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_CAPPED
+                  : LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_BUY}
               </button>
             </div>
           );

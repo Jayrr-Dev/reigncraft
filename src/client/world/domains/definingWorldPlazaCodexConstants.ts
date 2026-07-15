@@ -22,7 +22,6 @@ export type WorldPlazaCodexSectionId =
   | 'lapidary'
   | 'pathology'
   | 'recipes'
-  | 'spritcore'
   | 'lore';
 
 /** One selectable entry in the codex dropdown menu. */
@@ -71,12 +70,6 @@ export const DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS: readonly WorldPlazaCodexMe
       label: 'Recipes',
       icon: 'mdi:book-outline',
       description: 'Cookbook pages and craft recipes',
-    },
-    {
-      id: 'spritcore',
-      label: 'Spritcore',
-      icon: 'mdi:star-four-points',
-      description: 'Spend kill drops on permanent stat upgrades',
     },
   ] as const;
 

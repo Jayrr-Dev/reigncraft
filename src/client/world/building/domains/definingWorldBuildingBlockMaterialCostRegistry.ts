@@ -185,15 +185,35 @@ function seedingWorldBuildingTreeFloorMaterialCosts(): void {
   }
 }
 
+function creatingWorldBuildingWoodPlusFlowerMaterialCostEntry(
+  speciesId: (typeof DEFINING_WORLD_PLAZA_FLOWER_DYE_SPECIES_ORDER)[number]
+): DefiningWorldBuildingBlockMaterialCostEntry {
+  return {
+    requirements: [
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+        quantityPerLayer:
+          DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER,
+        itemLabel: 'Wood',
+      },
+      {
+        itemTypeId:
+          DEFINING_WORLD_PLAZA_FLOWER_SPECIES_TO_ITEM_TYPE_ID[speciesId],
+        quantityPerLayer:
+          DEFINING_WORLD_BUILDING_BLOCK_DYE_FLOWER_QUANTITY_PER_LAYER,
+        itemLabel:
+          DEFINING_WORLD_PLAZA_FLOWER_DYE_NAME_BY_SPECIES_ID[speciesId],
+      },
+    ],
+  };
+}
+
 function seedingWorldBuildingFlowerBlockMaterialCosts(): void {
   for (const speciesId of DEFINING_WORLD_PLAZA_FLOWER_DYE_SPECIES_ORDER) {
     const definitionId = formattingWorldPlazaFlowerBlockDefinitionId(speciesId);
 
     DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_BY_DEFINITION_ID[definitionId] =
-      creatingWorldBuildingSingleMaterialCostEntry(
-        DEFINING_WORLD_PLAZA_FLOWER_SPECIES_TO_ITEM_TYPE_ID[speciesId],
-        DEFINING_WORLD_PLAZA_FLOWER_DYE_NAME_BY_SPECIES_ID[speciesId]
-      );
+      creatingWorldBuildingWoodPlusFlowerMaterialCostEntry(speciesId);
   }
 }
 
@@ -201,27 +221,9 @@ function seedingWorldBuildingDyedWoodFloorMaterialCosts(): void {
   for (const speciesId of DEFINING_WORLD_PLAZA_FLOWER_DYE_SPECIES_ORDER) {
     const definitionId =
       formattingWorldPlazaDyedWoodFloorBlockDefinitionId(speciesId);
-    const flowerName =
-      DEFINING_WORLD_PLAZA_FLOWER_DYE_NAME_BY_SPECIES_ID[speciesId];
 
     DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_BY_DEFINITION_ID[definitionId] =
-      {
-        requirements: [
-          {
-            itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
-            quantityPerLayer:
-              DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER,
-            itemLabel: 'Wood',
-          },
-          {
-            itemTypeId:
-              DEFINING_WORLD_PLAZA_FLOWER_SPECIES_TO_ITEM_TYPE_ID[speciesId],
-            quantityPerLayer:
-              DEFINING_WORLD_BUILDING_BLOCK_DYE_FLOWER_QUANTITY_PER_LAYER,
-            itemLabel: flowerName,
-          },
-        ],
-      };
+      creatingWorldBuildingWoodPlusFlowerMaterialCostEntry(speciesId);
   }
 }
 
@@ -257,33 +259,15 @@ export function resolvingWorldBuildingBlockMaterialCost(
     );
 
   if (dyedSpeciesId !== null) {
-    return {
-      requirements: [
-        {
-          itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
-          quantityPerLayer:
-            DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER,
-          itemLabel: 'Wood',
-        },
-        {
-          itemTypeId:
-            DEFINING_WORLD_PLAZA_FLOWER_SPECIES_TO_ITEM_TYPE_ID[dyedSpeciesId],
-          quantityPerLayer:
-            DEFINING_WORLD_BUILDING_BLOCK_DYE_FLOWER_QUANTITY_PER_LAYER,
-          itemLabel:
-            DEFINING_WORLD_PLAZA_FLOWER_DYE_NAME_BY_SPECIES_ID[dyedSpeciesId],
-        },
-      ],
-    };
+    return creatingWorldBuildingWoodPlusFlowerMaterialCostEntry(dyedSpeciesId);
   }
 
   const flowerSpeciesId =
     resolvingWorldPlazaFlowerSpeciesIdFromBlockDefinitionId(definitionId);
 
   if (flowerSpeciesId !== null) {
-    return creatingWorldBuildingSingleMaterialCostEntry(
-      DEFINING_WORLD_PLAZA_FLOWER_SPECIES_TO_ITEM_TYPE_ID[flowerSpeciesId],
-      DEFINING_WORLD_PLAZA_FLOWER_DYE_NAME_BY_SPECIES_ID[flowerSpeciesId]
+    return creatingWorldBuildingWoodPlusFlowerMaterialCostEntry(
+      flowerSpeciesId
     );
   }
 

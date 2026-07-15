@@ -167,4 +167,52 @@ describe('definingWorldBuildingBlockMaterialCostRegistry', () => {
       )
     ).toBe(true);
   });
+
+  it('requires three wood plus one flower for solid flower dye blocks', () => {
+    const definitionId = 'decorative:flower:rose';
+    const cost = resolvingWorldBuildingBlockMaterialCost(definitionId);
+
+    expect(cost?.requirements).toEqual([
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+        quantityPerLayer:
+          DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER,
+        itemLabel: 'Wood',
+      },
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_ROSE,
+        quantityPerLayer:
+          DEFINING_WORLD_BUILDING_BLOCK_DYE_FLOWER_QUANTITY_PER_LAYER,
+        itemLabel: 'Rose',
+      },
+    ]);
+
+    expect(
+      checkingWorldBuildingBlockMaterialAffordable(
+        creatingInventoryStateWithSlots([
+          {
+            itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+            quantity: 3,
+          },
+        ]),
+        definitionId
+      )
+    ).toBe(false);
+
+    expect(
+      checkingWorldBuildingBlockMaterialAffordable(
+        creatingInventoryStateWithSlots([
+          {
+            itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+            quantity: 3,
+          },
+          {
+            itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_ROSE,
+            quantity: 1,
+          },
+        ]),
+        definitionId
+      )
+    ).toBe(true);
+  });
 });

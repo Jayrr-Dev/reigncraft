@@ -9,6 +9,10 @@
  */
 
 import { computingWorldPlazaSpritcoreEquivalentValue } from '@/components/world/spritcore/domains/computingWorldPlazaSpritcoreEquivalentValue';
+import {
+  computingWorldPlazaSpritcoreDefenseUpgradePrice,
+  computingWorldPlazaSpritcoreMoveSpeedUpgradePrice,
+} from '@/components/world/spritcore/domains/computingWorldPlazaSpritcoreUpgradePrice';
 
 import type { WorldPlazaSpritcoreUpgradeBonuses } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
 
@@ -113,46 +117,6 @@ function computingWildlifePetSpritcoreHealthUpgradePrice(
     naturalMaxHealth,
 
     curveMax
-  );
-}
-
-function computingWildlifePetSpritcoreDefenseUpgradePrice(
-  naturalDefense: number,
-
-  currentDefense: number,
-
-  defenseStep: number,
-
-  defenseMaximum: number
-): number {
-  return computingWildlifePetSpritcoreUpgradeDeltaPrice(
-    currentDefense,
-
-    currentDefense + defenseStep,
-
-    naturalDefense,
-
-    defenseMaximum
-  );
-}
-
-function computingWildlifePetSpritcoreMoveSpeedUpgradePrice(
-  naturalRunSpeed: number,
-
-  currentRunSpeed: number,
-
-  moveSpeedStep: number,
-
-  moveSpeedMaximum: number
-): number {
-  return computingWildlifePetSpritcoreUpgradeDeltaPrice(
-    currentRunSpeed,
-
-    currentRunSpeed + moveSpeedStep,
-
-    naturalRunSpeed,
-
-    moveSpeedMaximum
   );
 }
 
@@ -329,7 +293,7 @@ export function resolvingWildlifePetSpritcoreUpgradeOffers(
 
       step: steps.defenseStep,
 
-      price: computingWildlifePetSpritcoreDefenseUpgradePrice(
+      price: computingWorldPlazaSpritcoreDefenseUpgradePrice(
         input.naturalDefense,
 
         currentDefense,
@@ -349,7 +313,7 @@ export function resolvingWildlifePetSpritcoreUpgradeOffers(
 
       step: steps.moveSpeedStep,
 
-      price: computingWildlifePetSpritcoreMoveSpeedUpgradePrice(
+      price: computingWorldPlazaSpritcoreMoveSpeedUpgradePrice(
         input.naturalRunSpeed,
 
         currentRunSpeed,

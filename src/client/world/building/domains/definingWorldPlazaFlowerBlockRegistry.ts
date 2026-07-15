@@ -1,5 +1,6 @@
 /**
- * Declarative placeable flower patch blocks (one per herb species).
+ * Declarative placeable solid flower-dye blocks (one per herb species).
+ * Cost is wood + matching flower (see material cost registry).
  *
  * @module components/world/building/domains/definingWorldPlazaFlowerBlockRegistry
  */
@@ -12,7 +13,6 @@ import {
   DEFINING_WORLD_PLAZA_FLOWER_DYE_COLOR_BY_SPECIES_ID,
   DEFINING_WORLD_PLAZA_FLOWER_DYE_NAME_BY_SPECIES_ID,
   DEFINING_WORLD_PLAZA_FLOWER_DYE_SPECIES_ORDER,
-  DEFINING_WORLD_PLAZA_FLOWER_PATCH_GROUND_COLOR,
 } from '@/components/world/building/domains/definingWorldPlazaFlowerDyeConstants';
 import { formattingWorldBuildingBlockSwatchColor } from '@/components/world/building/domains/formattingWorldBuildingBlockSwatchColor';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
@@ -29,21 +29,8 @@ function darkeningWorldPlazaFlowerBlockStrokeColor(fillColor: number): number {
   return (red << 16) | (green << 8) | blue;
 }
 
-function creatingWorldPlazaFlowerPatchPaletteSurface(
-  petalColor: number
-): ReturnType<typeof creatingWorldBuildingBlockCssPaletteSurface> {
-  const petalHex = formattingWorldBuildingBlockSwatchColor(petalColor);
-  const groundHex = formattingWorldBuildingBlockSwatchColor(
-    DEFINING_WORLD_PLAZA_FLOWER_PATCH_GROUND_COLOR
-  );
-
-  return creatingWorldBuildingBlockCssPaletteSurface(
-    `radial-gradient(circle at 28% 32%, ${petalHex} 0 14%, transparent 15%), radial-gradient(circle at 68% 40%, ${petalHex} 0 12%, transparent 13%), radial-gradient(circle at 48% 68%, ${petalHex} 0 11%, transparent 12%), ${groundHex}`
-  );
-}
-
 /**
- * Builds the persisted block definition id for one flower patch.
+ * Builds the persisted block definition id for one flower dye block.
  */
 export function formattingWorldPlazaFlowerBlockDefinitionId(
   speciesId: WorldFlowerSpeciesId
@@ -52,7 +39,7 @@ export function formattingWorldPlazaFlowerBlockDefinitionId(
 }
 
 /**
- * True when a block definition id is a per-species flower patch.
+ * True when a block definition id is a per-species flower dye block.
  */
 export function checkingWorldBuildingBlockDefinitionIdIsFlowerBlock(
   definitionId: string
@@ -83,7 +70,7 @@ export function resolvingWorldPlazaFlowerSpeciesIdFromBlockDefinitionId(
 }
 
 /**
- * Builds passable flower patch definitions for every herb species.
+ * Builds passable solid-color dye blocks for every herb species.
  */
 export function registeringWorldPlazaFlowerBlockDefinitions(): Record<
   string,
@@ -92,9 +79,10 @@ export function registeringWorldPlazaFlowerBlockDefinitions(): Record<
   const definitions: Record<string, DefiningWorldBuildingBlockDefinition> = {};
 
   for (const speciesId of DEFINING_WORLD_PLAZA_FLOWER_DYE_SPECIES_ORDER) {
-    const petalColor =
+    const fillColor =
       DEFINING_WORLD_PLAZA_FLOWER_DYE_COLOR_BY_SPECIES_ID[speciesId];
     const definitionId = formattingWorldPlazaFlowerBlockDefinitionId(speciesId);
+    const petalHex = formattingWorldBuildingBlockSwatchColor(fillColor);
 
     definitions[definitionId] = {
       id: definitionId,
@@ -103,10 +91,10 @@ export function registeringWorldPlazaFlowerBlockDefinitions(): Record<
       collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
       isInteractive: false,
       visualConfig: {
-        label: 'Flower',
-        fillColor: petalColor,
-        strokeColor: darkeningWorldPlazaFlowerBlockStrokeColor(petalColor),
-        paletteSurface: creatingWorldPlazaFlowerPatchPaletteSurface(petalColor),
+        label: 'Block',
+        fillColor,
+        strokeColor: darkeningWorldPlazaFlowerBlockStrokeColor(fillColor),
+        paletteSurface: creatingWorldBuildingBlockCssPaletteSurface(petalHex),
       },
     };
   }

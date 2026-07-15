@@ -9,6 +9,15 @@
 /** Diminishing-return pivot for health and offense Spiritcore pricing. */
 export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_K = 50_000;
 
+/**
+ * Softer K for Defense and move-speed lanes.
+ *
+ * Hard caps sit on narrow bands (e.g. Girl Defense 5→25), so the main K makes
+ * early steps cost thousands of SC. This K targets ~50 SC for the first Girl
+ * Defense step and ~17 SC for the first Speed step.
+ */
+export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_DEFENSE_MOVE_SPEED_K = 1_000;
+
 /** Starting player max health on the leveling curve. */
 export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_BASE_HP = 1_000;
 

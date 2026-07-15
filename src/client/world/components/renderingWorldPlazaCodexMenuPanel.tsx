@@ -34,7 +34,6 @@ import {
   STYLING_WORLD_PLAZA_CODEX_MENU_PANEL_CLASS_NAME,
   type WorldPlazaCodexSectionId,
 } from '@/components/world/domains/definingWorldPlazaCodexConstants';
-import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import {
   gettingWorldPlazaBestiarySightedSpeciesSnapshot,
   subscribingWorldPlazaBestiaryDiscovery,
@@ -43,7 +42,6 @@ import {
   gettingWorldPlazaExploredBiomesSnapshot,
   subscribingWorldPlazaExploredBiomes,
 } from '@/components/world/domains/managingWorldPlazaExploredBiomesStore';
-import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import {
   gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
   gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
@@ -165,15 +163,6 @@ export function RenderingWorldPlazaCodexMenuPanel({
     return null;
   }
 
-  const visibleCodexMenuOptions =
-    DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS.filter(
-      (option) =>
-        option.id !== 'spritcore' ||
-        checkingWorldPlazaGenerationFeatureEnabled(
-          DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SPRITCORE_LEVELING
-        )
-    );
-
   const resolvingCodexMenuOptionDescription = (
     optionId: WorldPlazaCodexSectionId,
     description: string
@@ -272,7 +261,7 @@ export function RenderingWorldPlazaCodexMenuPanel({
       role="menu"
       aria-label={LABELING_WORLD_PLAZA_CODEX_MENU}
     >
-      {visibleCodexMenuOptions.map((option) => (
+      {DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS.map((option) => (
         <button
           key={option.id}
           type="button"

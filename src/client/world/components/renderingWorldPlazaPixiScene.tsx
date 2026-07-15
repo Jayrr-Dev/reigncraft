@@ -177,7 +177,6 @@ import { RenderingWorldPlazaRoomStatusHud } from '@/components/world/components/
 import { RenderingWorldPlazaRoomTypingIndicators } from '@/components/world/components/renderingWorldPlazaRoomTypingIndicators';
 import { RenderingWorldPlazaSavedCoordsDirectionArrowOverlay } from '@/components/world/components/renderingWorldPlazaSavedCoordsDirectionArrowOverlay';
 import { RenderingWorldPlazaSavedCoordsTileStarMarkers } from '@/components/world/components/renderingWorldPlazaSavedCoordsTileStarMarkers';
-import { RenderingWorldPlazaSpritcoreUpgradeOverlay } from '@/components/world/components/renderingWorldPlazaSpritcoreUpgradeOverlay';
 import { RenderingWorldPlazaTerrainCollisionDebugOverlay } from '@/components/world/components/renderingWorldPlazaTerrainCollisionDebugOverlay';
 import { RenderingWorldPlazaTutorialOverlay } from '@/components/world/components/renderingWorldPlazaTutorialOverlay';
 import { RenderingWorldPlazaWorldNotifications } from '@/components/world/components/renderingWorldPlazaWorldNotifications';
@@ -300,7 +299,6 @@ import {
   recordingWorldPlazaBestiarySpeciesStudied,
 } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
-import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import {
   gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
   gettingWorldPlazaHerbariumCloverStudyCountSnapshot,
@@ -9508,6 +9506,16 @@ function RenderingWorldPlazaPixiSceneConnected({
               isDepleted: isStaminaDepleted,
             }}
             derivedStats={selectedCharacterEngineDerivedStats}
+            inventoryState={inventoryState}
+            nominalAttackSpeed={nominalAttackSpeed}
+            naturalDefense={naturalCharacterSpritcoreStats.defense}
+            naturalRunSpeed={
+              naturalCharacterSpritcoreStats.runSpeedGridPerSecond
+            }
+            onInventoryStateChange={(nextState) => {
+              updatingInventoryState(() => nextState);
+            }}
+            onShowToast={showingGameplayHudToast}
           />
           <RenderingWildlifePetRosterPanel
             isOpen={isPetRosterPanelOpen}
@@ -9624,26 +9632,6 @@ function RenderingWorldPlazaPixiSceneConnected({
         isOpen={activeCodexSection === 'recipes'}
         onClose={closingCodexSection}
       />
-      {checkingWorldPlazaGenerationFeatureEnabled(
-        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SPRITCORE_LEVELING
-      ) ? (
-        <RenderingWorldPlazaSpritcoreUpgradeOverlay
-          isOpen={activeCodexSection === 'spritcore'}
-          inventoryState={inventoryState}
-          effectiveMaxHealth={
-            selectedCharacterEngineDerivedStats.effectiveMaxHealth
-          }
-          attackPower={selectedCharacterEngineDerivedStats.attackPower}
-          nominalAttackSpeed={nominalAttackSpeed}
-          naturalDefense={naturalCharacterSpritcoreStats.defense}
-          naturalRunSpeed={naturalCharacterSpritcoreStats.runSpeedGridPerSecond}
-          onInventoryStateChange={(nextState) => {
-            updatingInventoryState(() => nextState);
-          }}
-          onShowToast={showingGameplayHudToast}
-          onClose={closingCodexSection}
-        />
-      ) : null}
       <RenderingWorldPlazaLoreBookOverlay
         isOpen={activeCodexSection === 'lore'}
         onClose={closingCodexSection}

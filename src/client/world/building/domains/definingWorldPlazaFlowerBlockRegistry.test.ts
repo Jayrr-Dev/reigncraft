@@ -10,7 +10,7 @@ import { DEFINING_WORLD_PLAZA_FLOWER_DYE_SPECIES_ORDER } from '@/components/worl
 import { describe, expect, it } from 'vitest';
 
 describe('definingWorldPlazaFlowerBlockRegistry', () => {
-  it('registers twelve flower patches with palette surfaces', () => {
+  it('registers twelve solid-color flower dye blocks', () => {
     const definitions = registeringWorldPlazaFlowerBlockDefinitions();
 
     expect(Object.keys(definitions)).toHaveLength(12);
@@ -25,13 +25,17 @@ describe('definingWorldPlazaFlowerBlockRegistry', () => {
       expect(definition?.collisionShape).toBe(
         DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE
       );
+      expect(definition?.visualConfig.label).toBe('Block');
       expect(
         checkingWorldBuildingBlockDefinitionIdIsFlowerBlock(definitionId)
       ).toBe(true);
       expect(
         resolvingWorldPlazaFlowerSpeciesIdFromBlockDefinitionId(definitionId)
       ).toBe(speciesId);
-      expect(definition?.visualConfig.paletteSurface).toBeDefined();
+      expect(definition?.visualConfig.paletteSurface).toEqual({
+        kind: 'css',
+        background: expect.stringMatching(/^#[0-9a-f]{6}$/i),
+      });
       expect(resolvingWorldBuildingBlockDefinition(definitionId)?.id).toBe(
         definitionId
       );

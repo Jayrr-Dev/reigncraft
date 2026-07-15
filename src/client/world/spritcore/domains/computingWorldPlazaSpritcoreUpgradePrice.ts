@@ -8,6 +8,7 @@ import { computingWorldPlazaSpritcoreEquivalentValue } from '@/components/world/
 import {
   DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_BASE_DPS,
   DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_BASE_HP,
+  DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_DEFENSE_MOVE_SPEED_K,
   DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_MAX_DPS,
   DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_MAX_HP,
 } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreLevelingConstants';
@@ -16,7 +17,8 @@ function computingWorldPlazaSpritcoreUpgradeDeltaPrice(
   beforeValue: number,
   afterValue: number,
   baseValue: number,
-  maximumValue: number
+  maximumValue: number,
+  k?: number
 ): number {
   if (afterValue <= beforeValue) {
     return 0;
@@ -27,12 +29,14 @@ function computingWorldPlazaSpritcoreUpgradeDeltaPrice(
     computingWorldPlazaSpritcoreEquivalentValue(
       afterValue,
       baseValue,
-      maximumValue
+      maximumValue,
+      k
     ) -
       computingWorldPlazaSpritcoreEquivalentValue(
         beforeValue,
         baseValue,
-        maximumValue
+        maximumValue,
+        k
       )
   );
 }
@@ -79,7 +83,8 @@ export function computingWorldPlazaSpritcoreDefenseUpgradePrice(
     currentDefense,
     currentDefense + defenseStep,
     naturalDefense,
-    defenseMaximum
+    defenseMaximum,
+    DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_DEFENSE_MOVE_SPEED_K
   );
 }
 
@@ -94,7 +99,8 @@ export function computingWorldPlazaSpritcoreMoveSpeedUpgradePrice(
     currentRunSpeed,
     currentRunSpeed + moveSpeedStep,
     naturalRunSpeed,
-    moveSpeedMaximum
+    moveSpeedMaximum,
+    DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_DEFENSE_MOVE_SPEED_K
   );
 }
 

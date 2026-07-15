@@ -55,8 +55,11 @@ describe('resolvingWorldPlazaSpritcoreUpgradeOffers', () => {
 
     expect(offers.defense.currentValue).toBe(5);
     expect(offers.defense.nextValue).toBe(6);
-    expect(offers.defense.price).toBeGreaterThan(0);
+    expect(offers.defense.price).toBeGreaterThan(10);
+    expect(offers.defense.price).toBeLessThan(120);
     expect(offers.moveSpeed.currentValue).toBeCloseTo(3, 5);
+    expect(offers.moveSpeed.price).toBeGreaterThan(5);
+    expect(offers.moveSpeed.price).toBeLessThan(80);
     expect(offers.moveSpeed.isCapped).toBe(false);
   });
 

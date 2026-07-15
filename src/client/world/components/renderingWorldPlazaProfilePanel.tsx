@@ -8,9 +8,11 @@
  * @module components/world/components/renderingWorldPlazaProfilePanel
  */
 
+import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import { Icon } from '@/components/ui/icon';
 import type { ComputingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import {
   DEFINING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_SIZE_PX,
   DEFINING_WORLD_PLAZA_PROFILE_PANEL_DEFAULT_TAB_ID,
@@ -27,6 +29,7 @@ import {
   LABELING_WORLD_PLAZA_PROFILE_PANEL_PASSIVES_SECTION,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_TAB_LIST,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_TITLE,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SECTION,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_VITALS_SECTION,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_ANCHOR_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_CELL_CLASS_NAME,
@@ -44,6 +47,7 @@ import {
   STYLING_WORLD_PLAZA_PROFILE_PANEL_EFFECT_ROW_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_HEADER_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_IDENTITY_ROW_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_LEVEL_CHIP_BUTTON_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_LEVEL_CHIP_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_NAME_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_PORTRAIT_FRAME_CLASS_NAME,
@@ -65,6 +69,7 @@ import {
   STYLING_WORLD_PLAZA_PROFILE_PANEL_VITAL_VALUE_CLASS_NAME,
   type DefiningWorldPlazaProfilePanelTabId,
 } from '@/components/world/domains/definingWorldPlazaProfilePanelConstants';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { resolvingWorldPlazaAvatarSkinPortrait } from '@/components/world/domains/resolvingWorldPlazaAvatarSkinPortrait';
 import type { ResolvingWorldPlazaProfilePanelImmunityEntry } from '@/components/world/domains/resolvingWorldPlazaProfilePanelImmunityEntries';
 import type { ResolvingWorldPlazaProfilePanelPassiveEntry } from '@/components/world/domains/resolvingWorldPlazaProfilePanelPassiveEntries';
@@ -81,6 +86,7 @@ import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/healt
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
 import type { UsingWorldPlazaPlayerHungerHudSnapshot } from '@/components/world/hunger/hooks/usingWorldPlazaPlayerHunger';
+import { RenderingWorldPlazaSpritcoreUpgradePanel } from '@/components/world/spritcore/components/renderingWorldPlazaSpritcoreUpgradePanel';
 import { useEffect, useMemo, useState } from 'react';
 
 /** Props for {@link RenderingWorldPlazaProfilePanel}. */
@@ -95,6 +101,13 @@ export interface RenderingWorldPlazaProfilePanelProps {
   hungerHudSnapshot: UsingWorldPlazaPlayerHungerHudSnapshot;
   staminaHud: ResolvingWorldPlazaProfilePanelStaminaHud;
   derivedStats: ComputingWorldPlazaCharacterEngineDerivedStats;
+  /** Inventory used for Spritcore balance and spend on the Upgrade tab. */
+  inventoryState?: DefiningInventoryState;
+  nominalAttackSpeed?: number;
+  naturalDefense?: number;
+  naturalRunSpeed?: number;
+  onInventoryStateChange?: (nextState: DefiningInventoryState) => void;
+  onShowToast?: (message: string) => void;
 }
 
 function RenderingWorldPlazaProfilePanelVitalRows({
@@ -173,7 +186,9 @@ function RenderingWorldPlazaProfilePanelArmorSlots({
       {slots.map((slot) => (
         <div
           key={slot.id}
-          className={STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_CELL_CLASS_NAME}
+          className={
+            STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_CELL_CLASS_NAME
+          }
           aria-label={`${slot.label} armor slot (empty)`}
         >
           <Icon
@@ -286,8 +301,24 @@ export function RenderingWorldPlazaProfilePanel({
   hungerHudSnapshot,
   staminaHud,
   derivedStats,
+  inventoryState,
+  nominalAttackSpeed,
+  naturalDefense,
+  naturalRunSpeed,
+  onInventoryStateChange,
+  onShowToast,
 }: RenderingWorldPlazaProfilePanelProps): React.JSX.Element | null {
   const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();
+  const isSpritcoreUpgradeEnabled = checkingWorldPlazaGenerationFeatureEnabled(
+    DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SPRITCORE_LEVELING
+  );
+  const visibleTabs = useMemo(
+    () =>
+      DEFINING_WORLD_PLAZA_PROFILE_PANEL_TAB_REGISTRY.filter(
+        (tab) => tab.id !== 'upgrade' || isSpritcoreUpgradeEnabled
+      ),
+    [isSpritcoreUpgradeEnabled]
+  );
   const [activeTabId, setActiveTabId] =
     useState<DefiningWorldPlazaProfilePanelTabId>(
       DEFINING_WORLD_PLAZA_PROFILE_PANEL_DEFAULT_TAB_ID
@@ -309,6 +340,12 @@ export function RenderingWorldPlazaProfilePanel({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (activeTabId === 'upgrade' && !isSpritcoreUpgradeEnabled) {
+      setActiveTabId(DEFINING_WORLD_PLAZA_PROFILE_PANEL_DEFAULT_TAB_ID);
+    }
+  }, [activeTabId, isSpritcoreUpgradeEnabled]);
+
   if (!isOpen) {
     return null;
   }
@@ -320,6 +357,14 @@ export function RenderingWorldPlazaProfilePanel({
     derivedStats,
     skinId: selectedAvatarSkinId,
   });
+  const canShowUpgradeTab =
+    isSpritcoreUpgradeEnabled &&
+    inventoryState !== undefined &&
+    nominalAttackSpeed !== undefined &&
+    naturalDefense !== undefined &&
+    naturalRunSpeed !== undefined &&
+    onInventoryStateChange !== undefined &&
+    onShowToast !== undefined;
 
   return (
     <div className={STYLING_WORLD_PLAZA_PROFILE_PANEL_ANCHOR_CLASS_NAME}>
@@ -383,19 +428,38 @@ export function RenderingWorldPlazaProfilePanel({
             <p className={STYLING_WORLD_PLAZA_PROFILE_PANEL_SKIN_CLASS_NAME}>
               {characterDisplayName}
             </p>
-            <span
-              className={
-                STYLING_WORLD_PLAZA_PROFILE_PANEL_LEVEL_CHIP_CLASS_NAME
-              }
-            >
-              <Icon
-                icon="mdi:star-four-points"
-                width={10}
-                height={10}
-                aria-hidden
-              />
-              Level {derivedStats.level}
-            </span>
+            {canShowUpgradeTab ? (
+              <button
+                type="button"
+                className={
+                  STYLING_WORLD_PLAZA_PROFILE_PANEL_LEVEL_CHIP_BUTTON_CLASS_NAME
+                }
+                aria-label={`Open ${LABELING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SECTION} upgrades`}
+                onClick={() => setActiveTabId('upgrade')}
+              >
+                <Icon
+                  icon="mdi:star-four-points"
+                  width={10}
+                  height={10}
+                  aria-hidden
+                />
+                Level {derivedStats.level}
+              </button>
+            ) : (
+              <span
+                className={
+                  STYLING_WORLD_PLAZA_PROFILE_PANEL_LEVEL_CHIP_CLASS_NAME
+                }
+              >
+                <Icon
+                  icon="mdi:star-four-points"
+                  width={10}
+                  height={10}
+                  aria-hidden
+                />
+                Level {derivedStats.level}
+              </span>
+            )}
           </div>
         </div>
 
@@ -404,7 +468,7 @@ export function RenderingWorldPlazaProfilePanel({
           role="tablist"
           aria-label={LABELING_WORLD_PLAZA_PROFILE_PANEL_TAB_LIST}
         >
-          {DEFINING_WORLD_PLAZA_PROFILE_PANEL_TAB_REGISTRY.map((tab) => {
+          {visibleTabs.map((tab) => {
             const isActive = tab.id === activeTabId;
 
             return (
@@ -506,7 +570,9 @@ export function RenderingWorldPlazaProfilePanel({
                 </div>
               </section>
             </div>
-          ) : (
+          ) : null}
+
+          {activeTabId === 'stats' ? (
             <div
               id="plaza-profile-tab-panel-stats"
               role="tabpanel"
@@ -575,7 +641,29 @@ export function RenderingWorldPlazaProfilePanel({
                 </div>
               </section>
             </div>
-          )}
+          ) : null}
+
+          {activeTabId === 'upgrade' && canShowUpgradeTab ? (
+            <div
+              id="plaza-profile-tab-panel-upgrade"
+              role="tabpanel"
+              aria-labelledby="plaza-profile-tab-upgrade"
+              className={
+                STYLING_WORLD_PLAZA_PROFILE_PANEL_TAB_SECTION_STACK_CLASS_NAME
+              }
+            >
+              <RenderingWorldPlazaSpritcoreUpgradePanel
+                inventoryState={inventoryState}
+                effectiveMaxHealth={derivedStats.effectiveMaxHealth}
+                attackPower={derivedStats.attackPower}
+                nominalAttackSpeed={nominalAttackSpeed}
+                naturalDefense={naturalDefense}
+                naturalRunSpeed={naturalRunSpeed}
+                onInventoryStateChange={onInventoryStateChange}
+                onShowToast={onShowToast}
+              />
+            </div>
+          ) : null}
         </div>
       </section>
     </div>

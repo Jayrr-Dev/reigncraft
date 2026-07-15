@@ -101,7 +101,10 @@ export const LABELING_WORLD_PLAZA_PROFILE_PANEL_EFFECTS_EMPTY =
   'No active effects' as const;
 
 /** Profile panel body tab ids. */
-export type DefiningWorldPlazaProfilePanelTabId = 'status' | 'stats';
+export type DefiningWorldPlazaProfilePanelTabId =
+  | 'status'
+  | 'stats'
+  | 'upgrade';
 
 /** One tab in the profile panel strip. */
 export type DefiningWorldPlazaProfilePanelTabDefinition = {
@@ -109,12 +112,21 @@ export type DefiningWorldPlazaProfilePanelTabDefinition = {
   label: string;
 };
 
-/** Ordered tabs: live vitals/effects vs derived stats/passives. */
+/** Ordered tabs: vitals, derived stats, Spritcore spend. */
 export const DEFINING_WORLD_PLAZA_PROFILE_PANEL_TAB_REGISTRY: readonly DefiningWorldPlazaProfilePanelTabDefinition[] =
   [
     { id: 'status', label: 'Status' },
     { id: 'stats', label: 'Stats' },
+    { id: 'upgrade', label: 'Upgrade' },
   ] as const;
+
+/** Section heading above Spritcore balance and buy rows. */
+export const LABELING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SECTION =
+  'Spritcore' as const;
+
+/** Short hint under the Upgrade section heading. */
+export const LABELING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_HINT =
+  'Spend kill drops on permanent gains' as const;
 
 /** Default tab when the panel opens. */
 export const DEFINING_WORLD_PLAZA_PROFILE_PANEL_DEFAULT_TAB_ID: DefiningWorldPlazaProfilePanelTabId =
@@ -174,6 +186,34 @@ export const STYLING_WORLD_PLAZA_PROFILE_PANEL_SKIN_CLASS_NAME =
 /** Level chip in the identity row. */
 export const STYLING_WORLD_PLAZA_PROFILE_PANEL_LEVEL_CHIP_CLASS_NAME =
   'mt-0.5 inline-flex w-max items-center gap-1 rounded-full border border-poster-gold/50 bg-poster-teal-deep/85 px-2 py-0.5 font-display text-[10px] font-bold uppercase tracking-[0.08em] text-parchment' as const;
+
+/** Clickable Level chip (opens Upgrade tab). */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_LEVEL_CHIP_BUTTON_CLASS_NAME =
+  `${STYLING_WORLD_PLAZA_PROFILE_PANEL_LEVEL_CHIP_CLASS_NAME} cursor-pointer ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.focusRingGold}` as const;
+
+/** Compact summary chips (balance / combat power) on the Upgrade tab. */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SUMMARY_GRID_CLASS_NAME =
+  'grid grid-cols-2 gap-1' as const;
+
+/** One Upgrade-tab summary chip. */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SUMMARY_CHIP_CLASS_NAME =
+  'rounded-md border border-poster-wood/30 bg-parchment-dark/30 px-1.5 py-1' as const;
+
+/** Tiny label above a summary chip value. */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SUMMARY_LABEL_CLASS_NAME =
+  'text-[9px] font-bold uppercase tracking-[0.08em] text-ink-soft' as const;
+
+/** Numeric value inside a summary chip. */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SUMMARY_VALUE_CLASS_NAME =
+  'mt-0.5 truncate font-display text-[11px] font-bold tabular-nums text-ink' as const;
+
+/** One Spritcore buy row on the Upgrade tab. */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_ROW_CLASS_NAME =
+  'flex items-center gap-1.5 rounded-md border border-poster-wood/30 bg-parchment-dark/30 px-1.5 py-1' as const;
+
+/** Buy / Capped control on an Upgrade row. */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_BUY_BUTTON_CLASS_NAME =
+  `shrink-0 rounded px-2 py-0.5 font-display text-[10px] font-bold uppercase tracking-[0.06em] text-parchment bg-poster-teal-deep/90 disabled:cursor-not-allowed disabled:opacity-40 ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.focusRingGold}` as const;
 
 /** Segmented tab strip under the identity row. */
 export const STYLING_WORLD_PLAZA_PROFILE_PANEL_TAB_LIST_CLASS_NAME =

@@ -1,5 +1,5 @@
 /**
- * Dye colors and labels for flower-stained wood and flower patch blocks.
+ * Dye colors and labels for flower-stained wood and solid flower dye blocks.
  *
  * @module components/world/building/domains/definingWorldPlazaFlowerDyeConstants
  */
@@ -31,7 +31,7 @@ export const DEFINING_WORLD_PLAZA_FLOWER_DYE_NAME_BY_SPECIES_ID: Record<
 };
 
 /**
- * Petal dye colors used for stained planks and flower patch swatches.
+ * Petal dye colors used for stained planks and solid flower dye blocks.
  * Tuned from herbarium field notes (orange calendula, purple lavender, etc.).
  */
 export const DEFINING_WORLD_PLAZA_FLOWER_DYE_COLOR_BY_SPECIES_ID: Record<
@@ -51,6 +51,3 @@ export const DEFINING_WORLD_PLAZA_FLOWER_DYE_COLOR_BY_SPECIES_ID: Record<
   foxglove: 0xb05a9e,
   belladonna: 0x3d1f4a,
 };
-
-/** Soft ground tint under flower patch swatches. */
-export const DEFINING_WORLD_PLAZA_FLOWER_PATCH_GROUND_COLOR = 0x4a7a3a;
