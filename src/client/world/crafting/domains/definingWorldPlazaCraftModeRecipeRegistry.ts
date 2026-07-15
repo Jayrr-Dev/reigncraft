@@ -57,6 +57,7 @@ import {
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { DEFINING_WORLD_PLAZA_CRAFT_RECIPE_NEARBY_STATION_RANGE_TILES } from '@/components/world/crafting/domains/definingWorldPlazaCraftRecipeNearbyStationConstants';
 import { registeringWorldPlazaCraftModeToolRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaCraftModeToolRecipes';
+import { registeringWorldPlazaIronPlateArmorCraftModeRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaIronPlateArmorCraftModeRecipes';
 import { registeringWorldPlazaSpecialtyWeaponCraftModeRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaSpecialtyWeaponCraftModeRecipes';
 import { registeringWorldPlazaSurvivalCraftModeRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaSurvivalCraftModeRecipes';
 import {
@@ -1105,6 +1106,7 @@ const DEFINING_WORLD_PLAZA_CRAFT_MODE_MANUAL_RECIPE_REGISTRY = [
   ),
   ...registeringWorldPlazaSurvivalCraftModeRecipes(),
   ...registeringWorldPlazaSpecialtyWeaponCraftModeRecipes(),
+  ...registeringWorldPlazaIronPlateArmorCraftModeRecipes(),
 ] as const satisfies readonly DefiningWorldPlazaCraftModeRecipeDefinition[];
 
 /**

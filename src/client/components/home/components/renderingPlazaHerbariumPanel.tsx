@@ -392,12 +392,10 @@ export function RenderingPlazaHerbariumPanel({
   const closingEntryDetail = useCallback((): void => {
     setSelectedEntryId(null);
   }, []);
-  const sightedCount = filteredGuideEntries.filter(
-    (entry) => entry.isSighted
-  ).length;
-  const totalCount = filteredGuideEntries.length;
+  const sightedCount = guideEntries.filter((entry) => entry.isSighted).length;
+  const totalCount = guideEntries.length;
   const studiedProgress = computingPlazaCodexAggregateStudyProgress(
-    filteredGuideEntries.map((entry) => ({
+    guideEntries.map((entry) => ({
       trackId: resolvingPlazaHerbariumCodexStudyTrackId(entry.kind),
       studyCount: entry.studyCount,
     }))
@@ -416,7 +414,7 @@ export function RenderingPlazaHerbariumPanel({
 
   return (
     <div
-      className={`plaza-panel plaza-pop-in flex h-[min(90dvh,42rem)] w-full max-w-md flex-col gap-3 overflow-hidden rounded-md p-4 font-body sm:h-[min(85dvh,42rem)] sm:gap-4 sm:p-6 ${className}`.trim()}
+      className={`plaza-panel plaza-pop-in flex h-[min(90dvh,42rem)] w-full max-w-md flex-col gap-3 overflow-visible rounded-md p-4 font-body sm:h-[min(85dvh,42rem)] sm:gap-4 sm:p-6 ${className}`.trim()}
     >
       <div className="flex shrink-0 items-center gap-3">
         {onBack ? (

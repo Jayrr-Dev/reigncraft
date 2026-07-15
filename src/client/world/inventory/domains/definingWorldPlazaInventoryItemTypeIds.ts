@@ -586,11 +586,73 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_GLASS_VEIL_GREAVES =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_GLASS_VEIL_SLIPPERS =
   'world-plaza-glass-veil-slippers' as const;
 
+/** Siphon set (sprite sheet order: helm, arm, body, leg, foot). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_SIPHON_ARMOR_ITEM_TYPE_IDS = [
+  'world-plaza-siphon-cowl',
+  'world-plaza-siphon-claws',
+  'world-plaza-siphon-carapace',
+  'world-plaza-siphon-greaves',
+  'world-plaza-siphon-treads',
+] as const;
+
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SIPHON_COWL =
+  'world-plaza-siphon-cowl' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SIPHON_CLAWS =
+  'world-plaza-siphon-claws' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SIPHON_CARAPACE =
+  'world-plaza-siphon-carapace' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SIPHON_GREAVES =
+  'world-plaza-siphon-greaves' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SIPHON_TREADS =
+  'world-plaza-siphon-treads' as const;
+
+/** Iron Plate set (sprite sheet order: helm, arm, body, leg, foot). Craftable at anvil. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_IRON_PLATE_ARMOR_ITEM_TYPE_IDS = [
+  'world-plaza-iron-plate-casque',
+  'world-plaza-iron-plate-gauntlets',
+  'world-plaza-iron-plate-breastplate',
+  'world-plaza-iron-plate-greaves',
+  'world-plaza-iron-plate-sabatons',
+] as const;
+
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_PLATE_CASQUE =
+  'world-plaza-iron-plate-casque' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_PLATE_GAUNTLETS =
+  'world-plaza-iron-plate-gauntlets' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_PLATE_BREASTPLATE =
+  'world-plaza-iron-plate-breastplate' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_PLATE_GREAVES =
+  'world-plaza-iron-plate-greaves' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_PLATE_SABATONS =
+  'world-plaza-iron-plate-sabatons' as const;
+
+/** Apostle Clay set (sprite sheet order: helm, arm, body, leg, foot). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_APOSTLE_CLAY_ARMOR_ITEM_TYPE_IDS = [
+  'world-plaza-apostle-clay-mask',
+  'world-plaza-apostle-clay-gauntlets',
+  'world-plaza-apostle-clay-harness',
+  'world-plaza-apostle-clay-greaves',
+  'world-plaza-apostle-clay-sabatons',
+] as const;
+
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APOSTLE_CLAY_MASK =
+  'world-plaza-apostle-clay-mask' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APOSTLE_CLAY_GAUNTLETS =
+  'world-plaza-apostle-clay-gauntlets' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APOSTLE_CLAY_HARNESS =
+  'world-plaza-apostle-clay-harness' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APOSTLE_CLAY_GREAVES =
+  'world-plaza-apostle-clay-greaves' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APOSTLE_CLAY_SABATONS =
+  'world-plaza-apostle-clay-sabatons' as const;
+
 /** All unique armour set pieces (find-only; not craftable). */
 export const DEFINING_WORLD_PLAZA_UNIQUE_ARMOR_SET_ITEM_TYPE_IDS = [
   ...DEFINING_WORLD_PLAZA_INVENTORY_CHAOS_ARMOR_ITEM_TYPE_IDS,
   ...DEFINING_WORLD_PLAZA_INVENTORY_BESSEMER_ARMOR_ITEM_TYPE_IDS,
   ...DEFINING_WORLD_PLAZA_INVENTORY_GLASS_VEIL_ARMOR_ITEM_TYPE_IDS,
+  ...DEFINING_WORLD_PLAZA_INVENTORY_SIPHON_ARMOR_ITEM_TYPE_IDS,
+  ...DEFINING_WORLD_PLAZA_INVENTORY_APOSTLE_CLAY_ARMOR_ITEM_TYPE_IDS,
 ] as const;
 
 /** Early unique weapons (find-only; inventory-early-weapon-sprites.webp order). */
@@ -616,9 +678,33 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WEAPON_THAW_PICK =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WEAPON_LUCKY_TWIG =
   'world-plaza-weapon-lucky-twig' as const;
 
-/** Specialty signature weapons (Blacksmith unique swords + early find-only). */
+/** Mid unique weapons (find-only; inventory-mid-weapon-sprites.webp order). */
+export const DEFINING_WORLD_PLAZA_MID_UNIQUE_WEAPON_ITEM_TYPE_IDS = [
+  'world-plaza-weapon-bessemer-edge',
+  'world-plaza-weapon-glass-shard',
+  'world-plaza-weapon-leech-knife',
+  'world-plaza-weapon-ledger-stub',
+  'world-plaza-weapon-choir-blade',
+  'world-plaza-weapon-venom-barb',
+] as const;
+
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WEAPON_BESSEMER_EDGE =
+  'world-plaza-weapon-bessemer-edge' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WEAPON_GLASS_SHARD =
+  'world-plaza-weapon-glass-shard' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WEAPON_LEECH_KNIFE =
+  'world-plaza-weapon-leech-knife' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WEAPON_LEDGER_STUB =
+  'world-plaza-weapon-ledger-stub' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WEAPON_CHOIR_BLADE =
+  'world-plaza-weapon-choir-blade' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WEAPON_VENOM_BARB =
+  'world-plaza-weapon-venom-barb' as const;
+
+/** Specialty unique weapons (early + mid find-only, late craftable). */
 export const DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ITEM_TYPE_IDS = [
   ...DEFINING_WORLD_PLAZA_EARLY_UNIQUE_WEAPON_ITEM_TYPE_IDS,
+  ...DEFINING_WORLD_PLAZA_MID_UNIQUE_WEAPON_ITEM_TYPE_IDS,
   'world-plaza-weapon-chaos-die',
   'world-plaza-weapon-quiet-hand',
   'world-plaza-weapon-glass-needle',

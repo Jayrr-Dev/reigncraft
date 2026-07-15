@@ -17,6 +17,29 @@ describe('syncingWorldPlazaEquippedSpecialtyWeaponModifiers', () => {
     ).toBe(true);
   });
 
+  it('applies Glass Shard attack speed while equipped', () => {
+    const next = syncingWorldPlazaEquippedSpecialtyWeaponModifiers(
+      creatingWorldPlazaEntityHealthInitialState(),
+      'world-plaza-weapon-glass-shard',
+      1000
+    );
+    expect(
+      next.movementModifiers.some(
+        (modifier) =>
+          modifier.kind === 'attack_speed' && modifier.multiplier === 1.1
+      )
+    ).toBe(true);
+  });
+
+  it('applies Leech Knife lifesteal while equipped', () => {
+    const next = syncingWorldPlazaEquippedSpecialtyWeaponModifiers(
+      creatingWorldPlazaEntityHealthInitialState(),
+      'world-plaza-weapon-leech-knife',
+      1000
+    );
+    expect(next.physicalDamageLifestealModifiers[0]?.ratio).toBe(0.08);
+  });
+
   it('applies Siphon Fang lifesteal while equipped', () => {
     const next = syncingWorldPlazaEquippedSpecialtyWeaponModifiers(
       creatingWorldPlazaEntityHealthInitialState(),

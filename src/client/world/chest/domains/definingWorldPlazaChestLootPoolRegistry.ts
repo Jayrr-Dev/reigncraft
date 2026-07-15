@@ -30,6 +30,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_IRON,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
+  DEFINING_WORLD_PLAZA_MID_UNIQUE_WEAPON_ITEM_TYPE_IDS,
   DEFINING_WORLD_PLAZA_UNIQUE_ARMOR_SET_ITEM_TYPE_IDS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 
@@ -168,6 +169,14 @@ export const DEFINING_WORLD_PLAZA_CHEST_LOOT_POOL_REGISTRY = {
         weight: 1,
       })
     ),
+    // Mid unique find-only weapons (rarer than early)
+    ...DEFINING_WORLD_PLAZA_MID_UNIQUE_WEAPON_ITEM_TYPE_IDS.map(
+      (itemTypeId) => ({
+        itemTypeId,
+        quantity: 1,
+        weight: 0.5,
+      })
+    ),
     // Unique armour set pieces (Chaos / Bessemer / Glass Veil)
     ...DEFINING_WORLD_PLAZA_UNIQUE_ARMOR_SET_ITEM_TYPE_IDS.map(
       (itemTypeId) => ({
@@ -189,6 +198,16 @@ export const DEFINING_WORLD_PLAZA_CHEST_LOOT_POOL_REGISTRY = {
         weight: 1,
       })
     ),
+  /**
+   * Dedicated mid unique weapon pool (equal weight).
+   * Use for fixed chests that should always grant one mid unique.
+   */
+  'mid-unique-weapons':
+    DEFINING_WORLD_PLAZA_MID_UNIQUE_WEAPON_ITEM_TYPE_IDS.map((itemTypeId) => ({
+      itemTypeId,
+      quantity: 1,
+      weight: 1,
+    })),
   /**
    * Dedicated unique armour pool (equal weight across Chaos / Bessemer / Glass Veil).
    * Use for fixed chests that should always grant one unique armour piece.

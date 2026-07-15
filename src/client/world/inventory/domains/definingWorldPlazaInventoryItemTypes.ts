@@ -53,19 +53,22 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_WOOD_AXE_INVENTORY_ICON_URL } from '@/components/world/inventory/domains/definingWorldPlazaToolInventoryIconConstants';
+import { registeringWorldPlazaInventoryApostleClayArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryApostleClayArmorItemDefinitions';
 import { registeringWorldPlazaInventoryBagItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryBagItemDefinitions';
 import { registeringWorldPlazaInventoryBerryItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryBerryItemDefinitions';
 import { registeringWorldPlazaInventoryBessemerArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryBessemerArmorItemDefinitions';
 import { registeringWorldPlazaInventoryCeramicsItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCeramicsItemDefinitions';
 import { registeringWorldPlazaInventoryChaosArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryChaosArmorItemDefinitions';
 import { registeringWorldPlazaInventoryChestKeyItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryChestKeyItemDefinitions';
-import { registeringWorldPlazaInventoryGlassVeilArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryGlassVeilArmorItemDefinitions';
 import { registeringWorldPlazaInventoryCloverItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCloverItemDefinitions';
 import { registeringWorldPlazaInventoryCoffeeItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCoffeeItemDefinitions';
 import { registeringWorldPlazaInventoryFlowerItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryFlowerItemDefinitions';
+import { registeringWorldPlazaInventoryGlassVeilArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryGlassVeilArmorItemDefinitions';
 import { registeringWorldPlazaInventoryHealerItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryHealerItemDefinitions';
 import { registeringWorldPlazaInventoryIngotItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryIngotItemDefinitions';
+import { registeringWorldPlazaInventoryIronPlateArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryIronPlateArmorItemDefinitions';
 import { registeringWorldPlazaInventoryOreItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryOreItemDefinitions';
+import { registeringWorldPlazaInventorySiphonArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventorySiphonArmorItemDefinitions';
 import { registeringWorldPlazaInventorySurvivalItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventorySurvivalItemDefinitions';
 import { registeringWorldPlazaInventoryTallGrassItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryTallGrassItemDefinitions';
 import { registeringWorldPlazaInventoryWetClayItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryWetClayItemDefinitions';
@@ -310,6 +313,9 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     ...registeringWorldPlazaInventoryChaosArmorItemDefinitions(),
     ...registeringWorldPlazaInventoryBessemerArmorItemDefinitions(),
     ...registeringWorldPlazaInventoryGlassVeilArmorItemDefinitions(),
+    ...registeringWorldPlazaInventorySiphonArmorItemDefinitions(),
+    ...registeringWorldPlazaInventoryIronPlateArmorItemDefinitions(),
+    ...registeringWorldPlazaInventoryApostleClayArmorItemDefinitions(),
     ...registeringWorldPlazaSpecialtyWeaponInventoryItems(),
     ...registeringWorldPlazaInventoryOreItemDefinitions(),
     ...registeringWorldPlazaInventoryWetClayItemDefinitions(),

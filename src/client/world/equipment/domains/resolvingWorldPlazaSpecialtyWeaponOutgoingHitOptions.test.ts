@@ -51,4 +51,41 @@ describe('resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions', () => {
     });
     expect(result.potentialDamageProc?.pendingEvRatio).toBe(0.5);
   });
+
+  it('always grants Bessemer Edge self shield', () => {
+    const result = resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions({
+      itemTypeId: 'world-plaza-weapon-bessemer-edge',
+      random: () => 0.5,
+    });
+    expect(result.selfShieldProc?.shieldPoints).toBe(6);
+  });
+
+  it('applies Glass Shard critical bias', () => {
+    const result = resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions({
+      itemTypeId: 'world-plaza-weapon-glass-shard',
+      random: () => 0.99,
+    });
+    expect(
+      result.attackerDamageRollModifiers.some(
+        (modifier) => modifier.kind === 'critical_bias'
+      )
+    ).toBe(true);
+  });
+
+  it('always plants Venom Barb poison', () => {
+    const result = resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions({
+      itemTypeId: 'world-plaza-weapon-venom-barb',
+      random: () => 0.5,
+    });
+    expect(result.poisonProc?.potency).toBe('toxic');
+    expect(result.poisonProc?.flatExpectedDamage).toBe(12);
+  });
+
+  it('always bleeds with Choir Blade', () => {
+    const result = resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions({
+      itemTypeId: 'world-plaza-weapon-choir-blade',
+      random: () => 0.5,
+    });
+    expect(result.bleedProc?.flatExpectedDamage).toBe(14);
+  });
 });

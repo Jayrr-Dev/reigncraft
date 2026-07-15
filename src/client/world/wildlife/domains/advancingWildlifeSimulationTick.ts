@@ -2830,6 +2830,8 @@ export function applyingWildlifeInstanceDamage(
           selfCurseProc: specialtyHitOptions.selfCurseProc,
           bleedProc: specialtyHitOptions.bleedProc,
           temperatureProc: specialtyHitOptions.temperatureProc,
+          poisonProc: specialtyHitOptions.poisonProc,
+          selfShieldProc: specialtyHitOptions.selfShieldProc,
           weaponId: specialtyWeapon.weaponId,
         })
       : null;

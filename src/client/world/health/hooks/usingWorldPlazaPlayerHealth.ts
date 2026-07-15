@@ -126,6 +126,10 @@ import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DAMAGED_DURATION_MS,
 } from '@/components/world/domains/definingWorldPlazaGirlSampleCombatMotionConstants';
 import {
+  checkingWorldPlazaApostleClayArmorFullSetMarkerIsActive,
+  resolvingWorldPlazaApostleClayArmorFullSetOnHitEphemeralModifiers,
+} from '@/components/world/equipment/domains/resolvingWorldPlazaApostleClayArmorSetCombatModifiers';
+import {
   checkingWorldPlazaChaosArmorFullSetMarkerIsActive,
   resolvingWorldPlazaChaosArmorFullSetOnHitEphemeralModifiers,
 } from '@/components/world/equipment/domains/resolvingWorldPlazaChaosArmorSetCombatModifiers';
@@ -573,6 +577,14 @@ export function usingWorldPlazaPlayerHealth({
           ),
           damageKind: kind,
         });
+      const apostleClayOnHitModifiers =
+        resolvingWorldPlazaApostleClayArmorFullSetOnHitEphemeralModifiers({
+          hasFullSetMarker:
+            checkingWorldPlazaApostleClayArmorFullSetMarkerIsActive(
+              state.damageRollModifiers
+            ),
+          damageKind: kind,
+        });
       const glassVeilInstinct =
         resolvingWorldPlazaGlassVeilFullSetOnHitEphemeralModifiers({
           hasFullSetMarker:
@@ -599,6 +611,7 @@ export function usingWorldPlazaPlayerHealth({
             attackerDamageRollModifiers: attackerDamageRollModifiersRef.current,
             ephemeralDefenderDamageRollModifiers: [
               ...chaosOnHitModifiers,
+              ...apostleClayOnHitModifiers,
               ...glassVeilInstinct.modifiers,
             ],
           },

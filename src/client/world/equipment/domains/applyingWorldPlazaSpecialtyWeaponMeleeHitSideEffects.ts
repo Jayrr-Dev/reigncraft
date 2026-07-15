@@ -8,15 +8,21 @@ import {
   encodingWorldPlazaSpecialtyWeaponForcedTierValue,
   formattingWorldPlazaSpecialtyWeaponModifierId,
   type DefiningWorldPlazaSpecialtyWeaponOnHitBleedProc,
+  type DefiningWorldPlazaSpecialtyWeaponOnHitPoisonProc,
   type DefiningWorldPlazaSpecialtyWeaponOnHitPotentialDamageProc,
   type DefiningWorldPlazaSpecialtyWeaponOnHitSelfCurseProc,
+  type DefiningWorldPlazaSpecialtyWeaponOnHitSelfShieldProc,
   type DefiningWorldPlazaSpecialtyWeaponOnHitTemperatureProc,
 } from '@/components/world/equipment/domains/definingWorldPlazaSpecialtyWeaponRegistry';
 import { applyingWorldPlazaEntityHealthBleedStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthBleedStack';
+import { applyingWorldPlazaEntityHealthPoisonStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPoisonStack';
 import { applyingWorldPlazaEntityHealthPotentialDamage } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPotentialDamage';
 import { applyingWorldPlazaEntityHealthTemperatureImpulse } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthTemperatureImpulse';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
-import { addingWorldPlazaEntityHealthDamageRollModifier } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import {
+  addingWorldPlazaEntityHealthDamageRollModifier,
+  addingWorldPlazaEntityHealthShield,
+} from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type ApplyingWorldPlazaSpecialtyWeaponMeleeHitSideEffectsParams = {
@@ -28,6 +34,8 @@ export type ApplyingWorldPlazaSpecialtyWeaponMeleeHitSideEffectsParams = {
   readonly selfCurseProc: DefiningWorldPlazaSpecialtyWeaponOnHitSelfCurseProc | null;
   readonly bleedProc: DefiningWorldPlazaSpecialtyWeaponOnHitBleedProc | null;
   readonly temperatureProc: DefiningWorldPlazaSpecialtyWeaponOnHitTemperatureProc | null;
+  readonly poisonProc: DefiningWorldPlazaSpecialtyWeaponOnHitPoisonProc | null;
+  readonly selfShieldProc: DefiningWorldPlazaSpecialtyWeaponOnHitSelfShieldProc | null;
   readonly weaponId: string;
 };
 
@@ -37,7 +45,7 @@ export type ApplyingWorldPlazaSpecialtyWeaponMeleeHitSideEffectsResult = {
 };
 
 /**
- * Plants fated damage / bleed / temperature on the target, or self-curses the player.
+ * Plants fated / bleed / poison / temperature on the target, or self shield / curse on the player.
  */
 export function applyingWorldPlazaSpecialtyWeaponMeleeHitSideEffects({
   instance,
@@ -48,6 +56,8 @@ export function applyingWorldPlazaSpecialtyWeaponMeleeHitSideEffects({
   selfCurseProc,
   bleedProc,
   temperatureProc,
+  poisonProc,
+  selfShieldProc,
   weaponId,
 }: ApplyingWorldPlazaSpecialtyWeaponMeleeHitSideEffectsParams): ApplyingWorldPlazaSpecialtyWeaponMeleeHitSideEffectsResult {
   let nextInstance = instance;
@@ -81,6 +91,18 @@ export function applyingWorldPlazaSpecialtyWeaponMeleeHitSideEffects({
     };
   }
 
+  if (poisonProc && !nextInstance.isDead) {
+    nextInstance = {
+      ...nextInstance,
+      healthState: applyingWorldPlazaEntityHealthPoisonStack(
+        nextInstance.healthState,
+        poisonProc.potency,
+        poisonProc.flatExpectedDamage,
+        nowMs
+      ),
+    };
+  }
+
   if (temperatureProc && !nextInstance.isDead) {
     nextInstance = {
       ...nextInstance,
@@ -89,6 +111,13 @@ export function applyingWorldPlazaSpecialtyWeaponMeleeHitSideEffects({
         temperatureProc.deltaCelsius
       ),
     };
+  }
+
+  if (selfShieldProc) {
+    nextPlayerHealth = addingWorldPlazaEntityHealthShield(
+      nextPlayerHealth,
+      selfShieldProc.shieldPoints
+    );
   }
 
   if (selfCurseProc) {

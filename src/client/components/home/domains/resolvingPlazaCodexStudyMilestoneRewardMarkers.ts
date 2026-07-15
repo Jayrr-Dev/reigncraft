@@ -43,6 +43,7 @@ export type ResolvingPlazaCodexOverallProgressMilestoneRewardMarkersOptions = {
 
 /**
  * Short popover copy for a milestone chest (remaining, claim, or claimed).
+ * When a grant is defined, always name it so players see what the chest holds.
  */
 export function resolvingPlazaCodexStudyMilestoneRewardPopoverLabel(
   remainingNeeded: number,
@@ -61,11 +62,44 @@ export function resolvingPlazaCodexStudyMilestoneRewardPopoverLabel(
     return `Claim ${options.rewardLabel}`;
   }
 
+  if (options.rewardLabel) {
+    if (isReached || remainingNeeded <= 0) {
+      return options.rewardLabel;
+    }
+
+    return remainingNeeded === 1
+      ? `1 more · ${options.rewardLabel}`
+      : `${remainingNeeded} more · ${options.rewardLabel}`;
+  }
+
   if (isReached || remainingNeeded <= 0) {
     return 'Reward ready';
   }
 
   return remainingNeeded === 1 ? '1 more' : `${remainingNeeded} more`;
+}
+
+/** Popover horizontal pin so edge chests stay inside the panel. */
+export type PlazaCodexStudyMilestoneRewardPopoverAlign =
+  | 'start'
+  | 'center'
+  | 'end';
+
+/**
+ * Early chests pin start, late chests pin end, mid-track stays centered.
+ */
+export function resolvingPlazaCodexStudyMilestoneRewardPopoverAlign(
+  percent: number
+): PlazaCodexStudyMilestoneRewardPopoverAlign {
+  if (percent <= 15) {
+    return 'start';
+  }
+
+  if (percent >= 85) {
+    return 'end';
+  }
+
+  return 'center';
 }
 
 /**

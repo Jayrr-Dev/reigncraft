@@ -4,9 +4,12 @@ import {
   checkingWorldPlazaOreSmeltingFuelItemTypeId,
   resolvingWorldPlazaOreSmeltingRecipe,
 } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingRegistry';
+import { checkingWorldPlazaInventoryItemIsApostleClayArmor } from '@/components/world/equipment/domains/definingWorldPlazaApostleClayArmorSetRegistry';
 import { checkingWorldPlazaInventoryItemIsBessemerArmor } from '@/components/world/equipment/domains/definingWorldPlazaBessemerArmorSetRegistry';
 import { checkingWorldPlazaInventoryItemIsChaosArmor } from '@/components/world/equipment/domains/definingWorldPlazaChaosArmorSetRegistry';
 import { checkingWorldPlazaInventoryItemIsGlassVeilArmor } from '@/components/world/equipment/domains/definingWorldPlazaGlassVeilArmorSetRegistry';
+import { checkingWorldPlazaInventoryItemIsIronPlateArmor } from '@/components/world/equipment/domains/definingWorldPlazaIronPlateArmorSetRegistry';
+import { checkingWorldPlazaInventoryItemIsSiphonArmor } from '@/components/world/equipment/domains/definingWorldPlazaSiphonArmorSetRegistry';
 import { checkingWorldPlazaInventoryItemIsSurvivalWear } from '@/components/world/equipment/domains/definingWorldPlazaSurvivalWearBuffRegistry';
 import { resolvingWorldPlazaEquipmentAttackEvModifier } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
@@ -892,7 +895,10 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
         (checkingWorldPlazaInventoryItemIsSurvivalWear(item.itemTypeId) ||
           checkingWorldPlazaInventoryItemIsChaosArmor(item.itemTypeId) ||
           checkingWorldPlazaInventoryItemIsBessemerArmor(item.itemTypeId) ||
-          checkingWorldPlazaInventoryItemIsGlassVeilArmor(item.itemTypeId)),
+          checkingWorldPlazaInventoryItemIsGlassVeilArmor(item.itemTypeId) ||
+          checkingWorldPlazaInventoryItemIsSiphonArmor(item.itemTypeId) ||
+          checkingWorldPlazaInventoryItemIsIronPlateArmor(item.itemTypeId) ||
+          checkingWorldPlazaInventoryItemIsApostleClayArmor(item.itemTypeId)),
       canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),
       canRefine:
         Boolean(options.isOreSmeltingStationReachable) &&
@@ -1000,7 +1006,10 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       (checkingWorldPlazaInventoryItemIsSurvivalWear(item.itemTypeId) ||
         checkingWorldPlazaInventoryItemIsChaosArmor(item.itemTypeId) ||
         checkingWorldPlazaInventoryItemIsBessemerArmor(item.itemTypeId) ||
-        checkingWorldPlazaInventoryItemIsGlassVeilArmor(item.itemTypeId)),
+        checkingWorldPlazaInventoryItemIsGlassVeilArmor(item.itemTypeId) ||
+        checkingWorldPlazaInventoryItemIsSiphonArmor(item.itemTypeId) ||
+        checkingWorldPlazaInventoryItemIsIronPlateArmor(item.itemTypeId) ||
+        checkingWorldPlazaInventoryItemIsApostleClayArmor(item.itemTypeId)),
     canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),
     canRefine:
       Boolean(options.isOreSmeltingStationReachable) &&

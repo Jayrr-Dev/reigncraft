@@ -10,8 +10,10 @@ import {
   resolvingWorldPlazaSpecialtyWeaponDefinition,
   type DefiningWorldPlazaSpecialtyWeaponDefinition,
   type DefiningWorldPlazaSpecialtyWeaponOnHitBleedProc,
+  type DefiningWorldPlazaSpecialtyWeaponOnHitPoisonProc,
   type DefiningWorldPlazaSpecialtyWeaponOnHitPotentialDamageProc,
   type DefiningWorldPlazaSpecialtyWeaponOnHitSelfCurseProc,
+  type DefiningWorldPlazaSpecialtyWeaponOnHitSelfShieldProc,
   type DefiningWorldPlazaSpecialtyWeaponOnHitTemperatureProc,
 } from '@/components/world/equipment/domains/definingWorldPlazaSpecialtyWeaponRegistry';
 import type {
@@ -26,6 +28,8 @@ export type ResolvingWorldPlazaSpecialtyWeaponOutgoingHitOptionsResult = {
   readonly selfCurseProc: DefiningWorldPlazaSpecialtyWeaponOnHitSelfCurseProc | null;
   readonly bleedProc: DefiningWorldPlazaSpecialtyWeaponOnHitBleedProc | null;
   readonly temperatureProc: DefiningWorldPlazaSpecialtyWeaponOnHitTemperatureProc | null;
+  readonly poisonProc: DefiningWorldPlazaSpecialtyWeaponOnHitPoisonProc | null;
+  readonly selfShieldProc: DefiningWorldPlazaSpecialtyWeaponOnHitSelfShieldProc | null;
 };
 
 function buildingPassiveAttackerModifiers(
@@ -55,6 +59,8 @@ export function resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions(input: {
     selfCurseProc: null,
     bleedProc: null,
     temperatureProc: null,
+    poisonProc: null,
+    selfShieldProc: null,
   };
 
   if (!input.itemTypeId) {
@@ -88,70 +94,66 @@ export function resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions(input: {
         value: encodingWorldPlazaSpecialtyWeaponForcedTierValue(proc.tier),
         expiresAtMs: null,
       });
-      return {
-        attackerDamageRollModifiers,
-        potentialDamageProc: null,
-        selfCurseProc: null,
-        bleedProc: null,
-        temperatureProc: null,
-      };
+      return { ...empty, attackerDamageRollModifiers };
     }
 
     if (proc.kind === 'lock_in') {
       return {
+        ...empty,
         attackerDamageRollModifiers,
         forcedRollMode: 'lock_in',
-        potentialDamageProc: null,
-        selfCurseProc: null,
-        bleedProc: null,
-        temperatureProc: null,
       };
     }
 
     if (proc.kind === 'potential_damage') {
       return {
+        ...empty,
         attackerDamageRollModifiers,
         potentialDamageProc: proc,
-        selfCurseProc: null,
-        bleedProc: null,
-        temperatureProc: null,
       };
     }
 
     if (proc.kind === 'bleed') {
       return {
+        ...empty,
         attackerDamageRollModifiers,
-        potentialDamageProc: null,
-        selfCurseProc: null,
         bleedProc: proc,
-        temperatureProc: null,
       };
     }
 
     if (proc.kind === 'temperature') {
       return {
+        ...empty,
         attackerDamageRollModifiers,
-        potentialDamageProc: null,
-        selfCurseProc: null,
-        bleedProc: null,
         temperatureProc: proc,
       };
     }
 
+    if (proc.kind === 'poison') {
+      return {
+        ...empty,
+        attackerDamageRollModifiers,
+        poisonProc: proc,
+      };
+    }
+
+    if (proc.kind === 'self_shield') {
+      return {
+        ...empty,
+        attackerDamageRollModifiers,
+        selfShieldProc: proc,
+      };
+    }
+
     return {
+      ...empty,
       attackerDamageRollModifiers,
-      potentialDamageProc: null,
       selfCurseProc: proc,
-      bleedProc: null,
-      temperatureProc: null,
     };
   }
 
   return {
+    ...empty,
     attackerDamageRollModifiers,
-    potentialDamageProc: null,
-    selfCurseProc: null,
-    bleedProc: null,
-    temperatureProc: null,
   };
 }

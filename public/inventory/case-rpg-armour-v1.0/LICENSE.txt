@@ -1,0 +1,35 @@
+License: Asset License (Paid Edition)
+Author: CaseIRL
+Version: v1.0
+
+----------------------------------------
+Usage Rights
+----------------------------------------
+You are free to use these assets in both
+personal and commercial projects.
+
+You may:
+- Modify the assets for use in your own projects.
+- Include the assets in released games and applications.
+- Use the assets in promotional or published media related to your projects.
+
+You may NOT:
+- Redistribute or resell these assets in any form.
+- Include them in asset collections, generators, or templates intended for resale or redistribution.
+- Claim the assets as your own creation.
+
+----------------------------------------
+Attribution
+----------------------------------------
+Credit is appreciated but not required.
+If you choose to give credit, please link to:
+https://caseirl.itch.io/
+
+----------------------------------------
+Support
+----------------------------------------
+For questions, updates, or future packs:
+https://caseirl.itch.io/ 
+
+Or to contact directly:
+contact@caseirl.dev

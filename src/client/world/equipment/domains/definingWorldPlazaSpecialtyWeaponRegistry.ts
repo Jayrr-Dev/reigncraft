@@ -12,6 +12,7 @@ import type {
   DefiningWorldPlazaDamageOutcomeTier,
   DefiningWorldPlazaEntityHealthDamageRollModifierKind,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import { encodingWorldPlazaEntityHealthDamageRollForcedTierValue } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollForcedTier';
 
 export const DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_MODIFIER_ID_PREFIX =
@@ -28,6 +29,12 @@ export const DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ID = {
   CAMPFIRE_BRAND: 'campfire-brand',
   THAW_PICK: 'thaw-pick',
   LUCKY_TWIG: 'lucky-twig',
+  BESSEMER_EDGE: 'bessemer-edge',
+  GLASS_SHARD: 'glass-shard',
+  LEECH_KNIFE: 'leech-knife',
+  LEDGER_STUB: 'ledger-stub',
+  CHOIR_BLADE: 'choir-blade',
+  VENOM_BARB: 'venom-barb',
   CHAOS_DIE: 'chaos-die',
   QUIET_HAND: 'quiet-hand',
   GLASS_NEEDLE: 'glass-needle',
@@ -84,13 +91,29 @@ export type DefiningWorldPlazaSpecialtyWeaponOnHitTemperatureProc = {
   readonly deltaCelsius: number;
 };
 
+export type DefiningWorldPlazaSpecialtyWeaponOnHitPoisonProc = {
+  readonly kind: 'poison';
+  readonly weight: number;
+  readonly potency: DefiningWorldPlazaEntityPoisonPotency;
+  /** Flat poison pool EV when the proc lands. */
+  readonly flatExpectedDamage: number;
+};
+
+export type DefiningWorldPlazaSpecialtyWeaponOnHitSelfShieldProc = {
+  readonly kind: 'self_shield';
+  readonly weight: number;
+  readonly shieldPoints: number;
+};
+
 export type DefiningWorldPlazaSpecialtyWeaponOnHitProc =
   | DefiningWorldPlazaSpecialtyWeaponOnHitForcedTierProc
   | DefiningWorldPlazaSpecialtyWeaponOnHitLockInProc
   | DefiningWorldPlazaSpecialtyWeaponOnHitPotentialDamageProc
   | DefiningWorldPlazaSpecialtyWeaponOnHitSelfCurseProc
   | DefiningWorldPlazaSpecialtyWeaponOnHitBleedProc
-  | DefiningWorldPlazaSpecialtyWeaponOnHitTemperatureProc;
+  | DefiningWorldPlazaSpecialtyWeaponOnHitTemperatureProc
+  | DefiningWorldPlazaSpecialtyWeaponOnHitPoisonProc
+  | DefiningWorldPlazaSpecialtyWeaponOnHitSelfShieldProc;
 
 export type DefiningWorldPlazaSpecialtyWeaponDefinition = {
   readonly weaponId: DefiningWorldPlazaSpecialtyWeaponId;
@@ -211,6 +234,119 @@ export const DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_REGISTRY: readonly DefiningWo
       attackerRollModifiers: [{ kind: 'luck', value: 0.15 }],
       onHitProcs: [],
       maxDurability: 60,
+    },
+    {
+      weaponId: DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ID.BESSEMER_EDGE,
+      itemTypeId: 'world-plaza-weapon-bessemer-edge',
+      displayName: 'Bessemer Edge',
+      tooltip:
+        'Industrial plate blade. Unique find. Steady EV and tighter rolls. Hits drip a little shield onto you.',
+      iconifyIcon: 'game-icons:broadsword',
+      rarity: 'rare',
+      obtainMethod: 'find',
+      heldItemTier: 'steel',
+      attackEvModifier: { mode: 'multiplicative', value: 1.1 },
+      attackerRollModifiers: [{ kind: 'stability', value: 0.8 }],
+      onHitProcs: [{ kind: 'self_shield', weight: 1, shieldPoints: 6 }],
+      maxDurability: 180,
+    },
+    {
+      weaponId: DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ID.GLASS_SHARD,
+      itemTypeId: 'world-plaza-weapon-glass-shard',
+      displayName: 'Glass Shard',
+      tooltip:
+        'Jagged crystal knife. Unique find. Lower EV, faster swings, critical bias.',
+      iconifyIcon: 'game-icons:backstab',
+      rarity: 'rare',
+      obtainMethod: 'find',
+      heldItemTier: 'iron',
+      attackEvModifier: { mode: 'multiplicative', value: 0.9 },
+      attackSpeedMultiplier: 1.1,
+      attackerRollModifiers: [{ kind: 'critical_bias', value: 1 }],
+      onHitProcs: [],
+      maxDurability: 120,
+    },
+    {
+      weaponId: DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ID.LEECH_KNIFE,
+      itemTypeId: 'world-plaza-weapon-leech-knife',
+      displayName: 'Leech Knife',
+      tooltip:
+        'Blood-groove knife. Unique find. Slightly lower EV. Siphons a cut of physical damage you deal.',
+      iconifyIcon: 'game-icons:broken-heart',
+      rarity: 'rare',
+      obtainMethod: 'find',
+      heldItemTier: 'iron',
+      attackEvModifier: { mode: 'multiplicative', value: 0.95 },
+      physicalDamageLifestealRatio: 0.08,
+      attackerRollModifiers: [],
+      onHitProcs: [],
+      maxDurability: 150,
+    },
+    {
+      weaponId: DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ID.LEDGER_STUB,
+      itemTypeId: 'world-plaza-weapon-ledger-stub',
+      displayName: 'Ledger Stub',
+      tooltip:
+        'Short blade with a bound scrap page. Unique find. Weak cut; sometimes plants fated damage.',
+      iconifyIcon: 'game-icons:scroll-unfurled',
+      rarity: 'rare',
+      obtainMethod: 'find',
+      heldItemTier: 'iron',
+      attackEvModifier: { mode: 'multiplicative', value: 0.85 },
+      attackerRollModifiers: [],
+      onHitProcs: [
+        {
+          kind: 'potential_damage',
+          weight: 0.3,
+          pendingEvRatio: 0.35,
+          resolveDelayMs: 1500,
+        },
+      ],
+      maxDurability: 140,
+    },
+    {
+      weaponId: DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ID.CHOIR_BLADE,
+      itemTypeId: 'world-plaza-weapon-choir-blade',
+      displayName: 'Choir Blade',
+      tooltip:
+        'Bleed-song steel. Unique find. Hits open a heavier bleed than a wood stick.',
+      iconifyIcon: 'game-icons:broadsword',
+      rarity: 'rare',
+      obtainMethod: 'find',
+      heldItemTier: 'steel',
+      attackEvModifier: { mode: 'multiplicative', value: 1 },
+      attackerRollModifiers: [],
+      onHitProcs: [
+        {
+          kind: 'bleed',
+          weight: 1,
+          severity: 'bleeding',
+          flatExpectedDamage: 14,
+        },
+      ],
+      maxDurability: 170,
+    },
+    {
+      weaponId: DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ID.VENOM_BARB,
+      itemTypeId: 'world-plaza-weapon-venom-barb',
+      displayName: 'Venom Barb',
+      tooltip:
+        'Green-tipped stiletto. Unique find. Lower EV; every hit plants a toxic pool.',
+      iconifyIcon: 'game-icons:backstab',
+      rarity: 'rare',
+      obtainMethod: 'find',
+      heldItemTier: 'iron',
+      attackEvModifier: { mode: 'multiplicative', value: 0.9 },
+      attackerRollModifiers: [],
+      onHitProcs: [
+        {
+          kind: 'poison',
+          weight: 1,
+          potency: 'toxic',
+          flatExpectedDamage: 12,
+        },
+      ],
+      maxDurability: 130,
     },
     {
       weaponId: DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ID.CHAOS_DIE,
