@@ -61,6 +61,7 @@ import { registeringWorldPlazaInventoryFlowerItemDefinitions } from '@/component
 import { registeringWorldPlazaInventoryIngotItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryIngotItemDefinitions';
 import { registeringWorldPlazaInventoryOreItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryOreItemDefinitions';
 import { registeringWorldPlazaInventoryWetClayItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryWetClayItemDefinitions';
+import { registeringWorldPlazaSpritcoreTierItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaSpritcoreTierItemDefinitions';
 import { registeringWorldPlazaTieredToolInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaTieredToolInventoryItems';
 import { registeringWorldPlazaWildlifeMeatInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems';
 import { registeringWorldPlazaWildlifeSpecialtyLootInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeSpecialtyLootInventoryItems';
@@ -350,6 +351,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       stackQuantityDisplay:
         DEFINING_WORLD_PLAZA_SPRITCORE_STACK_QUANTITY_DISPLAY,
     },
+    ...registeringWorldPlazaSpritcoreTierItemDefinitions(),
     ...registeringWorldPlazaInventoryBagItemDefinitions(),
     ...registeringWorldPlazaCraftRecipePageInventoryItems(),
   ];

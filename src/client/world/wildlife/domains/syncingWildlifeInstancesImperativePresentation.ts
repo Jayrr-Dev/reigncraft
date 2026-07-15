@@ -59,6 +59,7 @@ import {
 import { drawingWildlifeCyrobornGlowOrbOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeCyrobornGlowOrbOnGraphics';
 import { drawingWildlifeFairyGlowOrbOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeFairyGlowOrbOnGraphics';
 import { drawingWildlifeVitalsOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeVitalsOnGraphics';
+import { resolvingWildlifeCyrobornScalePulseFromInstance } from '@/components/world/wildlife/domains/resolvingWildlifeCyrobornScalePulseFromInstance';
 import {
   resolvingWildlifeGlowOrbHoverLiftPx,
   resolvingWildlifeGlowOrbHoverOffsetPx,
@@ -351,6 +352,7 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
 
         if (!areFairyGlowEnabled || !usesGlowOrb) {
           orbGraphics.visible = false;
+          orbGraphics.scale.set(1);
         } else {
           const hoverOffset = resolvingWildlifeGlowOrbHoverOffsetPx(
             entry.speciesId,
@@ -358,6 +360,11 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
             input.nowMs,
             instance.isDead
           );
+          const cyrobornScalePulse =
+            resolvingWildlifeCyrobornScalePulseFromInstance({
+              instance,
+              nowMs: input.nowMs,
+            });
 
           orbGraphics.position.set(
             screenPoint.x + hoverOffset.x,
@@ -368,14 +375,20 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
             sortKey,
             entry.bodyZIndexRef
           );
-          orbGraphics.visible = !(instance.isDead && spriteAlpha <= 0);
+          orbGraphics.scale.set(cyrobornScalePulse.scaleMultiplier);
+
           if (entry.speciesId === DEFINING_WILDLIFE_CYROBORN_SPECIES_ID) {
+            // Crystal stays sapphire while imploding; hide once collapsed.
+            orbGraphics.visible =
+              !cyrobornScalePulse.hideBody &&
+              !(instance.isDead && spriteAlpha <= 0);
             drawingWildlifeCyrobornGlowOrbOnGraphics(orbGraphics, {
               nowMs: input.nowMs,
-              alphaScale: spriteAlpha,
-              isDead: instance.isDead,
+              alphaScale: instance.isDead ? 1 : spriteAlpha,
+              isDead: false,
             });
           } else {
+            orbGraphics.visible = !(instance.isDead && spriteAlpha <= 0);
             drawingWildlifeFairyGlowOrbOnGraphics(orbGraphics, {
               nowMs: input.nowMs,
               alphaScale: spriteAlpha,

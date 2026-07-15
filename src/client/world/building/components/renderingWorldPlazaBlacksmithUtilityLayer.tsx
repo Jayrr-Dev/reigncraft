@@ -10,8 +10,16 @@
  */
 
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
-import { DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND } from '@/components/world/building/domains/definingWorldPlazaBlacksmithUtilitySpriteConstants';
+import { checkingWorldBuildingPlacedBlockIsFootprintSatellite } from '@/components/world/building/domains/definingWorldBuildingPlacementFootprint';
 import {
+  checkingWorldPlazaBlacksmithUtilityKindShowsChimneySmoke,
+  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_CHIMNEY_EMBER_COLOR,
+  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_CHIMNEY_EMBER_PUFF_COUNT,
+  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_CHIMNEY_SMOKE_COLOR,
+  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_CHIMNEY_SMOKE_PUFF_COUNT,
+} from '@/components/world/building/domains/definingWorldPlazaBlacksmithUtilitySpriteConstants';
+import {
+  checkingWorldPlazaBlacksmithUtilityBlockIsOreSmeltingActive,
   resolvingWorldPlazaBlacksmithUtilityKindForBlockDefinitionId,
   syncingWorldPlazaVisibleBlacksmithUtilityLayer,
   type SyncingWorldPlazaBlacksmithUtilitySpriteState,
@@ -124,14 +132,21 @@ export function RenderingWorldPlazaBlacksmithUtilityLayer({
     const nowMs = performance.now();
 
     for (const block of placedBlocksRef.current) {
-      if (
-        !activeBlockIdsRef.current?.has(block.blockId) ||
-        (resolvingWorldPlazaBlacksmithUtilityKindForBlockDefinitionId(
+      if (checkingWorldBuildingPlacedBlockIsFootprintSatellite(block)) {
+        continue;
+      }
+
+      const utilityKind =
+        resolvingWorldPlazaBlacksmithUtilityKindForBlockDefinitionId(
           block.definitionId
-        ) !== DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.BLOOMERY &&
-          resolvingWorldPlazaBlacksmithUtilityKindForBlockDefinitionId(
-            block.definitionId
-          ) !== DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.BESSEMER_FORGE)
+        );
+
+      if (
+        !checkingWorldPlazaBlacksmithUtilityBlockIsOreSmeltingActive(
+          block,
+          activeBlockIdsRef.current
+        ) ||
+        !checkingWorldPlazaBlacksmithUtilityKindShowsChimneySmoke(utilityKind)
       ) {
         continue;
       }
@@ -163,14 +178,35 @@ export function RenderingWorldPlazaBlacksmithUtilityLayer({
         didMutateEntityLayerOrder = true;
       }
 
-      for (let puffIndex = 0; puffIndex < 4; puffIndex += 1) {
+      for (
+        let puffIndex = 0;
+        puffIndex <
+        DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_CHIMNEY_SMOKE_PUFF_COUNT;
+        puffIndex += 1
+      ) {
         const phase = (nowMs * 0.00035 + puffIndex * 0.24) % 1;
         const radius = 2.5 + phase * 4;
         const x = Math.sin(phase * Math.PI * 2 + puffIndex) * 3;
         const y = -phase * 30;
         smokeGraphics.circle(x, y, radius).fill({
-          color: 0x6f6b64,
+          color: DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_CHIMNEY_SMOKE_COLOR,
           alpha: (1 - phase) * 0.3,
+        });
+      }
+
+      for (
+        let emberIndex = 0;
+        emberIndex <
+        DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_CHIMNEY_EMBER_PUFF_COUNT;
+        emberIndex += 1
+      ) {
+        const phase = (nowMs * 0.00055 + emberIndex * 0.41) % 1;
+        const radius = 1.2 + phase * 1.8;
+        const x = Math.sin(phase * Math.PI * 2 + emberIndex * 1.7) * 2;
+        const y = -phase * 18;
+        smokeGraphics.circle(x, y, radius).fill({
+          color: DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_CHIMNEY_EMBER_COLOR,
+          alpha: (1 - phase) * 0.45,
         });
       }
     }

@@ -9,6 +9,7 @@ import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/
 import { computingWorldPlazaTerrainElevationScreenOffsetPxAtTileIndex } from '@/components/world/domains/computingWorldPlazaTerrainElevationScreenOffsetPxAtTileIndex';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import type { CreatingWorldPlazaGrassFloorChunkDrawPassContext } from '@/components/world/domains/creatingWorldPlazaGrassFloorChunkDrawPassContext';
+import { DEFINING_WORLD_PLAZA_GRASS_FLOOR_FILL_BLEED_PX } from '@/components/world/domains/definingWorldPlazaGrassFloorConstants';
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
@@ -138,15 +139,20 @@ export function drawingWorldPlazaGrassFloorTileOnGraphics(
   };
 
   if (drawsFloorFill) {
+    const fillHalfWidth =
+      halfWidth + DEFINING_WORLD_PLAZA_GRASS_FLOOR_FILL_BLEED_PX;
+    const fillHalfHeight =
+      halfHeight + DEFINING_WORLD_PLAZA_GRASS_FLOOR_FILL_BLEED_PX;
+
     graphics
       .poly([
         center.x,
-        center.y - halfHeight,
-        center.x + halfWidth,
+        center.y - fillHalfHeight,
+        center.x + fillHalfWidth,
         center.y,
         center.x,
-        center.y + halfHeight,
-        center.x - halfWidth,
+        center.y + fillHalfHeight,
+        center.x - fillHalfWidth,
         center.y,
       ])
       .fill({ color: fillColor });
@@ -172,12 +178,12 @@ export function drawingWorldPlazaGrassFloorTileOnGraphics(
       graphics
         .poly([
           center.x,
-          center.y - halfHeight,
-          center.x + halfWidth,
+          center.y - fillHalfHeight,
+          center.x + fillHalfWidth,
           center.y,
           center.x,
-          center.y + halfHeight,
-          center.x - halfWidth,
+          center.y + fillHalfHeight,
+          center.x - fillHalfWidth,
           center.y,
         ])
         .fill({ color: hazardTint.color, alpha: hazardTint.alpha });

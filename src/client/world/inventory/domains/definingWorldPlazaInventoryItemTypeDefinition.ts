@@ -77,6 +77,11 @@ export type DefiningWorldPlazaInventoryItemTypeDefinition =
     readonly iconImageUrl?: string;
     /** One cropped pixel-art cell from a public sprite sheet. */
     readonly iconSpriteSheet?: DefiningWorldPlazaInventorySpriteSheetIcon;
+    /**
+     * Optional CSS color drawn over {@link iconSpriteSheet} with a sheet-cell
+     * alpha mask (used for Spritcore crimson/gold cycles).
+     */
+    readonly iconSpriteOverlayColor?: string;
     /** Bundled Iconify glyph id (e.g. `mdi:bag-personal`). */
     readonly iconifyIcon?: string;
     /** Special content tags (Godforge, Unique, Quest Reward). */

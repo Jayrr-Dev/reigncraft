@@ -90,22 +90,63 @@ export const RenderingWorldPlazaInventoryItemGlyph = memo(
         spriteSheet.rowCount <= 1
           ? 0
           : (spriteSheet.rowIndex / (spriteSheet.rowCount - 1)) * 100;
+      const backgroundPosition = `${backgroundPositionX}% ${backgroundPositionY}%`;
+      const backgroundSize = `${spriteSheet.columnCount * 100}% ${spriteSheet.rowCount * 100}%`;
+      const spriteSheetStyle: React.CSSProperties = {
+        backgroundImage: `url("${spriteSheet.spriteSheetUrl}")`,
+        backgroundPosition,
+        backgroundRepeat: 'no-repeat',
+        backgroundSize,
+      };
+      const overlayColor = plazaTypeDef.iconSpriteOverlayColor;
+
+      if (!overlayColor) {
+        return (
+          <span
+            className={cn(
+              STYLING_WORLD_PLAZA_INVENTORY_SLOT_IMAGE_ICON_CLASS,
+              iconClassName
+            )}
+            style={{
+              ...iconStyle,
+              ...spriteSheetStyle,
+            }}
+            aria-hidden
+          />
+        );
+      }
 
       return (
         <span
           className={cn(
             STYLING_WORLD_PLAZA_INVENTORY_SLOT_IMAGE_ICON_CLASS,
+            'relative overflow-hidden',
             iconClassName
           )}
-          style={{
-            ...iconStyle,
-            backgroundImage: `url("${spriteSheet.spriteSheetUrl}")`,
-            backgroundPosition: `${backgroundPositionX}% ${backgroundPositionY}%`,
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: `${spriteSheet.columnCount * 100}% ${spriteSheet.rowCount * 100}%`,
-          }}
+          style={iconStyle}
           aria-hidden
-        />
+        >
+          <span
+            className="absolute inset-0 bg-no-repeat [image-rendering:pixelated]"
+            style={spriteSheetStyle}
+          />
+          <span
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundColor: overlayColor,
+              mixBlendMode: 'color',
+              opacity: 0.92,
+              WebkitMaskImage: `url("${spriteSheet.spriteSheetUrl}")`,
+              maskImage: `url("${spriteSheet.spriteSheetUrl}")`,
+              WebkitMaskPosition: backgroundPosition,
+              maskPosition: backgroundPosition,
+              WebkitMaskSize: backgroundSize,
+              maskSize: backgroundSize,
+              WebkitMaskRepeat: 'no-repeat',
+              maskRepeat: 'no-repeat',
+            }}
+          />
+        </span>
       );
     }
 

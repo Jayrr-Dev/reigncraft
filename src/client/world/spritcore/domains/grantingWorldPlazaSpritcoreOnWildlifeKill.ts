@@ -6,15 +6,24 @@
 
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
+import { resolvingWorldPlazaSpritcoreDropTierDefinition } from '@/components/world/spritcore/domains/resolvingWorldPlazaSpritcoreDropTier';
 import { resolvingWorldPlazaSpritcoreWildlifeDrop } from '@/components/world/spritcore/domains/resolvingWorldPlazaSpritcoreWildlifeDrop';
 import type { DefiningWildlifeMeatDropKillContext } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+
+export type GrantingWorldPlazaSpritcoreOnWildlifeKillGrant = {
+  readonly amount: number;
+  readonly itemTypeId: string;
+  readonly displayName: string;
+};
 
 export type GrantingWorldPlazaSpritcoreOnWildlifeKillInput = {
   readonly species: DefiningWildlifeSpeciesDefinition;
   readonly killContext?: DefiningWildlifeMeatDropKillContext | null;
   readonly playerTargetId: string | null;
-  readonly onGrant: (amount: number) => void;
+  readonly onGrant: (
+    grant: GrantingWorldPlazaSpritcoreOnWildlifeKillGrant
+  ) => void;
 };
 
 /**
@@ -47,7 +56,14 @@ export function grantingWorldPlazaSpritcoreOnWildlifeKill(
     return 0;
   }
 
-  input.onGrant(dropAmount);
+  const tierDefinition =
+    resolvingWorldPlazaSpritcoreDropTierDefinition(dropAmount);
+
+  input.onGrant({
+    amount: dropAmount,
+    itemTypeId: tierDefinition.itemTypeId,
+    displayName: tierDefinition.displayName,
+  });
 
   return dropAmount;
 }

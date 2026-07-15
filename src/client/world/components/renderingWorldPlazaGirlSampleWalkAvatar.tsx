@@ -145,6 +145,8 @@ import { notifyingWorldPlazaAvatarMotionSfxEvent } from '@/components/world/doma
 import { recordingWorldPlazaPlayerPerformanceDiagnostics } from '@/components/world/domains/recordingWorldPlazaPlayerPerformanceDiagnostics';
 import { resolvingWorldPlazaAvatarClipPresentation } from '@/components/world/domains/resolvingWorldPlazaAvatarClipPresentation';
 import { resolvingWorldPlazaAvatarRollDurationMs } from '@/components/world/domains/resolvingWorldPlazaAvatarRollDurationMs';
+import { DEFINING_WORLD_PLAZA_CYROBORN_DEATH_IMPLODE_DURATION_MS } from '@/components/world/domains/definingWorldPlazaCyrobornScalePulseConstants';
+import { resolvingWorldPlazaCyrobornScalePulseMultiplier } from '@/components/world/domains/resolvingWorldPlazaCyrobornScalePulseMultiplier';
 import { resolvingWorldPlazaGirlSampleCombatSpritePresentation } from '@/components/world/domains/resolvingWorldPlazaGirlSampleCombatSpritePresentation';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import { resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection';
@@ -285,6 +287,13 @@ export interface RenderingWorldPlazaGirlSampleWalkAvatarProps {
   isRollDodgeActiveRef?: React.RefObject<boolean>;
   /** Roll animation progress synced each frame; 0 outside the dodge window. */
   rollDodgeProgressRef?: React.RefObject<number>;
+  /**
+   * Optional hook when a roll successfully begins (after stamina spend).
+   * Used by ranged skins (Cyroborn) to cast on roll.
+   */
+  onRollStartedRef?: React.RefObject<
+    ((roll: DefiningWorldPlazaAvatarRollPresentationState) => void) | null
+  >;
   /** Live melee attack presentation. */
   meleeAttackStateRef?: React.RefObject<DefiningWorldPlazaAvatarMeleePresentationState | null>;
   pushStateRef?: React.RefObject<DefiningWorldPlazaAvatarPushPresentationState | null>;
@@ -345,6 +354,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   isRollingRef,
   isRollDodgeActiveRef,
   rollDodgeProgressRef,
+  onRollStartedRef,
   meleeAttackStateRef,
   pushStateRef,
   blockReactionStateRef,
@@ -1199,7 +1209,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           damagedReactionUntilMsRef.current = 0;
         }
 
-        rollStateRef.current = {
+        const nextRollState = {
           direction: rollDirection,
           startedAtMs: nowMs,
           startPosition: {
@@ -1211,6 +1221,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
             y: playerPosition.y + rollGridDirection.y * forwardGridDistance,
           },
         };
+        rollStateRef.current = nextRollState;
+        onRollStartedRef?.current?.(nextRollState);
 
         if (rollChainUnlockAtMsRef) {
           rollChainUnlockAtMsRef.current =
@@ -2152,8 +2164,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         placedBlocksByTile: scenePlacedBlocksByTile,
         isJumping: Boolean(activeJumpState),
         playerRadiusGrid: characterEngineDerivedStats.collisionRadiusGrid,
-        playerHeightWorldLayers:
-          characterEngineDerivedStats.heightWorldLayers,
+        playerHeightWorldLayers: characterEngineDerivedStats.heightWorldLayers,
         maxNodeExpansions: performanceProfile.navigationMaxNodeExpansions,
       });
       settingWorldPlazaPerformanceDiagnosticsGauge(
@@ -2415,7 +2426,35 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       combatSpritePresentation.anchorXNormalized,
       combatSpritePresentation.anchorYNormalized
     );
-    sprite.scale.set(effectiveSpriteScale);
+
+    const activeMeleeForScale = meleeAttackStateRef?.current ?? null;
+    const attackProgressForScale =
+      activeMeleeForScale && activeMeleeForScale.durationMs > 0
+        ? Math.min(
+            1,
+            (nowMs - activeMeleeForScale.startedAtMs) /
+              activeMeleeForScale.durationMs
+          )
+        : null;
+    const deathStateForScale = deathStateRef?.current ?? null;
+    const deathProgressForScale =
+      isPlayerDead && deathStateForScale
+        ? Math.min(
+            1,
+            (nowMs - deathStateForScale.startedAtMs) /
+              DEFINING_WORLD_PLAZA_CYROBORN_DEATH_IMPLODE_DURATION_MS
+          )
+        : null;
+    const cyrobornScalePulse = resolvingWorldPlazaCyrobornScalePulseMultiplier({
+      skinId: characterDefinition.skinId,
+      jumpProgress: activeJumpState ? jumpProgress : null,
+      attackProgress: attackProgressForScale,
+      deathProgress: deathProgressForScale,
+    });
+    sprite.scale.set(
+      effectiveSpriteScale * cyrobornScalePulse.scaleMultiplier
+    );
+    sprite.visible = !cyrobornScalePulse.hideBody;
 
     applyingWorldPlazaGirlSampleAvatarMotionToSpriteWithFallback({
       sprite,

@@ -29,6 +29,11 @@ export type ResolvingWorldPlazaPlayerCombatLockTickParams = {
   readonly isDocileConfirmPending: boolean;
   /** True when a click/chase walk target is already active. */
   readonly hasActiveWalk: boolean;
+  /**
+   * Override engagement reach (grid). Ranged skins use cast range so chase
+   * stops and auto-attack fires without closing to melee.
+   */
+  readonly engagementReachGrid?: number;
 };
 
 export type ResolvingWorldPlazaPlayerCombatLockTickResult =
@@ -57,6 +62,7 @@ export function resolvingWorldPlazaPlayerCombatLockTick({
   isMeleeBusy,
   isDocileConfirmPending,
   hasActiveWalk,
+  engagementReachGrid = DEFINING_WORLD_PLAZA_PLAYER_COMBAT_LOCK_MELEE_REACH_GRID,
 }: ResolvingWorldPlazaPlayerCombatLockTickParams): ResolvingWorldPlazaPlayerCombatLockTickResult {
   if (!target || target.isDead || target.instanceId !== lock.targetInstanceId) {
     return { kind: 'clear' };
@@ -67,7 +73,7 @@ export function resolvingWorldPlazaPlayerCombatLockTick({
     target.position.y - playerPosition.y
   );
 
-  if (distanceGrid > DEFINING_WORLD_PLAZA_PLAYER_COMBAT_LOCK_MELEE_REACH_GRID) {
+  if (distanceGrid > engagementReachGrid) {
     const destination = {
       x: target.position.x,
       y: target.position.y,

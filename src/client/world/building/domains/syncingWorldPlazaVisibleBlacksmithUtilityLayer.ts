@@ -88,6 +88,27 @@ export function checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility(
 }
 
 /**
+ * True when ore smelting is running on this utility anchor (or its footprint).
+ */
+export function checkingWorldPlazaBlacksmithUtilityBlockIsOreSmeltingActive(
+  block: DefiningWorldBuildingPlacedBlock,
+  activeBlockIds?: ReadonlySet<string>
+): boolean {
+  if (!activeBlockIds || activeBlockIds.size === 0) {
+    return false;
+  }
+
+  if (activeBlockIds.has(block.blockId)) {
+    return true;
+  }
+
+  const footprintGroupId =
+    resolvingWorldBuildingPlacedBlockFootprintGroupId(block);
+
+  return footprintGroupId !== null && activeBlockIds.has(footprintGroupId);
+}
+
+/**
  * Screen-Y offset for utility sprite feet on the support surface top face.
  *
  * Matches extruded column bases: top anchor L sits above the platform when
@@ -281,11 +302,15 @@ export function syncingWorldPlazaVisibleBlacksmithUtilityLayer(input: {
     const isPlacementPreview =
       block.blockId ===
       DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID;
-    const spriteUrl = input.activeBlockIds?.has(block.blockId)
-      ? DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_ACTIVE_WORLD_SPRITE_URL[
-          utilityKind
-        ]
-      : DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL[utilityKind];
+    const spriteUrl =
+      checkingWorldPlazaBlacksmithUtilityBlockIsOreSmeltingActive(
+        block,
+        input.activeBlockIds
+      )
+        ? DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_ACTIVE_WORLD_SPRITE_URL[
+            utilityKind
+          ]
+        : DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL[utilityKind];
     const texture =
       peekingWorldPlazaBlacksmithUtilitySpriteTextureForUrl(spriteUrl);
 

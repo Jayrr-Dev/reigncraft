@@ -264,6 +264,10 @@ import type {
   DefiningWorldPlazaRemotePlayer,
 } from '@/components/world/domains/definingWorldPlazaOnlineRoom';
 import type { UsingWorldPlazaOnlineRoomChatResult } from '@/components/world/domains/definingWorldPlazaOnlineRoomChatBindings';
+import {
+  resolvingWorldPlazaPlayableAvatarRangedCombatProfile,
+  resolvingWorldPlazaPlayableAvatarRangedNormalAttackArchetypeId,
+} from '@/components/world/domains/definingWorldPlazaPlayableAvatarRangedCombatRegistry';
 import { DEFINING_WORLD_PLAZA_PLAYER_COMBAT_LOCK_HOVER_CURSOR } from '@/components/world/domains/definingWorldPlazaPlayerCombatLockConstants';
 import type { DefiningWorldPlazaPlayerCombatLockState } from '@/components/world/domains/definingWorldPlazaPlayerCombatLockTypes';
 import { DEFINING_WORLD_PLAZA_PLAYER_NIGHT_LIGHT_ENABLED } from '@/components/world/domains/definingWorldPlazaPlayerNightLightConstants';
@@ -322,6 +326,7 @@ import { resolvingWorldPlazaAvatarClipPresentation } from '@/components/world/do
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import { resolvingWorldPlazaInitialPlayerSpawnWorldPoint } from '@/components/world/domains/resolvingWorldPlazaInitialPlayerSpawnWorldPoint';
 import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
+import { resolvingWorldPlazaPlayableAvatarRangedCastRequest } from '@/components/world/domains/resolvingWorldPlazaPlayableAvatarRangedCastRequest';
 import { resolvingWorldPlazaPlayerCombatLockTick } from '@/components/world/domains/resolvingWorldPlazaPlayerCombatLockTick';
 import { resolvingWorldPlazaSavedCoordsById } from '@/components/world/domains/resolvingWorldPlazaSavedCoordsListFromStorage';
 import { resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport } from '@/components/world/domains/resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport';
@@ -544,10 +549,7 @@ import { computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier } fro
 import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
 import { consumingWorldPlazaInventoryItemFromSlot } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemFromSlot';
 import { parsingWorldPlazaFlowerSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
-import {
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED,
-} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { parsingWorldPlazaOreSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { disarmingWorldPlazaInventorySlotArmedHarvestEnchantments } from '@/components/world/inventory/domains/disarmingWorldPlazaInventorySlotArmedHarvestEnchantments';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
@@ -608,6 +610,7 @@ import type {
 } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import type { ManagingWorldPlazaProjectileStore } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
 import { usingWorldPlazaProjectileEngine } from '@/components/world/projectile/hooks/usingWorldPlazaProjectileEngine';
+import type { GrantingWorldPlazaSpritcoreOnWildlifeKillGrant } from '@/components/world/spritcore/domains/grantingWorldPlazaSpritcoreOnWildlifeKill';
 import { initializingWorldPlazaSpritcoreUpgradeStore } from '@/components/world/spritcore/domains/managingWorldPlazaSpritcoreUpgradeStore';
 import { usingWorldPlazaSpritcoreUpgradeBonuses } from '@/components/world/spritcore/hooks/usingWorldPlazaSpritcoreUpgradeBonuses';
 import { RenderingWorldPlazaTeaPotAddWaterInteractionLabels } from '@/components/world/tea-brewing/components/renderingWorldPlazaTeaPotAddWaterInteractionLabels';
@@ -1167,6 +1170,9 @@ function RenderingWorldPlazaPixiSceneConnected({
   const rollChainUnlockAtMsRef = useRef(0);
   const rollStateRef =
     useRef<DefiningWorldPlazaAvatarRollPresentationState | null>(null);
+  const onRollStartedRef = useRef<
+    ((roll: DefiningWorldPlazaAvatarRollPresentationState) => void) | null
+  >(null);
   const meleeAttackStateRef =
     useRef<DefiningWorldPlazaAvatarMeleePresentationState | null>(null);
   const combatLockRef = useRef<DefiningWorldPlazaPlayerCombatLockState | null>(
@@ -4382,20 +4388,26 @@ function RenderingWorldPlazaPixiSceneConnected({
     saveSlotIndex: PlazaSaveSlotIndex | null;
     playerPosition: DefiningWorldPlazaWorldPoint;
     playerTargetId: string;
-    onSpritcoreGrant: (amount: number) => void;
+    onSpritcoreGrant: (
+      grant: GrantingWorldPlazaSpritcoreOnWildlifeKillGrant
+    ) => void;
   } | null>(null);
-  const grantingSpritcoreOnWildlifeKillRef = useRef<(amount: number) => void>(
-    () => {}
-  );
-  grantingSpritcoreOnWildlifeKillRef.current = (amount: number): void => {
+  const grantingSpritcoreOnWildlifeKillRef = useRef<
+    (grant: GrantingWorldPlazaSpritcoreOnWildlifeKillGrant) => void
+  >(() => {});
+  grantingSpritcoreOnWildlifeKillRef.current = (
+    grant: GrantingWorldPlazaSpritcoreOnWildlifeKillGrant
+  ): void => {
     const grantResult = addItemWithStacking({
       id: crypto.randomUUID(),
-      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
-      quantity: amount,
+      itemTypeId: grant.itemTypeId,
+      quantity: grant.amount,
     });
 
     if (grantResult.quantityAccepted > 0) {
-      showingGameplayHudToast(`+${grantResult.quantityAccepted} Spritcore`);
+      showingGameplayHudToast(
+        `+${grantResult.quantityAccepted} ${grant.displayName}`
+      );
     }
   };
 
@@ -4406,8 +4418,8 @@ function RenderingWorldPlazaPixiSceneConnected({
         saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
         playerPosition: playerPositionRef.current,
         playerTargetId: localPlayerProjectileTargetId,
-        onSpritcoreGrant: (amount: number) => {
-          grantingSpritcoreOnWildlifeKillRef.current(amount);
+        onSpritcoreGrant: (grant) => {
+          grantingSpritcoreOnWildlifeKillRef.current(grant);
         },
       }
     : null;
@@ -5612,12 +5624,20 @@ function RenderingWorldPlazaPixiSceneConnected({
         applyingPlayerMeleeDamageOnSwingCompleteRef.current?.(completed)
       );
 
+      const rangedCombatProfile =
+        resolvingWorldPlazaPlayableAvatarRangedCombatProfile(
+          selectedCharacterEngineDefinition.presentation.skinId
+        );
+      const engagementReachGrid =
+        rangedCombatProfile?.castRangeGrid ??
+        DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID;
+
       const reachDistance = Math.hypot(
         instance.position.x - playerPosition.x,
         instance.position.y - playerPosition.y
       );
 
-      if (reachDistance > DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID) {
+      if (reachDistance > engagementReachGrid) {
         replacingWildlifeInstance(
           wildlifeStoreRef.current,
           enqueueingWildlifeMissFloatFeedback({
@@ -5644,13 +5664,55 @@ function RenderingWorldPlazaPixiSceneConnected({
         }
       );
 
+      const attackDirection = resolvingWorldPlazaGirlSampleWalkDirection(
+        instance.position.x - playerPosition.x,
+        instance.position.y - playerPosition.y,
+        localAvatarMotionStateRef.current.facingDirection
+      );
+
       clearingWalkTarget();
+
+      if (rangedCombatProfile?.suppressMelee) {
+        const archetypeId =
+          resolvingWorldPlazaPlayableAvatarRangedNormalAttackArchetypeId(
+            rangedCombatProfile,
+            Math.random()
+          );
+
+        if (archetypeId) {
+          spawnProjectileRef.current?.(
+            resolvingWorldPlazaPlayableAvatarRangedCastRequest({
+              archetypeId,
+              origin: playerPosition,
+              targetPoint: {
+                x: instance.position.x,
+                y: instance.position.y,
+                layer: playerPosition.layer,
+              },
+              nowMs,
+            })
+          );
+        }
+
+        // Cast animation + attack-interval gate; no contact melee damage.
+        meleeAttackStateRef.current = {
+          direction: attackDirection,
+          startedAtMs: nowMs,
+          targetGridX: instance.position.x,
+          targetGridY: instance.position.y,
+          targetInstanceId: instance.instanceId,
+          damageAmount: 0,
+          durationMs: meleeTiming.durationMs,
+          animationFps: meleeTiming.animationFps,
+          damageRegistered: true,
+        };
+
+        playingWorldPlazaAvatarMeleeSwingSfx();
+        return true;
+      }
+
       meleeAttackStateRef.current = {
-        direction: resolvingWorldPlazaGirlSampleWalkDirection(
-          instance.position.x - playerPosition.x,
-          instance.position.y - playerPosition.y,
-          localAvatarMotionStateRef.current.facingDirection
-        ),
+        direction: attackDirection,
         startedAtMs: performance.now(),
         targetGridX: instance.position.x,
         targetGridY: instance.position.y,
@@ -5682,11 +5744,57 @@ function RenderingWorldPlazaPixiSceneConnected({
       playerPositionRef,
       playerTransformWildlifeSpeciesIdRef,
       selectedAvatarCharacterDefinition,
+      selectedCharacterEngineDefinition.presentation.skinId,
       selectedCharacterEngineDerivedStats.attackPower,
       selectedCharacterEngineDerivedStats.attackSpeed,
+      spawnProjectileRef,
       wildlifeStoreRef,
     ]
   );
+
+  onRollStartedRef.current = (roll) => {
+    const rangedCombatProfile =
+      resolvingWorldPlazaPlayableAvatarRangedCombatProfile(
+        selectedCharacterEngineDefinition.presentation.skinId
+      );
+    const rollArchetypeId = rangedCombatProfile?.rollCastArchetypeId;
+
+    if (!rollArchetypeId) {
+      return;
+    }
+
+    const playerPosition = playerPositionRef.current;
+
+    if (!playerPosition) {
+      return;
+    }
+
+    const lock = combatLockRef.current;
+    const lockedTarget = lock
+      ? gettingWildlifeInstance(wildlifeStoreRef.current, lock.targetInstanceId)
+      : null;
+    const targetPoint =
+      lockedTarget && !lockedTarget.isDead
+        ? {
+            x: lockedTarget.position.x,
+            y: lockedTarget.position.y,
+            layer: playerPosition.layer,
+          }
+        : {
+            x: roll.targetPosition.x,
+            y: roll.targetPosition.y,
+            layer: playerPosition.layer,
+          };
+
+    spawnProjectileRef.current?.(
+      resolvingWorldPlazaPlayableAvatarRangedCastRequest({
+        archetypeId: rollArchetypeId,
+        origin: playerPosition,
+        targetPoint,
+        nowMs: roll.startedAtMs,
+      })
+    );
+  };
 
   const lockingCombatOnWildlifeInstance = useCallback(
     (instance: DefiningWildlifeInstance): void => {
@@ -5705,12 +5813,20 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
+      const rangedCombatProfile =
+        resolvingWorldPlazaPlayableAvatarRangedCombatProfile(
+          selectedCharacterEngineDefinition.presentation.skinId
+        );
+      const engagementReachGrid =
+        rangedCombatProfile?.castRangeGrid ??
+        DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID;
+
       const reachDistance = Math.hypot(
         instance.position.x - playerPosition.x,
         instance.position.y - playerPosition.y
       );
 
-      if (reachDistance <= DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID) {
+      if (reachDistance <= engagementReachGrid) {
         startingMeleeSwingAtWildlife(instance);
         return;
       }
@@ -5725,6 +5841,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       applyingWalkPlanToDestination,
       isClickRunIntentRef,
       playerPositionRef,
+      selectedCharacterEngineDefinition.presentation.skinId,
       startingMeleeSwingAtWildlife,
     ]
   );
@@ -5894,6 +6011,10 @@ function RenderingWorldPlazaPixiSceneConnected({
             applyingPlayerMeleeDamageOnSwingCompleteRef.current?.(completed)
         );
       }
+      const rangedCombatProfile =
+        resolvingWorldPlazaPlayableAvatarRangedCombatProfile(
+          selectedCharacterEngineDefinition.presentation.skinId
+        );
       const tickResult = resolvingWorldPlazaPlayerCombatLockTick({
         lock,
         playerPosition,
@@ -5910,6 +6031,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           readingWildlifeDocileAttackConfirmPending()
         ),
         hasActiveWalk: Boolean(isWalkingRef.current && walkTargetRef.current),
+        engagementReachGrid: rangedCombatProfile?.castRangeGrid,
       });
 
       if (tickResult.kind === 'clear') {
@@ -5962,6 +6084,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     isLocalGameplayEnabled,
     isWalkingRef,
     playerPositionRef,
+    selectedCharacterEngineDefinition.presentation.skinId,
     startingMeleeSwingAtWildlife,
     walkTargetRef,
     wildlifeStoreRef,
@@ -8154,6 +8277,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                     isRollingRef={isRollingRef}
                     isRollDodgeActiveRef={isRollDodgeActiveRef}
                     rollDodgeProgressRef={rollDodgeProgressRef}
+                    onRollStartedRef={onRollStartedRef}
                     meleeAttackStateRef={meleeAttackStateRef}
                     applyingPlayerMeleeDamageOnSwingCompleteRef={
                       applyingPlayerMeleeDamageOnSwingCompleteRef

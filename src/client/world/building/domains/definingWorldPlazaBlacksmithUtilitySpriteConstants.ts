@@ -105,3 +105,42 @@ export const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_FOOT_SINK_PX = {
 /** Ghost alpha while dragging a blacksmith utility in craft/build placement. */
 export const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_ALPHA =
   0.72 as const;
+
+/**
+ * Tall refinery props with a top vent: rising smoke + embers while smelting.
+ * (Kiln / stove use arch glow in the active sprite only.)
+ */
+export const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KINDS_WITH_CHIMNEY_SMOKE =
+  [
+    DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.BLOOMERY,
+    DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.BESSEMER_FORGE,
+  ] as const satisfies readonly DefiningWorldPlazaBlacksmithUtilityKind[];
+
+const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_CHIMNEY_SMOKE_KIND_SET =
+  new Set<DefiningWorldPlazaBlacksmithUtilityKind>(
+    DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KINDS_WITH_CHIMNEY_SMOKE
+  );
+
+/** True when this utility should show procedural chimney smoke while active. */
+export function checkingWorldPlazaBlacksmithUtilityKindShowsChimneySmoke(
+  utilityKind: DefiningWorldPlazaBlacksmithUtilityKind | null
+): boolean {
+  return (
+    utilityKind !== null &&
+    DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_CHIMNEY_SMOKE_KIND_SET.has(
+      utilityKind
+    )
+  );
+}
+
+/** Grey smoke puff count per frame (bloomery / Bessemer). */
+export const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_CHIMNEY_SMOKE_PUFF_COUNT = 4;
+
+/** Chimney smoke fill color (ARGB hex without alpha). */
+export const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_CHIMNEY_SMOKE_COLOR = 0x6f6b64;
+
+/** Warm ember puff count per frame at the vent mouth. */
+export const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_CHIMNEY_EMBER_PUFF_COUNT = 2;
+
+/** Ember fill color (ARGB hex without alpha). */
+export const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_CHIMNEY_EMBER_COLOR = 0xff8833;

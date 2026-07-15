@@ -8,20 +8,21 @@
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import { Icon } from '@/components/ui/icon';
-import { countingWorldPlazaInventoryItemTypeQuantity } from '@/components/world/crafting/domains/countingWorldPlazaInventoryItemTypeQuantity';
 import {
   LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_PANEL_SUBTITLE,
   LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_PANEL_TITLE,
 } from '@/components/world/domains/definingWorldPlazaSpritcoreUpgradeOverlayConstants';
-import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { formattingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryStackQuantityLabel';
 import { computingWorldPlazaSpritcoreCombatPower } from '@/components/world/spritcore/domains/computingWorldPlazaSpritcoreCombatPower';
+import {
+  consumingWorldPlazaSpritcoreInventoryQuantity,
+  countingWorldPlazaSpritcoreInventoryQuantity,
+} from '@/components/world/spritcore/domains/countingWorldPlazaSpritcoreInventoryQuantity';
 import {
   DEFINING_WORLD_PLAZA_SPRITCORE_ITEM_NAME,
   DEFINING_WORLD_PLAZA_SPRITCORE_STACK_QUANTITY_DISPLAY,
 } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreConstants';
-import { DEFINING_WORLD_PLAZA_INVENTORY_SPRITCORE_SPRITE_SHEET_URL } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreSpriteSheetConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_SPRITCORE_SPRITE_SHEET_ICON } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreSpriteSheetConstants';
 import type { WorldPlazaSpritcoreUpgradeLaneId } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
 import {
   applyingWorldPlazaSpritcoreUpgradePurchase,
@@ -83,10 +84,16 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
     gettingWorldPlazaSpritcoreUpgradeSnapshot,
     gettingWorldPlazaSpritcoreUpgradeSnapshot
   );
-  const spiritcoreBalance = countingWorldPlazaInventoryItemTypeQuantity(
-    inventoryState,
-    DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE
-  );
+  const spiritcoreBalance =
+    countingWorldPlazaSpritcoreInventoryQuantity(inventoryState);
+  const spiritcoreHeaderIcon =
+    DEFINING_WORLD_PLAZA_INVENTORY_SPRITCORE_SPRITE_SHEET_ICON;
+  const spiritcoreHeaderIconPositionX =
+    spiritcoreHeaderIcon.columnCount <= 1
+      ? 0
+      : (spiritcoreHeaderIcon.columnIndex /
+          (spiritcoreHeaderIcon.columnCount - 1)) *
+        100;
   const offers = useMemo(
     () =>
       resolvingWorldPlazaSpritcoreUpgradeOffers({
@@ -119,9 +126,8 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
         return;
       }
 
-      const consumeResult = consumingWorldPlazaInventoryItemByType(
+      const consumeResult = consumingWorldPlazaSpritcoreInventoryQuantity(
         inventoryState,
-        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
         price
       );
 
@@ -169,11 +175,13 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
       <div className="flex items-start justify-between gap-3 border-b border-poster-teal/20 px-4 py-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <img
-              src={DEFINING_WORLD_PLAZA_INVENTORY_SPRITCORE_SPRITE_SHEET_URL}
-              alt=""
-              className="size-8 [image-rendering:pixelated]"
-              draggable={false}
+            <span
+              className="size-8 shrink-0 bg-no-repeat [image-rendering:pixelated]"
+              style={{
+                backgroundImage: `url("${spiritcoreHeaderIcon.spriteSheetUrl}")`,
+                backgroundPosition: `${spiritcoreHeaderIconPositionX}% 0%`,
+                backgroundSize: `${spiritcoreHeaderIcon.columnCount * 100}% ${spiritcoreHeaderIcon.rowCount * 100}%`,
+              }}
               aria-hidden
             />
             <h2 className="font-display text-lg font-bold uppercase tracking-wide text-ink">

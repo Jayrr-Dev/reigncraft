@@ -37,6 +37,7 @@ export const DEFINING_WILDLIFE_SPRITE_SHEET_FRAME_HEIGHT_BY_FOLDER: Readonly<
   cow: 74,
   'cow-brown': 74,
   crocodile: 64,
+  cyroborn: 64,
   deer: 64,
   donkey: 64,
   elephant: 128,

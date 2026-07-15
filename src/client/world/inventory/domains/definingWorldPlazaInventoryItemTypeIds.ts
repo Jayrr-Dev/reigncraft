@@ -167,9 +167,45 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_GHOST_WING_MUSHROOM =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_GHOST_WING_MUSHROOM =
   'world-plaza-cooked-ghost-wing-mushroom' as const;
 
-/** Spritcore currency item type id. */
+/** Spritcore currency item type id (legacy single-type stacks). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE =
   'world-plaza-spritcore' as const;
+
+/** Weakest wildlife Spiritcore drop tier (violet cycle). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE_FAINT =
+  'world-plaza-spritcore-faint' as const;
+
+/** Mid wildlife Spiritcore drop tier (violet cycle). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE_BRIGHT =
+  'world-plaza-spritcore-bright' as const;
+
+/** High wildlife Spiritcore drop tier (violet cycle). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE_STRONG =
+  'world-plaza-spritcore-strong' as const;
+
+/** Top wildlife Spiritcore drop tier (violet cycle). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE_RADIANT =
+  'world-plaza-spritcore-radiant' as const;
+
+/** Crimson-cycle Spiritcore orbs (red overlay on base sheet). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE_FAINT_CRIMSON =
+  'world-plaza-spritcore-faint-crimson' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE_BRIGHT_CRIMSON =
+  'world-plaza-spritcore-bright-crimson' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE_STRONG_CRIMSON =
+  'world-plaza-spritcore-strong-crimson' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE_RADIANT_CRIMSON =
+  'world-plaza-spritcore-radiant-crimson' as const;
+
+/** Gold-cycle Spiritcore orbs (gold overlay on base sheet). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE_FAINT_GOLD =
+  'world-plaza-spritcore-faint-gold' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE_BRIGHT_GOLD =
+  'world-plaza-spritcore-bright-gold' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE_STRONG_GOLD =
+  'world-plaza-spritcore-strong-gold' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE_RADIANT_GOLD =
+  'world-plaza-spritcore-radiant-gold' as const;
 
 /** Tiny starter bag (2x2). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_POUCH =

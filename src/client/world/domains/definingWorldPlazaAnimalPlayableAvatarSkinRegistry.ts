@@ -71,6 +71,7 @@ const DEFINING_WORLD_PLAZA_ANIMAL_PLAYABLE_DISPLAY_NAME_OVERRIDES: Record<
   'shepherd-dog': 'Shepherd Dog',
   'water-buffalo': 'Water Buffalo',
   'white-tiger': 'White Tiger',
+  cyroborn: 'Cyroborn',
 };
 
 const DEFINING_WORLD_PLAZA_ANIMAL_PLAYABLE_JUMP_SHEET_FOLDERS = new Set([
