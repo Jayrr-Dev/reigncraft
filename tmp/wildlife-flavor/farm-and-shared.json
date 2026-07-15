@@ -1,0 +1,142 @@
+[
+  {
+    "itemTypeId": "world-plaza-wildlife-milk",
+    "name": "Milk",
+    "description": "Warm from a plains cow. Healer work loves it; so does a dry throat on the road."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-wool",
+    "name": "Wool",
+    "description": "Greasy fleece off a grazer. Packs wounds, stuffs bedding, and stops a cold wind."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-hide",
+    "name": "Hide",
+    "description": "Plain cattle skin, still stiff with blood. First cut of leather for anyone who scrapes it clean."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-horn",
+    "name": "Horn",
+    "description": "Solid tip from bull, bison, ram, or worse. Scrapes into tools, handles, and bitter tonics."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-bristle",
+    "name": "Bristle",
+    "description": "Stiff hair from pig or boar. Makes brushes, and it shows up in drawing poultices that pull rot out."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-dog-fur",
+    "name": "Dog Fur",
+    "description": "Soft undercoat from a companion that ran with you. Kennel salves bind better with it mixed in."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-dog-tooth",
+    "name": "Dog Tooth",
+    "description": "Clean canine off a hound. Worn on a collar more often than hung as a trophy."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-cat-claw",
+    "name": "Cat Claw",
+    "description": "Curved nail from a house cat. Ground fine, it stops a scratch from bleeding longer than it should."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-soft-hide",
+    "name": "Soft Hide",
+    "description": "Thin skin from a deer that almost got away. Soft enough to pillow a fever sleep."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-tendon",
+    "name": "Tendon",
+    "description": "Tough sinew from a runner's leg. Bowstring, splint wrap, and bruise liniment all start here."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-hoof",
+    "name": "Hoof",
+    "description": "Hard chunk from horse, zebra, or donkey. Smells like road dust even after you wash it."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-shell-scute",
+    "name": "Shell Scute",
+    "description": "One plate off a turtle, tortoise, or river catch. Stacks into armor or scrapes into beadwork."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-full-shell",
+    "name": "Full Shell",
+    "description": "Whole carapace, still curved. Bowl, shield plate, or a lid that never warps."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-scale",
+    "name": "Scale",
+    "description": "Tough plate from crocodile, fish, or colder kin. Rattles in the bag like loose coin."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-brown-fur",
+    "name": "Brown Fur",
+    "description": "Warm coat off a brown bear or grizzly. Holds heat after the animal is long gone."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-claw",
+    "name": "Claw",
+    "description": "Heavy hook from bear or lion. Digs into leather work and into anything that still fights back."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-fang",
+    "name": "Fang",
+    "description": "Long tooth from wolf, tiger, or polar bear. Healer kits keep one for wolf-fever work."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-thick-hide",
+    "name": "Thick Hide",
+    "description": "Elephant skin measured in fingers. Takes forever to tan and forever to punch through."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-ivory",
+    "name": "Ivory",
+    "description": "Pale shard from an elephant tusk. Carves clean, and every Forgewright ruin wants more of it."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-plate-hide",
+    "name": "Plate Hide",
+    "description": "Rhino skin thick as armor board. Fold it wrong and it cracks; fold it right and arrows bounce."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-ember-scale",
+    "name": "Ember Scale",
+    "description": "Heat-hardened plate from a sunhead, or a rare Cyroborn shed. Still warm to the touch."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-feather",
+    "name": "Feather",
+    "description": "Light hen plume. Fever cloths take it; so do fletchers who cannot afford better."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-egg",
+    "name": "Egg",
+    "description": "Warm from the nest. Crack it into a pan before it remembers it had a mother."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-pig-fat",
+    "name": "Pig Fat",
+    "description": "Dense lard that cooks hot and fills a bag. Salves, liniments, and greasy meals all run on it."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-brown-hide",
+    "name": "Brown Hide",
+    "description": "Coat from brown plains cattle. Same leather work as plain hide, just darker when tanned."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-sheep-skin",
+    "name": "Sheep Skin",
+    "description": "Skin with wool still clinging. Wound packs love the padding; bedrolls love the rest."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-muddy-hide",
+    "name": "Muddy Hide",
+    "description": "Water-buffalo skin caked in river mud. Scrape the muck and the leather underneath is stubborn."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-shaggy-coat",
+    "name": "Shaggy Coat",
+    "description": "Thick bison fleece full of burs and plains dust. Keeps a wanderer warm when the wind turns mean."
+  }
+]

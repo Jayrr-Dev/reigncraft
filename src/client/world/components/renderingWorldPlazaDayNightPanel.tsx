@@ -58,7 +58,7 @@ export const RenderingWorldPlazaDayNightPanel = memo(
         }
         const dayNumberElement = dayNumberElementRef.current;
         if (dayNumberElement) {
-          dayNumberElement.textContent = dayNumber;
+          dayNumberElement.textContent = String(dayNumber);
         }
       };
 

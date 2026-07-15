@@ -79,29 +79,6 @@ export function resolvingPlazaCodexStudyMilestoneRewardPopoverLabel(
   return remainingNeeded === 1 ? '1 more' : `${remainingNeeded} more`;
 }
 
-/** Popover horizontal pin so edge chests stay inside the panel. */
-export type PlazaCodexStudyMilestoneRewardPopoverAlign =
-  | 'start'
-  | 'center'
-  | 'end';
-
-/**
- * Early chests pin start, late chests pin end, mid-track stays centered.
- */
-export function resolvingPlazaCodexStudyMilestoneRewardPopoverAlign(
-  percent: number
-): PlazaCodexStudyMilestoneRewardPopoverAlign {
-  if (percent <= 15) {
-    return 'start';
-  }
-
-  if (percent >= 85) {
-    return 'end';
-  }
-
-  return 'center';
-}
-
 /**
  * True when any overall milestone chest on this meter is reached (reward ready).
  * When section context is provided, only defined unclaimed rewards count.

@@ -16,22 +16,15 @@ export type PlazaCodexMilestoneRewardClaimDialogModel = {
 
 /**
  * Resolves title, short description, and recipe art for the claim dialog.
- * Prefers registry claim copy; falls back to craft recipe fields when needed.
+ * Prefers registry claim copy; falls back to craft recipe description when blank.
  */
 export function resolvingPlazaCodexMilestoneRewardClaimDialogModel(
   definition: PlazaCodexMilestoneRewardDefinition
 ): PlazaCodexMilestoneRewardClaimDialogModel {
-  if (definition.reward.kind !== 'attach-recipe') {
-    return {
-      title: definition.reward.label,
-      description: definition.reward.description,
-      recipeVisual: null,
-    };
-  }
-
-  const recipe = resolvingWorldPlazaCraftModeRecipeDefinition(
-    definition.reward.recipeId
-  );
+  const recipe =
+    definition.reward.kind === 'attach-recipe'
+      ? resolvingWorldPlazaCraftModeRecipeDefinition(definition.reward.recipeId)
+      : null;
 
   return {
     title: definition.reward.label,

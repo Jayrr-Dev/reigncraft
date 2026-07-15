@@ -111,7 +111,9 @@ export function RenderingWorldPlazaCodexMenuPanel({
     gettingWorldPlazaHerbariumSightedTreeVariantsSnapshot,
     () => []
   );
-  const herbariumTreeStudyCounts = useSyncExternalStore(
+  const herbariumTreeStudyCounts = useSyncExternalStore<
+    ReturnType<typeof gettingWorldPlazaHerbariumTreeStudyCountsSnapshot>
+  >(
     subscribingWorldPlazaHerbariumDiscovery,
     gettingWorldPlazaHerbariumTreeStudyCountsSnapshot,
     () => ({})
@@ -126,7 +128,9 @@ export function RenderingWorldPlazaCodexMenuPanel({
     gettingWorldPlazaHerbariumSightedBerryLootKindsSnapshot,
     () => []
   );
-  const herbariumBerryStudyCounts = useSyncExternalStore(
+  const herbariumBerryStudyCounts = useSyncExternalStore<
+    ReturnType<typeof gettingWorldPlazaHerbariumBerryStudyCountsSnapshot>
+  >(
     subscribingWorldPlazaHerbariumDiscovery,
     gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
     () => ({})
@@ -136,7 +140,9 @@ export function RenderingWorldPlazaCodexMenuPanel({
     gettingWorldPlazaHerbariumSightedMushroomSpeciesSnapshot,
     () => []
   );
-  const herbariumMushroomStudyCounts = useSyncExternalStore(
+  const herbariumMushroomStudyCounts = useSyncExternalStore<
+    ReturnType<typeof gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot>
+  >(
     subscribingWorldPlazaHerbariumDiscovery,
     gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot,
     () => ({})

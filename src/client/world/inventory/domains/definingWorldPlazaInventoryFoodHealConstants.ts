@@ -47,6 +47,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_FOOD_HEAL_SIZE_TIER_MULTIPLIER: Read
   [1]: 1.15,
   [2]: 1.3,
   [3]: 1.5,
+  [4]: 1.75,
 };
 
 /** Extra heal when meat came from an obese large-frame kill. */

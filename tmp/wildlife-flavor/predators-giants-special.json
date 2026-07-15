@@ -1,0 +1,87 @@
+[
+  {
+    "itemTypeId": "world-plaza-wildlife-tusk",
+    "name": "Tusk",
+    "description": "Curved tusk from a boar that charged first. File the tip and it becomes a tool."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-white-fur",
+    "name": "White Fur",
+    "description": "Thick white fur from a polar bear. Still smells like snow and fish."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-wolf-fur",
+    "name": "Wolf Fur",
+    "description": "Grey fur from the wolf that was stalking you. Pack scent clings for days."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-night-pelt",
+    "name": "Night Pelt",
+    "description": "Near-black pelt from an omega wolf. Starlight used to slide off it."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-omega-fang",
+    "name": "Omega Fang",
+    "description": "Heavy fang from a pack leader that hunted by starlight. Something in the enamel feels wrong."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-spotted-hide",
+    "name": "Spotted Hide",
+    "description": "Spotted hide from a night scavenger. Rank, durable, never quite clean."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-bone",
+    "name": "Bone",
+    "description": "Stout bone a hyena cracked open. Marrow long gone."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-mane",
+    "name": "Mane",
+    "description": "Tuft of lion mane. Proud on a wall, silly on a belt."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-lean-hide",
+    "name": "Lean Hide",
+    "description": "Lean hide from a lioness. Less show than a mane, more work hours in it."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-stripe-fur",
+    "name": "Stripe Fur",
+    "description": "Fur striped like the tiger that wore it. Grass camouflage you will never match."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-spot-fur",
+    "name": "Spot Fur",
+    "description": "Jaguar-spotted fur. Soft until you remember what it cost."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-jawbone",
+    "name": "Jawbone",
+    "description": "Crushing jawbone from a jaguar. Hinge still works if you force it."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-crown-plate",
+    "name": "Crown Plate",
+    "description": "Heat-warped plate from a sunhead crown. Warm long after the Firelands cool."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-shag-wool",
+    "name": "Shag Wool",
+    "description": "Shaggy mammoth wool. Holds cold like a bad habit."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-ice-tusk",
+    "name": "Ice Tusk",
+    "description": "Tip of a mammoth tusk. Frost never quite leaves the grain."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-gold-dust",
+    "name": "Gold Dust",
+    "description": "Fine gold dust shed by a fairy. Cold in the palm, quieter than a Spritcore."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-wing-mote",
+    "name": "Wing Mote",
+    "description": "Bright mote torn from a fairy wing. Hold it still and it tries to leave."
+  }
+]

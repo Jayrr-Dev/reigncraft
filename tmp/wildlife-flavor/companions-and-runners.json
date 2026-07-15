@@ -1,0 +1,92 @@
+[
+  {
+    "itemTypeId": "world-plaza-wildlife-pale-fur",
+    "name": "Pale Fur",
+    "description": "White tuft off a pale house cat. Shows every speck of trail dust."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-sun-fur",
+    "name": "Sun Fur",
+    "description": "Orange cat fluff that still holds a little warm-stone smell."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-heavy-fur",
+    "name": "Heavy Fur",
+    "description": "Thick coat from a big house cat. Heavier than it looks in the bag."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-night-whisker",
+    "name": "Night Whisker",
+    "description": "One long whisker from a black cat. Fine as thread, stubborn as the animal."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-antler",
+    "name": "Antler",
+    "description": "Branched rack from a stag that lost the chase. Saw it down for hafts."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-stripe-hide",
+    "name": "Stripe Hide",
+    "description": "Zebra hide still wearing its stripes. Easy to spot. Hard to lose."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-thin-hide",
+    "name": "Thin Hide",
+    "description": "Light hide from an antilope sprinter. Tears if you pull wrong."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-desert-hide",
+    "name": "Desert Hide",
+    "description": "Dry oryx hide, stiff with sand. Holds a crease forever."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-plume",
+    "name": "Plume",
+    "description": "Tall ostrich plume. Looks fancy until the wind shreds it."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-ostrich-egg",
+    "name": "Ostrich Egg",
+    "description": "Egg the size of a stone bowl. Crack it careful or wear the yolk."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-camel-hair",
+    "name": "Camel Hair",
+    "description": "Coarse camel hair. Itches first. Keeps you warm anyway."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-bladder",
+    "name": "Bladder",
+    "description": "Sealed camel bladder. Holds water if you clean and plug it right."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-tall-hide",
+    "name": "Tall Hide",
+    "description": "Hide off a giraffe's long side. Too much leather for one bag."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-neck-bone",
+    "name": "Neck Bone",
+    "description": "Long giraffe neck bone. Makes a haft if you don't mind the reach."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-monkey-fur",
+    "name": "Monkey Fur",
+    "description": "Soft jungle monkey fur. Still smells like canopy and theft."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-stolen-fruit",
+    "name": "Stolen Fruit",
+    "description": "Fruit from a monkey cheek pouch. Warm, dented, still edible."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-chimp-fur",
+    "name": "Chimp Fur",
+    "description": "Dark chimp fur. Dense, oily, hard to scrub off your hands."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-knuckle-bone",
+    "name": "Knuckle Bone",
+    "description": "Thick knuckle bone. Something walked on these for years."
+  }
+]

@@ -1,5 +1,7 @@
-import { computingWorldPlazaEquipmentModifiedEv } from '@/components/world/equipment/domains/computingWorldPlazaEquipmentModifiedEv';
-import { computingWorldPlazaEquipmentAttackEvWithFlat } from '@/components/world/equipment/domains/computingWorldPlazaEquipmentModifiedEv';
+import {
+  computingWorldPlazaEquipmentAttackEvWithFlat,
+  computingWorldPlazaEquipmentModifiedEv,
+} from '@/components/world/equipment/domains/computingWorldPlazaEquipmentModifiedEv';
 import { describe, expect, it } from 'vitest';
 
 describe('computingWorldPlazaEquipmentModifiedEv', () => {

@@ -42,10 +42,12 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_RESOURCE_ITEM_DESCRIPTION_ENTRIES } from '@/components/world/inventory/domains/definingWorldPlazaInventoryResourceItemDescriptionCorpus';
+import { DEFINING_WORLD_PLAZA_TALL_GRASS_INVENTORY_ITEM_SEEDS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryTallGrassItemCatalog';
 import { DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
 import { DEFINING_WILDLIFE_FISH_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeFishMeatCatalog';
 import { resolvingWildlifeMeatItemDescriptionEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatItemDescriptionCorpus';
 import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
+import { DEFINING_WILDLIFE_SPECIALTY_LOOT_ITEM_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeSpecialtyLootItemCatalog';
 import { resolvingWildlifeVariantMeatItemDescriptionEntry } from '@/components/world/wildlife/domains/definingWildlifeVariantMeatItemDescriptionCorpus';
 import { DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeVariantMeatRegistry';
 
@@ -291,6 +293,20 @@ function listingMushroomDescriptionEntries(): DefiningWorldPlazaInventoryItemDes
   return entries;
 }
 
+function listingWildlifeSpecialtyLootDescriptionEntries(): DefiningWorldPlazaInventoryItemDescriptionEntry[] {
+  return DEFINING_WILDLIFE_SPECIALTY_LOOT_ITEM_CATALOG.map((entry) => ({
+    typeId: entry.itemTypeId,
+    description: entry.description,
+  }));
+}
+
+function listingTallGrassDescriptionEntries(): DefiningWorldPlazaInventoryItemDescriptionEntry[] {
+  return DEFINING_WORLD_PLAZA_TALL_GRASS_INVENTORY_ITEM_SEEDS.map((seed) => ({
+    typeId: seed.typeId,
+    description: seed.description,
+  }));
+}
+
 function buildingWorldPlazaInventoryItemDescriptionCorpus(): Readonly<
   Record<string, string>
 > {
@@ -317,6 +333,14 @@ function buildingWorldPlazaInventoryItemDescriptionCorpus(): Readonly<
   }
 
   for (const entry of listingMushroomDescriptionEntries()) {
+    corpus[entry.typeId] = entry.description;
+  }
+
+  for (const entry of listingWildlifeSpecialtyLootDescriptionEntries()) {
+    corpus[entry.typeId] = entry.description;
+  }
+
+  for (const entry of listingTallGrassDescriptionEntries()) {
     corpus[entry.typeId] = entry.description;
   }
 

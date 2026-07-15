@@ -7,7 +7,6 @@ import {
   checkingPlazaCodexOverallProgressHasRewardReady,
   resolvingPlazaCodexDiscoveryMilestoneRewardMarkers,
   resolvingPlazaCodexOverallProgressMilestoneRewardMarkers,
-  resolvingPlazaCodexStudyMilestoneRewardPopoverAlign,
   resolvingPlazaCodexStudyMilestoneRewardPopoverLabel,
 } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeToolRecipeIds';
@@ -133,20 +132,6 @@ describe('resolvingPlazaCodexStudyMilestoneRewardPopoverLabel', () => {
         rewardLabel: 'Wood Pickaxe recipe',
       })
     ).toBe('1 more · Wood Pickaxe recipe');
-  });
-});
-
-describe('resolvingPlazaCodexStudyMilestoneRewardPopoverAlign', () => {
-  it('pins early and late chests to the panel edges', () => {
-    expect(resolvingPlazaCodexStudyMilestoneRewardPopoverAlign(5)).toBe(
-      'start'
-    );
-    expect(resolvingPlazaCodexStudyMilestoneRewardPopoverAlign(50)).toBe(
-      'center'
-    );
-    expect(resolvingPlazaCodexStudyMilestoneRewardPopoverAlign(100)).toBe(
-      'end'
-    );
   });
 });
 

@@ -32,8 +32,8 @@ function resolvingBerryDetailRevealFromBase(
   tierId: PlazaCodexStudyTierId
 ): DefiningWorldPlazaInventoryBerryDetailReveal {
   const base = DEFINING_PLAZA_CODEX_INVENTORY_REVEAL_BY_TIER[tierId];
-  const descriptionTier =
-    base.descriptionTier >= 2 ? 2 : base.descriptionTier;
+  const descriptionTier: 0 | 1 | 2 =
+    base.descriptionTier <= 0 ? 0 : base.descriptionTier === 1 ? 1 : 2;
 
   return {
     descriptionTier,

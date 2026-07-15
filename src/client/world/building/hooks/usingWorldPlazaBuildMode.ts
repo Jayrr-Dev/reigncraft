@@ -216,7 +216,7 @@ export interface UsingWorldPlazaBuildModeResult {
   placingBlockAtSelectedTile: () => void;
   removingBlockAtSelectedTile: () => void;
   unclaimingPlotAtSelectedTile: () => void;
-  savingBuildDraft: () => Promise<void>;
+  savingBuildDraft: () => Promise<boolean>;
   clearingAllDevPlacedObjects: () => Promise<void>;
 }
 

@@ -1,0 +1,62 @@
+[
+  {
+    "itemTypeId": "world-plaza-wildlife-horsehair",
+    "name": "Horsehair",
+    "description": "Mane and tail from a feral runner. Twists into cord that holds."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-fine-hair",
+    "name": "Fine Hair",
+    "description": "Fine desert hair off the fastest thing on four legs. Soft enough to braid."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-coarse-hair",
+    "name": "Coarse Hair",
+    "description": "Rough hair from a stubborn animal. Scratchy, still useful."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-llama-wool",
+    "name": "Llama Wool",
+    "description": "Highland wool with grit still in it. Warm if you can stand the smell."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-spit-sac",
+    "name": "Spit Sac",
+    "description": "Wet pouch from a llama that hated you first. Don't open it indoors."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-soft-fleece",
+    "name": "Soft Fleece",
+    "description": "Alpaca fleece soft enough to feel wrong in a pack. Yes, it was that soft."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-yak-wool",
+    "name": "Yak Wool",
+    "description": "Dense cold-country wool under a foot of hair. Keeps frost out of whatever you wrap."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-down",
+    "name": "Down",
+    "description": "Soft fluff from under a coat of fat. Stuff a lining and stop shivering."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-blubber",
+    "name": "Blubber",
+    "description": "Thick fat from a bird that lived on ice. Greasy, heavy, worth the mess."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-river-hide",
+    "name": "River Hide",
+    "description": "Thick hide from the swamp's worst temper. Takes forever to dry."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-ivory-tooth",
+    "name": "Ivory Tooth",
+    "description": "Big ivory tooth from a river brute. Heavy enough to matter in your palm."
+  },
+  {
+    "itemTypeId": "world-plaza-wildlife-tooth",
+    "name": "Tooth",
+    "description": "Sharp tooth from a river ambusher. Still wants to bite something."
+  }
+]

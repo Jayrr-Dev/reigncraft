@@ -148,8 +148,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_TUBE,
       name: 'Iron Tube',
       rarity: 'uncommon',
-      description:
-        'A hollow iron pipe drawn on the anvil. Scaffold for tools, traps, and later forgework.',
       iconSpriteSheet:
         DEFINING_WORLD_PLAZA_INVENTORY_IRON_TUBE_SPRITE_SHEET_ICON,
       maxStack: 99,

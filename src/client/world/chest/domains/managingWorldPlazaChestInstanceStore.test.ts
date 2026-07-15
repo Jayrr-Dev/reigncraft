@@ -1,4 +1,7 @@
-import type { DefiningInventorySlot } from '@/components/inventory/domains/definingInventoryItem';
+import type {
+  DefiningInventorySlot,
+  DefiningInventoryState,
+} from '@/components/inventory/domains/definingInventoryItem';
 import { creatingEmptyInventoryState } from '@/components/inventory/domains/reducingInventoryState';
 import {
   listingWorldPlazaActiveLockedChestKeySources,

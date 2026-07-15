@@ -191,7 +191,7 @@ export type DefiningWorldPlazaEntityHealthStunEffect = {
 /** Active disease scheduler entry with pending staged grants. */
 export type DefiningWorldPlazaEntityHealthDiseaseEffect = {
   id: string;
-  diseaseId: string;
+  diseaseId: DefiningWorldPlazaEntityDiseaseId;
   /** Wall epoch when raw meat infection was contracted. */
   contractedAtMs: number;
   /** Wall epoch when symptoms and staged grants begin. */

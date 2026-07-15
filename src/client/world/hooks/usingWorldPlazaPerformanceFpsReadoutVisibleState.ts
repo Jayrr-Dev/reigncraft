@@ -57,7 +57,7 @@ function writingWorldPlazaPerformanceFpsReadoutVisibleToStorage(
 export function usingWorldPlazaPerformanceFpsReadoutVisibleState(
   isFeatureAvailable: boolean
 ): UsingWorldPlazaPerformanceFpsReadoutVisibleStateResult {
-  const [isFpsReadoutVisible, setIsFpsReadoutVisible] = useState(
+  const [isFpsReadoutVisible, setIsFpsReadoutVisible] = useState<boolean>(
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_DEFAULT_VISIBLE
   );
 

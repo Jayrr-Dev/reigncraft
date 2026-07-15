@@ -4,10 +4,12 @@ import { resolvingWildlifeCyrobornScalePulseFromInstance } from '@/components/wo
 import { describe, expect, it } from 'vitest';
 
 function buildingStubInstance(
-  overrides: Partial<DefiningWildlifeInstance> & {
+  overrides: Omit<Partial<DefiningWildlifeInstance>, 'aiState'> & {
     aiState?: Partial<DefiningWildlifeInstance['aiState']>;
-  }
+  } = {}
 ): DefiningWildlifeInstance {
+  const { aiState: aiStateOverrides, ...restOverrides } = overrides;
+
   return {
     instanceId: 'cyroborn-1',
     speciesId: 'cyroborn',
@@ -51,9 +53,9 @@ function buildingStubInstance(
       hasUsedBluffCharge: false,
       isSleeping: false,
       sleepStartedAtMs: null,
-      ...overrides.aiState,
+      ...aiStateOverrides,
     },
-    ...overrides,
+    ...restOverrides,
   } as DefiningWildlifeInstance;
 }
 
