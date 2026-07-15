@@ -25,7 +25,8 @@ describe('syncingWorldPlazaArmorWornTemperatureModifiers', () => {
 
     const bodyModifier = nextState.timedTemperatureModifiers.find(
       (modifier) =>
-        modifier.id === formattingWorldPlazaSurvivalArmorTemperatureModifierId('body')
+        modifier.id ===
+        formattingWorldPlazaSurvivalArmorTemperatureModifierId('body')
     );
 
     expect(bodyModifier?.coldComfortBonusCelsius).toBe(8);

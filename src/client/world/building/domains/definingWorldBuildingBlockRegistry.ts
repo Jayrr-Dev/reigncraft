@@ -22,12 +22,6 @@ import { registeringWorldPlazaFlowerBlockDefinitions } from '@/components/world/
 import { registeringWorldPlazaIngotWallBlockDefinitions } from '@/components/world/building/domains/definingWorldPlazaIngotWallBlockRegistry';
 import { registeringWorldPlazaOreWallBlockDefinitions } from '@/components/world/building/domains/definingWorldPlazaOreWallBlockRegistry';
 import {
-  DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_BRUSH_WINDBREAK_HEAT_LEVEL_CELSIUS,
-  DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_CLAIM_BEDROLL_HEAT_LEVEL_CELSIUS,
-  DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_SCOUT_TENT_HEAT_LEVEL_CELSIUS,
-  DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_SHADE_LEAN_TO_COLD_LEVEL_CELSIUS,
-} from '@/components/world/equipment/domains/definingWorldPlazaSurvivalShelterTemperatureConstants';
-import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_TREE_PINE,
   registeringWorldPlazaTreeFloorBlockDefinitions,
 } from '@/components/world/building/domains/definingWorldPlazaTreeFloorBlockRegistry';
@@ -36,6 +30,12 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_COLLISION_RADIUS_GRID,
   DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK,
 } from '@/components/world/domains/definingWorldPlazaTerrainObstacleConstants';
+import {
+  DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_CLAIM_BEDROLL_HEAT_LEVEL_CELSIUS,
+  DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_SCOUT_TENT_HEAT_LEVEL_CELSIUS,
+  DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_SHADE_LEAN_TO_COLD_LEVEL_CELSIUS,
+  DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_WIND_BREAK_HEAT_LEVEL_CELSIUS,
+} from '@/components/world/equipment/domains/definingWorldPlazaSurvivalShelterTemperatureConstants';
 import { DEFINING_WORLD_PLAZA_TEMPERATURE_ICE_BLOCK_CELSIUS } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 
 /**
@@ -396,7 +396,7 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
     isInteractive: false,
     environmentalTemperature: {
       heatLevelCelsius:
-        DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_BRUSH_WINDBREAK_HEAT_LEVEL_CELSIUS,
+        DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_WIND_BREAK_HEAT_LEVEL_CELSIUS,
     },
     visualConfig: {
       label: 'Windbreak',

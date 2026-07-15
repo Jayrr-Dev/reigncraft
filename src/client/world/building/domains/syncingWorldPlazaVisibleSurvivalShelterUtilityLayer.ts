@@ -1,14 +1,16 @@
 import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
 import { checkingWorldBuildingPlacedBlockIsPassableTile } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import { resolvingWorldBuildingBlockDefinition } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
-import { checkingWorldBuildingPlacedBlockIsFootprintSatellite } from '@/components/world/building/domains/definingWorldBuildingPlacementFootprint';
 import { DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX } from '@/components/world/building/domains/definingWorldBuildingBuildModeConstants';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
   resolvingWorldBuildingPlacedBlockBlockHeight,
   resolvingWorldBuildingPlacedBlockWorldLayer,
 } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
-import { resolvingWorldBuildingBlockPlacementFootprint } from '@/components/world/building/domains/definingWorldBuildingPlacementFootprint';
+import {
+  checkingWorldBuildingPlacedBlockIsFootprintSatellite,
+  resolvingWorldBuildingBlockPlacementFootprint,
+} from '@/components/world/building/domains/definingWorldBuildingPlacementFootprint';
 import {
   DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_DISPLAY_SCALE,
   DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_FOOT_SINK_PX,
@@ -16,9 +18,10 @@ import {
   resolvingWorldPlazaSurvivalShelterKindForBlockDefinitionId,
 } from '@/components/world/building/domains/definingWorldPlazaSurvivalShelterSpriteConstants';
 import { peekingWorldPlazaSurvivalShelterSpriteTextureForKind } from '@/components/world/building/domains/loadingWorldPlazaSurvivalShelterSpriteTextures';
-import { resolvingWorldPlazaBlacksmithUtilityDepthSortGridPoint } from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
-import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
-import { DEFINING_WORLD_DEPTH_BLACKSMITH_UTILITY_ENTITY_DEPTH_BIAS } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
+import {
+  resolvingWorldPlazaBlacksmithUtilityDepthSortGridPoint,
+  resolvingWorldPlazaBlacksmithUtilityEntityZIndex,
+} from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import { DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX } from '@/components/world/domains/definingWorldPlazaIsometricTileLayoutConstants';
 import type { Sprite, Texture } from 'pixi.js';
@@ -50,15 +53,18 @@ function applyingWorldPlazaSurvivalShelterToSprite(
     : { tileWidth: 1, tileHeight: 1 };
   const worldLayer = resolvingWorldBuildingPlacedBlockWorldLayer(block);
   const blockHeight = resolvingWorldBuildingPlacedBlockBlockHeight(block);
-  const depthSortGridPoint = resolvingWorldPlazaBlacksmithUtilityDepthSortGridPoint(
-    block.tilePosition.tileX,
-    block.tilePosition.tileY,
-    footprint.tileWidth,
-    footprint.tileHeight
-  );
+  const depthSortGridPoint =
+    resolvingWorldPlazaBlacksmithUtilityDepthSortGridPoint(
+      block.tilePosition.tileX,
+      block.tilePosition.tileY,
+      footprint.tileWidth,
+      footprint.tileHeight
+    );
   const screenPoint =
     convertingWorldPlazaGridPointToIsometricScreenPoint(depthSortGridPoint);
-  const layerOffsetY = checkingWorldBuildingPlacedBlockIsPassableTile(blockHeight)
+  const layerOffsetY = checkingWorldBuildingPlacedBlockIsPassableTile(
+    blockHeight
+  )
     ? computingWorldBuildingWorldLayerScreenOffsetPx(worldLayer)
     : computingWorldBuildingWorldLayerScreenOffsetPx(worldLayer - 1);
   const targetWidth =
@@ -72,14 +78,16 @@ function applyingWorldPlazaSurvivalShelterToSprite(
   sprite.scale.set(textureScale);
   sprite.position.set(
     screenPoint.x,
-    screenPoint.y + layerOffsetY + DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_FOOT_SINK_PX
+    screenPoint.y +
+      layerOffsetY +
+      DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_FOOT_SINK_PX
   );
-  sprite.zIndex =
-    computingWorldDepthSortKey(
-      depthSortGridPoint.x,
-      depthSortGridPoint.y,
-      worldLayer
-    ) + DEFINING_WORLD_DEPTH_BLACKSMITH_UTILITY_ENTITY_DEPTH_BIAS;
+  sprite.zIndex = resolvingWorldPlazaBlacksmithUtilityEntityZIndex(
+    block.tilePosition.tileX,
+    block.tilePosition.tileY,
+    footprint.tileWidth,
+    footprint.tileHeight
+  );
 }
 
 export function syncingWorldPlazaVisibleSurvivalShelterUtilityLayer(input: {
@@ -104,17 +112,17 @@ export function syncingWorldPlazaVisibleSurvivalShelterUtilityLayer(input: {
       continue;
     }
 
-    const shelterKind = resolvingWorldPlazaSurvivalShelterKindForBlockDefinitionId(
-      block.definitionId
-    );
+    const shelterKind =
+      resolvingWorldPlazaSurvivalShelterKindForBlockDefinitionId(
+        block.definitionId
+      );
 
     if (!shelterKind) {
       continue;
     }
 
-    const texture = peekingWorldPlazaSurvivalShelterSpriteTextureForKind(
-      shelterKind
-    );
+    const texture =
+      peekingWorldPlazaSurvivalShelterSpriteTextureForKind(shelterKind);
 
     if (!texture) {
       continue;
@@ -129,11 +137,7 @@ export function syncingWorldPlazaVisibleSurvivalShelterUtilityLayer(input: {
 
     if (existingSprite) {
       const previousZIndex = existingSprite.zIndex;
-      applyingWorldPlazaSurvivalShelterToSprite(
-        existingSprite,
-        block,
-        texture
-      );
+      applyingWorldPlazaSurvivalShelterToSprite(existingSprite, block, texture);
       existingSprite.alpha = isPlacementPreview
         ? DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_PLACEMENT_PREVIEW_ALPHA
         : 1;

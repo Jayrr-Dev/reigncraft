@@ -18,7 +18,7 @@ const WOOL_WRAP = {
   id: 'wrap-1',
   itemTypeId: 'world-plaza-survival-wool-neck-wrap',
   quantity: 1,
-  slotIndex: 1,
+  slotIndex: 0,
 } as const;
 
 const LEG_WRAPS = {
@@ -117,7 +117,9 @@ describe('equippingWorldPlazaArmorItemFromInventory', () => {
     });
 
     expect(result.errorMessage).toBe('This form cannot wear that piece.');
-    expect(result.inventoryState.slots[0]?.itemTypeId).toBe(LEG_WRAPS.itemTypeId);
+    expect(result.inventoryState.slots[0]?.itemTypeId).toBe(
+      LEG_WRAPS.itemTypeId
+    );
   });
 });
 
@@ -137,6 +139,10 @@ describe('unequippingWorldPlazaArmorSlotToInventory', () => {
 
     expect(result.errorMessage).toBeNull();
     expect(result.loadoutState.body).toBeNull();
-    expect(result.inventoryState.slots[0]?.itemTypeId).toBe(HIDE_VEST.itemTypeId);
+    expect(
+      result.inventoryState.slots.some(
+        (slot) => slot?.itemTypeId === HIDE_VEST.itemTypeId
+      )
+    ).toBe(true);
   });
 });

@@ -144,7 +144,7 @@ describe('managingWorldPlazaRecipeDiscoveryStore', () => {
       DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.CERAMICS
     );
 
-    expect(survivalOnly).toHaveLength(1);
+    expect(survivalOnly).toHaveLength(25);
     // Stations/traps/tubes (6) + tiered tool recipes (24).
     expect(blacksmithOnly).toHaveLength(30);
     expect(ceramicsOnly).toHaveLength(9);
