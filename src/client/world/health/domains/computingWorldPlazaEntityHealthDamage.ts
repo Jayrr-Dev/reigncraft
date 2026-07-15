@@ -1,5 +1,9 @@
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
+import { applyingWorldPlazaDamageRollDodgedAsZeroDamage } from '@/components/world/health/domains/applyingWorldPlazaDamageRollDodgedAsZeroDamage';
 import { applyingWorldPlazaDamageRollMinimumOutcomeTier } from '@/components/world/health/domains/applyingWorldPlazaDamageRollMinimumOutcomeTier';
 import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
+import { DEFINING_WORLD_PLAZA_ENTITY_DEATH_IMMUNITY_MINIMUM_HEALTH } from '@/components/world/health/domains/definingWorldPlazaEntityBuffImmunityDamageKinds';
 import {
   shouldWorldPlazaEntityDamageKindAbsorbShield,
   shouldWorldPlazaEntityDamageKindUseDamageRoll,
@@ -147,13 +151,19 @@ export function computingWorldPlazaEntityHealthDamage({
       options.forcedDeviationScore === undefined &&
       options.forcedRollMode === undefined &&
       rollParams.forcedDeviationScore === null;
-    const rollResult =
+    const flooredRollResult =
       shouldFloorMinimumTier && options.minimumOutcomeTier !== undefined
         ? applyingWorldPlazaDamageRollMinimumOutcomeTier(
             rawRollResult,
             options.minimumOutcomeTier
           )
         : rawRollResult;
+    const rollResult = applyingWorldPlazaDamageRollDodgedAsZeroDamage(
+      flooredRollResult,
+      checkingWorldPlazaGenerationFeatureEnabled(
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.DODGE_ZERO_DAMAGE
+      )
+    );
 
     expectedDamage = rollResult.expectedDamage;
     rolledDamage = rollResult.rolledDamage;
@@ -176,7 +186,10 @@ export function computingWorldPlazaEntityHealthDamage({
     ? Math.min(state.shieldPoints, afterModifiers)
     : 0;
   const healthDamage = Math.max(0, afterModifiers - absorbedByShield);
-  const nextHealth = Math.max(0, state.currentHealth - healthDamage);
+  const healthFloor = state.isDeathImmune
+    ? DEFINING_WORLD_PLAZA_ENTITY_DEATH_IMMUNITY_MINIMUM_HEALTH
+    : 0;
+  const nextHealth = Math.max(healthFloor, state.currentHealth - healthDamage);
   const nextShield = Math.max(0, state.shieldPoints - absorbedByShield);
 
   const nextState: DefiningWorldPlazaEntityHealthState = {

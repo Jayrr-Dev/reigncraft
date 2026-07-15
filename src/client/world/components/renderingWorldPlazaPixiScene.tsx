@@ -1224,6 +1224,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.CHESTS];
   const isTrapGenerationEnabled =
     generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TRAPS];
+  const isPlacedBlocksGenerationEnabled =
+    generationFeatureFlags[
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PLACED_BLOCKS
+    ];
   const isWildlifeSpeechBubblesEnabled =
     generationFeatureFlags[
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_SPEECH_BUBBLES
@@ -1586,9 +1590,11 @@ function RenderingWorldPlazaPixiSceneConnected({
     ownedPlots,
   ]);
 
-  const activeScenePlacedBlocks = isEditSessionActive
-    ? activePlacedBlocks
-    : placedBlocks;
+  const activeScenePlacedBlocks = !isPlacedBlocksGenerationEnabled
+    ? BUILDING_WORLD_PLAZA_PLACED_BLOCKS_SCENE_REF_EMPTY.blocks
+    : isEditSessionActive
+      ? activePlacedBlocks
+      : placedBlocks;
   placedBlocksRef.current = buildingWorldPlazaPlacedBlocksSceneRef(
     activeScenePlacedBlocks
   );

@@ -298,6 +298,8 @@ export type DefiningWorldPlazaEntityHealthState = {
   lastDamagedAtMs: number | null;
   lastDamageKind: DefiningWorldPlazaEntityDamageKind | null;
   isDead: boolean;
+  /** When true, damage cannot drop health below 1 or set isDead. */
+  isDeathImmune: boolean;
   temperatureResistance: DefiningWorldPlazaEntityTemperatureResistance;
   /** Expiring comfort/resist bonuses from herbs and similar. */
   timedTemperatureModifiers: readonly DefiningWorldPlazaEntityHealthTimedTemperatureModifier[];

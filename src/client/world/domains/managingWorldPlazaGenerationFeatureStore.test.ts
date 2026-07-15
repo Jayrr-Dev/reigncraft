@@ -85,6 +85,11 @@ describe('managingWorldPlazaGenerationFeatureStore', () => {
         DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_HOTBAR
       )
     ).toBe(false);
+    expect(
+      checkingWorldPlazaGenerationFeatureEnabled(
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PLACED_BLOCKS
+      )
+    ).toBe(false);
 
     settingWorldPlazaGenerationFeatureEnabled(
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES,

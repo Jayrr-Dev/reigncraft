@@ -239,6 +239,8 @@ describe('advancingWorldPlazaEntityHealthTick', () => {
 
     // forcedDeviationScore bypasses the floor (dev / Ultra Instinct path).
     expect(result.appliedDamage.tier).toBe('dodged');
+    expect(result.appliedDamage.rolledDamage).toBe(0);
+    expect(result.appliedDamage.healthDamage).toBe(0);
 
     const floored = computingWorldPlazaEntityHealthDamage({
       state: creatingWorldPlazaEntityHealthInitialState(),
@@ -255,5 +257,25 @@ describe('advancingWorldPlazaEntityHealthTick', () => {
     expect(floored.appliedDamage.tier).not.toBe('blocked');
     expect(floored.appliedDamage.tier).not.toBe('dodged');
     expect(floored.appliedDamage.healthDamage).toBeGreaterThan(0);
+  });
+
+  it('applies 0 damage on dodged rolls when dodge-zero-damage is on', () => {
+    const result = computingWorldPlazaEntityHealthDamage({
+      state: creatingWorldPlazaEntityHealthInitialState(),
+      rawAmount: 100,
+      kind: 'physical',
+      nowMs: 1_000,
+      options: {
+        forcedDeviationScore: -3.5,
+      },
+    });
+
+    expect(result.appliedDamage.tier).toBe('dodged');
+    expect(result.appliedDamage.rolledDamage).toBe(0);
+    expect(result.appliedDamage.afterModifiers).toBe(0);
+    expect(result.appliedDamage.healthDamage).toBe(0);
+    expect(result.state.currentHealth).toBe(
+      DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX
+    );
   });
 });

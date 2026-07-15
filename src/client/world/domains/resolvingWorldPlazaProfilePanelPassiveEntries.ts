@@ -70,6 +70,18 @@ export function resolvingWorldPlazaProfilePanelPassiveEntries(
       continue;
     }
 
+    if (effect.kind === 'temperature') {
+      const isHeat = effect.deltaCelsius > 0;
+      const absDelta = Math.abs(effect.deltaCelsius);
+      entries.push({
+        id: `on-hit-temperature-${effect.deltaCelsius}`,
+        label: isHeat ? `Heat +${absDelta}°C` : `Cold −${absDelta}°C`,
+        iconName: 'mdi:thermometer',
+        valueText: formattingProcChancePercent(effect.procChance),
+      });
+      continue;
+    }
+
     const buffDescriptor = resolvingWorldPlazaEntityBuffDescriptor(
       effect.buffId
     );

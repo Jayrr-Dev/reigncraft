@@ -1,4 +1,8 @@
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
+import {
+  DEFINING_WORLD_PLAZA_ENTITY_POISON_IMMUNITY_DAMAGE_KINDS,
+  checkingWorldPlazaEntityDamageKindImmunityGroupIsActive,
+} from '@/components/world/health/domains/definingWorldPlazaEntityBuffImmunityDamageKinds';
 import type {
   DefiningWorldPlazaEntityHealthPoisonEffect,
   DefiningWorldPlazaEntityHealthState,
@@ -38,6 +42,15 @@ export function applyingWorldPlazaEntityHealthPoisonStack(
   durationMsOverride?: number
 ): DefiningWorldPlazaEntityHealthState {
   if (totalPoisonDamage <= 0) {
+    return state;
+  }
+
+  if (
+    checkingWorldPlazaEntityDamageKindImmunityGroupIsActive(
+      state.damageKindImmunities,
+      DEFINING_WORLD_PLAZA_ENTITY_POISON_IMMUNITY_DAMAGE_KINDS
+    )
+  ) {
     return state;
   }
 

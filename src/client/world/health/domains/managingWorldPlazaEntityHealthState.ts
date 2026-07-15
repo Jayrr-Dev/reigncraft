@@ -8,6 +8,14 @@ import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/
 import { computingWorldPlazaEntityHealthAmplifiedHealAmount } from '@/components/world/health/domains/computingWorldPlazaEntityHealthHealAmplifier';
 import type { DefiningWorldPlazaEntityBleedSeverity } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import {
+  DEFINING_WORLD_PLAZA_ENTITY_BLEED_IMMUNITY_DAMAGE_KINDS,
+  DEFINING_WORLD_PLAZA_ENTITY_DEATH_IMMUNITY_MINIMUM_HEALTH,
+  DEFINING_WORLD_PLAZA_ENTITY_FATED_IMMUNITY_DAMAGE_KINDS,
+  DEFINING_WORLD_PLAZA_ENTITY_POISON_IMMUNITY_DAMAGE_KINDS,
+  checkingWorldPlazaEntityDamageKindImmunityGroupIsActive,
+  togglingWorldPlazaEntityDamageKindImmunityGroup,
+} from '@/components/world/health/domains/definingWorldPlazaEntityBuffImmunityDamageKinds';
+import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_DAMAGE_PER_LAYER,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_SAFE_LAYER_DELTA,
@@ -76,6 +84,7 @@ export function creatingWorldPlazaEntityHealthInitialState(): DefiningWorldPlaza
     timedTemperatureModifiers: [],
     combatTemperatureOffsetCelsius: 0,
     damageKindImmunities: [],
+    isDeathImmune: false,
   };
 }
 
@@ -811,6 +820,7 @@ export function revivingWorldPlazaEntityHealthToFull(
     lastDamagedAtMs: null,
     lastDamageKind: null,
     isDead: false,
+    isDeathImmune: false,
     temperatureResistance: {
       ...DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT,
     },
@@ -1055,4 +1065,86 @@ export function togglingWorldPlazaEntityColdImmunity(
   return settingWorldPlazaEntityTemperatureResistance(state, {
     isColdImmune: !state.temperatureResistance.isColdImmune,
   });
+}
+
+/** Toggles poison damage-kind immunity and clears active poison stacks when enabling. */
+export function togglingWorldPlazaEntityPoisonImmunity(
+  state: DefiningWorldPlazaEntityHealthState
+): DefiningWorldPlazaEntityHealthState {
+  const wasActive = checkingWorldPlazaEntityDamageKindImmunityGroupIsActive(
+    state.damageKindImmunities,
+    DEFINING_WORLD_PLAZA_ENTITY_POISON_IMMUNITY_DAMAGE_KINDS
+  );
+  const nextImmunities = togglingWorldPlazaEntityDamageKindImmunityGroup(
+    state.damageKindImmunities,
+    DEFINING_WORLD_PLAZA_ENTITY_POISON_IMMUNITY_DAMAGE_KINDS
+  );
+
+  return {
+    ...state,
+    damageKindImmunities: nextImmunities,
+    poisonEffects: wasActive ? state.poisonEffects : [],
+  };
+}
+
+/** Toggles bleed damage-kind immunity and clears active bleed stacks when enabling. */
+export function togglingWorldPlazaEntityBleedImmunity(
+  state: DefiningWorldPlazaEntityHealthState
+): DefiningWorldPlazaEntityHealthState {
+  const wasActive = checkingWorldPlazaEntityDamageKindImmunityGroupIsActive(
+    state.damageKindImmunities,
+    DEFINING_WORLD_PLAZA_ENTITY_BLEED_IMMUNITY_DAMAGE_KINDS
+  );
+  const nextImmunities = togglingWorldPlazaEntityDamageKindImmunityGroup(
+    state.damageKindImmunities,
+    DEFINING_WORLD_PLAZA_ENTITY_BLEED_IMMUNITY_DAMAGE_KINDS
+  );
+
+  return {
+    ...state,
+    damageKindImmunities: nextImmunities,
+    bleedEffects: wasActive ? state.bleedEffects : [],
+  };
+}
+
+/** Toggles fated damage-kind immunity and clears pending fated marks when enabling. */
+export function togglingWorldPlazaEntityFatedImmunity(
+  state: DefiningWorldPlazaEntityHealthState
+): DefiningWorldPlazaEntityHealthState {
+  const wasActive = checkingWorldPlazaEntityDamageKindImmunityGroupIsActive(
+    state.damageKindImmunities,
+    DEFINING_WORLD_PLAZA_ENTITY_FATED_IMMUNITY_DAMAGE_KINDS
+  );
+  const nextImmunities = togglingWorldPlazaEntityDamageKindImmunityGroup(
+    state.damageKindImmunities,
+    DEFINING_WORLD_PLAZA_ENTITY_FATED_IMMUNITY_DAMAGE_KINDS
+  );
+
+  return {
+    ...state,
+    damageKindImmunities: nextImmunities,
+    potentialDamageEffects: wasActive ? state.potentialDamageEffects : [],
+  };
+}
+
+/** Toggles death immunity (minimum 1 HP floor). */
+export function togglingWorldPlazaEntityDeathImmunity(
+  state: DefiningWorldPlazaEntityHealthState
+): DefiningWorldPlazaEntityHealthState {
+  if (state.isDeathImmune) {
+    return {
+      ...state,
+      isDeathImmune: false,
+    };
+  }
+
+  return {
+    ...state,
+    isDeathImmune: true,
+    currentHealth: Math.max(
+      state.currentHealth,
+      DEFINING_WORLD_PLAZA_ENTITY_DEATH_IMMUNITY_MINIMUM_HEALTH
+    ),
+    isDead: false,
+  };
 }

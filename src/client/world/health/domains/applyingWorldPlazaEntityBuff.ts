@@ -45,9 +45,13 @@ import {
   removingWorldPlazaEntityHealthStunEffect,
   togglingWorldPlazaEntityColdComfortBonus,
   togglingWorldPlazaEntityColdImmunity,
+  togglingWorldPlazaEntityBleedImmunity,
+  togglingWorldPlazaEntityDeathImmunity,
+  togglingWorldPlazaEntityFatedImmunity,
   togglingWorldPlazaEntityHealthInvincible,
   togglingWorldPlazaEntityHeatComfortBonus,
   togglingWorldPlazaEntityHeatImmunity,
+  togglingWorldPlazaEntityPoisonImmunity,
 } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { creatingWorldPlazaEntityHealthTimedTemperatureModifier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthEffectiveTemperatureResistance';
 
@@ -469,6 +473,22 @@ function applyingWorldPlazaEntityBuffDescriptor(
 
   if (effect.kind === 'toggle_cold_immunity') {
     return togglingWorldPlazaEntityColdImmunity(state);
+  }
+
+  if (effect.kind === 'toggle_poison_immunity') {
+    return togglingWorldPlazaEntityPoisonImmunity(state);
+  }
+
+  if (effect.kind === 'toggle_bleed_immunity') {
+    return togglingWorldPlazaEntityBleedImmunity(state);
+  }
+
+  if (effect.kind === 'toggle_fated_immunity') {
+    return togglingWorldPlazaEntityFatedImmunity(state);
+  }
+
+  if (effect.kind === 'toggle_death_immunity') {
+    return togglingWorldPlazaEntityDeathImmunity(state);
   }
 
   if (effect.kind === 'invincibility_toggle') {

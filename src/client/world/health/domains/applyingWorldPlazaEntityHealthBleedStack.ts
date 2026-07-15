@@ -7,6 +7,10 @@ import {
   DEFINING_WORLD_PLAZA_ENTITY_BLEED_STACK_ESCALATION_BLEEDING_COUNT,
   DEFINING_WORLD_PLAZA_ENTITY_BLEED_STACK_ESCALATION_HEMORRHAGING_COUNT,
 } from '@/components/world/health/domains/definingWorldPlazaEntityBleedStackConstants';
+import {
+  DEFINING_WORLD_PLAZA_ENTITY_BLEED_IMMUNITY_DAMAGE_KINDS,
+  checkingWorldPlazaEntityDamageKindImmunityGroupIsActive,
+} from '@/components/world/health/domains/definingWorldPlazaEntityBuffImmunityDamageKinds';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import type {
   DefiningWorldPlazaEntityHealthBleedEffect,
@@ -196,6 +200,15 @@ export function applyingWorldPlazaEntityHealthBleedStack(
   const bleedDamage = Math.max(0, totalBleedDamage);
 
   if (bleedDamage <= 0) {
+    return state;
+  }
+
+  if (
+    checkingWorldPlazaEntityDamageKindImmunityGroupIsActive(
+      state.damageKindImmunities,
+      DEFINING_WORLD_PLAZA_ENTITY_BLEED_IMMUNITY_DAMAGE_KINDS
+    )
+  ) {
     return state;
   }
 

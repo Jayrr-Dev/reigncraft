@@ -107,6 +107,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE: DefiningWorldPlaz
     lastDamagedAtMs: null,
     lastDamageKind: null,
     isDead: false,
+    isDeathImmune: false,
     temperatureResistance: {
       ...DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT,
     },

@@ -10,6 +10,7 @@
 
 import type { DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
 import type { DefiningWorldPlazaGirlSampleWalkDirectionTextures } from '@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures';
+import { checkingWildlifeSpeciesUsesGlowOrbPresentation } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesUsesGlowOrbPresentation';
 import {
   DEFINING_WILDLIFE_SPECIES_EXTENDED_MOTION_CLIP_SHEETS,
   type DefiningWildlifeExtendedMotionClipKind,
@@ -184,6 +185,15 @@ async function loadingWildlifeMotionSheetOrIdleFallback(
 export function loadingWildlifeSpeciesTextures(
   species: DefiningWildlifeSpeciesDefinition
 ): Promise<DefiningWildlifeSpeciesTextures> {
+  // Procedural glow-orb bodies (fairy) have no sprite sheets on disk.
+  if (checkingWildlifeSpeciesUsesGlowOrbPresentation(species)) {
+    return Promise.reject(
+      new Error(
+        `Wildlife species "${species.speciesId}" uses glowOrb presentation; sprite sheets are not loaded`
+      )
+    );
+  }
+
   const cacheKey = species.speciesId;
   const cached = loadingWildlifeSpeciesTexturesCache.get(cacheKey);
 
@@ -194,71 +204,73 @@ export function loadingWildlifeSpeciesTextures(
   const loadingPromiseHolder: {
     current?: Promise<DefiningWildlifeSpeciesTextures>;
   } = {};
-  const loadingPromise = (async (): Promise<DefiningWildlifeSpeciesTextures> => {
-    const loadedSheetUrls = new Set<string>();
-    const idleLoaded = await loadingWildlifeMotionSheet(species, 'idle');
-    loadedSheetUrls.add(idleLoaded.sheetUrl);
+  const loadingPromise =
+    (async (): Promise<DefiningWildlifeSpeciesTextures> => {
+      const loadedSheetUrls = new Set<string>();
+      const idleLoaded = await loadingWildlifeMotionSheet(species, 'idle');
+      loadedSheetUrls.add(idleLoaded.sheetUrl);
 
-    const requiredMotionKinds = DEFINING_WILDLIFE_MOTION_CLIP_KINDS_LIST.filter(
-      (motionKind) => motionKind !== 'idle'
-    );
-    const motionEntries = await Promise.all(
-      requiredMotionKinds.map(async (motionKind) => {
-        const loaded = await loadingWildlifeMotionSheetOrIdleFallback(
-          species,
-          motionKind,
-          idleLoaded
+      const requiredMotionKinds =
+        DEFINING_WILDLIFE_MOTION_CLIP_KINDS_LIST.filter(
+          (motionKind) => motionKind !== 'idle'
         );
-        loadedSheetUrls.add(loaded.sheetUrl);
-
-        return [motionKind, loaded.sheet] as const;
-      })
-    );
-    const extendedClipSheets =
-      DEFINING_WILDLIFE_SPECIES_EXTENDED_MOTION_CLIP_SHEETS[
-        species.speciesId
-      ] ?? {};
-    const extendedEntries = await Promise.all(
-      (
-        Object.entries(extendedClipSheets) as Array<
-          [DefiningWildlifeExtendedMotionClipKind, readonly string[]]
-        >
-      ).map(async ([motionKind, sheetUrls]) => {
-        const encodedFolder = species.spriteFolder
-          .split('/')
-          .map((segment) => encodeURIComponent(segment))
-          .join('/');
-        try {
-          const loaded = await loadingWildlifeSheetWithFallback(
-            sheetUrls.map(
-              (fileName) =>
-                `${DEFINING_WILDLIFE_ASSET_BASE_URL}/${encodedFolder}/${fileName}`
-            )
+      const motionEntries = await Promise.all(
+        requiredMotionKinds.map(async (motionKind) => {
+          const loaded = await loadingWildlifeMotionSheetOrIdleFallback(
+            species,
+            motionKind,
+            idleLoaded
           );
           loadedSheetUrls.add(loaded.sheetUrl);
-          const sheet = slicingWildlifeSheetIntoDirectionRows(loaded.texture);
 
-          return [motionKind, sheet] as const;
-        } catch {
-          loadedSheetUrls.add(idleLoaded.sheetUrl);
-          return [motionKind, idleLoaded.sheet] as const;
-        }
-      })
-    );
+          return [motionKind, loaded.sheet] as const;
+        })
+      );
+      const extendedClipSheets =
+        DEFINING_WILDLIFE_SPECIES_EXTENDED_MOTION_CLIP_SHEETS[
+          species.speciesId
+        ] ?? {};
+      const extendedEntries = await Promise.all(
+        (
+          Object.entries(extendedClipSheets) as Array<
+            [DefiningWildlifeExtendedMotionClipKind, readonly string[]]
+          >
+        ).map(async ([motionKind, sheetUrls]) => {
+          const encodedFolder = species.spriteFolder
+            .split('/')
+            .map((segment) => encodeURIComponent(segment))
+            .join('/');
+          try {
+            const loaded = await loadingWildlifeSheetWithFallback(
+              sheetUrls.map(
+                (fileName) =>
+                  `${DEFINING_WILDLIFE_ASSET_BASE_URL}/${encodedFolder}/${fileName}`
+              )
+            );
+            loadedSheetUrls.add(loaded.sheetUrl);
+            const sheet = slicingWildlifeSheetIntoDirectionRows(loaded.texture);
 
-    if (
-      loadingWildlifeSpeciesTexturesCache.get(cacheKey) ===
-      loadingPromiseHolder.current
-    ) {
-      loadingWildlifeSpeciesLoadedSheetUrls.set(cacheKey, loadedSheetUrls);
-    }
+            return [motionKind, sheet] as const;
+          } catch {
+            loadedSheetUrls.add(idleLoaded.sheetUrl);
+            return [motionKind, idleLoaded.sheet] as const;
+          }
+        })
+      );
 
-    return {
-      idle: idleLoaded.sheet,
-      ...Object.fromEntries(motionEntries),
-      ...Object.fromEntries(extendedEntries),
-    } as DefiningWildlifeSpeciesTextures;
-  })();
+      if (
+        loadingWildlifeSpeciesTexturesCache.get(cacheKey) ===
+        loadingPromiseHolder.current
+      ) {
+        loadingWildlifeSpeciesLoadedSheetUrls.set(cacheKey, loadedSheetUrls);
+      }
+
+      return {
+        idle: idleLoaded.sheet,
+        ...Object.fromEntries(motionEntries),
+        ...Object.fromEntries(extendedEntries),
+      } as DefiningWildlifeSpeciesTextures;
+    })();
   loadingPromiseHolder.current = loadingPromise;
 
   loadingWildlifeSpeciesTexturesCache.set(cacheKey, loadingPromise);

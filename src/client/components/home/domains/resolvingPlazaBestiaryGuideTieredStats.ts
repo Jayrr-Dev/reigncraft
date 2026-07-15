@@ -105,6 +105,19 @@ function listingPlazaBestiaryOnHitProcRows(
       };
     }
 
+    if (effect.kind === 'temperature') {
+      const isHeat = effect.deltaCelsius > 0;
+      const absDelta = Math.abs(effect.deltaCelsius);
+
+      return {
+        icon: 'mdi:thermometer',
+        label: isHeat ? `Heat +${absDelta}°C` : `Cold −${absDelta}°C`,
+        procChancePercent: formattingPlazaBestiaryProcChancePercent(
+          effect.procChance
+        ),
+      };
+    }
+
     const buffDescriptor = resolvingWorldPlazaEntityBuffDescriptor(
       effect.buffId
     );

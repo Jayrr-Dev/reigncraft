@@ -34,6 +34,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE = {
   NPCS: 'npcs',
   CHESTS: 'chests',
   TRAPS: 'traps',
+  PLACED_BLOCKS: 'placed-blocks',
   TREES: 'trees',
   COLUMN_ROCKS: 'column-rocks',
   ORE_VEINS: 'ore-veins',
@@ -49,6 +50,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE = {
   PONDS: 'ponds',
   SWAMP_PONDS: 'swamp-ponds',
   TEA_BREWING: 'tea-brewing',
+  DODGE_ZERO_DAMAGE: 'dodge-zero-damage',
 } as const;
 
 export type DefiningWorldPlazaGenerationFeatureId =
@@ -264,7 +266,8 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.NPCS,
       groupId: 'entities',
       label: 'NPCs',
-      description: 'Placed villagers, interaction badges, and Talk/Shop/Quest panels.',
+      description:
+        'Placed villagers, interaction badges, and Talk/Shop/Quest panels.',
     },
     {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.CHESTS,
@@ -279,6 +282,13 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
       label: 'Traps',
       description:
         'Player-placed bear traps and caltrops. Bear traps snare/bleed with Arm/Disarm/Pick up; caltrops are one-shot slow + bleed.',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PLACED_BLOCKS,
+      groupId: 'entities',
+      label: 'Placed blocks',
+      description:
+        'Player-built floors, walls, campfires, furnaces, and craft utilities. Off hides draw, shadows, and block collision.',
     },
     {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES,
@@ -375,6 +385,13 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
       description:
         'Teapot water fill, ingredient popover, campfire brew, and pour labels.',
     },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.DODGE_ZERO_DAMAGE,
+      groupId: 'systems',
+      label: 'Dodge = 0 damage',
+      description:
+        'Dodged damage rolls apply 0 damage. Off keeps the old low rolled amount.',
+    },
   ];
 
 export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS: Readonly<
@@ -407,6 +424,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS: Readonly<
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.NPCS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.CHESTS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TRAPS]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PLACED_BLOCKS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TREES]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.COLUMN_ROCKS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.ORE_VEINS]: true,
@@ -422,6 +440,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS: Readonly<
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PONDS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SWAMP_PONDS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TEA_BREWING]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.DODGE_ZERO_DAMAGE]: true,
 };
 
 export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_STORAGE_KEY =

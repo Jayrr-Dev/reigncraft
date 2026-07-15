@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { checkingWildlifeSpeciesUsesGlowOrbPresentation } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesUsesGlowOrbPresentation';
+import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import {
   listingWildlifeBootPreloadSpeciesIds,
   preloadingWildlifeBootSpeciesTextures,
@@ -13,6 +15,17 @@ vi.mock(
     loadingWildlifeSpeciesTextures: loadingWildlifeSpeciesTexturesMock,
   })
 );
+
+function countingWildlifeBootTexturePreloadSpecies(): number {
+  return listingWildlifeBootPreloadSpeciesIds().filter((speciesId) => {
+    const species = resolvingWildlifeSpeciesDefinition(speciesId);
+
+    return (
+      species !== null &&
+      !checkingWildlifeSpeciesUsesGlowOrbPresentation(species)
+    );
+  }).length;
+}
 
 describe('listingWildlifeBootPreloadSpeciesIds', () => {
   it('includes plains spawn-table species', () => {
@@ -36,6 +49,10 @@ describe('listingWildlifeBootPreloadSpeciesIds', () => {
 
     expect(new Set(speciesIds).size).toBe(speciesIds.length);
   });
+
+  it('includes glow-orb companions in the roster for non-texture boot work', () => {
+    expect(listingWildlifeBootPreloadSpeciesIds()).toContain('fairy');
+  });
 });
 
 describe('preloadingWildlifeBootSpeciesTextures', () => {
@@ -43,7 +60,7 @@ describe('preloadingWildlifeBootSpeciesTextures', () => {
     loadingWildlifeSpeciesTexturesMock.mockReset();
   });
 
-  it('loads every boot roster species and reports full progress', async () => {
+  it('loads every sprite boot roster species and reports full progress', async () => {
     loadingWildlifeSpeciesTexturesMock.mockResolvedValue({});
     const reportedRatios: number[] = [];
 
@@ -52,8 +69,13 @@ describe('preloadingWildlifeBootSpeciesTextures', () => {
     });
 
     expect(loadingWildlifeSpeciesTexturesMock).toHaveBeenCalledTimes(
-      listingWildlifeBootPreloadSpeciesIds().length
+      countingWildlifeBootTexturePreloadSpecies()
     );
+    expect(
+      loadingWildlifeSpeciesTexturesMock.mock.calls.some(
+        ([species]) => species.speciesId === 'fairy'
+      )
+    ).toBe(false);
     expect(reportedRatios.at(-1)).toBe(1);
   });
 

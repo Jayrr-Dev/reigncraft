@@ -10,6 +10,7 @@
  * @module components/world/wildlife/domains/preloadingWildlifeBootSpeciesTextures
  */
 
+import { checkingWildlifeSpeciesUsesGlowOrbPresentation } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesUsesGlowOrbPresentation';
 import { DEFINING_WILDLIFE_BOOT_PRELOAD_MAX_SPECIES_MOBILE } from '@/components/world/wildlife/domains/definingWildlifeBiomeProximityTextureConstants';
 import {
   DEFINING_WILDLIFE_BOOT_PRELOAD_BIOME_KINDS,
@@ -70,7 +71,10 @@ export async function preloadingWildlifeBootSpeciesTextures(
         speciesIds[speciesIndex]!
       );
 
-      if (speciesDefinition) {
+      if (
+        speciesDefinition &&
+        !checkingWildlifeSpeciesUsesGlowOrbPresentation(speciesDefinition)
+      ) {
         try {
           await loadingWildlifeSpeciesTextures(speciesDefinition);
         } catch {

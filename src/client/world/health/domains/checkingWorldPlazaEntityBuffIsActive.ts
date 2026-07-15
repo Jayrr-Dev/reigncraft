@@ -15,6 +15,12 @@ import {
   resolvingWorldPlazaEntityBuffDescriptor,
   type DefiningWorldPlazaEntityBuffDescriptor,
 } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
+import {
+  DEFINING_WORLD_PLAZA_ENTITY_BLEED_IMMUNITY_DAMAGE_KINDS,
+  DEFINING_WORLD_PLAZA_ENTITY_FATED_IMMUNITY_DAMAGE_KINDS,
+  DEFINING_WORLD_PLAZA_ENTITY_POISON_IMMUNITY_DAMAGE_KINDS,
+  checkingWorldPlazaEntityDamageKindImmunityGroupIsActive,
+} from '@/components/world/health/domains/definingWorldPlazaEntityBuffImmunityDamageKinds';
 import { checkingWorldPlazaEntityHealthDamageRollPresetIsActive } from '@/components/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { DEFINING_WORLD_PLAZA_LUCKY_BUFF_ID } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverConstants';
@@ -161,6 +167,31 @@ function checkingWorldPlazaEntityBuffDescriptorIsActive({
 
   if (effect.kind === 'toggle_cold_immunity') {
     return state.temperatureResistance.isColdImmune;
+  }
+
+  if (effect.kind === 'toggle_poison_immunity') {
+    return checkingWorldPlazaEntityDamageKindImmunityGroupIsActive(
+      state.damageKindImmunities,
+      DEFINING_WORLD_PLAZA_ENTITY_POISON_IMMUNITY_DAMAGE_KINDS
+    );
+  }
+
+  if (effect.kind === 'toggle_bleed_immunity') {
+    return checkingWorldPlazaEntityDamageKindImmunityGroupIsActive(
+      state.damageKindImmunities,
+      DEFINING_WORLD_PLAZA_ENTITY_BLEED_IMMUNITY_DAMAGE_KINDS
+    );
+  }
+
+  if (effect.kind === 'toggle_fated_immunity') {
+    return checkingWorldPlazaEntityDamageKindImmunityGroupIsActive(
+      state.damageKindImmunities,
+      DEFINING_WORLD_PLAZA_ENTITY_FATED_IMMUNITY_DAMAGE_KINDS
+    );
+  }
+
+  if (effect.kind === 'toggle_death_immunity') {
+    return state.isDeathImmune;
   }
 
   if (effect.kind === 'temporary_max_health') {

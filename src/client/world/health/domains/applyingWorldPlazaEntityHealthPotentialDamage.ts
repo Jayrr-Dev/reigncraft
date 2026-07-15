@@ -1,3 +1,7 @@
+import {
+  DEFINING_WORLD_PLAZA_ENTITY_FATED_IMMUNITY_DAMAGE_KINDS,
+  checkingWorldPlazaEntityDamageKindImmunityGroupIsActive,
+} from '@/components/world/health/domains/definingWorldPlazaEntityBuffImmunityDamageKinds';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 
 let managingWorldPlazaEntityHealthPotentialDamageNextId = 0;
@@ -28,6 +32,15 @@ export function applyingWorldPlazaEntityHealthPotentialDamage({
   const delayMs = Math.max(0, resolveDelayMs);
 
   if (expectedDamage <= 0 || delayMs <= 0) {
+    return state;
+  }
+
+  if (
+    checkingWorldPlazaEntityDamageKindImmunityGroupIsActive(
+      state.damageKindImmunities,
+      DEFINING_WORLD_PLAZA_ENTITY_FATED_IMMUNITY_DAMAGE_KINDS
+    )
+  ) {
     return state;
   }
 

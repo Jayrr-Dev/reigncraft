@@ -102,6 +102,18 @@ export type DefiningWorldPlazaEntityBuffEffect =
       kind: 'toggle_cold_immunity';
     }
   | {
+      kind: 'toggle_poison_immunity';
+    }
+  | {
+      kind: 'toggle_bleed_immunity';
+    }
+  | {
+      kind: 'toggle_fated_immunity';
+    }
+  | {
+      kind: 'toggle_death_immunity';
+    }
+  | {
       kind: 'invincibility_toggle';
     }
   | {
@@ -1253,6 +1265,58 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       durationMs: null,
       effect: {
         kind: 'toggle_cold_immunity',
+      },
+    },
+    {
+      id: 'poison-immunity-buff',
+      label: 'Poison Immunity',
+      description:
+        'Blocks toxic, venomous, and lethal poison. New poison stacks will not apply.',
+      polarity: 'buff',
+      category: 'defence',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'toggle_poison_immunity',
+      },
+    },
+    {
+      id: 'bleed-immunity-buff',
+      label: 'Bleed Immunity',
+      description:
+        'Blocks bleeding, hemorrhaging, and exsanguinating. New bleed stacks will not apply.',
+      polarity: 'buff',
+      category: 'defence',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'toggle_bleed_immunity',
+      },
+    },
+    {
+      id: 'fated-immunity-buff',
+      label: 'Fated Immunity',
+      description:
+        'Blocks fated (delayed) damage. New fated marks will not apply.',
+      polarity: 'buff',
+      category: 'defence',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'toggle_fated_immunity',
+      },
+    },
+    {
+      id: 'death-immunity-buff',
+      label: 'Death Immunity',
+      description:
+        'You cannot die while this is active. Health stays at a minimum of 1.',
+      polarity: 'buff',
+      category: 'defence',
+      durationKind: 'toggle',
+      durationMs: null,
+      effect: {
+        kind: 'toggle_death_immunity',
       },
     },
     {
