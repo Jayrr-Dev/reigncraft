@@ -1,6 +1,7 @@
 'use client';
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
+import { recordingWorldPlazaHerbariumMushroomSighted } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
@@ -165,6 +166,8 @@ export function usingWorldPlazaMushroomPickInteraction({
           }
           return;
         }
+
+        recordingWorldPlazaHerbariumMushroomSighted(pickResult.speciesId);
 
         const catalogEntry = resolvingWorldPlazaMushroomCatalogEntryBySpeciesId(
           pickResult.speciesId

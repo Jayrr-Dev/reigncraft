@@ -6,6 +6,7 @@ import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/ch
 import { checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex';
 import { computingWorldPlazaFirelandsStructureAnchorTileIndex } from '@/components/world/domains/computingWorldPlazaFirelandsStructureAnchorTileIndex';
 import {
+  DEFINING_WORLD_PLAZA_FIRELANDS_PROPS_ENABLED,
   DEFINING_WORLD_PLAZA_FIRELANDS_SCATTER_DETAIL_NOISE_FREQUENCY,
   DEFINING_WORLD_PLAZA_FIRELANDS_SCATTER_DETAIL_NOISE_MIN,
   DEFINING_WORLD_PLAZA_FIRELANDS_SCATTER_DETAIL_NOISE_SEED,
@@ -128,6 +129,10 @@ export function resolvingWorldPlazaFirelandsVolcanoAnchorAtTileIndex(
   tileX: number,
   tileY: number
 ): { readonly tileX: number; readonly tileY: number } | null {
+  if (!DEFINING_WORLD_PLAZA_FIRELANDS_PROPS_ENABLED) {
+    return null;
+  }
+
   const anchorTile = computingWorldPlazaFirelandsStructureAnchorTileIndex(
     tileX,
     tileY
@@ -164,6 +169,10 @@ export function resolvingWorldPlazaFirelandsRuinPropAtTileIndex(
   tileX: number,
   tileY: number
 ): DefiningWorldPlazaFirelandsPropInstance | null {
+  if (!DEFINING_WORLD_PLAZA_FIRELANDS_PROPS_ENABLED) {
+    return null;
+  }
+
   if (!checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex(tileX, tileY)) {
     return null;
   }
@@ -344,6 +353,10 @@ function resolvingWorldPlazaFirelandsScatterPropAtAnchorTileIndex(
   tileX: number,
   tileY: number
 ): DefiningWorldPlazaFirelandsPropInstance | null {
+  if (!DEFINING_WORLD_PLAZA_FIRELANDS_PROPS_ENABLED) {
+    return null;
+  }
+
   if (!checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex(tileX, tileY)) {
     return null;
   }

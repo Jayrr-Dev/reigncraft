@@ -45,6 +45,12 @@ export const DEFINING_WORLD_PLAZA_FIRELANDS_BODY_NOISE_THRESHOLD = 0.65;
 /** Ambient air temperature (°C) across the Firelands biome. */
 export const DEFINING_WORLD_PLAZA_FIRELANDS_AMBIENT_TEMPERATURE_CELSIUS = 62;
 
+/**
+ * When false, Firelands keeps floor tiles only (no volcano, scatter, or ruin props).
+ * Flip back on when Firelands decoration art is ready again.
+ */
+export const DEFINING_WORLD_PLAZA_FIRELANDS_PROPS_ENABLED = false;
+
 /** Lava placement noise threshold inside Firelands (much denser than global lava). */
 export const DEFINING_WORLD_PLAZA_FIRELANDS_LAVA_TILE_NOISE_THRESHOLD = 0.72;
 

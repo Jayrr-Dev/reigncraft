@@ -17,7 +17,8 @@ import {
 } from '@/components/world/health/domains/definingWorldPlazaEntityBuffImmunityDamageKinds';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_DOT_TICK_INTERVAL_MS,
-  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_DAMAGE_PER_LAYER,
+  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_DAMAGE_EXPONENTIAL_GROWTH,
+  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_DAMAGE_MAX_HEALTH_FRACTION_BASE,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_SAFE_LAYER_DELTA,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
@@ -855,7 +856,15 @@ export function tickingWorldPlazaEntityHealthState(
   });
 }
 
-/** Computes fall damage from layers dropped beyond the safe threshold. */
+/**
+ * Computes exponential fall EV as a max-health fraction for the roll engine.
+ *
+ * Caller passes the result as `rawAmount` with damage kind `fall`
+ * (`max_health_percent_ev`). The damage pipeline converts fraction → flat EV,
+ * then rolls.
+ *
+ * @param layerDelta - Layers dropped on landing.
+ */
 export function computingWorldPlazaEntityHealthFallDamage(
   layerDelta: number
 ): number {
@@ -867,7 +876,12 @@ export function computingWorldPlazaEntityHealthFallDamage(
     layerDelta - DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_SAFE_LAYER_DELTA;
 
   return (
-    damagingLayers * DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_DAMAGE_PER_LAYER
+    DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_DAMAGE_MAX_HEALTH_FRACTION_BASE *
+    (Math.pow(
+      DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_DAMAGE_EXPONENTIAL_GROWTH,
+      damagingLayers
+    ) -
+      1)
   );
 }
 

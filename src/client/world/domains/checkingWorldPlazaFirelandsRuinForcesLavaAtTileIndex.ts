@@ -1,6 +1,7 @@
 import { checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex';
 import { computingWorldPlazaFirelandsStructureAnchorTileIndex } from '@/components/world/domains/computingWorldPlazaFirelandsStructureAnchorTileIndex';
 import {
+  DEFINING_WORLD_PLAZA_FIRELANDS_PROPS_ENABLED,
   DEFINING_WORLD_PLAZA_FIRELANDS_RUIN_CENTRALITY_MAX,
   DEFINING_WORLD_PLAZA_FIRELANDS_RUIN_CENTRALITY_MIN,
   DEFINING_WORLD_PLAZA_FIRELANDS_STRUCTURE_SPACING_ANCHOR_TILE,
@@ -47,6 +48,10 @@ function pickingWorldPlazaFirelandsRuinBlueprintIndexAtAnchor(
   anchorTileX: number,
   anchorTileY: number
 ): number | null {
+  if (!DEFINING_WORLD_PLAZA_FIRELANDS_PROPS_ENABLED) {
+    return null;
+  }
+
   if (
     !checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex(anchorTileX, anchorTileY)
   ) {

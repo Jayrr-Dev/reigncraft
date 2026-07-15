@@ -46,8 +46,17 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_LAVA_INSTANT_DAMAGE = 15;
 /** Fall damage: layers fallen without damage (falls of 6+ blocks deal damage). */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_SAFE_LAYER_DELTA = 5;
 
-/** HP lost per layer beyond the safe threshold. */
-export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_DAMAGE_PER_LAYER = 15;
+/**
+ * Exponential fall EV beyond the safe threshold, as a max-health fraction:
+ * `fractionBase * (growth ^ damagingLayers - 1)`.
+ *
+ * Passed as `max_health_percent_ev` into the damage roll engine. Soft early
+ * drops; 12-layer falls reach ~100% max HP EV (lethal for full health).
+ */
+export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_DAMAGE_MAX_HEALTH_FRACTION_BASE = 0.025;
+
+/** Per damaging-layer growth factor for fall EV (must be > 1). */
+export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FALL_DAMAGE_EXPONENTIAL_GROWTH = 1.7;
 
 /** Climate thresholds for environmental hazards (0..1). */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HEAT_CLIMATE_TEMPERATURE_MIN = 0.72;

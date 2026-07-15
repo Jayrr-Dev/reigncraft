@@ -60,6 +60,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_ROW_COUNT,
   DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCeramicsSpriteSheetConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_IRON_TUBE_SPRITE_SHEET_ICON } from '@/components/world/inventory/domains/definingWorldPlazaInventoryIronTubeSpriteSheetConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CALTROPS,
@@ -310,8 +311,8 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
     description:
       'Draw four iron ingots into a hollow tube on the anvil. Intermediate stock for later forge recipes.',
     recipeVisual: {
-      visualKind: 'iconify',
-      recipeEmblemIconifyIcon: 'mdi:pipe',
+      visualKind: 'sprite-sheet',
+      spriteSheetIcon: DEFINING_WORLD_PLAZA_INVENTORY_IRON_TUBE_SPRITE_SHEET_ICON,
     },
     ingredients: [
       {

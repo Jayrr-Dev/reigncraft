@@ -22,14 +22,24 @@ export const DEFINING_PLAZA_BIOMES_MYTHIC_KIND: DefiningWorldPlazaBiomeKind =
   'flower_forest';
 
 /**
- * Only this biome may use the legendary codex tier.
+ * Canonical legendary Firelands id (kept for call sites that need one kind).
+ *
+ * Prefer {@link DEFINING_PLAZA_BIOMES_LEGENDARY_KINDS} for set checks.
+ */
+export const DEFINING_PLAZA_BIOMES_LEGENDARY_KIND: DefiningWorldPlazaBiomeKind =
+  'firelands';
+
+/**
+ * Biomes that may use the legendary codex tier.
  *
  * Validated by:
  * - `src/client/world/domains/checkingPlazaBiomesGuideRarityAgainstWorldFrequencies.ts`
  * - `src/client/world/domains/resolvingWorldPlazaBiomeFrequencySampling.test.ts`
  */
-export const DEFINING_PLAZA_BIOMES_LEGENDARY_KIND: DefiningWorldPlazaBiomeKind =
-  'firelands';
+export const DEFINING_PLAZA_BIOMES_LEGENDARY_KINDS = [
+  'firelands',
+  'frostsink',
+] as const satisfies readonly DefiningWorldPlazaBiomeKind[];
 
 /** One biome entry in the codex biomes guide. */
 export type DefiningPlazaBiomesGuideEntry = {
@@ -184,7 +194,14 @@ export const DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES: readonly DefiningPlazaBiomesGu
     {
       kind: 'firelands',
       icon: 'solar:fire-bold',
-      summary: 'Scorched earth, ember vents, and ash.',
+      summary: 'Scorched earth and ash.',
+      rarity: 'legendary',
+    },
+    {
+      kind: 'frostsink',
+      icon: 'mdi:snowflake-alert',
+      summary:
+        'Cryocore ice disc where molecular motion drains toward absolute cold.',
       rarity: 'legendary',
     },
   ] as const;

@@ -31,6 +31,7 @@ import {
   ensuringWorldPlazaVisibleFlowerDecorationLayer,
   updatingWorldPlazaVisibleFlowerDecorationLayer,
 } from '@/components/world/domains/syncingWorldPlazaVisibleFlowerDecorationLayer';
+import { syncingWorldPlazaVisibleFrostsinkDecorationLayer } from '@/components/world/domains/syncingWorldPlazaVisibleFrostsinkDecorationLayer';
 import {
   advancingWorldPlazaVisibleLavaOverlayAnimation,
   clearingWorldPlazaLavaPoolLightSources,
@@ -98,6 +99,10 @@ type RunningWorldPlazaRockColumnsLayerState = {
 };
 
 type RunningWorldPlazaFirelandsDecorationsLayerState = {
+  spriteByKey: Map<string, Sprite>;
+};
+
+type RunningWorldPlazaFrostsinkDecorationsLayerState = {
   spriteByKey: Map<string, Sprite>;
 };
 
@@ -414,6 +419,79 @@ export function registeringWorldPlazaTerrainLayers(
       destroyRuntimeState: (context, runtimeState) => {
         const state =
           runtimeState as RunningWorldPlazaFirelandsDecorationsLayerState;
+
+        for (const sprite of state.spriteByKey.values()) {
+          sprite.parent?.removeChild(sprite);
+          sprite.destroy();
+        }
+
+        state.spriteByKey.clear();
+      },
+    },
+    {
+      kind: 'incremental',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.FROSTSINK_DECORATIONS,
+      parentLayer: 'trunk',
+      boundsProfile: 'floor',
+      participatesInHeavyIdleSkip: true,
+      renderLayerToggle: 'floor',
+      requiresAnyGenerationFeature: [
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES,
+      ],
+      requiresTextures: [
+        REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.FROSTSINK_SPRITES,
+      ],
+      invalidateOn: [
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FROSTSINK_TEXTURES_READY,
+      ],
+      createRuntimeState:
+        (): RunningWorldPlazaFrostsinkDecorationsLayerState => ({
+          spriteByKey: new Map(),
+        }),
+      sync: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaFrostsinkDecorationsLayerState;
+
+        if (!context.floorBounds) {
+          return { isComplete: true, needsChildSort: false };
+        }
+
+        const frostsinkSyncResult =
+          syncingWorldPlazaVisibleFrostsinkDecorationLayer({
+            parentContainer: context.trunkLayer,
+            bounds: context.floorBounds,
+            spriteByKey: state.spriteByKey,
+            centerTileX: Math.round(context.playerPosition.x),
+            centerTileY: Math.round(context.playerPosition.y),
+            maxBuildsPerCall: 8,
+            shouldSortChildrenImmediately: false,
+          });
+
+        for (const frostsinkSprite of state.spriteByKey.values()) {
+          frostsinkSprite.visible = context.isFloorRenderLayerEnabled;
+        }
+
+        return {
+          isComplete: frostsinkSyncResult.isComplete,
+          needsChildSort: frostsinkSyncResult.needsChildSort,
+          builtCount: frostsinkSyncResult.propsBuilt,
+        };
+      },
+      resetRuntimeState: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaFrostsinkDecorationsLayerState;
+
+        for (const sprite of state.spriteByKey.values()) {
+          context.trunkLayer.removeChild(sprite);
+          sprite.destroy();
+        }
+
+        state.spriteByKey.clear();
+      },
+      destroyRuntimeState: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaFrostsinkDecorationsLayerState;
 
         for (const sprite of state.spriteByKey.values()) {
           sprite.parent?.removeChild(sprite);

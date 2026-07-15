@@ -140,6 +140,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_MUSIC_BY_KIND: Record<
   ocean: 'pineapple_under_the_sea',
   rocky: 'strange_worlds',
   firelands: 'forgotten_biomes',
+  frostsink: 'polar_lights',
 };
 
 /**

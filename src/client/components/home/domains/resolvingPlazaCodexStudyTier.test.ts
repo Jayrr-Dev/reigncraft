@@ -13,6 +13,7 @@ const ALL_TRACK_IDS: readonly PlazaCodexStudyTrackId[] = [
   'herbarium-tree',
   'herbarium-clover',
   'herbarium-berry',
+  'herbarium-mushroom',
   'bestiary',
   'lapidary',
   'pathology',

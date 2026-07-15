@@ -1,12 +1,11 @@
+import { listingWorldPlazaChestInstances } from '@/components/world/chest/domains/managingWorldPlazaChestInstanceStore';
 import type { DefiningWorldCollisionProvider } from '@/components/world/collision/domains/definingWorldCollisionProvider';
 import { findingWorldCollisionProviderById } from '@/components/world/collision/domains/definingWorldCollisionProviderRegistry';
-import { listingWorldPlazaChestInstances } from '@/components/world/chest/domains/managingWorldPlazaChestInstanceStore';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
 } from '@/components/world/domains/definingWorldPlazaIsometricConstants';
-import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
-import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_OBSTACLE_KIND_BLOCK,
@@ -18,6 +17,7 @@ import { drawingWorldPlazaDashedIsometricTileDiamondStrokeOnGraphics } from '@/c
 import { drawingWorldPlazaDashedScreenDiamondColliderStrokeOnGraphics } from '@/components/world/domains/drawingWorldPlazaDashedScreenDiamondColliderStrokeOnGraphics';
 import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domains/formattingWorldPlazaTileIndexCacheKey';
 import { listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex } from '@/components/world/domains/listingWorldPlazaColumnRockFootprintTileIndicesAtAnchorTileIndex';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import {
   resolvingWorldPlazaColumnRockBaseDiamondFromMetadata,
   resolvingWorldPlazaColumnRockBaseDiamondPlayerContactScreenHalfExtentsPx,
@@ -25,6 +25,7 @@ import {
 } from '@/components/world/domains/resolvingWorldPlazaColumnRockBaseDiamondFromMetadata';
 import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex';
 import { resolvingWorldPlazaFirelandsBlockingPropAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFirelandsPropAtTileIndex';
+import { resolvingWorldPlazaFrostsinkBlockingPropAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFrostsinkPropAtTileIndex';
 import { resolvingWorldPlazaTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainElevationAtTileIndex';
 import {
   resolvingWorldPlazaRockCollisionRadiusGridAtTileIndex,
@@ -265,6 +266,42 @@ function drawingWorldCollisionFirelandsPropProviderDebugOnGraphics(
   );
 }
 
+function drawingWorldCollisionFrostsinkPropProviderDebugOnGraphics(
+  graphics: Graphics,
+  tileX: number,
+  tileY: number,
+  seenFrostsinkPropAnchorKeys: Set<string>,
+  provider: DefiningWorldCollisionProvider
+): void {
+  const frostsinkProp = resolvingWorldPlazaFrostsinkBlockingPropAtTileIndex(
+    tileX,
+    tileY
+  );
+
+  if (!frostsinkProp || frostsinkProp.collisionRadiusGrid <= 0) {
+    return;
+  }
+
+  const anchorKey = formattingWorldPlazaTileIndexCacheKey(
+    frostsinkProp.anchorTileX,
+    frostsinkProp.anchorTileY
+  );
+
+  if (seenFrostsinkPropAnchorKeys.has(anchorKey)) {
+    return;
+  }
+
+  seenFrostsinkPropAnchorKeys.add(anchorKey);
+
+  drawingWorldPlazaDashedGridCircleColliderStrokeOnGraphics(
+    graphics,
+    frostsinkProp.anchorTileX,
+    frostsinkProp.anchorTileY,
+    frostsinkProp.collisionRadiusGrid,
+    provider.debugStroke.strokeColor
+  );
+}
+
 /**
  * Draws procedural terrain colliders for one tile using provider debug strokes.
  */
@@ -332,6 +369,20 @@ function drawingWorldCollisionProviderDebugCollidersAtTileOnGraphics(
       tileY,
       seenFirelandsPropAnchorKeys,
       firelandsProvider
+    );
+  }
+
+  const frostsinkProvider = findingWorldCollisionProviderById(
+    'frostsinkPropCircle'
+  );
+
+  if (frostsinkProvider) {
+    drawingWorldCollisionFrostsinkPropProviderDebugOnGraphics(
+      graphics,
+      tileX,
+      tileY,
+      seenFirelandsPropAnchorKeys,
+      frostsinkProvider
     );
   }
 }

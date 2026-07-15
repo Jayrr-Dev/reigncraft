@@ -65,6 +65,9 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_ROCK_COLLIDER_STROKE_C
 /** Circular collider outline for blocking Firelands props. */
 export const DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_FIRELANDS_PROP_COLLIDER_STROKE_COLOR = 0xff5544;
 
+/** Stroke color for Frostsink Cryocore collision circles. */
+export const DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_FROSTSINK_PROP_COLLIDER_STROKE_COLOR = 0x55c8ff;
+
 /** Circular collider outline for live wildlife body circles. */
 export const DEFINING_WORLD_PLAZA_TERRAIN_COLLISION_DEBUG_WILDLIFE_COLLIDER_STROKE_COLOR = 0x44ddff;
 

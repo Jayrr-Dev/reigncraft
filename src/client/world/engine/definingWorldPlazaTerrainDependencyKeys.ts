@@ -27,6 +27,7 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY = {
   ISLAND_MODE_REVISION: 'islandModeRevision',
   PROCEDURAL_TREES_AND_ROCKS_REVISION: 'proceduralTreesAndRocksRevision',
   FIRELANDS_TEXTURES_READY: 'firelandsTexturesReady',
+  FROSTSINK_TEXTURES_READY: 'frostsinkTexturesReady',
   LONG_GRASS_TEXTURES_READY: 'longGrassTexturesReady',
   SHRUB_TEXTURES_READY: 'shrubTexturesReady',
   MUSHROOM_TEXTURES_READY: 'mushroomTexturesReady',

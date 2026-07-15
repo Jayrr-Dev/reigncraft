@@ -5,6 +5,7 @@ import { RenderingPlazaHerbariumBerryPortrait } from '@/components/home/componen
 import { RenderingPlazaHerbariumCloverPortrait } from '@/components/home/components/renderingPlazaHerbariumCloverPortrait';
 import { RenderingPlazaHerbariumFlowerPortrait } from '@/components/home/components/renderingPlazaHerbariumFlowerPortrait';
 import { RenderingPlazaHerbariumGuideDetailView } from '@/components/home/components/renderingPlazaHerbariumGuideDetailView';
+import { RenderingPlazaHerbariumMushroomPortrait } from '@/components/home/components/renderingPlazaHerbariumMushroomPortrait';
 import { RenderingPlazaHerbariumTreePortrait } from '@/components/home/components/renderingPlazaHerbariumTreePortrait';
 import { DEFINING_PLAZA_HERBARIUM_PANEL_SUBTITLE } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
 import {
@@ -25,8 +26,10 @@ import {
   gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
   gettingWorldPlazaHerbariumCloverStudyCountSnapshot,
   gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
+  gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot,
   gettingWorldPlazaHerbariumSightedBerryLootKindsSnapshot,
   gettingWorldPlazaHerbariumSightedCloverKindsSnapshot,
+  gettingWorldPlazaHerbariumSightedMushroomSpeciesSnapshot,
   gettingWorldPlazaHerbariumSightedTreeVariantsSnapshot,
   gettingWorldPlazaHerbariumTreeStudyCountsSnapshot,
   subscribingWorldPlazaHerbariumDiscovery,
@@ -61,6 +64,7 @@ export type PlazaHerbariumCategoryFilterId =
   | 'flower'
   | 'clover'
   | 'berry'
+  | 'mushroom'
   | 'tree';
 
 const PLAZA_HERBARIUM_CATEGORY_FILTERS: readonly {
@@ -71,6 +75,7 @@ const PLAZA_HERBARIUM_CATEGORY_FILTERS: readonly {
   { id: 'flower', label: 'Flowers' },
   { id: 'clover', label: 'Clovers' },
   { id: 'berry', label: 'Berries' },
+  { id: 'mushroom', label: 'Mushrooms' },
   { id: 'tree', label: 'Trees' },
 ];
 
@@ -82,6 +87,62 @@ export type RenderingPlazaHerbariumPanelProps = {
 
 const PLAZA_HERBARIUM_GUIDE_TILE_RARITY_BADGE_CLASS_NAME =
   'h-4! max-w-18 px-1 text-[7px] sm:h-4! sm:px-1 sm:text-[7px]';
+
+function RenderingPlazaHerbariumGuideCardPortrait({
+  entry,
+  variant,
+}: {
+  entry: PlazaHerbariumGuideDisplayEntry;
+  variant: 'silhouette' | 'revealed';
+}): React.JSX.Element {
+  if (entry.kind === 'flower') {
+    return (
+      <RenderingPlazaHerbariumFlowerPortrait
+        speciesId={entry.speciesId}
+        variant={variant}
+        className="size-[48%]"
+      />
+    );
+  }
+
+  if (entry.kind === 'clover') {
+    return (
+      <RenderingPlazaHerbariumCloverPortrait
+        cloverKind={entry.cloverKind}
+        variant={variant}
+        className="size-[48%]"
+      />
+    );
+  }
+
+  if (entry.kind === 'berry') {
+    return (
+      <RenderingPlazaHerbariumBerryPortrait
+        berryLootKind={entry.berryLootKind}
+        variant={variant}
+        className="size-[48%]"
+      />
+    );
+  }
+
+  if (entry.kind === 'mushroom') {
+    return (
+      <RenderingPlazaHerbariumMushroomPortrait
+        speciesId={entry.speciesId}
+        variant={variant}
+        className="size-[48%]"
+      />
+    );
+  }
+
+  return (
+    <RenderingPlazaHerbariumTreePortrait
+      treeVariant={entry.variant}
+      variant={variant}
+      className="size-[48%]"
+    />
+  );
+}
 
 function RenderingPlazaHerbariumGuideCardRarityBadge({
   entry,
@@ -123,31 +184,10 @@ function RenderingPlazaHerbariumGuideCard({
           className={PLAZA_HERBARIUM_GUIDE_TILE_STAGE_CLASS_NAME}
           aria-hidden
         >
-          {entry.kind === 'flower' ? (
-            <RenderingPlazaHerbariumFlowerPortrait
-              speciesId={entry.speciesId}
-              variant="silhouette"
-              className="size-[48%]"
-            />
-          ) : entry.kind === 'clover' ? (
-            <RenderingPlazaHerbariumCloverPortrait
-              cloverKind={entry.cloverKind}
-              variant="silhouette"
-              className="size-[48%]"
-            />
-          ) : entry.kind === 'berry' ? (
-            <RenderingPlazaHerbariumBerryPortrait
-              berryLootKind={entry.berryLootKind}
-              variant="silhouette"
-              className="size-[48%]"
-            />
-          ) : (
-            <RenderingPlazaHerbariumTreePortrait
-              treeVariant={entry.variant}
-              variant="silhouette"
-              className="size-[48%]"
-            />
-          )}
+          <RenderingPlazaHerbariumGuideCardPortrait
+            entry={entry}
+            variant="silhouette"
+          />
           <RenderingPlazaHerbariumGuideCardRarityBadge entry={entry} />
         </div>
         <span
@@ -173,31 +213,10 @@ function RenderingPlazaHerbariumGuideCard({
       aria-label={`View ${entry.displayName} details`}
     >
       <div className={PLAZA_HERBARIUM_GUIDE_TILE_STAGE_CLASS_NAME} aria-hidden>
-        {entry.kind === 'flower' ? (
-          <RenderingPlazaHerbariumFlowerPortrait
-            speciesId={entry.speciesId}
-            variant="revealed"
-            className="size-[48%]"
-          />
-        ) : entry.kind === 'clover' ? (
-          <RenderingPlazaHerbariumCloverPortrait
-            cloverKind={entry.cloverKind}
-            variant="revealed"
-            className="size-[48%]"
-          />
-        ) : entry.kind === 'berry' ? (
-          <RenderingPlazaHerbariumBerryPortrait
-            berryLootKind={entry.berryLootKind}
-            variant="revealed"
-            className="size-[48%]"
-          />
-        ) : (
-          <RenderingPlazaHerbariumTreePortrait
-            treeVariant={entry.variant}
-            variant="revealed"
-            className="size-[48%]"
-          />
-        )}
+        <RenderingPlazaHerbariumGuideCardPortrait
+          entry={entry}
+          variant="revealed"
+        />
         <span className="absolute left-1 top-1 flex items-center gap-0.5 rounded-sm border border-poster-teal/35 bg-poster-teal-deep/90 px-1 py-0.5 shadow">
           <Icon
             icon={resolvingPlazaHerbariumEntryStudyTierBookIcon(entry)}
@@ -266,6 +285,16 @@ export function RenderingPlazaHerbariumPanel({
     gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
     () => ({})
   );
+  const sightedMushroomSpeciesIds = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumSightedMushroomSpeciesSnapshot,
+    () => []
+  );
+  const mushroomStudyCountsBySpeciesId = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot,
+    () => ({})
+  );
   const exploredBiomeKinds = useSyncExternalStore(
     subscribingWorldPlazaExploredBiomes,
     gettingWorldPlazaExploredBiomesSnapshot,
@@ -283,6 +312,10 @@ export function RenderingPlazaHerbariumPanel({
     () => new Set(sightedBerryLootKinds),
     [sightedBerryLootKinds]
   );
+  const sightedMushroomSpeciesSet = useMemo(
+    () => new Set(sightedMushroomSpeciesIds),
+    [sightedMushroomSpeciesIds]
+  );
   const exploredKinds = useMemo(
     () => new Set(exploredBiomeKinds),
     [exploredBiomeKinds]
@@ -297,15 +330,19 @@ export function RenderingPlazaHerbariumPanel({
         sightedCloverSet,
         cloverStudyCount,
         sightedBerryLootSet,
-        berryStudyCountsByLootKind
+        berryStudyCountsByLootKind,
+        sightedMushroomSpeciesSet,
+        mushroomStudyCountsBySpeciesId
       ),
     [
       berryStudyCountsByLootKind,
       cloverStudyCount,
       exploredKinds,
       flowerStudyCountsBySpeciesId,
+      mushroomStudyCountsBySpeciesId,
       sightedBerryLootSet,
       sightedCloverSet,
+      sightedMushroomSpeciesSet,
       sightedTreeSet,
       treeStudyCountsByVariant,
     ]
@@ -329,6 +366,10 @@ export function RenderingPlazaHerbariumPanel({
 
       if (entry.kind === 'berry') {
         return `berry:${entry.berryLootKind}`;
+      }
+
+      if (entry.kind === 'mushroom') {
+        return `mushroom:${entry.speciesId}`;
       }
 
       return `tree:${entry.variant}`;
@@ -359,9 +400,13 @@ export function RenderingPlazaHerbariumPanel({
   const closingEntryDetail = useCallback((): void => {
     setSelectedEntryId(null);
   }, []);
-  const sightedCount = guideEntries.filter((entry) => entry.isSighted).length;
-  const studiedCount = guideEntries.filter((entry) => entry.isStudied).length;
-  const totalCount = guideEntries.length;
+  const sightedCount = filteredGuideEntries.filter(
+    (entry) => entry.isSighted
+  ).length;
+  const studiedCount = filteredGuideEntries.filter(
+    (entry) => entry.isStudied
+  ).length;
+  const totalCount = filteredGuideEntries.length;
 
   if (selectedEntry?.isSighted) {
     return (

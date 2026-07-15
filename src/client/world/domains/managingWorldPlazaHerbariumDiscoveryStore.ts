@@ -9,6 +9,7 @@
 import type { DefiningWorldPlazaTreeVariantKind } from '@/components/world/domains/definingWorldPlazaTreeConstants';
 import { readingWorldPlazaHerbariumDiscoveryFromStorage } from '@/components/world/domains/readingWorldPlazaHerbariumDiscoveryFromStorage';
 import { writingWorldPlazaHerbariumDiscoveryToStorage } from '@/components/world/domains/writingWorldPlazaHerbariumDiscoveryToStorage';
+import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
 import type { WorldCloverSearchLootKind } from '../../../shared/worldCloverSearchLoot';
 import type { WorldFlowerSpeciesId } from '../../../shared/worldFlowerRarity';
 import type { WorldShrubBerryLootKind } from '../../../shared/worldShrubBerryLoot';
@@ -39,6 +40,13 @@ const MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_BERRY_STUDY_COUNTS: Readonl
   Partial<Record<WorldShrubBerryLootKind, number>>
 > = {};
 
+const MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SIGHTED_MUSHROOM_SPECIES_IDS: readonly DefiningWorldPlazaMushroomSpeciesId[] =
+  [];
+
+const MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_MUSHROOM_STUDY_COUNTS: Readonly<
+  Partial<Record<DefiningWorldPlazaMushroomSpeciesId, number>>
+> = {};
+
 let managingWorldPlazaHerbariumDiscoveryStorageOwnerId: string | null = null;
 let managingWorldPlazaHerbariumDiscoverySightedFlowerSpeciesIds =
   new Set<WorldFlowerSpeciesId>();
@@ -61,6 +69,10 @@ let managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind = new Map<
   WorldShrubBerryLootKind,
   number
 >();
+let managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIds =
+  new Set<DefiningWorldPlazaMushroomSpeciesId>();
+let managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsBySpeciesId =
+  new Map<DefiningWorldPlazaMushroomSpeciesId, number>();
 
 let managingWorldPlazaHerbariumDiscoverySightedFlowerSnapshotCache: readonly WorldFlowerSpeciesId[] =
   MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_FLOWER_SNAPSHOT;
@@ -80,6 +92,11 @@ let managingWorldPlazaHerbariumDiscoverySightedBerryLootKindsSnapshotCache: read
 let managingWorldPlazaHerbariumDiscoveryBerryStudyCountsSnapshotCache: Readonly<
   Partial<Record<WorldShrubBerryLootKind, number>>
 > = MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_BERRY_STUDY_COUNTS;
+let managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIdsSnapshotCache: readonly DefiningWorldPlazaMushroomSpeciesId[] =
+  MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SIGHTED_MUSHROOM_SPECIES_IDS;
+let managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsSnapshotCache: Readonly<
+  Partial<Record<DefiningWorldPlazaMushroomSpeciesId, number>>
+> = MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_MUSHROOM_STUDY_COUNTS;
 
 function refreshingWorldPlazaHerbariumDiscoverySnapshotCaches(): void {
   managingWorldPlazaHerbariumDiscoverySightedFlowerSnapshotCache =
@@ -125,6 +142,21 @@ function refreshingWorldPlazaHerbariumDiscoverySnapshotCaches(): void {
       : Object.fromEntries([
           ...managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind.entries(),
         ]);
+
+  managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIdsSnapshotCache =
+    managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIds.size === 0
+      ? MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SIGHTED_MUSHROOM_SPECIES_IDS
+      : [
+          ...managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIds,
+        ].sort();
+
+  managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsSnapshotCache =
+    managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsBySpeciesId.size ===
+    0
+      ? MANAGING_WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_MUSHROOM_STUDY_COUNTS
+      : Object.fromEntries([
+          ...managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsBySpeciesId.entries(),
+        ]);
 }
 
 function notifyingWorldPlazaHerbariumDiscoverySubscribers(): void {
@@ -144,7 +176,9 @@ function persistingWorldPlazaHerbariumDiscovery(): void {
     managingWorldPlazaHerbariumDiscoverySightedCloverKinds,
     managingWorldPlazaHerbariumDiscoveryCloverStudyCount,
     managingWorldPlazaHerbariumDiscoverySightedBerryLootKinds,
-    managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind
+    managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind,
+    managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIds,
+    managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsBySpeciesId
   );
 }
 
@@ -185,6 +219,12 @@ export function initializingWorldPlazaHerbariumDiscoveryStore(
   );
   managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind = new Map(
     snapshot.berryStudyCountsByLootKind
+  );
+  managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIds = new Set(
+    snapshot.sightedMushroomSpeciesIds
+  );
+  managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsBySpeciesId = new Map(
+    snapshot.mushroomStudyCountsBySpeciesId
   );
   refreshingWorldPlazaHerbariumDiscoverySnapshotCaches();
   notifyingWorldPlazaHerbariumDiscoverySubscribers();
@@ -234,6 +274,18 @@ export function gettingWorldPlazaHerbariumBerryStudyCountsSnapshot(): Readonly<
   Partial<Record<WorldShrubBerryLootKind, number>>
 > {
   return managingWorldPlazaHerbariumDiscoveryBerryStudyCountsSnapshotCache;
+}
+
+/** Returns a stable snapshot of sighted mushroom species for React subscriptions. */
+export function gettingWorldPlazaHerbariumSightedMushroomSpeciesSnapshot(): readonly DefiningWorldPlazaMushroomSpeciesId[] {
+  return managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIdsSnapshotCache;
+}
+
+/** Returns per-species mushroom Study totals for tiered herbarium detail. */
+export function gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot(): Readonly<
+  Partial<Record<DefiningWorldPlazaMushroomSpeciesId, number>>
+> {
+  return managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsSnapshotCache;
 }
 
 /**
@@ -521,6 +573,99 @@ export function ensuringWorldPlazaHerbariumBerryStudyAtLeast(
 }
 
 /**
+ * Records one mushroom species as sighted if the player has not logged it yet.
+ *
+ * @param speciesId - Mushroom species encountered or picked.
+ */
+export function recordingWorldPlazaHerbariumMushroomSighted(
+  speciesId: DefiningWorldPlazaMushroomSpeciesId
+): void {
+  if (
+    managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIds.has(speciesId)
+  ) {
+    return;
+  }
+
+  managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIds = new Set([
+    ...managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIds,
+    speciesId,
+  ]);
+  persistingWorldPlazaHerbariumDiscovery();
+  notifyingWorldPlazaHerbariumDiscoverySubscribers();
+}
+
+/**
+ * Records Study progress for a mushroom species and ensures it is sighted.
+ *
+ * @param speciesId - Mushroom species the local player studied.
+ * @param studyPoints - Points awarded for this Study (default 1).
+ */
+export function recordingWorldPlazaHerbariumMushroomStudied(
+  speciesId: DefiningWorldPlazaMushroomSpeciesId,
+  studyPoints = 1
+): void {
+  const awardedStudyPoints = Math.max(1, Math.floor(studyPoints));
+  const nextStudyCount =
+    (managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsBySpeciesId.get(
+      speciesId
+    ) ?? 0) + awardedStudyPoints;
+
+  managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIds = new Set([
+    ...managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIds,
+    speciesId,
+  ]);
+  managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsBySpeciesId = new Map(
+    managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsBySpeciesId
+  );
+  managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsBySpeciesId.set(
+    speciesId,
+    nextStudyCount
+  );
+
+  persistingWorldPlazaHerbariumDiscovery();
+  notifyingWorldPlazaHerbariumDiscoverySubscribers();
+}
+
+/**
+ * Raises mushroom study progress to at least `minimumStudyCount` without lowering.
+ *
+ * @param speciesId - Mushroom species already gathered.
+ * @param minimumStudyCount - Floor for study progress (minimum 1).
+ */
+export function ensuringWorldPlazaHerbariumMushroomStudyAtLeast(
+  speciesId: DefiningWorldPlazaMushroomSpeciesId,
+  minimumStudyCount: number
+): void {
+  const studyFloor = Math.max(1, Math.floor(minimumStudyCount));
+  const currentStudyCount =
+    managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsBySpeciesId.get(
+      speciesId
+    ) ?? 0;
+
+  if (
+    currentStudyCount >= studyFloor &&
+    managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIds.has(speciesId)
+  ) {
+    return;
+  }
+
+  managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIds = new Set([
+    ...managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIds,
+    speciesId,
+  ]);
+  managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsBySpeciesId = new Map(
+    managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsBySpeciesId
+  );
+  managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsBySpeciesId.set(
+    speciesId,
+    Math.max(currentStudyCount, studyFloor)
+  );
+
+  persistingWorldPlazaHerbariumDiscovery();
+  notifyingWorldPlazaHerbariumDiscoverySubscribers();
+}
+
+/**
  * Subscribes to herbarium discovery changes.
  *
  * @param onStoreChange - Callback invoked when discovery state changes.
@@ -546,6 +691,8 @@ export function resettingWorldPlazaHerbariumDiscoveryStoreForTests(): void {
   managingWorldPlazaHerbariumDiscoveryCloverStudyCount = 0;
   managingWorldPlazaHerbariumDiscoverySightedBerryLootKinds = new Set();
   managingWorldPlazaHerbariumDiscoveryBerryStudyCountsByLootKind = new Map();
+  managingWorldPlazaHerbariumDiscoverySightedMushroomSpeciesIds = new Set();
+  managingWorldPlazaHerbariumDiscoveryMushroomStudyCountsBySpeciesId = new Map();
   refreshingWorldPlazaHerbariumDiscoverySnapshotCaches();
   managingWorldPlazaHerbariumDiscoverySubscribers.clear();
 }

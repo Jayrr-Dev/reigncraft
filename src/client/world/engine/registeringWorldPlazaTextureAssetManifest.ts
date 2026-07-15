@@ -1,7 +1,18 @@
-﻿import type { DefiningWorldPlazaFirelandsPropKind } from '@/components/world/domains/definingWorldPlazaFirelandsRuinBlueprintConstants';
+import {
+  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_ACTIVE_WORLD_SPRITE_URL,
+  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL,
+} from '@/components/world/building/domains/definingWorldPlazaBlacksmithUtilitySpriteConstants';
+import { DEFINING_WORLD_PLAZA_CHEST_SPRITE_URLS } from '@/components/world/chest/domains/definingWorldPlazaChestConstants';
+import type { DefiningWorldPlazaFirelandsPropKind } from '@/components/world/domains/definingWorldPlazaFirelandsRuinBlueprintConstants';
 import { DEFINING_WORLD_PLAZA_LONG_GRASS_SPRITE_URLS } from '@/components/world/domains/definingWorldPlazaLongGrassConstants';
 import { DEFINING_WORLD_PLAZA_SHRUB_SPRITE_URLS } from '@/components/world/domains/definingWorldPlazaShrubConstants';
-import { DEFINING_WORLD_PLAZA_CHEST_SPRITE_URLS } from '@/components/world/chest/domains/definingWorldPlazaChestConstants';
+import type { DefiningWorldPlazaFrostsinkPropKind } from '@/components/world/domains/resolvingWorldPlazaFrostsinkPropAtTileIndex';
+import { creatingWorldPlazaTextureAssetLoader } from '@/components/world/engine/creatingWorldPlazaTextureAssetLoader';
+import {
+  DEFINING_WORLD_PLAZA_MUSHROOM_SPRITE_SHEET_COLUMN_COUNT,
+  DEFINING_WORLD_PLAZA_MUSHROOM_SPRITE_SHEET_ROW_COUNT,
+  DEFINING_WORLD_PLAZA_WORLD_MUSHROOM_SPRITE_SHEET_URL,
+} from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpriteSheetConstants';
 import {
   DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_CELL_PX,
   DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_COLUMN_COUNT,
@@ -12,16 +23,6 @@ import {
   DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_COLUMN_COUNT,
   DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_URL,
 } from '@/components/world/trap/domains/definingWorldPlazaCaltropConstants';
-import {
-  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_ACTIVE_WORLD_SPRITE_URL,
-  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL,
-} from '@/components/world/building/domains/definingWorldPlazaBlacksmithUtilitySpriteConstants';
-import {
-  DEFINING_WORLD_PLAZA_MUSHROOM_SPRITE_SHEET_COLUMN_COUNT,
-  DEFINING_WORLD_PLAZA_MUSHROOM_SPRITE_SHEET_ROW_COUNT,
-  DEFINING_WORLD_PLAZA_WORLD_MUSHROOM_SPRITE_SHEET_URL,
-} from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpriteSheetConstants';
-import { creatingWorldPlazaTextureAssetLoader } from '@/components/world/engine/creatingWorldPlazaTextureAssetLoader';
 import { Assets, Rectangle, Texture } from 'pixi.js';
 
 /**
@@ -34,6 +35,7 @@ import { Assets, Rectangle, Texture } from 'pixi.js';
 export const REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID = {
   LAVA_STATIC_TILE: 'lava-static-tile',
   FIRELANDS_SPRITES: 'firelands-sprites',
+  FROSTSINK_SPRITES: 'frostsink-sprites',
   LONG_GRASS_SPRITES: 'long-grass-sprites',
   SHRUB_SPRITES: 'shrub-sprites',
   MUSHROOM_SPRITES: 'mushroom-sprites',
@@ -103,6 +105,18 @@ const LOADING_WORLD_PLAZA_FIRELANDS_TEXTURE_URLS: Record<
   lava_obelisk: ['/fire/sprites/props/Constructions/LavaObelsik.webp'],
   lava_totem: ['/fire/sprites/props/Constructions/LavaTotem.webp'],
   lava_fence: ['/fire/sprites/props/Constructions/LavaFence.webp'],
+};
+
+const LOADING_WORLD_PLAZA_FROSTSINK_TEXTURE_URLS: Record<
+  DefiningWorldPlazaFrostsinkPropKind,
+  readonly string[]
+> = {
+  cryocore: [
+    '/frost/sprites/props/Cryocore/Cryocore1.webp',
+    '/frost/sprites/props/Cryocore/Cryocore2.webp',
+    '/frost/sprites/props/Cryocore/Cryocore3.webp',
+    '/frost/sprites/props/Cryocore/Cryocore4.webp',
+  ],
 };
 
 async function waitingWorldPlazaFirelandsTextureRetryDelayMs(
@@ -206,6 +220,39 @@ export const registeringWorldPlazaFirelandsSpriteTextureLoader =
       const kindEntries = Object.entries(
         LOADING_WORLD_PLAZA_FIRELANDS_TEXTURE_URLS
       ) as [DefiningWorldPlazaFirelandsPropKind, readonly string[]][];
+      const flatUrls = kindEntries.flatMap(([, urls]) => [...urls]);
+      const loadedTextures =
+        await loadingWorldPlazaFirelandsTexturesWithConcurrency(
+          flatUrls,
+          LOADING_WORLD_PLAZA_FIRELANDS_TEXTURE_CONCURRENCY
+        );
+
+      let flatIndex = 0;
+
+      for (const [kind, urls] of kindEntries) {
+        loadedTexturesByKind[kind] = loadedTextures.slice(
+          flatIndex,
+          flatIndex + urls.length
+        );
+        flatIndex += urls.length;
+      }
+
+      return loadedTexturesByKind;
+    },
+  });
+
+/** Loader for Frostsink Cryocore sprite textures. */
+export const registeringWorldPlazaFrostsinkSpriteTextureLoader =
+  creatingWorldPlazaTextureAssetLoader({
+    id: REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.FROSTSINK_SPRITES,
+    load: async () => {
+      const loadedTexturesByKind = {} as Record<
+        DefiningWorldPlazaFrostsinkPropKind,
+        readonly Texture[]
+      >;
+      const kindEntries = Object.entries(
+        LOADING_WORLD_PLAZA_FROSTSINK_TEXTURE_URLS
+      ) as [DefiningWorldPlazaFrostsinkPropKind, readonly string[]][];
       const flatUrls = kindEntries.flatMap(([, urls]) => [...urls]);
       const loadedTextures =
         await loadingWorldPlazaFirelandsTexturesWithConcurrency(
@@ -383,9 +430,7 @@ export const registeringWorldPlazaCaltropSpriteTextureLoader =
 
 const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_SPRITE_URLS = [
   ...new Set([
-    ...Object.values(
-      DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL
-    ),
+    ...Object.values(DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL),
     ...Object.values(
       DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_ACTIVE_WORLD_SPRITE_URL
     ),
@@ -404,10 +449,9 @@ export const registeringWorldPlazaBlacksmithUtilitySpriteTextureLoader =
       );
 
       return Object.fromEntries(
-        DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_SPRITE_URLS.map((url, index) => [
-          url,
-          loadedTextures[index],
-        ])
+        DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_SPRITE_URLS.map(
+          (url, index) => [url, loadedTextures[index]]
+        )
       ) as Record<string, Texture>;
     },
   });
@@ -416,6 +460,7 @@ export const registeringWorldPlazaBlacksmithUtilitySpriteTextureLoader =
 export const REGISTERING_WORLD_PLAZA_TERRAIN_TEXTURE_ASSET_MANIFEST = [
   registeringWorldPlazaLavaStaticTileTextureLoader,
   registeringWorldPlazaFirelandsSpriteTextureLoader,
+  registeringWorldPlazaFrostsinkSpriteTextureLoader,
   registeringWorldPlazaLongGrassSpriteTextureLoader,
   registeringWorldPlazaShrubSpriteTextureLoader,
   registeringWorldPlazaMushroomSpriteTextureLoader,
@@ -454,6 +499,29 @@ export function peekingWorldPlazaFirelandsSpriteTextureForPropFromManifest(
 ): Texture | null {
   const texturesByKind =
     registeringWorldPlazaFirelandsSpriteTextureLoader.peek();
+
+  if (!texturesByKind) {
+    return null;
+  }
+
+  const textures = texturesByKind[kind];
+
+  if (textures.length === 0) {
+    return null;
+  }
+
+  return textures[variantIndex % textures.length] ?? textures[0] ?? null;
+}
+
+/**
+ * Resolves one cached Frostsink texture for a prop kind and variant index.
+ */
+export function peekingWorldPlazaFrostsinkSpriteTextureForPropFromManifest(
+  kind: DefiningWorldPlazaFrostsinkPropKind,
+  variantIndex: number
+): Texture | null {
+  const texturesByKind =
+    registeringWorldPlazaFrostsinkSpriteTextureLoader.peek();
 
   if (!texturesByKind) {
     return null;

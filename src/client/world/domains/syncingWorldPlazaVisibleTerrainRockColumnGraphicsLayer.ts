@@ -7,13 +7,21 @@ import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/dom
 import { drawingWorldPlazaTerrainRockColumnOnGraphics } from '@/components/world/domains/drawingWorldPlazaTerrainRockColumnOnGraphics';
 import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domains/formattingWorldPlazaTileIndexCacheKey';
 import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
-import { resolvingWorldPlazaStoneDecorationAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaStoneDecorationAtTileIndex';
+import type { DefiningWorldPlazaColumnRockMetadata } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex';
+import { resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex';
+import type { DefiningWorldPlazaStoneDecoration } from '@/components/world/domains/resolvingWorldPlazaStoneDecorationAtTileIndex';
 import { resolvingWorldPlazaTerrainRockColumnEntityZIndex } from '@/components/world/domains/resolvingWorldPlazaTerrainRockColumnEntityZIndex';
+import { applyingWorldPlazaRockMineStateToColumnRockMetadata } from '@/components/world/harvest/domains/applyingWorldPlazaRockMineStateToColumnRockMetadata';
+import { readingWorldPlazaRuntimeMinedRockState } from '@/components/world/harvest/domains/registeringWorldPlazaMinedRocksVisualLayerLookup';
 import type { Container } from 'pixi.js';
 import { Graphics } from 'pixi.js';
 
 /**
  * Incrementally syncs depth-sorted procedural rock columns for a visible window.
+ *
+ * Reads column-rock metadata directly (not stone-decoration). That keeps
+ * Firelands ore veins and COLUMN_ROCKS-only toggles drawable even when pebble
+ * stone decorations are off or biome pebble gates return null.
  *
  * @module components/world/domains/syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer
  */
@@ -45,6 +53,60 @@ export interface SyncingWorldPlazaVisibleTerrainRockColumnGraphicsLayerResult {
 }
 
 /**
+ * Builds the draw payload rock-column graphics expect from anchor metadata.
+ */
+function buildingWorldPlazaStoneDecorationFromColumnRockMetadata(
+  metadata: DefiningWorldPlazaColumnRockMetadata
+): DefiningWorldPlazaStoneDecoration {
+  return {
+    offsetX: 0,
+    offsetY: 0,
+    sizeTierIndex: metadata.sizeTierIndex,
+    bodyHalfWidthPx: metadata.bodyHalfWidthPx,
+    bodyHalfHeightPx: metadata.bodyHalfHeightPx,
+    bodyColor: metadata.bodyColor,
+    highlightColor: metadata.highlightColor,
+    surfaceWorldLayer: metadata.surfaceWorldLayer,
+    shapeVariantIndex: metadata.shapeVariantIndex,
+    columnRockFootprintTileWidth: metadata.footprintTileWidth,
+    columnRockFootprintTileHeight: metadata.footprintTileHeight,
+    columnRockAnchorTileX: metadata.anchorTileX,
+    columnRockAnchorTileY: metadata.anchorTileY,
+  };
+}
+
+/**
+ * Resolves live (mine-aware) column-rock metadata for one spacing anchor.
+ */
+function resolvingWorldPlazaVisibleTerrainRockColumnMetadataAtAnchorTileIndex(
+  tileX: number,
+  tileY: number
+): DefiningWorldPlazaColumnRockMetadata | null {
+  if (!checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex(tileX, tileY)) {
+    return null;
+  }
+
+  const seedMetadata = resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
+    tileX,
+    tileY
+  );
+
+  if (
+    !seedMetadata ||
+    !checkingWorldPlazaStoneDecorationUsesColumnRockRendering(
+      seedMetadata.sizeTierIndex
+    )
+  ) {
+    return null;
+  }
+
+  return applyingWorldPlazaRockMineStateToColumnRockMetadata(
+    seedMetadata,
+    readingWorldPlazaRuntimeMinedRockState(tileX, tileY)
+  );
+}
+
+/**
  * Lists spacing anchors for visible mega-boulders (one graphics object per boulder).
  *
  * @param bounds - Visible tile bounds.
@@ -56,21 +118,11 @@ function listingWorldPlazaVisibleTerrainRockColumnCandidatesInBounds(
 
   for (let tileY = bounds.minTileY; tileY <= bounds.maxTileY; tileY += 1) {
     for (let tileX = bounds.minTileX; tileX <= bounds.maxTileX; tileX += 1) {
-      if (!checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex(tileX, tileY)) {
-        continue;
-      }
-
-      const stoneDecoration = resolvingWorldPlazaStoneDecorationAtTileIndex(
-        tileX,
-        tileY
-      );
-
       if (
-        !stoneDecoration ||
-        !checkingWorldPlazaStoneDecorationUsesColumnRockRendering(
-          stoneDecoration.sizeTierIndex
-        ) ||
-        stoneDecoration.surfaceWorldLayer === null
+        !resolvingWorldPlazaVisibleTerrainRockColumnMetadataAtAnchorTileIndex(
+          tileX,
+          tileY
+        )
       ) {
         continue;
       }
@@ -114,17 +166,16 @@ export function syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer(
     neededKeys.add(cacheKey);
 
     const existingRockGraphics = input.rockGraphicsByKey.get(cacheKey);
-    const stoneDecoration = resolvingWorldPlazaStoneDecorationAtTileIndex(
-      candidate.tileX,
-      candidate.tileY
-    );
+    const rockMetadata =
+      resolvingWorldPlazaVisibleTerrainRockColumnMetadataAtAnchorTileIndex(
+        candidate.tileX,
+        candidate.tileY
+      );
 
     if (
       existingRockGraphics &&
-      (!stoneDecoration ||
-        stoneDecoration.surfaceWorldLayer === null ||
-        existingRockGraphics.label !==
-          String(stoneDecoration.surfaceWorldLayer))
+      (!rockMetadata ||
+        existingRockGraphics.label !== String(rockMetadata.surfaceWorldLayer))
     ) {
       input.parentContainer.removeChild(existingRockGraphics);
       existingRockGraphics.destroy();
@@ -163,19 +214,20 @@ export function syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer(
       continue;
     }
 
-    const stoneDecoration = resolvingWorldPlazaStoneDecorationAtTileIndex(
-      candidate.tileX,
-      candidate.tileY
-    );
+    const rockMetadata =
+      resolvingWorldPlazaVisibleTerrainRockColumnMetadataAtAnchorTileIndex(
+        candidate.tileX,
+        candidate.tileY
+      );
 
-    if (!stoneDecoration || stoneDecoration.surfaceWorldLayer === null) {
+    if (!rockMetadata) {
       continue;
     }
 
     const nextRockZIndex = resolvingWorldPlazaTerrainRockColumnEntityZIndex(
       candidate.tileX,
       candidate.tileY,
-      stoneDecoration
+      rockMetadata
     );
 
     if (existingRockGraphics.zIndex !== nextRockZIndex) {
@@ -185,27 +237,30 @@ export function syncingWorldPlazaVisibleTerrainRockColumnGraphicsLayer(
   }
 
   for (const candidate of columnsToBuild) {
-    const stoneDecoration = resolvingWorldPlazaStoneDecorationAtTileIndex(
-      candidate.tileX,
-      candidate.tileY
-    );
+    const rockMetadata =
+      resolvingWorldPlazaVisibleTerrainRockColumnMetadataAtAnchorTileIndex(
+        candidate.tileX,
+        candidate.tileY
+      );
 
-    if (!stoneDecoration || stoneDecoration.surfaceWorldLayer === null) {
+    if (!rockMetadata) {
       continue;
     }
 
+    const stoneDecoration =
+      buildingWorldPlazaStoneDecorationFromColumnRockMetadata(rockMetadata);
     const cacheKey = formattingWorldPlazaTileIndexCacheKey(
       candidate.tileX,
       candidate.tileY
     );
     const rockGraphics = new Graphics();
     rockGraphics.eventMode = 'none';
-    rockGraphics.label = String(stoneDecoration.surfaceWorldLayer);
+    rockGraphics.label = String(rockMetadata.surfaceWorldLayer);
     markingWorldPlazaPixiDisplayObjectCullable(rockGraphics);
     rockGraphics.zIndex = resolvingWorldPlazaTerrainRockColumnEntityZIndex(
       candidate.tileX,
       candidate.tileY,
-      stoneDecoration
+      rockMetadata
     );
     drawingWorldPlazaTerrainRockColumnOnGraphics(
       rockGraphics,

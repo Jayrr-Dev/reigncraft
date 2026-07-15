@@ -540,6 +540,7 @@ export const DEFINING_FILMCOW_BIOME_FOOTSTEP_SURFACE_BY_KIND: Record<
   ocean: 'sand',
   rocky: 'concrete',
   firelands: 'gravel',
+  frostsink: 'snow',
 };
 
 /** Wildlife body-size buckets for clip weighting and playback tuning. */

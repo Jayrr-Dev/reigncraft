@@ -1,5 +1,7 @@
 import { resolvingWorldPlazaHerbariumDiscoveryStorageKey } from '@/components/world/domains/definingWorldPlazaHerbariumDiscoveryConstants';
 import type { DefiningWorldPlazaTreeVariantKind } from '@/components/world/domains/definingWorldPlazaTreeConstants';
+import { DEFINING_WORLD_PLAZA_MUSHROOM_SPECIES_IDS } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
+import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
 import type { WorldCloverSearchLootKind } from '../../../shared/worldCloverSearchLoot';
 import type { WorldFlowerSpeciesId } from '../../../shared/worldFlowerRarity';
 import { WORLD_FLOWER_SPECIES_RARITY_REGISTRY } from '../../../shared/worldFlowerRarity';
@@ -16,6 +18,10 @@ const DEFINING_WORLD_PLAZA_HERBARIUM_BERRY_LOOT_KIND_SET = new Set<string>([
   'golden_berry',
   'tea_leaves',
 ]);
+
+const DEFINING_WORLD_PLAZA_HERBARIUM_MUSHROOM_SPECIES_ID_SET = new Set<string>(
+  DEFINING_WORLD_PLAZA_MUSHROOM_SPECIES_IDS
+);
 
 const DEFINING_WORLD_PLAZA_HERBARIUM_FLOWER_SPECIES_ID_SET = new Set<string>(
   WORLD_FLOWER_SPECIES_RARITY_REGISTRY.map(
@@ -48,6 +54,11 @@ export type WorldPlazaHerbariumDiscoverySnapshot = {
   cloverStudyCount: number;
   sightedBerryLootKinds: ReadonlySet<WorldShrubBerryLootKind>;
   berryStudyCountsByLootKind: ReadonlyMap<WorldShrubBerryLootKind, number>;
+  sightedMushroomSpeciesIds: ReadonlySet<DefiningWorldPlazaMushroomSpeciesId>;
+  mushroomStudyCountsBySpeciesId: ReadonlyMap<
+    DefiningWorldPlazaMushroomSpeciesId,
+    number
+  >;
 };
 
 function checkingWorldPlazaHerbariumFlowerSpeciesId(
@@ -125,6 +136,15 @@ function checkingWorldPlazaHerbariumBerryLootKind(
   );
 }
 
+function checkingWorldPlazaHerbariumMushroomSpeciesId(
+  value: unknown
+): value is DefiningWorldPlazaMushroomSpeciesId {
+  return (
+    typeof value === 'string' &&
+    DEFINING_WORLD_PLAZA_HERBARIUM_MUSHROOM_SPECIES_ID_SET.has(value)
+  );
+}
+
 const WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SNAPSHOT: WorldPlazaHerbariumDiscoverySnapshot =
   {
     sightedFlowerSpeciesIds: new Set(),
@@ -135,6 +155,8 @@ const WORLD_PLAZA_HERBARIUM_DISCOVERY_EMPTY_SNAPSHOT: WorldPlazaHerbariumDiscove
     cloverStudyCount: 0,
     sightedBerryLootKinds: new Set(),
     berryStudyCountsByLootKind: new Map(),
+    sightedMushroomSpeciesIds: new Set(),
+    mushroomStudyCountsBySpeciesId: new Map(),
   };
 
 /**
@@ -199,6 +221,14 @@ export function readingWorldPlazaHerbariumDiscoveryFromStorage(
       berryStudyCountsByLootKind: readingWorldPlazaHerbariumStudyCounts(
         Reflect.get(parsedValue, 'berryStudyCounts'),
         checkingWorldPlazaHerbariumBerryLootKind
+      ),
+      sightedMushroomSpeciesIds: readingWorldPlazaHerbariumIdSet(
+        Reflect.get(parsedValue, 'sightedMushrooms'),
+        checkingWorldPlazaHerbariumMushroomSpeciesId
+      ),
+      mushroomStudyCountsBySpeciesId: readingWorldPlazaHerbariumStudyCounts(
+        Reflect.get(parsedValue, 'mushroomStudyCounts'),
+        checkingWorldPlazaHerbariumMushroomSpeciesId
       ),
     };
   } catch {

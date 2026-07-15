@@ -191,7 +191,7 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
       { speciesId: 'grizzly', weight: 1, packSizeRange: [1, 1] },
       {
         speciesId: 'omega-wolf',
-        weight: 0.5,
+        weight: 1.5,
         packSizeRange: [5, 5],
         nightOnly: true,
         packComposition: DEFINING_WILDLIFE_OMEGA_WOLF_PACK_COMPOSITION,
@@ -234,10 +234,31 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
     ],
   },
   firelands: {
-    densityThreshold: 0.72,
+    densityThreshold: 0.58,
     entries: [
-      { speciesId: 'sunhead', weight: 3, packSizeRange: [1, 1] },
+      { speciesId: 'sunhead', weight: 6, packSizeRange: [1, 1] },
       { speciesId: 'grey-wolf', weight: 1, packSizeRange: [1, 2] },
+    ],
+  },
+  frostsink: {
+    densityThreshold: 0.62,
+    entries: [
+      { speciesId: 'deer', weight: 4, packSizeRange: [1, 3] },
+      DEFINING_WILDLIFE_PINGUIN_PACK_SPAWN_ENTRY,
+      { speciesId: 'husky', weight: 3, packSizeRange: [2, 5] },
+      { speciesId: 'grey-wolf', weight: 3, packSizeRange: [2, 5] },
+      { speciesId: 'yak', weight: 2, packSizeRange: [1, 3] },
+      { speciesId: 'polar-bear', weight: 1, packSizeRange: [1, 1] },
+      { speciesId: 'grizzly', weight: 1, packSizeRange: [1, 1] },
+      { speciesId: 'mammoth', weight: 1, packSizeRange: [1, 2] },
+      { speciesId: 'brown-bear', weight: 1, packSizeRange: [1, 1] },
+      {
+        speciesId: 'omega-wolf',
+        weight: 0.35,
+        packSizeRange: [5, 5],
+        nightOnly: true,
+        packComposition: DEFINING_WILDLIFE_OMEGA_WOLF_PACK_COMPOSITION,
+      },
     ],
   },
 };

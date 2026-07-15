@@ -4,15 +4,16 @@ import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import { buildingWorldPlazaVisibleTileBoundsCacheKey } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
+import { formattingWorldPlazaDayNightDayNumber } from '@/components/world/domains/formattingWorldPlazaDayNightDayNumber';
 import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domains/formattingWorldPlazaTileIndexCacheKey';
 import {
   buildingWorldPlazaBurntGrassTileKeysCacheKey,
   buildingWorldPlazaChoppedTreesCacheKey,
   buildingWorldPlazaClearedLongGrassCacheKey,
   buildingWorldPlazaPickedFlowersCacheKey,
+  buildingWorldPlazaPickedMushroomsCacheKey,
   buildingWorldPlazaPickedPebblesCacheKey,
   buildingWorldPlazaPickedShrubsCacheKey,
-  buildingWorldPlazaPickedMushroomsCacheKey,
   buildingWorldPlazaPlacedTreeBlocksCacheKey,
 } from '@/components/world/engine/buildingWorldPlazaTerrainLayerCacheKeys';
 import {
@@ -22,17 +23,17 @@ import {
 } from '@/components/world/engine/definingWorldPlazaTerrainDependencyKeys';
 import {
   checkingWorldPlazaTerrainTextureAssetManifestIsReady,
+  registeringWorldPlazaBearTrapSpriteTextureLoader,
   registeringWorldPlazaBlacksmithUtilitySpriteTextureLoader,
+  registeringWorldPlazaCaltropSpriteTextureLoader,
   registeringWorldPlazaChestSpriteTextureLoader,
   registeringWorldPlazaFirelandsSpriteTextureLoader,
-  registeringWorldPlazaLongGrassSpriteTextureLoader,
+  registeringWorldPlazaFrostsinkSpriteTextureLoader,
   registeringWorldPlazaLavaStaticTileTextureLoader,
-  registeringWorldPlazaShrubSpriteTextureLoader,
+  registeringWorldPlazaLongGrassSpriteTextureLoader,
   registeringWorldPlazaMushroomSpriteTextureLoader,
-  registeringWorldPlazaBearTrapSpriteTextureLoader,
-  registeringWorldPlazaCaltropSpriteTextureLoader,
+  registeringWorldPlazaShrubSpriteTextureLoader,
 } from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
-import { formattingWorldPlazaDayNightDayNumber } from '@/components/world/domains/formattingWorldPlazaDayNightDayNumber';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
@@ -41,9 +42,9 @@ import {
   gettingWorldPlazaLocalPickedShrubsRevision,
   type DefiningWorldPlazaPickedShrubTileState,
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
-import type { DefiningWorldPlazaPickedMushroomTileState } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
 import { buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
 import { gettingWorldPlazaTemperatureDebugOverrideRevision } from '@/components/world/health/domains/managingWorldPlazaTemperatureDebugOverrideStore';
+import type { DefiningWorldPlazaPickedMushroomTileState } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
 
 /**
  * Computes the terrain dependency snapshot for one engine tick.
@@ -120,9 +121,10 @@ export function computingWorldPlazaTerrainDependencySnapshot(
       buildingWorldPlazaChoppedTreesCacheKey(input.choppedTreesByTileKey),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_PEBBLES]: `${buildingWorldPlazaPickedPebblesCacheKey(input.pickedPebblesByTileKey)}|${buildingWorldPlazaPickedFlowersCacheKey(input.pickedFlowersByTileKey)}`,
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_LONG_GRASS]:
-      buildingWorldPlazaClearedLongGrassCacheKey(input.clearedLongGrassByTileKey),
-    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_SHRUBS]:
-      `${buildingWorldPlazaPickedShrubsCacheKey(input.pickedShrubsByTileKey)}|${gettingWorldPlazaLocalPickedShrubsRevision()}`,
+      buildingWorldPlazaClearedLongGrassCacheKey(
+        input.clearedLongGrassByTileKey
+      ),
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_SHRUBS]: `${buildingWorldPlazaPickedShrubsCacheKey(input.pickedShrubsByTileKey)}|${gettingWorldPlazaLocalPickedShrubsRevision()}`,
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_MUSHROOMS]:
       buildingWorldPlazaPickedMushroomsCacheKey(input.pickedMushroomsByTileKey),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS]:
@@ -143,6 +145,8 @@ export function computingWorldPlazaTerrainDependencySnapshot(
       String(input.proceduralTreesAndRocksRevision),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FIRELANDS_TEXTURES_READY]:
       registeringWorldPlazaFirelandsSpriteTextureLoader.isReady() ? '1' : '0',
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FROSTSINK_TEXTURES_READY]:
+      registeringWorldPlazaFrostsinkSpriteTextureLoader.isReady() ? '1' : '0',
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.LONG_GRASS_TEXTURES_READY]:
       registeringWorldPlazaLongGrassSpriteTextureLoader.isReady() ? '1' : '0',
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.SHRUB_TEXTURES_READY]:

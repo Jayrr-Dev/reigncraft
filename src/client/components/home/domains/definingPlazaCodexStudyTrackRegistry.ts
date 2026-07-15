@@ -17,6 +17,7 @@ export type PlazaCodexStudyTrackId =
   | 'herbarium-tree'
   | 'herbarium-clover'
   | 'herbarium-berry'
+  | 'herbarium-mushroom'
   | 'bestiary'
   | 'lapidary'
   | 'pathology';
@@ -118,6 +119,11 @@ export const DEFINING_PLAZA_CODEX_STUDY_TRACK_REGISTRY: Record<
   },
   'herbarium-berry': {
     trackId: 'herbarium-berry',
+    studyScaleMultiplier: DEFINING_PLAZA_CODEX_STUDY_DEFAULT_MULTIPLIER,
+    sectionTitleOverrides: HERBARIUM_SECTION_OVERRIDES,
+  },
+  'herbarium-mushroom': {
+    trackId: 'herbarium-mushroom',
     studyScaleMultiplier: DEFINING_PLAZA_CODEX_STUDY_DEFAULT_MULTIPLIER,
     sectionTitleOverrides: HERBARIUM_SECTION_OVERRIDES,
   },

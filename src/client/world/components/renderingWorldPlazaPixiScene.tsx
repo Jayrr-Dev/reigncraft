@@ -23,6 +23,10 @@ import {
   checkingPlazaHerbariumFlowerStudyTierUnlocked,
   formattingPlazaHerbariumFlowerStudyCountProgress,
 } from '@/components/home/domains/resolvingPlazaHerbariumFlowerStudyTier';
+import {
+  checkingPlazaHerbariumMushroomStudyMasteryUnlocked,
+  formattingPlazaHerbariumMushroomStudyCountProgress,
+} from '@/components/home/domains/resolvingPlazaHerbariumMushroomStudyTier';
 import { formattingPlazaHerbariumStudyCountProgress } from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
 import {
   checkingPlazaLapidaryStudyTierUnlocked,
@@ -33,6 +37,7 @@ import {
   resolvingPlazaHerbariumBerryStudyDisplayName,
   resolvingPlazaHerbariumCloverStudyDisplayName,
   resolvingPlazaHerbariumFlowerStudyDisplayName,
+  resolvingPlazaHerbariumMushroomStudyDisplayName,
   resolvingPlazaHerbariumTreeStudyDisplayName,
   resolvingPlazaLapidaryOreStudyDisplayName,
 } from '@/components/home/domains/resolvingPlazaStudySubjectDisplayName';
@@ -282,10 +287,12 @@ import {
   gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
   gettingWorldPlazaHerbariumCloverStudyCountSnapshot,
   gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
+  gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot,
   gettingWorldPlazaHerbariumTreeStudyCountsSnapshot,
   recordingWorldPlazaHerbariumBerryStudied,
   recordingWorldPlazaHerbariumCloverStudied,
   recordingWorldPlazaHerbariumFlowerStudied,
+  recordingWorldPlazaHerbariumMushroomStudied,
   recordingWorldPlazaHerbariumTreeStudied,
 } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import {
@@ -418,7 +425,10 @@ import { usingWorldPlazaTreeChopInteraction } from '@/components/world/harvest/h
 import { usingWorldPlazaTreeChopProgress } from '@/components/world/harvest/hooks/usingWorldPlazaTreeChopProgress';
 import { usingWorldPlazaTreeStumpStudyProgress } from '@/components/world/harvest/hooks/usingWorldPlazaTreeStumpStudyProgress';
 import { pickingWorldHarvestDevvitFlower } from '@/components/world/harvest/repositories/callingWorldHarvestDevvitApi';
-import { RenderingWorldPlazaEntityDeathScreenOverlay } from '@/components/world/health/components/renderingWorldPlazaEntityDeathScreenOverlay';
+import {
+  RenderingWorldPlazaEntityDeathScreenOverlay,
+  type DefiningWorldPlazaEntityDeathRespawnChoice,
+} from '@/components/world/health/components/renderingWorldPlazaEntityDeathScreenOverlay';
 import {
   RenderingWorldPlazaEntityHealthBars,
   type RenderingWorldPlazaEntityHealthBarEntry,
@@ -433,13 +443,16 @@ import {
   checkingWorldPlazaEntityPlayerStunIsActive,
   resolvingWorldPlazaEntityHealthActiveStunEffect,
 } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerStunIsActive';
-import { DEFINING_WORLD_PLAZA_ENTITY_DEATH_AUTO_RESPAWN_MS } from '@/components/world/health/domains/definingWorldPlazaEntityDeathScreenConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import type { DefiningWorldPlazaEntityHealthSyncSnapshot } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { DEFINING_WORLD_PLAZA_ENTITY_SOULBREAK_DEV_HEALTH_PERCENT_EV } from '@/components/world/health/domains/definingWorldPlazaEntitySoulbreakConstants';
 import { formattingWorldPlazaEntityDeathScreenTitle } from '@/components/world/health/domains/formattingWorldPlazaEntityDeathScreenTitle';
 import { resolvingWorldPlazaEntityHealthAttackSpeedMultiplier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthAttackSpeedMultiplier';
 import { resolvingWorldPlazaEntityTemperatureComfortBand } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureComfortBand';
+import {
+  DEFINING_WORLD_PLAZA_DEATH_RESPAWN_ORIGIN_WORLD_POINT,
+  resolvingWorldPlazaNearestOwnedClaimRespawnWorldPoint,
+} from '@/components/world/health/domains/resolvingWorldPlazaNearestOwnedClaimRespawnWorldPoint';
 import { usingWorldPlazaPersistingPlayerConditions } from '@/components/world/health/hooks/usingWorldPlazaPersistingPlayerConditions';
 import { usingWorldPlazaPlayerHealth } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import { trackingWorldPlazaArrowKeyInput } from '@/components/world/hooks/trackingWorldPlazaArrowKeyInput';
@@ -538,6 +551,7 @@ import {
   resolvingWorldPlazaInventoryFoodDefinition,
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { resolvingWorldPlazaInventoryItemRecipePageRecipeId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemRecipePage';
+import { parsingWorldPlazaMushroomSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryMushroomDetailReveal';
 import { wearingWorldPlazaEquippedInventoryToolDurability } from '@/components/world/inventory/domains/wearingWorldPlazaEquippedInventoryToolDurability';
 import { trackingWorldPlazaInventoryDropPlacement } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
 import { usingWorldPlazaHeldFourLeafCloverCharm } from '@/components/world/inventory/hooks/usingWorldPlazaHeldFourLeafCloverCharm';
@@ -6204,6 +6218,26 @@ function RenderingWorldPlazaPixiSceneConnected({
               formattingPlazaHerbariumBerryStudyCountProgress(studyCount),
           })
         );
+        return;
+      }
+
+      if (context.studyKind === 'mushroom' && context.mushroomSpeciesId) {
+        recordingWorldPlazaHerbariumMushroomStudied(context.mushroomSpeciesId);
+        const studyCount =
+          gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot()[
+            context.mushroomSpeciesId
+          ] ?? 1;
+        showingGameplayHudToast(
+          formattingPlazaStudyCompleteToastMessage({
+            subjectDisplayName: resolvingPlazaHerbariumMushroomStudyDisplayName(
+              context.mushroomSpeciesId,
+              studyCount
+            ),
+            codexLabel: 'Herbarium',
+            progressLabel:
+              formattingPlazaHerbariumMushroomStudyCountProgress(studyCount),
+          })
+        );
       }
     },
     [showingGameplayHudToast, updatingInventoryState]
@@ -6257,6 +6291,8 @@ function RenderingWorldPlazaPixiSceneConnected({
       const berryLootKind = parsingWorldPlazaBerryLootKindFromItemTypeId(
         item.itemTypeId
       );
+      const mushroomSpeciesId =
+        parsingWorldPlazaMushroomSpeciesIdFromItemTypeId(item.itemTypeId);
 
       if (flowerSpeciesId) {
         const currentStudyCount =
@@ -6352,6 +6388,31 @@ function RenderingWorldPlazaPixiSceneConnected({
           slotIndex,
           studyKind: 'berry',
           berryLootKind,
+        });
+
+        if (!didStart) {
+          showingGameplayHudToast('Already studying.');
+        }
+        return;
+      }
+
+      if (mushroomSpeciesId) {
+        const currentStudyCount =
+          gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot()[
+            mushroomSpeciesId
+          ] ?? 0;
+
+        if (
+          checkingPlazaHerbariumMushroomStudyMasteryUnlocked(currentStudyCount)
+        ) {
+          showingGameplayHudToast('Already fully studied.');
+          return;
+        }
+
+        const didStart = startingSpecimenStudy({
+          slotIndex,
+          studyKind: 'mushroom',
+          mushroomSpeciesId,
         });
 
         if (!didStart) {
@@ -6771,23 +6832,29 @@ function RenderingWorldPlazaPixiSceneConnected({
     wildlifeStoreRef,
   ]);
 
-  useEffect(() => {
-    if (!isPlayerDead) {
-      return;
-    }
+  const choosingDeathRespawn = useCallback(
+    (choice: DefiningWorldPlazaEntityDeathRespawnChoice): void => {
+      if (!isPlayerDead) {
+        return;
+      }
 
-    const respawnTimeoutId = window.setTimeout(() => {
-      respawnRef.current?.();
+      const destinationWorldPoint =
+        choice === 'origin'
+          ? { ...DEFINING_WORLD_PLAZA_DEATH_RESPAWN_ORIGIN_WORLD_POINT }
+          : resolvingWorldPlazaNearestOwnedClaimRespawnWorldPoint(
+              playerPositionRef.current,
+              ownedPlotsRef.current,
+              placedBlocksRef.current.blocks
+            );
+
+      respawnRef.current?.(destinationWorldPoint);
       resettingHungerRef.current?.();
       clearingCombatLock();
       clearingWalkTarget();
       hostRef.current?.focus();
-    }, DEFINING_WORLD_PLAZA_ENTITY_DEATH_AUTO_RESPAWN_MS);
-
-    return () => {
-      window.clearTimeout(respawnTimeoutId);
-    };
-  }, [clearingCombatLock, clearingWalkTarget, isPlayerDead]);
+    },
+    [clearingCombatLock, clearingWalkTarget, isPlayerDead]
+  );
 
   const handlingPresenceReconnect = useCallback((): void => {
     reconnectingPresence();
@@ -8182,6 +8249,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           <RenderingWorldPlazaEntityDeathScreenOverlay
             isPlayerDead={isLocalGameplayEnabled && isPlayerDead}
             deathTitle={deathScreenTitle}
+            onChoosingRespawn={choosingDeathRespawn}
           />
           <RenderingWorldPlazaMobileLandscapePrompt
             isVisible={shouldShowLandscapePrompt}

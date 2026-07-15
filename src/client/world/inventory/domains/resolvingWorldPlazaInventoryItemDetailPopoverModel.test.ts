@@ -1,12 +1,15 @@
 import { DEFINING_PLAZA_HERBARIUM_BERRY_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumBerryStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumCloverStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
+import { DEFINING_PLAZA_HERBARIUM_MUSHROOM_STUDY_FULL_COUNT } from '@/components/home/domains/resolvingPlazaHerbariumMushroomStudyTier';
 import { DEFINING_PLAZA_LAPIDARY_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaLapidaryStudyTier';
 import { resolvingWorldPlazaCloverItemTypeIdFromLootKind } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverSpriteSheetConstants';
 import { resolvingWorldPlazaFlowerItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFlowerSpriteSheetConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_GOLDEN_CHANTER_MUSHROOM,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_GOLDEN_CHANTER_MUSHROOM,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { resolvingWorldPlazaOreItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
@@ -525,6 +528,181 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel berry Study', () =>
 
     expect(
       full?.infoRows.find((row) => row.id === 'berry-well-fed')?.value
+    ).toMatch(/%/);
+  });
+});
+
+describe('resolvingWorldPlazaInventoryItemDetailPopoverModel mushroom Study', () => {
+  const rawGoldenChanterItemTypeId =
+    DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_GOLDEN_CHANTER_MUSHROOM;
+  const cookedGoldenChanterItemTypeId =
+    DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_GOLDEN_CHANTER_MUSHROOM;
+
+  it('offers Study while mushroom progress is incomplete', () => {
+    const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'chanter-1',
+        itemTypeId: rawGoldenChanterItemTypeId,
+        quantity: 2,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        mushroomStudyCountsBySpeciesId: { 'golden-chanter': 1 },
+      }
+    );
+
+    expect(model?.canStudy).toBe(true);
+  });
+
+  it('hides Study once the mushroom dossier is full', () => {
+    const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'chanter-1',
+        itemTypeId: rawGoldenChanterItemTypeId,
+        quantity: 2,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        mushroomStudyCountsBySpeciesId: {
+          'golden-chanter': DEFINING_PLAZA_HERBARIUM_MUSHROOM_STUDY_FULL_COUNT,
+        },
+      }
+    );
+
+    expect(model?.canStudy).toBe(false);
+  });
+
+  it('gates hunger and heal by study tier for raw and cooked', () => {
+    const unstudied = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'chanter-1',
+        itemTypeId: rawGoldenChanterItemTypeId,
+        quantity: 2,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        mushroomStudyCountsBySpeciesId: { 'golden-chanter': 0 },
+        playerEffectiveMaxHealth: 100,
+      }
+    );
+
+    expect(unstudied?.description).toBe('');
+    expect(
+      unstudied?.infoRows.some((row) => row.id === 'herbarium-study')
+    ).toBe(true);
+    expect(unstudied?.badges.some((badge) => badge.id === 'food')).toBe(false);
+    expect(unstudied?.badges.some((badge) => badge.id === 'food-heal')).toBe(
+      false
+    );
+
+    const familiarity = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'chanter-1',
+        itemTypeId: rawGoldenChanterItemTypeId,
+        quantity: 2,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        mushroomStudyCountsBySpeciesId: { 'golden-chanter': 1 },
+      }
+    );
+
+    expect(familiarity?.description.length).toBeGreaterThan(0);
+    expect(familiarity?.badges.some((badge) => badge.id === 'food')).toBe(
+      false
+    );
+
+    const application = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'chanter-1',
+        itemTypeId: rawGoldenChanterItemTypeId,
+        quantity: 2,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        mushroomStudyCountsBySpeciesId: { 'golden-chanter': 20 },
+      }
+    );
+
+    expect(
+      application?.infoRows.some((row) => row.id === 'mushroom-when-eaten')
+    ).toBe(true);
+    expect(application?.badges.some((badge) => badge.id === 'food')).toBe(
+      false
+    );
+
+    const proficiency = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'chanter-1',
+        itemTypeId: rawGoldenChanterItemTypeId,
+        quantity: 2,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        mushroomStudyCountsBySpeciesId: { 'golden-chanter': 50 },
+        playerEffectiveMaxHealth: 100,
+      }
+    );
+
+    expect(proficiency?.badges.find((badge) => badge.id === 'food')?.label).toBe(
+      'Fills hunger'
+    );
+    expect(
+      proficiency?.badges.find((badge) => badge.id === 'food-heal')?.label
+    ).toBe('Heals');
+    expect(
+      proficiency?.badges.some((badge) =>
+        badge.label.includes('%')
+      )
+    ).toBe(false);
+
+    const expertise = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'chanter-1',
+        itemTypeId: rawGoldenChanterItemTypeId,
+        quantity: 2,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        mushroomStudyCountsBySpeciesId: { 'golden-chanter': 75 },
+        playerEffectiveMaxHealth: 100,
+      }
+    );
+
+    expect(expertise?.badges.some((badge) => badge.id === 'food')).toBe(true);
+    expect(expertise?.badges.find((badge) => badge.id === 'food')?.label).toMatch(
+      /% hunger/
+    );
+    expect(expertise?.badges.some((badge) => badge.id === 'food-heal')).toBe(
+      true
+    );
+
+    const cookedFull = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'chanter-cooked-1',
+        itemTypeId: cookedGoldenChanterItemTypeId,
+        quantity: 1,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        mushroomStudyCountsBySpeciesId: {
+          'golden-chanter': DEFINING_PLAZA_HERBARIUM_MUSHROOM_STUDY_FULL_COUNT,
+        },
+        playerEffectiveMaxHealth: 100,
+      }
+    );
+
+    expect(cookedFull?.canStudy).toBe(false);
+    expect(
+      cookedFull?.infoRows.find((row) => row.id === 'cooked-well-fed')?.value
     ).toMatch(/%/);
   });
 });

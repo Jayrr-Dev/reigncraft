@@ -6,6 +6,10 @@
 
 import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
+import {
+  checkingWorldPlazaFrostsinkWildlifeAllowedAtRadiusTiles,
+  resolvingWorldPlazaFrostsinkAtTileIndex,
+} from '@/components/world/domains/resolvingWorldPlazaFrostsinkAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import {
   mappingWorldPlazaGrassSeededUnitToFloatRange,
@@ -116,6 +120,17 @@ export function resolvingWildlifeSpawnAtTileIndex(
   }
 
   if (checkingWorldPlazaLavaAtTileIndex(tileX, tileY)) {
+    return null;
+  }
+
+  const frostsink = resolvingWorldPlazaFrostsinkAtTileIndex(tileX, tileY);
+
+  if (
+    frostsink &&
+    !checkingWorldPlazaFrostsinkWildlifeAllowedAtRadiusTiles(
+      frostsink.radiusTiles
+    )
+  ) {
     return null;
   }
 

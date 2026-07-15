@@ -6,6 +6,7 @@ import {
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { findingWorldPlazaFirelandsTeleportWorldPointForDev } from '@/components/world/domains/findingWorldPlazaFirelandsTeleportWorldPointForDev';
+import { findingWorldPlazaFrostsinkTeleportWorldPointForDev } from '@/components/world/domains/findingWorldPlazaFrostsinkTeleportWorldPointForDev';
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { checkingWorldPlazaGridPointOccupiesWalkingBlockedTile } from '@/components/world/domains/resolvingWorldPlazaTerrainObstacleKindFromFeature';
@@ -167,6 +168,10 @@ export function findingWorldPlazaBiomeTeleportWorldPointForDev({
 }: FindingWorldPlazaBiomeTeleportWorldPointForDevParams): DefiningWorldPlazaWorldPoint | null {
   if (biomeKind === 'firelands') {
     return findingWorldPlazaFirelandsTeleportWorldPointForDev();
+  }
+
+  if (biomeKind === 'frostsink') {
+    return findingWorldPlazaFrostsinkTeleportWorldPointForDev();
   }
 
   const originTileX = Math.floor(originWorldPoint?.x ?? 0);

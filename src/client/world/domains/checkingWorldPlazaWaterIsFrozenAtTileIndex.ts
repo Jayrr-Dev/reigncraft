@@ -2,6 +2,7 @@ import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world
 import { computingWorldPlazaDayNightSunState } from '@/components/world/domains/computingWorldPlazaDayNightSunState';
 import { DEFINING_WORLD_PLAZA_WATER_FROZEN_CLIMATE_TEMPERATURE_MAX } from '@/components/world/domains/definingWorldPlazaWaterConstants';
 import { resolvingWorldPlazaClimateAtTile } from '@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex';
+import { checkingWorldPlazaFrostsinkDiscContainsTileAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFrostsinkAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { resolvingWorldPlazaWaterPhaseTemperatureAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterPhaseTemperatureAtTileIndex';
 import { readingWorldPlazaEnvironmentalTemperatureSamplingContext } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
@@ -77,6 +78,10 @@ export function checkingWorldPlazaWaterIsClimateFrozenAtTileIndex(
     return false;
   }
 
+  if (checkingWorldPlazaFrostsinkDiscContainsTileAtTileIndex(tileX, tileY)) {
+    return true;
+  }
+
   const climate = resolvingWorldPlazaClimateAtTile(tileX, tileY);
 
   return (
@@ -129,7 +134,8 @@ export function checkingWorldPlazaWaterIsFrozenAtTileIndex(
       }
     } else {
       if (
-        cacheByColumn.size >= CHECKING_WORLD_PLAZA_WATER_FROZEN_CACHE_MAX_COLUMNS
+        cacheByColumn.size >=
+        CHECKING_WORLD_PLAZA_WATER_FROZEN_CACHE_MAX_COLUMNS
       ) {
         cacheByColumn.clear();
       }

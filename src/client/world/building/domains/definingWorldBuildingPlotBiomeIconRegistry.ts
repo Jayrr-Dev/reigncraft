@@ -45,6 +45,10 @@ export const DEFINING_WORLD_BUILDING_PLOT_BIOME_ICON_REGISTRY: Record<
     iconClassName: 'text-stone-600',
   },
   firelands: { iconifyIcon: 'mdi:fire', iconClassName: 'text-red-700' },
+  frostsink: {
+    iconifyIcon: 'mdi:snowflake-variant',
+    iconClassName: 'text-cyan-700',
+  },
 };
 
 /**

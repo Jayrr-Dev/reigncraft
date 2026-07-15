@@ -13,6 +13,7 @@ import {
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_WHEAT,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { resolvingWorldPlazaInventoryCoconutSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCoconutSpriteSheetConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_IRON_TUBE_SPRITE_SHEET_ICON } from '@/components/world/inventory/domains/definingWorldPlazaInventoryIronTubeSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SPRITCORE_SPHERE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
@@ -135,7 +136,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       rarity: 'uncommon',
       description:
         'A hollow iron pipe drawn on the anvil. Scaffold for tools, traps, and later forgework.',
-      iconifyIcon: 'mdi:pipe',
+      iconSpriteSheet: DEFINING_WORLD_PLAZA_INVENTORY_IRON_TUBE_SPRITE_SHEET_ICON,
       maxStack: 99,
       isDroppable: true,
       isStackable: true,

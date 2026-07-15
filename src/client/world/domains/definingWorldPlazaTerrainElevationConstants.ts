@@ -394,7 +394,7 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SIDE_FILL_DEPTH_BAND_LAYER_S
 export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_SIDE_FILL_ALPHA =
   1 as const;
 
-/** Thin black outline on exposed cliff rims and vertical drops. */
+/** Outline color for exposed cliff rims (unused while stroke alpha is 0). */
 export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_EXPOSED_CLIFF_EDGE_STROKE_COLOR =
   0x000000 as const;
 
@@ -402,15 +402,18 @@ export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_EXPOSED_CLIFF_EDGE_STROKE_CO
 export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_EXPOSED_CLIFF_EDGE_STROKE_WIDTH_PX =
   1 as const;
 
-/** Stroke alpha for exposed cliff edge outlines. */
+/**
+ * Stroke alpha for exposed cliff rim / vertical corner outlines.
+ * Kept at 0 so raised columns read as solid blocks without wireframe edges.
+ */
 export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_EXPOSED_CLIFF_EDGE_STROKE_ALPHA =
-  1 as const;
+  0 as const;
 
 /** Stroke color for elevation column edges (unused while alpha is 0). */
 export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_STROKE_COLOR =
   0x2a2418 as const;
 
-/** Procedural terrain skips full cap strokes; exposed cliff edges draw separately. */
+/** Procedural terrain skips full cap strokes (and exposed cliff edges while their alpha is 0). */
 export const DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_COLUMN_STROKE_ALPHA =
   0 as const;
 

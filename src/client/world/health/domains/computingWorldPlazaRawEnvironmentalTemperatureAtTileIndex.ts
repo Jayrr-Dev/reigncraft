@@ -1,5 +1,6 @@
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
 import { listingWorldBuildingPlacedBlocksAtTileFromIndex } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
+import { resolvingWorldPlazaActiveOreSmeltingHeatCelsiusAtTileIndex } from '@/components/world/crafting/domains/managingWorldPlazaActiveOreSmeltingHeatTilesStore';
 import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
 import { checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex';
 import { checkingWorldPlazaWaterIsClimateFrozenAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
@@ -8,9 +9,9 @@ import { applyingWorldPlazaForestCanopyAmbientCelsius } from '@/components/world
 import { applyingWorldPlazaPlainsAmbientCelsius } from '@/components/world/domains/definingWorldPlazaPlainsTemperatureConstants';
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { resolvingWorldPlazaClimateAtTile } from '@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex';
+import { resolvingWorldPlazaFrostsinkAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFrostsinkAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { resolvingWorldPlazaLitCampfireHeatCelsiusAtTileIndex } from '@/components/world/fire/domains/managingWorldPlazaLitCampfireHeatTilesStore';
-import { resolvingWorldPlazaActiveOreSmeltingHeatCelsiusAtTileIndex } from '@/components/world/crafting/domains/managingWorldPlazaActiveOreSmeltingHeatTilesStore';
 import { applyingWorldPlazaTemperatureDebugOverrideToCelsius } from '@/components/world/health/domains/applyingWorldPlazaTemperatureDebugOverride';
 import { mergingWorldPlazaEnvironmentalTemperatureLevels } from '@/components/world/health/domains/combiningWorldPlazaEnvironmentalTemperatureLevel';
 import { convertingWorldPlazaClimateNormalizedToCelsius } from '@/components/world/health/domains/convertingWorldPlazaClimateNormalizedToCelsius';
@@ -67,6 +68,12 @@ export function computingWorldPlazaRawEnvironmentalTemperatureAtTileIndex({
       ambientCelsius,
       DEFINING_WORLD_PLAZA_FIRELANDS_AMBIENT_TEMPERATURE_CELSIUS
     );
+  }
+
+  const frostsink = resolvingWorldPlazaFrostsinkAtTileIndex(tileX, tileY);
+
+  if (frostsink) {
+    ambientCelsius = frostsink.ambientTemperatureCelsius;
   }
 
   const waterTile = resolvingWorldPlazaWaterAtTileIndex(tileX, tileY);

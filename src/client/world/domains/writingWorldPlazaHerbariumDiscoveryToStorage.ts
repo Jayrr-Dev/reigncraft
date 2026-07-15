@@ -1,5 +1,6 @@
 import { resolvingWorldPlazaHerbariumDiscoveryStorageKey } from '@/components/world/domains/definingWorldPlazaHerbariumDiscoveryConstants';
 import type { DefiningWorldPlazaTreeVariantKind } from '@/components/world/domains/definingWorldPlazaTreeConstants';
+import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
 import type { WorldCloverSearchLootKind } from '../../../shared/worldCloverSearchLoot';
 import type { WorldFlowerSpeciesId } from '../../../shared/worldFlowerRarity';
 import type { WorldShrubBerryLootKind } from '../../../shared/worldShrubBerryLoot';
@@ -31,7 +32,12 @@ export function writingWorldPlazaHerbariumDiscoveryToStorage(
   sightedCloverKinds: ReadonlySet<WorldCloverSearchLootKind>,
   cloverStudyCount: number,
   sightedBerryLootKinds: ReadonlySet<WorldShrubBerryLootKind>,
-  berryStudyCountsByLootKind: ReadonlyMap<WorldShrubBerryLootKind, number>
+  berryStudyCountsByLootKind: ReadonlyMap<WorldShrubBerryLootKind, number>,
+  sightedMushroomSpeciesIds: ReadonlySet<DefiningWorldPlazaMushroomSpeciesId>,
+  mushroomStudyCountsBySpeciesId: ReadonlyMap<
+    DefiningWorldPlazaMushroomSpeciesId,
+    number
+  >
 ): void {
   if (typeof window === 'undefined') {
     return;
@@ -53,6 +59,10 @@ export function writingWorldPlazaHerbariumDiscoveryToStorage(
       sightedBerries: [...sightedBerryLootKinds].sort(),
       berryStudyCounts: formattingWorldPlazaHerbariumStudyCountsRecord(
         berryStudyCountsByLootKind
+      ),
+      sightedMushrooms: [...sightedMushroomSpeciesIds].sort(),
+      mushroomStudyCounts: formattingWorldPlazaHerbariumStudyCountsRecord(
+        mushroomStudyCountsBySpeciesId
       ),
     })
   );

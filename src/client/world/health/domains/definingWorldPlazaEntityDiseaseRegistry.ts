@@ -875,7 +875,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
     id: 'amatoxin-bell',
     label: 'Bell Amatoxin',
     description:
-      'Galerina toxins. Same liver kill as Angel Button, slightly lighter dose.',
+      'Galerina toxins. Same liver kill as Ivory Button, slightly lighter dose.',
     severity: 'critical',
     icon: 'game-icons:death-skull',
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
@@ -1027,8 +1027,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
   'lantern-gut': {
     id: 'lantern-gut',
     label: 'Lantern Gut',
-    description:
-      'Jack-o-lantern mushroom purge. Toxic cramps and nausea.',
+    description: 'Jack-o-lantern mushroom purge. Toxic cramps and nausea.',
     severity: 'moderate',
     icon: 'mdi:stomach',
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
@@ -1055,8 +1054,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
   'bolete-bile': {
     id: 'bolete-bile',
     label: 'Bolete Bile',
-    description:
-      "Satan's bolete gut poison. Miserable toxic burn, worse raw.",
+    description: "Satan's bolete gut poison. Miserable toxic burn, worse raw.",
     severity: 'mild',
     icon: 'mdi:stomach',
     hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,

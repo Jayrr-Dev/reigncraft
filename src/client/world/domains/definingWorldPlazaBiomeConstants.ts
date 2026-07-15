@@ -327,4 +327,21 @@ export const DEFINING_WORLD_PLAZA_BIOME_CATALOG: Record<
     skyBackdropClassName:
       'bg-gradient-to-b from-red-950 via-orange-900 to-[#3a2420]',
   },
+  frostsink: {
+    kind: 'frostsink',
+    displayName: 'Frostsink',
+    temperature: 0.05,
+    altitudeFactor: 0.08,
+    tileFillColor: 0xd4e8f0,
+    blockAccentColor: 0xa8c8d8,
+    blockHighlightColor: 0xe8f4fa,
+    speckColor: 0xffffff,
+    speckTileModulus: 8,
+    flowerColors: null,
+    flowerTileModulus: null,
+    longGrassTileModulus: null,
+    shrubTileModulus: null,
+    skyBackdropClassName:
+      'bg-gradient-to-b from-slate-400 via-cyan-100 to-[#d4e8f0]',
+  },
 };

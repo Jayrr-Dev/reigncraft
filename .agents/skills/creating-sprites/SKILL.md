@@ -11,24 +11,30 @@ description: >-
 
 # Creating sprites
 
-Pipeline: pick grid → pick cell size → generate equal-cell art on **key color BG** → remove bg → pack → **inspect** → WebP → optional inventory wire-up.
+Pipeline: pick grid → pick cell size → pick key BG (grey vs blue) → generate equal-cell art → remove bg → pack → **inspect** → WebP → optional inventory wire-up.
 
 ## Generation background (mandatory)
 
-**Always** generate source art on solid **`#7A7A7A`** (`rgb(122, 122, 122)`).
+Pick a **solid flat key color** for the whole generate/process pass. Never ask the model for “transparent background” (models fake it with white fringe).
 
-| Why        | Detail                                                                      |
-| ---------- | --------------------------------------------------------------------------- |
-| Easy key   | Mid gray is far from white petals, dark outlines, and most plant greens     |
-| Consistent | Same key every sheet → one remove path in the pack script                   |
-| Next phase | Downstream tools can chroma-key without guessing checkerboards / pure white |
+| Item palette                      | Key BG        | RGB                  | When                                                                                                 |
+| --------------------------------- | ------------- | -------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Default** (colorful / non-grey) | **`#7A7A7A`** | `rgb(122, 122, 122)` | Plants, food, flowers, bags, most non-metal glyphs                                                   |
+| **Greyish / metal**               | **`#0088FF`** | `rgb(0, 136, 255)`   | Iron, steel, stone-grey, pipes, tubes, tools with grey metal, any icon whose fills sit near mid-grey |
+
+| Why        | Detail                                                                                         |
+| ---------- | ---------------------------------------------------------------------------------------------- |
+| Easy key   | Far from the icon’s own hues so punch-out does not eat silhouette                              |
+| Grey items | Mid-grey key (`#7A7A7A`) fights iron/stone greys; **always** use blue chroma for greyish items |
+| Consistent | One key per sheet; pack with matching `--key-bg`                                               |
+| Next phase | Downstream tools chroma-key without guessing checkerboards / pure white                        |
 
 Rules:
 
-1. Every `GenerateImage` / sheet prompt **must** say: solid flat background exactly `#7A7A7A`, no gradients, no checkerboard, no pure white/black fill behind the icon.
-2. Do **not** ask the model for “transparent background” (models fake it with white fringe). Key `#7A7A7A` instead, then punch it in process.
-3. Pack script defaults to keying `#7A7A7A` (with a small RGB tolerance). Keep `--no-bg-remove` only for already-cleaned inputs.
-4. Icon pixels must not use exactly `#7A7A7A` as fill (nudge grays to `#6E6E6E` / `#868686` if needed).
+1. Every `GenerateImage` / sheet prompt **must** name the exact key hex (from the table), solid flat, no gradients, no checkerboard, no pure white/black fill behind the icon.
+2. Pack with the **same** key: `--key-bg "#7A7A7A"` (default) or `--key-bg "#0088FF"` for greyish/metal. Raise `--key-tolerance` slightly if blue fringe remains (greyish path often `~40`).
+3. Keep `--no-bg-remove` only for already-cleaned inputs.
+4. Icon pixels must not use the active key color as fill. Default path: nudge greys off `#7A7A7A` (`#6E6E6E` / `#868686`). Blue path: avoid `#0088FF` / near-primary blues in the glyph.
 
 ## Cell size (quality)
 
@@ -58,7 +64,7 @@ Industry / engine rules this project follows:
 | Spacing           | **0 px** gap between cells (tight grid)                                                                                                                                    |
 | Alignment         | Regular grid, left→right, top→bottom                                                                                                                                       |
 | Filter            | Nearest-neighbor only (no bilinear)                                                                                                                                        |
-| Background        | Source art: solid `#7A7A7A`. Shipped WebP: true RGBA transparency (no checkerboard, no leftover key gray)                                                                  |
+| Background        | Source art: solid key BG (`#7A7A7A` default, **`#0088FF` for greyish/metal**). Shipped WebP: true RGBA transparency (no leftover key color)                                |
 | Uniform footprint | Each icon’s opaque bounds fit inside its cell with similar max height/width (~70–90% of cell). Tier “size” is shown by **silhouette detail**, not by blowing past the cell |
 | No bleed          | No pixel of icon A in cell B                                                                                                                                               |
 
@@ -66,13 +72,13 @@ If generated art has uneven spacing or wildly different bounding boxes, **do not
 
 ## Defaults
 
-| Setting               | Value                                         |
-| --------------------- | --------------------------------------------- |
-| Cell size             | **32×32 px** (or **64×64** when high quality) |
-| Padding inside cell   | **2 px** (or **4 px** when high quality)      |
-| Export                | lossless WebP (`method=6`)                    |
-| Preferred when N = 12 | **4×3**                                       |
-| Generation BG         | **`#7A7A7A`** (always; keyed out in process)  |
+| Setting               | Value                                               |
+| --------------------- | --------------------------------------------------- |
+| Cell size             | **32×32 px** (or **64×64** when high quality)       |
+| Padding inside cell   | **2 px** (or **4 px** when high quality)            |
+| Export                | lossless WebP (`method=6`)                          |
+| Preferred when N = 12 | **4×3**                                             |
+| Generation BG         | **`#7A7A7A`** colorful; **`#0088FF`** greyish/metal |
 
 ## Picking a grid
 
@@ -94,9 +100,9 @@ If generated art has uneven spacing or wildly different bounding boxes, **do not
 
 ```
 Sprite Progress:
-- [ ] 1. Confirm subject list + grid (C×R) + cell size (32 or 64)
-- [ ] 2. Generate equal-cell art (sheet OR separate icons)
-- [ ] 3. Process with script (--expected-occupied N; --high-quality if 64)
+- [ ] 1. Confirm subject list + grid (C×R) + cell size (32 or 64) + key BG (#7A7A7A or #0088FF)
+- [ ] 2. Generate equal-cell art (sheet OR separate icons) on that key BG
+- [ ] 3. Process with script (--expected-occupied N; --key-bg for greyish; --high-quality if 64)
 - [ ] 4. Inspect output with Read tool (mandatory)
 - [ ] 5. Fix / regenerate if inspect fails
 - [ ] 6. Ship WebP under public/
@@ -105,7 +111,7 @@ Sprite Progress:
 
 ### 1. Confirm list + grid + quality
 
-Order is left→right, top→bottom. Record `C`, `R`, `N`, and `S` (32 or 64).
+Order is left→right, top→bottom. Record `C`, `R`, `N`, `S` (32 or 64), and key BG (`#7A7A7A` or `#0088FF`).
 
 ### 2. Generate
 
@@ -114,6 +120,10 @@ Order is left→right, top→bottom. Record `C`, `R`, `N`, and `S` (32 or 64).
 **Every generate prompt must include the key BG**, e.g.:
 
 > Solid flat background exactly `#7A7A7A` (medium gray). No transparency, no checkerboard, no white or black backdrop.
+
+Greyish / metal items:
+
+> Solid flat background exactly `#0088FF` (bright chromakey blue). No transparency, no checkerboard, no white or black backdrop. Do not use blue in the metal glyph.
 
 **Sheet mode:** one image with explicit equal cells:
 
@@ -131,11 +141,19 @@ Do not ship the raw generator PNG.
 ### 3. Process
 
 ```bash
-# Standard 32px — from one sheet
+# Standard 32px — from one sheet (default grey key)
 python .agents/skills/creating-sprites/scripts/processing_sprite_sheet.py \
   --input "PATH/generated.png" \
   --output "public/.../NAME.webp" \
   --columns C --rows R --cell-size 32 --padding 2 \
+  --expected-occupied N
+
+# Greyish / metal (blue chroma)
+python .agents/skills/creating-sprites/scripts/processing_sprite_sheet.py \
+  --input "PATH/generated.png" \
+  --output "public/.../NAME.webp" \
+  --columns C --rows R --cell-size 32 --padding 2 \
+  --key-bg "#0088FF" --key-tolerance 40 \
   --expected-occupied N
 
 # High quality 64px — separate icons (recommended)
@@ -209,8 +227,9 @@ Glyph renderer uses CSS background crop. Keep Iconify as fallback.
 - Assuming every sheet is 4×3
 - Assuming every sheet is 32×32 (check quality mode)
 - Using `--high-quality` then hard-coding inspect as `(C*32, R*32)`
-- Generating on white, black, checkerboard, or “transparent” instead of `#7A7A7A`
-- Leaving `#7A7A7A` fringes in the shipped WebP (inspect corners + gaps)
+- Generating on white, black, checkerboard, or “transparent” instead of a solid key hex
+- Using `#7A7A7A` key for greyish/metal icons (use `#0088FF` instead)
+- Leaving key-color fringes in the shipped WebP (inspect corners + gaps)
 
 ## Example
 

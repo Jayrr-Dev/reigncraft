@@ -33,6 +33,7 @@ const DEFINING_WILDLIFE_DEV_SPAWN_BIOME_LABELS: Record<
   ocean: 'Ocean',
   rocky: 'Rocky',
   firelands: 'Firelands',
+  frostsink: 'Frostsink',
 };
 
 /** Ordered biome chips that have at least one spawn-table entry. */

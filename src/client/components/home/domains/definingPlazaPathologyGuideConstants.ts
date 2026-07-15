@@ -65,7 +65,8 @@ const DEFINING_PLAZA_PATHOLOGY_GUIDE_COPY: Record<
   DefiningPlazaPathologyGuideCopy
 > = {
   salmonellosis: {
-    summary: 'Gut heaves after half-cooked fowl; legs feel poured full of sand.',
+    summary:
+      'Gut heaves after half-cooked fowl; legs feel poured full of sand.',
     studiedSummary:
       'Specimen: undercooked poultry, pink at the bone. Belly clenches first, then toxic poison drains about a quarter of your strength across half a fever day. Cook until the juices run clear.',
   },
@@ -125,7 +126,8 @@ const DEFINING_PLAZA_PATHOLOGY_GUIDE_COPY: Record<
       'Parasites in tree-dweller flesh, monkey and chimp. Reflexes slip; fever poison then takes about three tenths of your strength across most of a day. Rare prey, common regret.',
   },
   'equine-drowse': {
-    summary: 'Horse flesh brought sleep between bouts of not knowing north from south.',
+    summary:
+      'Horse flesh brought sleep between bouts of not knowing north from south.',
     studiedSummary:
       'From horse and donkey meat. Drowsiness and confusion trade places in waves. Cook long or nap in a dangerous place.',
   },
@@ -135,83 +137,90 @@ const DEFINING_PLAZA_PATHOLOGY_GUIDE_COPY: Record<
       'Hyena carcass, rank even cold. Weakness stacks; venomous poison then drains close to two fifths of your strength over most of a day. Scavenger meat is never worth the gamble.',
   },
   'tusk-fluke': {
-    summary: 'Tusked giant meat drained stamina at a run; poison would not shake loose.',
+    summary:
+      'Tusked giant meat drained stamina at a run; poison would not shake loose.',
     studiedSummary:
       'Flukes from elephant, rhino, and mammoth flesh. Sprint stamina collapses; toxic poison then takes over a third of your strength across a full day. Heavy cook, long rest.',
   },
   'cucco-rage': {
-    summary: 'Raw bird meat: hotter blood, harder hits, then the flock thinks for me.',
+    summary:
+      'Raw bird meat: hotter blood, harder hits, then the flock thinks for me.',
     studiedSummary:
       'Aggressive bird flesh eaten raw. Body runs hot and strikes hard first; later the flock seems to steer the hands, and a late toxic burn drains about a quarter of your strength. Strange blessing, stranger curse.',
   },
   'pollen-fever': {
-    summary: 'Chewed petals left the throat dusty; fever and a light burn followed.',
+    summary:
+      'Chewed petals left the throat dusty; fever and a light burn followed.',
     studiedSummary:
       'Airborne dust from raw flower petals. Mild fever slows the gait; toxic burn then drains about fifteen percent of your strength over several hours. Dry petals are worse than wet.',
   },
   'petal-pox': {
-    summary: 'Petal rash itched until the skin took hits easier; blood seeped late.',
+    summary:
+      'Petal rash itched until the skin took hits easier; blood seeped late.',
     studiedSummary:
       'Itchy rash from petal contact, raw or chewed. Skin thins to blows first; late bleeding drains about a quarter of your strength across half a day. Wash hands after picking.',
   },
   rootgut: {
-    summary: 'Bitter root oils from raw blooms; belly cramps followed the nausea.',
+    summary:
+      'Bitter root oils from raw blooms; belly cramps followed the nausea.',
     studiedSummary:
       'Bitter oils in raw flower roots and stems, not just petals. Nausea first, then toxic cramp that drains about a fifth of your strength over several hours. Boil or avoid the whole plant.',
   },
   moonblight: {
-    summary: 'Night bloom toxins: confusion thickens under moon, eases at dawn.',
+    summary:
+      'Night bloom toxins: confusion thickens under moon, eases at dawn.',
     studiedSummary:
       'Toxins from night-blooming flowers eaten raw. Confusion and stamina drain swell under moonlight; daylight pulls the edge off. Travel by day if you slip.',
   },
   seedlung: {
-    summary: 'Raw flower seeds left each breath shaving stamina; dust burned after.',
+    summary:
+      'Raw flower seeds left each breath shaving stamina; dust burned after.',
     studiedSummary:
       'Seeds in raw flower meals lodge in the lungs. Every breath costs stamina; venomous dust then drains over two fifths of your strength across most of a day. Spit seeds out before you chew.',
   },
   'amatoxin-angel': {
     summary:
-      'Angel Button meal: gut purge, a cruel calm, then the body starts to fail.',
+      'Ivory Button meal: gut purge, a cruel calm, then the body starts to fail.',
     studiedSummary:
-      'Destroying-angel toxins from Angel Button. Nausea first, then venomous burn, then a delayed fated hit and lethal poison. Cooking barely softens it. Do not trust the white gills.',
+      'White-gill button toxins. Nausea first, then venomous burn, then a delayed fated hit and lethal poison. Cooking barely softens it. Smooth ivory caps with free white gills.',
   },
   'amatoxin-bell': {
     summary:
-      'Funeral Bell tea of the woods: same late collapse as the angel, quieter start.',
+      'Brown Bell tea of the woods: same late collapse as the ivory buttons, quieter start.',
     studiedSummary:
-      'Amatoxin from Funeral Bell. Slow gut misery, then venom, then delayed organ shock. Fire does not scrub this clean. Night finds these caps more often than day.',
+      'Small brown-bell toxins on wet night wood. Slow gut misery, then venom, then delayed organ shock. Fire does not scrub this clean. Night finds these caps more often than day.',
   },
   'gyromitra-storm': {
     summary:
-      'Brain Cap left me dizzy, then the blood felt wrong under the skin.',
+      'Brain Brown left me dizzy, then the blood felt wrong under the skin.',
     studiedSummary:
-      'Gyromitra toxins. Confusion and gut cramp first; later poison and a bleed stage. Even cooked residue can linger. Leave the wrinkled brown look-alikes alone.',
+      'Wrinkled brain-fold toxins. Confusion and gut cramp first; later poison and a bleed stage. Even cooked residue can linger. Chambered stems near honeycomb cones.',
   },
   'ghost-wing-fog': {
     summary:
-      'Ghost Wing meal: cold fog in the head, steps that miss their mark.',
+      'Pale Frost Shelf meal: cold fog in the head, steps that miss their mark.',
     studiedSummary:
-      'Cold-biome false oyster toxins. Confusion and slow gait first; later toxic drain. Night and dawn are when these pale shelves show. Shelf Oyster is the safe twin.',
+      'Cold pale-shelf toxins. Confusion and slow gait first; later toxic drain. Night and dawn are when these frost shelves show on cold wood.',
   },
   'parasol-purge': {
-    summary: 'Green Vomiter emptied me in minutes; legs turned to water.',
+    summary: 'Olive-gill Cap emptied me in minutes; legs turned to water.',
     studiedSummary:
-      'Violent gut purge from Green Vomiter. Nausea and toxic burn hit hard; cooking only softens the odds. White Parasol shares the open grass but not the green tint.',
+      'Violent gut purge from olive-gill parasols. Nausea and toxic burn hit hard; cooking only softens the odds. Tall pale caps on open ground; mature gills lean olive.',
   },
   'lantern-gut': {
-    summary: 'False Lantern burned the gut; sweat came cold after.',
+    summary: 'Orange Cap burned the gut; sweat came cold after.',
     studiedSummary:
-      'Look-alike of Golden Chanter. Toxic gut burn and a short fever. Cooking cuts residual risk but does not erase a bad pick. Check the false gills.',
+      'Bright orange night caps with true knife-edge gills. Toxic gut burn and a short fever. Cooking cuts residual risk but does not erase a bad pick. Often clustered on wood at dusk.',
   },
   'bolete-bile': {
-    summary: 'Devil\'s Bolete left a bitter burn behind the ribs.',
+    summary: 'Red-pore Cap left a bitter burn behind the ribs.',
     studiedSummary:
-      'Net-stem bolete toxins. Mild-to-moderate gut poison; some cooked residue can stick. King Bolete is the safe twin with a clean pore face.',
+      'Red-pore bolete toxins. Mild-to-moderate gut poison; some cooked residue can stick. Broad brown caps with a red pore sponge that stains under the thumb.',
   },
   'yellow-stain-gut': {
-    summary: 'Yellow Stain bruised chrome and the stomach followed.',
+    summary: 'Yellow-bruise Cap stained chrome and the stomach followed.',
     studiedSummary:
-      'Chromium-like irritants in Yellow Stain. Gut cramp and toxic burn; cooking lowers chance. Field Agaric bruises dull, not yellow.',
+      'Yellow-bruise agaric irritants. Gut cramp and toxic burn; cooking lowers chance. White caps that flash chrome yellow under a firm thumb.',
   },
 };
 
@@ -220,7 +229,9 @@ function buildingPlazaPathologyGuideEntries(): readonly DefiningPlazaPathologyGu
     .slice()
     .sort((left, right) => {
       const severityDelta =
-        DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SEVERITY_SORT_ORDER[right.severity] -
+        DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SEVERITY_SORT_ORDER[
+          right.severity
+        ] -
         DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SEVERITY_SORT_ORDER[left.severity];
 
       if (severityDelta !== 0) {

@@ -2,11 +2,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   ensuringWorldPlazaHerbariumBerryStudyAtLeast,
+  ensuringWorldPlazaHerbariumMushroomStudyAtLeast,
   gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
+  gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot,
   gettingWorldPlazaHerbariumSightedBerryLootKindsSnapshot,
+  gettingWorldPlazaHerbariumSightedMushroomSpeciesSnapshot,
   initializingWorldPlazaHerbariumDiscoveryStore,
   recordingWorldPlazaHerbariumBerrySighted,
   recordingWorldPlazaHerbariumBerryStudied,
+  recordingWorldPlazaHerbariumMushroomSighted,
+  recordingWorldPlazaHerbariumMushroomStudied,
   resettingWorldPlazaHerbariumDiscoveryStoreForTests,
 } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 
@@ -94,6 +99,69 @@ describe('managingWorldPlazaHerbariumDiscoveryStore berry study', () => {
     });
     expect(gettingWorldPlazaHerbariumSightedBerryLootKindsSnapshot()).toEqual([
       'blue_berry',
+    ]);
+  });
+});
+
+describe('managingWorldPlazaHerbariumDiscoveryStore mushroom study', () => {
+  beforeEach(() => {
+    vi.stubGlobal('localStorage', creatingTestLocalStorage());
+    vi.stubGlobal('window', globalThis);
+    resettingWorldPlazaHerbariumDiscoveryStoreForTests();
+  });
+
+  it('records a mushroom sighting once', () => {
+    initializingWorldPlazaHerbariumDiscoveryStore('test-mushroom-sighted');
+    recordingWorldPlazaHerbariumMushroomSighted('golden-chanter');
+    recordingWorldPlazaHerbariumMushroomSighted('golden-chanter');
+
+    expect(gettingWorldPlazaHerbariumSightedMushroomSpeciesSnapshot()).toEqual([
+      'golden-chanter',
+    ]);
+    expect(gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot()).toEqual({});
+  });
+
+  it('increments per-species study counts and sights the species', () => {
+    initializingWorldPlazaHerbariumDiscoveryStore('test-mushroom-study');
+    recordingWorldPlazaHerbariumMushroomStudied('false-lantern');
+    recordingWorldPlazaHerbariumMushroomStudied('false-lantern');
+
+    expect(gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot()).toEqual({
+      'false-lantern': 2,
+    });
+    expect(gettingWorldPlazaHerbariumSightedMushroomSpeciesSnapshot()).toEqual([
+      'false-lantern',
+    ]);
+  });
+
+  it('raises study to a floor without lowering existing progress', () => {
+    initializingWorldPlazaHerbariumDiscoveryStore('test-mushroom-ensure');
+    recordingWorldPlazaHerbariumMushroomStudied('king-bolete', 10);
+
+    ensuringWorldPlazaHerbariumMushroomStudyAtLeast('king-bolete', 5);
+    expect(gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot()).toEqual({
+      'king-bolete': 10,
+    });
+
+    ensuringWorldPlazaHerbariumMushroomStudyAtLeast('king-bolete', 20);
+    expect(gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot()).toEqual({
+      'king-bolete': 20,
+    });
+  });
+
+  it('persists mushroom study across store reinitialization for the same owner', () => {
+    initializingWorldPlazaHerbariumDiscoveryStore('test-mushroom-persist');
+    recordingWorldPlazaHerbariumMushroomStudied('cloud-puff', 3);
+
+    initializingWorldPlazaHerbariumDiscoveryStore('other-owner');
+    expect(gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot()).toEqual({});
+
+    initializingWorldPlazaHerbariumDiscoveryStore('test-mushroom-persist');
+    expect(gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot()).toEqual({
+      'cloud-puff': 3,
+    });
+    expect(gettingWorldPlazaHerbariumSightedMushroomSpeciesSnapshot()).toEqual([
+      'cloud-puff',
     ]);
   });
 });

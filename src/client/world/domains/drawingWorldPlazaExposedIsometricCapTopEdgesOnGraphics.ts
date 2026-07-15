@@ -1,15 +1,15 @@
-import { computingWorldBuildingWorldLayerScreenOffsetPx } from "@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx";
-import type { CheckingWorldPlazaTerrainElevationExposedCliffVerticalEdgeKind } from "@/components/world/domains/checkingWorldPlazaTerrainElevationCardinalNeighborSurfaceConnectsAtTileIndex";
+import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
+import type { CheckingWorldPlazaTerrainElevationExposedCliffVerticalEdgeKind } from '@/components/world/domains/checkingWorldPlazaTerrainElevationCardinalNeighborSurfaceConnectsAtTileIndex';
+import {
+  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
+  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
+} from '@/components/world/domains/definingWorldPlazaIsometricConstants';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_EXPOSED_CLIFF_EDGE_STROKE_ALPHA,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_EXPOSED_CLIFF_EDGE_STROKE_COLOR,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_EXPOSED_CLIFF_EDGE_STROKE_WIDTH_PX,
-} from "@/components/world/domains/definingWorldPlazaTerrainElevationConstants";
-import {
-  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_HEIGHT_PX,
-  DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX,
-} from "@/components/world/domains/definingWorldPlazaIsometricConstants";
-import type { Graphics } from "pixi.js";
+} from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
+import type { Graphics } from 'pixi.js';
 
 /**
  * Draws exposed top-cap rim outlines on isometric tile columns.
@@ -33,31 +33,55 @@ interface DrawingWorldPlazaExposedIsometricCapScreenFrame {
 interface DrawingWorldPlazaExposedIsometricCapCardinalEdge {
   readonly deltaX: number;
   readonly deltaY: number;
-  readonly fromVertex: "top" | "right" | "bottom" | "left";
-  readonly toVertex: "top" | "right" | "bottom" | "left";
+  readonly fromVertex: 'top' | 'right' | 'bottom' | 'left';
+  readonly toVertex: 'top' | 'right' | 'bottom' | 'left';
   readonly isFrontFacing: boolean;
 }
 
 /** Maps each cardinal neighbor to the shared top-cap diamond edge. */
 const DRAWING_WORLD_PLAZA_EXPOSED_ISOMETRIC_CAP_CARDINAL_EDGES: readonly DrawingWorldPlazaExposedIsometricCapCardinalEdge[] =
   [
-    { deltaX: 0, deltaY: -1, fromVertex: "top", toVertex: "right", isFrontFacing: false },
-    { deltaX: 1, deltaY: 0, fromVertex: "right", toVertex: "bottom", isFrontFacing: true },
-    { deltaX: 0, deltaY: 1, fromVertex: "bottom", toVertex: "left", isFrontFacing: true },
-    { deltaX: -1, deltaY: 0, fromVertex: "left", toVertex: "top", isFrontFacing: false },
+    {
+      deltaX: 0,
+      deltaY: -1,
+      fromVertex: 'top',
+      toVertex: 'right',
+      isFrontFacing: false,
+    },
+    {
+      deltaX: 1,
+      deltaY: 0,
+      fromVertex: 'right',
+      toVertex: 'bottom',
+      isFrontFacing: true,
+    },
+    {
+      deltaX: 0,
+      deltaY: 1,
+      fromVertex: 'bottom',
+      toVertex: 'left',
+      isFrontFacing: true,
+    },
+    {
+      deltaX: -1,
+      deltaY: 0,
+      fromVertex: 'left',
+      toVertex: 'top',
+      isFrontFacing: false,
+    },
   ];
 
 /** Diamond corner order for walking cap edges clockwise. */
 const DRAWING_WORLD_PLAZA_EXPOSED_ISOMETRIC_CAP_DIAMOND_VERTEX_ORDER = [
-  "top",
-  "right",
-  "bottom",
-  "left",
+  'top',
+  'right',
+  'bottom',
+  'left',
 ] as const;
 
 /** Front-facing vertical cliff strokes at SW, SE, and south cap corners. */
 const DRAWING_WORLD_PLAZA_EXPOSED_ISOMETRIC_CAP_VERTICAL_EDGE_KINDS: readonly CheckingWorldPlazaTerrainElevationExposedCliffVerticalEdgeKind[] =
-  ["east", "west", "south"];
+  ['east', 'west', 'south'];
 
 /** Neighbor surface connect check used to detect exposed cap edges. */
 export type DrawingWorldPlazaExposedIsometricCapCheckingCardinalNeighborSurfaceConnectsAtTileIndex =
@@ -66,7 +90,7 @@ export type DrawingWorldPlazaExposedIsometricCapCheckingCardinalNeighborSurfaceC
     tileY: number,
     deltaX: number,
     deltaY: number,
-    surfaceLayer: number,
+    surfaceLayer: number
   ) => boolean;
 
 /** Input for exposed top-cap edge drawing. */
@@ -86,7 +110,7 @@ export interface DrawingWorldPlazaExposedIsometricCapTopEdgesParams {
   readonly checkingCapDiamondEdgeShouldStroke?: (
     edgeIndex: number,
     fromVertex: (typeof DRAWING_WORLD_PLAZA_EXPOSED_ISOMETRIC_CAP_DIAMOND_VERTEX_ORDER)[number],
-    toVertex: (typeof DRAWING_WORLD_PLAZA_EXPOSED_ISOMETRIC_CAP_DIAMOND_VERTEX_ORDER)[number],
+    toVertex: (typeof DRAWING_WORLD_PLAZA_EXPOSED_ISOMETRIC_CAP_DIAMOND_VERTEX_ORDER)[number]
   ) => boolean;
 }
 
@@ -98,16 +122,16 @@ export interface DrawingWorldPlazaExposedIsometricCapTopEdgesParams {
  */
 function resolvingWorldPlazaExposedIsometricCapDiamondVertex(
   frame: DrawingWorldPlazaExposedIsometricCapScreenFrame,
-  vertex: (typeof DRAWING_WORLD_PLAZA_EXPOSED_ISOMETRIC_CAP_DIAMOND_VERTEX_ORDER)[number],
+  vertex: (typeof DRAWING_WORLD_PLAZA_EXPOSED_ISOMETRIC_CAP_DIAMOND_VERTEX_ORDER)[number]
 ): { readonly x: number; readonly y: number } {
   switch (vertex) {
-    case "top":
+    case 'top':
       return { x: frame.centerX, y: frame.centerY - frame.halfHeight };
-    case "right":
+    case 'right':
       return { x: frame.centerX + frame.halfWidth, y: frame.centerY };
-    case "bottom":
+    case 'bottom':
       return { x: frame.centerX, y: frame.centerY + frame.halfHeight };
-    case "left":
+    case 'left':
       return { x: frame.centerX - frame.halfWidth, y: frame.centerY };
   }
 }
@@ -128,14 +152,14 @@ function checkingWorldPlazaExposedIsometricCapCliffInDirectionAtTileIndex(
   cliffDeltaX: number,
   cliffDeltaY: number,
   surfaceLayer: number,
-  checkingCardinalNeighborSurfaceConnectsAtTileIndex: DrawingWorldPlazaExposedIsometricCapCheckingCardinalNeighborSurfaceConnectsAtTileIndex,
+  checkingCardinalNeighborSurfaceConnectsAtTileIndex: DrawingWorldPlazaExposedIsometricCapCheckingCardinalNeighborSurfaceConnectsAtTileIndex
 ): boolean {
   return !checkingCardinalNeighborSurfaceConnectsAtTileIndex(
     tileX,
     tileY,
     cliffDeltaX,
     cliffDeltaY,
-    surfaceLayer,
+    surfaceLayer
   );
 }
 
@@ -160,47 +184,51 @@ function countingWorldPlazaExposedIsometricCapCliffDirectionsAtVertex(
   tileX: number,
   tileY: number,
   surfaceLayer: number,
-  vertex: "bottom" | "left" | "right",
-  checkingCardinalNeighborSurfaceConnectsAtTileIndex: DrawingWorldPlazaExposedIsometricCapCheckingCardinalNeighborSurfaceConnectsAtTileIndex,
+  vertex: 'bottom' | 'left' | 'right',
+  checkingCardinalNeighborSurfaceConnectsAtTileIndex: DrawingWorldPlazaExposedIsometricCapCheckingCardinalNeighborSurfaceConnectsAtTileIndex
 ): number {
-  const hasEastCliff = checkingWorldPlazaExposedIsometricCapCliffInDirectionAtTileIndex(
-    tileX,
-    tileY,
-    1,
-    0,
-    surfaceLayer,
-    checkingCardinalNeighborSurfaceConnectsAtTileIndex,
-  );
-  const hasSouthCliff = checkingWorldPlazaExposedIsometricCapCliffInDirectionAtTileIndex(
-    tileX,
-    tileY,
-    0,
-    1,
-    surfaceLayer,
-    checkingCardinalNeighborSurfaceConnectsAtTileIndex,
-  );
-  const hasWestCliff = checkingWorldPlazaExposedIsometricCapCliffInDirectionAtTileIndex(
-    tileX,
-    tileY,
-    -1,
-    0,
-    surfaceLayer,
-    checkingCardinalNeighborSurfaceConnectsAtTileIndex,
-  );
-  const hasNorthCliff = checkingWorldPlazaExposedIsometricCapCliffInDirectionAtTileIndex(
-    tileX,
-    tileY,
-    0,
-    -1,
-    surfaceLayer,
-    checkingCardinalNeighborSurfaceConnectsAtTileIndex,
-  );
+  const hasEastCliff =
+    checkingWorldPlazaExposedIsometricCapCliffInDirectionAtTileIndex(
+      tileX,
+      tileY,
+      1,
+      0,
+      surfaceLayer,
+      checkingCardinalNeighborSurfaceConnectsAtTileIndex
+    );
+  const hasSouthCliff =
+    checkingWorldPlazaExposedIsometricCapCliffInDirectionAtTileIndex(
+      tileX,
+      tileY,
+      0,
+      1,
+      surfaceLayer,
+      checkingCardinalNeighborSurfaceConnectsAtTileIndex
+    );
+  const hasWestCliff =
+    checkingWorldPlazaExposedIsometricCapCliffInDirectionAtTileIndex(
+      tileX,
+      tileY,
+      -1,
+      0,
+      surfaceLayer,
+      checkingCardinalNeighborSurfaceConnectsAtTileIndex
+    );
+  const hasNorthCliff =
+    checkingWorldPlazaExposedIsometricCapCliffInDirectionAtTileIndex(
+      tileX,
+      tileY,
+      0,
+      -1,
+      surfaceLayer,
+      checkingCardinalNeighborSurfaceConnectsAtTileIndex
+    );
 
-  if (vertex === "bottom") {
+  if (vertex === 'bottom') {
     return (hasEastCliff ? 1 : 0) + (hasSouthCliff ? 1 : 0);
   }
 
-  if (vertex === "right") {
+  if (vertex === 'right') {
     return (hasEastCliff ? 1 : 0) + (hasNorthCliff ? 1 : 0);
   }
 
@@ -221,14 +249,14 @@ function checkingWorldPlazaExposedIsometricCapVerticalEdgeShouldDrawAtTileIndex(
   tileY: number,
   edgeKind: CheckingWorldPlazaTerrainElevationExposedCliffVerticalEdgeKind,
   surfaceLayer: number,
-  checkingCardinalNeighborSurfaceConnectsAtTileIndex: DrawingWorldPlazaExposedIsometricCapCheckingCardinalNeighborSurfaceConnectsAtTileIndex,
+  checkingCardinalNeighborSurfaceConnectsAtTileIndex: DrawingWorldPlazaExposedIsometricCapCheckingCardinalNeighborSurfaceConnectsAtTileIndex
 ): boolean {
   const minimumCornerCliffDirectionCount =
     DRAWING_WORLD_PLAZA_EXPOSED_ISOMETRIC_CAP_TOP_EDGE_CORNER_VERTEX_MIN_CLIFF_DIRECTION_COUNT;
   const vertexByEdgeKind = {
-    east: "right",
-    south: "bottom",
-    west: "left",
+    east: 'right',
+    south: 'bottom',
+    west: 'left',
   } as const;
 
   return (
@@ -237,7 +265,7 @@ function checkingWorldPlazaExposedIsometricCapVerticalEdgeShouldDrawAtTileIndex(
       tileY,
       surfaceLayer,
       vertexByEdgeKind[edgeKind],
-      checkingCardinalNeighborSurfaceConnectsAtTileIndex,
+      checkingCardinalNeighborSurfaceConnectsAtTileIndex
     ) >= minimumCornerCliffDirectionCount
   );
 }
@@ -258,7 +286,7 @@ function checkingWorldPlazaExposedIsometricCapDiamondEdgeIsExposed(
   surfaceLayer: number,
   fromVertex: (typeof DRAWING_WORLD_PLAZA_EXPOSED_ISOMETRIC_CAP_DIAMOND_VERTEX_ORDER)[number],
   toVertex: (typeof DRAWING_WORLD_PLAZA_EXPOSED_ISOMETRIC_CAP_DIAMOND_VERTEX_ORDER)[number],
-  checkingCardinalNeighborSurfaceConnectsAtTileIndex: DrawingWorldPlazaExposedIsometricCapCheckingCardinalNeighborSurfaceConnectsAtTileIndex,
+  checkingCardinalNeighborSurfaceConnectsAtTileIndex: DrawingWorldPlazaExposedIsometricCapCheckingCardinalNeighborSurfaceConnectsAtTileIndex
 ): boolean {
   for (const cliffEdge of DRAWING_WORLD_PLAZA_EXPOSED_ISOMETRIC_CAP_CARDINAL_EDGES) {
     if (
@@ -269,7 +297,7 @@ function checkingWorldPlazaExposedIsometricCapDiamondEdgeIsExposed(
         tileY,
         cliffEdge.deltaX,
         cliffEdge.deltaY,
-        surfaceLayer,
+        surfaceLayer
       )
     ) {
       return true;
@@ -292,7 +320,7 @@ function listingWorldPlazaExposedIsometricCapEdgeIndices(
   tileY: number,
   surfaceLayer: number,
   checkingCardinalNeighborSurfaceConnectsAtTileIndex: DrawingWorldPlazaExposedIsometricCapCheckingCardinalNeighborSurfaceConnectsAtTileIndex,
-  checkingCapDiamondEdgeShouldStroke?: DrawingWorldPlazaExposedIsometricCapTopEdgesParams["checkingCapDiamondEdgeShouldStroke"],
+  checkingCapDiamondEdgeShouldStroke?: DrawingWorldPlazaExposedIsometricCapTopEdgesParams['checkingCapDiamondEdgeShouldStroke']
 ): number[] {
   const exposedEdgeIndices: number[] = [];
   const vertexCount =
@@ -314,7 +342,7 @@ function listingWorldPlazaExposedIsometricCapEdgeIndices(
           surfaceLayer,
           fromVertex,
           toVertex,
-          checkingCardinalNeighborSurfaceConnectsAtTileIndex,
+          checkingCardinalNeighborSurfaceConnectsAtTileIndex
         );
 
     if (shouldStroke) {
@@ -331,21 +359,24 @@ function listingWorldPlazaExposedIsometricCapEdgeIndices(
  * @param exposedEdgeIndices - Edge indices from {@link listingWorldPlazaExposedIsometricCapEdgeIndices}.
  */
 function groupingWorldPlazaExposedIsometricCapEdgeRuns(
-  exposedEdgeIndices: readonly number[],
+  exposedEdgeIndices: readonly number[]
 ): Array<{ readonly startEdge: number; readonly endEdge: number }> {
   if (exposedEdgeIndices.length === 0) {
     return [];
   }
 
   if (exposedEdgeIndices.length === 1) {
-    return [{ startEdge: exposedEdgeIndices[0], endEdge: exposedEdgeIndices[0] }];
+    return [
+      { startEdge: exposedEdgeIndices[0], endEdge: exposedEdgeIndices[0] },
+    ];
   }
 
   const breaksAfterIndex: number[] = [];
 
   for (let index = 0; index < exposedEdgeIndices.length; index += 1) {
     const currentEdge = exposedEdgeIndices[index];
-    const nextEdge = exposedEdgeIndices[(index + 1) % exposedEdgeIndices.length];
+    const nextEdge =
+      exposedEdgeIndices[(index + 1) % exposedEdgeIndices.length];
 
     if ((currentEdge + 1) % 4 !== nextEdge) {
       breaksAfterIndex.push(index);
@@ -412,7 +443,7 @@ function strokingWorldPlazaExposedIsometricCapEdgeRunOnGraphics(
   endEdge: number,
   strokeColor: number,
   strokeWidthPx: number,
-  strokeAlpha: number,
+  strokeAlpha: number
 ): void {
   const vertexCount =
     DRAWING_WORLD_PLAZA_EXPOSED_ISOMETRIC_CAP_DIAMOND_VERTEX_ORDER.length;
@@ -420,7 +451,7 @@ function strokingWorldPlazaExposedIsometricCapEdgeRunOnGraphics(
     DRAWING_WORLD_PLAZA_EXPOSED_ISOMETRIC_CAP_DIAMOND_VERTEX_ORDER[startEdge];
   const startPoint = resolvingWorldPlazaExposedIsometricCapDiamondVertex(
     frame,
-    startVertex,
+    startVertex
   );
 
   graphics.moveTo(startPoint.x, startPoint.y);
@@ -434,7 +465,7 @@ function strokingWorldPlazaExposedIsometricCapEdgeRunOnGraphics(
       ];
     const nextPoint = resolvingWorldPlazaExposedIsometricCapDiamondVertex(
       frame,
-      nextVertex,
+      nextVertex
     );
     graphics.lineTo(nextPoint.x, nextPoint.y);
 
@@ -450,8 +481,8 @@ function strokingWorldPlazaExposedIsometricCapEdgeRunOnGraphics(
     color: strokeColor,
     alpha: strokeAlpha,
     alignment: 0.5,
-    cap: "round",
-    join: "round",
+    cap: 'round',
+    join: 'round',
   });
 }
 
@@ -461,7 +492,7 @@ function strokingWorldPlazaExposedIsometricCapEdgeRunOnGraphics(
  * @param params - Tile indices, cap center, surface layer, and stroke options.
  */
 export function drawingWorldPlazaExposedIsometricCapTopEdgesOnGraphics(
-  params: DrawingWorldPlazaExposedIsometricCapTopEdgesParams,
+  params: DrawingWorldPlazaExposedIsometricCapTopEdgesParams
 ): void {
   const strokeColor =
     params.strokeColor ??
@@ -472,6 +503,11 @@ export function drawingWorldPlazaExposedIsometricCapTopEdgesOnGraphics(
   const strokeAlpha =
     params.strokeAlpha ??
     DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_EXPOSED_CLIFF_EDGE_STROKE_ALPHA;
+
+  if (strokeAlpha <= 0 || strokeWidthPx <= 0) {
+    return;
+  }
+
   const surfaceCenterY =
     params.groundCenterY +
     computingWorldBuildingWorldLayerScreenOffsetPx(params.surfaceLayer);
@@ -501,20 +537,20 @@ export function drawingWorldPlazaExposedIsometricCapTopEdgesOnGraphics(
             params.tileY,
             edgeKind,
             params.surfaceLayer,
-            params.checkingCardinalNeighborSurfaceConnectsAtTileIndex,
+            params.checkingCardinalNeighborSurfaceConnectsAtTileIndex
           )
         ) {
           continue;
         }
 
-        if (edgeKind === "east") {
+        if (edgeKind === 'east') {
           params.graphics.moveTo(eastX, surfaceCenterY);
           params.graphics.lineTo(eastX, bottomCenterY);
           drewVerticalEdge = true;
           continue;
         }
 
-        if (edgeKind === "west") {
+        if (edgeKind === 'west') {
           params.graphics.moveTo(westX, surfaceCenterY);
           params.graphics.lineTo(westX, bottomCenterY);
           drewVerticalEdge = true;
@@ -532,8 +568,8 @@ export function drawingWorldPlazaExposedIsometricCapTopEdgesOnGraphics(
           color: strokeColor,
           alpha: strokeAlpha,
           alignment: 0.5,
-          cap: "round",
-          join: "round",
+          cap: 'round',
+          join: 'round',
         });
       }
     }
@@ -545,8 +581,8 @@ export function drawingWorldPlazaExposedIsometricCapTopEdgesOnGraphics(
       params.tileY,
       params.surfaceLayer,
       params.checkingCardinalNeighborSurfaceConnectsAtTileIndex,
-      params.checkingCapDiamondEdgeShouldStroke,
-    ),
+      params.checkingCapDiamondEdgeShouldStroke
+    )
   );
 
   for (const exposedCapEdgeRun of exposedCapEdgeRuns) {
@@ -557,7 +593,7 @@ export function drawingWorldPlazaExposedIsometricCapTopEdgesOnGraphics(
       exposedCapEdgeRun.endEdge,
       strokeColor,
       strokeWidthPx,
-      strokeAlpha,
+      strokeAlpha
     );
   }
 }

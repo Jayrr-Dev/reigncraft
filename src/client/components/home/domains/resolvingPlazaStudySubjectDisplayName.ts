@@ -10,8 +10,11 @@ import {
   DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES,
   DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES,
 } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
+import { DEFINING_PLAZA_HERBARIUM_MUSHROOM_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaHerbariumMushroomGuideConstants';
 import { DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaLapidaryGuideConstants';
+import { checkingPlazaCodexStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import type { DefiningWorldPlazaTreeVariantKind } from '@/components/world/domains/definingWorldPlazaTreeConstants';
+import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type { WorldCloverSearchLootKind } from '../../../../shared/worldCloverSearchLoot';
@@ -59,6 +62,30 @@ export function resolvingPlazaHerbariumBerryStudyDisplayName(
   );
 }
 
+/**
+ * Color/shape field name until proficiency (50 studies), then true name.
+ */
+export function resolvingPlazaHerbariumMushroomStudyDisplayName(
+  speciesId: DefiningWorldPlazaMushroomSpeciesId,
+  studyCount = 0
+): string {
+  const entry = DEFINING_PLAZA_HERBARIUM_MUSHROOM_GUIDE_ENTRIES.find(
+    (guideEntry) => guideEntry.speciesId === speciesId
+  );
+
+  if (!entry) {
+    return speciesId;
+  }
+
+  const isTrueNameUnlocked = checkingPlazaCodexStudyTierUnlocked(
+    'herbarium-mushroom',
+    'proficiency',
+    studyCount
+  );
+
+  return isTrueNameUnlocked ? entry.displayName : entry.fieldName;
+}
+
 export function resolvingPlazaLapidaryOreStudyDisplayName(
   speciesId: WorldOreSpeciesId
 ): string {
@@ -72,5 +99,7 @@ export function resolvingPlazaLapidaryOreStudyDisplayName(
 export function resolvingPlazaBestiarySpeciesStudyDisplayName(
   speciesId: DefiningWildlifeSpeciesId
 ): string {
-  return resolvingWildlifeSpeciesDefinition(speciesId)?.displayName ?? speciesId;
+  return (
+    resolvingWildlifeSpeciesDefinition(speciesId)?.displayName ?? speciesId
+  );
 }

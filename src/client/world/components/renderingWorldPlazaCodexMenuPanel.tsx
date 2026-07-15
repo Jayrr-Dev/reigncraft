@@ -8,10 +8,13 @@
 
 import { DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaBestiaryGuideConstants';
 import { DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
+import { DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaHerbariumBerryGuideConstants';
+import { DEFINING_PLAZA_HERBARIUM_CLOVER_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaHerbariumCloverGuideConstants';
 import {
   DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES,
   DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES,
 } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
+import { DEFINING_PLAZA_HERBARIUM_MUSHROOM_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaHerbariumMushroomGuideConstants';
 import { DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaLapidaryGuideConstants';
 import { DEFINING_PLAZA_PATHOLOGY_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaPathologyGuideConstants';
 import { DEFINING_PLAZA_RECIPES_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaRecipesGuideConstants';
@@ -40,8 +43,14 @@ import {
   subscribingWorldPlazaExploredBiomes,
 } from '@/components/world/domains/managingWorldPlazaExploredBiomesStore';
 import {
+  gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
   gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
+  gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot,
+  gettingWorldPlazaHerbariumSightedBerryLootKindsSnapshot,
+  gettingWorldPlazaHerbariumSightedCloverKindsSnapshot,
+  gettingWorldPlazaHerbariumSightedMushroomSpeciesSnapshot,
   gettingWorldPlazaHerbariumSightedTreeVariantsSnapshot,
+  gettingWorldPlazaHerbariumTreeStudyCountsSnapshot,
   subscribingWorldPlazaHerbariumDiscovery,
 } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import {
@@ -97,6 +106,36 @@ export function RenderingWorldPlazaCodexMenuPanel({
     gettingWorldPlazaHerbariumSightedTreeVariantsSnapshot,
     () => []
   );
+  const herbariumTreeStudyCounts = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumTreeStudyCountsSnapshot,
+    () => ({})
+  );
+  const sightedHerbariumCloverKinds = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumSightedCloverKindsSnapshot,
+    () => []
+  );
+  const sightedHerbariumBerryLootKinds = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumSightedBerryLootKindsSnapshot,
+    () => []
+  );
+  const herbariumBerryStudyCounts = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
+    () => ({})
+  );
+  const sightedHerbariumMushroomSpeciesIds = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumSightedMushroomSpeciesSnapshot,
+    () => []
+  );
+  const herbariumMushroomStudyCounts = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot,
+    () => ({})
+  );
   const lapidaryOreStudyCounts = useSyncExternalStore<
     ReturnType<typeof gettingWorldPlazaLapidaryOreStudyCountsSnapshot>
   >(
@@ -147,11 +186,40 @@ export function RenderingWorldPlazaCodexMenuPanel({
         DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES.filter(
           (entry) => (herbariumFlowerStudyCounts[entry.speciesId] ?? 0) > 0
         ).length;
+      const discoveredTreeCount =
+        DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES.filter(
+          (entry) =>
+            (herbariumTreeStudyCounts[entry.variant] ?? 0) > 0 ||
+            sightedHerbariumTreeVariants.includes(entry.variant)
+        ).length;
+      const discoveredCloverCount =
+        DEFINING_PLAZA_HERBARIUM_CLOVER_GUIDE_ENTRIES.filter((entry) =>
+          sightedHerbariumCloverKinds.includes(entry.cloverKind)
+        ).length;
+      const discoveredBerryCount =
+        DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES.filter(
+          (entry) =>
+            (herbariumBerryStudyCounts[entry.berryLootKind] ?? 0) > 0 ||
+            sightedHerbariumBerryLootKinds.includes(entry.berryLootKind)
+        ).length;
+      const discoveredMushroomCount =
+        DEFINING_PLAZA_HERBARIUM_MUSHROOM_GUIDE_ENTRIES.filter(
+          (entry) =>
+            (herbariumMushroomStudyCounts[entry.speciesId] ?? 0) > 0 ||
+            sightedHerbariumMushroomSpeciesIds.includes(entry.speciesId)
+        ).length;
 
       return formattingPlazaHerbariumCodexMenuDescription(
-        discoveredFlowerCount + sightedHerbariumTreeVariants.length,
+        discoveredFlowerCount +
+          discoveredTreeCount +
+          discoveredCloverCount +
+          discoveredBerryCount +
+          discoveredMushroomCount,
         DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES.length +
-          DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES.length
+          DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES.length +
+          DEFINING_PLAZA_HERBARIUM_CLOVER_GUIDE_ENTRIES.length +
+          DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES.length +
+          DEFINING_PLAZA_HERBARIUM_MUSHROOM_GUIDE_ENTRIES.length
       );
     }
 

@@ -55,7 +55,7 @@ describe('resolvingWildlifeSpeciesOnHitPlayerProcs', () => {
 
   it('procs temperature impulse for sunhead when rolls succeed', () => {
     let rollIndex = 0;
-    const rolls = [0, 0, 0, 0];
+    const rolls = [0, 0, 0];
 
     const procs = resolvingWildlifeSpeciesOnHitPlayerProcs(
       'sunhead',
@@ -65,7 +65,7 @@ describe('resolvingWildlifeSpeciesOnHitPlayerProcs', () => {
 
     expect(procs).toContainEqual({
       kind: 'temperature',
-      deltaCelsius: 22,
+      deltaCelsius: 300,
     });
   });
 });

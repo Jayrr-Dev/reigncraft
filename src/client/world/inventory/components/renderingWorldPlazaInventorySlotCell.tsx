@@ -25,6 +25,7 @@ import {
   gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
   gettingWorldPlazaHerbariumCloverStudyCountSnapshot,
   gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
+  gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot,
   subscribingWorldPlazaHerbariumDiscovery,
 } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import {
@@ -492,6 +493,11 @@ function InventoryPlazaSlotItem({
     gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
     () => ({})
   );
+  const mushroomStudyCountsBySpeciesId = useSyncExternalStore(
+    subscribingWorldPlazaHerbariumDiscovery,
+    gettingWorldPlazaHerbariumMushroomStudyCountsSnapshot,
+    () => ({})
+  );
   const oreStudyCountsBySpeciesId = useSyncExternalStore(
     subscribingWorldPlazaLapidaryDiscovery,
     gettingWorldPlazaLapidaryOreStudyCountsSnapshot,
@@ -505,6 +511,7 @@ function InventoryPlazaSlotItem({
         flowerStudyCountsBySpeciesId,
         cloverStudyCount,
         berryStudyCountsByLootKind,
+        mushroomStudyCountsBySpeciesId,
         oreStudyCountsBySpeciesId,
         playerEffectiveMaxHealth,
         isOreSmeltingStationReachable,
@@ -518,6 +525,7 @@ function InventoryPlazaSlotItem({
       isEquipped,
       isOreSmeltingStationReachable,
       item,
+      mushroomStudyCountsBySpeciesId,
       oreStudyCountsBySpeciesId,
       playerEffectiveMaxHealth,
       studyCountsBySpeciesId,

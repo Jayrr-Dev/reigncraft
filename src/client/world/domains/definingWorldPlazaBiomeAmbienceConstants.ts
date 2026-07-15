@@ -151,6 +151,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_AMBIENCE_BY_KIND: Partial<
   rocky: 'dripping_water_1',
   firelands: 'small_motor_water_1',
   snowy_plains: 'winter_storm',
+  frostsink: 'winter_storm',
 };
 
 /** Tile scan radius when searching for nearby stream or river water. */

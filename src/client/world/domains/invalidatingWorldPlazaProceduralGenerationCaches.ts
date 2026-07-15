@@ -7,6 +7,7 @@ import { invalidatingWorldPlazaWaterShimmerTileEntryCache } from '@/components/w
 import { invalidatingWorldPlazaBiomeCaches } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { invalidatingWorldPlazaColumnRockMetadataCache } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtAnchorTileIndex';
 import { invalidatingWorldPlazaFirelandsPropCache } from '@/components/world/domains/resolvingWorldPlazaFirelandsPropAtTileIndex';
+import { invalidatingWorldPlazaFrostsinkPropCache } from '@/components/world/domains/resolvingWorldPlazaFrostsinkPropAtTileIndex';
 import { invalidatingWorldPlazaLakeShoreDepthCache } from '@/components/world/domains/resolvingWorldPlazaLakeShoreDepthAtTileIndex';
 import { invalidatingWorldPlazaLakeWaterShallowDepthCache } from '@/components/world/domains/resolvingWorldPlazaLakeWaterDepthAtTileIndex';
 import { invalidatingWorldPlazaMiniMapTileFillColorCache } from '@/components/world/domains/resolvingWorldPlazaMiniMapTileFillColor';
@@ -35,6 +36,7 @@ export function invalidatingWorldPlazaProceduralGenerationCaches(): void {
   invalidatingWorldPlazaWaterFrozenStateAtTileIndexCache();
   invalidatingWorldPlazaNamedRealmCaches();
   invalidatingWorldPlazaFirelandsPropCache();
+  invalidatingWorldPlazaFrostsinkPropCache();
   invalidatingWorldPlazaWaterAtTileIndexCache();
   invalidatingWorldPlazaWaterShimmerTileEntryCache();
   invalidatingWorldPlazaWaterSurfaceTileDrawMetadataCache();

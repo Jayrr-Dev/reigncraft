@@ -12,8 +12,11 @@ import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/def
 /** Tile samples per frequency run. */
 export const DEFINING_WORLD_PLAZA_BIOME_FREQUENCY_SAMPLE_COUNT = 300_000;
 
-/** Random tile coordinate radius around world origin. */
-export const DEFINING_WORLD_PLAZA_BIOME_FREQUENCY_SAMPLE_RADIUS = 3000;
+/**
+ * Random tile coordinate radius around world origin.
+ * Must reach the Frostsink discovery ring (~3k–10k) or legendary ice never samples.
+ */
+export const DEFINING_WORLD_PLAZA_BIOME_FREQUENCY_SAMPLE_RADIUS = 10_000;
 
 /** Expected world coverage band for Firelands (percent). */
 export const DEFINING_WORLD_PLAZA_FIRELANDS_COVERAGE_PERCENT_MIN = 0.5;
@@ -37,4 +40,5 @@ export const DEFINING_WORLD_PLAZA_BIOME_FREQUENCY_SAMPLE_KINDS: readonly Definin
     'ocean',
     'rocky',
     'firelands',
+    'frostsink',
   ] as const;

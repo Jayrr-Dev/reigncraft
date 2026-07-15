@@ -20,6 +20,7 @@ import {
   checkingWorldPlazaMushroomPastureHabitatSpeciesId,
   checkingWorldPlazaMushroomStumpHabitatSpeciesId,
 } from '@/components/world/mushrooms/domains/checkingWorldPlazaMushroomHabitatSpawn';
+import { checkingWorldPlazaMushroomSpawnBlockedByWaterAtTileIndex } from '@/components/world/mushrooms/domains/checkingWorldPlazaMushroomSpawnBlockedByWaterAtTileIndex';
 import { computingWorldPlazaMushroomBunchTilePositions } from '@/components/world/mushrooms/domains/computingWorldPlazaMushroomBunchTilePositions';
 import { computingWorldPlazaMushroomRingTilePositions } from '@/components/world/mushrooms/domains/computingWorldPlazaMushroomRingTilePositions';
 import { computingWorldPlazaMushroomSeedUnitFromTileIndex } from '@/components/world/mushrooms/domains/computingWorldPlazaMushroomSeedUnitFromTileIndex';
@@ -831,7 +832,13 @@ export function resolvingWorldPlazaMushroomHabitatClaimAtTileIndex(
     params.woodHabitatEnabled ??
     checkingWorldPlazaMushroomWoodHabitatEnabledByDefault();
 
-  if (checkingWaterAtTile(params.tileX, params.tileY)) {
+  if (
+    checkingWorldPlazaMushroomSpawnBlockedByWaterAtTileIndex({
+      tileX: params.tileX,
+      tileY: params.tileY,
+      checkingWaterAtTile,
+    })
+  ) {
     return null;
   }
 

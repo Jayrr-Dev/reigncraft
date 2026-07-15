@@ -13,6 +13,7 @@ export type DefiningWorldCollisionProviderId =
   | 'columnRockDiamond'
   | 'treeTrunkCircle'
   | 'firelandsPropCircle'
+  | 'frostsinkPropCircle'
   | 'chestPropCircle'
   | 'pebbleRockCircle'
   | 'waterTileSquare'

@@ -16,12 +16,14 @@ import type { WorldCloverSearchLootKind } from '../../../../shared/worldCloverSe
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 import type { WorldOreSpeciesId } from '../../../../shared/worldOreRarity';
 import type { WorldShrubBerryLootKind } from '../../../../shared/worldShrubBerryLoot';
+import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
 
 export type DefiningWorldPlazaInventorySpecimenStudyKind =
   | 'flower'
   | 'ore'
   | 'clover'
-  | 'berry';
+  | 'berry'
+  | 'mushroom';
 
 export type DefiningWorldPlazaInventorySpecimenStudyProgressContext = {
   readonly slotIndex: number;
@@ -30,6 +32,7 @@ export type DefiningWorldPlazaInventorySpecimenStudyProgressContext = {
   readonly oreSpeciesId?: WorldOreSpeciesId;
   readonly cloverKind?: WorldCloverSearchLootKind;
   readonly berryLootKind?: WorldShrubBerryLootKind;
+  readonly mushroomSpeciesId?: DefiningWorldPlazaMushroomSpeciesId;
   readonly damageBaselineMs: number | null;
 };
 

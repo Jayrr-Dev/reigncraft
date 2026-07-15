@@ -19,12 +19,12 @@ import { checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled } from '@/compo
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { checkingWorldPlazaGrassFloorTileIsBurntAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBurntGrassFloorTileFillColorAtTileIndex';
 import { resolvingWorldPlazaDayNightCyclePhase } from '@/components/world/domains/resolvingWorldPlazaDayNightCyclePhase';
-import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import {
   checkingWorldPlazaMushroomPastureBiomeKind,
   checkingWorldPlazaMushroomPastureHabitatSpeciesId,
   checkingWorldPlazaMushroomStumpHabitatSpeciesId,
 } from '@/components/world/mushrooms/domains/checkingWorldPlazaMushroomHabitatSpawn';
+import { checkingWorldPlazaMushroomSpawnBlockedByWaterAtTileIndex } from '@/components/world/mushrooms/domains/checkingWorldPlazaMushroomSpawnBlockedByWaterAtTileIndex';
 import { computingWorldPlazaMushroomSeedUnitFromTileIndex } from '@/components/world/mushrooms/domains/computingWorldPlazaMushroomSeedUnitFromTileIndex';
 import {
   DEFINING_WORLD_PLAZA_MUSHROOM_HABITAT_ANCHOR_SCAN_RADIUS_TILES,
@@ -204,7 +204,12 @@ function stampingWorldPlazaMushroomHabitatSeatClaim(
     return;
   }
 
-  if (resolvingWorldPlazaWaterAtTileIndex(seatTileX, seatTileY)) {
+  if (
+    checkingWorldPlazaMushroomSpawnBlockedByWaterAtTileIndex({
+      tileX: seatTileX,
+      tileY: seatTileY,
+    })
+  ) {
     return;
   }
 
@@ -377,7 +382,12 @@ export function listingWorldPlazaMushroomDecorationCandidatesInBounds(
         continue;
       }
 
-      if (resolvingWorldPlazaWaterAtTileIndex(anchorTileX, anchorTileY)) {
+      if (
+        checkingWorldPlazaMushroomSpawnBlockedByWaterAtTileIndex({
+          tileX: anchorTileX,
+          tileY: anchorTileY,
+        })
+      ) {
         continue;
       }
 

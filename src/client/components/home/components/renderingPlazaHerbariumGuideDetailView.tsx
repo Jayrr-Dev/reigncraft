@@ -7,10 +7,12 @@ import {
 import { RenderingPlazaHerbariumBerryPortrait } from '@/components/home/components/renderingPlazaHerbariumBerryPortrait';
 import { RenderingPlazaHerbariumCloverPortrait } from '@/components/home/components/renderingPlazaHerbariumCloverPortrait';
 import { RenderingPlazaHerbariumFlowerPortrait } from '@/components/home/components/renderingPlazaHerbariumFlowerPortrait';
+import { RenderingPlazaHerbariumMushroomPortrait } from '@/components/home/components/renderingPlazaHerbariumMushroomPortrait';
 import { RenderingPlazaHerbariumTreePortrait } from '@/components/home/components/renderingPlazaHerbariumTreePortrait';
 import { DEFINING_PLAZA_HERBARIUM_BERRY_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumBerryPortraitConstants';
 import { DEFINING_PLAZA_HERBARIUM_CLOVER_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumCloverPortraitConstants';
 import { DEFINING_PLAZA_HERBARIUM_FLOWER_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumFlowerPortraitConstants';
+import { DEFINING_PLAZA_HERBARIUM_MUSHROOM_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumMushroomPortraitConstants';
 import { DEFINING_PLAZA_HERBARIUM_TREE_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumTreePortraitConstants';
 import type { PlazaCodexStudyTrackId } from '@/components/home/domains/definingPlazaCodexStudyTrackRegistry';
 import {
@@ -46,6 +48,8 @@ function resolvingPlazaHerbariumCodexStudyTrackId(
       return 'herbarium-clover';
     case 'berry':
       return 'herbarium-berry';
+    case 'mushroom':
+      return 'herbarium-mushroom';
   }
 }
 
@@ -62,6 +66,10 @@ function labelingPlazaHerbariumPropertiesCellTitle(
 
   if (entry.kind === 'berry') {
     return entry.berryLootKind === 'tea_leaves' ? 'Gathered' : 'Eaten';
+  }
+
+  if (entry.kind === 'mushroom') {
+    return 'Eaten';
   }
 
   return 'Wood';
@@ -176,6 +184,13 @@ export function RenderingPlazaHerbariumGuideDetailView({
                 zoom={DEFINING_PLAZA_HERBARIUM_BERRY_PORTRAIT_DETAIL_ZOOM}
                 className="size-24 sm:size-28"
               />
+            ) : entry.kind === 'mushroom' ? (
+              <RenderingPlazaHerbariumMushroomPortrait
+                speciesId={entry.speciesId}
+                variant="revealed"
+                zoom={DEFINING_PLAZA_HERBARIUM_MUSHROOM_PORTRAIT_DETAIL_ZOOM}
+                className="size-24 sm:size-28"
+              />
             ) : (
               <RenderingPlazaHerbariumTreePortrait
                 treeVariant={entry.variant}
@@ -258,6 +273,11 @@ export function RenderingPlazaHerbariumGuideDetailView({
                 {entry.propertiesSummary ? (
                   <p className="text-[11px] font-medium text-ink">
                     {entry.propertiesSummary}
+                  </p>
+                ) : null}
+                {entry.kind === 'mushroom' && entry.preparationNotes ? (
+                  <p className="text-[11px] font-medium text-ink-soft">
+                    {entry.preparationNotes}
                   </p>
                 ) : null}
                 {entry.biomeChips.length > 0 ? (
@@ -346,6 +366,28 @@ export function RenderingPlazaHerbariumGuideDetailView({
                 entry.luckyEffectStatRows.length > 0 ? (
                   <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {entry.luckyEffectStatRows.map((row) => (
+                      <div
+                        key={`${row.label}:${row.value}`}
+                        className={cn(
+                          PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME,
+                          row.value.length > 42 ? 'sm:col-span-2' : null
+                        )}
+                      >
+                        <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                          {row.label}
+                        </dt>
+                        <dd className="mt-0.5 font-mono text-[11px] tabular-nums font-medium leading-snug text-ink">
+                          {row.value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : null}
+                {entry.kind === 'mushroom' &&
+                entry.eatEffectStatRows &&
+                entry.eatEffectStatRows.length > 0 ? (
+                  <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {entry.eatEffectStatRows.map((row) => (
                       <div
                         key={`${row.label}:${row.value}`}
                         className={cn(

@@ -18,4 +18,5 @@ export type DefiningWorldPlazaBiomeKind =
   | 'beach'
   | 'ocean'
   | 'rocky'
-  | 'firelands';
+  | 'firelands'
+  | 'frostsink';

@@ -194,4 +194,18 @@ export const DEFINING_WORLD_PLAZA_BIOME_WATER_PALETTES: Record<
   },
   rocky: {},
   firelands: {},
+  frostsink: {
+    [DEFINING_WORLD_PLAZA_WATER_KIND_LAKE]:
+      definingWorldPlazaBiomeLakeWaterPalette(
+        0x4a6d82,
+        0x425c70,
+        0x527488,
+        0x4a6478,
+        0.68
+      ),
+    [DEFINING_WORLD_PLAZA_WATER_KIND_RIVER]:
+      definingWorldPlazaBiomeStillWaterPalette(0x5a8aa4, 0x6a9cb4, 0.5),
+    [DEFINING_WORLD_PLAZA_WATER_KIND_STREAM]:
+      definingWorldPlazaBiomeStillWaterPalette(0x7ab4cc, 0x6a9cb4, 0.5),
+  },
 };

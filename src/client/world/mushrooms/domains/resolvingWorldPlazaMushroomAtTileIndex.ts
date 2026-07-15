@@ -7,8 +7,8 @@
 import { formattingWorldPlazaDayNightDayNumber } from '@/components/world/domains/formattingWorldPlazaDayNightDayNumber';
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { resolvingWorldPlazaDayNightCyclePhase } from '@/components/world/domains/resolvingWorldPlazaDayNightCyclePhase';
-import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { checkingWorldPlazaMushroomHabitatSpeciesId } from '@/components/world/mushrooms/domains/checkingWorldPlazaMushroomHabitatSpawn';
+import { checkingWorldPlazaMushroomSpawnBlockedByWaterAtTileIndex } from '@/components/world/mushrooms/domains/checkingWorldPlazaMushroomSpawnBlockedByWaterAtTileIndex';
 import { computingWorldPlazaMushroomSeedUnitFromTileIndex } from '@/components/world/mushrooms/domains/computingWorldPlazaMushroomSeedUnitFromTileIndex';
 import {
   DEFINING_WORLD_PLAZA_MUSHROOM_PLACEMENT_SEED_SALT,
@@ -48,6 +48,12 @@ export function resolvingWorldPlazaMushroomSparseAtTileIndex({
   readonly dayNumber: number;
   readonly cyclePhase: number;
 }): DefiningWorldPlazaMushroomCatalogEntry | null {
+  if (
+    checkingWorldPlazaMushroomSpawnBlockedByWaterAtTileIndex({ tileX, tileY })
+  ) {
+    return null;
+  }
+
   const biome = resolvingWorldPlazaBiomeAtTileIndex(tileX, tileY);
   const effectiveModulus = resolvingWorldPlazaMushroomEffectiveSpawnModulus(
     DEFINING_WORLD_PLAZA_MUSHROOM_TILE_MODULUS,
@@ -125,7 +131,9 @@ export function resolvingWorldPlazaMushroomAtTileIndex({
   cyclePhase,
   epochMs = Date.now(),
 }: ResolvingWorldPlazaMushroomAtTileIndexParams): DefiningWorldPlazaMushroomCatalogEntry | null {
-  if (resolvingWorldPlazaWaterAtTileIndex(tileX, tileY)) {
+  if (
+    checkingWorldPlazaMushroomSpawnBlockedByWaterAtTileIndex({ tileX, tileY })
+  ) {
     return null;
   }
 

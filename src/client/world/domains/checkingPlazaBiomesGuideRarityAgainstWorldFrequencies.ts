@@ -1,6 +1,6 @@
 import {
   DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES,
-  DEFINING_PLAZA_BIOMES_LEGENDARY_KIND,
+  DEFINING_PLAZA_BIOMES_LEGENDARY_KINDS,
   DEFINING_PLAZA_BIOMES_MYTHIC_KIND,
   type DefiningPlazaBiomesGuideEntry,
   type PlazaBiomesRarityId,
@@ -18,6 +18,10 @@ import {
   DEFINING_WORLD_PLAZA_FLOWER_FOREST_COVERAGE_PERCENT_MAX,
   DEFINING_WORLD_PLAZA_FLOWER_FOREST_COVERAGE_PERCENT_MIN,
 } from '@/components/world/domains/definingWorldPlazaFlowerForestBiomeConstants';
+import {
+  DEFINING_WORLD_PLAZA_FROSTSINK_COVERAGE_PERCENT_MAX,
+  DEFINING_WORLD_PLAZA_FROSTSINK_COVERAGE_PERCENT_MIN,
+} from '@/components/world/domains/definingWorldPlazaFrostsinkBiomeConstants';
 
 const PLAZA_BIOMES_RARITY_ORDER: readonly PlazaBiomesRarityId[] = [
   'common',
@@ -26,6 +30,10 @@ const PLAZA_BIOMES_RARITY_ORDER: readonly PlazaBiomesRarityId[] = [
   'mythic',
   'legendary',
 ] as const;
+
+const PLAZA_BIOMES_LEGENDARY_KIND_SET = new Set<DefiningWorldPlazaBiomeKind>(
+  DEFINING_PLAZA_BIOMES_LEGENDARY_KINDS
+);
 
 function averagingPlazaBiomesGuideRarityTierPercent(
   guideEntries: readonly DefiningPlazaBiomesGuideEntry[],
@@ -83,22 +91,28 @@ export function listingPlazaBiomesGuideRarityWorldFrequencyMismatches(
     (entry) => entry.rarity === 'legendary'
   );
 
-  if (legendaryEntries.length !== 1) {
+  if (legendaryEntries.length !== DEFINING_PLAZA_BIOMES_LEGENDARY_KINDS.length) {
     mismatches.push(
-      `Expected exactly one legendary codex biome, found ${legendaryEntries.length}.`
+      `Expected exactly ${DEFINING_PLAZA_BIOMES_LEGENDARY_KINDS.length} legendary codex biomes, found ${legendaryEntries.length}.`
     );
   }
 
-  if (legendaryEntries[0]?.kind !== DEFINING_PLAZA_BIOMES_LEGENDARY_KIND) {
-    mismatches.push(
-      `Legendary codex biome must be ${DEFINING_PLAZA_BIOMES_LEGENDARY_KIND}.`
-    );
+  const legendaryKinds = new Set(legendaryEntries.map((entry) => entry.kind));
+  for (const expectedKind of DEFINING_PLAZA_BIOMES_LEGENDARY_KINDS) {
+    if (!legendaryKinds.has(expectedKind)) {
+      mismatches.push(
+        `Legendary codex biomes must include ${expectedKind}.`
+      );
+    }
   }
 
   const rarestRow = percentRows.at(-1);
-  if (rarestRow?.kind !== DEFINING_PLAZA_BIOMES_LEGENDARY_KIND) {
+  if (
+    rarestRow === undefined ||
+    !PLAZA_BIOMES_LEGENDARY_KIND_SET.has(rarestRow.kind)
+  ) {
     mismatches.push(
-      `Expected ${DEFINING_PLAZA_BIOMES_LEGENDARY_KIND} to be the rarest sampled biome, but got ${rarestRow?.kind ?? 'none'}.`
+      `Expected a legendary biome (firelands or frostsink) to be the rarest sampled biome, but got ${rarestRow?.kind ?? 'none'}.`
     );
   }
 
@@ -118,9 +132,7 @@ export function listingPlazaBiomesGuideRarityWorldFrequencyMismatches(
     );
   }
 
-  const firelandsPercent = percentsByKind.get(
-    DEFINING_PLAZA_BIOMES_LEGENDARY_KIND
-  );
+  const firelandsPercent = percentsByKind.get('firelands');
   if (firelandsPercent === undefined) {
     mismatches.push('Firelands was missing from the frequency sample.');
   } else if (
@@ -132,14 +144,36 @@ export function listingPlazaBiomesGuideRarityWorldFrequencyMismatches(
     );
   }
 
-  if (
-    flowerForestPercent !== undefined &&
-    firelandsPercent !== undefined &&
-    flowerForestPercent <= firelandsPercent
+  const frostsinkPercent = percentsByKind.get('frostsink');
+  if (frostsinkPercent === undefined) {
+    mismatches.push('Frostsink was missing from the frequency sample.');
+  } else if (
+    frostsinkPercent < DEFINING_WORLD_PLAZA_FROSTSINK_COVERAGE_PERCENT_MIN ||
+    frostsinkPercent > DEFINING_WORLD_PLAZA_FROSTSINK_COVERAGE_PERCENT_MAX
   ) {
     mismatches.push(
-      `Expected mythic flower forest coverage (${flowerForestPercent.toFixed(2)}%) to exceed legendary Firelands (${firelandsPercent.toFixed(2)}%).`
+      `Frostsink coverage ${frostsinkPercent.toFixed(2)}% is outside ${DEFINING_WORLD_PLAZA_FROSTSINK_COVERAGE_PERCENT_MIN}% to ${DEFINING_WORLD_PLAZA_FROSTSINK_COVERAGE_PERCENT_MAX}%.`
     );
+  }
+
+  if (flowerForestPercent !== undefined) {
+    if (
+      firelandsPercent !== undefined &&
+      flowerForestPercent <= firelandsPercent
+    ) {
+      mismatches.push(
+        `Expected mythic flower forest coverage (${flowerForestPercent.toFixed(2)}%) to exceed legendary Firelands (${firelandsPercent.toFixed(2)}%).`
+      );
+    }
+
+    if (
+      frostsinkPercent !== undefined &&
+      flowerForestPercent <= frostsinkPercent
+    ) {
+      mismatches.push(
+        `Expected mythic flower forest coverage (${flowerForestPercent.toFixed(2)}%) to exceed legendary Frostsink (${frostsinkPercent.toFixed(2)}%).`
+      );
+    }
   }
 
   for (const entry of guideEntries) {

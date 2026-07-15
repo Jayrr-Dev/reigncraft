@@ -7,6 +7,7 @@ import type { DefiningWorldPlazaAvatarMotionState } from '@/components/world/dom
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { pushingWorldPlazaDangerSenseStatusDamagePulse } from '@/components/world/domains/managingWorldPlazaDangerSenseStatusDamagePulseStore';
+import { subscribingWorldPlazaPathologyDiscovery } from '@/components/world/domains/managingWorldPlazaPathologyDiscoveryStore';
 import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { notifyingWorldPlazaGirlSampleVoiceSfxEvent } from '@/components/world/domains/notifyingWorldPlazaGirlSampleVoiceSfxEvent';
 import { resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry } from '@/components/world/domains/resolvingWorldPlazaGirlSampleRollDodgeActiveBuffHudEntry';
@@ -103,7 +104,6 @@ import {
   subscribingWorldPlazaTemperatureDisplayUnit,
   togglingWorldPlazaTemperatureDisplayUnit,
 } from '@/components/world/health/domains/managingWorldPlazaTemperatureDisplayUnitStore';
-import { subscribingWorldPlazaPathologyDiscovery } from '@/components/world/domains/managingWorldPlazaPathologyDiscoveryStore';
 import { mappingWorldPlazaDamageOutcomeTierToFloatTextKind } from '@/components/world/health/domains/mappingWorldPlazaDamageOutcomeTierToFloatTextKind';
 import { mappingWorldPlazaEnvironmentalHazardKindToDamageKind } from '@/components/world/health/domains/mappingWorldPlazaEnvironmentalHazardKindToDamageKind';
 import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
@@ -245,8 +245,13 @@ export interface UsingWorldPlazaPlayerHealthResult {
   applyStarvationDamageRef: React.RefObject<(amount: number) => void>;
   /** Dev heal-in-place without teleport. */
   reviveRef: React.RefObject<() => void>;
-  /** Full respawn at the plaza spawn point (death screen revive). */
-  respawnRef: React.RefObject<() => void>;
+  /**
+   * Full respawn (death screen revive).
+   * Optional destination overrides the session default spawn point.
+   */
+  respawnRef: React.RefObject<
+    (destinationWorldPoint?: DefiningWorldPlazaWorldPoint) => void
+  >;
   toggleInvincibleRef: React.RefObject<() => void>;
   doubleMaxHealthRef: React.RefObject<() => void>;
   halveMaxHealthRef: React.RefObject<() => void>;
@@ -794,7 +799,8 @@ export function usingWorldPlazaPlayerHealth({
               Math.abs(
                 previous.localTemperatureCelsius -
                   nextSnapshot.localTemperatureCelsius
-              ) < DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_TEMPERATURE_EPSILON)) &&
+              ) <
+                DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_TEMPERATURE_EPSILON)) &&
           previous.temperatureDisplayUnit ===
             nextSnapshot.temperatureDisplayUnit &&
           previous.temperatureResistance ===
@@ -918,75 +924,80 @@ export function usingWorldPlazaPlayerHealth({
     [enqueueFloatText, pushingHudSnapshot]
   );
 
-  const respawningPlayer = useCallback((): void => {
-    if (isRespawningRef.current) {
-      return;
-    }
+  const respawningPlayer = useCallback(
+    (
+      destinationWorldPoint: DefiningWorldPlazaWorldPoint = respawnWorldPoint
+    ): void => {
+      if (isRespawningRef.current) {
+        return;
+      }
 
-    isRespawningRef.current = true;
-    const nowMs = performance.now();
+      isRespawningRef.current = true;
+      const nowMs = performance.now();
 
-    applyingWorldPlazaPlayerTeleportToWorldPoint({
-      destinationWorldPoint: respawnWorldPoint,
-      placedBlocks: placedBlocksRef.current?.blocks ?? [],
-      playerPositionRef,
-      walkTargetRef,
-      isWalkingRef,
-      isJumpingRef,
-      localAvatarMotionStateRef,
-      syncingMovePositionRef: syncingMovePositionRef ?? { current: null },
-      playerHeightWorldLayers: characterEngineDefinition
-        ? computingWorldPlazaCharacterEngineDerivedStats(
-            characterEngineDefinition
-          ).heightWorldLayers
-        : undefined,
-    });
+      applyingWorldPlazaPlayerTeleportToWorldPoint({
+        destinationWorldPoint,
+        placedBlocks: placedBlocksRef.current?.blocks ?? [],
+        playerPositionRef,
+        walkTargetRef,
+        isWalkingRef,
+        isJumpingRef,
+        localAvatarMotionStateRef,
+        syncingMovePositionRef: syncingMovePositionRef ?? { current: null },
+        playerHeightWorldLayers: characterEngineDefinition
+          ? computingWorldPlazaCharacterEngineDerivedStats(
+              characterEngineDefinition
+            ).heightWorldLayers
+          : undefined,
+      });
 
-    let revivedState = revivingWorldPlazaEntityHealthToFull(
-      healthStateRef.current,
-      nowMs
-    );
-
-    if (characterEngineDefinition) {
-      revivedState = reseedingWorldPlazaCharacterEngineHealthBaseline(
-        revivedState,
-        characterEngineDefinition,
+      let revivedState = revivingWorldPlazaEntityHealthToFull(
+        healthStateRef.current,
         nowMs
       );
-    }
 
-    attackerDamageRollModifiersRef.current = [];
-    healthStateRef.current = settingWorldPlazaEntityHealthInvincible(
-      revivedState,
-      DEFINING_WORLD_PLAZA_ENTITY_HEALTH_RESPAWN_INVINCIBILITY_MS,
-      nowMs
-    );
-    postRespawnInvincibilityUntilMsRef.current =
-      nowMs + DEFINING_WORLD_PLAZA_ENTITY_HEALTH_RESPAWN_INVINCIBILITY_MS;
-    enqueueFloatText(
-      {
-        kind: 'heal',
-        amount: healthStateRef.current.currentHealth,
-        damageKind: 'healing',
-      },
-      nowMs
-    );
-    syncingMovePositionRef?.current?.();
-    pushingHudSnapshot(nowMs);
-    isRespawningRef.current = false;
-  }, [
-    characterEngineDefinition,
-    isJumpingRef,
-    isWalkingRef,
-    localAvatarMotionStateRef,
-    placedBlocksRef,
-    playerPositionRef,
-    pushingHudSnapshot,
-    respawnWorldPoint,
-    syncingMovePositionRef,
-    walkTargetRef,
-    enqueueFloatText,
-  ]);
+      if (characterEngineDefinition) {
+        revivedState = reseedingWorldPlazaCharacterEngineHealthBaseline(
+          revivedState,
+          characterEngineDefinition,
+          nowMs
+        );
+      }
+
+      attackerDamageRollModifiersRef.current = [];
+      healthStateRef.current = settingWorldPlazaEntityHealthInvincible(
+        revivedState,
+        DEFINING_WORLD_PLAZA_ENTITY_HEALTH_RESPAWN_INVINCIBILITY_MS,
+        nowMs
+      );
+      postRespawnInvincibilityUntilMsRef.current =
+        nowMs + DEFINING_WORLD_PLAZA_ENTITY_HEALTH_RESPAWN_INVINCIBILITY_MS;
+      enqueueFloatText(
+        {
+          kind: 'heal',
+          amount: healthStateRef.current.currentHealth,
+          damageKind: 'healing',
+        },
+        nowMs
+      );
+      syncingMovePositionRef?.current?.();
+      pushingHudSnapshot(nowMs);
+      isRespawningRef.current = false;
+    },
+    [
+      characterEngineDefinition,
+      isJumpingRef,
+      isWalkingRef,
+      localAvatarMotionStateRef,
+      placedBlocksRef,
+      playerPositionRef,
+      pushingHudSnapshot,
+      respawnWorldPoint,
+      syncingMovePositionRef,
+      walkTargetRef,
+      enqueueFloatText,
+    ]
+  );
 
   const takeDamageRef = useRef<
     (
@@ -1012,7 +1023,9 @@ export function usingWorldPlazaPlayerHealth({
     () => undefined
   );
   const reviveRef = useRef<() => void>(() => undefined);
-  const respawnRef = useRef<() => void>(() => undefined);
+  const respawnRef = useRef<
+    (destinationWorldPoint?: DefiningWorldPlazaWorldPoint) => void
+  >(() => undefined);
   const toggleInvincibleRef = useRef<() => void>(() => undefined);
   const doubleMaxHealthRef = useRef<() => void>(() => undefined);
   const halveMaxHealthRef = useRef<() => void>(() => undefined);
@@ -1150,15 +1163,21 @@ export function usingWorldPlazaPlayerHealth({
     };
 
     applyFallDamageRef.current = (layerDelta) => {
-      const damage = computingWorldPlazaEntityHealthFallDamage(layerDelta);
+      const fallMaxHealthPercentEv =
+        computingWorldPlazaEntityHealthFallDamage(layerDelta);
 
-      if (damage <= 0) {
+      if (fallMaxHealthPercentEv <= 0) {
         return;
       }
 
       mutatingHealthState(
         (state, nowMs) =>
-          applyingDamageWithFloatFeedback(state, damage, 'fall', nowMs),
+          applyingDamageWithFloatFeedback(
+            state,
+            fallMaxHealthPercentEv,
+            'fall',
+            nowMs
+          ),
         { flashDamage: true }
       );
     };
@@ -1227,8 +1246,8 @@ export function usingWorldPlazaPlayerHealth({
       );
     };
 
-    respawnRef.current = () => {
-      respawningPlayer();
+    respawnRef.current = (destinationWorldPoint) => {
+      respawningPlayer(destinationWorldPoint);
     };
 
     toggleInvincibleRef.current = () => {

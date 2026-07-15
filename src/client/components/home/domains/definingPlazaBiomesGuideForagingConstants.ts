@@ -246,4 +246,8 @@ export const DEFINING_PLAZA_BIOMES_GUIDE_FORAGING_BY_KIND: Record<
     resources: ['ash', 'embers'],
     vegetation: ['scrub'],
   },
+  frostsink: {
+    resources: ['wood', 'freshwater', 'flint'],
+    vegetation: ['spruce', 'pine', 'birch', 'tall_grass'],
+  },
 };

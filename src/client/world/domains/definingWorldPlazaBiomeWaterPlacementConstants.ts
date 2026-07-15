@@ -68,4 +68,9 @@ export const DEFINING_WORLD_PLAZA_BIOME_ALLOWED_WATER_KINDS: Record<
   ocean: [],
   rocky: [],
   firelands: [],
+  frostsink: [
+    DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
+    DEFINING_WORLD_PLAZA_WATER_KIND_RIVER,
+    DEFINING_WORLD_PLAZA_WATER_KIND_STREAM,
+  ],
 };

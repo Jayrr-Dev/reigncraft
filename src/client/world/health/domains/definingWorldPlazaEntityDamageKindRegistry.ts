@@ -79,7 +79,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_KIND_REGISTRY: Record<
     floatIcon: 'mdi:arrow-down-bold',
     floatClassNameOverride: null,
     usesDamageRoll: true,
-    expectedDamageInput: 'flat_ev',
+    expectedDamageInput: 'max_health_percent_ev',
     temperatureExposure: null,
     deathScreenTitle: 'YOU FELL',
   },

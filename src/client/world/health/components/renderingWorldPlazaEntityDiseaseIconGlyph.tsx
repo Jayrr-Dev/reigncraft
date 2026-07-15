@@ -76,7 +76,13 @@ export function RenderingWorldPlazaEntityDiseaseIconGlyph({
     <Icon
       icon={fallbackIcon}
       className={cn('shrink-0', className)}
-      style={style}
+      style={{
+        ...style,
+        filter:
+          variant === 'silhouette'
+            ? DEFINING_WORLD_PLAZA_ENTITY_DISEASE_ICON_SILHOUETTE_FILTER
+            : style?.filter,
+      }}
       aria-hidden
     />
   );

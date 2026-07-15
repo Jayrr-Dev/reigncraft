@@ -18,6 +18,7 @@ describe('definingWorldPlazaOreBiomeRarityConstants', () => {
     });
 
     expect(pool.poolId).toBe('firelands');
+    expect(pool.veinChance).toBe(1);
     expect(pool.weights).toBe(DEFINING_WORLD_PLAZA_ORE_WEIGHTS_FIRELANDS);
     expect(pool.weights.map((entry) => entry.speciesId).sort()).toEqual(
       ['gold', 'scarlet', 'silver', 'sulfur'].sort()

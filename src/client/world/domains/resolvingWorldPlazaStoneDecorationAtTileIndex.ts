@@ -235,12 +235,15 @@ function computingWorldPlazaStoneDecorationAtTileIndex(
     return null;
   }
 
-  if (checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex(tileX, tileY)) {
-    return null;
-  }
+  const isFirelandsBiome = checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex(
+    tileX,
+    tileY
+  );
 
   // Slope rims stay bare so pebbles and boulders do not hang over cliff faces.
-  if (checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex(tileX, tileY)) {
+  if (
+    checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex(tileX, tileY)
+  ) {
     return null;
   }
 
@@ -275,6 +278,11 @@ function computingWorldPlazaStoneDecorationAtTileIndex(
         columnRockAnchorTileY: columnRockMetadata.anchorTileY,
       };
     }
+  }
+
+  // Firelands keeps volcanic ore columns only (no pebbles / grey floor stones).
+  if (isFirelandsBiome) {
+    return null;
   }
 
   if (checkingWorldPlazaTreeBlocksGridTile(tileX, tileY)) {

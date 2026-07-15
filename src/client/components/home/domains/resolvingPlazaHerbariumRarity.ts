@@ -14,6 +14,8 @@ import { DEFINING_WORLD_PLAZA_FLOWER_SPECIES_TO_ITEM_TYPE_ID } from '@/component
 import type { DefiningWorldPlazaInventoryItemRarity } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_RARITY_LABELS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
+import { resolvingWorldPlazaMushroomCatalogEntryBySpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
+import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
 import type { WorldCloverSearchLootKind } from '../../../../shared/worldCloverSearchLoot';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 import type { WorldShrubBerryLootKind } from '../../../../shared/worldShrubBerryLoot';
@@ -22,7 +24,8 @@ export type ResolvingPlazaHerbariumRarityEntry =
   | { kind: 'flower'; speciesId: WorldFlowerSpeciesId }
   | { kind: 'tree'; variant: DefiningWorldPlazaTreeVariantKind }
   | { kind: 'clover'; cloverKind: WorldCloverSearchLootKind }
-  | { kind: 'berry'; berryLootKind: WorldShrubBerryLootKind };
+  | { kind: 'berry'; berryLootKind: WorldShrubBerryLootKind }
+  | { kind: 'mushroom'; speciesId: DefiningWorldPlazaMushroomSpeciesId };
 
 /**
  * Resolves the rarity id for one herbarium guide entry.
@@ -54,6 +57,11 @@ export function resolvingPlazaHerbariumEntryRarity(
     const definition = resolvingWorldPlazaInventoryItemTypeDefinition(typeId);
 
     return definition?.rarity ?? 'basic';
+  }
+
+  if (entry.kind === 'mushroom') {
+    return resolvingWorldPlazaMushroomCatalogEntryBySpeciesId(entry.speciesId)
+      .rarity;
   }
 
   return DEFINING_PLAZA_HERBARIUM_TREE_RARITY_BY_VARIANT[entry.variant];

@@ -76,6 +76,12 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_COOK_DURATION_MS = 2_200;
 /** Quantity granted per successful pick. */
 export const DEFINING_WORLD_PLAZA_MUSHROOM_PICK_QUANTITY = 1;
 
+/**
+ * Chebyshev buffer around water. Mushrooms never spawn on water or within this
+ * many tiles of a water tile (1 = no shoreline seats).
+ */
+export const DEFINING_WORLD_PLAZA_MUSHROOM_WATER_BUFFER_TILES = 1;
+
 /** Dawn band around sunrise (cycle phase 0..1). */
 export const DEFINING_WORLD_PLAZA_MUSHROOM_PHASE_DAWN_MIN = 0.14;
 export const DEFINING_WORLD_PLAZA_MUSHROOM_PHASE_DAWN_MAX = 0.3;

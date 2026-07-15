@@ -161,7 +161,7 @@ export const DEFINING_PLAZA_MECHANICS_DAMAGE_SECTIONS: readonly PlazaMechanicsSe
       id: 'fall',
       title: 'Fall',
       description:
-        'Damage from landing after a long drop. Fall damage rolls through the EV engine. The farther you fall, the higher the EV.',
+        'Damage from landing after a long drop. Fall EV is a percent of your max health and rolls through the EV engine. The farther you fall, the higher that percent.',
       icon: damageFall.floatIcon ?? 'mdi:arrow-down-bold',
     },
     {

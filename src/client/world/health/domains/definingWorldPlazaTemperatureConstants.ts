@@ -194,9 +194,10 @@ export const DEFINING_WORLD_PLAZA_COMBAT_TEMPERATURE_OFFSET_DECAY_RATE_PER_SECON
 
 /**
  * Soft cap on stacked combat temperature offset magnitude (°C).
- * Extra impulse beyond the cap is ignored so spam cannot instantly lava-spike.
+ * Matches the strongest single impulse (sunhead heat hit) so one proc can land
+ * at full strength; further stack beyond the cap is ignored.
  */
-export const DEFINING_WORLD_PLAZA_COMBAT_TEMPERATURE_OFFSET_MAX_ABS_CELSIUS = 80;
+export const DEFINING_WORLD_PLAZA_COMBAT_TEMPERATURE_OFFSET_MAX_ABS_CELSIUS = 300;
 
 /**
  * Tile radius used when averaging raw local temperature from neighboring tiles.

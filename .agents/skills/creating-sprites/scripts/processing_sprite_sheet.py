@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Process a generated sprite sheet into a transparent cell-packed WebP.
 
-Generate source icons on solid #7A7A7A (skill default). This script keys that
-color out before packing equal cells.
+Generate source icons on solid key BG (skill default #7A7A7A; use #0088FF for
+greyish/metal items). This script keys that color out before packing equal cells.
 
 Usage (from repo root):
   python .agents/skills/creating-sprites/scripts/processing_sprite_sheet.py \\
@@ -30,9 +30,12 @@ from pathlib import Path
 
 from PIL import Image
 
-# Mandatory generate BG from creating-sprites skill (easy chroma key).
+# Mandatory generate BG from creating-sprites skill.
+# Colorful / non-grey: #7A7A7A. Greyish / metal: #0088FF (--key-bg).
 DEFINING_SPRITE_KEY_BACKGROUND_RGB = (122, 122, 122)  # #7A7A7A
 DEFINING_SPRITE_KEY_BACKGROUND_TOLERANCE = 18
+DEFINING_SPRITE_GREYISH_KEY_BACKGROUND_RGB = (0, 136, 255)  # #0088FF
+DEFINING_SPRITE_GREYISH_KEY_BACKGROUND_HEX = "#0088FF"
 
 
 def removing_key_background(
@@ -266,7 +269,7 @@ def parsing_args() -> argparse.Namespace:
     parser.add_argument(
         "--key-bg",
         default="#7A7A7A",
-        help="Solid generate BG to key out (default #7A7A7A).",
+        help="Solid generate BG to key out (default #7A7A7A; use #0088FF for greyish/metal).",
     )
     parser.add_argument(
         "--key-tolerance",

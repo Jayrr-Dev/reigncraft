@@ -77,6 +77,7 @@ export const DEFINING_WORLD_PLAZA_BIOME_DEV_TELEPORT_OPTIONS: readonly DefiningW
       'ocean',
       'rocky',
       'firelands',
+      'frostsink',
     ] as const satisfies readonly DefiningWorldPlazaBiomeKind[]
   ).map((kind) => ({
     kind,

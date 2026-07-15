@@ -20,6 +20,11 @@ import {
   type DefiningPlazaHerbariumTreeEntry,
 } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
 import {
+  DEFINING_PLAZA_HERBARIUM_MUSHROOM_GUIDE_ENTRIES,
+  LABELING_PLAZA_HERBARIUM_UNDISCOVERED_MUSHROOM_HINT,
+  type DefiningPlazaHerbariumMushroomEntry,
+} from '@/components/home/domains/definingPlazaHerbariumMushroomGuideConstants';
+import {
   checkingPlazaCodexStudyTierUnlocked,
   resolvingPlazaCodexStudyTierId,
 } from '@/components/home/domains/resolvingPlazaCodexStudyTier';
@@ -32,6 +37,10 @@ import {
   type PlazaHerbariumFlowerEatEffectStatRow,
 } from '@/components/home/domains/resolvingPlazaHerbariumFlowerEatEffectStatRows';
 import {
+  resolvingPlazaHerbariumMushroomEatEffectStatRows,
+  type PlazaHerbariumMushroomEatEffectStatRow,
+} from '@/components/home/domains/resolvingPlazaHerbariumMushroomEatEffectStatRows';
+import {
   resolvingPlazaHerbariumEntryRarity,
   resolvingPlazaHerbariumEntryRarityLabel,
 } from '@/components/home/domains/resolvingPlazaHerbariumRarity';
@@ -42,6 +51,8 @@ import {
   type DefiningWorldPlazaTreeVariantKind,
 } from '@/components/world/domains/definingWorldPlazaTreeConstants';
 import type { DefiningWorldPlazaInventoryItemRarity } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
+import { resolvingWorldPlazaMushroomCatalogEntryBySpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
+import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
 import type { WorldCloverSearchLootKind } from '../../../../shared/worldCloverSearchLoot';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 import type { WorldShrubBerryLootKind } from '../../../../shared/worldShrubBerryLoot';
@@ -106,16 +117,26 @@ export type PlazaHerbariumGuideBerryDisplayEntry =
     eatEffectStatRows: null;
   };
 
+export type PlazaHerbariumGuideMushroomDisplayEntry =
+  PlazaHerbariumGuideDisplayEntryBase & {
+    kind: 'mushroom';
+    speciesId: DefiningWorldPlazaMushroomSpeciesId;
+    preparationNotes: string | null;
+    eatEffectStatRows: readonly PlazaHerbariumMushroomEatEffectStatRow[] | null;
+  };
+
 export type PlazaHerbariumGuideDisplayEntry =
   | PlazaHerbariumGuideFlowerDisplayEntry
   | PlazaHerbariumGuideTreeDisplayEntry
   | PlazaHerbariumGuideCloverDisplayEntry
-  | PlazaHerbariumGuideBerryDisplayEntry;
+  | PlazaHerbariumGuideBerryDisplayEntry
+  | PlazaHerbariumGuideMushroomDisplayEntry;
 
 const HERBARIUM_FLOWER_TRACK: PlazaCodexStudyTrackId = 'herbarium-flower';
 const HERBARIUM_TREE_TRACK: PlazaCodexStudyTrackId = 'herbarium-tree';
 const HERBARIUM_CLOVER_TRACK: PlazaCodexStudyTrackId = 'herbarium-clover';
 const HERBARIUM_BERRY_TRACK: PlazaCodexStudyTrackId = 'herbarium-berry';
+const HERBARIUM_MUSHROOM_TRACK: PlazaCodexStudyTrackId = 'herbarium-mushroom';
 
 /** Biome kinds that ever draw a pickable flower decoration. */
 function listingPlazaHerbariumFlowerBearingBiomeKinds(): readonly DefiningWorldPlazaBiomeKind[] {
@@ -139,6 +160,14 @@ function listingPlazaHerbariumTreeBiomeKinds(
   }
 
   return biomeKinds;
+}
+
+/** Biome kinds where one mushroom species can fruit. */
+function listingPlazaHerbariumMushroomBiomeKinds(
+  speciesId: DefiningWorldPlazaMushroomSpeciesId
+): readonly DefiningWorldPlazaBiomeKind[] {
+  return resolvingWorldPlazaMushroomCatalogEntryBySpeciesId(speciesId)
+    .biomeKinds;
 }
 
 function buildingPlazaHerbariumBiomeChips(
@@ -233,6 +262,10 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
   sightedBerryLootKinds: ReadonlySet<WorldShrubBerryLootKind> = new Set(),
   berryStudyCountsByLootKind: Readonly<
     Partial<Record<WorldShrubBerryLootKind, number>>
+  > = {},
+  sightedMushroomSpeciesIds: ReadonlySet<DefiningWorldPlazaMushroomSpeciesId> = new Set(),
+  mushroomStudyCountsBySpeciesId: Readonly<
+    Partial<Record<DefiningWorldPlazaMushroomSpeciesId, number>>
   > = {}
 ): PlazaHerbariumGuideDisplayEntry[] {
   const flowerBiomeKinds = listingPlazaHerbariumFlowerBearingBiomeKinds();
@@ -428,8 +461,7 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
   const berryEntries: PlazaHerbariumGuideBerryDisplayEntry[] =
     DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES.map(
       (entry: DefiningPlazaHerbariumBerryEntry) => {
-        const studyCount =
-          berryStudyCountsByLootKind[entry.berryLootKind] ?? 0;
+        const studyCount = berryStudyCountsByLootKind[entry.berryLootKind] ?? 0;
         const isSighted =
           studyCount > 0 || sightedBerryLootKinds.has(entry.berryLootKind);
         const discoveryState = resolvingPlazaHerbariumDiscoveryState(
@@ -442,7 +474,10 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
           isHabitatsUnlocked,
           isFullyStudied,
           studyTierId,
-        } = resolvingPlazaHerbariumStudyGates(HERBARIUM_BERRY_TRACK, studyCount);
+        } = resolvingPlazaHerbariumStudyGates(
+          HERBARIUM_BERRY_TRACK,
+          studyCount
+        );
         const rarity = resolvingPlazaHerbariumEntryRarity({
           kind: 'berry',
           berryLootKind: entry.berryLootKind,
@@ -483,7 +518,85 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
       }
     );
 
-  return [...flowerEntries, ...cloverEntries, ...berryEntries, ...treeEntries];
+  const mushroomEntries: PlazaHerbariumGuideMushroomDisplayEntry[] =
+    DEFINING_PLAZA_HERBARIUM_MUSHROOM_GUIDE_ENTRIES.map(
+      (entry: DefiningPlazaHerbariumMushroomEntry) => {
+        const studyCount = mushroomStudyCountsBySpeciesId[entry.speciesId] ?? 0;
+        const isSighted =
+          studyCount > 0 || sightedMushroomSpeciesIds.has(entry.speciesId);
+        const discoveryState = resolvingPlazaHerbariumDiscoveryState(
+          sightedMushroomSpeciesIds.has(entry.speciesId),
+          studyCount
+        );
+        const {
+          isStudied,
+          isPropertiesUnlocked,
+          isHabitatsUnlocked,
+          isExpertiseUnlocked,
+          isFullyStudied,
+          studyTierId,
+        } = resolvingPlazaHerbariumStudyGates(
+          HERBARIUM_MUSHROOM_TRACK,
+          studyCount
+        );
+        const rarity = resolvingPlazaHerbariumEntryRarity({
+          kind: 'mushroom',
+          speciesId: entry.speciesId,
+        });
+        const biomeKinds = listingPlazaHerbariumMushroomBiomeKinds(
+          entry.speciesId
+        );
+
+        return {
+          kind: 'mushroom',
+          speciesId: entry.speciesId,
+          icon: entry.icon,
+          discoveryState,
+          isSighted,
+          isStudied,
+          isFullyStudied,
+          studyCount,
+          studyTierId,
+          rarity,
+          rarityLabel: resolvingPlazaHerbariumEntryRarityLabel(rarity),
+          eatEffectStatRows: isExpertiseUnlocked
+            ? resolvingPlazaHerbariumMushroomEatEffectStatRows(entry.speciesId)
+            : null,
+          displayName: isSighted
+            ? checkingPlazaCodexStudyTierUnlocked(
+                HERBARIUM_MUSHROOM_TRACK,
+                'proficiency',
+                studyCount
+              )
+              ? entry.displayName
+              : entry.fieldName
+            : LABELING_PLAZA_HERBARIUM_UNDISCOVERED_NAME,
+          summary: isSighted
+            ? entry.summary
+            : LABELING_PLAZA_HERBARIUM_UNDISCOVERED_MUSHROOM_HINT,
+          studiedSummary: entry.studiedSummary,
+          propertiesSummary: isPropertiesUnlocked
+            ? entry.propertiesSummary
+            : null,
+          preparationNotes: isPropertiesUnlocked
+            ? entry.preparationNotes
+            : null,
+          apostleFlavor: isFullyStudied ? (entry.apostleFlavor ?? null) : null,
+          biomeKinds,
+          biomeChips: isHabitatsUnlocked
+            ? buildingPlazaHerbariumBiomeChips(biomeKinds, exploredBiomeKinds)
+            : [],
+        };
+      }
+    );
+
+  return [
+    ...flowerEntries,
+    ...cloverEntries,
+    ...berryEntries,
+    ...mushroomEntries,
+    ...treeEntries,
+  ];
 }
 
 /**

@@ -23,6 +23,16 @@ describe('resolvingWorldPlazaEntityHealthDamageRollBaseExpectedDamage', () => {
     ).toBe(30);
   });
 
+  it('converts fall percent into max-health EV', () => {
+    expect(
+      resolvingWorldPlazaEntityHealthDamageRollBaseExpectedDamage({
+        kind: 'fall',
+        rawAmount: 0.2,
+        effectiveMaxHealth: 1000,
+      })
+    ).toBe(200);
+  });
+
   it('clamps negative soulbreak percent to zero EV', () => {
     expect(
       resolvingWorldPlazaEntityHealthDamageRollBaseExpectedDamage({

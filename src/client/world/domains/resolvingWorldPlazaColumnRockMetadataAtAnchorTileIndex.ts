@@ -2,12 +2,14 @@ import { checkingWorldPlazaColumnRockFootprintOverlapsCliffEdgeAtAnchorTileIndex
 import { checkingWorldPlazaColumnRockFootprintOverlapsTreeAtAnchorTileIndex } from '@/components/world/domains/checkingWorldPlazaColumnRockFootprintOverlapsTreeAtAnchorTileIndex';
 import { checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex } from '@/components/world/domains/checkingWorldPlazaColumnRockSpawnAnchorAtTileIndex';
 import { checkingWorldPlazaLandNearSurfaceWaterAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLandNearSurfaceWaterAtTileIndex';
+import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
 import { checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex';
 import { checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex';
 import { checkingWorldPlazaTileIsRockyBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsRockyBiomeAtTileIndex';
 import { checkingWorldPlazaTreeBlocksGridTile } from '@/components/world/domains/checkingWorldPlazaTreeBlocksGridTile';
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import {
+  DEFINING_WORLD_PLAZA_ORE_FIRELANDS_COLUMN_MAX_FOOTPRINT_TILE_SPAN,
   DEFINING_WORLD_PLAZA_ORE_FIRELANDS_COLUMN_STONE_NOISE_MIN,
   DEFINING_WORLD_PLAZA_ORE_NEAR_WATER_COLUMN_STONE_NOISE_MIN,
 } from '@/components/world/domains/definingWorldPlazaOreBiomeRarityConstants';
@@ -210,6 +212,11 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
     return null;
   }
 
+  // Ore columns stay on solid basalt, not in lava pools.
+  if (checkingWorldPlazaLavaAtTileIndex(anchorTileX, anchorTileY)) {
+    return null;
+  }
+
   // Slope rims stay bare so extruded boulders do not hang over cliff faces.
   if (
     checkingWorldPlazaTerrainElevationTileIsCliffEdgeAtTileIndex(
@@ -382,6 +389,13 @@ function computingWorldPlazaColumnRockMetadataAtAnchorTileIndex(
         isRockyBiome,
         centrality
       );
+
+  if (firelandsOreColumnMode) {
+    const maxFootprint =
+      DEFINING_WORLD_PLAZA_ORE_FIRELANDS_COLUMN_MAX_FOOTPRINT_TILE_SPAN;
+    footprintTileWidth = Math.min(footprintTileWidth, maxFootprint);
+    footprintTileHeight = Math.min(footprintTileHeight, maxFootprint);
+  }
 
   if (
     !mediumFieldBoulderPlacement &&

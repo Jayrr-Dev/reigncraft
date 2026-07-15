@@ -14,6 +14,11 @@ import {
   type PlazaHerbariumFlowerStudyTierId,
 } from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
 import {
+  LABELING_PLAZA_HERBARIUM_MUSHROOM_STUDY_TIER_SECTION_TITLES,
+  LABELING_PLAZA_HERBARIUM_MUSHROOM_STUDY_TIER_TEASERS,
+  type PlazaHerbariumMushroomStudyTierId,
+} from '@/components/home/domains/definingPlazaHerbariumMushroomStudyTier';
+import {
   LABELING_PLAZA_HERBARIUM_STUDY_TIER_SECTION_TITLES,
   LABELING_PLAZA_HERBARIUM_STUDY_TIER_TEASERS,
   type PlazaHerbariumStudyTierId,
@@ -38,6 +43,12 @@ import {
   resolvingPlazaHerbariumBerryStudyTierBookIcon,
 } from '@/components/home/domains/resolvingPlazaHerbariumBerryStudyTier';
 import {
+  checkingPlazaHerbariumMushroomStudyTierUnlocked,
+  formattingPlazaHerbariumMushroomStudyCountProgress,
+  formattingPlazaHerbariumMushroomStudyProgressLabel,
+  resolvingPlazaHerbariumMushroomStudyTierBookIcon,
+} from '@/components/home/domains/resolvingPlazaHerbariumMushroomStudyTier';
+import {
   checkingPlazaHerbariumStudyTierUnlocked,
   formattingPlazaHerbariumStudyCountProgress,
   formattingPlazaHerbariumStudyProgressLabel,
@@ -48,7 +59,8 @@ type HerbariumDetailTierId =
   | Exclude<PlazaHerbariumFlowerStudyTierId, 'sighted'>
   | Exclude<PlazaHerbariumStudyTierId, 'sighted'>
   | Exclude<PlazaHerbariumCloverStudyTierId, 'sighted'>
-  | Exclude<PlazaHerbariumBerryStudyTierId, 'sighted'>;
+  | Exclude<PlazaHerbariumBerryStudyTierId, 'sighted'>
+  | Exclude<PlazaHerbariumMushroomStudyTierId, 'sighted'>;
 
 export function formattingPlazaHerbariumEntryStudyCountProgress(
   entry: PlazaHerbariumGuideDisplayEntry
@@ -60,6 +72,10 @@ export function formattingPlazaHerbariumEntryStudyCountProgress(
       return formattingPlazaHerbariumCloverStudyCountProgress(entry.studyCount);
     case 'berry':
       return formattingPlazaHerbariumBerryStudyCountProgress(entry.studyCount);
+    case 'mushroom':
+      return formattingPlazaHerbariumMushroomStudyCountProgress(
+        entry.studyCount
+      );
     case 'tree':
       return formattingPlazaHerbariumStudyCountProgress(entry.studyCount);
   }
@@ -75,6 +91,8 @@ export function resolvingPlazaHerbariumEntryStudyTierBookIcon(
       return resolvingPlazaHerbariumCloverStudyTierBookIcon(entry.studyCount);
     case 'berry':
       return resolvingPlazaHerbariumBerryStudyTierBookIcon(entry.studyCount);
+    case 'mushroom':
+      return resolvingPlazaHerbariumMushroomStudyTierBookIcon(entry.studyCount);
     case 'tree':
       return resolvingPlazaHerbariumStudyTierBookIcon(entry.studyCount);
   }
@@ -90,6 +108,8 @@ export function formattingPlazaHerbariumEntryStudyProgressLabel(
       return formattingPlazaHerbariumCloverStudyProgressLabel(entry.studyCount);
     case 'berry':
       return formattingPlazaHerbariumBerryStudyProgressLabel(entry.studyCount);
+    case 'mushroom':
+      return formattingPlazaHerbariumMushroomStudyProgressLabel(entry.studyCount);
     case 'tree':
       return formattingPlazaHerbariumStudyProgressLabel(entry.studyCount);
   }
@@ -111,6 +131,10 @@ export function labelingPlazaHerbariumEntryStudyTierSectionTitle(
     case 'berry':
       return LABELING_PLAZA_HERBARIUM_BERRY_STUDY_TIER_SECTION_TITLES[
         tierId as Exclude<PlazaHerbariumBerryStudyTierId, 'sighted'>
+      ];
+    case 'mushroom':
+      return LABELING_PLAZA_HERBARIUM_MUSHROOM_STUDY_TIER_SECTION_TITLES[
+        tierId as Exclude<PlazaHerbariumMushroomStudyTierId, 'sighted'>
       ];
     case 'tree':
       return LABELING_PLAZA_HERBARIUM_STUDY_TIER_SECTION_TITLES[
@@ -135,6 +159,10 @@ export function labelingPlazaHerbariumEntryStudyTierTeaser(
     case 'berry':
       return LABELING_PLAZA_HERBARIUM_BERRY_STUDY_TIER_TEASERS[
         tierId as Exclude<PlazaHerbariumBerryStudyTierId, 'sighted'>
+      ];
+    case 'mushroom':
+      return LABELING_PLAZA_HERBARIUM_MUSHROOM_STUDY_TIER_TEASERS[
+        tierId as Exclude<PlazaHerbariumMushroomStudyTierId, 'sighted'>
       ];
     case 'tree':
       return LABELING_PLAZA_HERBARIUM_STUDY_TIER_TEASERS[
@@ -161,6 +189,11 @@ export function checkingPlazaHerbariumEntryStudyTierUnlocked(
     case 'berry':
       return checkingPlazaHerbariumBerryStudyTierUnlocked(
         tierId as PlazaHerbariumBerryStudyTierId,
+        entry.studyCount
+      );
+    case 'mushroom':
+      return checkingPlazaHerbariumMushroomStudyTierUnlocked(
+        tierId as PlazaHerbariumMushroomStudyTierId,
         entry.studyCount
       );
     case 'tree':

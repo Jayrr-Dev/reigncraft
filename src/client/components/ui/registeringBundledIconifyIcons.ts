@@ -152,6 +152,7 @@ import mdiMapLegend from '@iconify-icons/mdi/map-legend';
 import mdiMapMarkerMinus from '@iconify-icons/mdi/map-marker-minus';
 import mdiMapMarkerPlus from '@iconify-icons/mdi/map-marker-plus';
 import mdiMortarPestlePlus from '@iconify-icons/mdi/mortar-pestle-plus';
+import mdiMushroom from '@iconify-icons/mdi/mushroom';
 import mdiPalmTree from '@iconify-icons/mdi/palm-tree';
 import mdiPaw from '@iconify-icons/mdi/paw';
 import mdiPenguin from '@iconify-icons/mdi/penguin';
@@ -174,6 +175,8 @@ import mdiShieldOff from '@iconify-icons/mdi/shield-off';
 import mdiShieldPlus from '@iconify-icons/mdi/shield-plus';
 import mdiSleep from '@iconify-icons/mdi/sleep';
 import mdiSnowflake from '@iconify-icons/mdi/snowflake';
+import mdiSnowflakeAlert from '@iconify-icons/mdi/snowflake-alert';
+import mdiSnowflakeVariant from '@iconify-icons/mdi/snowflake-variant';
 import mdiSpeedometer from '@iconify-icons/mdi/speedometer';
 import mdiSprout from '@iconify-icons/mdi/sprout';
 import mdiStairsUp from '@iconify-icons/mdi/stairs-up';
@@ -399,6 +402,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:lock': mdiLock,
   'mdi:magnify': mdiMagnify,
   'mdi:mortar-pestle-plus': mdiMortarPestlePlus,
+  'mdi:mushroom': mdiMushroom,
   'mdi:map-legend': mdiMapLegend,
   'mdi:map-marker-minus': mdiMapMarkerMinus,
   'mdi:map-marker-plus': mdiMapMarkerPlus,
@@ -424,6 +428,8 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:power-sleep': mdiPowerSleep,
   'mdi:sleep': mdiSleep,
   'mdi:snowflake': mdiSnowflake,
+  'mdi:snowflake-alert': mdiSnowflakeAlert,
+  'mdi:snowflake-variant': mdiSnowflakeVariant,
   'mdi:speedometer': mdiSpeedometer,
   'mdi:sprout': mdiSprout,
   'mdi:stairs-up': mdiStairsUp,

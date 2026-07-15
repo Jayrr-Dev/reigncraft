@@ -64,6 +64,11 @@ import {
 import { checkingWorldPlazaInventoryItemIsRecipePage } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemRecipePage';
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
 import {
+  parsingWorldPlazaMushroomSpeciesIdFromItemTypeId,
+  resolvingWorldPlazaInventoryMushroomDetailContent,
+  resolvingWorldPlazaInventoryMushroomDetailReveal,
+} from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryMushroomDetailReveal';
+import {
   resolvingWorldPlazaInventoryOreDetailContent,
   resolvingWorldPlazaInventoryOreDetailReveal,
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryOreDetailReveal';
@@ -72,6 +77,7 @@ import {
   resolvingWorldPlazaInventoryWildlifeMeatDetailContent,
   resolvingWorldPlazaInventoryWildlifeMeatDetailReveal,
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryWildlifeMeatDetailReveal';
+import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_CLAY_TEAPOT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CUP_OF_TEA,
@@ -138,6 +144,10 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModelOptions = {
   /** Per-berry/tea Study totals; gates forage inspect detail. */
   readonly berryStudyCountsByLootKind?: Readonly<
     Partial<Record<WorldShrubBerryLootKind, number>>
+  >;
+  /** Per-mushroom Study totals; gates forage inspect detail. */
+  readonly mushroomStudyCountsBySpeciesId?: Readonly<
+    Partial<Record<DefiningWorldPlazaMushroomSpeciesId, number>>
   >;
   /** Local player effective max HP for food heal preview. */
   readonly playerEffectiveMaxHealth?: number;
@@ -245,6 +255,30 @@ function checkingWorldPlazaInventoryItemCanStudyBerry(
 }
 
 /**
+ * True when a mushroom specimen still has herbarium Study progress left.
+ */
+function checkingWorldPlazaInventoryItemCanStudyMushroom(
+  itemTypeId: string,
+  mushroomStudyCountsBySpeciesId:
+    | Readonly<Partial<Record<DefiningWorldPlazaMushroomSpeciesId, number>>>
+    | undefined
+): boolean {
+  const speciesId = parsingWorldPlazaMushroomSpeciesIdFromItemTypeId(itemTypeId);
+
+  if (!speciesId) {
+    return false;
+  }
+
+  const studyCount = mushroomStudyCountsBySpeciesId?.[speciesId] ?? 0;
+
+  return !checkingPlazaCodexStudyTierUnlocked(
+    'herbarium-mushroom',
+    'mastery',
+    studyCount
+  );
+}
+
+/**
  * True when the item can be Studied for Herbarium or Lapidary progress.
  */
 function checkingWorldPlazaInventoryItemCanStudy(
@@ -258,6 +292,9 @@ function checkingWorldPlazaInventoryItemCanStudy(
   cloverStudyCount: number | undefined,
   berryStudyCountsByLootKind:
     | Readonly<Partial<Record<WorldShrubBerryLootKind, number>>>
+    | undefined,
+  mushroomStudyCountsBySpeciesId:
+    | Readonly<Partial<Record<DefiningWorldPlazaMushroomSpeciesId, number>>>
     | undefined
 ): boolean {
   return (
@@ -273,6 +310,10 @@ function checkingWorldPlazaInventoryItemCanStudy(
     checkingWorldPlazaInventoryItemCanStudyBerry(
       itemTypeId,
       berryStudyCountsByLootKind
+    ) ||
+    checkingWorldPlazaInventoryItemCanStudyMushroom(
+      itemTypeId,
+      mushroomStudyCountsBySpeciesId
     )
   );
 }
@@ -688,6 +729,24 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
         food: foodDefinition,
       })
     : null;
+  const mushroomSpeciesId = parsingWorldPlazaMushroomSpeciesIdFromItemTypeId(
+    item.itemTypeId
+  );
+  const mushroomStudyCount = mushroomSpeciesId
+    ? (options.mushroomStudyCountsBySpeciesId?.[mushroomSpeciesId] ?? 0)
+    : 0;
+  const mushroomReveal = mushroomSpeciesId
+    ? resolvingWorldPlazaInventoryMushroomDetailReveal(mushroomStudyCount)
+    : null;
+  const mushroomContent =
+    mushroomSpeciesId && foodDefinition
+      ? resolvingWorldPlazaInventoryMushroomDetailContent(mushroomSpeciesId, {
+          studyCount: mushroomStudyCount,
+          food: foodDefinition,
+          foodItemMetadata: item.metadata,
+          effectiveMaxHealth: options.playerEffectiveMaxHealth,
+        })
+      : null;
   const oreSpeciesId = parsingWorldPlazaOreSpeciesIdFromItemTypeId(
     item.itemTypeId
   );
@@ -728,13 +787,19 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     (!flowerSpeciesId || Boolean(flowerReveal?.showGenericItemMeta)) &&
     (!cloverKind || Boolean(cloverReveal?.showGenericItemMeta)) &&
     (!berryLootKind || Boolean(berryReveal?.showGenericItemMeta)) &&
+    (!mushroomSpeciesId || Boolean(mushroomReveal?.showGenericItemMeta)) &&
     (!oreSpeciesId || Boolean(oreReveal?.showGenericItemMeta));
   const includeGenericFoodRows =
-    !isWildlifeMeat && !flowerSpeciesId && !cloverKind && !berryLootKind;
+    !isWildlifeMeat &&
+    !flowerSpeciesId &&
+    !cloverKind &&
+    !berryLootKind &&
+    !mushroomSpeciesId;
   const includeFoodHungerBadge =
     !isWildlifeMeat &&
     !flowerSpeciesId &&
     !cloverKind &&
+    !mushroomSpeciesId &&
     (!berryLootKind || Boolean(berryReveal?.showFoodHungerBadge));
 
   const durabilitySnapshot = resolvingWorldPlazaInventoryItemDurability(item);
@@ -773,7 +838,8 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
         options.flowerStudyCountsBySpeciesId,
         options.oreStudyCountsBySpeciesId,
         options.cloverStudyCount,
-        options.berryStudyCountsByLootKind
+        options.berryStudyCountsByLootKind,
+        options.mushroomStudyCountsBySpeciesId
       ),
       canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
         item.itemTypeId
@@ -818,12 +884,14 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     ...(flowerContent?.badges ?? []),
     ...(cloverContent?.badges ?? []),
     ...(berryContent?.badges ?? []),
+    ...(mushroomContent?.badges ?? []),
     ...(oreContent?.badges ?? []),
   ];
   const mergedInfoRows = [
     ...(flowerContent?.infoRows ?? []),
     ...(cloverContent?.infoRows ?? []),
     ...(berryContent?.infoRows ?? []),
+    ...(mushroomContent?.infoRows ?? []),
     ...(oreContent?.infoRows ?? []),
     ...genericInfoRows,
     ...(wildlifeMeatContent?.infoRows ?? []),
@@ -839,12 +907,14 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
         ? (cloverContent?.description ?? '')
         : berryLootKind
           ? (berryContent?.description ?? '')
-          : oreSpeciesId
-            ? (oreContent?.description ?? '')
-            : (wildlifeMeatContent?.description ??
-              resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
-                fallbackName: definition.name,
-              }))),
+          : mushroomSpeciesId
+            ? (mushroomContent?.description ?? '')
+            : oreSpeciesId
+              ? (oreContent?.description ?? '')
+              : (wildlifeMeatContent?.description ??
+                resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
+                  fallbackName: definition.name,
+                }))),
     durabilityLabel: formattingWorldPlazaInventoryItemDurabilityLabel(item),
     durabilityRatio: durabilitySnapshot?.ratio ?? null,
     badges: mergedBadges,
@@ -859,7 +929,8 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       options.flowerStudyCountsBySpeciesId,
       options.oreStudyCountsBySpeciesId,
       options.cloverStudyCount,
-      options.berryStudyCountsByLootKind
+      options.berryStudyCountsByLootKind,
+      options.mushroomStudyCountsBySpeciesId
     ),
     canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
       item.itemTypeId

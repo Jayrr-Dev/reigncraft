@@ -33,7 +33,7 @@ export type DefiningPlazaHerbariumTreeEntry = {
 
 /** Subtitle shown under the Herbarium panel title. */
 export const DEFINING_PLAZA_HERBARIUM_PANEL_SUBTITLE =
-  'Pick flowers, search long grass for clovers, or study tree stumps.' as const;
+  'Pick flowers and mushrooms, search long grass for clovers, or study tree stumps.' as const;
 
 /** Label shown for species the player has not sighted yet. */
 export const LABELING_PLAZA_HERBARIUM_UNDISCOVERED_NAME = '???' as const;

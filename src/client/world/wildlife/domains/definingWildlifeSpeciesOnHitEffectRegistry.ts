@@ -185,15 +185,9 @@ export const DEFINING_WILDLIFE_SPECIES_ON_HIT_EFFECTS: Partial<
   ],
   sunhead: [
     {
-      kind: 'bleed',
-      severity: 'hemorrhaging',
-      procChance: 0.5,
-      damageScale: 0.4,
-    },
-    {
       kind: 'temperature',
-      deltaCelsius: 22,
-      procChance: 0.45,
+      deltaCelsius: 300,
+      procChance: 0.65,
     },
     {
       kind: 'buff',

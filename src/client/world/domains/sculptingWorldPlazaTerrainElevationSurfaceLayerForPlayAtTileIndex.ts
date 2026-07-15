@@ -31,23 +31,24 @@ import {
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_LEDGE_NOISE_THRESHOLD,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MIN_LAYER,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PLAY_TIER_SURFACE_LAYERS,
+  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SCULPT_BARRIER_MIN_ALTITUDE_FACTOR,
+  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SCULPT_OBSTACLE_MIN_ALTITUDE_FACTOR,
+  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SCULPT_OBSTACLE_THRESHOLD_ALTITUDE_DAMPING,
+  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SCULPT_SUMMIT_MIN_ALTITUDE_FACTOR,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_STEP_BUMP_MAX_BASE_LAYER,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_STEP_BUMP_NOISE_FREQUENCY,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_STEP_BUMP_NOISE_OCTAVES,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_STEP_BUMP_NOISE_SEED,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_STEP_BUMP_NOISE_THRESHOLD,
-  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SCULPT_OBSTACLE_THRESHOLD_ALTITUDE_DAMPING,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_HIGH_TIER_SURFACE_LAYERS,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_MIN_BASE_LAYER,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_NOISE_FREQUENCY,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_NOISE_OCTAVES,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_NOISE_SEED,
   DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_NOISE_THRESHOLD,
-  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SCULPT_BARRIER_MIN_ALTITUDE_FACTOR,
-  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SCULPT_OBSTACLE_MIN_ALTITUDE_FACTOR,
-  DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SCULPT_SUMMIT_MIN_ALTITUDE_FACTOR,
-} from "@/components/world/domains/definingWorldPlazaTerrainElevationConstants";
-import { samplingWorldPlazaFractalNoise } from "@/components/world/domains/generatingWorldPlazaValueNoise";
+} from '@/components/world/domains/definingWorldPlazaTerrainElevationConstants';
+import { samplingWorldPlazaFractalNoise } from '@/components/world/domains/generatingWorldPlazaValueNoise';
+import { resolvingWorldPlazaFrostsinkTerrainElevationSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFrostsinkTerrainElevationAtTileIndex';
 
 /**
  * Snaps smooth elevation into walk/jump play tiers and adds local obstacles.
@@ -64,7 +65,7 @@ import { samplingWorldPlazaFractalNoise } from "@/components/world/domains/gener
  * @param rawSurfaceLayer - Layer from continuous noise before sculpting.
  */
 export function quantizingWorldPlazaTerrainElevationSurfaceLayerToPlayTier(
-  rawSurfaceLayer: number,
+  rawSurfaceLayer: number
 ): number {
   let nearestTier: number =
     DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PLAY_TIER_SURFACE_LAYERS[0];
@@ -91,13 +92,13 @@ export function quantizingWorldPlazaTerrainElevationSurfaceLayerToPlayTier(
  */
 function computingWorldPlazaTerrainElevationSculptNoiseThresholdFromAltitudeFactor(
   baseThreshold: number,
-  altitudeFactor: number,
+  altitudeFactor: number
 ): number {
   return Math.min(
     0.97,
     baseThreshold +
       (1 - altitudeFactor) *
-        DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SCULPT_OBSTACLE_THRESHOLD_ALTITUDE_DAMPING,
+        DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SCULPT_OBSTACLE_THRESHOLD_ALTITUDE_DAMPING
   );
 }
 
@@ -113,9 +114,12 @@ function applyingWorldPlazaTerrainElevationStepBumpAtTileIndex(
   tileX: number,
   tileY: number,
   surfaceLayer: number,
-  altitudeFactor: number,
+  altitudeFactor: number
 ): number {
-  if (surfaceLayer > DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_STEP_BUMP_MAX_BASE_LAYER) {
+  if (
+    surfaceLayer >
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_STEP_BUMP_MAX_BASE_LAYER
+  ) {
     return surfaceLayer;
   }
 
@@ -124,16 +128,17 @@ function applyingWorldPlazaTerrainElevationStepBumpAtTileIndex(
     tileY,
     DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_STEP_BUMP_NOISE_SEED,
     {
-      frequency: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_STEP_BUMP_NOISE_FREQUENCY,
+      frequency:
+        DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_STEP_BUMP_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_STEP_BUMP_NOISE_OCTAVES,
-    },
+    }
   );
 
   if (
     stepBumpSample <
     computingWorldPlazaTerrainElevationSculptNoiseThresholdFromAltitudeFactor(
       DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_STEP_BUMP_NOISE_THRESHOLD,
-      altitudeFactor,
+      altitudeFactor
     )
   ) {
     return surfaceLayer;
@@ -154,10 +159,11 @@ function applyingWorldPlazaTerrainElevationJumpLedgeAtTileIndex(
   tileX: number,
   tileY: number,
   surfaceLayer: number,
-  altitudeFactor: number,
+  altitudeFactor: number
 ): number {
   if (
-    surfaceLayer >= DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_JUMP_FOUR_BLOCK_SURFACE_LAYER
+    surfaceLayer >=
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_JUMP_FOUR_BLOCK_SURFACE_LAYER
   ) {
     return surfaceLayer;
   }
@@ -169,14 +175,14 @@ function applyingWorldPlazaTerrainElevationJumpLedgeAtTileIndex(
     {
       frequency: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_LEDGE_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_LEDGE_NOISE_OCTAVES,
-    },
+    }
   );
 
   if (
     ledgeSample <
     computingWorldPlazaTerrainElevationSculptNoiseThresholdFromAltitudeFactor(
       DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_LEDGE_NOISE_THRESHOLD,
-      altitudeFactor,
+      altitudeFactor
     )
   ) {
     return surfaceLayer;
@@ -191,14 +197,15 @@ function applyingWorldPlazaTerrainElevationJumpLedgeAtTileIndex(
  * @param barrierBand - Normalized sample above the barrier threshold.
  */
 function resolvingWorldPlazaTerrainElevationImpasseBarrierSurfaceLayerFromBand(
-  barrierBand: number,
+  barrierBand: number
 ): number {
   const barrierTierIndex = Math.min(
-    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BARRIER_SURFACE_LAYERS.length - 1,
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BARRIER_SURFACE_LAYERS.length -
+      1,
     Math.floor(
       barrierBand *
-        DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BARRIER_SURFACE_LAYERS.length,
-    ),
+        DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BARRIER_SURFACE_LAYERS.length
+    )
   );
 
   return DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BARRIER_SURFACE_LAYERS[
@@ -216,7 +223,7 @@ function resolvingWorldPlazaTerrainElevationImpasseBarrierSurfaceLayerFromBand(
 function applyingWorldPlazaTerrainElevationEnclavePocketAtTileIndex(
   tileX: number,
   tileY: number,
-  surfaceLayer: number,
+  surfaceLayer: number
 ): number {
   if (
     surfaceLayer >
@@ -232,20 +239,27 @@ function applyingWorldPlazaTerrainElevationEnclavePocketAtTileIndex(
     {
       frequency: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ENCLAVE_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ENCLAVE_NOISE_OCTAVES,
-    },
+    }
   );
 
-  if (enclaveSample < DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ENCLAVE_NOISE_THRESHOLD) {
+  if (
+    enclaveSample <
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ENCLAVE_NOISE_THRESHOLD
+  ) {
     return surfaceLayer;
   }
 
   if (
-    enclaveSample >= DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ENCLAVE_INTERIOR_NOISE_MIN
+    enclaveSample >=
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ENCLAVE_INTERIOR_NOISE_MIN
   ) {
     return DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ENCLAVE_INTERIOR_SURFACE_LAYER;
   }
 
-  if (enclaveSample >= DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ENCLAVE_RIM_NOISE_MIN) {
+  if (
+    enclaveSample >=
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ENCLAVE_RIM_NOISE_MIN
+  ) {
     return DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ENCLAVE_RIM_SURFACE_LAYER;
   }
 
@@ -254,24 +268,28 @@ function applyingWorldPlazaTerrainElevationEnclavePocketAtTileIndex(
     tileY,
     DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BREACH_NOISE_SEED,
     {
-      frequency: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BREACH_NOISE_FREQUENCY,
-      octaves: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BREACH_NOISE_OCTAVES,
-    },
+      frequency:
+        DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BREACH_NOISE_FREQUENCY,
+      octaves:
+        DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BREACH_NOISE_OCTAVES,
+    }
   );
 
   if (
-    breachSample >= DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BREACH_NOISE_THRESHOLD
+    breachSample >=
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BREACH_NOISE_THRESHOLD
   ) {
     return DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BREACH_SURFACE_LAYER;
   }
 
   const enclaveWallBand =
-    (enclaveSample - DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ENCLAVE_NOISE_THRESHOLD) /
+    (enclaveSample -
+      DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ENCLAVE_NOISE_THRESHOLD) /
     (DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ENCLAVE_RIM_NOISE_MIN -
       DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_ENCLAVE_NOISE_THRESHOLD);
 
   return resolvingWorldPlazaTerrainElevationImpasseBarrierSurfaceLayerFromBand(
-    enclaveWallBand,
+    enclaveWallBand
   );
 }
 
@@ -287,7 +305,7 @@ function applyingWorldPlazaTerrainElevationEnclavePocketAtTileIndex(
 function applyingWorldPlazaTerrainElevationImpasseBarrierAtTileIndex(
   tileX: number,
   tileY: number,
-  surfaceLayer: number,
+  surfaceLayer: number
 ): number {
   if (
     surfaceLayer >
@@ -301,13 +319,16 @@ function applyingWorldPlazaTerrainElevationImpasseBarrierAtTileIndex(
     tileY,
     DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BARRIER_NOISE_SEED,
     {
-      frequency: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BARRIER_NOISE_FREQUENCY,
-      octaves: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BARRIER_NOISE_OCTAVES,
-    },
+      frequency:
+        DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BARRIER_NOISE_FREQUENCY,
+      octaves:
+        DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BARRIER_NOISE_OCTAVES,
+    }
   );
 
   if (
-    barrierSample < DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BARRIER_NOISE_THRESHOLD
+    barrierSample <
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BARRIER_NOISE_THRESHOLD
   ) {
     return surfaceLayer;
   }
@@ -317,23 +338,28 @@ function applyingWorldPlazaTerrainElevationImpasseBarrierAtTileIndex(
     tileY,
     DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BREACH_NOISE_SEED,
     {
-      frequency: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BREACH_NOISE_FREQUENCY,
-      octaves: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BREACH_NOISE_OCTAVES,
-    },
+      frequency:
+        DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BREACH_NOISE_FREQUENCY,
+      octaves:
+        DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BREACH_NOISE_OCTAVES,
+    }
   );
 
   if (
-    breachSample >= DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BREACH_NOISE_THRESHOLD
+    breachSample >=
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BREACH_NOISE_THRESHOLD
   ) {
     return DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BREACH_SURFACE_LAYER;
   }
 
   const barrierBand =
-    (barrierSample - DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BARRIER_NOISE_THRESHOLD) /
-    (1 - DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BARRIER_NOISE_THRESHOLD);
+    (barrierSample -
+      DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BARRIER_NOISE_THRESHOLD) /
+    (1 -
+      DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_IMPASSE_BARRIER_NOISE_THRESHOLD);
 
   return resolvingWorldPlazaTerrainElevationImpasseBarrierSurfaceLayerFromBand(
-    barrierBand,
+    barrierBand
   );
 }
 
@@ -347,9 +373,12 @@ function applyingWorldPlazaTerrainElevationImpasseBarrierAtTileIndex(
 function applyingWorldPlazaTerrainElevationChasmCarvingAtTileIndex(
   tileX: number,
   tileY: number,
-  surfaceLayer: number,
+  surfaceLayer: number
 ): number {
-  if (surfaceLayer < DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CHASM_MIN_PLATEAU_LAYER) {
+  if (
+    surfaceLayer <
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CHASM_MIN_PLATEAU_LAYER
+  ) {
     return surfaceLayer;
   }
 
@@ -360,10 +389,12 @@ function applyingWorldPlazaTerrainElevationChasmCarvingAtTileIndex(
     {
       frequency: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CHASM_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CHASM_NOISE_OCTAVES,
-    },
+    }
   );
 
-  if (chasmSample < DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CHASM_NOISE_THRESHOLD) {
+  if (
+    chasmSample < DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_CHASM_NOISE_THRESHOLD
+  ) {
     return surfaceLayer;
   }
 
@@ -380,9 +411,11 @@ function applyingWorldPlazaTerrainElevationChasmCarvingAtTileIndex(
 function applyingWorldPlazaTerrainElevationSummitPeakAtTileIndex(
   tileX: number,
   tileY: number,
-  surfaceLayer: number,
+  surfaceLayer: number
 ): number {
-  if (surfaceLayer < DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_MIN_BASE_LAYER) {
+  if (
+    surfaceLayer < DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_MIN_BASE_LAYER
+  ) {
     return surfaceLayer;
   }
 
@@ -393,24 +426,31 @@ function applyingWorldPlazaTerrainElevationSummitPeakAtTileIndex(
     {
       frequency: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_NOISE_FREQUENCY,
       octaves: DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_NOISE_OCTAVES,
-    },
+    }
   );
 
-  if (summitSample < DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_NOISE_THRESHOLD) {
+  if (
+    summitSample < DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_NOISE_THRESHOLD
+  ) {
     return surfaceLayer;
   }
 
   const summitBand =
-    (summitSample - DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_NOISE_THRESHOLD) /
+    (summitSample -
+      DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_NOISE_THRESHOLD) /
     (1 - DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_NOISE_THRESHOLD);
   const summitTierIndex = Math.min(
-    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_HIGH_TIER_SURFACE_LAYERS.length - 1,
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_HIGH_TIER_SURFACE_LAYERS.length -
+      1,
     Math.floor(
-      summitBand * DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_HIGH_TIER_SURFACE_LAYERS.length,
-    ),
+      summitBand *
+        DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_HIGH_TIER_SURFACE_LAYERS.length
+    )
   );
   const summitLayer =
-    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_HIGH_TIER_SURFACE_LAYERS[summitTierIndex];
+    DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_SUMMIT_HIGH_TIER_SURFACE_LAYERS[
+      summitTierIndex
+    ];
 
   return Math.max(surfaceLayer, summitLayer);
 }
@@ -427,15 +467,24 @@ export function sculptingWorldPlazaTerrainElevationSurfaceLayerForPlayAtTileInde
   tileX: number,
   tileY: number,
   rawSurfaceLayer: number,
-  altitudeFactor: number,
+  altitudeFactor: number
 ): number {
+  const frostsinkSurfaceLayer =
+    resolvingWorldPlazaFrostsinkTerrainElevationSurfaceLayerAtTileIndex(
+      tileX,
+      tileY
+    );
+
+  if (frostsinkSurfaceLayer !== null) {
+    return frostsinkSurfaceLayer;
+  }
+
   if (altitudeFactor <= 0) {
     return DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_MIN_LAYER;
   }
 
-  let surfaceLayer = quantizingWorldPlazaTerrainElevationSurfaceLayerToPlayTier(
-    rawSurfaceLayer,
-  );
+  let surfaceLayer =
+    quantizingWorldPlazaTerrainElevationSurfaceLayerToPlayTier(rawSurfaceLayer);
 
   if (
     altitudeFactor >=
@@ -445,13 +494,13 @@ export function sculptingWorldPlazaTerrainElevationSurfaceLayerForPlayAtTileInde
       tileX,
       tileY,
       surfaceLayer,
-      altitudeFactor,
+      altitudeFactor
     );
     surfaceLayer = applyingWorldPlazaTerrainElevationJumpLedgeAtTileIndex(
       tileX,
       tileY,
       surfaceLayer,
-      altitudeFactor,
+      altitudeFactor
     );
   }
 
@@ -462,12 +511,12 @@ export function sculptingWorldPlazaTerrainElevationSurfaceLayerForPlayAtTileInde
     surfaceLayer = applyingWorldPlazaTerrainElevationEnclavePocketAtTileIndex(
       tileX,
       tileY,
-      surfaceLayer,
+      surfaceLayer
     );
     surfaceLayer = applyingWorldPlazaTerrainElevationImpasseBarrierAtTileIndex(
       tileX,
       tileY,
-      surfaceLayer,
+      surfaceLayer
     );
   }
 
@@ -478,14 +527,14 @@ export function sculptingWorldPlazaTerrainElevationSurfaceLayerForPlayAtTileInde
     surfaceLayer = applyingWorldPlazaTerrainElevationSummitPeakAtTileIndex(
       tileX,
       tileY,
-      surfaceLayer,
+      surfaceLayer
     );
   }
 
   surfaceLayer = applyingWorldPlazaTerrainElevationChasmCarvingAtTileIndex(
     tileX,
     tileY,
-    surfaceLayer,
+    surfaceLayer
   );
 
   return surfaceLayer;

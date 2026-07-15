@@ -32,14 +32,20 @@ export const DEFINING_WORLD_PLAZA_ORE_VEIN_CHANCE_ROCKY = 0.38;
 /** Vein chance on land beside surface water (clay banks). */
 export const DEFINING_WORLD_PLAZA_ORE_VEIN_CHANCE_NEAR_WATER = 0.5;
 
-/** Vein chance in firelands. Almost every firelands column rock is an ore vein. */
-export const DEFINING_WORLD_PLAZA_ORE_VEIN_CHANCE_FIRELANDS = 0.72;
+/** Vein chance in firelands. Every firelands column rock is an ore vein. */
+export const DEFINING_WORLD_PLAZA_ORE_VEIN_CHANCE_FIRELANDS = 1;
 
 /**
  * Stone-noise bar for firelands ore columns (world default 0.72 is too sparse).
- * ~52% of 6×6 anchors when noise is roughly uniform.
+ * Lower bar so bare Firelands still reads as a volcanic mining field.
  */
-export const DEFINING_WORLD_PLAZA_ORE_FIRELANDS_COLUMN_STONE_NOISE_MIN = 0.48;
+export const DEFINING_WORLD_PLAZA_ORE_FIRELANDS_COLUMN_STONE_NOISE_MIN = 0.34;
+
+/**
+ * Max footprint span for firelands ore columns.
+ * Keeps veins off cliff rims and clear of neighboring 6×6 anchors.
+ */
+export const DEFINING_WORLD_PLAZA_ORE_FIRELANDS_COLUMN_MAX_FOOTPRINT_TILE_SPAN = 2;
 
 /**
  * Stone-noise bar for shore clay banks (world default 0.72 leaves riverbanks thin).

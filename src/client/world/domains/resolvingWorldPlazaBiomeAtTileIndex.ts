@@ -27,6 +27,7 @@ import {
   DEFINING_WORLD_PLAZA_FLOWER_FOREST_BODY_NOISE_THRESHOLD,
   DEFINING_WORLD_PLAZA_FLOWER_FOREST_HUMIDITY_MIN,
 } from '@/components/world/domains/definingWorldPlazaFlowerForestBiomeConstants';
+import { DEFINING_WORLD_PLAZA_FROSTSINK_BIOME_KIND } from '@/components/world/domains/definingWorldPlazaFrostsinkBiomeConstants';
 import {
   DEFINING_WORLD_PLAZA_GENERATION_FEATURE,
   DEFINING_WORLD_PLAZA_GENERATION_FEATURE_FLAT_BIOME_KIND,
@@ -50,6 +51,7 @@ import {
   invalidatingWorldPlazaClimateAtTileCache,
   resolvingWorldPlazaClimateAtTile,
 } from '@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex';
+import { checkingWorldPlazaFrostsinkDiscContainsTileAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFrostsinkAtTileIndex';
 import {
   checkingWorldPlazaIslandModeForcesOceanAtTileIndex,
   resolvingWorldPlazaIslandModeZoneAtTileIndex,
@@ -329,12 +331,22 @@ export function resolvingWorldPlazaBiomeDefinitionAtRegion(
   }
 
   const climate = resolvingWorldPlazaBiomeClimateAtRegion(regionX, regionY);
-  const biomeKind = pickingWorldPlazaBiomeKindFromClimate(
+  let biomeKind = pickingWorldPlazaBiomeKindFromClimate(
     climate.temperature,
     climate.humidity,
     sampleTileX,
     sampleTileY
   );
+
+  if (
+    checkingWorldPlazaFrostsinkDiscContainsTileAtTileIndex(
+      sampleTileX,
+      sampleTileY
+    )
+  ) {
+    biomeKind = DEFINING_WORLD_PLAZA_FROSTSINK_BIOME_KIND;
+  }
+
   const biomeDefinition = DEFINING_WORLD_PLAZA_BIOME_CATALOG[biomeKind];
   columnCache.set(regionY, biomeDefinition);
 
@@ -385,12 +397,17 @@ export function resolvingWorldPlazaBiomeAtTileIndex(
   }
 
   const climate = resolvingWorldPlazaClimateAtTile(tileX, tileY);
-  const biomeKind = pickingWorldPlazaBiomeKindFromClimate(
+  let biomeKind = pickingWorldPlazaBiomeKindFromClimate(
     climate.temperature,
     climate.humidity,
     tileX,
     tileY
   );
+
+  if (checkingWorldPlazaFrostsinkDiscContainsTileAtTileIndex(tileX, tileY)) {
+    biomeKind = DEFINING_WORLD_PLAZA_FROSTSINK_BIOME_KIND;
+  }
+
   const biomeDefinition = DEFINING_WORLD_PLAZA_BIOME_CATALOG[biomeKind];
   columnCache.set(tileY, biomeDefinition);
 

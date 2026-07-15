@@ -47,6 +47,7 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_BIOME_SPAWN_DENSITY = {
   desert: 0.18,
   beach: 0.22,
   firelands: 0.45,
+  frostsink: 0.35,
   ocean: 0,
 } as const satisfies Record<DefiningWorldPlazaBiomeKind, number>;
 

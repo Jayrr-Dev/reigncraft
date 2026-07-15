@@ -1,9 +1,13 @@
 'use client';
 
 import {
+  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_ACTIONS_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_BUTTON_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_TEXT,
+  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_ORIGIN_LABEL,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_OVERLAY_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_REMAKE_LABEL,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_STACK_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_TITLE_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_WAKE_FADE_OUT_MS,
@@ -17,22 +21,30 @@ export type DefiningWorldPlazaEntityDeathScreenPhase =
   | 'held'
   | 'waking';
 
+export type DefiningWorldPlazaEntityDeathRespawnChoice = 'remake' | 'origin';
+
 export type RenderingWorldPlazaEntityDeathScreenOverlayProps = {
   /** When true, the player is dead and the death sequence should run. */
   isPlayerDead: boolean;
   /** Damage-type-specific death title, e.g. `YOU DIED` or `YOU FELL`. */
   deathTitle: string;
+  /** Called when the player picks Remake or Origin. */
+  onChoosingRespawn: (
+    choice: DefiningWorldPlazaEntityDeathRespawnChoice
+  ) => void;
 };
 
 /**
- * Full-screen death overlay with a Dark Souls-style title entrance and slow wake fade.
+ * Full-screen death overlay with a Dark Souls-style title entrance and respawn choices.
  */
 export function RenderingWorldPlazaEntityDeathScreenOverlay({
   isPlayerDead,
   deathTitle,
+  onChoosingRespawn,
 }: RenderingWorldPlazaEntityDeathScreenOverlayProps): React.JSX.Element | null {
   const [phase, setPhase] =
     useState<DefiningWorldPlazaEntityDeathScreenPhase>('hidden');
+  const [hasChosenRespawn, setHasChosenRespawn] = useState(false);
   const lockedDeathTitleRef = useRef(deathTitle);
   const wasPlayerDeadRef = useRef(false);
   const overlayRef = useRef<HTMLDivElement | null>(null);
@@ -49,6 +61,7 @@ export function RenderingWorldPlazaEntityDeathScreenOverlay({
     if (isPlayerDead) {
       if (!wasPlayerDeadRef.current) {
         lockedDeathTitleRef.current = deathTitle;
+        setHasChosenRespawn(false);
         setPhase('entering');
       }
 
@@ -83,6 +96,7 @@ export function RenderingWorldPlazaEntityDeathScreenOverlay({
 
     const hideTimeoutId = window.setTimeout(() => {
       setPhase('hidden');
+      setHasChosenRespawn(false);
     }, DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_WAKE_FADE_OUT_MS);
 
     return () => {
@@ -105,6 +119,19 @@ export function RenderingWorldPlazaEntityDeathScreenOverlay({
     phase === 'entering'
       ? 'plaza-death-screen-stack--entering'
       : 'plaza-death-screen-stack--visible';
+
+  const shouldShowRespawnChoices = phase === 'held' && !hasChosenRespawn;
+
+  const choosingRespawn = (
+    choice: DefiningWorldPlazaEntityDeathRespawnChoice
+  ): void => {
+    if (hasChosenRespawn) {
+      return;
+    }
+
+    setHasChosenRespawn(true);
+    onChoosingRespawn(choice);
+  };
 
   return (
     <div
@@ -129,6 +156,38 @@ export function RenderingWorldPlazaEntityDeathScreenOverlay({
         >
           {DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_TEXT}
         </p>
+        {shouldShowRespawnChoices ? (
+          <div
+            className={
+              DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_ACTIONS_CLASS_NAME
+            }
+            role="group"
+            aria-label="Choose where to respawn"
+          >
+            <button
+              type="button"
+              className={
+                DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_BUTTON_CLASS_NAME
+              }
+              onClick={() => {
+                choosingRespawn('remake');
+              }}
+            >
+              {DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_REMAKE_LABEL}
+            </button>
+            <button
+              type="button"
+              className={
+                DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_BUTTON_CLASS_NAME
+              }
+              onClick={() => {
+                choosingRespawn('origin');
+              }}
+            >
+              {DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_ORIGIN_LABEL}
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
   );
