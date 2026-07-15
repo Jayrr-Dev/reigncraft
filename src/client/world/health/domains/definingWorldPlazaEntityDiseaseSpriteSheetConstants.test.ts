@@ -18,14 +18,20 @@ describe('definingWorldPlazaEntityDiseaseSpriteSheetConstants', () => {
       DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_COLUMN_COUNT *
       DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_ROW_COUNT;
 
-    expect(DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_IDS).toHaveLength(
-      cellCapacity
-    );
+    expect(
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_IDS.length
+    ).toBeGreaterThan(0);
+    expect(
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_IDS.length
+    ).toBeLessThanOrEqual(cellCapacity);
 
     const seenCells = new Set<string>();
+    const seenIds = new Set<string>();
 
     for (const diseaseId of DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_IDS) {
       expect(registeredIds.has(diseaseId)).toBe(true);
+      expect(seenIds.has(diseaseId)).toBe(false);
+      seenIds.add(diseaseId);
 
       const sprite = resolvingWorldPlazaEntityDiseaseSpriteSheetIcon(diseaseId);
       expect(sprite).not.toBeNull();

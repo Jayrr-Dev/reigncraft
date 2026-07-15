@@ -16,8 +16,10 @@ export type PlazaCodexMilestoneRewardMeterKind = 'discovered' | 'studied';
 export type PlazaCodexMilestoneAttachRecipeReward = {
   readonly kind: 'attach-recipe';
   readonly recipeId: DefiningWorldPlazaCraftModeRecipeId;
-  /** Short player-facing label for popovers / claim feedback. */
+  /** Short player-facing label for popovers / claim dialog title. */
   readonly label: string;
+  /** One-line claim dialog blurb (what the player just got). */
+  readonly description: string;
 };
 
 export type PlazaCodexMilestoneRewardGrant =
@@ -44,6 +46,8 @@ export const DEFINING_PLAZA_CODEX_MILESTONE_REWARD_REGISTRY = [
       kind: 'attach-recipe',
       recipeId: DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.AXE_WOOD,
       label: 'Wood Axe recipe',
+      description:
+        'Pinned in your cookbook. Carve a spare axe from wood when the starter one fails.',
     },
   },
   {
@@ -54,6 +58,8 @@ export const DEFINING_PLAZA_CODEX_MILESTONE_REWARD_REGISTRY = [
       kind: 'attach-recipe',
       recipeId: DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.PICKAXE_WOOD,
       label: 'Wood Pickaxe recipe',
+      description:
+        'Pinned in your cookbook. Remake a pick from wood and stone when soft rock stops yielding.',
     },
   },
   {
@@ -64,6 +70,8 @@ export const DEFINING_PLAZA_CODEX_MILESTONE_REWARD_REGISTRY = [
       kind: 'attach-recipe',
       recipeId: DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.FISHROD_WOOD,
       label: 'Wood Fishing Rod recipe',
+      description:
+        'Pinned in your cookbook. Rebuild a wood rod when the tip snaps.',
     },
   },
 ] as const satisfies readonly PlazaCodexMilestoneRewardDefinition[];

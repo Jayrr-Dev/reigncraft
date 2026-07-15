@@ -1,4 +1,5 @@
 import { computingWorldPlazaEquipmentModifiedEv } from '@/components/world/equipment/domains/computingWorldPlazaEquipmentModifiedEv';
+import { computingWorldPlazaEquipmentAttackEvWithFlat } from '@/components/world/equipment/domains/computingWorldPlazaEquipmentModifiedEv';
 import { describe, expect, it } from 'vitest';
 
 describe('computingWorldPlazaEquipmentModifiedEv', () => {
@@ -22,5 +23,19 @@ describe('computingWorldPlazaEquipmentModifiedEv', () => {
         value: 1.45,
       })
     ).toBe(435);
+  });
+});
+
+describe('computingWorldPlazaEquipmentAttackEvWithFlat', () => {
+  it('applies multiplier then flat', () => {
+    expect(computingWorldPlazaEquipmentAttackEvWithFlat(100, 1.15, 20)).toBe(
+      135
+    );
+  });
+
+  it('matches steel and gold mean EV at base 100', () => {
+    expect(computingWorldPlazaEquipmentAttackEvWithFlat(100, 1.3, 50)).toBe(
+      180
+    );
   });
 });

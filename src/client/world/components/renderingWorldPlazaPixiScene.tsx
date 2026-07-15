@@ -4459,18 +4459,16 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const equippedWeaponSlotItem =
     inventoryState.slots[DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX];
+  const equippedWeaponItemTypeId = equippedWeaponSlotItem?.itemTypeId ?? null;
   const equippedSpecialtyWeaponItemTypeId =
-    equippedWeaponSlotItem &&
-    checkingWorldPlazaInventoryItemIsSpecialtyWeapon(
-      equippedWeaponSlotItem.itemTypeId
-    )
-      ? equippedWeaponSlotItem.itemTypeId
+    equippedWeaponItemTypeId &&
+    checkingWorldPlazaInventoryItemIsSpecialtyWeapon(equippedWeaponItemTypeId)
+      ? equippedWeaponItemTypeId
       : null;
-  const playerEquippedSpecialtyWeaponItemTypeIdRef = useRef<string | null>(
-    equippedSpecialtyWeaponItemTypeId
+  const playerEquippedWeaponItemTypeIdRef = useRef<string | null>(
+    equippedWeaponItemTypeId
   );
-  playerEquippedSpecialtyWeaponItemTypeIdRef.current =
-    equippedSpecialtyWeaponItemTypeId;
+  playerEquippedWeaponItemTypeIdRef.current = equippedWeaponItemTypeId;
 
   useEffect(() => {
     if (!isLocalGameplayEnabled) {
@@ -4787,7 +4785,8 @@ function RenderingWorldPlazaPixiSceneConnected({
       localAvatarMotionStateRef,
       playerHealthStateRef: healthStateRef,
       playerAttackerDamageRollModifiersRef: attackerDamageRollModifiersRef,
-      playerEquippedSpecialtyWeaponItemTypeIdRef,
+      playerEquippedSpecialtyWeaponItemTypeIdRef:
+        playerEquippedWeaponItemTypeIdRef,
       onPlayerSiphonHealFromWildlifeHit: (healAmount) => {
         if (healAmount > 0) {
           enqueueHealFloatRef.current?.(healAmount);

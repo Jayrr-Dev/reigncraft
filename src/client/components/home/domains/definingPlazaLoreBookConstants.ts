@@ -288,7 +288,7 @@ export const DEFINING_PLAZA_LORE_BOOK_CHAPTERS: readonly PlazaLoreBookChapter[] 
             'Equip an axe and a tree becomes Chop. Equip a pickaxe and a boulder becomes Mine. Floor pebbles need no tool: Pick puts one stone in the bag if you have room. Tall trunks and mega-boulders take longer. Keep swinging until a stump or empty patch remains.',
             'Ore veins answer the same pick, and they are how wanderers fund better tools. Stone and wood are how they fund walls. None of this is glamorous. All of it is how claims stop being wishes.',
             'The sound of a good swing is half the craft. Bad aim is the other half. Stand where the tree wants to fall, not where your pride wants to stand.',
-          },
+          ],
         },
         {
           id: 'wild-gather',

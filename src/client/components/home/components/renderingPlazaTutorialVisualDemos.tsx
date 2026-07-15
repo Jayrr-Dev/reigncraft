@@ -67,9 +67,9 @@ function RenderingPlazaTutorialIsoTile({
 
   const fillClassName =
     variant === 'claimed'
-      ? 'bg-[linear-gradient(180deg,#d9a441_0%,#a67c28_100%)]'
+      ? 'bg-[linear-gradient(180deg,#fb923c_0%,#ea580c_100%)]'
       : variant === 'claimable'
-        ? 'bg-[linear-gradient(180deg,#7cb86a_0%,#4f8f45_100%)]'
+        ? 'bg-[linear-gradient(180deg,#7dd3fc_0%,#38bdf8_100%)]'
         : variant === 'path'
           ? 'bg-[linear-gradient(180deg,#8f9a72_0%,#6d7658_100%)]'
           : 'bg-[linear-gradient(180deg,#6f9a58_0%,#4f7440_100%)]';
@@ -413,6 +413,7 @@ export function RenderingPlazaTutorialRunJumpDemo({
 
       {isMobile ? (
         <div className="flex flex-wrap items-center justify-center gap-2">
+          <RenderingPlazaTutorialTouchHint label="Hold" />
           <RenderingPlazaTutorialTouchHint label="Double tap" />
           <span
             aria-hidden
@@ -435,7 +436,7 @@ export function RenderingPlazaTutorialRunJumpDemo({
             className="plaza-tutorial-key-space"
           />
           <span className="text-[10px] font-medium italic text-ink-soft">
-            or double-click to run
+            or hold / double-click to run
           </span>
         </div>
       )}
@@ -473,9 +474,9 @@ export function RenderingPlazaTutorialSprintStaminaDemo({
 
       {isMobile ? (
         <div className="flex flex-wrap items-center justify-center gap-2">
-          <RenderingPlazaTutorialTouchHint label="Double tap" />
+          <RenderingPlazaTutorialTouchHint label="Hold" />
           <span className="text-[10px] font-medium italic text-ink-soft">
-            to sprint — stamina drains while you run
+            to sprint: stamina drains while you run
           </span>
         </div>
       ) : (
@@ -485,7 +486,7 @@ export function RenderingPlazaTutorialSprintStaminaDemo({
             className="plaza-tutorial-key-shift"
           />
           <span className="text-[10px] font-medium italic text-ink-soft">
-            to sprint — stamina drains while you run
+            to sprint: stamina drains while you run
           </span>
         </div>
       )}
@@ -835,8 +836,8 @@ export function RenderingPlazaTutorialClaimDemo({
 
       <p className="text-center text-xs font-medium text-ink-soft">
         {isMobile
-          ? 'Tap a highlighted tile next to your land to expand your realm.'
-          : 'Click a highlighted tile next to your land to expand your plot.'}
+          ? 'Arm Claim, then tap a sky-blue tile beside your land (or start a new plot).'
+          : 'Arm Claim, then click a sky-blue tile beside your land (or start a new plot).'}
       </p>
     </div>
   );
@@ -865,7 +866,7 @@ export function RenderingPlazaTutorialPlotsAndClaimsDemo({
         <div className={tileBadge.shellClassName}>
           <span className={tileBadge.labelClassName}>Tiles</span>
           <span className={tileBadge.valueClassName}>
-            8<span className={tileBadge.maxValueClassName}>/24</span>
+            8<span className={tileBadge.maxValueClassName}>/64</span>
           </span>
         </div>
       </div>
@@ -916,8 +917,8 @@ export function RenderingPlazaTutorialSaveCoordsDemo({
 
       <p className="text-center text-xs font-medium text-ink-soft">
         {isMobile
-          ? 'Open Claim mode and tap Save Coords while hovering a tile (max 3 saved).'
-          : 'Open Claim mode (C) and press Save Coords while hovering a tile (max 3 saved).'}
+          ? 'Open Claim mode, tap Save Coords, then tap a tile (max 3 saved).'
+          : 'Open Claim mode (C), press Save Coords, then click a tile (max 3 saved).'}
       </p>
     </div>
   );
@@ -1136,7 +1137,7 @@ export function RenderingPlazaTutorialHealthDemo(): React.JSX.Element {
       </div>
 
       <p className="text-center text-xs font-medium text-ink-soft">
-        Watch your health bar — hazards and combat drain it over time.
+        Watch your health bar: hazards and combat drain it over time.
       </p>
     </div>
   );
@@ -1269,6 +1270,7 @@ const PLAZA_TUTORIAL_INVENTORY_DEMO_SLOTS = [
   { kind: 'emoji' as const, label: '🫐' },
   { kind: 'emoji' as const, label: '🪨' },
   { kind: 'emoji' as const, label: '🍖' },
+  { kind: 'emoji' as const, label: '' },
 ];
 
 type RenderingPlazaTutorialStatusEffectDemoRow = {
@@ -1384,7 +1386,7 @@ export function RenderingPlazaTutorialMiniMapDemo(): React.JSX.Element {
         />
 
         <span
-          className="absolute left-[46%] top-[42%] size-2 rounded-[1px] border border-dashed border-poster-gold/80 bg-poster-gold/35"
+          className="absolute left-[46%] top-[42%] size-2 rounded-[1px] border border-dashed border-orange-500/80 bg-orange-500/45"
           aria-hidden
         />
       </div>
@@ -1414,7 +1416,7 @@ export function RenderingPlazaTutorialMiniMapDemo(): React.JSX.Element {
         </span>
         <span className="inline-flex items-center gap-1">
           <span
-            className="size-2 rounded-[1px] border border-dashed border-poster-gold/80 bg-poster-gold/35"
+            className="size-2 rounded-[1px] border border-dashed border-orange-500/80 bg-orange-500/45"
             aria-hidden
           />
           Your land

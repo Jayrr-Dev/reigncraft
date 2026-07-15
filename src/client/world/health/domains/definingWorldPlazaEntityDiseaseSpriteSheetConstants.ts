@@ -2,8 +2,8 @@ import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/healt
 import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 
 /**
- * Disease HUD / Pathology microbe sprite sheet (7×3 @ 64px = 448×192).
- * Mushroom toxin diseases fall back to Iconify until their cells ship.
+ * Disease HUD / Pathology microbe sprite sheet (7×5 @ 64px = 448×320).
+ * Rows 0–2: meat / flower microbes. Rows 3–4: mushroom toxin proteins (6 pad cells).
  *
  * @module components/world/health/domains/definingWorldPlazaEntityDiseaseSpriteSheetConstants
  */
@@ -12,10 +12,10 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_URL =
   '/inventory/sprites/inventory-disease-sprites.webp' as const;
 
 export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_COLUMN_COUNT = 7;
-export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_ROW_COUNT = 3;
+export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_ROW_COUNT = 5;
 export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_CELL_SIZE_PX = 64;
 
-/** Sprite sheet cell order (left→right, top→bottom; matches 7×3 art export). */
+/** Sprite sheet cell order (left→right, top→bottom; matches 7×5 art export). */
 export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_IDS = [
   'salmonellosis',
   'chronic-wasting',
@@ -38,6 +38,14 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_IDS = [
   'rootgut',
   'moonblight',
   'seedlung',
+  'amatoxin-angel',
+  'amatoxin-bell',
+  'gyromitra-storm',
+  'ghost-wing-fog',
+  'parasol-purge',
+  'lantern-gut',
+  'bolete-bile',
+  'yellow-stain-gut',
 ] as const satisfies readonly DefiningWorldPlazaEntityDiseaseId[];
 
 const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_INDEX_BY_ID = new Map<

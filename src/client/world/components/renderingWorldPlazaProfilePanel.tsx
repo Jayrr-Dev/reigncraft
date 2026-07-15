@@ -398,6 +398,7 @@ export function RenderingWorldPlazaProfilePanel({
     hunger: hungerHudSnapshot,
     derivedStats,
     skinId: selectedAvatarSkinId,
+    inventoryState,
   });
   const canShowUpgradeTab =
     isSpritcoreUpgradeEnabled &&

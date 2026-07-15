@@ -448,21 +448,23 @@ export function RenderingPlazaHerbariumPanel({
         ) : null}
       </div>
 
-      <RenderingPlazaCodexDualProgress
-        sectionId="herbarium"
-        left={{
-          label: 'Sighted',
-          value: sightedCount,
-          max: totalCount,
-          ariaLabel: 'Flora sighted',
-        }}
-        right={{
-          label: 'Studied',
-          value: studiedProgress.value,
-          max: studiedProgress.max,
-          ariaLabel: 'Flora study points',
-        }}
-      />
+      {categoryFilterId === 'all' ? (
+        <RenderingPlazaCodexDualProgress
+          sectionId="herbarium"
+          left={{
+            label: 'Sighted',
+            value: sightedCount,
+            max: totalCount,
+            ariaLabel: 'Flora sighted',
+          }}
+          right={{
+            label: 'Studied',
+            value: studiedProgress.value,
+            max: studiedProgress.max,
+            ariaLabel: 'Flora study points',
+          }}
+        />
+      ) : null}
 
       <div
         className={PLAZA_HERBARIUM_CATEGORY_TAB_BAR_CLASS_NAME}

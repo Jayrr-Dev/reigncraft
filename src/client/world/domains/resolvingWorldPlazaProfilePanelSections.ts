@@ -6,6 +6,7 @@
  */
 
 import type { ComputingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
+import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import {
   DEFINING_WORLD_PLAZA_CHARACTER_HEIGHT_ATTRIBUTE_ICON,
   LABELING_WORLD_PLAZA_CHARACTER_HEIGHT_ATTRIBUTE,
@@ -17,6 +18,7 @@ import {
 import { resolvingWorldPlazaCharacterHeightDisplayText } from '@/components/world/character/domains/resolvingWorldPlazaCharacterHeightDisplayText';
 import { resolvingWorldPlazaCharacterWeightDisplayText } from '@/components/world/character/domains/resolvingWorldPlazaCharacterWeightDisplayText';
 import type { DefiningWorldPlazaAvatarSkinId } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
+import { formattingWorldPlazaProfilePanelAttackValueText } from '@/components/world/domains/formattingWorldPlazaProfilePanelAttackValueText';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_FORWARD_GRID_DISTANCE,
@@ -64,6 +66,8 @@ import { resolvingWorldPlazaEntityTemperatureComfortBand } from '@/components/wo
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import type { DefiningWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import type { UsingWorldPlazaPlayerHungerHudSnapshot } from '@/components/world/hunger/hooks/usingWorldPlazaPlayerHunger';
+import { resolvingWorldPlazaEquippedAttackEv } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
+import { DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 
 /** Live stamina HUD values consumed by the profile panel. */
 export type ResolvingWorldPlazaProfilePanelStaminaHud = {
@@ -217,11 +221,29 @@ export function resolvingWorldPlazaProfilePanelSections(input: {
   hunger: UsingWorldPlazaPlayerHungerHudSnapshot;
   derivedStats: ComputingWorldPlazaCharacterEngineDerivedStats;
   skinId?: DefiningWorldPlazaAvatarSkinId;
+  inventoryState?: DefiningInventoryState;
+  equippedWeaponSlotIndex?: number | null;
 }): ResolvingWorldPlazaProfilePanelSections {
-  const { health, stamina, hunger, derivedStats, skinId } = input;
+  const {
+    health,
+    stamina,
+    hunger,
+    derivedStats,
+    skinId,
+    inventoryState,
+    equippedWeaponSlotIndex = DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX,
+  } = input;
   const comfortBand = resolvingWorldPlazaEntityTemperatureComfortBand(
     health.temperatureResistance
   );
+
+  const equippedAttackEv = inventoryState
+    ? resolvingWorldPlazaEquippedAttackEv(
+        derivedStats.attackPower,
+        inventoryState,
+        equippedWeaponSlotIndex
+      )
+    : derivedStats.attackPower;
 
   const vitalRows: ResolvingWorldPlazaProfilePanelVitalRow[] = [
     {
@@ -261,7 +283,10 @@ export function resolvingWorldPlazaProfilePanelSections(input: {
       id: 'attack',
       label: 'Attack',
       iconName: 'boxicons:sword-filled',
-      valueText: `${Math.round(derivedStats.attackPower)}`,
+      valueText: formattingWorldPlazaProfilePanelAttackValueText(
+        derivedStats.attackPower,
+        equippedAttackEv
+      ),
     },
     {
       id: 'defense',

@@ -5,7 +5,10 @@
  */
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
-import { computingWorldPlazaEquipmentModifiedEv } from '@/components/world/equipment/domains/computingWorldPlazaEquipmentModifiedEv';
+import {
+  computingWorldPlazaEquipmentAttackEvWithFlat,
+  computingWorldPlazaEquipmentModifiedEv,
+} from '@/components/world/equipment/domains/computingWorldPlazaEquipmentModifiedEv';
 import type { DefiningWorldPlazaEquipmentEvModifier } from '@/components/world/equipment/domains/definingWorldPlazaEquipmentEvModifier';
 import { resolvingWorldPlazaEquipmentCapabilitiesForItemTypeId } from '@/components/world/equipment/domains/resolvingWorldPlazaEquipmentCapabilitiesForItemTypeId';
 
@@ -44,7 +47,9 @@ export function resolvingWorldPlazaEquipmentAttackEvModifier(
 }
 
 /**
- * Applies equipped weapon attack EV modifier to character base attack EV.
+ * Applies equipped weapon attack EV modifier + flat tier bonus to base attack EV.
+ * Formula: `(base * multiplicative) + flat` when multiplicative; additive modes
+ * still add their value, then flat.
  */
 export function resolvingWorldPlazaEquippedAttackEv(
   baseAttackEv: number,
@@ -65,6 +70,25 @@ export function resolvingWorldPlazaEquippedAttackEv(
     slotItem.itemTypeId
   );
   const modifier = resolvingWorldPlazaEquipmentAttackEvModifier(capabilities);
+  const flatDamage = capabilities?.meleeFlatDamage ?? 0;
 
-  return computingWorldPlazaEquipmentModifiedEv(baseAttackEv, modifier);
+  if (!modifier) {
+    return computingWorldPlazaEquipmentAttackEvWithFlat(
+      baseAttackEv,
+      1,
+      flatDamage
+    );
+  }
+
+  if (modifier.mode === 'multiplicative') {
+    return computingWorldPlazaEquipmentAttackEvWithFlat(
+      baseAttackEv,
+      modifier.value,
+      flatDamage
+    );
+  }
+
+  return (
+    computingWorldPlazaEquipmentModifiedEv(baseAttackEv, modifier) + flatDamage
+  );
 }

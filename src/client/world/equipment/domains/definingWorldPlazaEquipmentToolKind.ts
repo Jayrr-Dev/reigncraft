@@ -9,6 +9,7 @@ import type {
   DefiningWorldPlazaHeldItemTier,
   DefiningWorldPlazaHeldItemVisualId,
 } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemTypes';
+import type { DefiningWorldPlazaToolTierAttackerRollCrumb } from '@/components/world/equipment/domains/definingWorldPlazaToolTierConstants';
 
 /** Harvesting / building / combat tool categories checked by the equipment engine. */
 export type DefiningWorldPlazaEquipmentToolKind =
@@ -33,8 +34,15 @@ export type DefiningWorldPlazaEquipmentItemCapabilities = {
    * Prefer {@link attackEvModifier}; still honored as multiplicative attack EV.
    */
   readonly meleeDamageMultiplier?: number;
+  /**
+   * Flat attack EV added after the multiplicative modifier
+   * (`base * mult + flat`).
+   */
+  readonly meleeFlatDamage?: number;
   /** Additive or multiplicative modifier on player attack EV while equipped. */
   readonly attackEvModifier?: DefiningWorldPlazaEquipmentEvModifier;
   /** Additive or multiplicative modifier on player defense EV while equipped. */
   readonly defenseEvModifier?: DefiningWorldPlazaEquipmentEvModifier;
+  /** Passive attacker damage-roll crumbs while this item is equipped. */
+  readonly attackerRollModifiers?: readonly DefiningWorldPlazaToolTierAttackerRollCrumb[];
 };

@@ -271,21 +271,23 @@ export function RenderingPlazaBestiaryPanel({
         ) : null}
       </div>
 
-      <RenderingPlazaCodexDualProgress
-        sectionId="bestiary"
-        left={{
-          label: 'Sighted',
-          value: sightedCount,
-          max: totalCount,
-          ariaLabel: 'Wildlife sighted',
-        }}
-        right={{
-          label: 'Studied',
-          value: studiedProgress.value,
-          max: studiedProgress.max,
-          ariaLabel: 'Wildlife study points',
-        }}
-      />
+      {biomeFilterId === 'all' ? (
+        <RenderingPlazaCodexDualProgress
+          sectionId="bestiary"
+          left={{
+            label: 'Sighted',
+            value: sightedCount,
+            max: totalCount,
+            ariaLabel: 'Wildlife sighted',
+          }}
+          right={{
+            label: 'Studied',
+            value: studiedProgress.value,
+            max: studiedProgress.max,
+            ariaLabel: 'Wildlife study points',
+          }}
+        />
+      ) : null}
 
       <div
         className={PLAZA_BESTIARY_BIOME_TAB_BAR_CLASS_NAME}

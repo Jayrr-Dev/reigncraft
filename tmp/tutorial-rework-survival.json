@@ -2,11 +2,11 @@
   "tabId": "survival",
   "notes": [
     "Verified hotbar is 6 slots (COLUMNS=6), not five; slot 0 is weapons/tools only.",
-    "Verified eat is a timed channel (1–10s by food); cancel on walk/jump/roll/damage; double-click desktop / double-tap mobile within 500ms.",
-    "Hunger: walk ×1.15 / sprint ×2 drain; regen blocked at ≤30%; Hungry (≤20%) no sprint; Starving (<5%) slower + no jump; at 0% HP ticks every 2s.",
-    "Disease: silent incubation then badge under health; food restore ×0.5 while symptomatic; deer/cow cooked still tiny prion residual; well-fed buff is a separate cooked roll.",
-    "Study: corpse ~60s; Study channel 3–10s; awards 1–3 points; Bestiary mastery at 100 (unified codex ladder, not legacy 200).",
-    "Meal theft: contested pickup 2–10s + hard aggro until death.",
+    "Verified eat is a timed channel (1 to 10s by food); cancel on walk/jump/roll/damage; double-click desktop / double-tap mobile within 500ms.",
+    "Hunger: walk x1.15 / sprint x2 drain; regen blocked at or below 30%; Hungry (at or below 20%) no sprint; Starving (below 5%) slower + no jump; at 0% HP ticks every 2s.",
+    "Disease: silent incubation then badge under health; food restore x0.5 while symptomatic; deer/cow cooked still tiny prion residual; well-fed buff is a separate cooked roll.",
+    "Study: corpse ~60s; Study channel 3 to 10s; awards 1 to 3 points; Bestiary mastery at 100 (unified codex ladder, not legacy 200).",
+    "Meal theft: contested pickup 2 to 10s + hard aggro until death.",
     "Minimap colors confirmed: you yellow (#f4d35e), others blue (#3b82f6), owned plots orange.",
     "Status stack (top-right) covers bleed/poison/heat/cold/lava/frostbite/shields; buff badges (under HP) gold buff / red debuff / disease-colored (lime common, purple prions, others by disease).",
     "No new sections: frostbite/fire/fishing stay in Mechanics Guide; campfire cook kept under cook-wild-meat.",
@@ -27,7 +27,7 @@
       {
         "id": "manage-hunger",
         "title": "Manage Hunger",
-        "description": "Hunger drains over time, faster while walking (×1.15) and much faster while sprinting (×2). Double-click food in your hotbar to eat (a short hold, about 1 to 10 seconds by food). Walk, jump, roll, or take a hit to cancel mid-bite with no consume. Below 20% you cannot sprint; below 5% you also cannot jump and move slower. At 0% hunger you take damage every 2 seconds until you eat.",
+        "description": "Hunger drains over time, faster while walking (x1.15) and much faster while sprinting (x2). Double-click food in your hotbar to eat (a short hold, about 1 to 10 seconds by food). Walk, jump, roll, or take a hit to cancel mid-bite with no consume. Below 20% you cannot sprint; below 5% you also cannot jump and move slower. At 0% hunger you take damage every 2 seconds until you eat.",
         "icon": "mdi:food-drumstick"
       },
       {
@@ -57,7 +57,7 @@
       {
         "id": "track-status-effects",
         "title": "Status Effects",
-        "description": "Icons on the top-right track active conditions: bleed, poison, heat, cold, lava burn, frostbite stacks, shields, and similar DoTs. Numbers show remaining damage, stacks, or time left. Tap or hover a row when you need the summary line.",
+        "description": "Icons on the top-right track active conditions: bleed, poison, heat, cold, lava burn, frostbite stacks, shields, and similar DoTs. Numbers show remaining damage, stacks, or time left. Click a row when you need the summary line.",
         "icon": "mdi:shield-half-full"
       },
       {
@@ -81,7 +81,7 @@
       {
         "id": "manage-hunger",
         "title": "Manage Hunger",
-        "description": "Hunger drains over time, faster while walking (×1.15) and much faster while sprinting (×2). Double-tap food in your hotbar to eat (a short hold, about 1 to 10 seconds by food). Walk, jump, roll, or take a hit to cancel mid-bite with no consume. Below 20% you cannot sprint; below 5% you also cannot jump and move slower. At 0% hunger you take damage every 2 seconds until you eat.",
+        "description": "Hunger drains over time, faster while walking (x1.15) and much faster while sprinting (x2). Double-tap food in your hotbar to eat (a short hold, about 1 to 10 seconds by food). Walk, jump, roll, or take a hit to cancel mid-bite with no consume. Below 20% you cannot sprint; below 5% you also cannot jump and move slower. At 0% hunger you take damage every 2 seconds until you eat.",
         "icon": "mdi:food-drumstick"
       },
       {

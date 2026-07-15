@@ -143,6 +143,11 @@ const DEFINING_WORLD_PLAZA_TIERED_TOOL_RARITY_BY_TIER: Readonly<
   gold: 'epic',
 };
 
+/** Tool kinds that apply melee multiplier + flat attack EV. */
+const DEFINING_WORLD_PLAZA_TIERED_TOOL_COMBAT_KINDS: ReadonlySet<
+  DefiningWorldPlazaTieredToolFamily['toolKind']
+> = new Set(['sword', 'axe', 'scythe']);
+
 function buildingTieredToolInventoryItem(
   family: DefiningWorldPlazaTieredToolFamily,
   tier: DefiningWorldPlazaHeldItemTier
@@ -153,6 +158,9 @@ function buildingTieredToolInventoryItem(
         family.inventoryIconFamily
       ][tier]
     : undefined;
+  const grantsMeleeCombat = DEFINING_WORLD_PLAZA_TIERED_TOOL_COMBAT_KINDS.has(
+    family.toolKind
+  );
 
   return {
     typeId: family.typeIdByTier[tier],
@@ -169,13 +177,17 @@ function buildingTieredToolInventoryItem(
       harvestSpeedMultiplier: tierStats.harvestSpeedMultiplier,
       heldItemVisualId: family.visualId,
       heldItemTier: tier,
-      ...(family.toolKind === 'sword'
+      ...(grantsMeleeCombat
         ? {
             attackEvModifier: {
               mode: 'multiplicative' as const,
               value: tierStats.meleeDamageMultiplier,
             },
             meleeDamageMultiplier: tierStats.meleeDamageMultiplier,
+            meleeFlatDamage: tierStats.meleeFlatDamage,
+            ...(tierStats.attackerRollModifiers
+              ? { attackerRollModifiers: tierStats.attackerRollModifiers }
+              : {}),
           }
         : {}),
     },

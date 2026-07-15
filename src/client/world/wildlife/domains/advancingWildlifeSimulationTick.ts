@@ -22,6 +22,7 @@ import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/d
 import { applyingWorldPlazaSpecialtyWeaponMeleeHitSideEffects } from '@/components/world/equipment/domains/applyingWorldPlazaSpecialtyWeaponMeleeHitSideEffects';
 import { resolvingWorldPlazaSpecialtyWeaponDefinition } from '@/components/world/equipment/domains/definingWorldPlazaSpecialtyWeaponRegistry';
 import { resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions } from '@/components/world/equipment/domains/resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions';
+import { resolvingWorldPlazaEquippedItemAttackerRollModifiers } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedItemAttackerRollModifiers';
 import {
   computingWorldPlazaEntityHealthDamageToHealAmount,
   resolvingWorldPlazaEntityHealthDamageToHealRatio,
@@ -2762,15 +2763,24 @@ export function applyingWildlifeInstanceDamage(
   const projectileArchetype = projectileArchetypeId
     ? resolvingWorldPlazaProjectileArchetype(projectileArchetypeId)
     : null;
+  const equippedWeaponItemTypeId =
+    playerOutgoingCombat?.specialtyWeaponItemTypeId ?? null;
   const specialtyHitOptions =
     !projectileArchetype && !attackerTransformSpeciesId
       ? resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions({
-          itemTypeId: playerOutgoingCombat?.specialtyWeaponItemTypeId,
+          itemTypeId: equippedWeaponItemTypeId,
         })
       : null;
+  const equippedItemRollModifiers =
+    !projectileArchetype && !attackerTransformSpeciesId
+      ? resolvingWorldPlazaEquippedItemAttackerRollModifiers(
+          equippedWeaponItemTypeId
+        )
+      : [];
   const mergedAttackerModifiers = [
     ...(playerOutgoingCombat?.attackerDamageRollModifiers ?? []),
     ...(specialtyHitOptions?.attackerDamageRollModifiers ?? []),
+    ...equippedItemRollModifiers,
   ];
   const damageAppliedInstance = projectileArchetype
     ? applyingWildlifeInstanceHealthPayload({

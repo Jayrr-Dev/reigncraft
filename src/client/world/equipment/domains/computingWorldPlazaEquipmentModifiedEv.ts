@@ -24,3 +24,15 @@ export function computingWorldPlazaEquipmentModifiedEv(
 
   return baseEv * modifier.value;
 }
+
+/**
+ * Tiered weapons: `(base * multiplicative) + flat`.
+ * Flat is applied after the multiplier so profile bonus stays readable.
+ */
+export function computingWorldPlazaEquipmentAttackEvWithFlat(
+  baseEv: number,
+  multiplicative: number,
+  flatDamage: number
+): number {
+  return baseEv * multiplicative + flatDamage;
+}

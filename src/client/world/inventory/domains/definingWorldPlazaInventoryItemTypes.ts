@@ -13,6 +13,7 @@ import {
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_FISH,
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_WHEAT,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
+import { DEFINING_WORLD_PLAZA_TOOL_TIER_STATS } from '@/components/world/equipment/domains/definingWorldPlazaToolTierConstants';
 import { resolvingWorldPlazaInventoryCoconutSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCoconutSpriteSheetConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
@@ -218,9 +219,17 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       isStackable: false,
       equipment: {
         toolKinds: ['axe'],
-        harvestSpeedMultiplier: 1,
+        harvestSpeedMultiplier:
+          DEFINING_WORLD_PLAZA_TOOL_TIER_STATS.wood.harvestSpeedMultiplier,
         heldItemVisualId: 'axe',
         heldItemTier: 'wood',
+        attackEvModifier: {
+          mode: 'multiplicative',
+          value: DEFINING_WORLD_PLAZA_TOOL_TIER_STATS.wood.meleeDamageMultiplier,
+        },
+        meleeDamageMultiplier:
+          DEFINING_WORLD_PLAZA_TOOL_TIER_STATS.wood.meleeDamageMultiplier,
+        meleeFlatDamage: DEFINING_WORLD_PLAZA_TOOL_TIER_STATS.wood.meleeFlatDamage,
       },
       durability: {
         max: DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
