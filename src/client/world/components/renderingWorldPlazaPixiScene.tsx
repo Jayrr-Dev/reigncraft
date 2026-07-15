@@ -283,7 +283,11 @@ import type { WorldPlazaCodexSectionId } from '@/components/world/domains/defini
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import { DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID } from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
-import { checkingWorldPlazaMovementDirectionIsActive } from '@/components/world/domains/definingWorldPlazaMovementDirection';
+import {
+  checkingWorldPlazaMovementDirectionIsActive,
+  DEFINING_WORLD_PLAZA_MOVEMENT_DIRECTION_IDLE,
+  type DefiningWorldPlazaMovementDirection,
+} from '@/components/world/domains/definingWorldPlazaMovementDirection';
 import type {
   DefiningWorldPlazaOnlineRoomSnapshot,
   DefiningWorldPlazaRemotePlayer,
@@ -408,10 +412,12 @@ import { usingWorldPlazaCampfireCookProgress } from '@/components/world/fire/hoo
 import { usingWorldPlazaCampfireInteraction } from '@/components/world/fire/hooks/usingWorldPlazaCampfireInteraction';
 import { usingWorldPlazaFireCells } from '@/components/world/fire/hooks/usingWorldPlazaFireCells';
 import { usingWorldPlazaFlintIgnitionAttempt } from '@/components/world/fire/hooks/usingWorldPlazaFlintIgnitionAttempt';
+import { RenderingWorldPlazaFishingCastOverlay } from '@/components/world/fishing/components/renderingWorldPlazaFishingCastOverlay';
 import { RenderingWorldPlazaFishingInteractionLabels } from '@/components/world/fishing/components/renderingWorldPlazaFishingInteractionLabels';
 import { RenderingWorldPlazaFishingSfx } from '@/components/world/fishing/components/renderingWorldPlazaFishingSfx';
 import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fishing/domains/checkingWorldPlazaFishingCastEligibility';
 import { computingWorldPlazaFishingCatchEscapeChance } from '@/components/world/fishing/domains/computingWorldPlazaFishingCatchEscapeChance';
+import { resolvingWorldPlazaFishingTileFromSelectionKey } from '@/components/world/fishing/domains/formattingWorldPlazaFishingTileSelectionKey';
 import { gettingWorldPlazaFishingReelEscapeReduction } from '@/components/world/fishing/domains/managingWorldPlazaFishingReelEscapeReduction';
 import { preparingWorldPlazaFishingCastSession } from '@/components/world/fishing/domains/preparingWorldPlazaFishingCastSession';
 import { spawningWorldPlazaFishingCastEncounter } from '@/components/world/fishing/domains/spawningWorldPlazaFishingCastEncounter';
@@ -4232,7 +4238,9 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const enqueueFishingCatchRarityFloatBridgeRef = useRef<
     NonNullable<
-      Parameters<typeof usingWorldPlazaFishingInteraction>[0]['enqueueFishingCatchRarityFloat']
+      Parameters<
+        typeof usingWorldPlazaFishingInteraction
+      >[0]['enqueueFishingCatchRarityFloat']
     >
   >(() => undefined);
 
@@ -4243,6 +4251,9 @@ function RenderingWorldPlazaPixiSceneConnected({
       selectedSlotIndex: equipment.selectedSlotIndex,
       resolvingEquippedFishrodCatchEscapeChance,
       showingGameplayHudToast,
+      localPersistenceOwnerId,
+      redditUserId,
+      saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
       onWildlifeSpeciesSighted: grantingBestiarySightedRecipeRewardsIfEarned,
       enqueueFishingCatchRarityFloat: (rarity) => {
         enqueueFishingCatchRarityFloatBridgeRef.current(rarity);
@@ -4251,6 +4262,22 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const completingFishingCastRef = useRef(completingFishingCast);
   completingFishingCastRef.current = completingFishingCast;
+
+  const fishingKeyboardDirectionLiveRefHolder = useRef<{
+    ref: React.RefObject<DefiningWorldPlazaMovementDirection> | null;
+  }>({ ref: null });
+  const fishingKeyboardDirectionProxyRef = useMemo(
+    () =>
+      ({
+        get current() {
+          return (
+            fishingKeyboardDirectionLiveRefHolder.current.ref?.current ??
+            DEFINING_WORLD_PLAZA_MOVEMENT_DIRECTION_IDLE
+          );
+        },
+      }) as React.RefObject<DefiningWorldPlazaMovementDirection>,
+    []
+  );
 
   const fishingCastEncounterSpawnRef = useRef<
     ((entry: { tileX: number; tileY: number }) => void) | null
@@ -4306,6 +4333,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   } = usingWorldPlazaFishingProgress({
     playerPositionRef,
     selectedInteractableBlockKeysRef,
+    keyboardDirectionRef: fishingKeyboardDirectionProxyRef,
+    walkTargetRef,
+    jumpRequestedRef,
+    rollRequestedRef,
     avatarToolActionRef: localAvatarToolActionRef,
     preparingFishingCastSession: preparingFishingCastSessionForEntry,
     onCastComplete: (session) => {
@@ -4323,6 +4354,27 @@ function RenderingWorldPlazaPixiSceneConnected({
     },
     [reelingFishingCast]
   );
+
+  const handlingFishingReelActiveCast = useCallback((): void => {
+    if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+      return;
+    }
+
+    const activeTargetKey = fishingProgressSnapshot.activeTargetKey;
+
+    if (!activeTargetKey) {
+      return;
+    }
+
+    const tile =
+      resolvingWorldPlazaFishingTileFromSelectionKey(activeTargetKey);
+
+    if (!tile) {
+      return;
+    }
+
+    reelingFishingCast(tile);
+  }, [fishingProgressSnapshot.activeTargetKey, reelingFishingCast]);
 
   const handlingFishingInteraction = useCallback(
     (entry: Parameters<typeof validatingFishingCastStart>[0]): void => {
@@ -4686,6 +4738,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       cancellingPlayerMovementIntentRef:
         cancellingPendingInventoryGroundDropQueueRef,
     });
+  fishingKeyboardDirectionLiveRefHolder.current.ref = keyboardDirectionRef;
 
   const dayNightSunState = usingWorldPlazaDayNightSunState(
     isHudDayNightEnabled || isHudMinimapEnabled
@@ -8446,6 +8499,11 @@ function RenderingWorldPlazaPixiSceneConnected({
     treeStumpStudyProgressSnapshot.isActive ||
     treeStumpStudyProgressSnapshot.isCancelling;
 
+  const isLocalPlayerHudFadedForFishing =
+    fishingProgressSnapshot.isActive || fishingProgressSnapshot.isCancelling;
+
+  const localPlayerChromeOpacity = isLocalPlayerHudFadedForFishing ? 0 : 1;
+
   const playerNameLabelEntries =
     useMemo((): RenderingWorldPlazaPlayerNameLabelEntry[] => {
       if (!onlineUserId) {
@@ -9835,6 +9893,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               localUserId={localHealthEntityUserId}
               localHudSnapshot={playerHealthHudSnapshot}
               localStaminaHud={localStaminaHudForHealthBars}
+              localChromeOpacity={localPlayerChromeOpacity}
               isHealthTrackVisible={isHudHealthEnabled}
               playerPositionRef={playerPositionRef}
               remotePlayerRegistryRef={remotePlayerRegistryRef}
@@ -9871,6 +9930,21 @@ function RenderingWorldPlazaPixiSceneConnected({
                 }
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
+              />
+              <RenderingWorldPlazaFishingCastOverlay
+                localUserId={localHealthEntityUserId}
+                progressSnapshot={fishingProgressSnapshot}
+                progressRatioRef={fishingProgressRatioRef}
+                reelOpportunityActiveRef={fishingReelOpportunityActiveRef}
+                playerPositionRef={playerPositionRef}
+                playerRenderPositionRegistryRef={
+                  playerRenderPositionRegistryRef
+                }
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                onReel={handlingFishingReelActiveCast}
+                onReelHoldStart={startingFishingReelHold}
+                onReelHoldEnd={stoppingFishingReelHold}
               />
               <RenderingWorldPlazaInventorySpecimenStudyOverlay
                 localUserId={localHealthEntityUserId}
@@ -10064,7 +10138,6 @@ function RenderingWorldPlazaPixiSceneConnected({
                   selectedInteractableBlockKeysRef
                 }
                 timedInteractionProgressSnapshot={fishingProgressSnapshot}
-                timedInteractionProgressRatioRef={fishingProgressRatioRef}
                 reelOpportunityActiveRef={fishingReelOpportunityActiveRef}
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
@@ -10196,6 +10269,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 <RenderingWorldPlazaPlayerNameLabels
                   nameLabelEntries={playerNameLabelEntries}
                   localUserId={onlineUserId}
+                  localChromeOpacity={localPlayerChromeOpacity}
                   playerPositionRef={playerPositionRef}
                   remotePlayerRegistryRef={remotePlayerRegistryRef}
                   playerRenderPositionRegistryRef={

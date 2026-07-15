@@ -52,6 +52,12 @@ export const DEFINING_WORLD_PLAZA_FISHING_REEL_CLICK_COOLDOWN_MS = 180;
 /** Fish granted per successful cast. */
 export const DEFINING_WORLD_PLAZA_FISHING_CATCH_QUANTITY = 1;
 
+/**
+ * Local health / name / stamina chrome fade while fishing (ms).
+ * Hide on cast start; fade back in when cast ends or cancels.
+ */
+export const DEFINING_WORLD_PLAZA_FISHING_LOCAL_PLAYER_CHROME_FADE_MS = 280;
+
 /** Progress ring icon for fishing casts. */
 export const DEFINING_WORLD_PLAZA_FISHING_TIMED_INTERACTION_PROGRESS_ICON =
   'mdi:fishing' as const;

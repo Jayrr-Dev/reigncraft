@@ -1,15 +1,13 @@
 'use client';
 
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
-import { computingWorldPlazaGridChebyshevDistance } from '@/components/world/domains/computingWorldPlazaGridChebyshevDistance';
+import type { DefiningWorldPlazaMovementDirection } from '@/components/world/domains/definingWorldPlazaMovementDirection';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fishing/domains/checkingWorldPlazaFishingCastEligibility';
+import { checkingWorldPlazaFishingCastShouldContinue } from '@/components/world/fishing/domains/checkingWorldPlazaFishingCastShouldContinue';
 import type { DefiningWorldPlazaFishingCastSessionContext } from '@/components/world/fishing/domains/definingWorldPlazaFishingCastSessionContext';
-import {
-  DEFINING_WORLD_PLAZA_FISHING_PLAYER_RANGE_TILES,
-  DEFINING_WORLD_PLAZA_FISHING_TIMED_INTERACTION_PROGRESS_ICON,
-} from '@/components/world/fishing/domains/definingWorldPlazaFishingConstants';
+import { DEFINING_WORLD_PLAZA_FISHING_TIMED_INTERACTION_PROGRESS_ICON } from '@/components/world/fishing/domains/definingWorldPlazaFishingConstants';
 import { formattingWorldPlazaFishingTileSelectionKey } from '@/components/world/fishing/domains/formattingWorldPlazaFishingTileSelectionKey';
 import type { ListingWorldPlazaFishingTilesInInteractionRangeEntry } from '@/components/world/fishing/domains/listingWorldPlazaFishingTilesInInteractionRange';
 import {
@@ -31,6 +29,10 @@ import { useCallback, useEffect, useRef, type RefObject } from 'react';
 export type UsingWorldPlazaFishingProgressParams = {
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
   readonly selectedInteractableBlockKeysRef: RefObject<ReadonlySet<string>>;
+  readonly keyboardDirectionRef: RefObject<DefiningWorldPlazaMovementDirection>;
+  readonly walkTargetRef: RefObject<DefiningWorldPlazaWorldPoint | null>;
+  readonly jumpRequestedRef: RefObject<boolean>;
+  readonly rollRequestedRef: RefObject<boolean>;
   readonly avatarToolActionRef?: RefObject<DefiningWorldPlazaAvatarToolAction | null>;
   readonly preparingFishingCastSession: (
     entry: ListingWorldPlazaFishingTilesInInteractionRangeEntry
@@ -68,27 +70,18 @@ export type UsingWorldPlazaFishingProgressResult = {
   readonly stoppingFishingReelHold: () => void;
 };
 
-function checkingWorldPlazaFishingStillInRange(
-  playerPosition: DefiningWorldPlazaWorldPoint,
-  tileX: number,
-  tileY: number
-): boolean {
-  const distance = computingWorldPlazaGridChebyshevDistance(
-    playerPosition.x,
-    playerPosition.y,
-    tileX + 0.5,
-    tileY + 0.5
-  );
-
-  return distance <= DEFINING_WORLD_PLAZA_FISHING_PLAYER_RANGE_TILES;
-}
-
 /**
  * Timed fishing cast adapter over the shared interaction progress mechanic.
+ *
+ * Cancels when the player walks, keys a direction, jumps, or rolls.
  */
 export function usingWorldPlazaFishingProgress({
   playerPositionRef,
   selectedInteractableBlockKeysRef,
+  keyboardDirectionRef,
+  walkTargetRef,
+  jumpRequestedRef,
+  rollRequestedRef,
   avatarToolActionRef,
   preparingFishingCastSession,
   onCastComplete,
@@ -164,6 +157,11 @@ export function usingWorldPlazaFishingProgress({
         entry.tileY
       );
 
+      // Drop pending path so cast can start; new walk / key / jump / roll cancels.
+      walkTargetRef.current = null;
+      jumpRequestedRef.current = false;
+      rollRequestedRef.current = false;
+
       const didStart = startingTimedInteraction({
         targetKey,
         context: preparedSession.session,
@@ -171,23 +169,18 @@ export function usingWorldPlazaFishingProgress({
         progressIcon:
           DEFINING_WORLD_PLAZA_FISHING_TIMED_INTERACTION_PROGRESS_ICON,
         checkingShouldContinue: () => {
-          const livePosition = playerPositionRef.current;
-
-          if (!livePosition) {
-            return false;
-          }
-
-          if (
-            !checkingWorldPlazaFishingStillInRange(
-              livePosition,
-              entry.tileX,
-              entry.tileY
-            )
-          ) {
-            return false;
-          }
-
-          return selectedInteractableBlockKeysRef.current.has(targetKey);
+          return checkingWorldPlazaFishingCastShouldContinue({
+            playerPosition: playerPositionRef.current,
+            tileX: entry.tileX,
+            tileY: entry.tileY,
+            targetKey,
+            selectedInteractableBlockKeys:
+              selectedInteractableBlockKeysRef.current,
+            keyboardDirection: keyboardDirectionRef.current,
+            walkTarget: walkTargetRef.current,
+            jumpRequested: jumpRequestedRef.current,
+            rollRequested: rollRequestedRef.current,
+          });
         },
         avatarToolAction: {
           toolActionId: 'tree-chop',
@@ -211,10 +204,14 @@ export function usingWorldPlazaFishingProgress({
       return 'started';
     },
     [
+      jumpRequestedRef,
+      keyboardDirectionRef,
       playerPositionRef,
       preparingFishingCastSession,
+      rollRequestedRef,
       selectedInteractableBlockKeysRef,
       startingTimedInteraction,
+      walkTargetRef,
     ]
   );
 

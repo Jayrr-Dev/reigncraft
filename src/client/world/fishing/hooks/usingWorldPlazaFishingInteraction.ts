@@ -8,6 +8,7 @@ import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fis
 import { rollingWorldPlazaFishingCatchEscaped } from '@/components/world/fishing/domains/computingWorldPlazaFishingCatchEscapeChance';
 import type { DefiningWorldPlazaFishingCastSessionContext } from '@/components/world/fishing/domains/definingWorldPlazaFishingCastSessionContext';
 import { DEFINING_WORLD_PLAZA_FISHING_CATCH_QUANTITY } from '@/components/world/fishing/domains/definingWorldPlazaFishingConstants';
+import { droppingWorldPlazaFishingCatchSpritcoreGroundItem } from '@/components/world/fishing/domains/droppingWorldPlazaFishingCatchSpritcoreGroundItem';
 import type { EnqueueingWorldPlazaFishingCatchRarityFloat } from '@/components/world/fishing/domains/enqueueingWorldPlazaFishingCatchRarityFloatFeedback';
 import { enqueueingWorldPlazaFishingCatchRarityFloatFeedback } from '@/components/world/fishing/domains/enqueueingWorldPlazaFishingCatchRarityFloatFeedback';
 import type { ListingWorldPlazaFishingTilesInInteractionRangeEntry } from '@/components/world/fishing/domains/listingWorldPlazaFishingTilesInInteractionRange';
@@ -18,6 +19,7 @@ import { resolvingWorldPlazaFishingCatchSpritcoreDrop } from '@/components/world
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { wearingWorldPlazaEquippedInventoryToolDurability } from '@/components/world/inventory/domains/wearingWorldPlazaEquippedInventoryToolDurability';
 import { useCallback, type RefObject } from 'react';
+import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 export type UpdatingWorldPlazaFishingInventoryState = (
   updater: (
@@ -31,6 +33,9 @@ export type UsingWorldPlazaFishingInteractionParams = {
   readonly selectedSlotIndex: number | null;
   readonly resolvingEquippedFishrodCatchEscapeChance: () => number;
   readonly showingGameplayHudToast: (message: string) => void;
+  readonly localPersistenceOwnerId: string | null;
+  readonly redditUserId: string | null;
+  readonly saveSlotIndex: PlazaSaveSlotIndex | null;
   /** Fired when a creature catch records a Bestiary sighting. */
   readonly onWildlifeSpeciesSighted?: () => void;
   /** Rising rarity float above the player (landed or escaped). */
@@ -55,6 +60,9 @@ export function usingWorldPlazaFishingInteraction({
   selectedSlotIndex,
   resolvingEquippedFishrodCatchEscapeChance,
   showingGameplayHudToast,
+  localPersistenceOwnerId,
+  redditUserId,
+  saveSlotIndex,
   onWildlifeSpeciesSighted,
   enqueueFishingCatchRarityFloat,
 }: UsingWorldPlazaFishingInteractionParams): UsingWorldPlazaFishingInteractionResult {
@@ -116,7 +124,6 @@ export function usingWorldPlazaFishingInteraction({
 
         let didBreak = false;
         let quantityAccepted = 0;
-        let spritcoreAccepted = 0;
         let wasInventoryFull = false;
 
         if (didCreatureEscape) {
@@ -170,29 +177,9 @@ export function usingWorldPlazaFishingInteraction({
             return null;
           }
 
-          let nextState = withCatch.state;
-
-          if (spritcoreDrop) {
-            const withSpritcore = addingInventoryItemWithStacking(
-              nextState,
-              {
-                id: `fishing-spritcore-${catchEntry.catchId}-${session.tileX}-${session.tileY}`,
-                itemTypeId: spritcoreDrop.itemTypeId,
-                quantity: spritcoreDrop.amount,
-              },
-              DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
-            );
-
-            // Fish still lands even if Spritcore cannot fit; keep the catch.
-            if (withSpritcore.quantityOverflow === 0) {
-              nextState = withSpritcore.state;
-              spritcoreAccepted = withSpritcore.quantityAccepted;
-            }
-          }
-
           didBreak = wearResult.broken;
           quantityAccepted = withCatch.quantityAccepted;
-          return nextState;
+          return withCatch.state;
         });
 
         if (wasInventoryFull) {
@@ -217,16 +204,25 @@ export function usingWorldPlazaFishingInteraction({
             recordingWorldPlazaBestiarySpeciesSighted(catchEntry.catchId);
             onWildlifeSpeciesSighted?.();
           }
+
+          if (spritcoreDrop) {
+            void droppingWorldPlazaFishingCatchSpritcoreGroundItem({
+              localPersistenceOwnerId,
+              redditUserId,
+              saveSlotIndex,
+              tileX: session.tileX,
+              tileY: session.tileY,
+              layer: playerPosition.layer ?? 1,
+              spritcoreDrop,
+              playerPosition,
+            });
+          }
         }
 
         if (didBreak) {
           showingGameplayHudToast('Your fishing rod broke.');
         } else if (catchEntry.kind === 'junk') {
           showingGameplayHudToast(`Fished up ${grant.displayName}.`);
-        } else if (spritcoreAccepted > 0) {
-          showingGameplayHudToast(
-            `Caught ${grant.displayName} (+${spritcoreAccepted} Spritcore).`
-          );
         } else {
           showingGameplayHudToast(`Caught ${grant.displayName}.`);
         }
@@ -236,9 +232,12 @@ export function usingWorldPlazaFishingInteraction({
     },
     [
       enqueueFishingCatchRarityFloat,
+      localPersistenceOwnerId,
       onWildlifeSpeciesSighted,
       playerPositionRef,
+      redditUserId,
       resolvingEquippedFishrodCatchEscapeChance,
+      saveSlotIndex,
       selectedSlotIndex,
       showingGameplayHudToast,
       updatingInventoryState,

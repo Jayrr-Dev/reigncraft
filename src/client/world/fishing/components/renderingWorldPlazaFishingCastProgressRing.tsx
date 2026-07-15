@@ -4,7 +4,11 @@ import { Icon } from '@/components/ui/icon';
 
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 
-import { DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME } from '@/components/world/fishing/domains/definingWorldPlazaFishingReelOpportunityConstants';
+import {
+  DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_FISHING_REEL_READY_YELLOW_ONCE_CLASS_NAME,
+} from '@/components/world/fishing/domains/definingWorldPlazaFishingReelOpportunityConstants';
+import { gettingWorldPlazaFishingReelReadyFlashVisible } from '@/components/world/fishing/domains/managingWorldPlazaFishingReelCastState';
 
 import {
   computingWorldPlazaTimedInteractionProgressRingLayout,
@@ -157,8 +161,11 @@ export const RenderingWorldPlazaFishingCastProgressRing = memo(
 
           wrapperElement.classList.toggle(
             DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME,
-
             isReelReady
+          );
+          wrapperElement.classList.toggle(
+            DEFINING_WORLD_PLAZA_FISHING_REEL_READY_YELLOW_ONCE_CLASS_NAME,
+            isReelReady && gettingWorldPlazaFishingReelReadyFlashVisible()
           );
         }
       };

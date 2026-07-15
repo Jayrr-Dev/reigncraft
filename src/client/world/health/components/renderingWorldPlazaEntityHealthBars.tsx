@@ -18,6 +18,7 @@ import {
   checkingWorldPlazaDomOverlayFrameShouldUpdate,
   subscribingWorldPlazaDomOverlayFrame,
 } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import { DEFINING_WORLD_PLAZA_FISHING_LOCAL_PLAYER_CHROME_FADE_MS } from '@/components/world/fishing/domains/definingWorldPlazaFishingConstants';
 import { RenderingWorldPlazaEntityHealthBuffIconRow } from '@/components/world/health/components/renderingWorldPlazaEntityHealthBuffIcons';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_CRITICAL_RATIO,
@@ -106,6 +107,11 @@ export interface RenderingWorldPlazaEntityHealthBarsProps {
   localUserId: string;
   localHudSnapshot: UsingWorldPlazaPlayerHealthHudSnapshot;
   localStaminaHud?: RenderingWorldPlazaEntityHealthBarLocalStaminaHud | null;
+  /**
+   * Opacity for the local player's health / name / stamina chrome.
+   * Fades out while fishing and fades back in when the cast ends.
+   */
+  localChromeOpacity?: number;
   /** When false, hides the health track but can still show stamina. */
   isHealthTrackVisible?: boolean;
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
@@ -249,6 +255,7 @@ function areWorldPlazaEntityHealthBarsPropsEqual(
 ): boolean {
   if (
     previous.localUserId !== next.localUserId ||
+    previous.localChromeOpacity !== next.localChromeOpacity ||
     previous.isHealthTrackVisible !== next.isHealthTrackVisible ||
     previous.playerPositionRef !== next.playerPositionRef ||
     previous.remotePlayerRegistryRef !== next.remotePlayerRegistryRef ||
@@ -623,6 +630,7 @@ export const RenderingWorldPlazaEntityHealthBars = memo(
     localUserId,
     localHudSnapshot,
     localStaminaHud = null,
+    localChromeOpacity = 1,
     isHealthTrackVisible = true,
     playerPositionRef,
     remotePlayerRegistryRef,
@@ -796,12 +804,22 @@ export const RenderingWorldPlazaEntityHealthBars = memo(
                 scaleElementByUserIdRef.current.delete(entry.userId);
               }}
               className={
-                RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WRAPPER_CLASS_NAME
+                entry.userId === localUserId
+                  ? `${RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WRAPPER_CLASS_NAME} plaza-local-player-chrome`
+                  : RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WRAPPER_CLASS_NAME
               }
               style={{
                 ...RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WRAPPER_CONTAIN_STYLE,
                 transform:
                   RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_HIDDEN_TRANSFORM,
+                ...(entry.userId === localUserId
+                  ? {
+                      opacity: localChromeOpacity,
+                      transition: `opacity ${DEFINING_WORLD_PLAZA_FISHING_LOCAL_PLAYER_CHROME_FADE_MS}ms ease`,
+                      pointerEvents:
+                        localChromeOpacity < 0.05 ? 'none' : undefined,
+                    }
+                  : {}),
               }}
             >
               <RenderingWorldPlazaEntityHealthBarVisual

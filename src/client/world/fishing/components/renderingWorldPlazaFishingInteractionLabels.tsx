@@ -9,21 +9,20 @@ import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domai
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME } from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
-import { RenderingWorldPlazaFishingCastProgressRing } from '@/components/world/fishing/components/renderingWorldPlazaFishingCastProgressRing';
 import {
   DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_GLOW_CLASS_NAME,
   DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_FISHING_REEL_READY_YELLOW_ONCE_CLASS_NAME,
 } from '@/components/world/fishing/domains/definingWorldPlazaFishingReelOpportunityConstants';
 import { formattingWorldPlazaFishingTileSelectionKey } from '@/components/world/fishing/domains/formattingWorldPlazaFishingTileSelectionKey';
 import type { ListingWorldPlazaFishingTilesInInteractionRangeEntry } from '@/components/world/fishing/domains/listingWorldPlazaFishingTilesInInteractionRange';
 import { listingWorldPlazaFishingTilesInInteractionRange } from '@/components/world/fishing/domains/listingWorldPlazaFishingTilesInInteractionRange';
-import { gettingWorldPlazaFishingReelHold } from '@/components/world/fishing/domains/managingWorldPlazaFishingReelCastState';
-import { checkingWorldPlazaTimedInteractionProgressRingVisible } from '@/components/world/interaction/domains/checkingWorldPlazaTimedInteractionProgressMatchesTarget';
 import {
-  DEFINING_WORLD_PLAZA_TIMED_INTERACTION_LABEL_RING_SLOT_CLASS_NAME,
-  DEFINING_WORLD_PLAZA_TIMED_INTERACTION_LABEL_ROW_CLASS_NAME,
-} from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionLabelUiConstants';
-import { DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_LABEL_GAP_PX } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressConstants';
+  gettingWorldPlazaFishingReelHold,
+  gettingWorldPlazaFishingReelReadyFlashVisible,
+} from '@/components/world/fishing/domains/managingWorldPlazaFishingReelCastState';
+import { checkingWorldPlazaTimedInteractionProgressRingVisible } from '@/components/world/interaction/domains/checkingWorldPlazaTimedInteractionProgressMatchesTarget';
+import { DEFINING_WORLD_PLAZA_TIMED_INTERACTION_LABEL_ROW_CLASS_NAME } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionLabelUiConstants';
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
 import { resolvingWorldPlazaGroundTileInteractionLabelScreenPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaGroundTileInteractionLabelScreenPoint';
 import { useLayoutEffect, useRef, useState } from 'react';
@@ -40,7 +39,6 @@ export type RenderingWorldPlazaFishingInteractionLabelsProps = {
     ReadonlySet<string>
   >;
   readonly timedInteractionProgressSnapshot: DefiningWorldPlazaTimedInteractionProgressSnapshot;
-  readonly timedInteractionProgressRatioRef: React.RefObject<number>;
   readonly reelOpportunityActiveRef: React.RefObject<boolean>;
   readonly cameraOffsetRef: React.RefObject<DefiningWorldPlazaCameraOffset>;
   readonly cameraWorldZoomRef: React.RefObject<number>;
@@ -61,7 +59,6 @@ export function RenderingWorldPlazaFishingInteractionLabels({
   playerPositionRef,
   selectedInteractableBlockKeysRef,
   timedInteractionProgressSnapshot,
-  timedInteractionProgressRatioRef,
   reelOpportunityActiveRef,
   cameraOffsetRef,
   cameraWorldZoomRef,
@@ -195,6 +192,10 @@ export function RenderingWorldPlazaFishingInteractionLabels({
           const isReelReady =
             isCasting && reelOpportunityActiveRef.current === true;
           const isReelHeld = isReelReady && gettingWorldPlazaFishingReelHold();
+          const isYellowReadyFlash =
+            isReelReady &&
+            !isReelHeld &&
+            gettingWorldPlazaFishingReelReadyFlashVisible();
           const shouldShowLabel = !isCasting || isReelReady;
 
           reelButtonElement.hidden = !shouldShowLabel;
@@ -202,6 +203,10 @@ export function RenderingWorldPlazaFishingInteractionLabels({
           reelButtonElement.classList.toggle(
             DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME,
             isReelReady && !isReelHeld
+          );
+          reelButtonElement.classList.toggle(
+            DEFINING_WORLD_PLAZA_FISHING_REEL_READY_YELLOW_ONCE_CLASS_NAME,
+            isYellowReadyFlash
           );
           reelButtonElement.classList.toggle(
             DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_GLOW_CLASS_NAME,
@@ -350,31 +355,6 @@ export function RenderingWorldPlazaFishingInteractionLabels({
                   onFishRef.current(entry);
                 }}
               ></button>
-              {isCasting ? (
-                <div
-                  className={
-                    DEFINING_WORLD_PLAZA_TIMED_INTERACTION_LABEL_RING_SLOT_CLASS_NAME
-                  }
-                  style={{
-                    marginLeft: `${DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_LABEL_GAP_PX}px`,
-                  }}
-                >
-                  <RenderingWorldPlazaFishingCastProgressRing
-                    snapshot={timedInteractionProgressSnapshot}
-                    progressRatioRef={timedInteractionProgressRatioRef}
-                    reelOpportunityActiveRef={reelOpportunityActiveRef}
-                    onReel={() => {
-                      onReelRef.current(entry);
-                    }}
-                    onReelHoldStart={() => {
-                      onReelHoldStartRef.current();
-                    }}
-                    onReelHoldEnd={() => {
-                      onReelHoldEndRef.current();
-                    }}
-                  />
-                </div>
-              ) : null}
             </div>
           </div>
         );

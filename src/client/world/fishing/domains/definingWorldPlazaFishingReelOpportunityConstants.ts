@@ -42,9 +42,13 @@ export const DEFINING_WORLD_PLAZA_FISHING_REEL_OPPORTUNITY_WINDOW_PLACEMENT_ATTE
  */
 export const DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_ACCELERATION_EXTRA_RATIO = 1;
 
-/** CSS class toggled while a reel opportunity window is active. */
+/** CSS class toggled while a reel opportunity window is active (green Reel text). */
 export const DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME =
   'world-plaza-fishing-reel-ready-flash' as const;
+
+/** Yellow glow: only the first ready window of a cast. */
+export const DEFINING_WORLD_PLAZA_FISHING_REEL_READY_YELLOW_ONCE_CLASS_NAME =
+  'world-plaza-fishing-reel-ready-yellow-once' as const;
 
 /** CSS class toggled while the player is holding reel during a ready window. */
 export const DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_GLOW_CLASS_NAME =

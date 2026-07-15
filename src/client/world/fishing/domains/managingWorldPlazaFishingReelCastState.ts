@@ -22,7 +22,14 @@ type ManagingWorldPlazaFishingReelCastState = {
   lastReelClickAtMs: number;
   elapsedBonusMs: number;
   isHoldingReel: boolean;
+  /** True after the player starts holding during a ready window; lasts the cast. */
+  hasCaughtReel: boolean;
+  /** Window clock is inside a rolled opportunity. */
+  isInsideOpportunityWindow: boolean;
+  /** Ready for reel UI / clicks: inside window, or caught and still fishing. */
   isOpportunityActive: boolean;
+  /** Yellow ready flash should render this frame (first window only). */
+  isReadyFlashVisible: boolean;
   firedOpportunityWindowIndices: Set<number>;
 };
 
@@ -34,7 +41,10 @@ const managingWorldPlazaFishingReelCastInitialState: ManagingWorldPlazaFishingRe
     lastReelClickAtMs: 0,
     elapsedBonusMs: 0,
     isHoldingReel: false,
+    hasCaughtReel: false,
+    isInsideOpportunityWindow: false,
     isOpportunityActive: false,
+    isReadyFlashVisible: false,
     firedOpportunityWindowIndices: new Set(),
   };
 
@@ -119,19 +129,34 @@ export function gettingWorldPlazaFishingReelOpportunityActive(): boolean {
   return managingWorldPlazaFishingReelCastState.isOpportunityActive;
 }
 
+export function gettingWorldPlazaFishingReelReadyFlashVisible(): boolean {
+  return managingWorldPlazaFishingReelCastState.isReadyFlashVisible;
+}
+
 export function gettingWorldPlazaFishingReelEscapeReduction(): number {
   return managingWorldPlazaFishingReelCastState.escapeReduction;
 }
 
 export function settingWorldPlazaFishingReelHold(isHoldingReel: boolean): void {
+  const shouldCatchReel =
+    isHoldingReel &&
+    (managingWorldPlazaFishingReelCastState.isInsideOpportunityWindow ||
+      managingWorldPlazaFishingReelCastState.hasCaughtReel);
+
   managingWorldPlazaFishingReelCastState = {
     ...managingWorldPlazaFishingReelCastState,
     isHoldingReel,
+    hasCaughtReel:
+      managingWorldPlazaFishingReelCastState.hasCaughtReel || shouldCatchReel,
   };
 }
 
 export function gettingWorldPlazaFishingReelHold(): boolean {
   return managingWorldPlazaFishingReelCastState.isHoldingReel;
+}
+
+export function gettingWorldPlazaFishingReelCaught(): boolean {
+  return managingWorldPlazaFishingReelCastState.hasCaughtReel;
 }
 
 export type ApplyingWorldPlazaFishingReelEscapeReductionResult =
@@ -195,23 +220,32 @@ export function tickingWorldPlazaFishingReelCastFrame(
   }
 
   const castElapsedMs = resolvingWorldPlazaFishingReelCastElapsedMs(nowMs);
-  const isOpportunityActive = checkingWorldPlazaFishingReelOpportunityActive(
-    castElapsedMs,
-    managingWorldPlazaFishingReelCastState.windows
-  );
+  const isInsideOpportunityWindow =
+    checkingWorldPlazaFishingReelOpportunityActive(
+      castElapsedMs,
+      managingWorldPlazaFishingReelCastState.windows
+    );
+  const hasCaughtReel = managingWorldPlazaFishingReelCastState.hasCaughtReel;
+  const isOpportunityActive = isInsideOpportunityWindow || hasCaughtReel;
+  const isHoldingReel = managingWorldPlazaFishingReelCastState.isHoldingReel;
+  const firstWindow = managingWorldPlazaFishingReelCastState.windows[0];
+  const isInsideFirstOpportunityWindow =
+    firstWindow !== undefined &&
+    castElapsedMs >= firstWindow.startMs &&
+    castElapsedMs < firstWindow.startMs + firstWindow.durationMs;
+  const isReadyFlashVisible =
+    isInsideFirstOpportunityWindow && !hasCaughtReel && !isHoldingReel;
 
   managingWorldPlazaFishingReelCastState = {
     ...managingWorldPlazaFishingReelCastState,
+    isInsideOpportunityWindow,
     isOpportunityActive,
+    isReadyFlashVisible,
   };
 
   firingWorldPlazaFishingReelOpportunityStudyCues(castElapsedMs);
 
-  if (
-    !managingWorldPlazaFishingReelCastState.isHoldingReel ||
-    !isOpportunityActive ||
-    deltaMs <= 0
-  ) {
+  if (!isHoldingReel || !isOpportunityActive || deltaMs <= 0) {
     return;
   }
 

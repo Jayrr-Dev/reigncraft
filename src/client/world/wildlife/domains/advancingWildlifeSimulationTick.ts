@@ -23,6 +23,7 @@ import { applyingWorldPlazaSpecialtyWeaponMeleeHitSideEffects } from '@/componen
 import { resolvingWorldPlazaSpecialtyWeaponDefinition } from '@/components/world/equipment/domains/definingWorldPlazaSpecialtyWeaponRegistry';
 import { resolvingWorldPlazaEquippedItemAttackerRollModifiers } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedItemAttackerRollModifiers';
 import { resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions } from '@/components/world/equipment/domains/resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions';
+import { resolvingWorldPlazaFishingCastEncounterStalkIntent } from '@/components/world/fishing/domains/resolvingWorldPlazaFishingCastEncounterStalkIntent';
 import {
   computingWorldPlazaEntityHealthDamageToHealAmount,
   resolvingWorldPlazaEntityHealthDamageToHealRatio,
@@ -199,7 +200,6 @@ import { notifyingWildlifeOmegaWolfSfxEvent } from '@/components/world/wildlife/
 import { notifyingWildlifeSpeciesSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeSpeciesSfxEvent';
 import { notifyingWildlifeSpeciesSfxOnIntentTransition } from '@/components/world/wildlife/domains/notifyingWildlifeSpeciesSfxFromSimulation';
 import { resolvingWildlifeBehaviorNeighborQueryRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeBehaviorNeighborQueryRadiusGrid';
-import { resolvingWorldPlazaFishingCastEncounterStalkIntent } from '@/components/world/fishing/domains/resolvingWorldPlazaFishingCastEncounterStalkIntent';
 import { resolvingWildlifeFairyDaybreakWanderAwayIntent } from '@/components/world/wildlife/domains/resolvingWildlifeFairyDaybreakWanderAwayIntent';
 import {
   resolvingWildlifeInstanceCollisionRadiusGrid,
@@ -1231,8 +1231,8 @@ export function advancingWildlifeSimulationTick({
   playerTransformWildlifeSpeciesId = null,
   npcPreyTargets = [],
 }: AdvancingWildlifeSimulationTickParams): AdvancingWildlifeSimulationTickResult {
-  // Dev QA blank slate defaults Wildlife AI off: keep manually spawned animals
-  // frozen and hittable. Flip Wildlife AI on (or spawn from Dev) to run combat.
+  // Dev QA freezes manually spawned animals when wildlife-ai is off
+  // (Perf Flags / All off). All-on default leaves AI running.
   const isWildlifeAiEnabledForDevQa =
     checkingWorldPlazaGenerationFeatureEnabled(
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_AI

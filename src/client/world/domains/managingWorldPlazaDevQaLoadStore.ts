@@ -1,16 +1,15 @@
 /**
  * Session-scoped store for the single-player "This a dev load" QA world.
  *
- * When enabled: flat plains blank slate, generation features off (session
- * override; audio stays on), frozen wildlife AI / no aggro if animals are
- * spawned manually. Night lighting stays mounted so torch/fairy lights still
- * punch holes when Features re-enables animals. Re-enable layers via Features
- * debug controls while profiling.
+ * When enabled: Dev QA session with every generation feature on (session
+ * override). Compact biome grid + frozen wildlife AI / no aggro unless
+ * Wildlife AI is left on via Perf Flags. Flip layers off from Features /
+ * Perf Flags while profiling.
  *
  * @module components/world/domains/managingWorldPlazaDevQaLoadStore
  */
 
-import { DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_BLANK_SLATE } from '@/components/world/domains/definingWorldPlazaDevQaLoadConstants';
+import { DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_ALL_ON } from '@/components/world/domains/definingWorldPlazaDevQaLoadConstants';
 import {
   applyingWorldPlazaGenerationFeatureSessionOverride,
   clearingWorldPlazaGenerationFeatureSessionOverride,
@@ -61,10 +60,10 @@ export function readingWorldPlazaDevQaLoadRevision(): number {
 }
 
 /**
- * Ensures Dev QA session override has every known feature id.
+ * Ensures Dev QA session override has every known feature id (all on).
  *
  * Safe on React remounts / HMR: only fills *missing* keys. Does not wipe
- * Perf Flags toggles the player already flipped on.
+ * Perf Flags toggles the player already flipped off.
  */
 export function syncingWorldPlazaDevQaGenerationFeatureBlankSlateIfEnabled(): void {
   if (!managingWorldPlazaDevQaLoadState.isEnabled) {
@@ -72,14 +71,14 @@ export function syncingWorldPlazaDevQaGenerationFeatureBlankSlateIfEnabled(): vo
   }
 
   mergingWorldPlazaGenerationFeatureSessionOverrideMissingKeys(
-    DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_BLANK_SLATE
+    DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_ALL_ON
   );
 }
 
 /**
- * Enables the QA blank-slate world for the current session.
+ * Enables the QA unlock-all world for the current session.
  *
- * First enable applies the full blank-slate map. Repeat calls only fill
+ * First enable applies the full all-on map. Repeat calls only fill
  * missing feature ids so open Perf Flags toggles stay put.
  */
 export function enablingWorldPlazaDevQaLoad(): void {
@@ -90,7 +89,7 @@ export function enablingWorldPlazaDevQaLoad(): void {
   if (!wasEnabled) {
     managingWorldPlazaDevQaLoadState.revision += 1;
     applyingWorldPlazaGenerationFeatureSessionOverride(
-      DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_BLANK_SLATE
+      DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_ALL_ON
     );
     invalidatingWorldPlazaProceduralGenerationCachesDeferred();
     notifyingWorldPlazaDevQaLoadSubscribers();
@@ -98,7 +97,7 @@ export function enablingWorldPlazaDevQaLoad(): void {
   }
 
   mergingWorldPlazaGenerationFeatureSessionOverrideMissingKeys(
-    DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_BLANK_SLATE
+    DEFINING_WORLD_PLAZA_DEV_QA_GENERATION_FEATURE_ALL_ON
   );
 }
 

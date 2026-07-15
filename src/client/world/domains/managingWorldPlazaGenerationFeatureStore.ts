@@ -189,7 +189,7 @@ export function gettingWorldPlazaGenerationFeatureFlagsSnapshot(): Readonly<
 }
 
 /**
- * Applies a session-only flag map (Dev QA blank slate). Does not touch storage.
+ * Applies a session-only flag map (Dev QA all-on / blank slate). Does not touch storage.
  */
 export function applyingWorldPlazaGenerationFeatureSessionOverride(
   flags: Readonly<Record<DefiningWorldPlazaGenerationFeatureId, boolean>>

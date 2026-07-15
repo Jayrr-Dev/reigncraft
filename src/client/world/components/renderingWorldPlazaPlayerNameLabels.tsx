@@ -13,6 +13,7 @@ import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaPlayerNameLabelScreenPoint } from '@/components/world/domains/resolvingWorldPlazaPlayerNameLabelScreenPoint';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import { DEFINING_WORLD_PLAZA_FISHING_LOCAL_PLAYER_CHROME_FADE_MS } from '@/components/world/fishing/domains/definingWorldPlazaFishingConstants';
 import { useLayoutEffect, useRef } from 'react';
 
 /** Off-screen default before the first animation frame positions a label. */
@@ -46,6 +47,11 @@ export interface RenderingWorldPlazaPlayerNameLabelsProps {
   /** Local and remote players to label. */
   nameLabelEntries: readonly RenderingWorldPlazaPlayerNameLabelEntry[];
   localUserId: string;
+  /**
+   * Opacity for the local player's name label.
+   * Fades out while fishing and fades back in when the cast ends.
+   */
+  localChromeOpacity?: number;
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   remotePlayerRegistryRef: React.RefObject<
     Map<string, DefiningWorldPlazaRemotePlayer>
@@ -64,6 +70,7 @@ export interface RenderingWorldPlazaPlayerNameLabelsProps {
 export function RenderingWorldPlazaPlayerNameLabels({
   nameLabelEntries,
   localUserId,
+  localChromeOpacity = 1,
   playerPositionRef,
   remotePlayerRegistryRef,
   playerRenderPositionRegistryRef,
@@ -166,9 +173,20 @@ export function RenderingWorldPlazaPlayerNameLabels({
 
             labelElementByUserIdRef.current.delete(entry.userId);
           }}
-          className={RENDERING_WORLD_PLAZA_PLAYER_NAME_LABEL_WRAPPER_CLASS_NAME}
+          className={
+            entry.userId === localUserId
+              ? `${RENDERING_WORLD_PLAZA_PLAYER_NAME_LABEL_WRAPPER_CLASS_NAME} plaza-local-player-chrome`
+              : RENDERING_WORLD_PLAZA_PLAYER_NAME_LABEL_WRAPPER_CLASS_NAME
+          }
           style={{
             transform: RENDERING_WORLD_PLAZA_PLAYER_NAME_LABEL_HIDDEN_TRANSFORM,
+            ...(entry.userId === localUserId
+              ? {
+                  opacity: localChromeOpacity,
+                  transition: `opacity ${DEFINING_WORLD_PLAZA_FISHING_LOCAL_PLAYER_CHROME_FADE_MS}ms ease`,
+                  pointerEvents: localChromeOpacity < 0.05 ? 'none' : undefined,
+                }
+              : {}),
           }}
         >
           <RenderingWorldPlazaPlayerNameLabelRowWithProfilePopover

@@ -360,7 +360,7 @@ export const App = () => {
     setGameSession(session);
   };
 
-  // Keep blank-slate feature flags in sync after HMR / remount while a Dev QA
+  // Keep Dev QA all-on feature flags in sync after HMR / remount while a Dev QA
   // session is already active (start handler alone does not re-run). Merge only
   // missing keys so Perf Flags toggles are not wiped.
   useEffect(() => {
