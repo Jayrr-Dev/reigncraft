@@ -6,6 +6,7 @@
  * @module components/home/components/renderingPlazaLoreBookPanel
  */
 
+import { RenderingPlazaLoreBookCoverGlyph } from '@/components/home/components/renderingPlazaLoreBookCoverGlyph';
 import { RenderingPlazaLoreBookIllustration } from '@/components/home/components/renderingPlazaLoreBookIllustration';
 import { RenderingPlazaOpenBookFrame } from '@/components/home/components/renderingPlazaOpenBookFrame';
 import {
@@ -272,8 +273,11 @@ export function RenderingPlazaLoreBookPanel({
               />
             </button>
           ) : null}
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-sm border border-parchment/35 bg-black/25 text-poster-gold sm:size-14">
-            <Icon icon={book.icon} className="size-7 sm:size-8" aria-hidden />
+          <span className="flex size-12 shrink-0 items-center justify-center sm:size-14">
+            <RenderingPlazaLoreBookCoverGlyph
+              bookId={book.id}
+              className="size-12 sm:size-14"
+            />
           </span>
         </div>
       }

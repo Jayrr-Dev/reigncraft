@@ -1,5 +1,9 @@
 'use client';
 
+import {
+  DEFINING_PLAZA_BUTTON_SFX_KIND,
+  definingPlazaButtonSfxDataAttributes,
+} from '@/components/home/domains/definingPlazaDefaultButtonSfxConstants';
 import { Icon } from '@/components/ui/icon';
 import {
   DEFINING_WORLD_BUILDING_CLAIM_MODE_LOCAL_OWNER_GROUP_CLASS_NAME,
@@ -255,6 +259,9 @@ export function RenderingWorldPlazaClaimModePlotList({
                       type="button"
                       aria-label={`Teleport to ${regionLabel}`}
                       title={`Teleport to ${regionLabel}`}
+                      {...definingPlazaButtonSfxDataAttributes(
+                        DEFINING_PLAZA_BUTTON_SFX_KIND.homeButton
+                      )}
                       onClick={() => {
                         onTeleportToPlotBounds(contiguousRegion.bounds);
                       }}
@@ -281,6 +288,9 @@ export function RenderingWorldPlazaClaimModePlotList({
                         isRequestingFriendPlotVisit ||
                         onRequestingFriendPlotVisit === undefined
                       }
+                      {...definingPlazaButtonSfxDataAttributes(
+                        DEFINING_PLAZA_BUTTON_SFX_KIND.homeButton
+                      )}
                       onClick={() => {
                         onRequestingFriendPlotVisit?.(
                           ownerGroup.ownerUserId,
@@ -315,6 +325,9 @@ export function RenderingWorldPlazaClaimModePlotList({
                       type="button"
                       aria-label={`Teleport to ${regionLabel}`}
                       title={`Teleport to ${regionLabel}`}
+                      {...definingPlazaButtonSfxDataAttributes(
+                        DEFINING_PLAZA_BUTTON_SFX_KIND.homeButton
+                      )}
                       onClick={() => {
                         onTeleportingToApprovedFriendPlot(
                           contiguousRegion.bounds,

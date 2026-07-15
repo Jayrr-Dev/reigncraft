@@ -3,9 +3,10 @@ import { DEFINING_PLAZA_BUTTON_SFX_KIND } from '@/components/home/domains/defini
 import { playingPlazaBookSfx } from '@/components/home/domains/playingPlazaBookSfx';
 import { playingPlazaHomeScreenButtonSfx } from '@/components/home/domains/playingPlazaHomeScreenButtonSfx';
 import { selectingPlazaHomeScreenButtonSfxClipId } from '@/components/home/domains/selectingPlazaHomeScreenButtonSfxClipId';
+import { playingWorldPlazaInventoryBagSfx } from '@/components/world/inventory/domains/playingWorldPlazaInventoryBagSfx';
 
 /**
- * Plays the resolved chest-close or custom book clip for one button press.
+ * Plays the resolved chest-close, bag-move, or custom book clip for one button press.
  */
 export function notifyingPlazaDefaultButtonPressed(
   kind: DefiningPlazaButtonSfxKind,
@@ -22,6 +23,15 @@ export function notifyingPlazaDefaultButtonPressed(
       return;
     case DEFINING_PLAZA_BUTTON_SFX_KIND.bookClose:
       playingPlazaBookSfx({ actionId: 'close' });
+      return;
+    case DEFINING_PLAZA_BUTTON_SFX_KIND.inventoryMove:
+      playingWorldPlazaInventoryBagSfx({ actionId: 'move' });
+      return;
+    case DEFINING_PLAZA_BUTTON_SFX_KIND.homeButton:
+      playingPlazaHomeScreenButtonSfx({
+        clipId: selectingPlazaHomeScreenButtonSfxClipId(),
+        volumeMultiplier,
+      });
       return;
     default:
       playingPlazaHomeScreenButtonSfx({

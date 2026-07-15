@@ -9,11 +9,11 @@ export type DefiningWorldPlazaFishingReelOpportunityWindow = {
   readonly durationMs: number;
 };
 
-/** Min reel-ready windows rolled per cast. */
+/** Reel-ready windows rolled per cast (exactly one). */
 export const DEFINING_WORLD_PLAZA_FISHING_REEL_OPPORTUNITY_WINDOW_COUNT_MIN = 1;
 
-/** Max reel-ready windows rolled per cast. */
-export const DEFINING_WORLD_PLAZA_FISHING_REEL_OPPORTUNITY_WINDOW_COUNT_MAX = 3;
+/** Max reel-ready windows rolled per cast (locked to one). */
+export const DEFINING_WORLD_PLAZA_FISHING_REEL_OPPORTUNITY_WINDOW_COUNT_MAX = 1;
 
 /** Shortest reel-ready window length. */
 export const DEFINING_WORLD_PLAZA_FISHING_REEL_OPPORTUNITY_WINDOW_DURATION_MS_MIN = 450;

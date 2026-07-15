@@ -17,6 +17,10 @@ export const DEFINING_PLAZA_BUTTON_SFX_KIND = {
   bookPageTurn: 'book-page-turn',
   bookOpen: 'book-open',
   bookClose: 'book-close',
+  /** Inventory bag slot-move / item-switch clip. */
+  inventoryMove: 'inventory-move',
+  /** Start-screen chest-close clip (claim badge buttons in-world). */
+  homeButton: 'home-button',
 } as const;
 
 export type DefiningPlazaButtonSfxKind =

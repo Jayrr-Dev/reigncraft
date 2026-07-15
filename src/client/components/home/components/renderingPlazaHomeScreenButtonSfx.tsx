@@ -18,6 +18,7 @@ export function RenderingPlazaHomeScreenButtonSfx(
     trackDefaultButtonPresses: props.trackDefaultButtonPresses ?? true,
     defaultButtonPressVolumeMultiplier:
       props.defaultButtonPressVolumeMultiplier ?? 1,
+    remapDefaultButtonPressKindTo: props.remapDefaultButtonPressKindTo,
   });
   return null;
 }

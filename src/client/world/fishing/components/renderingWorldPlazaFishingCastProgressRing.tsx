@@ -2,6 +2,7 @@
 
 import { Icon } from '@/components/ui/icon';
 
+import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 
 import {
@@ -213,6 +214,9 @@ export const RenderingWorldPlazaFishingCastProgressRing = memo(
           transition: 'opacity 180ms ease-out',
         }}
         aria-label="Reel in"
+        {...{
+          [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true,
+        }}
         onPointerDown={(event) => {
           event.preventDefault();
           event.stopPropagation();
@@ -233,6 +237,9 @@ export const RenderingWorldPlazaFishingCastProgressRing = memo(
           if (event.currentTarget.hasPointerCapture(event.pointerId)) {
             event.currentTarget.releasePointerCapture(event.pointerId);
           }
+          onReelHoldEndRef.current();
+        }}
+        onLostPointerCapture={() => {
           onReelHoldEndRef.current();
         }}
         onClick={(event) => {

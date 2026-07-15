@@ -88,8 +88,8 @@ export const DEFINING_PLAZA_LORE_BOOK_SUBTITLE =
 /** Accessible label for the lore book dialog. */
 export const LABELING_PLAZA_LORE_BOOK_DIALOG = 'Lore book';
 
-/** Accessible label for the volume shelf. */
-export const LABELING_PLAZA_LORE_BOOK_SHELF = 'Lore book shelf';
+/** Accessible label for the volume library shelf. */
+export const LABELING_PLAZA_LORE_BOOK_SHELF = 'Lore book library';
 
 /** Accessible label for the chapter bookmark list. */
 export const LABELING_PLAZA_LORE_BOOK_CHAPTER_LIST = 'Lore book chapters';
@@ -97,8 +97,8 @@ export const LABELING_PLAZA_LORE_BOOK_CHAPTER_LIST = 'Lore book chapters';
 /** Title placeholder for sealed entries. */
 export const DEFINING_PLAZA_LORE_BOOK_SEALED_TITLE = '? ? ?';
 
-/** Back-control label when returning from a volume to the shelf. */
-export const DEFINING_PLAZA_LORE_BOOK_SHELF_BACK_LABEL = 'All books';
+/** Back-control label when returning from a volume to the library. */
+export const DEFINING_PLAZA_LORE_BOOK_SHELF_BACK_LABEL = 'Library';
 
 /** Ordered chapters and entries of the lore book. */
 export const DEFINING_PLAZA_LORE_BOOK_CHAPTERS: readonly PlazaLoreBookChapter[] =

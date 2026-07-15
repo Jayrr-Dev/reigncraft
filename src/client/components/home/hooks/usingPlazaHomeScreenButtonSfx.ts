@@ -1,15 +1,17 @@
 'use client';
 
 import { computingPlazaHomeScreenButtonSfxEffectiveVolume } from '@/components/home/domains/computingPlazaHomeScreenButtonSfxEffectiveVolume';
+import type { DefiningPlazaButtonSfxKind } from '@/components/home/domains/definingPlazaDefaultButtonSfxConstants';
 import type { DefiningPlazaHomeScreenButtonSfxClipId } from '@/components/home/domains/definingPlazaHomeScreenButtonSfxConstants';
 import {
   registeringPlazaHomeScreenButtonSfxPlayback,
   type PlayingPlazaHomeScreenButtonSfxRequest,
 } from '@/components/home/domains/playingPlazaHomeScreenButtonSfx';
 import { preloadingPlazaHomeScreenUiSfx } from '@/components/home/domains/preloadingPlazaHomeScreenUiSfx';
-import { schedulingPlazaHomeScreenIdlePreload } from '@/components/home/domains/schedulingPlazaHomeScreenIdlePreload';
 import { resolvingPlazaHomeScreenButtonSfxStarAudioId } from '@/components/home/domains/resolvingPlazaHomeScreenButtonSfxStarAudioId';
+import { schedulingPlazaHomeScreenIdlePreload } from '@/components/home/domains/schedulingPlazaHomeScreenIdlePreload';
 import { trackingPlazaDefaultButtonPressSfx } from '@/components/home/domains/trackingPlazaDefaultButtonPressSfx';
+import type { StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 import {
   initializingWorldPlazaSfxVolumeStoreFromStorage,
   subscribingWorldPlazaSfxVolume,
@@ -22,19 +24,24 @@ import {
 } from '@/components/world/domains/managingWorldPlazaStarAudio';
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { useLayoutEffect, useRef } from 'react';
-import type { StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 export type UsingPlazaHomeScreenButtonSfxOptions = {
   /**
-   * When true, capture every button click for the default chest-close clip
-   * (or a declared custom / silent kind).
+   * When true, capture every button click for the resolved press sound.
    */
   readonly trackDefaultButtonPresses?: boolean;
   /**
-   * Volume scale for tracked default chest-close presses.
-   * Home keeps `1`; in-world HUD uses the quieter world UI multiplier.
+   * Volume scale for tracked chest-close / home-button presses.
+   * Home keeps `1`; claim badge buttons in-world use the quieter multiplier.
    */
   readonly defaultButtonPressVolumeMultiplier?: number;
+  /**
+   * Remap attribute-less buttons away from home chest-close (plaza → bag move).
+   */
+  readonly remapDefaultButtonPressKindTo?: Exclude<
+    DefiningPlazaButtonSfxKind,
+    'default'
+  >;
 };
 
 /**
@@ -48,6 +55,7 @@ export function usingPlazaHomeScreenButtonSfx(
   const trackDefaultButtonPresses = options.trackDefaultButtonPresses ?? true;
   const defaultButtonPressVolumeMultiplier =
     options.defaultButtonPressVolumeMultiplier ?? 1;
+  const remapDefaultButtonPressKindTo = options.remapDefaultButtonPressKindTo;
   const starAudioRef = useRef<StarAudio | null>(null);
   const isPreloadReadyRef = useRef(false);
 
@@ -121,6 +129,7 @@ export function usingPlazaHomeScreenButtonSfx(
     const unregisterDefaultButtonPressTracking = trackDefaultButtonPresses
       ? trackingPlazaDefaultButtonPressSfx({
           volumeMultiplier: defaultButtonPressVolumeMultiplier,
+          remapDefaultKindTo: remapDefaultButtonPressKindTo,
         })
       : () => {};
 
@@ -133,5 +142,9 @@ export function usingPlazaHomeScreenButtonSfx(
       starAudioRef.current = null;
       isPreloadReadyRef.current = false;
     };
-  }, [defaultButtonPressVolumeMultiplier, trackDefaultButtonPresses]);
+  }, [
+    defaultButtonPressVolumeMultiplier,
+    remapDefaultButtonPressKindTo,
+    trackDefaultButtonPresses,
+  ]);
 }

@@ -8,6 +8,7 @@ import { RenderingPlazaBookSfx } from '@/components/home/components/renderingPla
 import { RenderingPlazaHomeScreen } from '@/components/home/components/renderingPlazaHomeScreen';
 import { RenderingPlazaHomeScreenButtonSfx } from '@/components/home/components/renderingPlazaHomeScreenButtonSfx';
 import { RenderingPlazaHomeScreenMusic } from '@/components/home/components/renderingPlazaHomeScreenMusic';
+import { DEFINING_PLAZA_BUTTON_SFX_KIND } from '@/components/home/domains/definingPlazaDefaultButtonSfxConstants';
 import { DEFINING_PLAZA_HOME_SCREEN_BUTTON_SFX_WORLD_UI_VOLUME_MULTIPLIER } from '@/components/home/domains/definingPlazaHomeScreenButtonSfxConstants';
 import { usingPlazaSinglePlayerSaveHydration } from '@/components/home/hooks/usingPlazaSinglePlayerSaveHydration';
 import { DEFINING_REIGNCRAFT_TOASTER_ID } from '@/components/ui/domains/definingReigncraftToastConstants';
@@ -484,6 +485,9 @@ export const App = () => {
       <RenderingPlazaHomeScreenButtonSfx
         defaultButtonPressVolumeMultiplier={
           DEFINING_PLAZA_HOME_SCREEN_BUTTON_SFX_WORLD_UI_VOLUME_MULTIPLIER
+        }
+        remapDefaultButtonPressKindTo={
+          DEFINING_PLAZA_BUTTON_SFX_KIND.inventoryMove
         }
       />
       <div className="flex h-dvh min-h-0 w-full flex-col bg-gray-950">

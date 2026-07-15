@@ -1,6 +1,9 @@
 /**
  * Looping reel-winding SFX while the player holds reel during a cast.
  *
+ * Starts once per hold; ignores repeat start calls so a short clip / overlay
+ * remount cannot restart the sample from the beginning every frame.
+ *
  * @module components/world/fishing/domains/managingWorldPlazaFishingReelSfxLoop
  */
 
@@ -11,11 +14,19 @@ import { DEFINING_WORLD_PLAZA_FISHING_SFX_REEL_PROFILE } from '@/components/worl
 import { resolvingWorldPlazaFishingSfxStarAudioId } from '@/components/world/fishing/domains/resolvingWorldPlazaFishingSfxStarAudioId';
 
 let managingWorldPlazaFishingReelSfxLoopHandle: SoundHandle | null = null;
+let managingWorldPlazaFishingReelSfxLoopDesired = false;
 
 export function startingWorldPlazaFishingReelSfxLoop(): void {
-  if (managingWorldPlazaFishingReelSfxLoopHandle?.playing) {
+  managingWorldPlazaFishingReelSfxLoopDesired = true;
+
+  const existingHandle = managingWorldPlazaFishingReelSfxLoopHandle;
+
+  if (existingHandle?.playing) {
     return;
   }
+
+  // Stale handle after an engine prune — drop and recreate once.
+  managingWorldPlazaFishingReelSfxLoopHandle = null;
 
   const peakVolume = computingWorldPlazaFishingSfxEffectiveVolume(
     DEFINING_WORLD_PLAZA_FISHING_SFX_REEL_PROFILE
@@ -35,7 +46,10 @@ export function startingWorldPlazaFishingReelSfxLoop(): void {
 }
 
 export function stoppingWorldPlazaFishingReelSfxLoop(): void {
+  managingWorldPlazaFishingReelSfxLoopDesired = false;
+
   const handle = managingWorldPlazaFishingReelSfxLoopHandle;
+  managingWorldPlazaFishingReelSfxLoopHandle = null;
 
   if (!handle) {
     return;
@@ -44,6 +58,8 @@ export function stoppingWorldPlazaFishingReelSfxLoop(): void {
   if (handle.playing) {
     handle.stop();
   }
+}
 
-  managingWorldPlazaFishingReelSfxLoopHandle = null;
+export function checkingWorldPlazaFishingReelSfxLoopDesired(): boolean {
+  return managingWorldPlazaFishingReelSfxLoopDesired;
 }

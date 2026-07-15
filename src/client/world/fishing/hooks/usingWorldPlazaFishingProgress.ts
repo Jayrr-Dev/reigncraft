@@ -124,7 +124,8 @@ export function usingWorldPlazaFishingProgress({
     );
 
     return () => {
-      playingWorldPlazaFishingSfx({ actionId: 'reel_hold_stop' });
+      // Only tear down the frame sub — hold SFX stops on pointer up / cast end.
+      // Stopping here remounts the sample from 0 whenever deps flicker.
       unsubscribeDomOverlayFrame();
     };
   }, [snapshot.isActive]);
@@ -253,9 +254,14 @@ export function usingWorldPlazaFishingProgress({
   );
 
   const startingFishingReelHold = useCallback((): void => {
+    // Holding reel must not fight click-to-move / hold-to-run steering.
+    walkTargetRef.current = null;
+    jumpRequestedRef.current = false;
+    rollRequestedRef.current = false;
     settingWorldPlazaFishingReelHold(true);
+    // Idempotent: loop manager ignores repeat starts while already playing.
     playingWorldPlazaFishingSfx({ actionId: 'reel_hold_start' });
-  }, []);
+  }, [jumpRequestedRef, rollRequestedRef, walkTargetRef]);
 
   const stoppingFishingReelHold = useCallback((): void => {
     settingWorldPlazaFishingReelHold(false);

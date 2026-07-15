@@ -471,15 +471,17 @@ export function creatingWorldPlazaHowlerAudioEngine(): ManagingWorldPlazaHowlerA
 
     if (loop) {
       asset.howl.loop(true, soundId);
+    } else {
+      // Looping voices must stay tracked across Howler 'end' ticks (fires each
+      // cycle). Only one-shots release the voice slot when the clip finishes.
+      asset.howl.once(
+        'end',
+        () => {
+          removingVoice(engineVoiceId);
+        },
+        soundId
+      );
     }
-
-    asset.howl.once(
-      'end',
-      () => {
-        removingVoice(engineVoiceId);
-      },
-      soundId
-    );
 
     return {
       id: engineVoiceId,

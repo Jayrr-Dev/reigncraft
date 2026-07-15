@@ -29,6 +29,7 @@ import {
 } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { projectingWorldPlazaViewportClientPointToGridPoint } from '@/components/world/domains/projectingWorldPlazaViewportClientPointToGridPoint';
 import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
+import { gettingWorldPlazaFishingReelCastActive } from '@/components/world/fishing/domains/managingWorldPlazaFishingReelCastState';
 import {
   applyingWorldPlazaNavigationWalkTargets,
   clearingWorldPlazaNavigationWalkWaypoints,
@@ -313,12 +314,7 @@ export function trackingWorldPlazaClickMovementTarget({
         playerHeightWorldLayers
       );
     },
-    [
-      isJumpingRef,
-      placedBlocksRef,
-      playerHeightWorldLayers,
-      playerPositionRef,
-    ]
+    [isJumpingRef, placedBlocksRef, playerHeightWorldLayers, playerPositionRef]
   );
 
   const resolvingPlazaClickTargetFromEvent = useCallback(
@@ -395,6 +391,11 @@ export function trackingWorldPlazaClickMovementTarget({
         event.button !==
         DEFINING_WORLD_PLAZA_CLICK_MOVEMENT_PRIMARY_POINTER_BUTTON
       ) {
+        return;
+      }
+
+      // Reel hold / cast channel owns the pointer — do not start click-walk.
+      if (gettingWorldPlazaFishingReelCastActive()) {
         return;
       }
 
@@ -509,6 +510,23 @@ export function trackingWorldPlazaClickMovementTarget({
     let lastSteerRefreshAtMs = 0;
 
     const refreshingHeldWalkTarget = (): void => {
+      // Fishing cast clears walk intents; hold-to-run must not re-steer into them.
+      if (gettingWorldPlazaFishingReelCastActive()) {
+        if (isPointerHeldRef.current) {
+          isPointerHeldRef.current = false;
+          pointerHeldSinceMsRef.current = 0;
+          lastPointerClientRef.current = null;
+          walkTargetRef.current = null;
+          isWalkingRef.current = false;
+          isClickRunIntentRef.current = false;
+        }
+
+        animationFrameId = window.requestAnimationFrame(
+          refreshingHeldWalkTarget
+        );
+        return;
+      }
+
       const pointerClient = lastPointerClientRef.current;
       const nowMs = performance.now();
       const isHoldToRunActive =

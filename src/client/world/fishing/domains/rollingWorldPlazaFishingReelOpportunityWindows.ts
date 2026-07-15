@@ -42,7 +42,7 @@ function checkingWorldPlazaFishingReelOpportunityWindowOverlaps(
 }
 
 /**
- * Schedules one or more non-overlapping reel-ready windows across a cast.
+ * Schedules exactly one reel-ready window across a cast.
  */
 export function rollingWorldPlazaFishingReelOpportunityWindows(
   castDurationMs: number,

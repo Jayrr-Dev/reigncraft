@@ -23,7 +23,7 @@ export const DEFINING_PLAZA_HOME_SCREEN_BUTTON_SFX_CLIP_VARIANTS: readonly Defin
 export const DEFINING_PLAZA_HOME_SCREEN_BUTTON_SFX_TARGET_VOLUME = 0.55;
 
 /**
- * Volume scale for in-world HUD / panel buttons that reuse this clip.
- * Quieter than the home menu so plaza UI clicks stay soft.
+ * Volume scale for in-world claim badge buttons that reuse the home chest clip.
+ * Quieter than the home menu so claim list feedback stays soft.
  */
 export const DEFINING_PLAZA_HOME_SCREEN_BUTTON_SFX_WORLD_UI_VOLUME_MULTIPLIER = 0.55;

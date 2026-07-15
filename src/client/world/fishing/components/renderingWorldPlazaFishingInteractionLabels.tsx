@@ -341,6 +341,13 @@ export function RenderingWorldPlazaFishingInteractionLabels({
                   }
                   onReelHoldEndRef.current();
                 }}
+                onLostPointerCapture={() => {
+                  if (!isCasting) {
+                    return;
+                  }
+
+                  onReelHoldEndRef.current();
+                }}
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();

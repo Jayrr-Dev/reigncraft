@@ -146,22 +146,22 @@ export function gettingWorldPlazaFishingReelEscapeReduction(): number {
 }
 
 export function settingWorldPlazaFishingReelHold(isHoldingReel: boolean): void {
+  const wasHoldingReel = managingWorldPlazaFishingReelCastState.isHoldingReel;
+
+  if (isHoldingReel === wasHoldingReel) {
+    return;
+  }
+
   const shouldCatchReel =
     isHoldingReel &&
     (managingWorldPlazaFishingReelCastState.isInsideOpportunityWindow ||
       managingWorldPlazaFishingReelCastState.hasCaughtReel);
-  const wasHoldingReel = managingWorldPlazaFishingReelCastState.isHoldingReel;
 
   managingWorldPlazaFishingReelCastState = {
     ...managingWorldPlazaFishingReelCastState,
     isHoldingReel,
-    // Fresh press restarts the accelerate → slow pull cycle.
-    holdElapsedMs:
-      isHoldingReel && !wasHoldingReel
-        ? 0
-        : isHoldingReel
-          ? managingWorldPlazaFishingReelCastState.holdElapsedMs
-          : 0,
+    // Fresh press (or release) resets the accelerate → slow pull cycle.
+    holdElapsedMs: 0,
     hasCaughtReel:
       managingWorldPlazaFishingReelCastState.hasCaughtReel || shouldCatchReel,
   };
@@ -173,6 +173,11 @@ export function gettingWorldPlazaFishingReelHold(): boolean {
 
 export function gettingWorldPlazaFishingReelCaught(): boolean {
   return managingWorldPlazaFishingReelCastState.hasCaughtReel;
+}
+
+/** True while a fishing cast reel session is live (between begin and reset). */
+export function gettingWorldPlazaFishingReelCastActive(): boolean {
+  return managingWorldPlazaFishingReelCastState.castStartedAtMs > 0;
 }
 
 export type ApplyingWorldPlazaFishingReelEscapeReductionResult =

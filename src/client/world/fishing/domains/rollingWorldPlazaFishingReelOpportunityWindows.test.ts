@@ -14,16 +14,16 @@ import { rollingWorldPlazaFishingReelOpportunityWindows } from '@/components/wor
 import { describe, expect, it } from 'vitest';
 
 describe('rollingWorldPlazaFishingReelOpportunityWindows', () => {
-  it('returns at least one window for a normal cast duration', () => {
+  it('returns exactly one window for a normal cast duration', () => {
     const windows = rollingWorldPlazaFishingReelOpportunityWindows(
       6000,
       () => 0.5
     );
 
-    expect(windows.length).toBeGreaterThanOrEqual(
-      DEFINING_WORLD_PLAZA_FISHING_REEL_OPPORTUNITY_WINDOW_COUNT_MIN
+    expect(windows).toHaveLength(
+      DEFINING_WORLD_PLAZA_FISHING_REEL_OPPORTUNITY_WINDOW_COUNT_MAX
     );
-    expect(windows.length).toBeLessThanOrEqual(
+    expect(DEFINING_WORLD_PLAZA_FISHING_REEL_OPPORTUNITY_WINDOW_COUNT_MIN).toBe(
       DEFINING_WORLD_PLAZA_FISHING_REEL_OPPORTUNITY_WINDOW_COUNT_MAX
     );
   });

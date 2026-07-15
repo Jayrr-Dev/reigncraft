@@ -3223,9 +3223,45 @@ video {
   }
 }
 
-/* --- Lore book (Codex Lore) --- */
+/* --- Lore book library (Codex Lore) --- */
 
-/* Dark leather cover wrapping the two-page spread. */
+.lore-book-library {
+  position: relative;
+}
+
+.lore-book-library__board {
+  background:
+    radial-gradient(
+      ellipse at 50% 0%,
+      rgba(217, 164, 65, 0.1),
+      transparent 55%
+    ),
+    linear-gradient(180deg, #3a281c 0%, #2a1c14 48%, #1f1510 100%);
+  border: 2px solid rgba(196, 163, 90, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 230, 170, 0.08),
+    0 14px 32px rgba(0, 0, 0, 0.5);
+}
+
+.lore-book-library__ledge {
+  background: linear-gradient(
+    180deg,
+    rgba(120, 84, 48, 0.15) 0%,
+    #5a3d24 18%,
+    #3d2918 100%
+  );
+  border-top: 2px solid rgba(196, 163, 90, 0.4);
+  box-shadow: inset 0 2px 0 rgba(255, 220, 150, 0.12);
+}
+
+.lore-book-library-volume:hover .lore-book-library-volume__cover,
+.lore-book-library-volume:focus-visible .lore-book-library-volume__cover {
+  filter: brightness(1.08);
+}
+
+/* --- Lore book reader pages (open-book frame) --- */
+
+/* Dark leather cover wrapping the two-page spread (legacy / unused shell). */
 .lore-book-cover {
   position: relative;
   /* Fixed frame so flipping pages never resizes the dialog. */
