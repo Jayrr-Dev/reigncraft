@@ -10,7 +10,6 @@
 import { readingWorldPlazaLastPositionFromStorage } from '@/components/world/domains/readingWorldPlazaLastPositionFromStorage';
 import { readingWorldPlazaWorldSeedFromStorage } from '@/components/world/domains/readingWorldPlazaWorldSeedFromStorage';
 import { writingWorldPlazaWorldSeedToStorage } from '@/components/world/domains/writingWorldPlazaWorldSeedToStorage';
-import { invalidatingWorldPlazaProceduralGenerationCaches } from '@/components/world/domains/invalidatingWorldPlazaProceduralGenerationCaches';
 import type { PlazaSaveSlotIndex } from '../../../shared/plazaGameSession';
 import {
   gettingWorldGenerationSeed,
@@ -22,6 +21,18 @@ let managingWorldPlazaWorldSeedStorageOwnerId: string | null = null;
 let managingWorldPlazaWorldSeedCloudSaveSlotIndex: PlazaSaveSlotIndex | null =
   null;
 let managingWorldPlazaWorldSeedValue = 0;
+
+/**
+ * Clears procedural terrain caches without pinning the invalidation barrel in
+ * the main chunk (other feature stores defer the same import for cycle safety).
+ */
+function invalidatingWorldPlazaProceduralGenerationCachesDeferred(): void {
+  void import('@/components/world/domains/invalidatingWorldPlazaProceduralGenerationCaches').then(
+    (invalidatingModule) => {
+      invalidatingModule.invalidatingWorldPlazaProceduralGenerationCaches();
+    }
+  );
+}
 
 export type InitializingWorldPlazaWorldSeedStoreOptions = {
   cloudSaveSlotIndex?: PlazaSaveSlotIndex | null;
@@ -66,7 +77,7 @@ function applyingWorldPlazaWorldSeed(worldSeed: number): void {
 
   managingWorldPlazaWorldSeedValue = nextSeed;
   settingWorldGenerationSeed(nextSeed);
-  invalidatingWorldPlazaProceduralGenerationCaches();
+  invalidatingWorldPlazaProceduralGenerationCachesDeferred();
 }
 
 /**

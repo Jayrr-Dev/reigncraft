@@ -81,6 +81,6 @@
     "build": "node scripts/syncPublicToDist.mjs && vite build"
   },
   "dev": {
-    "subreddit": "reigncraft_dev"
+    "subreddit": "Reigncraft"
   }
 }
