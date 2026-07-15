@@ -12,35 +12,36 @@ import {
  * Page 0 is the main equippable row; pages 1+ are storage rows.
  *
  * @param storagePageIndex - Requested page (0 = main hotbar)
+ * @param pageCount - Total hotbar pages (main + storage); defaults to base layout
  */
 export function resolvingWorldPlazaInventoryClampedStoragePageIndex(
-  storagePageIndex: number
+  storagePageIndex: number,
+  pageCount: number = DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT
 ): number {
   if (!Number.isFinite(storagePageIndex)) {
     return 0;
   }
 
-  return Math.max(
-    0,
-    Math.min(
-      DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT - 1,
-      Math.trunc(storagePageIndex)
-    )
-  );
+  const maxPage = Math.max(0, Math.trunc(pageCount) - 1);
+
+  return Math.max(0, Math.min(maxPage, Math.trunc(storagePageIndex)));
 }
 
 /**
  * Absolute slot indices for one storage-only page (length = page size).
  *
  * @param storagePageIndex - Storage-only page (0 = first storage row)
+ * @param storagePageCount - Storage-only page count; defaults to base layout
  */
 export function resolvingWorldPlazaInventoryStoragePageSlotIndices(
-  storagePageIndex: number
+  storagePageIndex: number,
+  storagePageCount: number = DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_PAGE_COUNT
 ): readonly number[] {
+  const maxStoragePage = Math.max(0, Math.trunc(storagePageCount) - 1);
   const page = Math.max(
     0,
     Math.min(
-      DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_PAGE_COUNT - 1,
+      maxStoragePage,
       Math.trunc(Number.isFinite(storagePageIndex) ? storagePageIndex : 0)
     )
   );
@@ -60,12 +61,16 @@ export function resolvingWorldPlazaInventoryStoragePageSlotIndices(
  * Page 0 = main equippable row. Later pages = storage rows.
  *
  * @param storagePageIndex - Hotbar page (0-based)
+ * @param pageCount - Total hotbar pages (main + storage)
  */
 export function resolvingWorldPlazaInventoryVisibleSlotIndices(
-  storagePageIndex: number
+  storagePageIndex: number,
+  pageCount: number = DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT
 ): readonly number[] {
-  const page =
-    resolvingWorldPlazaInventoryClampedStoragePageIndex(storagePageIndex);
+  const page = resolvingWorldPlazaInventoryClampedStoragePageIndex(
+    storagePageIndex,
+    pageCount
+  );
 
   if (page === 0) {
     return Array.from(
@@ -74,7 +79,10 @@ export function resolvingWorldPlazaInventoryVisibleSlotIndices(
     );
   }
 
-  return resolvingWorldPlazaInventoryStoragePageSlotIndices(page - 1);
+  return resolvingWorldPlazaInventoryStoragePageSlotIndices(
+    page - 1,
+    Math.max(0, Math.trunc(pageCount) - 1)
+  );
 }
 
 /**
@@ -92,8 +100,10 @@ export function resolvingWorldPlazaInventoryStoragePageIndexFromWheelDeltaY(
   storagePageCount: number,
   wheelDeltaY: number
 ): number {
-  const currentPage =
-    resolvingWorldPlazaInventoryClampedStoragePageIndex(storagePageIndex);
+  const currentPage = resolvingWorldPlazaInventoryClampedStoragePageIndex(
+    storagePageIndex,
+    storagePageCount
+  );
   const maxPage = Math.max(0, Math.trunc(storagePageCount) - 1);
 
   if (!Number.isFinite(wheelDeltaY) || wheelDeltaY === 0) {

@@ -8,6 +8,7 @@
 import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeToolRecipeIds';
 import type { WorldPlazaCodexSectionId } from '@/components/world/domains/definingWorldPlazaCodexConstants';
+import type { DefiningWorldPlazaInventoryStorageExpansionPageTier } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
 
 /** Which dual-progress meter the chest sits on. */
 export type PlazaCodexMilestoneRewardMeterKind = 'discovered' | 'studied';
@@ -22,8 +23,18 @@ export type PlazaCodexMilestoneAttachRecipeReward = {
   readonly description: string;
 };
 
+/** Unlock one bonus inventory storage page (+6 slots; global cap 3). */
+export type PlazaCodexMilestoneUnlockStorageRowReward = {
+  readonly kind: 'unlock-storage-row';
+  /** Dialog / popover art tier (rare / mythic / legendary ledger page). */
+  readonly pageTier: DefiningWorldPlazaInventoryStorageExpansionPageTier;
+  readonly label: string;
+  readonly description: string;
+};
+
 export type PlazaCodexMilestoneRewardGrant =
-  PlazaCodexMilestoneAttachRecipeReward;
+  | PlazaCodexMilestoneAttachRecipeReward
+  | PlazaCodexMilestoneUnlockStorageRowReward;
 
 export type PlazaCodexMilestoneRewardDefinition = {
   readonly sectionId: WorldPlazaCodexSectionId;
@@ -72,6 +83,42 @@ export const DEFINING_PLAZA_CODEX_MILESTONE_REWARD_REGISTRY = [
       label: 'Wood Fishing Rod recipe',
       description:
         'Pinned in your cookbook. Rebuild a wood rod when the tip snaps.',
+    },
+  },
+  {
+    sectionId: 'herbarium',
+    meterKind: 'discovered',
+    percent: 20,
+    reward: {
+      kind: 'unlock-storage-row',
+      pageTier: 'rare',
+      label: 'Rare Packing Ledger',
+      description:
+        'Your pack gains one storage page (+6 slots). At most three ledgers can bind.',
+    },
+  },
+  {
+    sectionId: 'lapidary',
+    meterKind: 'discovered',
+    percent: 20,
+    reward: {
+      kind: 'unlock-storage-row',
+      pageTier: 'mythic',
+      label: 'Mythic Packing Ledger',
+      description:
+        'Your pack gains one storage page (+6 slots). At most three ledgers can bind.',
+    },
+  },
+  {
+    sectionId: 'bestiary',
+    meterKind: 'discovered',
+    percent: 20,
+    reward: {
+      kind: 'unlock-storage-row',
+      pageTier: 'legendary',
+      label: 'Legendary Packing Ledger',
+      description:
+        'Your pack gains one storage page (+6 slots). At most three ledgers can bind.',
     },
   },
 ] as const satisfies readonly PlazaCodexMilestoneRewardDefinition[];

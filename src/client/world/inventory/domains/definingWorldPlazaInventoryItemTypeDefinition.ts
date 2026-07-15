@@ -6,6 +6,7 @@ import type { DefiningWorldPlazaInventoryItemCost } from '@/components/world/inv
 import type { DefiningWorldPlazaInventoryCustomItemIconId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
 import type { DefiningWorldPlazaInventoryItemSpecialTag } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemSpecialTagConstants';
 import type { DefiningWorldPlazaInventoryStackQuantityDisplayBehavior } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStackQuantityDisplay';
+import type { DefiningWorldPlazaInventoryStorageExpansionPageTier } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
 
 /** Hunger restoration applied when a food item is eaten. */
 export type DefiningWorldPlazaInventoryItemFoodBehavior = {
@@ -109,6 +110,12 @@ export type DefiningWorldPlazaInventoryItemTypeDefinition =
      */
     readonly recipePage?: {
       readonly recipeId: DefiningWorldPlazaCraftModeRecipeId;
+    };
+    /**
+     * Packing ledger page: double-click unlocks one bonus storage row (cap 3).
+     */
+    readonly storageExpansionPage?: {
+      readonly tier: DefiningWorldPlazaInventoryStorageExpansionPageTier;
     };
     /**
      * When true, the hotbar ground action uses Place instead of Drop

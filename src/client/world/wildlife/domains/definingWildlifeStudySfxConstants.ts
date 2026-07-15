@@ -23,7 +23,8 @@ export type DefiningWildlifeStudySfxSectionId =
   | 'study'
   | 'codex'
   | 'chest'
-  | 'key';
+  | 'key'
+  | 'recipe';
 
 /**
  * Base one-shot volume per section before the SFX volume slider is applied.
@@ -41,6 +42,8 @@ export const DEFINING_WILDLIFE_STUDY_SFX_TARGET_VOLUME_BY_SECTION: Record<
   chest: 0.5,
   /** Finding a chest key while foraging: softest of the set. */
   key: 0.38,
+  /** Auto-granted recipe pages (Bestiary / Lapidary). */
+  recipe: 0.68,
 };
 
 /** @deprecated Prefer {@link DEFINING_WILDLIFE_STUDY_SFX_TARGET_VOLUME_BY_SECTION}.study */

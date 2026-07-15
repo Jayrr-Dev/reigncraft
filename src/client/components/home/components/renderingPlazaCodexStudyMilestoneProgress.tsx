@@ -6,7 +6,6 @@
 
 import { RenderingPlazaCodexMilestoneRewardClaimDialog } from '@/components/home/components/renderingPlazaCodexMilestoneRewardClaimDialog';
 import { claimingPlazaCodexMilestoneReward } from '@/components/home/domains/claimingPlazaCodexMilestoneReward';
-import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
 import type { PlazaCodexMilestoneRewardDefinition } from '@/components/home/domains/definingPlazaCodexMilestoneRewardRegistry';
 import {
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_FILL_CLASS_NAME,
@@ -31,7 +30,10 @@ import { Icon } from '@/components/ui/icon';
 import { RenderingWorldPlazaCraftModeRecipeSpriteSheetPreview } from '@/components/world/building/components/renderingWorldPlazaCraftModeRecipeSpriteSheetPreview';
 import { resolvingWorldPlazaCraftModeRecipeDefinition } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry';
 import type { DefiningWorldPlazaCraftModeRecipeVisual } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
+import { resolvingWorldPlazaInventoryStorageExpansionPageSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionPageSpriteSheetConstants';
+import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import { usingWorldPlazaAnchoredPopoverViewportShiftX } from '@/components/world/hooks/usingWorldPlazaAnchoredPopoverViewportShiftX';
+import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
 import { useCallback, useRef, useState } from 'react';
 
 export type RenderingPlazaCodexStudyMilestoneProgressProps = {
@@ -54,10 +56,23 @@ function computingPlazaCodexStudyMilestoneProgressPercent(
 
 function RenderingPlazaCodexStudyMilestoneRewardPopoverIcon({
   recipeVisual,
+  itemSpriteSheet,
 }: {
-  readonly recipeVisual: DefiningWorldPlazaCraftModeRecipeVisual;
-}): React.JSX.Element {
-  if (recipeVisual.visualKind === 'sprite-sheet') {
+  readonly recipeVisual: DefiningWorldPlazaCraftModeRecipeVisual | null;
+  readonly itemSpriteSheet: DefiningWorldPlazaInventorySpriteSheetIcon | null;
+}): React.JSX.Element | null {
+  if (itemSpriteSheet) {
+    return (
+      <RenderingWorldPlazaCraftModeRecipeSpriteSheetPreview
+        spriteSheetIcon={itemSpriteSheet}
+        className={
+          DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_POPOVER_ICON_CLASS_NAME
+        }
+      />
+    );
+  }
+
+  if (recipeVisual?.visualKind === 'sprite-sheet') {
     return (
       <RenderingWorldPlazaCraftModeRecipeSpriteSheetPreview
         spriteSheetIcon={recipeVisual.spriteSheetIcon}
@@ -68,7 +83,7 @@ function RenderingPlazaCodexStudyMilestoneRewardPopoverIcon({
     );
   }
 
-  if (recipeVisual.visualKind === 'iconify') {
+  if (recipeVisual?.visualKind === 'iconify') {
     return (
       <Icon
         icon={recipeVisual.recipeEmblemIconifyIcon}
@@ -79,14 +94,18 @@ function RenderingPlazaCodexStudyMilestoneRewardPopoverIcon({
     );
   }
 
-  return (
-    <Icon
-      icon="mdi:campfire"
-      className={
-        DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_POPOVER_ICON_CLASS_NAME
-      }
-    />
-  );
+  if (recipeVisual?.visualKind === 'world-plaza-campfire') {
+    return (
+      <Icon
+        icon="mdi:campfire"
+        className={
+          DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_POPOVER_ICON_CLASS_NAME
+        }
+      />
+    );
+  }
+
+  return null;
 }
 
 function RenderingPlazaCodexStudyMilestoneRewardMarker({
@@ -122,6 +141,12 @@ function RenderingPlazaCodexStudyMilestoneRewardMarker({
           marker.rewardDefinition.reward.recipeId
         )?.recipeVisual ?? null)
       : null;
+  const rewardItemSpriteSheet =
+    marker.rewardDefinition?.reward.kind === 'unlock-storage-row'
+      ? resolvingWorldPlazaInventoryStorageExpansionPageSpriteSheetIcon(
+          marker.rewardDefinition.reward.pageTier
+        )
+      : null;
   const { popoverRef, popoverShiftStyle } =
     usingWorldPlazaAnchoredPopoverViewportShiftX(
       isPopoverOpen ? `${marker.id}:${popoverLabel}` : null
@@ -141,7 +166,11 @@ function RenderingPlazaCodexStudyMilestoneRewardMarker({
               marker.rewardDefinition,
               marker.isReached
             );
-            if (claimResult === 'attached') {
+            if (
+              claimResult === 'attached' ||
+              claimResult === 'unlocked' ||
+              claimResult === 'at-cap'
+            ) {
               playingWildlifeStudySfx({ sectionId: 'codex' });
               onRewardClaimed(marker.rewardDefinition);
               return;
@@ -177,9 +206,10 @@ function RenderingPlazaCodexStudyMilestoneRewardMarker({
             left: `${marker.percent}%`,
           }}
         >
-          {rewardRecipeVisual ? (
+          {rewardRecipeVisual || rewardItemSpriteSheet ? (
             <RenderingPlazaCodexStudyMilestoneRewardPopoverIcon
               recipeVisual={rewardRecipeVisual}
+              itemSpriteSheet={rewardItemSpriteSheet}
             />
           ) : null}
           <span

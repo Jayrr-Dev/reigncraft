@@ -78,6 +78,7 @@ import {
   resolvingWorldPlazaInventoryItemForgeLevel,
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemInstanceInspectFields';
 import { checkingWorldPlazaInventoryItemIsRecipePage } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemRecipePage';
+import { checkingWorldPlazaInventoryItemIsStorageExpansionPage } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemStorageExpansionPage';
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
 import {
   parsingWorldPlazaMushroomSpeciesIdFromItemTypeId,
@@ -120,6 +121,7 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly canEat: boolean;
   readonly canStudy: boolean;
   readonly canAttachRecipePage: boolean;
+  readonly canUnlockStorageRow: boolean;
   readonly canDrop: boolean;
   /** Drop for loose loot; Place for world-set gear (traps). */
   readonly dropActionLabel: string;
@@ -884,6 +886,9 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
         item.itemTypeId
       ),
+      canUnlockStorageRow: checkingWorldPlazaInventoryItemIsStorageExpansionPage(
+        item.itemTypeId
+      ),
       canDrop: definition.isDroppable,
       dropActionLabel:
         resolvingWorldPlazaInventoryItemGroundActionLabel(definition),
@@ -995,6 +1000,9 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       options.mushroomStudyCountsBySpeciesId
     ),
     canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
+      item.itemTypeId
+    ),
+    canUnlockStorageRow: checkingWorldPlazaInventoryItemIsStorageExpansionPage(
       item.itemTypeId
     ),
     canDrop: definition.isDroppable,

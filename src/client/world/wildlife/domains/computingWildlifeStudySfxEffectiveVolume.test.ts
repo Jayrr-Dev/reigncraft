@@ -7,5 +7,6 @@ describe('computingWildlifeStudySfxEffectiveVolume', () => {
     expect(computingWildlifeStudySfxEffectiveVolume('codex')).toBe(0.74);
     expect(computingWildlifeStudySfxEffectiveVolume('chest')).toBe(0.5);
     expect(computingWildlifeStudySfxEffectiveVolume('key')).toBe(0.38);
+    expect(computingWildlifeStudySfxEffectiveVolume('recipe')).toBe(0.68);
   });
 });

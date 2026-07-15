@@ -3562,7 +3562,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   );
 
   const grantingLapidaryOreStudyRecipeRewardsIfEarned =
-    useCallback((): void => {
+    useCallback((): boolean => {
       let rewardToasts: readonly string[] = [];
       updatingInventoryState((currentState) => {
         const lapidaryRewards =
@@ -3577,9 +3577,13 @@ function RenderingWorldPlazaPixiSceneConnected({
           ? lapidaryRewards.state
           : null;
       });
+      if (rewardToasts.length > 0) {
+        playingWildlifeStudySfx({ sectionId: 'recipe' });
+      }
       for (const toast of rewardToasts) {
         showingGameplayHudToast(toast);
       }
+      return rewardToasts.length > 0;
     }, [
       localPersistenceOwnerId,
       onlineUserId,
@@ -3587,27 +3591,35 @@ function RenderingWorldPlazaPixiSceneConnected({
       updatingInventoryState,
     ]);
 
-  const grantingBestiarySightedRecipeRewardsIfEarned = useCallback((): void => {
-    let rewardToasts: readonly string[] = [];
-    updatingInventoryState((currentState) => {
-      const bestiaryRewards =
-        ensuringWorldPlazaInventoryBestiarySightedRecipeRewards(currentState, {
-          storageOwnerId: onlineUserId ?? localPersistenceOwnerId,
-        });
-      rewardToasts = bestiaryRewards.rewardToasts;
-      return bestiaryRewards.grantedRecipeIds.length > 0
-        ? bestiaryRewards.state
-        : null;
-    });
-    for (const toast of rewardToasts) {
-      showingGameplayHudToast(toast);
-    }
-  }, [
-    localPersistenceOwnerId,
-    onlineUserId,
-    showingGameplayHudToast,
-    updatingInventoryState,
-  ]);
+  const grantingBestiarySightedRecipeRewardsIfEarned =
+    useCallback((): boolean => {
+      let rewardToasts: readonly string[] = [];
+      updatingInventoryState((currentState) => {
+        const bestiaryRewards =
+          ensuringWorldPlazaInventoryBestiarySightedRecipeRewards(
+            currentState,
+            {
+              storageOwnerId: onlineUserId ?? localPersistenceOwnerId,
+            }
+          );
+        rewardToasts = bestiaryRewards.rewardToasts;
+        return bestiaryRewards.grantedRecipeIds.length > 0
+          ? bestiaryRewards.state
+          : null;
+      });
+      if (rewardToasts.length > 0) {
+        playingWildlifeStudySfx({ sectionId: 'recipe' });
+      }
+      for (const toast of rewardToasts) {
+        showingGameplayHudToast(toast);
+      }
+      return rewardToasts.length > 0;
+    }, [
+      localPersistenceOwnerId,
+      onlineUserId,
+      showingGameplayHudToast,
+      updatingInventoryState,
+    ]);
 
   const { validatingRockMineStart, completingRockMineLayer } =
     usingWorldPlazaRockMineInteraction({
@@ -5553,8 +5565,9 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
 
       recordingWorldPlazaBestiarySpeciesStudied(pending.speciesId, studyPoints);
-      playingWildlifeStudySfx();
-      grantingBestiarySightedRecipeRewardsIfEarned();
+      if (!grantingBestiarySightedRecipeRewardsIfEarned()) {
+        playingWildlifeStudySfx();
+      }
     },
     [
       grantingBestiarySightedRecipeRewardsIfEarned,
@@ -5664,7 +5677,6 @@ function RenderingWorldPlazaPixiSceneConnected({
         })
       );
       recordingWorldPlazaBestiarySpeciesStudied(entry.speciesId, studyPoints);
-      playingWildlifeStudySfx();
       const studyCount =
         gettingWorldPlazaBestiaryStudyCountsSnapshot()[entry.speciesId] ??
         studyPoints;
@@ -5677,7 +5689,9 @@ function RenderingWorldPlazaPixiSceneConnected({
           progressLabel: formattingPlazaBestiaryStudyCountProgress(studyCount),
         })
       );
-      grantingBestiarySightedRecipeRewardsIfEarned();
+      if (!grantingBestiarySightedRecipeRewardsIfEarned()) {
+        playingWildlifeStudySfx();
+      }
       clearingInteractableBlockClickSelection();
     },
     [
@@ -7023,7 +7037,9 @@ function RenderingWorldPlazaPixiSceneConnected({
               formattingPlazaLapidaryStudyCountProgress(studyCount),
           })
         );
-        grantingLapidaryOreStudyRecipeRewardsIfEarned();
+        if (!grantingLapidaryOreStudyRecipeRewardsIfEarned()) {
+          playingWildlifeStudySfx();
+        }
         return;
       }
 
@@ -7061,6 +7077,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               formattingPlazaHerbariumFlowerStudyCountProgress(studyCount),
           })
         );
+        playingWildlifeStudySfx();
         return;
       }
 
@@ -7077,6 +7094,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               formattingPlazaHerbariumCloverStudyCountProgress(studyCount),
           })
         );
+        playingWildlifeStudySfx();
         return;
       }
 
@@ -7096,6 +7114,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               formattingPlazaHerbariumBerryStudyCountProgress(studyCount),
           })
         );
+        playingWildlifeStudySfx();
         return;
       }
 
@@ -7116,6 +7135,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               formattingPlazaHerbariumMushroomStudyCountProgress(studyCount),
           })
         );
+        playingWildlifeStudySfx();
       }
     },
     [

@@ -7,7 +7,10 @@
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COCONUT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_COCONUT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ROASTED_COFFEE_BEANS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { DEFINING_WORLD_PLAZA_COFFEE_BEANS_CAMPFIRE_ROAST_DURATION_MS } from '@/components/world/inventory/domains/definingWorldPlazaCoffeeProcessingConstants';
 import { DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
 import { DEFINING_WILDLIFE_FISH_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeFishMeatCatalog';
 import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
@@ -20,7 +23,7 @@ export type DefiningWildlifeMeatCookRecipe = {
   cookDurationMs: number;
 };
 
-/** Palm coconut husk → roasted split coconut. */
+/** Palm coconut husk → roasted split coconut; coffee beans → campfire roast. */
 const DEFINING_WORLD_PLAZA_FORAGE_COOK_RECIPES: readonly DefiningWildlifeMeatCookRecipe[] =
   [
     {
@@ -28,6 +31,13 @@ const DEFINING_WORLD_PLAZA_FORAGE_COOK_RECIPES: readonly DefiningWildlifeMeatCoo
       cookedItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_COCONUT,
       cookedDisplayName: 'Cooked Coconut',
       cookDurationMs: 2_000,
+    },
+    {
+      rawItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS,
+      cookedItemTypeId:
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ROASTED_COFFEE_BEANS,
+      cookedDisplayName: 'Roasted Coffee Beans',
+      cookDurationMs: DEFINING_WORLD_PLAZA_COFFEE_BEANS_CAMPFIRE_ROAST_DURATION_MS,
     },
     ...DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG.map((entry) => ({
       rawItemTypeId: entry.rawItemTypeId,

@@ -4,6 +4,7 @@ import {
 } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import { DEFINING_INVENTORY_UNLIMITED_STACK_SIZE } from '@/components/inventory/domains/definingInventoryStackConstants';
 import { registeringWorldPlazaCraftRecipePageInventoryItems } from '@/components/world/crafting/domains/registeringWorldPlazaCraftRecipePageInventoryItems';
+import { registeringWorldPlazaInventoryStorageExpansionPageItems } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryStorageExpansionPageItems';
 import { DEFINING_WORLD_PLAZA_TOOL_TIER_STATS } from '@/components/world/equipment/domains/definingWorldPlazaToolTierConstants';
 import { registeringWorldPlazaFishingCatchInventoryItems } from '@/components/world/fishing/domains/registeringWorldPlazaFishingCatchInventoryItems';
 import {
@@ -387,6 +388,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     ...registeringWorldPlazaSpritcoreTierItemDefinitions(),
     ...registeringWorldPlazaInventoryBagItemDefinitions(),
     ...registeringWorldPlazaCraftRecipePageInventoryItems(),
+    ...registeringWorldPlazaInventoryStorageExpansionPageItems(),
   ];
 
 /** Pre-built registry for world plaza inventory item types. */

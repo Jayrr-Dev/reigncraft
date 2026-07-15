@@ -356,6 +356,9 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CHEST_KEY =
 /** Coffee processing chain from coffee cherries. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS =
   'world-plaza-coffee-beans' as const;
+/** Campfire-roasted beans for a longer teapot cup brew. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ROASTED_COFFEE_BEANS =
+  'world-plaza-roasted-coffee-beans' as const;
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_COFFEE =
   'world-plaza-brewed-coffee' as const;
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP =

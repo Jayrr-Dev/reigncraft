@@ -111,6 +111,10 @@ export type PlazaSinglePlayerSaveSlotPersistedData = {
   playerConditions: PlazaSinglePlayerSavePlayerConditions | null;
   /** Cookbook recipe page ids the player has attached (Guide unlock). */
   attachedRecipeIds: readonly string[] | null;
+  /** Bonus inventory storage rows unlocked (0–3). */
+  inventoryBonusStorageRows: number | null;
+  /** Codex milestone keys already claimed for storage-expansion rewards. */
+  inventoryStorageExpansionClaimedCodexKeys: readonly string[] | null;
   /** Bestiary sighted / studied progress. */
   bestiaryDiscovery: PlazaSinglePlayerSaveBestiaryDiscovery | null;
   /** Biome kinds entered at least once. */
@@ -128,6 +132,8 @@ export type PlazaSinglePlayerSaveSlotUpdateRequest = {
   inventory?: WorldInventoryDevvitPersistedState | null;
   playerConditions?: PlazaSinglePlayerSavePlayerConditions | null;
   attachedRecipeIds?: readonly string[] | null;
+  inventoryBonusStorageRows?: number | null;
+  inventoryStorageExpansionClaimedCodexKeys?: readonly string[] | null;
   bestiaryDiscovery?: PlazaSinglePlayerSaveBestiaryDiscovery | null;
   exploredBiomeKinds?: readonly string[] | null;
   discoveredNamedRealmIds?: readonly string[] | null;

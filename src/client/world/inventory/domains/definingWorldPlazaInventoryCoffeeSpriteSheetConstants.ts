@@ -4,11 +4,11 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CUP_OF_TEA,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ROASTED_COFFEE_BEANS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 
 /**
- * Coffee inventory sprite sheet (3×1 @ 32px): beans, brewed cup, empty cup.
- * Cup of tea reuses the brewed coffee cell until dedicated art ships.
+ * Coffee inventory sprite sheet (4×1 @ 32px): beans, roasted beans, brewed cup, empty cup.
  *
  * @module components/world/inventory/domains/definingWorldPlazaInventoryCoffeeSpriteSheetConstants
  */
@@ -16,11 +16,12 @@ import {
 export const DEFINING_WORLD_PLAZA_INVENTORY_COFFEE_SPRITE_SHEET_URL =
   '/inventory/sprites/inventory-coffee-sprites.webp' as const;
 
-export const DEFINING_WORLD_PLAZA_INVENTORY_COFFEE_SPRITE_SHEET_COLUMN_COUNT = 3;
+export const DEFINING_WORLD_PLAZA_INVENTORY_COFFEE_SPRITE_SHEET_COLUMN_COUNT = 4;
 export const DEFINING_WORLD_PLAZA_INVENTORY_COFFEE_SPRITE_SHEET_ROW_COUNT = 1;
 
 export const DEFINING_WORLD_PLAZA_INVENTORY_COFFEE_SPRITE_SHEET_TYPE_IDS = [
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ROASTED_COFFEE_BEANS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_COFFEE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
 ] as const;
@@ -57,15 +58,16 @@ export function resolvingWorldPlazaInventoryCoffeeSpriteSheetIcon(
   }
 
   const columnIndex =
-    sheetIndex % DEFINING_WORLD_PLAZA_INVENTORY_COFFEE_SPRITE_SHEET_COLUMN_COUNT;
+    sheetIndex %
+    DEFINING_WORLD_PLAZA_INVENTORY_COFFEE_SPRITE_SHEET_COLUMN_COUNT;
   const rowIndex = Math.floor(
-    sheetIndex /
-      DEFINING_WORLD_PLAZA_INVENTORY_COFFEE_SPRITE_SHEET_COLUMN_COUNT
+    sheetIndex / DEFINING_WORLD_PLAZA_INVENTORY_COFFEE_SPRITE_SHEET_COLUMN_COUNT
   );
 
   return {
     spriteSheetUrl: DEFINING_WORLD_PLAZA_INVENTORY_COFFEE_SPRITE_SHEET_URL,
-    columnCount: DEFINING_WORLD_PLAZA_INVENTORY_COFFEE_SPRITE_SHEET_COLUMN_COUNT,
+    columnCount:
+      DEFINING_WORLD_PLAZA_INVENTORY_COFFEE_SPRITE_SHEET_COLUMN_COUNT,
     rowCount: DEFINING_WORLD_PLAZA_INVENTORY_COFFEE_SPRITE_SHEET_ROW_COUNT,
     columnIndex,
     rowIndex,

@@ -8,6 +8,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO_ICONIFY_ICON,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ADD_FUEL,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ATTACH,
+  LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_BIND_LEDGER,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_EQUIP,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO,
   LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_PLACE,
@@ -31,6 +32,7 @@ export type RenderingWorldPlazaInventoryItemDetailPopoverProps = {
   readonly onEatItem?: () => void;
   readonly onStudyItem?: () => void;
   readonly onAttachRecipePage?: () => void;
+  readonly onUnlockStorageRow?: () => void;
   readonly onDropItem?: () => void;
   readonly onEquipItem?: () => void;
   readonly onEquipArmorItem?: () => void;
@@ -51,6 +53,7 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
   onEatItem,
   onStudyItem,
   onAttachRecipePage,
+  onUnlockStorageRow,
   onDropItem,
   onEquipItem,
   onEquipArmorItem,
@@ -209,6 +212,17 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
               onClick={onAttachRecipePage}
             >
               {LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ATTACH}
+            </button>
+          ) : null}
+
+          {model.canUnlockStorageRow && onUnlockStorageRow ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={actionTowerClassNames.button}
+              onClick={onUnlockStorageRow}
+            >
+              {LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_BIND_LEDGER}
             </button>
           ) : null}
 

@@ -13,13 +13,19 @@ import {
   addingWorldPlazaInventoryItemWithStacking,
 } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import {
-  DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
   DEFINING_WORLD_PLAZA_INVENTORY_QUERY_KEY_ROOT,
   DEFINING_WORLD_PLAZA_INVENTORY_SEED_DEMO_ITEMS,
   DEFINING_WORLD_PLAZA_INVENTORY_STARTER_ITEMS,
   resolvingWorldPlazaInventoryQueryKeySuffix,
   resolvingWorldPlazaInventoryStorageKey,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_MAX_CAPACITY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
+import {
+  gettingWorldPlazaInventoryBonusStorageRows,
+  subscribingWorldPlazaInventoryStorageExpansion,
+} from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
+import { resizingWorldPlazaInventoryStateToCapacity } from '@/components/world/inventory/domains/resizingWorldPlazaInventoryStateToCapacity';
+import { resolvingWorldPlazaInventoryCapacity } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryCapacity';
 import type { DefiningWorldPlazaInventoryDemoSeedItem } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS,
@@ -47,7 +53,7 @@ import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/invent
 import { notifyingWorldPlazaInventoryItemMoved } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemMoved';
 import { creatingInventoryDevvitAdapter } from '@/components/world/inventory/repositories/creatingInventoryDevvitAdapter';
 import { creatingInventoryPlazaSinglePlayerSaveAdapter } from '@/components/world/inventory/repositories/creatingInventoryPlazaSinglePlayerSaveAdapter';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 /**
@@ -148,6 +154,13 @@ export function usingWorldPlazaInventory(
   const hasDevQaCraftSeededRef = useRef(false);
   const isKingpinAccount =
     checkingWorldPlazaInventoryUserIsKingpin(onlineUsername);
+  const bonusStorageRows = useSyncExternalStore(
+    subscribingWorldPlazaInventoryStorageExpansion,
+    gettingWorldPlazaInventoryBonusStorageRows,
+    () => 0
+  );
+  const unlockedCapacity =
+    resolvingWorldPlazaInventoryCapacity(bonusStorageRows);
 
   const adapter = useMemo(() => {
     if (isSignedInSinglePlayer && localPersistenceOwnerId && saveSlotIndex) {
@@ -155,7 +168,7 @@ export function usingWorldPlazaInventory(
         storageKey: resolvingWorldPlazaInventoryStorageKey(
           localPersistenceOwnerId
         ),
-        capacity: DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
+        capacity: DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_MAX_CAPACITY,
         registry: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
         saveSlotIndex,
       });
@@ -166,13 +179,13 @@ export function usingWorldPlazaInventory(
         storageKey: resolvingWorldPlazaInventoryStorageKey(
           localPersistenceOwnerId
         ),
-        capacity: DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
+        capacity: DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_MAX_CAPACITY,
         registry: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
       });
     }
 
     return creatingInventoryDevvitAdapter({
-      capacity: DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
+      capacity: DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_MAX_CAPACITY,
       registry: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
     });
   }, [
@@ -186,7 +199,7 @@ export function usingWorldPlazaInventory(
   const engine = usingInventoryEngine({
     registry: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
     adapter,
-    capacity: DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
+    capacity: DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_MAX_CAPACITY,
     queryKeySuffix: persistenceOwnerId
       ? resolvingWorldPlazaInventoryQueryKeySuffix(persistenceOwnerId)
       : DEFINING_WORLD_PLAZA_INVENTORY_QUERY_KEY_ROOT,
@@ -194,6 +207,20 @@ export function usingWorldPlazaInventory(
   });
 
   const { state, isLoading, isLoaded, setState, updateState } = engine;
+
+  useEffect(() => {
+    if (!isLoaded) {
+      return;
+    }
+
+    updateState((currentState) => {
+      const nextState = resizingWorldPlazaInventoryStateToCapacity(
+        currentState,
+        unlockedCapacity
+      );
+      return nextState === currentState ? null : nextState;
+    });
+  }, [isLoaded, unlockedCapacity, updateState]);
 
   const moveItem = useCallback(
     (fromSlotIndex: number, toSlotIndex: number): void => {
@@ -274,9 +301,7 @@ export function usingWorldPlazaInventory(
       if (!seededDevQaCraftInventoryKeys.has(devQaSeedKey)) {
         seededDevQaCraftInventoryKeys.add(devQaSeedKey);
 
-        let seededState = creatingEmptyInventoryState(
-          DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY
-        );
+        let seededState = creatingEmptyInventoryState(unlockedCapacity);
         seededState = seedingWorldPlazaInventoryItems(
           seededState,
           DEFINING_WORLD_PLAZA_INVENTORY_STARTER_ITEMS
@@ -309,7 +334,7 @@ export function usingWorldPlazaInventory(
         hasNormalizedWeaponToolSlotRef.current = true;
 
         const seededState = seedingWorldPlazaInventoryItems(
-          creatingEmptyInventoryState(DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY),
+          creatingEmptyInventoryState(unlockedCapacity),
           DEFINING_WORLD_PLAZA_INVENTORY_KINGPIN_TEST_SEED_ITEMS
         );
         setState(seededState);
@@ -329,9 +354,7 @@ export function usingWorldPlazaInventory(
         hasSeededRef.current = true;
         hasNormalizedWeaponToolSlotRef.current = true;
 
-        let seededState = creatingEmptyInventoryState(
-          DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY
-        );
+        let seededState = creatingEmptyInventoryState(unlockedCapacity);
         seededState = seedingWorldPlazaInventoryItems(
           seededState,
           DEFINING_WORLD_PLAZA_INVENTORY_STARTER_ITEMS
@@ -408,6 +431,7 @@ export function usingWorldPlazaInventory(
     seedDemoItems,
     setState,
     state,
+    unlockedCapacity,
   ]);
 
   return {

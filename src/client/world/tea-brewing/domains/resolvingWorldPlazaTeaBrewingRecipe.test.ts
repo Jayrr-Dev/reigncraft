@@ -1,9 +1,11 @@
-import { computingWorldPlazaTeaBrewingRecipeSignature } from '@/components/world/tea-brewing/domains/computingWorldPlazaTeaBrewingRecipeSignature';
+import { DEFINING_WORLD_PLAZA_ROASTED_COFFEE_BEANS_TEA_BREW_DURATION_MS } from '@/components/world/inventory/domains/definingWorldPlazaCoffeeProcessingConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_YARROW,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ROASTED_COFFEE_BEANS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { computingWorldPlazaTeaBrewingRecipeSignature } from '@/components/world/tea-brewing/domains/computingWorldPlazaTeaBrewingRecipeSignature';
 import { resolvingWorldPlazaTeaBrewingRecipe } from '@/components/world/tea-brewing/domains/resolvingWorldPlazaTeaBrewingRecipe';
 import { describe, expect, it } from 'vitest';
 
@@ -75,8 +77,10 @@ describe('resolvingWorldPlazaTeaBrewingRecipe', () => {
     ]);
 
     expect(single?.effects[0]?.durationMs).toBe(90_000);
-    expect(diverse?.effects.find((effect) => effect.traitId === 'tea-calm')
-      ?.durationMs).toBe(Math.round(90_000 * 1.25));
+    expect(
+      diverse?.effects.find((effect) => effect.traitId === 'tea-calm')
+        ?.durationMs
+    ).toBe(Math.round(90_000 * 1.25));
   });
 
   it('grants a stamina concentration bonus for three coffee contributions', () => {
@@ -92,6 +96,29 @@ describe('resolvingWorldPlazaTeaBrewingRecipe', () => {
       modifierKind: 'stamina_max',
     });
     expect(brew?.displayName.startsWith('Concentrated ')).toBe(true);
+  });
+
+  it('doubles cup trait duration for campfire-roasted coffee beans', () => {
+    const plain = resolvingWorldPlazaTeaBrewingRecipe([
+      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS,
+    ]);
+    const roasted = resolvingWorldPlazaTeaBrewingRecipe([
+      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ROASTED_COFFEE_BEANS,
+    ]);
+
+    const plainDuration = plain?.effects.find(
+      (effect) => effect.traitId === 'coffee-buzz'
+    )?.durationMs;
+    const roastedDuration = roasted?.effects.find(
+      (effect) => effect.traitId === 'coffee-buzz-dark'
+    )?.durationMs;
+
+    expect(plainDuration).toBeGreaterThan(0);
+    expect(roastedDuration).toBe((plainDuration ?? 0) * 2);
+    expect(roastedDuration).toBe(
+      DEFINING_WORLD_PLAZA_ROASTED_COFFEE_BEANS_TEA_BREW_DURATION_MS *
+        (1 + 0.25)
+    );
   });
 
   it('keeps negative traits when concentrating foxglove', () => {

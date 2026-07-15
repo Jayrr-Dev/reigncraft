@@ -24,6 +24,7 @@ import { resolvingPlazaCodexMilestoneRewardClaimDialogModel } from '@/components
 import { Icon } from '@/components/ui/icon';
 import { RenderingWorldPlazaCraftModeRecipeSpriteSheetPreview } from '@/components/world/building/components/renderingWorldPlazaCraftModeRecipeSpriteSheetPreview';
 import type { DefiningWorldPlazaCraftModeRecipeVisual } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
+import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import { createPortal } from 'react-dom';
 
 export type RenderingPlazaCodexMilestoneRewardClaimDialogProps = {
@@ -33,9 +34,22 @@ export type RenderingPlazaCodexMilestoneRewardClaimDialogProps = {
 
 function RenderingPlazaCodexMilestoneRewardClaimDialogArt({
   recipeVisual,
+  itemSpriteSheet,
 }: {
   readonly recipeVisual: DefiningWorldPlazaCraftModeRecipeVisual | null;
+  readonly itemSpriteSheet: DefiningWorldPlazaInventorySpriteSheetIcon | null;
 }): React.JSX.Element {
+  if (itemSpriteSheet) {
+    return (
+      <RenderingWorldPlazaCraftModeRecipeSpriteSheetPreview
+        spriteSheetIcon={itemSpriteSheet}
+        className={
+          STYLING_PLAZA_CODEX_MILESTONE_REWARD_CLAIM_DIALOG_ART_ICON_CLASS_NAME
+        }
+      />
+    );
+  }
+
   if (recipeVisual?.visualKind === 'sprite-sheet') {
     return (
       <RenderingWorldPlazaCraftModeRecipeSpriteSheetPreview
@@ -117,6 +131,7 @@ export function RenderingPlazaCodexMilestoneRewardClaimDialog({
           >
             <RenderingPlazaCodexMilestoneRewardClaimDialogArt
               recipeVisual={model.recipeVisual}
+              itemSpriteSheet={model.itemSpriteSheet}
             />
           </div>
           <p

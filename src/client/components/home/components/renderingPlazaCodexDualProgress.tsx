@@ -21,6 +21,10 @@ import {
   gettingWorldPlazaRecipeAttachedSnapshot,
   subscribingWorldPlazaRecipeDiscovery,
 } from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
+import {
+  gettingWorldPlazaInventoryStorageExpansionClaimedSnapshot,
+  subscribingWorldPlazaInventoryStorageExpansion,
+} from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
 import { useSyncExternalStore } from 'react';
 
 export type PlazaCodexDualProgressMetric = {
@@ -91,6 +95,12 @@ export function RenderingPlazaCodexDualProgress({
     () => []
   );
   const attachedRecipeIds = new Set(attachedRecipeIdsList);
+  // Re-render when packing-ledger Codex claims change claimed-chest state.
+  useSyncExternalStore(
+    subscribingWorldPlazaInventoryStorageExpansion,
+    gettingWorldPlazaInventoryStorageExpansionClaimedSnapshot,
+    () => []
+  );
 
   return (
     <div className={DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SHELL_CLASS_NAME}>

@@ -1,5 +1,6 @@
 'use client';
 
+import type { StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 import {
   initializingWorldPlazaSfxVolumeStoreFromStorage,
   subscribingWorldPlazaSfxVolume,
@@ -20,7 +21,6 @@ import {
 } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
 import { resolvingWildlifeStudySfxStarAudioId } from '@/components/world/wildlife/domains/resolvingWildlifeStudySfxStarAudioId';
 import { useEffect, useRef } from 'react';
-import type { StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Preloads Fantasy UI study / reward clips and wires sectioned playback.

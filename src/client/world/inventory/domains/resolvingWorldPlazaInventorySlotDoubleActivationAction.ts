@@ -1,13 +1,15 @@
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import { checkingWorldPlazaInventoryItemIsFood } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { checkingWorldPlazaInventoryItemIsRecipePage } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemRecipePage';
+import { checkingWorldPlazaInventoryItemIsStorageExpansionPage } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemStorageExpansionPage';
 
 export type ResolvingWorldPlazaInventorySlotDoubleActivationAction =
   | 'eat'
   | 'equip'
   | 'open-detail'
   | 'toggle-bag'
-  | 'attach-recipe-page';
+  | 'attach-recipe-page'
+  | 'unlock-storage-row';
 
 export type ResolvingWorldPlazaInventorySlotDoubleActivationActionOptions = {
   readonly isEquipped?: boolean;
@@ -35,6 +37,10 @@ export function resolvingWorldPlazaInventorySlotDoubleActivationAction(
 
   if (checkingWorldPlazaInventoryItemIsRecipePage(itemTypeId)) {
     return 'attach-recipe-page';
+  }
+
+  if (checkingWorldPlazaInventoryItemIsStorageExpansionPage(itemTypeId)) {
+    return 'unlock-storage-row';
   }
 
   return 'open-detail';

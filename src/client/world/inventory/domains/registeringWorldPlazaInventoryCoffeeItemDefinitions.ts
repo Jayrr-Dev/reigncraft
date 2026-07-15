@@ -1,5 +1,5 @@
 /**
- * Coffee processing inventory items: beans, brewed cup, empty clay cup.
+ * Coffee processing inventory items: beans, roasted beans, brewed cup, empty clay cup.
  *
  * @module components/world/inventory/domains/registeringWorldPlazaInventoryCoffeeItemDefinitions
  */
@@ -11,6 +11,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_COFFEE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ROASTED_COFFEE_BEANS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { resolvingWorldPlazaInventoryFoodHealDeclaration } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealDeclaration';
 
@@ -26,6 +27,18 @@ export function registeringWorldPlazaInventoryCoffeeItemDefinitions(): readonly 
       iconSpriteSheet:
         resolvingWorldPlazaInventoryCoffeeSpriteSheetIcon(
           DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS
+        ) ?? undefined,
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ROASTED_COFFEE_BEANS,
+      name: 'Roasted Coffee Beans',
+      rarity: 'uncommon',
+      maxStack: 99,
+      isDroppable: true,
+      isStackable: true,
+      iconSpriteSheet:
+        resolvingWorldPlazaInventoryCoffeeSpriteSheetIcon(
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ROASTED_COFFEE_BEANS
         ) ?? undefined,
     },
     {

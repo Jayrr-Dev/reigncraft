@@ -31,6 +31,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_TUBE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ROASTED_COFFEE_BEANS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SMOKE_OIL_CROCK,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES,
@@ -130,7 +131,12 @@ const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DESCRIPTION_STATIC_ENTRIES: readonly D
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS,
       description:
-        'Roasted beans pulled from coffee cherries. Ready for a clay-cup brew.',
+        'Dried beans from coffee cherries. Roast at a campfire, then steep in a teapot for a longer cup.',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ROASTED_COFFEE_BEANS,
+      description:
+        'Campfire-roasted beans, oily and dark. Steep in a teapot for a cup that lasts twice as long.',
     },
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_COFFEE,

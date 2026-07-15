@@ -1,3 +1,4 @@
+import { DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import { resolvingWorldPlazaInventoryVisibleSlotIndices } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStoragePage';
 
 /**
@@ -8,10 +9,12 @@ import { resolvingWorldPlazaInventoryVisibleSlotIndices } from '@/components/wor
  *
  * @param storagePageIndex - Current hotbar page
  * @param draggingFromSlotIndex - Absolute source slot, or null when idle
+ * @param pageCount - Total hotbar pages (main + storage)
  */
 export function resolvingWorldPlazaInventoryRetainedDragSlotIndices(
   storagePageIndex: number,
-  draggingFromSlotIndex: number | null
+  draggingFromSlotIndex: number | null,
+  pageCount: number = DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT
 ): readonly number[] {
   if (draggingFromSlotIndex === null) {
     return [];
@@ -25,8 +28,10 @@ export function resolvingWorldPlazaInventoryRetainedDragSlotIndices(
     return [];
   }
 
-  const visibleSlotIndices =
-    resolvingWorldPlazaInventoryVisibleSlotIndices(storagePageIndex);
+  const visibleSlotIndices = resolvingWorldPlazaInventoryVisibleSlotIndices(
+    storagePageIndex,
+    pageCount
+  );
 
   if (visibleSlotIndices.includes(draggingFromSlotIndex)) {
     return [];

@@ -4,7 +4,7 @@ import {
   type DefiningWorldBuildingPlacedBlock,
 } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { formattingWorldPlazaCampfireInteractionTileKey } from '@/components/world/fire/domains/formattingWorldPlazaCampfireInteractionTileKey';
-import { listingWildlifeRawMeatItemTypeIdsInInventory } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
+import { resolvingFirstWildlifeMeatCookRecipeInInventory } from '@/components/world/wildlife/domains/definingWildlifeMeatCookRecipes';
 import type { WorldFireDevvitCell } from '../../../../shared/worldFireDevvit';
 
 export type DefiningWorldPlazaCampfireInteractionAction =
@@ -47,8 +47,8 @@ export function listingWorldPlazaCampfireBlocksInInteractionRange(
   inventorySlots: readonly { itemTypeId: string; quantity: number }[] = [],
   hasBrewableTeaPot = false
 ): readonly ListingWorldPlazaCampfireBlocksInInteractionRangeEntry[] {
-  const hasRawMeat =
-    listingWildlifeRawMeatItemTypeIdsInInventory(inventorySlots).length > 0;
+  const hasCookableItem =
+    resolvingFirstWildlifeMeatCookRecipeInInventory(inventorySlots) !== null;
   const entries: ListingWorldPlazaCampfireBlocksInInteractionRangeEntry[] = [];
 
   for (const block of placedBlocks) {
@@ -70,7 +70,7 @@ export function listingWorldPlazaCampfireBlocksInInteractionRange(
     const actions: DefiningWorldPlazaCampfireInteractionAction[] = fireCell
       ? [
           'add-wood',
-          ...(hasRawMeat ? (['cook'] as const) : []),
+          ...(hasCookableItem ? (['cook'] as const) : []),
           ...(hasBrewableTeaPot ? (['brew-tea'] as const) : []),
         ]
       : ['light'];

@@ -36,11 +36,15 @@ import {
 } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryBagTransfer';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import {
-  DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT,
   DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX,
   LABELING_WORLD_PLAZA_INVENTORY_HOTBAR,
   STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import {
+  gettingWorldPlazaInventoryBonusStorageRows,
+  subscribingWorldPlazaInventoryStorageExpansion,
+} from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
+import { resolvingWorldPlazaInventoryPageCount } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryCapacity';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import {
@@ -83,7 +87,15 @@ import type {
   DragStartEvent,
 } from '@dnd-kit/core';
 import type * as React from 'react';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 export type RenderingWorldPlazaInventoryOreSmeltingStation = {
@@ -182,6 +194,8 @@ type RenderingWorldPlazaInventoryHotbarInventoryShellProps = {
   readonly viewportHudScale: number;
   readonly selectedSlotIndex: number | null;
   readonly storagePageIndex: number;
+  /** Total hotbar pages (main + unlocked storage rows). */
+  readonly storagePageCount: number;
   readonly onStoragePageIndexChange: (nextPageIndex: number) => void;
   readonly onSelectHotbarSlot?: (slotIndex: number) => void;
   readonly onEquipArmorHotbarSlot?: (slotIndex: number) => void;
@@ -232,6 +246,7 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
     viewportHudScale,
     selectedSlotIndex,
     storagePageIndex,
+    storagePageCount,
     onStoragePageIndexChange,
     onSelectHotbarSlot,
     onEquipArmorHotbarSlot,
@@ -269,8 +284,12 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
     );
 
     const visibleSlotIndices = useMemo(
-      () => resolvingWorldPlazaInventoryVisibleSlotIndices(storagePageIndex),
-      [storagePageIndex]
+      () =>
+        resolvingWorldPlazaInventoryVisibleSlotIndices(
+          storagePageIndex,
+          storagePageCount
+        ),
+      [storagePageCount, storagePageIndex]
     );
 
     const hasBrewedTeaPot = useMemo(
@@ -297,21 +316,22 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
       () =>
         resolvingWorldPlazaInventoryRetainedDragSlotIndices(
           storagePageIndex,
-          draggingFromSlotIndex
+          draggingFromSlotIndex,
+          storagePageCount
         ),
-      [draggingFromSlotIndex, storagePageIndex]
+      [draggingFromSlotIndex, storagePageCount, storagePageIndex]
     );
 
     const { onDragOver: onStoragePageDragOver, clearingDragHoverPaging } =
       usingWorldPlazaInventoryStoragePageDragHover({
         storagePageIndex,
-        storagePageCount: DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT,
+        storagePageCount,
         onStoragePageIndexChange,
       });
 
     const onStoragePageWheel = usingWorldPlazaInventoryStoragePageWheel({
       storagePageIndex,
-      storagePageCount: DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT,
+      storagePageCount,
       onStoragePageIndexChange,
     });
 
@@ -495,7 +515,7 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
                   ) : null}
                   <RenderingWorldPlazaInventoryPageArrowButtons
                     storagePageIndex={storagePageIndex}
-                    storagePageCount={DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT}
+                    storagePageCount={storagePageCount}
                     viewportStyles={viewportStyles}
                     onStoragePageIndexChange={onStoragePageIndexChange}
                   />
@@ -567,6 +587,14 @@ export function RenderingWorldPlazaInventoryHotbar({
   >(null);
 
   const [storagePageIndex, setStoragePageIndex] = useState(0);
+  const bonusStorageRows = useSyncExternalStore(
+    subscribingWorldPlazaInventoryStorageExpansion,
+    gettingWorldPlazaInventoryBonusStorageRows,
+    () => 0
+  );
+  const storagePageCount = resolvingWorldPlazaInventoryPageCount(
+    bonusStorageRows
+  );
 
   const handlingStoragePageIndexChange = useCallback(
     (nextPageIndex: number): void => {
@@ -576,6 +604,12 @@ export function RenderingWorldPlazaInventoryHotbar({
     },
     []
   );
+
+  useEffect(() => {
+    if (storagePageIndex >= storagePageCount) {
+      setStoragePageIndex(Math.max(0, storagePageCount - 1));
+    }
+  }, [storagePageCount, storagePageIndex]);
 
   const closingItemActionPopover = useCallback((): void => {
     setOpenItemDetailSlotIndex(null);
@@ -991,6 +1025,7 @@ export function RenderingWorldPlazaInventoryHotbar({
           viewportHudScale={hotbarViewportHudScale}
           selectedSlotIndex={selectedSlotIndex}
           storagePageIndex={storagePageIndex}
+          storagePageCount={storagePageCount}
           onStoragePageIndexChange={handlingStoragePageIndexChange}
           onSelectHotbarSlot={handlingEquipHotbarSlot}
           onEquipArmorHotbarSlot={onEquipArmorHotbarSlot}

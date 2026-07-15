@@ -8,7 +8,6 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_BLUE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_GOLDEN,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_ARNICA,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_BELLADONNA,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_CALENDULA,
@@ -23,6 +22,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_YARROW,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { DEFINING_WORLD_PLAZA_COFFEE_TEA_BREWING_INGREDIENT_REGISTRY } from '@/components/world/tea-brewing/domains/definingWorldPlazaCoffeeTeaBrewingIngredientRegistry';
 import { DEFINING_WORLD_PLAZA_TEA_BREWING_FORAGE_INGREDIENT_REGISTRY } from '@/components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingForageIngredientRegistry';
 import type { DefiningWorldPlazaTeaBrewingIngredientDefinition } from '@/components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingTypes';
 
@@ -320,38 +320,7 @@ export const DEFINING_WORLD_PLAZA_TEA_BREWING_INGREDIENT_REGISTRY: readonly Defi
         },
       ],
     },
-    {
-      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS,
-      noun: 'Coffee',
-      traits: [
-        {
-          traitId: 'coffee-buzz',
-          category: 'stamina',
-          polarity: 'positive',
-          adjective: 'Roasted',
-          basePotency: 1,
-          baseDurationMs: 120_000,
-          effect: {
-            kind: 'movement_modifier',
-            modifierKind: 'speed',
-            baseMultiplierDelta: 0.2,
-          },
-        },
-        {
-          traitId: 'coffee-stamina',
-          category: 'stamina',
-          polarity: 'positive',
-          adjective: 'Wired',
-          basePotency: 1,
-          baseDurationMs: 120_000,
-          effect: {
-            kind: 'movement_modifier',
-            modifierKind: 'stamina_max',
-            baseMultiplierDelta: 0.1,
-          },
-        },
-      ],
-    },
+    ...DEFINING_WORLD_PLAZA_COFFEE_TEA_BREWING_INGREDIENT_REGISTRY,
     ...DEFINING_WORLD_PLAZA_TEA_BREWING_FORAGE_INGREDIENT_REGISTRY,
   ];
 
