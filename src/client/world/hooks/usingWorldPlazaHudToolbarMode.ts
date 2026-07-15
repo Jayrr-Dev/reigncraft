@@ -56,6 +56,17 @@ export function usingWorldPlazaHudToolbarMode({
     );
   }, [isBlockBuildModeActive, isClaimModeActive]);
 
+  // Items must never keep claim/build paint live (badge can flip before edit
+  // flags settle, or Items can be selected from other HUD paths).
+  useEffect(() => {
+    if (
+      hudToolbarMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS &&
+      isEditSessionActive
+    ) {
+      togglingEditSession();
+    }
+  }, [hudToolbarMode, isEditSessionActive, togglingEditSession]);
+
   const selectingHudToolbarMode = useCallback(
     (mode: DefiningWorldPlazaHudToolbarModeId): void => {
       if (

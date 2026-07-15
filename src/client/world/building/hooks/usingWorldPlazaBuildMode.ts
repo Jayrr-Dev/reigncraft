@@ -1458,20 +1458,34 @@ export function usingWorldPlazaBuildMode({
 
   const flushingBuildDraftBeforeExiting =
     useCallback(async (): Promise<void> => {
-      if (
-        checkingWorldBuildingBuildDraftHasUnsavedChanges(buildDraftRef.current)
-      ) {
-        const didSave = await savingBuildDraft();
+      const draftToPersist = buildDraftRef.current;
+      const shouldPersist =
+        onlineUserId !== null &&
+        checkingWorldBuildingBuildDraftHasUnsavedChanges(draftToPersist);
 
-        // Keep the draft (and edit session) if Redis rejected the flush so
-        // kiln/bloomery tiles are not wiped while materials stay spent.
-        if (!didSave) {
-          return;
-        }
+      // Exit claim/build paint immediately so Items (and other HUD exits) never
+      // sit on top of an active edit overlay while a save is in flight.
+      exitingBuildMode();
+
+      if (!shouldPersist || !draftToPersist || !onlineUserId) {
+        return;
       }
 
-      exitingBuildMode();
-    }, [exitingBuildMode, savingBuildDraft]);
+      setIsSavingBuildDraft(true);
+
+      try {
+        await persistingWorldBuildingBuildDraft(draftToPersist, onlineUserId);
+        await refetchingPlots();
+      } catch (error) {
+        onBuildFeedbackMessageRef.current?.(
+          error instanceof Error
+            ? error.message
+            : 'Could not save build changes.'
+        );
+      } finally {
+        setIsSavingBuildDraft(false);
+      }
+    }, [exitingBuildMode, onlineUserId, refetchingPlots]);
 
   const switchingEditMode = useCallback(
     (targetMode: Exclude<DefiningWorldBuildingEditMode, 'off'>): void => {
