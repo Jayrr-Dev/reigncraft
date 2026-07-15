@@ -10,10 +10,14 @@ import type { DefiningWorldPlazaRemotePlayer } from '@/components/world/domains/
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
-import type { DefiningWorldPlazaEntitySleepSpeechBubble } from '@/components/world/health/domains/advancingWorldPlazaEntitySleepSpeechBubble';
+import {
+  advancingWorldPlazaEntitySleepSpeechBubble,
+  type DefiningWorldPlazaEntitySleepSpeechBubble,
+} from '@/components/world/health/domains/advancingWorldPlazaEntitySleepSpeechBubble';
 import { resolvingWorldPlazaEntityWorldAnchoredSleepSpeechBubbleScreenPoint } from '@/components/world/health/domains/resolvingWorldPlazaEntityWorldAnchoredSleepSpeechBubbleScreenPoint';
 import { RenderingWildlifeSpeechBubbleContent } from '@/components/world/wildlife/components/renderingWildlifeSpeechBubbleContent';
-import { useLayoutEffect, useRef } from 'react';
+import type { RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 const RENDERING_WORLD_PLAZA_ENTITY_SLEEP_SPEECH_BUBBLE_HIDDEN_TRANSFORM =
   'translate(-9999px, -9999px)' as const;
@@ -27,12 +31,15 @@ const RENDERING_WORLD_PLAZA_ENTITY_SLEEP_SPEECH_BUBBLE_SCALE_CLASS_NAME =
 const RENDERING_WORLD_PLAZA_ENTITY_SLEEP_SPEECH_BUBBLE_INITIAL_SCALE_STYLE =
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle();
 
+const RENDERING_WORLD_PLAZA_ENTITY_SLEEP_SPEECH_BUBBLE_ADVANCE_MS = 100;
+
 export type RenderingWorldPlazaEntityWorldAnchoredSleepSpeechBubbleProps = {
   localUserId: string;
   anchorGridX: number;
   anchorGridY: number;
   isVisible: boolean;
-  bubble: DefiningWorldPlazaEntitySleepSpeechBubble | null;
+  /** Sleep presentation start time; null while awake. */
+  sleepStartedAtMsRef: RefObject<number | null>;
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   remotePlayerRegistryRef: React.RefObject<
     Map<string, DefiningWorldPlazaRemotePlayer>
@@ -47,13 +54,15 @@ export type RenderingWorldPlazaEntityWorldAnchoredSleepSpeechBubbleProps = {
 
 /**
  * Wildlife-style Zzz speech bubble anchored above a sleeping player.
+ *
+ * Owns its line-advance clock so the plaza scene is not re-rendered at 10Hz.
  */
 export function RenderingWorldPlazaEntityWorldAnchoredSleepSpeechBubble({
   localUserId,
   anchorGridX,
   anchorGridY,
   isVisible,
-  bubble,
+  sleepStartedAtMsRef,
   playerPositionRef,
   remotePlayerRegistryRef,
   playerRenderPositionRegistryRef,
@@ -64,8 +73,45 @@ export function RenderingWorldPlazaEntityWorldAnchoredSleepSpeechBubble({
   const remotePlayersRef = useRef(remotePlayers);
   const bubbleWrapperRef = useRef<HTMLDivElement | null>(null);
   const bubbleScaleRef = useRef<HTMLDivElement | null>(null);
+  const [bubble, setBubble] =
+    useState<DefiningWorldPlazaEntitySleepSpeechBubble | null>(null);
 
   remotePlayersRef.current = remotePlayers;
+
+  useEffect(() => {
+    if (!isVisible) {
+      setBubble(null);
+      return;
+    }
+
+    let isActive = true;
+
+    const advancingSleepSpeechBubble = (): void => {
+      if (!isActive) {
+        return;
+      }
+
+      setBubble((currentBubble) =>
+        advancingWorldPlazaEntitySleepSpeechBubble({
+          nowMs: performance.now(),
+          isAsleep: true,
+          sleepStartedAtMs: sleepStartedAtMsRef.current,
+          activeBubble: currentBubble,
+        })
+      );
+    };
+
+    advancingSleepSpeechBubble();
+    const intervalId = window.setInterval(
+      advancingSleepSpeechBubble,
+      RENDERING_WORLD_PLAZA_ENTITY_SLEEP_SPEECH_BUBBLE_ADVANCE_MS
+    );
+
+    return () => {
+      isActive = false;
+      window.clearInterval(intervalId);
+    };
+  }, [isVisible, sleepStartedAtMsRef]);
 
   useLayoutEffect(() => {
     if (!isVisible || bubble === null) {

@@ -426,10 +426,6 @@ import { RenderingWorldPlazaEntityHealthFloatTexts } from '@/components/world/he
 import { RenderingWorldPlazaEntityStatusEffectStack } from '@/components/world/health/components/renderingWorldPlazaEntityStatusEffectStack';
 import { RenderingWorldPlazaEntityWorldAnchoredSleepSpeechBubble } from '@/components/world/health/components/renderingWorldPlazaEntityWorldAnchoredSleepSpeechBubble';
 import { RenderingWorldPlazaEntityWorldAnchoredStunDots } from '@/components/world/health/components/renderingWorldPlazaEntityWorldAnchoredStunDots';
-import {
-  advancingWorldPlazaEntitySleepSpeechBubble,
-  type DefiningWorldPlazaEntitySleepSpeechBubble,
-} from '@/components/world/health/domains/advancingWorldPlazaEntitySleepSpeechBubble';
 import { checkingWorldPlazaEntityBuffIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityBuffIsActive';
 import { checkingWorldPlazaEntityPlayerSleepIsActive } from '@/components/world/health/domains/checkingWorldPlazaEntityPlayerSleepIsActive';
 import {
@@ -1164,8 +1160,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     useRef<DefiningWorldPlazaAvatarDeathPresentationState | null>(null);
   const sleepStateRef =
     useRef<DefiningWorldPlazaAvatarSleepPresentationState | null>(null);
-  const [sleepSpeechBubble, setSleepSpeechBubble] =
-    useState<DefiningWorldPlazaEntitySleepSpeechBubble | null>(null);
+  const sleepStartedAtMsRef = useRef<number | null>(null);
   const isBlockBuildModeActiveRef = useRef(false);
   const isBuildModeActiveRef = useRef(false);
   const isClaimModeActiveRef = useRef(false);
@@ -6416,6 +6411,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     performance.now()
   );
   isPlayerAsleepRef.current = isPlayerAsleep;
+  sleepStartedAtMsRef.current = sleepStateRef.current?.startedAtMs ?? null;
   isPlayerStunnedRef.current = checkingWorldPlazaEntityPlayerStunIsActive(
     healthStateRef.current,
     performance.now()
@@ -6424,38 +6420,6 @@ function RenderingWorldPlazaPixiSceneConnected({
     healthStateRef.current,
     performance.now()
   );
-
-  useEffect(() => {
-    if (!isPlayerAsleep) {
-      setSleepSpeechBubble(null);
-      return;
-    }
-
-    let isActive = true;
-
-    const advancingSleepSpeechBubble = (): void => {
-      if (!isActive) {
-        return;
-      }
-
-      setSleepSpeechBubble((currentBubble) =>
-        advancingWorldPlazaEntitySleepSpeechBubble({
-          nowMs: performance.now(),
-          isAsleep: true,
-          sleepStartedAtMs: sleepStateRef.current?.startedAtMs ?? null,
-          activeBubble: currentBubble,
-        })
-      );
-    };
-
-    advancingSleepSpeechBubble();
-    const intervalId = window.setInterval(advancingSleepSpeechBubble, 100);
-
-    return () => {
-      isActive = false;
-      window.clearInterval(intervalId);
-    };
-  }, [isPlayerAsleep]);
 
   const deathScreenTitle = formattingWorldPlazaEntityDeathScreenTitle(
     playerHealthHudSnapshot.lastDamageKind
@@ -8438,8 +8402,8 @@ function RenderingWorldPlazaPixiSceneConnected({
                 localUserId={localHealthEntityUserId}
                 anchorGridX={playerPositionRef.current.x}
                 anchorGridY={playerPositionRef.current.y}
-                isVisible={isPlayerAsleep && sleepSpeechBubble !== null}
-                bubble={sleepSpeechBubble}
+                isVisible={isPlayerAsleep}
+                sleepStartedAtMsRef={sleepStartedAtMsRef}
                 playerPositionRef={playerPositionRef}
                 remotePlayerRegistryRef={remotePlayerRegistryRef}
                 playerRenderPositionRegistryRef={
