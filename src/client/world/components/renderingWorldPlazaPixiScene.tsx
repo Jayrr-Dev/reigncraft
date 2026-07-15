@@ -1363,6 +1363,12 @@ function RenderingWorldPlazaPixiSceneConnected({
   const onBlockRemovedRef = useRef<
     ((removedBlock: DefiningWorldBuildingPlacedBlock) => void) | null
   >(null);
+  const showingBuildFeedbackToastRef = useRef<(message: string) => void>(
+    () => undefined
+  );
+  const forwardingBuildFeedbackMessage = useCallback((message: string): void => {
+    showingBuildFeedbackToastRef.current(message);
+  }, []);
   const pendingCraftRecipeIdRef =
     useRef<DefiningWorldPlazaCraftModeRecipeId | null>(null);
   const [
@@ -1458,6 +1464,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     refetchingPlots,
     onSuccessfulBlockPlacementRef,
     onBlockRemovedRef,
+    onBuildFeedbackMessage: forwardingBuildFeedbackMessage,
   });
 
   const { hudToolbarMode, selectingHudToolbarMode } =
@@ -1730,6 +1737,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     useRef<DefiningWorldPlazaHeldItemPresentation | null>(null);
 
   const { showingGameplayHudToast } = usingWorldPlazaGameplayHudToast();
+  showingBuildFeedbackToastRef.current = showingGameplayHudToast;
   const oreSmeltingStations = usingWorldPlazaOreSmeltingStations({
     inventoryState,
     updatingInventoryState,
@@ -1973,6 +1981,25 @@ function RenderingWorldPlazaPixiSceneConnected({
     },
     [showingGameplayHudToast]
   );
+
+  const cancelingArmedCraftPlacement = useCallback((): void => {
+    clearingPendingCraftPlacement({
+      showCanceledToast: true,
+      showRefundFeedback: true,
+      honorSessionWaiver: false,
+    });
+
+    if (isEditSessionActive) {
+      togglingEditSession();
+    }
+
+    selectingHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CRAFT);
+  }, [
+    clearingPendingCraftPlacement,
+    isEditSessionActive,
+    selectingHudToolbarMode,
+    togglingEditSession,
+  ]);
 
   const handlingSuccessfulCraftedBlockPlacement = useCallback(
     (
@@ -8454,6 +8481,11 @@ function RenderingWorldPlazaPixiSceneConnected({
                     isMobile={hudIsMobile}
                     isFullscreen={hudIsFullscreen}
                     topOverlay={craftModeTimedCraftProgressHud}
+                    onCancelPlacement={
+                      pendingCraftPlacementPreviewDefinitionId !== null
+                        ? cancelingArmedCraftPlacement
+                        : null
+                    }
                   >
                     {hudToolbarMode ===
                     DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS ? (
@@ -8663,6 +8695,11 @@ function RenderingWorldPlazaPixiSceneConnected({
                     isMobile={hudIsMobile}
                     isFullscreen={hudIsFullscreen}
                     topOverlay={craftModeTimedCraftProgressHud}
+                    onCancelPlacement={
+                      pendingCraftPlacementPreviewDefinitionId !== null
+                        ? cancelingArmedCraftPlacement
+                        : null
+                    }
                   >
                     {hudToolbarMode ===
                     DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS ? (

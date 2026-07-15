@@ -93,8 +93,10 @@ import { resolvingWorldBuildingBuildModeTilePopoverMode } from '@/components/wor
 import { resolvingWorldBuildingEditPaintActionAtTile } from '@/components/world/building/domains/resolvingWorldBuildingEditPaintActionAtTile';
 import { resolvingWorldBuildingHoverPlacementWorldLayer } from '@/components/world/building/domains/resolvingWorldBuildingHoverPlacementWorldLayer';
 import { resolvingWorldBuildingMinimumWorldLayerForBlockHeight } from '@/components/world/building/domains/resolvingWorldBuildingMinimumWorldLayerForBlockHeight';
+import { resolvingWorldBuildingBlockPlacementBlockedMessage } from '@/components/world/building/domains/resolvingWorldBuildingBlockPlacementBlockedMessage';
 import { resolvingWorldBuildingPlotOwnerLimits } from '@/components/world/building/domains/resolvingWorldBuildingPlotOwnerLimits';
 import type { RefetchingWorldBuildingPlotsResult } from '@/components/world/building/hooks/usingWorldPlazaPlacedBlocksQuery';
+import { LABELING_WORLD_BUILDING_PLACEMENT_BLOCKED_TILE_GENERIC } from '@/components/world/building/domains/definingWorldBuildingPlacementBlockedMessageConstants';
 import { clearingWorldBuildingDevPlacedObjects } from '@/components/world/building/repositories/clearingWorldBuildingDevPlacedObjects';
 import { persistingWorldBuildingBuildDraft } from '@/components/world/building/repositories/persistingWorldBuildingBuildDraft';
 import { removingWorldBuildingPlotPersistence } from '@/components/world/building/repositories/persistingWorldBuildingPlacedBlock';
@@ -231,6 +233,8 @@ export interface UsingWorldPlazaBuildModeParams {
   onBlockRemovedRef?: MutableRefObject<
     ((removedBlock: DefiningWorldBuildingPlacedBlock) => void) | null
   >;
+  /** Optional toast / HUD feedback when a placement attempt is blocked. */
+  onBuildFeedbackMessage?: (message: string) => void;
 }
 
 /**
@@ -247,6 +251,7 @@ export function usingWorldPlazaBuildMode({
   refetchingPlots,
   onSuccessfulBlockPlacementRef,
   onBlockRemovedRef,
+  onBuildFeedbackMessage,
 }: UsingWorldPlazaBuildModeParams): UsingWorldPlazaBuildModeResult {
   const resolvedPlotOwnerLimits = useMemo(
     () => resolvingWorldBuildingPlotOwnerLimits(plotOwnerLimits),
@@ -313,6 +318,14 @@ export function usingWorldPlazaBuildMode({
   const [buildErrorMessage, setBuildErrorMessage] = useState<string | null>(
     null
   );
+  const onBuildFeedbackMessageRef = useRef(onBuildFeedbackMessage);
+  onBuildFeedbackMessageRef.current = onBuildFeedbackMessage;
+
+  const reportingBuildErrorMessage = useCallback((message: string): void => {
+    setBuildErrorMessage(message);
+    onBuildFeedbackMessageRef.current?.(message);
+  }, []);
+
   const [selectedWorldLayer, setSelectedWorldLayer] = useState<number>(() =>
     resolvingWorldBuildingMinimumWorldLayerForBlockHeight(
       DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT
@@ -439,6 +452,7 @@ export function usingWorldPlazaBuildMode({
       setIsPresetBlockTypeSelected(true);
       setSelectedWorldLayer(selectionResult.selectedWorldLayer);
       setSelectedBlockHeight(selectionResult.selectedBlockHeight);
+      setSelectedBuildPaintAction('place');
       setBuildErrorMessage(null);
     },
     [selectedWorldLayer]
@@ -721,6 +735,39 @@ export function usingWorldPlazaBuildMode({
   const canPlaceAtPreviewTile = checkingCanPlaceAtTile(previewTilePosition);
   const canPlaceAtSelectedTile = checkingCanPlaceAtTile(selectedTilePosition);
 
+  const resolvingBlockedPlacementMessageAtTile = useCallback(
+    (tilePosition: DefiningWorldBuildingTilePosition): string => {
+      if (!onlineUserId || !selectedDefinitionId) {
+        return LABELING_WORLD_BUILDING_PLACEMENT_BLOCKED_TILE_GENERIC;
+      }
+
+      const definition = resolvingWorldBuildingBlockDefinition(
+        selectedDefinitionId
+      );
+
+      if (!definition) {
+        return LABELING_WORLD_BUILDING_PLACEMENT_BLOCKED_TILE_GENERIC;
+      }
+
+      const placementWorldLayer =
+        resolvingPlacementWorldLayerForTile(tilePosition);
+
+      return resolvingWorldBuildingBlockPlacementBlockedMessage({
+        plots: activeViewportPlots,
+        anchorTilePosition: tilePosition,
+        actorUserId: onlineUserId,
+        worldLayer: placementWorldLayer,
+        definition,
+      });
+    },
+    [
+      activeViewportPlots,
+      onlineUserId,
+      resolvingPlacementWorldLayerForTile,
+      selectedDefinitionId,
+    ]
+  );
+
   const canClaimAtPreviewTile = useMemo(() => {
     if (!onlineUserId || !previewTilePosition) {
       return false;
@@ -931,7 +978,7 @@ export function usingWorldPlazaBuildMode({
       });
 
       if ('errorMessage' in placementResult) {
-        setBuildErrorMessage(placementResult.errorMessage);
+        reportingBuildErrorMessage(placementResult.errorMessage);
         return;
       }
 
@@ -961,7 +1008,7 @@ export function usingWorldPlazaBuildMode({
                 (block) => block.blockId !== blockId
               ),
             });
-            setBuildErrorMessage(
+            reportingBuildErrorMessage(
               error instanceof Error
                 ? error.message
                 : 'Could not place temporary build.'
@@ -1010,6 +1057,7 @@ export function usingWorldPlazaBuildMode({
       onlineUserId,
       plots,
       refetchingPlots,
+      reportingBuildErrorMessage,
       resolvingPlacementWorldLayerForTile,
       selectedDefinitionId,
       selectedBlockHeight,
@@ -1474,10 +1522,15 @@ export function usingWorldPlazaBuildMode({
             return;
           }
 
-          setBuildErrorMessage(
-            isBuildPlacementSelectionActive
-              ? 'Cannot place here.'
-              : 'Pick a material and block size first.'
+          if (isBuildPlacementSelectionActive) {
+            reportingBuildErrorMessage(
+              resolvingBlockedPlacementMessageAtTile(tilePosition)
+            );
+            return;
+          }
+
+          reportingBuildErrorMessage(
+            'Pick a material and block size first.'
           );
           return;
         }
@@ -1503,6 +1556,8 @@ export function usingWorldPlazaBuildMode({
       onlineUserId,
       placingBlockAtTile,
       removingBlockAtTile,
+      reportingBuildErrorMessage,
+      resolvingBlockedPlacementMessageAtTile,
       resolvingRemovalWorldLayerForTile,
       selectedBuildPaintAction,
       selectedClaimPaintAction,

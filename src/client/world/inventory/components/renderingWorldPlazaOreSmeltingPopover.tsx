@@ -9,6 +9,7 @@ import {
   definingWorldPlazaOreSmeltingSlotDroppableId,
   type DefiningWorldPlazaOreSmeltingStationSlotKind,
 } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingDndIds';
+import { resolvingWorldPlazaOreSmeltingPopoverUi } from '@/components/world/crafting/domains/resolvingWorldPlazaOreSmeltingPopoverUi';
 import type { DefiningWorldPlazaOreSmeltingStationState } from '@/components/world/crafting/hooks/usingWorldPlazaOreSmeltingStations';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
@@ -25,6 +26,7 @@ type RenderingWorldPlazaOreSmeltingSlotProps = {
   readonly itemTypeId: string | null;
   readonly isLocked: boolean;
   readonly stationBlockDefinitionId: string;
+  readonly inputSlotLabel: string;
 };
 
 function resolvingDraggedItemTypeId(active: Active | null): string | null {
@@ -41,6 +43,7 @@ function RenderingWorldPlazaOreSmeltingSlot({
   itemTypeId,
   isLocked,
   stationBlockDefinitionId,
+  inputSlotLabel,
 }: RenderingWorldPlazaOreSmeltingSlotProps): React.JSX.Element {
   const { active } = useDndContext();
   const draggedItemTypeId = resolvingDraggedItemTypeId(active);
@@ -58,10 +61,12 @@ function RenderingWorldPlazaOreSmeltingSlot({
     disabled: isLocked || itemTypeId !== null,
   });
 
+  const slotLabel = slotKind === 'ore' ? inputSlotLabel : 'Fuel';
+
   return (
     <div className="flex flex-col items-center gap-1">
       <span className="text-[9px] font-bold uppercase tracking-wide text-amber-100">
-        {slotKind === 'ore' ? 'Ore' : 'Fuel'}
+        {slotLabel}
       </span>
       <div
         ref={setNodeRef}
@@ -73,7 +78,7 @@ function RenderingWorldPlazaOreSmeltingSlot({
               ? 'border-red-400'
               : 'border-stone-500',
         ].join(' ')}
-        aria-label={`${slotKind} smelting slot`}
+        aria-label={`${slotLabel} smelting slot`}
       >
         {itemTypeId ? (
           <RenderingWorldPlazaInventoryItemGlyph
@@ -109,6 +114,9 @@ export function RenderingWorldPlazaOreSmeltingPopover({
   onCollectOutput,
 }: RenderingWorldPlazaOreSmeltingPopoverProps): React.JSX.Element {
   const isSmelting = stationState.endsAtMs !== null;
+  const popoverUi = resolvingWorldPlazaOreSmeltingPopoverUi(
+    stationBlockDefinitionId
+  );
 
   if (typeof document === 'undefined') {
     return <></>;
@@ -119,13 +127,13 @@ export function RenderingWorldPlazaOreSmeltingPopover({
   return createPortal(
     <div
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
-      className="pointer-events-auto fixed left-1/2 top-1/2 z-50 w-44 -translate-x-1/2 -translate-y-1/2 rounded-md border-2 border-amber-900 bg-stone-900/95 p-2 text-amber-50 shadow-xl"
+      className={popoverUi.panelClassName}
     >
       <div className="mb-2 flex items-center justify-between gap-2">
         <span className="text-[11px] font-bold">{stationName}</span>
         <button
           type="button"
-          className="h-5 w-5 rounded text-xs text-stone-300 hover:bg-stone-700"
+          className={popoverUi.closeButtonClassName}
           onClick={onClose}
           aria-label="Close smelting station"
         >
@@ -139,12 +147,14 @@ export function RenderingWorldPlazaOreSmeltingPopover({
           itemTypeId={stationState.inputItemTypeId}
           isLocked={isSmelting}
           stationBlockDefinitionId={stationBlockDefinitionId}
+          inputSlotLabel={popoverUi.inputSlotLabel}
         />
         <RenderingWorldPlazaOreSmeltingSlot
           slotKind="fuel"
           itemTypeId={stationState.fuelItemTypeId}
           isLocked={isSmelting}
           stationBlockDefinitionId={stationBlockDefinitionId}
+          inputSlotLabel={popoverUi.inputSlotLabel}
         />
       </div>
 
@@ -159,7 +169,7 @@ export function RenderingWorldPlazaOreSmeltingPopover({
           ? 'Smelting...'
           : stationState.outputItemTypeId
             ? `${stationState.outputDisplayName} waiting`
-            : 'Drop ore + 1 coal or 3 wood'}
+            : popoverUi.idleHintText}
       </p>
       {stationState.outputItemTypeId ? (
         <button

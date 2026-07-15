@@ -95,32 +95,36 @@ export function usingWorldPlazaCraftModeTimedCraft({
     []
   );
 
-  const boostingActiveCraft = useCallback((): boolean => {
-    const craftState = activeCraftRef.current;
+  const boostingActiveCraft = useCallback(
+    (strikeCombo: number = 1): boolean => {
+      const craftState = activeCraftRef.current;
 
-    if (!craftState) {
-      return false;
-    }
+      if (!craftState) {
+        return false;
+      }
 
-    const nowMs = Date.now();
-    const nextEndsAtMs = computingWorldPlazaCraftModeBoostedEndsAtMs({
-      nowMs,
-      endsAtMs: craftState.endsAtMs,
-      baseDurationMs: craftState.baseDurationMs,
-      pausedUntilMs: craftState.pausedUntilMs,
-    });
+      const nowMs = Date.now();
+      const nextEndsAtMs = computingWorldPlazaCraftModeBoostedEndsAtMs({
+        nowMs,
+        endsAtMs: craftState.endsAtMs,
+        baseDurationMs: craftState.baseDurationMs,
+        pausedUntilMs: craftState.pausedUntilMs,
+        strikeCombo,
+      });
 
-    if (nextEndsAtMs >= craftState.endsAtMs) {
-      return false;
-    }
+      if (nextEndsAtMs >= craftState.endsAtMs) {
+        return false;
+      }
 
-    playingWildlifeStudySfx();
-    setActiveCraft({
-      ...craftState,
-      endsAtMs: nextEndsAtMs,
-    });
-    return true;
-  }, []);
+      playingWildlifeStudySfx();
+      setActiveCraft({
+        ...craftState,
+        endsAtMs: nextEndsAtMs,
+      });
+      return true;
+    },
+    []
+  );
 
   const haltingActiveCraft = useCallback((): boolean => {
     const craftState = activeCraftRef.current;

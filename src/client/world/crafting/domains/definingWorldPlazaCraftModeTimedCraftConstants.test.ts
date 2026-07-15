@@ -21,15 +21,26 @@ describe('craft mode timed craft constants', () => {
     );
   });
 
-  it('pulls end time forward by a noticeable share of base duration', () => {
+  it('pulls end time forward by a weaker base cut, amplified by combo', () => {
     const nowMs = 1_000_000;
+    const baseEndsAtMs = nowMs + 80_000;
     const nextEndsAtMs = computingWorldPlazaCraftModeBoostedEndsAtMs({
       nowMs,
-      endsAtMs: nowMs + 80_000,
+      endsAtMs: baseEndsAtMs,
       baseDurationMs: 100_000,
+      strikeCombo: 1,
+    });
+    const comboEndsAtMs = computingWorldPlazaCraftModeBoostedEndsAtMs({
+      nowMs,
+      endsAtMs: baseEndsAtMs,
+      baseDurationMs: 100_000,
+      strikeCombo: 5,
     });
 
-    expect(nowMs + 80_000 - nextEndsAtMs).toBe(14_000);
+    expect(baseEndsAtMs - nextEndsAtMs).toBe(4_900);
+    expect(baseEndsAtMs - comboEndsAtMs).toBeGreaterThan(
+      baseEndsAtMs - nextEndsAtMs
+    );
   });
 
   it('freezes remaining time while halted, then resumes', () => {

@@ -14,11 +14,15 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_DURATION_MS_MIN = 5_000;
 /** Slowest craft duration (complexity 10). */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_DURATION_MS_MAX = 180_000;
 
-/** Fraction of base craft duration removed per successful hammer hit. */
-export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_RATIO_OF_BASE = 0.14;
+/** Fraction of base craft duration removed per hammer hit at combo 1x.
+ * Cut ~65% from the old 0.14 feel (was too strong). */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_RATIO_OF_BASE = 0.049;
 
-/** Floor for one hammer boost so short crafts still feel snappy. */
-export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_MS_MIN = 2_500;
+/** Floor for one hammer boost at combo 1x (also cut ~65% from 2500). */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_MS_MIN = 875;
+
+/** Extra base-duration fraction added per consecutive strike beyond the first. */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_COMBO_RATIO_STEP = 0.012;
 
 /** Never finish a craft in the same frame as a hammer hit. */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_MIN_REMAINING_MS = 250;
@@ -76,9 +80,11 @@ export type ComputingWorldPlazaCraftModeBoostedEndsAtMsParams = {
   readonly endsAtMs: number;
   readonly baseDurationMs: number;
   readonly pausedUntilMs?: number | null;
+  /** Consecutive hammer hits (1 = first). Higher = stronger speed-up. */
+  readonly strikeCombo?: number;
 };
 
-/** Pulls craft end time forward by a noticeable chunk of the base duration. */
+/** Pulls craft end time forward; consecutive strikes amplify the cut. */
 export function computingWorldPlazaCraftModeBoostedEndsAtMs(
   params: ComputingWorldPlazaCraftModeBoostedEndsAtMsParams
 ): number {
@@ -92,11 +98,13 @@ export function computingWorldPlazaCraftModeBoostedEndsAtMs(
     return params.endsAtMs;
   }
 
+  const strikeCombo = Math.max(1, params.strikeCombo ?? 1);
+  const comboRatio =
+    DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_RATIO_OF_BASE +
+    (strikeCombo - 1) * DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_COMBO_RATIO_STEP;
   const desiredBoostMs = Math.max(
-    DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_MS_MIN,
-    Math.round(
-      params.baseDurationMs * DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_RATIO_OF_BASE
-    )
+    DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_MS_MIN * strikeCombo,
+    Math.round(params.baseDurationMs * comboRatio)
   );
   const maxBoostMs =
     remainingMs - DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_MIN_REMAINING_MS;

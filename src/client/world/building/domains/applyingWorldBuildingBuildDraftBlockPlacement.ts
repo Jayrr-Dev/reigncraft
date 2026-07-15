@@ -35,6 +35,7 @@ import {
 import { listingWorldBuildingPlacedBlocksFromPlots } from '@/components/world/building/domains/listingWorldBuildingPlacedBlocksFromPlots';
 import { placingWorldBuildingBlock } from '@/components/world/building/domains/placingWorldBuildingBlock';
 import { placingWorldBuildingSessionBlock } from '@/components/world/building/domains/placingWorldBuildingSessionBlock';
+import { resolvingWorldBuildingBlockPlacementBlockedMessage } from '@/components/world/building/domains/resolvingWorldBuildingBlockPlacementBlockedMessage';
 
 /** Successful local placement result. */
 export interface ApplyingWorldBuildingBuildDraftBlockPlacementSuccess {
@@ -145,9 +146,13 @@ export function applyingWorldBuildingBuildDraftBlockPlacement(
       )
     ) {
       return {
-        errorMessage: isMultiTile
-          ? 'Need a clear 2 by 2 pad on your claim for that build.'
-          : 'That tile is not available for building.',
+        errorMessage: resolvingWorldBuildingBlockPlacementBlockedMessage({
+          plots: effectivePlots,
+          anchorTilePosition: input.tilePosition,
+          actorUserId: input.actorUserId,
+          worldLayer: input.worldLayer,
+          definition,
+        }),
       };
     }
 
@@ -175,9 +180,13 @@ export function applyingWorldBuildingBuildDraftBlockPlacement(
         !checkingWorldBuildingPlotOwnedByUser(plotForTile, input.actorUserId)
       ) {
         return {
-          errorMessage: isMultiTile
-            ? 'Need a clear 2 by 2 pad on your claim for that build.'
-            : 'That tile is not available for building.',
+          errorMessage: resolvingWorldBuildingBlockPlacementBlockedMessage({
+            plots: Array.from(workingPlotsById.values()),
+            anchorTilePosition: input.tilePosition,
+            actorUserId: input.actorUserId,
+            worldLayer: input.worldLayer,
+            definition,
+          }),
         };
       }
 

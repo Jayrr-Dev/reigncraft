@@ -6,6 +6,7 @@
  * @module components/world/components/renderingWorldPlazaHudToolbarBottomAnchor
  */
 
+import { RenderingWorldPlazaBuildPlacementCancelButton } from '@/components/world/building/components/renderingWorldPlazaBuildPlacementCancelButton';
 import { ProvidingWorldPlazaViewportHudScale } from '@/components/world/components/providingWorldPlazaViewportHudScale';
 import { RenderingWorldPlazaHudToolbarModeBadges } from '@/components/world/components/renderingWorldPlazaHudToolbarModeBadges';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
@@ -30,6 +31,11 @@ export type RenderingWorldPlazaHudToolbarBottomAnchorProps = {
   readonly isFullscreen?: boolean;
   /** Optional chrome above mode badges (e.g. active craft progress). */
   readonly topOverlay?: ReactNode;
+  /**
+   * When set, Items / Craft / Claim and the mode body are replaced by Cancel.
+   * Used while a craft placeable ghost is armed.
+   */
+  readonly onCancelPlacement?: (() => void) | null;
   readonly children: ReactNode;
 };
 
@@ -45,6 +51,7 @@ export function RenderingWorldPlazaHudToolbarBottomAnchor({
   isMobile = false,
   isFullscreen = false,
   topOverlay = null,
+  onCancelPlacement = null,
   children,
 }: RenderingWorldPlazaHudToolbarBottomAnchorProps): React.JSX.Element {
   const hotbarViewportHudScale = useMemo(
@@ -92,14 +99,26 @@ export function RenderingWorldPlazaHudToolbarBottomAnchor({
           style={bottomStackStyle}
         >
           {topOverlay}
-          <RenderingWorldPlazaHudToolbarModeBadges
-            activeMode={activeMode}
-            onSelectMode={onSelectMode}
-            isEditEnabled={isEditEnabled}
-          />
-          <div className={STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_BODY_CLASS_NAME}>
-            {children}
-          </div>
+          {onCancelPlacement ? (
+            <RenderingWorldPlazaBuildPlacementCancelButton
+              onCancel={onCancelPlacement}
+            />
+          ) : (
+            <>
+              <RenderingWorldPlazaHudToolbarModeBadges
+                activeMode={activeMode}
+                onSelectMode={onSelectMode}
+                isEditEnabled={isEditEnabled}
+              />
+              <div
+                className={
+                  STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_BODY_CLASS_NAME
+                }
+              >
+                {children}
+              </div>
+            </>
+          )}
         </div>
       </ProvidingWorldPlazaViewportHudScale>
     </div>
