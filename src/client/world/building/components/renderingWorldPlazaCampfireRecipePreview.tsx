@@ -1,13 +1,13 @@
 'use client';
 
 /**
- * Cookbook preview of the procedural map campfire (stone ring + log teepee).
+ * Cookbook preview of the campfire craft recipe (stone ring + log teepee).
  *
  * @module components/world/building/components/renderingWorldPlazaCampfireRecipePreview
  */
 
 import { DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER } from '@/components/home/domains/definingPlazaBestiarySpritePortraitConstants';
-import { Icon } from '@/components/ui/icon';
+import { resolvingWorldPlazaCampfireInventorySpriteSheetIcon } from '@/components/world/building/domains/definingWorldPlazaCampfireInventorySpriteConstants';
 import { cn } from '@/lib/utils';
 
 export type RenderingWorldPlazaCampfireRecipePreviewPresentation =
@@ -31,6 +31,7 @@ export function RenderingWorldPlazaCampfireRecipePreview({
   className,
 }: RenderingWorldPlazaCampfireRecipePreviewProps): React.JSX.Element {
   const isCard = presentation === 'card';
+  const spriteSheetIcon = resolvingWorldPlazaCampfireInventorySpriteSheetIcon();
 
   return (
     <div
@@ -49,17 +50,14 @@ export function RenderingWorldPlazaCampfireRecipePreview({
       aria-hidden
     >
       <div
-        className={cn(
-          'absolute h-[26%] w-[58%] translate-y-[38%] rounded-[50%] bg-[#5d3a1f]/15',
-          isCard && 'h-[24%] w-[64%]'
-        )}
-      />
-      <Icon
-        icon="game-icons:campfire"
-        className={cn(
-          'relative text-[#8b5a2b] drop-shadow-[0_2px_0_rgba(74,55,40,0.22)]',
-          isCard ? 'size-[72%]' : 'size-24 sm:size-28'
-        )}
+        className={cn('shrink-0', isCard ? 'size-[92%]' : 'size-24 sm:size-28')}
+        style={{
+          backgroundImage: `url(${spriteSheetIcon.spriteSheetUrl})`,
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: '100% 100%',
+          backgroundPosition: 'center',
+          imageRendering: 'pixelated',
+        }}
       />
     </div>
   );

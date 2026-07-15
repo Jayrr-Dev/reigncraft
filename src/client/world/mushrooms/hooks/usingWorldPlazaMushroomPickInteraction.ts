@@ -2,6 +2,11 @@
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
+import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
+import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
+import { resolvingWorldPlazaMushroomCatalogEntryBySpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
 import type { ListingWorldPlazaMushroomsInInteractionRangeEntry } from '@/components/world/mushrooms/domains/listingWorldPlazaMushroomsInInteractionRange';
 import {
   checkingWorldPlazaMushroomPickEligibility,
@@ -10,11 +15,6 @@ import {
   type DefiningWorldPlazaPickedMushroomTileState,
 } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
 import { checkingWorldPlazaRuntimeMushroomIsPicked } from '@/components/world/mushrooms/domains/registeringWorldPlazaPickedMushroomsLookup';
-import { resolvingWorldPlazaMushroomCatalogEntryBySpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
-import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
-import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
-import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, type RefObject } from 'react';
 
@@ -181,7 +181,7 @@ export function usingWorldPlazaMushroomPickInteraction({
           return;
         }
 
-        let acceptedQuantity = 0;
+        let quantityAccepted = 0;
 
         updatingInventoryState((currentState) => {
           const addResult = addingWorldPlazaInventoryItemWithStacking(
@@ -193,18 +193,26 @@ export function usingWorldPlazaMushroomPickInteraction({
             },
             DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
           );
-          acceptedQuantity = addResult.quantityAccepted;
-          return addResult.nextState;
+
+          quantityAccepted = addResult.quantityAccepted;
+
+          if (addResult.quantityAccepted < pickResult.mushroomQuantity) {
+            return null;
+          }
+
+          return addResult.state;
         });
 
-        if (acceptedQuantity > 0) {
-          notifyingWorldPlazaInventoryItemAdded();
-          showingWorldPlazaInventoryItemPickupToast({
-            itemTypeId: catalogEntry.rawItemTypeId,
-            quantity: acceptedQuantity,
-            registry: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
-          });
+        if (quantityAccepted < pickResult.mushroomQuantity) {
+          showingGameplayHudToast('Your inventory is full.');
+          return;
         }
+
+        notifyingWorldPlazaInventoryItemAdded(quantityAccepted);
+        showingWorldPlazaInventoryItemPickupToast({
+          itemTypeId: catalogEntry.rawItemTypeId,
+          quantity: quantityAccepted,
+        });
 
         await queryClient.invalidateQueries({
           queryKey: [DEFINING_WORLD_PLAZA_PICKED_MUSHROOMS_QUERY_KEY_ROOT],

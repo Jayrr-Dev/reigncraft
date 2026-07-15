@@ -4,6 +4,7 @@ import { resolvingWorldPlazaLastPositionStorageKey } from '@/components/world/do
 import { resolvingWorldPlazaDiscoveredNamedRealmsStorageKey } from '@/components/world/domains/definingWorldPlazaNamedRealmConstants';
 import { resolvingWorldPlazaRecipeDiscoveryStorageKey } from '@/components/world/domains/definingWorldPlazaRecipeDiscoveryConstants';
 import { resolvingWorldPlazaSavedCoordsStorageKey } from '@/components/world/domains/definingWorldPlazaSavedCoordsConstants';
+import { clearingWorldPlazaRecipeDiscoveryStoreForOwner } from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
 import {
   clearingWorldPlazaLocalFarmlandMemoryForOwner,
   resolvingWorldPlazaFarmlandLocalStorageKey,
@@ -74,4 +75,5 @@ export function clearingPlazaSinglePlayerSaveSlotLocalStorage(
   clearingWorldPlazaLocalPickedPebblesMemoryForOwner(persistenceOwnerId);
   clearingWorldPlazaLocalPickedFlowersMemoryForOwner(persistenceOwnerId);
   clearingWorldPlazaLocalFarmlandMemoryForOwner(persistenceOwnerId);
+  clearingWorldPlazaRecipeDiscoveryStoreForOwner(persistenceOwnerId);
 }

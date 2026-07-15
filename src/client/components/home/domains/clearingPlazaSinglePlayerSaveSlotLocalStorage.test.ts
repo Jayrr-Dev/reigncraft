@@ -1,4 +1,11 @@
 import { clearingPlazaSinglePlayerSaveSlotLocalStorage } from '@/components/home/domains/clearingPlazaSinglePlayerSaveSlotLocalStorage';
+import { DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
+import {
+  attachingWorldPlazaRecipePage,
+  gettingWorldPlazaRecipeAttachedSnapshot,
+  initializingWorldPlazaRecipeDiscoveryStore,
+  resettingWorldPlazaRecipeDiscoveryStoreForTests,
+} from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
 import {
   clearingWorldPlazaLocalFarmlandMemoryForOwner,
   resolvingWorldPlazaFarmlandLocalStorageKey,
@@ -10,6 +17,13 @@ import { resolvingWorldPlazaPickedFlowersLocalStorageKey } from '@/components/wo
 import { resolvingWorldPlazaPickedPebblesLocalStorageKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import { resolvingWorldPlazaInventoryStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock(
+  '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi',
+  () => ({
+    savingPlazaSinglePlayerSaveSlotData: vi.fn(async () => undefined),
+  })
+);
 
 function creatingTestLocalStorage(): Storage {
   const storage = new Map<string, string>();
@@ -48,6 +62,7 @@ describe('clearingPlazaSinglePlayerSaveSlotLocalStorage', () => {
 
   afterEach(() => {
     clearingWorldPlazaLocalFarmlandMemoryForOwner(persistenceOwnerId);
+    resettingWorldPlazaRecipeDiscoveryStoreForTests();
     vi.unstubAllGlobals();
   });
 
@@ -92,5 +107,18 @@ describe('clearingPlazaSinglePlayerSaveSlotLocalStorage', () => {
         resolvingWorldPlazaFarmlandLocalStorageKey(persistenceOwnerId)
       )
     ).toBeNull();
+  });
+
+  it('drops recipe discovery memory so same-slot re-enter does not keep attaches', () => {
+    resettingWorldPlazaRecipeDiscoveryStoreForTests();
+    initializingWorldPlazaRecipeDiscoveryStore(persistenceOwnerId);
+    attachingWorldPlazaRecipePage(
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE
+    );
+
+    clearingPlazaSinglePlayerSaveSlotLocalStorage(persistenceOwnerId);
+    initializingWorldPlazaRecipeDiscoveryStore(persistenceOwnerId);
+
+    expect(gettingWorldPlazaRecipeAttachedSnapshot()).toEqual([]);
   });
 });

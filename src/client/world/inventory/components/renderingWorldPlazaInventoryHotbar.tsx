@@ -19,13 +19,6 @@ import {
   parsingWorldPlazaOreSmeltingSlotDroppableId,
   type DefiningWorldPlazaOreSmeltingStationSlotKind,
 } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingDndIds';
-import { parsingWorldPlazaTeaBrewingSlotDroppableId } from '@/components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingDndIds';
-import { placingWorldPlazaTeaPotIngredientFromInventorySlot } from '@/components/world/tea-brewing/domains/mutatingWorldPlazaTeaPotIngredientSlots';
-import { returningWorldPlazaTeaPotIngredientToInventory } from '@/components/world/tea-brewing/domains/mutatingWorldPlazaTeaPotIngredientSlots';
-import { resolvingWorldPlazaTeaPotIngredientSlots } from '@/components/world/tea-brewing/domains/resolvingWorldPlazaTeaBrewingMetadata';
-import { RenderingWorldPlazaTeaBrewingPopover } from '@/components/world/tea-brewing/components/renderingWorldPlazaTeaBrewingPopover';
-import { checkingWorldPlazaInventoryHasBrewedTeaPot } from '@/components/world/tea-brewing/domains/brewingWorldPlazaTeaPotAtCampfire';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import type { DefiningWorldPlazaOreSmeltingStationState } from '@/components/world/crafting/hooks/usingWorldPlazaOreSmeltingStations';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles } from '@/components/world/domains/resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles';
@@ -35,8 +28,8 @@ import {
   usingWorldPlazaInventoryHotbarSlotInteractionsValue,
 } from '@/components/world/inventory/components/providingWorldPlazaInventoryHotbarSlotInteractions';
 import { RenderingWorldPlazaInventoryDragOverlayItem } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDragOverlayItem';
-import { RenderingWorldPlazaOreSmeltingPopover } from '@/components/world/inventory/components/renderingWorldPlazaOreSmeltingPopover';
 import { RenderingWorldPlazaInventoryPageArrowButtons } from '@/components/world/inventory/components/renderingWorldPlazaInventoryPageArrowButtons';
+import { RenderingWorldPlazaOreSmeltingPopover } from '@/components/world/inventory/components/renderingWorldPlazaOreSmeltingPopover';
 import {
   resolvingWorldPlazaInventoryDraggedItemById,
   resolvingWorldPlazaInventoryDragLocationForItemId,
@@ -48,6 +41,7 @@ import {
   LABELING_WORLD_PLAZA_INVENTORY_HOTBAR,
   STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import {
   STYLING_WORLD_PLAZA_INVENTORY_GRID_WRAPPER_CLASS_NAME,
@@ -68,8 +62,21 @@ import { resolvingWorldPlazaInventoryVisibleSlotIndices } from '@/components/wor
 import type { TrackingWorldPlazaInventoryDropPlacementResult } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
 import { usingWorldPlazaInventoryStoragePageDragHover } from '@/components/world/inventory/hooks/usingWorldPlazaInventoryStoragePageDragHover';
+import { usingWorldPlazaInventoryStoragePageWheel } from '@/components/world/inventory/hooks/usingWorldPlazaInventoryStoragePageWheel';
+import { RenderingWorldPlazaTeaBrewingPopover } from '@/components/world/tea-brewing/components/renderingWorldPlazaTeaBrewingPopover';
+import { checkingWorldPlazaInventoryHasBrewedTeaPot } from '@/components/world/tea-brewing/domains/brewingWorldPlazaTeaPotAtCampfire';
+import { parsingWorldPlazaTeaBrewingSlotDroppableId } from '@/components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingDndIds';
+import {
+  placingWorldPlazaTeaPotIngredientFromInventorySlot,
+  returningWorldPlazaTeaPotIngredientToInventory,
+} from '@/components/world/tea-brewing/domains/mutatingWorldPlazaTeaPotIngredientSlots';
+import { resolvingWorldPlazaTeaPotIngredientSlots } from '@/components/world/tea-brewing/domains/resolvingWorldPlazaTeaBrewingMetadata';
 import { cn } from '@/lib/utils';
-import type { DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core';
+import type {
+  DragEndEvent,
+  DragOverEvent,
+  DragStartEvent,
+} from '@dnd-kit/core';
 import type * as React from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
@@ -174,7 +181,9 @@ type RenderingWorldPlazaInventoryHotbarInventoryShellProps = {
   readonly closingBagPopover: () => void;
   readonly openingTeaPotPopover: (slotIndex: number) => void;
   readonly closingTeaPotPopover: () => void;
-  readonly handlingReturnTeaPotIngredient: (teapotIngredientSlotIndex: number) => void;
+  readonly handlingReturnTeaPotIngredient: (
+    teapotIngredientSlotIndex: number
+  ) => void;
   readonly onInventoryDragStart: (event: DragStartEvent) => void;
   readonly onInventoryDragEnd: (event: DragEndEvent) => void;
   readonly resolvingDraggedItemById: (
@@ -269,6 +278,12 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
         storagePageCount: DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT,
         onStoragePageIndexChange,
       });
+
+    const onStoragePageWheel = usingWorldPlazaInventoryStoragePageWheel({
+      storagePageIndex,
+      storagePageCount: DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT,
+      onStoragePageIndexChange,
+    });
 
     const handlingInventoryDragOver = useCallback(
       (event: DragOverEvent): void => {
@@ -385,6 +400,7 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
             STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS
           )}
           style={viewportStyles.shellStyle}
+          onWheel={onStoragePageWheel}
         >
           {isLoading ? (
             <div
@@ -771,7 +787,10 @@ export function RenderingWorldPlazaInventoryHotbar({
         return;
       }
 
-      moveItem(slotIndex, DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX);
+      moveItem(
+        slotIndex,
+        DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX
+      );
       setOpenItemDetailSlotIndex(null);
       setOpenBagHotbarSlotIndex(null);
     },

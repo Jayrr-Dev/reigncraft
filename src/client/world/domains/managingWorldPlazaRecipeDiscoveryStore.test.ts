@@ -4,8 +4,10 @@ import { filteringPlazaRecipesGuideDisplayEntriesByCookbook } from '@/components
 import { resolvingPlazaRecipesGuideDisplayEntries } from '@/components/home/domains/resolvingPlazaRecipesGuideDisplayEntries';
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID } from '@/components/world/building/domains/definingWorldPlazaCraftModeCookbookRegistry';
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
+import { resolvingWorldPlazaRecipeDiscoveryStorageKey } from '@/components/world/domains/definingWorldPlazaRecipeDiscoveryConstants';
 import {
   attachingWorldPlazaRecipePage,
+  clearingWorldPlazaRecipeDiscoveryStoreForOwner,
   gettingWorldPlazaRecipeAttachedSnapshot,
   initializingWorldPlazaRecipeDiscoveryStore,
   recordingWorldPlazaRecipePageAttached,
@@ -70,9 +72,6 @@ describe('managingWorldPlazaRecipeDiscoveryStore', () => {
 
     expect(gettingWorldPlazaRecipeAttachedSnapshot()).toEqual([
       DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE,
-      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_BOTTLE,
-      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_CUP,
-      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_TEAPOT,
     ]);
 
     const persisted = readingWorldPlazaRecipeDiscoveryFromStorage(
@@ -80,10 +79,7 @@ describe('managingWorldPlazaRecipeDiscoveryStore', () => {
     );
     expect([...persisted.attachedRecipeIds].sort()).toEqual([
       DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE,
-      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_BOTTLE,
-      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_CUP,
-      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_TEAPOT,
-    ].sort());
+    ]);
     expect(savingPlazaSinglePlayerSaveSlotData).not.toHaveBeenCalled();
   });
 
@@ -96,23 +92,32 @@ describe('managingWorldPlazaRecipeDiscoveryStore', () => {
     );
 
     expect(savingPlazaSinglePlayerSaveSlotData).toHaveBeenLastCalledWith(1, {
-      attachedRecipeIds: [
-        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE,
-        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_BOTTLE,
-        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_CUP,
-        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_TEAPOT,
-      ].sort(),
+      attachedRecipeIds: [DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE],
     });
   });
 
-  it('auto-attaches ceramics ware recipes on hydrate', () => {
+  it('does not auto-attach ceramics ware recipes on hydrate', () => {
     initializingWorldPlazaRecipeDiscoveryStore('test-ceramics-ware-start');
 
-    expect(gettingWorldPlazaRecipeAttachedSnapshot()).toEqual([
-      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_BOTTLE,
-      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_CUP,
-      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_TEAPOT,
-    ]);
+    expect(gettingWorldPlazaRecipeAttachedSnapshot()).toEqual([]);
+  });
+
+  it('drops in-memory attaches for a wiped owner so the next hydrate re-reads storage', () => {
+    const ownerId = 'test-recipes-wipe-owner';
+    initializingWorldPlazaRecipeDiscoveryStore(ownerId);
+    attachingWorldPlazaRecipePage(
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CAMPFIRE
+    );
+
+    clearingWorldPlazaRecipeDiscoveryStoreForOwner(ownerId);
+    window.localStorage.removeItem(
+      resolvingWorldPlazaRecipeDiscoveryStorageKey(ownerId)
+    );
+
+    // Same owner again must not keep the pre-wipe RAM snapshot.
+    initializingWorldPlazaRecipeDiscoveryStore(ownerId);
+
+    expect(gettingWorldPlazaRecipeAttachedSnapshot()).toEqual([]);
   });
 
   it('shows mystery names until attached, then filters by cookbook', () => {

@@ -140,6 +140,13 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_DRAG_HOVER_DELAY_MS =
 export const DEFINING_WORLD_PLAZA_INVENTORY_PAGE_ARROW_DRAG_HOVER_REPEAT_MS =
   420 as const;
 
+/**
+ * Min ms between wheel-driven inventory page steps.
+ * Stops trackpad inertia from skipping several rows at once.
+ */
+export const DEFINING_WORLD_PLAZA_INVENTORY_PAGE_WHEEL_COOLDOWN_MS =
+  140 as const;
+
 /** Data attribute on hotbar slot surfaces that open item or bag popovers. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_SLOT_DATA_ATTRIBUTE =
   'data-plaza-inventory-slot' as const;

@@ -6,6 +6,7 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import {
   resolvingWorldPlazaInventoryClampedStoragePageIndex,
+  resolvingWorldPlazaInventoryStoragePageIndexFromWheelDeltaY,
   resolvingWorldPlazaInventoryStoragePageSlotIndices,
   resolvingWorldPlazaInventoryVisibleSlotIndices,
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStoragePage';
@@ -53,5 +54,23 @@ describe('resolvingWorldPlazaInventoryStoragePage', () => {
     expect(resolvingWorldPlazaInventoryVisibleSlotIndices(3)).toEqual([
       18, 19, 20, 21, 22, 23,
     ]);
+  });
+
+  it('pages from wheel delta without leaving the page range', () => {
+    expect(
+      resolvingWorldPlazaInventoryStoragePageIndexFromWheelDeltaY(0, 4, 120)
+    ).toBe(1);
+    expect(
+      resolvingWorldPlazaInventoryStoragePageIndexFromWheelDeltaY(1, 4, -40)
+    ).toBe(0);
+    expect(
+      resolvingWorldPlazaInventoryStoragePageIndexFromWheelDeltaY(0, 4, -40)
+    ).toBe(0);
+    expect(
+      resolvingWorldPlazaInventoryStoragePageIndexFromWheelDeltaY(3, 4, 120)
+    ).toBe(3);
+    expect(
+      resolvingWorldPlazaInventoryStoragePageIndexFromWheelDeltaY(2, 4, 0)
+    ).toBe(2);
   });
 });

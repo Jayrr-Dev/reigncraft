@@ -76,3 +76,30 @@ export function resolvingWorldPlazaInventoryVisibleSlotIndices(
 
   return resolvingWorldPlazaInventoryStoragePageSlotIndices(page - 1);
 }
+
+/**
+ * Next hotbar page from a wheel delta while hovering the items row.
+ *
+ * Scroll down (positive deltaY) pages toward later storage rows.
+ * Scroll up pages back toward the main hotbar.
+ *
+ * @param storagePageIndex - Current page (0-based)
+ * @param storagePageCount - Total pages (main + storage)
+ * @param wheelDeltaY - Wheel event deltaY
+ */
+export function resolvingWorldPlazaInventoryStoragePageIndexFromWheelDeltaY(
+  storagePageIndex: number,
+  storagePageCount: number,
+  wheelDeltaY: number
+): number {
+  const currentPage =
+    resolvingWorldPlazaInventoryClampedStoragePageIndex(storagePageIndex);
+  const maxPage = Math.max(0, Math.trunc(storagePageCount) - 1);
+
+  if (!Number.isFinite(wheelDeltaY) || wheelDeltaY === 0) {
+    return Math.min(currentPage, maxPage);
+  }
+
+  const step = wheelDeltaY > 0 ? 1 : -1;
+  return Math.max(0, Math.min(maxPage, currentPage + step));
+}

@@ -8,7 +8,6 @@
  */
 
 import { savingPlazaSinglePlayerSaveSlotData } from '@/components/home/repositories/callingPlazaSinglePlayerSavesDevvitApi';
-import { DEFINING_WORLD_PLAZA_CERAMICS_WARE_RECIPES_START_ATTACHED } from '@/components/world/crafting/domains/definingWorldPlazaCeramicsWareRecipesStartAttached';
 import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { readingWorldPlazaRecipeDiscoveryFromStorage } from '@/components/world/domains/readingWorldPlazaRecipeDiscoveryFromStorage';
 import { writingWorldPlazaRecipeDiscoveryToStorage } from '@/components/world/domains/writingWorldPlazaRecipeDiscoveryToStorage';
@@ -67,31 +66,6 @@ function persistingWorldPlazaRecipeDiscovery(): void {
   mirroringWorldPlazaRecipeDiscoveryToCloudSave();
 }
 
-/**
- * Ensures ceramics ware recipes (cup / teapot / bottle) are attached.
- * Returns true when any new attach was written.
- */
-function ensuringWorldPlazaCeramicsWareRecipesStartAttached(): boolean {
-  let didAttach = false;
-
-  for (const recipeId of DEFINING_WORLD_PLAZA_CERAMICS_WARE_RECIPES_START_ATTACHED) {
-    if (managingWorldPlazaRecipeDiscoveryAttachedRecipeIds.has(recipeId)) {
-      continue;
-    }
-
-    if (!didAttach) {
-      managingWorldPlazaRecipeDiscoveryAttachedRecipeIds = new Set(
-        managingWorldPlazaRecipeDiscoveryAttachedRecipeIds
-      );
-      didAttach = true;
-    }
-
-    managingWorldPlazaRecipeDiscoveryAttachedRecipeIds.add(recipeId);
-  }
-
-  return didAttach;
-}
-
 export type InitializingWorldPlazaRecipeDiscoveryStoreOptions = {
   /** When set, attaches mirror into this Redis save slot. */
   cloudSaveSlotIndex?: PlazaSaveSlotIndex | null;
@@ -111,13 +85,6 @@ export function initializingWorldPlazaRecipeDiscoveryStore(
 
   if (managingWorldPlazaRecipeDiscoveryStorageOwnerId === storageOwnerId) {
     managingWorldPlazaRecipeDiscoveryCloudSaveSlotIndex = cloudSaveSlotIndex;
-
-    if (ensuringWorldPlazaCeramicsWareRecipesStartAttached()) {
-      refreshingWorldPlazaRecipeDiscoverySnapshotCaches();
-      persistingWorldPlazaRecipeDiscovery();
-      notifyingWorldPlazaRecipeDiscoverySubscribers();
-    }
-
     return;
   }
 
@@ -127,14 +94,7 @@ export function initializingWorldPlazaRecipeDiscoveryStore(
   managingWorldPlazaRecipeDiscoveryAttachedRecipeIds = new Set(
     snapshot.attachedRecipeIds
   );
-
-  if (ensuringWorldPlazaCeramicsWareRecipesStartAttached()) {
-    refreshingWorldPlazaRecipeDiscoverySnapshotCaches();
-    persistingWorldPlazaRecipeDiscovery();
-  } else {
-    refreshingWorldPlazaRecipeDiscoverySnapshotCaches();
-  }
-
+  refreshingWorldPlazaRecipeDiscoverySnapshotCaches();
   notifyingWorldPlazaRecipeDiscoverySubscribers();
 }
 
@@ -198,6 +158,26 @@ export function subscribingWorldPlazaRecipeDiscovery(
 
 export function gettingWorldPlazaRecipeAttachedSnapshot(): readonly DefiningWorldPlazaCraftModeRecipeId[] {
   return managingWorldPlazaRecipeDiscoveryAttachedSnapshotCache;
+}
+
+/**
+ * Drops in-memory cookbook attaches for one persistence owner so the next
+ * hydrate re-reads storage (used when a save slot is wiped).
+ *
+ * @param persistenceOwnerId - Scoped localStorage owner id for the slot.
+ */
+export function clearingWorldPlazaRecipeDiscoveryStoreForOwner(
+  persistenceOwnerId: string
+): void {
+  if (managingWorldPlazaRecipeDiscoveryStorageOwnerId !== persistenceOwnerId) {
+    return;
+  }
+
+  managingWorldPlazaRecipeDiscoveryStorageOwnerId = null;
+  managingWorldPlazaRecipeDiscoveryCloudSaveSlotIndex = null;
+  managingWorldPlazaRecipeDiscoveryAttachedRecipeIds = new Set();
+  refreshingWorldPlazaRecipeDiscoverySnapshotCaches();
+  notifyingWorldPlazaRecipeDiscoverySubscribers();
 }
 
 /** Test helper: clears in-memory state between unit tests. */

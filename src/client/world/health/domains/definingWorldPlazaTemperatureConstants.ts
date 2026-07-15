@@ -102,13 +102,14 @@ export function computingWorldPlazaCampfireTemperatureCelsiusFromFuelWoodCount(
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_HEAT_RADIATION_RING = 1;
 
 /**
- * Floor for adjacent campfire heat tiles (°C). Keeps the one-block ring above
- * comfort so floor tint / mild heat damage still read after dilution.
+ * Floor for adjacent campfire heat tiles (°C). Just above comfort high so the
+ * one-block ring still thaws / warms cold biomes without staying near standing
+ * heat.
  */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_ADJACENT_MIN_CELSIUS = 55;
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_ADJACENT_MIN_CELSIUS = 42;
 
 /** Adjacent campfire tile heat as a fraction of the standing-tile temperature. */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_ADJACENT_CELSIUS_RATIO = 0.65;
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_ADJACENT_CELSIUS_RATIO = 0.4;
 
 /**
  * Adjacent campfire heat (°C) from the standing-tile temperature.
