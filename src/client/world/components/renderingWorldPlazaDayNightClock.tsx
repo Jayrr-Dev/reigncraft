@@ -11,7 +11,7 @@ import {
   gettingWorldPlazaDayNightDebugOverrideRevision,
   subscribingWorldPlazaDayNightDebugOverride,
 } from '@/components/world/domains/managingWorldPlazaDayNightDebugOverrideStore';
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 
 export interface RenderingWorldPlazaDayNightClockProps {
   /** When embedded, renders inside the dev panel instead of the top-left HUD. */
@@ -20,6 +20,8 @@ export interface RenderingWorldPlazaDayNightClockProps {
 
 /**
  * Top-left in-game clock tied to the shared day/night cycle.
+ *
+ * Updates the `<time>` label imperatively so the 1s refresh does not re-render.
  */
 export function RenderingWorldPlazaDayNightClock({
   layout = 'anchored',
@@ -29,13 +31,19 @@ export function RenderingWorldPlazaDayNightClock({
     gettingWorldPlazaDayNightDebugOverrideRevision,
     () => 0
   );
-  const [clockTime, setClockTime] = useState(() =>
-    formattingWorldPlazaDayNightClockTime()
-  );
+  const timeElementRef = useRef<HTMLTimeElement>(null);
+  const initialClockTime = formattingWorldPlazaDayNightClockTime();
 
   useEffect(() => {
+    const timeElement = timeElementRef.current;
+    if (!timeElement) {
+      return;
+    }
+
     const refreshingClockTime = (): void => {
-      setClockTime(formattingWorldPlazaDayNightClockTime());
+      const clockTime = formattingWorldPlazaDayNightClockTime();
+      timeElement.textContent = clockTime;
+      timeElement.dateTime = clockTime;
     };
 
     refreshingClockTime();
@@ -59,10 +67,11 @@ export function RenderingWorldPlazaDayNightClock({
       }
     >
       <time
+        ref={timeElementRef}
         className={DEFINING_WORLD_PLAZA_DAY_NIGHT_CLOCK_TEXT_CLASS_NAME}
-        dateTime={clockTime}
+        dateTime={initialClockTime}
       >
-        {clockTime}
+        {initialClockTime}
       </time>
     </div>
   );

@@ -28,10 +28,12 @@ import {
   gettingWorldPlazaDayNightDebugOverrideRevision,
   subscribingWorldPlazaDayNightDebugOverride,
 } from '@/components/world/domains/managingWorldPlazaDayNightDebugOverrideStore';
-import { memo, useEffect, useState, useSyncExternalStore } from 'react';
+import { memo, useEffect, useRef, useSyncExternalStore } from 'react';
 
 /**
  * Compact parchment panel with shared in-game clock time and day index.
+ *
+ * Time/day strings update imperatively (no React clock state).
  */
 export const RenderingWorldPlazaDayNightPanel = memo(
   function RenderingWorldPlazaDayNightPanel(): React.JSX.Element {
@@ -40,17 +42,24 @@ export const RenderingWorldPlazaDayNightPanel = memo(
       gettingWorldPlazaDayNightDebugOverrideRevision,
       () => 0
     );
-    const [clockTime, setClockTime] = useState(() =>
-      formattingWorldPlazaDayNightClockTime()
-    );
-    const [dayNumber, setDayNumber] = useState(() =>
-      formattingWorldPlazaDayNightDayNumber()
-    );
+    const timeElementRef = useRef<HTMLTimeElement>(null);
+    const dayNumberElementRef = useRef<HTMLSpanElement>(null);
+    const initialClockTime = formattingWorldPlazaDayNightClockTime();
+    const initialDayNumber = formattingWorldPlazaDayNightDayNumber();
 
     useEffect(() => {
       const refreshingClock = (): void => {
-        setClockTime(formattingWorldPlazaDayNightClockTime());
-        setDayNumber(formattingWorldPlazaDayNightDayNumber());
+        const clockTime = formattingWorldPlazaDayNightClockTime();
+        const dayNumber = formattingWorldPlazaDayNightDayNumber();
+        const timeElement = timeElementRef.current;
+        if (timeElement) {
+          timeElement.textContent = clockTime;
+          timeElement.dateTime = clockTime;
+        }
+        const dayNumberElement = dayNumberElementRef.current;
+        if (dayNumberElement) {
+          dayNumberElement.textContent = dayNumber;
+        }
       };
 
       refreshingClock();
@@ -82,12 +91,13 @@ export const RenderingWorldPlazaDayNightPanel = memo(
             {LABELING_WORLD_PLAZA_DAY_NIGHT_PANEL_TIME}
           </span>
           <time
+            ref={timeElementRef}
             className={
               STYLING_WORLD_PLAZA_DAY_NIGHT_PANEL_TIME_VALUE_CLASS_NAME
             }
-            dateTime={clockTime}
+            dateTime={initialClockTime}
           >
-            {clockTime}
+            {initialClockTime}
           </time>
         </div>
 
@@ -98,9 +108,10 @@ export const RenderingWorldPlazaDayNightPanel = memo(
             {LABELING_WORLD_PLAZA_DAY_NIGHT_PANEL_DAY}
           </span>
           <span
+            ref={dayNumberElementRef}
             className={STYLING_WORLD_PLAZA_DAY_NIGHT_PANEL_ROW_VALUE_CLASS_NAME}
           >
-            {dayNumber}
+            {initialDayNumber}
           </span>
         </div>
 

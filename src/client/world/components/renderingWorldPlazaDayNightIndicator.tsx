@@ -24,7 +24,7 @@ import { resolvingWorldPlazaDayNightIndicatorPresentation } from '@/components/w
 import { resolvingWorldPlazaDayNightIndicatorViewportStyles } from '@/components/world/domains/resolvingWorldPlazaDayNightIndicatorViewportStyles';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
 import { cn } from '@/lib/utils';
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 
 /** Props for {@link RenderingWorldPlazaDayNightIndicator}. */
 export type RenderingWorldPlazaDayNightIndicatorProps = {
@@ -40,6 +40,9 @@ export type RenderingWorldPlazaDayNightIndicatorProps = {
 
 /**
  * Circular day/night orb with rising sunny fill and a moving sun/moon.
+ *
+ * Clock strings for aria/title update via setAttribute (no React clock state).
+ * Visual fill still follows quantized sunState buckets.
  */
 export const RenderingWorldPlazaDayNightIndicator = memo(
   function RenderingWorldPlazaDayNightIndicator({
@@ -49,9 +52,8 @@ export const RenderingWorldPlazaDayNightIndicator = memo(
     onToggle,
   }: RenderingWorldPlazaDayNightIndicatorProps): React.JSX.Element {
     const sunState = usingWorldPlazaDayNightSunState();
-    const [clockTime, setClockTime] = useState(() =>
-      formattingWorldPlazaDayNightClockTime()
-    );
+    const buttonElementRef = useRef<HTMLButtonElement>(null);
+    const isDaytimeRef = useRef(true);
     const viewportStyles = useMemo(
       () =>
         resolvingWorldPlazaDayNightIndicatorViewportStyles(
@@ -74,14 +76,26 @@ export const RenderingWorldPlazaDayNightIndicator = memo(
       [presentation.celestialBody, viewportStyles.iconSizePx]
     );
 
+    isDaytimeRef.current = presentation.isDaytime;
+
     useEffect(() => {
-      const refreshingClockTime = (): void => {
-        setClockTime(formattingWorldPlazaDayNightClockTime());
+      const buttonElement = buttonElementRef.current;
+      if (!buttonElement) {
+        return;
+      }
+
+      const refreshingAriaLabel = (): void => {
+        const clockTime = formattingWorldPlazaDayNightClockTime();
+        const ariaLabel = `${LABELING_WORLD_PLAZA_ACTION_BAR_DAY_NIGHT}: ${clockTime}, ${
+          isDaytimeRef.current ? 'day' : 'night'
+        }`;
+        buttonElement.setAttribute('aria-label', ariaLabel);
+        buttonElement.setAttribute('title', ariaLabel);
       };
 
-      refreshingClockTime();
+      refreshingAriaLabel();
       const intervalId = window.setInterval(
-        refreshingClockTime,
+        refreshingAriaLabel,
         DEFINING_WORLD_PLAZA_DAY_NIGHT_CLOCK_REFRESH_INTERVAL_MS
       );
 
@@ -90,12 +104,13 @@ export const RenderingWorldPlazaDayNightIndicator = memo(
       };
     }, [sunState.bucketIndex]);
 
-    const ariaLabel = `${LABELING_WORLD_PLAZA_ACTION_BAR_DAY_NIGHT}: ${clockTime}, ${
+    const initialAriaLabel = `${LABELING_WORLD_PLAZA_ACTION_BAR_DAY_NIGHT}: ${formattingWorldPlazaDayNightClockTime()}, ${
       presentation.isDaytime ? 'day' : 'night'
     }`;
 
     return (
       <button
+        ref={buttonElementRef}
         type="button"
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
         className={cn(
@@ -103,10 +118,10 @@ export const RenderingWorldPlazaDayNightIndicator = memo(
           isOpen && 'plaza-day-night-orb--open'
         )}
         style={viewportStyles.sphereStyle}
-        aria-label={ariaLabel}
+        aria-label={initialAriaLabel}
         aria-pressed={isOpen}
         aria-expanded={isOpen}
-        title={ariaLabel}
+        title={initialAriaLabel}
         onClick={onToggle}
       >
         <span
