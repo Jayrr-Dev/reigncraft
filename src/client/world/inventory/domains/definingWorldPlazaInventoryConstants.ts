@@ -11,6 +11,7 @@ import {
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaGameplayHudLayoutConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_WOOD,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
@@ -187,6 +188,10 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_STARTER_ITEMS: readonly DefiningWorl
     },
     {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE,
+      quantity: 1,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_WOOD,
       quantity: 1,
     },
     {

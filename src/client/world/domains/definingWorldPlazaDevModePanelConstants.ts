@@ -14,6 +14,13 @@ import { DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT } from '@/components/world/d
  */
 export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_ENABLED = true as const;
 
+/**
+ * When false, hides the Dev launcher button. Panel stays closed unless opened
+ * through another path; set true to restore the in-world Dev control.
+ */
+export const DEFINING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_VISIBLE =
+  false as const;
+
 /** sessionStorage key for dev panel open state. */
 export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_OPEN_STORAGE_KEY =
   'world-plaza-dev-mode-panel-open' as const;

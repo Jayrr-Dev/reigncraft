@@ -23,10 +23,10 @@ export const DEFINING_PLAZA_BESTIARY_PORTRAIT_DETAIL_ZOOM = 1.35;
  * Fishing catch loot cells already fill most of the 32px frame, so card zoom
  * stays near 1 (land walk sheets need ~1.55 to punch past padding).
  */
-export const DEFINING_PLAZA_BESTIARY_PORTRAIT_FISH_CARD_ZOOM = 0.9;
+export const DEFINING_PLAZA_BESTIARY_PORTRAIT_FISH_CARD_ZOOM = 0.65;
 
 /** Detail hero zoom for fishing catch portraits. */
-export const DEFINING_PLAZA_BESTIARY_PORTRAIT_FISH_DETAIL_ZOOM = 0.8;
+export const DEFINING_PLAZA_BESTIARY_PORTRAIT_FISH_DETAIL_ZOOM = 0.55;
 
 /** CSS filter that flattens the sprite into a locked-entry silhouette. */
 export const DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER =

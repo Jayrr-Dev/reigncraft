@@ -19,6 +19,7 @@ import { RenderingWorldPlazaDevModePanelViewSelect } from '@/components/world/co
 import { RenderingWorldPlazaDevPanelCloseButton } from '@/components/world/components/renderingWorldPlazaDevPanelCloseButton';
 import { RenderingWorldPlazaFeaturesDebugControls } from '@/components/world/components/renderingWorldPlazaFeaturesDebugControls';
 import { RenderingWorldPlazaPerformanceDiagnosticsFpsReadout } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsFpsReadout';
+import { RenderingWorldPlazaPerformanceDiagnosticsFpsToggleButton } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsFpsToggleButton';
 import { RenderingWorldPlazaPerformanceDiagnosticsOverlay } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsOverlay';
 import { RenderingWorldPlazaPerformanceDiagnosticsToggleButton } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsToggleButton';
 import { RenderingWorldPlazaPlayerWorldLayerDebugLabel } from '@/components/world/components/renderingWorldPlazaPlayerWorldLayerDebugLabel';
@@ -27,6 +28,7 @@ import { RenderingWorldPlazaTerrainCollisionDebugToggleButton } from '@/componen
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
+  DEFINING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_VISIBLE,
   LABELING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER,
   LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER,
   LABELING_WORLD_PLAZA_DEV_MODE_PANEL_CLOSE,
@@ -53,6 +55,7 @@ import {
   resolvingWorldPlazaDevModePanelView,
   type DefiningWorldPlazaDevModePanelViewId,
 } from '@/components/world/domains/definingWorldPlazaDevModePanelViews';
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_PERF_LAUNCHER_VISIBLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsUiConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaDevModePanelViewportLayout } from '@/components/world/domains/resolvingWorldPlazaDevModePanelViewportLayout';
 import { RenderingWorldPlazaDevModeCombatRollControls } from '@/components/world/health/components/renderingWorldPlazaDevModeCombatRollControls';
@@ -62,6 +65,7 @@ import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/healt
 import type { DefiningWorldPlazaDamageOutcomeTier } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { DefiningWorldPlazaEntityPoisonPotency } from '@/components/world/health/domains/definingWorldPlazaEntityPoisonPotencyRegistry';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
+import { usingWorldPlazaPerformanceFpsReadoutVisibleState } from '@/components/world/hooks/usingWorldPlazaPerformanceFpsReadoutVisibleState';
 import { RenderingWorldPlazaDevProjectileSpawnerControls } from '@/components/world/projectile/components/renderingWorldPlazaDevProjectileSpawnerControls';
 import type { SpawningWorldPlazaProjectileRequest } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import { RenderingWorldPlazaDevWildlifeSpawnerControls } from '@/components/world/wildlife/components/renderingWorldPlazaDevWildlifeSpawnerControls';
@@ -280,6 +284,21 @@ export function RenderingWorldPlazaDevModePanel(
   const hasHealthControls = hasWorldPlazaDevModeHealthControls(props);
   const playerHealthSubcategoryId =
     activeViewId === 'player-climate' ? playerClimateTabId : activeView.leafId;
+  const { isFpsReadoutVisible, togglingFpsReadoutVisible } =
+    usingWorldPlazaPerformanceFpsReadoutVisibleState(
+      isPerformanceDiagnosticsFeatureAvailable
+    );
+  const showDevLauncher = DEFINING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_VISIBLE;
+  const showPerfLauncher =
+    isPerformanceDiagnosticsFeatureAvailable &&
+    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_PERF_LAUNCHER_VISIBLE;
+  const showFpsToggle = isPerformanceDiagnosticsFeatureAvailable;
+  const showToolbar =
+    Boolean(onExitToHome) ||
+    showDevLauncher ||
+    showPerfLauncher ||
+    showFpsToggle;
+  const showDevPanel = showDevLauncher && isOpen;
 
   return (
     <>
@@ -288,44 +307,54 @@ export function RenderingWorldPlazaDevModePanel(
         style={viewportLayout.style}
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
       >
-        <div
-          className={viewportLayout.toolbarClassName}
-          style={viewportLayout.toolbarStyle}
-        >
-          {onExitToHome ? (
-            <button
-              type="button"
-              aria-label={LABELING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER}
-              className={
-                STYLING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER_BUTTON_CLASS_NAME
-              }
-              onClick={onExitToHome}
-            >
-              {LABELING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER}
-            </button>
-          ) : null}
-          <button
-            type="button"
-            aria-label={LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER}
-            aria-expanded={isOpen}
-            className={
-              isOpen
-                ? STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_ACTIVE_CLASS_NAME
-                : STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME
-            }
-            onClick={onToggle}
+        {showToolbar ? (
+          <div
+            className={viewportLayout.toolbarClassName}
+            style={viewportLayout.toolbarStyle}
           >
-            Dev
-          </button>
-          {isPerformanceDiagnosticsFeatureAvailable ? (
-            <RenderingWorldPlazaPerformanceDiagnosticsToggleButton
-              isVisible={isPerformanceDiagnosticsVisible}
-              onToggle={onTogglePerformanceDiagnostics}
-            />
-          ) : null}
-        </div>
+            {onExitToHome ? (
+              <button
+                type="button"
+                aria-label={LABELING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER}
+                className={
+                  STYLING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER_BUTTON_CLASS_NAME
+                }
+                onClick={onExitToHome}
+              >
+                {LABELING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER}
+              </button>
+            ) : null}
+            {showDevLauncher ? (
+              <button
+                type="button"
+                aria-label={LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER}
+                aria-expanded={isOpen}
+                className={
+                  isOpen
+                    ? STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_ACTIVE_CLASS_NAME
+                    : STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME
+                }
+                onClick={onToggle}
+              >
+                Dev
+              </button>
+            ) : null}
+            {showPerfLauncher ? (
+              <RenderingWorldPlazaPerformanceDiagnosticsToggleButton
+                isVisible={isPerformanceDiagnosticsVisible}
+                onToggle={onTogglePerformanceDiagnostics}
+              />
+            ) : null}
+            {showFpsToggle ? (
+              <RenderingWorldPlazaPerformanceDiagnosticsFpsToggleButton
+                isVisible={isFpsReadoutVisible}
+                onToggle={togglingFpsReadoutVisible}
+              />
+            ) : null}
+          </div>
+        ) : null}
 
-        {isOpen ? (
+        {showDevPanel ? (
           <div className={STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SHELL_CLASS_NAME}>
             <div
               className={STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HEADER_CLASS_NAME}
@@ -586,10 +615,12 @@ export function RenderingWorldPlazaDevModePanel(
 
       {isPerformanceDiagnosticsFeatureAvailable ? (
         <>
-          <RenderingWorldPlazaPerformanceDiagnosticsFpsReadout
-            viewportHudScale={viewportHudScale}
-            isMobile={isMobile}
-          />
+          {isFpsReadoutVisible ? (
+            <RenderingWorldPlazaPerformanceDiagnosticsFpsReadout
+              viewportHudScale={viewportHudScale}
+              isMobile={isMobile}
+            />
+          ) : null}
           <RenderingWorldPlazaPerformanceDiagnosticsOverlay
             isVisible={isPerformanceDiagnosticsVisible}
             onClose={onTogglePerformanceDiagnostics}
