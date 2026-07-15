@@ -96,15 +96,17 @@ export function RenderingWorldPlazaWildlifeForageEatOverlays({
       }
     }
 
-    return subscribingWorldPlazaDomOverlayFrame((frameTimeMs) => {
+    return subscribingWorldPlazaDomOverlayFrame((_deltaMs, frameTimeMs) => {
       if (!isActive) {
         return;
       }
 
       if (
         !checkingWorldPlazaDomOverlayFrameShouldUpdate(
+          0,
+          lastUpdateTimeMsRef.current,
           frameTimeMs,
-          lastUpdateTimeMsRef.current
+          false
         )
       ) {
         return;
@@ -117,9 +119,9 @@ export function RenderingWorldPlazaWildlifeForageEatOverlays({
 
       iteratingWorldPlazaDomOverlayEntriesWithinBudget({
         entries: liveOverlays,
-        frameBudgetMs: DEFINING_WORLD_PLAZA_TEXT_OVERLAY_FRAME_BUDGET_MS,
-        iterationState,
-        handlingEntry: (overlay) => {
+        state: iterationState,
+        timeBudgetMs: DEFINING_WORLD_PLAZA_TEXT_OVERLAY_FRAME_BUDGET_MS,
+        visit: (overlay) => {
           const elements = elementsByInstanceId.get(overlay.instanceId);
 
           if (!elements) {

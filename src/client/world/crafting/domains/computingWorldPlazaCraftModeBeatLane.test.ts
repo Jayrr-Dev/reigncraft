@@ -2,6 +2,7 @@ import {
   buildingWorldPlazaCraftModeBeatLaneNotesFromPattern,
   checkingWorldPlazaCraftModeBeatNoteInHitZone,
   computingWorldPlazaCraftModeBeatNoteLeftPercent,
+  computingWorldPlazaCraftModeBeatTravelMsForTempo,
   computingWorldPlazaCraftModeBeatTravelMsToHitZone,
   resolvingWorldPlazaCraftModeBeatLaneHitTarget,
   resolvingWorldPlazaCraftModeBeatNextHitZoneCenterPercent,
@@ -9,6 +10,7 @@ import {
 } from '@/components/world/crafting/domains/computingWorldPlazaCraftModeBeatLane';
 import {
   DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_HIT_ZONE_CENTER_PERCENT,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_NOTE_TRAVEL_MS,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PATTERN_REGISTRY,
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeBeatLaneConstants';
 import { describe, expect, it } from 'vitest';
@@ -18,7 +20,11 @@ describe('computingWorldPlazaCraftModeBeatLane', () => {
     const hitAtMs = 10_000;
     const zone = DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_HIT_ZONE_CENTER_PERCENT;
     const leftPercent = computingWorldPlazaCraftModeBeatNoteLeftPercent(
-      { hitAtMs, targetHitZoneCenterPercent: zone },
+      {
+        hitAtMs,
+        targetHitZoneCenterPercent: zone,
+        travelMs: DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_NOTE_TRAVEL_MS,
+      },
       hitAtMs
     );
 
@@ -28,9 +34,11 @@ describe('computingWorldPlazaCraftModeBeatLane', () => {
   it('spawns notes to the right of the hit zone before they arrive', () => {
     const hitAtMs = 10_000;
     const zone = 50;
-    const nowMs = hitAtMs - computingWorldPlazaCraftModeBeatTravelMsToHitZone(zone);
+    const travelMs = DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_NOTE_TRAVEL_MS;
+    const nowMs =
+      hitAtMs - computingWorldPlazaCraftModeBeatTravelMsToHitZone(zone, travelMs);
     const leftPercent = computingWorldPlazaCraftModeBeatNoteLeftPercent(
-      { hitAtMs, targetHitZoneCenterPercent: zone },
+      { hitAtMs, targetHitZoneCenterPercent: zone, travelMs },
       nowMs
     );
 
@@ -76,5 +84,14 @@ describe('computingWorldPlazaCraftModeBeatLane', () => {
   it('picks hotter strike colors as combo climbs', () => {
     expect(resolvingWorldPlazaCraftModeBeatStrikeColorTier(1).label).toBe('amber');
     expect(resolvingWorldPlazaCraftModeBeatStrikeColorTier(12).label).toBe('cyan');
+  });
+
+  it('shortens travel time as tempo rises after pauses', () => {
+    expect(computingWorldPlazaCraftModeBeatTravelMsForTempo(1)).toBe(
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_NOTE_TRAVEL_MS
+    );
+    expect(computingWorldPlazaCraftModeBeatTravelMsForTempo(2)).toBe(
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_NOTE_TRAVEL_MS / 2
+    );
   });
 });

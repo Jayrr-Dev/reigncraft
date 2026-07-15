@@ -194,6 +194,15 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT =
 /** Fired empty clay teapot (kiln output from wet teapot). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT =
   'world-plaza-empty-clay-teapot' as const;
+/** Watered clay teapot awaiting herb slots and a campfire brew. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT =
+  'world-plaza-watered-clay-teapot' as const;
+/** Brewed clay teapot with pourable servings. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_CLAY_TEAPOT =
+  'world-plaza-brewed-clay-teapot' as const;
+/** Poured tea in a clay cup (name and effects live in metadata). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CUP_OF_TEA =
+  'world-plaza-cup-of-tea' as const;
 /** Unfired clay bottle shaped from wet clay (fire in kiln). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOTTLE =
   'world-plaza-wet-clay-bottle' as const;

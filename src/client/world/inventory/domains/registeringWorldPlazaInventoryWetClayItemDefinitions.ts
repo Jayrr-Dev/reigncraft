@@ -17,7 +17,7 @@ export function registeringWorldPlazaInventoryWetClayItemDefinitions(): readonly
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY,
       name: 'Wet Clay',
       rarity: 'basic',
-      description:
+      tooltip:
         'Clay soaked at the shore. Soft enough to mold; dry it and it holds shape.',
       maxStack: 99,
       isDroppable: true,

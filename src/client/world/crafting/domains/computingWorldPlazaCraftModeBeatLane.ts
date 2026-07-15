@@ -19,6 +19,8 @@ export type DefiningWorldPlazaCraftModeBeatLaneNote = {
   readonly hitAtMs: number;
   /** Gold-zone center this note aims at (zone may snap later for new waves). */
   readonly targetHitZoneCenterPercent: number;
+  /** Full right→left travel duration for this note (shorter = faster tempo). */
+  readonly travelMs: number;
   readonly resolved: boolean;
 };
 
@@ -26,7 +28,8 @@ export type DefiningWorldPlazaCraftModeBeatLaneNote = {
  * Real ms for a note spawned on the right to reach `hitZoneCenterPercent`.
  */
 export function computingWorldPlazaCraftModeBeatTravelMsToHitZone(
-  hitZoneCenterPercent: number = DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_HIT_ZONE_CENTER_PERCENT
+  hitZoneCenterPercent: number = DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_HIT_ZONE_CENTER_PERCENT,
+  travelMs: number = DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_NOTE_TRAVEL_MS
 ): number {
   const travelSpan =
     DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_SPAWN_LEFT_PERCENT -
@@ -36,7 +39,14 @@ export function computingWorldPlazaCraftModeBeatTravelMsToHitZone(
       hitZoneCenterPercent) /
     travelSpan;
 
-  return hitProgress * DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_NOTE_TRAVEL_MS;
+  return hitProgress * travelMs;
+}
+
+/** Scales base travel ms by tempo (higher tempo = shorter travel). */
+export function computingWorldPlazaCraftModeBeatTravelMsForTempo(
+  tempo: number
+): number {
+  return Math.round(DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_NOTE_TRAVEL_MS / tempo);
 }
 
 /**
@@ -45,7 +55,7 @@ export function computingWorldPlazaCraftModeBeatTravelMsToHitZone(
 export function computingWorldPlazaCraftModeBeatNoteLeftPercent(
   note: Pick<
     DefiningWorldPlazaCraftModeBeatLaneNote,
-    'hitAtMs' | 'targetHitZoneCenterPercent'
+    'hitAtMs' | 'targetHitZoneCenterPercent' | 'travelMs'
   >,
   nowMs: number
 ): number {
@@ -55,13 +65,11 @@ export function computingWorldPlazaCraftModeBeatNoteLeftPercent(
   const spawnAtMs =
     note.hitAtMs -
     computingWorldPlazaCraftModeBeatTravelMsToHitZone(
-      note.targetHitZoneCenterPercent
+      note.targetHitZoneCenterPercent,
+      note.travelMs
     );
   const elapsedMs = nowMs - spawnAtMs;
-  const t = Math.min(
-    1,
-    Math.max(0, elapsedMs / DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_NOTE_TRAVEL_MS)
-  );
+  const t = Math.min(1, Math.max(0, elapsedMs / note.travelMs));
 
   return (
     DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_SPAWN_LEFT_PERCENT - t * travelSpan
@@ -94,13 +102,15 @@ export function buildingWorldPlazaCraftModeBeatLaneNotesFromPattern(
   pattern: DefiningWorldPlazaCraftModeBeatPatternDefinition,
   patternStartMs: number,
   noteIdPrefix: string,
-  hitZoneCenterPercent: number
+  hitZoneCenterPercent: number,
+  travelMs: number = DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_NOTE_TRAVEL_MS
 ): readonly DefiningWorldPlazaCraftModeBeatLaneNote[] {
   return pattern.notes.map((noteDefinition, index) => ({
     noteId: `${noteIdPrefix}-${pattern.id}-${index}`,
     kind: noteDefinition.kind,
     hitAtMs: patternStartMs + noteDefinition.hitOffsetMs,
     targetHitZoneCenterPercent: hitZoneCenterPercent,
+    travelMs,
     resolved: false,
   }));
 }

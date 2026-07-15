@@ -47,6 +47,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE = {
   STREAMS: 'streams',
   PONDS: 'ponds',
   SWAMP_PONDS: 'swamp-ponds',
+  TEA_BREWING: 'tea-brewing',
 } as const;
 
 export type DefiningWorldPlazaGenerationFeatureId =
@@ -359,6 +360,13 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
       label: 'Swamp ponds',
       description: 'Large murky pools deep inside swamp biomes.',
     },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TEA_BREWING,
+      groupId: 'systems',
+      label: 'Tea brewing',
+      description:
+        'Teapot water fill, ingredient popover, campfire brew, and pour labels.',
+    },
   ];
 
 export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS: Readonly<
@@ -404,6 +412,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS: Readonly<
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STREAMS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PONDS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SWAMP_PONDS]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TEA_BREWING]: true,
 };
 
 export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_STORAGE_KEY =

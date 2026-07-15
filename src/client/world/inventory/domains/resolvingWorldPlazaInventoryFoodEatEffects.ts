@@ -17,8 +17,11 @@ import { parsingWorldPlazaFlowerSpeciesIdFromItemTypeId } from '@/components/wor
 import { resolvingWorldPlazaInventoryFoodHealAmount } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealAmount';
 import type { DefiningWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { resolvingWorldPlazaPlayerHeldLuckyFoodBuffChanceMultiplier } from '@/components/world/inventory/domains/resolvingWorldPlazaPlayerHeldLuckyFoodBuffChanceMultiplier';
+import { applyingWorldPlazaTeaBrewingDrinkEffects } from '@/components/world/tea-brewing/domains/applyingWorldPlazaTeaBrewingDrinkEffects';
+import { resolvingWorldPlazaTeaBrewingMetadata } from '@/components/world/tea-brewing/domains/resolvingWorldPlazaTeaBrewingMetadata';
 import { DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import { resolvingWildlifeAggroDeerMeatCookedResidualDiseaseChance } from '@/components/world/wildlife/domains/resolvingWildlifeAggroDeerMeatCookedResidualDiseaseChance';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CUP_OF_TEA } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 
 export const DEFINING_WORLD_PLAZA_FOOD_SICKNESS_DEBUFF_ID =
   'food-sickness-debuff' as const;
@@ -235,6 +238,45 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
       didRollSickness: isSick,
       didRollDisease: flowerResult.didRollDisease,
       didRollWellFedBuff: false,
+    };
+  }
+
+  if (foodDefinition.itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CUP_OF_TEA) {
+    const brew = resolvingWorldPlazaTeaBrewingMetadata(foodItemMetadata);
+    let teaHealthState = nextHealthState;
+
+    if (brew) {
+      teaHealthState = applyingWorldPlazaTeaBrewingDrinkEffects({
+        brew,
+        healthState: teaHealthState,
+        nowMs,
+        worldEpochMs: resolvedWorldEpochMs,
+      }).nextHealthState;
+    }
+
+    const healthHealAmount = resolvingWorldPlazaInventoryFoodHealAmount({
+      healthHeal: foodDefinition.healthHeal,
+      effectiveMaxHealth: computingWorldPlazaEntityHealthEffectiveMax(
+        teaHealthState,
+        nowMs
+      ),
+    });
+
+    if (healthHealAmount > 0) {
+      teaHealthState = healingWorldPlazaEntityHealthWithAmplifiers({
+        receiverState: teaHealthState,
+        baseHealAmount: healthHealAmount,
+        nowMs,
+      }).state;
+    }
+
+    return {
+      effectiveHungerRestoreRatio: foodDefinition.hungerRestoreRatio,
+      healthHealAmount,
+      nextHealthState: teaHealthState,
+      didRollSickness: false,
+      didRollDisease: false,
+      didRollWellFedBuff: brew !== null,
     };
   }
 

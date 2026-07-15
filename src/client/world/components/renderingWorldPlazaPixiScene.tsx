@@ -371,6 +371,18 @@ import { checkingWorldPlazaWetClayEligibility } from '@/components/world/wet-cla
 import { checkingWorldPlazaInventoryHasClay } from '@/components/world/wet-clay/domains/wettingWorldPlazaClayInInventory';
 import { usingWorldPlazaWetClayInteraction } from '@/components/world/wet-clay/hooks/usingWorldPlazaWetClayInteraction';
 import { usingWorldPlazaWetClayProgress } from '@/components/world/wet-clay/hooks/usingWorldPlazaWetClayProgress';
+import { RenderingWorldPlazaTeaPotAddWaterInteractionLabels } from '@/components/world/tea-brewing/components/renderingWorldPlazaTeaPotAddWaterInteractionLabels';
+import { checkingWorldPlazaTeaPotAddWaterEligibility } from '@/components/world/tea-brewing/domains/checkingWorldPlazaTeaPotAddWaterEligibility';
+import {
+  brewingWorldPlazaTeaPotAtCampfire,
+  checkingWorldPlazaInventoryHasBrewableTeaPot,
+} from '@/components/world/tea-brewing/domains/brewingWorldPlazaTeaPotAtCampfire';
+import {
+  checkingWorldPlazaInventoryHasEmptyClayTeaPot,
+} from '@/components/world/tea-brewing/domains/fillingWorldPlazaTeaPotWithWater';
+import { pouringWorldPlazaTeaFromBrewedPot } from '@/components/world/tea-brewing/domains/pouringWorldPlazaTeaFromBrewedPot';
+import { usingWorldPlazaTeaPotAddWaterInteraction } from '@/components/world/tea-brewing/hooks/usingWorldPlazaTeaPotAddWaterInteraction';
+import { usingWorldPlazaTeaPotCampfireBrewProgress } from '@/components/world/tea-brewing/hooks/usingWorldPlazaTeaPotCampfireBrewProgress';
 import { RenderingWorldPlazaFlowerInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaFlowerInteractionLabels';
 import { RenderingWorldPlazaLongGrassInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaLongGrassInteractionLabels';
 import { RenderingWorldPlazaShrubInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaShrubInteractionLabels';
@@ -522,6 +534,7 @@ import {
   selectingWorldPlazaFarmlandTileForClickAction,
   selectingWorldPlazaFishingTileForClickAction,
   selectingWorldPlazaWetClayTileForClickAction,
+  selectingWorldPlazaTeaPotAddWaterTileForClickAction,
   selectingWorldPlazaInteractableBlockForClickAction,
   selectingWorldPlazaInteractableChestForClickAction,
   selectingWorldPlazaInteractableFlowerForClickAction,
@@ -1255,6 +1268,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   const isHudWorldAnchorsEnabled =
     generationFeatureFlags[
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_WORLD_ANCHORS
+    ];
+  const isTeaBrewingEnabled =
+    generationFeatureFlags[
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TEA_BREWING
     ];
 
   useEffect(() => {
@@ -2878,10 +2895,43 @@ function RenderingWorldPlazaPixiSceneConnected({
     onCookComplete: handlingCampfireCookComplete,
   });
 
+  const handlingTeaPotCampfireBrewComplete = useCallback((): void => {
+    updatingInventoryState((currentState) => {
+      const brewResult = brewingWorldPlazaTeaPotAtCampfire(currentState);
+
+      if (brewResult.outcome === 'brewed') {
+        showingGameplayHudToast(`${brewResult.displayName} ready.`);
+        notifyingWorldPlazaInventoryItemAdded(1);
+        return brewResult.nextState;
+      }
+
+      if (brewResult.outcome === 'no-ingredients') {
+        showingGameplayHudToast('Add ingredients to the teapot first.');
+      } else if (brewResult.outcome === 'invalid-recipe') {
+        showingGameplayHudToast('That mix will not brew.');
+      } else {
+        showingGameplayHudToast('Need a watered teapot with ingredients.');
+      }
+
+      return null;
+    });
+  }, [showingGameplayHudToast, updatingInventoryState]);
+
+  const {
+    snapshot: teaPotCampfireBrewProgressSnapshot,
+    progressRatioRef: teaPotCampfireBrewProgressRatioRef,
+    startingTeaPotCampfireBrew,
+  } = usingWorldPlazaTeaPotCampfireBrewProgress({
+    playerPositionRef,
+    selectedInteractableBlockKeysRef,
+    fireCellsRef,
+    onBrewComplete: handlingTeaPotCampfireBrewComplete,
+  });
+
   const handlingCampfireAction = useCallback(
     (
       block: DefiningWorldBuildingPlacedBlock,
-      action: 'light' | 'add-wood' | 'cook'
+      action: 'light' | 'add-wood' | 'cook' | 'brew-tea'
     ): void => {
       if (action === 'cook') {
         const { isLit } = resolvingCampfireInteractionState(block);
@@ -2899,6 +2949,21 @@ function RenderingWorldPlazaPixiSceneConnected({
 
         if (!didStart) {
           showingGameplayHudToast('Already cooking meat.');
+        }
+
+        return;
+      }
+
+      if (action === 'brew-tea') {
+        if (!checkingWorldPlazaInventoryHasBrewableTeaPot(inventoryState)) {
+          showingGameplayHudToast('Need a watered teapot with ingredients.');
+          return;
+        }
+
+        const didStart = startingTeaPotCampfireBrew(block);
+
+        if (!didStart) {
+          showingGameplayHudToast('Already brewing tea.');
         }
 
         return;
@@ -2926,6 +2991,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       resolvingCampfireInteractionState,
       showingGameplayHudToast,
       startingCampfireCook,
+      startingTeaPotCampfireBrew,
     ]
   );
 
@@ -3448,6 +3514,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   const hasEquippedFishrod =
     equipment.checkingEquippedToolKind('fishrod').hasToolKind;
   const hasClayInInventory = checkingWorldPlazaInventoryHasClay(inventoryState);
+  const hasEmptyTeaPotInInventory =
+    checkingWorldPlazaInventoryHasEmptyClayTeaPot(inventoryState);
+  const hasBrewableTeaPotInInventory =
+    checkingWorldPlazaInventoryHasBrewableTeaPot(inventoryState);
   const hasEquippedHoe = equipment.checkingEquippedToolKind('hoe').hasToolKind;
   const hasEquippedScythe =
     equipment.checkingEquippedToolKind('scythe').hasToolKind;
@@ -3459,12 +3529,16 @@ function RenderingWorldPlazaPixiSceneConnected({
   );
   const hasEquippedFishrodRef = useRef(hasEquippedFishrod);
   const hasClayInInventoryRef = useRef(hasClayInInventory);
+  const hasEmptyTeaPotInInventoryRef = useRef(hasEmptyTeaPotInInventory);
+  const hasBrewableTeaPotInInventoryRef = useRef(hasBrewableTeaPotInInventory);
   const hasEquippedHoeRef = useRef(hasEquippedHoe);
   const hasEquippedScytheRef = useRef(hasEquippedScythe);
   const hasSeedsInInventoryRef = useRef(hasSeedsInInventory);
   const proximityPlacedBlocksRef = useRef(activeScenePlacedBlocks);
   hasEquippedFishrodRef.current = hasEquippedFishrod;
   hasClayInInventoryRef.current = hasClayInInventory;
+  hasEmptyTeaPotInInventoryRef.current = hasEmptyTeaPotInInventory;
+  hasBrewableTeaPotInInventoryRef.current = hasBrewableTeaPotInInventory;
   hasEquippedHoeRef.current = hasEquippedHoe;
   hasEquippedScytheRef.current = hasEquippedScythe;
   hasSeedsInInventoryRef.current = hasSeedsInInventory;
@@ -3598,6 +3672,47 @@ function RenderingWorldPlazaPixiSceneConnected({
     ]
   );
 
+  const {
+    validatingTeaPotAddWaterStart,
+    completingTeaPotAddWater,
+    completingTeaPotAddWaterFromHotbarSlot,
+  } = usingWorldPlazaTeaPotAddWaterInteraction({
+    playerPositionRef,
+    inventoryState,
+    updatingInventoryState,
+    showingGameplayHudToast,
+    hasEmptyTeaPotInInventoryRef,
+  });
+
+  const completingTeaPotAddWaterRef = useRef(completingTeaPotAddWater);
+  completingTeaPotAddWaterRef.current = completingTeaPotAddWater;
+
+  const handlingTeaPotAddWaterInteraction = useCallback(
+    (
+      entry: Parameters<typeof validatingTeaPotAddWaterStart>[0]
+    ): void => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return;
+      }
+
+      if (!hasEmptyTeaPotInInventory) {
+        showingGameplayHudToast('Need an empty clay teapot.');
+        return;
+      }
+
+      if (!validatingTeaPotAddWaterStart(entry)) {
+        return;
+      }
+
+      completingTeaPotAddWaterRef.current(entry);
+    },
+    [
+      hasEmptyTeaPotInInventory,
+      showingGameplayHudToast,
+      validatingTeaPotAddWaterStart,
+    ]
+  );
+
   const { validatingFarmingActionStart, completingFarmingAction } =
     usingWorldPlazaFarmingInteraction({
       persistenceOwnerId: chopPersistenceOwnerId,
@@ -3711,6 +3826,24 @@ function RenderingWorldPlazaPixiSceneConnected({
         }
       }
 
+      if (isTeaBrewingEnabled && hasEmptyTeaPotInInventory) {
+        const teaPotAddWaterEligibility =
+          checkingWorldPlazaTeaPotAddWaterEligibility(
+            playerPosition,
+            tileX,
+            tileY
+          );
+
+        if (teaPotAddWaterEligibility.isEligible) {
+          selectingWorldPlazaTeaPotAddWaterTileForClickAction(
+            selectedInteractableBlockKeysRef,
+            tileX,
+            tileY
+          );
+          return true;
+        }
+      }
+
       const farmlandEntries = listingWorldPlazaFarmlandTilesInInteractionRange({
         playerPosition,
         farmlandByTileKey: farmlandByTileKeyRef.current,
@@ -3734,9 +3867,11 @@ function RenderingWorldPlazaPixiSceneConnected({
     [
       hasEquippedFishrod,
       hasClayInInventory,
+      hasEmptyTeaPotInInventory,
       hasEquippedHoe,
       hasEquippedScythe,
       hasSeedsInInventory,
+      isTeaBrewingEnabled,
       playerPositionRef,
     ]
   );
@@ -5787,6 +5922,51 @@ function RenderingWorldPlazaPixiSceneConnected({
       showingGameplayHudToast,
       startingFoodEat,
     ]
+  );
+
+  const handlingAddWaterHotbarSlot = useCallback(
+    (slotIndex: number): void => {
+      if (!isTeaBrewingEnabled) {
+        return;
+      }
+
+      completingTeaPotAddWaterFromHotbarSlot(slotIndex);
+    },
+    [completingTeaPotAddWaterFromHotbarSlot, isTeaBrewingEnabled]
+  );
+
+  const handlingPourTeaHotbarSlot = useCallback(
+    (slotIndex: number): void => {
+      if (!isTeaBrewingEnabled) {
+        return;
+      }
+
+      updatingInventoryState((currentState) => {
+        const pourResult = pouringWorldPlazaTeaFromBrewedPot(
+          currentState,
+          slotIndex
+        );
+
+        if (pourResult.outcome === 'poured') {
+          showingGameplayHudToast(`${pourResult.displayName} poured.`);
+          notifyingWorldPlazaInventoryItemAdded(1);
+          return pourResult.nextState;
+        }
+
+        if (pourResult.outcome === 'no-brewed-teapot') {
+          showingGameplayHudToast('Need a brewed teapot in inventory.');
+        } else if (pourResult.outcome === 'no-empty-cup') {
+          showingGameplayHudToast('Need an empty clay cup.');
+        } else if (pourResult.outcome === 'inventory-full') {
+          showingGameplayHudToast('Inventory is full.');
+        } else if (pourResult.outcome === 'invalid-brew') {
+          showingGameplayHudToast('That teapot has nothing left to pour.');
+        }
+
+        return null;
+      });
+    },
+    [isTeaBrewingEnabled, showingGameplayHudToast, updatingInventoryState]
   );
 
   const handlingSpecimenStudyComplete = useCallback(
@@ -8133,6 +8313,11 @@ function RenderingWorldPlazaPixiSceneConnected({
                 inventorySlotsRef={campfireInventorySlotsRef}
                 cookProgressSnapshot={campfireCookProgressSnapshot}
                 cookProgressRatioRef={campfireCookProgressRatioRef}
+                teaBrewProgressSnapshot={teaPotCampfireBrewProgressSnapshot}
+                teaBrewProgressRatioRef={teaPotCampfireBrewProgressRatioRef}
+                hasBrewableTeaPot={
+                  isTeaBrewingEnabled && hasBrewableTeaPotInInventory
+                }
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
                 onCampfireAction={handlingCampfireAction}
@@ -8270,6 +8455,18 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraWorldZoomRef={cameraWorldZoomRef}
                 onWetClay={handlingWetClayInteraction}
               />
+              {isTeaBrewingEnabled ? (
+                <RenderingWorldPlazaTeaPotAddWaterInteractionLabels
+                  playerPositionRef={playerPositionRef}
+                  selectedInteractableBlockKeysRef={
+                    selectedInteractableBlockKeysRef
+                  }
+                  hasEmptyTeaPotInInventory={hasEmptyTeaPotInInventory}
+                  cameraOffsetRef={cameraOffsetRef}
+                  cameraWorldZoomRef={cameraWorldZoomRef}
+                  onAddWater={handlingTeaPotAddWaterInteraction}
+                />
+              ) : null}
               <RenderingWorldPlazaFarmingInteractionLabels
                 playerPositionRef={playerPositionRef}
                 farmlandByTileKeyRef={farmlandByTileKeyRef}
@@ -8505,6 +8702,8 @@ function RenderingWorldPlazaPixiSceneConnected({
                         }
                         onRefineHotbarSlot={handlingRefineHotbarSlot}
                         onAddFuelHotbarSlot={handlingAddFuelHotbarSlot}
+                        onAddWaterHotbarSlot={handlingAddWaterHotbarSlot}
+                        onPourTeaHotbarSlot={handlingPourTeaHotbarSlot}
                         onUseActiveEnchantment={handlingUseActiveEnchantment}
                         playerEffectiveMaxHealth={
                           playerHealthHudSnapshot.effectiveMaxHealth
@@ -8721,6 +8920,8 @@ function RenderingWorldPlazaPixiSceneConnected({
                         }
                         onRefineHotbarSlot={handlingRefineHotbarSlot}
                         onAddFuelHotbarSlot={handlingAddFuelHotbarSlot}
+                        onAddWaterHotbarSlot={handlingAddWaterHotbarSlot}
+                        onPourTeaHotbarSlot={handlingPourTeaHotbarSlot}
                         onUseActiveEnchantment={handlingUseActiveEnchantment}
                         playerEffectiveMaxHealth={
                           playerHealthHudSnapshot.effectiveMaxHealth

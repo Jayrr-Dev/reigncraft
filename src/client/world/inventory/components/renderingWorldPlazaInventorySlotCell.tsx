@@ -109,6 +109,12 @@ export type RenderingWorldPlazaInventorySlotCellProps =
     readonly onRefineHotbarSlot?: (slotIndex: number) => void;
     /** Deposit wood or coal as fuel into a reachable smelting station. */
     readonly onAddFuelHotbarSlot?: (slotIndex: number) => void;
+    /** Fill an empty teapot from shore water. */
+    readonly onAddWaterHotbarSlot?: (slotIndex: number) => void;
+    /** Open the watered teapot ingredient popover. */
+    readonly onOpenTeaPotHotbarSlot?: (slotIndex: number) => void;
+    /** Pour tea from a brewed pot into an empty cup. */
+    readonly onPourTeaHotbarSlot?: (slotIndex: number) => void;
     /** Active enchantment use from the item action popover. */
     readonly onUseActiveEnchantment?: (
       slotIndex: number,
@@ -125,6 +131,8 @@ export type RenderingWorldPlazaInventorySlotCellProps =
      * one. Gates Refine / Add Fuel in the item action tower.
      */
     readonly isOreSmeltingStationReachable?: boolean;
+    /** True when inventory holds a brewed teapot for Pour Tea. */
+    readonly hasBrewedTeaPot?: boolean;
   };
 
 /** Props for {@link RenderingWorldPlazaInventoryItemIcon}. */
@@ -237,12 +245,16 @@ export function RenderingWorldPlazaInventorySlotCell({
   onDropHotbarSlot,
   onRefineHotbarSlot,
   onAddFuelHotbarSlot,
+  onAddWaterHotbarSlot,
+  onOpenTeaPotHotbarSlot,
+  onPourTeaHotbarSlot,
   onUseActiveEnchantment,
   onOpenBagPopover,
   isBagPopoverOpen = false,
   onCloseBagPopover,
   playerEffectiveMaxHealth,
   isOreSmeltingStationReachable = false,
+  hasBrewedTeaPot = false,
 }: RenderingWorldPlazaInventorySlotCellProps): React.JSX.Element {
   const viewportStyles = usingWorldPlazaInventoryHotbarViewportStylesResolved();
   const { active } = useDndContext();
@@ -351,12 +363,16 @@ export function RenderingWorldPlazaInventorySlotCell({
       onDropHotbarSlot={onDropHotbarSlot}
       onRefineHotbarSlot={onRefineHotbarSlot}
       onAddFuelHotbarSlot={onAddFuelHotbarSlot}
+      onAddWaterHotbarSlot={onAddWaterHotbarSlot}
+      onOpenTeaPotHotbarSlot={onOpenTeaPotHotbarSlot}
+      onPourTeaHotbarSlot={onPourTeaHotbarSlot}
       onUseActiveEnchantment={onUseActiveEnchantment}
       onOpenBagPopover={onOpenBagPopover}
       isBagPopoverOpen={isBagPopoverOpen}
       onCloseBagPopover={onCloseBagPopover}
       playerEffectiveMaxHealth={playerEffectiveMaxHealth}
       isOreSmeltingStationReachable={isOreSmeltingStationReachable}
+      hasBrewedTeaPot={hasBrewedTeaPot}
       slotIndex={slotIndex}
     />
   );
@@ -383,6 +399,9 @@ type InventoryPlazaSlotItemProps = {
   readonly onDropHotbarSlot?: (slotIndex: number) => void;
   readonly onRefineHotbarSlot?: (slotIndex: number) => void;
   readonly onAddFuelHotbarSlot?: (slotIndex: number) => void;
+  readonly onAddWaterHotbarSlot?: (slotIndex: number) => void;
+  readonly onOpenTeaPotHotbarSlot?: (slotIndex: number) => void;
+  readonly onPourTeaHotbarSlot?: (slotIndex: number) => void;
   readonly onUseActiveEnchantment?: (
     slotIndex: number,
     enchantmentId: string
@@ -392,6 +411,7 @@ type InventoryPlazaSlotItemProps = {
   readonly onCloseBagPopover?: () => void;
   readonly playerEffectiveMaxHealth?: number;
   readonly isOreSmeltingStationReachable?: boolean;
+  readonly hasBrewedTeaPot?: boolean;
   readonly slotIndex: number;
 };
 
@@ -414,12 +434,16 @@ function InventoryPlazaSlotItem({
   onDropHotbarSlot,
   onRefineHotbarSlot,
   onAddFuelHotbarSlot,
+  onAddWaterHotbarSlot,
+  onOpenTeaPotHotbarSlot,
+  onPourTeaHotbarSlot,
   onUseActiveEnchantment,
   onOpenBagPopover,
   isBagPopoverOpen = false,
   onCloseBagPopover,
   playerEffectiveMaxHealth,
   isOreSmeltingStationReachable = false,
+  hasBrewedTeaPot = false,
   slotIndex,
 }: InventoryPlazaSlotItemProps): React.JSX.Element {
   const isReservedWeaponToolSlot =
@@ -484,11 +508,13 @@ function InventoryPlazaSlotItem({
         oreStudyCountsBySpeciesId,
         playerEffectiveMaxHealth,
         isOreSmeltingStationReachable,
+        hasBrewedTeaPot,
       }),
     [
       berryStudyCountsByLootKind,
       cloverStudyCount,
       flowerStudyCountsBySpeciesId,
+      hasBrewedTeaPot,
       isEquipped,
       isOreSmeltingStationReachable,
       item,
@@ -547,6 +573,21 @@ function InventoryPlazaSlotItem({
     onAddFuelHotbarSlot?.(slotIndex);
     onCloseItemDetailPopover?.();
   }, [onAddFuelHotbarSlot, onCloseItemDetailPopover, slotIndex]);
+
+  const handlingAddWaterFromDetailPopover = useCallback((): void => {
+    onAddWaterHotbarSlot?.(slotIndex);
+    onCloseItemDetailPopover?.();
+  }, [onAddWaterHotbarSlot, onCloseItemDetailPopover, slotIndex]);
+
+  const handlingOpenTeaPotFromDetailPopover = useCallback((): void => {
+    onOpenTeaPotHotbarSlot?.(slotIndex);
+    onCloseItemDetailPopover?.();
+  }, [onCloseItemDetailPopover, onOpenTeaPotHotbarSlot, slotIndex]);
+
+  const handlingPourTeaFromDetailPopover = useCallback((): void => {
+    onPourTeaHotbarSlot?.(slotIndex);
+    onCloseItemDetailPopover?.();
+  }, [onCloseItemDetailPopover, onPourTeaHotbarSlot, slotIndex]);
 
   const handlingEquipFromDetailPopover = useCallback((): void => {
     onEquipSlot?.(slotIndex);
@@ -889,6 +930,21 @@ function InventoryPlazaSlotItem({
           onAddFuelItem={
             detailPopoverModel.canAddFuel && onAddFuelHotbarSlot
               ? handlingAddFuelFromDetailPopover
+              : undefined
+          }
+          onAddWater={
+            detailPopoverModel.canAddWater && onAddWaterHotbarSlot
+              ? handlingAddWaterFromDetailPopover
+              : undefined
+          }
+          onOpenTeapot={
+            detailPopoverModel.canOpenTeapot && onOpenTeaPotHotbarSlot
+              ? handlingOpenTeaPotFromDetailPopover
+              : undefined
+          }
+          onPourTea={
+            detailPopoverModel.canPourTea && onPourTeaHotbarSlot
+              ? handlingPourTeaFromDetailPopover
               : undefined
           }
           onDropItem={

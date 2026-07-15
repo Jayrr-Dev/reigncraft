@@ -6,6 +6,7 @@ import {
   checkingWorldPlazaCraftModeBeatNoteDespawned,
   checkingWorldPlazaCraftModeBeatNoteInHitZone,
   computingWorldPlazaCraftModeBeatNoteLeftPercent,
+  computingWorldPlazaCraftModeBeatTravelMsForTempo,
   computingWorldPlazaCraftModeBeatTravelMsToHitZone,
   resolvingWorldPlazaCraftModeBeatBreakColorTier,
   resolvingWorldPlazaCraftModeBeatLaneHitTarget,
@@ -23,6 +24,11 @@ import {
   DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PATTERN_GAP_MS_MAX,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PATTERN_GAP_MS_MIN,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PATTERN_REGISTRY,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PAUSE_CHANCE,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PAUSE_GAP_MS_MAX,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PAUSE_GAP_MS_MIN,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_POST_PAUSE_TEMPO_STEP,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_TEMPO_MAX,
   LABELING_WORLD_PLAZA_CRAFT_MODE_BEAT_CRACKED,
   LABELING_WORLD_PLAZA_CRAFT_MODE_BEAT_HAMMER,
   LABELING_WORLD_PLAZA_CRAFT_MODE_BEAT_HINT,
@@ -97,6 +103,7 @@ export function RenderingWorldPlazaCraftModeTimedCraftProgressHud({
   const nextPatternAtMsRef = useRef(0);
   const lastPatternIndexRef = useRef(-1);
   const waveSerialRef = useRef(0);
+  const tempoRef = useRef(1);
   const floatSerialRef = useRef(0);
   const onHammerHitRef = useRef(onHammerHit);
   const onCrackedHitRef = useRef(onCrackedHit);
@@ -120,6 +127,7 @@ export function RenderingWorldPlazaCraftModeTimedCraftProgressHud({
       nextPatternAtMsRef.current = 0;
       lastPatternIndexRef.current = -1;
       waveSerialRef.current = 0;
+      tempoRef.current = 1;
       return;
     }
 
@@ -128,6 +136,7 @@ export function RenderingWorldPlazaCraftModeTimedCraftProgressHud({
       craftStartedAtMs + DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_FIRST_PATTERN_DELAY_MS;
     lastPatternIndexRef.current = -1;
     waveSerialRef.current = 0;
+    tempoRef.current = 1;
     setNotes([]);
     setStrikeCombo(0);
     setFloatPopups([]);
@@ -167,24 +176,48 @@ export function RenderingWorldPlazaCraftModeTimedCraftProgressHud({
           hitZoneCenterPercentRef.current = nextZoneCenter;
           setHitZoneCenterPercent(nextZoneCenter);
 
+          const travelMs = computingWorldPlazaCraftModeBeatTravelMsForTempo(
+            tempoRef.current
+          );
           const patternHitStartMs =
             nowMs +
-            computingWorldPlazaCraftModeBeatTravelMsToHitZone(nextZoneCenter);
+            computingWorldPlazaCraftModeBeatTravelMsToHitZone(
+              nextZoneCenter,
+              travelMs
+            );
           const spawnedNotes = buildingWorldPlazaCraftModeBeatLaneNotesFromPattern(
             pattern,
             patternHitStartMs,
             `wave-${waveSerialRef.current}`,
-            nextZoneCenter
+            nextZoneCenter,
+            travelMs
           );
           const lastHitOffsetMs =
             pattern.notes[pattern.notes.length - 1]?.hitOffsetMs ?? 0;
-          nextPatternAtMsRef.current =
-            patternHitStartMs +
-            lastHitOffsetMs +
-            rollingRandomInRange(
-              DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PATTERN_GAP_MS_MIN,
-              DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PATTERN_GAP_MS_MAX
+          const shouldPause =
+            Math.random() < DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PAUSE_CHANCE;
+          const gapMs = shouldPause
+            ? rollingRandomInRange(
+                DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PAUSE_GAP_MS_MIN,
+                DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PAUSE_GAP_MS_MAX
+              )
+            : Math.round(
+                rollingRandomInRange(
+                  DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PATTERN_GAP_MS_MIN,
+                  DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PATTERN_GAP_MS_MAX
+                ) / tempoRef.current
+              );
+
+          if (shouldPause) {
+            tempoRef.current = Math.min(
+              DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_TEMPO_MAX,
+              tempoRef.current *
+                DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_POST_PAUSE_TEMPO_STEP
             );
+          }
+
+          nextPatternAtMsRef.current =
+            patternHitStartMs + lastHitOffsetMs + gapMs;
           nextNotes = [...nextNotes, ...spawnedNotes];
         }
       }
@@ -361,39 +394,44 @@ export function RenderingWorldPlazaCraftModeTimedCraftProgressHud({
               note,
               laneNowMs
             );
-            const isVisible = checkingWorldPlazaCraftModeBeatNoteInHitZone(
+            const isInGoldZone = checkingWorldPlazaCraftModeBeatNoteInHitZone(
               leftPercent,
               hitZoneCenterPercent
             );
-
-            if (!isVisible) {
-              return null;
-            }
-
             const isCracked = note.kind === 'cracked';
 
             return (
               <span
                 key={note.noteId}
-                className={`pointer-events-none absolute top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 shadow-[0_0_12px_rgba(0,0,0,0.45)] ${
-                  isCracked
-                    ? 'border-rose-300 bg-rose-700 text-rose-50'
-                    : strikeColors.diskClassName
+                className={`pointer-events-none absolute top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 ${
+                  isInGoldZone
+                    ? `shadow-[0_0_12px_rgba(0,0,0,0.45)] ${
+                        isCracked
+                          ? 'border-rose-300 bg-rose-700 text-rose-50'
+                          : strikeColors.diskClassName
+                      }`
+                    : isCracked
+                      ? 'border-rose-300/70 bg-transparent'
+                      : 'border-amber-200/70 bg-transparent'
                 }`}
                 style={{ left: `${leftPercent}%` }}
                 aria-hidden
               >
-                <Icon
-                  icon={
-                    isCracked
-                      ? DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_CRACKED_ICON
-                      : DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_HAMMER_ICON
-                  }
-                  width={18}
-                  height={18}
-                />
-                {isCracked ? (
-                  <span className="pointer-events-none absolute inset-x-1 top-1/2 h-0.5 -translate-y-1/2 rotate-[-28deg] bg-rose-100/95" />
+                {isInGoldZone ? (
+                  <>
+                    <Icon
+                      icon={
+                        isCracked
+                          ? DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_CRACKED_ICON
+                          : DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_HAMMER_ICON
+                      }
+                      width={18}
+                      height={18}
+                    />
+                    {isCracked ? (
+                      <span className="pointer-events-none absolute inset-x-1 top-1/2 h-0.5 -translate-y-1/2 rotate-[-28deg] bg-rose-100/95" />
+                    ) : null}
+                  </>
                 ) : null}
                 <span className="sr-only">
                   {isCracked

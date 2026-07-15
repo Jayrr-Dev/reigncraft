@@ -21,6 +21,9 @@ import type {
 import { listingWorldPlazaCampfireBlocksInInteractionRange } from '@/components/world/fire/domains/listingWorldPlazaCampfireBlocksInInteractionRange';
 import { resolvingWorldPlazaCampfireInteractionLabelScreenPoint } from '@/components/world/fire/domains/resolvingWorldPlazaCampfireInteractionLabelScreenPoint';
 import type { UsingWorldPlazaCampfireCookProgressSnapshot } from '@/components/world/fire/hooks/usingWorldPlazaCampfireCookProgress';
+import { LABELING_WORLD_PLAZA_TEA_BREWING_BREW } from '@/components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingConstants';
+import { formattingWorldPlazaTeaPotCampfireBrewProgressTargetKey } from '@/components/world/tea-brewing/domains/formattingWorldPlazaTeaPotCampfireBrewProgressTargetKey';
+import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
 import { RenderingWorldPlazaTimedInteractionLabelRow } from '@/components/world/interaction/components/renderingWorldPlazaTimedInteractionLabelRow';
 import { useLayoutEffect, useRef, useState } from 'react';
 import type { WorldFireDevvitCell } from '../../../../shared/worldFireDevvit';
@@ -42,6 +45,9 @@ export type RenderingWorldPlazaCampfireInteractionLabelsProps = {
   >;
   readonly cookProgressSnapshot: UsingWorldPlazaCampfireCookProgressSnapshot;
   readonly cookProgressRatioRef: React.RefObject<number>;
+  readonly teaBrewProgressSnapshot: DefiningWorldPlazaTimedInteractionProgressSnapshot;
+  readonly teaBrewProgressRatioRef: React.RefObject<number>;
+  readonly hasBrewableTeaPot: boolean;
   readonly cameraOffsetRef: React.RefObject<DefiningWorldPlazaCameraOffset>;
   readonly cameraWorldZoomRef: React.RefObject<number>;
   readonly onCampfireAction: (
@@ -59,7 +65,10 @@ function formattingWorldPlazaCampfireInteractionLabelTileKey(
 }
 
 function resolvingWorldPlazaCampfireInteractionLabelText(
-  action: Exclude<DefiningWorldPlazaCampfireInteractionAction, 'cook'>
+  action: Exclude<
+    DefiningWorldPlazaCampfireInteractionAction,
+    'cook' | 'brew-tea'
+  >
 ): string {
   return action === 'add-wood' ? 'Add Wood' : 'Light';
 }
@@ -80,6 +89,9 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
   inventorySlotsRef,
   cookProgressSnapshot,
   cookProgressRatioRef,
+  teaBrewProgressSnapshot,
+  teaBrewProgressRatioRef,
+  hasBrewableTeaPot,
   cameraOffsetRef,
   cameraWorldZoomRef,
   onCampfireAction,
@@ -96,11 +108,13 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
   const placedBlocksRef = useRef(placedBlocks);
   const fireCellsRef = useRef(fireCells);
   const onCampfireActionRef = useRef(onCampfireAction);
+  const hasBrewableTeaPotRef = useRef(hasBrewableTeaPot);
 
   selectedCampfiresRef.current = selectedCampfires;
   placedBlocksRef.current = placedBlocks;
   fireCellsRef.current = fireCells;
   onCampfireActionRef.current = onCampfireAction;
+  hasBrewableTeaPotRef.current = hasBrewableTeaPot;
 
   useLayoutEffect(() => {
     let isActive = true;
@@ -123,7 +137,8 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
           placedBlocksRef.current,
           fireCellsRef.current,
           selectedInteractableBlockKeysRef.current,
-          inventorySlotsRef.current ?? []
+          inventorySlotsRef.current ?? [],
+          hasBrewableTeaPotRef.current
         );
 
       const currentEntries = selectedCampfiresRef.current;
@@ -195,6 +210,7 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
     cameraOffsetRef,
     cameraWorldZoomRef,
     fireCells,
+    hasBrewableTeaPot,
     inventorySlotsRef,
     placedBlocks,
     selectedInteractableBlockKeysRef,
@@ -212,6 +228,8 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
         const cookTargetKey = formattingWorldPlazaCampfireCookProgressTargetKey(
           entry.block
         );
+        const teaBrewTargetKey =
+          formattingWorldPlazaTeaPotCampfireBrewProgressTargetKey(entry.block);
 
         return (
           <div
@@ -256,6 +274,21 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
                       progressRatioRef={cookProgressRatioRef}
                       onActivate={() => {
                         onCampfireActionRef.current(entry.block, 'cook');
+                      }}
+                    />
+                  );
+                }
+
+                if (action === 'brew-tea') {
+                  return (
+                    <RenderingWorldPlazaTimedInteractionLabelRow
+                      key={`${tileKey}:brew-tea`}
+                      label={LABELING_WORLD_PLAZA_TEA_BREWING_BREW}
+                      targetKey={teaBrewTargetKey}
+                      progressSnapshot={teaBrewProgressSnapshot}
+                      progressRatioRef={teaBrewProgressRatioRef}
+                      onActivate={() => {
+                        onCampfireActionRef.current(entry.block, 'brew-tea');
                       }}
                     />
                   );

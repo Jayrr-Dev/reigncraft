@@ -49,6 +49,21 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PATTERN_GAP_MS_MIN = 900;
 /** Idle gap between pattern waves (inclusive max). */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PATTERN_GAP_MS_MAX = 1_700;
 
+/** Chance a wave ends in a longer lull before the next rush. */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PAUSE_CHANCE = 0.22;
+
+/** Long lull duration after an occasional pause (inclusive min). */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PAUSE_GAP_MS_MIN = 2_200;
+
+/** Long lull duration after an occasional pause (inclusive max). */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PAUSE_GAP_MS_MAX = 3_400;
+
+/** How much faster waves run after each pause (multiplies tempo). */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_POST_PAUSE_TEMPO_STEP = 1.18;
+
+/** Cap on post-pause speed-up (1 = normal, higher = faster notes + shorter gaps). */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_TEMPO_MAX = 1.75;
+
 /** Delay before the first pattern after craft start. */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_FIRST_PATTERN_DELAY_MS = 700;
 

@@ -18,6 +18,11 @@ import type { DefiningWorldPlazaInventoryItemActionTowerClassNames } from '@/com
 import { resolvingWorldPlazaInventoryItemActionTowerClassNames } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemActionTowerClassNames';
 import type { ResolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailPopoverModel';
 import type { ResolvingWorldPlazaInventoryItemEnchantmentRow } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemEnchantments';
+import {
+  LABELING_WORLD_PLAZA_TEA_BREWING_ADD_WATER,
+  LABELING_WORLD_PLAZA_TEA_BREWING_OPEN,
+  LABELING_WORLD_PLAZA_TEA_BREWING_POUR,
+} from '@/components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingConstants';
 import { cn } from '@/lib/utils';
 import { useCallback, useState, type SyntheticEvent } from 'react';
 
@@ -31,6 +36,9 @@ export type RenderingWorldPlazaInventoryItemDetailPopoverProps = {
   readonly onOpenBag?: () => void;
   readonly onRefineItem?: () => void;
   readonly onAddFuelItem?: () => void;
+  readonly onAddWater?: () => void;
+  readonly onOpenTeapot?: () => void;
+  readonly onPourTea?: () => void;
   readonly onUseActiveEnchantment?: (enchantmentId: string) => void;
 };
 
@@ -47,6 +55,9 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
   onOpenBag,
   onRefineItem,
   onAddFuelItem,
+  onAddWater,
+  onOpenTeapot,
+  onPourTea,
   onUseActiveEnchantment,
 }: RenderingWorldPlazaInventoryItemDetailPopoverProps): React.JSX.Element {
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false);
@@ -119,6 +130,39 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
               onClick={onOpenBag}
             >
               Open
+            </button>
+          ) : null}
+
+          {model.canOpenTeapot && onOpenTeapot ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={actionTowerClassNames.button}
+              onClick={onOpenTeapot}
+            >
+              {LABELING_WORLD_PLAZA_TEA_BREWING_OPEN}
+            </button>
+          ) : null}
+
+          {model.canAddWater && onAddWater ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={actionTowerClassNames.button}
+              onClick={onAddWater}
+            >
+              {LABELING_WORLD_PLAZA_TEA_BREWING_ADD_WATER}
+            </button>
+          ) : null}
+
+          {model.canPourTea && onPourTea ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={actionTowerClassNames.button}
+              onClick={onPourTea}
+            >
+              {LABELING_WORLD_PLAZA_TEA_BREWING_POUR}
             </button>
           ) : null}
 

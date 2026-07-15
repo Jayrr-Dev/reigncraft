@@ -28,6 +28,11 @@ export type WorldPlazaInventoryHotbarSlotInteractions = {
   readonly onDropHotbarSlot?: (slotIndex: number) => void;
   readonly onRefineHotbarSlot?: (slotIndex: number) => void;
   readonly onAddFuelHotbarSlot?: (slotIndex: number) => void;
+  readonly onAddWaterHotbarSlot?: (slotIndex: number) => void;
+  readonly onOpenTeaPotHotbarSlot?: (slotIndex: number) => void;
+  readonly onPourTeaHotbarSlot?: (slotIndex: number) => void;
+  readonly openTeaPotHotbarSlotIndex: number | null;
+  readonly closingTeaPotPopover: () => void;
   readonly onUseActiveEnchantment?: (
     slotIndex: number,
     enchantmentId: string
@@ -40,6 +45,8 @@ export type WorldPlazaInventoryHotbarSlotInteractions = {
   readonly playerEffectiveMaxHealth?: number;
   /** Gates Refine / Add Fuel when near or using a smelting station. */
   readonly isOreSmeltingStationReachable?: boolean;
+  /** True when inventory holds a brewed teapot for Pour Tea. */
+  readonly hasBrewedTeaPot?: boolean;
 };
 
 const WorldPlazaInventoryHotbarSlotInteractionsContext =
@@ -96,6 +103,9 @@ export const RenderingWorldPlazaInventoryHotbarSlotCell = memo(
       onDropHotbarSlot,
       onRefineHotbarSlot,
       onAddFuelHotbarSlot,
+      onAddWaterHotbarSlot,
+      onOpenTeaPotHotbarSlot,
+      onPourTeaHotbarSlot,
       onUseActiveEnchantment,
       togglingItemActionPopover,
       closingItemActionPopover,
@@ -103,6 +113,7 @@ export const RenderingWorldPlazaInventoryHotbarSlotCell = memo(
       closingBagPopover,
       playerEffectiveMaxHealth,
       isOreSmeltingStationReachable,
+      hasBrewedTeaPot,
     } = usingWorldPlazaInventoryHotbarSlotInteractions();
 
     return (
@@ -119,12 +130,16 @@ export const RenderingWorldPlazaInventoryHotbarSlotCell = memo(
         onDropHotbarSlot={onDropHotbarSlot}
         onRefineHotbarSlot={onRefineHotbarSlot}
         onAddFuelHotbarSlot={onAddFuelHotbarSlot}
+        onAddWaterHotbarSlot={onAddWaterHotbarSlot}
+        onOpenTeaPotHotbarSlot={onOpenTeaPotHotbarSlot}
+        onPourTeaHotbarSlot={onPourTeaHotbarSlot}
         onUseActiveEnchantment={onUseActiveEnchantment}
         onOpenBagPopover={openingBagPopover}
         isBagPopoverOpen={openBagHotbarSlotIndex === props.slotIndex}
         onCloseBagPopover={closingBagPopover}
         playerEffectiveMaxHealth={playerEffectiveMaxHealth}
         isOreSmeltingStationReachable={isOreSmeltingStationReachable}
+        hasBrewedTeaPot={hasBrewedTeaPot}
       />
     );
   }
@@ -144,6 +159,11 @@ export function usingWorldPlazaInventoryHotbarSlotInteractionsValue(
       input.onEatHotbarSlot,
       input.onRefineHotbarSlot,
       input.onAddFuelHotbarSlot,
+      input.onAddWaterHotbarSlot,
+      input.onOpenTeaPotHotbarSlot,
+      input.onPourTeaHotbarSlot,
+      input.closingTeaPotPopover,
+      input.openTeaPotHotbarSlotIndex,
       input.onStudyHotbarSlot,
       input.onSelectHotbarSlot,
       input.onUseActiveEnchantment,
@@ -152,6 +172,7 @@ export function usingWorldPlazaInventoryHotbarSlotInteractionsValue(
       input.openingBagPopover,
       input.playerEffectiveMaxHealth,
       input.isOreSmeltingStationReachable,
+      input.hasBrewedTeaPot,
       input.selectedSlotIndex,
       input.togglingItemActionPopover,
     ]

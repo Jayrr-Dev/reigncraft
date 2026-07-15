@@ -109,7 +109,10 @@ export function resolvingWorldPlazaInventoryFoodEatDurationMs(options: {
     return DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_BERRIES;
   }
 
-  if (itemTypeId === 'world-plaza-brewed-coffee') {
+  if (
+    itemTypeId === 'world-plaza-brewed-coffee' ||
+    itemTypeId === 'world-plaza-cup-of-tea'
+  ) {
     return DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_BREWED_COFFEE;
   }
 

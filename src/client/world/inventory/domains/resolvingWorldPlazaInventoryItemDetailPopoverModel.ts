@@ -75,6 +75,20 @@ import {
   resolvingWorldPlazaInventoryWildlifeMeatDetailContent,
   resolvingWorldPlazaInventoryWildlifeMeatDetailReveal,
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryWildlifeMeatDetailReveal';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_CLAY_TEAPOT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CUP_OF_TEA,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import {
+  DEFINING_WORLD_PLAZA_TEA_BREWING_POURS_PER_POT,
+} from '@/components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingConstants';
+import {
+  resolvingWorldPlazaTeaBrewingMetadata,
+  resolvingWorldPlazaTeaPotRemainingPours,
+} from '@/components/world/tea-brewing/domains/resolvingWorldPlazaTeaBrewingMetadata';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 import type { WorldOreSpeciesId } from '../../../../shared/worldOreRarity';
@@ -102,6 +116,9 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly canOpenBag: boolean;
   readonly canRefine: boolean;
   readonly canAddFuel: boolean;
+  readonly canAddWater: boolean;
+  readonly canOpenTeapot: boolean;
+  readonly canPourTea: boolean;
 };
 
 export type ResolvingWorldPlazaInventoryItemDetailPopoverModelOptions = {
@@ -132,6 +149,8 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModelOptions = {
    * one. Gates Refine / Add Fuel on ores and fuel.
    */
   readonly isOreSmeltingStationReachable?: boolean;
+  /** True when inventory holds a brewed teapot for Pour Tea on empty cups. */
+  readonly hasBrewedTeaPot?: boolean;
 };
 
 /**
@@ -402,6 +421,70 @@ function listingWorldPlazaInventoryItemDetailBadges(
   return badges;
 }
 
+function resolvingWorldPlazaTeaBrewingDetailOverrides(
+  item: DefiningInventoryItem
+): {
+  readonly name: string;
+  readonly description: string;
+  readonly extraInfoRows: readonly DefiningWorldPlazaInventoryItemDetailInfoRow[];
+} | null {
+  const brew = resolvingWorldPlazaTeaBrewingMetadata(item.metadata);
+
+  if (
+    item.itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CUP_OF_TEA &&
+    brew
+  ) {
+    return {
+      name: brew.displayName,
+      description: brew.description,
+      extraInfoRows: [],
+    };
+  }
+
+  if (
+    item.itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_CLAY_TEAPOT &&
+    brew
+  ) {
+    const remainingPours =
+      resolvingWorldPlazaTeaPotRemainingPours(item.metadata) ??
+      DEFINING_WORLD_PLAZA_TEA_BREWING_POURS_PER_POT;
+
+    return {
+      name: brew.displayName,
+      description: brew.description,
+      extraInfoRows: [
+        {
+          id: 'tea-pot-remaining-pours',
+          label: 'Servings left',
+          value: `${remainingPours} / ${DEFINING_WORLD_PLAZA_TEA_BREWING_POURS_PER_POT}`,
+          tone: 'neutral',
+        },
+      ],
+    };
+  }
+
+  return null;
+}
+
+function resolvingWorldPlazaInventoryItemDetailTeaActions(
+  itemTypeId: string,
+  options: ResolvingWorldPlazaInventoryItemDetailPopoverModelOptions
+): {
+  readonly canAddWater: boolean;
+  readonly canOpenTeapot: boolean;
+  readonly canPourTea: boolean;
+} {
+  return {
+    canAddWater:
+      itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT,
+    canOpenTeapot:
+      itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT,
+    canPourTea:
+      itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP &&
+      Boolean(options.hasBrewedTeaPot),
+  };
+}
+
 function listingWorldPlazaInventoryItemDetailInfoRows(
   item: DefiningInventoryItem,
   definition: DefiningWorldPlazaInventoryItemTypeDefinition,
@@ -659,6 +742,11 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     activeEnhancements,
     activeEnchantments,
   } = partitioningWorldPlazaInventoryItemEnchantmentRows(enchantmentRows);
+  const teaActions = resolvingWorldPlazaInventoryItemDetailTeaActions(
+    item.itemTypeId,
+    options
+  );
+  const teaOverrides = resolvingWorldPlazaTeaBrewingDetailOverrides(item);
 
   if (wildlifeMeatContent && !includeGenericMeta) {
     return {
@@ -697,6 +785,7 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       canAddFuel:
         Boolean(options.isOreSmeltingStationReachable) &&
         checkingWorldPlazaOreSmeltingFuelItemTypeId(item.itemTypeId),
+      ...teaActions,
     };
   }
 
@@ -736,8 +825,9 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
 
   return {
     itemTypeId: item.itemTypeId,
-    name: definition.name,
-    description: flowerSpeciesId
+    name: teaOverrides?.name ?? definition.name,
+    description: teaOverrides?.description ??
+      (flowerSpeciesId
       ? (flowerContent?.description ?? '')
       : cloverKind
         ? (cloverContent?.description ?? '')
@@ -748,11 +838,11 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
             : (wildlifeMeatContent?.description ??
               resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
                 fallbackName: definition.name,
-              })),
+              }))),
     durabilityLabel: formattingWorldPlazaInventoryItemDurabilityLabel(item),
     durabilityRatio: durabilitySnapshot?.ratio ?? null,
     badges: mergedBadges,
-    infoRows: mergedInfoRows,
+    infoRows: [...mergedInfoRows, ...(teaOverrides?.extraInfoRows ?? [])],
     passiveEnhancements,
     passiveEnchantments,
     activeEnhancements,
@@ -781,5 +871,6 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     canAddFuel:
       Boolean(options.isOreSmeltingStationReachable) &&
       checkingWorldPlazaOreSmeltingFuelItemTypeId(item.itemTypeId),
+    ...teaActions,
   };
 }

@@ -32,9 +32,7 @@ const heatDamageMock = vi.hoisted(() => vi.fn(() => false));
 vi.mock(
   '@/components/world/wildlife/domains/checkingWildlifeIsTakingEnvironmentalHeatDamage',
   () => ({
-    checkingWildlifeIsTakingEnvironmentalHeatDamage: (
-      ...args: unknown[]
-    ) => heatDamageMock(...args),
+    checkingWildlifeIsTakingEnvironmentalHeatDamage: heatDamageMock,
   })
 );
 

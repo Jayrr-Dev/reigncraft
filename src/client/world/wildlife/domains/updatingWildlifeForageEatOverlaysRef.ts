@@ -71,7 +71,7 @@ export function updatingWildlifeForageEatOverlaysRef({
       instanceId: instance.instanceId,
       gridX: instance.position.x,
       gridY: instance.position.y,
-      layer: instance.position.layer,
+      layer: instance.position.layer ?? 1,
       sizeScale,
       frameHeightPx,
       jumpArcOffsetPx,

@@ -19,6 +19,13 @@ import {
   parsingWorldPlazaOreSmeltingSlotDroppableId,
   type DefiningWorldPlazaOreSmeltingStationSlotKind,
 } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingDndIds';
+import { parsingWorldPlazaTeaBrewingSlotDroppableId } from '@/components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingDndIds';
+import { placingWorldPlazaTeaPotIngredientFromInventorySlot } from '@/components/world/tea-brewing/domains/mutatingWorldPlazaTeaPotIngredientSlots';
+import { returningWorldPlazaTeaPotIngredientToInventory } from '@/components/world/tea-brewing/domains/mutatingWorldPlazaTeaPotIngredientSlots';
+import { resolvingWorldPlazaTeaPotIngredientSlots } from '@/components/world/tea-brewing/domains/resolvingWorldPlazaTeaBrewingMetadata';
+import { RenderingWorldPlazaTeaBrewingPopover } from '@/components/world/tea-brewing/components/renderingWorldPlazaTeaBrewingPopover';
+import { checkingWorldPlazaInventoryHasBrewedTeaPot } from '@/components/world/tea-brewing/domains/brewingWorldPlazaTeaPotAtCampfire';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import type { DefiningWorldPlazaOreSmeltingStationState } from '@/components/world/crafting/hooks/usingWorldPlazaOreSmeltingStations';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles } from '@/components/world/domains/resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles';
@@ -117,6 +124,10 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
   readonly onRefineHotbarSlot?: (slotIndex: number) => void;
   /** Deposit wood or coal as fuel into a reachable smelting station. */
   readonly onAddFuelHotbarSlot?: (slotIndex: number) => void;
+  /** Fill an empty teapot near shore water. */
+  readonly onAddWaterHotbarSlot?: (slotIndex: number) => void;
+  /** Pour tea from a brewed pot into an empty cup. */
+  readonly onPourTeaHotbarSlot?: (slotIndex: number) => void;
   /** Active enchantment use from the item action popover. */
   readonly onUseActiveEnchantment?: (
     slotIndex: number,
@@ -149,16 +160,22 @@ type RenderingWorldPlazaInventoryHotbarInventoryShellProps = {
   readonly onDropHotbarSlot?: (slotIndex: number) => void;
   readonly onRefineHotbarSlot?: (slotIndex: number) => void;
   readonly onAddFuelHotbarSlot?: (slotIndex: number) => void;
+  readonly onAddWaterHotbarSlot?: (slotIndex: number) => void;
+  readonly onPourTeaHotbarSlot?: (slotIndex: number) => void;
   readonly onUseActiveEnchantment?: (
     slotIndex: number,
     enchantmentId: string
   ) => void;
   readonly openBagHotbarSlotIndex: number | null;
+  readonly openTeaPotHotbarSlotIndex: number | null;
   readonly openItemDetailSlotIndex: number | null;
   readonly togglingItemActionPopover: (slotIndex: number) => void;
   readonly closingItemActionPopover: () => void;
   readonly openingBagPopover: (slotIndex: number) => void;
   readonly closingBagPopover: () => void;
+  readonly openingTeaPotPopover: (slotIndex: number) => void;
+  readonly closingTeaPotPopover: () => void;
+  readonly handlingReturnTeaPotIngredient: (teapotIngredientSlotIndex: number) => void;
   readonly onInventoryDragStart: (event: DragStartEvent) => void;
   readonly onInventoryDragEnd: (event: DragEndEvent) => void;
   readonly resolvingDraggedItemById: (
@@ -188,13 +205,19 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
     onDropHotbarSlot,
     onRefineHotbarSlot,
     onAddFuelHotbarSlot,
+    onAddWaterHotbarSlot,
+    onPourTeaHotbarSlot,
     onUseActiveEnchantment,
     openBagHotbarSlotIndex,
+    openTeaPotHotbarSlotIndex,
     openItemDetailSlotIndex,
     togglingItemActionPopover,
     closingItemActionPopover,
     openingBagPopover,
     closingBagPopover,
+    openingTeaPotPopover,
+    closingTeaPotPopover,
+    handlingReturnTeaPotIngredient,
     onInventoryDragStart,
     onInventoryDragEnd,
     resolvingDraggedItemById,
@@ -211,6 +234,22 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
       () => resolvingWorldPlazaInventoryVisibleSlotIndices(storagePageIndex),
       [storagePageIndex]
     );
+
+    const hasBrewedTeaPot = useMemo(
+      () => checkingWorldPlazaInventoryHasBrewedTeaPot(state),
+      [state]
+    );
+
+    const openTeaPotItem =
+      openTeaPotHotbarSlotIndex !== null
+        ? state.slots[openTeaPotHotbarSlotIndex]
+        : null;
+    const openTeaPotIngredientSlots =
+      openTeaPotItem &&
+      openTeaPotItem.itemTypeId ===
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT
+        ? resolvingWorldPlazaTeaPotIngredientSlots(openTeaPotItem.metadata)
+        : null;
 
     const [draggingFromSlotIndex, setDraggingFromSlotIndex] = useState<
       number | null
@@ -319,13 +358,19 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
         onDropHotbarSlot,
         onRefineHotbarSlot,
         onAddFuelHotbarSlot,
+        onAddWaterHotbarSlot,
+        onOpenTeaPotHotbarSlot: openingTeaPotPopover,
+        onPourTeaHotbarSlot,
         onUseActiveEnchantment,
         togglingItemActionPopover,
         closingItemActionPopover,
         openingBagPopover,
         closingBagPopover,
+        openTeaPotHotbarSlotIndex,
+        closingTeaPotPopover,
         playerEffectiveMaxHealth,
         isOreSmeltingStationReachable,
+        hasBrewedTeaPot,
       });
 
     return (
@@ -385,6 +430,13 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
                       onCollectOutput={oreSmeltingStation.onCollectOutput}
                     />
                   ) : null}
+                  {openTeaPotIngredientSlots ? (
+                    <RenderingWorldPlazaTeaBrewingPopover
+                      ingredientSlots={openTeaPotIngredientSlots}
+                      onClose={closingTeaPotPopover}
+                      onReturnIngredient={handlingReturnTeaPotIngredient}
+                    />
+                  ) : null}
                   <RenderingWorldPlazaInventoryPageArrowButtons
                     storagePageIndex={storagePageIndex}
                     storagePageCount={DEFINING_WORLD_PLAZA_INVENTORY_PAGE_COUNT}
@@ -425,6 +477,8 @@ export function RenderingWorldPlazaInventoryHotbar({
   onAttachRecipePageHotbarSlot,
   onRefineHotbarSlot,
   onAddFuelHotbarSlot,
+  onAddWaterHotbarSlot,
+  onPourTeaHotbarSlot,
   onUseActiveEnchantment,
   isEmbeddedInHudToolbarStack = false,
   playerEffectiveMaxHealth,
@@ -449,6 +503,10 @@ export function RenderingWorldPlazaInventoryHotbar({
     number | null
   >(null);
 
+  const [openTeaPotHotbarSlotIndex, setOpenTeaPotHotbarSlotIndex] = useState<
+    number | null
+  >(null);
+
   const [storagePageIndex, setStoragePageIndex] = useState(0);
 
   const handlingStoragePageIndexChange = useCallback(
@@ -456,6 +514,7 @@ export function RenderingWorldPlazaInventoryHotbar({
       setStoragePageIndex(nextPageIndex);
       setOpenItemDetailSlotIndex(null);
       setOpenBagHotbarSlotIndex(null);
+      setOpenTeaPotHotbarSlotIndex(null);
     },
     []
   );
@@ -473,16 +532,57 @@ export function RenderingWorldPlazaInventoryHotbar({
       currentSlotIndex === slotIndex ? null : slotIndex
     );
     setOpenBagHotbarSlotIndex(null);
+    setOpenTeaPotHotbarSlotIndex(null);
   }, []);
 
   const openingBagPopover = useCallback((slotIndex: number): void => {
     setOpenBagHotbarSlotIndex(slotIndex);
     setOpenItemDetailSlotIndex(null);
+    setOpenTeaPotHotbarSlotIndex(null);
   }, []);
 
   const closingBagPopover = useCallback((): void => {
     setOpenBagHotbarSlotIndex(null);
   }, []);
+
+  const openingTeaPotPopover = useCallback((slotIndex: number): void => {
+    setOpenTeaPotHotbarSlotIndex(slotIndex);
+    setOpenItemDetailSlotIndex(null);
+    setOpenBagHotbarSlotIndex(null);
+  }, []);
+
+  const closingTeaPotPopover = useCallback((): void => {
+    setOpenTeaPotHotbarSlotIndex(null);
+  }, []);
+
+  const handlingReturnTeaPotIngredient = useCallback(
+    (teapotIngredientSlotIndex: number): void => {
+      if (openTeaPotHotbarSlotIndex === null) {
+        return;
+      }
+
+      updateState((currentState) => {
+        const result = returningWorldPlazaTeaPotIngredientToInventory(
+          currentState,
+          openTeaPotHotbarSlotIndex,
+          teapotIngredientSlotIndex
+        );
+
+        if (result.outcome === 'updated') {
+          return result.nextState;
+        }
+
+        if (result.outcome === 'invalid') {
+          showingReigncraftToast(result.reason);
+        } else if (result.outcome === 'inventory-full') {
+          showingReigncraftToast('Inventory is full.');
+        }
+
+        return currentState;
+      });
+    },
+    [openTeaPotHotbarSlotIndex, updateState]
+  );
 
   const handlingInventoryDragStart = useCallback(
     (event: DragStartEvent): void => {
@@ -521,6 +621,9 @@ export function RenderingWorldPlazaInventoryHotbar({
   const stateRef = useRef(state);
   stateRef.current = state;
 
+  const openTeaPotHotbarSlotIndexRef = useRef(openTeaPotHotbarSlotIndex);
+  openTeaPotHotbarSlotIndexRef.current = openTeaPotHotbarSlotIndex;
+
   const handlingInventoryDragEnd = useCallback(
     (event: DragEndEvent): void => {
       const inventoryState = stateRef.current;
@@ -544,6 +647,49 @@ export function RenderingWorldPlazaInventoryHotbar({
             smeltingSlotKind
           );
         }
+        return;
+      }
+
+      const teaBrewingSlotIndex = event.over
+        ? parsingWorldPlazaTeaBrewingSlotDroppableId(String(event.over.id))
+        : null;
+
+      if (
+        teaBrewingSlotIndex !== null &&
+        openTeaPotHotbarSlotIndexRef.current !== null
+      ) {
+        const itemId = parsingInventoryItemDraggableId(String(event.active.id));
+        const fromLocation = itemId
+          ? resolvingWorldPlazaInventoryDragLocationForItemId(
+              inventoryState,
+              itemId,
+              DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+            )
+          : null;
+
+        if (fromLocation?.kind === 'hotbar') {
+          updateState((currentState) => {
+            const result = placingWorldPlazaTeaPotIngredientFromInventorySlot(
+              currentState,
+              openTeaPotHotbarSlotIndexRef.current!,
+              fromLocation.slotIndex,
+              teaBrewingSlotIndex
+            );
+
+            if (result.outcome === 'updated') {
+              return result.nextState;
+            }
+
+            if (result.outcome === 'invalid') {
+              showingReigncraftToast(result.reason);
+            } else if (result.outcome === 'inventory-full') {
+              showingReigncraftToast('Inventory is full.');
+            }
+
+            return currentState;
+          });
+        }
+
         return;
       }
 
@@ -652,6 +798,22 @@ export function RenderingWorldPlazaInventoryHotbar({
     }
   }, [openBagHotbarSlotIndex, state]);
 
+  useEffect(() => {
+    if (openTeaPotHotbarSlotIndex === null) {
+      return;
+    }
+
+    const slotItem = state.slots[openTeaPotHotbarSlotIndex];
+
+    if (
+      !slotItem ||
+      slotItem.itemTypeId !==
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT
+    ) {
+      setOpenTeaPotHotbarSlotIndex(null);
+    }
+  }, [openTeaPotHotbarSlotIndex, state]);
+
   const hotbarViewportHudScale = useMemo(
     () =>
       viewportHudScale *
@@ -687,13 +849,19 @@ export function RenderingWorldPlazaInventoryHotbar({
           onDropHotbarSlot={handlingDropHotbarSlot}
           onRefineHotbarSlot={onRefineHotbarSlot}
           onAddFuelHotbarSlot={onAddFuelHotbarSlot}
+          onAddWaterHotbarSlot={onAddWaterHotbarSlot}
+          onPourTeaHotbarSlot={onPourTeaHotbarSlot}
           onUseActiveEnchantment={onUseActiveEnchantment}
           openBagHotbarSlotIndex={openBagHotbarSlotIndex}
+          openTeaPotHotbarSlotIndex={openTeaPotHotbarSlotIndex}
           openItemDetailSlotIndex={openItemDetailSlotIndex}
           togglingItemActionPopover={togglingItemActionPopover}
           closingItemActionPopover={closingItemActionPopover}
           openingBagPopover={openingBagPopover}
           closingBagPopover={closingBagPopover}
+          openingTeaPotPopover={openingTeaPotPopover}
+          closingTeaPotPopover={closingTeaPotPopover}
+          handlingReturnTeaPotIngredient={handlingReturnTeaPotIngredient}
           onInventoryDragStart={handlingInventoryDragStart}
           onInventoryDragEnd={handlingInventoryDragEnd}
           resolvingDraggedItemById={resolvingDraggedItemById}

@@ -969,7 +969,14 @@ export function usingWorldPlazaPlayerHealth({
   ]);
 
   const takeDamageRef = useRef<
-    (amount: number, kind?: DefiningWorldPlazaEntityDamageKind) => void
+    (
+      amount: number,
+      kind?: DefiningWorldPlazaEntityDamageKind,
+      options?: Pick<
+        DefiningWorldPlazaEntityHealthDamageOptions,
+        'forcedDeviationScore' | 'forcedRollMode' | 'skipDamageRoll'
+      >
+    ) => void
   >(() => undefined);
   const enqueueMissFloatRef = useRef<() => void>(() => undefined);
   const enqueueItemGainFloatRef = useRef<

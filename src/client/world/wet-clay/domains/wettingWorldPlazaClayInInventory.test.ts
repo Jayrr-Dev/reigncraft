@@ -17,6 +17,7 @@ function creatingInventoryWithClay(quantity: number) {
             id: 'clay-1',
             itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_CLAY,
             quantity,
+            slotIndex: index,
           }
         : slot
     ),

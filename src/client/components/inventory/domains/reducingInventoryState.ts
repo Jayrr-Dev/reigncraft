@@ -5,6 +5,7 @@ import type {
   DefiningInventoryState,
 } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningInventoryItemRegistry } from '@/components/inventory/domains/definingInventoryItemRegistry';
+import { checkingWorldPlazaTeaBrewingMetadataStackCompatible } from '@/components/world/tea-brewing/domains/resolvingWorldPlazaTeaBrewingMetadata';
 import { checkingWorldPlazaInventoryItemHasAggroDeerMeatMetadata } from '@/components/world/wildlife/domains/checkingWorldPlazaInventoryItemHasAggroDeerMeatMetadata';
 
 /**
@@ -139,7 +140,11 @@ function checkingInventoryItemMetadataStackCompatible(
 ): boolean {
   return (
     checkingWorldPlazaInventoryItemHasAggroDeerMeatMetadata(leftMetadata) ===
-    checkingWorldPlazaInventoryItemHasAggroDeerMeatMetadata(rightMetadata)
+      checkingWorldPlazaInventoryItemHasAggroDeerMeatMetadata(rightMetadata) &&
+    checkingWorldPlazaTeaBrewingMetadataStackCompatible(
+      leftMetadata,
+      rightMetadata
+    )
   );
 }
 
