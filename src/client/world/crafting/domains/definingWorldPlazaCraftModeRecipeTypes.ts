@@ -26,6 +26,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID = {
   WET_CLAY_BOTTLE: 'recipe-wet-clay-bottle',
   BEAR_TRAP: 'recipe-bear-trap',
   CALTROPS: 'recipe-caltrops',
+  IRON_TUBE: 'recipe-iron-tube',
 } as const;
 
 /** One craft-mode recipe id. */

@@ -1,12 +1,13 @@
-import { creatingWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
-import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { creatingWorldBuildingTilePosition } from '@/components/world/building/domains/definingWorldBuildingTilePosition';
 import { checkingWorldPlazaCraftRecipeNearbyStationSatisfied } from '@/components/world/crafting/domains/checkingWorldPlazaCraftRecipeNearbyStationSatisfied';
 import {
   DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BEAR_TRAP_IRON_INGOT_COST,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BEAR_TRAP_WOOD_COST,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CALTROPS_IRON_INGOT_COST,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CALTROPS_OUTPUT_QUANTITY,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_IRON_TUBE_IRON_INGOT_COST,
   resolvingWorldPlazaCraftModeRecipeDefinition,
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry';
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
@@ -91,7 +92,8 @@ describe('checkingWorldPlazaCraftRecipeNearbyStationSatisfied', () => {
     expect(bearTrapRecipe?.ingredients).toEqual([
       {
         itemTypeId: 'world-plaza-ingot-iron',
-        quantity: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BEAR_TRAP_IRON_INGOT_COST,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BEAR_TRAP_IRON_INGOT_COST,
       },
       {
         itemTypeId: 'world-plaza-wood',
@@ -112,13 +114,37 @@ describe('checkingWorldPlazaCraftRecipeNearbyStationSatisfied', () => {
     expect(caltropsRecipe?.ingredients).toEqual([
       {
         itemTypeId: 'world-plaza-ingot-iron',
-        quantity: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CALTROPS_IRON_INGOT_COST,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CALTROPS_IRON_INGOT_COST,
       },
     ]);
     expect(caltropsRecipe?.outcome).toEqual({
       kind: 'item',
       itemTypeId: 'world-plaza-caltrops',
       quantity: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CALTROPS_OUTPUT_QUANTITY,
+    });
+  });
+
+  it('registers iron tube as an anvil-gated item craft', () => {
+    const ironTubeRecipe = resolvingWorldPlazaCraftModeRecipeDefinition(
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.IRON_TUBE
+    );
+
+    expect(ironTubeRecipe?.recipeType).toBe('item');
+    expect(ironTubeRecipe?.requiredNearbyBlockDefinitionId).toBe(
+      DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL
+    );
+    expect(ironTubeRecipe?.ingredients).toEqual([
+      {
+        itemTypeId: 'world-plaza-ingot-iron',
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_IRON_TUBE_IRON_INGOT_COST,
+      },
+    ]);
+    expect(ironTubeRecipe?.outcome).toEqual({
+      kind: 'item',
+      itemTypeId: 'world-plaza-iron-tube',
+      quantity: 1,
     });
   });
 });

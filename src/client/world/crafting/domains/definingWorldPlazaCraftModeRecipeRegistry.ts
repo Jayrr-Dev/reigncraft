@@ -44,20 +44,27 @@ import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE,
 } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
-import { DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID } from '@/components/world/building/domains/definingWorldPlazaCraftModeCookbookRegistry';
 import {
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND,
   resolvingWorldPlazaBlacksmithUtilitySpriteSheetIcon,
 } from '@/components/world/building/domains/definingWorldPlazaBlacksmithUtilitySpriteConstants';
+import { DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID } from '@/components/world/building/domains/definingWorldPlazaCraftModeCookbookRegistry';
 import {
   DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID,
   type DefiningWorldPlazaCraftModeRecipeDefinition,
   type DefiningWorldPlazaCraftModeRecipeId,
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
+import { DEFINING_WORLD_PLAZA_CRAFT_RECIPE_NEARBY_STATION_RANGE_TILES } from '@/components/world/crafting/domains/definingWorldPlazaCraftRecipeNearbyStationConstants';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
+  DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_ROW_COUNT,
+  DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryCeramicsSpriteSheetConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CALTROPS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_TUBE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_CLAY,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COAL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
@@ -68,11 +75,6 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import {
-  DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
-  DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_ROW_COUNT,
-  DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
-} from '@/components/world/inventory/domains/definingWorldPlazaInventoryCeramicsSpriteSheetConstants';
-import {
   DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_COLUMN_COUNT,
   DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_ROW_COUNT,
   DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_URL,
@@ -82,7 +84,6 @@ import {
   DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_ROW_COUNT,
   DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_URL,
 } from '@/components/world/trap/domains/definingWorldPlazaCaltropConstants';
-import { DEFINING_WORLD_PLAZA_CRAFT_RECIPE_NEARBY_STATION_RANGE_TILES } from '@/components/world/crafting/domains/definingWorldPlazaCraftRecipeNearbyStationConstants';
 
 /** Campfire recipe ingredient counts. */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CAMPFIRE_STONE_COST = 8;
@@ -122,6 +123,9 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BEAR_TRAP_WOOD_COST = 2;
 /** Caltrops smith recipe ingredient counts (requires nearby anvil). */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CALTROPS_IRON_INGOT_COST = 1;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CALTROPS_OUTPUT_QUANTITY = 3;
+
+/** Iron tube smith recipe ingredient counts (requires nearby anvil). */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_IRON_TUBE_IRON_INGOT_COST = 4;
 
 /**
  * All registered craft recipes in cookbook pager order.
@@ -300,6 +304,35 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
     },
   },
   {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.IRON_TUBE,
+    cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.BLACKSMITH,
+    title: 'Iron Tube',
+    description:
+      'Draw four iron ingots into a hollow tube on the anvil. Intermediate stock for later forge recipes.',
+    recipeVisual: {
+      visualKind: 'iconify',
+      recipeEmblemIconifyIcon: 'mdi:pipe',
+    },
+    ingredients: [
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_IRON_TUBE_IRON_INGOT_COST,
+      },
+    ],
+    recipeType: 'item',
+    complexity: 4,
+    requiredNearbyBlockDefinitionId:
+      DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL,
+    requiredNearbyBlockRangeTiles:
+      DEFINING_WORLD_PLAZA_CRAFT_RECIPE_NEARBY_STATION_RANGE_TILES,
+    outcome: {
+      kind: 'item',
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_TUBE,
+      quantity: 1,
+    },
+  },
+  {
     id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CLAY_KILN,
     cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.CERAMICS,
     title: 'Clay Kiln',
@@ -381,7 +414,8 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
     recipeVisual: {
       visualKind: 'sprite-sheet',
       spriteSheetIcon: {
-        spriteSheetUrl: DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
+        spriteSheetUrl:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
         columnCount:
           DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
         rowCount:
@@ -414,7 +448,8 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
     recipeVisual: {
       visualKind: 'sprite-sheet',
       spriteSheetIcon: {
-        spriteSheetUrl: DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
+        spriteSheetUrl:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
         columnCount:
           DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
         rowCount:
@@ -447,7 +482,8 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
     recipeVisual: {
       visualKind: 'sprite-sheet',
       spriteSheetIcon: {
-        spriteSheetUrl: DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
+        spriteSheetUrl:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
         columnCount:
           DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
         rowCount:

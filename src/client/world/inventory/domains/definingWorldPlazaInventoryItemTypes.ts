@@ -24,14 +24,12 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_TIMBER_WHISPER,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryEnchantmentTypeIds';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
-import { DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_URL } from '@/components/world/trap/domains/definingWorldPlazaBearTrapConstants';
-import { DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_URL } from '@/components/world/trap/domains/definingWorldPlazaCaltropConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CALTROPS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CALTROPS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COCONUT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_COCONUT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EXPEDITION_BAG,
@@ -39,6 +37,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_WOOD,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_WOOD,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_TUBE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PACK,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_POUCH,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RUCKSACK,
@@ -55,22 +54,24 @@ import {
 import { DEFINING_WORLD_PLAZA_WOOD_AXE_INVENTORY_ICON_URL } from '@/components/world/inventory/domains/definingWorldPlazaToolInventoryIconConstants';
 import { registeringWorldPlazaInventoryBagItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryBagItemDefinitions';
 import { registeringWorldPlazaInventoryBerryItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryBerryItemDefinitions';
-import { registeringWorldPlazaInventoryCoffeeItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCoffeeItemDefinitions';
 import { registeringWorldPlazaInventoryCeramicsItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCeramicsItemDefinitions';
 import { registeringWorldPlazaInventoryCloverItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCloverItemDefinitions';
+import { registeringWorldPlazaInventoryCoffeeItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCoffeeItemDefinitions';
 import { registeringWorldPlazaInventoryFlowerItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryFlowerItemDefinitions';
+import { registeringWorldPlazaInventoryIngotItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryIngotItemDefinitions';
 import { registeringWorldPlazaInventoryOreItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryOreItemDefinitions';
 import { registeringWorldPlazaInventoryWetClayItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryWetClayItemDefinitions';
-import { registeringWorldPlazaInventoryIngotItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryIngotItemDefinitions';
 import { registeringWorldPlazaTieredToolInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaTieredToolInventoryItems';
-import { registeringWorldPlazaMushroomInventoryItems } from '@/components/world/mushrooms/domains/registeringWorldPlazaMushroomInventoryItems';
 import { registeringWorldPlazaWildlifeMeatInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems';
 import { registeringWorldPlazaWildlifeSpecialtyLootInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeSpecialtyLootInventoryItems';
 import { resolvingWorldPlazaInventoryFoodHealDeclaration } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealDeclaration';
+import { registeringWorldPlazaMushroomInventoryItems } from '@/components/world/mushrooms/domains/registeringWorldPlazaMushroomInventoryItems';
 import {
   DEFINING_WORLD_PLAZA_SPRITCORE_ITEM_NAME,
   DEFINING_WORLD_PLAZA_SPRITCORE_STACK_QUANTITY_DISPLAY,
 } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreConstants';
+import { DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_URL } from '@/components/world/trap/domains/definingWorldPlazaBearTrapConstants';
+import { DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_URL } from '@/components/world/trap/domains/definingWorldPlazaCaltropConstants';
 import { Leaf, Package } from 'lucide-react';
 
 export {
@@ -127,6 +128,17 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
         toolKinds: ['ignite'],
         harvestSpeedMultiplier: 1,
       },
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_TUBE,
+      name: 'Iron Tube',
+      rarity: 'uncommon',
+      description:
+        'A hollow iron pipe drawn on the anvil. Scaffold for tools, traps, and later forgework.',
+      iconifyIcon: 'mdi:pipe',
+      maxStack: 99,
+      isDroppable: true,
+      isStackable: true,
     },
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP,

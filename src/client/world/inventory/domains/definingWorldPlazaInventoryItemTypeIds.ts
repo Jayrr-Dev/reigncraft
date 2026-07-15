@@ -330,6 +330,10 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_STEEL =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_GOLD =
   'world-plaza-fishrod-gold' as const;
 
+/** Forged intermediate: hollow iron tube (smith ingredient). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_TUBE =
+  'world-plaza-iron-tube' as const;
+
 /** Placeable bear trap (drops as armed world trap). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP =
   'world-plaza-bear-trap' as const;

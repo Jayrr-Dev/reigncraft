@@ -156,6 +156,7 @@ import mdiPalmTree from '@iconify-icons/mdi/palm-tree';
 import mdiPaw from '@iconify-icons/mdi/paw';
 import mdiPenguin from '@iconify-icons/mdi/penguin';
 import mdiPineTree from '@iconify-icons/mdi/pine-tree';
+import mdiPipe from '@iconify-icons/mdi/pipe';
 import mdiPlay from '@iconify-icons/mdi/play';
 import mdiPowerSleep from '@iconify-icons/mdi/power-sleep';
 import mdiPurse from '@iconify-icons/mdi/purse';
@@ -405,6 +406,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:paw': mdiPaw,
   'mdi:penguin': mdiPenguin,
   'mdi:pine-tree': mdiPineTree,
+  'mdi:pipe': mdiPipe,
   'mdi:play': mdiPlay,
   'mdi:purse': mdiPurse,
   'mdi:refresh': mdiRefresh,
