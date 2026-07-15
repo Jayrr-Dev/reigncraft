@@ -18,9 +18,13 @@ export const DEFINING_PLAZA_CODEX_DISCOVERY_MILESTONE_REWARD_PERCENTS = [
   25, 50, 75, 100,
 ] as const;
 
-/** Iconify id for locked/unlocked milestone chest placeholders. */
+/** Iconify id for locked / unclaimed milestone chest placeholders. */
 export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CHEST_ICON =
   'mdi:treasure-chest' as const;
+
+/** Iconify id for claimed (unlocked) milestone markers. */
+export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CLAIMED_ICON =
+  'mdi:check-bold' as const;
 
 /** Outer wrap: track + overlapping chest nodes. */
 export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_SHELL_CLASS_NAME =
@@ -42,8 +46,12 @@ export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_MARKERS_CLASS_NAME =
 export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_LOCKED_CLASS_NAME =
   'absolute top-1/2 flex size-4 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-poster-teal/40 bg-parchment/90 text-ink-soft/55 shadow-[0_1px_0_0_rgba(20,37,43,0.35)] outline-none before:absolute before:-inset-2 before:content-[""]' as const;
 
-/** Reached milestone chest circle (reward pending / claimed later). */
+/** Reached milestone chest circle (reward pending). */
 export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_REACHED_CLASS_NAME =
+  'absolute top-1/2 flex size-4 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-poster-gold/70 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-poster-gold shadow-[0_1px_0_0_#14252b] outline-none before:absolute before:-inset-2 before:content-[""]' as const;
+
+/** Claimed milestone circle: gold check instead of chest. */
+export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_CLAIMED_CLASS_NAME =
   'absolute top-1/2 flex size-4 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-poster-gold/70 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-poster-gold shadow-[0_1px_0_0_#14252b] outline-none before:absolute before:-inset-2 before:content-[""]' as const;
 
 /** Chest icon size inside the circle. */

@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaChestLootPoolEntry } from '@/components/world/chest/domains/definingWorldPlazaChestTypes';
+import { DEFINING_WORLD_PLAZA_DISTANCE_DANGER_BAND_TILES } from '@/components/world/domains/definingWorldPlazaDistanceDangerConstants';
 import {
   DEFINING_WORLD_PLAZA_EARLY_UNIQUE_WEAPON_ITEM_TYPE_IDS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
@@ -30,6 +31,10 @@ import {
   DEFINING_WORLD_PLAZA_MID_UNIQUE_WEAPON_ITEM_TYPE_IDS,
   DEFINING_WORLD_PLAZA_UNIQUE_ARMOR_SET_ITEM_TYPE_IDS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+
+/** Mid unique weapons only roll from chests this far from spawn. */
+export const DEFINING_WORLD_PLAZA_CHEST_MID_UNIQUE_MIN_DISTANCE_FROM_ORIGIN_TILES =
+  DEFINING_WORLD_PLAZA_DISTANCE_DANGER_BAND_TILES;
 
 export const DEFINING_WORLD_PLAZA_CHEST_LOOT_POOL_REGISTRY = {
   'starter-forage': [
@@ -151,12 +156,14 @@ export const DEFINING_WORLD_PLAZA_CHEST_LOOT_POOL_REGISTRY = {
         weight: 1,
       })
     ),
-    // Mid unique find-only weapons (rarer than early)
+    // Mid unique find-only weapons (rarer than early; past first danger band)
     ...DEFINING_WORLD_PLAZA_MID_UNIQUE_WEAPON_ITEM_TYPE_IDS.map(
       (itemTypeId) => ({
         itemTypeId,
         quantity: 1,
         weight: 0.5,
+        minDistanceFromOriginTiles:
+          DEFINING_WORLD_PLAZA_CHEST_MID_UNIQUE_MIN_DISTANCE_FROM_ORIGIN_TILES,
       })
     ),
     // Unique armour set pieces (Chaos / Bessemer / Glass Veil)
@@ -183,12 +190,15 @@ export const DEFINING_WORLD_PLAZA_CHEST_LOOT_POOL_REGISTRY = {
   /**
    * Dedicated mid unique weapon pool (equal weight).
    * Use for fixed chests that should always grant one mid unique.
+   * Same distance gate as packs-and-tools mid uniques.
    */
   'mid-unique-weapons':
     DEFINING_WORLD_PLAZA_MID_UNIQUE_WEAPON_ITEM_TYPE_IDS.map((itemTypeId) => ({
       itemTypeId,
       quantity: 1,
       weight: 1,
+      minDistanceFromOriginTiles:
+        DEFINING_WORLD_PLAZA_CHEST_MID_UNIQUE_MIN_DISTANCE_FROM_ORIGIN_TILES,
     })),
   /**
    * Dedicated unique armour pool (equal weight across Chaos / Bessemer / Glass Veil).

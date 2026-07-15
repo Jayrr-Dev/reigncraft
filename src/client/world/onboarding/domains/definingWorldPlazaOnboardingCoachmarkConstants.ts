@@ -125,28 +125,43 @@ export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_OFFSET_PX =
   12 as const;
 
 /**
- * Authored tip width: `min(18rem, 100vw - 1.5rem)`.
+ * Soft tips auto-dismiss so they never demand a tap during combat or death.
+ * Outside click / Escape / Got it still complete the step immediately.
+ */
+export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_AUTO_DISMISS_MS =
+  8_000 as const;
+
+/**
+ * Authored tip width: `min(14rem, 100vw - 2rem)`.
  * Explicit width (not max-width) so abspos shrink-to-fit cannot crush the card
  * when the anchor sits near the right edge of a narrow mobile viewport.
  */
 export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_MAX_WIDTH_REM =
-  18 as const;
+  14 as const;
 
 export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_VIEWPORT_GUTTER_REM =
-  1.5 as const;
+  2 as const;
 
-/** Tip card shell (compact parchment panel). */
+/**
+ * Tip layer paints above bottom HUD chrome (hotbar / mode badges at z-50) and
+ * under item-detail / profile overlays (z-60+). Death tips stay hidden via
+ * `isPlayerDead` rather than z-order. Pointer-events stay off on the layer.
+ */
+export const STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_LAYER_CLASS_NAME =
+  'pointer-events-none fixed inset-0 z-[55]' as const;
+
+/** Tip card shell (quiet parchment chip, not a modal). */
 export const STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_CLASS_NAME =
-  'pointer-events-auto select-none rounded-md border-2 border-poster-wood/70 bg-[linear-gradient(165deg,#f0e2c4_0%,#e3d1a8_100%)] px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,250,230,0.6),0_6px_16px_rgba(20,28,26,0.45)] w-[min(18rem,calc(100vw-1.5rem))] box-border opacity-[0.99]' as const;
+  'pointer-events-auto select-none rounded border border-poster-wood/55 bg-[linear-gradient(165deg,#f0e2c4f2_0%,#e3d1a8f0_100%)] px-2.5 py-1.5 shadow-[inset_0_0_0_1px_rgba(255,250,230,0.45),0_3px_10px_rgba(20,28,26,0.28)] w-[min(14rem,calc(100vw-2rem))] box-border' as const;
 
 export const STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_TITLE_CLASS_NAME =
-  'font-display text-sm font-semibold text-poster-wood' as const;
+  'font-display text-xs font-semibold text-poster-wood' as const;
 
 export const STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_BODY_CLASS_NAME =
-  'mt-1 text-xs leading-snug text-poster-wood/90' as const;
+  'mt-0.5 text-[11px] leading-snug text-poster-wood/85' as const;
 
 export const STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_ACTIONS_CLASS_NAME =
-  'mt-2 flex justify-end' as const;
+  'mt-1.5 flex justify-end' as const;
 
 export const STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_DISMISS_BUTTON_CLASS_NAME =
-  'rounded border border-poster-wood/50 bg-poster-teal-deep/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-poster-wood hover:bg-poster-teal-deep/20' as const;
+  'rounded border border-poster-wood/40 bg-poster-teal-deep/5 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-poster-wood/80 hover:bg-poster-teal-deep/15' as const;

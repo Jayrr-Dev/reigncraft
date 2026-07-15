@@ -7,6 +7,8 @@ import { usingWorldPlazaOnboardingCoachmarks } from '@/components/world/onboardi
 export type RenderingWorldPlazaOnboardingCoachmarkLayerProps =
   UsingWorldPlazaOnboardingCoachmarksParams & {
     readonly isMobile: boolean;
+    /** Hide tips over the death screen (bleed etc. still count while dead). */
+    readonly isPlayerDead: boolean;
   };
 
 /**
@@ -14,12 +16,13 @@ export type RenderingWorldPlazaOnboardingCoachmarkLayerProps =
  */
 export function RenderingWorldPlazaOnboardingCoachmarkLayer({
   isMobile,
+  isPlayerDead,
   ...coachmarkParams
 }: RenderingWorldPlazaOnboardingCoachmarkLayerProps): React.JSX.Element | null {
   const { activeCoachmark, dismissingActiveCoachmark } =
     usingWorldPlazaOnboardingCoachmarks(coachmarkParams);
 
-  if (!coachmarkParams.isEnabled || activeCoachmark === null) {
+  if (!coachmarkParams.isEnabled || isPlayerDead || activeCoachmark === null) {
     return null;
   }
 

@@ -9,6 +9,7 @@ import { RenderingUserProfileFriendRequestPlazaModal } from '@/components/friend
 import { usingUserProfileFriendPlazaNotifications } from '@/components/friends/hooks/usingUserProfileFriendPlazaNotifications';
 import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/hooks/usingUserProfileFriendRequestPlazaDialogs';
 import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
+import { deletingPlazaSinglePlayerSaveSlot } from '@/components/home/domains/deletingPlazaSinglePlayerSaveSlot';
 import { formattingPlazaStudyCompleteToastMessage } from '@/components/home/domains/formattingPlazaStudyCompleteToastMessage';
 import { formattingPlazaBestiaryStudyCountProgress } from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
 import {
@@ -48,6 +49,7 @@ import type {
 import { addingInventoryItemWithStacking } from '@/components/inventory/domains/reducingInventoryState';
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import { sendingWorldPlazaAudioLifecycleEvent } from '@/components/world/audio/lifecycle/managingWorldPlazaAudioLifecycleStore';
+import { RenderingWorldPlazaDeathSfx } from '@/components/world/audio/lifecycle/renderingWorldPlazaDeathSfx';
 import { RenderingSpiritedSpritesBetaLayer } from '@/components/world/beta/spirited/components/renderingSpiritedSpritesBetaLayer';
 import type { DefiningSpiritedSpritesBetaAnimalId } from '@/components/world/beta/spirited/domains/definingSpiritedSpritesBetaCatalog';
 import {
@@ -67,13 +69,6 @@ import { RenderingWorldPlazaPlacedBlockGroundShadows } from '@/components/world/
 import { RenderingWorldPlazaPlacedBlocks } from '@/components/world/building/components/renderingWorldPlazaPlacedBlocks';
 import { RenderingWorldPlazaPlotBoundaries } from '@/components/world/building/components/renderingWorldPlazaPlotBoundaries';
 import { RenderingWorldPlazaSurvivalShelterUtilityLayer } from '@/components/world/building/components/renderingWorldPlazaSurvivalShelterUtilityLayer';
-import { RenderingWorldPlazaStorageChestLayer } from '@/components/world/storage-chest/components/renderingWorldPlazaStorageChestLayer';
-import {
-  checkingWorldBuildingBlockDefinitionIdIsStorageChest,
-} from '@/components/world/storage-chest/domains/syncingWorldPlazaVisibleStorageChestLayer';
-import {
-  DEFINING_WORLD_PLAZA_STORAGE_CHEST_PLACEMENT_PREVIEW_BLOCK_ID,
-} from '@/components/world/storage-chest/domains/definingWorldPlazaStorageChestConstants';
 import {
   countingWorldBuildingOwnerOwnedPlotCount,
   countingWorldBuildingOwnerPlotTileClaims,
@@ -287,6 +282,10 @@ import type {
 } from '@/components/world/domains/definingWorldPlazaOnlineRoom';
 import type { UsingWorldPlazaOnlineRoomChatResult } from '@/components/world/domains/definingWorldPlazaOnlineRoomChatBindings';
 import {
+  LABELING_WORLD_PLAZA_PERMA_DEATH_DEATH_SCREEN_FLAVOR_TEXT,
+  LABELING_WORLD_PLAZA_PERMA_DEATH_DEATH_SCREEN_RETURN_HOME_LABEL,
+} from '@/components/world/domains/definingWorldPlazaPermaDeathLoadConstants';
+import {
   resolvingWorldPlazaPlayableAvatarRangedCombatProfile,
   resolvingWorldPlazaPlayableAvatarRangedNormalAttackArchetypeId,
 } from '@/components/world/domains/definingWorldPlazaPlayableAvatarRangedCombatRegistry';
@@ -307,6 +306,7 @@ import {
   DEFINING_WORLD_PLAZA_HOST_FULLSCREEN_CLASS_NAME,
   DEFINING_WORLD_PLAZA_VIEWPORT_FRAME_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaViewportFullscreenConstants';
+import { ensuringWorldPlazaPermaDeathAvatarSkin } from '@/components/world/domains/ensuringWorldPlazaPermaDeathAvatarSkin';
 import { ensuringWorldPlazaRandomAnimalAvatarSkin } from '@/components/world/domains/ensuringWorldPlazaRandomAnimalAvatarSkin';
 import { ensuringWorldPlazaSurvivalCookbookRecipesAttached } from '@/components/world/domains/ensuringWorldPlazaSurvivalCookbookRecipesAttached';
 import { findingWorldPlazaBiomeTeleportWorldPointForDev } from '@/components/world/domains/findingWorldPlazaBiomeTeleportWorldPointForDev';
@@ -337,22 +337,13 @@ import {
   recordingWorldPlazaLapidaryOreStudied,
 } from '@/components/world/domains/managingWorldPlazaLapidaryDiscoveryStore';
 import { settingWorldPlazaOnlineRoomId } from '@/components/world/domains/managingWorldPlazaOnlineRoomIdStore';
+import { checkingWorldPlazaPermaDeathLoadEnabled } from '@/components/world/domains/managingWorldPlazaPermaDeathLoadStore';
 import { checkingWorldPlazaRandomAnimalLoadEnabled } from '@/components/world/domains/managingWorldPlazaRandomAnimalLoadStore';
 import {
   attachingWorldPlazaRecipePage,
   checkingWorldPlazaRecipePageAttachedInStore,
   initializingWorldPlazaRecipeDiscoveryStore,
 } from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
-import {
-  checkingWorldPlazaInventoryStorageExpansionAtCap,
-  initializingWorldPlazaInventoryStorageExpansionStore,
-  unlockingWorldPlazaInventoryStorageRow,
-} from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
-import {
-  LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_AT_CAP_TOAST,
-  LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_UNLOCKED_TOAST,
-} from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
-import { checkingWorldPlazaInventoryItemIsStorageExpansionPage } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemStorageExpansionPage';
 import { settingWorldPlazaPerformanceDiagnosticsEnabled } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { parsingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync';
 import { parsingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync';
@@ -605,9 +596,18 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { parsingWorldPlazaOreSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
+import {
+  LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_AT_CAP_TOAST,
+  LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_UNLOCKED_TOAST,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
 import { disarmingWorldPlazaInventorySlotArmedHarvestEnchantments } from '@/components/world/inventory/domains/disarmingWorldPlazaInventorySlotArmedHarvestEnchantments';
 import { ensuringWorldPlazaInventoryBestiarySightedRecipeRewards } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryBestiarySightedRecipeRewards';
 import { ensuringWorldPlazaInventoryLapidaryOreStudyRecipeRewards } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryLapidaryOreStudyRecipeRewards';
+import {
+  checkingWorldPlazaInventoryStorageExpansionAtCap,
+  initializingWorldPlazaInventoryStorageExpansionStore,
+  unlockingWorldPlazaInventoryStorageRow,
+} from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { parsingWorldPlazaBerryLootKindFromItemTypeId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBerryDetailReveal';
 import { parsingWorldPlazaCloverKindFromItemTypeId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryCloverDetailReveal';
@@ -617,6 +617,7 @@ import {
   resolvingWorldPlazaInventoryFoodDefinition,
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { resolvingWorldPlazaInventoryItemRecipePageRecipeId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemRecipePage';
+import { checkingWorldPlazaInventoryItemIsStorageExpansionPage } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemStorageExpansionPage';
 import { parsingWorldPlazaMushroomSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryMushroomDetailReveal';
 import { wearingWorldPlazaEquippedInventoryToolDurability } from '@/components/world/inventory/domains/wearingWorldPlazaEquippedInventoryToolDurability';
 import { trackingWorldPlazaInventoryDropPlacement } from '@/components/world/inventory/hooks/trackingWorldPlazaInventoryDropPlacement';
@@ -684,6 +685,9 @@ import type { WildlifePetSpritcoreUpgradeLaneId } from '@/components/world/sprit
 import { WORLD_PLAZA_SPRITCORE_UPGRADE_EMPTY_BONUSES } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
 import { initializingWorldPlazaSpritcoreUpgradeStore } from '@/components/world/spritcore/domains/managingWorldPlazaSpritcoreUpgradeStore';
 import { usingWorldPlazaSpritcoreUpgradeBonuses } from '@/components/world/spritcore/hooks/usingWorldPlazaSpritcoreUpgradeBonuses';
+import { RenderingWorldPlazaStorageChestLayer } from '@/components/world/storage-chest/components/renderingWorldPlazaStorageChestLayer';
+import { DEFINING_WORLD_PLAZA_STORAGE_CHEST_PLACEMENT_PREVIEW_BLOCK_ID } from '@/components/world/storage-chest/domains/definingWorldPlazaStorageChestConstants';
+import { checkingWorldBuildingBlockDefinitionIdIsStorageChest } from '@/components/world/storage-chest/domains/syncingWorldPlazaVisibleStorageChestLayer';
 import { usingWorldPlazaStorageChest } from '@/components/world/storage-chest/hooks/usingWorldPlazaStorageChest';
 import { RenderingWorldPlazaTeaPotAddWaterInteractionLabels } from '@/components/world/tea-brewing/components/renderingWorldPlazaTeaPotAddWaterInteractionLabels';
 import {
@@ -836,7 +840,10 @@ import type {
   PlazaDevvitOnlineWildlifeSnapshot,
 } from '../../../shared/plazaDevvitOnline';
 import { PLAZA_DEVVIT_ONLINE_DEFAULT_MAX_PLAYERS } from '../../../shared/plazaDevvitOnline';
-import type { PlazaSaveSlotIndex } from '../../../shared/plazaGameSession';
+import {
+  PLAZA_SINGLE_PLAYER_PERMA_DEATH_SAVE_SLOT_INDEX,
+  type PlazaSaveSlotIndex,
+} from '../../../shared/plazaGameSession';
 import { WORLD_HARVEST_DEVVIT_PICK_FLOWER_API_PATH } from '../../../shared/worldHarvestDevvit';
 
 /** Live online room binding passed into the connected plaza scene. */
@@ -7630,6 +7637,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     if (checkingWorldPlazaRandomAnimalLoadEnabled()) {
       ensuringWorldPlazaRandomAnimalAvatarSkin();
     }
+    if (checkingWorldPlazaPermaDeathLoadEnabled()) {
+      ensuringWorldPlazaPermaDeathAvatarSkin();
+    }
     initializingWorldPlazaAvatarTransformCooldownStore(storageOwnerId);
     initializingWorldPlazaRecipeDiscoveryStore(storageOwnerId, {
       cloudSaveSlotIndex: discoveryCloudSaveSlotIndex,
@@ -7844,10 +7854,12 @@ function RenderingWorldPlazaPixiSceneConnected({
   ]);
 
   const wasPlayerDeadRef = useRef(false);
+  const hasWipedPermaDeathSaveRef = useRef(false);
 
   useEffect(() => {
     if (!isPlayerDead) {
       wasPlayerDeadRef.current = false;
+      hasWipedPermaDeathSaveRef.current = false;
       return;
     }
 
@@ -7856,6 +7868,15 @@ function RenderingWorldPlazaPixiSceneConnected({
     }
 
     wasPlayerDeadRef.current = true;
+    const isPermaDeathRun = checkingWorldPlazaPermaDeathLoadEnabled();
+
+    if (isPermaDeathRun && !hasWipedPermaDeathSaveRef.current) {
+      hasWipedPermaDeathSaveRef.current = true;
+      void deletingPlazaSinglePlayerSaveSlot(
+        PLAZA_SINGLE_PLAYER_PERMA_DEATH_SAVE_SLOT_INDEX,
+        redditUserId !== null
+      );
+    }
     clearingCombatLock();
     clearingWalkTarget();
     closeChat();
@@ -7887,7 +7908,8 @@ function RenderingWorldPlazaPixiSceneConnected({
       deathInventoryState &&
       committingInventoryState &&
       isLocalGameplayEnabled &&
-      isSpritcoreLevelingEnabled
+      isSpritcoreLevelingEnabled &&
+      !isPermaDeathRun
     ) {
       void applyingWorldPlazaPlayerDeathSpritcorePenalty({
         inventoryState: deathInventoryState,
@@ -7915,6 +7937,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     singlePlayerSaveSlotIndex,
     wildlifeStoreRef,
   ]);
+
+  const handlingPermaDeathReturnHome = useCallback((): void => {
+    onExitToHome?.();
+  }, [onExitToHome]);
 
   const choosingDeathRespawn = useCallback(
     (choice: DefiningWorldPlazaEntityDeathRespawnChoice): void => {
@@ -8930,6 +8956,7 @@ function RenderingWorldPlazaPixiSceneConnected({
             <RenderingWorldPlazaAvatarMeleeSfx />
             <RenderingWorldPlazaEquipmentSfx />
             <RenderingWorldPlazaInventoryBagSfx />
+            <RenderingWorldPlazaDeathSfx />
             <RenderingWorldPlazaGirlSampleVoiceSfx />
             <RenderingWildlifeOmegaWolfSfx
               playerPositionRef={playerPositionRef}
@@ -9360,7 +9387,21 @@ function RenderingWorldPlazaPixiSceneConnected({
           <RenderingWorldPlazaEntityDeathScreenOverlay
             isPlayerDead={isLocalGameplayEnabled && isPlayerDead}
             deathTitle={deathScreenTitle}
+            deathMode={
+              checkingWorldPlazaPermaDeathLoadEnabled()
+                ? 'perma-death'
+                : 'standard'
+            }
+            flavorText={
+              checkingWorldPlazaPermaDeathLoadEnabled()
+                ? LABELING_WORLD_PLAZA_PERMA_DEATH_DEATH_SCREEN_FLAVOR_TEXT
+                : undefined
+            }
+            returnHomeLabel={
+              LABELING_WORLD_PLAZA_PERMA_DEATH_DEATH_SCREEN_RETURN_HOME_LABEL
+            }
             onChoosingRespawn={choosingDeathRespawn}
+            onReturnHome={handlingPermaDeathReturnHome}
           />
           <RenderingWorldPlazaMobileLandscapePrompt
             isVisible={shouldShowLandscapePrompt}
@@ -9373,6 +9414,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               storageOwnerId={onlineUserId ?? localPersistenceOwnerId}
               isEnabled={isHudOnboardingCoachmarksEnabled}
               isMobile={hudIsMobile}
+              isPlayerDead={isPlayerDead}
               playerUserId={onlineUserId ?? localPersistenceOwnerId}
               playerPositionRef={playerPositionRef}
               wildlifeStoreRef={wildlifeStoreRef}

@@ -19,6 +19,7 @@ import { resolvingWorldPlazaGameplayHudBottomCenterAnchorViewportStyles } from '
 import { STYLING_WORLD_PLAZA_INVENTORY_LIGHT_THEME_SCOPE_CLASS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { resolvingWorldPlazaInventoryHotbarDeviceScale } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarDeviceScale';
 import { computingWorldPlazaInventoryHotbarShellWidthPx } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
+import { DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
 import { cn } from '@/lib/utils';
 import { useMemo, type ReactNode } from 'react';
 
@@ -97,6 +98,9 @@ export function RenderingWorldPlazaHudToolbarBottomAnchor({
         <div
           className={STYLING_WORLD_PLAZA_HUD_TOOLBAR_BOTTOM_STACK_CLASS_NAME}
           style={bottomStackStyle}
+          {...{
+            [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]: 'hotbar',
+          }}
         >
           {topOverlay}
           {onCancelPlacement ? (

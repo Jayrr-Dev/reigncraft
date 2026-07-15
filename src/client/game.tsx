@@ -26,6 +26,10 @@ import {
   syncingWorldPlazaDevQaGenerationFeatureBlankSlateIfEnabled,
 } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
+  disablingWorldPlazaPermaDeathLoad,
+  enablingWorldPlazaPermaDeathLoad,
+} from '@/components/world/domains/managingWorldPlazaPermaDeathLoadStore';
+import {
   disablingWorldPlazaRandomAnimalLoad,
   enablingWorldPlazaRandomAnimalLoad,
 } from '@/components/world/domains/managingWorldPlazaRandomAnimalLoadStore';
@@ -56,6 +60,7 @@ import { PLAZA_DEVVIT_ONLINE_DEFAULT_MAX_PLAYERS } from '../shared/plazaDevvitOn
 import type { PlazaGameSession } from '../shared/plazaGameSession';
 import {
   checkingPlazaSinglePlayerDevQaLoadSession,
+  checkingPlazaSinglePlayerPermaDeathLoadSession,
   checkingPlazaSinglePlayerRandomAnimalLoadSession,
   resolvingPlazaSinglePlayerDevQaSessionOwnerId,
   resolvingPlazaSinglePlayerSessionOwnerId,
@@ -340,6 +345,16 @@ export const App = () => {
       disablingWorldPlazaRandomAnimalLoad();
     }
 
+    if (checkingPlazaSinglePlayerPermaDeathLoadSession(session)) {
+      enablingWorldPlazaPermaDeathLoad(
+        session.mode === 'single-player'
+          ? (session.startingAvatarSkinId ?? null)
+          : null
+      );
+    } else {
+      disablingWorldPlazaPermaDeathLoad();
+    }
+
     sendingWorldPlazaAudioLifecycleEvent('SESSION_STARTED');
     void startingWorldPlazaSessionAudioLoading();
     setGameSession(session);
@@ -359,6 +374,16 @@ export const App = () => {
       disablingWorldPlazaRandomAnimalLoad();
     }
 
+    if (checkingPlazaSinglePlayerPermaDeathLoadSession(gameSession)) {
+      enablingWorldPlazaPermaDeathLoad(
+        gameSession.mode === 'single-player'
+          ? (gameSession.startingAvatarSkinId ?? null)
+          : null
+      );
+    } else {
+      disablingWorldPlazaPermaDeathLoad();
+    }
+
     if (checkingPlazaSinglePlayerDevQaLoadSession(gameSession)) {
       if (!checkingWorldPlazaDevQaLoadEnabled()) {
         enablingWorldPlazaDevQaLoad();
@@ -374,6 +399,7 @@ export const App = () => {
   const handlingExitToHome = (): void => {
     disablingWorldPlazaDevQaLoad();
     disablingWorldPlazaRandomAnimalLoad();
+    disablingWorldPlazaPermaDeathLoad();
     sendingWorldPlazaAudioLifecycleEvent('EXIT_HOME');
     resettingWorldPlazaSessionAudioLoading();
     setGameSession(null);

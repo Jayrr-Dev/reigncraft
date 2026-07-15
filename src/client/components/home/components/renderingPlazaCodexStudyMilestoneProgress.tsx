@@ -13,7 +13,9 @@ import {
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_SHELL_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_TRACK_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CHEST_ICON,
+  DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CLAIMED_ICON,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_ICON_CLASS_NAME,
+  DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_CLAIMED_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_LOCKED_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_REACHED_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NOTIFICATION_BADGE_CLASS_NAME,
@@ -30,9 +32,9 @@ import { Icon } from '@/components/ui/icon';
 import { RenderingWorldPlazaCraftModeRecipeSpriteSheetPreview } from '@/components/world/building/components/renderingWorldPlazaCraftModeRecipeSpriteSheetPreview';
 import { resolvingWorldPlazaCraftModeRecipeDefinition } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry';
 import type { DefiningWorldPlazaCraftModeRecipeVisual } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
-import { resolvingWorldPlazaInventoryStorageExpansionPageSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionPageSpriteSheetConstants';
-import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import { usingWorldPlazaAnchoredPopoverViewportShiftX } from '@/components/world/hooks/usingWorldPlazaAnchoredPopoverViewportShiftX';
+import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
+import { resolvingWorldPlazaInventoryStorageExpansionPageSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionPageSpriteSheetConstants';
 import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
 import { useCallback, useRef, useState } from 'react';
 
@@ -121,10 +123,14 @@ function RenderingPlazaCodexStudyMilestoneRewardMarker({
     definition: PlazaCodexMilestoneRewardDefinition
   ) => void;
 }): React.JSX.Element {
-  const showAsReached = marker.isReached && !marker.isClaimed;
-  const nodeClassName = showAsReached
-    ? DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_REACHED_CLASS_NAME
-    : DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_LOCKED_CLASS_NAME;
+  const nodeClassName = marker.isClaimed
+    ? DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_CLAIMED_CLASS_NAME
+    : marker.isReached
+      ? DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_REACHED_CLASS_NAME
+      : DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_LOCKED_CLASS_NAME;
+  const nodeIcon = marker.isClaimed
+    ? DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CLAIMED_ICON
+    : DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CHEST_ICON;
   const rewardLabel = marker.rewardDefinition?.reward.label ?? null;
   const popoverLabel = resolvingPlazaCodexStudyMilestoneRewardPopoverLabel(
     marker.remainingNeeded,
@@ -180,7 +186,7 @@ function RenderingPlazaCodexStudyMilestoneRewardMarker({
         }}
       >
         <Icon
-          icon={DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CHEST_ICON}
+          icon={nodeIcon}
           className={
             DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_ICON_CLASS_NAME
           }

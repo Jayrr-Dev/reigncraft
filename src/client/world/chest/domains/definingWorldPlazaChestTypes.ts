@@ -81,4 +81,9 @@ export type DefiningWorldPlazaChestLootPoolEntry = {
   readonly itemTypeId: string;
   readonly quantity: number;
   readonly weight: number;
+  /**
+   * When set, entry is omitted from the roll unless chest Euclidean
+   * distance from plaza origin is at least this many tiles.
+   */
+  readonly minDistanceFromOriginTiles?: number;
 };

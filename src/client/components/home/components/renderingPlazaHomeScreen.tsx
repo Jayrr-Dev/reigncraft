@@ -23,6 +23,7 @@ import {
   PLAZA_DEVVIT_ONLINE_MIN_PLAYERS,
 } from '../../../../shared/plazaDevvitOnline';
 import {
+  PLAZA_SINGLE_PLAYER_PERMA_DEATH_SAVE_SLOT_INDEX,
   PLAZA_SINGLE_PLAYER_RANDOM_ANIMAL_SAVE_SLOT_INDEX,
   type PlazaGameSession,
   type PlazaSaveSlotIndex,
@@ -51,9 +52,19 @@ const RenderingPlazaTutorialPanel = lazy(async () => {
   return { default: panelModule.RenderingPlazaTutorialPanel };
 });
 
+const RenderingPlazaPermaDeathCharacterPickerPanel = lazy(async () => {
+  const panelModule =
+    await import('@/components/home/components/renderingPlazaPermaDeathCharacterPickerPanel');
+
+  return {
+    default: panelModule.RenderingPlazaPermaDeathCharacterPickerPanel,
+  };
+});
+
 type PlazaHomeScreenStep =
   | 'mode-select'
   | 'single-player'
+  | 'perma-death-character'
   | 'multiplayer'
   | 'tutorial';
 
@@ -133,6 +144,36 @@ export function RenderingPlazaHomeScreen({
 
   const handlingBackToModeSelect = (): void => {
     setStep('mode-select');
+  };
+
+  const handlingBackToSinglePlayer = (): void => {
+    setStep('single-player');
+  };
+
+  const handlingSelectPermaDeathSaveSlot = (options: {
+    hasSaveData: boolean;
+  }): void => {
+    if (options.hasSaveData) {
+      onStartSession({
+        mode: 'single-player',
+        saveSlotIndex: PLAZA_SINGLE_PLAYER_PERMA_DEATH_SAVE_SLOT_INDEX,
+        loadProfile: 'perma-death',
+      });
+      return;
+    }
+
+    setStep('perma-death-character');
+  };
+
+  const handlingConfirmPermaDeathCharacter = (
+    startingAvatarSkinId: string
+  ): void => {
+    onStartSession({
+      mode: 'single-player',
+      saveSlotIndex: PLAZA_SINGLE_PLAYER_PERMA_DEATH_SAVE_SLOT_INDEX,
+      loadProfile: 'perma-death',
+      startingAvatarSkinId,
+    });
   };
 
   const handlingSelectSaveSlot = (saveSlotIndex: PlazaSaveSlotIndex): void => {
@@ -314,6 +355,16 @@ export function RenderingPlazaHomeScreen({
             <RenderingPlazaSinglePlayerSaveSlotsPanel
               onBack={handlingBackToModeSelect}
               onSelectSaveSlot={handlingSelectSaveSlot}
+              onSelectPermaDeathSaveSlot={handlingSelectPermaDeathSaveSlot}
+            />
+          </Suspense>
+        ) : null}
+
+        {step === 'perma-death-character' ? (
+          <Suspense fallback={null}>
+            <RenderingPlazaPermaDeathCharacterPickerPanel
+              onBack={handlingBackToSinglePlayer}
+              onConfirmCharacter={handlingConfirmPermaDeathCharacter}
             />
           </Suspense>
         ) : null}

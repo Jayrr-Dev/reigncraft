@@ -13,6 +13,10 @@ import {
   subscribingWorldPlazaBestiaryDiscovery,
 } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import {
+  checkingWorldPlazaPermaDeathLoadEnabled,
+  subscribingWorldPlazaPermaDeathLoad,
+} from '@/components/world/domains/managingWorldPlazaPermaDeathLoadStore';
+import {
   checkingWorldPlazaRandomAnimalLoadEnabled,
   subscribingWorldPlazaRandomAnimalLoad,
 } from '@/components/world/domains/managingWorldPlazaRandomAnimalLoadStore';
@@ -33,9 +37,14 @@ export function usingWorldPlazaGuardingAvatarSkinAccess(): void {
     checkingWorldPlazaRandomAnimalLoadEnabled,
     checkingWorldPlazaRandomAnimalLoadEnabled
   );
+  const isPermaDeathLoadEnabled = useSyncExternalStore(
+    subscribingWorldPlazaPermaDeathLoad,
+    checkingWorldPlazaPermaDeathLoadEnabled,
+    checkingWorldPlazaPermaDeathLoadEnabled
+  );
 
   useEffect(() => {
-    if (isRandomAnimalLoadEnabled) {
+    if (isRandomAnimalLoadEnabled || isPermaDeathLoadEnabled) {
       return;
     }
 
@@ -59,6 +68,7 @@ export function usingWorldPlazaGuardingAvatarSkinAccess(): void {
       DEFINING_WORLD_PLAZA_AVATAR_SKIN_DEFAULT
     );
   }, [
+    isPermaDeathLoadEnabled,
     isRandomAnimalLoadEnabled,
     studyCountsBySpeciesId,
     userData?.alias,

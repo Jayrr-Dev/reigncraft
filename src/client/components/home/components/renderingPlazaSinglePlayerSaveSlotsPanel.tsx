@@ -7,6 +7,7 @@ import {
   definingPlazaButtonSfxDataAttributes,
 } from '@/components/home/domains/definingPlazaDefaultButtonSfxConstants';
 import {
+  DEFINING_PLAZA_SINGLE_PLAYER_PERMA_DEATH_SAVE_SLOT_INDEX,
   DEFINING_PLAZA_SINGLE_PLAYER_RANDOM_ANIMAL_SAVE_SLOT_INDEX,
   LABELING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_TOGGLE,
   LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_COMING_SOON,
@@ -36,6 +37,11 @@ import { usingPlazaSinglePlayerSaveSlotDeleteMutation } from '@/components/home/
 import { usingPlazaSinglePlayerSaveSlotsQuery } from '@/components/home/hooks/usingPlazaSinglePlayerSaveSlotsQuery';
 import { Icon } from '@/components/ui/icon';
 import {
+  DEFINING_WORLD_PLAZA_PERMA_DEATH_LOAD_SLOT_ACTION_ICON,
+  LABELING_WORLD_PLAZA_PERMA_DEATH_LOAD_SLOT_SUBTITLE_NEW,
+  LABELING_WORLD_PLAZA_PERMA_DEATH_LOAD_SLOT_TITLE,
+} from '@/components/world/domains/definingWorldPlazaPermaDeathLoadConstants';
+import {
   LABELING_WORLD_PLAZA_RANDOM_ANIMAL_LOAD_SLOT_SUBTITLE_NEW,
   LABELING_WORLD_PLAZA_RANDOM_ANIMAL_LOAD_SLOT_TITLE,
 } from '@/components/world/domains/definingWorldPlazaRandomAnimalLoadConstants';
@@ -49,6 +55,7 @@ import {
 export type RenderingPlazaSinglePlayerSaveSlotsPanelProps = {
   onBack: () => void;
   onSelectSaveSlot: (saveSlotIndex: PlazaSaveSlotIndex) => void;
+  onSelectPermaDeathSaveSlot: (options: { hasSaveData: boolean }) => void;
 };
 
 /**
@@ -57,6 +64,7 @@ export type RenderingPlazaSinglePlayerSaveSlotsPanelProps = {
 export function RenderingPlazaSinglePlayerSaveSlotsPanel({
   onBack,
   onSelectSaveSlot,
+  onSelectPermaDeathSaveSlot,
 }: RenderingPlazaSinglePlayerSaveSlotsPanelProps): React.JSX.Element {
   const { saveSlotSummaries } = usingPlazaSinglePlayerSaveSlotsQuery();
   const { deleteSaveSlotAsync, isDeletingSaveSlot } =
@@ -177,6 +185,9 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
           const isRandomAnimalSlot =
             saveSlotIndex ===
             DEFINING_PLAZA_SINGLE_PLAYER_RANDOM_ANIMAL_SAVE_SLOT_INDEX;
+          const isPermaDeathSlot =
+            saveSlotIndex ===
+            DEFINING_PLAZA_SINGLE_PLAYER_PERMA_DEATH_SAVE_SLOT_INDEX;
 
           return (
             <li
@@ -197,6 +208,13 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
                 onClick={() => {
                   if (!isTemporarilyLocked) {
                     notifyingPlazaHomeScreenButtonClicked();
+                    if (isPermaDeathSlot) {
+                      onSelectPermaDeathSaveSlot({
+                        hasSaveData: saveSlotSummary.hasSaveData,
+                      });
+                      return;
+                    }
+
                     onSelectSaveSlot(saveSlotIndex);
                   }
                 }}
@@ -214,7 +232,9 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
                   >
                     {isRandomAnimalSlot
                       ? LABELING_WORLD_PLAZA_RANDOM_ANIMAL_LOAD_SLOT_TITLE
-                      : `Slot ${saveSlotIndex}`}
+                      : isPermaDeathSlot
+                        ? LABELING_WORLD_PLAZA_PERMA_DEATH_LOAD_SLOT_TITLE
+                        : `Slot ${saveSlotIndex}`}
                   </span>
                   <span
                     className={
@@ -225,9 +245,11 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
                       ? LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_COMING_SOON
                       : isRandomAnimalSlot && !saveSlotSummary.hasSaveData
                         ? LABELING_WORLD_PLAZA_RANDOM_ANIMAL_LOAD_SLOT_SUBTITLE_NEW
-                        : formattingPlazaSinglePlayerSaveSlotLastPlayedLabel(
-                            saveSlotSummary.lastPlayedAtMs
-                          )}
+                        : isPermaDeathSlot && !saveSlotSummary.hasSaveData
+                          ? LABELING_WORLD_PLAZA_PERMA_DEATH_LOAD_SLOT_SUBTITLE_NEW
+                          : formattingPlazaSinglePlayerSaveSlotLastPlayedLabel(
+                              saveSlotSummary.lastPlayedAtMs
+                            )}
                   </span>
                 </span>
                 {isTemporarilyLocked ? (
@@ -250,7 +272,13 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
                     }`}
                   >
                     <Icon
-                      icon={isRandomAnimalSlot ? 'mdi:paw' : 'mdi:play'}
+                      icon={
+                        isRandomAnimalSlot
+                          ? 'mdi:paw'
+                          : isPermaDeathSlot
+                            ? DEFINING_WORLD_PLAZA_PERMA_DEATH_LOAD_SLOT_ACTION_ICON
+                            : 'mdi:play'
+                      }
                       className="size-3.5"
                       aria-hidden
                     />

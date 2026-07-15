@@ -15,6 +15,7 @@ import {
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { buildingWildlifeStudyStarAudioManifest } from '@/components/world/wildlife/domains/buildingWildlifeStudyStarAudioManifest';
 import { computingWildlifeStudySfxEffectiveVolume } from '@/components/world/wildlife/domains/computingWildlifeStudySfxEffectiveVolume';
+import { DEFINING_WILDLIFE_STUDY_SFX_CLIP_ID_BY_SECTION } from '@/components/world/wildlife/domains/definingWildlifeStudySfxConstants';
 import {
   registeringWildlifeStudySfxPlayback,
   type PlayingWildlifeStudySfxRequest,
@@ -54,8 +55,10 @@ export function usingWildlifeStudySfx(): void {
         return;
       }
 
+      const clipId = DEFINING_WILDLIFE_STUDY_SFX_CLIP_ID_BY_SECTION[sectionId];
+
       playingWorldPlazaStarAudioSfx(
-        resolvingWildlifeStudySfxStarAudioId('study_learn'),
+        resolvingWildlifeStudySfxStarAudioId(clipId),
         { volume }
       );
     };

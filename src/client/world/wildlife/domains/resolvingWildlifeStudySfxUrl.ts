@@ -8,6 +8,7 @@ const DEFINING_WILDLIFE_STUDY_SFX_FILE_NAME_BY_CLIP_ID: Record<
   string
 > = {
   study_learn: 'study-learn.ogg',
+  chest_open: 'chest-open.ogg',
 };
 
 /**

@@ -32,7 +32,7 @@ export function registeringWildlifeStudySfxPlayback(
 }
 
 /**
- * Plays the Fantasy UI study clip for study completion or a reward grant.
+ * Plays the Fantasy UI clip for study completion or a reward grant.
  */
 export function playingWildlifeStudySfx(
   request: PlayingWildlifeStudySfxRequest = {}

@@ -7,11 +7,15 @@ export type PlazaSaveSlotIndex = 1 | 2 | 3;
 /** Save slot used for the Random Animal single-player mode. */
 export const PLAZA_SINGLE_PLAYER_RANDOM_ANIMAL_SAVE_SLOT_INDEX = 2;
 
+/** Save slot used for the Perma Death single-player mode. */
+export const PLAZA_SINGLE_PLAYER_PERMA_DEATH_SAVE_SLOT_INDEX = 3;
+
 /** Single-player world load profile chosen on the home screen. */
 export type PlazaSinglePlayerLoadProfile =
   | 'standard'
   | 'dev-qa'
-  | 'random-animal';
+  | 'random-animal'
+  | 'perma-death';
 
 /** Active plaza session chosen on the home screen. */
 export type PlazaGameSession =
@@ -20,6 +24,8 @@ export type PlazaGameSession =
       saveSlotIndex: PlazaSaveSlotIndex;
       /** Defaults to standard save-slot play when omitted. */
       loadProfile?: PlazaSinglePlayerLoadProfile;
+      /** Avatar skin chosen on the home screen for a new Perma Death run. */
+      startingAvatarSkinId?: string;
     }
   | {
       mode: 'multiplayer';
@@ -80,5 +86,18 @@ export function checkingPlazaSinglePlayerRandomAnimalLoadSession(
 ): boolean {
   return (
     session?.mode === 'single-player' && session.loadProfile === 'random-animal'
+  );
+}
+
+/**
+ * Returns true when the session is the Perma Death single-player load.
+ *
+ * @param session - Active plaza session, or null.
+ */
+export function checkingPlazaSinglePlayerPermaDeathLoadSession(
+  session: PlazaGameSession | null
+): boolean {
+  return (
+    session?.mode === 'single-player' && session.loadProfile === 'perma-death'
   );
 }

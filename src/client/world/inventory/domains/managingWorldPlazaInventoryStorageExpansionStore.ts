@@ -133,19 +133,19 @@ export function unlockingWorldPlazaInventoryStorageRow(): UnlockingWorldPlazaInv
   return 'unlocked';
 }
 
-export type ClaimingWorldPlazaInventoryStorageExpansionCodexResult =
-  | 'unlocked'
-  | 'already-claimed'
-  | 'at-cap';
+export type MarkingWorldPlazaInventoryStorageExpansionCodexClaimedResult =
+  | 'marked'
+  | 'already-claimed';
 
 /**
- * Claims a Codex storage-expansion chest (idempotent). Unlocks a row when under cap.
+ * Marks a Codex packing-ledger chest claimed (idempotent). Does not unlock a row;
+ * the inventory item Use action unlocks capacity.
  */
-export function claimingWorldPlazaInventoryStorageExpansionCodexReward(input: {
+export function markingWorldPlazaInventoryStorageExpansionCodexClaimed(input: {
   readonly sectionId: string;
   readonly meterKind: string;
   readonly percent: number;
-}): ClaimingWorldPlazaInventoryStorageExpansionCodexResult {
+}): MarkingWorldPlazaInventoryStorageExpansionCodexClaimedResult {
   const claimKey =
     resolvingWorldPlazaInventoryStorageExpansionCodexClaimKey(input);
 
@@ -160,20 +160,14 @@ export function claimingWorldPlazaInventoryStorageExpansionCodexReward(input: {
   );
   managingWorldPlazaInventoryStorageExpansionClaimedCodexKeys.add(claimKey);
   refreshingWorldPlazaInventoryStorageExpansionClaimedSnapshotCache();
-
-  if (
-    managingWorldPlazaInventoryStorageExpansionBonusRows >=
-    DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_MAX_BONUS_ROWS
-  ) {
-    persistingWorldPlazaInventoryStorageExpansion();
-    notifyingWorldPlazaInventoryStorageExpansionSubscribers();
-    return 'at-cap';
-  }
-
-  managingWorldPlazaInventoryStorageExpansionBonusRows += 1;
   persistingWorldPlazaInventoryStorageExpansion();
   notifyingWorldPlazaInventoryStorageExpansionSubscribers();
-  return 'unlocked';
+  return 'marked';
+}
+
+/** Current persistence owner for expansion + inventory localStorage grants. */
+export function gettingWorldPlazaInventoryStorageExpansionStorageOwnerId(): string | null {
+  return managingWorldPlazaInventoryStorageExpansionStorageOwnerId;
 }
 
 export function checkingWorldPlazaInventoryStorageExpansionCodexClaimed(input: {

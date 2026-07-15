@@ -90,7 +90,7 @@ describe('resolvingWorldPlazaOnboardingActiveCoachmark', () => {
     expect(activeCoachmark?.id).toBe('chop');
   });
 
-  it('shows craft guidance before the player enters craft mode', () => {
+  it('shows craft guidance after gather/loot and before craft mode', () => {
     const activeCoachmark = resolvingWorldPlazaOnboardingActiveCoachmark(
       new Set([
         'move',
@@ -107,7 +107,12 @@ describe('resolvingWorldPlazaOnboardingActiveCoachmark', () => {
         'stamina',
         'status-effects',
       ]),
-      buildingWorldPlazaOnboardingTestLiveSignals()
+      buildingWorldPlazaOnboardingTestLiveSignals({
+        sessionSignals: {
+          ...RESOLVING_WORLD_PLAZA_ONBOARDING_TEST_EMPTY_SESSION_SIGNALS,
+          hasLootPickup: true,
+        },
+      })
     );
 
     expect(activeCoachmark?.id).toBe('craft');

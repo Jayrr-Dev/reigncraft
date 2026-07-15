@@ -28,7 +28,7 @@ export type ComputingWorldPlazaOnboardingCoachmarkTipLayout = {
 };
 
 /**
- * Resolves the authored tip width: `min(18rem, 100vw - 1.5rem)`.
+ * Resolves the authored tip width: `min(14rem, 100vw - 2rem)`.
  */
 export function computingWorldPlazaOnboardingCoachmarkTipWidthPx(
   viewportWidthPx: number,

@@ -6,15 +6,17 @@ import { computingWorldPlazaOnboardingCoachmarkTipLayout } from '@/components/wo
 import type { WorldPlazaOnboardingCoachmarkDefinition } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
 import {
   DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE,
+  DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_AUTO_DISMISS_MS,
   DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_OFFSET_PX,
   STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_DISMISS_BUTTON_CLASS_NAME,
   STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_GLOW_CLASS_NAME,
+  STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_LAYER_CLASS_NAME,
   STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_ACTIONS_CLASS_NAME,
   STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_BODY_CLASS_NAME,
   STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_CLASS_NAME,
   STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_TITLE_CLASS_NAME,
 } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 export type RenderingWorldPlazaOnboardingCoachmarkProps = {
   readonly definition: WorldPlazaOnboardingCoachmarkDefinition;
@@ -26,9 +28,6 @@ type CoachmarkTipPosition = {
   readonly top: number;
   readonly left: number;
 };
-
-const RENDERING_WORLD_PLAZA_ONBOARDING_COACHMARK_LAYER_CLASS_NAME =
-  'pointer-events-none fixed inset-0 z-[70]' as const;
 
 function resolvingWorldPlazaOnboardingCoachmarkAnchorElement(
   targetAnchorId: WorldPlazaOnboardingCoachmarkDefinition['targetAnchorId']
@@ -123,7 +122,8 @@ function computingWorldPlazaOnboardingCoachmarkClampedTipPosition(
 /**
  * Soft coachmark tip + anchor glow. Does not block gameplay outside the tip card.
  * Dismiss matches gameplay HUD popover open patterns: outside pointer / Escape closes
- * and completes the step so the tip does not reopen.
+ * and completes the step so the tip does not reopen. Also auto-dismisses after a short
+ * delay so tips never sit over death or combat UI.
  */
 export function RenderingWorldPlazaOnboardingCoachmark({
   definition,
@@ -136,6 +136,17 @@ export function RenderingWorldPlazaOnboardingCoachmark({
   );
 
   usingWorldPlazaGameplayHudControlledPopoverDismiss(tipRef, true, onDismiss);
+
+  useEffect(() => {
+    const dismissTimeoutId = window.setTimeout(
+      onDismiss,
+      DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_AUTO_DISMISS_MS
+    );
+
+    return () => {
+      window.clearTimeout(dismissTimeoutId);
+    };
+  }, [definition.id, onDismiss]);
 
   useLayoutEffect(() => {
     const anchorElement = resolvingWorldPlazaOnboardingCoachmarkAnchorElement(
@@ -185,7 +196,7 @@ export function RenderingWorldPlazaOnboardingCoachmark({
 
   return (
     <div
-      className={RENDERING_WORLD_PLAZA_ONBOARDING_COACHMARK_LAYER_CLASS_NAME}
+      className={STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_LAYER_CLASS_NAME}
       aria-live="polite"
     >
       <div

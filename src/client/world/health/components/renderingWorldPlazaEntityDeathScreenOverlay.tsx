@@ -23,15 +23,27 @@ export type DefiningWorldPlazaEntityDeathScreenPhase =
 
 export type DefiningWorldPlazaEntityDeathRespawnChoice = 'remake' | 'origin';
 
+export type DefiningWorldPlazaEntityDeathScreenMode =
+  | 'standard'
+  | 'perma-death';
+
 export type RenderingWorldPlazaEntityDeathScreenOverlayProps = {
   /** When true, the player is dead and the death sequence should run. */
   isPlayerDead: boolean;
   /** Damage-type-specific death title, e.g. `YOU DIED` or `YOU FELL`. */
   deathTitle: string;
+  /** Standard runs offer Remake / Origin; Perma Death only offers Return Home. */
+  deathMode?: DefiningWorldPlazaEntityDeathScreenMode;
+  /** Optional flavor line override under the title. */
+  flavorText?: string;
   /** Called when the player picks Remake or Origin. */
-  onChoosingRespawn: (
+  onChoosingRespawn?: (
     choice: DefiningWorldPlazaEntityDeathRespawnChoice
   ) => void;
+  /** Called when the player ends a Perma Death run from the death screen. */
+  onReturnHome?: () => void;
+  /** Label for the Perma Death return action. */
+  returnHomeLabel?: string;
 };
 
 /**
@@ -40,7 +52,11 @@ export type RenderingWorldPlazaEntityDeathScreenOverlayProps = {
 export function RenderingWorldPlazaEntityDeathScreenOverlay({
   isPlayerDead,
   deathTitle,
+  deathMode = 'standard',
+  flavorText = DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_TEXT,
   onChoosingRespawn,
+  onReturnHome,
+  returnHomeLabel,
 }: RenderingWorldPlazaEntityDeathScreenOverlayProps): React.JSX.Element | null {
   const [phase, setPhase] =
     useState<DefiningWorldPlazaEntityDeathScreenPhase>('hidden');
@@ -121,16 +137,26 @@ export function RenderingWorldPlazaEntityDeathScreenOverlay({
       : 'plaza-death-screen-stack--visible';
 
   const shouldShowRespawnChoices = phase === 'held' && !hasChosenRespawn;
+  const isPermaDeathMode = deathMode === 'perma-death';
 
   const choosingRespawn = (
     choice: DefiningWorldPlazaEntityDeathRespawnChoice
   ): void => {
-    if (hasChosenRespawn) {
+    if (hasChosenRespawn || !onChoosingRespawn) {
       return;
     }
 
     setHasChosenRespawn(true);
     onChoosingRespawn(choice);
+  };
+
+  const returningHome = (): void => {
+    if (hasChosenRespawn || !onReturnHome) {
+      return;
+    }
+
+    setHasChosenRespawn(true);
+    onReturnHome();
   };
 
   return (
@@ -139,7 +165,7 @@ export function RenderingWorldPlazaEntityDeathScreenOverlay({
       className={`${DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_OVERLAY_CLASS_NAME} plaza-death-screen-overlay ${overlayPhaseClassName}`}
       role="status"
       aria-live="assertive"
-      aria-label={`${lockedDeathTitle}. ${DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_TEXT}`}
+      aria-label={`${lockedDeathTitle}. ${flavorText}`}
     >
       <div
         className={`${DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_STACK_CLASS_NAME} ${stackPhaseClassName}`}
@@ -154,7 +180,7 @@ export function RenderingWorldPlazaEntityDeathScreenOverlay({
         <p
           className={DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_CLASS_NAME}
         >
-          {DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_FLAVOR_TEXT}
+          {flavorText}
         </p>
         {shouldShowRespawnChoices ? (
           <div
@@ -162,30 +188,48 @@ export function RenderingWorldPlazaEntityDeathScreenOverlay({
               DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_ACTIONS_CLASS_NAME
             }
             role="group"
-            aria-label="Choose where to respawn"
+            aria-label={
+              isPermaDeathMode
+                ? 'End Perma Death run'
+                : 'Choose where to respawn'
+            }
           >
-            <button
-              type="button"
-              className={
-                DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_BUTTON_CLASS_NAME
-              }
-              onClick={() => {
-                choosingRespawn('remake');
-              }}
-            >
-              {DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_REMAKE_LABEL}
-            </button>
-            <button
-              type="button"
-              className={
-                DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_BUTTON_CLASS_NAME
-              }
-              onClick={() => {
-                choosingRespawn('origin');
-              }}
-            >
-              {DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_ORIGIN_LABEL}
-            </button>
+            {isPermaDeathMode ? (
+              <button
+                type="button"
+                className={
+                  DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_BUTTON_CLASS_NAME
+                }
+                onClick={returningHome}
+              >
+                {returnHomeLabel ?? 'Return Home'}
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className={
+                    DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_BUTTON_CLASS_NAME
+                  }
+                  onClick={() => {
+                    choosingRespawn('remake');
+                  }}
+                >
+                  {DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_REMAKE_LABEL}
+                </button>
+                <button
+                  type="button"
+                  className={
+                    DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_BUTTON_CLASS_NAME
+                  }
+                  onClick={() => {
+                    choosingRespawn('origin');
+                  }}
+                >
+                  {DEFINING_WORLD_PLAZA_ENTITY_DEATH_SCREEN_ORIGIN_LABEL}
+                </button>
+              </>
+            )}
           </div>
         ) : null}
       </div>

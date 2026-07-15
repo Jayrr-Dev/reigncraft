@@ -192,7 +192,11 @@ export function usingWorldPlazaChestOpenInteraction({
 
       const grants = resolvingWorldPlazaChestLootGrant(
         instance.loot,
-        instance.chestId
+        instance.chestId,
+        {
+          worldX: instance.position.x,
+          worldY: instance.position.y,
+        }
       );
       const isFirstWorldChestOpen =
         listingWorldPlazaLocalOpenedChestIds(persistenceOwnerId).size === 0;

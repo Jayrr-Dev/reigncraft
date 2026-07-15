@@ -1,8 +1,8 @@
 ﻿/**
  * Fantasy UI SFX for study completion and related reward grants.
  *
- * Same `study_learn` clip for every section; volumes differ so codex,
- * chest, and key finds read as distinct reward beats.
+ * Most sections share `study_learn` at different volumes. World chest open
+ * uses a dedicated key-insertion clip so loot reads as a physical open.
  *
  * Assets live under `public/home/sfx/fantasy-ui/`.
  *
@@ -13,11 +13,11 @@
 export const DEFINING_WILDLIFE_STUDY_SFX_ASSET_BASE_URL =
   '/home/sfx/fantasy-ui' as const;
 
-/** Stable id for the shared study / reward clip. */
-export type DefiningWildlifeStudySfxClipId = 'study_learn';
+/** Stable ids for study / reward one-shots. */
+export type DefiningWildlifeStudySfxClipId = 'study_learn' | 'chest_open';
 
 /**
- * Reward / learn contexts that reuse the study clip at different volumes.
+ * Reward / learn contexts that pick a clip and base volume.
  */
 export type DefiningWildlifeStudySfxSectionId =
   | 'study'
@@ -25,6 +25,20 @@ export type DefiningWildlifeStudySfxSectionId =
   | 'chest'
   | 'key'
   | 'recipe';
+
+/**
+ * Which clip each reward section plays.
+ */
+export const DEFINING_WILDLIFE_STUDY_SFX_CLIP_ID_BY_SECTION: Record<
+  DefiningWildlifeStudySfxSectionId,
+  DefiningWildlifeStudySfxClipId
+> = {
+  study: 'study_learn',
+  codex: 'study_learn',
+  chest: 'chest_open',
+  key: 'study_learn',
+  recipe: 'study_learn',
+};
 
 /**
  * Base one-shot volume per section before the SFX volume slider is applied.
@@ -38,7 +52,7 @@ export const DEFINING_WILDLIFE_STUDY_SFX_TARGET_VOLUME_BY_SECTION: Record<
   study: 0.62,
   /** Codex milestone claim: slightly louder celebration. */
   codex: 0.74,
-  /** World chest loot: a touch quieter than study. */
+  /** World chest loot: key-in-lock open beat. */
   chest: 0.5,
   /** Finding a chest key while foraging: softest of the set. */
   key: 0.38,

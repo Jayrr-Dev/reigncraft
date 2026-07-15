@@ -14,7 +14,13 @@ import type {
   DefiningWorldPlazaChestLootGrant,
   DefiningWorldPlazaChestLootPoolEntry,
 } from '@/components/world/chest/domains/definingWorldPlazaChestTypes';
+import { computingWorldPlazaDistanceFromOriginTiles } from '@/components/world/domains/computingWorldPlazaDistanceDangerBandFromOrigin';
 import { creatingSeededRandomNumberGenerator } from '@/lib/probability/creatingSeededRandomNumberGenerator';
+
+export type ResolvingWorldPlazaChestLootGrantContext = {
+  readonly worldX: number;
+  readonly worldY: number;
+};
 
 /** FNV-1a hash of chestId → uint32 seed for deterministic pool rolls. */
 export function hashingWorldPlazaChestIdToSeed(
@@ -80,13 +86,41 @@ function pickingWorldPlazaChestLootPoolEntry(
   return entries[entries.length - 1] ?? null;
 }
 
+function filteringWorldPlazaChestLootPoolEntriesByDistance(
+  entries: readonly DefiningWorldPlazaChestLootPoolEntry[],
+  context: ResolvingWorldPlazaChestLootGrantContext | undefined
+): readonly DefiningWorldPlazaChestLootPoolEntry[] {
+  if (!context) {
+    return entries.filter(
+      (entry) => entry.minDistanceFromOriginTiles === undefined
+    );
+  }
+
+  const distanceFromOrigin = computingWorldPlazaDistanceFromOriginTiles(
+    context.worldX,
+    context.worldY
+  );
+
+  return entries.filter((entry) => {
+    const minDistance = entry.minDistanceFromOriginTiles;
+
+    if (minDistance === undefined) {
+      return true;
+    }
+
+    return distanceFromOrigin >= minDistance;
+  });
+}
+
 /**
  * Resolves chest loot into concrete grant rows.
  * Item loot returns one row. Pool loot rolls one weighted entry seeded by chestId.
+ * Distance-gated pool entries require `context` (chest world position).
  */
 export function resolvingWorldPlazaChestLootGrant(
   loot: DefiningWorldPlazaChestLoot,
-  chestId: DefiningWorldPlazaChestId
+  chestId: DefiningWorldPlazaChestId,
+  context?: ResolvingWorldPlazaChestLootGrantContext
 ): readonly DefiningWorldPlazaChestLootGrant[] {
   if (loot.kind === 'item') {
     if (loot.quantity <= 0) {
@@ -102,10 +136,19 @@ export function resolvingWorldPlazaChestLootGrant(
     return [];
   }
 
+  const eligibleEntries = filteringWorldPlazaChestLootPoolEntriesByDistance(
+    poolEntries,
+    context
+  );
+
+  if (eligibleEntries.length === 0) {
+    return [];
+  }
+
   const rng = creatingSeededRandomNumberGenerator(
     hashingWorldPlazaChestIdToSeed(chestId)
   );
-  const picked = pickingWorldPlazaChestLootPoolEntry(poolEntries, rng());
+  const picked = pickingWorldPlazaChestLootPoolEntry(eligibleEntries, rng());
 
   if (!picked || picked.quantity <= 0) {
     return [];

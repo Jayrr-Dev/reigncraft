@@ -7,6 +7,12 @@
 import { releasingWorldPlazaAudioScopesByPrefix } from '@/components/world/audio/engine/managingWorldPlazaAudioScopeStore';
 import { DEFINING_WORLD_PLAZA_AUDIO_LIFECYCLE_MACHINE } from '@/components/world/audio/lifecycle/definingWorldPlazaAudioLifecycleMachine';
 import {
+  fadingWorldPlazaAudioInOnPlayerRespawn,
+  fadingWorldPlazaAudioOutOnPlayerDeath,
+  restoringWorldPlazaAudioVolumeAfterDeath,
+} from '@/components/world/audio/lifecycle/managingWorldPlazaDeathAudioFade';
+import { playingWorldPlazaDeathSfx } from '@/components/world/audio/lifecycle/playingWorldPlazaDeathSfx';
+import {
   sendingStateMachineEvent,
   startingStateMachine,
 } from '@/lib/stateMachine/advancingStateMachine';
@@ -16,9 +22,12 @@ import type {
   DefiningStateMachineSnapshot,
 } from '@/lib/stateMachine/definingStateMachineTypes';
 
-export type ManagingWorldPlazaAudioLifecycleCommand = {
-  readonly type: 'release-world-scopes';
-};
+export type ManagingWorldPlazaAudioLifecycleCommand =
+  | { readonly type: 'release-world-scopes' }
+  | { readonly type: 'play-death-sfx' }
+  | { readonly type: 'fade-out-on-death' }
+  | { readonly type: 'fade-in-on-respawn' }
+  | { readonly type: 'restore-volume-after-death' };
 
 const DEFINING_WORLD_PLAZA_AUDIO_LIFECYCLE_REGISTRY: DefiningStateMachineRegistry<
   undefined,
@@ -27,6 +36,12 @@ const DEFINING_WORLD_PLAZA_AUDIO_LIFECYCLE_REGISTRY: DefiningStateMachineRegistr
   guards: {},
   actions: {
     'audio.releaseWorldScopes': () => [{ type: 'release-world-scopes' }],
+    'audio.playDeathSfx': () => [{ type: 'play-death-sfx' }],
+    'audio.fadeOutOnDeath': () => [{ type: 'fade-out-on-death' }],
+    'audio.fadeInOnRespawn': () => [{ type: 'fade-in-on-respawn' }],
+    'audio.restoreVolumeAfterDeath': () => [
+      { type: 'restore-volume-after-death' },
+    ],
   },
 };
 
@@ -38,6 +53,26 @@ function applyingWorldPlazaAudioLifecycleCommands(
   for (const command of commands) {
     if (command.type === 'release-world-scopes') {
       releasingWorldPlazaAudioScopesByPrefix('world:');
+      continue;
+    }
+
+    if (command.type === 'play-death-sfx') {
+      playingWorldPlazaDeathSfx();
+      continue;
+    }
+
+    if (command.type === 'fade-out-on-death') {
+      fadingWorldPlazaAudioOutOnPlayerDeath();
+      continue;
+    }
+
+    if (command.type === 'fade-in-on-respawn') {
+      fadingWorldPlazaAudioInOnPlayerRespawn();
+      continue;
+    }
+
+    if (command.type === 'restore-volume-after-death') {
+      restoringWorldPlazaAudioVolumeAfterDeath();
     }
   }
 }

@@ -7,5 +7,8 @@ describe('resolvingWildlifeStudySfxUrl', () => {
     expect(resolvingWildlifeStudySfxUrl('study_learn')).toBe(
       '/home/sfx/fantasy-ui/study-learn.ogg'
     );
+    expect(resolvingWildlifeStudySfxUrl('chest_open')).toBe(
+      '/home/sfx/fantasy-ui/chest-open.ogg'
+    );
   });
 });

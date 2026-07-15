@@ -83,7 +83,13 @@ function checkingWorldPlazaOnboardingContextualStepEligible(
     case 'status-effects':
       return liveSignals.statusEffectCount > 0;
     case 'craft':
-      return !liveSignals.sessionSignals.hasCraftModeSelected;
+      return (
+        (liveSignals.sessionSignals.hasLootPickup ||
+          liveSignals.sessionSignals.hasChopStarted ||
+          liveSignals.sessionSignals.hasForagePicked ||
+          liveSignals.sessionSignals.hasMineStarted) &&
+        !liveSignals.sessionSignals.hasCraftModeSelected
+      );
     case 'cook':
       return liveSignals.hasRawCookableMeat;
     case 'codex':
