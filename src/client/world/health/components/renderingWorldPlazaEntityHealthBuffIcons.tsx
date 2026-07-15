@@ -14,48 +14,30 @@ import {
   memo,
   useCallback,
   useEffect,
-  useState,
+  useRef,
   type SyntheticEvent,
 } from 'react';
 
-export function usingWorldPlazaEntityHealthBuffCountdownNowMs(
-  hasTimedBuff: boolean
-): number {
-  const [nowMs, setNowMs] = useState(() => performance.now());
-
-  useEffect(() => {
-    if (!hasTimedBuff) {
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      setNowMs(performance.now());
-    }, 250);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [hasTimedBuff]);
-
-  return nowMs;
-}
+const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_COUNTDOWN_REFRESH_MS = 250;
 
 function RenderingWorldPlazaEntityHealthBuffIcon({
   buff,
-  nowMs,
   isOpen,
   onToggle,
 }: {
   buff: DefiningWorldPlazaEntityActiveBuffHudEntry;
-  nowMs: number;
   isOpen: boolean;
   onToggle: () => void;
 }): React.JSX.Element {
-  const remainingSeconds = computingWorldPlazaEntityBuffHudRemainingSeconds(
-    buff.expiresAtMs,
-    nowMs,
-    { isDisease: buff.isDisease === true }
-  );
+  const countdownElementRef = useRef<HTMLSpanElement>(null);
+  const buffRef = useRef(buff);
+  buffRef.current = buff;
+  const initialRemainingSeconds =
+    computingWorldPlazaEntityBuffHudRemainingSeconds(
+      buff.expiresAtMs,
+      performance.now(),
+      { isDisease: buff.isDisease === true }
+    );
   const borderClassName = buff.isDisease
     ? (buff.hudIconBorderClassName ?? 'border-lime-500/70 bg-lime-950/90')
     : buff.polarity === 'debuff'
@@ -67,6 +49,44 @@ function RenderingWorldPlazaEntityHealthBuffIcon({
     },
     []
   );
+
+  useEffect(() => {
+    if (buff.expiresAtMs === null) {
+      return;
+    }
+
+    const publishingCountdown = (): void => {
+      const liveBuff = buffRef.current;
+      const remainingSeconds = computingWorldPlazaEntityBuffHudRemainingSeconds(
+        liveBuff.expiresAtMs,
+        performance.now(),
+        { isDisease: liveBuff.isDisease === true }
+      );
+      const countdownElement = countdownElementRef.current;
+      if (!countdownElement) {
+        return;
+      }
+
+      if (remainingSeconds === null) {
+        countdownElement.textContent = '';
+        countdownElement.style.display = 'none';
+        return;
+      }
+
+      countdownElement.style.display = '';
+      countdownElement.textContent = String(remainingSeconds);
+    };
+
+    publishingCountdown();
+    const intervalId = window.setInterval(
+      publishingCountdown,
+      RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_COUNTDOWN_REFRESH_MS
+    );
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [buff.expiresAtMs, buff.isDisease]);
 
   return (
     <button
@@ -112,9 +132,12 @@ function RenderingWorldPlazaEntityHealthBuffIcon({
           />
         )}
       </div>
-      {remainingSeconds !== null ? (
-        <span className="text-[5px] font-bold leading-none tabular-nums text-white/90">
-          {remainingSeconds}
+      {initialRemainingSeconds !== null ? (
+        <span
+          ref={countdownElementRef}
+          className="text-[5px] font-bold leading-none tabular-nums text-white/90"
+        >
+          {initialRemainingSeconds}
         </span>
       ) : null}
     </button>
@@ -130,6 +153,7 @@ export interface RenderingWorldPlazaEntityHealthBuffIconRowProps {
 /**
  * Compact buff/debuff icons rendered above the entity nameplate / HP stack.
  * Memoized so HP/stamina vitals ticks do not remount the clickable buttons.
+ * Countdown digits update imperatively (no shared nowMs React clock).
  */
 export const RenderingWorldPlazaEntityHealthBuffIconRow = memo(
   function RenderingWorldPlazaEntityHealthBuffIconRow({
@@ -137,8 +161,6 @@ export const RenderingWorldPlazaEntityHealthBuffIconRow = memo(
     openBuffId,
     onOpenBuffIdChange,
   }: RenderingWorldPlazaEntityHealthBuffIconRowProps): React.JSX.Element {
-    const hasTimedBuff = activeBuffs.some((buff) => buff.expiresAtMs !== null);
-    const nowMs = usingWorldPlazaEntityHealthBuffCountdownNowMs(hasTimedBuff);
     const togglingBuffId = useCallback(
       (buffId: string) => {
         onOpenBuffIdChange(openBuffId === buffId ? null : buffId);
@@ -159,7 +181,6 @@ export const RenderingWorldPlazaEntityHealthBuffIconRow = memo(
           <RenderingWorldPlazaEntityHealthBuffIcon
             key={buff.id}
             buff={buff}
-            nowMs={nowMs}
             isOpen={openBuffId === buff.id}
             onToggle={() => {
               togglingBuffId(buff.id);

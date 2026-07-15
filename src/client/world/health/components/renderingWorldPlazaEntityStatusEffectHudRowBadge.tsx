@@ -1,8 +1,8 @@
 'use client';
 
 import { Icon } from '@/components/ui/icon';
-import { RenderingWorldPlazaGameplayHudExplanationPopover } from '@/components/world/components/renderingWorldPlazaGameplayHudExplanationPopover';
 import type { RenderingWorldPlazaGameplayHudExplanationPopoverProps } from '@/components/world/components/renderingWorldPlazaGameplayHudExplanationPopover';
+import { RenderingWorldPlazaGameplayHudExplanationPopover } from '@/components/world/components/renderingWorldPlazaGameplayHudExplanationPopover';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
@@ -10,7 +10,7 @@ import { formattingWorldPlazaEntityStatusEffectHudDisplayValue } from '@/compone
 import { computingWorldPlazaEntityEffectRemainingSeconds } from '@/components/world/health/domains/resolvingWorldPlazaEntityEffectCountdownNowMs';
 import { usingWorldPlazaGameplayHudPopoverOpenState } from '@/components/world/hooks/usingWorldPlazaGameplayHudPopoverOpenState';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useCallback, useRef, type SyntheticEvent } from 'react';
+import { useCallback, useEffect, useRef, type SyntheticEvent } from 'react';
 
 const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_ICON_SIZE_PX = 14 as const;
 const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_ICON_SIZE_MOBILE_PX =
@@ -33,6 +33,8 @@ const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_VALUE_CLASS_NAME =
 
 const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_VALUE_MOBILE_CLASS_NAME =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.badge.statusEffectValueMobile;
+
+const RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_COUNTDOWN_REFRESH_MS = 250;
 
 function resolvingWorldPlazaEntityStatusEffectHudRowDisplayValue(
   row: DefiningWorldPlazaEntityStatusEffectHudRow,
@@ -66,6 +68,21 @@ function resolvingWorldPlazaEntityStatusEffectHudRowDisplayValue(
   });
 }
 
+function checkingWorldPlazaEntityStatusEffectHudRowIsExpired(
+  row: DefiningWorldPlazaEntityStatusEffectHudRow,
+  displayValue: string
+): boolean {
+  if (row.displayMode === 'time' && displayValue === '0s') {
+    return true;
+  }
+
+  if (row.displayMode === 'timed_damage' && displayValue.endsWith('·0s')) {
+    return true;
+  }
+
+  return false;
+}
+
 function resolvingWorldPlazaEntityStatusEffectHudRowPopoverFooter(
   row: DefiningWorldPlazaEntityStatusEffectHudRow,
   displayValue: string
@@ -87,26 +104,34 @@ function resolvingWorldPlazaEntityStatusEffectHudRowPopoverFooter(
 
 export interface RenderingWorldPlazaEntityStatusEffectHudRowBadgeProps {
   row: DefiningWorldPlazaEntityStatusEffectHudRow;
-  nowMs: number;
   explanationPopoverLayout?: Pick<
     RenderingWorldPlazaGameplayHudExplanationPopoverProps,
     'placement' | 'anchor'
   >;
 }
 
+/**
+ * Status-effect badge. Timed countdowns update the value span imperatively.
+ */
 export function RenderingWorldPlazaEntityStatusEffectHudRowBadge({
   row,
-  nowMs,
   explanationPopoverLayout,
 }: RenderingWorldPlazaEntityStatusEffectHudRowBadgeProps): React.JSX.Element | null {
   const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
+  const valueElementRef = useRef<HTMLSpanElement>(null);
+  const rowRef = useRef(row);
+  rowRef.current = row;
   const { isPopoverOpen, togglingPopoverOpen } =
     usingWorldPlazaGameplayHudPopoverOpenState(containerRef);
-  const displayValue = resolvingWorldPlazaEntityStatusEffectHudRowDisplayValue(
-    row,
-    nowMs
-  );
+  const initialDisplayValue =
+    resolvingWorldPlazaEntityStatusEffectHudRowDisplayValue(
+      row,
+      performance.now()
+    );
+  const isTimedCountdown =
+    (row.displayMode === 'time' || row.displayMode === 'timed_damage') &&
+    row.expiresAtMs !== null;
   const iconSizePx = isMobile
     ? RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_ICON_SIZE_MOBILE_PX
     : RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_ICON_SIZE_PX;
@@ -117,13 +142,56 @@ export function RenderingWorldPlazaEntityStatusEffectHudRowBadge({
     []
   );
   const popoverFooter =
-    resolvingWorldPlazaEntityStatusEffectHudRowPopoverFooter(row, displayValue);
+    resolvingWorldPlazaEntityStatusEffectHudRowPopoverFooter(
+      row,
+      initialDisplayValue
+    );
 
-  if (row.displayMode === 'time' && displayValue === '0s') {
-    return null;
-  }
+  useEffect(() => {
+    if (!isTimedCountdown) {
+      return;
+    }
 
-  if (row.displayMode === 'timed_damage' && displayValue.endsWith('·0s')) {
+    const publishingDisplayValue = (): void => {
+      const liveRow = rowRef.current;
+      const displayValue =
+        resolvingWorldPlazaEntityStatusEffectHudRowDisplayValue(
+          liveRow,
+          performance.now()
+        );
+      const valueElement = valueElementRef.current;
+      if (valueElement) {
+        valueElement.textContent = displayValue;
+      }
+      const containerElement = containerRef.current;
+      if (containerElement) {
+        containerElement.style.display =
+          checkingWorldPlazaEntityStatusEffectHudRowIsExpired(
+            liveRow,
+            displayValue
+          )
+            ? 'none'
+            : '';
+      }
+    };
+
+    publishingDisplayValue();
+    const intervalId = window.setInterval(
+      publishingDisplayValue,
+      RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_COUNTDOWN_REFRESH_MS
+    );
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [isTimedCountdown, row.expiresAtMs, row.displayMode, row.numericValue]);
+
+  if (
+    checkingWorldPlazaEntityStatusEffectHudRowIsExpired(
+      row,
+      initialDisplayValue
+    )
+  ) {
     return null;
   }
 
@@ -164,8 +232,9 @@ export function RenderingWorldPlazaEntityStatusEffectHudRowBadge({
             className={`drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] ${row.hudIconColorClassName}`}
           />
         </span>
-        {displayValue.length > 0 ? (
+        {initialDisplayValue.length > 0 ? (
           <span
+            ref={valueElementRef}
             className={`${RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_VALUE_CLASS_NAME} ${
               isMobile
                 ? RENDERING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_BADGE_VALUE_MOBILE_CLASS_NAME
@@ -177,7 +246,7 @@ export function RenderingWorldPlazaEntityStatusEffectHudRowBadge({
                     .textParchment
             }`}
           >
-            {displayValue}
+            {initialDisplayValue}
           </span>
         ) : null}
       </button>

@@ -13,7 +13,7 @@ import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains
 import { RenderingWorldPlazaEntityStatusEffectHudRowBadge } from '@/components/world/health/components/renderingWorldPlazaEntityStatusEffectHudRowBadge';
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
 import { resolvingWorldPlazaEntityWorldAnchoredBleedStackScreenPoint } from '@/components/world/health/domains/resolvingWorldPlazaEntityWorldAnchoredBleedStackScreenPoint';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 
 const RENDERING_WORLD_PLAZA_ENTITY_WORLD_ANCHORED_BLEED_STACK_HIDDEN_TRANSFORM =
   'translate(-9999px, -9999px)' as const;
@@ -23,28 +23,6 @@ const RENDERING_WORLD_PLAZA_ENTITY_WORLD_ANCHORED_BLEED_STACK_WRAPPER_CLASS_NAME
 
 const RENDERING_WORLD_PLAZA_ENTITY_WORLD_ANCHORED_BLEED_STACK_INITIAL_SCALE_STYLE =
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle();
-
-function usingWorldPlazaEntityWorldAnchoredBleedStackNowMs(
-  isVisible: boolean
-): number {
-  const [nowMs, setNowMs] = useState(() => performance.now());
-
-  useEffect(() => {
-    if (!isVisible) {
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      setNowMs(performance.now());
-    }, 250);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [isVisible]);
-
-  return nowMs;
-}
 
 export interface RenderingWorldPlazaEntityWorldAnchoredBleedStackProps {
   localUserId: string;
@@ -65,6 +43,9 @@ export interface RenderingWorldPlazaEntityWorldAnchoredBleedStackProps {
 
 /**
  * Bleed stack plaque anchored above the local player's avatar head.
+ *
+ * Countdown digits live inside the badge (imperative); this wrapper only
+ * tracks world position.
  */
 export function RenderingWorldPlazaEntityWorldAnchoredBleedStack({
   localUserId,
@@ -81,9 +62,6 @@ export function RenderingWorldPlazaEntityWorldAnchoredBleedStack({
   const bleedRowRef = useRef(bleedRow);
   const remotePlayersRef = useRef(remotePlayers);
   const wrapperElementRef = useRef<HTMLDivElement | null>(null);
-  const nowMs = usingWorldPlazaEntityWorldAnchoredBleedStackNowMs(
-    bleedRow !== null
-  );
 
   bleedRowRef.current = bleedRow;
   remotePlayersRef.current = remotePlayers;
@@ -173,10 +151,7 @@ export function RenderingWorldPlazaEntityWorldAnchoredBleedStack({
           RENDERING_WORLD_PLAZA_ENTITY_WORLD_ANCHORED_BLEED_STACK_INITIAL_SCALE_STYLE
         }
       >
-        <RenderingWorldPlazaEntityStatusEffectHudRowBadge
-          row={bleedRow}
-          nowMs={nowMs}
-        />
+        <RenderingWorldPlazaEntityStatusEffectHudRowBadge row={bleedRow} />
       </div>
     </div>
   );

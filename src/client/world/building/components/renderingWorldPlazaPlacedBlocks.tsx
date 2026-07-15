@@ -4,6 +4,7 @@ import { checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering } from '@/c
 import { resolvingWorldBuildingPlacedBlockTopWorldLayer } from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { drawingWorldBuildingPlacedBlockColumnOnGraphics } from '@/components/world/building/domains/drawingWorldBuildingPlacedBlocksOnGraphics';
+import { filteringWorldBuildingPlacedBlocksInTileBounds } from '@/components/world/building/domains/filteringWorldBuildingPlacedBlocksInTileBounds';
 import {
   formattingWorldBuildingPlacedBlocksTileColumnKey,
   groupingWorldBuildingPlacedBlocksByTileColumn,
@@ -11,19 +12,23 @@ import {
 } from '@/components/world/building/domains/groupingWorldBuildingPlacedBlocksByTileColumn';
 import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
 import { checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility } from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
+import { usingWorldPlazaPlacedBlockRenderCullBounds } from '@/components/world/building/hooks/usingWorldPlazaPlacedBlockRenderCullBounds';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore,
   usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags,
 } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
 import type { Graphics } from 'pixi.js';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, type RefObject } from 'react';
 
-export interface RenderingWorldPlazaPlacedBlocksProps {
+export type RenderingWorldPlazaPlacedBlocksProps = {
   placedBlocks: DefiningWorldBuildingPlacedBlock[];
+  /** Live player position for snapped column mount culling. */
+  playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
   /** When below 1, entire columns render semi-transparent (claim mode). */
   blockColumnAlpha?: number;
-}
+};
 
 type RenderingWorldPlazaPlacedBlockTileColumnProps = {
   readonly tileColumn: GroupingWorldBuildingPlacedBlocksTileColumn;
@@ -97,20 +102,28 @@ const RenderingWorldPlazaPlacedBlockTileColumn = memo(
  */
 export function RenderingWorldPlazaPlacedBlocks({
   placedBlocks,
+  playerPositionRef,
   blockColumnAlpha = 1,
 }: RenderingWorldPlazaPlacedBlocksProps): React.JSX.Element | null {
   const renderLayerFlags =
     usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags();
+  const cullBounds =
+    usingWorldPlazaPlacedBlockRenderCullBounds(playerPositionRef);
+  const placedBlocksInCullWindow = useMemo(
+    () =>
+      filteringWorldBuildingPlacedBlocksInTileBounds(placedBlocks, cullBounds),
+    [cullBounds, placedBlocks]
+  );
   const placedBlocksWithoutSpriteLayers = useMemo(
     () =>
-      placedBlocks.filter(
+      placedBlocksInCullWindow.filter(
         (block) =>
           !checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering(block) &&
           !checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility(
             block.definitionId
           )
       ),
-    [placedBlocks]
+    [placedBlocksInCullWindow]
   );
   const tileColumns = useMemo(
     () =>

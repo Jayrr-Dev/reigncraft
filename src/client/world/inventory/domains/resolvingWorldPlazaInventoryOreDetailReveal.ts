@@ -5,10 +5,7 @@
  */
 
 import { DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaLapidaryGuideConstants';
-import {
-  DEFINING_PLAZA_LAPIDARY_STUDY_FULL_COUNT,
-  LABELING_PLAZA_LAPIDARY_STUDY_TIER_TEASERS,
-} from '@/components/home/domains/definingPlazaLapidaryStudyTier';
+import { DEFINING_PLAZA_LAPIDARY_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaLapidaryStudyTier';
 import { resolvingPlazaLapidaryOreVeinStatRows } from '@/components/home/domains/resolvingPlazaLapidaryOreVeinStatRows';
 import {
   formattingPlazaLapidaryStudyCountProgress,
@@ -100,18 +97,6 @@ export function resolvingWorldPlazaInventoryOreDetailContent(
             : progressLabel,
       tone: 'neutral',
     });
-
-    if (
-      options.studyCount < DEFINING_PLAZA_LAPIDARY_STUDY_FULL_COUNT &&
-      reveal.descriptionTier === 0
-    ) {
-      infoRows.push({
-        id: 'lapidary-study-hint',
-        label: 'Hint',
-        value: LABELING_PLAZA_LAPIDARY_STUDY_TIER_TEASERS.fieldNotes,
-        tone: 'neutral',
-      });
-    }
   }
 
   if (reveal.showPropertiesSummary && guideEntry?.propertiesSummary) {

@@ -4,10 +4,7 @@
  * @module components/world/inventory/domains/resolvingWorldPlazaInventoryFlowerDetailReveal
  */
 
-import {
-  DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_FULL_COUNT,
-  LABELING_PLAZA_HERBARIUM_FLOWER_STUDY_TIER_TEASERS,
-} from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
+import { DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
 import { resolvingPlazaHerbariumFlowerEatEffectStatRows } from '@/components/home/domains/resolvingPlazaHerbariumFlowerEatEffectStatRows';
 import {
@@ -106,18 +103,6 @@ export function resolvingWorldPlazaInventoryFlowerDetailContent(
             : progressLabel,
       tone: 'neutral',
     });
-
-    if (
-      options.studyCount < DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_FULL_COUNT &&
-      reveal.descriptionTier === 0
-    ) {
-      infoRows.push({
-        id: 'herbarium-study-hint',
-        label: 'Hint',
-        value: LABELING_PLAZA_HERBARIUM_FLOWER_STUDY_TIER_TEASERS.fieldNotes,
-        tone: 'neutral',
-      });
-    }
   }
 
   if (reveal.showPropertiesSummary && guideEntry?.propertiesSummary) {

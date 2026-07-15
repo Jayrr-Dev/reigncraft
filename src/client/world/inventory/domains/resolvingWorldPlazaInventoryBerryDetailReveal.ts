@@ -5,10 +5,7 @@
  */
 
 import { DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaHerbariumBerryGuideConstants';
-import {
-  DEFINING_PLAZA_HERBARIUM_BERRY_STUDY_FULL_COUNT,
-  LABELING_PLAZA_HERBARIUM_BERRY_STUDY_TIER_TEASERS,
-} from '@/components/home/domains/definingPlazaHerbariumBerryStudyTier';
+import { DEFINING_PLAZA_HERBARIUM_BERRY_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumBerryStudyTier';
 import {
   formattingPlazaHerbariumBerryStudyCountProgress,
   resolvingPlazaHerbariumBerryNextStudyTierUnlockCount,
@@ -74,10 +71,15 @@ function formattingChancePercent(chance: number): string {
   return `${Math.round(chance * 100)}%`;
 }
 
-function listingBerryWellFedBuffLabels(food: {
-  readonly cookedWellFedBuffId?: string;
-  readonly cookedWellFedBuffIds?: readonly string[];
-} | null | undefined): string[] {
+function listingBerryWellFedBuffLabels(
+  food:
+    | {
+        readonly cookedWellFedBuffId?: string;
+        readonly cookedWellFedBuffIds?: readonly string[];
+      }
+    | null
+    | undefined
+): string[] {
   if (!food) {
     return [];
   }
@@ -144,18 +146,6 @@ export function resolvingWorldPlazaInventoryBerryDetailContent(
             : progressLabel,
       tone: 'neutral',
     });
-
-    if (
-      options.studyCount < DEFINING_PLAZA_HERBARIUM_BERRY_STUDY_FULL_COUNT &&
-      reveal.descriptionTier === 0
-    ) {
-      infoRows.push({
-        id: 'herbarium-study-hint',
-        label: 'Hint',
-        value: LABELING_PLAZA_HERBARIUM_BERRY_STUDY_TIER_TEASERS.fieldNotes,
-        tone: 'neutral',
-      });
-    }
   }
 
   if (reveal.showPropertiesSummary && guideEntry?.propertiesSummary) {

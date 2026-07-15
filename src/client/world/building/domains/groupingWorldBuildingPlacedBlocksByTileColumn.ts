@@ -78,11 +78,30 @@ function comparingWorldBuildingPlacedBlocksForColumnDrawOrder(
 /**
  * Groups placed blocks by tile and sorts each stack by world layer.
  *
+ * Cached by source array identity so repeated callers (shadow + column sync)
+ * do not regroup the same list.
+ *
  * @param placedBlocks - Blocks visible in the viewport.
  */
+const GROUPING_WORLD_BUILDING_PLACED_BLOCKS_BY_TILE_COLUMN_CACHE = new WeakMap<
+  readonly DefiningWorldBuildingPlacedBlock[],
+  GroupingWorldBuildingPlacedBlocksTileColumn[]
+>();
+
 export function groupingWorldBuildingPlacedBlocksByTileColumn(
-  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[],
+  placedBlocks: readonly DefiningWorldBuildingPlacedBlock[]
 ): GroupingWorldBuildingPlacedBlocksTileColumn[] {
+  if (placedBlocks.length === 0) {
+    return [];
+  }
+
+  const cachedColumns =
+    GROUPING_WORLD_BUILDING_PLACED_BLOCKS_BY_TILE_COLUMN_CACHE.get(placedBlocks);
+
+  if (cachedColumns) {
+    return cachedColumns;
+  }
+
   const blocksByTileColumnKey = new Map<
     GroupingWorldBuildingPlacedBlocksTileColumnKey,
     DefiningWorldBuildingPlacedBlock[]
@@ -91,18 +110,18 @@ export function groupingWorldBuildingPlacedBlocksByTileColumn(
   for (const block of placedBlocks) {
     const tileColumnKey = formattingWorldBuildingPlacedBlocksTileColumnKey(
       block.tilePosition.tileX,
-      block.tilePosition.tileY,
+      block.tilePosition.tileY
     );
     const existingBlocks = blocksByTileColumnKey.get(tileColumnKey) ?? [];
     existingBlocks.push(block);
     blocksByTileColumnKey.set(tileColumnKey, existingBlocks);
   }
 
-  return Array.from(blocksByTileColumnKey.entries())
+  const tileColumns = Array.from(blocksByTileColumnKey.entries())
     .map(([tileColumnKey, blocks]) => {
-      const [tileXText, tileYText] = tileColumnKey.split(":");
+      const [tileXText, tileYText] = tileColumnKey.split(':');
       const sortedBlocks = [...blocks].sort(
-        comparingWorldBuildingPlacedBlocksForColumnDrawOrder,
+        comparingWorldBuildingPlacedBlocksForColumnDrawOrder
       );
 
       return {
@@ -115,6 +134,13 @@ export function groupingWorldBuildingPlacedBlocksByTileColumn(
       (leftColumn, rightColumn) =>
         leftColumn.tileX +
         leftColumn.tileY -
-        (rightColumn.tileX + rightColumn.tileY),
+        (rightColumn.tileX + rightColumn.tileY)
     );
+
+  GROUPING_WORLD_BUILDING_PLACED_BLOCKS_BY_TILE_COLUMN_CACHE.set(
+    placedBlocks,
+    tileColumns
+  );
+
+  return tileColumns;
 }

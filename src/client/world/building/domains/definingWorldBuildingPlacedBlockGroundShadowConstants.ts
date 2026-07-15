@@ -32,8 +32,8 @@ export const DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_SCALE = 1.03;
 /** Gaussian blur strength softening shadow edges (pixels). */
 export const DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_BLUR_STRENGTH_PX = 6;
 
-/** Blur quality (pass count). Lower is faster; 4 gives a smoother haze. */
-export const DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_BLUR_QUALITY = 4;
+/** Blur quality (pass count). 2 keeps soft edges without the old 4-pass cost. */
+export const DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_BLUR_QUALITY = 2;
 
 /** Projected tongue length added per world layer of column height (pixels). */
 export const DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_LENGTH_PER_LAYER_PX = 2.4;
@@ -85,6 +85,8 @@ export const DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_CONTACT_SOFT_PAS
  * Soft passes for cast tongues projected away from the block (Gaussian blur).
  *
  * Only this layer is filtered so the edge touching the object stays dark.
+ * Kept to the higher-alpha offsets; tiny fringe passes were mostly invisible
+ * and dominated redraw cost on dense plots.
  */
 export const DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_CAST_SOFT_PASSES =
   [
@@ -124,65 +126,9 @@ export const DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_CAST_SOFT_PASSES
       drawTongues: true,
     },
     {
-      offsetXPx: 2,
-      offsetYPx: 2,
-      alphaScale: 0.09,
-      drawFootprint: false,
-      drawTongues: true,
-    },
-    {
-      offsetXPx: -2,
-      offsetYPx: 2,
-      alphaScale: 0.09,
-      drawFootprint: false,
-      drawTongues: true,
-    },
-    {
       offsetXPx: 0,
       offsetYPx: 3,
-      alphaScale: 0.07,
-      drawFootprint: false,
-      drawTongues: true,
-    },
-    {
-      offsetXPx: 1,
-      offsetYPx: 3,
-      alphaScale: 0.05,
-      drawFootprint: false,
-      drawTongues: true,
-    },
-    {
-      offsetXPx: -1,
-      offsetYPx: 3,
-      alphaScale: 0.05,
-      drawFootprint: false,
-      drawTongues: true,
-    },
-    {
-      offsetXPx: 0,
-      offsetYPx: 4,
-      alphaScale: 0.04,
-      drawFootprint: false,
-      drawTongues: true,
-    },
-    {
-      offsetXPx: 0,
-      offsetYPx: 5,
-      alphaScale: 0.03,
-      drawFootprint: false,
-      drawTongues: true,
-    },
-    {
-      offsetXPx: 0,
-      offsetYPx: 6,
-      alphaScale: 0.025,
-      drawFootprint: false,
-      drawTongues: true,
-    },
-    {
-      offsetXPx: 0,
-      offsetYPx: 7,
-      alphaScale: 0.02,
+      alphaScale: 0.08,
       drawFootprint: false,
       drawTongues: true,
     },

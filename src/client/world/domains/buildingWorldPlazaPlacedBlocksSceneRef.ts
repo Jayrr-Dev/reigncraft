@@ -24,7 +24,18 @@ export const BUILDING_WORLD_PLAZA_PLACED_BLOCKS_SCENE_REF_EMPTY: DefiningWorldPl
   };
 
 /**
- * Builds a scene ref snapshot with a fresh tile index.
+ * Cache by source array identity so PixiScene re-renders do not reindex every
+ * frame when the placed-block list is unchanged.
+ */
+const BUILDING_WORLD_PLAZA_PLACED_BLOCKS_SCENE_REF_BY_SOURCE_BLOCKS = new WeakMap<
+  readonly DefiningWorldBuildingPlacedBlock[],
+  DefiningWorldPlazaPlacedBlocksSceneRef
+>();
+
+/**
+ * Builds a scene ref snapshot with a tile index.
+ *
+ * Reuses the prior snapshot when `blocks` keeps the same array identity.
  *
  * @param blocks - Placed blocks visible in the scene.
  */
@@ -35,8 +46,22 @@ export function buildingWorldPlazaPlacedBlocksSceneRef(
     return BUILDING_WORLD_PLAZA_PLACED_BLOCKS_SCENE_REF_EMPTY;
   }
 
-  return {
+  const cachedSceneRef =
+    BUILDING_WORLD_PLAZA_PLACED_BLOCKS_SCENE_REF_BY_SOURCE_BLOCKS.get(blocks);
+
+  if (cachedSceneRef) {
+    return cachedSceneRef;
+  }
+
+  const sceneRef: DefiningWorldPlazaPlacedBlocksSceneRef = {
     blocks: [...blocks],
     blocksByTile: indexingWorldBuildingPlacedBlocksByTile(blocks),
   };
+
+  BUILDING_WORLD_PLAZA_PLACED_BLOCKS_SCENE_REF_BY_SOURCE_BLOCKS.set(
+    blocks,
+    sceneRef
+  );
+
+  return sceneRef;
 }

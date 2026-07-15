@@ -15,10 +15,7 @@ import type { DefiningWorldPlazaRemotePlayer } from '@/components/world/domains/
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
-import {
-  RenderingWorldPlazaEntityHealthBuffIconRow,
-  usingWorldPlazaEntityHealthBuffCountdownNowMs,
-} from '@/components/world/health/components/renderingWorldPlazaEntityHealthBuffIcons';
+import { RenderingWorldPlazaEntityHealthBuffIconRow } from '@/components/world/health/components/renderingWorldPlazaEntityHealthBuffIcons';
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_CRITICAL_RATIO,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_EMPTY_TRACK_COLOR,
@@ -40,7 +37,16 @@ import {
 import { resolvingWorldPlazaOverflowClipTopPx } from '@/components/world/health/domains/resolvingWorldPlazaOverflowClipTopPx';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import { usingWorldPlazaGameplayHudControlledPopoverDismiss } from '@/components/world/hooks/usingWorldPlazaGameplayHudPopoverOpenState';
-import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
+
+const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_FOOTER_COUNTDOWN_REFRESH_MS = 250;
 
 const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_HIDDEN_TRANSFORM =
   'translate(-9999px, -9999px)' as const;
@@ -256,25 +262,43 @@ function RenderingWorldPlazaEntityHealthBarVisual({
   const hudContainerRef = useRef<HTMLDivElement>(null);
   const buffCardRef = useRef<HTMLDivElement>(null);
   const openBuff = activeBuffs?.find((buff) => buff.id === openBuffId) ?? null;
-  const hasTimedBuff =
-    activeBuffs?.some((buff) => buff.expiresAtMs !== null) ?? false;
-  const buffCountdownNowMs =
-    usingWorldPlazaEntityHealthBuffCountdownNowMs(hasTimedBuff);
-  const openBuffRemainingSeconds =
-    openBuff === null
-      ? null
-      : computingWorldPlazaEntityBuffHudRemainingSeconds(
-          openBuff.expiresAtMs,
-          buffCountdownNowMs,
-          { isDisease: openBuff.isDisease === true }
-        );
-  const openBuffPopoverFooter =
-    openBuffRemainingSeconds !== null
-      ? `${openBuffRemainingSeconds}s remaining`
-      : null;
+  const [openBuffPopoverFooter, setOpenBuffPopoverFooter] = useState<
+    string | null
+  >(null);
   const closingOpenBuff = useCallback(() => {
     setOpenBuffId(null);
   }, []);
+
+  useEffect(() => {
+    if (openBuff === null || openBuff.expiresAtMs === null) {
+      setOpenBuffPopoverFooter(null);
+      return;
+    }
+
+    const expiresAtMs = openBuff.expiresAtMs;
+    const isDisease = openBuff.isDisease === true;
+
+    const publishingFooter = (): void => {
+      const remainingSeconds = computingWorldPlazaEntityBuffHudRemainingSeconds(
+        expiresAtMs,
+        performance.now(),
+        { isDisease }
+      );
+      setOpenBuffPopoverFooter(
+        remainingSeconds !== null ? `${remainingSeconds}s remaining` : null
+      );
+    };
+
+    publishingFooter();
+    const intervalId = window.setInterval(
+      publishingFooter,
+      RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BUFF_FOOTER_COUNTDOWN_REFRESH_MS
+    );
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [openBuff?.expiresAtMs, openBuff?.isDisease, openBuffId]);
 
   usingWorldPlazaGameplayHudControlledPopoverDismiss(
     hudContainerRef,

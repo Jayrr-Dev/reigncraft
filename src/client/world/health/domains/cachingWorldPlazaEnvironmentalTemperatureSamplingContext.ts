@@ -75,22 +75,41 @@ export function readingWorldPlazaEnvironmentalTemperatureSamplingContext(): Cach
 }
 
 /**
+ * Identity-scoped heat-emitter key so terrain ticks skip filter/map/sort when
+ * the placed-block array reference is unchanged.
+ */
+const CACHING_WORLD_PLAZA_PLACED_BLOCK_HEAT_KEY_BY_BLOCKS = new WeakMap<
+  readonly DefiningWorldBuildingPlacedBlock[],
+  string
+>();
+
+/**
  * Builds a stable cache key for placed blocks that emit environmental heat.
  */
 export function buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey(
   blocks: readonly DefiningWorldBuildingPlacedBlock[]
 ): string {
-  const placedBlockHeatKey = blocks
-    .filter(
-      (block) =>
-        resolvingWorldPlazaBlockEnvironmentalTemperatureLevel(block) !== null
-    )
-    .map(
-      (block) =>
-        `${block.tilePosition.tileX},${block.tilePosition.tileY}:${block.definitionId}:${block.blockId}`
-    )
-    .sort()
-    .join('|');
+  let placedBlockHeatKey =
+    CACHING_WORLD_PLAZA_PLACED_BLOCK_HEAT_KEY_BY_BLOCKS.get(blocks);
+
+  if (placedBlockHeatKey === undefined) {
+    placedBlockHeatKey = blocks
+      .filter(
+        (block) =>
+          resolvingWorldPlazaBlockEnvironmentalTemperatureLevel(block) !== null
+      )
+      .map(
+        (block) =>
+          `${block.tilePosition.tileX},${block.tilePosition.tileY}:${block.definitionId}:${block.blockId}`
+      )
+      .sort()
+      .join('|');
+    CACHING_WORLD_PLAZA_PLACED_BLOCK_HEAT_KEY_BY_BLOCKS.set(
+      blocks,
+      placedBlockHeatKey
+    );
+  }
+
   const litCampfireHeatKey = gettingWorldPlazaLitCampfireHeatTilesCacheKey();
   const activeOreSmeltingHeatKey =
     gettingWorldPlazaActiveOreSmeltingHeatTilesCacheKey();

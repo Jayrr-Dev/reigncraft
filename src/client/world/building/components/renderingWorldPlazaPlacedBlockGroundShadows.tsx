@@ -7,24 +7,27 @@ import {
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_ALPHA } from '@/components/world/building/domains/definingWorldBuildingPlacedBlockGroundShadowConstants';
 import {
-  drawingWorldBuildingPlacedBlockGroundShadowCastLayerOnGraphics,
-  drawingWorldBuildingPlacedBlockGroundShadowContactLayerOnGraphics,
+  drawingWorldBuildingPlacedBlockGroundShadowCastLayerForTileColumnOnGraphics,
+  drawingWorldBuildingPlacedBlockGroundShadowContactLayerForTileColumnOnGraphics,
 } from '@/components/world/building/domains/drawingWorldBuildingPlacedBlockGroundShadowLayerOnGraphics';
+import { filteringWorldBuildingPlacedBlocksInTileBounds } from '@/components/world/building/domains/filteringWorldBuildingPlacedBlocksInTileBounds';
 import {
   formattingWorldBuildingPlacedBlocksTileColumnKey,
   groupingWorldBuildingPlacedBlocksByTileColumn,
   type GroupingWorldBuildingPlacedBlocksTileColumn,
 } from '@/components/world/building/domains/groupingWorldBuildingPlacedBlocksByTileColumn';
+import { usingWorldPlazaPlacedBlockRenderCullBounds } from '@/components/world/building/hooks/usingWorldPlazaPlacedBlockRenderCullBounds';
 import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
 import { computingWorldDepthSortKey } from '@/components/world/depth';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
 import {
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore,
   usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags,
 } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
 import type { Graphics } from 'pixi.js';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, type RefObject } from 'react';
 
 /**
  * Renders block shadows with blur only on the cast away from the object.
@@ -35,11 +38,13 @@ import { memo, useCallback, useMemo } from 'react';
  * @module components/world/building/components/renderingWorldPlazaPlacedBlockGroundShadows
  */
 
-export interface RenderingWorldPlazaPlacedBlockGroundShadowsProps {
+export type RenderingWorldPlazaPlacedBlockGroundShadowsProps = {
   placedBlocks: DefiningWorldBuildingPlacedBlock[];
+  /** Live player position for snapped column mount culling. */
+  playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
   /** Multiplier applied to the default ground shadow opacity. */
   shadowAlphaScale?: number;
-}
+};
 
 type RenderingWorldPlazaPlacedBlockTileColumnGroundShadowsProps = {
   readonly tileColumn: GroupingWorldBuildingPlacedBlocksTileColumn;
@@ -72,10 +77,9 @@ const RenderingWorldPlazaPlacedBlockTileColumnGroundShadows = memo(
     shadowAlpha,
     drawsBlur,
   }: RenderingWorldPlazaPlacedBlockTileColumnGroundShadowsProps): React.JSX.Element {
-    const columnBlocks = tileColumn.blocks;
     const columnContentKey =
       formattingWorldBuildingPlacedBlockGroundShadowColumnContentKey(
-        columnBlocks
+        tileColumn.blocks
       );
     const floorSortKey = computingWorldDepthSortKey({
       x: tileColumn.tileX,
@@ -97,24 +101,28 @@ const RenderingWorldPlazaPlacedBlockTileColumnGroundShadows = memo(
           );
         }
 
-        drawingWorldBuildingPlacedBlockGroundShadowCastLayerOnGraphics({
-          graphics,
-          placedBlocks: [...columnBlocks],
-        });
+        drawingWorldBuildingPlacedBlockGroundShadowCastLayerForTileColumnOnGraphics(
+          {
+            graphics,
+            tileColumn,
+          }
+        );
       },
-      [columnBlocks, columnContentKey, drawsBlur]
+      [columnContentKey, drawsBlur, tileColumn]
     );
 
     const drawingContactLayer = useCallback(
       (graphics: Graphics) => {
         graphics.clear();
         clearingWorldBuildingPlacedBlockGroundShadowFiltersOnGraphics(graphics);
-        drawingWorldBuildingPlacedBlockGroundShadowContactLayerOnGraphics({
-          graphics,
-          placedBlocks: [...columnBlocks],
-        });
+        drawingWorldBuildingPlacedBlockGroundShadowContactLayerForTileColumnOnGraphics(
+          {
+            graphics,
+            tileColumn,
+          }
+        );
       },
-      [columnBlocks, columnContentKey]
+      [columnContentKey, tileColumn]
     );
 
     return (
@@ -128,19 +136,28 @@ const RenderingWorldPlazaPlacedBlockTileColumnGroundShadows = memo(
 
 export function RenderingWorldPlazaPlacedBlockGroundShadows({
   placedBlocks,
+  playerPositionRef,
   shadowAlphaScale = 1,
 }: RenderingWorldPlazaPlacedBlockGroundShadowsProps): React.JSX.Element | null {
   const renderLayerFlags =
     usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags();
   const performanceProfile = usingWorldPlazaPerformanceProfile();
   const sunState = usingWorldPlazaDayNightSunState();
+  const cullBounds =
+    usingWorldPlazaPlacedBlockRenderCullBounds(playerPositionRef);
   const shadowAlpha =
     DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_ALPHA *
     shadowAlphaScale *
     sunState.shadowAlphaScale;
+  const placedBlocksInCullWindow = useMemo(
+    () =>
+      filteringWorldBuildingPlacedBlocksInTileBounds(placedBlocks, cullBounds),
+    [cullBounds, placedBlocks]
+  );
   const tileColumns = useMemo(
-    () => groupingWorldBuildingPlacedBlocksByTileColumn(placedBlocks),
-    [placedBlocks]
+    () =>
+      groupingWorldBuildingPlacedBlocksByTileColumn(placedBlocksInCullWindow),
+    [placedBlocksInCullWindow]
   );
 
   if (

@@ -7881,6 +7881,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 />
                 <RenderingWorldPlazaPlacedBlockGroundShadows
                   placedBlocks={activeScenePlacedBlocks}
+                  playerPositionRef={playerPositionRef}
                   shadowAlphaScale={
                     isClaimModeActive
                       ? DEFINING_WORLD_BUILDING_CLAIM_MODE_PLACED_BLOCK_ALPHA
@@ -7957,6 +7958,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   />
                   <RenderingWorldPlazaPlacedBlocks
                     placedBlocks={activeScenePlacedBlocks}
+                    playerPositionRef={playerPositionRef}
                     blockColumnAlpha={
                       isClaimModeActive
                         ? DEFINING_WORLD_BUILDING_CLAIM_MODE_PLACED_BLOCK_ALPHA
