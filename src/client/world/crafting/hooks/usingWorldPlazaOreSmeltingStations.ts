@@ -10,7 +10,10 @@ import {
 } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingRegistry';
 import type { DefiningWorldPlazaOreSmeltingStationSlotKind } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingDndIds';
 import { consumingWorldPlazaInventoryItemFromSlot } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemFromSlot';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_CLAY,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export type DefiningWorldPlazaOreSmeltingStationState = {
@@ -148,9 +151,12 @@ export function usingWorldPlazaOreSmeltingStations({
       if (!isValid) {
         showingToast(
           slotKind === 'ore'
-            ? recipeAnywhere !== null
-              ? 'Fire wet clay ware in a clay kiln.'
-              : 'That item cannot be smelted.'
+            ? inventoryItem.itemTypeId ===
+              DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_CLAY
+              ? 'Needs wet clay'
+              : recipeAnywhere !== null
+                ? 'Fire wet clay ware in a clay kiln.'
+                : 'That item cannot be smelted.'
             : 'Fuel must be wood or coal.'
         );
         return;

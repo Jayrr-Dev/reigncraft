@@ -6,6 +6,7 @@ import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world
 import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import type { DefiningWorldPlazaPickedShrubTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
+import type { DefiningWorldPlazaPickedMushroomTileState } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
 
 /**
  * Cache keys for terrain layer dependency snapshots.
@@ -35,6 +36,10 @@ const clearedLongGrassCacheKeys = new WeakMap<
 >();
 const pickedShrubsCacheKeys = new WeakMap<
   ReadonlyMap<string, DefiningWorldPlazaPickedShrubTileState>,
+  string
+>();
+const pickedMushroomsCacheKeys = new WeakMap<
+  ReadonlyMap<string, DefiningWorldPlazaPickedMushroomTileState>,
   string
 >();
 const burntGrassCacheKeys = new WeakMap<ReadonlySet<string>, string>();
@@ -184,6 +189,29 @@ export function buildingWorldPlazaPickedShrubsCacheKey(
     .join('|');
 
   pickedShrubsCacheKeys.set(pickedShrubsByTileKey, cacheKey);
+  return cacheKey;
+}
+
+/**
+ * Builds a cache key for picked-mushroom state so mushroom layers resync after picks.
+ */
+export function buildingWorldPlazaPickedMushroomsCacheKey(
+  pickedMushroomsByTileKey: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedMushroomTileState
+  >
+): string {
+  const cachedKey = pickedMushroomsCacheKeys.get(pickedMushroomsByTileKey);
+
+  if (cachedKey !== undefined) {
+    return cachedKey;
+  }
+
+  const cacheKey = Array.from(pickedMushroomsByTileKey.keys())
+    .sort((tileKeyA, tileKeyB) => tileKeyA.localeCompare(tileKeyB))
+    .join('|');
+
+  pickedMushroomsCacheKeys.set(pickedMushroomsByTileKey, cacheKey);
   return cacheKey;
 }
 

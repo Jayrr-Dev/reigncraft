@@ -40,6 +40,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE = {
   STONE_DECORATIONS: 'stone-decorations',
   LONG_GRASS: 'long-grass',
   SHRUBS: 'shrubs',
+  MUSHROOMS: 'mushrooms',
   LAVA: 'lava',
   OCEAN: 'ocean',
   LAKES: 'lakes',
@@ -319,6 +320,13 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
         'Berry shrubs, pick loot, and wildlife browsing unpicked bushes.',
     },
     {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.MUSHROOMS,
+      groupId: 'terrain',
+      label: 'Mushrooms',
+      description:
+        'Forage mushrooms with day/phase schedules, pick loot, and campfire cook.',
+    },
+    {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAVA,
       groupId: 'hazards',
       label: 'Lava',
@@ -405,6 +413,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS: Readonly<
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.STONE_DECORATIONS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LONG_GRASS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SHRUBS]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.MUSHROOMS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAVA]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.OCEAN]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.LAKES]: true,

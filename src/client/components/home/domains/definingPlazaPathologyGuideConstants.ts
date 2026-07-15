@@ -169,6 +169,50 @@ const DEFINING_PLAZA_PATHOLOGY_GUIDE_COPY: Record<
     studiedSummary:
       'Seeds in raw flower meals lodge in the lungs. Every breath costs stamina; venomous dust then drains over two fifths of your strength across most of a day. Spit seeds out before you chew.',
   },
+  'amatoxin-angel': {
+    summary:
+      'Angel Button meal: gut purge, a cruel calm, then the body starts to fail.',
+    studiedSummary:
+      'Destroying-angel toxins from Angel Button. Nausea first, then venomous burn, then a delayed fated hit and lethal poison. Cooking barely softens it. Do not trust the white gills.',
+  },
+  'amatoxin-bell': {
+    summary:
+      'Funeral Bell tea of the woods: same late collapse as the angel, quieter start.',
+    studiedSummary:
+      'Amatoxin from Funeral Bell. Slow gut misery, then venom, then delayed organ shock. Fire does not scrub this clean. Night finds these caps more often than day.',
+  },
+  'gyromitra-storm': {
+    summary:
+      'Brain Cap left me dizzy, then the blood felt wrong under the skin.',
+    studiedSummary:
+      'Gyromitra toxins. Confusion and gut cramp first; later poison and a bleed stage. Even cooked residue can linger. Leave the wrinkled brown look-alikes alone.',
+  },
+  'ghost-wing-fog': {
+    summary:
+      'Ghost Wing meal: cold fog in the head, steps that miss their mark.',
+    studiedSummary:
+      'Cold-biome false oyster toxins. Confusion and slow gait first; later toxic drain. Night and dawn are when these pale shelves show. Shelf Oyster is the safe twin.',
+  },
+  'parasol-purge': {
+    summary: 'Green Vomiter emptied me in minutes; legs turned to water.',
+    studiedSummary:
+      'Violent gut purge from Green Vomiter. Nausea and toxic burn hit hard; cooking only softens the odds. White Parasol shares the open grass but not the green tint.',
+  },
+  'lantern-gut': {
+    summary: 'False Lantern burned the gut; sweat came cold after.',
+    studiedSummary:
+      'Look-alike of Golden Chanter. Toxic gut burn and a short fever. Cooking cuts residual risk but does not erase a bad pick. Check the false gills.',
+  },
+  'bolete-bile': {
+    summary: 'Devil\'s Bolete left a bitter burn behind the ribs.',
+    studiedSummary:
+      'Net-stem bolete toxins. Mild-to-moderate gut poison; some cooked residue can stick. King Bolete is the safe twin with a clean pore face.',
+  },
+  'yellow-stain-gut': {
+    summary: 'Yellow Stain bruised chrome and the stomach followed.',
+    studiedSummary:
+      'Chromium-like irritants in Yellow Stain. Gut cramp and toxic burn; cooking lowers chance. Field Agaric bruises dull, not yellow.',
+  },
 };
 
 function buildingPlazaPathologyGuideEntries(): readonly DefiningPlazaPathologyGuideEntry[] {

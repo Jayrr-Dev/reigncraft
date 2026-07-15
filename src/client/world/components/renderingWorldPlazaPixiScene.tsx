@@ -384,6 +384,7 @@ import { pouringWorldPlazaTeaFromBrewedPot } from '@/components/world/tea-brewin
 import { usingWorldPlazaTeaPotAddWaterInteraction } from '@/components/world/tea-brewing/hooks/usingWorldPlazaTeaPotAddWaterInteraction';
 import { usingWorldPlazaTeaPotCampfireBrewProgress } from '@/components/world/tea-brewing/hooks/usingWorldPlazaTeaPotCampfireBrewProgress';
 import { RenderingWorldPlazaFlowerInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaFlowerInteractionLabels';
+import { RenderingWorldPlazaMushroomInteractionLabels } from '@/components/world/mushrooms/components/renderingWorldPlazaMushroomInteractionLabels';
 import { RenderingWorldPlazaLongGrassInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaLongGrassInteractionLabels';
 import { RenderingWorldPlazaShrubInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaShrubInteractionLabels';
 import { RenderingWorldPlazaPebbleInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaPebbleInteractionLabels';
@@ -424,6 +425,11 @@ import { usingWorldPlazaChoppedTrees } from '@/components/world/harvest/hooks/us
 import { usingWorldPlazaClearedLongGrass } from '@/components/world/harvest/hooks/usingWorldPlazaClearedLongGrass';
 import { usingWorldPlazaFlowerPickInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaFlowerPickInteraction';
 import { usingWorldPlazaFlowerPickProgress } from '@/components/world/harvest/hooks/usingWorldPlazaFlowerPickProgress';
+import { usingWorldPlazaMushroomPickInteraction } from '@/components/world/mushrooms/hooks/usingWorldPlazaMushroomPickInteraction';
+import { usingWorldPlazaMushroomPickProgress } from '@/components/world/mushrooms/hooks/usingWorldPlazaMushroomPickProgress';
+import { usingWorldPlazaPickedMushrooms } from '@/components/world/mushrooms/hooks/usingWorldPlazaPickedMushrooms';
+import { formattingWorldPlazaPickedMushroomTileKey } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
+import { registeringWorldPlazaPickedMushroomsLookup } from '@/components/world/mushrooms/domains/registeringWorldPlazaPickedMushroomsLookup';
 import {
   DEFINING_WORLD_PLAZA_CLEARED_LONG_GRASS_QUERY_KEY_ROOT,
   usingWorldPlazaLongGrassSearchInteraction,
@@ -538,6 +544,7 @@ import {
   selectingWorldPlazaInteractableBlockForClickAction,
   selectingWorldPlazaInteractableChestForClickAction,
   selectingWorldPlazaInteractableFlowerForClickAction,
+  selectingWorldPlazaInteractableMushroomForClickAction,
   selectingWorldPlazaInteractableLongGrassForClickAction,
   selectingWorldPlazaInteractableShrubForClickAction,
   selectingWorldPlazaInteractablePebbleForClickAction,
@@ -2377,6 +2384,13 @@ function RenderingWorldPlazaPixiSceneConnected({
   const pickedFlowersByTileKeyRef = useRef(pickedFlowerStateByTileKey);
   pickedFlowersByTileKeyRef.current = pickedFlowerStateByTileKey;
 
+  const { pickedMushroomStateByTileKey } = usingWorldPlazaPickedMushrooms({
+    enabled: isLocalGameplayEnabled,
+    localPersistenceOwnerId,
+  });
+  const pickedMushroomsByTileKeyRef = useRef(pickedMushroomStateByTileKey);
+  pickedMushroomsByTileKeyRef.current = pickedMushroomStateByTileKey;
+
   const { clearedLongGrassStateByTileKey } = usingWorldPlazaClearedLongGrass({
     enabled: isLocalGameplayEnabled,
     localPersistenceOwnerId,
@@ -2426,6 +2440,20 @@ function RenderingWorldPlazaPixiSceneConnected({
       registeringWorldPlazaPickedFlowersLookup(null);
     };
   }, [pickedFlowerStateByTileKey]);
+
+  useEffect(() => {
+    registeringWorldPlazaPickedMushroomsLookup((tileX, tileY) =>
+      Boolean(
+        pickedMushroomStateByTileKey.get(
+          formattingWorldPlazaPickedMushroomTileKey(tileX, tileY)
+        )?.isPicked
+      )
+    );
+
+    return () => {
+      registeringWorldPlazaPickedMushroomsLookup(null);
+    };
+  }, [pickedMushroomStateByTileKey]);
 
   useEffect(() => {
     registeringWorldPlazaClearedLongGrassLookup(
@@ -2766,6 +2794,17 @@ function RenderingWorldPlazaPixiSceneConnected({
     []
   );
 
+  const selectingProceduralMushroomForInteractionLabel = useCallback(
+    (tileX: number, tileY: number): void => {
+      selectingWorldPlazaInteractableMushroomForClickAction(
+        selectedInteractableBlockKeysRef,
+        tileX,
+        tileY
+      );
+    },
+    []
+  );
+
   const selectingProceduralLongGrassForInteractionLabel = useCallback(
     (tileX: number, tileY: number): void => {
       selectingWorldPlazaInteractableLongGrassForClickAction(
@@ -2827,6 +2866,9 @@ function RenderingWorldPlazaPixiSceneConnected({
       pickedFlowerStateByTileKey,
       onProceduralFlowerPopoverSelect:
         selectingProceduralFlowerForInteractionLabel,
+      pickedMushroomStateByTileKey,
+      onProceduralMushroomPopoverSelect:
+        selectingProceduralMushroomForInteractionLabel,
       onProceduralLongGrassPopoverSelect:
         selectingProceduralLongGrassForInteractionLabel,
       onProceduralShrubPopoverSelect: selectingProceduralShrubForInteractionLabel,
@@ -3369,6 +3411,56 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
     },
     [showingGameplayHudToast, startingFlowerPick, validatingFlowerPickStart]
+  );
+
+  const { validatingMushroomPickStart, completingMushroomPick } =
+    usingWorldPlazaMushroomPickInteraction({
+      localPersistenceOwnerId,
+      pickedMushroomStateByTileKey,
+      playerPositionRef,
+      inventoryState,
+      updatingInventoryState,
+      showingGameplayHudToast,
+    });
+
+  const completingMushroomPickRef = useRef(completingMushroomPick);
+  completingMushroomPickRef.current = completingMushroomPick;
+
+  const handlingMushroomPickComplete = useCallback(
+    (entry: Parameters<typeof completingMushroomPick>[0]): void => {
+      void completingMushroomPickRef.current(entry);
+    },
+    []
+  );
+
+  const {
+    snapshot: mushroomPickProgressSnapshot,
+    progressRatioRef: mushroomPickProgressRatioRef,
+    startingMushroomPick,
+  } = usingWorldPlazaMushroomPickProgress({
+    playerPositionRef,
+    selectedInteractableBlockKeysRef,
+    avatarToolActionRef: localAvatarToolActionRef,
+    onPickComplete: handlingMushroomPickComplete,
+  });
+
+  const handlingMushroomPickInteraction = useCallback(
+    (entry: Parameters<typeof validatingMushroomPickStart>[0]): void => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return;
+      }
+
+      if (!validatingMushroomPickStart(entry)) {
+        return;
+      }
+
+      const didStart = startingMushroomPick(entry);
+
+      if (!didStart) {
+        showingGameplayHudToast('Already picking a mushroom.');
+      }
+    },
+    [showingGameplayHudToast, startingMushroomPick, validatingMushroomPickStart]
   );
 
   const { validatingLongGrassSearchStart, completingLongGrassSearch } =
@@ -4738,6 +4830,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     minedRockStateByTileKeyRef: minedRocksByTileKeyRef,
     pickedPebbleStateByTileKeyRef: pickedPebblesByTileKeyRef,
     pickedFlowerStateByTileKeyRef: pickedFlowersByTileKeyRef,
+    pickedMushroomStateByTileKeyRef: pickedMushroomsByTileKeyRef,
     clearedLongGrassStateByTileKeyRef: clearedLongGrassByTileKeyRef,
     pickedShrubStateByTileKeyRef: pickedShrubsByTileKeyRef,
     farmlandByTileKeyRef,
@@ -5367,6 +5460,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           minedRockStateByTileKey: minedRocksByTileKeyRef.current,
           pickedPebbleStateByTileKey: pickedPebblesByTileKeyRef.current,
           pickedFlowerStateByTileKey: pickedFlowersByTileKeyRef.current,
+          pickedMushroomStateByTileKey: pickedMushroomsByTileKeyRef.current,
           wildlifeStore: wildlifeStoreRef.current,
           resolveWildlifeCollisionRadiusGrid:
             resolvingWildlifePointerCollisionRadiusGrid,
@@ -7708,6 +7802,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               pickedFlowersByTileKeyRef={pickedFlowersByTileKeyRef}
               clearedLongGrassByTileKeyRef={clearedLongGrassByTileKeyRef}
               pickedShrubsByTileKeyRef={pickedShrubsByTileKeyRef}
+              pickedMushroomsByTileKeyRef={pickedMushroomsByTileKeyRef}
               floorLayerRef={terrainFloorLayerRef}
               trunkLayerRef={terrainTrunkLayerRef}
               canopyLayerRef={terrainCanopyLayerRef}
@@ -8375,6 +8470,17 @@ function RenderingWorldPlazaPixiSceneConnected({
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
                 onPickFlower={handlingFlowerPickInteraction}
+              />
+              <RenderingWorldPlazaMushroomInteractionLabels
+                selectedInteractableBlockKeysRef={
+                  selectedInteractableBlockKeysRef
+                }
+                pickedMushroomStateByTileKeyRef={pickedMushroomsByTileKeyRef}
+                timedInteractionProgressSnapshot={mushroomPickProgressSnapshot}
+                timedInteractionProgressRatioRef={mushroomPickProgressRatioRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+                onPickMushroom={handlingMushroomPickInteraction}
               />
               <RenderingWorldPlazaLongGrassInteractionLabels
                 selectedInteractableBlockKeysRef={

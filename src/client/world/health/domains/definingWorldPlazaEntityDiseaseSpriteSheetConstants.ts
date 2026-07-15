@@ -10,8 +10,8 @@ import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/wo
 export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_URL =
   '/inventory/sprites/inventory-disease-sprites.webp' as const;
 
-export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_COLUMN_COUNT = 7;
-export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_ROW_COUNT = 3;
+export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_COLUMN_COUNT = 8;
+export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_ROW_COUNT = 4;
 export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_CELL_SIZE_PX = 64;
 
 /** Sprite sheet cell order (left→right, top→bottom; matches art export). */
@@ -37,6 +37,14 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_SHEET_IDS = [
   'rootgut',
   'moonblight',
   'seedlung',
+  'amatoxin-angel',
+  'amatoxin-bell',
+  'gyromitra-storm',
+  'ghost-wing-fog',
+  'parasol-purge',
+  'lantern-gut',
+  'bolete-bile',
+  'yellow-stain-gut',
 ] as const satisfies readonly DefiningWorldPlazaEntityDiseaseId[];
 
 const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_SPRITE_INDEX_BY_ID = new Map<

@@ -146,16 +146,193 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BREAK_COLOR_TIERS = [
   { minCombo: 18, floatClassName: 'text-violet-400' },
 ] as const;
 
+/** Spacing knobs for grouped hammer bursts. */
+export type DefiningWorldPlazaCraftModeBeatBurstSpacing = {
+  readonly noteGapMs: number;
+  readonly groupGapMs: number;
+};
+
+/** Slow spaced bursts: readable warm-up groups. */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_SLOW = {
+  noteGapMs: 320,
+  groupGapMs: 780,
+} as const satisfies DefiningWorldPlazaCraftModeBeatBurstSpacing;
+
+/** Mid tempo: default craft pressure. */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_MID = {
+  noteGapMs: 240,
+  groupGapMs: 560,
+} as const satisfies DefiningWorldPlazaCraftModeBeatBurstSpacing;
+
+/** Fast bursts: tight hits inside each group. */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_FAST = {
+  noteGapMs: 170,
+  groupGapMs: 420,
+} as const satisfies DefiningWorldPlazaCraftModeBeatBurstSpacing;
+
+/** Blitz: dense packs for late-craft chaos. */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_BLITZ = {
+  noteGapMs: 130,
+  groupGapMs: 340,
+} as const satisfies DefiningWorldPlazaCraftModeBeatBurstSpacing;
+
 /**
- * Beat patterns: singles, doubles, triples, and trap mixes.
- * Keep the player guessing which wave comes next.
+ * Builds hammer (and optional cracked) notes from group sizes like 4-4-4 or 4-3-4.
+ * `crackedGlobalIndexes` marks absolute note indexes that become cracked traps.
+ */
+export function buildingWorldPlazaCraftModeBeatBurstNotes(
+  groups: readonly number[],
+  spacing: DefiningWorldPlazaCraftModeBeatBurstSpacing,
+  crackedGlobalIndexes: readonly number[] = []
+): readonly DefiningWorldPlazaCraftModeBeatNoteDefinition[] {
+  const crackedSet = new Set(crackedGlobalIndexes);
+  const notes: DefiningWorldPlazaCraftModeBeatNoteDefinition[] = [];
+  let hitOffsetMs = 0;
+  let globalIndex = 0;
+
+  for (let groupIndex = 0; groupIndex < groups.length; groupIndex += 1) {
+    const groupSize = groups[groupIndex] ?? 0;
+
+    for (let noteInGroup = 0; noteInGroup < groupSize; noteInGroup += 1) {
+      notes.push({
+        kind: crackedSet.has(globalIndex) ? 'cracked' : 'hammer',
+        hitOffsetMs,
+      });
+      globalIndex += 1;
+
+      if (noteInGroup < groupSize - 1) {
+        hitOffsetMs += spacing.noteGapMs;
+      }
+    }
+
+    if (groupIndex < groups.length - 1) {
+      hitOffsetMs += spacing.groupGapMs;
+    }
+  }
+
+  return notes;
+}
+
+function definingBeatBurstPattern(
+  id: string,
+  groups: readonly number[],
+  spacing: DefiningWorldPlazaCraftModeBeatBurstSpacing,
+  crackedGlobalIndexes: readonly number[] = []
+): DefiningWorldPlazaCraftModeBeatPatternDefinition {
+  return {
+    id,
+    notes: buildingWorldPlazaCraftModeBeatBurstNotes(
+      groups,
+      spacing,
+      crackedGlobalIndexes
+    ),
+  };
+}
+
+/**
+ * Burst combos: 4-4-4 / 8-8-8 / mixed 4-3-4 style packs at several speeds.
+ * Short singles and trap waves stay in the mix so cracked hammers still appear.
  */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PATTERN_REGISTRY: readonly DefiningWorldPlazaCraftModeBeatPatternDefinition[] =
   [
-    {
-      id: 'single',
-      notes: [{ kind: 'hammer', hitOffsetMs: 0 }],
-    },
+    definingBeatBurstPattern(
+      'burst-4-4-4-slow',
+      [4, 4, 4],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_SLOW
+    ),
+    definingBeatBurstPattern(
+      'burst-4-4-4-mid',
+      [4, 4, 4],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_MID
+    ),
+    definingBeatBurstPattern(
+      'burst-4-4-4-fast',
+      [4, 4, 4],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_FAST
+    ),
+    definingBeatBurstPattern(
+      'burst-8-8-8-mid',
+      [8, 8, 8],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_MID
+    ),
+    definingBeatBurstPattern(
+      'burst-8-8-8-fast',
+      [8, 8, 8],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_FAST
+    ),
+    definingBeatBurstPattern(
+      'burst-8-8-8-blitz',
+      [8, 8, 8],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_BLITZ
+    ),
+    definingBeatBurstPattern(
+      'burst-4-3-4-mid',
+      [4, 3, 4],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_MID
+    ),
+    definingBeatBurstPattern(
+      'burst-4-3-4-fast',
+      [4, 3, 4],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_FAST
+    ),
+    definingBeatBurstPattern(
+      'burst-3-4-3-mid',
+      [3, 4, 3],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_MID
+    ),
+    definingBeatBurstPattern(
+      'burst-5-3-5-fast',
+      [5, 3, 5],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_FAST
+    ),
+    definingBeatBurstPattern(
+      'burst-2-4-2-blitz',
+      [2, 4, 2],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_BLITZ
+    ),
+    definingBeatBurstPattern(
+      'burst-6-6-mid',
+      [6, 6],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_MID
+    ),
+    definingBeatBurstPattern(
+      'burst-6-6-fast',
+      [6, 6],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_FAST
+    ),
+    definingBeatBurstPattern(
+      'burst-4-8-4-mid',
+      [4, 8, 4],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_MID
+    ),
+    definingBeatBurstPattern(
+      'burst-3-3-3-blitz',
+      [3, 3, 3],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_BLITZ
+    ),
+    definingBeatBurstPattern(
+      'burst-5-5-5-fast',
+      [5, 5, 5],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_FAST
+    ),
+    definingBeatBurstPattern(
+      'burst-4-4-4-trap-mid',
+      [4, 4, 4],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_MID,
+      [5, 10]
+    ),
+    definingBeatBurstPattern(
+      'burst-4-3-4-trap-fast',
+      [4, 3, 4],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_FAST,
+      [4, 7]
+    ),
+    definingBeatBurstPattern(
+      'burst-8-trap-mid',
+      [8],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_MID,
+      [3, 6]
+    ),
     {
       id: 'double',
       notes: [
@@ -164,30 +341,8 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PATTERN_REGISTRY: readonly Def
       ],
     },
     {
-      id: 'triple',
-      notes: [
-        { kind: 'hammer', hitOffsetMs: 0 },
-        { kind: 'hammer', hitOffsetMs: 320 },
-        { kind: 'hammer', hitOffsetMs: 640 },
-      ],
-    },
-    {
       id: 'crack-single',
       notes: [{ kind: 'cracked', hitOffsetMs: 0 }],
-    },
-    {
-      id: 'hammer-then-crack',
-      notes: [
-        { kind: 'hammer', hitOffsetMs: 0 },
-        { kind: 'cracked', hitOffsetMs: 420 },
-      ],
-    },
-    {
-      id: 'crack-then-hammer',
-      notes: [
-        { kind: 'cracked', hitOffsetMs: 0 },
-        { kind: 'hammer', hitOffsetMs: 400 },
-      ],
     },
     {
       id: 'sandwich',
@@ -198,20 +353,10 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PATTERN_REGISTRY: readonly Def
       ],
     },
     {
-      id: 'double-crack-trap',
+      id: 'crack-then-hammer',
       notes: [
-        { kind: 'hammer', hitOffsetMs: 0 },
-        { kind: 'hammer', hitOffsetMs: 300 },
-        { kind: 'cracked', hitOffsetMs: 600 },
-      ],
-    },
-    {
-      id: 'burst-four',
-      notes: [
-        { kind: 'hammer', hitOffsetMs: 0 },
-        { kind: 'hammer', hitOffsetMs: 260 },
-        { kind: 'cracked', hitOffsetMs: 520 },
-        { kind: 'hammer', hitOffsetMs: 780 },
+        { kind: 'cracked', hitOffsetMs: 0 },
+        { kind: 'hammer', hitOffsetMs: 400 },
       ],
     },
   ];

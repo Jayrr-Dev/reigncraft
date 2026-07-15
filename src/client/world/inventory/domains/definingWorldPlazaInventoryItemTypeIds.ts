@@ -98,6 +98,72 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COCONUT =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_COCONUT =
   'world-plaza-cooked-coconut' as const;
 
+/** Raw / cooked forage mushrooms (sheet order matches mushroom catalog). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_GOLDEN_CHANTER_MUSHROOM =
+  'world-plaza-raw-golden-chanter-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_GOLDEN_CHANTER_MUSHROOM =
+  'world-plaza-cooked-golden-chanter-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_FALSE_LANTERN_MUSHROOM =
+  'world-plaza-raw-false-lantern-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_FALSE_LANTERN_MUSHROOM =
+  'world-plaza-cooked-false-lantern-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_HONEYCOMB_MOREL_MUSHROOM =
+  'world-plaza-raw-honeycomb-morel-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_HONEYCOMB_MOREL_MUSHROOM =
+  'world-plaza-cooked-honeycomb-morel-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_BRAIN_CAP_MUSHROOM =
+  'world-plaza-raw-brain-cap-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_BRAIN_CAP_MUSHROOM =
+  'world-plaza-cooked-brain-cap-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_KING_BOLETE_MUSHROOM =
+  'world-plaza-raw-king-bolete-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_KING_BOLETE_MUSHROOM =
+  'world-plaza-cooked-king-bolete-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_DEVILS_BOLETE_MUSHROOM =
+  'world-plaza-raw-devils-bolete-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_DEVILS_BOLETE_MUSHROOM =
+  'world-plaza-cooked-devils-bolete-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_CLOUD_PUFF_MUSHROOM =
+  'world-plaza-raw-cloud-puff-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_CLOUD_PUFF_MUSHROOM =
+  'world-plaza-cooked-cloud-puff-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_ANGEL_BUTTON_MUSHROOM =
+  'world-plaza-raw-angel-button-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_ANGEL_BUTTON_MUSHROOM =
+  'world-plaza-cooked-angel-button-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_CLUSTER_HONEY_MUSHROOM =
+  'world-plaza-raw-cluster-honey-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_CLUSTER_HONEY_MUSHROOM =
+  'world-plaza-cooked-cluster-honey-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_FUNERAL_BELL_MUSHROOM =
+  'world-plaza-raw-funeral-bell-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_FUNERAL_BELL_MUSHROOM =
+  'world-plaza-cooked-funeral-bell-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_WHITE_PARASOL_MUSHROOM =
+  'world-plaza-raw-white-parasol-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_WHITE_PARASOL_MUSHROOM =
+  'world-plaza-cooked-white-parasol-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_GREEN_VOMITER_MUSHROOM =
+  'world-plaza-raw-green-vomiter-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_GREEN_VOMITER_MUSHROOM =
+  'world-plaza-cooked-green-vomiter-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_FIELD_AGARIC_MUSHROOM =
+  'world-plaza-raw-field-agaric-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_FIELD_AGARIC_MUSHROOM =
+  'world-plaza-cooked-field-agaric-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_YELLOW_STAIN_MUSHROOM =
+  'world-plaza-raw-yellow-stain-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_YELLOW_STAIN_MUSHROOM =
+  'world-plaza-cooked-yellow-stain-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_SHELF_OYSTER_MUSHROOM =
+  'world-plaza-raw-shelf-oyster-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_SHELF_OYSTER_MUSHROOM =
+  'world-plaza-cooked-shelf-oyster-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RAW_GHOST_WING_MUSHROOM =
+  'world-plaza-raw-ghost-wing-mushroom' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_GHOST_WING_MUSHROOM =
+  'world-plaza-cooked-ghost-wing-mushroom' as const;
+
 /** Spritcore currency item type id. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE =
   'world-plaza-spritcore' as const;

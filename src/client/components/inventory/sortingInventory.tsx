@@ -40,6 +40,7 @@ import {
 } from '@dnd-kit/core';
 import type * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 /** Drop animation for inventory drag overlay snap-back. */
 const DEFINING_INVENTORY_DROP_ANIMATION: DropAnimation = {
@@ -260,18 +261,29 @@ export function SortingInventory({
       onDragCancel={handlingDragCancel}
     >
       {inventoryBody}
-      <DragOverlay
-        dropAnimation={DEFINING_INVENTORY_DROP_ANIMATION}
-        modifiers={[modifyingInventorySnapCenterToCursor]}
-        // Keep the overlay wrapper transparent to hit-testing so
-        // document.elementFromPoint during a drag resolves the world
-        // tile underneath instead of the overlay itself.
-        style={{ pointerEvents: 'none' }}
-      >
-        {activeItem ? (
-          <DragOverlayItemComponent item={activeItem} registry={registry} />
-        ) : null}
-      </DragOverlay>
+      {typeof document !== 'undefined'
+        ? createPortal(
+            // Portal escapes the hotbar shell: its `transform: translateZ(0)`
+            // makes it the containing block for fixed positioning, which would
+            // keep the ghost under body-portaled station popovers (kiln, etc.).
+            <DragOverlay
+              dropAnimation={DEFINING_INVENTORY_DROP_ANIMATION}
+              modifiers={[modifyingInventorySnapCenterToCursor]}
+              // Keep the overlay wrapper transparent to hit-testing so
+              // document.elementFromPoint during a drag resolves the world
+              // tile underneath instead of the overlay itself.
+              style={{ pointerEvents: 'none' }}
+            >
+              {activeItem ? (
+                <DragOverlayItemComponent
+                  item={activeItem}
+                  registry={registry}
+                />
+              ) : null}
+            </DragOverlay>,
+            document.body
+          )
+        : null}
     </DndContext>
   );
 }

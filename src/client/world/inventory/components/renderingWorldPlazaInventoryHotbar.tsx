@@ -514,7 +514,6 @@ export function RenderingWorldPlazaInventoryHotbar({
       setStoragePageIndex(nextPageIndex);
       setOpenItemDetailSlotIndex(null);
       setOpenBagHotbarSlotIndex(null);
-      setOpenTeaPotHotbarSlotIndex(null);
     },
     []
   );
@@ -532,13 +531,11 @@ export function RenderingWorldPlazaInventoryHotbar({
       currentSlotIndex === slotIndex ? null : slotIndex
     );
     setOpenBagHotbarSlotIndex(null);
-    setOpenTeaPotHotbarSlotIndex(null);
   }, []);
 
   const openingBagPopover = useCallback((slotIndex: number): void => {
     setOpenBagHotbarSlotIndex(slotIndex);
     setOpenItemDetailSlotIndex(null);
-    setOpenTeaPotHotbarSlotIndex(null);
   }, []);
 
   const closingBagPopover = useCallback((): void => {

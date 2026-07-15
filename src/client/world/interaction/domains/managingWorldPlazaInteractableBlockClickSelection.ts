@@ -7,6 +7,7 @@ import { formattingWorldPlazaTeaPotAddWaterTileSelectionKey } from '@/components
 import { formattingWorldPlazaTreeStumpStudySelectionKey } from '@/components/world/harvest/domains/formattingWorldPlazaTreeStumpStudySelectionKey';
 import { formattingWorldPlazaInteractableBlockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableBlockSelectionKey';
 import { formattingWorldPlazaInteractableFlowerSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableFlowerSelectionKey';
+import { formattingWorldPlazaInteractableMushroomSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableMushroomSelectionKey';
 import { formattingWorldPlazaInteractableLongGrassSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableLongGrassSelectionKey';
 import { formattingWorldPlazaInteractablePebbleSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractablePebbleSelectionKey';
 import { formattingWorldPlazaInteractableRockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableRockSelectionKey';
@@ -90,6 +91,23 @@ export function selectingWorldPlazaInteractableFlowerForClickAction(
   tileY: number
 ): void {
   const selectionKey = formattingWorldPlazaInteractableFlowerSelectionKey(
+    tileX,
+    tileY
+  );
+
+  selectedBlockKeysRef.current.clear();
+  selectedBlockKeysRef.current.add(selectionKey);
+}
+
+/**
+ * Selects one mushroom tile for popover-style pick interaction.
+ */
+export function selectingWorldPlazaInteractableMushroomForClickAction(
+  selectedBlockKeysRef: RefObject<Set<string>>,
+  tileX: number,
+  tileY: number
+): void {
+  const selectionKey = formattingWorldPlazaInteractableMushroomSelectionKey(
     tileX,
     tileY
   );

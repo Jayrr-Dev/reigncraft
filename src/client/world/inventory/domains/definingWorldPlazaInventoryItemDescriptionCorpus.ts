@@ -34,6 +34,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_RESOURCE_ITEM_DESCRIPTION_ENTRIES } from '@/components/world/inventory/domains/definingWorldPlazaInventoryResourceItemDescriptionCorpus';
+import { DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
 import { resolvingWildlifeMeatItemDescriptionEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatItemDescriptionCorpus';
 import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import { resolvingWildlifeVariantMeatItemDescriptionEntry } from '@/components/world/wildlife/domains/definingWildlifeVariantMeatItemDescriptionCorpus';
@@ -43,6 +44,14 @@ import { DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG } from '@/components/world/wildl
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DESCRIPTION_TEMPLATES = {
   rawWildlifeMeat: 'Double-click to eat: risky when raw. Cook at a campfire.',
   cookedWildlifeMeat: 'Double-click to eat: restores hunger safely.',
+  rawMushroomGood:
+    'Foraged cap. Double-click to eat raw, or roast at a campfire.',
+  rawMushroomBad:
+    'Look-alike cap. Eating raw is risky; cooking may only soften the odds.',
+  cookedMushroomGood:
+    'Double-click to eat: roasted forage, fuller than raw.',
+  cookedMushroomBad:
+    'Double-click to eat: heat dulled some toxins, not all. Still a gamble.',
 } as const;
 
 /** One explicit description keyed by inventory item type id. */
@@ -208,6 +217,29 @@ function listingWildlifeVariantMeatDescriptionEntries(): DefiningWorldPlazaInven
   return entries;
 }
 
+function listingMushroomDescriptionEntries(): DefiningWorldPlazaInventoryItemDescriptionEntry[] {
+  const entries: DefiningWorldPlazaInventoryItemDescriptionEntry[] = [];
+
+  for (const mushroom of DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG) {
+    const isGood = mushroom.polarity === 'good';
+
+    entries.push({
+      typeId: mushroom.rawItemTypeId,
+      description: isGood
+        ? DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DESCRIPTION_TEMPLATES.rawMushroomGood
+        : DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DESCRIPTION_TEMPLATES.rawMushroomBad,
+    });
+    entries.push({
+      typeId: mushroom.cookedItemTypeId,
+      description: isGood
+        ? DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DESCRIPTION_TEMPLATES.cookedMushroomGood
+        : DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DESCRIPTION_TEMPLATES.cookedMushroomBad,
+    });
+  }
+
+  return entries;
+}
+
 function buildingWorldPlazaInventoryItemDescriptionCorpus(): Readonly<
   Record<string, string>
 > {
@@ -230,6 +262,10 @@ function buildingWorldPlazaInventoryItemDescriptionCorpus(): Readonly<
   }
 
   for (const entry of listingWildlifeVariantMeatDescriptionEntries()) {
+    corpus[entry.typeId] = entry.description;
+  }
+
+  for (const entry of listingMushroomDescriptionEntries()) {
     corpus[entry.typeId] = entry.description;
   }
 

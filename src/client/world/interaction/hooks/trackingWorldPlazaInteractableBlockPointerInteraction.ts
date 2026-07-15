@@ -7,9 +7,11 @@ import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/
 import type { DefiningWorldPlazaMinedRockTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
+import type { DefiningWorldPlazaPickedMushroomTileState } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
 import type { DefiningWorldPlazaInteractableBlockClickDispatch } from '@/components/world/interaction/domains/definingWorldPlazaInteractableBlockClickAction';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
 import { resolvingWorldPlazaInteractableFlowerFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableFlowerFromPointerGridPoint';
+import { resolvingWorldPlazaInteractableMushroomFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableMushroomFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableLongGrassFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableLongGrassFromPointerGridPoint';
 import { DEFINING_WORLD_PLAZA_LONG_GRASS_SEARCH_POINTER_HIT_RADIUS_TILES } from '@/components/world/harvest/domains/definingWorldPlazaLongGrassSearchConstants';
 import { DEFINING_WORLD_PLAZA_SHRUB_PICK_POINTER_HIT_RADIUS_TILES } from '@/components/world/harvest/domains/definingWorldPlazaShrubPickConstants';
@@ -83,6 +85,16 @@ export type TrackingWorldPlazaInteractableBlockPointerInteractionParams = {
     tileX: number,
     tileY: number
   ) => void;
+  /** Runtime/persisted pick state keyed by mushroom tile. */
+  readonly pickedMushroomStateByTileKey?: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedMushroomTileState
+  >;
+  /** Opens the mushroom pick popover for a world mushroom. */
+  readonly onProceduralMushroomPopoverSelect?: (
+    tileX: number,
+    tileY: number
+  ) => void;
   /** Opens the long-grass search popover for a sprite clump. */
   readonly onProceduralLongGrassPopoverSelect?: (
     tileX: number,
@@ -146,6 +158,8 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
   onProceduralPebblePopoverSelect,
   pickedFlowerStateByTileKey,
   onProceduralFlowerPopoverSelect,
+  pickedMushroomStateByTileKey,
+  onProceduralMushroomPopoverSelect,
   onProceduralLongGrassPopoverSelect,
   onProceduralShrubPopoverSelect,
   onWorldChestPopoverSelect,
@@ -265,6 +279,24 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
         }
       }
 
+      if (onProceduralMushroomPopoverSelect) {
+        const mushroomMatch =
+          resolvingWorldPlazaInteractableMushroomFromPointerGridPoint(
+            pointerContext.gridPoint,
+            playerPosition,
+            chopPersistenceOwnerId,
+            pickedMushroomStateByTileKey
+          );
+
+        if (mushroomMatch) {
+          onProceduralMushroomPopoverSelect(
+            mushroomMatch.tileX,
+            mushroomMatch.tileY
+          );
+          return true;
+        }
+      }
+
       if (onProceduralLongGrassPopoverSelect) {
         const longGrassMatch =
           resolvingWorldPlazaInteractableLongGrassFromPointerGridPoint(
@@ -321,6 +353,7 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
       isEnabled,
       minedRockStateByTileKey,
       onProceduralFlowerPopoverSelect,
+      onProceduralMushroomPopoverSelect,
       onProceduralLongGrassPopoverSelect,
       onProceduralShrubPopoverSelect,
       onWorldChestPopoverSelect,
@@ -328,6 +361,7 @@ export function trackingWorldPlazaInteractableBlockPointerInteraction({
       onProceduralRockPopoverSelect,
       onProceduralTreePopoverSelect,
       pickedFlowerStateByTileKey,
+      pickedMushroomStateByTileKey,
       pickedPebbleStateByTileKey,
       placedBlocks,
       playerPositionRef,

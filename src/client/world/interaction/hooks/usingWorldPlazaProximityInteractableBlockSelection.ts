@@ -10,6 +10,7 @@ import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world
 import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import type { DefiningWorldPlazaPickedShrubTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
+import type { DefiningWorldPlazaPickedMushroomTileState } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
 import { syncingWorldPlazaProximityInteractableBlockSelection } from '@/components/world/interaction/domains/syncingWorldPlazaProximityInteractableBlockSelection';
 import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { useLayoutEffect, useRef, type RefObject } from 'react';
@@ -33,6 +34,9 @@ export type UsingWorldPlazaProximityInteractableBlockSelectionParams = {
   >;
   readonly pickedFlowerStateByTileKeyRef: RefObject<
     ReadonlyMap<string, DefiningWorldPlazaPickedFlowerTileState>
+  >;
+  readonly pickedMushroomStateByTileKeyRef?: RefObject<
+    ReadonlyMap<string, DefiningWorldPlazaPickedMushroomTileState>
   >;
   readonly clearedLongGrassStateByTileKeyRef?: RefObject<
     ReadonlyMap<string, DefiningWorldPlazaClearedLongGrassTileState>
@@ -64,6 +68,7 @@ export function usingWorldPlazaProximityInteractableBlockSelection({
   minedRockStateByTileKeyRef,
   pickedPebbleStateByTileKeyRef,
   pickedFlowerStateByTileKeyRef,
+  pickedMushroomStateByTileKeyRef,
   clearedLongGrassStateByTileKeyRef,
   pickedShrubStateByTileKeyRef,
   farmlandByTileKeyRef,
@@ -110,6 +115,8 @@ export function usingWorldPlazaProximityInteractableBlockSelection({
           minedRockStateByTileKey: minedRockStateByTileKeyRef.current,
           pickedPebbleStateByTileKey: pickedPebbleStateByTileKeyRef.current,
           pickedFlowerStateByTileKey: pickedFlowerStateByTileKeyRef.current,
+          pickedMushroomStateByTileKey:
+            pickedMushroomStateByTileKeyRef?.current,
           clearedLongGrassStateByTileKey:
             clearedLongGrassStateByTileKeyRef?.current,
           pickedShrubStateByTileKey: pickedShrubStateByTileKeyRef?.current,
@@ -138,6 +145,7 @@ export function usingWorldPlazaProximityInteractableBlockSelection({
     minedRockStateByTileKeyRef,
     pickedPebbleStateByTileKeyRef,
     pickedFlowerStateByTileKeyRef,
+    pickedMushroomStateByTileKeyRef,
     pickedShrubStateByTileKeyRef,
     placedBlocksRef,
     playerPositionRef,

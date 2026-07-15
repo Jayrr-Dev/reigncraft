@@ -28,7 +28,15 @@ export type DefiningWorldPlazaEntityDiseaseId =
   | 'petal-pox'
   | 'rootgut'
   | 'moonblight'
-  | 'seedlung';
+  | 'seedlung'
+  | 'amatoxin-angel'
+  | 'amatoxin-bell'
+  | 'gyromitra-storm'
+  | 'ghost-wing-fog'
+  | 'parasol-purge'
+  | 'lantern-gut'
+  | 'bolete-bile'
+  | 'yellow-stain-gut';
 
 /** Player-facing threat tier for sorting, UI, and balance review. */
 export type DefiningWorldPlazaEntityDiseaseSeverity =
@@ -819,6 +827,284 @@ export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_REGISTRY: Record<
         potency: 'venomous',
         healthPercentDamage: 0.42,
         durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(20),
+      },
+    ],
+  },
+  'amatoxin-angel': {
+    id: 'amatoxin-angel',
+    label: 'Angel Amatoxin',
+    description:
+      'Destroying-angel toxins. Gut purge, false recovery, then liver failure.',
+    severity: 'critical',
+    icon: 'game-icons:death-skull',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
+    hudIconBorderClassName:
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_BORDER,
+    incubationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(8),
+    durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(5),
+    grants: [
+      {
+        kind: 'buff',
+        delayMs: 0,
+        buffId: 'disease-nausea-slow-debuff',
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2),
+      },
+      {
+        kind: 'poison',
+        delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(4),
+        potency: 'venomous',
+        healthPercentDamage: 0.25,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(16),
+      },
+      {
+        kind: 'potential_damage',
+        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2),
+        healthPercentDamage: 0.4,
+        resolveDelayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(6),
+      },
+      {
+        kind: 'poison',
+        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2.5),
+        potency: 'lethal',
+        healthPercentDamage: 0.3,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(10),
+      },
+    ],
+  },
+  'amatoxin-bell': {
+    id: 'amatoxin-bell',
+    label: 'Bell Amatoxin',
+    description:
+      'Galerina toxins. Same liver kill as Angel Button, slightly lighter dose.',
+    severity: 'critical',
+    icon: 'game-icons:death-skull',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
+    hudIconBorderClassName:
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_BORDER,
+    incubationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(6),
+    durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(4),
+    grants: [
+      {
+        kind: 'buff',
+        delayMs: 0,
+        buffId: 'disease-nausea-slow-debuff',
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
+      },
+      {
+        kind: 'poison',
+        delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(3),
+        potency: 'venomous',
+        healthPercentDamage: 0.2,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(14),
+      },
+      {
+        kind: 'potential_damage',
+        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
+        healthPercentDamage: 0.3,
+        resolveDelayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(5),
+      },
+      {
+        kind: 'poison',
+        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2),
+        potency: 'lethal',
+        healthPercentDamage: 0.22,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(8),
+      },
+    ],
+  },
+  'gyromitra-storm': {
+    id: 'gyromitra-storm',
+    label: 'Gyromitra Storm',
+    description:
+      'False-morel hydrazine. Confusion, venomous poison, delayed organ hit.',
+    severity: 'critical',
+    icon: 'mdi:head-question',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_COLOR,
+    hudIconBorderClassName:
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_FEVER_BORDER,
+    incubationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(4),
+    durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(3),
+    grants: [
+      {
+        kind: 'confusion',
+        delayMs: 0,
+        intensity: 50,
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2),
+      },
+      {
+        kind: 'poison',
+        delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(2),
+        potency: 'venomous',
+        healthPercentDamage: 0.28,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(18),
+      },
+      {
+        kind: 'potential_damage',
+        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
+        healthPercentDamage: 0.25,
+        resolveDelayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(4),
+      },
+      {
+        kind: 'bleed',
+        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2),
+        severity: 'bleeding',
+        healthPercentDamage: 0.12,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(10),
+      },
+    ],
+  },
+  'ghost-wing-fog': {
+    id: 'ghost-wing-fog',
+    label: 'Ghost Wing Fog',
+    description:
+      'Angel-wing encephalopathy. Confusion and sleep waves; fated hit if already weak.',
+    severity: 'severe',
+    icon: 'mdi:weather-night',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_MOON_COLOR,
+    hudIconBorderClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_MOON_BORDER,
+    incubationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(6),
+    durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(3),
+    grants: [
+      {
+        kind: 'confusion',
+        delayMs: 0,
+        intensity: 40,
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
+      },
+      {
+        kind: 'sleep',
+        delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(8),
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(4),
+      },
+      {
+        kind: 'confusion',
+        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
+        intensity: 55,
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1.5),
+      },
+      {
+        kind: 'potential_damage',
+        delayMs: computingWorldPlazaInGameDaysToDiseaseRealMs(2),
+        healthPercentDamage: 0.2,
+        resolveDelayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(3),
+      },
+    ],
+  },
+  'parasol-purge': {
+    id: 'parasol-purge',
+    label: 'Parasol Purge',
+    description:
+      'Green-spored parasol gut storm. Hard toxic burn and stamina sickness.',
+    severity: 'moderate',
+    icon: 'mdi:stomach',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
+    hudIconBorderClassName:
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_BORDER,
+    incubationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(1),
+    durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1),
+    grants: [
+      {
+        kind: 'buff',
+        delayMs: 0,
+        buffId: 'disease-nausea-slow-debuff',
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1),
+      },
+      {
+        kind: 'buff',
+        delayMs: 0,
+        buffId: 'disease-stamina-sick-debuff',
+        durationMs: computingWorldPlazaInGameDaysToDiseaseRealMs(1),
+      },
+      {
+        kind: 'poison',
+        delayMs: 0,
+        potency: 'toxic',
+        healthPercentDamage: 0.28,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(10),
+      },
+    ],
+  },
+  'lantern-gut': {
+    id: 'lantern-gut',
+    label: 'Lantern Gut',
+    description:
+      'Jack-o-lantern mushroom purge. Toxic cramps and nausea.',
+    severity: 'moderate',
+    icon: 'mdi:stomach',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
+    hudIconBorderClassName:
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_BORDER,
+    incubationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(1),
+    durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(18),
+    grants: [
+      {
+        kind: 'buff',
+        delayMs: 0,
+        buffId: 'disease-nausea-slow-debuff',
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(18),
+      },
+      {
+        kind: 'poison',
+        delayMs: 0,
+        potency: 'toxic',
+        healthPercentDamage: 0.22,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(8),
+      },
+    ],
+  },
+  'bolete-bile': {
+    id: 'bolete-bile',
+    label: 'Bolete Bile',
+    description:
+      "Satan's bolete gut poison. Miserable toxic burn, worse raw.",
+    severity: 'mild',
+    icon: 'mdi:stomach',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
+    hudIconBorderClassName:
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_BORDER,
+    incubationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(2),
+    durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(12),
+    grants: [
+      {
+        kind: 'buff',
+        delayMs: 0,
+        buffId: 'disease-nausea-slow-debuff',
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(12),
+      },
+      {
+        kind: 'poison',
+        delayMs: computingWorldPlazaInGameHoursToDiseaseRealMs(1),
+        potency: 'toxic',
+        healthPercentDamage: 0.16,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(6),
+      },
+    ],
+  },
+  'yellow-stain-gut': {
+    id: 'yellow-stain-gut',
+    label: 'Yellow Stain Gut',
+    description:
+      'Phenol sting from yellow stainer. Mild nausea and light toxic tick.',
+    severity: 'mild',
+    icon: 'mdi:stomach',
+    hudIconColorClassName: DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_COLOR,
+    hudIconBorderClassName:
+      DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_SICKLY_BORDER,
+    incubationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(1),
+    durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(8),
+    grants: [
+      {
+        kind: 'buff',
+        delayMs: 0,
+        buffId: 'disease-nausea-slow-debuff',
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(8),
+      },
+      {
+        kind: 'poison',
+        delayMs: 0,
+        potency: 'toxic',
+        healthPercentDamage: 0.1,
+        durationMs: computingWorldPlazaInGameHoursToDiseaseRealMs(4),
       },
     ],
   },

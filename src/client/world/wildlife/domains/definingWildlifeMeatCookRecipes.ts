@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/definingWildlifeMeatCookRecipes
  */
 
+import { DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COCONUT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_COCONUT,
@@ -27,6 +28,12 @@ const DEFINING_WORLD_PLAZA_FORAGE_COOK_RECIPES: readonly DefiningWildlifeMeatCoo
       cookedDisplayName: 'Cooked Coconut',
       cookDurationMs: 2_000,
     },
+    ...DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG.map((entry) => ({
+      rawItemTypeId: entry.rawItemTypeId,
+      cookedItemTypeId: entry.cookedItemTypeId,
+      cookedDisplayName: entry.cookedDisplayName,
+      cookDurationMs: entry.cookDurationMs,
+    })),
   ];
 
 export const DEFINING_WILDLIFE_MEAT_COOK_RECIPES: readonly DefiningWildlifeMeatCookRecipe[] =

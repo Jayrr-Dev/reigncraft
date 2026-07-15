@@ -41,6 +41,7 @@ import {
 } from '@/components/world/domains/syncingWorldPlazaVisibleLavaOverlayLayer';
 import { syncingWorldPlazaVisibleLongGrassDecorationLayer } from '@/components/world/domains/syncingWorldPlazaVisibleLongGrassDecorationLayer';
 import { syncingWorldPlazaVisibleShrubDecorationLayer } from '@/components/world/domains/syncingWorldPlazaVisibleShrubDecorationLayer';
+import { syncingWorldPlazaVisibleMushroomDecorationLayer } from '@/components/world/mushrooms/domains/syncingWorldPlazaVisibleMushroomDecorationLayer';
 import {
   ensuringWorldPlazaVisibleStoneDecorationLayer,
   updatingWorldPlazaVisibleStoneDecorationLayer,
@@ -119,6 +120,10 @@ type RunningWorldPlazaLongGrassDecorationsLayerState = {
 };
 
 type RunningWorldPlazaShrubDecorationsLayerState = {
+  spriteByKey: Map<string, Sprite>;
+};
+
+type RunningWorldPlazaMushroomDecorationsLayerState = {
   spriteByKey: Map<string, Sprite>;
 };
 
@@ -837,6 +842,96 @@ export function registeringWorldPlazaTerrainLayers(
       destroyRuntimeState: (context, runtimeState) => {
         const state =
           runtimeState as RunningWorldPlazaShrubDecorationsLayerState;
+
+        for (const sprite of state.spriteByKey.values()) {
+          sprite.parent?.removeChild(sprite);
+          sprite.destroy();
+        }
+
+        state.spriteByKey.clear();
+      },
+    },
+    {
+      kind: 'incremental',
+      id: RUNNING_WORLD_PLAZA_TERRAIN_LAYER_ID.MUSHROOM_DECORATIONS,
+      parentLayer: 'floor',
+      boundsProfile: 'floor',
+      participatesInHeavyIdleSkip: true,
+      renderLayerToggle: 'floor',
+      requiresAnyGenerationFeature: [
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.MUSHROOMS,
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.BIOMES,
+      ],
+      requiresTextures: [
+        REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.MUSHROOM_SPRITES,
+      ],
+      invalidateOn: [
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.FLOOR_BOUNDS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_MUSHROOMS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.SUN_BUCKET,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.DAY_NUMBER,
+        DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.MUSHROOM_TEXTURES_READY,
+      ],
+      createRuntimeState: (): RunningWorldPlazaMushroomDecorationsLayerState => ({
+        spriteByKey: new Map(),
+      }),
+      sync: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaMushroomDecorationsLayerState;
+
+        if (!context.floorBounds) {
+          return { isComplete: true, needsChildSort: false };
+        }
+
+        const mushroomSyncResult =
+          syncingWorldPlazaVisibleMushroomDecorationLayer({
+            parentContainer: context.floorLayer,
+            bounds: context.floorBounds,
+            spriteByKey: state.spriteByKey,
+            burntGrassTileKeys: context.burntGrassTileKeys,
+            maxBuildsPerCall:
+              context.performanceProfile
+                .terrainElevationChunkBuildBudgetPerFrame *
+              context.performanceProfile.floorChunkSizeTiles,
+            shouldSortChildrenImmediately: false,
+          });
+
+        for (const mushroomSprite of state.spriteByKey.values()) {
+          if (!context.isFloorRenderLayerEnabled) {
+            mushroomSprite.visible = false;
+            continue;
+          }
+
+          if (
+            !mushroomSprite.visible &&
+            mushroomSprite.texture.width > 0 &&
+            mushroomSprite.texture.height > 0
+          ) {
+            mushroomSprite.visible = true;
+          }
+        }
+
+        return {
+          isComplete: mushroomSyncResult.isComplete,
+          needsChildSort: mushroomSyncResult.needsChildSort,
+          builtCount: mushroomSyncResult.propsBuilt,
+        };
+      },
+      resetRuntimeState: (context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaMushroomDecorationsLayerState;
+
+        for (const sprite of state.spriteByKey.values()) {
+          context.floorLayer.removeChild(sprite);
+          sprite.destroy();
+        }
+
+        state.spriteByKey.clear();
+      },
+      destroyRuntimeState: (_context, runtimeState) => {
+        const state =
+          runtimeState as RunningWorldPlazaMushroomDecorationsLayerState;
 
         for (const sprite of state.spriteByKey.values()) {
           sprite.parent?.removeChild(sprite);

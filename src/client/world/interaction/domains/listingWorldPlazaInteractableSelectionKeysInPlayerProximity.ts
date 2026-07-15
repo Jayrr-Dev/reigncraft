@@ -45,6 +45,10 @@ import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world
 import { formattingWorldPlazaPickedPebbleTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import type { DefiningWorldPlazaPickedShrubTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
 import { formattingWorldPlazaPickedShrubTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
+import type { DefiningWorldPlazaPickedMushroomTileState } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
+import { formattingWorldPlazaPickedMushroomTileKey } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
+import { checkingWorldPlazaMushroomDecorationAtTileIndex } from '@/components/world/mushrooms/domains/checkingWorldPlazaMushroomDecorationAtTileIndex';
+import { checkingWorldPlazaRuntimeMushroomIsPicked } from '@/components/world/mushrooms/domains/registeringWorldPlazaPickedMushroomsLookup';
 import { checkingWorldPlazaLocalTreeStumpStudied } from '@/components/world/harvest/domains/managingWorldPlazaLocalStudiedTreeStumps';
 import { checkingWorldPlazaRuntimeLongGrassIsCleared } from '@/components/world/harvest/domains/registeringWorldPlazaClearedLongGrassLookup';
 import { checkingWorldPlazaRuntimeShrubIsPicked } from '@/components/world/harvest/domains/registeringWorldPlazaPickedShrubsLookup';
@@ -52,6 +56,7 @@ import { checkingWorldPlazaInteractionLabelTileInPlayerProximity } from '@/compo
 import { DEFINING_WORLD_PLAZA_INTERACTION_LABEL_PROXIMITY_RADIUS_TILES } from '@/components/world/interaction/domains/definingWorldPlazaInteractionLabelProximityConstants';
 import { formattingWorldPlazaInteractableBlockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableBlockSelectionKey';
 import { formattingWorldPlazaInteractableFlowerSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableFlowerSelectionKey';
+import { formattingWorldPlazaInteractableMushroomSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableMushroomSelectionKey';
 import { formattingWorldPlazaInteractableLongGrassSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableLongGrassSelectionKey';
 import { formattingWorldPlazaInteractablePebbleSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractablePebbleSelectionKey';
 import { formattingWorldPlazaInteractableRockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableRockSelectionKey';
@@ -105,6 +110,10 @@ export type ListingWorldPlazaInteractableSelectionKeysInPlayerProximityParams =
     readonly pickedFlowerStateByTileKey?: ReadonlyMap<
       string,
       DefiningWorldPlazaPickedFlowerTileState
+    >;
+    readonly pickedMushroomStateByTileKey?: ReadonlyMap<
+      string,
+      DefiningWorldPlazaPickedMushroomTileState
     >;
     readonly clearedLongGrassStateByTileKey?: ReadonlyMap<
       string,
@@ -301,6 +310,21 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
       ) {
         keys.add(
           formattingWorldPlazaInteractableFlowerSelectionKey(tileX, tileY)
+        );
+      }
+
+      const mushroomTileKey = formattingWorldPlazaPickedMushroomTileKey(
+        tileX,
+        tileY
+      );
+
+      if (
+        !params.pickedMushroomStateByTileKey?.get(mushroomTileKey)?.isPicked &&
+        !checkingWorldPlazaRuntimeMushroomIsPicked(tileX, tileY) &&
+        checkingWorldPlazaMushroomDecorationAtTileIndex(tileX, tileY)
+      ) {
+        keys.add(
+          formattingWorldPlazaInteractableMushroomSelectionKey(tileX, tileY)
         );
       }
 

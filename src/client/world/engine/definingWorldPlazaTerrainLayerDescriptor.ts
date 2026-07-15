@@ -14,6 +14,7 @@ import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/w
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import type { DefiningWorldPlazaPickedShrubTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
+import type { DefiningWorldPlazaPickedMushroomTileState } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
 import type { Container } from 'pixi.js';
 import type { RefObject } from 'react';
 
@@ -68,6 +69,10 @@ export type RunningWorldPlazaTerrainLayerEngineContext = {
     string,
     DefiningWorldPlazaPickedShrubTileState
   >;
+  readonly pickedMushroomsByTileKey: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedMushroomTileState
+  >;
   readonly burntGrassTileKeys: ReadonlySet<string> | undefined;
   readonly isFloorRenderLayerEnabled: boolean;
   readonly isTrunkRenderLayerEnabled: boolean;
@@ -109,6 +114,9 @@ export type RunningWorldPlazaTerrainLayerEngineInputRefs = {
   >;
   readonly pickedShrubsByTileKeyRef?: RefObject<
     ReadonlyMap<string, DefiningWorldPlazaPickedShrubTileState>
+  >;
+  readonly pickedMushroomsByTileKeyRef?: RefObject<
+    ReadonlyMap<string, DefiningWorldPlazaPickedMushroomTileState>
   >;
   readonly floorLayerRef: RefObject<Container | null>;
   readonly trunkLayerRef: RefObject<Container | null>;

@@ -9,8 +9,10 @@ import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/
 import type { DefiningWorldPlazaMinedRockTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalMinedRocks';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
+import type { DefiningWorldPlazaPickedMushroomTileState } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
 import type { DefiningWorldPlazaInteractablePointerHitContext } from '@/components/world/interaction/domains/definingWorldPlazaInteractablePointerHitContext';
 import { resolvingWorldPlazaInteractableFlowerFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableFlowerFromPointerGridPoint';
+import { resolvingWorldPlazaInteractableMushroomFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableMushroomFromPointerGridPoint';
 import { resolvingWorldPlazaInteractableLongGrassFromPointerGridPoint } from '@/components/world/interaction/domains/resolvingWorldPlazaInteractableLongGrassFromPointerGridPoint';
 import { DEFINING_WORLD_PLAZA_LONG_GRASS_SEARCH_POINTER_HIT_RADIUS_TILES } from '@/components/world/harvest/domains/definingWorldPlazaLongGrassSearchConstants';
 import { DEFINING_WORLD_PLAZA_SHRUB_PICK_POINTER_HIT_RADIUS_TILES } from '@/components/world/harvest/domains/definingWorldPlazaShrubPickConstants';
@@ -54,6 +56,10 @@ export type CheckingWorldPlazaInteractablePointerHoverTargetInput = {
     string,
     DefiningWorldPlazaPickedFlowerTileState
   >;
+  readonly pickedMushroomStateByTileKey?: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedMushroomTileState
+  >;
   readonly wildlifeStore: ManagingWildlifeInstanceStore;
   readonly resolveWildlifeCollisionRadiusGrid: (
     instance: DefiningWildlifeInstance
@@ -79,6 +85,7 @@ export function checkingWorldPlazaInteractablePointerHoverTarget(
     minedRockStateByTileKey,
     pickedPebbleStateByTileKey,
     pickedFlowerStateByTileKey,
+    pickedMushroomStateByTileKey,
     wildlifeStore,
     resolveWildlifeCollisionRadiusGrid,
   } = input;
@@ -177,6 +184,18 @@ export function checkingWorldPlazaInteractablePointerHoverTarget(
   );
 
   if (flowerMatch !== null) {
+    return true;
+  }
+
+  const mushroomMatch =
+    resolvingWorldPlazaInteractableMushroomFromPointerGridPoint(
+      pointerContext.gridPoint,
+      playerPosition,
+      chopPersistenceOwnerId,
+      pickedMushroomStateByTileKey
+    );
+
+  if (mushroomMatch !== null) {
     return true;
   }
 

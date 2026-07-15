@@ -12,6 +12,7 @@ import {
   buildingWorldPlazaPickedFlowersCacheKey,
   buildingWorldPlazaPickedPebblesCacheKey,
   buildingWorldPlazaPickedShrubsCacheKey,
+  buildingWorldPlazaPickedMushroomsCacheKey,
   buildingWorldPlazaPlacedTreeBlocksCacheKey,
 } from '@/components/world/engine/buildingWorldPlazaTerrainLayerCacheKeys';
 import {
@@ -27,9 +28,11 @@ import {
   registeringWorldPlazaLongGrassSpriteTextureLoader,
   registeringWorldPlazaLavaStaticTileTextureLoader,
   registeringWorldPlazaShrubSpriteTextureLoader,
+  registeringWorldPlazaMushroomSpriteTextureLoader,
   registeringWorldPlazaBearTrapSpriteTextureLoader,
   registeringWorldPlazaCaltropSpriteTextureLoader,
 } from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
+import { formattingWorldPlazaDayNightDayNumber } from '@/components/world/domains/formattingWorldPlazaDayNightDayNumber';
 import type { DefiningWorldPlazaChoppedTreeTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalChoppedTrees';
 import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
@@ -38,6 +41,7 @@ import {
   gettingWorldPlazaLocalPickedShrubsRevision,
   type DefiningWorldPlazaPickedShrubTileState,
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
+import type { DefiningWorldPlazaPickedMushroomTileState } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
 import { buildingWorldPlazaPlacedEnvironmentalTemperatureBlocksCacheKey } from '@/components/world/health/domains/cachingWorldPlazaEnvironmentalTemperatureSamplingContext';
 import { gettingWorldPlazaTemperatureDebugOverrideRevision } from '@/components/world/health/domains/managingWorldPlazaTemperatureDebugOverrideStore';
 
@@ -71,6 +75,10 @@ export type ComputingWorldPlazaTerrainDependencySnapshotInput = {
   readonly pickedShrubsByTileKey: ReadonlyMap<
     string,
     DefiningWorldPlazaPickedShrubTileState
+  >;
+  readonly pickedMushroomsByTileKey: ReadonlyMap<
+    string,
+    DefiningWorldPlazaPickedMushroomTileState
   >;
   readonly burntGrassTileKeys: ReadonlySet<string> | undefined;
   readonly islandModeRevision: number;
@@ -115,12 +123,17 @@ export function computingWorldPlazaTerrainDependencySnapshot(
       buildingWorldPlazaClearedLongGrassCacheKey(input.clearedLongGrassByTileKey),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_SHRUBS]:
       `${buildingWorldPlazaPickedShrubsCacheKey(input.pickedShrubsByTileKey)}|${gettingWorldPlazaLocalPickedShrubsRevision()}`,
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PICKED_MUSHROOMS]:
+      buildingWorldPlazaPickedMushroomsCacheKey(input.pickedMushroomsByTileKey),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BURNT_GRASS]:
       buildingWorldPlazaBurntGrassTileKeysCacheKey(input.burntGrassTileKeys),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.THAW_VISUAL]:
       thawVisualSyncKey,
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.SUN_BUCKET]: String(
       sunState.bucketIndex
+    ),
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.DAY_NUMBER]: String(
+      formattingWorldPlazaDayNightDayNumber()
     ),
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.PLAYER_TILE]: playerTileKey,
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.ISLAND_MODE_REVISION]: String(
@@ -134,6 +147,8 @@ export function computingWorldPlazaTerrainDependencySnapshot(
       registeringWorldPlazaLongGrassSpriteTextureLoader.isReady() ? '1' : '0',
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.SHRUB_TEXTURES_READY]:
       registeringWorldPlazaShrubSpriteTextureLoader.isReady() ? '1' : '0',
+    [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.MUSHROOM_TEXTURES_READY]:
+      registeringWorldPlazaMushroomSpriteTextureLoader.isReady() ? '1' : '0',
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.CHEST_TEXTURES_READY]:
       registeringWorldPlazaChestSpriteTextureLoader.isReady() ? '1' : '0',
     [DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.BLACKSMITH_UTILITY_TEXTURES_READY]:

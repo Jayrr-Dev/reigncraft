@@ -16,6 +16,11 @@ import {
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_ACTIVE_WORLD_SPRITE_URL,
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL,
 } from '@/components/world/building/domains/definingWorldPlazaBlacksmithUtilitySpriteConstants';
+import {
+  DEFINING_WORLD_PLAZA_MUSHROOM_SPRITE_SHEET_COLUMN_COUNT,
+  DEFINING_WORLD_PLAZA_MUSHROOM_SPRITE_SHEET_ROW_COUNT,
+  DEFINING_WORLD_PLAZA_WORLD_MUSHROOM_SPRITE_SHEET_URL,
+} from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpriteSheetConstants';
 import { creatingWorldPlazaTextureAssetLoader } from '@/components/world/engine/creatingWorldPlazaTextureAssetLoader';
 import { Assets, Rectangle, Texture } from 'pixi.js';
 
@@ -31,6 +36,7 @@ export const REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID = {
   FIRELANDS_SPRITES: 'firelands-sprites',
   LONG_GRASS_SPRITES: 'long-grass-sprites',
   SHRUB_SPRITES: 'shrub-sprites',
+  MUSHROOM_SPRITES: 'mushroom-sprites',
   CHEST_SPRITES: 'chest-sprites',
   BEAR_TRAP_SPRITES: 'bear-trap-sprites',
   CALTROP_SPRITES: 'caltrop-sprites',
@@ -261,6 +267,44 @@ export const registeringWorldPlazaShrubSpriteTextureLoader =
     },
   });
 
+/** Loader for world mushroom sprite sheet frames (4x4 @ 32px). */
+export const registeringWorldPlazaMushroomSpriteTextureLoader =
+  creatingWorldPlazaTextureAssetLoader({
+    id: REGISTERING_WORLD_PLAZA_TEXTURE_ASSET_ID.MUSHROOM_SPRITES,
+    load: async () => {
+      const sheet = await loadingWorldPlazaFirelandsTextureWithRetry(
+        DEFINING_WORLD_PLAZA_WORLD_MUSHROOM_SPRITE_SHEET_URL
+      );
+      const cellPx = 32;
+      const frames: Texture[] = [];
+      const cellCount =
+        DEFINING_WORLD_PLAZA_MUSHROOM_SPRITE_SHEET_COLUMN_COUNT *
+        DEFINING_WORLD_PLAZA_MUSHROOM_SPRITE_SHEET_ROW_COUNT;
+
+      for (let sheetIndex = 0; sheetIndex < cellCount; sheetIndex += 1) {
+        const columnIndex =
+          sheetIndex % DEFINING_WORLD_PLAZA_MUSHROOM_SPRITE_SHEET_COLUMN_COUNT;
+        const rowIndex = Math.floor(
+          sheetIndex / DEFINING_WORLD_PLAZA_MUSHROOM_SPRITE_SHEET_COLUMN_COUNT
+        );
+
+        frames.push(
+          new Texture({
+            source: sheet.source,
+            frame: new Rectangle(
+              columnIndex * cellPx,
+              rowIndex * cellPx,
+              cellPx,
+              cellPx
+            ),
+          })
+        );
+      }
+
+      return frames;
+    },
+  });
+
 /** Loader for world chest prop sprite textures keyed by URL. */
 export const registeringWorldPlazaChestSpriteTextureLoader =
   creatingWorldPlazaTextureAssetLoader({
@@ -374,6 +418,7 @@ export const REGISTERING_WORLD_PLAZA_TERRAIN_TEXTURE_ASSET_MANIFEST = [
   registeringWorldPlazaFirelandsSpriteTextureLoader,
   registeringWorldPlazaLongGrassSpriteTextureLoader,
   registeringWorldPlazaShrubSpriteTextureLoader,
+  registeringWorldPlazaMushroomSpriteTextureLoader,
   registeringWorldPlazaChestSpriteTextureLoader,
   registeringWorldPlazaBearTrapSpriteTextureLoader,
   registeringWorldPlazaCaltropSpriteTextureLoader,
@@ -452,6 +497,24 @@ export function peekingWorldPlazaShrubSpriteTextureForUrlFromManifest(
   }
 
   return texturesByUrl[spriteUrl] ?? null;
+}
+
+/**
+ * Resolves one cached world-mushroom cell texture by species sheet index.
+ */
+export function peekingWorldPlazaMushroomSpriteTextureForSpeciesIndexFromManifest(
+  speciesIndex: number
+): Texture | null {
+  const frames = registeringWorldPlazaMushroomSpriteTextureLoader.peek();
+
+  if (!frames || frames.length === 0) {
+    return null;
+  }
+
+  return (
+    frames[((speciesIndex % frames.length) + frames.length) % frames.length] ??
+    null
+  );
 }
 
 /**

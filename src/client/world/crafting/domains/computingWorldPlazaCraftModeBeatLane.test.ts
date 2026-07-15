@@ -9,6 +9,8 @@ import {
   resolvingWorldPlazaCraftModeBeatStrikeColorTier,
 } from '@/components/world/crafting/domains/computingWorldPlazaCraftModeBeatLane';
 import {
+  buildingWorldPlazaCraftModeBeatBurstNotes,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_MID,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_HIT_ZONE_CENTER_PERCENT,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_NOTE_TRAVEL_MS,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PATTERN_REGISTRY,
@@ -70,6 +72,35 @@ describe('computingWorldPlazaCraftModeBeatLane', () => {
     expect(
       resolvingWorldPlazaCraftModeBeatLaneHitTarget(notes, 4_000, zone)
     ).toBeNull();
+  });
+
+  it('builds 4-4-4 bursts with group gaps and optional cracked traps', () => {
+    const notes = buildingWorldPlazaCraftModeBeatBurstNotes(
+      [4, 4, 4],
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_BURST_SPACING_MID,
+      [5]
+    );
+
+    expect(notes).toHaveLength(12);
+    expect(notes[0]?.kind).toBe('hammer');
+    expect(notes[5]?.kind).toBe('cracked');
+    expect(notes[4]?.hitOffsetMs).toBe(3 * 240 + 560);
+    expect(notes[5]?.hitOffsetMs).toBe(3 * 240 + 560 + 240);
+  });
+
+  it('registers long burst combos at multiple speeds', () => {
+    const ids = DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PATTERN_REGISTRY.map(
+      (pattern) => pattern.id
+    );
+
+    expect(ids).toContain('burst-4-4-4-slow');
+    expect(ids).toContain('burst-8-8-8-fast');
+    expect(ids).toContain('burst-4-3-4-mid');
+
+    const eightBurst = DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_PATTERN_REGISTRY.find(
+      (pattern) => pattern.id === 'burst-8-8-8-mid'
+    );
+    expect(eightBurst?.notes).toHaveLength(24);
   });
 
   it('snaps the gold zone left to right by default', () => {
