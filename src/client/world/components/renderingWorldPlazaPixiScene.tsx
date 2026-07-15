@@ -100,6 +100,7 @@ import {
 import { usingWorldPlazaBuildMode } from '@/components/world/building/hooks/usingWorldPlazaBuildMode';
 import { usingWorldPlazaClaimModePlotRegistryQuery } from '@/components/world/building/hooks/usingWorldPlazaClaimModePlotRegistryQuery';
 import { usingWorldPlazaLocalhostDevEnvironment } from '@/components/world/building/hooks/usingWorldPlazaLocalhostDevEnvironment';
+import { usingWorldPlazaPlacedBlockRenderCullBounds } from '@/components/world/building/hooks/usingWorldPlazaPlacedBlockRenderCullBounds';
 import { usingWorldPlazaPlacedBlocksQuery } from '@/components/world/building/hooks/usingWorldPlazaPlacedBlocksQuery';
 import { usingWorldPlazaPlotOwnerLimitsQuery } from '@/components/world/building/hooks/usingWorldPlazaPlotOwnerLimitsQuery';
 import { usingWorldPlazaPlotSubscription } from '@/components/world/building/hooks/usingWorldPlazaPlotSubscription';
@@ -1593,6 +1594,8 @@ function RenderingWorldPlazaPixiSceneConnected({
   placedBlocksRef.current = buildingWorldPlazaPlacedBlocksSceneRef(
     activeScenePlacedBlocks
   );
+  const placedBlockRenderCullBounds =
+    usingWorldPlazaPlacedBlockRenderCullBounds(playerPositionRef);
   const buildModeOwnedPlots = isEditSessionActive
     ? activeOwnedPlots
     : ownedPlots;
@@ -7881,7 +7884,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 />
                 <RenderingWorldPlazaPlacedBlockGroundShadows
                   placedBlocks={activeScenePlacedBlocks}
-                  playerPositionRef={playerPositionRef}
+                  cullBounds={placedBlockRenderCullBounds}
                   shadowAlphaScale={
                     isClaimModeActive
                       ? DEFINING_WORLD_BUILDING_CLAIM_MODE_PLACED_BLOCK_ALPHA
@@ -7958,7 +7961,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   />
                   <RenderingWorldPlazaPlacedBlocks
                     placedBlocks={activeScenePlacedBlocks}
-                    playerPositionRef={playerPositionRef}
+                    cullBounds={placedBlockRenderCullBounds}
                     blockColumnAlpha={
                       isClaimModeActive
                         ? DEFINING_WORLD_BUILDING_CLAIM_MODE_PLACED_BLOCK_ALPHA

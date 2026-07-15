@@ -1,5 +1,6 @@
 'use client';
 
+import { RenderingPlazaCodexDualProgress } from '@/components/home/components/renderingPlazaCodexDualProgress';
 import { RenderingPlazaHerbariumBerryPortrait } from '@/components/home/components/renderingPlazaHerbariumBerryPortrait';
 import { RenderingPlazaHerbariumCloverPortrait } from '@/components/home/components/renderingPlazaHerbariumCloverPortrait';
 import { RenderingPlazaHerbariumFlowerPortrait } from '@/components/home/components/renderingPlazaHerbariumFlowerPortrait';
@@ -361,8 +362,6 @@ export function RenderingPlazaHerbariumPanel({
   const sightedCount = guideEntries.filter((entry) => entry.isSighted).length;
   const studiedCount = guideEntries.filter((entry) => entry.isStudied).length;
   const totalCount = guideEntries.length;
-  const progressPercent =
-    totalCount > 0 ? Math.round((sightedCount / totalCount) * 100) : 0;
 
   if (selectedEntry?.isSighted) {
     return (
@@ -410,35 +409,20 @@ export function RenderingPlazaHerbariumPanel({
         ) : null}
       </div>
 
-      <div className="shrink-0 rounded-md border border-poster-teal/25 bg-parchment/45 px-3 py-1.5">
-        <div className="flex items-center justify-between gap-2 text-[10px] font-bold uppercase tracking-wide text-ink-soft">
-          <span>
-            Sighted{' '}
-            <span className="font-mono tabular-nums text-poster-teal-deep">
-              {sightedCount}/{totalCount}
-            </span>
-          </span>
-          <span>
-            Studied{' '}
-            <span className="font-mono tabular-nums text-poster-teal-deep">
-              {studiedCount}
-            </span>
-          </span>
-        </div>
-        <div
-          className="mt-1 h-1.5 overflow-hidden rounded-full border border-poster-teal/25 bg-poster-teal-deep/15"
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={totalCount}
-          aria-valuenow={sightedCount}
-          aria-label="Flora sighted"
-        >
-          <div
-            className="h-full rounded-full bg-[linear-gradient(90deg,#c98a2d_0%,#d9a441_100%)] transition-[width] duration-500"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-      </div>
+      <RenderingPlazaCodexDualProgress
+        left={{
+          label: 'Sighted',
+          value: sightedCount,
+          max: totalCount,
+          ariaLabel: 'Flora sighted',
+        }}
+        right={{
+          label: 'Studied',
+          value: studiedCount,
+          max: totalCount,
+          ariaLabel: 'Flora studied',
+        }}
+      />
 
       <div
         className={PLAZA_HERBARIUM_CATEGORY_TAB_BAR_CLASS_NAME}

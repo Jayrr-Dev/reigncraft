@@ -1,5 +1,6 @@
 'use client';
 
+import { RenderingPlazaCodexDualProgress } from '@/components/home/components/renderingPlazaCodexDualProgress';
 import { RenderingPlazaPathologyGuideDetailView } from '@/components/home/components/renderingPlazaPathologyGuideDetailView';
 import { DEFINING_PLAZA_PATHOLOGY_PANEL_SUBTITLE } from '@/components/home/domains/definingPlazaPathologyGuideConstants';
 import {

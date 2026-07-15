@@ -16,18 +16,17 @@ import {
   groupingWorldBuildingPlacedBlocksByTileColumn,
   type GroupingWorldBuildingPlacedBlocksTileColumn,
 } from '@/components/world/building/domains/groupingWorldBuildingPlacedBlocksByTileColumn';
-import { usingWorldPlazaPlacedBlockRenderCullBounds } from '@/components/world/building/hooks/usingWorldPlazaPlacedBlockRenderCullBounds';
 import { usingWorldPlazaPerformanceProfile } from '@/components/world/components/providingWorldPlazaPerformanceProfile';
 import { computingWorldDepthSortKey } from '@/components/world/depth';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
-import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import { usingWorldPlazaDayNightSunState } from '@/components/world/hooks/usingWorldPlazaDayNightSunState';
 import {
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore,
   usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags,
 } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
 import type { Graphics } from 'pixi.js';
-import { memo, useCallback, useMemo, type RefObject } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 
 /**
  * Renders block shadows with blur only on the cast away from the object.
@@ -40,8 +39,8 @@ import { memo, useCallback, useMemo, type RefObject } from 'react';
 
 export type RenderingWorldPlazaPlacedBlockGroundShadowsProps = {
   placedBlocks: DefiningWorldBuildingPlacedBlock[];
-  /** Live player position for snapped column mount culling. */
-  playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
+  /** Snapped tile window; columns outside stay unmounted. */
+  cullBounds: DefiningWorldPlazaVisibleTileBounds;
   /** Multiplier applied to the default ground shadow opacity. */
   shadowAlphaScale?: number;
 };
@@ -136,15 +135,13 @@ const RenderingWorldPlazaPlacedBlockTileColumnGroundShadows = memo(
 
 export function RenderingWorldPlazaPlacedBlockGroundShadows({
   placedBlocks,
-  playerPositionRef,
+  cullBounds,
   shadowAlphaScale = 1,
 }: RenderingWorldPlazaPlacedBlockGroundShadowsProps): React.JSX.Element | null {
   const renderLayerFlags =
     usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags();
   const performanceProfile = usingWorldPlazaPerformanceProfile();
   const sunState = usingWorldPlazaDayNightSunState();
-  const cullBounds =
-    usingWorldPlazaPlacedBlockRenderCullBounds(playerPositionRef);
   const shadowAlpha =
     DEFINING_WORLD_BUILDING_PLACED_BLOCK_GROUND_SHADOW_ALPHA *
     shadowAlphaScale *

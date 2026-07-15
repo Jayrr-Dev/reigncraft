@@ -12,20 +12,19 @@ import {
 } from '@/components/world/building/domains/groupingWorldBuildingPlacedBlocksByTileColumn';
 import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
 import { checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility } from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
-import { usingWorldPlazaPlacedBlockRenderCullBounds } from '@/components/world/building/hooks/usingWorldPlazaPlacedBlockRenderCullBounds';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
-import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import {
   checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabledFromStore,
   usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags,
 } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
 import type { Graphics } from 'pixi.js';
-import { memo, useCallback, useMemo, type RefObject } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 
 export type RenderingWorldPlazaPlacedBlocksProps = {
   placedBlocks: DefiningWorldBuildingPlacedBlock[];
-  /** Live player position for snapped column mount culling. */
-  playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
+  /** Snapped tile window; columns outside stay unmounted. */
+  cullBounds: DefiningWorldPlazaVisibleTileBounds;
   /** When below 1, entire columns render semi-transparent (claim mode). */
   blockColumnAlpha?: number;
 };
@@ -102,13 +101,11 @@ const RenderingWorldPlazaPlacedBlockTileColumn = memo(
  */
 export function RenderingWorldPlazaPlacedBlocks({
   placedBlocks,
-  playerPositionRef,
+  cullBounds,
   blockColumnAlpha = 1,
 }: RenderingWorldPlazaPlacedBlocksProps): React.JSX.Element | null {
   const renderLayerFlags =
     usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags();
-  const cullBounds =
-    usingWorldPlazaPlacedBlockRenderCullBounds(playerPositionRef);
   const placedBlocksInCullWindow = useMemo(
     () =>
       filteringWorldBuildingPlacedBlocksInTileBounds(placedBlocks, cullBounds),
