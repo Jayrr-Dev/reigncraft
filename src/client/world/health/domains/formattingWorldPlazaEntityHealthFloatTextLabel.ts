@@ -15,6 +15,11 @@ import type {
   DefiningWorldPlazaDamageOutcomeTier,
   DefiningWorldPlazaEntityDamageKind,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import {
+  DEFINING_WORLD_PLAZA_FISHING_CATCH_RARITY_FLOAT_TEXT_COLOR,
+  formattingWorldPlazaFishingCatchRarityFloatLabel,
+} from '@/components/world/fishing/domains/definingWorldPlazaFishingCatchRarityFloatConstants';
+import type { DefiningWorldPlazaInventoryItemRarity } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
 
 function resolvingWorldPlazaEntityHealthBeneficialTierLabel(
   outcomeTier: DefiningWorldPlazaDamageOutcomeTier | null | undefined
@@ -54,9 +59,11 @@ export function isWorldPlazaEntityHealthFloatDamageKind(
 export function formattingWorldPlazaEntityHealthFloatTextAmount({
   kind,
   amount,
-}: Pick<DefiningWorldPlazaEntityHealthFloatText, 'kind' | 'amount'>):
-  | string
-  | null {
+  rarity,
+}: Pick<
+  DefiningWorldPlazaEntityHealthFloatText,
+  'kind' | 'amount' | 'rarity'
+>): string | null {
   const roundedAmount = Math.max(0, Math.round(amount));
 
   if (kind === 'blocked') {
@@ -65,6 +72,14 @@ export function formattingWorldPlazaEntityHealthFloatTextAmount({
 
   if (kind === 'miss') {
     return 'Miss';
+  }
+
+  if (kind === 'fishing_catch_rarity') {
+    if (rarity === null || rarity === undefined) {
+      return null;
+    }
+
+    return formattingWorldPlazaFishingCatchRarityFloatLabel(rarity);
   }
 
   if (kind === 'health_scale') {
@@ -97,13 +112,15 @@ export function formattingWorldPlazaEntityHealthFloatTextLabel({
   amount,
   damageKind,
   outcomeTier,
+  rarity,
 }: Pick<
   DefiningWorldPlazaEntityHealthFloatText,
-  'kind' | 'amount' | 'damageKind' | 'outcomeTier'
+  'kind' | 'amount' | 'damageKind' | 'outcomeTier' | 'rarity'
 >): string {
   const amountLabel = formattingWorldPlazaEntityHealthFloatTextAmount({
     kind,
     amount,
+    rarity,
   });
 
   if (amountLabel === null) {
@@ -114,7 +131,7 @@ export function formattingWorldPlazaEntityHealthFloatTextLabel({
     return '';
   }
 
-  if (kind === 'miss') {
+  if (kind === 'miss' || kind === 'fishing_catch_rarity') {
     return amountLabel;
   }
 
@@ -249,6 +266,10 @@ export function resolvingWorldPlazaEntityHealthFloatTextClassName(
     return 'plaza-combat-float-item-gain text-poster-gold';
   }
 
+  if (kind === 'fishing_catch_rarity') {
+    return 'plaza-combat-float-fishing-catch';
+  }
+
   const tierDamageClassName =
     resolvingWorldPlazaEntityHealthFloatTextKindDamageClassName(kind);
 
@@ -260,10 +281,23 @@ export function resolvingWorldPlazaEntityHealthFloatTextClassName(
 }
 
 /**
+ * Resolves the inline text color for a fishing rarity float.
+ */
+export function resolvingWorldPlazaFishingCatchRarityFloatTextColor(
+  rarity: DefiningWorldPlazaInventoryItemRarity | null | undefined
+): string | null {
+  if (rarity === null || rarity === undefined) {
+    return null;
+  }
+
+  return DEFINING_WORLD_PLAZA_FISHING_CATCH_RARITY_FLOAT_TEXT_COLOR[rarity];
+}
+
+/**
  * Whether a float kind should use the display font styling.
  */
 export function shouldWorldPlazaEntityHealthFloatTextUseDisplayFont(
-  _kind: DefiningWorldPlazaEntityHealthFloatTextKind
+  kind: DefiningWorldPlazaEntityHealthFloatTextKind
 ): boolean {
-  return false;
+  return kind === 'fishing_catch_rarity';
 }

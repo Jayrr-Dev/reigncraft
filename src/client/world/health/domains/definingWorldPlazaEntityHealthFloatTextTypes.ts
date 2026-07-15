@@ -2,6 +2,7 @@ import type {
   DefiningWorldPlazaDamageOutcomeTier,
   DefiningWorldPlazaEntityDamageKind,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import type { DefiningWorldPlazaInventoryItemRarity } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
 
 /** Visual category for a floating health combat number. */
 export type DefiningWorldPlazaEntityHealthFloatTextKind =
@@ -22,7 +23,8 @@ export type DefiningWorldPlazaEntityHealthFloatTextKind =
   | 'miss'
   | 'study'
   | 'loyalty'
-  | 'item_gain';
+  | 'item_gain'
+  | 'fishing_catch_rarity';
 
 /** One ephemeral combat float above the local player. */
 export type DefiningWorldPlazaEntityHealthFloatText = {
@@ -32,6 +34,8 @@ export type DefiningWorldPlazaEntityHealthFloatText = {
   damageKind: DefiningWorldPlazaEntityDamageKind | null;
   /** Inventory item type when {@link kind} is `item_gain` (craft refunds, etc.). */
   itemTypeId?: string | null;
+  /** Catch rarity when {@link kind} is `fishing_catch_rarity`. */
+  rarity?: DefiningWorldPlazaInventoryItemRarity | null;
   /** Outcome tier when heal/shield amounts were rolled statistically. */
   outcomeTier?: DefiningWorldPlazaDamageOutcomeTier | null;
   /** Standard-deviation distance from expected when the float came from a roll. */

@@ -13,6 +13,8 @@ import type { DefiningWorldPlazaRemotePlayer } from '@/components/world/domains/
 import type { DefiningWorldPlazaPlayerRenderPosition } from '@/components/world/domains/definingWorldPlazaPlayerRenderPosition';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import { DEFINING_WORLD_PLAZA_FISHING_CATCH_RARITY_FLOAT_ICON_PX } from '@/components/world/fishing/domains/definingWorldPlazaFishingCatchRarityFloatConstants';
+import { resolvingWorldPlazaFishingRaritySpriteSheetIcon } from '@/components/world/fishing/domains/definingWorldPlazaFishingRaritySpriteSheetConstants';
 import {
   computingWorldPlazaEntityHealthDamageFloatAnimationDurationSec,
   computingWorldPlazaEntityHealthDamageFloatFontSizePx,
@@ -23,12 +25,15 @@ import {
   formattingWorldPlazaEntityHealthFloatTextAmount,
   isWorldPlazaEntityHealthFloatDamageKind,
   resolvingWorldPlazaEntityHealthFloatTextClassName,
+  resolvingWorldPlazaFishingCatchRarityFloatTextColor,
   shouldWorldPlazaEntityHealthFloatTextUseDisplayFont,
 } from '@/components/world/health/domains/formattingWorldPlazaEntityHealthFloatTextLabel';
 import { mappingWorldPlazaEntityHealthFloatTextIcon } from '@/components/world/health/domains/mappingWorldPlazaEntityHealthFloatTextIcon';
 import { resolvingWorldPlazaEntityHealthFloatTextScreenPoint } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthFloatTextScreenPoint';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
+import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
+import { STYLING_WORLD_PLAZA_INVENTORY_SLOT_IMAGE_ICON_CLASS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { useLayoutEffect, useRef } from 'react';
 
 const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_HIDDEN_TRANSFORM =
@@ -45,10 +50,36 @@ const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_ITEM_GAIN_GLYPH_STYLE = {
   height: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INGREDIENT_ICON_PX,
 } as const;
 
+const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_FISHING_RARITY_GLYPH_STYLE = {
+  width: DEFINING_WORLD_PLAZA_FISHING_CATCH_RARITY_FLOAT_ICON_PX,
+  height: DEFINING_WORLD_PLAZA_FISHING_CATCH_RARITY_FLOAT_ICON_PX,
+} as const;
+
 function computingWorldPlazaEntityHealthFloatTextIconSizePx(
   fontSizePx: number
 ): number {
   return Math.max(12, Math.round(fontSizePx * 0.82));
+}
+
+function computingWorldPlazaFishingRarityFloatSpriteSheetStyle(
+  spriteSheet: DefiningWorldPlazaInventorySpriteSheetIcon
+): React.CSSProperties {
+  const backgroundPositionX =
+    spriteSheet.columnCount <= 1
+      ? 0
+      : (spriteSheet.columnIndex / (spriteSheet.columnCount - 1)) * 100;
+  const backgroundPositionY =
+    spriteSheet.rowCount <= 1
+      ? 0
+      : (spriteSheet.rowIndex / (spriteSheet.rowCount - 1)) * 100;
+
+  return {
+    ...RENDERING_WORLD_PLAZA_ENTITY_HEALTH_FISHING_RARITY_GLYPH_STYLE,
+    backgroundImage: `url("${spriteSheet.spriteSheetUrl}")`,
+    backgroundPosition: `${backgroundPositionX}% ${backgroundPositionY}%`,
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: `${spriteSheet.columnCount * 100}% ${spriteSheet.rowCount * 100}%`,
+  };
 }
 
 export interface RenderingWorldPlazaEntityHealthFloatTextsProps {
@@ -191,6 +222,8 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
           floatText.kind === 'heal' || floatText.kind === 'heal_regen';
         const isStudyFloat = floatText.kind === 'study';
         const isItemGainFloat = floatText.kind === 'item_gain';
+        const isFishingCatchRarityFloat =
+          floatText.kind === 'fishing_catch_rarity';
         const isHealthScaleFloat = floatText.kind === 'health_scale';
         const healVisualStyle =
           isHealFloat || isHealthScaleFloat
@@ -209,11 +242,15 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
           ? 18 + Math.max(0, Math.round(floatText.amount) - 1) * 3
           : null;
         const itemGainFontSizePx = isItemGainFloat ? 18 : null;
+        const fishingCatchRarityFontSizePx = isFishingCatchRarityFloat
+          ? 16
+          : null;
         const resolvedFontSizePx =
           damageFontSizePx ??
           healVisualStyle?.fontSizePx ??
           studyFontSizePx ??
           itemGainFontSizePx ??
+          fishingCatchRarityFontSizePx ??
           18;
         const amountLabel =
           formattingWorldPlazaEntityHealthFloatTextAmount(floatText);
@@ -228,6 +265,15 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
           floatText.itemTypeId.length > 0
             ? floatText.itemTypeId
             : null;
+        const fishingRaritySpriteSheet =
+          isFishingCatchRarityFloat &&
+          floatText.rarity !== null &&
+          floatText.rarity !== undefined
+            ? resolvingWorldPlazaFishingRaritySpriteSheetIcon(floatText.rarity)
+            : null;
+        const fishingCatchRarityTextColor = isFishingCatchRarityFloat
+          ? resolvingWorldPlazaFishingCatchRarityFloatTextColor(floatText.rarity)
+          : null;
 
         return (
           <div
@@ -272,6 +318,9 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
                       textShadow: 'none',
                     }
                   : {}),
+                ...(fishingCatchRarityTextColor !== null
+                  ? { color: fishingCatchRarityTextColor }
+                  : {}),
               }}
             >
               {itemTypeId !== null ? (
@@ -292,6 +341,14 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
                     iconClassName="flex size-full items-center justify-center"
                   />
                 </span>
+              ) : fishingRaritySpriteSheet !== null ? (
+                <span
+                  className={`inline-flex shrink-0 items-center justify-center overflow-hidden leading-none ${STYLING_WORLD_PLAZA_INVENTORY_SLOT_IMAGE_ICON_CLASS}`}
+                  style={computingWorldPlazaFishingRarityFloatSpriteSheetStyle(
+                    fishingRaritySpriteSheet
+                  )}
+                  aria-hidden
+                />
               ) : (
                 <Icon
                   icon={mappingWorldPlazaEntityHealthFloatTextIcon(floatText)}
@@ -306,7 +363,9 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
                   className={
                     isItemGainFloat
                       ? 'tabular-nums text-poster-gold [paint-order:stroke_fill] [-webkit-text-stroke:1px_rgba(20,37,43,0.95)] [text-shadow:0_2px_0_rgba(20,37,43,0.95)]'
-                      : 'tabular-nums'
+                      : isFishingCatchRarityFloat
+                        ? 'tracking-[0.04em]'
+                        : 'tabular-nums'
                   }
                 >
                   {amountLabel}

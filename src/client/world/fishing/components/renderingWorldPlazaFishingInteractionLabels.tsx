@@ -10,10 +10,14 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME } from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
 import { RenderingWorldPlazaFishingCastProgressRing } from '@/components/world/fishing/components/renderingWorldPlazaFishingCastProgressRing';
-import { DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME } from '@/components/world/fishing/domains/definingWorldPlazaFishingReelOpportunityConstants';
+import {
+  DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_GLOW_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME,
+} from '@/components/world/fishing/domains/definingWorldPlazaFishingReelOpportunityConstants';
 import { formattingWorldPlazaFishingTileSelectionKey } from '@/components/world/fishing/domains/formattingWorldPlazaFishingTileSelectionKey';
 import type { ListingWorldPlazaFishingTilesInInteractionRangeEntry } from '@/components/world/fishing/domains/listingWorldPlazaFishingTilesInInteractionRange';
 import { listingWorldPlazaFishingTilesInInteractionRange } from '@/components/world/fishing/domains/listingWorldPlazaFishingTilesInInteractionRange';
+import { gettingWorldPlazaFishingReelHold } from '@/components/world/fishing/domains/managingWorldPlazaFishingReelCastState';
 import { checkingWorldPlazaTimedInteractionProgressRingVisible } from '@/components/world/interaction/domains/checkingWorldPlazaTimedInteractionProgressMatchesTarget';
 import {
   DEFINING_WORLD_PLAZA_TIMED_INTERACTION_LABEL_RING_SLOT_CLASS_NAME,
@@ -190,10 +194,18 @@ export function RenderingWorldPlazaFishingInteractionLabels({
             );
           const isReelReady =
             isCasting && reelOpportunityActiveRef.current === true;
+          const isReelHeld = isReelReady && gettingWorldPlazaFishingReelHold();
+          const shouldShowLabel = !isCasting || isReelReady;
 
+          reelButtonElement.hidden = !shouldShowLabel;
+          reelButtonElement.textContent = isCasting ? 'Reel' : 'Fish';
           reelButtonElement.classList.toggle(
             DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME,
-            isReelReady
+            isReelReady && !isReelHeld
+          );
+          reelButtonElement.classList.toggle(
+            DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_GLOW_CLASS_NAME,
+            isReelHeld
           );
         }
       }
@@ -267,6 +279,14 @@ export function RenderingWorldPlazaFishingInteractionLabels({
                 ref={(element) => {
                   if (element) {
                     reelButtonElementByTileKeyRef.current.set(tileKey, element);
+                    // Overlay frame owns label text/visibility; seed Fish until first tick.
+                    if (isCasting) {
+                      element.hidden = true;
+                      element.textContent = '';
+                    } else {
+                      element.hidden = false;
+                      element.textContent = 'Fish';
+                    }
                     return;
                   }
 
@@ -279,7 +299,7 @@ export function RenderingWorldPlazaFishingInteractionLabels({
                   DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME
                 }
                 onPointerDown={(event) => {
-                  if (!isCasting) {
+                  if (!isCasting || reelOpportunityActiveRef.current !== true) {
                     return;
                   }
 
@@ -319,15 +339,17 @@ export function RenderingWorldPlazaFishingInteractionLabels({
                   event.stopPropagation();
 
                   if (isCasting) {
+                    if (reelOpportunityActiveRef.current !== true) {
+                      return;
+                    }
+
                     onReelRef.current(entry);
                     return;
                   }
 
                   onFishRef.current(entry);
                 }}
-              >
-                {isCasting ? 'Reel' : 'Fish'}
-              </button>
+              ></button>
               {isCasting ? (
                 <div
                   className={

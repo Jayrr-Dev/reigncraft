@@ -15,6 +15,7 @@ import type {
   DefiningWorldPlazaEntityDamageKind,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { isWorldPlazaEntityHealthFloatDamageKind } from '@/components/world/health/domains/formattingWorldPlazaEntityHealthFloatTextLabel';
+import type { DefiningWorldPlazaInventoryItemRarity } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
 
 let managingWorldPlazaEntityHealthFloatTextNextId = 0;
 
@@ -24,6 +25,7 @@ export type ManagingWorldPlazaEntityHealthFloatTextEnqueueParams = {
   amount: number;
   damageKind?: DefiningWorldPlazaEntityDamageKind | null;
   itemTypeId?: string | null;
+  rarity?: DefiningWorldPlazaInventoryItemRarity | null;
   outcomeTier?: DefiningWorldPlazaDamageOutcomeTier | null;
   deviationScore?: number | null;
   nowMs: number;
@@ -69,6 +71,7 @@ export function enqueueingWorldPlazaEntityHealthFloatText({
   amount,
   damageKind = null,
   itemTypeId = null,
+  rarity = null,
   outcomeTier = null,
   deviationScore = null,
   nowMs,
@@ -88,6 +91,7 @@ export function enqueueingWorldPlazaEntityHealthFloatText({
     kind !== 'damage_softened' &&
     kind !== 'damage_dodged' &&
     kind !== 'damage_roll_blocked' &&
+    kind !== 'fishing_catch_rarity' &&
     amount < DEFINING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_MIN_AMOUNT
   ) {
     return {
@@ -117,12 +121,20 @@ export function enqueueingWorldPlazaEntityHealthFloatText({
     };
   }
 
+  if (kind === 'fishing_catch_rarity' && rarity === null) {
+    return {
+      floats: activeFloats,
+      lastBlockedFloatAtMs,
+    };
+  }
+
   const nextFloat: DefiningWorldPlazaEntityHealthFloatText = {
     id: creatingWorldPlazaEntityHealthFloatTextId(),
     kind,
     amount,
     damageKind,
     itemTypeId: kind === 'item_gain' ? itemTypeId : null,
+    rarity: kind === 'fishing_catch_rarity' ? rarity : null,
     outcomeTier,
     deviationScore,
     createdAtMs: nowMs,

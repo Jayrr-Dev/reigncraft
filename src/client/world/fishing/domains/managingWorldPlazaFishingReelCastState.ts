@@ -130,6 +130,10 @@ export function settingWorldPlazaFishingReelHold(isHoldingReel: boolean): void {
   };
 }
 
+export function gettingWorldPlazaFishingReelHold(): boolean {
+  return managingWorldPlazaFishingReelCastState.isHoldingReel;
+}
+
 export type ApplyingWorldPlazaFishingReelEscapeReductionResult =
   | 'applied'
   | 'capped'
