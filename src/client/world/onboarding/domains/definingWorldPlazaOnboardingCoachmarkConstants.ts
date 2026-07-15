@@ -32,6 +32,7 @@ export type WorldPlazaOnboardingCoachmarkStepId =
   | 'codex'
   | 'herbarium'
   | 'study'
+  | 'transform'
   | 'minimap'
   | 'build'
   | 'claim'
@@ -56,6 +57,7 @@ export type WorldPlazaOnboardingCoachmarkAnchorId =
   | 'codex-book'
   | 'cook-interaction'
   | 'study-interaction'
+  | 'transform-control'
   | 'minimap-orb'
   | 'profile-panel'
   | 'pets-roster';
@@ -81,6 +83,7 @@ export type WorldPlazaOnboardingCoachmarkAdvanceEvent =
   | 'codex-open'
   | 'herbarium-codex-open'
   | 'study-start'
+  | 'transform-open'
   | 'minimap-open'
   | 'build-mode-select'
   | 'claim-mode-select'

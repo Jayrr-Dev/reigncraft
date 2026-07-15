@@ -1,9 +1,7 @@
 'use client';
 
-import {
-  DEFINING_PLAZA_BESTIARY_PORTRAIT_CARD_ZOOM,
-  DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER,
-} from '@/components/home/domains/definingPlazaBestiarySpritePortraitConstants';
+import { DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER } from '@/components/home/domains/definingPlazaBestiarySpritePortraitConstants';
+import { resolvingPlazaBestiaryPortraitZoom } from '@/components/home/domains/resolvingPlazaBestiaryPortraitZoom';
 import { resolvingPlazaBestiarySpritePortrait } from '@/components/home/domains/resolvingPlazaBestiarySpritePortrait';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { useMemo } from 'react';
@@ -12,7 +10,7 @@ export type RenderingPlazaBestiarySpritePortraitProps = {
   speciesId: DefiningWildlifeSpeciesId;
   /** Silhouette hides identity for locked entries, Pokedex style. */
   variant: 'silhouette' | 'revealed';
-  /** Zoom on the cropped frame; defaults to the card zoom. */
+  /** Zoom on the cropped frame; defaults to species card zoom. */
   zoom?: number;
   className?: string;
 };
@@ -25,13 +23,15 @@ export type RenderingPlazaBestiarySpritePortraitProps = {
 export function RenderingPlazaBestiarySpritePortrait({
   speciesId,
   variant,
-  zoom = DEFINING_PLAZA_BESTIARY_PORTRAIT_CARD_ZOOM,
+  zoom,
   className = '',
 }: RenderingPlazaBestiarySpritePortraitProps): React.JSX.Element | null {
   const portrait = useMemo(
     () => resolvingPlazaBestiarySpritePortrait(speciesId),
     [speciesId]
   );
+  const resolvedZoom =
+    zoom ?? resolvingPlazaBestiaryPortraitZoom(speciesId, 'card');
 
   if (!portrait) {
     return null;
@@ -45,7 +45,7 @@ export function RenderingPlazaBestiarySpritePortrait({
         className={`pointer-events-none relative block ${className}`.trim()}
         aria-hidden
         style={{
-          transform: `scale(${zoom})`,
+          transform: `scale(${resolvedZoom})`,
           filter: isSilhouette
             ? DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER
             : 'drop-shadow(0 2px 3px rgba(0,0,0,0.45))',
@@ -80,7 +80,7 @@ export function RenderingPlazaBestiarySpritePortrait({
         className={`pointer-events-none flex items-center justify-center ${className}`.trim()}
         aria-hidden
         style={{
-          transform: `scale(${zoom})`,
+          transform: `scale(${resolvedZoom})`,
           filter: isSilhouette
             ? DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER
             : 'drop-shadow(0 2px 3px rgba(0,0,0,0.45))',
@@ -103,7 +103,7 @@ export function RenderingPlazaBestiarySpritePortrait({
         backgroundSize: portrait.backgroundSizeCss,
         backgroundPosition: portrait.backgroundPositionCss,
         backgroundRepeat: 'no-repeat',
-        transform: `scale(${zoom})`,
+        transform: `scale(${resolvedZoom})`,
         filter:
           variant === 'silhouette'
             ? DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER

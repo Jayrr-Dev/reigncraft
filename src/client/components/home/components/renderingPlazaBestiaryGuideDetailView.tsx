@@ -6,9 +6,9 @@ import {
   RenderingPlazaCodexBestiaryExtraDetailSection,
   RenderingPlazaCodexStudyDetailSection,
 } from '@/components/home/components/renderingPlazaCodexStudyDetailSections';
-import { DEFINING_PLAZA_BESTIARY_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaBestiarySpritePortraitConstants';
 import { LABELING_PLAZA_BESTIARY_PLAYABLE_UNLOCKED } from '@/components/home/domains/definingPlazaBestiaryStudyTier';
 import type { PlazaBestiaryGuideDisplayEntry } from '@/components/home/domains/resolvingPlazaBestiaryGuideDisplayEntries';
+import { resolvingPlazaBestiaryPortraitZoom } from '@/components/home/domains/resolvingPlazaBestiaryPortraitZoom';
 import {
   checkingPlazaCodexStudyTierUnlocked,
   formattingPlazaCodexStudyCountProgress,
@@ -110,7 +110,10 @@ export function RenderingPlazaBestiaryGuideDetailView({
             <RenderingPlazaBestiarySpritePortrait
               speciesId={entry.speciesId}
               variant="revealed"
-              zoom={DEFINING_PLAZA_BESTIARY_PORTRAIT_DETAIL_ZOOM}
+              zoom={resolvingPlazaBestiaryPortraitZoom(
+                entry.speciesId,
+                'detail'
+              )}
               className="size-24 sm:size-28"
             />
             <span className="absolute left-3 top-3 flex size-9 items-center justify-center rounded-full border border-poster-gold/50 bg-poster-teal-deep/85 text-parchment shadow-[0_1px_3px_rgba(0,0,0,0.4)]">

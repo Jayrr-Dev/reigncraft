@@ -25,6 +25,7 @@ export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_CONTEXTUAL_ORDER: readonl
     'codex',
     'herbarium',
     'study',
+    'transform',
     'minimap',
     'build',
     'claim',
@@ -249,6 +250,18 @@ export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_REGISTRY: readonly WorldP
       targetAnchorId: 'study-interaction',
       advanceEvent: 'study-start',
       tipPlacement: 'above',
+    },
+    {
+      id: 'transform',
+      phase: 'contextual',
+      title: 'Transform',
+      descriptionDesktop:
+        'You unlocked an animal form. Click the shell on the action bar to transform. Switching forms locks for a day, so pick carefully.',
+      descriptionMobile:
+        'You unlocked an animal form. Tap the shell on the action bar to transform. Switching forms locks for a day, so pick carefully.',
+      targetAnchorId: 'transform-control',
+      advanceEvent: 'transform-open',
+      tipPlacement: 'below',
     },
     {
       id: 'minimap',

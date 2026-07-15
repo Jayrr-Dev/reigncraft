@@ -7,6 +7,7 @@
  * @module components/world/components/renderingWorldPlazaActionBar
  */
 
+import { useUserData } from '@/components/hooks/useAuth';
 import {
   DEFINING_REIGNCRAFT_TOAST_WIDTH_PX,
   DEFINING_REIGNCRAFT_TOASTER_ID,
@@ -21,6 +22,7 @@ import { RenderingWorldPlazaExitHomeConfirmDialog } from '@/components/world/com
 import { RenderingWorldPlazaMasterVolumeMixerPanel } from '@/components/world/components/renderingWorldPlazaMasterVolumeMixerPanel';
 import { RenderingWorldPlazaMiniMapStack } from '@/components/world/components/renderingWorldPlazaMiniMapStack';
 import { RenderingWorldPlazaWorldLayerIndicator } from '@/components/world/components/renderingWorldPlazaWorldLayerIndicator';
+import { checkingWorldPlazaAvatarTransformControlVisible } from '@/components/world/domains/checkingWorldPlazaAvatarTransformControlVisible';
 import {
   DEFINING_WORLD_PLAZA_ACTION_BAR_ANCHOR_CLASS_NAME,
   DEFINING_WORLD_PLAZA_ACTION_BAR_BUTTON_ACTIVE_CLASS_NAME,
@@ -59,6 +61,11 @@ import {
   DEFINING_WORLD_PLAZA_VIEWPORT_FULLSCREEN_EXIT_LABEL,
 } from '@/components/world/domains/definingWorldPlazaViewportFullscreenConstants';
 import { STYLING_WORLD_PLAZA_ACTION_BAR_WORLD_LAYER_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaWorldLayerIndicatorConstants';
+import { listingWorldPlazaAvatarSkinOptionsForUser } from '@/components/world/domains/listingWorldPlazaAvatarSkinOptionsForUser';
+import {
+  gettingWorldPlazaBestiaryStudyCountsSnapshot,
+  subscribingWorldPlazaBestiaryDiscovery,
+} from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { resolvingWorldPlazaActionBarViewportStyles } from '@/components/world/domains/resolvingWorldPlazaActionBarViewportStyles';
 import { RenderingWorldPlazaTemperatureIndicator } from '@/components/world/health/components/renderingWorldPlazaTemperatureIndicator';
 import { RenderingWorldPlazaTemperaturePanel } from '@/components/world/health/components/renderingWorldPlazaTemperaturePanel';
@@ -85,7 +92,7 @@ import {
   UserRound,
   Users,
 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 
 /** Props for {@link RenderingWorldPlazaActionBar}. */
 export interface RenderingWorldPlazaActionBarProps {
@@ -203,7 +210,27 @@ export function RenderingWorldPlazaActionBar({
     [viewportHudScale, isMobile, isFullscreenViewport]
   );
 
+  const { data: userData } = useUserData();
   const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();
+  const studyCountsBySpeciesId = useSyncExternalStore(
+    subscribingWorldPlazaBestiaryDiscovery,
+    gettingWorldPlazaBestiaryStudyCountsSnapshot,
+    gettingWorldPlazaBestiaryStudyCountsSnapshot
+  );
+  const unlockedAvatarSkinOptions = useMemo(
+    () =>
+      listingWorldPlazaAvatarSkinOptionsForUser(
+        userData?.username,
+        userData?.alias,
+        studyCountsBySpeciesId
+      ),
+    [studyCountsBySpeciesId, userData?.alias, userData?.username]
+  );
+  const isTransformControlVisible =
+    checkingWorldPlazaAvatarTransformControlVisible(
+      unlockedAvatarSkinOptions,
+      selectedAvatarSkinId
+    );
   const { isMinimapPreferenceEnabled, settingMinimapEnabled } =
     usingWorldPlazaMinimapEnabled();
   const [isTransformPanelOpen, setIsTransformPanelOpen] = useState(false);
@@ -229,6 +256,14 @@ export function RenderingWorldPlazaActionBar({
     setIsCodexMenuOpen(false);
     settingMinimapEnabled(false);
   }, [isChatOpen, settingMinimapEnabled]);
+
+  useEffect(() => {
+    if (isTransformControlVisible) {
+      return;
+    }
+
+    setIsTransformPanelOpen(false);
+  }, [isTransformControlVisible]);
 
   useEffect(() => {
     if (
@@ -512,48 +547,54 @@ export function RenderingWorldPlazaActionBar({
                   </button>
                 ) : null}
 
-                <div
-                  className={
-                    STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_ANCHOR_CLASS_NAME
-                  }
-                >
-                  <button
-                    type="button"
-                    aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_TRANSFORM}
-                    aria-pressed={isTransformPanelOpen}
-                    aria-expanded={isTransformPanelOpen}
-                    onClick={() => {
-                      setIsHungerPanelOpen(false);
-                      setIsTemperaturePanelOpen(false);
-                      setIsDayNightPanelOpen(false);
-                      setIsSoundMixerOpen(false);
-                      setIsCodexMenuOpen(false);
-                      settingMinimapEnabled(false);
-                      setIsTransformPanelOpen((wasOpen) => !wasOpen);
-                    }}
-                    className={stylingWorldPlazaActionBarButton(
-                      isTransformPanelOpen
-                    )}
-                    style={viewportStyles.buttonStyle}
+                {isTransformControlVisible ? (
+                  <div
+                    className={
+                      STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_ANCHOR_CLASS_NAME
+                    }
                   >
-                    <Shell
-                      className={
-                        DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME
-                      }
-                      style={viewportStyles.iconStyle}
-                      aria-hidden="true"
-                    />
-                  </button>
-
-                  {isTransformPanelOpen ? (
-                    <RenderingWorldPlazaActionBarTransformPanel
-                      selectedAvatarSkinId={selectedAvatarSkinId}
-                      onSelectSkin={() => {
-                        setIsTransformPanelOpen(false);
+                    <button
+                      type="button"
+                      {...{
+                        [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]:
+                          'transform-control',
                       }}
-                    />
-                  ) : null}
-                </div>
+                      aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_TRANSFORM}
+                      aria-pressed={isTransformPanelOpen}
+                      aria-expanded={isTransformPanelOpen}
+                      onClick={() => {
+                        setIsHungerPanelOpen(false);
+                        setIsTemperaturePanelOpen(false);
+                        setIsDayNightPanelOpen(false);
+                        setIsSoundMixerOpen(false);
+                        setIsCodexMenuOpen(false);
+                        settingMinimapEnabled(false);
+                        setIsTransformPanelOpen((wasOpen) => !wasOpen);
+                      }}
+                      className={stylingWorldPlazaActionBarButton(
+                        isTransformPanelOpen
+                      )}
+                      style={viewportStyles.buttonStyle}
+                    >
+                      <Shell
+                        className={
+                          DEFINING_WORLD_PLAZA_ACTION_BAR_ICON_CLASS_NAME
+                        }
+                        style={viewportStyles.iconStyle}
+                        aria-hidden="true"
+                      />
+                    </button>
+
+                    {isTransformPanelOpen ? (
+                      <RenderingWorldPlazaActionBarTransformPanel
+                        selectedAvatarSkinId={selectedAvatarSkinId}
+                        onSelectSkin={() => {
+                          setIsTransformPanelOpen(false);
+                        }}
+                      />
+                    ) : null}
+                  </div>
+                ) : null}
 
                 {hungerHud ? (
                   <span

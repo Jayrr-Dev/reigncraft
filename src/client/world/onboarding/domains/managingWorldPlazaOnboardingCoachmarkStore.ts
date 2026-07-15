@@ -24,6 +24,7 @@ export type WorldPlazaOnboardingCoachmarkSessionSignals = {
   readonly hasCodexOpened: boolean;
   readonly hasHerbariumCodexOpened: boolean;
   readonly hasStudyStarted: boolean;
+  readonly hasTransformOpened: boolean;
   readonly hasMinimapOpened: boolean;
   readonly hasBuildModeSelected: boolean;
   readonly hasClaimModeSelected: boolean;
@@ -57,6 +58,7 @@ const MANAGING_WORLD_PLAZA_ONBOARDING_COACHMARK_EMPTY_SESSION_SIGNALS: WorldPlaz
     hasCodexOpened: false,
     hasHerbariumCodexOpened: false,
     hasStudyStarted: false,
+    hasTransformOpened: false,
     hasMinimapOpened: false,
     hasBuildModeSelected: false,
     hasClaimModeSelected: false,
@@ -339,6 +341,13 @@ export function notifyingWorldPlazaOnboardingProfileOpened(): void {
 export function notifyingWorldPlazaOnboardingPetsOpened(): void {
   patchingWorldPlazaOnboardingCoachmarkSessionSignals({
     hasPetsOpened: true,
+  });
+}
+
+/** Records that the character transform control was opened during this session. */
+export function notifyingWorldPlazaOnboardingTransformOpened(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasTransformOpened: true,
   });
 }
 

@@ -1,13 +1,21 @@
 'use client';
 
+import { useUserData } from '@/components/hooks/useAuth';
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
+import { checkingWorldPlazaAvatarTransformControlVisible } from '@/components/world/domains/checkingWorldPlazaAvatarTransformControlVisible';
 import {
   DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID,
   type DefiningWorldPlazaHudToolbarModeId,
 } from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { listingWorldPlazaAvatarSkinOptionsForUser } from '@/components/world/domains/listingWorldPlazaAvatarSkinOptionsForUser';
+import {
+  gettingWorldPlazaBestiaryStudyCountsSnapshot,
+  subscribingWorldPlazaBestiaryDiscovery,
+} from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import type { DefiningWorldPlazaEntityTemperatureComfortBand } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
 import { usingWorldPlazaMinimapEnabled } from '@/components/world/hooks/usingWorldPlazaMinimapEnabled';
+import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
 import { checkingWorldPlazaInventoryItemIsWeaponOrTool } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsWeaponOrTool';
 import { DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import {
@@ -42,6 +50,7 @@ import {
   notifyingWorldPlazaOnboardingStaminaDepleted,
   notifyingWorldPlazaOnboardingStatusEffectClicked,
   notifyingWorldPlazaOnboardingTemperatureClicked,
+  notifyingWorldPlazaOnboardingTransformOpened,
   subscribingWorldPlazaOnboardingCoachmarks,
 } from '@/components/world/onboarding/domains/managingWorldPlazaOnboardingCoachmarkStore';
 import {
@@ -58,6 +67,7 @@ import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/
 import {
   useEffect,
   useEffectEvent,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -138,6 +148,27 @@ export function usingWorldPlazaOnboardingCoachmarks({
   isStaminaDepleted,
   statusEffectCount,
 }: UsingWorldPlazaOnboardingCoachmarksParams): UsingWorldPlazaOnboardingCoachmarksResult {
+  const { data: userData } = useUserData();
+  const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();
+  const studyCountsBySpeciesId = useSyncExternalStore(
+    subscribingWorldPlazaBestiaryDiscovery,
+    gettingWorldPlazaBestiaryStudyCountsSnapshot,
+    gettingWorldPlazaBestiaryStudyCountsSnapshot
+  );
+  const unlockedAvatarSkinOptions = useMemo(
+    () =>
+      listingWorldPlazaAvatarSkinOptionsForUser(
+        userData?.username,
+        userData?.alias,
+        studyCountsBySpeciesId
+      ),
+    [studyCountsBySpeciesId, userData?.alias, userData?.username]
+  );
+  const isTransformControlVisible =
+    checkingWorldPlazaAvatarTransformControlVisible(
+      unlockedAvatarSkinOptions,
+      selectedAvatarSkinId
+    );
   const { isMinimapPreferenceEnabled: isMinimapOpen } =
     usingWorldPlazaMinimapEnabled();
   const onboardingSnapshot = useSyncExternalStore(
@@ -379,6 +410,14 @@ export function usingWorldPlazaOnboardingCoachmarks({
 
       if (
         target.closest(
+          `[${DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE}="transform-control"]`
+        )
+      ) {
+        notifyingWorldPlazaOnboardingTransformOpened();
+      }
+
+      if (
+        target.closest(
           `[${DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE}="hud-toolbar-craft"]`
         )
       ) {
@@ -453,6 +492,7 @@ export function usingWorldPlazaOnboardingCoachmarks({
     isHostileWildlifeNearby,
     hasRawCookableMeat,
     isMinimapOpen,
+    isTransformControlVisible,
     staminaRatio,
     isRunning,
     isStaminaDepleted,
@@ -502,6 +542,7 @@ export function usingWorldPlazaOnboardingCoachmarks({
     isMinimapOpen,
     isRunning,
     isStaminaDepleted,
+    isTransformControlVisible,
     localTemperatureCelsius,
     spritcoreInventoryQuantity,
     staminaRatio,
@@ -530,6 +571,7 @@ export function usingWorldPlazaOnboardingCoachmarks({
     liveSignals.sessionSignals.hasStatusEffectClicked,
     liveSignals.sessionSignals.hasStudyStarted,
     liveSignals.sessionSignals.hasTemperatureClicked,
+    liveSignals.sessionSignals.hasTransformOpened,
   ]);
 
   const dismissingActiveCoachmark = useEffectEvent(() => {

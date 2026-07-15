@@ -25,6 +25,7 @@ const RESOLVING_WORLD_PLAZA_ONBOARDING_TEST_EMPTY_SESSION_SIGNALS = {
   hasCodexOpened: false,
   hasHerbariumCodexOpened: false,
   hasStudyStarted: false,
+  hasTransformOpened: false,
   hasMinimapOpened: false,
   hasBuildModeSelected: false,
   hasClaimModeSelected: false,
@@ -59,6 +60,7 @@ function buildingWorldPlazaOnboardingTestLiveSignals(
     isHostileWildlifeNearby: false,
     hasRawCookableMeat: false,
     isMinimapOpen: false,
+    isTransformControlVisible: false,
     staminaRatio: 1,
     isRunning: false,
     isStaminaDepleted: false,
@@ -154,6 +156,36 @@ describe('resolvingWorldPlazaOnboardingActiveCoachmark', () => {
     expect(activeCoachmark?.id).toBe('herbarium');
   });
 
+  it('shows transform guidance when an animal form unlocks', () => {
+    const activeCoachmark = resolvingWorldPlazaOnboardingActiveCoachmark(
+      new Set([
+        'move',
+        'hotbar',
+        'action-bar',
+        'chop',
+        'forage',
+        'mine',
+        'loot',
+        'equip-tool',
+        'melee',
+        'hunger',
+        'temperature',
+        'stamina',
+        'status-effects',
+        'craft',
+        'cook',
+        'codex',
+        'herbarium',
+        'study',
+      ]),
+      buildingWorldPlazaOnboardingTestLiveSignals({
+        isTransformControlVisible: true,
+      })
+    );
+
+    expect(activeCoachmark?.id).toBe('transform');
+  });
+
   it('shows spritcore guidance when orbs are in inventory', () => {
     const activeCoachmark = resolvingWorldPlazaOnboardingActiveCoachmark(
       new Set([
@@ -175,6 +207,7 @@ describe('resolvingWorldPlazaOnboardingActiveCoachmark', () => {
         'codex',
         'herbarium',
         'study',
+        'transform',
         'minimap',
         'build',
         'claim',
@@ -215,6 +248,24 @@ describe('checkingWorldPlazaOnboardingCoachmarkAdvanceSatisfied', () => {
           sessionSignals: {
             ...RESOLVING_WORLD_PLAZA_ONBOARDING_TEST_EMPTY_SESSION_SIGNALS,
             hasCodexOpened: true,
+          },
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('completes transform when the shell control was opened', () => {
+    const definition =
+      resolvingWorldPlazaOnboardingCoachmarkDefinition('transform');
+
+    expect(
+      checkingWorldPlazaOnboardingCoachmarkAdvanceSatisfied(
+        definition,
+        buildingWorldPlazaOnboardingTestLiveSignals({
+          isTransformControlVisible: true,
+          sessionSignals: {
+            ...RESOLVING_WORLD_PLAZA_ONBOARDING_TEST_EMPTY_SESSION_SIGNALS,
+            hasTransformOpened: true,
           },
         })
       )

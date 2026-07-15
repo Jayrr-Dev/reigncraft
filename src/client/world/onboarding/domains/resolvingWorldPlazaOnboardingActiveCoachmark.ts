@@ -35,6 +35,7 @@ export type ResolvingWorldPlazaOnboardingCoachmarkLiveSignals = {
   readonly isHostileWildlifeNearby: boolean;
   readonly hasRawCookableMeat: boolean;
   readonly isMinimapOpen: boolean;
+  readonly isTransformControlVisible: boolean;
   readonly staminaRatio: number;
   readonly isRunning: boolean;
   readonly isStaminaDepleted: boolean;
@@ -91,6 +92,8 @@ function checkingWorldPlazaOnboardingContextualStepEligible(
       return liveSignals.sessionSignals.hasForagePicked;
     case 'study':
       return liveSignals.isCorpseStudyLabelVisible;
+    case 'transform':
+      return liveSignals.isTransformControlVisible;
     case 'minimap':
       return (
         liveSignals.sessionSignals.hasActionBarClicked &&
@@ -190,6 +193,8 @@ export function checkingWorldPlazaOnboardingCoachmarkAdvanceSatisfied(
       return liveSignals.sessionSignals.hasHerbariumCodexOpened;
     case 'study-start':
       return liveSignals.sessionSignals.hasStudyStarted;
+    case 'transform-open':
+      return liveSignals.sessionSignals.hasTransformOpened;
     case 'minimap-open':
       return liveSignals.sessionSignals.hasMinimapOpened;
     case 'build-mode-select':
