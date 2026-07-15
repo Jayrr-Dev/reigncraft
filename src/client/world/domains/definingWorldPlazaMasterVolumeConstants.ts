@@ -21,6 +21,31 @@ export const LABELING_WORLD_PLAZA_ACTION_BAR_SETTINGS = 'Settings' as const;
 /** Accessible label for the settings dropdown (volume + gameplay toggles). */
 export const LABELING_WORLD_PLAZA_MASTER_VOLUME_MIXER = 'Settings' as const;
 
+/** Settings dropdown badge views. */
+export type WorldPlazaSettingsViewId = 'main' | 'sound' | 'toggles';
+
+/** One badge in the settings view strip. */
+export type WorldPlazaSettingsViewDefinition = {
+  id: WorldPlazaSettingsViewId;
+  label: string;
+};
+
+/** Ordered Main / Sound / Toggles badge buttons. */
+export const DEFINING_WORLD_PLAZA_SETTINGS_VIEW_REGISTRY: readonly WorldPlazaSettingsViewDefinition[] =
+  [
+    { id: 'main', label: 'Main' },
+    { id: 'sound', label: 'Sound' },
+    { id: 'toggles', label: 'Toggles' },
+  ] as const;
+
+/** Default settings badge view when the dropdown opens. */
+export const DEFINING_WORLD_PLAZA_SETTINGS_DEFAULT_VIEW_ID: WorldPlazaSettingsViewId =
+  'main';
+
+/** Accessible label for the settings view badge strip. */
+export const LABELING_WORLD_PLAZA_SETTINGS_VIEW_LIST =
+  'Settings sections' as const;
+
 /** Label for the music volume slider. */
 export const LABELING_WORLD_PLAZA_MASTER_VOLUME_SLIDER =
   'Music volume' as const;
@@ -31,7 +56,23 @@ export const STYLING_WORLD_PLAZA_ACTION_BAR_SOUND_MIXER_ANCHOR_CLASS_NAME =
 
 /** Dropdown panel for the master volume mixer below the action bar. */
 export const STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_PANEL_CLASS_NAME =
-  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarDropdown} ${STYLING_WORLD_PLAZA_ACTION_BAR_DROPDOWN_LEFT_ANCHOR_CLASS_NAME} flex w-max min-w-[10rem] max-w-[13rem] flex-col gap-2 p-3 font-body max-md:w-[min(16.5rem,calc(100vw-0.75rem))] max-md:max-w-[calc(100vw-0.75rem)] max-md:gap-2.5 max-md:p-3.5` as const;
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.actionBarDropdown} ${STYLING_WORLD_PLAZA_ACTION_BAR_DROPDOWN_LEFT_ANCHOR_CLASS_NAME} flex w-max min-w-[11.5rem] max-w-[14rem] flex-col gap-2 p-3 font-body max-md:w-[min(16.5rem,calc(100vw-0.75rem))] max-md:max-w-[calc(100vw-0.75rem)] max-md:gap-2.5 max-md:p-3.5` as const;
+
+/** Row of Main / Sound / Toggles badge buttons. */
+export const STYLING_WORLD_PLAZA_SETTINGS_VIEW_LIST_CLASS_NAME =
+  'flex w-full flex-wrap gap-1' as const;
+
+/** Inactive settings view badge. */
+export const STYLING_WORLD_PLAZA_SETTINGS_VIEW_BADGE_CLASS_NAME =
+  `min-w-0 flex-1 justify-center !rounded-sm border-ink/25 bg-parchment px-1.5 py-1 text-[10px] font-bold uppercase tracking-wide text-ink-soft hover:border-ink/40 hover:text-ink ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.focusRingGold}` as const;
+
+/** Active settings view badge. */
+export const STYLING_WORLD_PLAZA_SETTINGS_VIEW_BADGE_ACTIVE_CLASS_NAME =
+  'border-poster-gold/55 bg-poster-gold/20 text-ink shadow-sm' as const;
+
+/** Body under the settings view badge strip. */
+export const STYLING_WORLD_PLAZA_SETTINGS_VIEW_BODY_CLASS_NAME =
+  'flex w-full flex-col gap-2' as const;
 
 /** Label text above the master volume slider. */
 export const STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_LABEL_CLASS_NAME =
@@ -46,7 +87,7 @@ export const LABELING_WORLD_PLAZA_SETTINGS_EXIT_HOME = 'Home' as const;
 
 /** Settings mixer top row: simple full-width exit-to-home control. */
 export const STYLING_WORLD_PLAZA_SETTINGS_EXIT_HOME_BUTTON_CLASS_NAME =
-  'mb-1 w-full rounded border border-ink/25 bg-parchment px-2 py-2 text-center text-sm font-bold text-ink max-md:min-h-11 max-md:py-2.5 max-md:text-base' as const;
+  'w-full rounded border border-ink/25 bg-parchment px-2 py-2 text-center text-sm font-bold text-ink max-md:min-h-11 max-md:py-2.5 max-md:text-base' as const;
 
 /** Guide sections opened from Settings (not the Guide book menu). */
 export type WorldPlazaSettingsGuideOption = {
@@ -81,4 +122,4 @@ export const STYLING_WORLD_PLAZA_SETTINGS_GUIDE_BUTTON_CLASS_NAME =
 
 /** Stack wrapping the settings guide openers under Home. */
 export const STYLING_WORLD_PLAZA_SETTINGS_GUIDE_STACK_CLASS_NAME =
-  'mb-1 flex w-full flex-col gap-1' as const;
+  'flex w-full flex-col gap-1' as const;

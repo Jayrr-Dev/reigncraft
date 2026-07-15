@@ -421,7 +421,7 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel berry Study', () =>
     expect(model?.canStudy).toBe(false);
   });
 
-  it('hides hunger and heal until proficiency, then unlocks by tier', () => {
+  it('hides hunger until proficiency, then unlocks by tier', () => {
     const unstudied = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       {
         id: 'coffee-cherry-1',
@@ -498,7 +498,7 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel berry Study', () =>
 
     expect(proficiency?.badges.some((badge) => badge.id === 'food')).toBe(true);
     expect(proficiency?.badges.some((badge) => badge.id === 'food-heal')).toBe(
-      true
+      false
     );
     expect(
       proficiency?.infoRows.some((row) => row.id === 'berry-well-fed')

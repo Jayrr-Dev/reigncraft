@@ -18,6 +18,8 @@ export type ComputingWorldPlazaPerformanceDiagnosticsAbDelta = {
   readonly percentDelta: number | null;
   readonly fpsDeltaLabel: string;
   readonly percentDeltaLabel: string;
+  readonly sessionMinimumFpsDelta: number;
+  readonly sessionMinimumFpsDeltaLabel: string;
   readonly isBFaster: boolean;
   readonly summaryLabel: string;
 };
@@ -63,17 +65,27 @@ export function computingWorldPlazaPerformanceDiagnosticsAbDelta(
       : formattingWorldPlazaPerformanceDiagnosticsSignedPercentDelta(
           percentDelta
         );
+  const sessionMinimumFpsDelta =
+    captureB.sessionMinimumFramesPerSecond -
+    captureA.sessionMinimumFramesPerSecond;
+  const sessionMinimumFpsDeltaLabel =
+    formattingWorldPlazaPerformanceDiagnosticsSignedFpsDelta(
+      sessionMinimumFpsDelta
+    );
   const isBFaster = fpsDelta > 0;
-  const summaryLabel =
+  const liveDeltaLabel =
     percentDelta === null
       ? `B − A = ${fpsDeltaLabel} fps`
       : `B − A = ${fpsDeltaLabel} fps (${percentDeltaLabel})`;
+  const summaryLabel = `${liveDeltaLabel} · min ${sessionMinimumFpsDeltaLabel}`;
 
   return {
     fpsDelta,
     percentDelta,
     fpsDeltaLabel,
     percentDeltaLabel,
+    sessionMinimumFpsDelta,
+    sessionMinimumFpsDeltaLabel,
     isBFaster,
     summaryLabel,
   };

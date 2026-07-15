@@ -407,21 +407,30 @@ export function checkingWorldPlazaPerformanceDiagnosticsIsEnabled(): boolean {
 /**
  * Enables or disables diagnostics collection.
  *
+ * Only resets measurement history on a false→true transition. Calling
+ * enable(true) again while already enabled must not wipe session min/avg, or
+ * lag spikes disappear mid-session when multiple mounts re-fire enable.
+ *
  * @param isEnabled - True to start recording samples.
  */
 export function settingWorldPlazaPerformanceDiagnosticsEnabled(
   isEnabled: boolean
 ): void {
+  const wasEnabled = measuringWorldPlazaPerformanceDiagnosticsState.isEnabled;
   measuringWorldPlazaPerformanceDiagnosticsState.isEnabled = isEnabled;
 
   if (isEnabled) {
-    resettingWorldPlazaPerformanceDiagnostics();
+    if (!wasEnabled) {
+      resettingWorldPlazaPerformanceDiagnostics();
+    }
     registeringWorldPlazaPerformanceDiagnosticsConsoleApi();
     installingWorldPlazaPerformanceDiagnosticsErrorListener();
     return;
   }
 
-  console.info('[world-plaza-perf] diagnostics disabled');
+  if (wasEnabled) {
+    console.info('[world-plaza-perf] diagnostics disabled');
+  }
 }
 
 /**

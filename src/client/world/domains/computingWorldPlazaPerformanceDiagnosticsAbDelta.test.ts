@@ -26,8 +26,10 @@ describe('computingWorldPlazaPerformanceDiagnosticsAbDelta', () => {
     expect(delta.percentDelta).toBe(12);
     expect(delta.fpsDeltaLabel).toBe('+6.0');
     expect(delta.percentDeltaLabel).toBe('+12%');
+    expect(delta.sessionMinimumFpsDelta).toBe(10);
+    expect(delta.sessionMinimumFpsDeltaLabel).toBe('+10.0');
     expect(delta.isBFaster).toBe(true);
-    expect(delta.summaryLabel).toBe('B − A = +6.0 fps (+12%)');
+    expect(delta.summaryLabel).toBe('B − A = +6.0 fps (+12%) · min +10.0');
   });
 
   it('computes negative delta when B is slower', () => {
@@ -53,7 +55,8 @@ describe('computingWorldPlazaPerformanceDiagnosticsAbDelta', () => {
     expect(delta.fpsDelta).toBe(-7.5);
     expect(delta.percentDelta).toBe(-12.5);
     expect(delta.isBFaster).toBe(false);
-    expect(delta.summaryLabel).toBe('B − A = -7.5 fps (-12%)');
+    expect(delta.sessionMinimumFpsDelta).toBe(-10);
+    expect(delta.summaryLabel).toBe('B − A = -7.5 fps (-12%) · min -10.0');
   });
 
   it('guards divide-by-zero when A fps is zero', () => {
@@ -78,6 +81,6 @@ describe('computingWorldPlazaPerformanceDiagnosticsAbDelta', () => {
 
     expect(delta.percentDelta).toBeNull();
     expect(delta.percentDeltaLabel).toBe('n/a');
-    expect(delta.summaryLabel).toBe('B − A = +40.0 fps');
+    expect(delta.summaryLabel).toBe('B − A = +40.0 fps · min +30.0');
   });
 });

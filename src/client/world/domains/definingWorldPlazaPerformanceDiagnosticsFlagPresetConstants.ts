@@ -47,6 +47,10 @@ export const LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_SAVE_PROMP
 export const LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_COMPARE_SECTION =
   'Compare' as const;
 
+/** Hint under Compare: capture freezes window then resets live session stats. */
+export const LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_COMPARE_HINT =
+  'Capture freezes live/avg/min, then resets session for the next run. Watch min for lag spikes.' as const;
+
 export const LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_CAPTURE_A =
   'Capture A' as const;
 

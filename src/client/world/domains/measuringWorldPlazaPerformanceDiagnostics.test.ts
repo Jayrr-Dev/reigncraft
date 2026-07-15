@@ -73,4 +73,31 @@ describe('beginningWorldPlazaPerformanceSample', () => {
 
     performanceNowSpy.mockRestore();
   });
+
+  it('does not wipe session min when enable(true) is called again', () => {
+    settingWorldPlazaPerformanceDiagnosticsEnabled(true);
+
+    let nowMs = 1000;
+    const performanceNowSpy = vi
+      .spyOn(performance, 'now')
+      .mockImplementation(() => nowMs);
+
+    markingWorldPlazaPerformanceDiagnosticsFrame();
+    nowMs += 200;
+    markingWorldPlazaPerformanceDiagnosticsFrame();
+
+    expect(
+      buildingWorldPlazaPerformanceDiagnosticsSnapshot()
+        .sessionMinimumFramesPerSecond
+    ).toBeCloseTo(5, 1);
+
+    settingWorldPlazaPerformanceDiagnosticsEnabled(true);
+
+    expect(
+      buildingWorldPlazaPerformanceDiagnosticsSnapshot()
+        .sessionMinimumFramesPerSecond
+    ).toBeCloseTo(5, 1);
+
+    performanceNowSpy.mockRestore();
+  });
 });

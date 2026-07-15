@@ -5,7 +5,10 @@
  */
 
 import type { ComputingWorldPlazaPerformanceDiagnosticsAbCapture } from '@/components/world/domains/computingWorldPlazaPerformanceDiagnosticsAbDelta';
-import type { MeasuringWorldPlazaPerformanceDiagnosticsSnapshot } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
+import {
+  resettingWorldPlazaPerformanceDiagnosticsMeasurementHistory,
+  type MeasuringWorldPlazaPerformanceDiagnosticsSnapshot,
+} from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 
 export type ManagingWorldPlazaPerformanceDiagnosticsAbCaptureSlot = 'A' | 'B';
 
@@ -58,7 +61,8 @@ export function gettingWorldPlazaPerformanceDiagnosticsAbCaptureB(): ComputingWo
 }
 
 /**
- * Stores one A or B capture from a live diagnostics snapshot.
+ * Stores one A or B capture from a live diagnostics snapshot, then clears the
+ * live session window so the next capture only reflects frames after this one.
  *
  * @param slot - Capture slot.
  * @param snapshot - Latest diagnostics snapshot.
@@ -76,7 +80,8 @@ export function capturingWorldPlazaPerformanceDiagnosticsAbSlot(
     framesPerSecond: snapshot.framesPerSecond,
     sessionFramesPerSecond: snapshot.sessionFramesPerSecond,
     sessionMinimumFramesPerSecond: snapshot.sessionMinimumFramesPerSecond,
-    capturedAtMs: snapshot.capturedAtMs,
+    // Wall clock for pasteable findings (snapshot.capturedAtMs is performance.now).
+    capturedAtMs: Date.now(),
     presetName,
   };
 
@@ -88,6 +93,9 @@ export function capturingWorldPlazaPerformanceDiagnosticsAbSlot(
 
   managingWorldPlazaPerformanceDiagnosticsAbCaptureState.revision += 1;
   notifyingWorldPlazaPerformanceDiagnosticsAbCaptureSubscribers();
+
+  // Fresh session min/avg for the other slot (or a re-capture).
+  resettingWorldPlazaPerformanceDiagnosticsMeasurementHistory();
 }
 
 export function clearingWorldPlazaPerformanceDiagnosticsAbCaptures(): void {

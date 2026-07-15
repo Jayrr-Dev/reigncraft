@@ -28,9 +28,10 @@ const TEMPERATE: DefiningWildlifeSpeciesTemperatureComfortBand = {
   comfortHighCelsius: DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS,
 };
 
+/** Cold-biased band used by plains/forest fauna (deer, stag, bears, …). */
 const COLD_ADAPTED: DefiningWildlifeSpeciesTemperatureComfortBand = {
   comfortLowCelsius: -20,
-  comfortHighCelsius: 18,
+  comfortHighCelsius: 32,
 };
 
 const ARCTIC: DefiningWildlifeSpeciesTemperatureComfortBand = {
@@ -88,10 +89,8 @@ export const DEFINING_WILDLIFE_SPECIES_TEMPERATURE_COMFORT_REGISTRY: Record<
   'cat-orange': { comfortLowCelsius: 5, comfortHighCelsius: 42 },
   'cat-large': { comfortLowCelsius: 5, comfortHighCelsius: 42 },
 
-  // Cold / mountain / boreal
-  // Slightly higher heat ceiling than shared COLD_ADAPTED (18) so mild warm
-  // days do not cook deer; still cold-biased vs temperate (40).
-  deer: { comfortLowCelsius: -20, comfortHighCelsius: 24 },
+  // Cold / mountain / boreal (heat floor via COLD_ADAPTED)
+  deer: COLD_ADAPTED,
   boar: { comfortLowCelsius: -8, comfortHighCelsius: 32 },
   'brown-bear': COLD_ADAPTED,
   grizzly: COLD_ADAPTED,

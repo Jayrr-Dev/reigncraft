@@ -45,7 +45,7 @@ export type PlazaCodexStudyTrackDefinition = {
 /** Unified tier gate for each Bestiary-only section. */
 export const DEFINING_PLAZA_CODEX_BESTIARY_EXTRA_SECTION_TIER_GATES: Record<
   PlazaCodexBestiaryExtraSectionId,
-  PlazaCodexStudyTierId
+  PlazaCodexStudyDetailSectionTierId
 > = {
   behavior: 'application',
   ecology: 'proficiency',

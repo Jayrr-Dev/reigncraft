@@ -250,9 +250,7 @@ export function RenderingPlazaPathologyGuideDetailView({
               studyCount={studyCount}
               tierId="expertise"
             >
-              <p className="text-[11px] font-medium text-ink-soft">
-                Mechanism notes unlock with further study of this illness.
-              </p>
+              {null}
             </RenderingPlazaCodexStudyDetailSection>
 
             <RenderingPlazaCodexStudyDetailSection

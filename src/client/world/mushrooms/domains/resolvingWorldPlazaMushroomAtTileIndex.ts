@@ -37,7 +37,7 @@ export type ResolvingWorldPlazaMushroomAtTileIndexParams = {
   readonly epochMs?: number;
 };
 
-function resolvingWorldPlazaMushroomSparseAtTileIndex({
+export function resolvingWorldPlazaMushroomSparseAtTileIndex({
   tileX,
   tileY,
   dayNumber,

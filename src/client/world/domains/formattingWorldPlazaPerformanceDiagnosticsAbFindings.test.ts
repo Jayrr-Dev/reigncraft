@@ -56,6 +56,6 @@ describe('formattingWorldPlazaPerformanceDiagnosticsAbFindings', () => {
     expect(text).toContain(
       'B: 56.0 fps live · 55.2 fps session avg · 41.0 fps session min · preset: Light'
     );
-    expect(text).toContain('Delta: B − A = +6.0 fps (+12%)');
+    expect(text).toContain('Delta: B − A = +6.0 fps (+12%) · min +9.0');
   });
 });

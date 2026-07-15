@@ -126,6 +126,14 @@ type RunningWorldPlazaShrubDecorationsLayerState = {
 
 type RunningWorldPlazaMushroomDecorationsLayerState = {
   spriteByKey: Map<string, Sprite>;
+  candidateCache: {
+    cacheKey: string;
+    candidates: readonly {
+      readonly tileX: number;
+      readonly tileY: number;
+      readonly speciesIndex: number;
+    }[];
+  };
 };
 
 type RunningWorldPlazaStoneDecorationsLayerState = {
