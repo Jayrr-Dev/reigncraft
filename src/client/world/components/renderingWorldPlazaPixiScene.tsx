@@ -606,6 +606,11 @@ import { RenderingWorldPlazaOnboardingCoachmarkLayer } from '@/components/world/
 import {
   initializingWorldPlazaOnboardingCoachmarkStore,
   notifyingWorldPlazaOnboardingChopStarted,
+  notifyingWorldPlazaOnboardingCookStarted,
+  notifyingWorldPlazaOnboardingForagePicked,
+  notifyingWorldPlazaOnboardingHerbariumCodexOpened,
+  notifyingWorldPlazaOnboardingMeleeSwung,
+  notifyingWorldPlazaOnboardingMineStarted,
   notifyingWorldPlazaOnboardingStudyStarted,
 } from '@/components/world/onboarding/domains/managingWorldPlazaOnboardingCoachmarkStore';
 import { RenderingWorldPlotVisitApprovedPlazaModal } from '@/components/world/plotVisit/components/renderingWorldPlotVisitApprovedPlazaModal';
@@ -3131,7 +3136,10 @@ function RenderingWorldPlazaPixiSceneConnected({
 
         if (!didStart) {
           showingGameplayHudToast('Already cooking meat.');
+          return;
         }
+
+        notifyingWorldPlazaOnboardingCookStarted();
 
         return;
       }
@@ -3471,7 +3479,10 @@ function RenderingWorldPlazaPixiSceneConnected({
 
       if (!didStart) {
         showingGameplayHudToast('Already mining a rock.');
+        return;
       }
+
+      notifyingWorldPlazaOnboardingMineStarted();
     },
     [
       equipment,
@@ -3530,7 +3541,10 @@ function RenderingWorldPlazaPixiSceneConnected({
 
       if (!didStart) {
         showingGameplayHudToast('Already picking a pebble.');
+        return;
       }
+
+      notifyingWorldPlazaOnboardingForagePicked();
     },
     [showingGameplayHudToast, startingPebblePick, validatingPebblePickStart]
   );
@@ -3582,7 +3596,10 @@ function RenderingWorldPlazaPixiSceneConnected({
 
       if (!didStart) {
         showingGameplayHudToast('Already picking a flower.');
+        return;
       }
+
+      notifyingWorldPlazaOnboardingForagePicked();
     },
     [showingGameplayHudToast, startingFlowerPick, validatingFlowerPickStart]
   );
@@ -3632,7 +3649,10 @@ function RenderingWorldPlazaPixiSceneConnected({
 
       if (!didStart) {
         showingGameplayHudToast('Already picking a mushroom.');
+        return;
       }
+
+      notifyingWorldPlazaOnboardingForagePicked();
     },
     [showingGameplayHudToast, startingMushroomPick, validatingMushroomPickStart]
   );
@@ -5923,6 +5943,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         };
 
         playingWorldPlazaAvatarMeleeSwingSfx();
+        notifyingWorldPlazaOnboardingMeleeSwung();
         return true;
       }
 
@@ -5950,6 +5971,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       };
 
       playingWorldPlazaAvatarMeleeSwingSfx();
+      notifyingWorldPlazaOnboardingMeleeSwung();
 
       return true;
     },
@@ -7398,6 +7420,10 @@ function RenderingWorldPlazaPixiSceneConnected({
       closeChat();
       closingFriendsPanel();
       openingCodexSection(section);
+
+      if (section === 'herbarium') {
+        notifyingWorldPlazaOnboardingHerbariumCodexOpened();
+      }
     },
     [closeChat, closingFriendsPanel, openingCodexSection]
   );
@@ -8688,7 +8714,9 @@ function RenderingWorldPlazaPixiSceneConnected({
               storageOwnerId={onlineUserId ?? localPersistenceOwnerId}
               isEnabled={isHudOnboardingCoachmarksEnabled}
               isMobile={hudIsMobile}
+              playerUserId={onlineUserId ?? localPersistenceOwnerId}
               playerPositionRef={playerPositionRef}
+              wildlifeStoreRef={wildlifeStoreRef}
               selectedInteractableBlockKeysRef={
                 selectedInteractableBlockKeysRef
               }
@@ -8701,6 +8729,12 @@ function RenderingWorldPlazaPixiSceneConnected({
               }
               temperatureComfortBand={temperatureComfortBand}
               hasAnyPets={hasAnyPets}
+              staminaRatio={staminaRatio}
+              isRunning={isRunningHud}
+              isStaminaDepleted={isStaminaDepleted}
+              statusEffectCount={
+                playerHealthHudSnapshot.statusEffectHudRows.length
+              }
             />
           ) : null}
           {isHudStatusEnabled && isLocalGameplayEnabled ? (

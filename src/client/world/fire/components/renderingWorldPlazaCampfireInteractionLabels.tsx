@@ -21,10 +21,10 @@ import type {
 import { listingWorldPlazaCampfireBlocksInInteractionRange } from '@/components/world/fire/domains/listingWorldPlazaCampfireBlocksInInteractionRange';
 import { resolvingWorldPlazaCampfireInteractionLabelScreenPoint } from '@/components/world/fire/domains/resolvingWorldPlazaCampfireInteractionLabelScreenPoint';
 import type { UsingWorldPlazaCampfireCookProgressSnapshot } from '@/components/world/fire/hooks/usingWorldPlazaCampfireCookProgress';
+import { RenderingWorldPlazaTimedInteractionLabelRow } from '@/components/world/interaction/components/renderingWorldPlazaTimedInteractionLabelRow';
+import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
 import { LABELING_WORLD_PLAZA_TEA_BREWING_BREW } from '@/components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingConstants';
 import { formattingWorldPlazaTeaPotCampfireBrewProgressTargetKey } from '@/components/world/tea-brewing/domains/formattingWorldPlazaTeaPotCampfireBrewProgressTargetKey';
-import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
-import { RenderingWorldPlazaTimedInteractionLabelRow } from '@/components/world/interaction/components/renderingWorldPlazaTimedInteractionLabelRow';
 import { useLayoutEffect, useRef, useState } from 'react';
 import type { WorldFireDevvitCell } from '../../../../shared/worldFireDevvit';
 
@@ -272,6 +272,7 @@ export function RenderingWorldPlazaCampfireInteractionLabels({
                       targetKey={cookTargetKey}
                       progressSnapshot={cookProgressSnapshot}
                       progressRatioRef={cookProgressRatioRef}
+                      onboardingAnchorId="cook-interaction"
                       onActivate={() => {
                         onCampfireActionRef.current(entry.block, 'cook');
                       }}

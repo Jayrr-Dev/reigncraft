@@ -5,6 +5,7 @@ import { RenderingWorldPlazaEntityStatusEffectHudRowBadge } from '@/components/w
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
 import { DEFINING_WORLD_PLAZA_ENTITY_STATUS_EFFECT_STACK_EXPLANATION_POPOVER_LAYOUT } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectStackConstants';
 import { resolvingWorldPlazaEntityStatusEffectStackViewportLayout } from '@/components/world/health/domains/resolvingWorldPlazaEntityStatusEffectStackViewportLayout';
+import { DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMemo } from 'react';
 
@@ -46,7 +47,11 @@ export function RenderingWorldPlazaEntityStatusEffectStack({
     <div
       className={viewportLayout.anchorClassName}
       style={viewportLayout.style}
-      {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+      {...{
+        [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true,
+        [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]:
+          'status-effect-stack',
+      }}
     >
       {statusEffectHudRows.map((row) => (
         <RenderingWorldPlazaEntityStatusEffectHudRowBadge

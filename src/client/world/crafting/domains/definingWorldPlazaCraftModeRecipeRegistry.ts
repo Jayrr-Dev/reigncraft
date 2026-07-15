@@ -143,7 +143,10 @@ type DefiningWorldPlazaHealerRecipeEntry = {
   readonly title: string;
   readonly description: string;
   readonly complexity: number;
-  readonly ingredients: readonly { readonly itemTypeId: string; readonly quantity: number }[];
+  readonly ingredients: readonly {
+    readonly itemTypeId: string;
+    readonly quantity: number;
+  }[];
 };
 
 function creatingWorldPlazaHealerRecipe(
@@ -167,31 +170,332 @@ function creatingWorldPlazaHealerRecipe(
 }
 
 const DEFINING_WORLD_PLAZA_HEALER_RECIPE_REGISTRY = [
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_YARROW_PRESSURE_DRESSING, itemTypeId: 'world-plaza-healer-yarrow-pressure-dressing', title: 'Yarrow Pressure Dressing', description: 'A field dressing for bleeding wounds.', complexity: 2, ingredients: [{ itemTypeId: 'world-plaza-flower-yarrow', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-wool', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_CALENDULA_WOUND_SALVE, itemTypeId: 'world-plaza-healer-calendula-wound-salve', title: 'Calendula Wound Salve', description: 'A rich salve for torn skin.', complexity: 2, ingredients: [{ itemTypeId: 'world-plaza-flower-calendula', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-pig-fat', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_CHAMOMILE_COMPRESS, itemTypeId: 'world-plaza-healer-chamomile-compress', title: 'Chamomile Compress', description: 'A calm cloth for a confused mind.', complexity: 2, ingredients: [{ itemTypeId: 'world-plaza-flower-chamomile', quantity: 1 }, { itemTypeId: 'world-plaza-tea-leaves', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_LAVENDER_ANTISEPTIC_WASH, itemTypeId: 'world-plaza-healer-lavender-antiseptic-wash', title: 'Lavender Antiseptic Wash', description: 'A clean wash for lingering sickness.', complexity: 2, ingredients: [{ itemTypeId: 'world-plaza-flower-lavender', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-milk', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_PEPPERMINT_DIGESTIVE_DROPS, itemTypeId: 'world-plaza-healer-peppermint-digestive-drops', title: 'Peppermint Digestive Drops', description: 'Cooling drops for cold marches.', complexity: 2, ingredients: [{ itemTypeId: 'world-plaza-flower-peppermint', quantity: 1 }, { itemTypeId: 'world-plaza-berry-blue', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_MEADOWSWEET_FEVER_CLOTH, itemTypeId: 'world-plaza-healer-meadowsweet-fever-cloth', title: 'Meadowsweet Fever Cloth', description: 'A damp cloth to draw out heat.', complexity: 2, ingredients: [{ itemTypeId: 'world-plaza-flower-meadowsweet', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-feather', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_ROSE_LINIMENT, itemTypeId: 'world-plaza-healer-rose-liniment', title: 'Rose Liniment', description: 'Rose oil against biting cold.', complexity: 2, ingredients: [{ itemTypeId: 'world-plaza-flower-rose', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-pig-fat', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_FIELD_AGARIC_RESTORATIVE_TABLET, itemTypeId: 'world-plaza-healer-field-agaric-restorative-tablet', title: 'Field Agaric Restorative Tablet', description: 'A bitter tablet for renewed vigor.', complexity: 3, ingredients: [{ itemTypeId: 'world-plaza-cooked-field-agaric-mushroom', quantity: 1 }, { itemTypeId: 'world-plaza-clover-3-leaf', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_KENNEL_PAW_SALVE, itemTypeId: 'world-plaza-healer-kennel-paw-salve', title: 'Kennel Paw Salve', description: 'Companion salve for battered paws.', complexity: 3, ingredients: [{ itemTypeId: 'world-plaza-wildlife-dog-fur', quantity: 1 }, { itemTypeId: 'world-plaza-flower-calendula', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-pig-fat', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_LITTERBOX_GUT_DROPS, itemTypeId: 'world-plaza-healer-litterbox-gut-drops', title: 'Litterbox Gut Drops', description: 'Companion drops for a sour gut.', complexity: 3, ingredients: [{ itemTypeId: 'world-plaza-wildlife-night-whisker', quantity: 1 }, { itemTypeId: 'world-plaza-flower-chamomile', quantity: 1 }, { itemTypeId: 'world-plaza-flower-lavender', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_ARNICA_BRUISE_LINIMENT, itemTypeId: 'world-plaza-healer-arnica-bruise-liniment', title: 'Arnica Bruise Liniment', description: 'Liniment that braces a bruised limb.', complexity: 4, ingredients: [{ itemTypeId: 'world-plaza-flower-arnica', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-tendon', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_ECHINACEA_TINCTURE, itemTypeId: 'world-plaza-healer-echinacea-tincture', title: 'Echinacea Tincture', description: 'Sharp tonic for shortening illness.', complexity: 4, ingredients: [{ itemTypeId: 'world-plaza-flower-echinacea', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-horn', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_VALERIAN_NIGHT_DRAUGHT, itemTypeId: 'world-plaza-healer-valerian-night-draught', title: 'Valerian Night Draught', description: 'A heavy draught for healing sleep.', complexity: 4, ingredients: [{ itemTypeId: 'world-plaza-flower-valerian', quantity: 1 }, { itemTypeId: 'world-plaza-flower-chamomile', quantity: 1 }, { itemTypeId: 'world-plaza-tea-leaves', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_REST_CURE_PILLOW, itemTypeId: 'world-plaza-healer-rest-cure-pillow', title: 'Rest-Cure Pillow', description: 'A pillow stuffed to sleep off sickness.', complexity: 4, ingredients: [{ itemTypeId: 'world-plaza-flower-valerian', quantity: 1 }, { itemTypeId: 'world-plaza-flower-lavender', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-soft-hide', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_SHEEPSKIN_WOUND_PACK, itemTypeId: 'world-plaza-healer-sheepskin-wound-pack', title: 'Sheepskin Wound Pack', description: 'A padded pack that binds and braces.', complexity: 5, ingredients: [{ itemTypeId: 'world-plaza-wildlife-sheep-skin', quantity: 1 }, { itemTypeId: 'world-plaza-flower-yarrow', quantity: 1 }, { itemTypeId: 'world-plaza-flower-arnica', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_WOLF_BITE_ANTISERUM, itemTypeId: 'world-plaza-healer-wolf-bite-antiserum', title: 'Wolf-Bite Antiserum', description: 'A serum tuned against wolf fever.', complexity: 5, ingredients: [{ itemTypeId: 'world-plaza-wildlife-fang', quantity: 1 }, { itemTypeId: 'world-plaza-flower-echinacea', quantity: 1 }, { itemTypeId: 'world-plaza-flower-lavender', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_BOAR_LARD_DRAWING_POULTICE, itemTypeId: 'world-plaza-healer-boar-lard-drawing-poultice', title: 'Boar-Lard Drawing Poultice', description: 'A lard poultice that draws out rot.', complexity: 5, ingredients: [{ itemTypeId: 'world-plaza-wildlife-pig-fat', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-bristle', quantity: 1 }, { itemTypeId: 'world-plaza-flower-meadowsweet', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_PACKHOUND_PLAGUE_COLLAR, itemTypeId: 'world-plaza-healer-packhound-plague-collar', title: 'Packhound Plague Collar', description: 'A protective collar for a sick companion.', complexity: 5, ingredients: [{ itemTypeId: 'world-plaza-wildlife-dog-tooth', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-dog-fur', quantity: 1 }, { itemTypeId: 'world-plaza-flower-echinacea', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_CAT_SCRATCH_STYPTIC, itemTypeId: 'world-plaza-healer-cat-scratch-styptic', title: 'Cat-Scratch Styptic', description: 'Fine powder for quick bleeding control.', complexity: 4, ingredients: [{ itemTypeId: 'world-plaza-wildlife-cat-claw', quantity: 1 }, { itemTypeId: 'world-plaza-flower-yarrow', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_BONE_SET_SPLINT_WRAP, itemTypeId: 'world-plaza-healer-bone-set-splint-wrap', title: 'Bone-Set Splint Wrap', description: 'An antler splint for a broken limb.', complexity: 6, ingredients: [{ itemTypeId: 'world-plaza-wildlife-antler', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-tendon', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-wool', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_DEEP_REST_SERUM, itemTypeId: 'world-plaza-healer-deep-rest-serum', title: 'Deep Rest Serum', description: 'An intense serum that accelerates recovery.', complexity: 7, ingredients: [{ itemTypeId: 'world-plaza-flower-valerian', quantity: 1 }, { itemTypeId: 'world-plaza-cooked-fairy-dust', quantity: 1 }, { itemTypeId: 'world-plaza-flower-lavender', quantity: 1 }, { itemTypeId: 'world-plaza-cooked-field-agaric-mushroom', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_FOXGLOVE_HEART_AMPOULE, itemTypeId: 'world-plaza-healer-foxglove-heart-ampoule', title: 'Foxglove Heart Ampoule', description: 'A high-stakes tonic for a failing heart.', complexity: 7, ingredients: [{ itemTypeId: 'world-plaza-flower-foxglove', quantity: 1 }, { itemTypeId: 'world-plaza-cooked-fairy-dust', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-milk', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_CYROBORN_FROSTBITE_PACK, itemTypeId: 'world-plaza-healer-cyroborn-frostbite-pack', title: 'Cyroborn Frostbite Pack', description: 'A pack to reset frostbitten limbs.', complexity: 8, ingredients: [{ itemTypeId: 'world-plaza-cooked-cyroborn-shard', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-fang', quantity: 1 }, { itemTypeId: 'world-plaza-flower-arnica', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_GRADED_PLAGUE_PURGE, itemTypeId: 'world-plaza-healer-graded-plague-purge', title: 'Graded Plague Purge', description: 'A measured purge for entrenched disease.', complexity: 8, ingredients: [{ itemTypeId: 'world-plaza-flower-echinacea', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-omega-fang', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-wing-mote', quantity: 1 }] },
-  { id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_BELLADONNA_LAST_RITES, itemTypeId: 'world-plaza-healer-belladonna-last-rites', title: 'Belladonna Last Rites', description: 'A final gamble against terminal infection.', complexity: 9, ingredients: [{ itemTypeId: 'world-plaza-flower-belladonna', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-ice-tusk', quantity: 1 }, { itemTypeId: 'world-plaza-wildlife-crown-plate', quantity: 1 }] },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_YARROW_PRESSURE_DRESSING,
+    itemTypeId: 'world-plaza-healer-yarrow-pressure-dressing',
+    title: 'Yarrow Pressure Dressing',
+    description: 'A field dressing for bleeding wounds.',
+    complexity: 2,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-yarrow', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-wool', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_CALENDULA_WOUND_SALVE,
+    itemTypeId: 'world-plaza-healer-calendula-wound-salve',
+    title: 'Calendula Wound Salve',
+    description: 'A rich salve for torn skin.',
+    complexity: 2,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-calendula', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-pig-fat', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_CHAMOMILE_COMPRESS,
+    itemTypeId: 'world-plaza-healer-chamomile-compress',
+    title: 'Chamomile Compress',
+    description: 'A calm cloth for a confused mind.',
+    complexity: 2,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-chamomile', quantity: 1 },
+      { itemTypeId: 'world-plaza-tea-leaves', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_LAVENDER_ANTISEPTIC_WASH,
+    itemTypeId: 'world-plaza-healer-lavender-antiseptic-wash',
+    title: 'Lavender Antiseptic Wash',
+    description: 'A clean wash for lingering sickness.',
+    complexity: 2,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-lavender', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-milk', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_PEPPERMINT_DIGESTIVE_DROPS,
+    itemTypeId: 'world-plaza-healer-peppermint-digestive-drops',
+    title: 'Peppermint Digestive Drops',
+    description: 'Cooling drops for cold marches.',
+    complexity: 2,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-peppermint', quantity: 1 },
+      { itemTypeId: 'world-plaza-berry-blue', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_MEADOWSWEET_FEVER_CLOTH,
+    itemTypeId: 'world-plaza-healer-meadowsweet-fever-cloth',
+    title: 'Meadowsweet Fever Cloth',
+    description: 'A damp cloth to draw out heat.',
+    complexity: 2,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-meadowsweet', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-feather', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_ROSE_LINIMENT,
+    itemTypeId: 'world-plaza-healer-rose-liniment',
+    title: 'Rose Liniment',
+    description: 'Rose oil against biting cold.',
+    complexity: 2,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-rose', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-pig-fat', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_FIELD_AGARIC_RESTORATIVE_TABLET,
+    itemTypeId: 'world-plaza-healer-field-agaric-restorative-tablet',
+    title: 'Field Agaric Restorative Tablet',
+    description: 'A bitter tablet for renewed vigor.',
+    complexity: 3,
+    ingredients: [
+      { itemTypeId: 'world-plaza-cooked-field-agaric-mushroom', quantity: 1 },
+      { itemTypeId: 'world-plaza-clover-3-leaf', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_KENNEL_PAW_SALVE,
+    itemTypeId: 'world-plaza-healer-kennel-paw-salve',
+    title: 'Kennel Paw Salve',
+    description: 'Companion salve for battered paws.',
+    complexity: 3,
+    ingredients: [
+      { itemTypeId: 'world-plaza-wildlife-dog-fur', quantity: 1 },
+      { itemTypeId: 'world-plaza-flower-calendula', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-pig-fat', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_LITTERBOX_GUT_DROPS,
+    itemTypeId: 'world-plaza-healer-litterbox-gut-drops',
+    title: 'Litterbox Gut Drops',
+    description: 'Companion drops for a sour gut.',
+    complexity: 3,
+    ingredients: [
+      { itemTypeId: 'world-plaza-wildlife-night-whisker', quantity: 1 },
+      { itemTypeId: 'world-plaza-flower-chamomile', quantity: 1 },
+      { itemTypeId: 'world-plaza-flower-lavender', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_ARNICA_BRUISE_LINIMENT,
+    itemTypeId: 'world-plaza-healer-arnica-bruise-liniment',
+    title: 'Arnica Bruise Liniment',
+    description: 'Liniment that braces a bruised limb.',
+    complexity: 4,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-arnica', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-tendon', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_ECHINACEA_TINCTURE,
+    itemTypeId: 'world-plaza-healer-echinacea-tincture',
+    title: 'Echinacea Tincture',
+    description: 'Sharp tonic for shortening illness.',
+    complexity: 4,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-echinacea', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-horn', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_VALERIAN_NIGHT_DRAUGHT,
+    itemTypeId: 'world-plaza-healer-valerian-night-draught',
+    title: 'Valerian Night Draught',
+    description: 'A heavy draught for healing sleep.',
+    complexity: 4,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-valerian', quantity: 1 },
+      { itemTypeId: 'world-plaza-flower-chamomile', quantity: 1 },
+      { itemTypeId: 'world-plaza-tea-leaves', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_REST_CURE_PILLOW,
+    itemTypeId: 'world-plaza-healer-rest-cure-pillow',
+    title: 'Rest-Cure Pillow',
+    description: 'A pillow stuffed to sleep off sickness.',
+    complexity: 4,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-valerian', quantity: 1 },
+      { itemTypeId: 'world-plaza-flower-lavender', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-soft-hide', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_SHEEPSKIN_WOUND_PACK,
+    itemTypeId: 'world-plaza-healer-sheepskin-wound-pack',
+    title: 'Sheepskin Wound Pack',
+    description: 'A padded pack that binds and braces.',
+    complexity: 5,
+    ingredients: [
+      { itemTypeId: 'world-plaza-wildlife-sheep-skin', quantity: 1 },
+      { itemTypeId: 'world-plaza-flower-yarrow', quantity: 1 },
+      { itemTypeId: 'world-plaza-flower-arnica', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_WOLF_BITE_ANTISERUM,
+    itemTypeId: 'world-plaza-healer-wolf-bite-antiserum',
+    title: 'Wolf-Bite Antiserum',
+    description: 'A serum tuned against wolf fever.',
+    complexity: 5,
+    ingredients: [
+      { itemTypeId: 'world-plaza-wildlife-fang', quantity: 1 },
+      { itemTypeId: 'world-plaza-flower-echinacea', quantity: 1 },
+      { itemTypeId: 'world-plaza-flower-lavender', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_BOAR_LARD_DRAWING_POULTICE,
+    itemTypeId: 'world-plaza-healer-boar-lard-drawing-poultice',
+    title: 'Boar-Lard Drawing Poultice',
+    description: 'A lard poultice that draws out rot.',
+    complexity: 5,
+    ingredients: [
+      { itemTypeId: 'world-plaza-wildlife-pig-fat', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-bristle', quantity: 1 },
+      { itemTypeId: 'world-plaza-flower-meadowsweet', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_PACKHOUND_PLAGUE_COLLAR,
+    itemTypeId: 'world-plaza-healer-packhound-plague-collar',
+    title: 'Packhound Plague Collar',
+    description: 'A protective collar for a sick companion.',
+    complexity: 5,
+    ingredients: [
+      { itemTypeId: 'world-plaza-wildlife-dog-tooth', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-dog-fur', quantity: 1 },
+      { itemTypeId: 'world-plaza-flower-echinacea', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_CAT_SCRATCH_STYPTIC,
+    itemTypeId: 'world-plaza-healer-cat-scratch-styptic',
+    title: 'Cat-Scratch Styptic',
+    description: 'Fine powder for quick bleeding control.',
+    complexity: 4,
+    ingredients: [
+      { itemTypeId: 'world-plaza-wildlife-cat-claw', quantity: 1 },
+      { itemTypeId: 'world-plaza-flower-yarrow', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_BONE_SET_SPLINT_WRAP,
+    itemTypeId: 'world-plaza-healer-bone-set-splint-wrap',
+    title: 'Bone-Set Splint Wrap',
+    description: 'An antler splint for a broken limb.',
+    complexity: 6,
+    ingredients: [
+      { itemTypeId: 'world-plaza-wildlife-antler', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-tendon', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-wool', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_DEEP_REST_SERUM,
+    itemTypeId: 'world-plaza-healer-deep-rest-serum',
+    title: 'Deep Rest Serum',
+    description: 'An intense serum that accelerates recovery.',
+    complexity: 7,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-valerian', quantity: 1 },
+      { itemTypeId: 'world-plaza-cooked-fairy-dust', quantity: 1 },
+      { itemTypeId: 'world-plaza-flower-lavender', quantity: 1 },
+      { itemTypeId: 'world-plaza-cooked-field-agaric-mushroom', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_FOXGLOVE_HEART_AMPOULE,
+    itemTypeId: 'world-plaza-healer-foxglove-heart-ampoule',
+    title: 'Foxglove Heart Ampoule',
+    description: 'A high-stakes tonic for a failing heart.',
+    complexity: 7,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-foxglove', quantity: 1 },
+      { itemTypeId: 'world-plaza-cooked-fairy-dust', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-milk', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_CYROBORN_FROSTBITE_PACK,
+    itemTypeId: 'world-plaza-healer-cyroborn-frostbite-pack',
+    title: 'Cyroborn Frostbite Pack',
+    description: 'A pack to reset frostbitten limbs.',
+    complexity: 8,
+    ingredients: [
+      { itemTypeId: 'world-plaza-cooked-cyroborn-shard', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-fang', quantity: 1 },
+      { itemTypeId: 'world-plaza-flower-arnica', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_GRADED_PLAGUE_PURGE,
+    itemTypeId: 'world-plaza-healer-graded-plague-purge',
+    title: 'Graded Plague Purge',
+    description: 'A measured purge for entrenched disease.',
+    complexity: 8,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-echinacea', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-omega-fang', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-wing-mote', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_BELLADONNA_LAST_RITES,
+    itemTypeId: 'world-plaza-healer-belladonna-last-rites',
+    title: 'Belladonna Last Rites',
+    description: 'A final gamble against terminal infection.',
+    complexity: 9,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-belladonna', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-ice-tusk', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-crown-plate', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_FATE_UNRAVEL_SALTS,
+    itemTypeId: 'world-plaza-healer-fate-unravel-salts',
+    title: 'Fate Unravel Salts',
+    description: 'Lucky salts that snap a fated mark before it resolves.',
+    complexity: 3,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-lavender', quantity: 1 },
+      { itemTypeId: 'world-plaza-flower-chamomile', quantity: 1 },
+      { itemTypeId: 'world-plaza-clover-4-leaf', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_DOOM_POSTPONE_POULTICE,
+    itemTypeId: 'world-plaza-healer-doom-postpone-poultice',
+    title: 'Doom Postpone Poultice',
+    description: 'A timed wrap that delays and softens a doom already marked.',
+    complexity: 5,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-valerian', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-soft-hide', quantity: 1 },
+      { itemTypeId: 'world-plaza-flower-meadowsweet', quantity: 1 },
+    ],
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_FATEBREAK_WARD,
+    itemTypeId: 'world-plaza-healer-fatebreak-ward',
+    title: 'Fatebreak Ward',
+    description: 'A rare ward that clears fated marks and stops new ones.',
+    complexity: 8,
+    ingredients: [
+      { itemTypeId: 'world-plaza-flower-echinacea', quantity: 1 },
+      { itemTypeId: 'world-plaza-wildlife-wing-mote', quantity: 1 },
+      { itemTypeId: 'world-plaza-clover-4-leaf', quantity: 1 },
+    ],
+  },
 ] as const satisfies readonly DefiningWorldPlazaHealerRecipeEntry[];
 
 /**

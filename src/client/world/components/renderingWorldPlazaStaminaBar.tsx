@@ -6,6 +6,7 @@ import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WIDTH_PX,
   DEFINING_WORLD_PLAZA_ENTITY_STAMINA_BAR_HEIGHT_PX,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthBarConstants';
+import { DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
 
 const RENDERING_WORLD_PLAZA_STAMINA_BAR_TRACK_CLASS =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.surface.barTrack;
@@ -74,6 +75,7 @@ export function RenderingWorldPlazaStaminaBarTrack({
         width: `${DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WIDTH_PX}px`,
         height: `${DEFINING_WORLD_PLAZA_ENTITY_STAMINA_BAR_HEIGHT_PX}px`,
       }}
+      {...{ [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]: 'stamina-bar' }}
       aria-hidden="true"
     >
       <div

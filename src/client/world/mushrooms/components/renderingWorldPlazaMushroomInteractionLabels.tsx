@@ -1,12 +1,12 @@
 'use client';
 
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
-import { computingWorldPlazaTileCenterScreenAnchorFromGridPoint } from '@/components/world/domains/computingWorldPlazaTileCenterScreenAnchorFromGridPoint';
-import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import {
   applyingWorldPlazaCameraZoomedDomOverlayPositionToElement,
   applyingWorldPlazaCameraZoomedDomOverlayScaleToElement,
 } from '@/components/world/domains/computingWorldPlazaCameraZoomedDomOverlayTransform';
+import { computingWorldPlazaTileCenterScreenAnchorFromGridPoint } from '@/components/world/domains/computingWorldPlazaTileCenterScreenAnchorFromGridPoint';
+import type { DefiningWorldPlazaCameraOffset } from '@/components/world/domains/definingWorldPlazaCameraOffset';
 import { projectingWorldPlazaIsometricWorldLocalToViewportScreenPoint } from '@/components/world/domains/projectingWorldPlazaIsometricScreenPointThroughCamera';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { RenderingWorldPlazaTimedInteractionLabelRow } from '@/components/world/interaction/components/renderingWorldPlazaTimedInteractionLabelRow';
@@ -114,10 +114,11 @@ export function RenderingWorldPlazaMushroomInteractionLabels({
         return;
       }
 
-      const nextSelectedMushrooms = listingWorldPlazaMushroomsInInteractionRange(
-        selectedInteractableBlockKeysRef.current,
-        pickedMushroomStateByTileKeyRef.current
-      );
+      const nextSelectedMushrooms =
+        listingWorldPlazaMushroomsInInteractionRange(
+          selectedInteractableBlockKeysRef.current,
+          pickedMushroomStateByTileKeyRef.current
+        );
 
       const currentEntries = selectedMushroomsRef.current;
       const didSelectionChange =
@@ -198,7 +199,7 @@ export function RenderingWorldPlazaMushroomInteractionLabels({
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-visible">
-      {selectedMushrooms.map((entry) => {
+      {selectedMushrooms.map((entry, mushroomIndex) => {
         const tileKey = formattingWorldPlazaInteractableMushroomSelectionKey(
           entry.tileX,
           entry.tileY
@@ -236,6 +237,9 @@ export function RenderingWorldPlazaMushroomInteractionLabels({
 
                 rowElementByTileKeyRef.current.delete(tileKey);
               }}
+              onboardingAnchorId={
+                mushroomIndex === 0 ? 'forage-interaction' : undefined
+              }
               onActivate={() => {
                 onPickMushroomRef.current(entry);
               }}

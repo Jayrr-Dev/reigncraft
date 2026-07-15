@@ -172,7 +172,7 @@ export function RenderingWorldPlazaPebbleInteractionLabels({
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-visible">
-      {selectedPebbles.map((entry) => {
+      {selectedPebbles.map((entry, pebbleIndex) => {
         const tileKey =
           formattingWorldPlazaPebbleInteractionLabelTileKey(entry);
 
@@ -208,6 +208,9 @@ export function RenderingWorldPlazaPebbleInteractionLabels({
 
                 rowElementByTileKeyRef.current.delete(tileKey);
               }}
+              onboardingAnchorId={
+                pebbleIndex === 0 ? 'forage-interaction' : undefined
+              }
               onActivate={() => {
                 onPickPebbleRef.current(entry);
               }}

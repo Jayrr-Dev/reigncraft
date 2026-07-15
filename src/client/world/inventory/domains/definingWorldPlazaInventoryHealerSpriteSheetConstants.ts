@@ -6,6 +6,13 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_HEALER_SPRITE_SHEET_URL =
 export const DEFINING_WORLD_PLAZA_INVENTORY_HEALER_SPRITE_SHEET_COLUMN_COUNT = 5;
 export const DEFINING_WORLD_PLAZA_INVENTORY_HEALER_SPRITE_SHEET_ROW_COUNT = 5;
 
+/** Overflow fated-ward icons (3×1 @ 32px). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_HEALER_FATED_SPRITE_SHEET_URL =
+  '/inventory/sprites/inventory-healer-fated-sprites.webp' as const;
+
+export const DEFINING_WORLD_PLAZA_INVENTORY_HEALER_FATED_SPRITE_SHEET_COLUMN_COUNT = 3;
+export const DEFINING_WORLD_PLAZA_INVENTORY_HEALER_FATED_SPRITE_SHEET_ROW_COUNT = 1;
+
 export const DEFINING_WORLD_PLAZA_INVENTORY_HEALER_SPRITE_SHEET_TYPE_IDS = [
   'world-plaza-healer-yarrow-pressure-dressing',
   'world-plaza-healer-calendula-wound-salve',
@@ -34,6 +41,13 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_HEALER_SPRITE_SHEET_TYPE_IDS = [
   'world-plaza-healer-belladonna-last-rites',
 ] as const;
 
+export const DEFINING_WORLD_PLAZA_INVENTORY_HEALER_FATED_SPRITE_SHEET_TYPE_IDS =
+  [
+    'world-plaza-healer-fate-unravel-salts',
+    'world-plaza-healer-doom-postpone-poultice',
+    'world-plaza-healer-fatebreak-ward',
+  ] as const;
+
 const DEFINING_WORLD_PLAZA_INVENTORY_HEALER_SPRITE_INDEX_BY_TYPE_ID = new Map<
   string,
   number
@@ -43,11 +57,38 @@ const DEFINING_WORLD_PLAZA_INVENTORY_HEALER_SPRITE_INDEX_BY_TYPE_ID = new Map<
   )
 );
 
+const DEFINING_WORLD_PLAZA_INVENTORY_HEALER_FATED_SPRITE_INDEX_BY_TYPE_ID =
+  new Map<string, number>(
+    DEFINING_WORLD_PLAZA_INVENTORY_HEALER_FATED_SPRITE_SHEET_TYPE_IDS.map(
+      (typeId, index) => [typeId, index]
+    )
+  );
+
 export function resolvingWorldPlazaInventoryHealerSpriteSheetIcon(
   itemTypeId: string
 ): DefiningWorldPlazaInventorySpriteSheetIcon | null {
+  const fatedSheetIndex =
+    DEFINING_WORLD_PLAZA_INVENTORY_HEALER_FATED_SPRITE_INDEX_BY_TYPE_ID.get(
+      itemTypeId
+    );
+
+  if (fatedSheetIndex !== undefined) {
+    return {
+      spriteSheetUrl:
+        DEFINING_WORLD_PLAZA_INVENTORY_HEALER_FATED_SPRITE_SHEET_URL,
+      columnCount:
+        DEFINING_WORLD_PLAZA_INVENTORY_HEALER_FATED_SPRITE_SHEET_COLUMN_COUNT,
+      rowCount:
+        DEFINING_WORLD_PLAZA_INVENTORY_HEALER_FATED_SPRITE_SHEET_ROW_COUNT,
+      columnIndex: fatedSheetIndex,
+      rowIndex: 0,
+    };
+  }
+
   const sheetIndex =
-    DEFINING_WORLD_PLAZA_INVENTORY_HEALER_SPRITE_INDEX_BY_TYPE_ID.get(itemTypeId);
+    DEFINING_WORLD_PLAZA_INVENTORY_HEALER_SPRITE_INDEX_BY_TYPE_ID.get(
+      itemTypeId
+    );
 
   if (sheetIndex === undefined) {
     return null;
@@ -55,7 +96,8 @@ export function resolvingWorldPlazaInventoryHealerSpriteSheetIcon(
 
   return {
     spriteSheetUrl: DEFINING_WORLD_PLAZA_INVENTORY_HEALER_SPRITE_SHEET_URL,
-    columnCount: DEFINING_WORLD_PLAZA_INVENTORY_HEALER_SPRITE_SHEET_COLUMN_COUNT,
+    columnCount:
+      DEFINING_WORLD_PLAZA_INVENTORY_HEALER_SPRITE_SHEET_COLUMN_COUNT,
     rowCount: DEFINING_WORLD_PLAZA_INVENTORY_HEALER_SPRITE_SHEET_ROW_COUNT,
     columnIndex:
       sheetIndex %

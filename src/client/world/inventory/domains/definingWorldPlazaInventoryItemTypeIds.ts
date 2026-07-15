@@ -372,6 +372,9 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_HEALER_ITEM_TYPE_IDS = [
   'world-plaza-healer-cyroborn-frostbite-pack',
   'world-plaza-healer-graded-plague-purge',
   'world-plaza-healer-belladonna-last-rites',
+  'world-plaza-healer-fate-unravel-salts',
+  'world-plaza-healer-doom-postpone-poultice',
+  'world-plaza-healer-fatebreak-ward',
 ] as const;
 
 /** Wood-tier swords through gold-tier swords. */

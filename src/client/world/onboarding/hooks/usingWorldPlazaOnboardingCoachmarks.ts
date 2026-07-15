@@ -7,13 +7,17 @@ import {
 } from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaEntityTemperatureComfortBand } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
+import { usingWorldPlazaMinimapEnabled } from '@/components/world/hooks/usingWorldPlazaMinimapEnabled';
 import { checkingWorldPlazaInventoryItemIsWeaponOrTool } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsWeaponOrTool';
 import { DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import {
   peekingWorldPlazaSpawnTerrainReady,
   subscribingWorldPlazaSpawnTerrainReady,
 } from '@/components/world/loading/domains/managingWorldPlazaSpawnTerrainReadyStore';
+import { checkingWorldPlazaInventoryHasEquippedPickaxe } from '@/components/world/onboarding/domains/checkingWorldPlazaInventoryHasEquippedPickaxe';
+import { checkingWorldPlazaInventoryHasRawCookableMeat } from '@/components/world/onboarding/domains/checkingWorldPlazaInventoryHasRawCookableMeat';
 import { checkingWorldPlazaInventoryHasUnequippedTool } from '@/components/world/onboarding/domains/checkingWorldPlazaInventoryHasUnequippedTool';
+import { checkingWorldPlazaOnboardingHostileWildlifeNearby } from '@/components/world/onboarding/domains/checkingWorldPlazaOnboardingHostileWildlifeNearby';
 import {
   DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE,
   type WorldPlazaOnboardingCoachmarkDefinition,
@@ -30,9 +34,13 @@ import {
   notifyingWorldPlazaOnboardingHotbarClicked,
   notifyingWorldPlazaOnboardingHungerClicked,
   notifyingWorldPlazaOnboardingLootPickup,
+  notifyingWorldPlazaOnboardingMinimapOpened,
   notifyingWorldPlazaOnboardingPetsOpened,
   notifyingWorldPlazaOnboardingPlayerMoved,
   notifyingWorldPlazaOnboardingProfileOpened,
+  notifyingWorldPlazaOnboardingSprinted,
+  notifyingWorldPlazaOnboardingStaminaDepleted,
+  notifyingWorldPlazaOnboardingStatusEffectClicked,
   notifyingWorldPlazaOnboardingTemperatureClicked,
   subscribingWorldPlazaOnboardingCoachmarks,
 } from '@/components/world/onboarding/domains/managingWorldPlazaOnboardingCoachmarkStore';
@@ -40,10 +48,13 @@ import {
   checkingWorldPlazaOnboardingChopLabelVisibleFromSelectionKeys,
   checkingWorldPlazaOnboardingCoachmarkAdvanceSatisfied,
   checkingWorldPlazaOnboardingCorpseStudyLabelVisibleFromSelectionKeys,
+  checkingWorldPlazaOnboardingForageLabelVisibleFromSelectionKeys,
+  checkingWorldPlazaOnboardingRockMineLabelVisibleFromSelectionKeys,
   resolvingWorldPlazaOnboardingActiveCoachmark,
   type ResolvingWorldPlazaOnboardingCoachmarkLiveSignals,
 } from '@/components/world/onboarding/domains/resolvingWorldPlazaOnboardingActiveCoachmark';
 import { countingWorldPlazaSpritcoreInventoryQuantity } from '@/components/world/spritcore/domains/countingWorldPlazaSpritcoreInventoryQuantity';
+import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import {
   useEffect,
   useEffectEvent,
@@ -56,7 +67,9 @@ import {
 export type UsingWorldPlazaOnboardingCoachmarksParams = {
   readonly storageOwnerId: string | null;
   readonly isEnabled: boolean;
+  readonly playerUserId: string | null;
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
+  readonly wildlifeStoreRef: RefObject<ManagingWildlifeInstanceStore>;
   readonly selectedInteractableBlockKeysRef: RefObject<ReadonlySet<string>>;
   readonly inventoryState: DefiningInventoryState;
   readonly hudToolbarMode: DefiningWorldPlazaHudToolbarModeId;
@@ -65,6 +78,10 @@ export type UsingWorldPlazaOnboardingCoachmarksParams = {
   readonly localTemperatureCelsius: number | null;
   readonly temperatureComfortBand: DefiningWorldPlazaEntityTemperatureComfortBand | null;
   readonly hasAnyPets: boolean;
+  readonly staminaRatio: number;
+  readonly isRunning: boolean;
+  readonly isStaminaDepleted: boolean;
+  readonly statusEffectCount: number;
 };
 
 export type UsingWorldPlazaOnboardingCoachmarksResult = {
@@ -105,7 +122,9 @@ function checkingWorldPlazaInventoryHasEquippedTool(
 export function usingWorldPlazaOnboardingCoachmarks({
   storageOwnerId,
   isEnabled,
+  playerUserId,
   playerPositionRef,
+  wildlifeStoreRef,
   selectedInteractableBlockKeysRef,
   inventoryState,
   hudToolbarMode,
@@ -114,7 +133,13 @@ export function usingWorldPlazaOnboardingCoachmarks({
   localTemperatureCelsius,
   temperatureComfortBand,
   hasAnyPets,
+  staminaRatio,
+  isRunning,
+  isStaminaDepleted,
+  statusEffectCount,
 }: UsingWorldPlazaOnboardingCoachmarksParams): UsingWorldPlazaOnboardingCoachmarksResult {
+  const { isMinimapPreferenceEnabled: isMinimapOpen } =
+    usingWorldPlazaMinimapEnabled();
   const onboardingSnapshot = useSyncExternalStore(
     subscribingWorldPlazaOnboardingCoachmarks,
     gettingWorldPlazaOnboardingCoachmarkSnapshot,
@@ -129,8 +154,11 @@ export function usingWorldPlazaOnboardingCoachmarks({
   const spawnPositionRef = useRef<DefiningWorldPlazaWorldPoint | null>(null);
   const initialInventoryQuantityRef = useRef<number | null>(null);
   const [isChopLabelVisible, setIsChopLabelVisible] = useState(false);
+  const [isForageLabelVisible, setIsForageLabelVisible] = useState(false);
+  const [isMineLabelVisible, setIsMineLabelVisible] = useState(false);
   const [isCorpseStudyLabelVisible, setIsCorpseStudyLabelVisible] =
     useState(false);
+  const [isHostileWildlifeNearby, setIsHostileWildlifeNearby] = useState(false);
 
   useEffect(() => {
     if (!isEnabled) {
@@ -188,9 +216,26 @@ export function usingWorldPlazaOnboardingCoachmarks({
           selectedInteractableBlockKeys
         )
       );
+      setIsForageLabelVisible(
+        checkingWorldPlazaOnboardingForageLabelVisibleFromSelectionKeys(
+          selectedInteractableBlockKeys
+        )
+      );
+      setIsMineLabelVisible(
+        checkingWorldPlazaOnboardingRockMineLabelVisibleFromSelectionKeys(
+          selectedInteractableBlockKeys
+        )
+      );
       setIsCorpseStudyLabelVisible(
         checkingWorldPlazaOnboardingCorpseStudyLabelVisibleFromSelectionKeys(
           selectedInteractableBlockKeys
+        )
+      );
+      setIsHostileWildlifeNearby(
+        checkingWorldPlazaOnboardingHostileWildlifeNearby(
+          wildlifeStoreRef.current,
+          playerPositionRef.current,
+          playerUserId
         )
       );
 
@@ -214,7 +259,37 @@ export function usingWorldPlazaOnboardingCoachmarks({
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [isEnabled, playerPositionRef, selectedInteractableBlockKeysRef]);
+  }, [
+    isEnabled,
+    playerPositionRef,
+    playerUserId,
+    selectedInteractableBlockKeysRef,
+    wildlifeStoreRef,
+  ]);
+
+  useEffect(() => {
+    if (!isEnabled) {
+      return;
+    }
+
+    if (isRunning) {
+      notifyingWorldPlazaOnboardingSprinted();
+    }
+
+    if (isStaminaDepleted) {
+      notifyingWorldPlazaOnboardingStaminaDepleted();
+    }
+  }, [isEnabled, isRunning, isStaminaDepleted]);
+
+  useEffect(() => {
+    if (!isEnabled) {
+      return;
+    }
+
+    if (isMinimapOpen) {
+      notifyingWorldPlazaOnboardingMinimapOpened();
+    }
+  }, [isEnabled, isMinimapOpen]);
 
   useEffect(() => {
     if (!isEnabled) {
@@ -323,6 +398,22 @@ export function usingWorldPlazaOnboardingCoachmarks({
           notifyingWorldPlazaOnboardingClaimModeSelected();
         }
       }
+
+      if (
+        target.closest(
+          `[${DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE}="minimap-orb"]`
+        )
+      ) {
+        notifyingWorldPlazaOnboardingMinimapOpened();
+      }
+
+      if (
+        target.closest(
+          `[${DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE}="status-effect-stack"]`
+        )
+      ) {
+        notifyingWorldPlazaOnboardingStatusEffectClicked();
+      }
     };
 
     document.addEventListener('click', handlingDocumentClick, true);
@@ -336,6 +427,10 @@ export function usingWorldPlazaOnboardingCoachmarks({
     checkingWorldPlazaInventoryHasUnequippedTool(inventoryState);
   const hasEquippedTool =
     checkingWorldPlazaInventoryHasEquippedTool(inventoryState);
+  const hasEquippedPickaxe =
+    checkingWorldPlazaInventoryHasEquippedPickaxe(inventoryState);
+  const hasRawCookableMeat =
+    checkingWorldPlazaInventoryHasRawCookableMeat(inventoryState);
   const spritcoreInventoryQuantity =
     countingWorldPlazaSpritcoreInventoryQuantity(inventoryState);
 
@@ -349,9 +444,19 @@ export function usingWorldPlazaOnboardingCoachmarks({
     spritcoreInventoryQuantity,
     hasAnyPets,
     isChopLabelVisible,
+    isForageLabelVisible,
+    isMineLabelVisible,
     isCorpseStudyLabelVisible,
     hasUnequippedTool,
     hasEquippedTool,
+    hasEquippedPickaxe,
+    isHostileWildlifeNearby,
+    hasRawCookableMeat,
+    isMinimapOpen,
+    staminaRatio,
+    isRunning,
+    isStaminaDepleted,
+    statusEffectCount,
   };
 
   const activeCoachmark =
@@ -382,28 +487,47 @@ export function usingWorldPlazaOnboardingCoachmarks({
   }, [
     activeCoachmark,
     hasAnyPets,
+    hasEquippedPickaxe,
     hasEquippedTool,
+    hasRawCookableMeat,
     hasUnequippedTool,
     hudToolbarMode,
     hungerRatio,
     isChopLabelVisible,
     isCorpseStudyLabelVisible,
     isEditEnabled,
+    isForageLabelVisible,
+    isHostileWildlifeNearby,
+    isMineLabelVisible,
+    isMinimapOpen,
+    isRunning,
+    isStaminaDepleted,
     localTemperatureCelsius,
     spritcoreInventoryQuantity,
+    staminaRatio,
+    statusEffectCount,
     temperatureComfortBand,
     liveSignals.sessionSignals.hasActionBarClicked,
     liveSignals.sessionSignals.hasBuildModeSelected,
     liveSignals.sessionSignals.hasChopStarted,
     liveSignals.sessionSignals.hasClaimModeSelected,
     liveSignals.sessionSignals.hasCodexOpened,
+    liveSignals.sessionSignals.hasCookStarted,
     liveSignals.sessionSignals.hasCraftModeSelected,
+    liveSignals.sessionSignals.hasForagePicked,
+    liveSignals.sessionSignals.hasHerbariumCodexOpened,
     liveSignals.sessionSignals.hasHotbarClicked,
     liveSignals.sessionSignals.hasHungerClicked,
     liveSignals.sessionSignals.hasLootPickup,
+    liveSignals.sessionSignals.hasMeleeSwung,
+    liveSignals.sessionSignals.hasMineStarted,
+    liveSignals.sessionSignals.hasMinimapOpened,
     liveSignals.sessionSignals.hasMoved,
     liveSignals.sessionSignals.hasPetsOpened,
     liveSignals.sessionSignals.hasProfileOpened,
+    liveSignals.sessionSignals.hasSprinted,
+    liveSignals.sessionSignals.hasStaminaDepleted,
+    liveSignals.sessionSignals.hasStatusEffectClicked,
     liveSignals.sessionSignals.hasStudyStarted,
     liveSignals.sessionSignals.hasTemperatureClicked,
   ]);

@@ -1,13 +1,18 @@
 import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import { applyingWorldPlazaEntityFrostbiteStack } from '@/components/world/health/domains/applyingWorldPlazaEntityFrostbiteStack';
 import { clearingWorldPlazaEntityDiseaseEffectsByMaxSeverity } from '@/components/world/health/domains/clearingWorldPlazaEntityDiseaseEffectsByMaxSeverity';
+import { clearingWorldPlazaEntityPotentialDamageEffects } from '@/components/world/health/domains/clearingWorldPlazaEntityPotentialDamageEffects';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { enablingWorldPlazaEntityFatedImmunity } from '@/components/world/health/domains/enablingWorldPlazaEntityFatedImmunity';
+import { postponingWorldPlazaEntityPotentialDamageEffects } from '@/components/world/health/domains/postponingWorldPlazaEntityPotentialDamageEffects';
 import { shorteningWorldPlazaEntityDiseaseRemainingDuration } from '@/components/world/health/domains/shorteningWorldPlazaEntityDiseaseRemainingDuration';
 import { applyingWorldPlazaInventoryFlowerEatEffects } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryFlowerEatEffects';
 import { resolvingWorldPlazaHealerConsumableEffectKind } from '@/components/world/inventory/domains/definingWorldPlazaHealerConsumableEffectRegistry';
 import {
   DEFINING_WORLD_PLAZA_HEALER_BELLADONNA_PURGE_SUCCESS_CHANCE,
   DEFINING_WORLD_PLAZA_HEALER_EFFECT_PROC_ROLL_ALWAYS,
+  DEFINING_WORLD_PLAZA_HEALER_FATED_POSTPONE_DAMAGE_FACTOR,
+  DEFINING_WORLD_PLAZA_HEALER_FATED_POSTPONE_EXTRA_DELAY_MS,
   DEFINING_WORLD_PLAZA_HEALER_FOXGLOVE_SUCCESS_CHANCE,
   DEFINING_WORLD_PLAZA_HEALER_GRADED_PURGE_SEVERE_CHANCE,
 } from '@/components/world/inventory/domains/definingWorldPlazaHealerConsumableEffectTunables';
@@ -182,5 +187,16 @@ export function applyingWorldPlazaInventoryHealerConsumableEffects({
             'critical'
           )
         : applyingFlower('belladonna');
+    case 'clearPendingFated':
+      return clearingWorldPlazaEntityPotentialDamageEffects(healthState);
+    case 'postponePendingFated':
+      return postponingWorldPlazaEntityPotentialDamageEffects(healthState, {
+        extraDelayMs: DEFINING_WORLD_PLAZA_HEALER_FATED_POSTPONE_EXTRA_DELAY_MS,
+        pendingDamageFactor:
+          DEFINING_WORLD_PLAZA_HEALER_FATED_POSTPONE_DAMAGE_FACTOR,
+        nowMs,
+      });
+    case 'enableFatedImmunity':
+      return enablingWorldPlazaEntityFatedImmunity(healthState);
   }
 }

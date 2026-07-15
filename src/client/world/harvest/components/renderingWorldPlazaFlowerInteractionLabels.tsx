@@ -171,7 +171,7 @@ export function RenderingWorldPlazaFlowerInteractionLabels({
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-visible">
-      {selectedFlowers.map((entry) => {
+      {selectedFlowers.map((entry, flowerIndex) => {
         const tileKey =
           formattingWorldPlazaFlowerInteractionLabelTileKey(entry);
 
@@ -207,6 +207,9 @@ export function RenderingWorldPlazaFlowerInteractionLabels({
 
                 rowElementByTileKeyRef.current.delete(tileKey);
               }}
+              onboardingAnchorId={
+                flowerIndex === 0 ? 'forage-interaction' : undefined
+              }
               onActivate={() => {
                 onPickFlowerRef.current(entry);
               }}

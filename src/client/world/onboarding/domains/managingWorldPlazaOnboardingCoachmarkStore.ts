@@ -209,10 +209,31 @@ export function notifyingWorldPlazaOnboardingChopStarted(): void {
   });
 }
 
+/** Records that a forage pick interaction started during this session. */
+export function notifyingWorldPlazaOnboardingForagePicked(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasForagePicked: true,
+  });
+}
+
+/** Records that a rock mine interaction started during this session. */
+export function notifyingWorldPlazaOnboardingMineStarted(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasMineStarted: true,
+  });
+}
+
 /** Records the first loot pickup during this session. */
 export function notifyingWorldPlazaOnboardingLootPickup(): void {
   patchingWorldPlazaOnboardingCoachmarkSessionSignals({
     hasLootPickup: true,
+  });
+}
+
+/** Records that the player swung at wildlife during this session. */
+export function notifyingWorldPlazaOnboardingMeleeSwung(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasMeleeSwung: true,
   });
 }
 
@@ -230,6 +251,27 @@ export function notifyingWorldPlazaOnboardingTemperatureClicked(): void {
   });
 }
 
+/** Records that the player sprinted during this session. */
+export function notifyingWorldPlazaOnboardingSprinted(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasSprinted: true,
+  });
+}
+
+/** Records that run stamina fully depleted during this session. */
+export function notifyingWorldPlazaOnboardingStaminaDepleted(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasStaminaDepleted: true,
+  });
+}
+
+/** Records a status effect stack interaction during this session. */
+export function notifyingWorldPlazaOnboardingStatusEffectClicked(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasStatusEffectClicked: true,
+  });
+}
+
 /** Records that Craft mode was selected during this session. */
 export function notifyingWorldPlazaOnboardingCraftModeSelected(): void {
   patchingWorldPlazaOnboardingCoachmarkSessionSignals({
@@ -244,10 +286,31 @@ export function notifyingWorldPlazaOnboardingCodexOpened(): void {
   });
 }
 
+/** Records that the Herbarium codex section was opened during this session. */
+export function notifyingWorldPlazaOnboardingHerbariumCodexOpened(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasHerbariumCodexOpened: true,
+  });
+}
+
 /** Records that a corpse Study interaction started during this session. */
 export function notifyingWorldPlazaOnboardingStudyStarted(): void {
   patchingWorldPlazaOnboardingCoachmarkSessionSignals({
     hasStudyStarted: true,
+  });
+}
+
+/** Records that the minimap was opened during this session. */
+export function notifyingWorldPlazaOnboardingMinimapOpened(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasMinimapOpened: true,
+  });
+}
+
+/** Records that a campfire cook interaction started during this session. */
+export function notifyingWorldPlazaOnboardingCookStarted(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasCookStarted: true,
   });
 }
 

@@ -168,7 +168,7 @@ export function RenderingWorldPlazaRockInteractionLabels({
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-visible">
-      {selectedRocks.map((entry) => {
+      {selectedRocks.map((entry, rockIndex) => {
         const tileKey = formattingWorldPlazaRockInteractionLabelTileKey(entry);
 
         return (
@@ -203,6 +203,9 @@ export function RenderingWorldPlazaRockInteractionLabels({
 
                 rowElementByTileKeyRef.current.delete(tileKey);
               }}
+              onboardingAnchorId={
+                rockIndex === 0 ? 'mine-interaction' : undefined
+              }
               onActivate={() => {
                 onMineRockRef.current(entry);
               }}

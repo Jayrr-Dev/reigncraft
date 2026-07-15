@@ -19,6 +19,7 @@ import {
   STYLING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_ORB_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaWorldLayerIndicatorConstants';
 import { resolvingWorldPlazaWorldLayerIndicatorViewportStyles } from '@/components/world/domains/resolvingWorldPlazaWorldLayerIndicatorViewportStyles';
+import { DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
 import { cn } from '@/lib/utils';
 import type { CSSProperties } from 'react';
 import { memo, useMemo } from 'react';
@@ -66,7 +67,10 @@ export const RenderingWorldPlazaWorldLayerIndicator = memo(
     return (
       <button
         type="button"
-        {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+        {...{
+          [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true,
+          [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]: 'minimap-orb',
+        }}
         className={cn(
           STYLING_WORLD_PLAZA_WORLD_LAYER_INDICATOR_ORB_CLASS_NAME,
           isOpen && 'plaza-world-layer-orb--open'

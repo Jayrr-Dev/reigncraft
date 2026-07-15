@@ -36,7 +36,8 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID = {
   HEALER_PEPPERMINT_DIGESTIVE_DROPS: 'recipe-healer-peppermint-digestive-drops',
   HEALER_MEADOWSWEET_FEVER_CLOTH: 'recipe-healer-meadowsweet-fever-cloth',
   HEALER_ROSE_LINIMENT: 'recipe-healer-rose-liniment',
-  HEALER_FIELD_AGARIC_RESTORATIVE_TABLET: 'recipe-healer-field-agaric-restorative-tablet',
+  HEALER_FIELD_AGARIC_RESTORATIVE_TABLET:
+    'recipe-healer-field-agaric-restorative-tablet',
   HEALER_KENNEL_PAW_SALVE: 'recipe-healer-kennel-paw-salve',
   HEALER_LITTERBOX_GUT_DROPS: 'recipe-healer-litterbox-gut-drops',
   HEALER_ARNICA_BRUISE_LINIMENT: 'recipe-healer-arnica-bruise-liniment',
@@ -54,6 +55,9 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID = {
   HEALER_CYROBORN_FROSTBITE_PACK: 'recipe-healer-cyroborn-frostbite-pack',
   HEALER_GRADED_PLAGUE_PURGE: 'recipe-healer-graded-plague-purge',
   HEALER_BELLADONNA_LAST_RITES: 'recipe-healer-belladonna-last-rites',
+  HEALER_FATE_UNRAVEL_SALTS: 'recipe-healer-fate-unravel-salts',
+  HEALER_DOOM_POSTPONE_POULTICE: 'recipe-healer-doom-postpone-poultice',
+  HEALER_FATEBREAK_WARD: 'recipe-healer-fatebreak-ward',
   ...DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID,
 } as const;
 
