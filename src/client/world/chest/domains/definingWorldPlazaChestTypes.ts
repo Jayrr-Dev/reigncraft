@@ -15,9 +15,13 @@ export type DefiningWorldPlazaChestState = 'open' | 'locked' | 'closed';
 /** Visual sprite state (locked reuses the closed art). */
 export type DefiningWorldPlazaChestSpriteVisualState = 'closed' | 'open';
 
+import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+
 /** Where the universal chest key for a locked chest can drop. */
 export type DefiningWorldPlazaChestKeySource =
   | 'wildlife'
+  | 'wildlife-strongest'
+  | 'wildlife-species'
   | 'shrub'
   | 'long-grass';
 
@@ -51,6 +55,8 @@ export type DefiningWorldPlazaChestPlacement = {
   readonly displayScale?: number;
   /** Required for locked procedural chests: where its key can drop. */
   readonly keySource?: DefiningWorldPlazaChestKeySource;
+  /** For `wildlife-species` chests: the animal that must be hunted. */
+  readonly keyWildlifeSpeciesId?: DefiningWildlifeSpeciesId;
 };
 
 export type DefiningWorldPlazaChestInstance = {
@@ -63,6 +69,7 @@ export type DefiningWorldPlazaChestInstance = {
   readonly collisionRadiusGrid: number;
   readonly displayScale: number;
   readonly keySource?: DefiningWorldPlazaChestKeySource;
+  readonly keyWildlifeSpeciesId?: DefiningWildlifeSpeciesId;
 };
 
 export type DefiningWorldPlazaChestLootGrant = {

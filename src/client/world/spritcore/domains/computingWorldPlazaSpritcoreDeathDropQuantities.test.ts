@@ -4,11 +4,11 @@ import { computingWorldPlazaSpritcoreDeathCommittedPenalty } from '@/components/
 import { computingWorldPlazaSpritcoreDeathDropQuantities } from '@/components/world/spritcore/domains/computingWorldPlazaSpritcoreDeathDropQuantities';
 
 describe('computingWorldPlazaSpritcoreDeathDropQuantities', () => {
-  it('spills 20% carried and 10% committed', () => {
+  it('spills 12% carried and 8% committed', () => {
     expect(computingWorldPlazaSpritcoreDeathDropQuantities(100, 200)).toEqual({
-      carriedDropQuantity: 20,
-      committedDropQuantity: 20,
-      totalDropQuantity: 40,
+      carriedDropQuantity: 12,
+      committedDropQuantity: 16,
+      totalDropQuantity: 28,
     });
   });
 
@@ -39,14 +39,14 @@ describe('computingWorldPlazaSpritcoreDeathCommittedPenalty', () => {
       totalSpritcoreInvested: 1000,
     });
 
-    expect(result.droppedQuantity).toBe(100);
+    expect(result.droppedQuantity).toBe(80);
     expect(result.nextBonuses).toEqual({
-      bonusMaxHealth: 900,
-      bonusAttackPower: 90,
-      bonusAttackSpeed: 0.45,
+      bonusMaxHealth: 920,
+      bonusAttackPower: 92,
+      bonusAttackSpeed: 0.46,
       bonusDefense: 0,
       bonusMoveSpeed: 0,
-      totalSpritcoreInvested: 900,
+      totalSpritcoreInvested: 920,
     });
   });
 

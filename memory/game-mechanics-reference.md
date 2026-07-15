@@ -190,7 +190,7 @@ Kinds using roll engine (`definingWorldPlazaEntityDamageKindRegistry.ts`): `phys
 **Player death**
 
 - Wildlife in sim radius despawned; threat cleared elsewhere (`clearingWildlifeAreaOnPlayerDeath.ts`)
-- Spritcore spill: **20%** carried inventory SC + **10%** committed (invested upgrades) drop as ground loot at corpse; upgrade bonuses scale down with committed loss (`definingWorldPlazaSpritcoreDeathDropConstants.ts`, `applyingWorldPlazaPlayerDeathSpritcorePenalty.ts`)
+- Spritcore spill: **12%** carried inventory SC + **8%** committed (invested upgrades) drop as ground loot at corpse; upgrade bonuses scale down with committed loss (`definingWorldPlazaSpritcoreDeathDropConstants.ts`, `applyingWorldPlazaPlayerDeathSpritcorePenalty.ts`)
 
 ---
 

@@ -175,7 +175,7 @@ export function RenderingWorldPlazaTreeInteractionLabels({
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-visible">
-      {selectedTrees.map((entry) => {
+      {selectedTrees.map((entry, treeIndex) => {
         const tileKey = formattingWorldPlazaTreeInteractionLabelTileKey(entry);
 
         return (
@@ -202,6 +202,9 @@ export function RenderingWorldPlazaTreeInteractionLabels({
               targetKey={tileKey}
               progressSnapshot={timedInteractionProgressSnapshot}
               progressRatioRef={timedInteractionProgressRatioRef}
+              onboardingAnchorId={
+                treeIndex === 0 ? 'chop-interaction' : undefined
+              }
               rowRef={(element) => {
                 if (element) {
                   rowElementByTileKeyRef.current.set(tileKey, element);

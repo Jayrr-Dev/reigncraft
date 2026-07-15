@@ -7,6 +7,8 @@
  */
 
 import { computingPlazaCodexAggregateStudyProgress } from '@/components/home/domains/computingPlazaCodexAggregateStudyProgress';
+import { DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
+import { DEFINING_PLAZA_RECIPES_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaRecipesGuideConstants';
 import { resolvingPlazaBestiaryGuideDisplayEntries } from '@/components/home/domains/resolvingPlazaBestiaryGuideDisplayEntries';
 import {
   resolvingPlazaCodexMenuRewardReadySections,
@@ -49,6 +51,10 @@ import {
   gettingWorldPlazaPathologyObtainedDiseasesSnapshot,
   subscribingWorldPlazaPathologyDiscovery,
 } from '@/components/world/domains/managingWorldPlazaPathologyDiscoveryStore';
+import {
+  gettingWorldPlazaRecipeAttachedSnapshot,
+  subscribingWorldPlazaRecipeDiscovery,
+} from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
 import { useMemo, useSyncExternalStore } from 'react';
 
 function buildingPlazaCodexDualMeterPair(
@@ -154,6 +160,11 @@ export function usingWorldPlazaCodexRewardReadySections(): ReadonlySet<WorldPlaz
     gettingWorldPlazaPathologyInfectionStudyPointsSnapshot,
     () => ({})
   );
+  const attachedRecipeIds = useSyncExternalStore(
+    subscribingWorldPlazaRecipeDiscovery,
+    gettingWorldPlazaRecipeAttachedSnapshot,
+    () => []
+  );
 
   return useMemo(() => {
     const exploredSet = new Set(exploredBiomeKinds);
@@ -212,33 +223,50 @@ export function usingWorldPlazaCodexRewardReadySections(): ReadonlySet<WorldPlaz
       }))
     );
 
-    return resolvingPlazaCodexMenuRewardReadySections({
-      bestiary: buildingPlazaCodexDualMeterPair(
-        bestiaryEntries.filter((entry) => entry.isSighted).length,
-        bestiaryEntries.length,
-        bestiaryStudied.value,
-        bestiaryStudied.max
-      ),
-      herbarium: buildingPlazaCodexDualMeterPair(
-        herbariumEntries.filter((entry) => entry.isSighted).length,
-        herbariumEntries.length,
-        herbariumStudied.value,
-        herbariumStudied.max
-      ),
-      lapidary: buildingPlazaCodexDualMeterPair(
-        lapidaryEntries.filter((entry) => entry.isSighted).length,
-        lapidaryEntries.length,
-        lapidaryStudied.value,
-        lapidaryStudied.max
-      ),
-      pathology: buildingPlazaCodexDualMeterPair(
-        pathologyEntries.filter((entry) => entry.isObtained).length,
-        pathologyEntries.length,
-        pathologyStudied.value,
-        pathologyStudied.max
-      ),
-    });
+    return resolvingPlazaCodexMenuRewardReadySections(
+      {
+        bestiary: buildingPlazaCodexDualMeterPair(
+          bestiaryEntries.filter((entry) => entry.isSighted).length,
+          bestiaryEntries.length,
+          bestiaryStudied.value,
+          bestiaryStudied.max
+        ),
+        herbarium: buildingPlazaCodexDualMeterPair(
+          herbariumEntries.filter((entry) => entry.isSighted).length,
+          herbariumEntries.length,
+          herbariumStudied.value,
+          herbariumStudied.max
+        ),
+        lapidary: buildingPlazaCodexDualMeterPair(
+          lapidaryEntries.filter((entry) => entry.isSighted).length,
+          lapidaryEntries.length,
+          lapidaryStudied.value,
+          lapidaryStudied.max
+        ),
+        pathology: buildingPlazaCodexDualMeterPair(
+          pathologyEntries.filter((entry) => entry.isObtained).length,
+          pathologyEntries.length,
+          pathologyStudied.value,
+          pathologyStudied.max
+        ),
+      },
+      {
+        biomes: {
+          value: DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES.filter((entry) =>
+            exploredSet.has(entry.kind)
+          ).length,
+          max: DEFINING_PLAZA_BIOMES_GUIDE_ENTRIES.length,
+        },
+        recipes: {
+          value: DEFINING_PLAZA_RECIPES_GUIDE_ENTRIES.filter((entry) =>
+            attachedRecipeIds.includes(entry.recipeId)
+          ).length,
+          max: DEFINING_PLAZA_RECIPES_GUIDE_ENTRIES.length,
+        },
+      }
+    );
   }, [
+    attachedRecipeIds,
     bestiaryKillCountsBySpeciesId,
     exploredBiomeKinds,
     herbariumBerryStudyCounts,

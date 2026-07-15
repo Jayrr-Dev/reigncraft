@@ -19,6 +19,7 @@ import {
   DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_TILE_MODULUS,
   DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_VARIANT_SEED_SALT,
 } from '@/components/world/chest/domains/definingWorldPlazaProceduralChestConstants';
+import { resolvingWorldPlazaProceduralChestWildlifeSpeciesIdAtTileIndex } from '@/components/world/chest/domains/resolvingWorldPlazaProceduralChestWildlifeSpeciesIdAtTileIndex';
 import { checkingWorldPlazaMushroomSpawnBlockedByWaterAtTileIndex } from '@/components/world/mushrooms/domains/checkingWorldPlazaMushroomSpawnBlockedByWaterAtTileIndex';
 
 const DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_FACINGS: readonly DefiningWorldPlazaChestFacing[] =
@@ -28,7 +29,7 @@ const DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_VARIANTS: readonly DefiningWorldPlaz
   ['a', 'b'];
 
 const DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_KEY_SOURCES: readonly DefiningWorldPlazaChestKeySource[] =
-  ['wildlife', 'shrub', 'long-grass'];
+  ['wildlife', 'wildlife-strongest', 'wildlife-species', 'shrub', 'long-grass'];
 
 /** Stable chest id for one procedural tile. */
 export function formattingWorldPlazaProceduralChestId(
@@ -110,6 +111,8 @@ export function resolvingWorldPlazaProceduralChestAtTileIndex(
     tileY,
     DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_VARIANT_SEED_SALT
   );
+  const keySource =
+    resolvingWorldPlazaProceduralChestKeySourceFromUnit(keySourceUnit);
 
   return {
     chestId: formattingWorldPlazaProceduralChestId(tileX, tileY),
@@ -122,7 +125,15 @@ export function resolvingWorldPlazaProceduralChestAtTileIndex(
       kind: 'pool',
       poolId: DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_LOOT_POOL_ID,
     },
-    keySource:
-      resolvingWorldPlazaProceduralChestKeySourceFromUnit(keySourceUnit),
+    keySource,
+    ...(keySource === 'wildlife-species'
+      ? {
+          keyWildlifeSpeciesId:
+            resolvingWorldPlazaProceduralChestWildlifeSpeciesIdAtTileIndex(
+              tileX,
+              tileY
+            ),
+        }
+      : {}),
   };
 }

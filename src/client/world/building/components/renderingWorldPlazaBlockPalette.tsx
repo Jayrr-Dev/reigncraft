@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { Icon } from '@/components/ui/icon';
 import { RenderingWorldBuildingBlockPaletteMaterialIcon } from '@/components/world/building/components/renderingWorldBuildingBlockPaletteMaterialIcon';
 import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
+import { formattingWorldBuildingBlockMaterialCostReadout } from '@/components/world/building/domains/definingWorldBuildingBlockMaterialCostRegistry';
 import { resolvingWorldBuildingBlockPaletteSurfaceStyle } from '@/components/world/building/domains/definingWorldBuildingBlockPaletteSurface';
 import {
   listingWorldBuildingPaletteBlockDefinitionsByCategory,
@@ -20,7 +21,9 @@ import {
   DEFINING_WORLD_BUILDING_CATEGORY_TAB_ICON_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CATEGORY_TAB_ICON_SELECTED_CLASS_NAME,
   DEFINING_WORLD_BUILDING_CATEGORY_TAB_SELECTED_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_SELECTED_BLOCK_COST_READOUT_CLASS_NAME,
   DEFINING_WORLD_BUILDING_SELECTED_BLOCK_READOUT_CLASS_NAME,
+  DEFINING_WORLD_BUILDING_SELECTED_BLOCK_READOUT_STACK_CLASS_NAME,
 } from '@/components/world/building/domains/definingWorldBuildingBuildModeConstants';
 import { formattingWorldBuildingBlockSwatchColor } from '@/components/world/building/domains/formattingWorldBuildingBlockSwatchColor';
 import {
@@ -53,6 +56,10 @@ export function RenderingWorldPlazaBlockPalette({
 }: RenderingWorldPlazaBlockPaletteProps): React.JSX.Element {
   const selectedDefinition = selectedDefinitionId
     ? resolvingWorldBuildingBlockDefinition(selectedDefinitionId)
+    : null;
+
+  const selectedCostReadout = selectedDefinitionId
+    ? formattingWorldBuildingBlockMaterialCostReadout(selectedDefinitionId)
     : null;
 
   const paletteCategories = useMemo(
@@ -175,9 +182,26 @@ export function RenderingWorldPlazaBlockPalette({
         </div>
       </div>
 
-      <p className={DEFINING_WORLD_BUILDING_SELECTED_BLOCK_READOUT_CLASS_NAME}>
-        {selectedDefinition?.name ?? 'None'}
-      </p>
+      <div
+        className={
+          DEFINING_WORLD_BUILDING_SELECTED_BLOCK_READOUT_STACK_CLASS_NAME
+        }
+      >
+        <p
+          className={DEFINING_WORLD_BUILDING_SELECTED_BLOCK_READOUT_CLASS_NAME}
+        >
+          {selectedDefinition?.name ?? 'None'}
+        </p>
+        {selectedCostReadout ? (
+          <p
+            className={
+              DEFINING_WORLD_BUILDING_SELECTED_BLOCK_COST_READOUT_CLASS_NAME
+            }
+          >
+            {selectedCostReadout}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }

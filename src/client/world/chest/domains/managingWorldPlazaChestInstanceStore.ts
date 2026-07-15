@@ -49,6 +49,7 @@ function creatingWorldPlazaChestInstanceFromPlacement(
     displayScale:
       placement.displayScale ?? DEFINING_WORLD_PLAZA_CHEST_DISPLAY_SCALE,
     keySource: placement.keySource,
+    keyWildlifeSpeciesId: placement.keyWildlifeSpeciesId,
   };
 }
 
@@ -133,6 +134,15 @@ export function upsertingWorldPlazaChestInstanceFromPlacement(
   notifyingWorldPlazaChestInstanceListeners();
 
   return true;
+}
+
+/** Lists locked chest instances still awaiting a key or open action. */
+export function listingWorldPlazaLockedChestInstances(
+  store: ManagingWorldPlazaChestInstanceStore = chestInstanceStore
+): readonly DefiningWorldPlazaChestInstance[] {
+  return listingWorldPlazaChestInstances(store).filter(
+    (instance) => instance.state === 'locked'
+  );
 }
 
 /** Key sources that still have at least one locked chest in the store. */

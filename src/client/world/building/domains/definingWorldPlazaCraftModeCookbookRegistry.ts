@@ -87,7 +87,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_REGISTRY = [
   {
     id: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.HEALER,
     title: "Healer's Cookbook",
-    subtitle: 'Restorative broths, poultices, and tonics.',
+    subtitle: 'Bandages, salves, sleep draughts, and cures.',
     ariaLabel: "Open the Healer's Cookbook",
     spriteColumnIndex: 2,
     emblemIconifyIcon: 'mdi:mortar-pestle-plus',

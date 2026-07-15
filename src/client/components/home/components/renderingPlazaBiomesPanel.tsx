@@ -1,6 +1,7 @@
 'use client';
 
 import { RenderingPlazaBiomesGuideDetailView } from '@/components/home/components/renderingPlazaBiomesGuideDetailView';
+import { RenderingPlazaCodexDiscoveryMilestoneProgress } from '@/components/home/components/renderingPlazaCodexDiscoveryMilestoneProgress';
 import {
   DEFINING_PLAZA_BIOMES_PANEL_SUBTITLE,
   DEFINING_PLAZA_BIOMES_RARITY_FILTERS,
@@ -239,8 +240,6 @@ export function RenderingPlazaBiomesPanel({
   }, []);
   const exploredCount = guideEntries.filter((entry) => entry.isExplored).length;
   const totalCount = guideEntries.length;
-  const progressPercent =
-    totalCount > 0 ? Math.round((exploredCount / totalCount) * 100) : 0;
 
   if (selectedEntry?.isExplored) {
     return (
@@ -288,27 +287,12 @@ export function RenderingPlazaBiomesPanel({
         ) : null}
       </div>
 
-      <div className="shrink-0 rounded-md border border-poster-teal/25 bg-parchment/45 px-3 py-2">
-        <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wide">
-          <span className="text-ink-soft">Discovered</span>
-          <span className="font-mono tabular-nums text-poster-teal-deep">
-            {exploredCount} / {totalCount}
-          </span>
-        </div>
-        <div
-          className="mt-1.5 h-2 overflow-hidden rounded-full border border-poster-teal/25 bg-poster-teal-deep/15"
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={totalCount}
-          aria-valuenow={exploredCount}
-          aria-label="Biomes discovered"
-        >
-          <div
-            className="h-full rounded-full bg-[linear-gradient(90deg,#c98a2d_0%,#d9a441_100%)] transition-[width] duration-500"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-      </div>
+      <RenderingPlazaCodexDiscoveryMilestoneProgress
+        label="Discovered"
+        value={exploredCount}
+        max={totalCount}
+        ariaLabel="Biomes discovered"
+      />
 
       <div
         className={PLAZA_BIOMES_RARITY_TAB_BAR_CLASS_NAME}

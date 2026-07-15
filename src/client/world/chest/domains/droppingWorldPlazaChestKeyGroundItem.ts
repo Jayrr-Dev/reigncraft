@@ -4,8 +4,8 @@
  * @module components/world/chest/domains/droppingWorldPlazaChestKeyGroundItem
  */
 
-import { listingWorldPlazaActiveLockedChestKeySources } from '@/components/world/chest/domains/managingWorldPlazaChestInstanceStore';
-import { rollingWorldPlazaChestKeyDrop } from '@/components/world/chest/domains/rollingWorldPlazaChestKeyDrop';
+import { checkingWorldPlazaChestKeyWildlifeKillQualifies } from '@/components/world/chest/domains/checkingWorldPlazaChestKeyWildlifeKillQualifies';
+import { DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_KEY_DROP_CHANCE } from '@/components/world/chest/domains/definingWorldPlazaProceduralChestConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWorldPlazaGroundItemsUseLocalPersistence } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemsUseLocalPersistence';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
@@ -43,9 +43,10 @@ export async function droppingWorldPlazaChestKeyGroundItem({
   playerPosition,
   randomUnit = Math.random(),
 }: DroppingWorldPlazaChestKeyGroundItemParams): Promise<DroppingWorldPlazaChestKeyGroundItemResult> {
-  const activeSources = listingWorldPlazaActiveLockedChestKeySources();
-
-  if (!rollingWorldPlazaChestKeyDrop(activeSources, 'wildlife', randomUnit)) {
+  if (
+    !checkingWorldPlazaChestKeyWildlifeKillQualifies(instance) ||
+    randomUnit >= DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_KEY_DROP_CHANCE
+  ) {
     return { outcome: 'none', groundItem: null };
   }
 

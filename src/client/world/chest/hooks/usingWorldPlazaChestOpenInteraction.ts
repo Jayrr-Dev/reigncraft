@@ -15,6 +15,7 @@ import {
   unlockingAndOpeningWorldPlazaChest,
 } from '@/components/world/chest/domains/managingWorldPlazaChestInstanceStore';
 import { openingWorldPlazaLocalChest } from '@/components/world/chest/domains/managingWorldPlazaLocalOpenedChests';
+import { resolvingWorldPlazaChestLockedHintToastMessage } from '@/components/world/chest/domains/resolvingWorldPlazaChestLockedHintToastMessage';
 import { resolvingWorldPlazaChestLootGrant } from '@/components/world/chest/domains/resolvingWorldPlazaChestLootGrant';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
@@ -40,6 +41,9 @@ export type UsingWorldPlazaChestOpenInteractionParams = {
 
 export type UsingWorldPlazaChestOpenInteractionResult = {
   readonly openingChest: (
+    entry: ListingWorldPlazaChestsInInteractionRangeEntry
+  ) => void;
+  readonly showingLockedChestHint: (
     entry: ListingWorldPlazaChestsInInteractionRangeEntry
   ) => void;
 };
@@ -278,5 +282,24 @@ export function usingWorldPlazaChestOpenInteraction({
     ]
   );
 
-  return { openingChest };
+  const showingLockedChestHint = useCallback(
+    (entry: ListingWorldPlazaChestsInInteractionRangeEntry): void => {
+      if (entry.action !== 'locked') {
+        return;
+      }
+
+      const instance = gettingWorldPlazaChestInstance(entry.chestId);
+
+      if (!instance || instance.state !== 'locked') {
+        return;
+      }
+
+      showingGameplayHudToast(
+        resolvingWorldPlazaChestLockedHintToastMessage(instance)
+      );
+    },
+    [showingGameplayHudToast]
+  );
+
+  return { openingChest, showingLockedChestHint };
 }

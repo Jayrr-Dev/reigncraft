@@ -21,6 +21,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE = {
   HUD_HEALTH: 'hud-health',
   HUD_STAMINA: 'hud-stamina',
   HUD_WORLD_ANCHORS: 'hud-world-anchors',
+  HUD_ONBOARDING_COACHMARKS: 'hud-onboarding-coachmarks',
   AUDIO_SFX: 'audio-sfx',
   PROJECTILES: 'projectiles',
   WILDLIFE: 'wildlife',
@@ -195,6 +196,14 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
       label: 'World HUD anchors',
       description:
         'Name tags, chat bubbles, eat overlay, stun/sleep markers, interaction labels.',
+    },
+    {
+      featureId:
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_ONBOARDING_COACHMARKS,
+      groupId: 'hud',
+      label: 'Onboarding coachmarks',
+      description:
+        'Soft first-spawn tips that highlight HUD controls without pausing play.',
     },
     {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.AUDIO_SFX,
@@ -419,6 +428,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS: Readonly<
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_HEALTH]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_STAMINA]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_WORLD_ANCHORS]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_ONBOARDING_COACHMARKS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.AUDIO_SFX]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PROJECTILES]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE]: true,

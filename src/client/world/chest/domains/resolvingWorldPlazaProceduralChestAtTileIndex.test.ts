@@ -58,7 +58,12 @@ describe('resolvingWorldPlazaProceduralChestAtTileIndex', () => {
       )
     );
     expect(first?.initialState).toBe('locked');
-    expect(first?.keySource).toMatch(/^(wildlife|shrub|long-grass)$/);
+    expect(first?.keySource).toMatch(
+      /^(wildlife|wildlife-strongest|wildlife-species|shrub|long-grass)$/
+    );
+    if (first?.keySource === 'wildlife-species') {
+      expect(first?.keyWildlifeSpeciesId).toBeTruthy();
+    }
     expect(first?.loot).toEqual({ kind: 'pool', poolId: 'starter-forage' });
   });
 });

@@ -159,14 +159,14 @@ describe('managingWorldPlazaSpritcoreUpgradeStore', () => {
       DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
     );
 
-    expect(applyingWorldPlazaSpritcoreDeathCommittedPenalty()).toBe(1000);
+    expect(applyingWorldPlazaSpritcoreDeathCommittedPenalty()).toBe(800);
     expect(gettingWorldPlazaSpritcoreUpgradeSnapshot()).toEqual({
-      bonusMaxHealth: 900,
-      bonusAttackPower: 90,
-      bonusAttackSpeed: 0.45,
+      bonusMaxHealth: 920,
+      bonusAttackPower: 92,
+      bonusAttackSpeed: 0.46,
       bonusDefense: 0,
       bonusMoveSpeed: 0,
-      totalSpritcoreInvested: 9000,
+      totalSpritcoreInvested: 9200,
     });
     expect(
       readingWorldPlazaSpritcoreUpgradeFromStorage(
@@ -174,12 +174,12 @@ describe('managingWorldPlazaSpritcoreUpgradeStore', () => {
         DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
       )
     ).toEqual({
-      bonusMaxHealth: 900,
-      bonusAttackPower: 90,
-      bonusAttackSpeed: 0.45,
+      bonusMaxHealth: 920,
+      bonusAttackPower: 92,
+      bonusAttackSpeed: 0.46,
       bonusDefense: 0,
       bonusMoveSpeed: 0,
-      totalSpritcoreInvested: 9000,
+      totalSpritcoreInvested: 9200,
     });
   });
 

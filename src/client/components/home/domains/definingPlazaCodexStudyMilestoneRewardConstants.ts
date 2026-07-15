@@ -5,9 +5,16 @@
  * @module components/home/domains/definingPlazaCodexStudyMilestoneRewardConstants
  */
 
-/** Relative positions along an overall panel progress bar (0–100). */
+/** Relative positions along dual-progress meters (Sighted/Logged + Studied). */
 export const DEFINING_PLAZA_CODEX_OVERALL_MILESTONE_REWARD_PERCENTS = [
   5, 20, 50, 75, 100,
+] as const;
+
+/**
+ * Four chests on discovery-only meters (Biomes Discovered, Recipes Attached).
+ */
+export const DEFINING_PLAZA_CODEX_DISCOVERY_MILESTONE_REWARD_PERCENTS = [
+  25, 50, 75, 100,
 ] as const;
 
 /** Iconify id for locked/unlocked milestone chest placeholders. */

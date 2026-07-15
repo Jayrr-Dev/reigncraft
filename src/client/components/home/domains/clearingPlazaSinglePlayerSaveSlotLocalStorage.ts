@@ -37,6 +37,8 @@ import {
 import { resolvingWorldPlazaPlayerConditionsStorageKey } from '@/components/world/health/domains/definingWorldPlazaPlayerConditionsConstants';
 import { resolvingWorldPlazaGroundItemsLocalStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemLocalStorageConstants';
 import { resolvingWorldPlazaInventoryStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import { resolvingWorldPlazaOnboardingCoachmarksStorageKey } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
+import { clearingWorldPlazaOnboardingCoachmarkStoreForOwner } from '@/components/world/onboarding/domains/managingWorldPlazaOnboardingCoachmarkStore';
 import {
   DEFINING_WORLD_PLAZA_SPRITCORE_UPGRADE_STORAGE_KEY_PREFIX,
   resolvingWorldPlazaSpritcoreUpgradeStorageKey,
@@ -74,6 +76,7 @@ export function clearingPlazaSinglePlayerSaveSlotLocalStorage(
     resolvingWorldPlazaAvatarTransformCooldownStorageKey(persistenceOwnerId),
     resolvingWorldPlazaSelectedAvatarSkinStorageKey(persistenceOwnerId),
     resolvingWorldPlazaSpritcoreUpgradeStorageKey(persistenceOwnerId),
+    resolvingWorldPlazaOnboardingCoachmarksStorageKey(persistenceOwnerId),
   ];
 
   for (const storageKey of storageKeys) {
@@ -97,4 +100,5 @@ export function clearingPlazaSinglePlayerSaveSlotLocalStorage(
   clearingWorldPlazaLocalPickedFlowersMemoryForOwner(persistenceOwnerId);
   clearingWorldPlazaLocalFarmlandMemoryForOwner(persistenceOwnerId);
   clearingWorldPlazaRecipeDiscoveryStoreForOwner(persistenceOwnerId);
+  clearingWorldPlazaOnboardingCoachmarkStoreForOwner(persistenceOwnerId);
 }

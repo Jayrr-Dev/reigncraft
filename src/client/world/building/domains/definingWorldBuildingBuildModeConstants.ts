@@ -79,9 +79,17 @@ export const DEFINING_WORLD_BUILDING_CATEGORY_TAB_ICON_CLASS_NAME =
 export const DEFINING_WORLD_BUILDING_CATEGORY_TAB_ICON_SELECTED_CLASS_NAME =
   'h-3.5 w-3.5 text-[#f4d35e]' as const;
 
-/** Selected-block readout classes shown under the swatch grid. */
+/** Selected-block readout stack under the swatch grid. */
+export const DEFINING_WORLD_BUILDING_SELECTED_BLOCK_READOUT_STACK_CLASS_NAME =
+  'flex min-w-0 flex-col items-center gap-0.5' as const;
+
+/** Selected-block name readout classes shown under the swatch grid. */
 export const DEFINING_WORLD_BUILDING_SELECTED_BLOCK_READOUT_CLASS_NAME =
   'truncate text-center text-[10px] font-semibold text-[#f4d35e]' as const;
+
+/** Selected-block material cost readout under the name. */
+export const DEFINING_WORLD_BUILDING_SELECTED_BLOCK_COST_READOUT_CLASS_NAME =
+  'truncate text-center text-[9px] font-medium tabular-nums text-white/70' as const;
 
 /** Compact value readout classes (layer / height summary). */
 export const DEFINING_WORLD_BUILDING_VALUE_READOUT_CLASS_NAME =

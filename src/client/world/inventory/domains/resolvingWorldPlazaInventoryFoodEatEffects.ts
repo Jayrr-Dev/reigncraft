@@ -14,6 +14,8 @@ import {
 import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 import { applyingWorldPlazaInventoryFlowerEatEffects } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryFlowerEatEffects';
 import { parsingWorldPlazaFlowerSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
+import { applyingWorldPlazaInventoryHealerConsumableEffects } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryHealerConsumableEffects';
+import { resolvingWorldPlazaHealerConsumableEffectKind } from '@/components/world/inventory/domains/definingWorldPlazaHealerConsumableEffectRegistry';
 import { resolvingWorldPlazaInventoryFoodHealAmount } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealAmount';
 import type { DefiningWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { resolvingWorldPlazaPlayerHeldLuckyFoodBuffChanceMultiplier } from '@/components/world/inventory/domains/resolvingWorldPlazaPlayerHeldLuckyFoodBuffChanceMultiplier';
@@ -237,6 +239,42 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
       nextHealthState: flowerResult.nextHealthState,
       didRollSickness: isSick,
       didRollDisease: flowerResult.didRollDisease,
+      didRollWellFedBuff: false,
+    };
+  }
+
+  if (
+    resolvingWorldPlazaHealerConsumableEffectKind(foodDefinition.itemTypeId)
+  ) {
+    let healerHealthState = applyingWorldPlazaInventoryHealerConsumableEffects({
+      itemTypeId: foodDefinition.itemTypeId,
+      healthState: nextHealthState,
+      nowMs,
+      worldEpochMs: resolvedWorldEpochMs,
+      effectRoll: sicknessRoll,
+    });
+    const healthHealAmount = resolvingWorldPlazaInventoryFoodHealAmount({
+      healthHeal: foodDefinition.healthHeal,
+      effectiveMaxHealth: computingWorldPlazaEntityHealthEffectiveMax(
+        healerHealthState,
+        nowMs
+      ),
+    });
+
+    if (healthHealAmount > 0) {
+      healerHealthState = healingWorldPlazaEntityHealthWithAmplifiers({
+        receiverState: healerHealthState,
+        baseHealAmount: healthHealAmount,
+        nowMs,
+      }).state;
+    }
+
+    return {
+      effectiveHungerRestoreRatio: foodDefinition.hungerRestoreRatio,
+      healthHealAmount,
+      nextHealthState: healerHealthState,
+      didRollSickness: false,
+      didRollDisease: false,
       didRollWellFedBuff: false,
     };
   }

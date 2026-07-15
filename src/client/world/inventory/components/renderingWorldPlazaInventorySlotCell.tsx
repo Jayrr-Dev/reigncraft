@@ -78,6 +78,7 @@ import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/i
 import { resolvingWorldPlazaInventorySlotDoubleActivationAction } from '@/components/world/inventory/domains/resolvingWorldPlazaInventorySlotDoubleActivationAction';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 import { resolvingWorldPlazaInventoryStorageSlotOrdinal } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStorageSlotOrdinal';
+import { DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
 import { cn } from '@/lib/utils';
 import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import type * as React from 'react';
@@ -291,6 +292,12 @@ export function RenderingWorldPlazaInventorySlotCell({
     return (
       <div
         ref={setDropRef}
+        {...(isReservedWeaponToolSlot
+          ? {
+              [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]:
+                'equip-tool-slot',
+            }
+          : {})}
         className={cn(
           resolvingWorldPlazaInventorySlotClassName({
             isEmpty: true,
@@ -819,6 +826,12 @@ function InventoryPlazaSlotItem({
   return (
     <div
       ref={setDropRef}
+      {...(isReservedWeaponToolSlot
+        ? {
+            [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]:
+              'equip-tool-slot',
+          }
+        : {})}
       className={cn(
         'relative overflow-visible',
         resolvingWorldPlazaInventorySlotClassName({

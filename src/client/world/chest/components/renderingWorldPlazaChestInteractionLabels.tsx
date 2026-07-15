@@ -52,6 +52,9 @@ export type RenderingWorldPlazaChestInteractionLabelsProps = {
   readonly onOpenChest: (
     entry: ListingWorldPlazaChestsInInteractionRangeEntry
   ) => void;
+  readonly onLockedChestHint: (
+    entry: ListingWorldPlazaChestsInInteractionRangeEntry
+  ) => void;
 };
 
 /**
@@ -63,6 +66,7 @@ export function RenderingWorldPlazaChestInteractionLabels({
   cameraWorldZoomRef,
   inventoryStateRef,
   onOpenChest,
+  onLockedChestHint,
 }: RenderingWorldPlazaChestInteractionLabelsProps): React.JSX.Element {
   const enabled = checkingWorldPlazaGenerationFeatureEnabled(
     DEFINING_WORLD_PLAZA_GENERATION_FEATURE.CHESTS
@@ -74,6 +78,7 @@ export function RenderingWorldPlazaChestInteractionLabels({
   >([]);
   const selectedChestsRef = useRef(selectedChests);
   const onOpenChestRef = useRef(onOpenChest);
+  const onLockedChestHintRef = useRef(onLockedChestHint);
   const idleProgressSnapshotRef =
     useRef<DefiningWorldPlazaTimedInteractionProgressSnapshot>(
       DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_INITIAL_SNAPSHOT
@@ -82,6 +87,7 @@ export function RenderingWorldPlazaChestInteractionLabels({
 
   selectedChestsRef.current = selectedChests;
   onOpenChestRef.current = onOpenChest;
+  onLockedChestHintRef.current = onLockedChestHint;
 
   useLayoutEffect(() => {
     if (!enabled) {
@@ -206,6 +212,7 @@ export function RenderingWorldPlazaChestInteractionLabels({
         const buttonClassName = entry.isDisabled
           ? DEFINING_WORLD_PLAZA_CHEST_INTERACTION_LABEL_DISABLED_BUTTON_CLASS_NAME
           : DEFINING_WORLD_PLAZA_CHEST_INTERACTION_LABEL_BUTTON_CLASS_NAME;
+        const isButtonDisabled = entry.isDisabled && entry.action !== 'locked';
 
         return (
           <div
@@ -232,7 +239,7 @@ export function RenderingWorldPlazaChestInteractionLabels({
               progressSnapshot={idleProgressSnapshotRef.current}
               progressRatioRef={idleProgressRatioRef}
               buttonClassName={buttonClassName}
-              disabled={entry.isDisabled}
+              disabled={isButtonDisabled}
               rowRef={(element) => {
                 if (element) {
                   rowElementByKeyRef.current.set(entry.selectionKey, element);
@@ -242,6 +249,11 @@ export function RenderingWorldPlazaChestInteractionLabels({
                 rowElementByKeyRef.current.delete(entry.selectionKey);
               }}
               onActivate={() => {
+                if (entry.action === 'locked') {
+                  onLockedChestHintRef.current(entry);
+                  return;
+                }
+
                 if (entry.isDisabled) {
                   return;
                 }

@@ -35,7 +35,7 @@ export type ApplyingWorldPlazaPlayerDeathSpritcorePenaltyResult = {
 };
 
 /**
- * Weakens the player on death: 20% carried SC and 10% committed SC spill.
+ * Weakens the player on death: 12% carried SC and 8% committed SC spill.
  */
 export async function applyingWorldPlazaPlayerDeathSpritcorePenalty({
   inventoryState,

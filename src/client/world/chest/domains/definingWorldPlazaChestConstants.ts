@@ -12,16 +12,16 @@ import { formattingWorldPlazaChestSpriteUrl } from '@/components/world/chest/dom
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME } from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
 
 /** Default display scale relative to one isometric tile width. */
-export const DEFINING_WORLD_PLAZA_CHEST_DISPLAY_SCALE = 1;
+export const DEFINING_WORLD_PLAZA_CHEST_DISPLAY_SCALE = 0.68;
 
 /** Default circle collision radius in grid units. */
-export const DEFINING_WORLD_PLAZA_CHEST_COLLISION_RADIUS_GRID = 0.35;
+export const DEFINING_WORLD_PLAZA_CHEST_COLLISION_RADIUS_GRID = 0.28;
 
 /** Max Euclidean distance from player to chest for Open. */
 export const DEFINING_WORLD_PLAZA_CHEST_INTERACT_REACH_GRID = 2;
 
 /** Pointer hit radius around the chest foot (tiles). */
-export const DEFINING_WORLD_PLAZA_CHEST_POINTER_HIT_RADIUS_TILES = 0.85;
+export const DEFINING_WORLD_PLAZA_CHEST_POINTER_HIT_RADIUS_TILES = 0.7;
 
 /** localStorage key prefix for opened chest ids. */
 export const DEFINING_WORLD_PLAZA_OPENED_CHESTS_LOCAL_STORAGE_KEY_PREFIX =

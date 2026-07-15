@@ -119,6 +119,7 @@ import {
   reseedingWorldPlazaCharacterEngineHealthBaseline,
 } from '@/components/world/character/domains/creatingWorldPlazaCharacterEngineInitialHealthState';
 import type { DefiningWorldPlazaCharacterEngineDefinition } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
+import { syncingWorldPlazaCharacterEngineHealthDerivedStats } from '@/components/world/character/domains/syncingWorldPlazaCharacterEngineHealthDerivedStats';
 import { applyingWorldPlazaDevQaPlayerHealthOverride } from '@/components/world/domains/applyingWorldPlazaDevQaPlayerHealthOverride';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_REACTION_DURATION_MS,
@@ -895,17 +896,36 @@ export function usingWorldPlazaPlayerHealth({
     });
   }, [pushingHudSnapshot]);
 
+  const previousCharacterEngineDefinitionRef =
+    useRef<DefiningWorldPlazaCharacterEngineDefinition | null>(null);
+
   useEffect(() => {
     if (!characterEngineDefinition) {
+      previousCharacterEngineDefinitionRef.current = null;
       return;
     }
 
-    healthStateRef.current =
-      creatingWorldPlazaCharacterEngineInitialHealthState(
-        characterEngineDefinition,
-        performance.now(),
-        spritcoreBonuses
-      );
+    const didCharacterDefinitionChange =
+      previousCharacterEngineDefinitionRef.current !==
+      characterEngineDefinition;
+    previousCharacterEngineDefinitionRef.current = characterEngineDefinition;
+
+    if (didCharacterDefinitionChange) {
+      healthStateRef.current =
+        creatingWorldPlazaCharacterEngineInitialHealthState(
+          characterEngineDefinition,
+          performance.now(),
+          spritcoreBonuses
+        );
+    } else {
+      healthStateRef.current =
+        syncingWorldPlazaCharacterEngineHealthDerivedStats(
+          healthStateRef.current,
+          characterEngineDefinition,
+          spritcoreBonuses
+        );
+    }
+
     pushingHudSnapshot(performance.now());
   }, [characterEngineDefinition, pushingHudSnapshot, spritcoreBonuses]);
 

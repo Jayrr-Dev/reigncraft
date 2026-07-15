@@ -6,7 +6,9 @@
  * @module components/home/components/renderingPlazaRecipesPanel
  */
 
+import { RenderingPlazaCodexDiscoveryMilestoneProgress } from '@/components/home/components/renderingPlazaCodexDiscoveryMilestoneProgress';
 import { RenderingPlazaRecipesGuideDetailView } from '@/components/home/components/renderingPlazaRecipesGuideDetailView';
+import { DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER } from '@/components/home/domains/definingPlazaBestiarySpritePortraitConstants';
 import {
   DEFINING_PLAZA_RECIPES_PANEL_SUBTITLE,
   LABELING_PLAZA_RECIPES_ATTACHED_PROGRESS,
@@ -22,7 +24,6 @@ import {
   resolvingPlazaRecipesGuideDisplayEntries,
   type PlazaRecipesGuideDisplayEntry,
 } from '@/components/home/domains/resolvingPlazaRecipesGuideDisplayEntries';
-import { DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER } from '@/components/home/domains/definingPlazaBestiarySpritePortraitConstants';
 import { Icon } from '@/components/ui/icon';
 import { RenderingWorldPlazaCampfireRecipePreview } from '@/components/world/building/components/renderingWorldPlazaCampfireRecipePreview';
 import { RenderingWorldPlazaCraftModeRecipeSpriteSheetPreview } from '@/components/world/building/components/renderingWorldPlazaCraftModeRecipeSpriteSheetPreview';
@@ -224,8 +225,6 @@ export function RenderingPlazaRecipesPanel({
   }, []);
   const attachedCount = guideEntries.filter((entry) => entry.isAttached).length;
   const totalCount = guideEntries.length;
-  const progressPercent =
-    totalCount > 0 ? Math.round((attachedCount / totalCount) * 100) : 0;
 
   if (selectedEntry?.isAttached) {
     return (
@@ -273,20 +272,12 @@ export function RenderingPlazaRecipesPanel({
         ) : null}
       </div>
 
-      <div className="flex shrink-0 flex-col gap-1">
-        <div className="flex items-center justify-between gap-2 text-[10px] font-bold uppercase tracking-wide text-ink-soft">
-          <span>
-            {LABELING_PLAZA_RECIPES_ATTACHED_PROGRESS} {attachedCount}/
-            {totalCount}
-          </span>
-        </div>
-        <div className="h-1.5 overflow-hidden rounded-full bg-poster-teal/15">
-          <div
-            className="h-full rounded-full bg-poster-gold/80 transition-[width]"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-      </div>
+      <RenderingPlazaCodexDiscoveryMilestoneProgress
+        label={LABELING_PLAZA_RECIPES_ATTACHED_PROGRESS}
+        value={attachedCount}
+        max={totalCount}
+        ariaLabel="Recipes attached"
+      />
 
       <div className={PLAZA_RECIPES_COOKBOOK_TAB_BAR_CLASS_NAME} role="tablist">
         {cookbookFilters.map((filter) => {

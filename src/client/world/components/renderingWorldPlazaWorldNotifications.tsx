@@ -20,7 +20,9 @@ import {
   subscribingWorldPlazaWorldNotifications,
   type DefiningWorldPlazaWorldNotification,
 } from '@/components/world/domains/managingWorldPlazaWorldNotificationsStore';
-import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { checkingWorldPlazaOnboardingShouldSuppressControlsHint } from '@/components/world/onboarding/domains/checkingWorldPlazaOnboardingShouldSuppressControlsHint';
+import { subscribingWorldPlazaOnboardingCoachmarks } from '@/components/world/onboarding/domains/managingWorldPlazaOnboardingCoachmarkStore';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 const RENDERING_WORLD_PLAZA_WORLD_NOTIFICATIONS_ANCHOR_CLASS =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.bottomCenter
@@ -43,11 +45,20 @@ export function RenderingWorldPlazaWorldNotifications({
     gettingWorldPlazaWorldNotificationsSnapshot,
     () => []
   );
+  const shouldSuppressControlsHint = useSyncExternalStore(
+    subscribingWorldPlazaOnboardingCoachmarks,
+    checkingWorldPlazaOnboardingShouldSuppressControlsHint,
+    () => false
+  );
 
   const didEnqueueControlsHintRef = useRef(false);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (didEnqueueControlsHintRef.current) {
+      return;
+    }
+
+    if (shouldSuppressControlsHint) {
       return;
     }
 
@@ -58,7 +69,7 @@ export function RenderingWorldPlazaWorldNotifications({
         ? LABELING_WORLD_PLAZA_MOBILE_CONTROLS_HINT
         : LABELING_WORLD_PLAZA_KEYBOARD_CONTROLS_HINT
     );
-  }, [isMobile]);
+  }, [isMobile, shouldSuppressControlsHint]);
 
   const activeNotification = queue[0] ?? null;
 
@@ -114,9 +125,12 @@ function RenderingWorldPlazaWorldNotificationEntry({
       setOpacity(0);
     }, fadeInMs + visibleDurationMs);
 
-    dismissTimer = window.setTimeout(() => {
-      dismissingWorldPlazaWorldNotification(notification.id);
-    }, fadeInMs + visibleDurationMs + fadeOutMs);
+    dismissTimer = window.setTimeout(
+      () => {
+        dismissingWorldPlazaWorldNotification(notification.id);
+      },
+      fadeInMs + visibleDurationMs + fadeOutMs
+    );
 
     return () => {
       if (fadeInFrame !== 0) {
@@ -139,7 +153,9 @@ function RenderingWorldPlazaWorldNotificationEntry({
     >
       {isRealmDiscovery ? (
         <span
-          className={DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_CLASS_NAME}
+          className={
+            DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_CLASS_NAME
+          }
         >
           {notification.message}
         </span>

@@ -9,6 +9,7 @@ import {
   checkingWorldBuildingBlockMaterialAffordable,
   DEFINING_WORLD_BUILDING_BLOCK_DYE_FLOWER_QUANTITY_PER_LAYER,
   DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER,
+  formattingWorldBuildingBlockMaterialCostReadout,
   listingWorldBuildingBlockMaterialCostDefinitionIds,
   resolvingWorldBuildingBlockMaterialCost,
 } from '@/components/world/building/domains/definingWorldBuildingBlockMaterialCostRegistry';
@@ -80,6 +81,16 @@ describe('definingWorldBuildingBlockMaterialCostRegistry', () => {
     expect(costIds).toContain('basic:wall:ore-iron');
     expect(costIds).toContain('basic:wall:ingot-iron');
     expect(costIds).toContain('decorative:flower:rose');
+  });
+
+  it('formats flower block palette cost as wood plus flower', () => {
+    expect(
+      formattingWorldBuildingBlockMaterialCostReadout(
+        'decorative:flower:foxglove'
+      )
+    ).toBe(
+      `${DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER} Wood + ${DEFINING_WORLD_BUILDING_BLOCK_DYE_FLOWER_QUANTITY_PER_LAYER} Foxglove`
+    );
   });
 
   it('requires three wood for a tree floor placement', () => {

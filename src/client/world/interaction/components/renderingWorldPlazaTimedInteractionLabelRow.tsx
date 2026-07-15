@@ -10,6 +10,7 @@ import {
 } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionLabelUiConstants';
 import { DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_LABEL_GAP_PX } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressConstants';
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
+import { DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
 import { memo, type RefObject } from 'react';
 
 export type RenderingWorldPlazaTimedInteractionLabelRowProps = {
@@ -22,6 +23,8 @@ export type RenderingWorldPlazaTimedInteractionLabelRowProps = {
   readonly buttonClassName?: string;
   /** When true, button is non-interactive (e.g. Locked chests). */
   readonly disabled?: boolean;
+  /** When set, tags the action button for onboarding coachmark targeting. */
+  readonly onboardingAnchorId?: string;
   readonly onActivate: () => void;
 };
 
@@ -37,6 +40,7 @@ export const RenderingWorldPlazaTimedInteractionLabelRow = memo(
     rowRef,
     buttonClassName = DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME,
     disabled = false,
+    onboardingAnchorId,
     onActivate,
   }: RenderingWorldPlazaTimedInteractionLabelRowProps): React.JSX.Element {
     const isProgressRingVisible =
@@ -53,7 +57,15 @@ export const RenderingWorldPlazaTimedInteractionLabelRow = memo(
         <button
           type="button"
           disabled={disabled}
-          {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+          {...{
+            [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true,
+            ...(onboardingAnchorId
+              ? {
+                  [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]:
+                    onboardingAnchorId,
+                }
+              : {}),
+          }}
           className={buttonClassName}
           onClick={(event) => {
             event.preventDefault();

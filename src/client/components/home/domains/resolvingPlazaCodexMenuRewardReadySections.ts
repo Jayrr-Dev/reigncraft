@@ -4,7 +4,10 @@
  * @module components/home/domains/resolvingPlazaCodexMenuRewardReadySections
  */
 
-import { checkingPlazaCodexOverallProgressHasRewardReady } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
+import {
+  checkingPlazaCodexDiscoveryProgressHasRewardReady,
+  checkingPlazaCodexOverallProgressHasRewardReady,
+} from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
 import type { WorldPlazaCodexSectionId } from '@/components/world/domains/definingWorldPlazaCodexConstants';
 
 /** One section's Sighted/Logged + Studied meters (same as dual progress). */
@@ -13,6 +16,12 @@ export type PlazaCodexMenuRewardReadyMeterPair = {
   readonly discoveredMax: number;
   readonly studiedValue: number;
   readonly studiedMax: number;
+};
+
+/** Single discovery meter (Biomes / Recipes) with four chests. */
+export type PlazaCodexMenuRewardReadyDiscoveryMeter = {
+  readonly value: number;
+  readonly max: number;
 };
 
 /**
@@ -34,20 +43,43 @@ export function checkingPlazaCodexDualMetersHaveRewardReady(
 }
 
 /**
- * Section ids whose dual-progress meters have a reached chest (reward ready).
+ * Section ids whose dual or discovery meters have a reached chest (reward ready).
  */
 export function resolvingPlazaCodexMenuRewardReadySections(
   metersBySection: Readonly<
-    Partial<Record<WorldPlazaCodexSectionId, PlazaCodexMenuRewardReadyMeterPair>>
-  >
+    Partial<
+      Record<WorldPlazaCodexSectionId, PlazaCodexMenuRewardReadyMeterPair>
+    >
+  >,
+  discoveryMetersBySection: Readonly<
+    Partial<
+      Record<WorldPlazaCodexSectionId, PlazaCodexMenuRewardReadyDiscoveryMeter>
+    >
+  > = {}
 ): ReadonlySet<WorldPlazaCodexSectionId> {
   const ready = new Set<WorldPlazaCodexSectionId>();
 
-  for (const [sectionId, meters] of Object.entries(metersBySection) as readonly [
+  for (const [sectionId, meters] of Object.entries(
+    metersBySection
+  ) as readonly [
     WorldPlazaCodexSectionId,
     PlazaCodexMenuRewardReadyMeterPair | undefined,
   ][]) {
     if (meters && checkingPlazaCodexDualMetersHaveRewardReady(meters)) {
+      ready.add(sectionId);
+    }
+  }
+
+  for (const [sectionId, meter] of Object.entries(
+    discoveryMetersBySection
+  ) as readonly [
+    WorldPlazaCodexSectionId,
+    PlazaCodexMenuRewardReadyDiscoveryMeter | undefined,
+  ][]) {
+    if (
+      meter &&
+      checkingPlazaCodexDiscoveryProgressHasRewardReady(meter.value, meter.max)
+    ) {
       ready.add(sectionId);
     }
   }

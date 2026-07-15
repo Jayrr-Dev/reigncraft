@@ -12,6 +12,7 @@
 
 import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import type { DefiningWorldPlazaCraftModeCookbookId } from '@/components/world/building/domains/definingWorldPlazaCraftModeCookbookRegistry';
+import { DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeToolRecipeIds';
 import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 
 /** Stable ids for craft-mode recipes. */
@@ -28,6 +29,32 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID = {
   BEAR_TRAP: 'recipe-bear-trap',
   CALTROPS: 'recipe-caltrops',
   IRON_TUBE: 'recipe-iron-tube',
+  HEALER_YARROW_PRESSURE_DRESSING: 'recipe-healer-yarrow-pressure-dressing',
+  HEALER_CALENDULA_WOUND_SALVE: 'recipe-healer-calendula-wound-salve',
+  HEALER_CHAMOMILE_COMPRESS: 'recipe-healer-chamomile-compress',
+  HEALER_LAVENDER_ANTISEPTIC_WASH: 'recipe-healer-lavender-antiseptic-wash',
+  HEALER_PEPPERMINT_DIGESTIVE_DROPS: 'recipe-healer-peppermint-digestive-drops',
+  HEALER_MEADOWSWEET_FEVER_CLOTH: 'recipe-healer-meadowsweet-fever-cloth',
+  HEALER_ROSE_LINIMENT: 'recipe-healer-rose-liniment',
+  HEALER_FIELD_AGARIC_RESTORATIVE_TABLET: 'recipe-healer-field-agaric-restorative-tablet',
+  HEALER_KENNEL_PAW_SALVE: 'recipe-healer-kennel-paw-salve',
+  HEALER_LITTERBOX_GUT_DROPS: 'recipe-healer-litterbox-gut-drops',
+  HEALER_ARNICA_BRUISE_LINIMENT: 'recipe-healer-arnica-bruise-liniment',
+  HEALER_ECHINACEA_TINCTURE: 'recipe-healer-echinacea-tincture',
+  HEALER_VALERIAN_NIGHT_DRAUGHT: 'recipe-healer-valerian-night-draught',
+  HEALER_REST_CURE_PILLOW: 'recipe-healer-rest-cure-pillow',
+  HEALER_SHEEPSKIN_WOUND_PACK: 'recipe-healer-sheepskin-wound-pack',
+  HEALER_WOLF_BITE_ANTISERUM: 'recipe-healer-wolf-bite-antiserum',
+  HEALER_BOAR_LARD_DRAWING_POULTICE: 'recipe-healer-boar-lard-drawing-poultice',
+  HEALER_PACKHOUND_PLAGUE_COLLAR: 'recipe-healer-packhound-plague-collar',
+  HEALER_CAT_SCRATCH_STYPTIC: 'recipe-healer-cat-scratch-styptic',
+  HEALER_BONE_SET_SPLINT_WRAP: 'recipe-healer-bone-set-splint-wrap',
+  HEALER_DEEP_REST_SERUM: 'recipe-healer-deep-rest-serum',
+  HEALER_FOXGLOVE_HEART_AMPOULE: 'recipe-healer-foxglove-heart-ampoule',
+  HEALER_CYROBORN_FROSTBITE_PACK: 'recipe-healer-cyroborn-frostbite-pack',
+  HEALER_GRADED_PLAGUE_PURGE: 'recipe-healer-graded-plague-purge',
+  HEALER_BELLADONNA_LAST_RITES: 'recipe-healer-belladonna-last-rites',
+  ...DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID,
 } as const;
 
 /** One craft-mode recipe id. */

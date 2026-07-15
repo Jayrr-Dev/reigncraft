@@ -126,7 +126,7 @@ export const LABELING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_SECTION =
 
 /** Short hint under the Upgrade section heading. */
 export const LABELING_WORLD_PLAZA_PROFILE_PANEL_UPGRADE_HINT =
-  'Spend kill drops on permanent gains' as const;
+  'Spend kill drops on upgrades. Death cuts invested power by 8%.' as const;
 
 /** Default tab when the panel opens. */
 export const DEFINING_WORLD_PLAZA_PROFILE_PANEL_DEFAULT_TAB_ID: DefiningWorldPlazaProfilePanelTabId =

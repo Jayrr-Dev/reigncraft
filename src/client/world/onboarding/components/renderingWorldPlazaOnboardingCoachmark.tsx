@@ -44,10 +44,9 @@ function resolvingWorldPlazaOnboardingCoachmarkAnchorElement(
 function computingWorldPlazaOnboardingCoachmarkTipPosition(
   definition: WorldPlazaOnboardingCoachmarkDefinition
 ): CoachmarkTipPosition {
-  const anchorElement =
-    resolvingWorldPlazaOnboardingCoachmarkAnchorElement(
-      definition.targetAnchorId
-    );
+  const anchorElement = resolvingWorldPlazaOnboardingCoachmarkAnchorElement(
+    definition.targetAnchorId
+  );
 
   if (!anchorElement) {
     if (definition.tipPlacement === 'center') {
@@ -67,7 +66,9 @@ function computingWorldPlazaOnboardingCoachmarkTipPosition(
 
   if (definition.tipPlacement === 'below') {
     return {
-      top: anchorRect.bottom + RENDERING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_OFFSET_PX,
+      top:
+        anchorRect.bottom +
+        RENDERING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_OFFSET_PX,
       left: anchorRect.left + anchorRect.width / 2,
     };
   }
@@ -80,7 +81,8 @@ function computingWorldPlazaOnboardingCoachmarkTipPosition(
   }
 
   return {
-    top: anchorRect.top - RENDERING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_OFFSET_PX,
+    top:
+      anchorRect.top - RENDERING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_OFFSET_PX,
     left: anchorRect.left + anchorRect.width / 2,
   };
 }
@@ -137,7 +139,8 @@ export function RenderingWorldPlazaOnboardingCoachmark({
   const tipTransform =
     definition.tipPlacement === 'below'
       ? 'translate(-50%, 0)'
-      : definition.tipPlacement === 'center' && definition.targetAnchorId === null
+      : definition.tipPlacement === 'center' &&
+          definition.targetAnchorId === null
         ? 'translate(-50%, -100%)'
         : 'translate(-50%, -100%)';
 
@@ -158,18 +161,30 @@ export function RenderingWorldPlazaOnboardingCoachmark({
         }}
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
       >
-        <p className={STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_TITLE_CLASS_NAME}>
+        <p
+          className={
+            STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_TITLE_CLASS_NAME
+          }
+        >
           {definition.title}
         </p>
-        <p className={STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_BODY_CLASS_NAME}>
+        <p
+          className={
+            STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_BODY_CLASS_NAME
+          }
+        >
           {description}
         </p>
         <div
-          className={STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_ACTIONS_CLASS_NAME}
+          className={
+            STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_ACTIONS_CLASS_NAME
+          }
         >
           <button
             type="button"
-            className={STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_DISMISS_BUTTON_CLASS_NAME}
+            className={
+              STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_DISMISS_BUTTON_CLASS_NAME
+            }
             onClick={(event) => {
               event.preventDefault();
               event.stopPropagation();

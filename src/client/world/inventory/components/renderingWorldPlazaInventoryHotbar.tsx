@@ -63,6 +63,7 @@ import type { TrackingWorldPlazaInventoryDropPlacementResult } from '@/component
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
 import { usingWorldPlazaInventoryStoragePageDragHover } from '@/components/world/inventory/hooks/usingWorldPlazaInventoryStoragePageDragHover';
 import { usingWorldPlazaInventoryStoragePageWheel } from '@/components/world/inventory/hooks/usingWorldPlazaInventoryStoragePageWheel';
+import { DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
 import { RenderingWorldPlazaTeaBrewingPopover } from '@/components/world/tea-brewing/components/renderingWorldPlazaTeaBrewingPopover';
 import { checkingWorldPlazaInventoryHasBrewedTeaPot } from '@/components/world/tea-brewing/domains/brewingWorldPlazaTeaPotAtCampfire';
 import { parsingWorldPlazaTeaBrewingSlotDroppableId } from '@/components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingDndIds';
@@ -392,7 +393,10 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
         interactions={slotInteractions}
       >
         <div
-          {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
+          {...{
+            [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '',
+            [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]: 'hotbar',
+          }}
           className={cn(
             STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_SHELL_CLASS_NAME,
             storagePageIndex > 0 &&

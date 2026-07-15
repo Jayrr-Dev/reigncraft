@@ -3,7 +3,9 @@ import {
   resolvingPlazaCodexMenuRewardReadySections,
 } from '@/components/home/domains/resolvingPlazaCodexMenuRewardReadySections';
 import {
+  checkingPlazaCodexDiscoveryProgressHasRewardReady,
   checkingPlazaCodexOverallProgressHasRewardReady,
+  resolvingPlazaCodexDiscoveryMilestoneRewardMarkers,
   resolvingPlazaCodexOverallProgressMilestoneRewardMarkers,
   resolvingPlazaCodexStudyMilestoneRewardPopoverLabel,
 } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
@@ -78,6 +80,29 @@ describe('checkingPlazaCodexOverallProgressHasRewardReady', () => {
   });
 });
 
+describe('resolvingPlazaCodexDiscoveryMilestoneRewardMarkers', () => {
+  it('places four chests on discovery-only meters', () => {
+    const markers = resolvingPlazaCodexDiscoveryMilestoneRewardMarkers(3, 14);
+
+    expect(markers.map((marker) => marker.percent)).toEqual([25, 50, 75, 100]);
+    expect(markers[0]?.threshold).toBe(4);
+    expect(markers[0]?.isReached).toBe(false);
+    expect(markers[0]?.remainingNeeded).toBe(1);
+    expect(markers[3]?.threshold).toBe(14);
+    expect(markers[3]?.isReached).toBe(false);
+  });
+
+  it('marks reward ready from the first discovery chest', () => {
+    expect(checkingPlazaCodexDiscoveryProgressHasRewardReady(3, 14)).toBe(
+      false
+    );
+    expect(checkingPlazaCodexDiscoveryProgressHasRewardReady(4, 14)).toBe(true);
+    expect(checkingPlazaCodexDiscoveryProgressHasRewardReady(12, 12)).toBe(
+      true
+    );
+  });
+});
+
 describe('resolvingPlazaCodexMenuRewardReadySections', () => {
   it('marks sections when either dual meter has a reached chest', () => {
     expect(
@@ -105,5 +130,17 @@ describe('resolvingPlazaCodexMenuRewardReadySections', () => {
     });
 
     expect([...ready]).toEqual(['bestiary']);
+  });
+
+  it('marks discovery-only sections with four-chest thresholds', () => {
+    const ready = resolvingPlazaCodexMenuRewardReadySections(
+      {},
+      {
+        biomes: { value: 3, max: 14 },
+        recipes: { value: 12, max: 12 },
+      }
+    );
+
+    expect([...ready].sort()).toEqual(['recipes']);
   });
 });

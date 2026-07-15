@@ -71,6 +71,7 @@ import { RenderingWorldPlazaHungerIndicator } from '@/components/world/hunger/co
 import { RenderingWorldPlazaHungerPanel } from '@/components/world/hunger/components/renderingWorldPlazaHungerPanel';
 import type { DefiningWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { STYLING_WORLD_PLAZA_ACTION_BAR_HUNGER_ANCHOR_CLASS_NAME } from '@/components/world/hunger/domains/definingWorldPlazaHungerPanelConstants';
+import { DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
 import { LABELING_WORLD_PLAZA_ACTION_BAR_PETS } from '@/components/world/wildlife/pets/domains/definingWildlifePetRosterPanelConstants';
 import { cn } from '@/lib/utils';
 import {
@@ -270,7 +271,10 @@ export function RenderingWorldPlazaActionBar({
       >
         <div className={DEFINING_WORLD_PLAZA_ACTION_BAR_COLUMN_CLASS_NAME}>
           <div
-            {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+            {...{
+              [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true,
+              [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]: 'action-bar',
+            }}
             className={DEFINING_WORLD_PLAZA_ACTION_BAR_SHELL_CLASS_NAME}
             style={viewportStyles.shellStyle}
             role="toolbar"

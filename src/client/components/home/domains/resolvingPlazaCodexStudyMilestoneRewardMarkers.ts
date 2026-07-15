@@ -4,7 +4,10 @@
  * @module components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers
  */
 
-import { DEFINING_PLAZA_CODEX_OVERALL_MILESTONE_REWARD_PERCENTS } from '@/components/home/domains/definingPlazaCodexStudyMilestoneRewardConstants';
+import {
+  DEFINING_PLAZA_CODEX_DISCOVERY_MILESTONE_REWARD_PERCENTS,
+  DEFINING_PLAZA_CODEX_OVERALL_MILESTONE_REWARD_PERCENTS,
+} from '@/components/home/domains/definingPlazaCodexStudyMilestoneRewardConstants';
 
 export type PlazaCodexOverallMilestoneRewardMarker = {
   /** Stable key from percent position. */
@@ -37,11 +40,13 @@ export function resolvingPlazaCodexStudyMilestoneRewardPopoverLabel(
  */
 export function checkingPlazaCodexOverallProgressHasRewardReady(
   value: number,
-  max: number
+  max: number,
+  percents: readonly number[] = DEFINING_PLAZA_CODEX_OVERALL_MILESTONE_REWARD_PERCENTS
 ): boolean {
   return resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
     value,
-    max
+    max,
+    percents
   ).some((marker) => marker.isReached);
 }
 
@@ -51,24 +56,51 @@ export function checkingPlazaCodexOverallProgressHasRewardReady(
  */
 export function resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
   value: number,
-  max: number
+  max: number,
+  percents: readonly number[] = DEFINING_PLAZA_CODEX_OVERALL_MILESTONE_REWARD_PERCENTS
 ): readonly PlazaCodexOverallMilestoneRewardMarker[] {
   if (max <= 0) {
     return [];
   }
 
-  return DEFINING_PLAZA_CODEX_OVERALL_MILESTONE_REWARD_PERCENTS.map(
-    (percent) => {
-      const threshold = Math.round((percent / 100) * max);
-      const remainingNeeded = Math.max(0, threshold - value);
-      return {
-        id: `milestone-${percent}`,
-        threshold,
-        percent,
-        isReached: value >= threshold,
-        remainingNeeded,
-      };
-    }
+  return percents.map((percent) => {
+    const threshold = Math.round((percent / 100) * max);
+    const remainingNeeded = Math.max(0, threshold - value);
+    return {
+      id: `milestone-${percent}`,
+      threshold,
+      percent,
+      isReached: value >= threshold,
+      remainingNeeded,
+    };
+  });
+}
+
+/**
+ * Four discovery-only chests for Biomes / Recipes single meters.
+ */
+export function resolvingPlazaCodexDiscoveryMilestoneRewardMarkers(
+  value: number,
+  max: number
+): readonly PlazaCodexOverallMilestoneRewardMarker[] {
+  return resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
+    value,
+    max,
+    DEFINING_PLAZA_CODEX_DISCOVERY_MILESTONE_REWARD_PERCENTS
+  );
+}
+
+/**
+ * True when a discovery-only meter (Biomes / Recipes) has a reached chest.
+ */
+export function checkingPlazaCodexDiscoveryProgressHasRewardReady(
+  value: number,
+  max: number
+): boolean {
+  return checkingPlazaCodexOverallProgressHasRewardReady(
+    value,
+    max,
+    DEFINING_PLAZA_CODEX_DISCOVERY_MILESTONE_REWARD_PERCENTS
   );
 }
 

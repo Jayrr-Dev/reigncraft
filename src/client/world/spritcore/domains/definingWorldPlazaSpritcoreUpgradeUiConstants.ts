@@ -15,8 +15,8 @@ export const LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_BALANCE =
 export const LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_COMBAT_POWER =
   'Combat power' as const;
 
-/** Buy button label. */
-export const LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_BUY = 'Buy' as const;
+/** Commit button label. */
+export const LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_BUY = 'Commit' as const;
 
 /** Capped button label. */
 export const LABELING_WORLD_PLAZA_SPRITCORE_UPGRADE_CAPPED = 'Capped' as const;

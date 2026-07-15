@@ -127,6 +127,7 @@ import {
   hydratingWorldPlazaChestInstanceStore,
   readingWorldPlazaChestInstanceStore,
 } from '@/components/world/chest/domains/managingWorldPlazaChestInstanceStore';
+import { registeringWorldPlazaChestWildlifeInstancesLookup } from '@/components/world/chest/domains/registeringWorldPlazaChestWildlifeInstancesLookup';
 import { usingWorldPlazaChestOpenInteraction } from '@/components/world/chest/hooks/usingWorldPlazaChestOpenInteraction';
 import { MeasuringWorldPlazaPixiRenderDiagnostics } from '@/components/world/components/measuringWorldPlazaPixiRenderDiagnostics';
 import {
@@ -601,6 +602,11 @@ import {
   usingNpcPanelState,
   usingNpcProximitySelection,
 } from '@/components/world/npc';
+import { RenderingWorldPlazaOnboardingCoachmarkLayer } from '@/components/world/onboarding/components/renderingWorldPlazaOnboardingCoachmarkLayer';
+import {
+  initializingWorldPlazaOnboardingCoachmarkStore,
+  notifyingWorldPlazaOnboardingChopStarted,
+} from '@/components/world/onboarding/domains/managingWorldPlazaOnboardingCoachmarkStore';
 import { RenderingWorldPlotVisitApprovedPlazaModal } from '@/components/world/plotVisit/components/renderingWorldPlotVisitApprovedPlazaModal';
 import { RenderingWorldPlotVisitRequestPlazaModal } from '@/components/world/plotVisit/components/renderingWorldPlotVisitRequestPlazaModal';
 import { WORLD_PLOT_VISIT_REQUESTS_OUTGOING_QUERY_KEY } from '@/components/world/plotVisit/domains/definingWorldPlotVisitRequest';
@@ -618,6 +624,7 @@ import type {
 } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import type { ManagingWorldPlazaProjectileStore } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
 import { usingWorldPlazaProjectileEngine } from '@/components/world/projectile/hooks/usingWorldPlazaProjectileEngine';
+import { applyingWorldPlazaPlayerDeathSpritcorePenalty } from '@/components/world/spritcore/domains/applyingWorldPlazaPlayerDeathSpritcorePenalty';
 import { consumingWorldPlazaSpritcoreInventoryQuantity } from '@/components/world/spritcore/domains/countingWorldPlazaSpritcoreInventoryQuantity';
 import type { WildlifePetSpritcoreUpgradeLaneId } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
 import { WORLD_PLAZA_SPRITCORE_UPGRADE_EMPTY_BONUSES } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
@@ -714,6 +721,7 @@ import {
 import {
   clearingWildlifeInstanceStore,
   gettingWildlifeInstance,
+  listingWildlifeInstances,
   replacingWildlifeInstance,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
 import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
@@ -1320,6 +1328,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   const isHudWorldAnchorsEnabled =
     generationFeatureFlags[
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_WORLD_ANCHORS
+    ];
+  const isHudOnboardingCoachmarksEnabled =
+    generationFeatureFlags[
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_ONBOARDING_COACHMARKS
     ];
   const isTeaBrewingEnabled =
     generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TEA_BREWING];
@@ -3377,7 +3389,9 @@ function RenderingWorldPlazaPixiSceneConnected({
 
       const didStart = startingTreeChop(entry, harvestSpeedMultiplier);
 
-      if (!didStart) {
+      if (didStart) {
+        notifyingWorldPlazaOnboardingChopStarted();
+      } else {
         showingGameplayHudToast('Already chopping a tree.');
       }
     },
@@ -3692,13 +3706,14 @@ function RenderingWorldPlazaPixiSceneConnected({
       showingGameplayHudToast,
     });
 
-  const { openingChest } = usingWorldPlazaChestOpenInteraction({
-    localPersistenceOwnerId,
-    playerPositionRef,
-    inventoryState,
-    updatingInventoryState,
-    showingGameplayHudToast,
-  });
+  const { openingChest, showingLockedChestHint } =
+    usingWorldPlazaChestOpenInteraction({
+      localPersistenceOwnerId,
+      playerPositionRef,
+      inventoryState,
+      updatingInventoryState,
+      showingGameplayHudToast,
+    });
 
   const { handlingBearTrapAction } = usingWorldPlazaBearTrapInteraction({
     localPersistenceOwnerId,
@@ -4642,6 +4657,21 @@ function RenderingWorldPlazaPixiSceneConnected({
     wildlifeSnapshotsOutRef,
     wildlifeStoreRef,
   ]);
+
+  useEffect(() => {
+    if (!isWildlifeGenerationEnabled) {
+      registeringWorldPlazaChestWildlifeInstancesLookup(null);
+      return;
+    }
+
+    registeringWorldPlazaChestWildlifeInstancesLookup(() =>
+      listingWildlifeInstances(wildlifeStoreRef.current)
+    );
+
+    return () => {
+      registeringWorldPlazaChestWildlifeInstancesLookup(null);
+    };
+  }, [isWildlifeGenerationEnabled, wildlifeStoreRef]);
 
   usingWildlifeActivePetSpawn({
     isEnabled: isLocalGameplayEnabled && isWildlifeGenerationEnabled,
@@ -6956,6 +6986,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       storageOwnerId,
       gettingWorldPlazaSelectedAvatarSkinId()
     );
+    initializingWorldPlazaOnboardingCoachmarkStore(storageOwnerId);
     attachingWorldPlazaAllCraftModeRecipesForDevQa();
   }, [
     discoveryCloudSaveSlotIndex,
@@ -7179,17 +7210,45 @@ function RenderingWorldPlazaPixiSceneConnected({
         resolveSpecies: resolvingWildlifeSpeciesDefinition,
       });
     }
+
+    const deathInventoryState = inventoryStateRef.current;
+    const committingInventoryState = onInventoryStateCommittedRef.current;
+    const isSpritcoreLevelingEnabled =
+      generationFeatureFlags[
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SPRITCORE_LEVELING
+      ];
+
+    if (
+      deathPosition &&
+      deathInventoryState &&
+      committingInventoryState &&
+      isLocalGameplayEnabled &&
+      isSpritcoreLevelingEnabled
+    ) {
+      void applyingWorldPlazaPlayerDeathSpritcorePenalty({
+        inventoryState: deathInventoryState,
+        deathPosition,
+        localPersistenceOwnerId,
+        redditUserId,
+        saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
+        onInventoryStateChange: committingInventoryState,
+      });
+    }
   }, [
     clearingCombatLock,
     clearingWalkTarget,
     closeChat,
     closingCodexSection,
     closingFriendsPanel,
+    generationFeatureFlags,
     isLocalGameplayEnabled,
     isPlayerDead,
+    isSinglePlayerSession,
     localPersistenceOwnerId,
     onlineUserId,
     playerPositionRef,
+    redditUserId,
+    singlePlayerSaveSlotIndex,
     wildlifeStoreRef,
   ]);
 
@@ -8621,6 +8680,18 @@ function RenderingWorldPlazaPixiSceneConnected({
           {isHudStatusEnabled && isLocalGameplayEnabled ? (
             <RenderingWorldPlazaWorldNotifications isMobile={hudIsMobile} />
           ) : null}
+          {isHudOnboardingCoachmarksEnabled && isLocalGameplayEnabled ? (
+            <RenderingWorldPlazaOnboardingCoachmarkLayer
+              storageOwnerId={onlineUserId ?? localPersistenceOwnerId}
+              isEnabled={isHudOnboardingCoachmarksEnabled}
+              isMobile={hudIsMobile}
+              playerPositionRef={playerPositionRef}
+              selectedInteractableBlockKeysRef={
+                selectedInteractableBlockKeysRef
+              }
+              inventoryState={inventoryState}
+            />
+          ) : null}
           {isHudStatusEnabled && isLocalGameplayEnabled ? (
             <RenderingWorldPlazaEntityStatusEffectStack
               statusEffectHudRows={playerHealthHudSnapshot.statusEffectHudRows}
@@ -8972,6 +9043,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   inventoryStateRef={inventoryStateRef}
                   onOpenChest={openingChest}
+                  onLockedChestHint={showingLockedChestHint}
                 />
               ) : null}
               {isTrapGenerationEnabled ? (

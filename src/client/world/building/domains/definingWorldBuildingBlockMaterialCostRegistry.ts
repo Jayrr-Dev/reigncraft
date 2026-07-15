@@ -367,6 +367,37 @@ export function consumingWorldBuildingBlockMaterialCost(
 }
 
 /**
+ * Formats inventory requirements as `3 Wood + 1 Foxglove` (per placed layer).
+ */
+export function formattingWorldBuildingBlockMaterialCostRequirementsLabel(
+  requirements: readonly DefiningWorldBuildingBlockMaterialCostRequirement[]
+): string {
+  return requirements
+    .map(
+      (requirement) =>
+        `${requirement.quantityPerLayer} ${requirement.itemLabel}`
+    )
+    .join(' + ');
+}
+
+/**
+ * Formats the Materials palette cost readout for one block, or null when free.
+ */
+export function formattingWorldBuildingBlockMaterialCostReadout(
+  definitionId: string
+): string | null {
+  const cost = resolvingWorldBuildingBlockMaterialCost(definitionId);
+
+  if (cost === null || cost.requirements.length === 0) {
+    return null;
+  }
+
+  return formattingWorldBuildingBlockMaterialCostRequirementsLabel(
+    cost.requirements
+  );
+}
+
+/**
  * Formats a player-facing toast when materials are short for one layer.
  */
 export function formattingWorldBuildingBlockMaterialShortfallMessage(
@@ -378,12 +409,9 @@ export function formattingWorldBuildingBlockMaterialShortfallMessage(
     return 'Not enough materials.';
   }
 
-  return `Need ${cost.requirements
-    .map(
-      (requirement) =>
-        `${requirement.quantityPerLayer} ${requirement.itemLabel}`
-    )
-    .join(' + ')}.`;
+  return `Need ${formattingWorldBuildingBlockMaterialCostRequirementsLabel(
+    cost.requirements
+  )}.`;
 }
 
 /** Lists every block definition id with a registered material cost. */
