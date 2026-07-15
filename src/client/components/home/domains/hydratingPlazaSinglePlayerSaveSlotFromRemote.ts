@@ -13,11 +13,10 @@ import { writingWorldPlazaExploredBiomesToStorage } from '@/components/world/dom
 import { writingWorldPlazaLastPositionToStorage } from '@/components/world/domains/writingWorldPlazaLastPositionToStorage';
 import { writingWorldPlazaRecipeDiscoveryToStorage } from '@/components/world/domains/writingWorldPlazaRecipeDiscoveryToStorage';
 import { writingWorldPlazaPlayerConditionsToStorage } from '@/components/world/health/domains/writingWorldPlazaPlayerConditionsToStorage';
-import {
-  DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
-  resolvingWorldPlazaInventoryStorageKey,
-} from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import { resolvingWorldPlazaInventoryStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_MAX_CAPACITY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
+import { hydratingWorldPlazaInventoryStorageExpansionFromRemote } from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
 import { listingWildlifeSpeciesIds } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { readingWildlifePetRosterFromStorage } from '@/components/world/wildlife/pets/domains/readingWildlifePetRosterFromStorage';
@@ -72,7 +71,7 @@ export async function hydratingPlazaSinglePlayerSaveSlotFromRemote(
       try {
         const existingLocalInventory = parsingInventoryState(
           JSON.parse(existingLocalInventoryJson),
-          DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
+          DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_MAX_CAPACITY,
           DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
         );
         localHasItems = existingLocalInventory.slots.some(
@@ -88,7 +87,7 @@ export async function hydratingPlazaSinglePlayerSaveSlotFromRemote(
     if (!localHasItems) {
       const parsedInventory = parsingInventoryState(
         remoteData.inventory,
-        DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY,
+        DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_MAX_CAPACITY,
         DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
       );
 
@@ -114,6 +113,26 @@ export async function hydratingPlazaSinglePlayerSaveSlotFromRemote(
     writingWorldPlazaRecipeDiscoveryToStorage(
       localPersistenceOwnerId,
       knownRecipeIds
+    );
+  }
+
+  if (
+    remoteData.inventoryBonusStorageRows !== null &&
+    remoteData.inventoryBonusStorageRows !== undefined
+  ) {
+    hydratingWorldPlazaInventoryStorageExpansionFromRemote(
+      localPersistenceOwnerId,
+      remoteData.inventoryBonusStorageRows,
+      remoteData.inventoryStorageExpansionClaimedCodexKeys
+    );
+  } else if (
+    remoteData.inventoryStorageExpansionClaimedCodexKeys &&
+    remoteData.inventoryStorageExpansionClaimedCodexKeys.length > 0
+  ) {
+    hydratingWorldPlazaInventoryStorageExpansionFromRemote(
+      localPersistenceOwnerId,
+      0,
+      remoteData.inventoryStorageExpansionClaimedCodexKeys
     );
   }
 

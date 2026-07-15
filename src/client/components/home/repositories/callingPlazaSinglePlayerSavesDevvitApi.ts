@@ -118,6 +118,8 @@ export async function deletingPlazaSinglePlayerSaveSlotData(
     inventory: null,
     playerConditions: null,
     attachedRecipeIds: null,
+    inventoryBonusStorageRows: null,
+    inventoryStorageExpansionClaimedCodexKeys: null,
     bestiaryDiscovery: null,
     exploredBiomeKinds: null,
     discoveredNamedRealmIds: null,

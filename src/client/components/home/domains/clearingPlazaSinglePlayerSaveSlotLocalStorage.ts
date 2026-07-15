@@ -37,6 +37,8 @@ import {
 import { resolvingWorldPlazaPlayerConditionsStorageKey } from '@/components/world/health/domains/definingWorldPlazaPlayerConditionsConstants';
 import { resolvingWorldPlazaGroundItemsLocalStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemLocalStorageConstants';
 import { resolvingWorldPlazaInventoryStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import { resolvingWorldPlazaInventoryStorageExpansionStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
+import { clearingWorldPlazaInventoryStorageExpansionStoreForOwner } from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
 import { resolvingWorldPlazaOnboardingCoachmarksStorageKey } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
 import { clearingWorldPlazaOnboardingCoachmarkStoreForOwner } from '@/components/world/onboarding/domains/managingWorldPlazaOnboardingCoachmarkStore';
 import {
@@ -64,6 +66,7 @@ export function clearingPlazaSinglePlayerSaveSlotLocalStorage(
     resolvingWorldPlazaBestiaryDiscoveryStorageKey(persistenceOwnerId),
     resolvingWorldPlazaDiscoveredNamedRealmsStorageKey(persistenceOwnerId),
     resolvingWorldPlazaRecipeDiscoveryStorageKey(persistenceOwnerId),
+    resolvingWorldPlazaInventoryStorageExpansionStorageKey(persistenceOwnerId),
     resolvingWorldPlazaGroundItemsLocalStorageKey(persistenceOwnerId),
     resolvingWorldPlazaChoppedTreesLocalStorageKey(persistenceOwnerId),
     resolvingWorldPlazaStudiedTreeStumpsLocalStorageKey(persistenceOwnerId),
@@ -100,5 +103,6 @@ export function clearingPlazaSinglePlayerSaveSlotLocalStorage(
   clearingWorldPlazaLocalPickedFlowersMemoryForOwner(persistenceOwnerId);
   clearingWorldPlazaLocalFarmlandMemoryForOwner(persistenceOwnerId);
   clearingWorldPlazaRecipeDiscoveryStoreForOwner(persistenceOwnerId);
+  clearingWorldPlazaInventoryStorageExpansionStoreForOwner(persistenceOwnerId);
   clearingWorldPlazaOnboardingCoachmarkStoreForOwner(persistenceOwnerId);
 }

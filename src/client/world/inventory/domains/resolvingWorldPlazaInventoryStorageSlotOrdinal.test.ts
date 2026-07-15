@@ -1,4 +1,5 @@
 import { DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_MAX_CAPACITY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
 import { resolvingWorldPlazaInventoryStorageSlotOrdinal } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStorageSlotOrdinal';
 import { describe, expect, it } from 'vitest';
 
@@ -16,14 +17,19 @@ describe('resolvingWorldPlazaInventoryStorageSlotOrdinal', () => {
       resolvingWorldPlazaInventoryStorageSlotOrdinal(
         DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY - 1
       )
-    ).toBe(12);
+    ).toBe(18);
+    expect(
+      resolvingWorldPlazaInventoryStorageSlotOrdinal(
+        DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_MAX_CAPACITY - 1
+      )
+    ).toBe(36);
   });
 
   it('returns null for out-of-range indices', () => {
     expect(resolvingWorldPlazaInventoryStorageSlotOrdinal(-1)).toBeNull();
     expect(
       resolvingWorldPlazaInventoryStorageSlotOrdinal(
-        DEFINING_WORLD_PLAZA_INVENTORY_CAPACITY
+        DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_MAX_CAPACITY
       )
     ).toBeNull();
   });

@@ -160,6 +160,8 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
   readonly onStudyHotbarSlot?: (slotIndex: number) => void;
   /** Attach cookbook recipe page from a hotbar/storage slot. */
   readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
+  /** Bind a packing ledger for one bonus storage page. */
+  readonly onUnlockStorageRowHotbarSlot?: (slotIndex: number) => void;
   /** Deposit ore into a reachable bloomery / kiln / stove. */
   readonly onRefineHotbarSlot?: (slotIndex: number) => void;
   /** Deposit wood or coal as fuel into a reachable smelting station. */
@@ -203,6 +205,7 @@ type RenderingWorldPlazaInventoryHotbarInventoryShellProps = {
   readonly onEatHotbarSlot?: (slotIndex: number) => void;
   readonly onStudyHotbarSlot?: (slotIndex: number) => void;
   readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
+  readonly onUnlockStorageRowHotbarSlot?: (slotIndex: number) => void;
   readonly onDropHotbarSlot?: (slotIndex: number) => void;
   readonly onRefineHotbarSlot?: (slotIndex: number) => void;
   readonly onAddFuelHotbarSlot?: (slotIndex: number) => void;
@@ -254,6 +257,7 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
     onEatHotbarSlot,
     onStudyHotbarSlot,
     onAttachRecipePageHotbarSlot,
+    onUnlockStorageRowHotbarSlot,
     onDropHotbarSlot,
     onRefineHotbarSlot,
     onAddFuelHotbarSlot,
@@ -421,6 +425,7 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
         onEatHotbarSlot,
         onStudyHotbarSlot,
         onAttachRecipePageHotbarSlot,
+        onUnlockStorageRowHotbarSlot,
         onDropHotbarSlot,
         onRefineHotbarSlot,
         onAddFuelHotbarSlot,
@@ -553,6 +558,7 @@ export function RenderingWorldPlazaInventoryHotbar({
   onEatHotbarSlot,
   onStudyHotbarSlot,
   onAttachRecipePageHotbarSlot,
+  onUnlockStorageRowHotbarSlot,
   onRefineHotbarSlot,
   onAddFuelHotbarSlot,
   onAddWaterHotbarSlot,
@@ -1033,6 +1039,7 @@ export function RenderingWorldPlazaInventoryHotbar({
           onEatHotbarSlot={onEatHotbarSlot}
           onStudyHotbarSlot={onStudyHotbarSlot}
           onAttachRecipePageHotbarSlot={onAttachRecipePageHotbarSlot}
+          onUnlockStorageRowHotbarSlot={onUnlockStorageRowHotbarSlot}
           onDropHotbarSlot={handlingDropHotbarSlot}
           onRefineHotbarSlot={onRefineHotbarSlot}
           onAddFuelHotbarSlot={onAddFuelHotbarSlot}

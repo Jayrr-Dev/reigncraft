@@ -250,6 +250,7 @@ export function RenderingWorldPlazaInventorySlotCell({
   onEatHotbarSlot,
   onStudyHotbarSlot,
   onAttachRecipePageHotbarSlot,
+  onUnlockStorageRowHotbarSlot,
   onDropHotbarSlot,
   onRefineHotbarSlot,
   onAddFuelHotbarSlot,
@@ -376,6 +377,7 @@ export function RenderingWorldPlazaInventorySlotCell({
       onEatHotbarSlot={onEatHotbarSlot}
       onStudyHotbarSlot={onStudyHotbarSlot}
       onAttachRecipePageHotbarSlot={onAttachRecipePageHotbarSlot}
+      onUnlockStorageRowHotbarSlot={onUnlockStorageRowHotbarSlot}
       onDropHotbarSlot={onDropHotbarSlot}
       onRefineHotbarSlot={onRefineHotbarSlot}
       onAddFuelHotbarSlot={onAddFuelHotbarSlot}
@@ -414,6 +416,7 @@ type InventoryPlazaSlotItemProps = {
   readonly onEatHotbarSlot?: (slotIndex: number) => void;
   readonly onStudyHotbarSlot?: (slotIndex: number) => void;
   readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
+  readonly onUnlockStorageRowHotbarSlot?: (slotIndex: number) => void;
   readonly onDropHotbarSlot?: (slotIndex: number) => void;
   readonly onRefineHotbarSlot?: (slotIndex: number) => void;
   readonly onAddFuelHotbarSlot?: (slotIndex: number) => void;
@@ -451,6 +454,7 @@ function InventoryPlazaSlotItem({
   onEatHotbarSlot,
   onStudyHotbarSlot,
   onAttachRecipePageHotbarSlot,
+  onUnlockStorageRowHotbarSlot,
   onDropHotbarSlot,
   onRefineHotbarSlot,
   onAddFuelHotbarSlot,
@@ -588,6 +592,11 @@ function InventoryPlazaSlotItem({
     onCloseItemDetailPopover?.();
   }, [onAttachRecipePageHotbarSlot, onCloseItemDetailPopover, slotIndex]);
 
+  const handlingUnlockStorageRowFromDetailPopover = useCallback((): void => {
+    onUnlockStorageRowHotbarSlot?.(slotIndex);
+    onCloseItemDetailPopover?.();
+  }, [onCloseItemDetailPopover, onUnlockStorageRowHotbarSlot, slotIndex]);
+
   const handlingDropFromDetailPopover = useCallback((): void => {
     onDropHotbarSlot?.(slotIndex);
     onCloseItemDetailPopover?.();
@@ -674,6 +683,10 @@ function InventoryPlazaSlotItem({
         onAttachRecipePageHotbarSlot?.(slotIndex);
         onCloseItemDetailPopover?.();
         return;
+      case 'unlock-storage-row':
+        onUnlockStorageRowHotbarSlot?.(slotIndex);
+        onCloseItemDetailPopover?.();
+        return;
       case 'equip':
         onEquipSlot?.(slotIndex);
         onCloseItemDetailPopover?.();
@@ -692,6 +705,7 @@ function InventoryPlazaSlotItem({
     onCloseItemDetailPopover,
     onEatHotbarSlot,
     onEquipSlot,
+    onUnlockStorageRowHotbarSlot,
     slotIndex,
     togglingBagPopover,
     togglingItemDetailPopover,
@@ -965,6 +979,12 @@ function InventoryPlazaSlotItem({
             detailPopoverModel.canAttachRecipePage &&
             onAttachRecipePageHotbarSlot
               ? handlingAttachRecipePageFromDetailPopover
+              : undefined
+          }
+          onUnlockStorageRow={
+            detailPopoverModel.canUnlockStorageRow &&
+            onUnlockStorageRowHotbarSlot
+              ? handlingUnlockStorageRowFromDetailPopover
               : undefined
           }
           onRefineItem={

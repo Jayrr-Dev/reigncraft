@@ -9,11 +9,18 @@ import {
   gettingWorldPlazaRecipeAttachedSnapshot,
   resettingWorldPlazaRecipeDiscoveryStoreForTests,
 } from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
+import {
+  gettingWorldPlazaInventoryBonusStorageRows,
+  initializingWorldPlazaInventoryStorageExpansionStore,
+  resettingWorldPlazaInventoryStorageExpansionStoreForTests,
+} from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('claimingPlazaCodexMilestoneReward', () => {
   beforeEach(() => {
     resettingWorldPlazaRecipeDiscoveryStoreForTests();
+    resettingWorldPlazaInventoryStorageExpansionStoreForTests();
+    initializingWorldPlazaInventoryStorageExpansionStore('test-codex-expand');
   });
 
   it('attaches the wood axe recipe when herbarium Sighted chest is reached', () => {
@@ -68,5 +75,29 @@ describe('claimingPlazaCodexMilestoneReward', () => {
         new Set([DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.FISHROD_WOOD])
       )
     ).toBe(true);
+  });
+
+  it('unlocks a bonus storage row from the herbarium Sighted 20% chest', () => {
+    const definition = resolvingPlazaCodexMilestoneRewardDefinition({
+      sectionId: 'herbarium',
+      meterKind: 'discovered',
+      percent: 20,
+    });
+
+    expect(definition).not.toBeNull();
+    if (!definition) {
+      return;
+    }
+
+    expect(claimingPlazaCodexMilestoneReward(definition, true)).toBe(
+      'unlocked'
+    );
+    expect(gettingWorldPlazaInventoryBonusStorageRows()).toBe(1);
+    expect(
+      checkingPlazaCodexMilestoneRewardClaimed(definition, new Set())
+    ).toBe(true);
+    expect(claimingPlazaCodexMilestoneReward(definition, true)).toBe(
+      'already-claimed'
+    );
   });
 });

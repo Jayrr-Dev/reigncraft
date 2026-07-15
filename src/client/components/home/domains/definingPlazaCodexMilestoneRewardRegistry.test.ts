@@ -8,42 +8,77 @@ import { describe, expect, it } from 'vitest';
 
 describe('definingPlazaCodexMilestoneRewardRegistry', () => {
   it('grants wood starter tools on first Sighted chests', () => {
-    expect(
-      resolvingPlazaCodexMilestoneRewardDefinition({
-        sectionId: 'herbarium',
-        meterKind: 'discovered',
-        percent: 5,
-      })?.reward.recipeId
-    ).toBe(DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.AXE_WOOD);
+    const herbarium = resolvingPlazaCodexMilestoneRewardDefinition({
+      sectionId: 'herbarium',
+      meterKind: 'discovered',
+      percent: 5,
+    });
+    expect(herbarium?.reward.kind).toBe('attach-recipe');
+    if (herbarium?.reward.kind === 'attach-recipe') {
+      expect(herbarium.reward.recipeId).toBe(
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.AXE_WOOD
+      );
+    }
 
-    expect(
-      resolvingPlazaCodexMilestoneRewardDefinition({
-        sectionId: 'lapidary',
-        meterKind: 'discovered',
-        percent: 5,
-      })?.reward.recipeId
-    ).toBe(DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.PICKAXE_WOOD);
+    const lapidary = resolvingPlazaCodexMilestoneRewardDefinition({
+      sectionId: 'lapidary',
+      meterKind: 'discovered',
+      percent: 5,
+    });
+    expect(lapidary?.reward.kind).toBe('attach-recipe');
+    if (lapidary?.reward.kind === 'attach-recipe') {
+      expect(lapidary.reward.recipeId).toBe(
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.PICKAXE_WOOD
+      );
+    }
 
-    expect(
-      resolvingPlazaCodexMilestoneRewardDefinition({
-        sectionId: 'bestiary',
-        meterKind: 'discovered',
-        percent: 5,
-      })?.reward.recipeId
-    ).toBe(DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.FISHROD_WOOD);
+    const bestiary = resolvingPlazaCodexMilestoneRewardDefinition({
+      sectionId: 'bestiary',
+      meterKind: 'discovered',
+      percent: 5,
+    });
+    expect(bestiary?.reward.kind).toBe('attach-recipe');
+    if (bestiary?.reward.kind === 'attach-recipe') {
+      expect(bestiary.reward.recipeId).toBe(
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.FISHROD_WOOD
+      );
+    }
   });
 
-  it('leaves later chests and other sections undefined for now', () => {
+  it('grants packing ledgers on Sighted 20% chests', () => {
     expect(
       resolvingPlazaCodexMilestoneRewardDefinition({
         sectionId: 'herbarium',
         meterKind: 'discovered',
         percent: 20,
-      })
-    ).toBeNull();
+      })?.reward
+    ).toMatchObject({
+      kind: 'unlock-storage-row',
+      pageTier: 'rare',
+    });
+    expect(
+      resolvingPlazaCodexMilestoneRewardDefinition({
+        sectionId: 'lapidary',
+        meterKind: 'discovered',
+        percent: 20,
+      })?.reward
+    ).toMatchObject({
+      kind: 'unlock-storage-row',
+      pageTier: 'mythic',
+    });
+    expect(
+      resolvingPlazaCodexMilestoneRewardDefinition({
+        sectionId: 'bestiary',
+        meterKind: 'discovered',
+        percent: 20,
+      })?.reward
+    ).toMatchObject({
+      kind: 'unlock-storage-row',
+      pageTier: 'legendary',
+    });
     expect(resolvingPlazaCodexMilestoneRewardsForSection('pathology')).toEqual(
       []
     );
-    expect(DEFINING_PLAZA_CODEX_MILESTONE_REWARD_REGISTRY).toHaveLength(3);
+    expect(DEFINING_PLAZA_CODEX_MILESTONE_REWARD_REGISTRY).toHaveLength(6);
   });
 });

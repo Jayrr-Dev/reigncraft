@@ -380,6 +380,8 @@ function checkingSaveSlotHasPersistedData(
     | 'inventory'
     | 'playerConditions'
     | 'attachedRecipeIds'
+    | 'inventoryBonusStorageRows'
+    | 'inventoryStorageExpansionClaimedCodexKeys'
     | 'bestiaryDiscovery'
     | 'exploredBiomeKinds'
     | 'discoveredNamedRealmIds'
@@ -391,6 +393,10 @@ function checkingSaveSlotHasPersistedData(
     data.inventory ||
     data.playerConditions ||
     (data.attachedRecipeIds && data.attachedRecipeIds.length > 0) ||
+    (typeof data.inventoryBonusStorageRows === 'number' &&
+      data.inventoryBonusStorageRows > 0) ||
+    (data.inventoryStorageExpansionClaimedCodexKeys &&
+      data.inventoryStorageExpansionClaimedCodexKeys.length > 0) ||
     data.bestiaryDiscovery ||
     (data.exploredBiomeKinds && data.exploredBiomeKinds.length > 0) ||
     (data.discoveredNamedRealmIds && data.discoveredNamedRealmIds.length > 0) ||
@@ -423,6 +429,17 @@ function parsingPersistedSaveSlotData(
     const attachedRecipeIds = parsingAttachedRecipeIds(
       parsed.attachedRecipeIds
     );
+    const inventoryBonusStorageRows =
+      typeof parsed.inventoryBonusStorageRows === 'number' &&
+      Number.isFinite(parsed.inventoryBonusStorageRows)
+        ? Math.max(0, Math.min(3, Math.trunc(parsed.inventoryBonusStorageRows)))
+        : null;
+    const inventoryStorageExpansionClaimedCodexKeys =
+      Array.isArray(parsed.inventoryStorageExpansionClaimedCodexKeys)
+        ? parsingSortedStringIdList(
+            parsed.inventoryStorageExpansionClaimedCodexKeys
+          )
+        : null;
     const bestiaryDiscovery = parsingBestiaryDiscovery(
       parsed.bestiaryDiscovery
     );
@@ -444,6 +461,8 @@ function parsingPersistedSaveSlotData(
       inventory,
       playerConditions,
       attachedRecipeIds,
+      inventoryBonusStorageRows,
+      inventoryStorageExpansionClaimedCodexKeys,
       bestiaryDiscovery,
       exploredBiomeKinds,
       discoveredNamedRealmIds,
@@ -527,6 +546,35 @@ function parsingSaveSlotUpdateBody(
     }
   }
 
+  if ('inventoryBonusStorageRows' in payload) {
+    if (payload.inventoryBonusStorageRows === null) {
+      update.inventoryBonusStorageRows = null;
+    } else if (
+      typeof payload.inventoryBonusStorageRows !== 'number' ||
+      !Number.isFinite(payload.inventoryBonusStorageRows)
+    ) {
+      return null;
+    } else {
+      update.inventoryBonusStorageRows = Math.max(
+        0,
+        Math.min(3, Math.trunc(payload.inventoryBonusStorageRows))
+      );
+    }
+  }
+
+  if ('inventoryStorageExpansionClaimedCodexKeys' in payload) {
+    if (payload.inventoryStorageExpansionClaimedCodexKeys === null) {
+      update.inventoryStorageExpansionClaimedCodexKeys = null;
+    } else if (!Array.isArray(payload.inventoryStorageExpansionClaimedCodexKeys)) {
+      return null;
+    } else {
+      update.inventoryStorageExpansionClaimedCodexKeys =
+        parsingSortedStringIdList(
+          payload.inventoryStorageExpansionClaimedCodexKeys
+        );
+    }
+  }
+
   if ('bestiaryDiscovery' in payload) {
     if (payload.bestiaryDiscovery === null) {
       update.bestiaryDiscovery = null;
@@ -586,6 +634,8 @@ function parsingSaveSlotUpdateBody(
     update.inventory === undefined &&
     update.playerConditions === undefined &&
     update.attachedRecipeIds === undefined &&
+    update.inventoryBonusStorageRows === undefined &&
+    update.inventoryStorageExpansionClaimedCodexKeys === undefined &&
     update.bestiaryDiscovery === undefined &&
     update.exploredBiomeKinds === undefined &&
     update.discoveredNamedRealmIds === undefined &&
@@ -619,6 +669,18 @@ function mergingSaveSlotData(
         ? null
         : (parsingAttachedRecipeIds(update.attachedRecipeIds) ?? null)
       : (existing?.attachedRecipeIds ?? null);
+  const nextInventoryBonusStorageRows =
+    update.inventoryBonusStorageRows !== undefined
+      ? update.inventoryBonusStorageRows
+      : (existing?.inventoryBonusStorageRows ?? null);
+  const nextInventoryStorageExpansionClaimedCodexKeys =
+    update.inventoryStorageExpansionClaimedCodexKeys !== undefined
+      ? update.inventoryStorageExpansionClaimedCodexKeys === null
+        ? null
+        : (parsingSortedStringIdList(
+            update.inventoryStorageExpansionClaimedCodexKeys
+          ) ?? null)
+      : (existing?.inventoryStorageExpansionClaimedCodexKeys ?? null);
   const nextBestiaryDiscovery =
     update.bestiaryDiscovery !== undefined
       ? update.bestiaryDiscovery === null
@@ -650,6 +712,9 @@ function mergingSaveSlotData(
     inventory: nextInventory,
     playerConditions: nextPlayerConditions,
     attachedRecipeIds: nextAttachedRecipeIds,
+    inventoryBonusStorageRows: nextInventoryBonusStorageRows,
+    inventoryStorageExpansionClaimedCodexKeys:
+      nextInventoryStorageExpansionClaimedCodexKeys,
     bestiaryDiscovery: nextBestiaryDiscovery,
     exploredBiomeKinds: nextExploredBiomeKinds,
     discoveredNamedRealmIds: nextDiscoveredNamedRealmIds,

@@ -336,6 +336,16 @@ import {
   checkingWorldPlazaRecipePageAttachedInStore,
   initializingWorldPlazaRecipeDiscoveryStore,
 } from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
+import {
+  checkingWorldPlazaInventoryStorageExpansionAtCap,
+  initializingWorldPlazaInventoryStorageExpansionStore,
+  unlockingWorldPlazaInventoryStorageRow,
+} from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
+import {
+  LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_AT_CAP_TOAST,
+  LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_UNLOCKED_TOAST,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
+import { checkingWorldPlazaInventoryItemIsStorageExpansionPage } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemStorageExpansionPage';
 import { settingWorldPlazaPerformanceDiagnosticsEnabled } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { parsingWorldPlazaUserProfileAvatarUrlForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileAvatarUrlForNetworkSync';
 import { parsingWorldPlazaUserProfileStatusKindForNetworkSync } from '@/components/world/domains/parsingWorldPlazaUserProfileStatusKindForNetworkSync';
@@ -2447,6 +2457,65 @@ function RenderingWorldPlazaPixiSceneConnected({
         attachingWorldPlazaRecipePage(recipeId);
         showingGameplayHudToast(
           LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PAGE_ATTACHED_TOAST
+        );
+        return consumeResult.nextState;
+      });
+    },
+    [inventoryState.slots, showingGameplayHudToast, updatingInventoryState]
+  );
+
+  const handlingUnlockStorageRowHotbarSlot = useCallback(
+    (slotIndex: number): void => {
+      const slotItem = inventoryState.slots[slotIndex];
+
+      if (!slotItem) {
+        return;
+      }
+
+      if (
+        !checkingWorldPlazaInventoryItemIsStorageExpansionPage(
+          slotItem.itemTypeId
+        )
+      ) {
+        return;
+      }
+
+      if (checkingWorldPlazaInventoryStorageExpansionAtCap()) {
+        showingGameplayHudToast(
+          LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_AT_CAP_TOAST
+        );
+        return;
+      }
+
+      updatingInventoryState((currentState) => {
+        if (checkingWorldPlazaInventoryStorageExpansionAtCap()) {
+          showingGameplayHudToast(
+            LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_AT_CAP_TOAST
+          );
+          return null;
+        }
+
+        const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
+          currentState,
+          slotIndex,
+          1
+        );
+
+        if (!consumeResult.consumed) {
+          return null;
+        }
+
+        const unlockResult = unlockingWorldPlazaInventoryStorageRow();
+
+        if (unlockResult === 'at-cap') {
+          showingGameplayHudToast(
+            LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_AT_CAP_TOAST
+          );
+          return null;
+        }
+
+        showingGameplayHudToast(
+          LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_UNLOCKED_TOAST
         );
         return consumeResult.nextState;
       });
@@ -7517,6 +7586,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     initializingWorldPlazaRecipeDiscoveryStore(storageOwnerId, {
       cloudSaveSlotIndex: discoveryCloudSaveSlotIndex,
     });
+    initializingWorldPlazaInventoryStorageExpansionStore(storageOwnerId, {
+      cloudSaveSlotIndex: discoveryCloudSaveSlotIndex,
+    });
     initializingWorldPlazaSpritcoreUpgradeStore(
       storageOwnerId,
       gettingWorldPlazaSelectedAvatarSkinId()
@@ -9922,6 +9994,9 @@ function RenderingWorldPlazaPixiSceneConnected({
                         onAttachRecipePageHotbarSlot={
                           handlingAttachRecipePageHotbarSlot
                         }
+                        onUnlockStorageRowHotbarSlot={
+                          handlingUnlockStorageRowHotbarSlot
+                        }
                         onRefineHotbarSlot={handlingRefineHotbarSlot}
                         onAddFuelHotbarSlot={handlingAddFuelHotbarSlot}
                         onAddWaterHotbarSlot={handlingAddWaterHotbarSlot}
@@ -10146,6 +10221,9 @@ function RenderingWorldPlazaPixiSceneConnected({
                         onStudyHotbarSlot={handlingStudyHotbarSlot}
                         onAttachRecipePageHotbarSlot={
                           handlingAttachRecipePageHotbarSlot
+                        }
+                        onUnlockStorageRowHotbarSlot={
+                          handlingUnlockStorageRowHotbarSlot
                         }
                         onRefineHotbarSlot={handlingRefineHotbarSlot}
                         onAddFuelHotbarSlot={handlingAddFuelHotbarSlot}
