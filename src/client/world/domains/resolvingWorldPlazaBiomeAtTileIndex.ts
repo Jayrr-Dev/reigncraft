@@ -51,6 +51,7 @@ import {
   invalidatingWorldPlazaClimateAtTileCache,
   resolvingWorldPlazaClimateAtTile,
 } from '@/components/world/domains/resolvingWorldPlazaClimateAtTileIndex';
+import { resolvingWorldPlazaDistanceDangerBiasedBiomeKind } from '@/components/world/domains/resolvingWorldPlazaDistanceDangerBiasedBiomeKind';
 import { checkingWorldPlazaFrostsinkDiscContainsTileAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFrostsinkAtTileIndex';
 import {
   checkingWorldPlazaIslandModeForcesOceanAtTileIndex,
@@ -144,6 +145,30 @@ export function resolvingWorldPlazaBiomeClimateAtRegion(
  * @param tileY - Optional tile row for ocean body noise.
  */
 export function pickingWorldPlazaBiomeKindFromClimate(
+  temperature: number,
+  humidity: number,
+  tileX?: number,
+  tileY?: number
+): DefiningWorldPlazaBiomeKind {
+  const climateBiomeKind = pickingWorldPlazaBiomeKindFromClimateUnbiased(
+    temperature,
+    humidity,
+    tileX,
+    tileY
+  );
+
+  if (tileX === undefined || tileY === undefined) {
+    return climateBiomeKind;
+  }
+
+  return resolvingWorldPlazaDistanceDangerBiasedBiomeKind(
+    climateBiomeKind,
+    tileX,
+    tileY
+  );
+}
+
+function pickingWorldPlazaBiomeKindFromClimateUnbiased(
   temperature: number,
   humidity: number,
   tileX?: number,

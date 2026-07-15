@@ -12,6 +12,7 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeDifficultyLevers';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeTemperamentId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeDistanceDangerFriendlyTemperamentWeightMultiplier } from '@/components/world/wildlife/domains/resolvingWildlifeDistanceDangerLevers';
 
 function gettingWildlifeSpawnDifficultyRole(
   temperamentId: DefiningWildlifeTemperamentId
@@ -83,10 +84,13 @@ export function resolvingWildlifeSpawnEffectiveDensityThreshold(
 /**
  * Filters temperament toggles and scales spawn weights and pack sizes.
  * Returns an empty array when every entry is disabled.
+ *
+ * @param dangerBand - Optional distance-danger band; thins friendly temperaments.
  */
 export function resolvingWildlifeSpawnEntriesForDifficulty(
   entries: readonly DefiningWildlifeBiomeSpawnEntry[],
-  levers: DefiningWildlifeDifficultyLevers = DEFINING_WILDLIFE_DIFFICULTY_LEVERS
+  levers: DefiningWildlifeDifficultyLevers = DEFINING_WILDLIFE_DIFFICULTY_LEVERS,
+  dangerBand = 0
 ): DefiningWildlifeBiomeSpawnEntry[] {
   const scaledEntries: DefiningWildlifeBiomeSpawnEntry[] = [];
 
@@ -104,7 +108,13 @@ export function resolvingWildlifeSpawnEntriesForDifficulty(
     }
 
     const role = gettingWildlifeSpawnDifficultyRole(species.temperamentId);
-    const weight = entry.weight * levers.spawnWeightByRole[role];
+    const friendlyMultiplier =
+      resolvingWildlifeDistanceDangerFriendlyTemperamentWeightMultiplier(
+        dangerBand,
+        species.temperamentId
+      );
+    const weight =
+      entry.weight * levers.spawnWeightByRole[role] * friendlyMultiplier;
 
     if (weight <= 0) {
       continue;

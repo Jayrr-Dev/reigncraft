@@ -8,8 +8,16 @@ import {
   gettingWorldPlazaSpritcoreUpgradeSnapshot,
   initializingWorldPlazaSpritcoreUpgradeStore,
   resettingWorldPlazaSpritcoreUpgradeStoreForTests,
+  type ApplyingWorldPlazaSpritcoreUpgradePurchaseContext,
 } from '@/components/world/spritcore/domains/managingWorldPlazaSpritcoreUpgradeStore';
 import { readingWorldPlazaSpritcoreUpgradeFromStorage } from '@/components/world/spritcore/domains/readingWorldPlazaSpritcoreUpgradeFromStorage';
+
+const TEST_SPRITCORE_PURCHASE_CONTEXT: ApplyingWorldPlazaSpritcoreUpgradePurchaseContext =
+  {
+    nominalAttackSpeed: 1,
+    naturalDefense: 5,
+    naturalRunSpeed: 3,
+  };
 
 function creatingTestLocalStorage(): Storage {
   const storage = new Map<string, string>();
@@ -49,9 +57,13 @@ describe('managingWorldPlazaSpritcoreUpgradeStore', () => {
       DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
     );
 
-    expect(applyingWorldPlazaSpritcoreUpgradePurchase('health', 120, 1)).toBe(
-      'applied'
-    );
+    expect(
+      applyingWorldPlazaSpritcoreUpgradePurchase(
+        'health',
+        120,
+        TEST_SPRITCORE_PURCHASE_CONTEXT
+      )
+    ).toBe('applied');
     expect(gettingWorldPlazaSpritcoreUpgradeSnapshot().bonusMaxHealth).toBe(
       100
     );
@@ -93,18 +105,26 @@ describe('managingWorldPlazaSpritcoreUpgradeStore', () => {
       'spritcore-owner',
       DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
     );
-    expect(applyingWorldPlazaSpritcoreUpgradePurchase('health', 120, 1)).toBe(
-      'applied'
-    );
+    expect(
+      applyingWorldPlazaSpritcoreUpgradePurchase(
+        'health',
+        120,
+        TEST_SPRITCORE_PURCHASE_CONTEXT
+      )
+    ).toBe('applied');
 
     initializingWorldPlazaSpritcoreUpgradeStore(
       'spritcore-owner',
       DEFINING_WORLD_PLAZA_AVATAR_SKIN.HUSKY
     );
     expect(gettingWorldPlazaSpritcoreUpgradeSnapshot().bonusMaxHealth).toBe(0);
-    expect(applyingWorldPlazaSpritcoreUpgradePurchase('damage', 50, 1)).toBe(
-      'applied'
-    );
+    expect(
+      applyingWorldPlazaSpritcoreUpgradePurchase(
+        'damage',
+        50,
+        TEST_SPRITCORE_PURCHASE_CONTEXT
+      )
+    ).toBe('applied');
     expect(gettingWorldPlazaSpritcoreUpgradeSnapshot().bonusAttackPower).toBe(
       10
     );
@@ -144,6 +164,8 @@ describe('managingWorldPlazaSpritcoreUpgradeStore', () => {
       bonusMaxHealth: 900,
       bonusAttackPower: 90,
       bonusAttackSpeed: 0.45,
+      bonusDefense: 0,
+      bonusMoveSpeed: 0,
       totalSpritcoreInvested: 9000,
     });
     expect(
@@ -155,6 +177,8 @@ describe('managingWorldPlazaSpritcoreUpgradeStore', () => {
       bonusMaxHealth: 900,
       bonusAttackPower: 90,
       bonusAttackSpeed: 0.45,
+      bonusDefense: 0,
+      bonusMoveSpeed: 0,
       totalSpritcoreInvested: 9000,
     });
   });

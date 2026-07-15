@@ -32,7 +32,7 @@ function buildingAnchor(
 }
 
 describe('resolvingWildlifeLargeSizeFrameFromAnchor', () => {
-  it('returns obese or apex only for +1σ, +2σ, and +3σ tiers', () => {
+  it('returns obese or apex only for +1σ, +2σ, +3σ, and +4σ tiers', () => {
     expect(
       resolvingWildlifeLargeSizeFrameFromAnchor(buildingAnchor(120, 84), 0)
     ).toBeNull();
@@ -44,6 +44,9 @@ describe('resolvingWildlifeLargeSizeFrameFromAnchor', () => {
     ).toMatch(/^(obese|apex)$/);
     expect(
       resolvingWildlifeLargeSizeFrameFromAnchor(buildingAnchor(120, 84), 3)
+    ).toMatch(/^(obese|apex)$/);
+    expect(
+      resolvingWildlifeLargeSizeFrameFromAnchor(buildingAnchor(120, 84), 4)
     ).toMatch(/^(obese|apex)$/);
   });
 });

@@ -7,7 +7,7 @@
  */
 
 /** Discrete size-roll tier used for generated mob names. */
-export type DefiningWildlifeSizeTier = -2 | -1 | 0 | 1 | 2 | 3;
+export type DefiningWildlifeSizeTier = -2 | -1 | 0 | 1 | 2 | 3 | 4;
 
 /** One fixed string or a seeded pool of options for prefix/suffix parts. */
 export type DefiningWildlifeNameTagPartValue =
@@ -103,6 +103,17 @@ export const DEFINING_WILDLIFE_NAME_TAG_TIER_CONFIG: Record<
     namePrefix: ['Legendary', 'Gody', 'Hellish', 'Demon', 'Mythical'],
     nameSuffix: null,
     color: '#ff6b35',
+  },
+  [4]: {
+    namePrefix: [
+      'Cataclysmic',
+      'Worldbreaker',
+      'Apocalyptic',
+      'Primordial',
+      'Unholy',
+    ],
+    nameSuffix: null,
+    color: '#c41e3a',
   },
 };
 

@@ -14,17 +14,17 @@ export type WorldPlazaSpritcoreUpgradeBonuses = {
   readonly totalSpritcoreInvested: number;
 };
 
-/** Upgrade lanes available in the player Spritcore panel. */
+/** Upgrade lanes available in the Spritcore power-up UI (player and companions). */
 export type WorldPlazaSpritcoreUpgradeLaneId =
   | 'health'
   | 'damage'
-  | 'attackSpeed';
-
-/** Upgrade lanes available in the companion Spritcore power-up UI. */
-export type WildlifePetSpritcoreUpgradeLaneId =
-  | WorldPlazaSpritcoreUpgradeLaneId
+  | 'attackSpeed'
   | 'defense'
   | 'moveSpeed';
+
+/** @deprecated Use WorldPlazaSpritcoreUpgradeLaneId — same five lanes for companions. */
+export type WildlifePetSpritcoreUpgradeLaneId =
+  WorldPlazaSpritcoreUpgradeLaneId;
 
 export const WORLD_PLAZA_SPRITCORE_UPGRADE_EMPTY_BONUSES: WorldPlazaSpritcoreUpgradeBonuses =
   {

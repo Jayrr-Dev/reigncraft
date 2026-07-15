@@ -202,4 +202,31 @@ describe('resolvingWildlifeInstanceCombatPresentation', () => {
       resolvingWildlifeInstanceSizeScale(chickenSpecies, runtChicken)
     ).toBeCloseTo(chickenSpecies.sizeScale * 0.42);
   });
+
+  it('scales health and attack +5% per 1000 tiles from origin', () => {
+    const nearOrigin = buildingChickenInstance('normal');
+    const farOut = buildingChickenInstance('normal');
+    farOut.spawnAnchor = { x: 2000, y: 0, layer: 1 };
+    farOut.position = { x: 2000, y: 0, layer: 1 };
+
+    const nearHealth = resolvingWildlifeInstanceBaseMaxHealth(
+      chickenSpecies,
+      nearOrigin
+    );
+    const farHealth = resolvingWildlifeInstanceBaseMaxHealth(
+      chickenSpecies,
+      farOut
+    );
+    const nearAttack = resolvingWildlifeInstanceAttackPowerMultiplier(
+      chickenSpecies,
+      nearOrigin
+    );
+    const farAttack = resolvingWildlifeInstanceAttackPowerMultiplier(
+      chickenSpecies,
+      farOut
+    );
+
+    expect(farHealth / nearHealth).toBeCloseTo(1.1);
+    expect(farAttack / nearAttack).toBeCloseTo(1.1);
+  });
 });

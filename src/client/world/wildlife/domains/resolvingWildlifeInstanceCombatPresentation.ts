@@ -4,6 +4,10 @@
  * @module components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation
  */
 
+import {
+  computingWorldPlazaDistanceDangerBandFromOrigin,
+  computingWorldPlazaDistanceDangerCombatScale,
+} from '@/components/world/domains/computingWorldPlazaDistanceDangerBandFromOrigin';
 import { resolvingWorldPlazaScaledAttackIntervalMs } from '@/components/world/domains/resolvingWorldPlazaGlobalAttackSpeedScale';
 import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
 import { resolvingWildlifeSpritcoreFeastAttackPowerMultiplier } from '@/components/world/wildlife/domains/applyingWildlifeSpritcoreFeast';
@@ -44,7 +48,24 @@ type DefiningWildlifeInstancePresentationProfile = Pick<
   DefiningWildlifeInstance,
   'speciesId' | 'aggressionLevel' | 'sizeScaleSample' | 'largeSizeFrame'
 > &
-  Partial<Pick<DefiningWildlifeInstance, 'petBond'>>;
+  Partial<Pick<DefiningWildlifeInstance, 'petBond' | 'spawnAnchor'>>;
+
+function resolvingWildlifeInstanceDistanceDangerCombatScale(
+  instance: Partial<Pick<DefiningWildlifeInstance, 'spawnAnchor'>>
+): number {
+  const spawnAnchor = instance.spawnAnchor;
+
+  if (!spawnAnchor) {
+    return 1;
+  }
+
+  return computingWorldPlazaDistanceDangerCombatScale(
+    computingWorldPlazaDistanceDangerBandFromOrigin(
+      spawnAnchor.x,
+      spawnAnchor.y
+    )
+  );
+}
 
 function resolvingWildlifeInstanceSpritcoreUpgradeBonusMaxHealth(
   instance: Partial<Pick<DefiningWildlifeInstance, 'petBond'>>
@@ -217,7 +238,8 @@ export function resolvingWildlifeInstanceBaseMaxHealth(
 ): number {
   let baseMaxHealth =
     species.vitals.baseMaxHealth *
-    resolvingWildlifeInstanceCombatStatMultiplier(species, instance);
+    resolvingWildlifeInstanceCombatStatMultiplier(species, instance) *
+    resolvingWildlifeInstanceDistanceDangerCombatScale(instance);
 
   if (checkingWildlifeInstanceIsObeseTurtle(species, instance)) {
     baseMaxHealth *=
@@ -240,10 +262,9 @@ export function resolvingWildlifeInstanceAttackPowerMultiplier(
   instance: DefiningWildlifeInstance,
   nowMs: number = Number.MAX_SAFE_INTEGER
 ): number {
-  let multiplier = resolvingWildlifeInstanceCombatStatMultiplier(
-    species,
-    instance
-  );
+  let multiplier =
+    resolvingWildlifeInstanceCombatStatMultiplier(species, instance) *
+    resolvingWildlifeInstanceDistanceDangerCombatScale(instance);
 
   if (checkingWildlifeIsAggressiveChicken(instance)) {
     multiplier *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_ATTACK_POWER_MULTIPLIER;

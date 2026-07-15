@@ -22,6 +22,8 @@ export type RenderingWorldPlazaSpritcoreUpgradeOverlayProps = {
   readonly effectiveMaxHealth: number;
   readonly attackPower: number;
   readonly nominalAttackSpeed: number;
+  readonly naturalDefense: number;
+  readonly naturalRunSpeed: number;
   readonly onInventoryStateChange: (nextState: DefiningInventoryState) => void;
   readonly onShowToast: (message: string) => void;
   readonly onClose: () => void;
@@ -36,6 +38,8 @@ export function RenderingWorldPlazaSpritcoreUpgradeOverlay({
   effectiveMaxHealth,
   attackPower,
   nominalAttackSpeed,
+  naturalDefense,
+  naturalRunSpeed,
   onInventoryStateChange,
   onShowToast,
   onClose,
@@ -97,6 +101,8 @@ export function RenderingWorldPlazaSpritcoreUpgradeOverlay({
         effectiveMaxHealth={effectiveMaxHealth}
         attackPower={attackPower}
         nominalAttackSpeed={nominalAttackSpeed}
+        naturalDefense={naturalDefense}
+        naturalRunSpeed={naturalRunSpeed}
         onInventoryStateChange={onInventoryStateChange}
         onShowToast={onShowToast}
         onClose={onClose}

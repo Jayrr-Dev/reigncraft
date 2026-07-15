@@ -115,6 +115,7 @@ import { usingWorldPlazaPlotOwnerLimitsQuery } from '@/components/world/building
 import { usingWorldPlazaPlotSubscription } from '@/components/world/building/hooks/usingWorldPlazaPlotSubscription';
 import { usingWorldPlazaSessionBuildingCleanup } from '@/components/world/building/hooks/usingWorldPlazaSessionBuildingCleanup';
 import { usingWorldPlazaTemporaryPlotLifecycle } from '@/components/world/building/hooks/usingWorldPlazaTemporaryPlotLifecycle';
+import { computingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineDerivedStats';
 import { usingWorldPlazaCharacterEngineSkillCooldowns } from '@/components/world/character/hooks/usingWorldPlazaCharacterEngineSkillCooldowns';
 import {
   usingWorldPlazaSelectedCharacterEngineDefinition,
@@ -621,6 +622,7 @@ import type { ManagingWorldPlazaProjectileStore } from '@/components/world/proje
 import { usingWorldPlazaProjectileEngine } from '@/components/world/projectile/hooks/usingWorldPlazaProjectileEngine';
 import { consumingWorldPlazaSpritcoreInventoryQuantity } from '@/components/world/spritcore/domains/countingWorldPlazaSpritcoreInventoryQuantity';
 import type { WildlifePetSpritcoreUpgradeLaneId } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
+import { WORLD_PLAZA_SPRITCORE_UPGRADE_EMPTY_BONUSES } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
 import { initializingWorldPlazaSpritcoreUpgradeStore } from '@/components/world/spritcore/domains/managingWorldPlazaSpritcoreUpgradeStore';
 import { usingWorldPlazaSpritcoreUpgradeBonuses } from '@/components/world/spritcore/hooks/usingWorldPlazaSpritcoreUpgradeBonuses';
 import { RenderingWorldPlazaTeaPotAddWaterInteractionLabels } from '@/components/world/tea-brewing/components/renderingWorldPlazaTeaPotAddWaterInteractionLabels';
@@ -1745,6 +1747,14 @@ function RenderingWorldPlazaPixiSceneConnected({
     0.25,
     selectedCharacterEngineDefinition.stats.attackSpeed +
       spritcoreBonuses.bonusAttackSpeed
+  );
+  const naturalCharacterSpritcoreStats = useMemo(
+    () =>
+      computingWorldPlazaCharacterEngineDerivedStats(
+        selectedCharacterEngineDefinition,
+        WORLD_PLAZA_SPRITCORE_UPGRADE_EMPTY_BONUSES
+      ),
+    [selectedCharacterEngineDefinition]
   );
 
   const { jumpRequestedRef } = trackingWorldPlazaJumpInput({
@@ -9625,6 +9635,8 @@ function RenderingWorldPlazaPixiSceneConnected({
           }
           attackPower={selectedCharacterEngineDerivedStats.attackPower}
           nominalAttackSpeed={nominalAttackSpeed}
+          naturalDefense={naturalCharacterSpritcoreStats.defense}
+          naturalRunSpeed={naturalCharacterSpritcoreStats.runSpeedGridPerSecond}
           onInventoryStateChange={(nextState) => {
             updatingInventoryState(() => nextState);
           }}

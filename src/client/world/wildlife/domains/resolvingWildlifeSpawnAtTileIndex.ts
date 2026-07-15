@@ -5,6 +5,7 @@
  */
 
 import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
+import { computingWorldPlazaDistanceDangerBandFromOrigin } from '@/components/world/domains/computingWorldPlazaDistanceDangerBandFromOrigin';
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import {
   checkingWorldPlazaFrostsinkWildlifeAllowedAtRadiusTiles,
@@ -27,6 +28,7 @@ import {
   type DefiningWildlifeBiomeSpawnEntry,
 } from '@/components/world/wildlife/domains/definingWildlifeBiomeSpawnTable';
 import type { DefiningWildlifeSpawnAnchor } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeDistanceDangerDifficultyLeversAtTile } from '@/components/world/wildlife/domains/resolvingWildlifeDistanceDangerLevers';
 import {
   resolvingWildlifeSpawnEffectiveDensityThreshold,
   resolvingWildlifeSpawnEntriesForDifficulty,
@@ -146,8 +148,15 @@ export function resolvingWildlifeSpawnAtTileIndex(
   const filteredEntries = isNight
     ? config.entries
     : config.entries.filter((entry) => !entry.nightOnly);
-  const spawnEntries =
-    resolvingWildlifeSpawnEntriesForDifficulty(filteredEntries);
+  const dangerBand = computingWorldPlazaDistanceDangerBandFromOrigin(
+    tileX,
+    tileY
+  );
+  const spawnEntries = resolvingWildlifeSpawnEntriesForDifficulty(
+    filteredEntries,
+    resolvingWildlifeDistanceDangerDifficultyLeversAtTile(tileX, tileY),
+    dangerBand
+  );
 
   if (spawnEntries.length === 0) {
     return null;

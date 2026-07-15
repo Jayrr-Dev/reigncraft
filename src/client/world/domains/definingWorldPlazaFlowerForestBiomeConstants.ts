@@ -34,7 +34,7 @@ export const DEFINING_WORLD_PLAZA_FLOWER_FOREST_BODY_NOISE_OCTAVES = 3;
  * Unit noise at or above which a mid-humidity tile becomes flower forest.
  * Tuned so coverage sits between rare biomes and legendary Firelands.
  */
-export const DEFINING_WORLD_PLAZA_FLOWER_FOREST_BODY_NOISE_THRESHOLD = 0.74;
+export const DEFINING_WORLD_PLAZA_FLOWER_FOREST_BODY_NOISE_THRESHOLD = 0.71;
 
 /** Expected world coverage band for flower forest (percent). */
 export const DEFINING_WORLD_PLAZA_FLOWER_FOREST_COVERAGE_PERCENT_MIN = 1.2;

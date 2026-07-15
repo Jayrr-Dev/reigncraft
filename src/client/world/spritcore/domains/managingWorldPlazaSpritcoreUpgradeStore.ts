@@ -9,6 +9,11 @@
 
 import { computingWorldPlazaSpritcoreDeathCommittedPenalty } from '@/components/world/spritcore/domains/computingWorldPlazaSpritcoreDeathCommittedPenalty';
 import {
+  computingWorldPlazaSpritcoreDefenseMaximum,
+  computingWorldPlazaSpritcoreMoveSpeedMaximum,
+  computingWorldPlazaSpritcoreUpgradeSteps,
+} from '@/components/world/spritcore/domains/computingWorldPlazaSpritcoreUpgradeSteps';
+import {
   DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_ATTACK_SPEED_UPGRADE_STEP,
   DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_DAMAGE_UPGRADE_STEP,
   DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_HEALTH_UPGRADE_STEP,
@@ -78,6 +83,12 @@ export function subscribingWorldPlazaSpritcoreUpgrade(
   };
 }
 
+export type ApplyingWorldPlazaSpritcoreUpgradePurchaseContext = {
+  readonly nominalAttackSpeed: number;
+  readonly naturalDefense: number;
+  readonly naturalRunSpeed: number;
+};
+
 export type ApplyingWorldPlazaSpritcoreUpgradePurchaseResult =
   | 'applied'
   | 'capped'
@@ -89,22 +100,50 @@ export type ApplyingWorldPlazaSpritcoreUpgradePurchaseResult =
 export function applyingWorldPlazaSpritcoreUpgradePurchase(
   laneId: WorldPlazaSpritcoreUpgradeLaneId,
   price: number,
-  currentNominalAttackSpeed: number
+  context: ApplyingWorldPlazaSpritcoreUpgradePurchaseContext
 ): ApplyingWorldPlazaSpritcoreUpgradePurchaseResult {
   if (!Number.isFinite(price) || price <= 0) {
     return 'invalid';
   }
 
   const current = managingWorldPlazaSpritcoreUpgradeSnapshot;
+  const steps = computingWorldPlazaSpritcoreUpgradeSteps(
+    context.naturalDefense
+  );
 
   if (laneId === 'attackSpeed') {
     const nextAttackSpeed =
-      currentNominalAttackSpeed +
+      context.nominalAttackSpeed +
       DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_ATTACK_SPEED_UPGRADE_STEP;
 
     if (
       nextAttackSpeed > DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_MAX_ATTACK_SPEED
     ) {
+      return 'capped';
+    }
+  }
+
+  if (laneId === 'defense') {
+    const defenseMaximum = computingWorldPlazaSpritcoreDefenseMaximum(
+      context.naturalDefense,
+      steps.defenseStep
+    );
+    const nextDefense =
+      context.naturalDefense + current.bonusDefense + steps.defenseStep;
+
+    if (context.naturalDefense <= 0 || nextDefense > defenseMaximum) {
+      return 'capped';
+    }
+  }
+
+  if (laneId === 'moveSpeed') {
+    const moveSpeedMaximum = computingWorldPlazaSpritcoreMoveSpeedMaximum(
+      context.naturalRunSpeed
+    );
+    const nextRunSpeed =
+      context.naturalRunSpeed + current.bonusMoveSpeed + steps.moveSpeedStep;
+
+    if (context.naturalRunSpeed <= 0 || nextRunSpeed > moveSpeedMaximum) {
       return 'capped';
     }
   }
@@ -125,8 +164,14 @@ export function applyingWorldPlazaSpritcoreUpgradePurchase(
         ? current.bonusAttackSpeed +
           DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_ATTACK_SPEED_UPGRADE_STEP
         : current.bonusAttackSpeed,
-    bonusDefense: current.bonusDefense,
-    bonusMoveSpeed: current.bonusMoveSpeed,
+    bonusDefense:
+      laneId === 'defense'
+        ? current.bonusDefense + steps.defenseStep
+        : current.bonusDefense,
+    bonusMoveSpeed:
+      laneId === 'moveSpeed'
+        ? current.bonusMoveSpeed + steps.moveSpeedStep
+        : current.bonusMoveSpeed,
     totalSpritcoreInvested: current.totalSpritcoreInvested + price,
   };
 

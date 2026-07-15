@@ -49,6 +49,21 @@ export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_DAMAGE_UPGRADE_STEP = 10;
 /** Attack speed gained per Spiritcore speed upgrade purchase (nominal APS). */
 export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_ATTACK_SPEED_UPGRADE_STEP = 0.05;
 
+/** Fraction of natural Defense gained per defense purchase. */
+export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_DEFENSE_UPGRADE_FRACTION = 0.1;
+
+/** Run speed gained per Spiritcore move-speed purchase (grid/s). */
+export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_MOVE_SPEED_UPGRADE_STEP = 0.05;
+
+/** Hard cap multiplier vs natural Defense (5× natural total Defense). */
+export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_DEFENSE_MAX_MULTIPLIER = 5;
+
+/** Hard cap multiplier vs natural run speed (2× natural run grid/s). */
+export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_MOVE_SPEED_MAX_MULTIPLIER = 2;
+
+/** Absolute run-speed ceiling for Spiritcore move-speed purchases. */
+export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_MAX_MOVE_SPEED_GRID_PER_SECOND = 8;
+
 /** localStorage key prefix for purchased Spritcore stat bonuses. */
 export const DEFINING_WORLD_PLAZA_SPRITCORE_UPGRADE_STORAGE_KEY_PREFIX =
   'world-plaza-spritcore-upgrade' as const;

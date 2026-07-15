@@ -13,7 +13,7 @@ import {
 import type { DefiningWildlifeSizeTier } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import type { DefiningWildlifeSpawnAnchor } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
-/** Returns obese or apex for +1σ/+2σ/+3σ spawns; null for smaller tiers. */
+/** Returns obese or apex for +1σ/+2σ/+3σ/+4σ spawns; null for smaller tiers. */
 export function resolvingWildlifeLargeSizeFrameFromAnchor(
   anchor: DefiningWildlifeSpawnAnchor,
   sizeTier: DefiningWildlifeSizeTier

@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor
  */
 
+import { computingWorldPlazaDistanceDangerBandFromOrigin } from '@/components/world/domains/computingWorldPlazaDistanceDangerBandFromOrigin';
 import { computingWildlifeStandardNormalSampleFromAnchor } from '@/components/world/wildlife/domains/computingWildlifeStandardNormalSampleFromAnchor';
 import {
   DEFINING_WILDLIFE_AGGRESSION_LEVEL_AGGRESSIVE_THRESHOLD,
@@ -18,6 +19,7 @@ import type {
   DefiningWildlifeAggressionLevel,
   DefiningWildlifeSpawnAnchor,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeDistanceDangerAggressionMeanShift } from '@/components/world/wildlife/domains/resolvingWildlifeDistanceDangerLevers';
 
 function mappingWildlifeAggressionBellCurveSampleToLevel(
   standardNormal: number,
@@ -54,9 +56,15 @@ export function resolvingWildlifeAggressionLevelFromAnchor(
   anchor: DefiningWildlifeSpawnAnchor,
   species: DefiningWildlifeSpeciesDefinition
 ): DefiningWildlifeAggressionLevel {
+  const dangerBand = computingWorldPlazaDistanceDangerBandFromOrigin(
+    anchor.tileX,
+    anchor.tileY
+  );
+
   return mappingWildlifeAggressionBellCurveSampleToLevel(
     resolvingWildlifeAggressionBellCurveSampleFromAnchor(anchor),
-    species.aggressionSpawn.bellCurveMeanShift
+    species.aggressionSpawn.bellCurveMeanShift +
+      resolvingWildlifeDistanceDangerAggressionMeanShift(dangerBand)
   );
 }
 

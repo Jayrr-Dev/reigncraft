@@ -68,6 +68,36 @@ export function computingWorldPlazaSpritcoreOffensiveUpgradePrice(
   );
 }
 
+/** Prices a defense upgrade from current Defense toward the hard cap. */
+export function computingWorldPlazaSpritcoreDefenseUpgradePrice(
+  naturalDefense: number,
+  currentDefense: number,
+  defenseStep: number,
+  defenseMaximum: number
+): number {
+  return computingWorldPlazaSpritcoreUpgradeDeltaPrice(
+    currentDefense,
+    currentDefense + defenseStep,
+    naturalDefense,
+    defenseMaximum
+  );
+}
+
+/** Prices a move-speed upgrade from current run speed toward the hard cap. */
+export function computingWorldPlazaSpritcoreMoveSpeedUpgradePrice(
+  naturalRunSpeed: number,
+  currentRunSpeed: number,
+  moveSpeedStep: number,
+  moveSpeedMaximum: number
+): number {
+  return computingWorldPlazaSpritcoreUpgradeDeltaPrice(
+    currentRunSpeed,
+    currentRunSpeed + moveSpeedStep,
+    naturalRunSpeed,
+    moveSpeedMaximum
+  );
+}
+
 /** Prices a mixed item as health price + offense price. */
 export function computingWorldPlazaSpritcoreMixedItemUpgradePrice(input: {
   readonly currentHealth: number;

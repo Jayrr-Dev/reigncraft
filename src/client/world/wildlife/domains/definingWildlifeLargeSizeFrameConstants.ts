@@ -1,12 +1,12 @@
 /**
- * Obese vs apex rolls and tuning for +1σ / +2σ / +3σ wildlife spawns.
+ * Obese vs apex rolls and tuning for +1σ / +2σ / +3σ / +4σ wildlife spawns.
  *
  * @module components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants
  */
 
 import type { DefiningWildlifeSizeTier } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 
-/** Large-size body frame rolled at spawn for tier +1, +2, and +3 animals. */
+/** Large-size body frame rolled at spawn for tier +1, +2, +3, and +4 animals. */
 export type DefiningWildlifeLargeSizeFrame = 'obese' | 'apex';
 
 /** Salt for the obese/apex coin flip at each spawn anchor. */
@@ -35,6 +35,9 @@ export const DEFINING_WILDLIFE_OBESE_HEALTH_MULTIPLIER_TIER_2 = 1.84;
 
 /** Extra max-health multiplier for obese +3σ animals over same-tier apex. */
 export const DEFINING_WILDLIFE_OBESE_HEALTH_MULTIPLIER_TIER_3 = 2.12;
+
+/** Extra max-health multiplier for obese +4σ animals over same-tier apex. */
+export const DEFINING_WILDLIFE_OBESE_HEALTH_MULTIPLIER_TIER_4 = 2.4;
 
 /** Hidden defender roll skew: obese animals soften or block slightly more often. */
 export const DEFINING_WILDLIFE_OBESE_INCOMING_BLOCK_BIAS = 0.35;
@@ -80,6 +83,14 @@ export const DEFINING_WILDLIFE_OBESE_NAME_TAG_PREFIXES_TIER_3 = [
   'Massive',
 ] as const;
 
+export const DEFINING_WILDLIFE_OBESE_NAME_TAG_PREFIXES_TIER_4 = [
+  'Planetoid',
+  'Continent',
+  'World-Eating',
+  'Leviathan',
+  'Behemoth',
+] as const;
+
 export const DEFINING_WILDLIFE_APEX_NAME_TAG_PREFIXES_TIER_1 = [
   'Buff',
   'Muscular',
@@ -114,17 +125,29 @@ export const DEFINING_WILDLIFE_APEX_NAME_TAG_PREFIXES_TIER_3 = [
   'Mythical',
 ] as const;
 
+export const DEFINING_WILDLIFE_APEX_NAME_TAG_PREFIXES_TIER_4 = [
+  'Cataclysmic',
+  'Worldbreaker',
+  'Apocalyptic',
+  'Primordial',
+  'Unholy',
+] as const;
+
 export const DEFINING_WILDLIFE_LARGE_SIZE_FRAME_NAME_TAG_PREFIX_PICK_SALT = 6653;
 
 export function checkingWildlifeSizeTierHasLargeSizeFrame(
   sizeTier: DefiningWildlifeSizeTier
 ): boolean {
-  return sizeTier === 1 || sizeTier === 2 || sizeTier === 3;
+  return sizeTier === 1 || sizeTier === 2 || sizeTier === 3 || sizeTier === 4;
 }
 
 export function mappingWildlifeLargeSizeFrameObeseHealthMultiplier(
   sizeTier: DefiningWildlifeSizeTier
 ): number {
+  if (sizeTier === 4) {
+    return DEFINING_WILDLIFE_OBESE_HEALTH_MULTIPLIER_TIER_4;
+  }
+
   if (sizeTier === 3) {
     return DEFINING_WILDLIFE_OBESE_HEALTH_MULTIPLIER_TIER_3;
   }
@@ -141,6 +164,10 @@ export function resolvingWildlifeLargeSizeFrameNameTagPrefixPool(
   sizeTier: DefiningWildlifeSizeTier
 ): readonly string[] {
   if (largeSizeFrame === 'obese') {
+    if (sizeTier === 4) {
+      return DEFINING_WILDLIFE_OBESE_NAME_TAG_PREFIXES_TIER_4;
+    }
+
     if (sizeTier === 3) {
       return DEFINING_WILDLIFE_OBESE_NAME_TAG_PREFIXES_TIER_3;
     }
@@ -150,6 +177,10 @@ export function resolvingWildlifeLargeSizeFrameNameTagPrefixPool(
     }
 
     return DEFINING_WILDLIFE_OBESE_NAME_TAG_PREFIXES_TIER_1;
+  }
+
+  if (sizeTier === 4) {
+    return DEFINING_WILDLIFE_APEX_NAME_TAG_PREFIXES_TIER_4;
   }
 
   if (sizeTier === 3) {

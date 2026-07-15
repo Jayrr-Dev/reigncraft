@@ -95,6 +95,38 @@ describe('resolvingWildlifeSpawnEntriesForDifficulty', () => {
     ]);
   });
 
+  it('further thins docile and passive entries when dangerBand is high', () => {
+    const plainsEntries: readonly DefiningWildlifeBiomeSpawnEntry[] = [
+      { speciesId: 'chicken', weight: 10, packSizeRange: [1, 3] },
+      { speciesId: 'grey-wolf', weight: 2, packSizeRange: [2, 4] },
+    ];
+
+    const nearOrigin = resolvingWildlifeSpawnEntriesForDifficulty(
+      plainsEntries,
+      buildingTestLevers(),
+      0
+    );
+    const farOut = resolvingWildlifeSpawnEntriesForDifficulty(
+      plainsEntries,
+      buildingTestLevers(),
+      4
+    );
+
+    const nearChicken = nearOrigin.find(
+      (entry) => entry.speciesId === 'chicken'
+    );
+    const farChicken = farOut.find((entry) => entry.speciesId === 'chicken');
+    const nearWolf = nearOrigin.find(
+      (entry) => entry.speciesId === 'grey-wolf'
+    );
+    const farWolf = farOut.find((entry) => entry.speciesId === 'grey-wolf');
+
+    expect(nearChicken?.weight).toBe(10);
+    expect(farChicken?.weight).toBeLessThan(10);
+    expect(nearWolf?.weight).toBe(2);
+    expect(farWolf?.weight).toBe(2);
+  });
+
   it('removes stalker temperaments when stalker spawns are disabled', () => {
     const jungleEntries: readonly DefiningWildlifeBiomeSpawnEntry[] = [
       { speciesId: 'deer', weight: 4, packSizeRange: [1, 3] },

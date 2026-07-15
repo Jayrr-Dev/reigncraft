@@ -47,6 +47,8 @@ export type RenderingWorldPlazaSpritcoreUpgradePanelProps = {
   readonly effectiveMaxHealth: number;
   readonly attackPower: number;
   readonly nominalAttackSpeed: number;
+  readonly naturalDefense: number;
+  readonly naturalRunSpeed: number;
   readonly onInventoryStateChange: (nextState: DefiningInventoryState) => void;
   readonly onShowToast: (message: string) => void;
   readonly onClose: () => void;
@@ -60,7 +62,7 @@ function formattingWorldPlazaSpritcoreUpgradeStatValue(
   laneId: WorldPlazaSpritcoreUpgradeLaneId,
   value: number
 ): string {
-  if (laneId === 'attackSpeed') {
+  if (laneId === 'attackSpeed' || laneId === 'moveSpeed') {
     return value.toFixed(2);
   }
 
@@ -75,6 +77,8 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
   effectiveMaxHealth,
   attackPower,
   nominalAttackSpeed,
+  naturalDefense,
+  naturalRunSpeed,
   onInventoryStateChange,
   onShowToast,
   onClose,
@@ -101,8 +105,17 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
         effectiveMaxHealth,
         attackPower,
         nominalAttackSpeed,
+        naturalDefense,
+        naturalRunSpeed,
       }),
-    [attackPower, bonuses, effectiveMaxHealth, nominalAttackSpeed]
+    [
+      attackPower,
+      bonuses,
+      effectiveMaxHealth,
+      naturalDefense,
+      naturalRunSpeed,
+      nominalAttackSpeed,
+    ]
   );
   const combatPower = computingWorldPlazaSpritcoreCombatPower(
     effectiveMaxHealth,
@@ -115,7 +128,7 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
       const offer = offers[laneId];
 
       if (offer.isCapped) {
-        onShowToast('Attack speed is already capped.');
+        onShowToast('Power-up is already capped.');
         return;
       }
 
@@ -139,7 +152,11 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
       const purchaseResult = applyingWorldPlazaSpritcoreUpgradePurchase(
         laneId,
         price,
-        nominalAttackSpeed
+        {
+          nominalAttackSpeed,
+          naturalDefense,
+          naturalRunSpeed,
+        }
       );
 
       if (purchaseResult !== 'applied') {
@@ -152,6 +169,8 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
     },
     [
       inventoryState,
+      naturalDefense,
+      naturalRunSpeed,
       nominalAttackSpeed,
       offers,
       onInventoryStateChange,
@@ -168,6 +187,8 @@ export function RenderingWorldPlazaSpritcoreUpgradePanel({
     { laneId: 'health', label: 'Health', icon: 'mdi:heart-plus' },
     { laneId: 'damage', label: 'Damage', icon: 'mdi:sword-cross' },
     { laneId: 'attackSpeed', label: 'Attack speed', icon: 'mdi:speedometer' },
+    { laneId: 'defense', label: 'Defense', icon: 'mdi:shield-half-full' },
+    { laneId: 'moveSpeed', label: 'Speed', icon: 'mdi:run-fast' },
   ];
 
   return (

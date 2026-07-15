@@ -13,6 +13,7 @@ import {
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_ICON_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_LOCKED_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_REACHED_CLASS_NAME,
+  DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NOTIFICATION_BADGE_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_POPOVER_CLASS_NAME,
 } from '@/components/home/domains/definingPlazaCodexStudyMilestoneRewardConstants';
 import {
@@ -102,6 +103,14 @@ export function RenderingPlazaCodexStudyMilestoneProgress({
                   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_ICON_CLASS_NAME
                 }
               />
+              {marker.isReached ? (
+                <span
+                  className={
+                    DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NOTIFICATION_BADGE_CLASS_NAME
+                  }
+                  aria-hidden
+                />
+              ) : null}
               <span
                 className={
                   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_POPOVER_CLASS_NAME

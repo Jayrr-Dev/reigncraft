@@ -184,6 +184,7 @@ export function creatingWildlifeInstanceAtPosition({
     aggressionLevel,
     sizeScaleSample,
     largeSizeFrame,
+    spawnAnchor,
   };
   const baseMaxHealth = resolvingWildlifeInstanceBaseMaxHealth(
     species,

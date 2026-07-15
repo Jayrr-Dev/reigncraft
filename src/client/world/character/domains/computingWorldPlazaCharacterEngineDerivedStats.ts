@@ -73,6 +73,16 @@ export function computingWorldPlazaCharacterEngineDerivedStats(
       ) +
       spritcoreBonuses.bonusAttackPower
   );
+  const naturalWalkSpeed =
+    locomotion.walkSpeedGridPerSecond ??
+    DEFINING_WORLD_PLAZA_ISOMETRIC_GRID_WALK_SPEED_PER_SECOND;
+  const naturalRunSpeed =
+    locomotion.runSpeedGridPerSecond ??
+    DEFINING_WORLD_PLAZA_ISOMETRIC_GRID_RUN_SPEED_PER_SECOND;
+  const walkMoveSpeedBonus =
+    naturalRunSpeed > 0
+      ? spritcoreBonuses.bonusMoveSpeed * (naturalWalkSpeed / naturalRunSpeed)
+      : spritcoreBonuses.bonusMoveSpeed;
   const displayLevel = computingWorldPlazaSpritcoreDisplayLevel(
     effectiveMaxHealth,
     attackPower,
@@ -91,7 +101,8 @@ export function computingWorldPlazaCharacterEngineDerivedStats(
           scaling.defensePerLevel,
           scalingLevel,
           growthLaneLevelOffset
-        )
+        ) +
+        spritcoreBonuses.bonusDefense
     ),
     sizeScale,
     heightWorldLayers:
@@ -100,12 +111,8 @@ export function computingWorldPlazaCharacterEngineDerivedStats(
     collisionRadiusGrid:
       size.collisionRadiusGrid ??
       DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID * sizeScale,
-    walkSpeedGridPerSecond:
-      locomotion.walkSpeedGridPerSecond ??
-      DEFINING_WORLD_PLAZA_ISOMETRIC_GRID_WALK_SPEED_PER_SECOND,
-    runSpeedGridPerSecond:
-      locomotion.runSpeedGridPerSecond ??
-      DEFINING_WORLD_PLAZA_ISOMETRIC_GRID_RUN_SPEED_PER_SECOND,
+    walkSpeedGridPerSecond: naturalWalkSpeed + walkMoveSpeedBonus,
+    runSpeedGridPerSecond: naturalRunSpeed + spritcoreBonuses.bonusMoveSpeed,
     jumpDistanceScale: locomotion.jumpDistanceScale ?? 1,
     jumpSpeedScale: Math.max(0.25, locomotion.jumpSpeedScale ?? 1),
     maxJumpLayerReach: Math.max(

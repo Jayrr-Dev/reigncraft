@@ -128,6 +128,7 @@ import {
   gettingWorldPlazaSpritcoreUpgradeSnapshot,
   subscribingWorldPlazaSpritcoreUpgrade,
 } from '@/components/world/spritcore/domains/managingWorldPlazaSpritcoreUpgradeStore';
+import { computingWildlifeInstanceDefenseMitigatedDamage } from '@/components/world/wildlife/domains/computingWildlifeInstanceDefenseMitigatedDamage';
 import {
   useCallback,
   useEffect,
@@ -544,9 +545,16 @@ export function usingWorldPlazaPlayerHealth({
         'forcedDeviationScore' | 'forcedRollMode' | 'skipDamageRoll'
       >
     ): DefiningWorldPlazaEntityHealthState => {
+      const mitigatedAmount =
+        kind === 'physical'
+          ? computingWildlifeInstanceDefenseMitigatedDamage(
+              amount,
+              characterEngineDefenseRef.current
+            )
+          : amount;
       const damageResult = computingWorldPlazaEntityHealthDamageWithSleepWake({
         state,
-        rawAmount: amount,
+        rawAmount: mitigatedAmount,
         kind,
         nowMs,
         options: resolvingWorldPlazaGirlSampleRollDodgeDamageOptions({
