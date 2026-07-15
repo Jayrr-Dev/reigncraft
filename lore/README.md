@@ -1,6 +1,6 @@
 # Reigncraft World Bible
 
-The lore and worldbuilding reference for Reigncraft ("CLAIM, STUDY, AND CONQUER"). Everything the in-game Codex Lore section, item flavor text, and future narrative content should draw from lives here.
+The lore and worldbuilding reference for Reigncraft ("CLAIM, TAME, AND CONQUER"). Everything the in-game Codex Lore section, item flavor text, and future narrative content should draw from lives here.
 
 The short version of the canon: the world is **Corpus**, built by the one god **Manus** as a contest to find a successor. Everything that dies comes back (the ladder). Every soul carries a **Spritcore**, dropped at death: money, mana, experience, and rank in one orb. Twelve loyal **Apostles** own everything people need to live, and a mortal must best all twelve to stand before Manus. The dominant faith (**Mereonism**) says the worthy rise; the rebellion (**the Uncored**) says no one rises alone. A quick always-loaded summary for AI sessions lives at `memory/lore-canon-reference.md`.
 
@@ -19,13 +19,13 @@ Every entry is a markdown file with a small metadata header. The rules:
 
 ## Directory map
 
-| Folder       | Contents                                                                                 |
-| ------------ | ---------------------------------------------------------------------------------------- |
+| Folder       | Contents                                                                                  |
+| ------------ | ----------------------------------------------------------------------------------------- |
 | `world/`     | Manus, the ladder, the soul and Spritcore, the Twelve Apostles, history, setting overview |
-| `locations/` | Corpus itself, the thirteen biomes, the Firelands ruins                                  |
-| `species/`   | Wildlife ecology, the Cucco, the Wanderers, travelers and friends (NPCs)                 |
-| `systems/`   | Lore-facing rules: factions and faith, disease and immunity, claims and settlement       |
-| `meta/`      | Style guide (voice, canonical terms, reference notes), open questions                    |
+| `locations/` | Corpus itself, the thirteen biomes, the Firelands ruins                                   |
+| `species/`   | Wildlife ecology, the Cucco, the Wanderers, travelers and friends (NPCs)                  |
+| `systems/`   | Lore-facing rules: factions and faith, disease and immunity, claims and settlement        |
+| `meta/`      | Style guide (voice, canonical terms, reference notes), open questions                     |
 
 ## Entry index
 

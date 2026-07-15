@@ -1,6 +1,6 @@
 # Reigncraft
 
-CLAIM, STUDY, AND CONQUER. A multiplayer survival game on Reddit set in **Corpus**: play as any animal in this world, explore biomes, fight wildlife, harvest, cook, build, and survive hunger, weather, and disease with other players in a shared plaza shard.
+CLAIM, TAME, AND CONQUER. A multiplayer survival game on Reddit set in **Corpus**: play as any animal in this world, explore biomes, fight wildlife, harvest, cook, build, and survive hunger, weather, and disease with other players in a shared plaza shard.
 
 ## App overview
 

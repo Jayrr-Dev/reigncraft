@@ -17,13 +17,13 @@ export const LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_COMING_SOON =
 export const LABELING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_TOGGLE =
   'Disable tutorial' as const;
 
-/** Row wrapping the disable-tutorial switch above the first save slot. */
+/** Row wrapping the disable-tutorial switch under the panel header. */
 export const STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_ROW_CLASS_NAME =
-  'flex cursor-pointer items-center justify-between gap-3 text-sm font-semibold text-ink' as const;
+  'flex w-full cursor-pointer items-center justify-between gap-3 text-xs font-semibold text-ink sm:text-sm' as const;
 
 /** Visual track for the disable-tutorial switch. */
 export const STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_TRACK_CLASS_NAME =
-  'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border-2 border-poster-teal/40 bg-ink/10 transition-colors has-[:checked]:border-poster-orange/70 has-[:checked]:bg-[linear-gradient(180deg,#e8a05c_0%,#c47a3a_100%)]' as const;
+  'relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border-2 border-poster-teal/40 bg-ink/10 transition-colors has-[:checked]:border-poster-orange/70 has-[:checked]:bg-[linear-gradient(180deg,#e8a05c_0%,#c47a3a_100%)]' as const;
 
 /** Hidden native checkbox driving the switch track. */
 export const STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_INPUT_CLASS_NAME =
@@ -31,7 +31,7 @@ export const STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_INPUT_CLASS_NAM
 
 /** Thumb knob for the disable-tutorial switch. */
 export const STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_THUMB_CLASS_NAME =
-  'pointer-events-none absolute left-0.5 size-5 rounded-full bg-parchment shadow-[0_2px_0_0_rgba(20,37,43,0.35)] transition-transform peer-checked:translate-x-5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-poster-gold' as const;
+  'pointer-events-none absolute left-0.5 size-3.5 rounded-full bg-parchment shadow-[0_2px_0_0_rgba(20,37,43,0.35)] transition-transform peer-checked:translate-x-3.5 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-poster-gold' as const;
 
 /** Locked save slot row shell. */
 export const STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_LOCKED_ROW_CLASS_NAME =

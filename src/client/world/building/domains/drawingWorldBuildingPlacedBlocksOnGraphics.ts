@@ -14,6 +14,7 @@ import {
   resolvingWorldBuildingBlockPlacementFootprint,
 } from '@/components/world/building/domains/definingWorldBuildingPlacementFootprint';
 import { checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility } from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
+import { checkingWorldBuildingBlockDefinitionIdIsStorageChest } from '@/components/world/storage-chest/domains/syncingWorldPlazaVisibleStorageChestLayer';
 import { DEFINING_WORLD_BUILDING_COLLISION_SHAPE_KIND_CIRCLE } from '@/components/world/building/domains/definingWorldBuildingCollisionShape';
 import {
   checkingWorldBuildingCutFootprintIsFull,
@@ -198,9 +199,10 @@ export function drawingWorldBuildingPlacedBlockColumnOnGraphics(
 
     if (
       checkingWorldBuildingPlacedBlockIsFootprintSatellite(block) ||
-      checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility(block.definitionId)
+      checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility(block.definitionId) ||
+      checkingWorldBuildingBlockDefinitionIdIsStorageChest(block.definitionId)
     ) {
-      // Sprites drawn by RenderingWorldPlazaBlacksmithUtilityLayer.
+      // Sprites drawn by utility / storage-chest Pixi layers.
       continue;
     }
 
@@ -720,6 +722,31 @@ export function drawingWorldBuildingPlacementPreviewOnGraphics(
         DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_STROKE_ALPHA
       );
     }
+
+    drawingWorldBuildingPlacementGuideToFloorOnGraphics({
+      graphics,
+      tileX,
+      tileY,
+      worldLayer,
+    });
+    return;
+  }
+
+  if (checkingWorldBuildingBlockDefinitionIdIsStorageChest(definition.id)) {
+    const utilityWashRadiusPx =
+      0.42 * DEFINING_WORLD_PLAZA_ISOMETRIC_HALF_TILE_WIDTH_PX;
+
+    drawingWorldBuildingPlacementPreviewFlatSpriteOnGraphics(
+      graphics,
+      tileX,
+      tileY,
+      worldLayer,
+      validityTintColor,
+      validityTintColor,
+      utilityWashRadiusPx,
+      DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_WASH_ALPHA,
+      DRAWING_WORLD_BUILDING_PLACEMENT_PREVIEW_VALIDITY_STROKE_ALPHA
+    );
 
     drawingWorldBuildingPlacementGuideToFloorOnGraphics({
       graphics,

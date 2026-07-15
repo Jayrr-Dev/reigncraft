@@ -6,6 +6,7 @@
 
 import { DEFINING_WORLD_PLAZA_CHEST_DISPLAY_SCALE } from '@/components/world/chest/domains/definingWorldPlazaChestConstants';
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME } from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
+import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 
 /** Slot grid columns for one storage chest. */
 export const DEFINING_WORLD_PLAZA_STORAGE_CHEST_COLUMNS = 6;
@@ -36,6 +37,17 @@ export const DEFINING_WORLD_PLAZA_STORAGE_CHEST_INTERACTION_LABEL_BUTTON_CLASS_N
 export const DEFINING_WORLD_PLAZA_STORAGE_CHEST_DISPLAY_SCALE =
   DEFINING_WORLD_PLAZA_CHEST_DISPLAY_SCALE;
 
+/** Extra screen-Y sink so sprite feet meet the tile diamond. */
+export const DEFINING_WORLD_PLAZA_STORAGE_CHEST_FOOT_SINK_PX = 4;
+
+/** Ghost alpha while placing a storage chest from craft. */
+export const DEFINING_WORLD_PLAZA_STORAGE_CHEST_PLACEMENT_PREVIEW_ALPHA =
+  0.72 as const;
+
+/** Synthetic block id for craft/build placement ghost. */
+export const DEFINING_WORLD_PLAZA_STORAGE_CHEST_PLACEMENT_PREVIEW_BLOCK_ID =
+  'placement-preview-storage-chest' as const;
+
 /** Closed lid sprite for placed storage chests. */
 export const DEFINING_WORLD_PLAZA_STORAGE_CHEST_SPRITE_URL_CLOSED =
   '/environment/sprites/props/chest/chest-a-s-closed.webp' as const;
@@ -43,3 +55,16 @@ export const DEFINING_WORLD_PLAZA_STORAGE_CHEST_SPRITE_URL_CLOSED =
 /** Open lid sprite while the storage UI is open. */
 export const DEFINING_WORLD_PLAZA_STORAGE_CHEST_SPRITE_URL_OPEN =
   '/environment/sprites/props/chest/chest-a-s-open.webp' as const;
+
+/**
+ * Cookbook / recipe-page glyph: single-cell crop of the world chest WebP.
+ */
+export function resolvingWorldPlazaStorageChestRecipeSpriteSheetIcon(): DefiningWorldPlazaInventorySpriteSheetIcon {
+  return {
+    spriteSheetUrl: DEFINING_WORLD_PLAZA_STORAGE_CHEST_SPRITE_URL_CLOSED,
+    columnCount: 1,
+    rowCount: 1,
+    columnIndex: 0,
+    rowIndex: 0,
+  };
+}

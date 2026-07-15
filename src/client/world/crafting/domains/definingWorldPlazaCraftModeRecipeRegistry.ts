@@ -61,6 +61,7 @@ import { registeringWorldPlazaCraftModeToolRecipes } from '@/components/world/cr
 import { registeringWorldPlazaCraftablePlateArmorCraftModeRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaCraftablePlateArmorCraftModeRecipes';
 import { registeringWorldPlazaSpecialtyWeaponCraftModeRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaSpecialtyWeaponCraftModeRecipes';
 import { registeringWorldPlazaSurvivalCraftModeRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaSurvivalCraftModeRecipes';
+import { resolvingWorldPlazaStorageChestRecipeSpriteSheetIcon } from '@/components/world/storage-chest/domains/definingWorldPlazaStorageChestConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
   DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_ROW_COUNT,
@@ -562,8 +563,8 @@ const DEFINING_WORLD_PLAZA_CRAFT_MODE_MANUAL_RECIPE_REGISTRY = [
     description:
       'A wood-and-stone footlocker on claimed ground. Dump gear in the 6×6 grid; it stays put for you alone.',
     recipeVisual: {
-      visualKind: 'iconify',
-      recipeEmblemIconifyIcon: 'mdi:treasure-chest',
+      visualKind: 'sprite-sheet',
+      spriteSheetIcon: resolvingWorldPlazaStorageChestRecipeSpriteSheetIcon(),
     },
     ingredients: [
       {

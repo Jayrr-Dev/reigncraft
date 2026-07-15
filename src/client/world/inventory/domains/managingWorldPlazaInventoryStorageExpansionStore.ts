@@ -28,6 +28,15 @@ let managingWorldPlazaInventoryStorageExpansionCloudSaveSlotIndex: PlazaSaveSlot
 let managingWorldPlazaInventoryStorageExpansionBonusRows = 0;
 let managingWorldPlazaInventoryStorageExpansionClaimedCodexKeys =
   new Set<string>();
+let managingWorldPlazaInventoryStorageExpansionClaimedSnapshotCache: readonly string[] =
+  MANAGING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_EMPTY_CLAIMED_SNAPSHOT;
+
+function refreshingWorldPlazaInventoryStorageExpansionClaimedSnapshotCache(): void {
+  managingWorldPlazaInventoryStorageExpansionClaimedSnapshotCache =
+    managingWorldPlazaInventoryStorageExpansionClaimedCodexKeys.size === 0
+      ? MANAGING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_EMPTY_CLAIMED_SNAPSHOT
+      : [...managingWorldPlazaInventoryStorageExpansionClaimedCodexKeys].sort();
+}
 
 function notifyingWorldPlazaInventoryStorageExpansionSubscribers(): void {
   for (const onStoreChange of managingWorldPlazaInventoryStorageExpansionSubscribers) {
@@ -49,7 +58,9 @@ function mirroringWorldPlazaInventoryStorageExpansionToCloudSave(): void {
           : null,
       inventoryStorageExpansionClaimedCodexKeys:
         managingWorldPlazaInventoryStorageExpansionClaimedCodexKeys.size > 0
-          ? [...managingWorldPlazaInventoryStorageExpansionClaimedCodexKeys].sort()
+          ? [
+              ...managingWorldPlazaInventoryStorageExpansionClaimedCodexKeys,
+            ].sort()
           : null,
     }
   ).catch(() => {
@@ -97,6 +108,7 @@ export function initializingWorldPlazaInventoryStorageExpansionStore(
   managingWorldPlazaInventoryStorageExpansionClaimedCodexKeys = new Set(
     snapshot.claimedCodexKeys
   );
+  refreshingWorldPlazaInventoryStorageExpansionClaimedSnapshotCache();
   notifyingWorldPlazaInventoryStorageExpansionSubscribers();
 }
 
@@ -134,9 +146,8 @@ export function claimingWorldPlazaInventoryStorageExpansionCodexReward(input: {
   readonly meterKind: string;
   readonly percent: number;
 }): ClaimingWorldPlazaInventoryStorageExpansionCodexResult {
-  const claimKey = resolvingWorldPlazaInventoryStorageExpansionCodexClaimKey(
-    input
-  );
+  const claimKey =
+    resolvingWorldPlazaInventoryStorageExpansionCodexClaimKey(input);
 
   if (
     managingWorldPlazaInventoryStorageExpansionClaimedCodexKeys.has(claimKey)
@@ -148,6 +159,7 @@ export function claimingWorldPlazaInventoryStorageExpansionCodexReward(input: {
     managingWorldPlazaInventoryStorageExpansionClaimedCodexKeys
   );
   managingWorldPlazaInventoryStorageExpansionClaimedCodexKeys.add(claimKey);
+  refreshingWorldPlazaInventoryStorageExpansionClaimedSnapshotCache();
 
   if (
     managingWorldPlazaInventoryStorageExpansionBonusRows >=
@@ -178,15 +190,9 @@ export function gettingWorldPlazaInventoryBonusStorageRows(): number {
   return managingWorldPlazaInventoryStorageExpansionBonusRows;
 }
 
-/** Sorted claimed Codex keys (for React subscriptions). */
+/** Sorted claimed Codex keys (for React subscriptions). Stable reference. */
 export function gettingWorldPlazaInventoryStorageExpansionClaimedSnapshot(): readonly string[] {
-  if (managingWorldPlazaInventoryStorageExpansionClaimedCodexKeys.size === 0) {
-    return MANAGING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_EMPTY_CLAIMED_SNAPSHOT;
-  }
-
-  return [
-    ...managingWorldPlazaInventoryStorageExpansionClaimedCodexKeys,
-  ].sort();
+  return managingWorldPlazaInventoryStorageExpansionClaimedSnapshotCache;
 }
 
 export function checkingWorldPlazaInventoryStorageExpansionAtCap(): boolean {
@@ -202,7 +208,9 @@ export function subscribingWorldPlazaInventoryStorageExpansion(
   managingWorldPlazaInventoryStorageExpansionSubscribers.add(onStoreChange);
 
   return () => {
-    managingWorldPlazaInventoryStorageExpansionSubscribers.delete(onStoreChange);
+    managingWorldPlazaInventoryStorageExpansionSubscribers.delete(
+      onStoreChange
+    );
   };
 }
 
@@ -234,6 +242,7 @@ export function hydratingWorldPlazaInventoryStorageExpansionFromRemote(
   ) {
     managingWorldPlazaInventoryStorageExpansionBonusRows = nextBonus;
     managingWorldPlazaInventoryStorageExpansionClaimedCodexKeys = nextClaimed;
+    refreshingWorldPlazaInventoryStorageExpansionClaimedSnapshotCache();
     notifyingWorldPlazaInventoryStorageExpansionSubscribers();
   }
 }
@@ -252,6 +261,7 @@ export function clearingWorldPlazaInventoryStorageExpansionStoreForOwner(
   managingWorldPlazaInventoryStorageExpansionCloudSaveSlotIndex = null;
   managingWorldPlazaInventoryStorageExpansionBonusRows = 0;
   managingWorldPlazaInventoryStorageExpansionClaimedCodexKeys = new Set();
+  refreshingWorldPlazaInventoryStorageExpansionClaimedSnapshotCache();
   notifyingWorldPlazaInventoryStorageExpansionSubscribers();
 }
 
@@ -261,5 +271,6 @@ export function resettingWorldPlazaInventoryStorageExpansionStoreForTests(): voi
   managingWorldPlazaInventoryStorageExpansionCloudSaveSlotIndex = null;
   managingWorldPlazaInventoryStorageExpansionBonusRows = 0;
   managingWorldPlazaInventoryStorageExpansionClaimedCodexKeys = new Set();
+  refreshingWorldPlazaInventoryStorageExpansionClaimedSnapshotCache();
   managingWorldPlazaInventoryStorageExpansionSubscribers.clear();
 }

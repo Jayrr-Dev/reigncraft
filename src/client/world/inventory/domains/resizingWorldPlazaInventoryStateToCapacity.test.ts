@@ -35,4 +35,30 @@ describe('resizingWorldPlazaInventoryStateToCapacity', () => {
     expect(next.capacity).toBe(30);
     expect(next.slots[29]?.id).toBe('item-1');
   });
+
+  it('returns the same state reference when already sized', () => {
+    const state = {
+      capacity: 24,
+      slots: Array.from({ length: 24 }, () => null),
+    };
+
+    expect(resizingWorldPlazaInventoryStateToCapacity(state, 24)).toBe(state);
+  });
+
+  it('returns the same state when retained capacity already matches', () => {
+    const state = {
+      capacity: 30,
+      slots: [
+        ...Array.from({ length: 29 }, () => null),
+        {
+          id: 'item-1',
+          itemTypeId: 'world-plaza-wood',
+          quantity: 1,
+          slotIndex: 29,
+        },
+      ],
+    };
+
+    expect(resizingWorldPlazaInventoryStateToCapacity(state, 24)).toBe(state);
+  });
 });

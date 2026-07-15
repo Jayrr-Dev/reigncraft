@@ -8,6 +8,11 @@ import type {
 import { creatingEmptyInventoryState } from '@/components/inventory/domains/reducingInventoryState';
 import type { UsingInventoryEngineResult } from '@/components/inventory/hooks/usingInventoryEngine';
 import { usingInventoryEngine } from '@/components/inventory/hooks/usingInventoryEngine';
+import { listingWorldPlazaCraftModeRecipeIngredientSeedItems } from '@/components/world/crafting/domains/listingWorldPlazaCraftModeRecipeIngredientSeedItems';
+import {
+  checkingWorldPlazaDevQaLoadEnabled,
+  readingWorldPlazaDevQaLoadRevision,
+} from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
   addingWorldPlazaInventoryItem,
   addingWorldPlazaInventoryItemWithStacking,
@@ -19,13 +24,6 @@ import {
   resolvingWorldPlazaInventoryQueryKeySuffix,
   resolvingWorldPlazaInventoryStorageKey,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
-import { DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_MAX_CAPACITY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
-import {
-  gettingWorldPlazaInventoryBonusStorageRows,
-  subscribingWorldPlazaInventoryStorageExpansion,
-} from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
-import { resizingWorldPlazaInventoryStateToCapacity } from '@/components/world/inventory/domains/resizingWorldPlazaInventoryStateToCapacity';
-import { resolvingWorldPlazaInventoryCapacity } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryCapacity';
 import type { DefiningWorldPlazaInventoryDemoSeedItem } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS,
@@ -38,22 +36,30 @@ import {
   readingWorldPlazaInventoryKingpinTestSeedVersion,
   writingWorldPlazaInventoryKingpinTestSeedVersion,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryKingpinTestSeed';
-import { listingWorldPlazaCraftModeRecipeIngredientSeedItems } from '@/components/world/crafting/domains/listingWorldPlazaCraftModeRecipeIngredientSeedItems';
-import {
-  checkingWorldPlazaDevQaLoadEnabled,
-  readingWorldPlazaDevQaLoadRevision,
-} from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
-import { listingWorldPlazaOreItemSeedItems } from '@/components/world/inventory/domains/listingWorldPlazaOreItemSeedItems';
+import { DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_MAX_CAPACITY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
 import { ensuringWorldPlazaInventoryBestiarySightedRecipeRewards } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryBestiarySightedRecipeRewards';
-import { ensuringWorldPlazaInventoryLapidaryOreStudyRecipeRewards } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryLapidaryOreStudyRecipeRewards';
 import { ensuringWorldPlazaInventoryCampfireRecipePage } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryCampfireRecipePage';
+import { ensuringWorldPlazaInventoryLapidaryOreStudyRecipeRewards } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryLapidaryOreStudyRecipeRewards';
+import { listingWorldPlazaOreItemSeedItems } from '@/components/world/inventory/domains/listingWorldPlazaOreItemSeedItems';
+import {
+  gettingWorldPlazaInventoryBonusStorageRows,
+  subscribingWorldPlazaInventoryStorageExpansion,
+} from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
 import { movingWorldPlazaInventoryItemToSlot } from '@/components/world/inventory/domains/movingWorldPlazaInventoryItemToSlot';
 import { normalizingWorldPlazaInventoryWeaponToolSlot } from '@/components/world/inventory/domains/normalizingWorldPlazaInventoryWeaponToolSlot';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { notifyingWorldPlazaInventoryItemMoved } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemMoved';
+import { resizingWorldPlazaInventoryStateToCapacity } from '@/components/world/inventory/domains/resizingWorldPlazaInventoryStateToCapacity';
+import { resolvingWorldPlazaInventoryCapacity } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryCapacity';
 import { creatingInventoryDevvitAdapter } from '@/components/world/inventory/repositories/creatingInventoryDevvitAdapter';
 import { creatingInventoryPlazaSinglePlayerSaveAdapter } from '@/components/world/inventory/repositories/creatingInventoryPlazaSinglePlayerSaveAdapter';
-import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+} from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 /**
@@ -207,20 +213,33 @@ export function usingWorldPlazaInventory(
   });
 
   const { state, isLoading, isLoaded, setState, updateState } = engine;
+  const updateStateRef = useRef(updateState);
+  updateStateRef.current = updateState;
 
+  // Grow/shrink slot array when bonus storage rows change (or after first load
+  // from max-capacity parse). Value-equality commit avoids update-depth loops
+  // when retained capacity cannot shrink below occupied slots.
   useEffect(() => {
     if (!isLoaded) {
       return;
     }
 
-    updateState((currentState) => {
+    updateStateRef.current((currentState) => {
       const nextState = resizingWorldPlazaInventoryStateToCapacity(
         currentState,
         unlockedCapacity
       );
-      return nextState === currentState ? null : nextState;
+
+      if (
+        nextState.capacity === currentState.capacity &&
+        nextState.slots.length === currentState.slots.length
+      ) {
+        return null;
+      }
+
+      return nextState;
     });
-  }, [isLoaded, unlockedCapacity, updateState]);
+  }, [isLoaded, unlockedCapacity]);
 
   const moveItem = useCallback(
     (fromSlotIndex: number, toSlotIndex: number): void => {

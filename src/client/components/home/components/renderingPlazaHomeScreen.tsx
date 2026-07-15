@@ -206,7 +206,7 @@ export function RenderingPlazaHomeScreen({
                     CRAFT
                   </span>
                 </h1>
-                <p className="plaza-title-tagline">CLAIM, STUDY, AND CONQUER</p>
+                <p className="plaza-title-tagline">CLAIM, TAME, AND CONQUER</p>
               </div>
               {username ? (
                 <RenderingPlazaHomeScreenPlayerBadge

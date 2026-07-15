@@ -97,68 +97,72 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
 
   return (
     <div className="plaza-panel plaza-pop-in flex w-full max-w-md flex-col gap-5 rounded-md p-5 font-body sm:p-6">
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          {...definingPlazaButtonSfxDataAttributes(
-            DEFINING_PLAZA_BUTTON_SFX_KIND.none
-          )}
-          onClick={() => {
-            notifyingPlazaHomeScreenButtonClicked();
-            onBack();
-          }}
-          aria-label="Back to mode select"
-          className="plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]"
-        >
-          <Icon icon="mdi:arrow-left" className="size-5" aria-hidden />
-        </button>
-        <div className="min-w-0">
-          <h2 className="font-display text-xl font-bold tracking-wide text-poster-teal-deep">
-            Single Player
-          </h2>
-          <p className="text-sm font-medium italic text-ink-soft">
-            Choose a save slot for your journey
-          </p>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            {...definingPlazaButtonSfxDataAttributes(
+              DEFINING_PLAZA_BUTTON_SFX_KIND.none
+            )}
+            onClick={() => {
+              notifyingPlazaHomeScreenButtonClicked();
+              onBack();
+            }}
+            aria-label="Back to mode select"
+            className="plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]"
+          >
+            <Icon icon="mdi:arrow-left" className="size-5" aria-hidden />
+          </button>
+          <div className="min-w-0">
+            <h2 className="font-display text-xl font-bold tracking-wide text-poster-teal-deep">
+              Single Player
+            </h2>
+            <p className="text-sm font-medium italic text-ink-soft">
+              Choose a save slot for your journey
+            </p>
+          </div>
         </div>
+
+        <label
+          className={
+            STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_ROW_CLASS_NAME
+          }
+          htmlFor="plaza-single-player-disable-tutorial"
+        >
+          <span>{LABELING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_TOGGLE}</span>
+          <span
+            className={
+              STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_TRACK_CLASS_NAME
+            }
+          >
+            <input
+              id="plaza-single-player-disable-tutorial"
+              type="checkbox"
+              role="switch"
+              checked={isTutorialDisabled}
+              aria-checked={isTutorialDisabled}
+              className={
+                STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_INPUT_CLASS_NAME
+              }
+              onChange={(event) => {
+                notifyingPlazaHomeScreenButtonClicked();
+                settingOnboardingTutorialEnabled(!event.currentTarget.checked);
+              }}
+            />
+            <span
+              aria-hidden
+              className={
+                STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_THUMB_CLASS_NAME
+              }
+            />
+          </span>
+        </label>
       </div>
 
       <div
         aria-hidden
         className="h-px bg-[linear-gradient(90deg,transparent,rgba(44,74,82,0.5),transparent)]"
       />
-
-      <label
-        className={STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_ROW_CLASS_NAME}
-        htmlFor="plaza-single-player-disable-tutorial"
-      >
-        <span>{LABELING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_TOGGLE}</span>
-        <span
-          className={
-            STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_TRACK_CLASS_NAME
-          }
-        >
-          <input
-            id="plaza-single-player-disable-tutorial"
-            type="checkbox"
-            role="switch"
-            checked={isTutorialDisabled}
-            aria-checked={isTutorialDisabled}
-            className={
-              STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_INPUT_CLASS_NAME
-            }
-            onChange={(event) => {
-              notifyingPlazaHomeScreenButtonClicked();
-              settingOnboardingTutorialEnabled(!event.currentTarget.checked);
-            }}
-          />
-          <span
-            aria-hidden
-            className={
-              STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_THUMB_CLASS_NAME
-            }
-          />
-        </span>
-      </label>
 
       <ul className="flex flex-col gap-4">
         {saveSlotSummaries.map((saveSlotSummary, slotOrderIndex) => {

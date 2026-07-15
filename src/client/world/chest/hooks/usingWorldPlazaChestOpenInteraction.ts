@@ -8,16 +8,25 @@
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import { DEFINING_WORLD_PLAZA_CHEST_INTERACT_REACH_GRID } from '@/components/world/chest/domains/definingWorldPlazaChestConstants';
+import { DEFINING_WORLD_PLAZA_FIRST_WORLD_CHEST_RECIPE_ID } from '@/components/world/chest/domains/definingWorldPlazaFirstWorldChestRecipeRewardConstants';
+import { ensuringWorldPlazaInventoryFirstWorldChestRecipeReward } from '@/components/world/chest/domains/ensuringWorldPlazaInventoryFirstWorldChestRecipeReward';
 import type { ListingWorldPlazaChestsInInteractionRangeEntry } from '@/components/world/chest/domains/listingWorldPlazaChestsInInteractionRange';
 import {
   gettingWorldPlazaChestInstance,
   openingWorldPlazaChest,
   unlockingAndOpeningWorldPlazaChest,
 } from '@/components/world/chest/domains/managingWorldPlazaChestInstanceStore';
-import { openingWorldPlazaLocalChest } from '@/components/world/chest/domains/managingWorldPlazaLocalOpenedChests';
+import {
+  listingWorldPlazaLocalOpenedChestIds,
+  openingWorldPlazaLocalChest,
+} from '@/components/world/chest/domains/managingWorldPlazaLocalOpenedChests';
 import { resolvingWorldPlazaChestLockedHintToastMessage } from '@/components/world/chest/domains/resolvingWorldPlazaChestLockedHintToastMessage';
 import { resolvingWorldPlazaChestLootGrant } from '@/components/world/chest/domains/resolvingWorldPlazaChestLootGrant';
+import { countingWorldPlazaInventoryItemTypeQuantity } from '@/components/world/crafting/domains/countingWorldPlazaInventoryItemTypeQuantity';
+import { resolvingWorldPlazaCraftRecipePageItemTypeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { checkingWorldPlazaRecipePageAttachedInStore } from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
+import { readingWorldPlazaRecipeDiscoveryFromStorage } from '@/components/world/domains/readingWorldPlazaRecipeDiscoveryFromStorage';
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import { countingWorldPlazaInventoryItemQuantityByTypeId } from '@/components/world/inventory/domains/countingWorldPlazaInventoryItemQuantityByTypeId';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CHEST_KEY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
@@ -185,6 +194,35 @@ export function usingWorldPlazaChestOpenInteraction({
         instance.loot,
         instance.chestId
       );
+      const isFirstWorldChestOpen =
+        listingWorldPlazaLocalOpenedChestIds(persistenceOwnerId).size === 0;
+      const firstChestRecipePageTypeId =
+        resolvingWorldPlazaCraftRecipePageItemTypeId(
+          DEFINING_WORLD_PLAZA_FIRST_WORLD_CHEST_RECIPE_ID
+        );
+      const alreadyHasFirstChestRecipePage =
+        countingWorldPlazaInventoryItemTypeQuantity(
+          inventoryStateRef.current,
+          firstChestRecipePageTypeId
+        ) > 0 ||
+        checkingWorldPlazaRecipePageAttachedInStore(
+          DEFINING_WORLD_PLAZA_FIRST_WORLD_CHEST_RECIPE_ID
+        ) ||
+        readingWorldPlazaRecipeDiscoveryFromStorage(
+          persistenceOwnerId
+        ).attachedRecipeIds.has(
+          DEFINING_WORLD_PLAZA_FIRST_WORLD_CHEST_RECIPE_ID
+        );
+      const firstChestRecipeGrants =
+        isFirstWorldChestOpen && !alreadyHasFirstChestRecipePage
+          ? [
+              {
+                itemTypeId: firstChestRecipePageTypeId,
+                quantity: 1,
+              },
+            ]
+          : [];
+      const allGrants = [...grants, ...firstChestRecipeGrants];
 
       let inventoryProbeState = inventoryStateRef.current;
 
@@ -214,8 +252,8 @@ export function usingWorldPlazaChestOpenInteraction({
       }
 
       if (
-        grants.length > 0 &&
-        !probingWorldPlazaChestInventoryCapacity(inventoryProbeState, grants)
+        allGrants.length > 0 &&
+        !probingWorldPlazaChestInventoryCapacity(inventoryProbeState, allGrants)
       ) {
         showingGameplayHudToast('Your inventory is full.');
         return;
@@ -225,6 +263,7 @@ export function usingWorldPlazaChestOpenInteraction({
 
       try {
         let didApplyInventoryUpdate = false;
+        let firstChestRewardToast: string | null = null;
 
         updatingInventoryState((currentState) => {
           let nextState = currentState;
@@ -252,8 +291,33 @@ export function usingWorldPlazaChestOpenInteraction({
             return null;
           }
 
+          nextState = grantedState;
+
+          if (isFirstWorldChestOpen) {
+            const recipeReward =
+              ensuringWorldPlazaInventoryFirstWorldChestRecipeReward(
+                nextState,
+                {
+                  storageOwnerId: persistenceOwnerId,
+                  openedWorldChestCount: 1,
+                }
+              );
+            nextState = recipeReward.state;
+            firstChestRewardToast = recipeReward.rewardToast;
+
+            if (recipeReward.grantedRecipeId) {
+              notifyingWorldPlazaInventoryItemAdded(1);
+              showingWorldPlazaInventoryItemPickupToast({
+                itemTypeId: resolvingWorldPlazaCraftRecipePageItemTypeId(
+                  recipeReward.grantedRecipeId
+                ),
+                quantity: 1,
+              });
+            }
+          }
+
           didApplyInventoryUpdate = true;
-          return grantedState;
+          return nextState;
         });
 
         if (!didApplyInventoryUpdate) {
@@ -272,6 +336,11 @@ export function usingWorldPlazaChestOpenInteraction({
 
         openingWorldPlazaLocalChest(persistenceOwnerId, entry.chestId);
         playingWildlifeStudySfx({ sectionId: 'chest' });
+
+        if (firstChestRewardToast) {
+          playingWildlifeStudySfx({ sectionId: 'recipe' });
+          showingGameplayHudToast(firstChestRewardToast);
+        }
       } finally {
         isCompletionPendingRef.current = false;
       }

@@ -6,7 +6,7 @@
 
 ## The pitch
 
-Reigncraft takes place in **Corpus**: a world built by one god, Manus, as a contest to find a being worthy of replacing him. Everything that dies here comes back, because nothing is allowed to leave the ladder. Souls wake into Corpus with empty hands, claim ground, gather cores off the dead, and climb. The tagline is the loop: **claim, study, and conquer**.
+Reigncraft takes place in **Corpus**: a world built by one god, Manus, as a contest to find a being worthy of replacing him. Everything that dies here comes back, because nothing is allowed to leave the ladder. Souls wake into Corpus with empty hands, claim ground, gather cores off the dead, and climb. The tagline is the loop: **claim, tame, and conquer**.
 
 The setting's flavor is grounded survival with a dry, deadpan streak. The god is real, generous, extremely pleased with himself, and the world's dominant religion has firm opinions about why the strong deserve their winnings. The player, mostly by playing normally, becomes exhibit A.
 

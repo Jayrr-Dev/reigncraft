@@ -67,6 +67,13 @@ import { RenderingWorldPlazaPlacedBlockGroundShadows } from '@/components/world/
 import { RenderingWorldPlazaPlacedBlocks } from '@/components/world/building/components/renderingWorldPlazaPlacedBlocks';
 import { RenderingWorldPlazaPlotBoundaries } from '@/components/world/building/components/renderingWorldPlazaPlotBoundaries';
 import { RenderingWorldPlazaSurvivalShelterUtilityLayer } from '@/components/world/building/components/renderingWorldPlazaSurvivalShelterUtilityLayer';
+import { RenderingWorldPlazaStorageChestLayer } from '@/components/world/storage-chest/components/renderingWorldPlazaStorageChestLayer';
+import {
+  checkingWorldBuildingBlockDefinitionIdIsStorageChest,
+} from '@/components/world/storage-chest/domains/syncingWorldPlazaVisibleStorageChestLayer';
+import {
+  DEFINING_WORLD_PLAZA_STORAGE_CHEST_PLACEMENT_PREVIEW_BLOCK_ID,
+} from '@/components/world/storage-chest/domains/definingWorldPlazaStorageChestConstants';
 import {
   countingWorldBuildingOwnerOwnedPlotCount,
   countingWorldBuildingOwnerPlotTileClaims,
@@ -1812,6 +1819,47 @@ function RenderingWorldPlazaPixiSceneConnected({
       worldLayer: previewWorldLayer,
       blockHeight: previewBlockHeight,
       ownerId: DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_PLACEMENT_PREVIEW_BLOCK_ID,
+      placedAt: '1970-01-01T00:00:00.000Z',
+    });
+  }, [
+    isBuildPlacementSelectionActive,
+    isClaimModeActive,
+    isEditSessionActive,
+    pendingCraftPlacementPreviewDefinitionId,
+    previewBlockHeight,
+    previewTilePosition,
+    previewWorldLayer,
+    selectedBuildPaintAction,
+    selectedDefinitionId,
+  ]);
+
+  const storageChestPlacementPreviewBlock = useMemo(() => {
+    const isPlacementPreviewVisible =
+      isEditSessionActive &&
+      !isClaimModeActive &&
+      ((selectedBuildPaintAction === 'place' &&
+        isBuildPlacementSelectionActive) ||
+        pendingCraftPlacementPreviewDefinitionId !== null);
+    const definitionId =
+      pendingCraftPlacementPreviewDefinitionId ?? selectedDefinitionId;
+
+    if (
+      !isPlacementPreviewVisible ||
+      !previewTilePosition ||
+      !definitionId ||
+      !checkingWorldBuildingBlockDefinitionIdIsStorageChest(definitionId)
+    ) {
+      return null;
+    }
+
+    return creatingWorldBuildingPlacedBlock({
+      blockId: DEFINING_WORLD_PLAZA_STORAGE_CHEST_PLACEMENT_PREVIEW_BLOCK_ID,
+      plotId: DEFINING_WORLD_PLAZA_STORAGE_CHEST_PLACEMENT_PREVIEW_BLOCK_ID,
+      definitionId,
+      tilePosition: previewTilePosition,
+      worldLayer: previewWorldLayer,
+      blockHeight: previewBlockHeight,
+      ownerId: DEFINING_WORLD_PLAZA_STORAGE_CHEST_PLACEMENT_PREVIEW_BLOCK_ID,
       placedAt: '1970-01-01T00:00:00.000Z',
     });
   }, [
@@ -9107,6 +9155,16 @@ function RenderingWorldPlazaPixiSceneConnected({
                       entityLayerRef={terrainTrunkLayerRef}
                     />
                   ) : null}
+                  <RenderingWorldPlazaStorageChestLayer
+                    placedBlocks={activeScenePlacedBlocks}
+                    placementPreviewBlock={storageChestPlacementPreviewBlock}
+                    openBlockIds={
+                      storageChestSession.selectedBlock
+                        ? new Set([storageChestSession.selectedBlock.blockId])
+                        : undefined
+                    }
+                    entityLayerRef={terrainTrunkLayerRef}
+                  />
                   <RenderingWorldPlazaClaimModePlotOwnershipOverlay
                     isVisible={isClaimModeActive}
                     overlayPlots={claimModeOverlayPlots}

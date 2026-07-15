@@ -55,7 +55,14 @@ import {
   gettingWorldPlazaRecipeAttachedSnapshot,
   subscribingWorldPlazaRecipeDiscovery,
 } from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
+import {
+  gettingWorldPlazaInventoryStorageExpansionClaimedSnapshot,
+  subscribingWorldPlazaInventoryStorageExpansion,
+} from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
 import { useMemo, useSyncExternalStore } from 'react';
+
+const USING_WORLD_PLAZA_CODEX_REWARD_READY_EMPTY_STORAGE_EXPANSION_CLAIMED: readonly string[] =
+  [];
 
 function buildingPlazaCodexDualMeterPair(
   discoveredValue: number,
@@ -164,6 +171,11 @@ export function usingWorldPlazaCodexRewardReadySections(): ReadonlySet<WorldPlaz
     subscribingWorldPlazaRecipeDiscovery,
     gettingWorldPlazaRecipeAttachedSnapshot,
     () => []
+  );
+  const storageExpansionClaimedKeys = useSyncExternalStore(
+    subscribingWorldPlazaInventoryStorageExpansion,
+    gettingWorldPlazaInventoryStorageExpansionClaimedSnapshot,
+    () => USING_WORLD_PLAZA_CODEX_REWARD_READY_EMPTY_STORAGE_EXPANSION_CLAIMED
   );
 
   return useMemo(() => {
@@ -285,5 +297,6 @@ export function usingWorldPlazaCodexRewardReadySections(): ReadonlySet<WorldPlaz
     sightedHerbariumMushroomSpeciesIds,
     sightedHerbariumTreeVariants,
     sightedLapidaryOreSpeciesIds,
+    storageExpansionClaimedKeys,
   ]);
 }

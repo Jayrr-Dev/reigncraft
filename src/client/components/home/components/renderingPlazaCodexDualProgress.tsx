@@ -27,6 +27,9 @@ import {
 } from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
 import { useSyncExternalStore } from 'react';
 
+const RENDERING_PLAZA_CODEX_DUAL_PROGRESS_EMPTY_CLAIMED_SNAPSHOT: readonly string[] =
+  [];
+
 export type PlazaCodexDualProgressMetric = {
   label: string;
   value: number;
@@ -99,7 +102,7 @@ export function RenderingPlazaCodexDualProgress({
   useSyncExternalStore(
     subscribingWorldPlazaInventoryStorageExpansion,
     gettingWorldPlazaInventoryStorageExpansionClaimedSnapshot,
-    () => []
+    () => RENDERING_PLAZA_CODEX_DUAL_PROGRESS_EMPTY_CLAIMED_SNAPSHOT
   );
 
   return (

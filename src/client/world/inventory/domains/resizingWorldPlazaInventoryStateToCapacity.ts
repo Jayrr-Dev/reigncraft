@@ -10,6 +10,7 @@ import type { DefiningInventoryState } from '@/components/inventory/domains/defi
  * Returns inventory state with `capacity` slots.
  * Growing pads empty null slots. Shrinking keeps the leading slice only when
  * trailing slots are empty; otherwise capacity stays large enough to hold items.
+ * Idempotent: returns the same state reference when nothing changes.
  */
 export function resizingWorldPlazaInventoryStateToCapacity(
   state: DefiningInventoryState,
@@ -48,6 +49,13 @@ export function resizingWorldPlazaInventoryStateToCapacity(
   }
 
   const retainedCapacity = Math.max(nextCapacity, lastOccupiedIndex + 1);
+
+  if (
+    retainedCapacity === state.capacity &&
+    state.slots.length === retainedCapacity
+  ) {
+    return state;
+  }
 
   return {
     capacity: retainedCapacity,
