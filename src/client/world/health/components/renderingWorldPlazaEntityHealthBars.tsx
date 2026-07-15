@@ -58,7 +58,11 @@ const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_HIDDEN_TRANSFORM =
   'translate(-9999px, -9999px)' as const;
 
 const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WRAPPER_CLASS_NAME =
-  'absolute left-0 top-0 z-10 select-none contain-layout contain-style' as const;
+  'absolute left-0 top-0 z-10 select-none' as const;
+
+const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WRAPPER_CONTAIN_STYLE = {
+  contain: 'layout style',
+} as const;
 
 const RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_INITIAL_SCALE_STYLE =
   computingWorldPlazaCameraZoomedDomOverlayScaleStyle();
@@ -795,6 +799,7 @@ export const RenderingWorldPlazaEntityHealthBars = memo(
                 RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WRAPPER_CLASS_NAME
               }
               style={{
+                ...RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_WRAPPER_CONTAIN_STYLE,
                 transform:
                   RENDERING_WORLD_PLAZA_ENTITY_HEALTH_BAR_HIDDEN_TRANSFORM,
               }}

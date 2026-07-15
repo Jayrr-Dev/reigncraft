@@ -8,6 +8,8 @@ import { formattingWorldPlazaDayNightDayNumber } from '@/components/world/domain
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { resolvingWorldPlazaDayNightCyclePhase } from '@/components/world/domains/resolvingWorldPlazaDayNightCyclePhase';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
+import { checkingWorldPlazaMushroomHabitatSpeciesId } from '@/components/world/mushrooms/domains/checkingWorldPlazaMushroomHabitatSpawn';
+import { computingWorldPlazaMushroomSeedUnitFromTileIndex } from '@/components/world/mushrooms/domains/computingWorldPlazaMushroomSeedUnitFromTileIndex';
 import {
   DEFINING_WORLD_PLAZA_MUSHROOM_PLACEMENT_SEED_SALT,
   DEFINING_WORLD_PLAZA_MUSHROOM_SPECIES_SEED_SALT,
@@ -20,16 +22,7 @@ import {
   type DefiningWorldPlazaMushroomCatalogEntry,
 } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
 import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
-
-function seedingWorldPlazaMushroomUnitFromTileIndex(
-  tileX: number,
-  tileY: number,
-  salt: number
-): number {
-  const seed = tileX * 374761393 + tileY * 668265263 + salt * 1274126177;
-  const normalized = Math.sin(seed) * 10_000;
-  return normalized - Math.floor(normalized);
-}
+import { resolvingWorldPlazaMushroomHabitatClaimAtTileIndex } from '@/components/world/mushrooms/domains/resolvingWorldPlazaMushroomHabitatClaimAtTileIndex';
 
 export type ResolvingWorldPlazaMushroomAtTileIndexParams = {
   readonly tileX: number;
@@ -38,6 +31,70 @@ export type ResolvingWorldPlazaMushroomAtTileIndexParams = {
   readonly cyclePhase?: number;
   readonly epochMs?: number;
 };
+
+function resolvingWorldPlazaMushroomSparseAtTileIndex({
+  tileX,
+  tileY,
+  dayNumber,
+  cyclePhase,
+}: {
+  readonly tileX: number;
+  readonly tileY: number;
+  readonly dayNumber: number;
+  readonly cyclePhase: number;
+}): DefiningWorldPlazaMushroomCatalogEntry | null {
+  const placementUnit = computingWorldPlazaMushroomSeedUnitFromTileIndex(
+    tileX,
+    tileY,
+    DEFINING_WORLD_PLAZA_MUSHROOM_PLACEMENT_SEED_SALT
+  );
+
+  if (
+    Math.floor(placementUnit * DEFINING_WORLD_PLAZA_MUSHROOM_TILE_MODULUS) !== 0
+  ) {
+    return null;
+  }
+
+  const biome = resolvingWorldPlazaBiomeAtTileIndex(tileX, tileY);
+
+  const eligible = DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG.filter((entry) => {
+    if (checkingWorldPlazaMushroomHabitatSpeciesId(entry.speciesId)) {
+      return false;
+    }
+
+    if (!entry.biomeKinds.includes(biome.kind)) {
+      return false;
+    }
+
+    if (!checkingWorldPlazaMushroomDayScheduleMatches(entry, dayNumber)) {
+      return false;
+    }
+
+    if (
+      !checkingWorldPlazaMushroomPhaseWindowMatches(
+        entry.phaseWindow,
+        cyclePhase
+      )
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
+  if (eligible.length === 0) {
+    return null;
+  }
+
+  const speciesUnit = computingWorldPlazaMushroomSeedUnitFromTileIndex(
+    tileX,
+    tileY,
+    DEFINING_WORLD_PLAZA_MUSHROOM_SPECIES_SEED_SALT
+  );
+  const pickIndex = Math.floor(speciesUnit * eligible.length) % eligible.length;
+
+  return eligible[pickIndex] ?? null;
+}
 
 /**
  * Deterministic mushroom species on a land tile, or null when none spawn now.
@@ -53,57 +110,28 @@ export function resolvingWorldPlazaMushroomAtTileIndex({
     return null;
   }
 
-  const placementUnit = seedingWorldPlazaMushroomUnitFromTileIndex(
-    tileX,
-    tileY,
-    DEFINING_WORLD_PLAZA_MUSHROOM_PLACEMENT_SEED_SALT
-  );
-
-  if (
-    Math.floor(placementUnit * DEFINING_WORLD_PLAZA_MUSHROOM_TILE_MODULUS) !== 0
-  ) {
-    return null;
-  }
-
   const resolvedDayNumber =
     dayNumber ?? formattingWorldPlazaDayNightDayNumber(epochMs);
   const resolvedCyclePhase =
     cyclePhase ?? resolvingWorldPlazaDayNightCyclePhase(epochMs);
-  const biome = resolvingWorldPlazaBiomeAtTileIndex(tileX, tileY);
 
-  const eligible = DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG.filter((entry) => {
-    if (!entry.biomeKinds.includes(biome.kind)) {
-      return false;
-    }
-
-    if (!checkingWorldPlazaMushroomDayScheduleMatches(entry, resolvedDayNumber)) {
-      return false;
-    }
-
-    if (
-      !checkingWorldPlazaMushroomPhaseWindowMatches(
-        entry.phaseWindow,
-        resolvedCyclePhase
-      )
-    ) {
-      return false;
-    }
-
-    return true;
-  });
-
-  if (eligible.length === 0) {
-    return null;
-  }
-
-  const speciesUnit = seedingWorldPlazaMushroomUnitFromTileIndex(
+  const habitatClaim = resolvingWorldPlazaMushroomHabitatClaimAtTileIndex({
     tileX,
     tileY,
-    DEFINING_WORLD_PLAZA_MUSHROOM_SPECIES_SEED_SALT
-  );
-  const pickIndex = Math.floor(speciesUnit * eligible.length) % eligible.length;
+    dayNumber: resolvedDayNumber,
+    cyclePhase: resolvedCyclePhase,
+  });
 
-  return eligible[pickIndex] ?? null;
+  if (habitatClaim) {
+    return habitatClaim;
+  }
+
+  return resolvingWorldPlazaMushroomSparseAtTileIndex({
+    tileX,
+    tileY,
+    dayNumber: resolvedDayNumber,
+    cyclePhase: resolvedCyclePhase,
+  });
 }
 
 export function resolvingWorldPlazaMushroomSpeciesIdAtTileIndex(

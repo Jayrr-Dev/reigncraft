@@ -1,5 +1,5 @@
 /**
- * Declarative mushroom habitat spawn prefs (utility only; not wired to spawn).
+ * Declarative mushroom habitat spawn prefs and anchor tuning.
  *
  * @module components/world/mushrooms/domains/definingWorldPlazaMushroomHabitatSpawnConstants
  */

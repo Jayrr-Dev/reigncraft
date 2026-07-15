@@ -4,17 +4,19 @@ import {
   DEFINING_WORLD_BUILDING_PLACED_BLOCK_RENDER_CULL_RADIUS_TILES,
   DEFINING_WORLD_BUILDING_PLACED_BLOCK_RENDER_CULL_SNAP_TILES,
 } from '@/components/world/building/domains/definingWorldBuildingPlacedBlockRenderCullConstants';
+import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
   buildingWorldPlazaVisibleTileBoundsCacheKey,
   type DefiningWorldPlazaVisibleTileBounds,
 } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
-import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
-import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
-import { useRef, useState, type RefObject } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 
 /**
  * Snapped Chebyshev cull bounds for placed-block Graphics columns.
+ *
+ * Uses rAF (not Pixi `useTick`) so the parent scene can call this outside
+ * `<Application>` and pass `cullBounds` into stage children.
  *
  * @module components/world/building/hooks/usingWorldPlazaPlacedBlockRenderCullBounds
  */
@@ -52,20 +54,36 @@ export function usingWorldPlazaPlacedBlockRenderCullBounds(
     buildingWorldPlazaVisibleTileBoundsCacheKey(cullBounds)
   );
 
-  usingWorldPlazaSafeTick(() => {
-    const nextBounds =
-      resolvingWorldPlazaPlacedBlockRenderCullBoundsFromGridPoint(
-        playerPositionRef.current ?? { x: 0, y: 0 }
-      );
-    const nextKey = buildingWorldPlazaVisibleTileBoundsCacheKey(nextBounds);
+  useEffect(() => {
+    let animationFrameId = 0;
+    let isActive = true;
 
-    if (nextKey === lastBoundsKeyRef.current) {
-      return;
-    }
+    const tickingCullBounds = (): void => {
+      if (!isActive) {
+        return;
+      }
 
-    lastBoundsKeyRef.current = nextKey;
-    setCullBounds(nextBounds);
-  }, 'tick:placed-block-render-cull');
+      const nextBounds =
+        resolvingWorldPlazaPlacedBlockRenderCullBoundsFromGridPoint(
+          playerPositionRef.current ?? { x: 0, y: 0 }
+        );
+      const nextKey = buildingWorldPlazaVisibleTileBoundsCacheKey(nextBounds);
+
+      if (nextKey !== lastBoundsKeyRef.current) {
+        lastBoundsKeyRef.current = nextKey;
+        setCullBounds(nextBounds);
+      }
+
+      animationFrameId = window.requestAnimationFrame(tickingCullBounds);
+    };
+
+    animationFrameId = window.requestAnimationFrame(tickingCullBounds);
+
+    return () => {
+      isActive = false;
+      window.cancelAnimationFrame(animationFrameId);
+    };
+  }, [playerPositionRef]);
 
   return cullBounds;
 }

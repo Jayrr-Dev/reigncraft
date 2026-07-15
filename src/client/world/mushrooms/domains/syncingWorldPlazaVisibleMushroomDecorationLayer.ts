@@ -7,6 +7,7 @@
 import { DEFINING_WORLD_DEPTH_MUSHROOM_DECORATION_LAYER_Z_INDEX } from '@/components/world/depth';
 import { computingWorldPlazaTerrainElevationScreenOffsetPxAtTileIndex } from '@/components/world/domains/computingWorldPlazaTerrainElevationScreenOffsetPxAtTileIndex';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import {
   DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_HEIGHT_PX,
   DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX,
@@ -14,12 +15,13 @@ import {
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domains/formattingWorldPlazaTileIndexCacheKey';
 import { listingWorldPlazaTileIndicesInBounds } from '@/components/world/domains/listingWorldPlazaTileIndicesInBounds';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
 import { checkingWorldPlazaGrassFloorTileIsBurntAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBurntGrassFloorTileFillColorAtTileIndex';
-import { checkingWorldPlazaMushroomDecorationAtTileIndex } from '@/components/world/mushrooms/domains/checkingWorldPlazaMushroomDecorationAtTileIndex';
 import { DEFINING_WORLD_PLAZA_MUSHROOM_DISPLAY_SCALE } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomConstants';
 import { resolvingWorldPlazaMushroomSpeciesSheetIndex } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpriteSheetConstants';
 import { peekingWorldPlazaMushroomSpriteTextureForSpeciesIndex } from '@/components/world/mushrooms/domains/loadingWorldPlazaMushroomSpriteTextures';
+import { checkingWorldPlazaRuntimeMushroomIsPicked } from '@/components/world/mushrooms/domains/registeringWorldPlazaPickedMushroomsLookup';
 import { resolvingWorldPlazaMushroomAtTileIndex } from '@/components/world/mushrooms/domains/resolvingWorldPlazaMushroomAtTileIndex';
 import type { Container } from 'pixi.js';
 import { Sprite, Texture } from 'pixi.js';
@@ -55,6 +57,14 @@ function listingWorldPlazaVisibleMushroomCandidatesInBounds(
   burntGrassTileKeys: ReadonlySet<string> | undefined,
   epochMs: number
 ): DefiningWorldPlazaMushroomTileInstance[] {
+  if (
+    !checkingWorldPlazaGenerationFeatureEnabled(
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.MUSHROOMS
+    )
+  ) {
+    return [];
+  }
+
   const candidates: DefiningWorldPlazaMushroomTileInstance[] = [];
 
   for (const { tileX, tileY } of listingWorldPlazaTileIndicesInBounds(bounds)) {
@@ -63,9 +73,12 @@ function listingWorldPlazaVisibleMushroomCandidatesInBounds(
         tileX,
         tileY,
         burntGrassTileKeys
-      ) ||
-      !checkingWorldPlazaMushroomDecorationAtTileIndex(tileX, tileY, epochMs)
+      )
     ) {
+      continue;
+    }
+
+    if (checkingWorldPlazaRuntimeMushroomIsPicked(tileX, tileY)) {
       continue;
     }
 
@@ -82,7 +95,9 @@ function listingWorldPlazaVisibleMushroomCandidatesInBounds(
     candidates.push({
       tileX,
       tileY,
-      speciesIndex: resolvingWorldPlazaMushroomSpeciesSheetIndex(entry.speciesId),
+      speciesIndex: resolvingWorldPlazaMushroomSpeciesSheetIndex(
+        entry.speciesId
+      ),
     });
   }
 
