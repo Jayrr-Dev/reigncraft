@@ -7,6 +7,10 @@
  */
 
 import { playingPlazaBookSfx } from '@/components/home/domains/playingPlazaBookSfx';
+import {
+  DEFINING_PLAZA_BUTTON_SFX_KIND,
+  definingPlazaButtonSfxDataAttributes,
+} from '@/components/home/domains/definingPlazaDefaultButtonSfxConstants';
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import { Icon } from '@/components/ui/icon';
 import { RenderingWorldPlazaCraftModeRecipeSpreadLeftPage } from '@/components/world/building/components/renderingWorldPlazaCraftModeRecipeSpreadLeftPage';
@@ -200,7 +204,6 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
       return;
     }
 
-    playingPlazaBookSfx({ actionId: 'page_turn' });
     setLeafIndex(nextLeafIndex);
   };
 
@@ -238,6 +241,9 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
             type="button"
             onClick={onClose}
             aria-label="Close"
+            {...definingPlazaButtonSfxDataAttributes(
+              DEFINING_PLAZA_BUTTON_SFX_KIND.none
+            )}
             className={COOKBOOK_CLOSE_BUTTON_CLASS_NAME}
           >
             <Icon icon="mdi:close" className="size-4 sm:size-5" aria-hidden />
@@ -316,6 +322,9 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
               type="button"
               onClick={() => turningCookbookLeaf(-1)}
               disabled={leafIndex <= 0}
+              {...definingPlazaButtonSfxDataAttributes(
+                DEFINING_PLAZA_BUTTON_SFX_KIND.bookPageTurn
+              )}
               className={COOKBOOK_PAGER_BUTTON_CLASS_NAME}
             >
               <Icon icon="mdi:chevron-left" className="size-4" aria-hidden />
@@ -328,6 +337,9 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
               type="button"
               onClick={() => turningCookbookLeaf(1)}
               disabled={leafIndex >= leafCount - 1}
+              {...definingPlazaButtonSfxDataAttributes(
+                DEFINING_PLAZA_BUTTON_SFX_KIND.bookPageTurn
+              )}
               className={COOKBOOK_PAGER_BUTTON_CLASS_NAME}
             >
               <span className="hidden sm:inline">Next</span>
