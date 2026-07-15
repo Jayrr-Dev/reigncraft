@@ -11,6 +11,7 @@ import {
   DEFINING_PLAZA_CODEX_DUAL_PROGRESS_COUNT_CLASS_NAME,
   DEFINING_PLAZA_CODEX_DUAL_PROGRESS_LABEL_CLASS_NAME,
   DEFINING_PLAZA_CODEX_DUAL_PROGRESS_ROW_CLASS_NAME,
+  DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SEPARATOR_CLASS_NAME,
   DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SHELL_CLASS_NAME,
 } from '@/components/home/domains/definingPlazaCodexDualProgressConstants';
 import { resolvingPlazaCodexOverallProgressMilestoneRewardMarkers } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
@@ -64,6 +65,10 @@ export function RenderingPlazaCodexDualProgress({
     <div className={DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SHELL_CLASS_NAME}>
       <div className={DEFINING_PLAZA_CODEX_DUAL_PROGRESS_ROW_CLASS_NAME}>
         <RenderingPlazaCodexDualProgressMeter metric={left} />
+        <div
+          aria-hidden
+          className={DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SEPARATOR_CLASS_NAME}
+        />
         <RenderingPlazaCodexDualProgressMeter metric={right} />
       </div>
     </div>

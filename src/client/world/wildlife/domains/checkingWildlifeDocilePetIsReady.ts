@@ -5,14 +5,20 @@
  */
 
 import { computingWorldPlazaInGameHoursToRealMs } from '@/components/world/domains/computingWorldPlazaInGameDurationMs';
-import { DEFINING_WILDLIFE_DOCILE_PET_COOLDOWN_IN_GAME_HOURS } from '@/components/world/wildlife/domains/definingWildlifeDocilePetConstants';
+import {
+  DEFINING_WILDLIFE_DOCILE_PET_COOLDOWN_MAX_IN_GAME_HOURS,
+  DEFINING_WILDLIFE_DOCILE_PET_COOLDOWN_MIN_IN_GAME_HOURS,
+} from '@/components/world/wildlife/domains/definingWildlifeDocilePetConstants';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 /**
  * True when this living companion can accept a Pet right now.
  */
 export function checkingWildlifeDocilePetIsReady(
-  instance: Pick<DefiningWildlifeInstance, 'petCooldownUntilMs'> | null | undefined,
+  instance:
+    | Pick<DefiningWildlifeInstance, 'petCooldownUntilMs'>
+    | null
+    | undefined,
   nowMs: number
 ): boolean {
   if (!instance) {
@@ -29,10 +35,19 @@ export function checkingWildlifeDocilePetIsReady(
 }
 
 /**
- * Pet cooldown duration in real milliseconds (one in-game hour).
+ * Rolls a Pet cooldown duration in real milliseconds from the in-game hour band.
+ * `rollUnit` is `[0, 1)` (pass a fixed value in tests).
  */
-export function computingWildlifeDocilePetCooldownDurationMs(): number {
-  return computingWorldPlazaInGameHoursToRealMs(
-    DEFINING_WILDLIFE_DOCILE_PET_COOLDOWN_IN_GAME_HOURS
-  );
+export function rollingWildlifeDocilePetCooldownDurationMs(
+  rollUnit: number = Math.random()
+): number {
+  const clampedRoll = Math.min(1, Math.max(0, rollUnit));
+  const spanHours =
+    DEFINING_WILDLIFE_DOCILE_PET_COOLDOWN_MAX_IN_GAME_HOURS -
+    DEFINING_WILDLIFE_DOCILE_PET_COOLDOWN_MIN_IN_GAME_HOURS;
+  const hours =
+    DEFINING_WILDLIFE_DOCILE_PET_COOLDOWN_MIN_IN_GAME_HOURS +
+    clampedRoll * spanHours;
+
+  return computingWorldPlazaInGameHoursToRealMs(hours);
 }

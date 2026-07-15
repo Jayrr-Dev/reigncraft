@@ -23,10 +23,18 @@ export const DEFINING_WILDLIFE_DOCILE_PET_WINDUP_MS = 2_000 as const;
 export const DEFINING_WILDLIFE_DOCILE_PET_STUDY_POINTS = 1 as const;
 
 /**
- * In-game hours before the same living companion can be petted again.
+ * Minimum in-game hours before the same living companion can be petted again.
  * Converted to wall-clock ms via `computingWorldPlazaInGameHoursToRealMs`.
  */
-export const DEFINING_WILDLIFE_DOCILE_PET_COOLDOWN_IN_GAME_HOURS = 1 as const;
+export const DEFINING_WILDLIFE_DOCILE_PET_COOLDOWN_MIN_IN_GAME_HOURS =
+  1 as const;
+
+/**
+ * Maximum in-game hours before the same living companion can be petted again.
+ * Each pet rolls uniformly in `[min, max]`.
+ */
+export const DEFINING_WILDLIFE_DOCILE_PET_COOLDOWN_MAX_IN_GAME_HOURS =
+  3 as const;
 
 /**
  * Extra screen lift above the wildlife name tag so Pet / Petting....

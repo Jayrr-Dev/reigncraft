@@ -6,6 +6,7 @@
 
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import type { WorldPlazaSpritcoreUpgradeBonuses } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
 import type { DefiningWildlifeAggressionLevel } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 /** Ordered loyalty tier ids from first follow through bonded. */
@@ -65,6 +66,8 @@ export type DefiningWildlifePetPersistedRecord = {
   hasNeglectedBadge: boolean;
   /** True while the companion left the owner trail to forage after neglect. */
   isNeglectHunting: boolean;
+  /** Permanent Spritcore power-up bonuses invested into this companion. */
+  spritcoreUpgrades: WorldPlazaSpritcoreUpgradeBonuses;
   lastKnownX: number | null;
   lastKnownY: number | null;
   lastKnownLayer: number | null;
@@ -102,4 +105,6 @@ export type DefiningWildlifePetBondState = {
   neglectAbandonAtMs?: number | null;
   /** Fractional hunger loyalty loss not yet applied as a whole point. */
   hungerLoyaltyLossAccumulator?: number;
+  /** Permanent Spritcore power-up bonuses invested into this companion. */
+  spritcoreUpgrades?: WorldPlazaSpritcoreUpgradeBonuses;
 };

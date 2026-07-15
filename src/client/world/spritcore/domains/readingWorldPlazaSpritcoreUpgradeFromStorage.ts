@@ -42,6 +42,12 @@ function parsingWorldPlazaSpritcoreUpgradeBonuses(
       bonusAttackSpeed: readingWorldPlazaSpritcoreUpgradeNonNegativeNumber(
         record.bonusAttackSpeed
       ),
+      bonusDefense: readingWorldPlazaSpritcoreUpgradeNonNegativeNumber(
+        record.bonusDefense
+      ),
+      bonusMoveSpeed: readingWorldPlazaSpritcoreUpgradeNonNegativeNumber(
+        record.bonusMoveSpeed
+      ),
       totalSpritcoreInvested:
         readingWorldPlazaSpritcoreUpgradeNonNegativeNumber(
           record.totalSpritcoreInvested

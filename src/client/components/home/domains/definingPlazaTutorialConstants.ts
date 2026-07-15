@@ -171,7 +171,7 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_DESKTOP: PlazaTutorialTabDefinition[] 
           id: 'study-wildlife',
           title: 'Study Wildlife',
           description:
-            'After a kill, the body stays for about a minute. Click the corpse and press Study. Larger animals take longer (3 to 10 seconds) and can grant 1 to 3 study points. Open Guide, then Bestiary, to track each species toward 100.',
+            'After a kill, the body stays for about a minute. Click the corpse and press Study. Larger animals take longer (3 to 10 seconds) and can grant 1 to 3 study points. Open Codex, then Bestiary, to track each species toward 100.',
           icon: 'mdi:book-open-page-variant',
         },
         {
@@ -340,7 +340,7 @@ export const DEFINING_PLAZA_TUTORIAL_TABS_MOBILE: PlazaTutorialTabDefinition[] =
           id: 'study-wildlife',
           title: 'Study Wildlife',
           description:
-            'After a kill, the body stays for about a minute. Tap the corpse and press Study. Larger animals take longer (3 to 10 seconds) and can grant 1 to 3 study points. Open Guide, then Bestiary, to track each species toward 100.',
+            'After a kill, the body stays for about a minute. Tap the corpse and press Study. Larger animals take longer (3 to 10 seconds) and can grant 1 to 3 study points. Open Codex, then Bestiary, to track each species toward 100.',
           icon: 'mdi:book-open-page-variant',
         },
         {

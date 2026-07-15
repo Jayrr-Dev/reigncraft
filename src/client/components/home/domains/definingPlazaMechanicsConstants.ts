@@ -321,7 +321,7 @@ export const DEFINING_PLAZA_MECHANICS_STATUS_EFFECT_SECTIONS: readonly PlazaMech
       id: 'meat-disease',
       title: 'Meat Diseases',
       description:
-        'A lime or purple badge below your health bar means symptoms have started from a raw-meat disease. One icon covers the whole illness even as poison, bleed, confusion, sleep, or movement locks kick in later. Some sleep waves can be deep sleep: hits will not wake you until that stage timer ends. Infection can incubate for hours or days before any badge appears. Cook wildlife cuts at a campfire before eating. Open Pathology in the Guide for each illness once you have contracted it. See Immune System for how recovery builds resistance.',
+        'A lime or purple badge below your health bar means symptoms have started from a raw-meat disease. One icon covers the whole illness even as poison, bleed, confusion, sleep, or movement locks kick in later. Some sleep waves can be deep sleep: hits will not wake you until that stage timer ends. Infection can incubate for hours or days before any badge appears. Cook wildlife cuts at a campfire before eating. Open Pathology in the Codex for each illness once you have contracted it. See Immune System for how recovery builds resistance.',
       icon: 'mdi:biohazard',
     },
     {

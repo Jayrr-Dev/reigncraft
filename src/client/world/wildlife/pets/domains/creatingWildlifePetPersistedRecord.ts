@@ -4,6 +4,7 @@
  * @module components/world/wildlife/pets/domains/creatingWildlifePetPersistedRecord
  */
 
+import { WORLD_PLAZA_SPRITCORE_UPGRADE_EMPTY_BONUSES } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type {
   DefiningWildlifePetBondState,
@@ -47,6 +48,8 @@ export function creatingWildlifePetPersistedRecord(
   const soulsaveConsumed = bondState?.soulsaveConsumed ?? false;
   const hasNeglectedBadge = bondState?.hasNeglectedBadge === true;
   const isNeglectHunting = bondState?.isNeglectHunting === true;
+  const spritcoreUpgrades =
+    bondState?.spritcoreUpgrades ?? WORLD_PLAZA_SPRITCORE_UPGRADE_EMPTY_BONUSES;
 
   return {
     petId: creatingWildlifePetId(bondState?.petId ?? params.petId),
@@ -67,6 +70,7 @@ export function creatingWildlifePetPersistedRecord(
     soulsaveConsumed,
     hasNeglectedBadge,
     isNeglectHunting,
+    spritcoreUpgrades: { ...spritcoreUpgrades },
     lastKnownX: instance.position.x,
     lastKnownY: instance.position.y,
     lastKnownLayer: instance.position.layer ?? null,
@@ -99,5 +103,6 @@ export function creatingWildlifePetBondStateFromPersistedRecord(
     isNeglectHunting: record.isNeglectHunting === true,
     neglectAbandonAtMs: null,
     hungerLoyaltyLossAccumulator: 0,
+    spritcoreUpgrades: { ...record.spritcoreUpgrades },
   };
 }

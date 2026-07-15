@@ -51,6 +51,14 @@ export function computingWorldPlazaSpritcoreDeathCommittedPenalty(
         0,
         Number((bonuses.bonusAttackSpeed * keepFraction).toFixed(4))
       ),
+      bonusDefense: Math.max(
+        0,
+        Math.floor(bonuses.bonusDefense * keepFraction)
+      ),
+      bonusMoveSpeed: Math.max(
+        0,
+        Number((bonuses.bonusMoveSpeed * keepFraction).toFixed(4))
+      ),
       totalSpritcoreInvested: Math.max(0, invested - droppedQuantity),
     },
   };

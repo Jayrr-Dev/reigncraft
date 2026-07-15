@@ -8,12 +8,15 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { notifyingWorldPlazaAvatarMeleeHitOutcome } from '@/components/world/domains/notifyingWorldPlazaAvatarMeleeHitOutcome';
 import { checkingWorldPlazaEntityHealthSleepCanWakeFromDamage } from '@/components/world/health/domains/checkingWorldPlazaEntityHealthSleepCanWakeFromDamage';
 import { applyingWildlifeInstanceHealthDamageWithFloatFeedback } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthDamageWithFloatFeedback';
+import { computingWildlifeInstanceDefenseMitigatedDamage } from '@/components/world/wildlife/domains/computingWildlifeInstanceDefenseMitigatedDamage';
 import { checkingWildlifeOmegaWolfSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { notifyingWildlifeOmegaWolfSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeOmegaWolfSfxEvent';
 import { notifyingWildlifeSpeciesSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeSpeciesSfxEvent';
 import { notifyingWildlifeVocalSfxOnDeath } from '@/components/world/wildlife/domains/notifyingWildlifeVocalSfxOnDeath';
+import { resolvingWildlifeInstanceEffectiveDefense } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import {
   resolvingWildlifeObeseIncomingPhysicalDamageOptions,
   resolvingWildlifeObeseJumpAttackDamageOptions,
@@ -91,6 +94,13 @@ export function applyingWildlifeInstancePhysicalDamage({
       nowMs
     );
   const shouldWakeFromHit = wasSleeping && canWakeFromDamage;
+  const species = resolvingWildlifeSpeciesDefinition(instance.speciesId);
+  const mitigatedAmount = species
+    ? computingWildlifeInstanceDefenseMitigatedDamage(
+        rawAmount,
+        resolvingWildlifeInstanceEffectiveDefense(species, instance)
+      )
+    : rawAmount;
 
   let nextInstance = applyingWildlifeInstanceHealthDamageWithFloatFeedback({
     instance: shouldWakeFromHit
@@ -103,7 +113,7 @@ export function applyingWildlifeInstancePhysicalDamage({
           },
         }
       : instance,
-    rawAmount,
+    rawAmount: mitigatedAmount,
     kind: 'physical',
     nowMs,
     options: damageOptions,

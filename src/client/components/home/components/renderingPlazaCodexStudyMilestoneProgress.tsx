@@ -13,8 +13,12 @@ import {
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_ICON_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_LOCKED_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_REACHED_CLASS_NAME,
+  DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_POPOVER_CLASS_NAME,
 } from '@/components/home/domains/definingPlazaCodexStudyMilestoneRewardConstants';
-import type { PlazaCodexOverallMilestoneRewardMarker } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
+import {
+  resolvingPlazaCodexStudyMilestoneRewardPopoverLabel,
+  type PlazaCodexOverallMilestoneRewardMarker,
+} from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
 import { Icon } from '@/components/ui/icon';
 
 export type RenderingPlazaCodexStudyMilestoneProgressProps = {
@@ -53,7 +57,9 @@ export function RenderingPlazaCodexStudyMilestoneProgress({
       className={`${DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_SHELL_CLASS_NAME} ${className}`.trim()}
     >
       <div
-        className={DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_TRACK_CLASS_NAME}
+        className={
+          DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_TRACK_CLASS_NAME
+        }
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={max}
@@ -61,31 +67,49 @@ export function RenderingPlazaCodexStudyMilestoneProgress({
         aria-label={ariaLabel}
       >
         <div
-          className={DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_FILL_CLASS_NAME}
+          className={
+            DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_FILL_CLASS_NAME
+          }
           style={{ width: `${progressPercent}%` }}
         />
       </div>
       <div
-        className={DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_MARKERS_CLASS_NAME}
-        aria-hidden
+        className={
+          DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_MARKERS_CLASS_NAME
+        }
       >
         {markers.map((marker) => {
           const nodeClassName = marker.isReached
             ? DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_REACHED_CLASS_NAME
             : DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_LOCKED_CLASS_NAME;
+          const popoverLabel =
+            resolvingPlazaCodexStudyMilestoneRewardPopoverLabel(
+              marker.remainingNeeded,
+              marker.isReached
+            );
 
           return (
-            <div
+            <button
               key={marker.id}
+              type="button"
               className={nodeClassName}
               style={{ left: `${marker.percent}%` }}
-              title={`Reward · ${marker.threshold}/${max}`}
+              aria-label={popoverLabel}
             >
               <Icon
                 icon={DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CHEST_ICON}
-                className={DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_ICON_CLASS_NAME}
+                className={
+                  DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_ICON_CLASS_NAME
+                }
               />
-            </div>
+              <span
+                className={
+                  DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_POPOVER_CLASS_NAME
+                }
+              >
+                {popoverLabel}
+              </span>
+            </button>
           );
         })}
       </div>

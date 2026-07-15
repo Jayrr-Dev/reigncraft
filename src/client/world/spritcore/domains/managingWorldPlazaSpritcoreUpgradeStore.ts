@@ -125,6 +125,8 @@ export function applyingWorldPlazaSpritcoreUpgradePurchase(
         ? current.bonusAttackSpeed +
           DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_ATTACK_SPEED_UPGRADE_STEP
         : current.bonusAttackSpeed,
+    bonusDefense: current.bonusDefense,
+    bonusMoveSpeed: current.bonusMoveSpeed,
     totalSpritcoreInvested: current.totalSpritcoreInvested + price,
   };
 

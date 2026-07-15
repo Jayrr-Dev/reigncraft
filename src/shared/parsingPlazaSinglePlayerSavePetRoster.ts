@@ -47,6 +47,7 @@ type ParsingPlazaSinglePlayerSavePetRecordRaw = {
   soulsaveConsumed?: unknown;
   hasNeglectedBadge?: unknown;
   isNeglectHunting?: unknown;
+  spritcoreUpgrades?: unknown;
   lastKnownX?: unknown;
   lastKnownY?: unknown;
   lastKnownLayer?: unknown;
@@ -233,6 +234,54 @@ function parsingPlazaSinglePlayerSavePetStringArray(
   );
 }
 
+function parsingPlazaSinglePlayerSavePetNonNegativeNumber(
+  value: unknown
+): number {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+    return 0;
+  }
+
+  return value;
+}
+
+function parsingPlazaSinglePlayerSavePetSpritcoreUpgrades(
+  raw: unknown
+): PlazaSinglePlayerSavePetRecord['spritcoreUpgrades'] {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+    return {
+      bonusMaxHealth: 0,
+      bonusAttackPower: 0,
+      bonusAttackSpeed: 0,
+      bonusDefense: 0,
+      bonusMoveSpeed: 0,
+      totalSpritcoreInvested: 0,
+    };
+  }
+
+  const record = raw as Record<string, unknown>;
+
+  return {
+    bonusMaxHealth: parsingPlazaSinglePlayerSavePetNonNegativeNumber(
+      record.bonusMaxHealth
+    ),
+    bonusAttackPower: parsingPlazaSinglePlayerSavePetNonNegativeNumber(
+      record.bonusAttackPower
+    ),
+    bonusAttackSpeed: parsingPlazaSinglePlayerSavePetNonNegativeNumber(
+      record.bonusAttackSpeed
+    ),
+    bonusDefense: parsingPlazaSinglePlayerSavePetNonNegativeNumber(
+      record.bonusDefense
+    ),
+    bonusMoveSpeed: parsingPlazaSinglePlayerSavePetNonNegativeNumber(
+      record.bonusMoveSpeed
+    ),
+    totalSpritcoreInvested: parsingPlazaSinglePlayerSavePetNonNegativeNumber(
+      record.totalSpritcoreInvested
+    ),
+  };
+}
+
 /** Validates one persisted pet record from save JSON. */
 export function parsingPlazaSinglePlayerSavePetRecord(
   raw: unknown
@@ -306,6 +355,9 @@ export function parsingPlazaSinglePlayerSavePetRecord(
     soulsaveConsumed: recordRaw.soulsaveConsumed === true,
     hasNeglectedBadge: recordRaw.hasNeglectedBadge === true,
     isNeglectHunting: recordRaw.isNeglectHunting === true,
+    spritcoreUpgrades: parsingPlazaSinglePlayerSavePetSpritcoreUpgrades(
+      recordRaw.spritcoreUpgrades
+    ),
     lastKnownX: parsingPlazaSinglePlayerSavePetNullableFiniteNumber(
       recordRaw.lastKnownX
     ),
@@ -403,6 +455,7 @@ export function serializingPlazaSinglePlayerSavePetRecord(
     learnedSkillIds: [...record.learnedSkillIds],
     weaponItem: record.weaponItem ? { ...record.weaponItem } : null,
     armorItem: record.armorItem ? { ...record.armorItem } : null,
+    spritcoreUpgrades: { ...record.spritcoreUpgrades },
   };
 }
 

@@ -17,7 +17,6 @@ import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/m
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
-import { resolvingWorldPlazaScaledAttackIntervalMs } from '@/components/world/domains/resolvingWorldPlazaGlobalAttackSpeedScale';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { resolvingWorldPlazaEntityHealthAttackSpeedMultiplier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthAttackSpeedMultiplier';
@@ -189,6 +188,7 @@ import { resolvingWildlifeBehaviorNeighborQueryRadiusGrid } from '@/components/w
 import { resolvingWildlifeFairyDaybreakWanderAwayIntent } from '@/components/world/wildlife/domains/resolvingWildlifeFairyDaybreakWanderAwayIntent';
 import {
   resolvingWildlifeInstanceCollisionRadiusGrid,
+  resolvingWildlifeInstanceEffectiveAttackIntervalMs,
   resolvingWildlifeInstanceMaxStaminaRatio,
   resolvingWildlifeInstanceRunSpeedGridPerSecond,
   resolvingWildlifeInstanceStaminaConfig,
@@ -685,10 +685,11 @@ function checkingWildlifeAttackReady(
       attacker.healthState,
       nowMs
     );
-  const attackIntervalMs =
-    resolvingWorldPlazaScaledAttackIntervalMs(
-      attackerSpecies.vitals.attackIntervalMs
-    ) / attackSpeedMultiplier;
+  const attackIntervalMs = resolvingWildlifeInstanceEffectiveAttackIntervalMs(
+    attackerSpecies,
+    attacker,
+    attackSpeedMultiplier
+  );
 
   return lastAttackAtMs === null || nowMs - lastAttackAtMs >= attackIntervalMs;
 }

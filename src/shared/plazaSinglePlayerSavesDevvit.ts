@@ -55,6 +55,16 @@ export type PlazaSinglePlayerSavePetInventoryItem = {
   metadata?: Readonly<Record<string, unknown>>;
 };
 
+/** Permanent Spritcore power-up bonuses invested into one companion. */
+export type PlazaSinglePlayerSavePetSpritcoreUpgrades = {
+  bonusMaxHealth: number;
+  bonusAttackPower: number;
+  bonusAttackSpeed: number;
+  bonusDefense: number;
+  bonusMoveSpeed: number;
+  totalSpritcoreInvested: number;
+};
+
 /** Persisted pet record shape for save slots / multiplayer roster. */
 export type PlazaSinglePlayerSavePetRecord = {
   petId: string;
@@ -77,6 +87,8 @@ export type PlazaSinglePlayerSavePetRecord = {
   hasNeglectedBadge: boolean;
   /** True while the companion left the owner trail to forage after neglect. */
   isNeglectHunting: boolean;
+  /** Permanent Spritcore power-up bonuses invested into this companion. */
+  spritcoreUpgrades: PlazaSinglePlayerSavePetSpritcoreUpgrades;
   lastKnownX: number | null;
   lastKnownY: number | null;
   lastKnownLayer: number | null;

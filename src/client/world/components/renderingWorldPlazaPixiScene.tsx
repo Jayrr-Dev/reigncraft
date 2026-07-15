@@ -221,7 +221,6 @@ import {
   DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_LAYER_Z_INDEX,
   DEFINING_WORLD_DEPTH_RENDER_PLANE_FLOOR_Z_INDEX,
 } from '@/components/world/depth';
-import { applyingWorldPlazaAvatarTransformDeathReset } from '@/components/world/domains/applyingWorldPlazaAvatarTransform';
 import { applyingWorldPlazaPlayerTeleportToWorldPoint } from '@/components/world/domains/applyingWorldPlazaPlayerTeleportToWorldPoint';
 import { attachingWorldPlazaAllCraftModeRecipesForDevQa } from '@/components/world/domains/attachingWorldPlazaAllCraftModeRecipesForDevQa';
 import {
@@ -620,7 +619,8 @@ import type {
 } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import type { ManagingWorldPlazaProjectileStore } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
 import { usingWorldPlazaProjectileEngine } from '@/components/world/projectile/hooks/usingWorldPlazaProjectileEngine';
-import { applyingWorldPlazaPlayerDeathSpritcorePenalty } from '@/components/world/spritcore/domains/applyingWorldPlazaPlayerDeathSpritcorePenalty';
+import { consumingWorldPlazaSpritcoreInventoryQuantity } from '@/components/world/spritcore/domains/countingWorldPlazaSpritcoreInventoryQuantity';
+import type { WildlifePetSpritcoreUpgradeLaneId } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
 import { initializingWorldPlazaSpritcoreUpgradeStore } from '@/components/world/spritcore/domains/managingWorldPlazaSpritcoreUpgradeStore';
 import { usingWorldPlazaSpritcoreUpgradeBonuses } from '@/components/world/spritcore/hooks/usingWorldPlazaSpritcoreUpgradeBonuses';
 import { RenderingWorldPlazaTeaPotAddWaterInteractionLabels } from '@/components/world/tea-brewing/components/renderingWorldPlazaTeaPotAddWaterInteractionLabels';
@@ -730,11 +730,13 @@ import { usingWorldPlazaWildlifeCorpseStudyProgress } from '@/components/world/w
 import {
   applyingWildlifePetOwnerFeed,
   applyingWildlifePetOwnerHeal,
+  applyingWildlifePetSpritcoreUpgradePurchase,
   checkingWildlifePetHasCapability,
   checkingWildlifePetItemIsEquippableWeapon,
   checkingWildlifePetNeedsOwnerFeed,
   formattingWildlifePetInstanceId,
   readingWildlifePetRosterSnapshot,
+  resolvingWildlifePetNaturalCombatStats,
   syncingWildlifePetBondToRoster,
   syncingWildlifePetInstanceVitalsToRoster,
   updatingWildlifePetRecord,
@@ -748,7 +750,13 @@ import {
   type ApplyingWildlifePetDevLoyaltyGrantKind,
 } from '@/components/world/wildlife/pets/domains/applyingWildlifePetDevLoyaltyGrant';
 import { DEFINING_WILDLIFE_PET_MODAL_HEAL_AMOUNT } from '@/components/world/wildlife/pets/domains/definingWildlifePetModalConstants';
+import {
+  LABELING_WILDLIFE_PET_SPRITCORE_UPGRADE_CAPPED,
+  LABELING_WILDLIFE_PET_SPRITCORE_UPGRADE_FAILED,
+  LABELING_WILDLIFE_PET_SPRITCORE_UPGRADE_NOT_ENOUGH,
+} from '@/components/world/wildlife/pets/domains/definingWildlifePetSpritcoreUpgradeConstants';
 import { findingWildlifeNearestPettableInstance } from '@/components/world/wildlife/pets/domains/findingWildlifeNearestPettableInstance';
+import { resolvingWildlifePetSpritcoreUpgradeOffers } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetSpritcoreUpgradeOffers';
 import { usingWildlifeActivePetSpawn } from '@/components/world/wildlife/pets/hooks/usingWildlifeActivePetSpawn';
 import { usingWildlifePetModalState } from '@/components/world/wildlife/pets/hooks/usingWildlifePetModalState';
 import { usingWildlifePetRosterPanelVisibleState } from '@/components/world/wildlife/pets/hooks/usingWildlifePetRosterPanelVisibleState';
@@ -4847,6 +4855,104 @@ function RenderingWorldPlazaPixiSceneConnected({
     [wildlifeStoreRef]
   );
 
+  const handlingPetPurchaseSpritcoreUpgrade = useCallback(
+    (instanceId: string, laneId: WildlifePetSpritcoreUpgradeLaneId): void => {
+      const instance = gettingWildlifeInstance(
+        wildlifeStoreRef.current,
+        instanceId
+      );
+      const petBond = instance?.petBond;
+
+      if (
+        !instance ||
+        !petBond ||
+        !checkingWildlifePetHasCapability(petBond.loyalty, 'advancedStatsUi')
+      ) {
+        return;
+      }
+
+      const naturalStats = resolvingWildlifePetNaturalCombatStats(instance);
+
+      if (!naturalStats) {
+        return;
+      }
+
+      const offers = resolvingWildlifePetSpritcoreUpgradeOffers({
+        bonuses: naturalStats.bonuses,
+        naturalMaxHealth: naturalStats.naturalMaxHealth,
+        naturalAttackPower: naturalStats.naturalAttackPower,
+        naturalAttackSpeed: naturalStats.naturalAttackSpeed,
+        naturalDefense: naturalStats.naturalDefense,
+        naturalRunSpeed: naturalStats.naturalRunSpeed,
+      });
+      const offer = offers[laneId];
+
+      if (offer.isCapped) {
+        showingGameplayHudToast(LABELING_WILDLIFE_PET_SPRITCORE_UPGRADE_CAPPED);
+        return;
+      }
+
+      const price = Math.ceil(offer.price);
+
+      updatingInventoryState((currentState) => {
+        const consumeResult = consumingWorldPlazaSpritcoreInventoryQuantity(
+          currentState,
+          price
+        );
+
+        if (!consumeResult.consumed) {
+          showingGameplayHudToast(
+            LABELING_WILDLIFE_PET_SPRITCORE_UPGRADE_NOT_ENOUGH
+          );
+          return null;
+        }
+
+        const purchaseResult = applyingWildlifePetSpritcoreUpgradePurchase({
+          instance,
+          laneId,
+          price,
+          naturalMaxHealth: naturalStats.naturalMaxHealth,
+          naturalAttackPower: naturalStats.naturalAttackPower,
+          naturalAttackSpeed: naturalStats.naturalAttackSpeed,
+          naturalDefense: naturalStats.naturalDefense,
+          naturalRunSpeed: naturalStats.naturalRunSpeed,
+        });
+
+        if (purchaseResult.status !== 'applied') {
+          showingGameplayHudToast(
+            purchaseResult.status === 'capped'
+              ? LABELING_WILDLIFE_PET_SPRITCORE_UPGRADE_CAPPED
+              : LABELING_WILDLIFE_PET_SPRITCORE_UPGRADE_FAILED
+          );
+          return null;
+        }
+
+        replacingWildlifeInstance(
+          wildlifeStoreRef.current,
+          purchaseResult.instance
+        );
+
+        if (petBond.isPersistent) {
+          updatingWildlifePetRecord(petBond.petId, {
+            spritcoreUpgrades: purchaseResult.bonuses,
+            healthCurrent: purchaseResult.instance.healthState.currentHealth,
+          });
+        }
+
+        showingGameplayHudToast(
+          laneId === 'health'
+            ? `Companion health +${purchaseResult.step}.`
+            : laneId === 'damage'
+              ? `Companion damage +${purchaseResult.step}.`
+              : `Companion attack speed +${purchaseResult.step}.`
+        );
+
+        return consumeResult.nextState;
+      });
+    },
+    [showingGameplayHudToast, updatingInventoryState, wildlifeStoreRef]
+  );
+
   const handlingPetEquipWeapon = useCallback(
     (instanceId: string, inventorySlotIndex: number): void => {
       const instance = gettingWildlifeInstance(
@@ -5845,7 +5951,6 @@ function RenderingWorldPlazaPixiSceneConnected({
         lastChaseGridX: instance.position.x,
         lastChaseGridY: instance.position.y,
         lastChaseReplanAtMs: 0,
-        suppressChase: false,
       };
       isClickRunIntentRef.current = true;
 
@@ -5988,16 +6093,6 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
 
       clearingDocileBetraySelection();
-
-      // Tap same locked target again to clear lock.
-      if (
-        combatLockRef.current?.targetInstanceId === clickedInstance.instanceId
-      ) {
-        clearingCombatLock();
-        clearingWalkTarget();
-        return true;
-      }
-
       lockingCombatOnWildlifeInstance(clickedInstance);
       return true;
     },
@@ -6097,11 +6192,6 @@ function RenderingWorldPlazaPixiSceneConnected({
         if (walkTargetRef.current || isWalkingRef.current) {
           clearingWalkTarget();
         }
-        return;
-      }
-
-      if (tickResult.kind === 'await') {
-        // Manual move while locked: keep crosshair + auto-swing in reach.
         return;
       }
 
@@ -6698,10 +6788,6 @@ function RenderingWorldPlazaPixiSceneConnected({
     sendingWorldPlazaAudioLifecycleEvent(
       isPlayerDead ? 'PLAYER_DIED' : 'PLAYER_RESPAWNED'
     );
-
-    if (isPlayerDead) {
-      applyingWorldPlazaAvatarTransformDeathReset();
-    }
   }, [isPlayerDead]);
 
   isPlayerDeadRef.current = isPlayerDead;
@@ -7052,23 +7138,6 @@ function RenderingWorldPlazaPixiSceneConnected({
         nowMs: Date.now(),
         resolveSpecies: resolvingWildlifeSpeciesDefinition,
       });
-
-      const deathInventoryState = inventoryStateRef.current;
-
-      if (deathInventoryState) {
-        void applyingWorldPlazaPlayerDeathSpritcorePenalty({
-          inventoryState: deathInventoryState,
-          deathPosition,
-          localPersistenceOwnerId,
-          redditUserId,
-          saveSlotIndex: isSinglePlayerSession
-            ? singlePlayerSaveSlotIndex
-            : null,
-          onInventoryStateChange: (nextState) => {
-            updatingInventoryState(() => nextState);
-          },
-        });
-      }
     }
   }, [
     clearingCombatLock,
@@ -7078,13 +7147,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     closingFriendsPanel,
     isLocalGameplayEnabled,
     isPlayerDead,
-    isSinglePlayerSession,
     localPersistenceOwnerId,
     onlineUserId,
     playerPositionRef,
-    redditUserId,
-    singlePlayerSaveSlotIndex,
-    updatingInventoryState,
     wildlifeStoreRef,
   ]);
 
@@ -7887,12 +7952,8 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      // Ground tap while locked: keep lock, free walk (no auto-chase steal).
-      // Unlock via dead target, new target, or re-tap same target.
-      const activeCombatLock = combatLockRef.current;
-      if (activeCombatLock) {
-        activeCombatLock.suppressChase = true;
-      }
+      // Clicking empty ground (or non-target) cancels combat lock-on and Betray?.
+      clearingCombatLock();
       clearingDocileBetraySelection();
       handlingPlazaPointerDown(event);
       syncingMovePositionRef.current?.();
@@ -9472,6 +9533,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         onUnequipWeapon={handlingPetUnequipWeapon}
         onTeachSkill={handlingPetTeachSkill}
         onEquipSkill={handlingPetEquipSkill}
+        onPurchaseSpritcoreUpgrade={handlingPetPurchaseSpritcoreUpgrade}
       />
       <RenderingUserProfileFriendRequestPlazaModal
         isOpen={activeFriendRequestDialog !== null}

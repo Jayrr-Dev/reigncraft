@@ -1,6 +1,6 @@
 /**
  * Pure advanced stat presentation for bonded companions.
- * Shows real combat values (Attack, Defense, Attack speed, Speed, Max HP),
+ * Shows real combat values (Attack, Defense, Attack speed, Speed, and Max HP),
  * matching Character attribute chips — not opaque Combat/Agility/Physicality scores.
  *
  * @module components/world/wildlife/pets/domains/resolvingWildlifePetAdvancedStats
@@ -8,16 +8,17 @@
 
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
 import { computingWorldPlazaEquipmentModifiedEv } from '@/components/world/equipment/domains/computingWorldPlazaEquipmentModifiedEv';
-import { resolvingWorldPlazaEquipmentAttackEvModifier } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
 import { resolvingWorldPlazaEquipmentCapabilitiesForItemTypeId } from '@/components/world/equipment/domains/resolvingWorldPlazaEquipmentCapabilitiesForItemTypeId';
-import { resolvingWorldPlazaScaledAttackIntervalMs } from '@/components/world/domains/resolvingWorldPlazaGlobalAttackSpeedScale';
+import { resolvingWorldPlazaEquipmentAttackEvModifier } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
   resolvingWildlifeInstanceAttackPowerMultiplier,
   resolvingWildlifeInstanceBaseMaxHealth,
-  resolvingWildlifeInstanceCombatStatMultiplier,
+  resolvingWildlifeInstanceEffectiveAttackIntervalMs,
+  resolvingWildlifeInstanceEffectiveDefense,
   resolvingWildlifeInstanceRunSpeedGridPerSecond,
+  resolvingWildlifeInstanceSpritcoreUpgradeAttackPowerBonus,
   resolvingWildlifeInstanceWalkSpeedGridPerSecond,
 } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 
@@ -47,13 +48,10 @@ export function resolvingWildlifePetAdvancedStats(
     return null;
   }
 
-  const combatSizeMult = resolvingWildlifeInstanceCombatStatMultiplier(
-    species,
-    params.instance
-  );
   const attackPower =
     species.vitals.attackPower *
-    resolvingWildlifeInstanceAttackPowerMultiplier(species, params.instance);
+      resolvingWildlifeInstanceAttackPowerMultiplier(species, params.instance) +
+    resolvingWildlifeInstanceSpritcoreUpgradeAttackPowerBonus(params.instance);
   let attackEv = attackPower;
 
   if (params.weaponItem) {
@@ -64,9 +62,13 @@ export function resolvingWildlifePetAdvancedStats(
     attackEv = computingWorldPlazaEquipmentModifiedEv(attackEv, modifier);
   }
 
-  const defense = Math.round(species.vitals.defense * combatSizeMult);
-  const attackIntervalMs = resolvingWorldPlazaScaledAttackIntervalMs(
-    species.vitals.attackIntervalMs
+  const defense = resolvingWildlifeInstanceEffectiveDefense(
+    species,
+    params.instance
+  );
+  const attackIntervalMs = resolvingWildlifeInstanceEffectiveAttackIntervalMs(
+    species,
+    params.instance
   );
   const attackSpeedPerSecond = 1000 / Math.max(1, attackIntervalMs);
   const walkSpeed = resolvingWildlifeInstanceWalkSpeedGridPerSecond(

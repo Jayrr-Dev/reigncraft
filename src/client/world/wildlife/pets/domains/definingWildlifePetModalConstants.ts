@@ -321,6 +321,22 @@ export const DEFINING_WILDLIFE_PET_MODAL_HEAL_LABEL = 'Heal' as const;
 /** Flat HP restored by one owner-cast Heal action (mirrors Minor Heal). */
 export const DEFINING_WILDLIFE_PET_MODAL_HEAL_AMOUNT = 120 as const;
 
+/** Companion Spritcore power-up row chrome. */
+export const DEFINING_WILDLIFE_PET_MODAL_SPRITCORE_UPGRADE_STACK_CLASS_NAME =
+  'flex flex-col gap-1.5' as const;
+
+/** One companion Spritcore power-up offer row. */
+export const DEFINING_WILDLIFE_PET_MODAL_SPRITCORE_UPGRADE_ROW_CLASS_NAME =
+  'flex items-center justify-between gap-2 rounded-md border border-poster-wood/30 bg-parchment-dark/30 px-2 py-1.5' as const;
+
+/** Companion Spritcore power-up Buy button. */
+export const DEFINING_WILDLIFE_PET_MODAL_SPRITCORE_UPGRADE_BUTTON_CLASS_NAME =
+  `${DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_CLASS_NAME} shrink-0 px-2.5` as const;
+
+/** Balance caption under Power up heading. */
+export const DEFINING_WILDLIFE_PET_MODAL_SPRITCORE_BALANCE_CLASS_NAME =
+  'text-[10px] font-semibold text-ink-soft' as const;
+
 export type DefiningWildlifePetModalCommandOption = {
   readonly commandId: 'follow' | 'stay' | 'attack' | 'defend';
   readonly label: string;

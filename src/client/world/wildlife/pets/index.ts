@@ -45,6 +45,12 @@ export {
 } from '@/components/world/wildlife/pets/domains/applyingWildlifePetOwnerHeal';
 
 export {
+  applyingWildlifePetSpritcoreUpgradePurchase,
+  type ApplyingWildlifePetSpritcoreUpgradePurchaseParams,
+  type ApplyingWildlifePetSpritcoreUpgradePurchaseResult,
+} from '@/components/world/wildlife/pets/domains/applyingWildlifePetSpritcoreUpgradePurchase';
+
+export {
   applyingWildlifePetPettingLoyalty,
   type ApplyingWildlifePetPettingLoyaltyResult,
 } from '@/components/world/wildlife/pets/domains/applyingWildlifePetPettingLoyalty';
@@ -95,12 +101,12 @@ export {
 
 export {
   DEFINING_WILDLIFE_PET_HUNGER_LOYALTY_LOSS_PER_IN_GAME_HOUR,
-  DEFINING_WILDLIFE_PET_NEGLECTED_LOYALTY_GAIN_MULTIPLIER,
-  DEFINING_WILDLIFE_PET_NEGLECTED_LOYALTY_LOSS_MULTIPLIER,
   DEFINING_WILDLIFE_PET_NEGLECT_ABANDON_MAX_IN_GAME_HOURS,
   DEFINING_WILDLIFE_PET_NEGLECT_ABANDON_MIN_IN_GAME_HOURS,
-  LABELING_WILDLIFE_PET_NEGLECTED_BADGE,
+  DEFINING_WILDLIFE_PET_NEGLECTED_LOYALTY_GAIN_MULTIPLIER,
+  DEFINING_WILDLIFE_PET_NEGLECTED_LOYALTY_LOSS_MULTIPLIER,
   LABELING_WILDLIFE_PET_NEGLECT_HUNTING_STATUS,
+  LABELING_WILDLIFE_PET_NEGLECTED_BADGE,
 } from '@/components/world/wildlife/pets/domains/definingWildlifePetHungerLoyaltyNeglectConstants';
 
 export { resolvingWildlifePetLoyaltyDeltaWithNeglectedBadge } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetLoyaltyDeltaWithNeglectedBadge';
@@ -169,6 +175,19 @@ export {
   type ResolvingWildlifePetAdvancedStatsResult,
 } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetAdvancedStats';
 
+export { resolvingWildlifePetNaturalCombatStats } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetNaturalCombatStats';
+
+export {
+  resolvingWildlifePetSpritcoreUpgradeOffers,
+  type ResolvingWildlifePetSpritcoreUpgradeOffer,
+  type ResolvingWildlifePetSpritcoreUpgradeOffersInput,
+} from '@/components/world/wildlife/pets/domains/resolvingWildlifePetSpritcoreUpgradeOffers';
+
+export {
+  DEFINING_WILDLIFE_PET_SPRITCORE_UPGRADE_LANE_REGISTRY,
+  LABELING_WILDLIFE_PET_SPRITCORE_UPGRADE_SECTION,
+} from '@/components/world/wildlife/pets/domains/definingWildlifePetSpritcoreUpgradeConstants';
+
 export {
   resolvingWildlifePetCommandIntent,
   type ResolvingWildlifePetCommandIntentParams,
@@ -211,10 +230,10 @@ export {
 } from '@/components/world/wildlife/pets/domains/syncingWildlifePetBondToRoster';
 
 export {
+  formattingWildlifePetRosterLiveVitalsFingerprint,
   resolvingWildlifePetRosterPetsWithLiveVitals,
   resolvingWildlifePetRosterPetsWithLiveVitalsFromStore,
   resolvingWildlifePetRosterRecordWithLiveVitals,
-  formattingWildlifePetRosterLiveVitalsFingerprint,
 } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetRosterPetsWithLiveVitals';
 
 export {

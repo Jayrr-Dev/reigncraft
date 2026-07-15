@@ -30,7 +30,7 @@ describe('wildlife docile pet cooldown', () => {
     expect(checkingWildlifeDocilePetIsReady(instance, 5_000)).toBe(true);
   });
 
-  it('rolls cooldown duration across the 8–16 in-game-hour band', () => {
+  it('rolls cooldown duration across the 1–3 in-game-hour band', () => {
     expect(rollingWildlifeDocilePetCooldownDurationMs(0)).toBe(
       computingWorldPlazaInGameHoursToRealMs(
         DEFINING_WILDLIFE_DOCILE_PET_COOLDOWN_MIN_IN_GAME_HOURS
@@ -45,14 +45,15 @@ describe('wildlife docile pet cooldown', () => {
 
   it('stamps petCooldownUntilMs on pet complete', () => {
     const nowMs = 10_000;
-    const { instance: next, becamePersistent } = applyingWildlifeDocilePetComplete({
-      instance: creatingWildlifeTestInstance({
-        speciesId: 'cat-orange',
-      }),
-      studyPoints: 1,
-      nowMs,
-      cooldownRollUnit: 0,
-    });
+    const { instance: next, becamePersistent } =
+      applyingWildlifeDocilePetComplete({
+        instance: creatingWildlifeTestInstance({
+          speciesId: 'cat-orange',
+        }),
+        studyPoints: 1,
+        nowMs,
+        cooldownRollUnit: 0,
+      });
 
     expect(next.petCooldownUntilMs).toBe(
       nowMs +

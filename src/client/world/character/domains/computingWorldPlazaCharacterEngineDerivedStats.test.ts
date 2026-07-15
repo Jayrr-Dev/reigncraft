@@ -29,6 +29,8 @@ describe('computingWorldPlazaCharacterEngineDerivedStats', () => {
       bonusMaxHealth: 19_000,
       bonusAttackPower: 0,
       bonusAttackSpeed: 0,
+      bonusDefense: 0,
+      bonusMoveSpeed: 0,
       totalSpritcoreInvested: 1,
     });
 

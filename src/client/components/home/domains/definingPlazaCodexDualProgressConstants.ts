@@ -10,7 +10,11 @@ export const DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SHELL_CLASS_NAME =
 
 /** Horizontal row holding the two metric columns. */
 export const DEFINING_PLAZA_CODEX_DUAL_PROGRESS_ROW_CLASS_NAME =
-  'flex items-start gap-3' as const;
+  'flex items-stretch gap-3' as const;
+
+/** Vertical rule between the two metric columns. */
+export const DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SEPARATOR_CLASS_NAME =
+  'w-px shrink-0 self-stretch bg-poster-teal/25' as const;
 
 /** One metric column (label + bar). */
 export const DEFINING_PLAZA_CODEX_DUAL_PROGRESS_COLUMN_CLASS_NAME =

@@ -8,16 +8,16 @@ import { COMPUTING_WORLD_PLAZA_IN_GAME_DAY_MS } from '@/components/world/domains
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { resolvingWildlifeInstanceBaseMaxHealth } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { resolvingWildlifePetDeathCauseNote } from '@/components/world/wildlife/pets/domains/definingWildlifePetDeathCauseNotes';
+import {
+  LABELING_WILDLIFE_PET_NEGLECTED_BADGE,
+  LABELING_WILDLIFE_PET_NEGLECT_HUNTING_STATUS,
+} from '@/components/world/wildlife/pets/domains/definingWildlifePetHungerLoyaltyNeglectConstants';
 import { DEFINING_WILDLIFE_PET_MAX_ACTIVE } from '@/components/world/wildlife/pets/domains/definingWildlifePetLoyaltyTiersRegistry';
 import {
   LABELING_WILDLIFE_PET_ROSTER_STATUS_ALIVE,
   LABELING_WILDLIFE_PET_ROSTER_STATUS_DECEASED,
   LABELING_WILDLIFE_PET_ROSTER_UNNAMED,
 } from '@/components/world/wildlife/pets/domains/definingWildlifePetRosterPanelConstants';
-import {
-  LABELING_WILDLIFE_PET_NEGLECTED_BADGE,
-  LABELING_WILDLIFE_PET_NEGLECT_HUNTING_STATUS,
-} from '@/components/world/wildlife/pets/domains/definingWildlifePetHungerLoyaltyNeglectConstants';
 import type { DefiningWildlifePetPersistedRecord } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
 import {
   checkingWildlifePetHasCapability,
@@ -121,7 +121,7 @@ export function resolvingWildlifePetRosterPanelRows(
           aggressionLevel: record.aggressionLevel,
           sizeScaleSample: record.sizeScaleSample,
           largeSizeFrame: null,
-        })
+        }) + record.spritcoreUpgrades.bonusMaxHealth
       : null;
     const currentHealth = isDeceased
       ? 0

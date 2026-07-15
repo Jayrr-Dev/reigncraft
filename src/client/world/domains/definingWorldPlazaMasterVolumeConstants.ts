@@ -89,7 +89,7 @@ export const LABELING_WORLD_PLAZA_SETTINGS_EXIT_HOME = 'Home' as const;
 export const STYLING_WORLD_PLAZA_SETTINGS_EXIT_HOME_BUTTON_CLASS_NAME =
   'w-full rounded border border-ink/25 bg-parchment px-2 py-2 text-center text-sm font-bold text-ink max-md:min-h-11 max-md:py-2.5 max-md:text-base' as const;
 
-/** Guide sections opened from Settings (not the Guide book menu). */
+/** Guide sections opened from Settings (not the Codex book menu). */
 export type WorldPlazaSettingsGuideOption = {
   id: Extract<WorldPlazaCodexSectionId, 'controls' | 'mechanics' | 'lore'>;
   label: string;

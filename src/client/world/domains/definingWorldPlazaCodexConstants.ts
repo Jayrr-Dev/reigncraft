@@ -81,10 +81,10 @@ export const DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS: readonly WorldPlazaCodexMe
   ] as const;
 
 /** Accessible label for the codex action in the plaza action bar. */
-export const LABELING_WORLD_PLAZA_ACTION_BAR_CODEX = 'Guide' as const;
+export const LABELING_WORLD_PLAZA_ACTION_BAR_CODEX = 'Codex' as const;
 
 /** Accessible label for the codex dropdown menu. */
-export const LABELING_WORLD_PLAZA_CODEX_MENU = 'Guide sections' as const;
+export const LABELING_WORLD_PLAZA_CODEX_MENU = 'Codex sections' as const;
 
 /** Wrapper anchoring the codex dropdown to its action bar button. */
 export const STYLING_WORLD_PLAZA_ACTION_BAR_CODEX_ANCHOR_CLASS_NAME =

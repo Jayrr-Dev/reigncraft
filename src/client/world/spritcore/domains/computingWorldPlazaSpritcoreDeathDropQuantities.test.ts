@@ -34,6 +34,8 @@ describe('computingWorldPlazaSpritcoreDeathCommittedPenalty', () => {
       bonusMaxHealth: 1000,
       bonusAttackPower: 100,
       bonusAttackSpeed: 0.5,
+      bonusDefense: 0,
+      bonusMoveSpeed: 0,
       totalSpritcoreInvested: 1000,
     });
 
@@ -42,6 +44,8 @@ describe('computingWorldPlazaSpritcoreDeathCommittedPenalty', () => {
       bonusMaxHealth: 900,
       bonusAttackPower: 90,
       bonusAttackSpeed: 0.45,
+      bonusDefense: 0,
+      bonusMoveSpeed: 0,
       totalSpritcoreInvested: 900,
     });
   });
@@ -51,6 +55,8 @@ describe('computingWorldPlazaSpritcoreDeathCommittedPenalty', () => {
       bonusMaxHealth: 100,
       bonusAttackPower: 10,
       bonusAttackSpeed: 0.05,
+      bonusDefense: 0,
+      bonusMoveSpeed: 0,
       totalSpritcoreInvested: 9,
     };
 

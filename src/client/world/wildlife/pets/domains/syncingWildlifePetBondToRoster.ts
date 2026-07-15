@@ -4,6 +4,7 @@
  * @module components/world/wildlife/pets/domains/syncingWildlifePetBondToRoster
  */
 
+import type { WorldPlazaSpritcoreUpgradeBonuses } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { checkingWildlifePetRosterHasLivingActiveRoom } from '@/components/world/wildlife/pets/domains/checkingWildlifePetRosterDeployable';
 import { creatingWildlifePetPersistedRecord } from '@/components/world/wildlife/pets/domains/creatingWildlifePetPersistedRecord';
@@ -12,6 +13,37 @@ import {
   updatingWildlifePetRecord,
   upsertingWildlifePetRecord,
 } from '@/components/world/wildlife/pets/domains/managingWildlifePetRosterStore';
+
+function checkingWildlifePetSpritcoreUpgradesEqual(
+  left: WorldPlazaSpritcoreUpgradeBonuses | undefined,
+  right: WorldPlazaSpritcoreUpgradeBonuses | undefined
+): boolean {
+  const leftBonuses = left ?? {
+    bonusMaxHealth: 0,
+    bonusAttackPower: 0,
+    bonusAttackSpeed: 0,
+    bonusDefense: 0,
+    bonusMoveSpeed: 0,
+    totalSpritcoreInvested: 0,
+  };
+  const rightBonuses = right ?? {
+    bonusMaxHealth: 0,
+    bonusAttackPower: 0,
+    bonusAttackSpeed: 0,
+    bonusDefense: 0,
+    bonusMoveSpeed: 0,
+    totalSpritcoreInvested: 0,
+  };
+
+  return (
+    leftBonuses.bonusMaxHealth === rightBonuses.bonusMaxHealth &&
+    leftBonuses.bonusAttackPower === rightBonuses.bonusAttackPower &&
+    leftBonuses.bonusAttackSpeed === rightBonuses.bonusAttackSpeed &&
+    leftBonuses.bonusDefense === rightBonuses.bonusDefense &&
+    leftBonuses.bonusMoveSpeed === rightBonuses.bonusMoveSpeed &&
+    leftBonuses.totalSpritcoreInvested === rightBonuses.totalSpritcoreInvested
+  );
+}
 
 export type SyncingWildlifePetBondToRosterParams = {
   instance: DefiningWildlifeInstance;
@@ -161,11 +193,14 @@ export function syncingWildlifePetInstanceVitalsToRoster(
     ) &&
     existingRecord.equippedSkillId === petBond.equippedSkillId &&
     existingRecord.soulsaveConsumed === petBond.soulsaveConsumed &&
-    existingRecord.hasNeglectedBadge ===
-      (petBond.hasNeglectedBadge === true) &&
+    existingRecord.hasNeglectedBadge === (petBond.hasNeglectedBadge === true) &&
     existingRecord.isNeglectHunting === (petBond.isNeglectHunting === true) &&
     existingRecord.weaponItem === petBond.weaponItem &&
     existingRecord.armorItem === petBond.armorItem &&
+    checkingWildlifePetSpritcoreUpgradesEqual(
+      existingRecord.spritcoreUpgrades,
+      petBond.spritcoreUpgrades
+    ) &&
     checkingWildlifePetVitalsPositionNearlyEqual(
       existingRecord.lastKnownX,
       existingRecord.lastKnownY,
@@ -191,6 +226,15 @@ export function syncingWildlifePetInstanceVitalsToRoster(
     isNeglectHunting: petBond.isNeglectHunting === true,
     weaponItem: petBond.weaponItem,
     armorItem: petBond.armorItem,
+    spritcoreUpgrades: petBond.spritcoreUpgrades ??
+      existingRecord.spritcoreUpgrades ?? {
+        bonusMaxHealth: 0,
+        bonusAttackPower: 0,
+        bonusAttackSpeed: 0,
+        bonusDefense: 0,
+        bonusMoveSpeed: 0,
+        totalSpritcoreInvested: 0,
+      },
     lastKnownX: instance.position.x,
     lastKnownY: instance.position.y,
     lastKnownLayer: nextLayer,

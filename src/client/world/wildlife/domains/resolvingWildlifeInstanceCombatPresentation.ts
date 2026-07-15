@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation
  */
 
+import { resolvingWorldPlazaScaledAttackIntervalMs } from '@/components/world/domains/resolvingWorldPlazaGlobalAttackSpeedScale';
 import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
 import { resolvingWildlifeSpritcoreFeastAttackPowerMultiplier } from '@/components/world/wildlife/domains/applyingWildlifeSpritcoreFeast';
 import { checkingWildlifeIsAggressiveChicken } from '@/components/world/wildlife/domains/checkingWildlifeIsAggressiveChicken';
@@ -42,7 +43,58 @@ import {
 type DefiningWildlifeInstancePresentationProfile = Pick<
   DefiningWildlifeInstance,
   'speciesId' | 'aggressionLevel' | 'sizeScaleSample' | 'largeSizeFrame'
->;
+> &
+  Partial<Pick<DefiningWildlifeInstance, 'petBond'>>;
+
+function resolvingWildlifeInstanceSpritcoreUpgradeBonusMaxHealth(
+  instance: Partial<Pick<DefiningWildlifeInstance, 'petBond'>>
+): number {
+  const bonus = instance.petBond?.spritcoreUpgrades?.bonusMaxHealth;
+
+  return typeof bonus === 'number' && Number.isFinite(bonus) && bonus > 0
+    ? bonus
+    : 0;
+}
+
+function resolvingWildlifeInstanceSpritcoreUpgradeBonusAttackPower(
+  instance: Partial<Pick<DefiningWildlifeInstance, 'petBond'>>
+): number {
+  const bonus = instance.petBond?.spritcoreUpgrades?.bonusAttackPower;
+
+  return typeof bonus === 'number' && Number.isFinite(bonus) && bonus > 0
+    ? bonus
+    : 0;
+}
+
+function resolvingWildlifeInstanceSpritcoreUpgradeBonusAttackSpeed(
+  instance: Partial<Pick<DefiningWildlifeInstance, 'petBond'>>
+): number {
+  const bonus = instance.petBond?.spritcoreUpgrades?.bonusAttackSpeed;
+
+  return typeof bonus === 'number' && Number.isFinite(bonus) && bonus > 0
+    ? bonus
+    : 0;
+}
+
+function resolvingWildlifeInstanceSpritcoreUpgradeBonusDefense(
+  instance: Partial<Pick<DefiningWildlifeInstance, 'petBond'>>
+): number {
+  const bonus = instance.petBond?.spritcoreUpgrades?.bonusDefense;
+
+  return typeof bonus === 'number' && Number.isFinite(bonus) && bonus > 0
+    ? bonus
+    : 0;
+}
+
+function resolvingWildlifeInstanceSpritcoreUpgradeBonusMoveSpeed(
+  instance: Partial<Pick<DefiningWildlifeInstance, 'petBond'>>
+): number {
+  const bonus = instance.petBond?.spritcoreUpgrades?.bonusMoveSpeed;
+
+  return typeof bonus === 'number' && Number.isFinite(bonus) && bonus > 0
+    ? bonus
+    : 0;
+}
 
 function checkingWildlifeInstanceIsObeseTurtle(
   species: DefiningWildlifeSpeciesDefinition,
@@ -176,7 +228,10 @@ export function resolvingWildlifeInstanceBaseMaxHealth(
     baseMaxHealth *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_HEALTH_MULTIPLIER;
   }
 
-  return Math.round(baseMaxHealth);
+  return (
+    Math.round(baseMaxHealth) +
+    resolvingWildlifeInstanceSpritcoreUpgradeBonusMaxHealth(instance)
+  );
 }
 
 /** Applies instance-specific melee damage multipliers. */
@@ -202,11 +257,73 @@ export function resolvingWildlifeInstanceAttackPowerMultiplier(
   return multiplier;
 }
 
-/** Resolves walk speed for one wildlife instance. */
-export function resolvingWildlifeInstanceWalkSpeedGridPerSecond(
+/** Flat Attack EV from companion Spritcore power-ups (0 for wild creatures). */
+export function resolvingWildlifeInstanceSpritcoreUpgradeAttackPowerBonus(
+  instance: Partial<Pick<DefiningWildlifeInstance, 'petBond'>>
+): number {
+  return resolvingWildlifeInstanceSpritcoreUpgradeBonusAttackPower(instance);
+}
+
+/** Species+size Defense before companion Spritcore defense purchases. */
+export function resolvingWildlifeInstanceBaseDefense(
   species: DefiningWildlifeSpeciesDefinition,
-  instance: DefiningWildlifeInstance,
-  nowMs: number = Number.MAX_SAFE_INTEGER
+  instance: Pick<DefiningWildlifeInstance, 'sizeScaleSample' | 'largeSizeFrame'>
+): number {
+  return Math.round(
+    species.vitals.defense *
+      resolvingWildlifeInstanceCombatStatMultiplier(species, instance)
+  );
+}
+
+/** Live Defense EV including companion Spritcore defense purchases. */
+export function resolvingWildlifeInstanceEffectiveDefense(
+  species: DefiningWildlifeSpeciesDefinition,
+  instance: Pick<
+    DefiningWildlifeInstance,
+    'sizeScaleSample' | 'largeSizeFrame'
+  > &
+    Partial<Pick<DefiningWildlifeInstance, 'petBond'>>
+): number {
+  return (
+    resolvingWildlifeInstanceBaseDefense(species, instance) +
+    resolvingWildlifeInstanceSpritcoreUpgradeBonusDefense(instance)
+  );
+}
+
+/**
+ * Authored run speed for one wildlife instance (size + obese/chicken only).
+ * Excludes health movement debuffs and Spritcore move-speed purchases.
+ */
+export function resolvingWildlifeInstanceNaturalRunSpeedGridPerSecond(
+  species: DefiningWildlifeSpeciesDefinition,
+  instance: Pick<
+    DefiningWildlifeInstance,
+    'sizeScaleSample' | 'largeSizeFrame' | 'aggressionLevel' | 'speciesId'
+  >
+): number {
+  const speedMultiplier = resolvingWildlifeInstanceSpeedStatMultiplier(
+    species,
+    instance
+  );
+  let runSpeed = species.vitals.runSpeedGridPerSecond * speedMultiplier;
+
+  if (checkingWildlifeIsAggressiveChicken(instance)) {
+    runSpeed *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPEED_MULTIPLIER;
+  }
+
+  return runSpeed;
+}
+
+/**
+ * Authored walk speed for one wildlife instance (size + obese/chicken only).
+ * Excludes health movement debuffs and Spritcore move-speed purchases.
+ */
+export function resolvingWildlifeInstanceNaturalWalkSpeedGridPerSecond(
+  species: DefiningWildlifeSpeciesDefinition,
+  instance: Pick<
+    DefiningWildlifeInstance,
+    'sizeScaleSample' | 'largeSizeFrame' | 'aggressionLevel' | 'speciesId'
+  >
 ): number {
   const speedMultiplier = resolvingWildlifeInstanceSpeedStatMultiplier(
     species,
@@ -217,6 +334,75 @@ export function resolvingWildlifeInstanceWalkSpeedGridPerSecond(
   if (checkingWildlifeIsAggressiveChicken(instance)) {
     walkSpeed *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPEED_MULTIPLIER;
   }
+
+  return walkSpeed;
+}
+
+function applyingWildlifeInstanceSpritcoreMoveSpeedBonus(
+  naturalWalkSpeed: number,
+  naturalRunSpeed: number,
+  bonusMoveSpeed: number
+): { walkSpeed: number; runSpeed: number } {
+  if (bonusMoveSpeed <= 0 || naturalRunSpeed <= 0) {
+    return {
+      walkSpeed: naturalWalkSpeed,
+      runSpeed: naturalRunSpeed,
+    };
+  }
+
+  const walkBonus =
+    naturalRunSpeed > 0
+      ? bonusMoveSpeed * (naturalWalkSpeed / naturalRunSpeed)
+      : bonusMoveSpeed;
+
+  return {
+    walkSpeed: naturalWalkSpeed + walkBonus,
+    runSpeed: naturalRunSpeed + bonusMoveSpeed,
+  };
+}
+
+/**
+ * Resolves effective melee attack interval for one wildlife instance, including
+ * companion Spritcore attack-speed purchases.
+ */
+export function resolvingWildlifeInstanceEffectiveAttackIntervalMs(
+  species: DefiningWildlifeSpeciesDefinition,
+  instance: Partial<Pick<DefiningWildlifeInstance, 'petBond'>>,
+  attackSpeedMultiplier: number = 1
+): number {
+  const naturalIntervalMs = resolvingWorldPlazaScaledAttackIntervalMs(
+    species.vitals.attackIntervalMs
+  );
+  const naturalAttackSpeed = 1000 / Math.max(1, naturalIntervalMs);
+  const bonusAttackSpeed =
+    resolvingWildlifeInstanceSpritcoreUpgradeBonusAttackSpeed(instance);
+  const effectiveAttackSpeed = Math.max(
+    0.05,
+    naturalAttackSpeed + bonusAttackSpeed
+  );
+  const scaledMultiplier = Math.max(0.05, attackSpeedMultiplier);
+
+  return 1000 / (effectiveAttackSpeed * scaledMultiplier);
+}
+
+/** Resolves walk speed for one wildlife instance. */
+export function resolvingWildlifeInstanceWalkSpeedGridPerSecond(
+  species: DefiningWildlifeSpeciesDefinition,
+  instance: DefiningWildlifeInstance,
+  nowMs: number = Number.MAX_SAFE_INTEGER
+): number {
+  const naturalWalkSpeed =
+    resolvingWildlifeInstanceNaturalWalkSpeedGridPerSecond(species, instance);
+  const naturalRunSpeed = resolvingWildlifeInstanceNaturalRunSpeedGridPerSecond(
+    species,
+    instance
+  );
+  const spritcoreSpeed = applyingWildlifeInstanceSpritcoreMoveSpeedBonus(
+    naturalWalkSpeed,
+    naturalRunSpeed,
+    resolvingWildlifeInstanceSpritcoreUpgradeBonusMoveSpeed(instance)
+  );
+  let walkSpeed = spritcoreSpeed.walkSpeed;
 
   const healthMovement = resolvingWorldPlazaEntityHealthMovementMultipliers(
     instance.healthState,
@@ -234,15 +420,18 @@ export function resolvingWildlifeInstanceRunSpeedGridPerSecond(
   instance: DefiningWildlifeInstance,
   nowMs: number = Number.MAX_SAFE_INTEGER
 ): number {
-  const speedMultiplier = resolvingWildlifeInstanceSpeedStatMultiplier(
+  const naturalWalkSpeed =
+    resolvingWildlifeInstanceNaturalWalkSpeedGridPerSecond(species, instance);
+  const naturalRunSpeed = resolvingWildlifeInstanceNaturalRunSpeedGridPerSecond(
     species,
     instance
   );
-  let runSpeed = species.vitals.runSpeedGridPerSecond * speedMultiplier;
-
-  if (checkingWildlifeIsAggressiveChicken(instance)) {
-    runSpeed *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPEED_MULTIPLIER;
-  }
+  const spritcoreSpeed = applyingWildlifeInstanceSpritcoreMoveSpeedBonus(
+    naturalWalkSpeed,
+    naturalRunSpeed,
+    resolvingWildlifeInstanceSpritcoreUpgradeBonusMoveSpeed(instance)
+  );
+  let runSpeed = spritcoreSpeed.runSpeed;
 
   const healthMovement = resolvingWorldPlazaEntityHealthMovementMultipliers(
     instance.healthState,

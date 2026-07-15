@@ -16,7 +16,7 @@ export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CHEST_ICON =
 
 /** Outer wrap: track + overlapping chest nodes. */
 export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_SHELL_CLASS_NAME =
-  'relative mt-1.5 h-4' as const;
+  'relative mt-1.5 h-4 overflow-visible' as const;
 
 /** Thin fill track centered in the shell. */
 export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_TRACK_CLASS_NAME =
@@ -28,16 +28,20 @@ export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_FILL_CLASS_NAME =
 
 /** Absolute layer holding chest circles. */
 export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_MARKERS_CLASS_NAME =
-  'pointer-events-none absolute inset-0' as const;
+  'absolute inset-0' as const;
 
 /** Locked (not yet reached) chest circle. */
 export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_LOCKED_CLASS_NAME =
-  'absolute top-1/2 flex size-4 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-poster-teal/40 bg-parchment/90 text-ink-soft/55 shadow-[0_1px_0_0_rgba(20,37,43,0.35)]' as const;
+  'group/milestone absolute top-1/2 flex size-4 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-poster-teal/40 bg-parchment/90 text-ink-soft/55 shadow-[0_1px_0_0_rgba(20,37,43,0.35)] outline-none' as const;
 
 /** Reached milestone chest circle (reward pending / claimed later). */
 export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_REACHED_CLASS_NAME =
-  'absolute top-1/2 flex size-4 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-poster-gold/70 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-poster-gold shadow-[0_1px_0_0_#14252b]' as const;
+  'group/milestone absolute top-1/2 flex size-4 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-poster-gold/70 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-poster-gold shadow-[0_1px_0_0_#14252b] outline-none' as const;
 
 /** Chest icon size inside the circle. */
 export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_ICON_CLASS_NAME =
   'size-2.5 shrink-0' as const;
+
+/** Hover/focus popover above a chest: remaining count until reward. */
+export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_POPOVER_CLASS_NAME =
+  'pointer-events-none absolute bottom-full left-1/2 z-20 mb-1 -translate-x-1/2 whitespace-nowrap rounded border border-poster-teal/30 bg-parchment px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-ink-soft opacity-0 shadow-[0_1px_0_0_rgba(20,37,43,0.25)] transition-opacity group-hover/milestone:opacity-100 group-focus/milestone:opacity-100' as const;

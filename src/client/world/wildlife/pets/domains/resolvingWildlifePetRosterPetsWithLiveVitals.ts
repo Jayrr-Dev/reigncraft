@@ -111,8 +111,16 @@ export function resolvingWildlifePetRosterRecordWithLiveVitals(
     record.loyalty === (instance.petBond?.loyalty ?? record.loyalty) &&
     record.hasNeglectedBadge ===
       (instance.petBond?.hasNeglectedBadge === true) &&
-    record.isNeglectHunting ===
-      (instance.petBond?.isNeglectHunting === true) &&
+    record.isNeglectHunting === (instance.petBond?.isNeglectHunting === true) &&
+    record.spritcoreUpgrades.bonusMaxHealth ===
+      (instance.petBond?.spritcoreUpgrades?.bonusMaxHealth ??
+        record.spritcoreUpgrades.bonusMaxHealth) &&
+    record.spritcoreUpgrades.bonusAttackPower ===
+      (instance.petBond?.spritcoreUpgrades?.bonusAttackPower ??
+        record.spritcoreUpgrades.bonusAttackPower) &&
+    record.spritcoreUpgrades.bonusAttackSpeed ===
+      (instance.petBond?.spritcoreUpgrades?.bonusAttackSpeed ??
+        record.spritcoreUpgrades.bonusAttackSpeed) &&
     record.deathCauseKind === null
   ) {
     return record;
@@ -126,6 +134,8 @@ export function resolvingWildlifePetRosterRecordWithLiveVitals(
     loyalty: instance.petBond?.loyalty ?? record.loyalty,
     hasNeglectedBadge: instance.petBond?.hasNeglectedBadge === true,
     isNeglectHunting: instance.petBond?.isNeglectHunting === true,
+    spritcoreUpgrades:
+      instance.petBond?.spritcoreUpgrades ?? record.spritcoreUpgrades,
     lastKnownX: instance.position.x,
     lastKnownY: instance.position.y,
     lastKnownLayer: instance.position.layer ?? null,

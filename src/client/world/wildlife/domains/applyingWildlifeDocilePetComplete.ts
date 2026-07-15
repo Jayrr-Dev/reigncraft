@@ -26,7 +26,7 @@ export type ApplyingWildlifeDocilePetCompleteResult = {
 };
 
 /**
- * Awards the Pet study float, starts the 8–16 in-game-hour cooldown, and
+ * Awards the Pet study float, starts the 1–3 in-game-hour cooldown, and
  * (when an owner is known) grants bonded-companion petting loyalty.
  */
 export function applyingWildlifeDocilePetComplete({

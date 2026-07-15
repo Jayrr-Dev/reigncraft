@@ -11,8 +11,15 @@ import type { DefiningInventoryState } from '@/components/inventory/domains/defi
 import { Icon } from '@/components/ui/icon';
 import { resolvingWorldPlazaCharacterEngineSkillDefinition } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineSkillRegistry';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { formattingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/formattingWorldPlazaInventoryStackQuantityLabel';
 import { checkingWorldPlazaInventoryItemIsFood } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
+import { countingWorldPlazaSpritcoreInventoryQuantity } from '@/components/world/spritcore/domains/countingWorldPlazaSpritcoreInventoryQuantity';
+import {
+  DEFINING_WORLD_PLAZA_SPRITCORE_ITEM_NAME,
+  DEFINING_WORLD_PLAZA_SPRITCORE_STACK_QUANTITY_DISPLAY,
+} from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreConstants';
+import type { WildlifePetSpritcoreUpgradeLaneId } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
@@ -22,11 +29,11 @@ import {
 import { RenderingWildlifePetSpeciesPortrait } from '@/components/world/wildlife/pets/components/renderingWildlifePetSpeciesPortrait';
 import { checkingWildlifePetItemIsEquippableWeapon } from '@/components/world/wildlife/pets/domains/checkingWildlifePetItemIsEquippableWeapon';
 import { checkingWildlifePetNeedsOwnerFeed } from '@/components/world/wildlife/pets/domains/checkingWildlifePetNeedsOwnerFeed';
-import { DEFINING_WILDLIFE_PET_MAX_LOYALTY } from '@/components/world/wildlife/pets/domains/definingWildlifePetLoyaltyTiersRegistry';
 import {
   LABELING_WILDLIFE_PET_NEGLECTED_BADGE,
   LABELING_WILDLIFE_PET_NEGLECT_HUNTING_STATUS,
 } from '@/components/world/wildlife/pets/domains/definingWildlifePetHungerLoyaltyNeglectConstants';
+import { DEFINING_WILDLIFE_PET_MAX_LOYALTY } from '@/components/world/wildlife/pets/domains/definingWildlifePetLoyaltyTiersRegistry';
 import {
   DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_ACTIVE_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_ACTION_BUTTON_CLASS_NAME,
@@ -67,6 +74,10 @@ import {
   DEFINING_WILDLIFE_PET_MODAL_SOULSAVE_READY_LABEL,
   DEFINING_WILDLIFE_PET_MODAL_SOULSAVE_TEXT_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_SPECIES_CLASS_NAME,
+  DEFINING_WILDLIFE_PET_MODAL_SPRITCORE_BALANCE_CLASS_NAME,
+  DEFINING_WILDLIFE_PET_MODAL_SPRITCORE_UPGRADE_BUTTON_CLASS_NAME,
+  DEFINING_WILDLIFE_PET_MODAL_SPRITCORE_UPGRADE_ROW_CLASS_NAME,
+  DEFINING_WILDLIFE_PET_MODAL_SPRITCORE_UPGRADE_STACK_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_STAT_BAR_TRACK_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_STAT_DETAIL_CLASS_NAME,
   DEFINING_WILDLIFE_PET_MODAL_STAT_LABEL_ROW_CLASS_NAME,
@@ -88,12 +99,20 @@ import {
   type DefiningWildlifePetModalTabId,
   type DefiningWildlifePetModalVitalId,
 } from '@/components/world/wildlife/pets/domains/definingWildlifePetModalConstants';
+import {
+  DEFINING_WILDLIFE_PET_SPRITCORE_UPGRADE_LANE_REGISTRY,
+  LABELING_WILDLIFE_PET_SPRITCORE_UPGRADE_BUY,
+  LABELING_WILDLIFE_PET_SPRITCORE_UPGRADE_CAPPED_BUTTON,
+  LABELING_WILDLIFE_PET_SPRITCORE_UPGRADE_SECTION,
+} from '@/components/world/wildlife/pets/domains/definingWildlifePetSpritcoreUpgradeConstants';
 import type { DefiningWildlifePetCommandId } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
 import { resolvingWildlifePetAdvancedStats } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetAdvancedStats';
 import {
   checkingWildlifePetHasCapability,
   resolvingWildlifePetLoyaltyTier,
 } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetLoyaltyTier';
+import { resolvingWildlifePetNaturalCombatStats } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetNaturalCombatStats';
+import { resolvingWildlifePetSpritcoreUpgradeOffers } from '@/components/world/wildlife/pets/domains/resolvingWildlifePetSpritcoreUpgradeOffers';
 import { useCallback, useEffect, useState, type SyntheticEvent } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -120,6 +139,11 @@ function formattingWildlifePetModalInstanceFingerprint(
     petBond?.soulsaveConsumed ? 1 : 0,
     petBond?.weaponItem?.itemTypeId ?? '',
     petBond?.learnedSkillIds.join(',') ?? '',
+    petBond?.spritcoreUpgrades?.bonusMaxHealth ?? 0,
+    petBond?.spritcoreUpgrades?.bonusAttackPower ?? 0,
+    petBond?.spritcoreUpgrades?.bonusAttackSpeed ?? 0,
+    petBond?.spritcoreUpgrades?.bonusDefense ?? 0,
+    petBond?.spritcoreUpgrades?.bonusMoveSpeed ?? 0,
     instance.customDisplayName ?? '',
   ].join('|');
 }
@@ -144,6 +168,10 @@ export type RenderingWildlifePetModalProps = {
   readonly onUnequipWeapon: (instanceId: string) => void;
   readonly onTeachSkill: (instanceId: string, skillId: string) => void;
   readonly onEquipSkill: (instanceId: string, skillId: string | null) => void;
+  readonly onPurchaseSpritcoreUpgrade: (
+    instanceId: string,
+    laneId: WildlifePetSpritcoreUpgradeLaneId
+  ) => void;
 };
 
 type RenderingWildlifePetModalVitalRow = {
@@ -232,6 +260,7 @@ export function RenderingWildlifePetModal({
   onUnequipWeapon,
   onTeachSkill,
   onEquipSkill,
+  onPurchaseSpritcoreUpgrade,
 }: RenderingWildlifePetModalProps): React.JSX.Element | null {
   const [instanceSnapshot, setInstanceSnapshot] =
     useState<DefiningWildlifeInstance | null>(null);
@@ -330,9 +359,7 @@ export function RenderingWildlifePetModal({
     capability: Parameters<typeof checkingWildlifePetHasCapability>[1]
   ): boolean => checkingWildlifePetHasCapability(loyalty, capability);
 
-  const hasPermanentName = Boolean(
-    instanceSnapshot.customDisplayName?.trim()
-  );
+  const hasPermanentName = Boolean(instanceSnapshot.customDisplayName?.trim());
   const hasHungerUi = hasCapability('hungerUi') && hasPermanentName;
   const hasBasicUi = hasCapability('basicUi');
   const hasAdvancedStatsUi = hasCapability('advancedStatsUi');
@@ -352,6 +379,21 @@ export function RenderingWildlifePetModal({
         weaponItem: petBond.weaponItem,
       })
     : null;
+  const naturalCombatStats = hasAdvancedStatsUi
+    ? resolvingWildlifePetNaturalCombatStats(instanceSnapshot)
+    : null;
+  const spritcoreUpgradeOffers = naturalCombatStats
+    ? resolvingWildlifePetSpritcoreUpgradeOffers({
+        bonuses: naturalCombatStats.bonuses,
+        naturalMaxHealth: naturalCombatStats.naturalMaxHealth,
+        naturalAttackPower: naturalCombatStats.naturalAttackPower,
+        naturalAttackSpeed: naturalCombatStats.naturalAttackSpeed,
+        naturalDefense: naturalCombatStats.naturalDefense,
+        naturalRunSpeed: naturalCombatStats.naturalRunSpeed,
+      })
+    : null;
+  const spiritcoreBalance =
+    countingWorldPlazaSpritcoreInventoryQuantity(inventoryState);
 
   const equippableWeaponSlots = hasEquipment
     ? inventoryState.slots
@@ -657,6 +699,87 @@ export function RenderingWildlifePetModal({
                   </div>
                 ))}
               </div>
+              {spritcoreUpgradeOffers ? (
+                <div
+                  className={
+                    DEFINING_WILDLIFE_PET_MODAL_SPRITCORE_UPGRADE_STACK_CLASS_NAME
+                  }
+                >
+                  <p
+                    className={
+                      DEFINING_WILDLIFE_PET_MODAL_SECTION_HEADING_CLASS_NAME
+                    }
+                  >
+                    {LABELING_WILDLIFE_PET_SPRITCORE_UPGRADE_SECTION}
+                  </p>
+                  <p
+                    className={
+                      DEFINING_WILDLIFE_PET_MODAL_SPRITCORE_BALANCE_CLASS_NAME
+                    }
+                  >
+                    {formattingWorldPlazaInventoryStackQuantityLabel(
+                      spiritcoreBalance,
+                      DEFINING_WORLD_PLAZA_SPRITCORE_STACK_QUANTITY_DISPLAY
+                    )}{' '}
+                    {DEFINING_WORLD_PLAZA_SPRITCORE_ITEM_NAME}
+                  </p>
+                  {DEFINING_WILDLIFE_PET_SPRITCORE_UPGRADE_LANE_REGISTRY.map(
+                    (lane) => {
+                      const offer = spritcoreUpgradeOffers[lane.laneId];
+                      const price = Math.ceil(offer.price);
+                      const canAfford = spiritcoreBalance >= price;
+                      const valueText =
+                        lane.laneId === 'attackSpeed' ||
+                        lane.laneId === 'moveSpeed'
+                          ? `${offer.currentValue.toFixed(2)} → ${offer.nextValue.toFixed(2)}`
+                          : `${Math.round(offer.currentValue)} → ${Math.round(offer.nextValue)}`;
+
+                      return (
+                        <div
+                          key={lane.laneId}
+                          className={
+                            DEFINING_WILDLIFE_PET_MODAL_SPRITCORE_UPGRADE_ROW_CLASS_NAME
+                          }
+                        >
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-ink">
+                              <Icon
+                                icon={lane.iconId}
+                                className="size-3.5"
+                                aria-hidden
+                              />
+                              {lane.label}
+                            </div>
+                            <div className="mt-0.5 text-[10px] text-ink-soft">
+                              {valueText}
+                            </div>
+                            <div className="text-[10px] font-semibold text-poster-teal-deep">
+                              {price.toLocaleString()} SC
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            className={
+                              DEFINING_WILDLIFE_PET_MODAL_SPRITCORE_UPGRADE_BUTTON_CLASS_NAME
+                            }
+                            disabled={offer.isCapped || !canAfford}
+                            onClick={() =>
+                              onPurchaseSpritcoreUpgrade(
+                                instanceId,
+                                lane.laneId
+                              )
+                            }
+                          >
+                            {offer.isCapped
+                              ? LABELING_WILDLIFE_PET_SPRITCORE_UPGRADE_CAPPED_BUTTON
+                              : LABELING_WILDLIFE_PET_SPRITCORE_UPGRADE_BUY}
+                          </button>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              ) : null}
             </div>
           ) : null}
 

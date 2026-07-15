@@ -39,8 +39,6 @@ export type ResolvingWorldPlazaPlayerCombatLockTickParams = {
 export type ResolvingWorldPlazaPlayerCombatLockTickResult =
   | { readonly kind: 'clear' }
   | { readonly kind: 'hold' }
-  /** Lock stays; player controls movement (no auto-chase). */
-  | { readonly kind: 'await' }
   | {
       readonly kind: 'chase';
       readonly destination: DefiningWorldPlazaWorldPoint;
@@ -54,7 +52,7 @@ export type ResolvingWorldPlazaPlayerCombatLockTickResult =
     };
 
 /**
- * Decides clear / hold / await / chase / swing for the current combat lock.
+ * Decides clear / hold / chase / swing for the current combat lock.
  */
 export function resolvingWorldPlazaPlayerCombatLockTick({
   lock,
@@ -76,10 +74,6 @@ export function resolvingWorldPlazaPlayerCombatLockTick({
   );
 
   if (distanceGrid > engagementReachGrid) {
-    if (lock.suppressChase) {
-      return { kind: 'await' };
-    }
-
     const destination = {
       x: target.position.x,
       y: target.position.y,

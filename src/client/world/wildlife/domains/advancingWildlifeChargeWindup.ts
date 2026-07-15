@@ -14,7 +14,10 @@ import type {
   DefiningWildlifeSpeciesId,
   DefiningWildlifeStaminaState,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { resolvingWildlifeInstanceAttackPowerMultiplier } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
+import {
+  resolvingWildlifeInstanceAttackPowerMultiplier,
+  resolvingWildlifeInstanceSpritcoreUpgradeAttackPowerBonus,
+} from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 
 export type AdvancingWildlifeChargeWindupInput = {
   intent: DefiningWildlifeBehaviorIntent;
@@ -140,11 +143,19 @@ export function resolvingWildlifeMeleeAttackPower(
   nowMs: number
 ): number {
   const chargeConfig = resolvingWildlifeSpeciesChargeConfig(species.speciesId);
+  const spritcoreAttackBonus =
+    resolvingWildlifeInstanceSpritcoreUpgradeAttackPowerBonus(instance);
 
   if (!chargeConfig) {
-    return Math.round(
-      baseAttackPower *
-        resolvingWildlifeInstanceAttackPowerMultiplier(species, instance, nowMs)
+    return (
+      Math.round(
+        baseAttackPower *
+          resolvingWildlifeInstanceAttackPowerMultiplier(
+            species,
+            instance,
+            nowMs
+          )
+      ) + spritcoreAttackBonus
     );
   }
 
@@ -153,15 +164,23 @@ export function resolvingWildlifeMeleeAttackPower(
     checkingWildlifeIsInActiveCharge(instance, species.speciesId, nowMs);
 
   if (!isChargeDamage) {
-    return Math.round(
-      baseAttackPower *
-        resolvingWildlifeInstanceAttackPowerMultiplier(species, instance, nowMs)
+    return (
+      Math.round(
+        baseAttackPower *
+          resolvingWildlifeInstanceAttackPowerMultiplier(
+            species,
+            instance,
+            nowMs
+          )
+      ) + spritcoreAttackBonus
     );
   }
 
-  return Math.round(
-    baseAttackPower *
-      chargeConfig.runDamageMultiplier *
-      resolvingWildlifeInstanceAttackPowerMultiplier(species, instance, nowMs)
+  return (
+    Math.round(
+      baseAttackPower *
+        chargeConfig.runDamageMultiplier *
+        resolvingWildlifeInstanceAttackPowerMultiplier(species, instance, nowMs)
+    ) + spritcoreAttackBonus
   );
 }

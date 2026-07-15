@@ -80,7 +80,7 @@ export type RenderingWorldPlazaCodexMenuPanelProps = {
 };
 
 /**
- * Dropdown panel listing Guide sections below the book button.
+ * Dropdown panel listing Codex sections below the book button.
  */
 export function RenderingWorldPlazaCodexMenuPanel({
   isOpen,
