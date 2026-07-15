@@ -90,7 +90,7 @@ describe('resolvingWorldPlazaChestLootGrant', () => {
 
     const allowedItemTypeIds = new Set<string>(
       DEFINING_WORLD_PLAZA_CHEST_LOOT_POOL_REGISTRY['packs-and-tools']
-        .filter((entry) => entry.minDistanceFromOriginTiles === undefined)
+        .filter((entry) => !('minDistanceFromOriginTiles' in entry))
         .map((entry) => entry.itemTypeId)
     );
 

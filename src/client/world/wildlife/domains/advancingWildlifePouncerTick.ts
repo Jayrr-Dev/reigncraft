@@ -193,7 +193,6 @@ export function advancingWildlifePouncerThink({
   let phase: DefiningWildlifePouncerPhase =
     instance.aiState.pouncerPhase ?? 'idle';
   let nextInstance = instance;
-  let nextIntent = intent;
 
   if (checkingWildlifeInstanceIsJumpScareCasting(nextInstance, nowMs)) {
     return {
@@ -280,15 +279,6 @@ export function advancingWildlifePouncerThink({
         },
       };
     } else {
-      nextIntent = resolvingWildlifePouncerRetreatIntent({
-        position: nextInstance.position,
-        preyTargetId: playerUserId,
-        preyPosition: playerPosition,
-        retreatFromX,
-        retreatFromY,
-        retreatDistanceGrid: config.retreatDistanceGrid,
-      });
-
       return {
         instance: {
           ...nextInstance,
@@ -297,7 +287,14 @@ export function advancingWildlifePouncerThink({
             pouncerPhase: 'retreat',
           },
         },
-        intent: nextIntent,
+        intent: resolvingWildlifePouncerRetreatIntent({
+          position: nextInstance.position,
+          preyTargetId: playerUserId,
+          preyPosition: playerPosition,
+          retreatFromX,
+          retreatFromY,
+          retreatDistanceGrid: config.retreatDistanceGrid,
+        }),
       };
     }
   }
@@ -336,15 +333,6 @@ export function advancingWildlifePouncerThink({
     (intent.mode === 'chase' || intent.mode === 'attack');
 
   if (canStartRetreat) {
-    nextIntent = resolvingWildlifePouncerRetreatIntent({
-      position: nextInstance.position,
-      preyTargetId: playerUserId,
-      preyPosition: playerPosition,
-      retreatFromX: nextInstance.position.x,
-      retreatFromY: nextInstance.position.y,
-      retreatDistanceGrid: config.retreatDistanceGrid,
-    });
-
     return {
       instance: {
         ...nextInstance,
@@ -355,7 +343,14 @@ export function advancingWildlifePouncerThink({
           pouncerRetreatFromY: nextInstance.position.y,
         },
       },
-      intent: nextIntent,
+      intent: resolvingWildlifePouncerRetreatIntent({
+        position: nextInstance.position,
+        preyTargetId: playerUserId,
+        preyPosition: playerPosition,
+        retreatFromX: nextInstance.position.x,
+        retreatFromY: nextInstance.position.y,
+        retreatDistanceGrid: config.retreatDistanceGrid,
+      }),
     };
   }
 

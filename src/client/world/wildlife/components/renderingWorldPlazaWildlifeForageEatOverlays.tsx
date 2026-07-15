@@ -84,7 +84,6 @@ export function RenderingWorldPlazaWildlifeForageEatOverlays({
       return;
     }
 
-    let isActive = true;
     const iterationState = iterationStateRef.current;
     const elementsByInstanceId = elementsByInstanceIdRef.current;
 
@@ -99,10 +98,6 @@ export function RenderingWorldPlazaWildlifeForageEatOverlays({
     }
 
     return subscribingWorldPlazaDomOverlayFrame((_deltaMs, frameTimeMs) => {
-      if (!isActive) {
-        return;
-      }
-
       if (
         !checkingWorldPlazaDomOverlayFrameShouldUpdate(
           0,

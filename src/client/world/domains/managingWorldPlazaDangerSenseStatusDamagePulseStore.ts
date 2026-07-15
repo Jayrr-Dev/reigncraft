@@ -118,7 +118,7 @@ export function computingWorldPlazaDangerSenseStatusDamagePulseIntensity(
     return 0;
   }
 
-  let envelope = 0;
+  let envelope: number;
 
   if (ageMs < fadeInMs) {
     const t = fadeInMs <= 0 ? 1 : ageMs / fadeInMs;

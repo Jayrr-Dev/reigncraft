@@ -45,6 +45,12 @@ export const DEFINING_WILDLIFE_DISEASE_TRANSMISSION_DEFAULT_CHANCES: DefiningWil
     aggressiveChance: 0.1,
   };
 
+/**
+ * Min real-ms between contact disease rolls for the same wildlife instance.
+ * Prevents per-frame re-rolls while the player stays overlapping a carrier.
+ */
+export const DEFINING_WORLD_PLAZA_WILDLIFE_CONTACT_DISEASE_COOLDOWN_MS = 2500;
+
 export const DEFINING_WILDLIFE_DISEASE_TRANSMISSION_REGISTRY: Partial<
   Record<DefiningWildlifeSpeciesId, DefiningWildlifeDiseaseTransmissionProfile>
 > = {

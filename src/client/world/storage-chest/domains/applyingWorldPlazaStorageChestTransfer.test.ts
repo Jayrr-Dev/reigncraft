@@ -1,4 +1,7 @@
-import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
+import type {
+  DefiningInventorySlot,
+  DefiningInventoryState,
+} from '@/components/inventory/domains/definingInventoryItem';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_POUCH,
@@ -26,6 +29,15 @@ function creatingHotbarWithStone(): DefiningInventoryState {
         : null
     ),
   };
+}
+
+function creatingMutableChestContents(
+  fillSlot?: (slots: DefiningInventorySlot[]) => void
+): DefiningInventoryState {
+  const empty = creatingWorldPlazaStorageChestEmptyContents();
+  const slots: DefiningInventorySlot[] = [...empty.slots];
+  fillSlot?.(slots);
+  return { capacity: empty.capacity, slots };
 }
 
 describe('applyingWorldPlazaStorageChestTransfer', () => {
@@ -64,13 +76,14 @@ describe('applyingWorldPlazaStorageChestTransfer', () => {
       capacity: 24,
       slots: Array.from({ length: 24 }, () => null),
     };
-    const chestContents = creatingWorldPlazaStorageChestEmptyContents();
-    chestContents.slots[2] = {
-      id: 'wood-1',
-      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
-      quantity: 2,
-      slotIndex: 2,
-    };
+    const chestContents = creatingMutableChestContents((slots) => {
+      slots[2] = {
+        id: 'wood-1',
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+        quantity: 2,
+        slotIndex: 2,
+      };
+    });
 
     const result = applyingWorldPlazaStorageChestTransfer(
       inventoryState,
@@ -118,13 +131,14 @@ describe('applyingWorldPlazaStorageChestTransfer', () => {
 
   it('stacks matching stone piles in the chest', () => {
     const inventoryState = creatingHotbarWithStone();
-    const chestContents = creatingWorldPlazaStorageChestEmptyContents();
-    chestContents.slots[0] = {
-      id: 'stone-chest',
-      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
-      quantity: 2,
-      slotIndex: 0,
-    };
+    const chestContents = creatingMutableChestContents((slots) => {
+      slots[0] = {
+        id: 'stone-chest',
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
+        quantity: 2,
+        slotIndex: 0,
+      };
+    });
 
     const result = applyingWorldPlazaStorageChestTransfer(
       inventoryState,

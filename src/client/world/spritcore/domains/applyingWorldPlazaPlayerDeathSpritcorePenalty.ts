@@ -55,7 +55,6 @@ export async function applyingWorldPlazaPlayerDeathSpritcorePenalty({
   );
 
   let carriedDropQuantity = 0;
-  let nextInventoryState = inventoryState;
 
   if (dropQuantities.carriedDropQuantity > 0) {
     const consumeResult = consumingWorldPlazaSpritcoreInventoryQuantity(
@@ -65,8 +64,7 @@ export async function applyingWorldPlazaPlayerDeathSpritcorePenalty({
 
     if (consumeResult.consumed) {
       carriedDropQuantity = dropQuantities.carriedDropQuantity;
-      nextInventoryState = consumeResult.nextState;
-      onInventoryStateChange(nextInventoryState);
+      onInventoryStateChange(consumeResult.nextState);
     }
   }
 

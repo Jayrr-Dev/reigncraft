@@ -33,15 +33,12 @@ function resolvingWorldPlazaFlowerPetalHsvFromRgb(
     return { hueDeg: 0, saturation: 0, value: maxChannel };
   }
 
-  let hueSector = 0;
-
-  if (maxChannel === red) {
-    hueSector = ((green - blue) / chroma) % 6;
-  } else if (maxChannel === green) {
-    hueSector = (blue - red) / chroma + 2;
-  } else {
-    hueSector = (red - green) / chroma + 4;
-  }
+  const hueSector =
+    maxChannel === red
+      ? ((green - blue) / chroma) % 6
+      : maxChannel === green
+        ? (blue - red) / chroma + 2
+        : (red - green) / chroma + 4;
 
   const hueDeg = (((hueSector * 60) % 360) + 360) % 360;
   const saturation = chroma / maxChannel;

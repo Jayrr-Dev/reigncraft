@@ -26,8 +26,9 @@ describe('registeringWorldPlazaCraftModeToolRecipes', () => {
 
     expect(recipes).toHaveLength(expectedRecipeCount);
     if (!DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED) {
+      const farmingRecipeIdSet = new Set<string>(farmingRecipeIds);
       expect(
-        recipes.some((recipe) => farmingRecipeIds.includes(recipe.id))
+        recipes.some((recipe) => farmingRecipeIdSet.has(recipe.id))
       ).toBe(false);
     }
     expect(

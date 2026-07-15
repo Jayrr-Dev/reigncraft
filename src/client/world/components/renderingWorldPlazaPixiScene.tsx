@@ -776,7 +776,10 @@ import { resolvingWildlifeDocilePetKind } from '@/components/world/wildlife/doma
 import { clearingWildlifeAreaOnPlayerDeath } from '@/components/world/wildlife/domains/clearingWildlifeAreaOnPlayerDeath';
 import { computingWildlifeCorpseStudyPoints } from '@/components/world/wildlife/domains/computingWildlifeCorpseStudyPoints';
 import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
-import { resolvingWildlifeDiseaseTransmissionProfile } from '@/components/world/wildlife/domains/definingWildlifeDiseaseTransmissionRegistry';
+import {
+  DEFINING_WORLD_PLAZA_WILDLIFE_CONTACT_DISEASE_COOLDOWN_MS,
+  resolvingWildlifeDiseaseTransmissionProfile,
+} from '@/components/world/wildlife/domains/definingWildlifeDiseaseTransmissionRegistry';
 import { DEFINING_WILDLIFE_DOCILE_PET_STUDY_POINTS } from '@/components/world/wildlife/domains/definingWildlifeDocilePetConstants';
 import { parsingWildlifeFishMeatSpeciesIdFromItemTypeId } from '@/components/world/wildlife/domains/definingWildlifeFishMeatCatalog';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';

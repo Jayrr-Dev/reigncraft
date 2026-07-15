@@ -95,8 +95,13 @@ export function advancingWildlifeChargeWindup(
   return { intent, chargeWindupStartedAtMs: startedAtMs };
 }
 
+export type DefiningWildlifeChargeRunAttackInstance = Pick<
+  DefiningWildlifeInstance,
+  'aiState' | 'staminaState'
+>;
+
 export function checkingWildlifeIsInActiveCharge(
-  instance: DefiningWildlifeInstance,
+  instance: DefiningWildlifeChargeRunAttackInstance,
   speciesId: DefiningWildlifeSpeciesId,
   nowMs: number
 ): boolean {
@@ -118,7 +123,7 @@ export function checkingWildlifeIsInActiveCharge(
 
 /** True while sprinting or mid-charge for species with charge tuning. */
 export function checkingWildlifeChargeRunAttackActive(
-  instance: DefiningWildlifeInstance,
+  instance: DefiningWildlifeChargeRunAttackInstance,
   speciesId: DefiningWildlifeSpeciesId,
   isRunning: boolean,
   nowMs: number
@@ -139,7 +144,7 @@ export function checkingWildlifeChargeRunAttackActive(
  * mid-charge and `runForcesCritical` is set.
  */
 export function resolvingWildlifeChargeRunAttackDamageOptions(
-  instance: DefiningWildlifeInstance,
+  instance: DefiningWildlifeChargeRunAttackInstance,
   speciesId: DefiningWildlifeSpeciesId,
   isRunning: boolean,
   nowMs: number
