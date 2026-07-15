@@ -7,7 +7,6 @@
  */
 
 import { seedingWorldPlazaGrassTileDecorationFromTileIndex } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
-import { resolvingWildlifeSpeciesSpeechLinesOnly } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSpeechRegistry';
 import {
   DEFINING_WILDLIFE_SPEECH_BUBBLE_DURATION_MS,
   DEFINING_WILDLIFE_SPEECH_LINE_PICK_SALT,
@@ -21,6 +20,7 @@ import {
   resolvingWildlifeSpeechLinePresentation,
   resolvingWildlifeSpeechLineText,
 } from '@/components/world/wildlife/domains/resolvingWildlifeSpeechLinePresentation';
+import { resolvingWildlifeSpeechLinesOnlyForInstance } from '@/components/world/wildlife/domains/resolvingWildlifeSpeechLinesForInstance';
 
 export type EmittingWildlifeForcedSpeechParams = {
   instance: DefiningWildlifeInstance;
@@ -36,10 +36,7 @@ export function emittingWildlifeForcedSpeech({
   nowMs,
   context,
 }: EmittingWildlifeForcedSpeechParams): DefiningWildlifeSpeechState {
-  const lines = resolvingWildlifeSpeciesSpeechLinesOnly(
-    instance.speciesId,
-    context
-  );
+  const lines = resolvingWildlifeSpeechLinesOnlyForInstance(instance, context);
   const previousSpeechState = instance.speechState;
 
   if (lines.length === 0) {

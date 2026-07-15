@@ -9,12 +9,17 @@ import {
   seedingWorldPlazaGrassTileDecorationFromTileIndex,
 } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
 import { checkingWildlifeIsAggressiveChicken } from '@/components/world/wildlife/domains/checkingWildlifeIsAggressiveChicken';
+import { checkingWildlifeIsGodSpawn } from '@/components/world/wildlife/domains/checkingWildlifeIsGodSpawn';
 import {
   DEFINING_WILDLIFE_AGGRESSION_NAME_TAG_AGGRESSIVE_PREFIXES,
   DEFINING_WILDLIFE_AGGRESSION_NAME_TAG_PREFIX_PICK_SALT,
   DEFINING_WILDLIFE_AGGRESSION_NAME_TAG_TAME_PREFIXES,
 } from '@/components/world/wildlife/domains/definingWildlifeAggressionNameTagConstants';
 import { DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_DISPLAY_NAME } from '@/components/world/wildlife/domains/definingWildlifeAggressiveChickenConstants';
+import {
+  DEFINING_WILDLIFE_GOD_SPAWN_NAME_TAG_COLOR,
+  DEFINING_WILDLIFE_GOD_SPAWN_NAME_TAG_PREFIX,
+} from '@/components/world/wildlife/domains/definingWildlifeGodSpawnConstants';
 import {
   DEFINING_WILDLIFE_LARGE_SIZE_FRAME_NAME_TAG_PREFIX_PICK_SALT,
   checkingWildlifeSizeTierHasLargeSizeFrame,
@@ -202,6 +207,7 @@ export function resolvingWildlifeGeneratedNameTagLabel(
     | 'sizeScaleSample'
     | 'spawnAnchor'
     | 'speciesId'
+    | 'isGodSpawn'
   >,
   species: Pick<
     DefiningWildlifeSpeciesDefinition,
@@ -218,6 +224,15 @@ export function resolvingWildlifeGeneratedNameTagLabel(
     return {
       displayLabel: DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_DISPLAY_NAME,
       textColor: tierParts.color,
+    };
+  }
+
+  if (checkingWildlifeIsGodSpawn(instance)) {
+    const speciesName = resolvingWildlifeSpeciesNameTagBaseName(species);
+
+    return {
+      displayLabel: `${DEFINING_WILDLIFE_GOD_SPAWN_NAME_TAG_PREFIX} ${speciesName}`,
+      textColor: DEFINING_WILDLIFE_GOD_SPAWN_NAME_TAG_COLOR,
     };
   }
 

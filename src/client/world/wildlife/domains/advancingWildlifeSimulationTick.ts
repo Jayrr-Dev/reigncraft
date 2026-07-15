@@ -194,6 +194,7 @@ import {
   resolvingWildlifeInstanceStaminaConfig,
   resolvingWildlifeInstanceWalkSpeedGridPerSecond,
 } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
+import { resolvingWildlifeInstanceEffectiveSpecies } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceEffectiveSpecies';
 import { resolvingWildlifeInstanceFacingDirection } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceFacingDirection';
 import { resolvingWildlifeInstanceSeparation } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceSeparation';
 import {
@@ -337,7 +338,10 @@ function resolvingWildlifePlayerCollision(
         continue;
       }
 
-      const species = resolveSpecies(liveInstance.speciesId);
+      const baseSpecies = resolveSpecies(liveInstance.speciesId);
+      const species = baseSpecies
+        ? resolvingWildlifeInstanceEffectiveSpecies(baseSpecies, liveInstance)
+        : null;
 
       if (!species) {
         continue;
@@ -1348,7 +1352,10 @@ export function advancingWildlifeSimulationTick({
       const instance =
         updatedById.get(staleInstance.instanceId) ?? staleInstance;
       const positionAtTickStart = instance.position;
-      const species = resolveSpecies(instance.speciesId);
+      const baseSpecies = resolveSpecies(instance.speciesId);
+      const species = baseSpecies
+        ? resolvingWildlifeInstanceEffectiveSpecies(baseSpecies, instance)
+        : null;
 
       if (!species || instance.isDead) {
         updatedById.set(instance.instanceId, instance);
@@ -2691,7 +2698,10 @@ export function applyingWildlifeInstanceDamage(
     return null;
   }
 
-  const species = resolveSpecies(instance.speciesId);
+  const baseSpecies = resolveSpecies(instance.speciesId);
+  const species = baseSpecies
+    ? resolvingWildlifeInstanceEffectiveSpecies(baseSpecies, instance)
+    : null;
 
   if (!species) {
     return null;

@@ -12,6 +12,7 @@ import { resolvingWorldPlazaScaledAttackIntervalMs } from '@/components/world/do
 import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
 import { resolvingWildlifeSpritcoreFeastAttackPowerMultiplier } from '@/components/world/wildlife/domains/applyingWildlifeSpritcoreFeast';
 import { checkingWildlifeIsAggressiveChicken } from '@/components/world/wildlife/domains/checkingWildlifeIsAggressiveChicken';
+import { checkingWildlifeIsGodSpawn } from '@/components/world/wildlife/domains/checkingWildlifeIsGodSpawn';
 import {
   DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_ATTACK_POWER_MULTIPLIER,
   DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_HEALTH_MULTIPLIER,
@@ -19,6 +20,11 @@ import {
   DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_SPEED_MULTIPLIER,
   DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_STAMINA_MULTIPLIER,
 } from '@/components/world/wildlife/domains/definingWildlifeAggressiveChickenConstants';
+import {
+  DEFINING_WILDLIFE_GOD_SPAWN_ATTACK_POWER_MULTIPLIER,
+  DEFINING_WILDLIFE_GOD_SPAWN_HEALTH_MULTIPLIER,
+  DEFINING_WILDLIFE_GOD_SPAWN_STAMINA_MULTIPLIER,
+} from '@/components/world/wildlife/domains/definingWildlifeGodSpawnConstants';
 import {
   checkingWildlifeSizeTierHasLargeSizeFrame,
   DEFINING_WILDLIFE_APEX_MAX_STAMINA_RATIO,
@@ -46,7 +52,11 @@ import {
 
 type DefiningWildlifeInstancePresentationProfile = Pick<
   DefiningWildlifeInstance,
-  'speciesId' | 'aggressionLevel' | 'sizeScaleSample' | 'largeSizeFrame'
+  | 'speciesId'
+  | 'aggressionLevel'
+  | 'sizeScaleSample'
+  | 'largeSizeFrame'
+  | 'isGodSpawn'
 > &
   Partial<Pick<DefiningWildlifeInstance, 'petBond' | 'spawnAnchor'>>;
 
@@ -250,6 +260,10 @@ export function resolvingWildlifeInstanceBaseMaxHealth(
     baseMaxHealth *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_HEALTH_MULTIPLIER;
   }
 
+  if (checkingWildlifeIsGodSpawn(instance)) {
+    baseMaxHealth *= DEFINING_WILDLIFE_GOD_SPAWN_HEALTH_MULTIPLIER;
+  }
+
   return (
     Math.round(baseMaxHealth) +
     resolvingWildlifeInstanceSpritcoreUpgradeBonusMaxHealth(instance)
@@ -268,6 +282,10 @@ export function resolvingWildlifeInstanceAttackPowerMultiplier(
 
   if (checkingWildlifeIsAggressiveChicken(instance)) {
     multiplier *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_ATTACK_POWER_MULTIPLIER;
+  }
+
+  if (checkingWildlifeIsGodSpawn(instance)) {
+    multiplier *= DEFINING_WILDLIFE_GOD_SPAWN_ATTACK_POWER_MULTIPLIER;
   }
 
   multiplier *= resolvingWildlifeSpritcoreFeastAttackPowerMultiplier(
@@ -479,6 +497,11 @@ export function resolvingWildlifeInstanceStaminaConfig(
   if (checkingWildlifeIsAggressiveChicken(instance)) {
     drainMultiplier /= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_STAMINA_MULTIPLIER;
     regenMultiplier *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_STAMINA_MULTIPLIER;
+  }
+
+  if (checkingWildlifeIsGodSpawn(instance)) {
+    drainMultiplier /= DEFINING_WILDLIFE_GOD_SPAWN_STAMINA_MULTIPLIER;
+    regenMultiplier *= DEFINING_WILDLIFE_GOD_SPAWN_STAMINA_MULTIPLIER;
   }
 
   if (instance.largeSizeFrame === 'obese') {

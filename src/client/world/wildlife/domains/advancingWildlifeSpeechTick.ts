@@ -6,7 +6,6 @@
 
 import { seedingWorldPlazaGrassTileDecorationFromTileIndex } from '@/components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex';
 import { DEFINING_WILDLIFE_SLEEP_SPEECH_BUBBLE_DURATION_MS } from '@/components/world/wildlife/domains/definingWildlifeSleepConstants';
-import { resolvingWildlifeSpeciesSpeechLines } from '@/components/world/wildlife/domains/definingWildlifeSpeciesSpeechRegistry';
 import {
   DEFINING_WILDLIFE_SPEECH_ATTACK_ENTER_CHANCE,
   DEFINING_WILDLIFE_SPEECH_ATTACK_SUSTAINED_BUCKET_MS,
@@ -48,6 +47,7 @@ import {
   resolvingWildlifeSpeechLinePresentation,
   resolvingWildlifeSpeechLineText,
 } from '@/components/world/wildlife/domains/resolvingWildlifeSpeechLinePresentation';
+import { resolvingWildlifeSpeechLinesForInstance } from '@/components/world/wildlife/domains/resolvingWildlifeSpeechLinesForInstance';
 
 export type AdvancingWildlifeSpeechTickParams = {
   instance: DefiningWildlifeInstance;
@@ -264,8 +264,8 @@ export function advancingWildlifeSpeechTick({
   );
 
   if (instance.aiState.isSleeping) {
-    const sleepLines = resolvingWildlifeSpeciesSpeechLines(
-      instance.speciesId,
+    const sleepLines = resolvingWildlifeSpeechLinesForInstance(
+      instance,
       'sleep'
     );
     const sleepLine = pickingWildlifeSpeechLine(
@@ -331,10 +331,7 @@ export function advancingWildlifeSpeechTick({
     };
   }
 
-  const lines = resolvingWildlifeSpeciesSpeechLines(
-    instance.speciesId,
-    context
-  );
+  const lines = resolvingWildlifeSpeechLinesForInstance(instance, context);
 
   if (lines.length === 0) {
     return {

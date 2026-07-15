@@ -31,6 +31,7 @@ import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/d
 import { resolvingWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { peekingWorldPlazaHungerTierSpriteTexture } from '@/components/world/hunger/domains/loadingWorldPlazaHungerTierSpriteTextures';
 import { checkingWildlifeInstanceShowsHungerUi } from '@/components/world/wildlife/domains/checkingWildlifeInstanceIsOwnedPet';
+import { checkingWildlifeIsGodSpawn } from '@/components/world/wildlife/domains/checkingWildlifeIsGodSpawn';
 import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
 import { checkingWildlifeSpeciesUsesGlowOrbPresentation } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesUsesGlowOrbPresentation';
 import { checkingWildlifeVitalsGraphicsShouldShow } from '@/components/world/wildlife/domains/checkingWildlifeVitalsGraphicsShouldShow';
@@ -50,6 +51,7 @@ import {
   DEFINING_WILDLIFE_FAIRY_POSITION_SMOOTHING_MAX_TRAIL_DISTANCE_GRID,
   DEFINING_WILDLIFE_FAIRY_POSITION_SMOOTHING_TAU_MS,
 } from '@/components/world/wildlife/domains/definingWildlifeFairyConstants';
+import { DEFINING_WILDLIFE_GOD_SPAWN_SPRITE_TINT } from '@/components/world/wildlife/domains/definingWildlifeGodSpawnConstants';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
@@ -342,6 +344,9 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
           entry.bodyZIndexRef
         );
         sprite.alpha = spriteAlpha;
+        sprite.tint = checkingWildlifeIsGodSpawn(instance)
+          ? DEFINING_WILDLIFE_GOD_SPAWN_SPRITE_TINT
+          : 0xffffff;
         sprite.visible = !(instance.isDead && spriteAlpha <= 0);
       }
 

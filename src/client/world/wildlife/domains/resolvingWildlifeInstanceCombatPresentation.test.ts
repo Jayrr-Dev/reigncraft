@@ -229,4 +229,40 @@ describe('resolvingWildlifeInstanceCombatPresentation', () => {
     expect(farHealth / nearHealth).toBeCloseTo(1.1);
     expect(farAttack / nearAttack).toBeCloseTo(1.1);
   });
+
+  it('stacks god-spawn 5x combat and 2x stamina on top of distance bonuses', () => {
+    const sheepSpecies = DEFINING_WILDLIFE_SPECIES_REGISTRY.sheep;
+    const normal = buildingChickenInstance('normal');
+    normal.speciesId = 'sheep';
+    normal.spawnAnchor = { x: 2000, y: 0, layer: 1 };
+    const godSpawn = buildingChickenInstance('aggressive');
+    godSpawn.speciesId = 'sheep';
+    godSpawn.spawnAnchor = { x: 2000, y: 0, layer: 1 };
+    godSpawn.isGodSpawn = true;
+    godSpawn.temperamentOverrideId = 'stalker';
+
+    expect(
+      resolvingWildlifeInstanceBaseMaxHealth(sheepSpecies, godSpawn) /
+        resolvingWildlifeInstanceBaseMaxHealth(sheepSpecies, normal)
+    ).toBeCloseTo(5);
+    expect(
+      resolvingWildlifeInstanceAttackPowerMultiplier(sheepSpecies, godSpawn) /
+        resolvingWildlifeInstanceAttackPowerMultiplier(sheepSpecies, normal)
+    ).toBeCloseTo(5);
+
+    const normalStamina = resolvingWildlifeInstanceStaminaConfig(
+      sheepSpecies,
+      normal
+    );
+    const godStamina = resolvingWildlifeInstanceStaminaConfig(
+      sheepSpecies,
+      godSpawn
+    );
+    expect(godStamina.drainMultiplier).toBeCloseTo(
+      normalStamina.drainMultiplier / 2
+    );
+    expect(godStamina.regenMultiplier).toBeCloseTo(
+      normalStamina.regenMultiplier * 2
+    );
+  });
 });

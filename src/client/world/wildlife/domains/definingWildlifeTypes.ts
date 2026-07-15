@@ -9,11 +9,11 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import type { DefiningWorldPlazaEntityHealthFloatText } from '@/components/world/health/domains/definingWorldPlazaEntityHealthFloatTextTypes';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { DefiningWildlifeLargeSizeFrame } from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
-import type { DefiningWildlifeStaminaFatigueTier } from '@/components/world/wildlife/domains/definingWildlifeStaminaFatigueConstants';
 import type {
   DefiningWildlifeStalkEventKind,
   DefiningWildlifeStalkPhase,
 } from '@/components/world/wildlife/domains/definingWildlifeStalkPhaseTypes';
+import type { DefiningWildlifeStaminaFatigueTier } from '@/components/world/wildlife/domains/definingWildlifeStaminaFatigueConstants';
 import type { DefiningWildlifePetBondState } from '@/components/world/wildlife/pets/domains/definingWildlifePetTypes';
 
 /** Stable species identifier (kebab-case). */
@@ -459,6 +459,8 @@ export type DefiningWildlifePendingRespawn = {
   anchorId: string;
   speciesId: DefiningWildlifeSpeciesId;
   aggressionLevel: DefiningWildlifeAggressionLevel;
+  isGodSpawn?: boolean;
+  temperamentOverrideId?: DefiningWildlifeTemperamentId | null;
   sleepScheduleSample: number;
   sizeScaleSample: number;
   largeSizeFrame: DefiningWildlifeLargeSizeFrame | null;

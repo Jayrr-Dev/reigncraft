@@ -104,6 +104,8 @@ export function advancingWildlifePendingRespawns({
         largeSizeFrame: pendingRespawn.largeSizeFrame,
         thinkScheduleAnchor: pendingRespawn.thinkScheduleAnchor,
         nowMs,
+        isGodSpawn: pendingRespawn.isGodSpawn === true,
+        temperamentOverrideId: pendingRespawn.temperamentOverrideId ?? null,
       })
     );
     store.knownAnchorIds.add(anchorId);

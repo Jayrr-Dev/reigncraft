@@ -53,6 +53,7 @@ import {
 } from '@/components/world/wildlife/domains/advancingWildlifeSimulationTick';
 import { advancingWildlifeSpeciesTextureEviction } from '@/components/world/wildlife/domains/advancingWildlifeSpeciesTextureEviction';
 import { checkingWildlifeInstanceShowsHungerUi } from '@/components/world/wildlife/domains/checkingWildlifeInstanceIsOwnedPet';
+import { checkingWildlifeIsGodSpawn } from '@/components/world/wildlife/domains/checkingWildlifeIsGodSpawn';
 import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
 import { checkingWildlifeSpeciesUsesGlowOrbPresentation } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesUsesGlowOrbPresentation';
 import { checkingWildlifeVitalsGraphicsShouldShow } from '@/components/world/wildlife/domains/checkingWildlifeVitalsGraphicsShouldShow';
@@ -69,6 +70,7 @@ import {
 } from '@/components/world/wildlife/domains/computingWildlifeRenderStructuralFingerprint';
 import { DEFINING_WILDLIFE_CYROBORN_SPECIES_ID } from '@/components/world/wildlife/domains/definingWildlifeCyrobornConstants';
 import { DEFINING_WILDLIFE_FAIRY_LIGHT_OWNER_KEY } from '@/components/world/wildlife/domains/definingWildlifeFairyConstants';
+import { DEFINING_WILDLIFE_GOD_SPAWN_SPRITE_TINT } from '@/components/world/wildlife/domains/definingWildlifeGodSpawnConstants';
 import { DEFINING_WILDLIFE_NAME_TAG_RECENT_COMBAT_REVEAL_MS } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import type { DefiningWildlifeSimulationTickConfig } from '@/components/world/wildlife/domains/definingWildlifeSimulationTickConfig';
 import {
@@ -151,6 +153,7 @@ type RenderingWildlifeInstanceSpriteProps = {
   isDomesticatedPet: boolean;
   isDead: boolean;
   spriteAlpha: number;
+  spriteTint: number;
   jumpLiftPx: number;
   jumpArcPeakPx: number;
 };
@@ -176,6 +179,7 @@ const RenderingWildlifeInstanceSprite = memo(
     isDomesticatedPet,
     isDead,
     spriteAlpha,
+    spriteTint,
     jumpLiftPx,
     jumpArcPeakPx,
   }: RenderingWildlifeInstanceSpriteProps): React.JSX.Element | null {
@@ -383,6 +387,7 @@ const RenderingWildlifeInstanceSprite = memo(
             scale={sizeScale}
             zIndex={sortKey}
             alpha={spriteAlpha}
+            tint={spriteTint}
           />
         )}
         {vitalsVisibility.showGraphics ? (
@@ -1128,6 +1133,11 @@ export function RenderingWildlifeLayer({
             isDomesticatedPet={checkingWildlifeInstanceShowsHungerUi(instance)}
             isDead={instance.isDead}
             spriteAlpha={spriteAlpha}
+            spriteTint={
+              checkingWildlifeIsGodSpawn(instance)
+                ? DEFINING_WILDLIFE_GOD_SPAWN_SPRITE_TINT
+                : 0xffffff
+            }
             jumpLiftPx={jumpLiftPx}
             jumpArcPeakPx={species.jump.jumpArcPeakPx}
           />

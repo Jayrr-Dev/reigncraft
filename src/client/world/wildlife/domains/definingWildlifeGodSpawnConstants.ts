@@ -5,8 +5,8 @@
  * @module components/world/wildlife/domains/definingWildlifeGodSpawnConstants
  */
 
-import type { DefiningWildlifeTemperamentId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type { DefiningWildlifeSpeechLine } from '@/components/world/wildlife/domains/definingWildlifeSpeechPresentationConstants';
+import type { DefiningWildlifeTemperamentId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 /** Deterministic salt for the god-spawn chance roll. */
 export const DEFINING_WILDLIFE_GOD_SPAWN_CHANCE_SALT = 9401;
@@ -58,15 +58,23 @@ export type DefiningWildlifeGodSpawnTemperamentId =
 
 /**
  * Cliché villain human lines used instead of animal vocalizations.
+ * Mix of campy taunts plus light game nods that still read as boss banter.
  * Shared across all speech contexts so combat always reads as taunting English.
  */
 export const DEFINING_WILDLIFE_GOD_SPAWN_SPEECH_LINES = [
-  { text: 'FOOLISH!', style: { font: 'display', fontSizePx: 12, bubbleAnimation: 'shake' } },
+  // Classic villain
+  {
+    text: 'FOOLISH!',
+    style: { font: 'display', fontSizePx: 12, bubbleAnimation: 'shake' },
+  },
   {
     text: 'DARE TO COME TO THESE LANDS!',
     style: { font: 'display', fontSizePx: 11, bubbleAnimation: 'shake' },
   },
-  { text: 'DIE!', style: { font: 'display', fontSizePx: 13, bubbleAnimation: 'bounce' } },
+  {
+    text: 'DIE!',
+    style: { font: 'display', fontSizePx: 13, bubbleAnimation: 'bounce' },
+  },
   {
     text: 'YOU SHALL PERISH!',
     style: { font: 'display', fontSizePx: 11, bubbleAnimation: 'shake' },
@@ -102,5 +110,119 @@ export const DEFINING_WILDLIFE_GOD_SPAWN_SPEECH_LINES = [
   {
     text: 'THIS REALM REJECTS YOU!',
     style: { font: 'display', fontSizePx: 10, bubbleAnimation: 'shake' },
+  },
+  // Fun original
+  {
+    text: 'NICE TRY, SNACK!',
+    style: { font: 'display', fontSizePx: 11, bubbleAnimation: 'bounce' },
+  },
+  {
+    text: 'COME CLOSER... IF YOU DARE!',
+    style: { font: 'display', fontSizePx: 10, bubbleAnimation: 'pulse' },
+  },
+  {
+    text: 'IS THAT ALL YOU BROUGHT?!',
+    style: { font: 'display', fontSizePx: 11, bubbleAnimation: 'shake' },
+  },
+  {
+    text: 'I ATE STRONGER HEROES FOR BREAKFAST!',
+    style: { font: 'display', fontSizePx: 10, bubbleAnimation: 'bounce' },
+  },
+  {
+    text: 'RUN. I LIKE THE CHASE.',
+    style: { font: 'display', fontSizePx: 11, bubbleAnimation: 'pulse' },
+  },
+  {
+    text: 'YOUR LEGEND ENDS HERE!',
+    style: { font: 'display', fontSizePx: 11, bubbleAnimation: 'shake' },
+  },
+  {
+    text: 'TOUCH GRASS? TOUCH DIRT. FOREVER.',
+    style: { font: 'display', fontSizePx: 10, bubbleAnimation: 'bounce' },
+  },
+  {
+    text: 'SKILL ISSUE!',
+    style: { font: 'display', fontSizePx: 12, bubbleAnimation: 'shake' },
+  },
+  {
+    text: 'PATHETIC. AGAIN!',
+    style: { font: 'display', fontSizePx: 12, bubbleAnimation: 'bounce' },
+  },
+  {
+    text: 'BOW, OR BE BROKEN!',
+    style: { font: 'display', fontSizePx: 11, bubbleAnimation: 'shake' },
+  },
+  // Subtle game nods (still villain-shaped)
+  {
+    text: 'PREPARE TO DIE!',
+    style: { font: 'display', fontSizePx: 12, bubbleAnimation: 'shake' },
+  },
+  {
+    text: 'YOU ARE NOT PREPARED!',
+    style: { font: 'display', fontSizePx: 11, bubbleAnimation: 'pulse' },
+  },
+  {
+    text: 'WOULD YOU KINDLY FALL?',
+    style: { font: 'display', fontSizePx: 11, bubbleAnimation: 'bounce' },
+  },
+  {
+    text: "YOU'RE TOO SLOW!",
+    style: { font: 'display', fontSizePx: 12, bubbleAnimation: 'shake' },
+  },
+  {
+    text: 'RIP AND TEAR!',
+    style: { font: 'display', fontSizePx: 12, bubbleAnimation: 'bounce' },
+  },
+  {
+    text: 'GET OVER HERE!',
+    style: { font: 'display', fontSizePx: 12, bubbleAnimation: 'shake' },
+  },
+  {
+    text: 'HEROES ALWAYS DIE!',
+    style: { font: 'display', fontSizePx: 11, bubbleAnimation: 'pulse' },
+  },
+  {
+    text: 'KEPT YOU WAITING?',
+    style: { font: 'display', fontSizePx: 11, bubbleAnimation: 'bounce' },
+  },
+  {
+    text: 'NO COST TOO GREAT.',
+    style: { font: 'display', fontSizePx: 11, bubbleAnimation: 'pulse' },
+  },
+  {
+    text: 'TARNISHED!',
+    style: { font: 'display', fontSizePx: 13, bubbleAnimation: 'shake' },
+  },
+  {
+    text: 'IT WAS DANGEROUS TO COME ALONE!',
+    style: { font: 'display', fontSizePx: 10, bubbleAnimation: 'shake' },
+  },
+  {
+    text: 'A LOSER IS YOU!',
+    style: { font: 'display', fontSizePx: 12, bubbleAnimation: 'bounce' },
+  },
+  {
+    text: 'WASTED!',
+    style: { font: 'display', fontSizePx: 13, bubbleAnimation: 'shake' },
+  },
+  {
+    text: 'THE CAKE WAS NEVER YOURS!',
+    style: { font: 'display', fontSizePx: 10, bubbleAnimation: 'pulse' },
+  },
+  {
+    text: 'I CHOOSE VIOLENCE!',
+    style: { font: 'display', fontSizePx: 12, bubbleAnimation: 'bounce' },
+  },
+  {
+    text: 'OBJECTION: YOUR EXISTENCE!',
+    style: { font: 'display', fontSizePx: 10, bubbleAnimation: 'shake' },
+  },
+  {
+    text: 'MAY CHAOS TAKE THE WHEEL!',
+    style: { font: 'display', fontSizePx: 10, bubbleAnimation: 'pulse' },
+  },
+  {
+    text: 'I USED TO BE AN ADVENTURER...',
+    style: { font: 'display', fontSizePx: 10, bubbleAnimation: 'bounce' },
   },
 ] as const satisfies readonly DefiningWildlifeSpeechLine[];

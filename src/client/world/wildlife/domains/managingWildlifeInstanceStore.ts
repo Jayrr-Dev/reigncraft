@@ -23,6 +23,7 @@ import type {
   DefiningWildlifePendingRespawn,
   DefiningWildlifeSpawnAnchor,
   DefiningWildlifeSpeechState,
+  DefiningWildlifeTemperamentId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import {
   buildingWildlifeSpatialGrid,
@@ -30,6 +31,7 @@ import {
 } from '@/components/world/wildlife/domains/managingWildlifeSpatialGrid';
 import { parsingWildlifeProceduralAnchorId } from '@/components/world/wildlife/domains/parsingWildlifeProceduralAnchorId';
 import { resolvingWildlifeAggressionLevelFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
+import { resolvingWildlifeGodSpawnFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeGodSpawnFromAnchor';
 import { resolvingWildlifeInstanceBaseMaxHealth } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { resolvingWildlifeInstanceSizeTierFromSample } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceSizeTierFromSample';
 import { resolvingWildlifeLargeSizeFrameFromAnchor } from '@/components/world/wildlife/domains/resolvingWildlifeLargeSizeFrameFromAnchor';
@@ -161,6 +163,10 @@ export type CreatingWildlifeInstanceAtPositionParams = {
   petBond?: DefiningWildlifePetBondState | null;
   /** Player-assigned name override to restore at spawn. */
   customDisplayName?: string | null;
+  /** Distance-scaled gold elite spawn. */
+  isGodSpawn?: boolean;
+  /** Forced aggressive temperament when {@link isGodSpawn} is true. */
+  temperamentOverrideId?: DefiningWildlifeTemperamentId | null;
 };
 
 /** Creates one wildlife instance at an explicit world position. */
@@ -178,6 +184,8 @@ export function creatingWildlifeInstanceAtPosition({
   nowMs,
   petBond = null,
   customDisplayName = null,
+  isGodSpawn = false,
+  temperamentOverrideId = null,
 }: CreatingWildlifeInstanceAtPositionParams): DefiningWildlifeInstance {
   const spawnHealthProfile = {
     speciesId: species.speciesId,
@@ -185,6 +193,8 @@ export function creatingWildlifeInstanceAtPosition({
     sizeScaleSample,
     largeSizeFrame,
     spawnAnchor,
+    isGodSpawn,
+    temperamentOverrideId,
   };
   const baseMaxHealth = resolvingWildlifeInstanceBaseMaxHealth(
     species,
@@ -196,6 +206,8 @@ export function creatingWildlifeInstanceAtPosition({
     speciesId: species.speciesId,
     anchorId,
     aggressionLevel,
+    isGodSpawn,
+    temperamentOverrideId,
     sleepScheduleSample,
     sizeScaleSample,
     largeSizeFrame,
@@ -240,9 +252,11 @@ function creatingWildlifeInstanceFromAnchor(
     []
   );
   const isOmegaWolf = checkingWildlifeOmegaWolfSpecies(anchor.speciesId);
-  const aggressionLevel: DefiningWildlifeAggressionLevel = isOmegaWolf
-    ? 'aggressive'
-    : resolvingWildlifeAggressionLevelFromAnchor(anchor, species);
+  const godSpawn = resolvingWildlifeGodSpawnFromAnchor(anchor);
+  const aggressionLevel: DefiningWildlifeAggressionLevel =
+    isOmegaWolf || godSpawn
+      ? 'aggressive'
+      : resolvingWildlifeAggressionLevelFromAnchor(anchor, species);
   const sleepScheduleSample =
     resolvingWildlifeSleepBellCurveSampleFromAnchor(anchor);
   const sizeScaleSample = isOmegaWolf
@@ -273,6 +287,8 @@ function creatingWildlifeInstanceFromAnchor(
     largeSizeFrame,
     thinkScheduleAnchor: anchor,
     nowMs,
+    isGodSpawn: godSpawn?.isGodSpawn ?? false,
+    temperamentOverrideId: godSpawn?.temperamentOverrideId ?? null,
   });
 }
 
@@ -475,6 +491,8 @@ export function queueingWildlifePendingRespawnFromDeadInstance(
     anchorId: instance.anchorId,
     speciesId: instance.speciesId,
     aggressionLevel: instance.aggressionLevel,
+    isGodSpawn: instance.isGodSpawn === true,
+    temperamentOverrideId: instance.temperamentOverrideId ?? null,
     sleepScheduleSample: instance.sleepScheduleSample,
     sizeScaleSample: instance.sizeScaleSample,
     largeSizeFrame: instance.largeSizeFrame ?? null,

@@ -44,7 +44,10 @@ export async function droppingWildlifeSpritcoreGroundItem({
   species,
   playerPosition,
 }: DroppingWildlifeSpritcoreGroundItemParams): Promise<DroppingWildlifeSpritcoreGroundItemResult> {
-  const killDrop = resolvingWorldPlazaSpritcoreWildlifeKillDrop(species);
+  const killDrop = resolvingWorldPlazaSpritcoreWildlifeKillDrop(
+    species,
+    instance
+  );
 
   if (!killDrop) {
     return { outcome: 'none' };

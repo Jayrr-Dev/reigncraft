@@ -9,6 +9,7 @@ import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/d
 import { resolvingWorldPlazaSpritcoreDropTierDefinition } from '@/components/world/spritcore/domains/resolvingWorldPlazaSpritcoreDropTier';
 import { resolvingWorldPlazaSpritcoreWildlifeDrop } from '@/components/world/spritcore/domains/resolvingWorldPlazaSpritcoreWildlifeDrop';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type ResolvingWorldPlazaSpritcoreWildlifeKillDrop = {
   readonly amount: number;
@@ -18,9 +19,12 @@ export type ResolvingWorldPlazaSpritcoreWildlifeKillDrop = {
 
 /**
  * Returns the tiered Spritcore stack for one wildlife death, or null when disabled.
+ * Uses the killed instance's effective combat strength when provided.
  */
 export function resolvingWorldPlazaSpritcoreWildlifeKillDrop(
-  species: DefiningWildlifeSpeciesDefinition
+  species: DefiningWildlifeSpeciesDefinition,
+  instance?: DefiningWildlifeInstance,
+  nowMs: number = Date.now()
 ): ResolvingWorldPlazaSpritcoreWildlifeKillDrop | null {
   if (
     !checkingWorldPlazaGenerationFeatureEnabled(
@@ -30,7 +34,11 @@ export function resolvingWorldPlazaSpritcoreWildlifeKillDrop(
     return null;
   }
 
-  const dropAmount = resolvingWorldPlazaSpritcoreWildlifeDrop(species);
+  const dropAmount = resolvingWorldPlazaSpritcoreWildlifeDrop(
+    species,
+    instance,
+    nowMs
+  );
 
   if (dropAmount <= 0) {
     return null;

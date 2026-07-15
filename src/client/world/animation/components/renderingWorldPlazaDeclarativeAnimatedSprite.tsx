@@ -36,6 +36,8 @@ export type RenderingWorldPlazaDeclarativeAnimatedSpriteProps = {
   readonly zIndex?: number;
   readonly visible?: boolean;
   readonly alpha?: number;
+  /** Pixi multiply tint (`0xffffff` = none). */
+  readonly tint?: number;
   /**
    * `shared` opts into the wildlife shared animation registry so one parent
    * tick advances many sprites. Default `self` keeps a per-sprite `useTick`.
@@ -54,6 +56,7 @@ export function RenderingWorldPlazaDeclarativeAnimatedSprite({
   zIndex,
   visible = true,
   alpha = 1,
+  tint = 0xffffff,
   tickMode = 'self',
   externalSpriteRef,
 }: RenderingWorldPlazaDeclarativeAnimatedSpriteProps): React.JSX.Element {
@@ -120,6 +123,7 @@ export function RenderingWorldPlazaDeclarativeAnimatedSprite({
 
     sprite.visible = visible;
     sprite.alpha = alpha;
+    sprite.tint = tint;
   }, [
     alpha,
     anchor.x,
@@ -128,6 +132,7 @@ export function RenderingWorldPlazaDeclarativeAnimatedSprite({
     positionX,
     positionY,
     scale,
+    tint,
     visible,
     width,
     zIndex,
