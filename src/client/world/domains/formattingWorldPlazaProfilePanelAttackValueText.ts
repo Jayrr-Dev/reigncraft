@@ -4,6 +4,8 @@
  * @module components/world/domains/formattingWorldPlazaProfilePanelAttackValueText
  */
 
+import { formattingWorldPlazaProfilePanelAttackValueParts } from '@/components/world/domains/formattingWorldPlazaProfilePanelAttackValueParts';
+
 /**
  * Shows base attack and equipped weapon bonus as `base +bonus`.
  * Unarmed / no bonus stays a plain number.
@@ -12,17 +14,14 @@ export function formattingWorldPlazaProfilePanelAttackValueText(
   baseAttackPower: number,
   equippedAttackEv: number
 ): string {
-  const base = Math.round(baseAttackPower);
-  const equipped = Math.round(equippedAttackEv);
-  const bonus = equipped - base;
+  const parts = formattingWorldPlazaProfilePanelAttackValueParts(
+    baseAttackPower,
+    equippedAttackEv
+  );
 
-  if (bonus > 0) {
-    return `${base} +${bonus}`;
+  if (parts.bonusText === null) {
+    return parts.baseText;
   }
 
-  if (bonus < 0) {
-    return `${base} ${bonus}`;
-  }
-
-  return `${base}`;
+  return `${parts.baseText} ${parts.bonusText}`;
 }

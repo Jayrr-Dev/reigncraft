@@ -5,8 +5,8 @@
  * @module components/world/domains/resolvingWorldPlazaProfilePanelSections
  */
 
-import type { ComputingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
+import type { ComputingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
 import {
   DEFINING_WORLD_PLAZA_CHARACTER_HEIGHT_ATTRIBUTE_ICON,
   LABELING_WORLD_PLAZA_CHARACTER_HEIGHT_ATTRIBUTE,
@@ -18,7 +18,6 @@ import {
 import { resolvingWorldPlazaCharacterHeightDisplayText } from '@/components/world/character/domains/resolvingWorldPlazaCharacterHeightDisplayText';
 import { resolvingWorldPlazaCharacterWeightDisplayText } from '@/components/world/character/domains/resolvingWorldPlazaCharacterWeightDisplayText';
 import type { DefiningWorldPlazaAvatarSkinId } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
-import { formattingWorldPlazaProfilePanelAttackValueText } from '@/components/world/domains/formattingWorldPlazaProfilePanelAttackValueText';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_FORWARD_GRID_DISTANCE,
@@ -55,18 +54,20 @@ import {
   DEFINING_WORLD_PLAZA_RUN_STAMINA_BURST_RAMP_SECONDS,
   DEFINING_WORLD_PLAZA_RUN_STAMINA_REGEN_PER_SECOND,
 } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
+import { formattingWorldPlazaProfilePanelAttackValueParts } from '@/components/world/domains/formattingWorldPlazaProfilePanelAttackValueParts';
+import { resolvingWorldPlazaProfilePanelAttackBonusDetailLines } from '@/components/world/domains/resolvingWorldPlazaProfilePanelAttackBonusDetailLines';
 import {
   resolvingWorldPlazaProfilePanelImmunityEntries,
   type ResolvingWorldPlazaProfilePanelImmunitySections,
 } from '@/components/world/domains/resolvingWorldPlazaProfilePanelImmunityEntries';
 import type { ResolvingWorldPlazaProfilePanelPassiveEntry } from '@/components/world/domains/resolvingWorldPlazaProfilePanelPassiveEntries';
 import { resolvingWorldPlazaProfilePanelPassiveEntries } from '@/components/world/domains/resolvingWorldPlazaProfilePanelPassiveEntries';
+import { resolvingWorldPlazaEquippedAttackEv } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
 import { formattingWorldPlazaTemperature } from '@/components/world/health/domains/convertingWorldPlazaTemperatureUnits';
 import { resolvingWorldPlazaEntityTemperatureComfortBand } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureComfortBand';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import type { DefiningWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import type { UsingWorldPlazaPlayerHungerHudSnapshot } from '@/components/world/hunger/hooks/usingWorldPlazaPlayerHunger';
-import { resolvingWorldPlazaEquippedAttackEv } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
 import { DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 
 /** Live stamina HUD values consumed by the profile panel. */
@@ -96,6 +97,11 @@ export type ResolvingWorldPlazaProfilePanelAttributeEntry = {
   label: string;
   iconName: string;
   valueText: string;
+  /** Signed bonus after valueText (e.g. `+10`); click may open detail popover. */
+  valueBonusText?: string;
+  valueBonusTone?: 'positive' | 'negative';
+  /** Popover lines explaining valueBonusText sources. */
+  valueBonusDetailLines?: readonly string[];
 };
 
 /** One labeled attribute category on the Stats tab. */
@@ -278,15 +284,32 @@ export function resolvingWorldPlazaProfilePanelSections(input: {
     },
   ];
 
+  const attackValueParts = formattingWorldPlazaProfilePanelAttackValueParts(
+    derivedStats.attackPower,
+    equippedAttackEv
+  );
+  const attackBonusDetailLines = inventoryState
+    ? resolvingWorldPlazaProfilePanelAttackBonusDetailLines(
+        derivedStats.attackPower,
+        inventoryState,
+        equippedWeaponSlotIndex
+      )
+    : [];
+
   const combatEntries: ResolvingWorldPlazaProfilePanelAttributeEntry[] = [
     {
       id: 'attack',
       label: 'Attack',
       iconName: 'boxicons:sword-filled',
-      valueText: formattingWorldPlazaProfilePanelAttackValueText(
-        derivedStats.attackPower,
-        equippedAttackEv
-      ),
+      valueText: attackValueParts.baseText,
+      ...(attackValueParts.bonusText !== null &&
+      attackValueParts.bonusTone !== null
+        ? {
+            valueBonusText: attackValueParts.bonusText,
+            valueBonusTone: attackValueParts.bonusTone,
+            valueBonusDetailLines: attackBonusDetailLines,
+          }
+        : {}),
     },
     {
       id: 'defense',

@@ -20,10 +20,13 @@ describe('resolvingWorldPlazaOreSmeltingStationAnchorBlock', () => {
   it('returns the anchor when a footprint satellite is clicked', () => {
     const anchor = creatingWorldBuildingPlacedBlock({
       blockId: 'bloomery-anchor',
+      plotId: 'plot-1',
       definitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
       tilePosition: { tileX: 4, tileY: 6 },
       worldLayer: 1,
       blockHeight: 1,
+      ownerId: 'owner-1',
+      placedAt: '2026-01-01T00:00:00.000Z',
       metadata: {
         [DEFINING_WORLD_BUILDING_FOOTPRINT_ROLE_METADATA_KEY]:
           DEFINING_WORLD_BUILDING_FOOTPRINT_ROLE_ANCHOR,
@@ -33,10 +36,13 @@ describe('resolvingWorldPlazaOreSmeltingStationAnchorBlock', () => {
     });
     const satellite = creatingWorldBuildingPlacedBlock({
       blockId: 'bloomery-sat',
+      plotId: 'plot-1',
       definitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
       tilePosition: { tileX: 5, tileY: 6 },
       worldLayer: 1,
       blockHeight: 1,
+      ownerId: 'owner-1',
+      placedAt: '2026-01-01T00:00:00.000Z',
       metadata: {
         [DEFINING_WORLD_BUILDING_FOOTPRINT_ROLE_METADATA_KEY]:
           DEFINING_WORLD_BUILDING_FOOTPRINT_ROLE_SATELLITE,
@@ -58,10 +64,13 @@ describe('listingWorldPlazaOreSmeltingStationsInInteractionRange', () => {
   it('lists a 1x1 stove when its selection key is active', () => {
     const stove = creatingWorldBuildingPlacedBlock({
       blockId: 'stove-1',
+      plotId: 'plot-1',
       definitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE,
       tilePosition: { tileX: 2, tileY: 3 },
       worldLayer: 1,
       blockHeight: 1,
+      ownerId: 'owner-1',
+      placedAt: '2026-01-01T00:00:00.000Z',
     });
 
     const entries = listingWorldPlazaOreSmeltingStationsInInteractionRange(
@@ -76,10 +85,13 @@ describe('listingWorldPlazaOreSmeltingStationsInInteractionRange', () => {
   it('lists the bloomery anchor when a satellite tile key is selected', () => {
     const anchor = creatingWorldBuildingPlacedBlock({
       blockId: 'bloomery-anchor',
+      plotId: 'plot-1',
       definitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
       tilePosition: { tileX: 4, tileY: 6 },
       worldLayer: 1,
       blockHeight: 1,
+      ownerId: 'owner-1',
+      placedAt: '2026-01-01T00:00:00.000Z',
       metadata: {
         [DEFINING_WORLD_BUILDING_FOOTPRINT_ROLE_METADATA_KEY]:
           DEFINING_WORLD_BUILDING_FOOTPRINT_ROLE_ANCHOR,
@@ -89,10 +101,13 @@ describe('listingWorldPlazaOreSmeltingStationsInInteractionRange', () => {
     });
     const satellite = creatingWorldBuildingPlacedBlock({
       blockId: 'bloomery-sat',
+      plotId: 'plot-1',
       definitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
       tilePosition: { tileX: 5, tileY: 7 },
       worldLayer: 1,
       blockHeight: 1,
+      ownerId: 'owner-1',
+      placedAt: '2026-01-01T00:00:00.000Z',
       metadata: {
         [DEFINING_WORLD_BUILDING_FOOTPRINT_ROLE_METADATA_KEY]:
           DEFINING_WORLD_BUILDING_FOOTPRINT_ROLE_SATELLITE,

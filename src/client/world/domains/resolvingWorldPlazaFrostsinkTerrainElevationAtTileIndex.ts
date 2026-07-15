@@ -31,7 +31,7 @@ const DEFINING_WORLD_PLAZA_TWO_PI = Math.PI * 2;
 function quantizingWorldPlazaFrostsinkSurfaceLayerToPlayTier(
   rawSurfaceLayer: number
 ): number {
-  let nearestTier =
+  let nearestTier: (typeof DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PLAY_TIER_SURFACE_LAYERS)[number] =
     DEFINING_WORLD_PLAZA_TERRAIN_ELEVATION_PLAY_TIER_SURFACE_LAYERS[0];
   let nearestDistance = Math.abs(rawSurfaceLayer - nearestTier);
 

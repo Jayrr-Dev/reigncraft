@@ -21,6 +21,7 @@ import { RenderingWorldPlazaDayNightPanel } from '@/components/world/components/
 import { RenderingWorldPlazaExitHomeConfirmDialog } from '@/components/world/components/renderingWorldPlazaExitHomeConfirmDialog';
 import { RenderingWorldPlazaMasterVolumeMixerPanel } from '@/components/world/components/renderingWorldPlazaMasterVolumeMixerPanel';
 import { RenderingWorldPlazaMiniMapStack } from '@/components/world/components/renderingWorldPlazaMiniMapStack';
+import { RenderingWorldPlazaPerformanceDiagnosticsFpsReadout } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsFpsReadout';
 import { RenderingWorldPlazaWorldLayerIndicator } from '@/components/world/components/renderingWorldPlazaWorldLayerIndicator';
 import { checkingWorldPlazaAvatarTransformControlVisible } from '@/components/world/domains/checkingWorldPlazaAvatarTransformControlVisible';
 import {
@@ -73,6 +74,7 @@ import { STYLING_WORLD_PLAZA_ACTION_BAR_TEMPERATURE_ANCHOR_CLASS_NAME } from '@/
 import type { DefiningWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
 import { usingWorldPlazaCodexRewardReadySections } from '@/components/world/hooks/usingWorldPlazaCodexRewardReadySections';
 import { usingWorldPlazaMinimapEnabled } from '@/components/world/hooks/usingWorldPlazaMinimapEnabled';
+import { usingWorldPlazaPerformanceFpsReadoutVisibleState } from '@/components/world/hooks/usingWorldPlazaPerformanceFpsReadoutVisibleState';
 import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
 import { RenderingWorldPlazaHungerIndicator } from '@/components/world/hunger/components/renderingWorldPlazaHungerIndicator';
 import { RenderingWorldPlazaHungerPanel } from '@/components/world/hunger/components/renderingWorldPlazaHungerPanel';
@@ -233,6 +235,8 @@ export function RenderingWorldPlazaActionBar({
     );
   const { isMinimapPreferenceEnabled, settingMinimapEnabled } =
     usingWorldPlazaMinimapEnabled();
+  const { isFpsReadoutVisible } =
+    usingWorldPlazaPerformanceFpsReadoutVisibleState();
   const [isTransformPanelOpen, setIsTransformPanelOpen] = useState(false);
   const [isHungerPanelOpen, setIsHungerPanelOpen] = useState(false);
   const [isTemperaturePanelOpen, setIsTemperaturePanelOpen] = useState(false);
@@ -827,6 +831,12 @@ export function RenderingWorldPlazaActionBar({
             setIsExitHomeConfirmOpen(false);
             onExitToHome();
           }}
+        />
+      ) : null}
+      {isFpsReadoutVisible ? (
+        <RenderingWorldPlazaPerformanceDiagnosticsFpsReadout
+          viewportHudScale={viewportHudScale}
+          isMobile={isMobile}
         />
       ) : null}
     </>

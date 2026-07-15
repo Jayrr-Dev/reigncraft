@@ -85,7 +85,7 @@ describe('revivingWorldPlazaEntityHealthToFull', () => {
       diseaseEffects: [
         {
           id: 'disease-1',
-          diseaseId: 'food-poisoning',
+          diseaseId: 'salmonellosis' as const,
           contractedAtMs: nowMs - 1_000,
           symptomsStartAtMs: nowMs,
           expiresAtMs: nowMs + 60_000,

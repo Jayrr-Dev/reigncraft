@@ -368,6 +368,7 @@ import { usingWorldPlazaArmorLoadout } from '@/components/world/equipment/hooks/
 import { usingWorldPlazaEquipment } from '@/components/world/equipment/hooks/usingWorldPlazaEquipment';
 import { RenderingWorldPlazaFarmingInteractionLabels } from '@/components/world/farming/components/renderingWorldPlazaFarmingInteractionLabels';
 import { RenderingWorldPlazaFarmlandGroundMarkers } from '@/components/world/farming/components/renderingWorldPlazaFarmlandGroundMarkers';
+import { DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED } from '@/components/world/farming/domains/definingWorldPlazaFarmingConstants';
 import { listingWorldPlazaFarmlandTilesInInteractionRange } from '@/components/world/farming/domains/listingWorldPlazaFarmlandTilesInInteractionRange';
 import {
   advancingWorldPlazaLocalFarmlandGrowthForOwner,
@@ -630,7 +631,7 @@ import {
 } from '@/components/world/npc';
 import { RenderingWorldPlazaOnboardingCoachmarkLayer } from '@/components/world/onboarding/components/renderingWorldPlazaOnboardingCoachmarkLayer';
 import {
-  initializingWorldPlazaOnboardingCoachmarkStore,
+  beginningWorldPlazaOnboardingCoachmarkPlaySession,
   notifyingWorldPlazaOnboardingChopStarted,
   notifyingWorldPlazaOnboardingCookStarted,
   notifyingWorldPlazaOnboardingForagePicked,
@@ -2059,6 +2060,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
 
       if (recipeDefinition.outcome.kind === 'item') {
+        const craftedItemQuantity = recipeDefinition.outcome.quantity;
         let didCraftIntoInventory = false;
 
         updatingInventoryState((currentState) => {
@@ -2069,9 +2071,7 @@ function RenderingWorldPlazaPixiSceneConnected({
 
           if (craftResult.outcome === 'crafted') {
             didCraftIntoInventory = true;
-            notifyingWorldPlazaInventoryItemAdded(
-              recipeDefinition.outcome.quantity
-            );
+            notifyingWorldPlazaInventoryItemAdded(craftedItemQuantity);
             showingGameplayHudToast(
               `${recipeDefinition.title} added to inventory.`
             );
@@ -6292,6 +6292,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         lastChaseGridX: instance.position.x,
         lastChaseGridY: instance.position.y,
         lastChaseReplanAtMs: 0,
+        suppressChase: false,
       };
       isClickRunIntentRef.current = true;
 
@@ -6323,7 +6324,10 @@ function RenderingWorldPlazaPixiSceneConnected({
         { x: instance.position.x, y: instance.position.y },
         { run: true }
       );
-      combatLockRef.current.lastChaseReplanAtMs = nowMs;
+      const activeCombatLock = combatLockRef.current;
+      if (activeCombatLock) {
+        activeCombatLock.lastChaseReplanAtMs = nowMs;
+      }
     },
     [
       applyingWalkPlanToDestination,
@@ -6913,35 +6917,31 @@ function RenderingWorldPlazaPixiSceneConnected({
       context: DefiningWorldPlazaInventorySpecimenStudyProgressContext
     ): void => {
       if (context.studyKind === 'ore' && context.oreSpeciesId) {
-        let oreConvertOutcome:
-          | 'converted'
-          | 'nothing-to-study'
-          | 'already-studied'
-          | 'inventory-full' = 'nothing-to-study';
+        let didConvertOre = false;
 
         updatingInventoryState((currentState) => {
           const convertResult = convertingWorldPlazaInventoryOreSlotToStudied(
             currentState,
             context.slotIndex
           );
-          oreConvertOutcome = convertResult.outcome;
-          return convertResult.outcome === 'converted'
-            ? convertResult.nextState
-            : null;
+
+          if (convertResult.outcome === 'converted') {
+            didConvertOre = true;
+            return convertResult.nextState;
+          }
+
+          if (convertResult.outcome === 'inventory-full') {
+            showingGameplayHudToast('Inventory is full.');
+          } else if (convertResult.outcome === 'already-studied') {
+            showingGameplayHudToast('That pile is already studied.');
+          } else {
+            showingGameplayHudToast('Nothing left to study.');
+          }
+
+          return null;
         });
 
-        if (oreConvertOutcome === 'inventory-full') {
-          showingGameplayHudToast('Inventory is full.');
-          return;
-        }
-
-        if (oreConvertOutcome === 'already-studied') {
-          showingGameplayHudToast('That pile is already studied.');
-          return;
-        }
-
-        if (oreConvertOutcome !== 'converted') {
-          showingGameplayHudToast('Nothing left to study.');
+        if (!didConvertOre) {
           return;
         }
 
@@ -7438,7 +7438,6 @@ function RenderingWorldPlazaPixiSceneConnected({
       storageOwnerId,
       gettingWorldPlazaSelectedAvatarSkinId()
     );
-    initializingWorldPlazaOnboardingCoachmarkStore(storageOwnerId);
     // Single-player starts with an empty cookbook; recipe pages unlock crafts.
     if (!isSinglePlayerSession) {
       ensuringWorldPlazaSurvivalCookbookRecipesAttached();
@@ -7451,6 +7450,11 @@ function RenderingWorldPlazaPixiSceneConnected({
     onlineUserId,
     selectedAvatarSkinId,
   ]);
+
+  useEffect(() => {
+    const storageOwnerId = onlineUserId ?? localPersistenceOwnerId;
+    beginningWorldPlazaOnboardingCoachmarkPlaySession(storageOwnerId);
+  }, [localPersistenceOwnerId, onlineUserId]);
 
   const {
     isTeleportFadeOverlayMounted,
@@ -8786,7 +8790,8 @@ function RenderingWorldPlazaPixiSceneConnected({
             />
             {isDevQaBlankSlate ? null : (
               <>
-                {isLocalGameplayEnabled ? (
+                {isLocalGameplayEnabled &&
+                DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED ? (
                   <RenderingWorldPlazaFarmlandGroundMarkers
                     farmlandByTileKeyRef={farmlandByTileKeyRef}
                     revision={farmlandRevision}
@@ -9587,21 +9592,23 @@ function RenderingWorldPlazaPixiSceneConnected({
                   onAddWater={handlingTeaPotAddWaterInteraction}
                 />
               ) : null}
-              <RenderingWorldPlazaFarmingInteractionLabels
-                playerPositionRef={playerPositionRef}
-                farmlandByTileKeyRef={farmlandByTileKeyRef}
-                selectedInteractableBlockKeysRef={
-                  selectedInteractableBlockKeysRef
-                }
-                hasEquippedHoe={hasEquippedHoe}
-                hasEquippedScythe={hasEquippedScythe}
-                hasSeedsInInventory={hasSeedsInInventory}
-                timedInteractionProgressSnapshot={farmingProgressSnapshot}
-                timedInteractionProgressRatioRef={farmingProgressRatioRef}
-                cameraOffsetRef={cameraOffsetRef}
-                cameraWorldZoomRef={cameraWorldZoomRef}
-                onFarmingAction={handlingFarmingInteraction}
-              />
+              {DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED ? (
+                <RenderingWorldPlazaFarmingInteractionLabels
+                  playerPositionRef={playerPositionRef}
+                  farmlandByTileKeyRef={farmlandByTileKeyRef}
+                  selectedInteractableBlockKeysRef={
+                    selectedInteractableBlockKeysRef
+                  }
+                  hasEquippedHoe={hasEquippedHoe}
+                  hasEquippedScythe={hasEquippedScythe}
+                  hasSeedsInInventory={hasSeedsInInventory}
+                  timedInteractionProgressSnapshot={farmingProgressSnapshot}
+                  timedInteractionProgressRatioRef={farmingProgressRatioRef}
+                  cameraOffsetRef={cameraOffsetRef}
+                  cameraWorldZoomRef={cameraWorldZoomRef}
+                  onFarmingAction={handlingFarmingInteraction}
+                />
+              ) : null}
               <RenderingWorldPlazaWildlifeCorpseStudyLabels
                 wildlifeStoreRef={wildlifeStoreRef}
                 playerPositionRef={playerPositionRef}

@@ -103,7 +103,7 @@ export function parsingWorldPlazaPlayerConditions(
     .filter((diseaseEffect) => diseaseEffect.expiresAtMs > worldEpochMs)
     .map((diseaseEffect) => ({
       id: diseaseEffect.id,
-      diseaseId: diseaseEffect.diseaseId,
+      diseaseId: diseaseEffect.diseaseId as DefiningWorldPlazaEntityDiseaseId,
       contractedAtMs: diseaseEffect.contractedAtMs,
       symptomsStartAtMs: diseaseEffect.symptomsStartAtMs,
       expiresAtMs: diseaseEffect.expiresAtMs,

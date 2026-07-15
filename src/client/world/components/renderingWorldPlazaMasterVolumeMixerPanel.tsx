@@ -45,6 +45,7 @@ import {
   STYLING_WORLD_PLAZA_MOBILE_AUTO_JUMP_CHECKBOX_CLASS_NAME,
   STYLING_WORLD_PLAZA_MOBILE_AUTO_JUMP_TOGGLE_ROW_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaMobileAutoJumpConstants';
+import { LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_TOGGLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsUiConstants';
 import {
   LABELING_WORLD_PLAZA_SFX_VOLUME_SLIDER,
   STYLING_WORLD_PLAZA_SFX_VOLUME_MIXER_SLIDER_CLASS_NAME,
@@ -57,6 +58,7 @@ import { usingWorldPlazaDangerSenseEnabled } from '@/components/world/hooks/usin
 import { usingWorldPlazaMasterVolume } from '@/components/world/hooks/usingWorldPlazaMasterVolume';
 import { usingWorldPlazaMinimapEnabled } from '@/components/world/hooks/usingWorldPlazaMinimapEnabled';
 import { usingWorldPlazaMobileAutoJumpEnabled } from '@/components/world/hooks/usingWorldPlazaMobileAutoJumpEnabled';
+import { usingWorldPlazaPerformanceFpsReadoutVisibleState } from '@/components/world/hooks/usingWorldPlazaPerformanceFpsReadoutVisibleState';
 import { usingWorldPlazaSfxVolume } from '@/components/world/hooks/usingWorldPlazaSfxVolume';
 import { LABELING_WORLD_PLAZA_HIDE_ACTIONS_TOGGLE } from '@/components/world/interaction/domains/definingWorldPlazaHideActionsPreferenceConstants';
 import { usingWorldPlazaHideActionsEnabled } from '@/components/world/interaction/hooks/usingWorldPlazaHideActionsEnabled';
@@ -107,6 +109,8 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
     usingWorldPlazaTemperatureDisplayUnit();
   const { isOnboardingTutorialEnabled, settingOnboardingTutorialEnabled } =
     usingWorldPlazaOnboardingTutorialEnabled();
+  const { isFpsReadoutVisible, settingFpsReadoutVisible } =
+    usingWorldPlazaPerformanceFpsReadoutVisibleState();
 
   if (!isOpen) {
     return null;
@@ -419,6 +423,23 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
               />
               <span>
                 {LABELING_WORLD_PLAZA_TEMPERATURE_DISPLAY_FAHRENHEIT_TOGGLE}
+              </span>
+            </label>
+            <label
+              className={STYLING_WORLD_PLAZA_MINIMAP_TOGGLE_ROW_CLASS_NAME}
+              htmlFor="world-plaza-fps-readout-visible"
+            >
+              <input
+                id="world-plaza-fps-readout-visible"
+                type="checkbox"
+                checked={isFpsReadoutVisible}
+                className={STYLING_WORLD_PLAZA_MINIMAP_CHECKBOX_CLASS_NAME}
+                onChange={(event) => {
+                  settingFpsReadoutVisible(event.currentTarget.checked);
+                }}
+              />
+              <span>
+                {LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_TOGGLE}
               </span>
             </label>
           </>

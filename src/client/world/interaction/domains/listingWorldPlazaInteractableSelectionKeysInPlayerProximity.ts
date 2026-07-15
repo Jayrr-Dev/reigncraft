@@ -8,22 +8,26 @@ import {
   listingWorldBuildingPlacementFootprintTilePositions,
   resolvingWorldBuildingBlockPlacementFootprint,
 } from '@/components/world/building/domains/definingWorldBuildingPlacementFootprint';
+import { DEFINING_WORLD_PLAZA_CHEST_INTERACT_REACH_GRID } from '@/components/world/chest/domains/definingWorldPlazaChestConstants';
+import { formattingWorldPlazaInteractableChestSelectionKey } from '@/components/world/chest/domains/formattingWorldPlazaInteractableChestSelectionKey';
+import { listingWorldPlazaChestsNearPlayerPosition } from '@/components/world/chest/domains/listingWorldPlazaChestsInInteractionRange';
 import { checkingWorldPlazaOreSmeltingStationBlockDefinitionId } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingRegistry';
 import { resolvingWorldPlazaOreSmeltingStationAnchorBlock } from '@/components/world/crafting/domains/resolvingWorldPlazaOreSmeltingStationAnchorBlock';
 import { checkingWorldPlazaLongGrassDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLongGrassDecorationAtTileIndex';
 import { checkingWorldPlazaPickableFlowerDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaPickableFlowerDecorationAtTileIndex';
 import { checkingWorldPlazaShrubDecorationAtTileIndex } from '@/components/world/domains/checkingWorldPlazaShrubDecorationAtTileIndex';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaTreeAtTileIndexWithPlacedBlocks } from '@/components/world/domains/listingWorldPlazaPlacedTreeBlocksInTileBounds';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { resolvingWorldPlazaColumnRockMetadataAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaColumnRockMetadataAtTileIndex';
 import { resolvingWorldPlazaStoneDecorationAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaStoneDecorationAtTileIndex';
+import { DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED } from '@/components/world/farming/domains/definingWorldPlazaFarmingConstants';
 import type { DefiningWorldPlazaFarmlandTileState } from '@/components/world/farming/domains/definingWorldPlazaFarmlandTypes';
 import { formattingWorldPlazaFarmlandTileSelectionKey } from '@/components/world/farming/domains/formattingWorldPlazaFarmlandTileSelectionKey';
 import { listingWorldPlazaFarmlandTilesInInteractionRange } from '@/components/world/farming/domains/listingWorldPlazaFarmlandTilesInInteractionRange';
 import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fishing/domains/checkingWorldPlazaFishingCastEligibility';
 import { formattingWorldPlazaFishingTileSelectionKey } from '@/components/world/fishing/domains/formattingWorldPlazaFishingTileSelectionKey';
-import { checkingWorldPlazaWetClayEligibility } from '@/components/world/wet-clay/domains/checkingWorldPlazaWetClayEligibility';
-import { formattingWorldPlazaWetClayTileSelectionKey } from '@/components/world/wet-clay/domains/formattingWorldPlazaWetClayTileSelectionKey';
 import {
   applyingWorldPlazaRockMineStateToColumnRockMetadata,
   computingWorldPlazaRockMineableLayerCount,
@@ -45,10 +49,6 @@ import type { DefiningWorldPlazaPickedPebbleTileState } from '@/components/world
 import { formattingWorldPlazaPickedPebbleTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedPebbles';
 import type { DefiningWorldPlazaPickedShrubTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
 import { formattingWorldPlazaPickedShrubTileKey } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
-import type { DefiningWorldPlazaPickedMushroomTileState } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
-import { formattingWorldPlazaPickedMushroomTileKey } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
-import { checkingWorldPlazaMushroomDecorationAtTileIndex } from '@/components/world/mushrooms/domains/checkingWorldPlazaMushroomDecorationAtTileIndex';
-import { checkingWorldPlazaRuntimeMushroomIsPicked } from '@/components/world/mushrooms/domains/registeringWorldPlazaPickedMushroomsLookup';
 import { checkingWorldPlazaLocalTreeStumpStudied } from '@/components/world/harvest/domains/managingWorldPlazaLocalStudiedTreeStumps';
 import { checkingWorldPlazaRuntimeLongGrassIsCleared } from '@/components/world/harvest/domains/registeringWorldPlazaClearedLongGrassLookup';
 import { checkingWorldPlazaRuntimeShrubIsPicked } from '@/components/world/harvest/domains/registeringWorldPlazaPickedShrubsLookup';
@@ -56,12 +56,30 @@ import { checkingWorldPlazaInteractionLabelTileInPlayerProximity } from '@/compo
 import { DEFINING_WORLD_PLAZA_INTERACTION_LABEL_PROXIMITY_RADIUS_TILES } from '@/components/world/interaction/domains/definingWorldPlazaInteractionLabelProximityConstants';
 import { formattingWorldPlazaInteractableBlockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableBlockSelectionKey';
 import { formattingWorldPlazaInteractableFlowerSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableFlowerSelectionKey';
-import { formattingWorldPlazaInteractableMushroomSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableMushroomSelectionKey';
 import { formattingWorldPlazaInteractableLongGrassSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableLongGrassSelectionKey';
+import { formattingWorldPlazaInteractableMushroomSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableMushroomSelectionKey';
 import { formattingWorldPlazaInteractablePebbleSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractablePebbleSelectionKey';
 import { formattingWorldPlazaInteractableRockSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableRockSelectionKey';
 import { formattingWorldPlazaInteractableShrubSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableShrubSelectionKey';
 import { formattingWorldPlazaInteractableTreeSelectionKey } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableTreeSelectionKey';
+import { checkingWorldPlazaMushroomDecorationAtTileIndex } from '@/components/world/mushrooms/domains/checkingWorldPlazaMushroomDecorationAtTileIndex';
+import type { DefiningWorldPlazaPickedMushroomTileState } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
+import { formattingWorldPlazaPickedMushroomTileKey } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
+import { checkingWorldPlazaRuntimeMushroomIsPicked } from '@/components/world/mushrooms/domains/registeringWorldPlazaPickedMushroomsLookup';
+import { DEFINING_NPC_PLAYER_INTERACT_REACH_GRID } from '@/components/world/npc/domains/definingNpcActionConstants';
+import { formattingNpcSelectionKey } from '@/components/world/npc/domains/formattingNpcSelectionKey';
+import {
+  listingNpcInstances,
+  type ManagingNpcInstanceStore,
+} from '@/components/world/npc/domains/managingNpcInstanceStore';
+import { DEFINING_WORLD_PLAZA_BEAR_TRAP_INTERACT_REACH_GRID } from '@/components/world/trap/domains/definingWorldPlazaBearTrapConstants';
+import { DEFINING_WORLD_PLAZA_CALTROP_INTERACT_REACH_GRID } from '@/components/world/trap/domains/definingWorldPlazaCaltropConstants';
+import { formattingWorldPlazaInteractableBearTrapSelectionKey } from '@/components/world/trap/domains/formattingWorldPlazaInteractableBearTrapSelectionKey';
+import { formattingWorldPlazaInteractableCaltropSelectionKey } from '@/components/world/trap/domains/formattingWorldPlazaInteractableCaltropSelectionKey';
+import { listingWorldPlazaBearTrapsNearPlayerPosition } from '@/components/world/trap/domains/listingWorldPlazaBearTrapsInInteractionRange';
+import { listingWorldPlazaCaltropsNearPlayerPosition } from '@/components/world/trap/domains/listingWorldPlazaCaltropsInInteractionRange';
+import { checkingWorldPlazaWetClayEligibility } from '@/components/world/wet-clay/domains/checkingWorldPlazaWetClayEligibility';
+import { formattingWorldPlazaWetClayTileSelectionKey } from '@/components/world/wet-clay/domains/formattingWorldPlazaWetClayTileSelectionKey';
 import { checkingWildlifeDocilePetProximityActionAvailable } from '@/components/world/wildlife/domains/checkingWildlifeDocilePetProximityActionAvailable';
 import { resolvingWildlifeDocilePetKind } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsPettable';
 import { formattingWildlifeCorpseStudySelectionKey } from '@/components/world/wildlife/domains/formattingWildlifeCorpseStudySelectionKey';
@@ -71,23 +89,6 @@ import {
   listingWildlifeInstances,
   type ManagingWildlifeInstanceStore,
 } from '@/components/world/wildlife/domains/managingWildlifeInstanceStore';
-import { formattingNpcSelectionKey } from '@/components/world/npc/domains/formattingNpcSelectionKey';
-import {
-  listingNpcInstances,
-  type ManagingNpcInstanceStore,
-} from '@/components/world/npc/domains/managingNpcInstanceStore';
-import { DEFINING_NPC_PLAYER_INTERACT_REACH_GRID } from '@/components/world/npc/domains/definingNpcActionConstants';
-import { DEFINING_WORLD_PLAZA_CHEST_INTERACT_REACH_GRID } from '@/components/world/chest/domains/definingWorldPlazaChestConstants';
-import { formattingWorldPlazaInteractableChestSelectionKey } from '@/components/world/chest/domains/formattingWorldPlazaInteractableChestSelectionKey';
-import { listingWorldPlazaChestsNearPlayerPosition } from '@/components/world/chest/domains/listingWorldPlazaChestsInInteractionRange';
-import { DEFINING_WORLD_PLAZA_BEAR_TRAP_INTERACT_REACH_GRID } from '@/components/world/trap/domains/definingWorldPlazaBearTrapConstants';
-import { formattingWorldPlazaInteractableBearTrapSelectionKey } from '@/components/world/trap/domains/formattingWorldPlazaInteractableBearTrapSelectionKey';
-import { listingWorldPlazaBearTrapsNearPlayerPosition } from '@/components/world/trap/domains/listingWorldPlazaBearTrapsInInteractionRange';
-import { DEFINING_WORLD_PLAZA_CALTROP_INTERACT_REACH_GRID } from '@/components/world/trap/domains/definingWorldPlazaCaltropConstants';
-import { formattingWorldPlazaInteractableCaltropSelectionKey } from '@/components/world/trap/domains/formattingWorldPlazaInteractableCaltropSelectionKey';
-import { listingWorldPlazaCaltropsNearPlayerPosition } from '@/components/world/trap/domains/listingWorldPlazaCaltropsInInteractionRange';
-import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
-import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 
 export type ListingWorldPlazaInteractableSelectionKeysInPlayerProximityParams =
   {
@@ -178,7 +179,9 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
   }
 
   for (const block of params.placedBlocks) {
-    if (!checkingWorldPlazaOreSmeltingStationBlockDefinitionId(block.definitionId)) {
+    if (
+      !checkingWorldPlazaOreSmeltingStationBlockDefinitionId(block.definitionId)
+    ) {
       continue;
     }
 
@@ -186,7 +189,9 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
       continue;
     }
 
-    const definition = resolvingWorldBuildingBlockDefinition(block.definitionId);
+    const definition = resolvingWorldBuildingBlockDefinition(
+      block.definitionId
+    );
     const footprint = definition
       ? resolvingWorldBuildingBlockPlacementFootprint(definition)
       : { tileWidth: 1, tileHeight: 1 };
@@ -386,6 +391,7 @@ export function listingWorldPlazaInteractableSelectionKeysInPlayerProximity(
   }
 
   if (
+    DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED &&
     params.farmlandByTileKey &&
     (params.hasEquippedHoe ||
       params.hasEquippedScythe ||

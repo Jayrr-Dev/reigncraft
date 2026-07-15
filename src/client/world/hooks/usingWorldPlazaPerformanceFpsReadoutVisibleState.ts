@@ -1,87 +1,43 @@
 'use client';
 
+import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_DEFAULT_VISIBLE } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsUiConstants';
 import {
-  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_DEFAULT_VISIBLE,
-  DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_VISIBLE_STORAGE_KEY,
-} from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsUiConstants';
-import { useCallback, useEffect, useState } from 'react';
+  checkingWorldPlazaPerformanceFpsReadoutVisible,
+  initializingWorldPlazaPerformanceFpsReadoutVisibleStoreFromStorage,
+  settingWorldPlazaPerformanceFpsReadoutVisible,
+  subscribingWorldPlazaPerformanceFpsReadoutVisible,
+} from '@/components/world/domains/managingWorldPlazaPerformanceFpsReadoutVisibleStore';
+import { useCallback, useLayoutEffect, useSyncExternalStore } from 'react';
 
 /** Result from {@link usingWorldPlazaPerformanceFpsReadoutVisibleState}. */
 export type UsingWorldPlazaPerformanceFpsReadoutVisibleStateResult = {
   /** True when the corner FPS counter is visible. */
   isFpsReadoutVisible: boolean;
-  /** Flips corner FPS counter visibility. */
-  togglingFpsReadoutVisible: () => void;
+  /** Enables or disables the corner FPS counter. */
+  settingFpsReadoutVisible: (isVisible: boolean) => void;
 };
 
 /**
- * Reads the persisted FPS readout flag from session storage.
+ * Runtime toggle for the plaza corner FPS readout (Settings → Toggles).
  */
-function readingWorldPlazaPerformanceFpsReadoutVisibleFromStorage(): boolean {
-  if (typeof window === 'undefined') {
-    return DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_DEFAULT_VISIBLE;
-  }
+export function usingWorldPlazaPerformanceFpsReadoutVisibleState(): UsingWorldPlazaPerformanceFpsReadoutVisibleStateResult {
+  useLayoutEffect(() => {
+    initializingWorldPlazaPerformanceFpsReadoutVisibleStoreFromStorage();
+  }, []);
 
-  const storedValue = window.sessionStorage.getItem(
-    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_VISIBLE_STORAGE_KEY
+  const isFpsReadoutVisible = useSyncExternalStore(
+    subscribingWorldPlazaPerformanceFpsReadoutVisible,
+    checkingWorldPlazaPerformanceFpsReadoutVisible,
+    () =>
+      DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_DEFAULT_VISIBLE
   );
 
-  if (storedValue === null) {
-    return DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_DEFAULT_VISIBLE;
-  }
-
-  return storedValue === 'true';
-}
-
-/**
- * Persists the FPS readout flag to session storage.
- *
- * @param isVisible - True when the corner FPS counter should stay on.
- */
-function writingWorldPlazaPerformanceFpsReadoutVisibleToStorage(
-  isVisible: boolean
-): void {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  window.sessionStorage.setItem(
-    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_VISIBLE_STORAGE_KEY,
-    String(isVisible)
-  );
-}
-
-/**
- * Runtime toggle for the plaza corner FPS readout.
- */
-export function usingWorldPlazaPerformanceFpsReadoutVisibleState(
-  isFeatureAvailable: boolean
-): UsingWorldPlazaPerformanceFpsReadoutVisibleStateResult {
-  const [isFpsReadoutVisible, setIsFpsReadoutVisible] = useState<boolean>(
-    DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_DEFAULT_VISIBLE
-  );
-
-  useEffect(() => {
-    if (!isFeatureAvailable) {
-      setIsFpsReadoutVisible(false);
-      return;
-    }
-
-    setIsFpsReadoutVisible(
-      readingWorldPlazaPerformanceFpsReadoutVisibleFromStorage()
-    );
-  }, [isFeatureAvailable]);
-
-  const togglingFpsReadoutVisible = useCallback((): void => {
-    setIsFpsReadoutVisible((isVisible) => {
-      const nextIsVisible = !isVisible;
-      writingWorldPlazaPerformanceFpsReadoutVisibleToStorage(nextIsVisible);
-      return nextIsVisible;
-    });
+  const settingFpsReadoutVisible = useCallback((isVisible: boolean): void => {
+    settingWorldPlazaPerformanceFpsReadoutVisible(isVisible);
   }, []);
 
   return {
-    isFpsReadoutVisible: isFeatureAvailable && isFpsReadoutVisible,
-    togglingFpsReadoutVisible,
+    isFpsReadoutVisible,
+    settingFpsReadoutVisible,
   };
 }

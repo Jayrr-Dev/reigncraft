@@ -2767,6 +2767,9 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           ref={(graphics) => {
             avatarGlowOrbGraphicsRef.current = graphics;
           }}
+          draw={() => {
+            // Drawn each frame via avatarGlowOrbGraphicsRef.
+          }}
           eventMode="none"
           visible={usesGlowOrbPresentation}
         />

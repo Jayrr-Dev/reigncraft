@@ -196,6 +196,8 @@ export function usingWorldPlazaOnboardingCoachmarks({
       return;
     }
 
+    // Hydrate owner only. Play-session restart (session-signal clear) lives in
+    // PixiScene so enabling tips mid-run cannot wipe move/mode signals.
     initializingWorldPlazaOnboardingCoachmarkStore(storageOwnerId);
     spawnPositionRef.current = null;
     initialInventoryQuantityRef.current = null;
@@ -500,7 +502,7 @@ export function usingWorldPlazaOnboardingCoachmarks({
   };
 
   const activeCoachmark =
-    isEnabled && isSpawnTerrainReady
+    isEnabled && isSpawnTerrainReady && storageOwnerId !== null
       ? resolvingWorldPlazaOnboardingActiveCoachmark(
           onboardingSnapshot.completedStepIds,
           liveSignals

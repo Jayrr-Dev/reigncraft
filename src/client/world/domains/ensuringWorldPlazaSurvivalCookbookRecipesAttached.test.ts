@@ -22,7 +22,7 @@ describe('ensuringWorldPlazaSurvivalCookbookRecipesAttached', () => {
 
     ensuringWorldPlazaSurvivalCookbookRecipesAttached();
 
-    expect(gettingWorldPlazaRecipeAttachedSnapshot().sort()).toEqual(
+    expect([...gettingWorldPlazaRecipeAttachedSnapshot()].sort()).toEqual(
       [...expectedSurvivalRecipeIds].sort()
     );
   });

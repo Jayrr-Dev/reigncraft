@@ -37,11 +37,11 @@ export const DEFINING_PLAZA_LORE_BOOK_ILLUSTRATIONS_BY_ENTRY_ID: Readonly<
 > = {
   corpus: {
     id: 'corpus-bands',
-    caption: 'One body, many parts',
+    caption: 'One body, and many parts labouring',
   },
   'the-bands': {
     id: 'biome-rings',
-    caption: 'Bands outward from spawn',
+    caption: 'Ever outward run the lands',
   },
   manus: {
     id: 'quiet-hand',
@@ -49,7 +49,7 @@ export const DEFINING_PLAZA_LORE_BOOK_ILLUSTRATIONS_BY_ENTRY_ID: Readonly<
   },
   'the-quiet-hand': {
     id: 'quiet-hand',
-    caption: 'Shapes everything, touches nothing',
+    caption: 'That shaped all things, and touches none',
   },
   'the-arrangement': {
     id: 'ladder-rungs',
@@ -57,23 +57,23 @@ export const DEFINING_PLAZA_LORE_BOOK_ILLUSTRATIONS_BY_ENTRY_ID: Readonly<
   },
   'the-core': {
     id: 'spritcore-orb',
-    caption: 'Loot, Commit, climb',
+    caption: 'Proof of survival, made small',
   },
   'the-spill': {
     id: 'spritcore-orb',
-    caption: 'Death skims the pouch',
+    caption: 'Death takes its toll of the purse',
   },
   'the-stewards': {
     id: 'apostle-circle',
-    caption: 'Twelve stewards, one god',
+    caption: 'Twelve stewards, and one god',
   },
   'the-worthy': {
     id: 'two-creeds',
-    caption: 'The Worthy and the Many',
+    caption: 'The Worthy, and the Many',
   },
   'the-many': {
     id: 'two-creeds',
-    caption: 'Shared fire, open chest',
+    caption: 'A shared fire, an open chest',
   },
   'old-climbers': {
     id: 'beast-tiers',
@@ -81,19 +81,19 @@ export const DEFINING_PLAZA_LORE_BOOK_ILLUSTRATIONS_BY_ENTRY_ID: Readonly<
   },
   'reading-temper': {
     id: 'beast-tiers',
-    caption: 'Temper is a contract',
+    caption: 'Temper is a covenant, and kept',
   },
   'the-cucco': {
     id: 'cucco',
-    caption: 'Assume, and walk wide',
+    caption: 'Presume, and give it a wide road',
   },
   'the-study': {
     id: 'beast-tiers',
-    caption: 'Sight is cheap. Study costs time.',
+    caption: 'Sight costs nothing; Study costs time',
   },
   'the-forgewrights': {
     id: 'firelands',
-    caption: 'Stone, iron, and scorched ground',
+    caption: 'Stone and iron, and scorched earth',
   },
   'the-scorching': {
     id: 'firelands',
@@ -101,11 +101,11 @@ export const DEFINING_PLAZA_LORE_BOOK_ILLUSTRATIONS_BY_ENTRY_ID: Readonly<
   },
   'the-dark-doors': {
     id: 'dark-doors',
-    caption: 'Gate structures, all of them dark',
+    caption: 'Gates of purpose, every one dark',
   },
   'the-frostsink': {
     id: 'biome-rings',
-    caption: 'Ice bowl around a Cryocore',
+    caption: 'A bowl of ice about a Cryocore',
   },
   'the-far-shore': {
     id: 'far-shore',
@@ -113,6 +113,6 @@ export const DEFINING_PLAZA_LORE_BOOK_ILLUSTRATIONS_BY_ENTRY_ID: Readonly<
   },
   'the-sealed-page': {
     id: 'sealed-marks',
-    caption: 'Seven marks. Nothing between.',
+    caption: 'Seven marks, and nothing between',
   },
 };

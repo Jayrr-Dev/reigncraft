@@ -187,8 +187,9 @@ function findingWorldPlazaFirelandsCentralityTeleportWorldPointForDev(): Definin
     DEFINING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_SEARCH_RADIUS_TILES;
   const step =
     DEFINING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_CENTRALITY_SEARCH_STEP_TILES;
-  let bestTile: { tileX: number; tileY: number; centrality: number } | null =
-    null;
+  let bestTileX = 0;
+  let bestTileY = 0;
+  let bestCentrality = -1;
 
   for (let radius = minRadius; radius <= maxRadius; radius += step) {
     for (let offset = -radius; offset <= radius; offset += step) {
@@ -229,12 +230,10 @@ function findingWorldPlazaFirelandsCentralityTeleportWorldPointForDev(): Definin
           continue;
         }
 
-        if (!bestTile || centrality > bestTile.centrality) {
-          bestTile = {
-            tileX: candidate.tileX,
-            tileY: candidate.tileY,
-            centrality,
-          };
+        if (centrality > bestCentrality) {
+          bestTileX = candidate.tileX;
+          bestTileY = candidate.tileY;
+          bestCentrality = centrality;
         }
 
         if (
@@ -248,10 +247,10 @@ function findingWorldPlazaFirelandsCentralityTeleportWorldPointForDev(): Definin
       }
     }
 
-    if (bestTile) {
+    if (bestCentrality > 0) {
       return buildingWorldPlazaFirelandsDevTeleportWorldPointAtTileIndex(
-        bestTile.tileX,
-        bestTile.tileY
+        bestTileX,
+        bestTileY
       );
     }
   }

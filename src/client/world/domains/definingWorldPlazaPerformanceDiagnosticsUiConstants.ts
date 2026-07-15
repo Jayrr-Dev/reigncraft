@@ -27,27 +27,15 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_BUTTON_LABEL =
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_TOGGLE_ARIA_LABEL =
   'Toggle performance diagnostics overlay' as const;
 
-/** Compact FPS readout toggle (replaces always-on corner counter). */
-export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_TOGGLE_BUTTON_CLASS_NAME =
-  'pointer-events-auto min-w-0 flex-1 rounded border border-emerald-800 bg-emerald-700 px-1 py-0.5 text-[8px] font-bold uppercase leading-none tracking-wide text-white shadow-sm transition hover:bg-emerald-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-300' as const;
-
-/** FPS toggle when the corner readout is visible. */
-export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_TOGGLE_BUTTON_ACTIVE_CLASS_NAME =
-  'pointer-events-auto min-w-0 flex-1 rounded border border-emerald-900 bg-emerald-600 px-1 py-0.5 text-[8px] font-bold uppercase leading-none tracking-wide text-white shadow-sm transition hover:bg-emerald-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-300' as const;
-
-/** Visible FPS toggle label. */
-export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_TOGGLE_BUTTON_LABEL =
+/** Settings → Toggles row label for the corner FPS counter. */
+export const LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_TOGGLE =
   'FPS' as const;
-
-/** Accessible label for the FPS readout toggle. */
-export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_TOGGLE_ARIA_LABEL =
-  'Toggle FPS readout' as const;
 
 /** sessionStorage key for corner FPS readout visibility. */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_VISIBLE_STORAGE_KEY =
   'world-plaza-fps-readout-visible' as const;
 
-/** Corner FPS starts hidden; player turns it on with the FPS button. */
+/** Corner FPS starts hidden; player turns it on from Settings → Toggles. */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_DEFAULT_VISIBLE =
   false as const;
 

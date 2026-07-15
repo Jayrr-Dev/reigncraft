@@ -827,7 +827,9 @@ export function resolvingWorldPlazaMushroomHabitatClaimAtTileIndex(
     params.resolveBiomeKindAtTile ??
     ((tileX, tileY) => resolvingWorldPlazaBiomeAtTileIndex(tileX, tileY).kind);
   const checkingWaterAtTile =
-    params.checkingWaterAtTile ?? resolvingWorldPlazaWaterAtTileIndex;
+    params.checkingWaterAtTile ??
+    ((tileX, tileY) =>
+      resolvingWorldPlazaWaterAtTileIndex(tileX, tileY) != null);
   const woodHabitatEnabled =
     params.woodHabitatEnabled ??
     checkingWorldPlazaMushroomWoodHabitatEnabledByDefault();

@@ -299,6 +299,42 @@ export const STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_LABEL_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_CLASS_NAME =
   'ml-auto shrink-0 tabular-nums font-display text-[11px] font-bold text-ink' as const;
 
+/** Positive signed bonus after an attribute value (e.g. Attack +10). */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_BONUS_POSITIVE_CLASS_NAME =
+  'text-emerald-800' as const;
+
+/** Negative signed bonus after an attribute value. */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_BONUS_NEGATIVE_CLASS_NAME =
+  'text-poster-orange-deep' as const;
+
+/** Clickable bonus span that opens the source popover. */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_BONUS_BUTTON_CLASS_NAME =
+  'cursor-pointer underline decoration-dotted underline-offset-2 hover:opacity-80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-poster-gold/70' as const;
+
+/** Wrapper for value + bonus so the popover can anchor. */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_WRAP_CLASS_NAME =
+  'relative ml-auto shrink-0' as const;
+
+/** Popover listing where an Attack bonus comes from (below chip; panel scrolls). */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTACK_BONUS_POPOVER_CLASS_NAME =
+  'absolute left-auto right-0 top-full z-20 mt-1 flex w-max max-w-[min(12rem,calc(100vw-2rem))] flex-col gap-0.5 rounded border border-poster-teal/30 bg-parchment px-1.5 py-1 text-left shadow-[0_1px_0_0_rgba(20,37,43,0.25)]' as const;
+
+/** Heading above Attack bonus source lines. */
+export const LABELING_WORLD_PLAZA_PROFILE_PANEL_ATTACK_BONUS_POPOVER_TITLE =
+  'Bonus sources' as const;
+
+/** Accessible label for the Attack bonus button. */
+export const LABELING_WORLD_PLAZA_PROFILE_PANEL_ATTACK_BONUS_BUTTON =
+  'Show Attack bonus sources' as const;
+
+/** Title class inside the Attack bonus popover. */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTACK_BONUS_POPOVER_TITLE_CLASS_NAME =
+  'text-[8px] font-bold uppercase tracking-wide text-ink-soft' as const;
+
+/** One source line inside the Attack bonus popover. */
+export const STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTACK_BONUS_POPOVER_LINE_CLASS_NAME =
+  'text-[9px] font-semibold leading-snug text-ink' as const;
+
 /** One active effect row. */
 export const STYLING_WORLD_PLAZA_PROFILE_PANEL_EFFECT_ROW_CLASS_NAME =
   'flex items-baseline gap-1.5 text-[11px] leading-tight' as const;

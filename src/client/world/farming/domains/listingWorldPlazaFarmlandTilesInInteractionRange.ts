@@ -7,7 +7,10 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { advancingWorldPlazaFarmlandGrowthPhases } from '@/components/world/farming/domains/advancingWorldPlazaFarmlandGrowthPhases';
 import { checkingWorldPlazaFarmingTillEligibility } from '@/components/world/farming/domains/checkingWorldPlazaFarmingTillEligibility';
-import { DEFINING_WORLD_PLAZA_FARMING_PLAYER_RANGE_TILES } from '@/components/world/farming/domains/definingWorldPlazaFarmingConstants';
+import {
+  DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED,
+  DEFINING_WORLD_PLAZA_FARMING_PLAYER_RANGE_TILES,
+} from '@/components/world/farming/domains/definingWorldPlazaFarmingConstants';
 import type { DefiningWorldPlazaFarmlandTileState } from '@/components/world/farming/domains/definingWorldPlazaFarmlandTypes';
 
 export type DefiningWorldPlazaFarmlandInteractionKind =
@@ -56,6 +59,10 @@ function resolvingFarmlandTileStateAt(
 export function listingWorldPlazaFarmlandTilesInInteractionRange(
   params: ListingWorldPlazaFarmlandTilesInInteractionRangeParams
 ): readonly ListingWorldPlazaFarmlandTilesInInteractionRangeEntry[] {
+  if (!DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED) {
+    return [];
+  }
+
   const entries: ListingWorldPlazaFarmlandTilesInInteractionRangeEntry[] = [];
   const nowMs = params.nowMs ?? performance.now();
   const centerTileX = Math.floor(params.playerPosition.x);

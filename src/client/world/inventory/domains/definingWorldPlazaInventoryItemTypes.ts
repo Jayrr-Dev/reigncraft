@@ -4,6 +4,7 @@ import {
 } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import { DEFINING_INVENTORY_UNLIMITED_STACK_SIZE } from '@/components/inventory/domains/definingInventoryStackConstants';
 import { registeringWorldPlazaCraftRecipePageInventoryItems } from '@/components/world/crafting/domains/registeringWorldPlazaCraftRecipePageInventoryItems';
+import { DEFINING_WORLD_PLAZA_TOOL_TIER_STATS } from '@/components/world/equipment/domains/definingWorldPlazaToolTierConstants';
 import { registeringWorldPlazaFishingCatchInventoryItems } from '@/components/world/fishing/domains/registeringWorldPlazaFishingCatchInventoryItems';
 import {
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE,
@@ -13,7 +14,6 @@ import {
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_FISH,
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_WHEAT,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
-import { DEFINING_WORLD_PLAZA_TOOL_TIER_STATS } from '@/components/world/equipment/domains/definingWorldPlazaToolTierConstants';
 import { resolvingWorldPlazaInventoryCoconutSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCoconutSpriteSheetConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
@@ -38,13 +38,11 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISH,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_WOOD,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLINT,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_WOOD,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_TUBE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PACK,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_POUCH,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RUCKSACK,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SCYTHE_WOOD,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD,
@@ -223,11 +221,13 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
         heldItemTier: 'wood',
         attackEvModifier: {
           mode: 'multiplicative',
-          value: DEFINING_WORLD_PLAZA_TOOL_TIER_STATS.wood.meleeDamageMultiplier,
+          value:
+            DEFINING_WORLD_PLAZA_TOOL_TIER_STATS.wood.meleeDamageMultiplier,
         },
         meleeDamageMultiplier:
           DEFINING_WORLD_PLAZA_TOOL_TIER_STATS.wood.meleeDamageMultiplier,
-        meleeFlatDamage: DEFINING_WORLD_PLAZA_TOOL_TIER_STATS.wood.meleeFlatDamage,
+        meleeFlatDamage:
+          DEFINING_WORLD_PLAZA_TOOL_TIER_STATS.wood.meleeFlatDamage,
       },
       durability: {
         max: DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
@@ -427,14 +427,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS: readonly DefiningWo
       quantity: 1,
     },
     {
-      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_WOOD,
-      quantity: 1,
-    },
-    {
-      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SCYTHE_WOOD,
-      quantity: 1,
-    },
-    {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_WOOD,
       quantity: 1,
     },
@@ -445,10 +437,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_DEMO_SEED_ITEMS: readonly DefiningWo
     {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CALTROPS,
       quantity: 6,
-    },
-    {
-      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED,
-      quantity: 8,
     },
   ] as const;
 

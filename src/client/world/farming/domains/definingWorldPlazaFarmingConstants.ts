@@ -4,6 +4,30 @@
  * @module components/world/farming/domains/definingWorldPlazaFarmingConstants
  */
 
+/**
+ * Player-facing farming (till / plant / harvest, hoe + scythe crafts, seeds).
+ * Off until the feature ships; set true to re-enable crafts and interactions.
+ */
+export const DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED = false;
+
+/** Tool kinds used only by farming (gated with the feature flag). */
+export const DEFINING_WORLD_PLAZA_FARMING_TOOL_KINDS = [
+  'hoe',
+  'scythe',
+] as const;
+
+export type DefiningWorldPlazaFarmingToolKind =
+  (typeof DEFINING_WORLD_PLAZA_FARMING_TOOL_KINDS)[number];
+
+/** True when `toolKind` is a farming-only tool. */
+export function checkingWorldPlazaFarmingToolKind(
+  toolKind: string
+): toolKind is DefiningWorldPlazaFarmingToolKind {
+  return (
+    DEFINING_WORLD_PLAZA_FARMING_TOOL_KINDS as readonly string[]
+  ).includes(toolKind);
+}
+
 /** Max Chebyshev distance from player to farmland tile actions. */
 export const DEFINING_WORLD_PLAZA_FARMING_PLAYER_RANGE_TILES = 2;
 

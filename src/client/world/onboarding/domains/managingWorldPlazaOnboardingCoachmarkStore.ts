@@ -97,28 +97,95 @@ function notifyingWorldPlazaOnboardingCoachmarkSubscribers(): void {
 }
 
 function persistingWorldPlazaOnboardingCoachmarkCompletedSteps(): void {
+  if (managingWorldPlazaOnboardingCoachmarkStorageOwnerId === null) {
+    return;
+  }
+
   writingWorldPlazaOnboardingCoachmarksToStorage(
     managingWorldPlazaOnboardingCoachmarkStorageOwnerId,
     managingWorldPlazaOnboardingCoachmarkCompletedStepIds
   );
 }
 
+function mergingWorldPlazaOnboardingCoachmarkCompletedStepsFromStorage(
+  storageOwnerId: string
+): Set<WorldPlazaOnboardingCoachmarkStepId> {
+  const ownedStepIds =
+    readingWorldPlazaOnboardingCoachmarksFromStorage(storageOwnerId);
+  const legacyGuestStepIds =
+    readingWorldPlazaOnboardingCoachmarksFromStorage(null);
+
+  if (legacyGuestStepIds.size === 0) {
+    return new Set(ownedStepIds);
+  }
+
+  const mergedStepIds = new Set([...ownedStepIds, ...legacyGuestStepIds]);
+
+  // Progress dismissed before the owner id was ready used the unsuffixed key.
+  // Fold it into the owner key once so leave/re-enter cannot revive those tips.
+  writingWorldPlazaOnboardingCoachmarksToStorage(storageOwnerId, mergedStepIds);
+
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(
+      resolvingWorldPlazaOnboardingCoachmarksStorageKey(null)
+    );
+  }
+
+  return mergedStepIds;
+}
+
 /**
  * Hydrates onboarding coachmark progress from localStorage for one session owner.
  *
- * @param storageOwnerId - Session owner id, or null for guest sessions.
+ * Ignores `null` owners so dismissals never persist to the unsuffixed guest key
+ * and then get lost when the real slot / reddit owner binds later.
+ *
+ * @param storageOwnerId - Session owner id, or null while identity is unknown.
  */
 export function initializingWorldPlazaOnboardingCoachmarkStore(
   storageOwnerId: string | null
 ): void {
+  if (storageOwnerId === null) {
+    return;
+  }
+
   if (managingWorldPlazaOnboardingCoachmarkStorageOwnerId === storageOwnerId) {
     return;
   }
 
   managingWorldPlazaOnboardingCoachmarkStorageOwnerId = storageOwnerId;
-  managingWorldPlazaOnboardingCoachmarkCompletedStepIds = new Set(
-    readingWorldPlazaOnboardingCoachmarksFromStorage(storageOwnerId)
-  );
+  managingWorldPlazaOnboardingCoachmarkCompletedStepIds =
+    mergingWorldPlazaOnboardingCoachmarkCompletedStepsFromStorage(
+      storageOwnerId
+    );
+  managingWorldPlazaOnboardingCoachmarkSessionSignals =
+    MANAGING_WORLD_PLAZA_ONBOARDING_COACHMARK_EMPTY_SESSION_SIGNALS;
+  refreshingWorldPlazaOnboardingCoachmarkSnapshotCache();
+  notifyingWorldPlazaOnboardingCoachmarkSubscribers();
+}
+
+/**
+ * Starts a play session: re-reads completed tips from storage and clears
+ * ephemeral session signals (move/mode clicks). Call on each world mount.
+ *
+ * @param storageOwnerId - Session owner id, or null while identity is unknown.
+ */
+export function beginningWorldPlazaOnboardingCoachmarkPlaySession(
+  storageOwnerId: string | null
+): void {
+  if (storageOwnerId === null) {
+    return;
+  }
+
+  if (managingWorldPlazaOnboardingCoachmarkStorageOwnerId !== storageOwnerId) {
+    initializingWorldPlazaOnboardingCoachmarkStore(storageOwnerId);
+    return;
+  }
+
+  managingWorldPlazaOnboardingCoachmarkCompletedStepIds =
+    mergingWorldPlazaOnboardingCoachmarkCompletedStepsFromStorage(
+      storageOwnerId
+    );
   managingWorldPlazaOnboardingCoachmarkSessionSignals =
     MANAGING_WORLD_PLAZA_ONBOARDING_COACHMARK_EMPTY_SESSION_SIGNALS;
   refreshingWorldPlazaOnboardingCoachmarkSnapshotCache();
@@ -147,6 +214,10 @@ export function gettingWorldPlazaOnboardingCoachmarkSnapshot(): WorldPlazaOnboar
 export function completingWorldPlazaOnboardingCoachmarkStep(
   stepId: WorldPlazaOnboardingCoachmarkStepId
 ): void {
+  if (managingWorldPlazaOnboardingCoachmarkStorageOwnerId === null) {
+    return;
+  }
+
   if (managingWorldPlazaOnboardingCoachmarkCompletedStepIds.has(stepId)) {
     return;
   }
@@ -363,6 +434,16 @@ export function resettingWorldPlazaOnboardingCoachmarkProgress(): void {
   persistingWorldPlazaOnboardingCoachmarkCompletedSteps();
   refreshingWorldPlazaOnboardingCoachmarkSnapshotCache();
   notifyingWorldPlazaOnboardingCoachmarkSubscribers();
+}
+
+/** Test-only: wipes module state without touching localStorage keys. */
+export function resettingWorldPlazaOnboardingCoachmarkStoreForTests(): void {
+  managingWorldPlazaOnboardingCoachmarkStorageOwnerId = null;
+  managingWorldPlazaOnboardingCoachmarkCompletedStepIds = new Set();
+  managingWorldPlazaOnboardingCoachmarkSessionSignals =
+    MANAGING_WORLD_PLAZA_ONBOARDING_COACHMARK_EMPTY_SESSION_SIGNALS;
+  managingWorldPlazaOnboardingCoachmarkSubscribers.clear();
+  refreshingWorldPlazaOnboardingCoachmarkSnapshotCache();
 }
 
 /** Clears onboarding coachmark progress for one persistence owner. */

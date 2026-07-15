@@ -98,7 +98,7 @@ describe('checkingWorldPlazaLongGrassDecorationAtTileIndex', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     featureEnabledMock.mockReturnValue(true);
-    waterMock.mockReturnValue(false);
+    waterMock.mockReturnValue(null);
     nearCliffEdgeMock.mockReturnValue(false);
     lavaMock.mockReturnValue(false);
     lakeShoreMock.mockReturnValue(false);

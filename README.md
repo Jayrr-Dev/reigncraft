@@ -11,8 +11,7 @@ Reigncraft is a [Devvit Web](https://developers.reddit.com/docs/capabilities/dev
 | Client UI | React 19, Tailwind CSS 4, Vite |
 | Plaza world | PixiJS 8 (`pixi.js` + `@pixi/react`) |
 | Devvit server | Node.js 22, Hono, tRPC v11 |
-| Multiplayer / data | Convex |
-| Session state | Redis (via Devvit) |
+| Multiplayer / session | Redis (via Devvit) |
 | Audio | `star-audio` |
 | Tests | Vitest |
 
@@ -96,13 +95,12 @@ Six tool families (sword, axe, pickaxe, hoe, scythe, fishrod), each with four ti
 
 App config lives in `devvit.json`.
 
-| Setting        | Purpose                                            |
-| -------------- | -------------------------------------------------- |
-| `convexUrl`    | Convex deployment URL (multiplayer / backend data) |
-| `giphyApiKey`  | Optional GIPHY key (secret)                        |
-| `geminiApiKey` | Optional Gemini key (secret)                       |
+| Setting        | Purpose                      |
+| -------------- | ---------------------------- |
+| `giphyApiKey`  | Optional GIPHY key (secret)  |
+| `geminiApiKey` | Optional Gemini key (secret) |
 
-HTTP allowlist includes the Convex cloud host and related APIs. Redis is enabled for server state.
+Redis is enabled for multiplayer rooms and server state (`redis: true` in `devvit.json`).
 
 Playtest subreddit (dev): `r/reigncraft_dev` (`dev.subreddit` in `devvit.json`).
 
@@ -136,7 +134,7 @@ Before submit for review: confirm `npx devvit upload` then `npx devvit install <
 ### Soft release (current)
 
 - Survival plaza loop: movement, combat, harvest, cooking, hunger, biomes
-- Multiplayer plaza shards via Devvit + Convex
+- Multiplayer plaza shards via Devvit + Redis polling
 - Mobile and desktop controls; tall splash + expanded game entrypoints
 - Unlisted publish for closed playtesting (not App Directory listed)
 - Install trigger is side-effect free (no auto post); mods use Create a new post

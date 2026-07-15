@@ -1,16 +1,35 @@
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID } from '@/components/world/building/domains/definingWorldPlazaCraftModeCookbookRegistry';
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeToolRecipeIds';
 import { registeringWorldPlazaCraftModeToolRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaCraftModeToolRecipes';
+import {
+  DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED,
+  DEFINING_WORLD_PLAZA_FARMING_TOOL_KINDS,
+} from '@/components/world/farming/domains/definingWorldPlazaFarmingConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_STEEL } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { describe, expect, it } from 'vitest';
 
 describe('registeringWorldPlazaCraftModeToolRecipes', () => {
   it('registers one blacksmith recipe per tool family and tier', () => {
     const recipes = registeringWorldPlazaCraftModeToolRecipes();
-
-    expect(recipes).toHaveLength(
-      Object.keys(DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID).length
+    const farmingRecipeIds = Object.values(
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID
+    ).filter((recipeId) =>
+      DEFINING_WORLD_PLAZA_FARMING_TOOL_KINDS.some((toolKind) =>
+        recipeId.includes(`-${toolKind}-`)
+      )
     );
+    const expectedRecipeCount =
+      Object.keys(DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID).length -
+      (DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED
+        ? 0
+        : farmingRecipeIds.length);
+
+    expect(recipes).toHaveLength(expectedRecipeCount);
+    if (!DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED) {
+      expect(
+        recipes.some((recipe) => farmingRecipeIds.includes(recipe.id))
+      ).toBe(false);
+    }
     expect(
       recipes.every(
         (recipe) =>

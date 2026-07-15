@@ -20,6 +20,8 @@ import {
   DEFINING_WORLD_PLAZA_PROFILE_PANEL_PORTRAIT_ZOOM,
   DEFINING_WORLD_PLAZA_PROFILE_PANEL_TAB_REGISTRY,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SECTION,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_ATTACK_BONUS_BUTTON,
+  LABELING_WORLD_PLAZA_PROFILE_PANEL_ATTACK_BONUS_POPOVER_TITLE,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_CLOSE,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_EFFECTS_EMPTY,
   LABELING_WORLD_PLAZA_PROFILE_PANEL_EFFECTS_SECTION,
@@ -36,10 +38,17 @@ import {
   STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_GRID_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_LABEL_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTACK_BONUS_POPOVER_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTACK_BONUS_POPOVER_LINE_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTACK_BONUS_POPOVER_TITLE_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_CHIP_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_GRID_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_LABEL_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_BONUS_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_BONUS_NEGATIVE_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_BONUS_POSITIVE_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_CLASS_NAME,
+  STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_WRAP_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_BACKDROP_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_CLOSE_BUTTON_CLASS_NAME,
   STYLING_WORLD_PLAZA_PROFILE_PANEL_EFFECT_DESCRIPTION_CLASS_NAME,
@@ -79,20 +88,22 @@ import {
   type ResolvingWorldPlazaProfilePanelStaminaHud,
   type ResolvingWorldPlazaProfilePanelVitalRow,
 } from '@/components/world/domains/resolvingWorldPlazaProfilePanelSections';
-import type { DefiningWorldPlazaArmorSlotDefinition } from '@/components/world/equipment/domains/definingWorldPlazaArmorSlotRegistry';
 import type { DefiningWorldPlazaArmorLoadoutState } from '@/components/world/equipment/domains/definingWorldPlazaArmorLoadoutTypes';
 import { creatingEmptyWorldPlazaArmorLoadoutState } from '@/components/world/equipment/domains/definingWorldPlazaArmorLoadoutTypes';
-import type { DefiningWorldPlazaArmorSlotId } from '@/components/world/equipment/domains/definingWorldPlazaArmorSlotRegistry';
+import type {
+  DefiningWorldPlazaArmorSlotDefinition,
+  DefiningWorldPlazaArmorSlotId,
+} from '@/components/world/equipment/domains/definingWorldPlazaArmorSlotRegistry';
 import { resolvingWorldPlazaArmorSlotsForAvatarSkin } from '@/components/world/equipment/domains/resolvingWorldPlazaArmorSlotsForAvatarSkin';
-import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { RenderingWorldPlazaEntityDiseaseIconGlyph } from '@/components/world/health/components/renderingWorldPlazaEntityDiseaseIconGlyph';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
 import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
 import type { UsingWorldPlazaPlayerHungerHudSnapshot } from '@/components/world/hunger/hooks/usingWorldPlazaPlayerHunger';
+import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { RenderingWorldPlazaSpritcoreUpgradePanel } from '@/components/world/spritcore/components/renderingWorldPlazaSpritcoreUpgradePanel';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 
 /** Props for {@link RenderingWorldPlazaProfilePanel}. */
 export interface RenderingWorldPlazaProfilePanelProps {
@@ -229,7 +240,9 @@ function RenderingWorldPlazaProfilePanelArmorSlots({
             ) : (
               <Icon
                 icon={slot.iconName}
-                width={DEFINING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_SIZE_PX}
+                width={
+                  DEFINING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_SIZE_PX
+                }
                 height={
                   DEFINING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_SIZE_PX
                 }
@@ -250,6 +263,135 @@ function RenderingWorldPlazaProfilePanelArmorSlots({
         );
       })}
     </div>
+  );
+}
+
+function RenderingWorldPlazaProfilePanelAttributeValue({
+  entry,
+}: {
+  entry:
+    | ResolvingWorldPlazaProfilePanelAttributeEntry
+    | ResolvingWorldPlazaProfilePanelPassiveEntry
+    | ResolvingWorldPlazaProfilePanelImmunityEntry;
+}): React.JSX.Element {
+  const valueBonusText =
+    'valueBonusText' in entry ? entry.valueBonusText : undefined;
+  const valueBonusTone =
+    'valueBonusTone' in entry ? entry.valueBonusTone : undefined;
+  const valueBonusDetailLines =
+    'valueBonusDetailLines' in entry ? entry.valueBonusDetailLines : undefined;
+  const [isBonusPopoverOpen, setIsBonusPopoverOpen] = useState(false);
+  const valueWrapRef = useRef<HTMLSpanElement | null>(null);
+  const hasBonusPopover =
+    valueBonusText !== undefined &&
+    valueBonusDetailLines !== undefined &&
+    valueBonusDetailLines.length > 0;
+
+  const closingBonusPopoverOnOutsidePointerDown = useEffectEvent(
+    (event: PointerEvent): void => {
+      if (!isBonusPopoverOpen) {
+        return;
+      }
+
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
+      }
+
+      if (valueWrapRef.current?.contains(target)) {
+        return;
+      }
+
+      setIsBonusPopoverOpen(false);
+    }
+  );
+
+  useEffect(() => {
+    if (!isBonusPopoverOpen) {
+      return;
+    }
+
+    document.addEventListener(
+      'pointerdown',
+      closingBonusPopoverOnOutsidePointerDown
+    );
+    return () => {
+      document.removeEventListener(
+        'pointerdown',
+        closingBonusPopoverOnOutsidePointerDown
+      );
+    };
+  }, [isBonusPopoverOpen]);
+
+  if (!valueBonusText || !valueBonusTone) {
+    return (
+      <span
+        className={STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_CLASS_NAME}
+      >
+        {entry.valueText}
+      </span>
+    );
+  }
+
+  const bonusToneClassName =
+    valueBonusTone === 'positive'
+      ? STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_BONUS_POSITIVE_CLASS_NAME
+      : STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_BONUS_NEGATIVE_CLASS_NAME;
+
+  return (
+    <span
+      ref={valueWrapRef}
+      className={
+        STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_WRAP_CLASS_NAME
+      }
+    >
+      <span
+        className={STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_CLASS_NAME}
+      >
+        {entry.valueText}{' '}
+        {hasBonusPopover ? (
+          <button
+            type="button"
+            className={`${bonusToneClassName} ${STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_BONUS_BUTTON_CLASS_NAME}`}
+            aria-label={LABELING_WORLD_PLAZA_PROFILE_PANEL_ATTACK_BONUS_BUTTON}
+            aria-expanded={isBonusPopoverOpen}
+            onClick={() => {
+              setIsBonusPopoverOpen((current) => !current);
+            }}
+          >
+            {valueBonusText}
+          </button>
+        ) : (
+          <span className={bonusToneClassName}>{valueBonusText}</span>
+        )}
+      </span>
+      {isBonusPopoverOpen && hasBonusPopover ? (
+        <div
+          role="tooltip"
+          className={
+            STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTACK_BONUS_POPOVER_CLASS_NAME
+          }
+        >
+          <span
+            className={
+              STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTACK_BONUS_POPOVER_TITLE_CLASS_NAME
+            }
+          >
+            {LABELING_WORLD_PLAZA_PROFILE_PANEL_ATTACK_BONUS_POPOVER_TITLE}
+          </span>
+          {valueBonusDetailLines.map((line) => (
+            <span
+              key={line}
+              className={
+                STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTACK_BONUS_POPOVER_LINE_CLASS_NAME
+              }
+            >
+              {line}
+            </span>
+          ))}
+        </div>
+      ) : null}
+    </span>
   );
 }
 
@@ -314,13 +456,7 @@ function RenderingWorldPlazaProfilePanelAttributeGrid({
             >
               {entry.label}
             </span>
-            <span
-              className={
-                STYLING_WORLD_PLAZA_PROFILE_PANEL_ATTRIBUTE_VALUE_CLASS_NAME
-              }
-            >
-              {entry.valueText}
-            </span>
+            <RenderingWorldPlazaProfilePanelAttributeValue entry={entry} />
           </div>
         );
       })}

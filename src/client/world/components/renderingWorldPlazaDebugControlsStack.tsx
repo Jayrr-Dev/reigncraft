@@ -12,6 +12,7 @@ import {
   DEFINING_WORLD_PLAZA_DEBUG_CONTROLS_STACK_GAP_CLASS_NAME,
   resolvingWorldPlazaDebugControlsStackAnchorTopClassName,
 } from '@/components/world/domains/definingWorldPlazaDebugControlsStackUiConstants';
+import { usingWorldPlazaPerformanceFpsReadoutVisibleState } from '@/components/world/hooks/usingWorldPlazaPerformanceFpsReadoutVisibleState';
 
 export interface RenderingWorldPlazaDebugControlsStackProps {
   /** True when the stamina HUD sits above the layer debug labels. */
@@ -59,6 +60,8 @@ export function RenderingWorldPlazaDebugControlsStack({
       hasStaminaBar,
       isBuildModeActive
     );
+  const { isFpsReadoutVisible } =
+    usingWorldPlazaPerformanceFpsReadoutVisibleState();
 
   return (
     <>
@@ -87,14 +90,14 @@ export function RenderingWorldPlazaDebugControlsStack({
           onToggle={onToggleFeaturesDebug}
         />
       </div>
+      {isFpsReadoutVisible ? (
+        <RenderingWorldPlazaPerformanceDiagnosticsFpsReadout />
+      ) : null}
       {isPerformanceDiagnosticsFeatureAvailable ? (
-        <>
-          <RenderingWorldPlazaPerformanceDiagnosticsFpsReadout />
-          <RenderingWorldPlazaPerformanceDiagnosticsOverlay
-            isVisible={isPerformanceDiagnosticsVisible}
-            onClose={onTogglePerformanceDiagnostics}
-          />
-        </>
+        <RenderingWorldPlazaPerformanceDiagnosticsOverlay
+          isVisible={isPerformanceDiagnosticsVisible}
+          onClose={onTogglePerformanceDiagnostics}
+        />
       ) : null}
     </>
   );

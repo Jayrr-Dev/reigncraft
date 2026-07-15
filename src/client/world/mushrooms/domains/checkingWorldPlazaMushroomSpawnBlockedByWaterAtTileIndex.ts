@@ -20,7 +20,8 @@ export type CheckingWorldPlazaMushroomSpawnBlockedByWaterAtTileIndexParams = {
 export function checkingWorldPlazaMushroomSpawnBlockedByWaterAtTileIndex({
   tileX,
   tileY,
-  checkingWaterAtTile = resolvingWorldPlazaWaterAtTileIndex,
+  checkingWaterAtTile = (tileX, tileY) =>
+    resolvingWorldPlazaWaterAtTileIndex(tileX, tileY) != null,
   bufferTiles = DEFINING_WORLD_PLAZA_MUSHROOM_WATER_BUFFER_TILES,
 }: CheckingWorldPlazaMushroomSpawnBlockedByWaterAtTileIndexParams): boolean {
   if (checkingWaterAtTile(tileX, tileY)) {

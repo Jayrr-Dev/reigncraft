@@ -19,6 +19,10 @@ import { resolvingWorldPlazaCraftModeToolRecipeSpriteSheetIcon } from '@/compone
 import { DEFINING_WORLD_PLAZA_CRAFT_RECIPE_NEARBY_STATION_RANGE_TILES } from '@/components/world/crafting/domains/definingWorldPlazaCraftRecipeNearbyStationConstants';
 import { DEFINING_WORLD_PLAZA_TOOL_TIER_STATS } from '@/components/world/equipment/domains/definingWorldPlazaToolTierConstants';
 import {
+  checkingWorldPlazaFarmingToolKind,
+  DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED,
+} from '@/components/world/farming/domains/definingWorldPlazaFarmingConstants';
+import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
@@ -30,6 +34,13 @@ export function registeringWorldPlazaCraftModeToolRecipes(): readonly DefiningWo
   const recipes: DefiningWorldPlazaCraftModeItemRecipeDefinition[] = [];
 
   for (const family of DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_FAMILIES) {
+    if (
+      !DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED &&
+      checkingWorldPlazaFarmingToolKind(family)
+    ) {
+      continue;
+    }
+
     const familySpec =
       DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_FAMILY_SPECS.find(
         (spec) => spec.family === family
