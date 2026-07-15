@@ -373,6 +373,22 @@ function parsingPersistedPetRoster(
   return roster.pets.length > 0 ? roster : null;
 }
 
+function checkingSaveWorldSeed(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function parsingPersistedWorldSeed(value: unknown): number | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (!checkingSaveWorldSeed(value)) {
+    return null;
+  }
+
+  return value | 0;
+}
+
 function checkingSaveSlotHasPersistedData(
   data: Pick<
     PlazaSinglePlayerSaveSlotPersistedData,
@@ -450,6 +466,7 @@ function parsingPersistedSaveSlotData(
       parsed.discoveredNamedRealmIds
     );
     const petRoster = parsingPersistedPetRoster(parsed.petRoster);
+    const worldSeed = parsingPersistedWorldSeed(parsed.worldSeed);
     const updatedAtMs =
       typeof parsed.updatedAtMs === 'number' &&
       Number.isFinite(parsed.updatedAtMs)
@@ -467,6 +484,7 @@ function parsingPersistedSaveSlotData(
       exploredBiomeKinds,
       discoveredNamedRealmIds,
       petRoster,
+      worldSeed,
       updatedAtMs,
     };
 
@@ -629,6 +647,16 @@ function parsingSaveSlotUpdateBody(
     }
   }
 
+  if ('worldSeed' in payload) {
+    if (payload.worldSeed === null) {
+      update.worldSeed = null;
+    } else if (!checkingSaveWorldSeed(payload.worldSeed)) {
+      return null;
+    } else {
+      update.worldSeed = payload.worldSeed | 0;
+    }
+  }
+
   if (
     update.lastPosition === undefined &&
     update.inventory === undefined &&
@@ -639,7 +667,8 @@ function parsingSaveSlotUpdateBody(
     update.bestiaryDiscovery === undefined &&
     update.exploredBiomeKinds === undefined &&
     update.discoveredNamedRealmIds === undefined &&
-    update.petRoster === undefined
+    update.petRoster === undefined &&
+    update.worldSeed === undefined
   ) {
     return null;
   }
@@ -706,6 +735,12 @@ function mergingSaveSlotData(
         ? null
         : parsingPersistedPetRoster(update.petRoster)
       : (existing?.petRoster ?? null);
+  const nextWorldSeed =
+    update.worldSeed !== undefined
+      ? update.worldSeed === null
+        ? null
+        : parsingPersistedWorldSeed(update.worldSeed)
+      : (existing?.worldSeed ?? null);
 
   const merged = {
     lastPosition: nextLastPosition,
@@ -719,6 +754,7 @@ function mergingSaveSlotData(
     exploredBiomeKinds: nextExploredBiomeKinds,
     discoveredNamedRealmIds: nextDiscoveredNamedRealmIds,
     petRoster: nextPetRoster,
+    worldSeed: nextWorldSeed,
     updatedAtMs: Math.max(
       existing?.updatedAtMs ?? 0,
       nextLastPosition?.updatedAtMs ?? 0,

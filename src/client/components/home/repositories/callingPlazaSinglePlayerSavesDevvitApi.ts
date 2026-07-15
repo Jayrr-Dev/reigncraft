@@ -1,4 +1,5 @@
 import { queuingPlazaSinglePlayerSaveSlotWrite } from '@/components/home/domains/queuingPlazaSinglePlayerSaveSlotWrites';
+import { gettingWorldPlazaWorldSeedForCloudMirror } from '@/components/world/domains/managingWorldPlazaWorldSeedStore';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 import type {
   PlazaSinglePlayerSaveSlotPersistedData,
@@ -124,6 +125,7 @@ export async function deletingPlazaSinglePlayerSaveSlotData(
     exploredBiomeKinds: null,
     discoveredNamedRealmIds: null,
     petRoster: null,
+    worldSeed: null,
   });
 }
 
@@ -141,19 +143,31 @@ export async function savingPlazaSinglePlayerSaveSlotData(
   saveSlotIndex: PlazaSaveSlotIndex,
   update: PlazaSinglePlayerSaveSlotUpdateRequest
 ): Promise<void> {
+  const mirroredWorldSeed =
+    update.worldSeed === undefined
+      ? gettingWorldPlazaWorldSeedForCloudMirror(saveSlotIndex)
+      : null;
+  const payload: PlazaSinglePlayerSaveSlotUpdateRequest =
+    mirroredWorldSeed === null
+      ? update
+      : {
+          ...update,
+          worldSeed: mirroredWorldSeed,
+        };
+
   await queuingPlazaSinglePlayerSaveSlotWrite(saveSlotIndex, async () => {
     const body = await callingPlazaSinglePlayerSavesDevvitApi(
       `${PLAZA_SINGLE_PLAYER_SAVES_API_BASE_PATH}/${saveSlotIndex}`,
       {
         method: 'PUT',
-        body: JSON.stringify(update),
+        body: JSON.stringify(payload),
         // Let the save survive page close (flush-on-pagehide persistence).
         keepalive: true,
       }
     );
-    const payload = body as Partial<PlazaSinglePlayerSaveSlotSaveResponse>;
+    const payloadResponse = body as Partial<PlazaSinglePlayerSaveSlotSaveResponse>;
 
-    if (payload.type !== 'saved') {
+    if (payloadResponse.type !== 'saved') {
       throw new Error('Invalid save slot save response.');
     }
   });

@@ -4,8 +4,13 @@
  * @module shared/worldShrubPlacement
  */
 
+import { gettingWorldGenerationSeed } from './worldGenerationSeed';
+
 /** Canonical species slug for decorative berry shrubs. */
 export const WORLD_SHRUB_SPECIES_ID = 'shrub' as const;
+
+/** Mixes the session world seed into the shrub placement hash. */
+const WORLD_SHRUB_WORLD_SEED_MIX = 2246822519;
 
 export type WorldShrubSpeciesId = typeof WORLD_SHRUB_SPECIES_ID;
 
@@ -85,7 +90,11 @@ export function seedingWorldShrubUnitFromTileIndex(
   tileY: number,
   salt: number = WORLD_SHRUB_PLACEMENT_SEED_SALT
 ): number {
-  const seed = tileX * 374761393 + tileY * 668265263 + salt * 1274126177;
+  const seed =
+    tileX * 374761393 +
+    tileY * 668265263 +
+    salt * 1274126177 +
+    gettingWorldGenerationSeed() * WORLD_SHRUB_WORLD_SEED_MIX;
   const normalized = Math.sin(seed) * 10_000;
   return normalized - Math.floor(normalized);
 }

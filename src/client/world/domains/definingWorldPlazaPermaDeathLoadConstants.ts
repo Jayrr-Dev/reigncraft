@@ -36,7 +36,7 @@ export const LABELING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_TITLE =
 
 /** Character picker panel subtitle on the home screen. */
 export const LABELING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_SUBTITLE =
-  'Five random forms. Death wipes this slot.' as const;
+  'Five forms for this run. Death wipes this slot.' as const;
 
 /** How many playable forms the Perma Death picker offers each new run. */
 export const DEFINING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_OPTION_COUNT = 5;

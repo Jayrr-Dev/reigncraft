@@ -6,6 +6,7 @@ import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/cra
 import { DEFINING_WORLD_PLAZA_BIOME_CATALOG } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import { creatingWorldPlazaLastPosition } from '@/components/world/domains/definingWorldPlazaLastPosition';
+import { hydratingWorldPlazaWorldSeedFromRemote } from '@/components/world/domains/managingWorldPlazaWorldSeedStore';
 import { readingWorldPlazaBestiaryDiscoveryFromStorage } from '@/components/world/domains/readingWorldPlazaBestiaryDiscoveryFromStorage';
 import { writingWorldPlazaBestiaryDiscoveryToStorage } from '@/components/world/domains/writingWorldPlazaBestiaryDiscoveryToStorage';
 import { writingWorldPlazaDiscoveredNamedRealmsToStorage } from '@/components/world/domains/writingWorldPlazaDiscoveredNamedRealmsToStorage';
@@ -23,6 +24,7 @@ import { readingWildlifePetRosterFromStorage } from '@/components/world/wildlife
 import { parsingWildlifePetRoster } from '@/components/world/wildlife/pets/domains/serializingWildlifePetRoster';
 import { writingWildlifePetRosterToStorage } from '@/components/world/wildlife/pets/domains/writingWildlifePetRosterToStorage';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
+import type { PlazaSinglePlayerSaveSlotPersistedData } from '../../../../shared/plazaSinglePlayerSavesDevvit';
 
 const DEFINING_WORLD_PLAZA_BIOME_KIND_SET = new Set<string>(
   Object.keys(DEFINING_WORLD_PLAZA_BIOME_CATALOG)
@@ -30,6 +32,28 @@ const DEFINING_WORLD_PLAZA_BIOME_KIND_SET = new Set<string>(
 const DEFINING_WORLD_PLAZA_BESTIARY_SPECIES_ID_SET = new Set<string>(
   listingWildlifeSpeciesIds()
 );
+
+function checkingPlazaSinglePlayerRemoteSaveHasProgress(
+  remoteData: PlazaSinglePlayerSaveSlotPersistedData
+): boolean {
+  return Boolean(
+    remoteData.lastPosition ||
+      remoteData.inventory ||
+      remoteData.playerConditions ||
+      (remoteData.attachedRecipeIds &&
+        remoteData.attachedRecipeIds.length > 0) ||
+      (typeof remoteData.inventoryBonusStorageRows === 'number' &&
+        remoteData.inventoryBonusStorageRows > 0) ||
+      (remoteData.inventoryStorageExpansionClaimedCodexKeys &&
+        remoteData.inventoryStorageExpansionClaimedCodexKeys.length > 0) ||
+      remoteData.bestiaryDiscovery ||
+      (remoteData.exploredBiomeKinds &&
+        remoteData.exploredBiomeKinds.length > 0) ||
+      (remoteData.discoveredNamedRealmIds &&
+        remoteData.discoveredNamedRealmIds.length > 0) ||
+      (remoteData.petRoster && remoteData.petRoster.pets.length > 0)
+  );
+}
 
 /**
  * Hydrates local single-player save storage from Devvit Redis.
@@ -45,6 +69,19 @@ export async function hydratingPlazaSinglePlayerSaveSlotFromRemote(
 
   if (!remoteData) {
     return;
+  }
+
+  if (
+    typeof remoteData.worldSeed === 'number' &&
+    Number.isFinite(remoteData.worldSeed)
+  ) {
+    hydratingWorldPlazaWorldSeedFromRemote(
+      localPersistenceOwnerId,
+      remoteData.worldSeed
+    );
+  } else if (checkingPlazaSinglePlayerRemoteSaveHasProgress(remoteData)) {
+    // Pre-seed saves keep the legacy fixed map.
+    hydratingWorldPlazaWorldSeedFromRemote(localPersistenceOwnerId, 0);
   }
 
   if (remoteData.lastPosition) {

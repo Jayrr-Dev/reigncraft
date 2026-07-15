@@ -123,6 +123,11 @@ export type PlazaSinglePlayerSaveSlotPersistedData = {
   discoveredNamedRealmIds: readonly string[] | null;
   /** Bonded companion roster. */
   petRoster: PlazaSinglePlayerSavePetRoster | null;
+  /**
+   * Procedural map seed for this save.
+   * `0` = legacy fixed layout; `null` = unset (pre-seed saves treat as `0`).
+   */
+  worldSeed: number | null;
   updatedAtMs: number;
 };
 
@@ -138,6 +143,7 @@ export type PlazaSinglePlayerSaveSlotUpdateRequest = {
   exploredBiomeKinds?: readonly string[] | null;
   discoveredNamedRealmIds?: readonly string[] | null;
   petRoster?: PlazaSinglePlayerSavePetRoster | null;
+  worldSeed?: number | null;
 };
 
 /** Summary shown on the home screen for one save slot. */

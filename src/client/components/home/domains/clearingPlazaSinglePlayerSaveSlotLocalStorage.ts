@@ -8,7 +8,9 @@ import { resolvingWorldPlazaLastPositionStorageKey } from '@/components/world/do
 import { resolvingWorldPlazaDiscoveredNamedRealmsStorageKey } from '@/components/world/domains/definingWorldPlazaNamedRealmConstants';
 import { resolvingWorldPlazaRecipeDiscoveryStorageKey } from '@/components/world/domains/definingWorldPlazaRecipeDiscoveryConstants';
 import { resolvingWorldPlazaSavedCoordsStorageKey } from '@/components/world/domains/definingWorldPlazaSavedCoordsConstants';
+import { resolvingWorldPlazaWorldSeedStorageKey } from '@/components/world/domains/definingWorldPlazaWorldSeedConstants';
 import { clearingWorldPlazaRecipeDiscoveryStoreForOwner } from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
+import { resettingWorldPlazaWorldSeedStore } from '@/components/world/domains/managingWorldPlazaWorldSeedStore';
 import {
   clearingWorldPlazaLocalFarmlandMemoryForOwner,
   resolvingWorldPlazaFarmlandLocalStorageKey,
@@ -84,6 +86,7 @@ export function clearingPlazaSinglePlayerSaveSlotLocalStorage(
     resolvingWorldPlazaSpritcoreUpgradeStorageKey(persistenceOwnerId),
     resolvingWorldPlazaOnboardingCoachmarksStorageKey(persistenceOwnerId),
     resolvingWorldPlazaOnboardingCoreFinishedStorageKey(persistenceOwnerId),
+    resolvingWorldPlazaWorldSeedStorageKey(persistenceOwnerId),
   ];
 
   for (const storageKey of storageKeys) {
@@ -109,4 +112,5 @@ export function clearingPlazaSinglePlayerSaveSlotLocalStorage(
   clearingWorldPlazaRecipeDiscoveryStoreForOwner(persistenceOwnerId);
   clearingWorldPlazaInventoryStorageExpansionStoreForOwner(persistenceOwnerId);
   clearingWorldPlazaOnboardingCoachmarkStoreForOwner(persistenceOwnerId);
+  resettingWorldPlazaWorldSeedStore();
 }

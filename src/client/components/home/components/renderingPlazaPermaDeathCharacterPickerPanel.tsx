@@ -19,7 +19,8 @@ import {
   STYLING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_OPTION_SELECTED_CLASS_NAME,
   STYLING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_START_DISABLED_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaPermaDeathLoadConstants';
-import { rollingWorldPlazaPermaDeathCharacterPickerOptions } from '@/components/world/domains/rollingWorldPlazaPermaDeathCharacterPickerOptions';
+import { clearingWorldPlazaPermaDeathCharacterPickerOffer } from '@/components/world/domains/managingWorldPlazaPermaDeathCharacterPickerOfferStore';
+import { resolvingWorldPlazaPermaDeathCharacterPickerOptions } from '@/components/world/domains/resolvingWorldPlazaPermaDeathCharacterPickerOptions';
 import { useState } from 'react';
 
 export type RenderingPlazaPermaDeathCharacterPickerPanelProps = {
@@ -29,7 +30,7 @@ export type RenderingPlazaPermaDeathCharacterPickerPanelProps = {
 
 /**
  * Character picker shown before a new Perma Death run.
- * Offers five random playable forms each time the panel mounts.
+ * Rolls five playable forms once per pending run; back/reopen keeps that offer.
  */
 export function RenderingPlazaPermaDeathCharacterPickerPanel({
   onBack,
@@ -40,7 +41,7 @@ export function RenderingPlazaPermaDeathCharacterPickerPanel({
     string | null
   >(null);
   const [offeredAvatarSkinOptions] = useState(() =>
-    rollingWorldPlazaPermaDeathCharacterPickerOptions(
+    resolvingWorldPlazaPermaDeathCharacterPickerOptions(
       DEFINING_WORLD_PLAZA_AVATAR_SKIN_OPTIONS.filter((skinOption) =>
         checkingWorldPlazaAvatarSkinAccessForUser(
           skinOption.skinId,
@@ -142,6 +143,7 @@ export function RenderingPlazaPermaDeathCharacterPickerPanel({
           }
 
           notifyingPlazaHomeScreenButtonClicked();
+          clearingWorldPlazaPermaDeathCharacterPickerOffer();
           onConfirmCharacter(selectedAvatarSkinId);
         }}
         className={`plaza-btn-3d flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border-2 border-poster-gold/70 bg-[linear-gradient(180deg,#c1592f_0%,#a2481f_100%)] px-4 py-3 font-display text-sm font-bold uppercase tracking-wide text-parchment shadow-[0_4px_0_0_#6d2c12] [--plaza-edge:#6d2c12] disabled:cursor-not-allowed disabled:opacity-50 ${

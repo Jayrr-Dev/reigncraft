@@ -4,6 +4,11 @@
  * @module components/world/domains/seedingWorldPlazaGrassTileDecorationFromTileIndex
  */
 
+import { gettingWorldGenerationSeed } from '../../../shared/worldGenerationSeed';
+
+/** Mixes the session world seed into the grass decoration hash. */
+const SEEDING_WORLD_PLAZA_GRASS_WORLD_SEED_MIX = 2246822519;
+
 /**
  * Returns a stable unit float in [0, 1) from tile coordinates and a salt.
  *
@@ -17,7 +22,10 @@ export function seedingWorldPlazaGrassTileDecorationFromTileIndex(
   salt: number,
 ): number {
   const seed =
-    tileX * 374761393 + tileY * 668265263 + salt * 1274126177;
+    tileX * 374761393 +
+    tileY * 668265263 +
+    salt * 1274126177 +
+    gettingWorldGenerationSeed() * SEEDING_WORLD_PLAZA_GRASS_WORLD_SEED_MIX;
   const normalized = Math.sin(seed) * 10000;
 
   return normalized - Math.floor(normalized);

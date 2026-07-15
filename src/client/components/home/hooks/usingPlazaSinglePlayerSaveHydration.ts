@@ -1,6 +1,7 @@
 'use client';
 
 import { hydratingPlazaSinglePlayerSaveSlotFromRemote } from '@/components/home/domains/hydratingPlazaSinglePlayerSaveSlotFromRemote';
+import { initializingWorldPlazaWorldSeedStore } from '@/components/world/domains/managingWorldPlazaWorldSeedStore';
 import { useEffect, useState } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
@@ -13,6 +14,19 @@ export type UsingPlazaSinglePlayerSaveHydrationParams = {
   /** Scoped localStorage owner id for the active slot. */
   localPersistenceOwnerId: string | null;
 };
+
+/**
+ * Activates the world generation seed before the plaza scene mounts.
+ */
+function ensuringPlazaSessionWorldSeedReady(
+  saveSlotIndex: PlazaSaveSlotIndex | null,
+  localPersistenceOwnerId: string | null
+): void {
+  initializingWorldPlazaWorldSeedStore(localPersistenceOwnerId, {
+    cloudSaveSlotIndex: saveSlotIndex,
+    useFixedLegacySeed: saveSlotIndex === null,
+  });
+}
 
 /**
  * Hydrates local save storage from Devvit Redis before a single-player session starts.
@@ -34,6 +48,10 @@ export function usingPlazaSinglePlayerSaveHydration({
       saveSlotIndex === null ||
       localPersistenceOwnerId === null
     ) {
+      ensuringPlazaSessionWorldSeedReady(
+        saveSlotIndex,
+        localPersistenceOwnerId
+      );
       setIsHydrating(false);
       return;
     }
@@ -50,6 +68,10 @@ export function usingPlazaSinglePlayerSaveHydration({
         // Fall back to local cache when remote hydration fails.
       } finally {
         if (!isCancelled) {
+          ensuringPlazaSessionWorldSeedReady(
+            saveSlotIndex,
+            localPersistenceOwnerId
+          );
           setIsHydrating(false);
         }
       }

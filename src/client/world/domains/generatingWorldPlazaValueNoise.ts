@@ -8,6 +8,8 @@
  * @module components/world/domains/generatingWorldPlazaValueNoise
  */
 
+import { gettingWorldGenerationSeed } from '../../../shared/worldGenerationSeed';
+
 /** Default octave count for fractal sampling. */
 export const DEFINING_WORLD_PLAZA_NOISE_DEFAULT_OCTAVES = 4;
 
@@ -47,7 +49,7 @@ export function hashingWorldPlazaCoordinateToUnitFloat(
   gridY: number,
   seed: number,
 ): number {
-  let hash = seed | 0;
+  let hash = (seed + gettingWorldGenerationSeed()) | 0;
   hash = Math.imul(hash ^ (gridX | 0), 0x27d4eb2d);
   hash = Math.imul(hash ^ (gridY | 0), 0x85ebca6b);
   hash ^= hash >>> 15;
