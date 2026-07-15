@@ -356,6 +356,24 @@ export type DefiningWildlifeSpeechState = {
   lastContextKey: string | null;
 };
 
+/**
+ * Temporary combat buff after gulping a Spritcore ground stack.
+ * Regen stays boosted until full HP; power can linger briefly after.
+ */
+export type DefiningWildlifeSpritcoreFeastState = {
+  /** Melee damage multiplier from SC quantity (≥ 1). */
+  attackPowerMultiplier: number;
+  /** SC units swallowed in the feast that granted this buff. */
+  spritcoreQuantityGulped: number;
+  /** When true, passive HP regen is enabled and sped up until full HP. */
+  boostedRegenUntilFullHp: boolean;
+  /**
+   * Absolute expiry for the power bonus once regen finishes (or when already
+   * full at feast time). Null while still regenerating to full.
+   */
+  powerExpiresAtMs: number | null;
+};
+
 /** Live wildlife instance in the simulation store. */
 export type DefiningWildlifeInstance = {
   instanceId: string;
@@ -422,6 +440,8 @@ export type DefiningWildlifeInstance = {
   softDepartureReason?: 'daybreak' | 'betrayal' | null;
   /** Bonded companion state when this instance is an owned pet. */
   petBond?: DefiningWildlifePetBondState | null;
+  /** Active Spritcore feast buff, or null / absent when none. */
+  spritcoreFeast?: DefiningWildlifeSpritcoreFeastState | null;
 };
 
 /** Dead anchor waiting to respawn once the player leaves the kill site. */

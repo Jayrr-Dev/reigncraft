@@ -133,6 +133,15 @@ describe('computingWorldPlazaCharacterEngineDerivedStats', () => {
     expect(grizzly.locomotion.allowedMotionKinds.includes('jump')).toBe(true);
   });
 
+  it('gives cyroborn a fast jump speed scale with normal distance', () => {
+    const cyroborn = resolvingWorldPlazaCharacterEngineDefinition('cyroborn');
+    const derived = computingWorldPlazaCharacterEngineDerivedStats(cyroborn);
+
+    expect(derived.jumpDistanceScale).toBe(1);
+    expect(derived.jumpSpeedScale).toBe(2);
+    expect(derived.maxJumpLayerReach).toBe(8);
+  });
+
   it('allows an explicit collision height override', () => {
     const girl = resolvingWorldPlazaCharacterEngineDefinition(
       DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE

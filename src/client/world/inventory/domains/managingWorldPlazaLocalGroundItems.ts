@@ -269,13 +269,46 @@ export function consumingWorldPlazaLocalGroundFoodUnit(
     consumerY: number;
   }
 ): { success: boolean; itemTypeId: string | null } {
+  const result = consumingWorldPlazaLocalGroundFoodQuantity(
+    persistenceOwnerId,
+    {
+      ...request,
+      quantity: 1,
+    }
+  );
+
+  return {
+    success: result.consumedQuantity > 0,
+    itemTypeId: result.itemTypeId,
+  };
+}
+
+/**
+ * Consumes up to `quantity` units from a locally stored ground stack.
+ */
+export function consumingWorldPlazaLocalGroundFoodQuantity(
+  persistenceOwnerId: string,
+  request: {
+    groundItemId: string;
+    consumerX: number;
+    consumerY: number;
+    quantity: number;
+  }
+): {
+  consumedQuantity: number;
+  itemTypeId: string | null;
+} {
+  if (request.quantity <= 0) {
+    return { consumedQuantity: 0, itemTypeId: null };
+  }
+
   const groundItems = listingPersistedLocalGroundItems(persistenceOwnerId);
   const groundItem = groundItems.find(
     (item) => item.id === request.groundItemId
   );
 
   if (!groundItem || groundItem.quantity <= 0) {
-    return { success: false, itemTypeId: null };
+    return { consumedQuantity: 0, itemTypeId: null };
   }
 
   const consumerPosition: DefiningWorldPlazaWorldPoint = {
@@ -287,10 +320,11 @@ export function consumingWorldPlazaLocalGroundFoodUnit(
   if (
     !checkingWorldPlazaGroundItemPickupInRange(consumerPosition, groundItem)
   ) {
-    return { success: false, itemTypeId: null };
+    return { consumedQuantity: 0, itemTypeId: null };
   }
 
-  const remainingQuantity = groundItem.quantity - 1;
+  const consumedQuantity = Math.min(request.quantity, groundItem.quantity);
+  const remainingQuantity = groundItem.quantity - consumedQuantity;
   const nextItems =
     remainingQuantity <= 0
       ? groundItems.filter((item) => item.id !== request.groundItemId)
@@ -302,5 +336,8 @@ export function consumingWorldPlazaLocalGroundFoodUnit(
 
   persistingLocalGroundItems(persistenceOwnerId, nextItems);
 
-  return { success: true, itemTypeId: groundItem.itemTypeId };
+  return {
+    consumedQuantity,
+    itemTypeId: groundItem.itemTypeId,
+  };
 }

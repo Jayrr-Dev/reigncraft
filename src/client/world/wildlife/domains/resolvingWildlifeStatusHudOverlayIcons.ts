@@ -4,8 +4,8 @@
  * @module components/world/wildlife/domains/resolvingWildlifeStatusHudOverlayIcons
  */
 
-import { formattingWorldPlazaEntityStatusEffectHudDisplayValue } from '@/components/world/health/domains/formattingWorldPlazaEntityStatusEffectHudDisplayValue';
 import type { DefiningWorldPlazaEntityStatusEffectHudRow } from '@/components/world/health/domains/definingWorldPlazaEntityStatusEffectHudRowTypes';
+import { formattingWorldPlazaEntityStatusEffectHudDisplayValue } from '@/components/world/health/domains/formattingWorldPlazaEntityStatusEffectHudDisplayValue';
 import type { DefiningWorldPlazaEntityActiveBuffHudEntry } from '@/components/world/health/domains/listingWorldPlazaEntityActiveBuffHudEntries';
 import { DEFINING_WILDLIFE_STATUS_HUD_MAX_ICONS } from '@/components/world/wildlife/domains/definingWildlifeStatusHudOverlayConstants';
 import type { DefiningWildlifeStatusHudOverlayIcon } from '@/components/world/wildlife/domains/definingWildlifeStatusHudOverlayTypes';
@@ -22,7 +22,8 @@ function resolvingStatusEffectNumericLabel(
   }
 
   const label = formattingWorldPlazaEntityStatusEffectHudDisplayValue({
-    displayMode: row.displayMode === 'timed_damage' ? 'damage' : row.displayMode,
+    displayMode:
+      row.displayMode === 'timed_damage' ? 'damage' : row.displayMode,
     numericValue: row.numericValue,
   });
 

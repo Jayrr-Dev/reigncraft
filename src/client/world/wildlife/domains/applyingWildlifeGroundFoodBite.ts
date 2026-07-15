@@ -3,7 +3,8 @@
  *
  * Stacks and flowers chew for a rolled 5-10s window
  * (`pendingGroundFoodBite`). Long grass uses a fixed 15s chew.
- * Then consumes exactly one unit / tile.
+ * Spritcore gulps the whole stack after a rolled 1-5s feast.
+ * Then consumes exactly one unit / tile (or the full SC stack).
  *
  * @module components/world/wildlife/domains/applyingWildlifeGroundFoodBite
  */
@@ -26,6 +27,10 @@ import {
   DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MIN_MS,
   DEFINING_WILDLIFE_GROUND_GRASS_BITE_DELAY_MS,
 } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
+import {
+  DEFINING_WILDLIFE_SPRITCORE_FEAST_BITE_DELAY_MAX_MS,
+  DEFINING_WILDLIFE_SPRITCORE_FEAST_BITE_DELAY_MIN_MS,
+} from '@/components/world/wildlife/domains/definingWildlifeSpritcoreFeastConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeInstance,
@@ -36,6 +41,7 @@ import {
   consumingWildlifeGroundFlowerBridge,
 } from '@/components/world/wildlife/domains/managingWildlifeGroundFlowerBridge';
 import {
+  consumingWildlifeGroundFoodBridgeQuantity,
   consumingWildlifeGroundFoodBridgeUnit,
   findingWildlifeGroundFoodItemById,
 } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
@@ -47,11 +53,13 @@ import {
   checkingWildlifeGroundShrubOptimisticIsPicked,
   consumingWildlifeGroundShrubBridge,
 } from '@/components/world/wildlife/domains/managingWildlifeGroundShrubBridge';
+import { applyingWildlifeSpritcoreFeast } from '@/components/world/wildlife/domains/applyingWildlifeSpritcoreFeast';
 import { refillingWildlifeHungerAfterGroundFlower } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundFlower';
 import { refillingWildlifeHungerAfterGroundFood } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundFood';
 import { refillingWildlifeHungerAfterGroundGrass } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundGrass';
 import { refillingWildlifeHungerAfterGroundShrub } from '@/components/world/wildlife/domains/refillingWildlifeHungerAfterGroundShrub';
 import { resolvingWildlifeGroundFoodWorldPoint } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodWorldPoint';
+import { checkingWorldPlazaInventoryItemIsSpritcore } from '@/components/world/spritcore/domains/checkingWorldPlazaInventoryItemIsSpritcore';
 
 function rollingWildlifeGroundFoodBiteDelayMs(): number {
   return (
@@ -59,6 +67,15 @@ function rollingWildlifeGroundFoodBiteDelayMs(): number {
     Math.random() *
       (DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MAX_MS -
         DEFINING_WILDLIFE_GROUND_FOOD_BITE_DELAY_MIN_MS)
+  );
+}
+
+function rollingWildlifeSpritcoreFeastBiteDelayMs(): number {
+  return (
+    DEFINING_WILDLIFE_SPRITCORE_FEAST_BITE_DELAY_MIN_MS +
+    Math.random() *
+      (DEFINING_WILDLIFE_SPRITCORE_FEAST_BITE_DELAY_MAX_MS -
+        DEFINING_WILDLIFE_SPRITCORE_FEAST_BITE_DELAY_MIN_MS)
   );
 }
 
@@ -367,12 +384,19 @@ export function applyingWildlifeGroundFoodBite(
     (pendingBite.groundItemId === canonicalGroundItemId ||
       pendingBite.groundItemId === groundItemId);
 
-  // Start (or restart on stack switch) the chew timer for one unit.
+  const isSpritcoreFeast = checkingWorldPlazaInventoryItemIsSpritcore(
+    groundItem.itemTypeId
+  );
+  const biteDelayMs = isSpritcoreFeast
+    ? rollingWildlifeSpritcoreFeastBiteDelayMs()
+    : rollingWildlifeGroundFoodBiteDelayMs();
+
+  // Start (or restart on stack switch) the chew timer for one unit / feast.
   if (!pendingMatchesStack || pendingBite === null) {
     return applyingWildlifeIdleChewStance(instance, {
       groundItemId: canonicalGroundItemId,
       startedAtMs: nowMs,
-      readyAtMs: nowMs + rollingWildlifeGroundFoodBiteDelayMs(),
+      readyAtMs: nowMs + biteDelayMs,
     });
   }
 
@@ -381,6 +405,36 @@ export function applyingWildlifeGroundFoodBite(
       ...pendingBite,
       groundItemId: canonicalGroundItemId,
     });
+  }
+
+  if (isSpritcoreFeast) {
+    const feastQuantity = groundItem.quantity;
+    const consumedQuantity = consumingWildlifeGroundFoodBridgeQuantity(
+      canonicalGroundItemId,
+      feastQuantity,
+      instance.position
+    );
+
+    if (consumedQuantity <= 0) {
+      return clearingWildlifePendingGroundFoodBite(instance);
+    }
+
+    const feastedInstance = applyingWildlifeSpritcoreFeast(
+      {
+        ...instance,
+        aiState: {
+          ...instance.aiState,
+          pendingGroundFoodBite: null,
+          isMoving: false,
+          motionClip: 'attack',
+          lastAttackAtMs: nowMs,
+        },
+      },
+      consumedQuantity,
+      nowMs
+    );
+
+    return feastedInstance;
   }
 
   const consumed = consumingWildlifeGroundFoodBridgeUnit(

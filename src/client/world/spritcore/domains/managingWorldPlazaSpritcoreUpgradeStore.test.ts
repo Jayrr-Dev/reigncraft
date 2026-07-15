@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { DEFINING_WORLD_PLAZA_AVATAR_SKIN } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { resolvingWorldPlazaSpritcoreUpgradeStorageKey } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreLevelingConstants';
 import {
   applyingWorldPlazaSpritcoreUpgradePurchase,
@@ -41,8 +42,11 @@ describe('managingWorldPlazaSpritcoreUpgradeStore', () => {
     resettingWorldPlazaSpritcoreUpgradeStoreForTests();
   });
 
-  it('persists purchased bonuses for one owner', () => {
-    initializingWorldPlazaSpritcoreUpgradeStore('spritcore-owner');
+  it('persists purchased bonuses for one owner form', () => {
+    initializingWorldPlazaSpritcoreUpgradeStore(
+      'spritcore-owner',
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+    );
 
     expect(applyingWorldPlazaSpritcoreUpgradePurchase('health', 120, 1)).toBe(
       'applied'
@@ -54,21 +58,88 @@ describe('managingWorldPlazaSpritcoreUpgradeStore', () => {
       gettingWorldPlazaSpritcoreUpgradeSnapshot().totalSpritcoreInvested
     ).toBe(120);
 
-    initializingWorldPlazaSpritcoreUpgradeStore('other-owner');
+    initializingWorldPlazaSpritcoreUpgradeStore(
+      'other-owner',
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+    );
     expect(gettingWorldPlazaSpritcoreUpgradeSnapshot().bonusMaxHealth).toBe(0);
 
-    initializingWorldPlazaSpritcoreUpgradeStore('spritcore-owner');
+    initializingWorldPlazaSpritcoreUpgradeStore(
+      'spritcore-owner',
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+    );
     expect(gettingWorldPlazaSpritcoreUpgradeSnapshot().bonusMaxHealth).toBe(
       100
     );
     expect(
-      readingWorldPlazaSpritcoreUpgradeFromStorage('spritcore-owner')
-        .bonusMaxHealth
+      readingWorldPlazaSpritcoreUpgradeFromStorage(
+        'spritcore-owner',
+        DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+      ).bonusMaxHealth
     ).toBe(100);
     expect(
       localStorage.getItem(
-        resolvingWorldPlazaSpritcoreUpgradeStorageKey('spritcore-owner')
+        resolvingWorldPlazaSpritcoreUpgradeStorageKey(
+          'spritcore-owner',
+          DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+        )
       )
     ).toContain('"bonusMaxHealth":100');
+  });
+
+  it('keeps Spiritcore spend separate per avatar form', () => {
+    initializingWorldPlazaSpritcoreUpgradeStore(
+      'spritcore-owner',
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+    );
+    expect(applyingWorldPlazaSpritcoreUpgradePurchase('health', 120, 1)).toBe(
+      'applied'
+    );
+
+    initializingWorldPlazaSpritcoreUpgradeStore(
+      'spritcore-owner',
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.HUSKY
+    );
+    expect(gettingWorldPlazaSpritcoreUpgradeSnapshot().bonusMaxHealth).toBe(0);
+    expect(applyingWorldPlazaSpritcoreUpgradePurchase('damage', 50, 1)).toBe(
+      'applied'
+    );
+    expect(gettingWorldPlazaSpritcoreUpgradeSnapshot().bonusAttackPower).toBe(
+      10
+    );
+
+    initializingWorldPlazaSpritcoreUpgradeStore(
+      'spritcore-owner',
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+    );
+    expect(gettingWorldPlazaSpritcoreUpgradeSnapshot().bonusMaxHealth).toBe(
+      100
+    );
+    expect(gettingWorldPlazaSpritcoreUpgradeSnapshot().bonusAttackPower).toBe(
+      0
+    );
+  });
+
+  it('migrates legacy owner-only saves onto the default Girl form', () => {
+    localStorage.setItem(
+      resolvingWorldPlazaSpritcoreUpgradeStorageKey('legacy-owner'),
+      JSON.stringify({ bonusMaxHealth: 200, totalSpritcoreInvested: 240 })
+    );
+
+    initializingWorldPlazaSpritcoreUpgradeStore(
+      'legacy-owner',
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+    );
+    expect(gettingWorldPlazaSpritcoreUpgradeSnapshot().bonusMaxHealth).toBe(
+      200
+    );
+    expect(
+      localStorage.getItem(
+        resolvingWorldPlazaSpritcoreUpgradeStorageKey(
+          'legacy-owner',
+          DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+        )
+      )
+    ).toContain('"bonusMaxHealth":200');
   });
 });

@@ -50,8 +50,6 @@ import { checkingWorldPlazaGirlSampleRollDodgeWindowIsActive } from '@/component
 import { checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead } from '@/components/world/domains/checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead';
 import { checkingWorldPlazaPlayerShouldSlideOnIceAfterRun } from '@/components/world/domains/checkingWorldPlazaPlayerShouldSlideOnIceAfterRun';
 import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
-import { DEFINING_WORLD_PLAZA_CYROBORN_DEATH_IMPLODE_DURATION_MS } from '@/components/world/domains/definingWorldPlazaCyrobornScalePulseConstants';
-import { resolvingWorldPlazaCyrobornScalePulseMultiplier } from '@/components/world/domains/resolvingWorldPlazaCyrobornScalePulseMultiplier';
 import { computingWorldPlazaAcceleratedRunSpeed } from '@/components/world/domains/computingWorldPlazaAcceleratedRunSpeed';
 import { computingWorldPlazaAvatarGroundShadowSizeScale } from '@/components/world/domains/computingWorldPlazaAvatarGroundShadowSizeScale';
 import { computingWorldPlazaGirlSampleFallDurationMs } from '@/components/world/domains/computingWorldPlazaGirlSampleFallDurationMs';
@@ -85,6 +83,7 @@ import {
   type DefiningWorldPlazaAvatarMotionKind,
   type DefiningWorldPlazaAvatarMotionState,
 } from '@/components/world/domains/definingWorldPlazaAvatarMotionConstants';
+import { DEFINING_WORLD_PLAZA_CYROBORN_DEATH_IMPLODE_DURATION_MS } from '@/components/world/domains/definingWorldPlazaCyrobornScalePulseConstants';
 import type { DefiningWorldPlazaFallState } from '@/components/world/domains/definingWorldPlazaFallState';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_BLOCK_REACTION_DURATION_MS,
@@ -147,6 +146,7 @@ import { notifyingWorldPlazaAvatarMotionSfxEvent } from '@/components/world/doma
 import { recordingWorldPlazaPlayerPerformanceDiagnostics } from '@/components/world/domains/recordingWorldPlazaPlayerPerformanceDiagnostics';
 import { resolvingWorldPlazaAvatarClipPresentation } from '@/components/world/domains/resolvingWorldPlazaAvatarClipPresentation';
 import { resolvingWorldPlazaAvatarRollDurationMs } from '@/components/world/domains/resolvingWorldPlazaAvatarRollDurationMs';
+import { resolvingWorldPlazaCyrobornScalePulseMultiplier } from '@/components/world/domains/resolvingWorldPlazaCyrobornScalePulseMultiplier';
 import { resolvingWorldPlazaGirlSampleCombatSpritePresentation } from '@/components/world/domains/resolvingWorldPlazaGirlSampleCombatSpritePresentation';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import { resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection';
@@ -413,9 +413,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   const avatarGlowOrbGraphicsRef = useRef<Graphics | null>(null);
   const avatarLavaSinkCoverBackGraphicsRef = useRef<Graphics | null>(null);
   const avatarLavaSinkCoverFrontGraphicsRef = useRef<Graphics | null>(null);
-  const usesGlowOrbPresentation = checkingWorldPlazaAvatarUsesGlowOrbPresentation(
-    characterDefinition.skinId
-  );
+  const usesGlowOrbPresentation =
+    checkingWorldPlazaAvatarUsesGlowOrbPresentation(characterDefinition.skinId);
   const animationTimeRef = useRef(0);
   const jumpStateRef = useRef<DefiningWorldPlazaJumpState | null>(null);
   const fallStateRef = useRef<DefiningWorldPlazaFallState | null>(null);
@@ -1557,7 +1556,11 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       );
       animationFrameIndex = Math.min(
         characterDefinition.jumpSheetLayout.frameCount - 1,
-        Math.floor((elapsedMs / 1000) * characterDefinition.jumpAnimationFps)
+        Math.floor(
+          (elapsedMs / 1000) *
+            characterDefinition.jumpAnimationFps *
+            characterEngineDerivedStats.jumpSpeedScale
+        )
       );
       activeMotionSuffix = 'jump';
       activeDirection = activeJumpState.direction;
@@ -2636,10 +2639,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         );
         glowOrbGraphics.visible =
           !isLavaSubmergedPastAvatarHeight && !cyrobornScalePulse.hideBody;
-        glowOrbGraphics.position.set(
-          hoverOffset.x,
-          bodyLiftPx + hoverOffset.y
-        );
+        glowOrbGraphics.position.set(hoverOffset.x, bodyLiftPx + hoverOffset.y);
         glowOrbGraphics.scale.set(
           effectiveSpriteScale * cyrobornScalePulse.scaleMultiplier
         );

@@ -4,12 +4,12 @@
  * @module components/world/domains/readingWorldPlazaSelectedAvatarSkinFromStorage
  */
 
+import { checkingWorldPlazaAvatarSkinIdKnown } from '@/components/world/domains/checkingWorldPlazaAvatarSkinIdKnown';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_SKIN_DEFAULT,
   type DefiningWorldPlazaAvatarSkinId,
 } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { resolvingWorldPlazaSelectedAvatarSkinStorageKey } from '@/components/world/domains/definingWorldPlazaAvatarTransformConstants';
-import { checkingWorldPlazaAvatarSkinIdKnown } from '@/components/world/domains/checkingWorldPlazaAvatarSkinIdKnown';
 
 /**
  * Hydrates the last selected avatar skin for one session owner.
@@ -38,7 +38,10 @@ export function readingWorldPlazaSelectedAvatarSkinFromStorage(
 
     const skinId = (parsed as { skinId?: unknown }).skinId;
 
-    if (typeof skinId !== 'string' || !checkingWorldPlazaAvatarSkinIdKnown(skinId)) {
+    if (
+      typeof skinId !== 'string' ||
+      !checkingWorldPlazaAvatarSkinIdKnown(skinId)
+    ) {
       return DEFINING_WORLD_PLAZA_AVATAR_SKIN_DEFAULT;
     }
 

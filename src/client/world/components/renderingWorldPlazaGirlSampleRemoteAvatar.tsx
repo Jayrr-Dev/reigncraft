@@ -27,7 +27,6 @@ import {
 import { DEFINING_WORLD_PLAZA_GIRL_SAMPLE_READY_IDLE_DURATION_MS } from '@/components/world/domains/definingWorldPlazaGirlSampleIdleConstants';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_ARC_PEAK_SCREEN_PX,
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_DURATION_MS,
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_JUMP_ARC_PEAK_SCREEN_PX,
 } from '@/components/world/domains/definingWorldPlazaGirlSampleJumpConstants';
 import { type DefiningWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/definingWorldPlazaGirlSampleWalkConstants';
@@ -48,6 +47,7 @@ import {
 } from '@/components/world/domains/managingWorldPlazaEntityDepthSortCache';
 import { checkingWorldPlazaPerformanceDiagnosticsRenderLayerIsEnabled } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
+import { resolvingWorldPlazaJumpDurationMs } from '@/components/world/domains/resolvingWorldPlazaJumpDurationMs';
 import {
   checkingWorldPlazaLavaHeatProximityAtGridPoint,
   checkingWorldPlazaLavaSinkHidesAvatarBodyAtBaseOffsetPx,
@@ -339,11 +339,12 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
 
     facingDirectionRef.current = facingDirection;
 
+    const jumpDurationMs = resolvingWorldPlazaJumpDurationMs(
+      characterEngineDerivedStats.jumpSpeedScale
+    );
     const elapsedJumpMs =
       jumpStartedAtMs > 0 ? Math.max(0, Date.now() - jumpStartedAtMs) : 0;
-    const isJumpActive =
-      jumpStartedAtMs > 0 &&
-      elapsedJumpMs < DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_DURATION_MS;
+    const isJumpActive = jumpStartedAtMs > 0 && elapsedJumpMs < jumpDurationMs;
 
     const resolvedMotionKind: DefiningWorldPlazaAvatarMotionKind = isJumpActive
       ? DEFINING_WORLD_PLAZA_AVATAR_MOTION_KIND_JUMP
@@ -365,10 +366,7 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
     }
 
     if (isJumpActive) {
-      const jumpProgress = Math.min(
-        1,
-        elapsedJumpMs / DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_DURATION_MS
-      );
+      const jumpProgress = Math.min(1, elapsedJumpMs / jumpDurationMs);
 
       jumpArcOffsetPx = computingWorldPlazaGirlSampleJumpArcOffsetPx(
         jumpProgress,
@@ -377,7 +375,9 @@ export function RenderingWorldPlazaGirlSampleRemoteAvatar({
       animationFrameIndex = Math.min(
         characterDefinition.jumpSheetLayout.frameCount - 1,
         Math.floor(
-          (elapsedJumpMs / 1000) * characterDefinition.jumpAnimationFps
+          (elapsedJumpMs / 1000) *
+            characterDefinition.jumpAnimationFps *
+            characterEngineDerivedStats.jumpSpeedScale
         )
       );
       activeMotionSuffix = 'jump';

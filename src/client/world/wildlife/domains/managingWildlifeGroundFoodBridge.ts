@@ -15,6 +15,15 @@ export type ManagingWildlifeGroundFoodBridge = {
     groundItemId: string,
     consumerPosition: DefiningWorldPlazaWorldPoint
   ) => boolean;
+  /**
+   * Optional whole-stack / multi-unit consume for Spritcore feasts.
+   * Falls back to looping `consumeGroundFoodUnit` when absent.
+   */
+  consumeGroundFoodQuantity?: (
+    groundItemId: string,
+    quantity: number,
+    consumerPosition: DefiningWorldPlazaWorldPoint
+  ) => number;
 };
 
 let managingWildlifeGroundFoodBridge: ManagingWildlifeGroundFoodBridge | null =
@@ -101,6 +110,58 @@ function consumingWildlifeEphemeralGroundFoodUnit(
   }
 
   return true;
+}
+
+function consumingWildlifeEphemeralGroundFoodQuantity(
+  groundItemId: string,
+  quantity: number,
+  consumerPosition: DefiningWorldPlazaWorldPoint
+): number {
+  if (quantity <= 0) {
+    return 0;
+  }
+
+  const canonicalId = resolvingWildlifeGroundFoodCanonicalItemId(groundItemId);
+  const itemIndex = wildlifeEphemeralGroundFoodItems.findIndex(
+    (entry) => entry.id === canonicalId
+  );
+
+  if (itemIndex < 0) {
+    return 0;
+  }
+
+  const item = wildlifeEphemeralGroundFoodItems[itemIndex];
+
+  if (!item || item.quantity <= 0) {
+    return 0;
+  }
+
+  const distance = resolvingDistanceGrid(
+    consumerPosition,
+    resolvingEphemeralGroundFoodWorldPoint(item)
+  );
+
+  if (distance > DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
+    return 0;
+  }
+
+  const consumedQuantity = Math.min(quantity, item.quantity);
+  const remainingQuantity = item.quantity - consumedQuantity;
+
+  if (remainingQuantity <= 0) {
+    wildlifeEphemeralGroundFoodItems = wildlifeEphemeralGroundFoodItems.filter(
+      (entry) => entry.id !== canonicalId
+    );
+  } else {
+    wildlifeEphemeralGroundFoodItems = wildlifeEphemeralGroundFoodItems.map(
+      (entry, index) =>
+        index === itemIndex
+          ? { ...entry, quantity: remainingQuantity }
+          : entry
+    );
+  }
+
+  return consumedQuantity;
 }
 
 /** Registers the active ground-item bridge for wildlife foraging. */
@@ -227,4 +288,63 @@ export function consumingWildlifeGroundFoodBridgeUnit(
   }
 
   return consumed;
+}
+
+/**
+ * Consumes up to `quantity` units from a ground stack (Spritcore whole-stack feast).
+ * Returns how many units were actually removed.
+ */
+export function consumingWildlifeGroundFoodBridgeQuantity(
+  groundItemId: string,
+  quantity: number,
+  consumerPosition: DefiningWorldPlazaWorldPoint
+): number {
+  if (quantity <= 0) {
+    return 0;
+  }
+
+  const canonicalId = resolvingWildlifeGroundFoodCanonicalItemId(groundItemId);
+
+  if (!checkingWildlifeGroundFoodItemIsPersisted(canonicalId)) {
+    return consumingWildlifeEphemeralGroundFoodQuantity(
+      canonicalId,
+      quantity,
+      consumerPosition
+    );
+  }
+
+  const bridgeConsume =
+    managingWildlifeGroundFoodBridge?.consumeGroundFoodQuantity;
+
+  if (bridgeConsume) {
+    const consumed = bridgeConsume(
+      canonicalId,
+      quantity,
+      consumerPosition
+    );
+
+    if (consumed > 0) {
+      consumingWildlifeEphemeralGroundFoodQuantity(
+        canonicalId,
+        consumed,
+        consumerPosition
+      );
+    }
+
+    return consumed;
+  }
+
+  let consumedTotal = 0;
+
+  for (let index = 0; index < quantity; index += 1) {
+    if (
+      !consumingWildlifeGroundFoodBridgeUnit(canonicalId, consumerPosition)
+    ) {
+      break;
+    }
+
+    consumedTotal += 1;
+  }
+
+  return consumedTotal;
 }

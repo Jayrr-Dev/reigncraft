@@ -6,6 +6,7 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
+import { checkingWorldPlazaInventoryItemIsSpritcore } from '@/components/world/spritcore/domains/checkingWorldPlazaInventoryItemIsSpritcore';
 import { checkingWildlifeSpeciesMayEatGroundFood } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesMayEatGroundFood';
 import { DEFINING_WILDLIFE_GROUND_FOOD_SCENT_RADIUS_GRID } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -16,6 +17,8 @@ export function resolvingWildlifeNearestEdibleGroundFood(
   species: DefiningWildlifeSpeciesDefinition,
   groundItems: readonly DefiningWorldPlazaGroundItem[]
 ): DefiningWorldPlazaGroundItem | null {
+  let nearestSpritcore: DefiningWorldPlazaGroundItem | null = null;
+  let nearestSpritcoreDistance = Number.POSITIVE_INFINITY;
   let nearest: DefiningWorldPlazaGroundItem | null = null;
   let nearestDistance = Number.POSITIVE_INFINITY;
 
@@ -34,10 +37,20 @@ export function resolvingWildlifeNearestEdibleGroundFood(
     const targetY = groundItem.gridY + 0.5;
     const distance = Math.hypot(position.x - targetX, position.y - targetY);
 
-    if (
-      distance > DEFINING_WILDLIFE_GROUND_FOOD_SCENT_RADIUS_GRID ||
-      distance >= nearestDistance
-    ) {
+    if (distance > DEFINING_WILDLIFE_GROUND_FOOD_SCENT_RADIUS_GRID) {
+      continue;
+    }
+
+    if (checkingWorldPlazaInventoryItemIsSpritcore(groundItem.itemTypeId)) {
+      if (distance < nearestSpritcoreDistance) {
+        nearestSpritcore = groundItem;
+        nearestSpritcoreDistance = distance;
+      }
+
+      continue;
+    }
+
+    if (distance >= nearestDistance) {
       continue;
     }
 
@@ -45,5 +58,6 @@ export function resolvingWildlifeNearestEdibleGroundFood(
     nearestDistance = distance;
   }
 
-  return nearest;
+  // Spritcore always wins over other stacks when any SC is in scent range.
+  return nearestSpritcore ?? nearest;
 }

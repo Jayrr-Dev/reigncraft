@@ -44,7 +44,7 @@ import {
   reducingWorldPlazaDevvitGroundItemQuantityOptimistically,
   reducingWorldPlazaLocalGroundItemQuantityOptimistically,
 } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
-import { consumingWorldPlazaLocalGroundFoodUnit } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
+import { consumingWorldPlazaLocalGroundFoodQuantity } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
 import { resolvingWorldPlazaGroundItemScreenPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaGroundItemScreenPoint';
 import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
 import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
@@ -297,16 +297,17 @@ export function RenderingWorldPlazaGroundItems({
               );
 
         if (useLocalGroundItems && localPersistenceOwnerId) {
-          const result = consumingWorldPlazaLocalGroundFoodUnit(
+          const result = consumingWorldPlazaLocalGroundFoodQuantity(
             localPersistenceOwnerId,
             {
               groundItemId,
               consumerX: consumerPosition.x,
               consumerY: consumerPosition.y,
+              quantity: 1,
             }
           );
 
-          if (result.success) {
+          if (result.consumedQuantity > 0) {
             reducingWorldPlazaLocalGroundItemQuantityOptimistically(
               groundItemId
             );
@@ -314,7 +315,7 @@ export function RenderingWorldPlazaGroundItems({
             itemsRef.current = currentItems;
           }
 
-          return result.success;
+          return result.consumedQuantity > 0;
         }
 
         reducingWorldPlazaDevvitGroundItemQuantityOptimistically(groundItemId);
@@ -329,6 +330,80 @@ export function RenderingWorldPlazaGroundItems({
         ).catch(() => undefined);
 
         return true;
+      },
+      consumeGroundFoodQuantity: (
+        groundItemId,
+        quantity,
+        consumerPosition
+      ) => {
+        if (quantity <= 0) {
+          return 0;
+        }
+
+        const currentItems = itemsRef.current ?? [];
+        const existingItem = currentItems.find(
+          (groundItem) => groundItem.id === groundItemId
+        );
+
+        if (!existingItem || existingItem.quantity <= 0) {
+          return 0;
+        }
+
+        const consumedQuantity = Math.min(quantity, existingItem.quantity);
+        const remainingQuantity = existingItem.quantity - consumedQuantity;
+
+        itemsRef.current =
+          remainingQuantity <= 0
+            ? currentItems.filter(
+                (groundItem) => groundItem.id !== groundItemId
+              )
+            : currentItems.map((groundItem) =>
+                groundItem.id === groundItemId
+                  ? { ...groundItem, quantity: remainingQuantity }
+                  : groundItem
+              );
+
+        if (useLocalGroundItems && localPersistenceOwnerId) {
+          const result = consumingWorldPlazaLocalGroundFoodQuantity(
+            localPersistenceOwnerId,
+            {
+              groundItemId,
+              consumerX: consumerPosition.x,
+              consumerY: consumerPosition.y,
+              quantity: consumedQuantity,
+            }
+          );
+
+          if (result.consumedQuantity > 0) {
+            reducingWorldPlazaLocalGroundItemQuantityOptimistically(
+              groundItemId,
+              result.consumedQuantity
+            );
+          } else {
+            itemsRef.current = currentItems;
+          }
+
+          return result.consumedQuantity;
+        }
+
+        reducingWorldPlazaDevvitGroundItemQuantityOptimistically(
+          groundItemId,
+          consumedQuantity
+        );
+
+        for (let index = 0; index < consumedQuantity; index += 1) {
+          void consumingWorldInventoryDevvitGroundFoodUnit(
+            WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_CONSUME_API_PATH,
+            {
+              groundItemId,
+              consumerX: consumerPosition.x,
+              consumerY: consumerPosition.y,
+              saveSlotIndex: singlePlayerSaveSlotIndex,
+            }
+          ).catch(() => undefined);
+        }
+
+        return consumedQuantity;
       },
     });
 

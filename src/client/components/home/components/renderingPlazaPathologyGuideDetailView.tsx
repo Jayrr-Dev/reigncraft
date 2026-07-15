@@ -4,13 +4,10 @@ import {
   PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME,
   RenderingPlazaCodexStudyDetailSection,
 } from '@/components/home/components/renderingPlazaCodexStudyDetailSections';
-import { RenderingPlazaCodexStudyMilestoneProgress } from '@/components/home/components/renderingPlazaCodexStudyMilestoneProgress';
-import { resolvingPlazaCodexStudyMilestoneRewardMarkers } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
 import {
   checkingPlazaCodexStudyTierUnlocked,
   formattingPlazaCodexStudyCountProgress,
   formattingPlazaCodexStudyProgressLabel,
-  resolvingPlazaCodexStudyFullCount,
   resolvingPlazaCodexStudyTierBookIcon,
 } from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import type { PlazaPathologyGuideDisplayEntry } from '@/components/home/domains/resolvingPlazaPathologyGuideDisplayEntries';
@@ -42,11 +39,6 @@ export function RenderingPlazaPathologyGuideDetailView({
   className = '',
 }: RenderingPlazaPathologyGuideDetailViewProps): React.JSX.Element {
   const studyCount = entry.studyCount;
-  const studyFullCount = resolvingPlazaCodexStudyFullCount(PATHOLOGY_TRACK);
-  const studyMilestoneMarkers = resolvingPlazaCodexStudyMilestoneRewardMarkers(
-    PATHOLOGY_TRACK,
-    studyCount
-  );
   const studyProgressLabel = formattingPlazaCodexStudyProgressLabel(
     PATHOLOGY_TRACK,
     studyCount
@@ -110,14 +102,6 @@ export function RenderingPlazaPathologyGuideDetailView({
           </button>
         ) : null}
       </div>
-
-      <RenderingPlazaCodexStudyMilestoneProgress
-        value={studyCount}
-        max={studyFullCount}
-        markers={studyMilestoneMarkers}
-        ariaLabel="Study milestone rewards"
-        className="shrink-0 px-0.5"
-      />
 
       <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 touch-pan-y">
         <article className="overflow-hidden rounded-md border border-poster-teal/35 bg-parchment/50 shadow-[0_2px_6px_rgba(28,25,18,0.18)]">

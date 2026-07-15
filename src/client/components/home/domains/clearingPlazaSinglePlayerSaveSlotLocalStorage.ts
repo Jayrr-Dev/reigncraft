@@ -1,3 +1,7 @@
+import {
+  resolvingWorldPlazaAvatarTransformCooldownStorageKey,
+  resolvingWorldPlazaSelectedAvatarSkinStorageKey,
+} from '@/components/world/domains/definingWorldPlazaAvatarTransformConstants';
 import { resolvingWorldPlazaBestiaryDiscoveryStorageKey } from '@/components/world/domains/definingWorldPlazaBestiaryDiscoveryConstants';
 import { resolvingWorldPlazaExploredBiomesStorageKey } from '@/components/world/domains/definingWorldPlazaExploredBiomesConstants';
 import { resolvingWorldPlazaLastPositionStorageKey } from '@/components/world/domains/definingWorldPlazaLastPositionConstants';
@@ -33,6 +37,10 @@ import {
 import { resolvingWorldPlazaPlayerConditionsStorageKey } from '@/components/world/health/domains/definingWorldPlazaPlayerConditionsConstants';
 import { resolvingWorldPlazaGroundItemsLocalStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemLocalStorageConstants';
 import { resolvingWorldPlazaInventoryStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
+import {
+  DEFINING_WORLD_PLAZA_SPRITCORE_UPGRADE_STORAGE_KEY_PREFIX,
+  resolvingWorldPlazaSpritcoreUpgradeStorageKey,
+} from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreLevelingConstants';
 
 /**
  * Removes all local single-player save data for one persistence owner.
@@ -63,10 +71,23 @@ export function clearingPlazaSinglePlayerSaveSlotLocalStorage(
     resolvingWorldPlazaFarmlandLocalStorageKey(persistenceOwnerId),
     resolvingWorldPlazaFireCellsLocalStorageKey(persistenceOwnerId),
     resolvingWorldPlazaPlayerConditionsStorageKey(persistenceOwnerId),
+    resolvingWorldPlazaAvatarTransformCooldownStorageKey(persistenceOwnerId),
+    resolvingWorldPlazaSelectedAvatarSkinStorageKey(persistenceOwnerId),
+    resolvingWorldPlazaSpritcoreUpgradeStorageKey(persistenceOwnerId),
   ];
 
   for (const storageKey of storageKeys) {
     window.localStorage.removeItem(storageKey);
+  }
+
+  const spritcoreOwnerPrefix = `${DEFINING_WORLD_PLAZA_SPRITCORE_UPGRADE_STORAGE_KEY_PREFIX}:${persistenceOwnerId}:`;
+
+  for (let index = window.localStorage.length - 1; index >= 0; index -= 1) {
+    const storageKey = window.localStorage.key(index);
+
+    if (storageKey?.startsWith(spritcoreOwnerPrefix)) {
+      window.localStorage.removeItem(storageKey);
+    }
   }
 
   clearingWorldPlazaLocalChoppedTreesMemoryForOwner(persistenceOwnerId);

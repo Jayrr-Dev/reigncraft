@@ -30,6 +30,8 @@ import { checkingWildlifeSpeciesFavoriteFood } from '@/components/world/wildlife
 import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
 import { checkingWildlifeIsStalkHuntTemperament } from '@/components/world/wildlife/domains/checkingWildlifeIsStalkHuntTemperament';
 import { checkingWildlifeStalkPackmateMayAttackPrey } from '@/components/world/wildlife/domains/checkingWildlifeStalkPackmateMayAttackPrey';
+import { checkingWorldPlazaInventoryItemIsSpritcore } from '@/components/world/spritcore/domains/checkingWorldPlazaInventoryItemIsSpritcore';
+import { DEFINING_WILDLIFE_SPRITCORE_FEAST_DISTANCE_BIAS } from '@/components/world/wildlife/domains/definingWildlifeSpritcoreFeastConstants';
 import {
   checkingWildlifeStalkPhaseIsAttacking,
   checkingWildlifeStalkPhaseIsFleeing,
@@ -611,6 +613,10 @@ function applyingWildlifeGroundFoodFavoriteDistanceBias(
   itemTypeId: string,
   distanceGrid: number
 ): number {
+  if (checkingWorldPlazaInventoryItemIsSpritcore(itemTypeId)) {
+    return distanceGrid * DEFINING_WILDLIFE_SPRITCORE_FEAST_DISTANCE_BIAS;
+  }
+
   if (!checkingWildlifeSpeciesFavoriteFood(species, itemTypeId)) {
     return distanceGrid;
   }
@@ -743,6 +749,14 @@ export function computingWildlifeSelectedGroundFoodItemId(
     blackboard.species,
     listingWildlifeGroundFoodItems(blackboard.nowMs)
   );
+
+  // Spritcore piles beat flora: animals ignore grass/flowers while SC is in scent.
+  if (
+    nearestStack &&
+    checkingWorldPlazaInventoryItemIsSpritcore(nearestStack.itemTypeId)
+  ) {
+    return nearestStack.id;
+  }
 
   const nearestFlora = resolvingWildlifeNearestGroundFloraTarget(blackboard);
 

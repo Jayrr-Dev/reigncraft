@@ -30,12 +30,17 @@ import {
 } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
-  checkingWorldPlazaAvatarTransformIsOnCooldown,
   gettingWorldPlazaAvatarTransformCooldownReadyAtMs,
   subscribingWorldPlazaAvatarTransformCooldown,
 } from '@/components/world/domains/managingWorldPlazaAvatarTransformCooldownStore';
 import { cn } from '@/lib/utils';
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 
 export type RenderingWorldPlazaActionBarTransformPanelProps = {
   readonly selectedAvatarSkinId: DefiningWorldPlazaAvatarSkinId;
@@ -58,9 +63,7 @@ export function RenderingWorldPlazaActionBarTransformPanel({
     gettingWorldPlazaAvatarTransformCooldownReadyAtMs,
     gettingWorldPlazaAvatarTransformCooldownReadyAtMs
   );
-  const isTransformOnCooldown =
-    checkingWorldPlazaAvatarTransformIsOnCooldown(Date.now()) ||
-    transformReadyAtMs > Date.now();
+  const isTransformOnCooldown = transformReadyAtMs > Date.now();
 
   const normalizedFilterText = filterText.trim().toLowerCase();
   const filteredSkinOptions = useMemo(() => {

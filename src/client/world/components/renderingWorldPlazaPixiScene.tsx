@@ -290,6 +290,11 @@ import {
 } from '@/components/world/domains/definingWorldPlazaViewportFullscreenConstants';
 import { findingWorldPlazaBiomeTeleportWorldPointForDev } from '@/components/world/domains/findingWorldPlazaBiomeTeleportWorldPointForDev';
 import {
+  gettingWorldPlazaSelectedAvatarSkinId,
+  initializingWorldPlazaAvatarSkinSelectionStore,
+} from '@/components/world/domains/managingWorldPlazaAvatarSkinSelectionStore';
+import { initializingWorldPlazaAvatarTransformCooldownStore } from '@/components/world/domains/managingWorldPlazaAvatarTransformCooldownStore';
+import {
   gettingWorldPlazaBestiaryStudyCountsSnapshot,
   recordingWorldPlazaBestiarySpeciesStudied,
 } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
@@ -505,6 +510,7 @@ import { usingWorldPlazaRunStamina } from '@/components/world/hooks/usingWorldPl
 import { usingWorldPlazaSavedCoordsQuery } from '@/components/world/hooks/usingWorldPlazaSavedCoordsQuery';
 import { usingWorldPlazaSavedCoordsTrackingVisibleState } from '@/components/world/hooks/usingWorldPlazaSavedCoordsTrackingVisibleState';
 import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarCharacterDefinition';
+import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
 import { usingWorldPlazaTerrainCollisionDebugVisibleState } from '@/components/world/hooks/usingWorldPlazaTerrainCollisionDebugVisibleState';
 import { usingWorldPlazaViewportFullscreenLetterbox } from '@/components/world/hooks/usingWorldPlazaViewportFullscreenLetterbox';
 import { usingWorldPlazaViewportHudScale } from '@/components/world/hooks/usingWorldPlazaViewportHudScale';
@@ -658,8 +664,8 @@ import { RenderingWorldPlazaWildlifeCorpseStudyLabels } from '@/components/world
 import { RenderingWorldPlazaWildlifeForageEatOverlays } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeForageEatOverlays';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
 import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeNameTags';
-import { RenderingWorldPlazaWildlifeStatusHudOverlays } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeStatusHudOverlays';
 import { RenderingWorldPlazaWildlifeSpeechBubbles } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeSpeechBubbles';
+import { RenderingWorldPlazaWildlifeStatusHudOverlays } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeStatusHudOverlays';
 import { applyingWildlifeDocilePetComplete } from '@/components/world/wildlife/domains/applyingWildlifeDocilePetComplete';
 import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
 import { checkingWildlifeDocilePetIsReady } from '@/components/world/wildlife/domains/checkingWildlifeDocilePetIsReady';
@@ -673,8 +679,8 @@ import { DEFINING_WILDLIFE_DOCILE_PET_STUDY_POINTS } from '@/components/world/wi
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
 import type { DefiningWildlifeForageEatOverlay } from '@/components/world/wildlife/domains/definingWildlifeForageEatOverlayTypes';
 import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife/domains/definingWildlifeNameTagTypes';
-import type { DefiningWildlifeStatusHudOverlay } from '@/components/world/wildlife/domains/definingWildlifeStatusHudOverlayTypes';
 import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wildlife/domains/definingWildlifeSpeechBubbleTypes';
+import type { DefiningWildlifeStatusHudOverlay } from '@/components/world/wildlife/domains/definingWildlifeStatusHudOverlayTypes';
 import type {
   DefiningWildlifeAggressionLevel,
   DefiningWildlifeInstance,
@@ -4289,9 +4295,9 @@ function RenderingWorldPlazaPixiSceneConnected({
   const wildlifeNameTagsRef = useRef<DefiningWildlifeNameTagOverlay[]>([]);
   const wildlifeNameTagsMountRevisionRef = useRef(0);
   const lastSyncedWildlifeNameTagsMountRevisionRef = useRef(0);
-  const wildlifeStatusHudOverlaysRef = useRef<DefiningWildlifeStatusHudOverlay[]>(
-    []
-  );
+  const wildlifeStatusHudOverlaysRef = useRef<
+    DefiningWildlifeStatusHudOverlay[]
+  >([]);
   const wildlifeStatusHudOverlaysMountRevisionRef = useRef(0);
   const lastSyncedWildlifeStatusHudOverlaysMountRevisionRef = useRef(0);
   const wildlifeCombatLockedInstanceIdRef = useRef<string | null>(null);
@@ -4480,6 +4486,9 @@ function RenderingWorldPlazaPixiSceneConnected({
       wildlifeForageEatOverlaysOutRef: wildlifeForageEatOverlaysRef,
       wildlifeNameTagsOutRef: wildlifeNameTagsRef,
       wildlifeNameTagsMountRevisionRef,
+      wildlifeStatusHudOverlaysOutRef: wildlifeStatusHudOverlaysRef,
+      wildlifeStatusHudOverlaysMountRevisionRef,
+      wildlifeCombatLockedInstanceIdRef,
       wildlifeHoveredInstanceIdRef,
       wildlifeDamagedPlayerAtMsByInstanceIdRef,
       meatDropContextRef: wildlifeMeatDropContextRef,
@@ -4567,11 +4576,15 @@ function RenderingWorldPlazaPixiSceneConnected({
     wildlifeForageEatOverlaysRef.current.length = 0;
     wildlifeNameTagsRef.current.length = 0;
     wildlifeNameTagsMountRevisionRef.current += 1;
+    wildlifeStatusHudOverlaysRef.current.length = 0;
+    wildlifeStatusHudOverlaysMountRevisionRef.current += 1;
+    wildlifeCombatLockedInstanceIdRef.current = null;
     wildlifeHoveredInstanceIdRef.current = null;
     wildlifeDamagedPlayerAtMsByInstanceIdRef.current.clear();
     setWildlifeFloatingCombatTexts([]);
     setWildlifeSpeechBubbles([]);
     setWildlifeForageEatOverlays([]);
+    setWildlifeStatusHudOverlays([]);
     setWildlifeNameTags([]);
   }, [
     isWildlifeGenerationEnabled,
@@ -5830,6 +5843,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         lastChaseGridX: instance.position.x,
         lastChaseGridY: instance.position.y,
         lastChaseReplanAtMs: 0,
+        suppressChase: false,
       };
       isClickRunIntentRef.current = true;
 
@@ -5972,6 +5986,16 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
 
       clearingDocileBetraySelection();
+
+      // Tap same locked target again to clear lock.
+      if (
+        combatLockRef.current?.targetInstanceId === clickedInstance.instanceId
+      ) {
+        clearingCombatLock();
+        clearingWalkTarget();
+        return true;
+      }
+
       lockingCombatOnWildlifeInstance(clickedInstance);
       return true;
     },
@@ -6071,6 +6095,11 @@ function RenderingWorldPlazaPixiSceneConnected({
         if (walkTargetRef.current || isWalkingRef.current) {
           clearingWalkTarget();
         }
+        return;
+      }
+
+      if (tickResult.kind === 'await') {
+        // Manual move while locked: keep crosshair + auto-swing in reach.
         return;
       }
 
@@ -6781,18 +6810,27 @@ function RenderingWorldPlazaPixiSceneConnected({
     storageOwnerId: onlineUserId ?? localPersistenceOwnerId,
   });
 
+  const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();
+
   useEffect(() => {
-    initializingWorldPlazaRecipeDiscoveryStore(
-      onlineUserId ?? localPersistenceOwnerId,
-      {
-        cloudSaveSlotIndex: discoveryCloudSaveSlotIndex,
-      }
-    );
+    const storageOwnerId = onlineUserId ?? localPersistenceOwnerId;
+
+    initializingWorldPlazaAvatarSkinSelectionStore(storageOwnerId);
+    initializingWorldPlazaAvatarTransformCooldownStore(storageOwnerId);
+    initializingWorldPlazaRecipeDiscoveryStore(storageOwnerId, {
+      cloudSaveSlotIndex: discoveryCloudSaveSlotIndex,
+    });
     initializingWorldPlazaSpritcoreUpgradeStore(
-      onlineUserId ?? localPersistenceOwnerId
+      storageOwnerId,
+      gettingWorldPlazaSelectedAvatarSkinId()
     );
     attachingWorldPlazaAllCraftModeRecipesForDevQa();
-  }, [discoveryCloudSaveSlotIndex, localPersistenceOwnerId, onlineUserId]);
+  }, [
+    discoveryCloudSaveSlotIndex,
+    localPersistenceOwnerId,
+    onlineUserId,
+    selectedAvatarSkinId,
+  ]);
 
   const {
     isTeleportFadeOverlayMounted,
@@ -7822,8 +7860,12 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      // Clicking empty ground (or non-target) cancels combat lock-on and Betray?.
-      clearingCombatLock();
+      // Ground tap while locked: keep lock, free walk (no auto-chase steal).
+      // Unlock via dead target, new target, or re-tap same target.
+      const activeCombatLock = combatLockRef.current;
+      if (activeCombatLock) {
+        activeCombatLock.suppressChase = true;
+      }
       clearingDocileBetraySelection();
       handlingPlazaPointerDown(event);
       syncingMovePositionRef.current?.();
@@ -8917,6 +8959,12 @@ function RenderingWorldPlazaPixiSceneConnected({
                   cameraWorldZoomRef={cameraWorldZoomRef}
                 />
               ) : null}
+              <RenderingWorldPlazaWildlifeStatusHudOverlays
+                overlays={wildlifeStatusHudOverlays}
+                overlaysOutRef={wildlifeStatusHudOverlaysRef}
+                cameraOffsetRef={cameraOffsetRef}
+                cameraWorldZoomRef={cameraWorldZoomRef}
+              />
               {isWildlifeDamageNumbersEnabled ? (
                 <RenderingWorldPlazaWildlifeHealthFloatTexts
                   floatingCombatTexts={wildlifeFloatingCombatTexts}

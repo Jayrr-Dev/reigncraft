@@ -4,17 +4,17 @@
  * @module components/world/domains/applyingWorldPlazaAvatarTransform
  */
 
+import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
 import type { DefiningWorldPlazaAvatarSkinId } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { LABELING_WORLD_PLAZA_AVATAR_TRANSFORM_COOLDOWN_TOAST } from '@/components/world/domains/definingWorldPlazaAvatarTransformConstants';
-import {
-  checkingWorldPlazaAvatarTransformIsOnCooldown,
-  startingWorldPlazaAvatarTransformCooldown,
-} from '@/components/world/domains/managingWorldPlazaAvatarTransformCooldownStore';
 import {
   gettingWorldPlazaSelectedAvatarSkinId,
   settingWorldPlazaSelectedAvatarSkin,
 } from '@/components/world/domains/managingWorldPlazaAvatarSkinSelectionStore';
-import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
+import {
+  checkingWorldPlazaAvatarTransformIsOnCooldown,
+  startingWorldPlazaAvatarTransformCooldown,
+} from '@/components/world/domains/managingWorldPlazaAvatarTransformCooldownStore';
 
 export type ApplyingWorldPlazaAvatarTransformResult =
   | 'applied'
@@ -37,7 +37,9 @@ export function applyingWorldPlazaAvatarTransform(
   }
 
   if (checkingWorldPlazaAvatarTransformIsOnCooldown(nowMs)) {
-    showingReigncraftToast(LABELING_WORLD_PLAZA_AVATAR_TRANSFORM_COOLDOWN_TOAST);
+    showingReigncraftToast(
+      LABELING_WORLD_PLAZA_AVATAR_TRANSFORM_COOLDOWN_TOAST
+    );
     return 'cooldown';
   }
 

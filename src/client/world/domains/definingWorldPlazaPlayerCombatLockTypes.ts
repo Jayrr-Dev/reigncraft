@@ -1,5 +1,5 @@
 /**
- * Live player combat lock-on state (chase + auto-melee).
+ * Live player combat lock-on state (auto-melee in reach; optional chase).
  *
  * @module components/world/domains/definingWorldPlazaPlayerCombatLockTypes
  */
@@ -12,4 +12,9 @@ export type DefiningWorldPlazaPlayerCombatLockState = {
   lastChaseGridY: number;
   /** {@link performance.now} of the last chase path replan. */
   lastChaseReplanAtMs: number;
+  /**
+   * When true, skip auto-chase so the player can tap-walk freely.
+   * Cleared on a fresh lock (new target). Set by ground taps while locked.
+   */
+  suppressChase: boolean;
 };

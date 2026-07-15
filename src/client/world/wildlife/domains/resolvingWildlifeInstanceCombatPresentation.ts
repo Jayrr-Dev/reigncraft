@@ -181,7 +181,8 @@ export function resolvingWildlifeInstanceBaseMaxHealth(
 /** Applies instance-specific melee damage multipliers. */
 export function resolvingWildlifeInstanceAttackPowerMultiplier(
   species: DefiningWildlifeSpeciesDefinition,
-  instance: DefiningWildlifeInstance
+  instance: DefiningWildlifeInstance,
+  nowMs: number = Number.MAX_SAFE_INTEGER
 ): number {
   let multiplier = resolvingWildlifeInstanceCombatStatMultiplier(
     species,
@@ -191,6 +192,11 @@ export function resolvingWildlifeInstanceAttackPowerMultiplier(
   if (checkingWildlifeIsAggressiveChicken(instance)) {
     multiplier *= DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_ATTACK_POWER_MULTIPLIER;
   }
+
+  multiplier *= resolvingWildlifeSpritcoreFeastAttackPowerMultiplier(
+    instance,
+    nowMs
+  );
 
   return multiplier;
 }

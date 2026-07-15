@@ -9,6 +9,7 @@ const baseLock = (): DefiningWorldPlazaPlayerCombatLockState => ({
   lastChaseGridX: 10,
   lastChaseGridY: 10,
   lastChaseReplanAtMs: 0,
+  suppressChase: false,
 });
 
 describe('resolvingWorldPlazaPlayerCombatLockTick', () => {
@@ -67,6 +68,27 @@ describe('resolvingWorldPlazaPlayerCombatLockTick', () => {
         DEFINING_WORLD_PLAZA_PLAYER_COMBAT_LOCK_MELEE_REACH_GRID + 2
       );
     }
+  });
+
+  it('awaits when out of reach and chase is suppressed', () => {
+    const result = resolvingWorldPlazaPlayerCombatLockTick({
+      lock: { ...baseLock(), suppressChase: true },
+      playerPosition: { x: 0, y: 0 },
+      target: {
+        instanceId: 'wildlife:wolf:1',
+        position: {
+          x: DEFINING_WORLD_PLAZA_PLAYER_COMBAT_LOCK_MELEE_REACH_GRID + 2,
+          y: 0,
+        },
+        isDead: false,
+      },
+      nowMs: 1000,
+      isMeleeBusy: false,
+      isDocileConfirmPending: false,
+      hasActiveWalk: true,
+    });
+
+    expect(result.kind).toBe('await');
   });
 
   it('swings when in reach and not busy', () => {
