@@ -52,23 +52,26 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_NIGHT_COOLING_CELSIUS = 8;
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_LAVA_CELSIUS = 920;
 
 /**
- * Lit campfire heat with zero fed wood (°C).
+ * Lit campfire standing-tile heat (°C).
  *
- * Each inventory wood raises standing-tile heat from this floor. Unlit pits
- * emit no heat (lit fire cells only).
+ * Held at comfort high so a lit pit warms cold biomes without heat DoT. Wood
+ * still feeds burn time / flame size; it does not raise environmental heat.
+ * Unlit pits emit no heat (lit fire cells only).
  */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_BASE_CELSIUS = 38;
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_BASE_CELSIUS =
+  DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS;
 
-/** Extra standing-tile heat (°C) per inventory wood fed to a lit campfire. */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS_PER_WOOD = 12;
+/** Extra standing-tile heat (°C) per inventory wood (0 = wood does not cook the player). */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_CELSIUS_PER_WOOD = 0;
 
-/** Cap for campfire standing-tile heat (°C), below lava. */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_MAX_CELSIUS = 120;
+/** Cap for campfire standing-tile heat (°C); matches comfort high. */
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_MAX_CELSIUS =
+  DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS;
 
 /**
- * One-wood campfire standing-tile temperature (°C).
+ * Canonical lit campfire standing-tile temperature (°C).
  *
- * Equals base + one wood step. Prefer
+ * Prefer
  * {@link computingWorldPlazaCampfireTemperatureCelsiusFromFuelWoodCount}
  * when wood count is known.
  */
@@ -102,14 +105,14 @@ export function computingWorldPlazaCampfireTemperatureCelsiusFromFuelWoodCount(
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_HEAT_RADIATION_RING = 1;
 
 /**
- * Floor for adjacent campfire heat tiles (°C). Just above comfort high so the
- * one-block ring still thaws / warms cold biomes without staying near standing
- * heat.
+ * Floor for adjacent campfire heat tiles (°C). Matches comfort high so the
+ * one-block ring warms without heat DoT.
  */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_ADJACENT_MIN_CELSIUS = 42;
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_ADJACENT_MIN_CELSIUS =
+  DEFINING_WORLD_PLAZA_TEMPERATURE_COMFORT_HIGH_CELSIUS;
 
 /** Adjacent campfire tile heat as a fraction of the standing-tile temperature. */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_ADJACENT_CELSIUS_RATIO = 0.4;
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_ADJACENT_CELSIUS_RATIO = 1;
 
 /**
  * Adjacent campfire heat (°C) from the standing-tile temperature.

@@ -7,10 +7,7 @@
  * @module components/world/health/domains/definingWorldPlazaTemperatureIndicatorConstants
  */
 
-import {
-  DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_MAX_CELSIUS,
-  DEFINING_WORLD_PLAZA_TEMPERATURE_CLIMATE_MIN_CELSIUS,
-} from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
+import { DEFINING_WORLD_PLAZA_TEMPERATURE_CLIMATE_MIN_CELSIUS } from '@/components/world/health/domains/definingWorldPlazaTemperatureConstants';
 
 /** Accessible name for the temperature orb. */
 export const LABELING_WORLD_PLAZA_ACTION_BAR_TEMPERATURE =
@@ -25,10 +22,9 @@ export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MIN_CELSIUS =
 
 /**
  * Fill ratio 1 maps to this heat ceiling (°C).
- * Campfire max; lava and hotter clamp to full.
+ * Past comfort / campfire warmth; lava and hotter clamp to full.
  */
-export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MAX_CELSIUS =
-  DEFINING_WORLD_PLAZA_TEMPERATURE_CAMPFIRE_MAX_CELSIUS;
+export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_MAX_CELSIUS = 120;
 
 /** Shared fill for the entire character comfort band. */
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_INDICATOR_SKY_BLUE = '#87ceeb';
