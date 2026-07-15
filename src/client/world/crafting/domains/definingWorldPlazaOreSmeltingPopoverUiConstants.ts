@@ -25,7 +25,7 @@ export type DefiningWorldPlazaOreSmeltingPopoverUiTheme = {
 
 /** Shared panel class prefix (position + size). */
 const DEFINING_WORLD_PLAZA_ORE_SMELTING_POPOVER_PANEL_BASE_CLASS_NAME =
-  'pointer-events-auto fixed left-1/2 top-1/2 z-50 w-44 -translate-x-1/2 -translate-y-1/2 rounded-md border-2 p-2 shadow-xl' as const;
+  'pointer-events-auto fixed left-1/2 top-1/2 z-50 w-56 -translate-x-1/2 -translate-y-1/2 rounded-md border-2 p-2 shadow-xl' as const;
 
 /** Warm terracotta shell for clay kiln / clay stove. */
 const DEFINING_WORLD_PLAZA_ORE_SMELTING_POPOVER_PANEL_CLAY_CLASS_NAME =
@@ -48,21 +48,21 @@ const DEFINING_WORLD_PLAZA_ORE_SMELTING_POPOVER_CLOSE_SOOT_CLASS_NAME =
 export const DEFINING_WORLD_PLAZA_ORE_SMELTING_POPOVER_UI_BY_STATION = {
   [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN]: {
     inputSlotLabel: 'Item',
-    idleHintText: 'Drop item + 1 coal or 3 wood',
+    idleHintText: 'Drop ware + fuel. Grab output when ready.',
     panelClassName: DEFINING_WORLD_PLAZA_ORE_SMELTING_POPOVER_PANEL_CLAY_CLASS_NAME,
     closeButtonClassName:
       DEFINING_WORLD_PLAZA_ORE_SMELTING_POPOVER_CLOSE_CLAY_CLASS_NAME,
   },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY]: {
     inputSlotLabel: 'Ore',
-    idleHintText: 'Drop ore + 1 coal or 3 wood',
+    idleHintText: 'Drop ore + fuel. Grab output when ready.',
     panelClassName: DEFINING_WORLD_PLAZA_ORE_SMELTING_POPOVER_PANEL_SOOT_CLASS_NAME,
     closeButtonClassName:
       DEFINING_WORLD_PLAZA_ORE_SMELTING_POPOVER_CLOSE_SOOT_CLASS_NAME,
   },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE]: {
     inputSlotLabel: 'Ore',
-    idleHintText: 'Drop ore + 1 coal or 3 wood',
+    idleHintText: 'Drop ore + fuel. Grab output when ready.',
     panelClassName: DEFINING_WORLD_PLAZA_ORE_SMELTING_POPOVER_PANEL_CLAY_CLASS_NAME,
     closeButtonClassName:
       DEFINING_WORLD_PLAZA_ORE_SMELTING_POPOVER_CLOSE_CLAY_CLASS_NAME,
@@ -75,7 +75,7 @@ export const DEFINING_WORLD_PLAZA_ORE_SMELTING_POPOVER_UI_BY_STATION = {
 /** Fallback when station id is unknown (ore + soot). */
 export const DEFINING_WORLD_PLAZA_ORE_SMELTING_POPOVER_UI_FALLBACK = {
   inputSlotLabel: 'Ore',
-  idleHintText: 'Drop ore + 1 coal or 3 wood',
+  idleHintText: 'Drop ore + fuel. Grab output when ready.',
   panelClassName: DEFINING_WORLD_PLAZA_ORE_SMELTING_POPOVER_PANEL_SOOT_CLASS_NAME,
   closeButtonClassName:
     DEFINING_WORLD_PLAZA_ORE_SMELTING_POPOVER_CLOSE_SOOT_CLASS_NAME,

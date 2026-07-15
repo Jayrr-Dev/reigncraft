@@ -4,11 +4,18 @@ import type { DefiningInventoryState } from '@/components/inventory/domains/defi
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import {
   checkingWorldPlazaOreSmeltingFuelItemTypeId,
-  DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS,
-  resolvingWorldPlazaOreSmeltingFuelUnitsCost,
+  resolvingWorldPlazaOreSmeltingFuelUnitsCostForRecipe,
   resolvingWorldPlazaOreSmeltingRecipe,
 } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingRegistry';
 import type { DefiningWorldPlazaOreSmeltingStationSlotKind } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingDndIds';
+import {
+  DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE,
+  checkingWorldPlazaOreSmeltingCanStartUnit,
+  resolvingWorldPlazaOreSmeltingStationCatchUpToNow,
+  resolvingWorldPlazaOreSmeltingStationMaybeStart,
+  type DefiningWorldPlazaOreSmeltingStationState,
+} from '@/components/world/crafting/domains/resolvingWorldPlazaOreSmeltingStationAdvance';
+import { resolvingWorldPlazaOreSmeltingStationCapacity } from '@/components/world/crafting/domains/resolvingWorldPlazaOreSmeltingStationCapacity';
 import { consumingWorldPlazaInventoryItemFromSlot } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemFromSlot';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_CLAY,
@@ -16,24 +23,10 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-export type DefiningWorldPlazaOreSmeltingStationState = {
-  readonly inputItemTypeId: string | null;
-  readonly fuelItemTypeId: string | null;
-  readonly outputItemTypeId: string | null;
-  readonly outputDisplayName: string | null;
-  readonly startedAtMs: number | null;
-  readonly endsAtMs: number | null;
-};
+export type { DefiningWorldPlazaOreSmeltingStationState };
 
-const DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE: DefiningWorldPlazaOreSmeltingStationState =
-  {
-    inputItemTypeId: null,
-    fuelItemTypeId: null,
-    outputItemTypeId: null,
-    outputDisplayName: null,
-    startedAtMs: null,
-    endsAtMs: null,
-  };
+/** How often idle / distant stations catch up to wall clock. */
+const DEFINING_WORLD_PLAZA_ORE_SMELTING_CATCH_UP_INTERVAL_MS = 250;
 
 export type UsingWorldPlazaOreSmeltingStationsParams = {
   readonly inventoryState: DefiningInventoryState;
@@ -66,9 +59,6 @@ export function usingWorldPlazaOreSmeltingStations({
   >(new Map());
   const stationStateByBlockIdRef = useRef(stationStateByBlockId);
   stationStateByBlockIdRef.current = stationStateByBlockId;
-  const completionTimeoutByBlockIdRef = useRef(
-    new Map<string, ReturnType<typeof setTimeout>>()
-  );
 
   const selectingStation = useCallback(
     (block: DefiningWorldBuildingPlacedBlock): void => {
@@ -90,14 +80,17 @@ export function usingWorldPlazaOreSmeltingStations({
       selectedStationBlock.blockId
     );
 
-    if (!stationState?.outputItemTypeId) {
+    if (
+      !stationState?.outputItemTypeId ||
+      stationState.outputQuantity < 1
+    ) {
       return;
     }
 
     const addResult = addingItemWithStacking({
       id: crypto.randomUUID(),
       itemTypeId: stationState.outputItemTypeId,
-      quantity: 1,
+      quantity: stationState.outputQuantity,
     });
 
     if (addResult.quantityAccepted === 0) {
@@ -105,15 +98,40 @@ export function usingWorldPlazaOreSmeltingStations({
       return;
     }
 
+    const remainingQuantity = addResult.quantityOverflow;
+    const recipe = resolvingWorldPlazaOreSmeltingRecipe(
+      stationState.inputItemTypeId ?? ''
+    );
+
     setStationStateByBlockId((currentStates) => {
-      const nextStates = new Map(currentStates);
-      nextStates.set(
-        selectedStationBlock.blockId,
-        DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE
+      const previousState =
+        currentStates.get(selectedStationBlock.blockId) ??
+        DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE;
+      const afterCollect: DefiningWorldPlazaOreSmeltingStationState = {
+        ...previousState,
+        outputItemTypeId:
+          remainingQuantity > 0 ? previousState.outputItemTypeId : null,
+        outputDisplayName:
+          remainingQuantity > 0 ? previousState.outputDisplayName : null,
+        outputQuantity: remainingQuantity,
+      };
+      const nextState = resolvingWorldPlazaOreSmeltingStationMaybeStart(
+        afterCollect,
+        recipe,
+        Date.now()
       );
+      const nextStates = new Map(currentStates);
+      nextStates.set(selectedStationBlock.blockId, nextState);
       return nextStates;
     });
-    showingToast(`${stationState.outputDisplayName ?? 'Smelted item'} collected.`);
+
+    const collectedLabel =
+      stationState.outputDisplayName ?? 'Smelted item';
+    showingToast(
+      remainingQuantity > 0
+        ? `Grabbed ${addResult.quantityAccepted} ${collectedLabel}. Inventory full for the rest.`
+        : `Grabbed ${addResult.quantityAccepted} ${collectedLabel}.`
+    );
   }, [
     addingItemWithStacking,
     selectedStationBlock,
@@ -152,7 +170,7 @@ export function usingWorldPlazaOreSmeltingStations({
           slotKind === 'ore'
             ? inventoryItem.itemTypeId ===
               DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_CLAY
-              ? 'Needs wet clay'
+              ? 'Needs wet clay ware.'
               : recipeAnywhere !== null
                 ? 'Fire wet clay ware in a clay kiln.'
                 : 'That item cannot be smelted.'
@@ -161,47 +179,40 @@ export function usingWorldPlazaOreSmeltingStations({
         return;
       }
 
-      const fuelUnitsCost =
-        slotKind === 'fuel'
-          ? resolvingWorldPlazaOreSmeltingFuelUnitsCost(
-              inventoryItem.itemTypeId
-            )
-          : null;
-
-      if (slotKind === 'fuel' && fuelUnitsCost === null) {
-        showingToast('Fuel must be wood or coal.');
-        return;
-      }
-
-      const consumeQuantity = slotKind === 'fuel' ? (fuelUnitsCost ?? 1) : 1;
-
-      if (
-        slotKind === 'fuel' &&
-        inventoryItem.quantity < consumeQuantity
-      ) {
-        const fuelLabel =
-          inventoryItem.itemTypeId ===
-          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD
-            ? 'wood'
-            : 'coal';
-        showingToast(
-          `Need ${consumeQuantity} ${fuelLabel} to smelt (wood costs 3× coal).`
-        );
-        return;
-      }
-
       const currentStationState =
         stationStateByBlockId.get(block.blockId) ??
         DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE;
 
+      const chamberItemTypeId =
+        slotKind === 'ore'
+          ? currentStationState.inputItemTypeId
+          : currentStationState.fuelItemTypeId;
+      const chamberQuantity =
+        slotKind === 'ore'
+          ? currentStationState.inputQuantity
+          : currentStationState.fuelQuantity;
+
       if (
-        currentStationState.startedAtMs !== null ||
-        currentStationState.outputItemTypeId !== null ||
-        (slotKind === 'ore' &&
-          currentStationState.inputItemTypeId !== null) ||
-        (slotKind === 'fuel' && currentStationState.fuelItemTypeId !== null)
+        chamberItemTypeId !== null &&
+        chamberItemTypeId !== inventoryItem.itemTypeId
       ) {
         showingToast('That station slot is occupied.');
+        return;
+      }
+
+      const capacity = resolvingWorldPlazaOreSmeltingStationCapacity(
+        inventoryItem.itemTypeId
+      );
+      const freeSpace = capacity - chamberQuantity;
+
+      if (freeSpace <= 0) {
+        showingToast('That station slot is full.');
+        return;
+      }
+
+      const depositQuantity = Math.min(inventoryItem.quantity, freeSpace);
+
+      if (depositQuantity <= 0) {
         return;
       }
 
@@ -210,7 +221,7 @@ export function usingWorldPlazaOreSmeltingStations({
         const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
           currentInventoryState,
           inventorySlotIndex,
-          consumeQuantity
+          depositQuantity
         );
         didConsume = consumeResult.consumed;
         return consumeResult.consumed ? consumeResult.nextState : null;
@@ -220,33 +231,86 @@ export function usingWorldPlazaOreSmeltingStations({
         return;
       }
 
+      const previousState =
+        stationStateByBlockId.get(block.blockId) ??
+        DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE;
+      const slottedState: DefiningWorldPlazaOreSmeltingStationState = {
+        ...previousState,
+        inputItemTypeId:
+          slotKind === 'ore'
+            ? inventoryItem.itemTypeId
+            : previousState.inputItemTypeId,
+        inputQuantity:
+          slotKind === 'ore'
+            ? previousState.inputQuantity + depositQuantity
+            : previousState.inputQuantity,
+        fuelItemTypeId:
+          slotKind === 'fuel'
+            ? inventoryItem.itemTypeId
+            : previousState.fuelItemTypeId,
+        fuelQuantity:
+          slotKind === 'fuel'
+            ? previousState.fuelQuantity + depositQuantity
+            : previousState.fuelQuantity,
+      };
+      const recipe = slottedState.inputItemTypeId
+        ? resolvingWorldPlazaOreSmeltingRecipe(
+            slottedState.inputItemTypeId,
+            block.definitionId
+          )
+        : null;
+      const nextState = resolvingWorldPlazaOreSmeltingStationMaybeStart(
+        slottedState,
+        recipe,
+        Date.now()
+      );
+
+      if (
+        previousState.endsAtMs === null &&
+        nextState.endsAtMs === null &&
+        recipe &&
+        slottedState.inputQuantity >= 1 &&
+        !checkingWorldPlazaOreSmeltingCanStartUnit(slottedState, recipe)
+      ) {
+        if (slottedState.fuelItemTypeId === null) {
+          showingToast('Add wood or coal fuel to start.');
+        } else {
+          const fuelCost =
+            resolvingWorldPlazaOreSmeltingFuelUnitsCostForRecipe(
+              slottedState.fuelItemTypeId,
+              recipe
+            );
+          if (
+            fuelCost !== null &&
+            slottedState.fuelQuantity < fuelCost
+          ) {
+            const fuelLabel =
+              slottedState.fuelItemTypeId ===
+              DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD
+                ? 'wood'
+                : 'coal';
+            showingToast(
+              `Need ${fuelCost} ${fuelLabel} for this ${recipe.outputDisplayName.toLowerCase()}.`
+            );
+          } else if (
+            slottedState.outputItemTypeId !== null &&
+            slottedState.outputItemTypeId !== recipe.outputItemTypeId
+          ) {
+            showingToast('Grab the output chamber first.');
+          } else if (
+            slottedState.outputQuantity >=
+            resolvingWorldPlazaOreSmeltingStationCapacity(
+              recipe.outputItemTypeId
+            )
+          ) {
+            showingToast(
+              'Output chamber is full. Grab before smelting more.'
+            );
+          }
+        }
+      }
+
       setStationStateByBlockId((currentStates) => {
-        const previousState =
-          currentStates.get(block.blockId) ??
-          DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE;
-        const slottedState = {
-          ...previousState,
-          inputItemTypeId:
-            slotKind === 'ore'
-              ? inventoryItem.itemTypeId
-              : previousState.inputItemTypeId,
-          fuelItemTypeId:
-            slotKind === 'fuel'
-              ? inventoryItem.itemTypeId
-              : previousState.fuelItemTypeId,
-        };
-        const shouldStart =
-          slottedState.inputItemTypeId !== null &&
-          slottedState.fuelItemTypeId !== null;
-        const startedAtMs = shouldStart ? Date.now() : null;
-        const nextState: DefiningWorldPlazaOreSmeltingStationState = {
-          ...slottedState,
-          startedAtMs,
-          endsAtMs:
-            startedAtMs === null
-              ? null
-              : startedAtMs + DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS,
-        };
         const nextStates = new Map(currentStates);
         nextStates.set(block.blockId, nextState);
         return nextStates;
@@ -314,69 +378,63 @@ export function usingWorldPlazaOreSmeltingStations({
     ]
   );
 
+  /**
+   * Wall-clock catch-up for every station, including when the UI is closed and
+   * the player is elsewhere. Also flushes overdue units when the tab wakes.
+   */
   useEffect(() => {
-    for (const [blockId, stationState] of stationStateByBlockId) {
-      if (
-        stationState.endsAtMs === null ||
-        completionTimeoutByBlockIdRef.current.has(blockId)
-      ) {
-        continue;
-      }
+    const catchingUpAllStations = (): void => {
+      const nowMs = Date.now();
+      const currentStates = stationStateByBlockIdRef.current;
+      let changed = false;
+      const nextStates = new Map(currentStates);
 
-      const timeoutId = setTimeout(() => {
-        const currentState =
-          stationStateByBlockIdRef.current.get(blockId);
-        const recipe = currentState?.inputItemTypeId
-          ? resolvingWorldPlazaOreSmeltingRecipe(
-              currentState.inputItemTypeId
-            )
-          : null;
-
-        if (!currentState || !recipe) {
-          completionTimeoutByBlockIdRef.current.delete(blockId);
-          return;
+      for (const [blockId, stationState] of currentStates) {
+        if (
+          stationState.endsAtMs === null ||
+          stationState.endsAtMs > nowMs
+        ) {
+          continue;
         }
 
-        const addResult = addingItemWithStacking({
-          id: crypto.randomUUID(),
-          itemTypeId: recipe.outputItemTypeId,
-          quantity: 1,
-        });
+        const recipe = stationState.inputItemTypeId
+          ? resolvingWorldPlazaOreSmeltingRecipe(stationState.inputItemTypeId)
+          : null;
+        const caughtUpState = resolvingWorldPlazaOreSmeltingStationCatchUpToNow(
+          stationState,
+          recipe,
+          nowMs
+        );
 
-        setStationStateByBlockId((currentStates) => {
-          const nextStates = new Map(currentStates);
-
-          if (addResult.quantityAccepted > 0) {
-            nextStates.set(
-              blockId,
-              DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE
-            );
-            showingToast(`${recipe.outputDisplayName} smelted.`);
-          } else {
-            nextStates.set(blockId, {
-              ...DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE,
-              outputItemTypeId: recipe.outputItemTypeId,
-              outputDisplayName: recipe.outputDisplayName,
-            });
-            showingToast('Inventory full. Output is waiting in the station.');
-          }
-
-          return nextStates;
-        });
-        completionTimeoutByBlockIdRef.current.delete(blockId);
-      }, Math.max(0, stationState.endsAtMs - Date.now()));
-
-      completionTimeoutByBlockIdRef.current.set(blockId, timeoutId);
-    }
-  }, [addingItemWithStacking, showingToast, stationStateByBlockId]);
-
-  useEffect(() => {
-    const timeoutMap = completionTimeoutByBlockIdRef.current;
-    return () => {
-      for (const timeoutId of timeoutMap.values()) {
-        clearTimeout(timeoutId);
+        if (caughtUpState !== stationState) {
+          changed = true;
+          nextStates.set(blockId, caughtUpState);
+        }
       }
-      timeoutMap.clear();
+
+      if (changed) {
+        setStationStateByBlockId(nextStates);
+      }
+    };
+
+    const intervalId = window.setInterval(
+      catchingUpAllStations,
+      DEFINING_WORLD_PLAZA_ORE_SMELTING_CATCH_UP_INTERVAL_MS
+    );
+    const handlingVisibilityChange = (): void => {
+      if (document.visibilityState === 'visible') {
+        catchingUpAllStations();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handlingVisibilityChange);
+
+    return () => {
+      window.clearInterval(intervalId);
+      document.removeEventListener(
+        'visibilitychange',
+        handlingVisibilityChange
+      );
     };
   }, []);
 

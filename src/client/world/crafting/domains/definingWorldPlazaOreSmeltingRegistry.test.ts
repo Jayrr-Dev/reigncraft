@@ -2,6 +2,7 @@ import {
   checkingWorldPlazaOreSmeltingFuelItemTypeId,
   DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY,
   resolvingWorldPlazaOreSmeltingFuelUnitsCost,
+  resolvingWorldPlazaOreSmeltingFuelUnitsCostForRecipe,
   resolvingWorldPlazaOreSmeltingRecipe,
 } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingRegistry';
 import {
@@ -113,5 +114,31 @@ describe('ore smelting registry', () => {
         DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_IRON
       )
     ).toBeNull();
+  });
+
+  it('gives each recipe a fixed duration and fuel multiplier', () => {
+    const iron = resolvingWorldPlazaOreSmeltingRecipe(
+      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_IRON
+    );
+    const scarlet = resolvingWorldPlazaOreSmeltingRecipe(
+      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_SCARLET
+    );
+
+    expect(iron?.durationMs).toBe(6_000);
+    expect(iron?.fuelCostMultiplier).toBe(2);
+    expect(scarlet?.durationMs).toBe(10_000);
+    expect(scarlet?.fuelCostMultiplier).toBe(3);
+    expect(
+      resolvingWorldPlazaOreSmeltingFuelUnitsCostForRecipe(
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COAL,
+        iron!
+      )
+    ).toBe(2);
+    expect(
+      resolvingWorldPlazaOreSmeltingFuelUnitsCostForRecipe(
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+        scarlet!
+      )
+    ).toBe(9);
   });
 });

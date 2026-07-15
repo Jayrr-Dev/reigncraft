@@ -4,6 +4,7 @@
  * @module components/world/inventory/domains/registeringWorldPlazaInventoryCoffeeItemDefinitions
  */
 
+import { DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BREWED_COFFEE } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { resolvingWorldPlazaInventoryCoffeeSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCoffeeSpriteSheetConstants';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import {
@@ -11,7 +12,6 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
-import { DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BREWED_COFFEE } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { resolvingWorldPlazaInventoryFoodHealDeclaration } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealDeclaration';
 
 export function registeringWorldPlazaInventoryCoffeeItemDefinitions(): readonly DefiningWorldPlazaInventoryItemTypeDefinition[] {
@@ -32,7 +32,7 @@ export function registeringWorldPlazaInventoryCoffeeItemDefinitions(): readonly 
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_COFFEE,
       name: 'Brewed Coffee',
       rarity: 'uncommon',
-      maxStack: 16,
+      maxStack: 8,
       isDroppable: true,
       isStackable: true,
       iconSpriteSheet:
@@ -52,7 +52,7 @@ export function registeringWorldPlazaInventoryCoffeeItemDefinitions(): readonly 
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
       name: 'Empty Clay Cup',
       rarity: 'basic',
-      maxStack: 16,
+      maxStack: 8,
       isDroppable: true,
       isStackable: true,
       iconSpriteSheet:

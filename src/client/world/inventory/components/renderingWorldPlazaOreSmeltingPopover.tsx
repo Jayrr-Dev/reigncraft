@@ -11,6 +11,7 @@ import {
 } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingDndIds';
 import { resolvingWorldPlazaOreSmeltingPopoverUi } from '@/components/world/crafting/domains/resolvingWorldPlazaOreSmeltingPopoverUi';
 import type { DefiningWorldPlazaOreSmeltingStationState } from '@/components/world/crafting/hooks/usingWorldPlazaOreSmeltingStations';
+import { checkingWorldPlazaInventorySlotDoubleActivation } from '@/components/world/inventory/domains/checkingWorldPlazaInventorySlotDoubleActivation';
 import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import {
@@ -25,9 +26,17 @@ import { createPortal } from 'react-dom';
 type RenderingWorldPlazaOreSmeltingSlotProps = {
   readonly slotKind: DefiningWorldPlazaOreSmeltingStationSlotKind;
   readonly itemTypeId: string | null;
-  readonly isLocked: boolean;
+  readonly quantity: number;
+  readonly isDropDisabled: boolean;
   readonly stationBlockDefinitionId: string;
   readonly inputSlotLabel: string;
+};
+
+type RenderingWorldPlazaOreSmeltingOutputSlotProps = {
+  readonly itemTypeId: string | null;
+  readonly quantity: number;
+  readonly displayName: string | null;
+  readonly onGrab: () => void;
 };
 
 function resolvingDraggedItemTypeId(active: Active | null): string | null {
@@ -61,10 +70,27 @@ function computingWorldPlazaOreSmeltingProgressRatio(
   );
 }
 
+function RenderingWorldPlazaOreSmeltingQuantityBadge({
+  quantity,
+}: {
+  readonly quantity: number;
+}): React.JSX.Element | null {
+  if (quantity < 1) {
+    return null;
+  }
+
+  return (
+    <span className="absolute -right-1 -bottom-1 rounded bg-stone-950/90 px-1 text-[8px] font-bold text-amber-100">
+      {quantity}
+    </span>
+  );
+}
+
 function RenderingWorldPlazaOreSmeltingSlot({
   slotKind,
   itemTypeId,
-  isLocked,
+  quantity,
+  isDropDisabled,
   stationBlockDefinitionId,
   inputSlotLabel,
 }: RenderingWorldPlazaOreSmeltingSlotProps): React.JSX.Element {
@@ -81,7 +107,7 @@ function RenderingWorldPlazaOreSmeltingSlot({
         : checkingWorldPlazaOreSmeltingFuelItemTypeId(draggedItemTypeId);
   const { setNodeRef, isOver } = useDroppable({
     id: definingWorldPlazaOreSmeltingSlotDroppableId(slotKind),
-    disabled: isLocked || itemTypeId !== null,
+    disabled: isDropDisabled,
   });
 
   const slotLabel = slotKind === 'ore' ? inputSlotLabel : 'Fuel';
@@ -94,7 +120,7 @@ function RenderingWorldPlazaOreSmeltingSlot({
       <div
         ref={setNodeRef}
         className={[
-          'flex h-11 w-11 items-center justify-center rounded border-2 bg-stone-950/80',
+          'relative flex h-11 w-11 items-center justify-center rounded border-2 bg-stone-950/80',
           isOver && isValidDraggedItem
             ? 'border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.8)]'
             : isOver
@@ -104,17 +130,103 @@ function RenderingWorldPlazaOreSmeltingSlot({
         aria-label={`${slotLabel} smelting slot`}
       >
         {itemTypeId ? (
-          <RenderingWorldPlazaInventoryItemGlyph
-            itemTypeId={itemTypeId}
-            registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
-            iconStyle={{ width: 30, height: 30 }}
-            emojiStyle={{ fontSize: 24 }}
-            fallbackTextStyle={{ fontSize: 9 }}
-          />
+          <>
+            <RenderingWorldPlazaInventoryItemGlyph
+              itemTypeId={itemTypeId}
+              registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
+              iconStyle={{ width: 30, height: 30 }}
+              emojiStyle={{ fontSize: 24 }}
+              fallbackTextStyle={{ fontSize: 9 }}
+            />
+            <RenderingWorldPlazaOreSmeltingQuantityBadge quantity={quantity} />
+          </>
         ) : (
           <span className="text-[8px] text-stone-400">Drop</span>
         )}
       </div>
+    </div>
+  );
+}
+
+function RenderingWorldPlazaOreSmeltingOutputSlot({
+  itemTypeId,
+  quantity,
+  displayName,
+  onGrab,
+}: RenderingWorldPlazaOreSmeltingOutputSlotProps): React.JSX.Element {
+  const previousTapRef = useRef<{
+    atMs: number;
+    clientPoint: { clientX: number; clientY: number };
+    slotIndex: number;
+  } | null>(null);
+
+  const handlingPointerDown = (
+    event: React.PointerEvent<HTMLButtonElement>
+  ): void => {
+    if (!itemTypeId || quantity < 1) {
+      return;
+    }
+
+    const nowMs = Date.now();
+    const clientPoint = {
+      clientX: event.clientX,
+      clientY: event.clientY,
+    };
+    const isDoubleActivation = checkingWorldPlazaInventorySlotDoubleActivation({
+      eventDetail: event.detail,
+      nowMs,
+      clientPoint,
+      slotIndex: 0,
+      previousTap: previousTapRef.current,
+    });
+
+    previousTapRef.current = {
+      atMs: nowMs,
+      clientPoint,
+      slotIndex: 0,
+    };
+
+    if (isDoubleActivation) {
+      onGrab();
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <span className="text-[9px] font-bold uppercase tracking-wide text-amber-100">
+        Output
+      </span>
+      <button
+        type="button"
+        className={[
+          'relative flex h-11 w-11 items-center justify-center rounded border-2 bg-stone-950/80',
+          itemTypeId
+            ? 'border-amber-500 hover:border-amber-300'
+            : 'border-stone-500',
+        ].join(' ')}
+        aria-label={
+          itemTypeId
+            ? `Output chamber: ${displayName ?? 'item'}. Double-click or use Grab.`
+            : 'Empty output chamber'
+        }
+        disabled={!itemTypeId || quantity < 1}
+        onPointerDown={handlingPointerDown}
+      >
+        {itemTypeId ? (
+          <>
+            <RenderingWorldPlazaInventoryItemGlyph
+              itemTypeId={itemTypeId}
+              registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
+              iconStyle={{ width: 30, height: 30 }}
+              emojiStyle={{ fontSize: 24 }}
+              fallbackTextStyle={{ fontSize: 9 }}
+            />
+            <RenderingWorldPlazaOreSmeltingQuantityBadge quantity={quantity} />
+          </>
+        ) : (
+          <span className="text-[8px] text-stone-400">Empty</span>
+        )}
+      </button>
     </div>
   );
 }
@@ -143,6 +255,9 @@ export function RenderingWorldPlazaOreSmeltingPopover({
   stationStateRef.current = stationState;
 
   const isSmelting = stationState.endsAtMs !== null;
+  const hasOutput =
+    stationState.outputItemTypeId !== null &&
+    stationState.outputQuantity > 0;
   const popoverUi = resolvingWorldPlazaOreSmeltingPopoverUi(
     stationBlockDefinitionId
   );
@@ -201,20 +316,28 @@ export function RenderingWorldPlazaOreSmeltingPopover({
         </button>
       </div>
 
-      <div className="flex items-end justify-center gap-3">
+      <div className="flex items-end justify-center gap-2">
         <RenderingWorldPlazaOreSmeltingSlot
           slotKind="ore"
           itemTypeId={stationState.inputItemTypeId}
-          isLocked={isSmelting}
+          quantity={stationState.inputQuantity}
+          isDropDisabled={false}
           stationBlockDefinitionId={stationBlockDefinitionId}
           inputSlotLabel={popoverUi.inputSlotLabel}
         />
         <RenderingWorldPlazaOreSmeltingSlot
           slotKind="fuel"
           itemTypeId={stationState.fuelItemTypeId}
-          isLocked={isSmelting}
+          quantity={stationState.fuelQuantity}
+          isDropDisabled={false}
           stationBlockDefinitionId={stationBlockDefinitionId}
           inputSlotLabel={popoverUi.inputSlotLabel}
+        />
+        <RenderingWorldPlazaOreSmeltingOutputSlot
+          itemTypeId={stationState.outputItemTypeId}
+          quantity={stationState.outputQuantity}
+          displayName={stationState.outputDisplayName}
+          onGrab={onCollectOutput}
         />
       </div>
 
@@ -228,17 +351,17 @@ export function RenderingWorldPlazaOreSmeltingPopover({
       <p className="mt-1 text-center text-[9px] text-stone-300">
         {isSmelting
           ? 'Smelting...'
-          : stationState.outputItemTypeId
-            ? `${stationState.outputDisplayName} waiting`
+          : hasOutput
+            ? `${stationState.outputDisplayName} ready`
             : popoverUi.idleHintText}
       </p>
-      {stationState.outputItemTypeId ? (
+      {hasOutput ? (
         <button
           type="button"
           className="mt-2 w-full rounded bg-amber-700 px-2 py-1 text-[10px] font-bold hover:bg-amber-600"
           onClick={onCollectOutput}
         >
-          Collect
+          Grab
         </button>
       ) : null}
     </div>,

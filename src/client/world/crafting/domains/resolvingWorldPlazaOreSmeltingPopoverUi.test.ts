@@ -13,7 +13,8 @@ describe('resolvingWorldPlazaOreSmeltingPopoverUi', () => {
     );
 
     expect(ui.inputSlotLabel).toBe('Item');
-    expect(ui.idleHintText).toContain('item');
+    expect(ui.idleHintText).toContain('ware');
+    expect(ui.idleHintText).toContain('Grab');
     expect(ui.panelClassName).toContain('bg-[#5c3d28]/95');
     expect(ui.panelClassName).toContain('border-[#a67c52]');
   });
@@ -25,6 +26,7 @@ describe('resolvingWorldPlazaOreSmeltingPopoverUi', () => {
 
     expect(ui.inputSlotLabel).toBe('Ore');
     expect(ui.idleHintText).toContain('ore');
+    expect(ui.idleHintText).toContain('Grab');
     expect(ui.panelClassName).toContain('bg-[#141210]/95');
     expect(ui.panelClassName).toContain('border-[#3d3830]');
   });

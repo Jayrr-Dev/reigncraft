@@ -27,7 +27,7 @@ export function registeringWorldPlazaInventoryCeramicsItemDefinitions(): readonl
       rarity: 'basic',
       tooltip:
         'Soft unfired clay shaped into a cup. Fire it in a kiln with coal before it holds drink.',
-      maxStack: 16,
+      maxStack: 8,
       isDroppable: true,
       isStackable: true,
       iconSpriteSheet:
@@ -96,7 +96,7 @@ export function registeringWorldPlazaInventoryCeramicsItemDefinitions(): readonl
       name: 'Cup of Tea',
       rarity: 'uncommon',
       tooltip: 'A poured clay cup of tea. Drink to take the steeped traits.',
-      maxStack: 16,
+      maxStack: 8,
       isDroppable: true,
       isStackable: true,
       iconSpriteSheet:
