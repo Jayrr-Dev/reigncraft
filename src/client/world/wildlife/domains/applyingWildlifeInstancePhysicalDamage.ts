@@ -7,12 +7,13 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { notifyingWorldPlazaAvatarMeleeHitOutcome } from '@/components/world/domains/notifyingWorldPlazaAvatarMeleeHitOutcome';
 import { checkingWorldPlazaEntityHealthSleepCanWakeFromDamage } from '@/components/world/health/domains/checkingWorldPlazaEntityHealthSleepCanWakeFromDamage';
+import type { DefiningWorldPlazaEntityHealthDamageOptions } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { resolvingWildlifeChargeRunAttackDamageOptions } from '@/components/world/wildlife/domains/advancingWildlifeChargeWindup';
 import { applyingWildlifeInstanceHealthDamageWithFloatFeedback } from '@/components/world/wildlife/domains/applyingWildlifeInstanceHealthDamageWithFloatFeedback';
 import { computingWildlifeInstanceDefenseMitigatedDamage } from '@/components/world/wildlife/domains/computingWildlifeInstanceDefenseMitigatedDamage';
 import { checkingWildlifeOmegaWolfSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
-import type { DefiningWorldPlazaEntityHealthDamageOptions } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { notifyingWildlifeOmegaWolfSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeOmegaWolfSfxEvent';
 import { notifyingWildlifeSpeciesSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeSpeciesSfxEvent';
@@ -48,8 +49,10 @@ export type ApplyingWildlifeInstancePhysicalDamageParams = {
   wakeContext?: ApplyingWildlifeInstancePhysicalDamageWakeContext | null;
   attacker?: Pick<
     DefiningWildlifeInstance,
-    'largeSizeFrame' | 'aiState' | 'speciesId'
+    'largeSizeFrame' | 'aiState' | 'speciesId' | 'staminaState'
   > | null;
+  /** When set with `attacker`, enables charge-run critical EV options. */
+  attackerIsRunning?: boolean;
   /**
    * Player girl/tool hits use EV. Animal transforms match wildlife→wildlife flat.
    * Ignored when `attacker` is set (always flat) or sleep/special options win.
@@ -71,6 +74,7 @@ export function applyingWildlifeInstancePhysicalDamage({
   nowMs,
   wakeContext = null,
   attacker = null,
+  attackerIsRunning = false,
   outgoingDamageStyle = 'player-ev',
   playerOutgoingDamageOptions = null,
 }: ApplyingWildlifeInstancePhysicalDamageParams): DefiningWildlifeInstance {
@@ -81,6 +85,14 @@ export function applyingWildlifeInstancePhysicalDamage({
   const obeseJumpAttackOptions = attacker
     ? resolvingWildlifeObeseJumpAttackDamageOptions(attacker, nowMs)
     : null;
+  const chargeRunAttackOptions = attacker
+    ? resolvingWildlifeChargeRunAttackDamageOptions(
+        attacker,
+        attacker.speciesId,
+        attackerIsRunning,
+        nowMs
+      )
+    : null;
   const omegaOutgoingOptions = attacker?.speciesId
     ? resolvingWildlifeOmegaWolfOutgoingDamageOptions(attacker.speciesId)
     : null;
@@ -88,6 +100,7 @@ export function applyingWildlifeInstancePhysicalDamage({
     attacker !== null || outgoingDamageStyle === 'wildlife-flat';
   const damageOptions =
     sleepAmbushOptions ??
+    chargeRunAttackOptions ??
     omegaOutgoingOptions ??
     obeseJumpAttackOptions ??
     obeseIncomingOptions ??

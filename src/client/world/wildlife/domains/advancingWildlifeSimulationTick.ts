@@ -21,8 +21,8 @@ import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/w
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
 import { applyingWorldPlazaSpecialtyWeaponMeleeHitSideEffects } from '@/components/world/equipment/domains/applyingWorldPlazaSpecialtyWeaponMeleeHitSideEffects';
 import { resolvingWorldPlazaSpecialtyWeaponDefinition } from '@/components/world/equipment/domains/definingWorldPlazaSpecialtyWeaponRegistry';
-import { resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions } from '@/components/world/equipment/domains/resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions';
 import { resolvingWorldPlazaEquippedItemAttackerRollModifiers } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedItemAttackerRollModifiers';
+import { resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions } from '@/components/world/equipment/domains/resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions';
 import {
   computingWorldPlazaEntityHealthDamageToHealAmount,
   resolvingWorldPlazaEntityHealthDamageToHealRatio,
@@ -53,6 +53,7 @@ import {
 import {
   advancingWildlifeChargeWindup,
   clearingWildlifeChargeWindupAfterStamina,
+  resolvingWildlifeChargeRunAttackDamageOptions,
   resolvingWildlifeMeleeAttackPower,
 } from '@/components/world/wildlife/domains/advancingWildlifeChargeWindup';
 import { advancingWildlifeCorpseLifecycle } from '@/components/world/wildlife/domains/advancingWildlifeCorpseLifecycle';
@@ -853,6 +854,7 @@ function applyingWildlifeMeleeAttack(
         rawAmount: attackPower,
         nowMs,
         attacker,
+        attackerIsRunning: isRunning,
         wakeContext: target.aiState.isSleeping
           ? {
               threatPoint: attacker.position,
@@ -956,6 +958,14 @@ function applyingWildlifeMeleeAttack(
         attacker,
         nowMs
       );
+      const chargeRunCriticalOptions = jumpScareFatal
+        ? null
+        : resolvingWildlifeChargeRunAttackDamageOptions(
+            attacker,
+            attackerSpecies.speciesId,
+            isRunning,
+            nowMs
+          );
 
       onPlayerHitByWildlife({
         instanceId: attacker.instanceId,
@@ -964,7 +974,12 @@ function applyingWildlifeMeleeAttack(
         aggressionLevel: attacker.aggressionLevel,
         ...(jumpScareFatal
           ? resolvingWildlifeJumpScareFatalDamageOptions()
-          : {}),
+          : chargeRunCriticalOptions
+            ? {
+                forcedDeviationScore:
+                  chargeRunCriticalOptions.forcedDeviationScore,
+              }
+            : {}),
       });
 
       if (jumpScareFatal) {

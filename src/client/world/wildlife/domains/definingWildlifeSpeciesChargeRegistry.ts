@@ -31,6 +31,11 @@ export type DefiningWildlifeSpeciesChargeConfig = {
   chargeStaminaExitThreshold: number;
   /** Multiplier applied to melee damage while sprinting or mid-charge. */
   runDamageMultiplier: number;
+  /**
+   * When true, sprinting or mid-charge melee forces a critical EV outcome
+   * (player and wildlife targets).
+   */
+  runForcesCritical?: boolean;
   /** Optional first-charge bluff (intimidate then wheel home). */
   bluff?: DefiningWildlifeSpeciesBluffChargeConfig;
 };
@@ -76,6 +81,20 @@ const DEFINING_WILDLIFE_SPECIES_CHARGE_REGISTRY: Partial<
     fullStaminaThreshold: 0.96,
     chargeStaminaExitThreshold: 0.4,
     runDamageMultiplier: 1.75,
+  },
+  elephant: {
+    windupMs: 1300,
+    fullStaminaThreshold: 0.95,
+    chargeStaminaExitThreshold: 0.35,
+    runDamageMultiplier: 2.15,
+    runForcesCritical: true,
+  },
+  'elephant-female': {
+    windupMs: 1200,
+    fullStaminaThreshold: 0.95,
+    chargeStaminaExitThreshold: 0.35,
+    runDamageMultiplier: 2.05,
+    runForcesCritical: true,
   },
 };
 

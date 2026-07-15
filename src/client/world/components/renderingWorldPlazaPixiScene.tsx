@@ -243,6 +243,7 @@ import {
   type DefiningWorldPlazaPlacedBlocksSceneRef,
 } from '@/components/world/domains/buildingWorldPlazaPlacedBlocksSceneRef';
 import { resolvingWorldPlazaAnimalPlayableAvatarUnlockWildlifeSpeciesId } from '@/components/world/domains/checkingWorldPlazaAnimalPlayableAvatarSkinStudyUnlocked';
+import { computingWorldPlazaAnimalAvatarRollAttackDamage } from '@/components/world/domains/computingWorldPlazaAnimalAvatarRollAttackDamage';
 import {
   computingWorldPlazaEmbeddedHostSizeStyle,
   computingWorldPlazaExpandedHostSizeStyle,
@@ -352,6 +353,10 @@ import {
   projectingWorldPlazaViewportClientPointToGridPoint,
   projectingWorldPlazaViewportClientPointToViewportScreenPoint,
 } from '@/components/world/domains/projectingWorldPlazaViewportClientPointToGridPoint';
+import {
+  resolvingWorldPlazaAnimalAvatarRollAttackProfile,
+  resolvingWorldPlazaAvatarRollStaminaCostMultiplier,
+} from '@/components/world/domains/resolvingWorldPlazaAnimalAvatarRollAttackProfile';
 import { resolvingWorldPlazaAvatarClipPresentation } from '@/components/world/domains/resolvingWorldPlazaAvatarClipPresentation';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import { resolvingWorldPlazaInitialPlayerSpawnWorldPoint } from '@/components/world/domains/resolvingWorldPlazaInitialPlayerSpawnWorldPoint';
@@ -735,9 +740,11 @@ import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/
 import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeNameTags';
 import { RenderingWorldPlazaWildlifeSpeechBubbles } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeSpeechBubbles';
 import { RenderingWorldPlazaWildlifeStatusHudOverlays } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeStatusHudOverlays';
+import { applyingWildlifeAnimalRollAttackHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifeAnimalRollAttackHitSideEffects';
 import { applyingWildlifeDocilePetComplete } from '@/components/world/wildlife/domains/applyingWildlifeDocilePetComplete';
 import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
 import { checkingWildlifeDocilePetIsReady } from '@/components/world/wildlife/domains/checkingWildlifeDocilePetIsReady';
+import { checkingWildlifeSharesPlayerTransformSpecies } from '@/components/world/wildlife/domains/checkingWildlifeSharesPlayerTransformSpecies';
 import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile';
 import { resolvingWildlifeDocilePetKind } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsPettable';
 import { clearingWildlifeAreaOnPlayerDeath } from '@/components/world/wildlife/domains/clearingWildlifeAreaOnPlayerDeath';
@@ -1264,6 +1271,26 @@ function RenderingWorldPlazaPixiSceneConnected({
   const onRollStartedRef = useRef<
     ((roll: DefiningWorldPlazaAvatarRollPresentationState) => void) | null
   >(null);
+  /** Instance ids already hit by the current animal roll (one hit each). */
+  const animalRollAttackHitInstanceIdsRef = useRef(new Set<string>());
+  const rollStaminaCostMultiplierRef = useRef(1);
+  const animalRollAttackDamageRef = useRef(0);
+  const animalRollAttackProfileRef = useRef<ReturnType<
+    typeof resolvingWorldPlazaAnimalAvatarRollAttackProfile
+  >(null);
+  const applyingAnimalRollAttackOnContactRef = useRef<
+    | ((
+        event: {
+          readonly instanceId: string;
+          readonly speciesId: DefiningWildlifeSpeciesId;
+        },
+        nowMs: number
+      ) => void)
+    | null
+  >(null);
+  const playerContactDiseaseLastRollAtMsByInstanceIdRef = useRef(
+    new Map<string, number>()
+  );
   const meleeAttackStateRef =
     useRef<DefiningWorldPlazaAvatarMeleePresentationState | null>(null);
   const combatLockRef = useRef<DefiningWorldPlazaPlayerCombatLockState | null>(
@@ -4971,6 +4998,22 @@ function RenderingWorldPlazaPixiSceneConnected({
       selectedCharacterEngineDefinition.presentation.skinId
     );
 
+  const animalRollAttackProfile =
+    resolvingWorldPlazaAnimalAvatarRollAttackProfile(
+      selectedCharacterEngineDefinition.presentation.skinId
+    );
+  animalRollAttackProfileRef.current = animalRollAttackProfile;
+  rollStaminaCostMultiplierRef.current =
+    resolvingWorldPlazaAvatarRollStaminaCostMultiplier(
+      selectedCharacterEngineDefinition.presentation.skinId
+    );
+  animalRollAttackDamageRef.current = animalRollAttackProfile
+    ? computingWorldPlazaAnimalAvatarRollAttackDamage(
+        selectedCharacterEngineDerivedStats.attackPower,
+        animalRollAttackProfile
+      )
+    : 0;
+
   const npcStoreRef = useRef(readingNpcInstanceStore());
   const npcPreyTargetsRef = useRef(listingNpcPreyTargets());
   npcPreyTargetsRef.current = listingNpcPreyTargets(npcStoreRef.current);
@@ -5062,7 +5105,9 @@ function RenderingWorldPlazaPixiSceneConnected({
           },
         });
       },
-      onPlayerContactWildlife: (event) => {
+      onPlayerContactWildlife: (event, nowMs) => {
+        applyingAnimalRollAttackOnContactRef.current?.(event, nowMs);
+
         const species = resolvingWildlifeSpeciesDefinition(event.speciesId);
         const profile = resolvingWildlifeDiseaseTransmissionProfile(
           event.speciesId
@@ -5071,6 +5116,23 @@ function RenderingWorldPlazaPixiSceneConnected({
         if (!species || !profile?.contact) {
           return;
         }
+
+        const lastDiseaseRollAtMs =
+          playerContactDiseaseLastRollAtMsByInstanceIdRef.current.get(
+            event.instanceId
+          ) ?? 0;
+
+        if (
+          nowMs - lastDiseaseRollAtMs <
+          DEFINING_WORLD_PLAZA_WILDLIFE_CONTACT_DISEASE_COOLDOWN_MS
+        ) {
+          return;
+        }
+
+        playerContactDiseaseLastRollAtMsByInstanceIdRef.current.set(
+          event.instanceId,
+          nowMs
+        );
 
         const chance = resolvingWildlifeDiseaseTransmissionChance({
           speciesId: event.speciesId,
@@ -5084,6 +5146,53 @@ function RenderingWorldPlazaPixiSceneConnected({
         }
       },
     });
+
+  applyingAnimalRollAttackOnContactRef.current = (event, nowMs) => {
+    const rollProfile = animalRollAttackProfileRef.current;
+    const rollDamage = animalRollAttackDamageRef.current;
+    const transformSpeciesId = playerTransformWildlifeSpeciesIdRef.current;
+
+    if (
+      !isRollingRef.current ||
+      !rollProfile?.dealsContactDamage ||
+      rollDamage <= 0 ||
+      !transformSpeciesId ||
+      animalRollAttackHitInstanceIdsRef.current.has(event.instanceId) ||
+      checkingWildlifeSharesPlayerTransformSpecies(
+        event.speciesId,
+        transformSpeciesId
+      )
+    ) {
+      return;
+    }
+
+    animalRollAttackHitInstanceIdsRef.current.add(event.instanceId);
+    applyWildlifeDamageRef.current?.(event.instanceId, rollDamage);
+
+    if (rollProfile.extraOnHitEffects.length === 0) {
+      return;
+    }
+
+    const hitInstance = gettingWildlifeInstance(
+      wildlifeStoreRef.current,
+      event.instanceId
+    );
+
+    if (!hitInstance || hitInstance.isDead) {
+      return;
+    }
+
+    replacingWildlifeInstance(
+      wildlifeStoreRef.current,
+      applyingWildlifeAnimalRollAttackHitSideEffects({
+        instance: hitInstance,
+        attackerSpeciesId: transformSpeciesId,
+        rollDamage,
+        extraOnHitEffects: rollProfile.extraOnHitEffects,
+        nowMs,
+      })
+    );
+  };
 
   useEffect(() => {
     if (isWildlifeGenerationEnabled) {
@@ -6441,6 +6550,8 @@ function RenderingWorldPlazaPixiSceneConnected({
   );
 
   onRollStartedRef.current = (roll) => {
+    animalRollAttackHitInstanceIdsRef.current.clear();
+
     const rangedCombatProfile =
       resolvingWorldPlazaPlayableAvatarRangedCombatProfile(
         selectedCharacterEngineDefinition.presentation.skinId
@@ -7479,6 +7590,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     healthStateRef,
     hungerMovementMultipliersRef,
     runStaminaStateRef: playerRunStaminaStateRef,
+    rollStaminaCostMultiplierRef,
   });
 
   const localStaminaHudForHealthBars = useMemo(

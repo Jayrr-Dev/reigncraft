@@ -41,6 +41,7 @@ import { ensuringWorldPlazaInventoryBestiarySightedRecipeRewards } from '@/compo
 import { ensuringWorldPlazaInventoryCampfireRecipePage } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryCampfireRecipePage';
 import { ensuringWorldPlazaInventoryLapidaryOreStudyRecipeRewards } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryLapidaryOreStudyRecipeRewards';
 import { listingWorldPlazaOreItemSeedItems } from '@/components/world/inventory/domains/listingWorldPlazaOreItemSeedItems';
+import { acquiringWorldPlazaInventoryLiveGrantHandler } from '@/components/world/inventory/domains/managingWorldPlazaInventoryLiveGrantStore';
 import {
   gettingWorldPlazaInventoryBonusStorageRows,
   subscribingWorldPlazaInventoryStorageExpansion,
@@ -240,6 +241,35 @@ export function usingWorldPlazaInventory(
       return nextState;
     });
   }, [isLoaded, unlockedCapacity]);
+
+  useEffect(() => {
+    return acquiringWorldPlazaInventoryLiveGrantHandler((itemTypeId) => {
+      let grantResult: 'granted' | 'inventory-full' = 'inventory-full';
+
+      updateStateRef.current((currentState) => {
+        const addResult = addingWorldPlazaInventoryItemWithStacking(
+          currentState,
+          {
+            id: crypto.randomUUID(),
+            itemTypeId,
+            quantity: 1,
+          },
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+        );
+
+        if (addResult.quantityAccepted < 1) {
+          grantResult = 'inventory-full';
+          return null;
+        }
+
+        grantResult = 'granted';
+        notifyingWorldPlazaInventoryItemAdded(addResult.quantityAccepted);
+        return addResult.state;
+      });
+
+      return grantResult;
+    });
+  }, []);
 
   const moveItem = useCallback(
     (fromSlotIndex: number, toSlotIndex: number): void => {

@@ -1,7 +1,9 @@
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import { encodingWorldPlazaEntityHealthDamageRollForcedTierValue } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollForcedTier';
 import {
   advancingWildlifeChargeWindup,
   clearingWildlifeChargeWindupAfterStamina,
+  resolvingWildlifeChargeRunAttackDamageOptions,
 } from '@/components/world/wildlife/domains/advancingWildlifeChargeWindup';
 import { creatingWildlifeInitialStaminaState } from '@/components/world/wildlife/domains/advancingWildlifeStaminaTick';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -184,6 +186,48 @@ describe('advancingWildlifeChargeWindup', () => {
         fatigueTier: 'fresh',
         runningForSeconds: 0,
       })
+    ).toBeNull();
+  });
+
+  it('forces critical on elephant run attacks', () => {
+    const elephant = {
+      ...buildingBoarInstance({
+        speciesId: 'elephant',
+        staminaState: { staminaRatio: 1 },
+      }),
+      speciesId: 'elephant' as const,
+    };
+
+    expect(
+      resolvingWildlifeChargeRunAttackDamageOptions(
+        elephant,
+        'elephant',
+        true,
+        1000
+      )
+    ).toEqual({
+      skipDamageRoll: false,
+      forcedDeviationScore:
+        encodingWorldPlazaEntityHealthDamageRollForcedTierValue('critical'),
+    });
+
+    expect(
+      resolvingWildlifeChargeRunAttackDamageOptions(
+        elephant,
+        'elephant',
+        false,
+        1000
+      )
+    ).toBeNull();
+  });
+
+  it('does not force critical on boar run attacks', () => {
+    const boar = buildingBoarInstance({
+      staminaState: { staminaRatio: 1 },
+    });
+
+    expect(
+      resolvingWildlifeChargeRunAttackDamageOptions(boar, 'boar', true, 1000)
     ).toBeNull();
   });
 });

@@ -196,9 +196,9 @@ export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_INFO =
 export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_ATTACH =
   'Attach' as const;
 
-/** Action tower button: bind a packing ledger for an extra storage page. */
-export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_BIND_LEDGER =
-  'Bind' as const;
+/** Action tower button: use a packing ledger for an extra storage page. */
+export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_USE_LEDGER =
+  'Use' as const;
 
 /** Action tower button: study a flower specimen for the Herbarium. */
 export const LABELING_WORLD_PLAZA_INVENTORY_ITEM_ACTION_TOWER_STUDY =

@@ -34,8 +34,8 @@ describe('resolvingPlazaCodexMilestoneRewardClaimDialogModel', () => {
   it('uses packing-ledger art for storage-row unlocks', () => {
     const definition = resolvingPlazaCodexMilestoneRewardDefinition({
       sectionId: 'herbarium',
-      meterKind: 'discovered',
-      percent: 20,
+      meterKind: 'studied',
+      percent: 50,
     });
 
     expect(definition).not.toBeNull();

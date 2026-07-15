@@ -36,11 +36,10 @@ export const LABELING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_TITLE =
 
 /** Character picker panel subtitle on the home screen. */
 export const LABELING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_SUBTITLE =
-  'Search unlocked characters. Death wipes this slot.' as const;
+  'Five random forms. Death wipes this slot.' as const;
 
-/** Search input placeholder in the Perma Death character picker. */
-export const LABELING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_FILTER_PLACEHOLDER =
-  'Search characters...' as const;
+/** How many playable forms the Perma Death picker offers each new run. */
+export const DEFINING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_OPTION_COUNT = 5;
 
 /** Primary action when a character is selected. */
 export const LABELING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_START_LABEL =
@@ -49,10 +48,6 @@ export const LABELING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_START_LABEL =
 /** Scrollable list region in the Perma Death character picker. */
 export const STYLING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_LIST_CLASS_NAME =
   'flex max-h-56 flex-col gap-1 overflow-y-auto rounded-md border border-ink/15 bg-parchment/60 p-1 sm:max-h-64' as const;
-
-/** Search input in the Perma Death character picker. */
-export const STYLING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_FILTER_INPUT_CLASS_NAME =
-  'w-full rounded-md border border-ink/20 bg-parchment px-3 py-2 text-sm text-ink placeholder:text-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-gold/70' as const;
 
 /** Base classes for one character option row. */
 export const STYLING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_OPTION_BASE_CLASS_NAME =

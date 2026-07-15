@@ -15,14 +15,27 @@ type WorldPlazaInventoryLiveGrantHandler = (
 
 let managingWorldPlazaInventoryLiveGrantHandler: WorldPlazaInventoryLiveGrantHandler | null =
   null;
+let managingWorldPlazaInventoryLiveGrantRegistrationCount = 0;
 
 /**
- * Registers the live inventory grant handler (one active world inventory session).
+ * Registers a live inventory grant handler for one mounted inventory session.
+ * Returns a disposer that drops this registration.
  */
-export function registeringWorldPlazaInventoryLiveGrantHandler(
-  handler: WorldPlazaInventoryLiveGrantHandler | null
-): void {
+export function acquiringWorldPlazaInventoryLiveGrantHandler(
+  handler: WorldPlazaInventoryLiveGrantHandler
+): () => void {
+  managingWorldPlazaInventoryLiveGrantRegistrationCount += 1;
   managingWorldPlazaInventoryLiveGrantHandler = handler;
+
+  return () => {
+    managingWorldPlazaInventoryLiveGrantRegistrationCount = Math.max(
+      0,
+      managingWorldPlazaInventoryLiveGrantRegistrationCount - 1
+    );
+    if (managingWorldPlazaInventoryLiveGrantRegistrationCount === 0) {
+      managingWorldPlazaInventoryLiveGrantHandler = null;
+    }
+  };
 }
 
 /**
@@ -37,4 +50,10 @@ export function grantingWorldPlazaInventoryLiveItem(
   }
 
   return managingWorldPlazaInventoryLiveGrantHandler(itemTypeId);
+}
+
+/** Test helper. */
+export function resettingWorldPlazaInventoryLiveGrantStoreForTests(): void {
+  managingWorldPlazaInventoryLiveGrantHandler = null;
+  managingWorldPlazaInventoryLiveGrantRegistrationCount = 0;
 }

@@ -85,40 +85,42 @@ export const DEFINING_PLAZA_CODEX_MILESTONE_REWARD_REGISTRY = [
         'Pinned in your cookbook. Rebuild a wood rod when the tip snaps.',
     },
   },
+  // Packing ledgers stagger by pace: herb Studied mid (Sighted too easy) →
+  // lapidary Sighted max → bestiary Sighted max.
   {
     sectionId: 'herbarium',
-    meterKind: 'discovered',
-    percent: 20,
+    meterKind: 'studied',
+    percent: 50,
     reward: {
       kind: 'unlock-storage-row',
       pageTier: 'rare',
       label: 'Rare Packing Ledger',
       description:
-        'Your pack gains one storage page (+6 slots). At most three ledgers can bind.',
+        'Added to your bag. Use it to unlock one storage page (+6 slots). At most three ledgers can expand your pack.',
     },
   },
   {
     sectionId: 'lapidary',
     meterKind: 'discovered',
-    percent: 20,
+    percent: 100,
     reward: {
       kind: 'unlock-storage-row',
       pageTier: 'mythic',
       label: 'Mythic Packing Ledger',
       description:
-        'Your pack gains one storage page (+6 slots). At most three ledgers can bind.',
+        'Added to your bag. Use it to unlock one storage page (+6 slots). At most three ledgers can expand your pack.',
     },
   },
   {
     sectionId: 'bestiary',
     meterKind: 'discovered',
-    percent: 20,
+    percent: 100,
     reward: {
       kind: 'unlock-storage-row',
       pageTier: 'legendary',
       label: 'Legendary Packing Ledger',
       description:
-        'Your pack gains one storage page (+6 slots). At most three ledgers can bind.',
+        'Added to your bag. Use it to unlock one storage page (+6 slots). At most three ledgers can expand your pack.',
     },
   },
 ] as const satisfies readonly PlazaCodexMilestoneRewardDefinition[];

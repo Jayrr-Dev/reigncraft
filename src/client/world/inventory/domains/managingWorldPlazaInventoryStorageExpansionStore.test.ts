@@ -1,9 +1,9 @@
 import {
   checkingWorldPlazaInventoryStorageExpansionAtCap,
   checkingWorldPlazaInventoryStorageExpansionCodexClaimed,
-  claimingWorldPlazaInventoryStorageExpansionCodexReward,
   gettingWorldPlazaInventoryBonusStorageRows,
   initializingWorldPlazaInventoryStorageExpansionStore,
+  markingWorldPlazaInventoryStorageExpansionCodexClaimed,
   resettingWorldPlazaInventoryStorageExpansionStoreForTests,
   unlockingWorldPlazaInventoryStorageRow,
 } from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
@@ -24,16 +24,16 @@ describe('managingWorldPlazaInventoryStorageExpansionStore', () => {
     expect(checkingWorldPlazaInventoryStorageExpansionAtCap()).toBe(true);
   });
 
-  it('claims Codex chests once and still marks claim at cap', () => {
+  it('marks Codex chests claimed without unlocking rows', () => {
     expect(
-      claimingWorldPlazaInventoryStorageExpansionCodexReward({
+      markingWorldPlazaInventoryStorageExpansionCodexClaimed({
         sectionId: 'herbarium',
         meterKind: 'discovered',
         percent: 20,
       })
-    ).toBe('unlocked');
+    ).toBe('marked');
     expect(
-      claimingWorldPlazaInventoryStorageExpansionCodexReward({
+      markingWorldPlazaInventoryStorageExpansionCodexClaimed({
         sectionId: 'herbarium',
         meterKind: 'discovered',
         percent: 20,
@@ -46,17 +46,6 @@ describe('managingWorldPlazaInventoryStorageExpansionStore', () => {
         percent: 20,
       })
     ).toBe(true);
-
-    unlockingWorldPlazaInventoryStorageRow();
-    unlockingWorldPlazaInventoryStorageRow();
-
-    expect(
-      claimingWorldPlazaInventoryStorageExpansionCodexReward({
-        sectionId: 'bestiary',
-        meterKind: 'discovered',
-        percent: 20,
-      })
-    ).toBe('at-cap');
-    expect(gettingWorldPlazaInventoryBonusStorageRows()).toBe(3);
+    expect(gettingWorldPlazaInventoryBonusStorageRows()).toBe(0);
   });
 });

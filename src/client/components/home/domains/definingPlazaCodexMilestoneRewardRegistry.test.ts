@@ -45,12 +45,12 @@ describe('definingPlazaCodexMilestoneRewardRegistry', () => {
     }
   });
 
-  it('grants packing ledgers on Sighted 20% chests', () => {
+  it('staggers packing ledgers: herb Studied mid, lapidary Sighted max, bestiary Sighted max', () => {
     expect(
       resolvingPlazaCodexMilestoneRewardDefinition({
         sectionId: 'herbarium',
-        meterKind: 'discovered',
-        percent: 20,
+        meterKind: 'studied',
+        percent: 50,
       })?.reward
     ).toMatchObject({
       kind: 'unlock-storage-row',
@@ -60,7 +60,7 @@ describe('definingPlazaCodexMilestoneRewardRegistry', () => {
       resolvingPlazaCodexMilestoneRewardDefinition({
         sectionId: 'lapidary',
         meterKind: 'discovered',
-        percent: 20,
+        percent: 100,
       })?.reward
     ).toMatchObject({
       kind: 'unlock-storage-row',
@@ -70,7 +70,7 @@ describe('definingPlazaCodexMilestoneRewardRegistry', () => {
       resolvingPlazaCodexMilestoneRewardDefinition({
         sectionId: 'bestiary',
         meterKind: 'discovered',
-        percent: 20,
+        percent: 100,
       })?.reward
     ).toMatchObject({
       kind: 'unlock-storage-row',

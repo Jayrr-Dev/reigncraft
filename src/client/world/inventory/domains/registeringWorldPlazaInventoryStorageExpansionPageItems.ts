@@ -23,7 +23,7 @@ export function registeringWorldPlazaInventoryStorageExpansionPageItems(): reado
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_PAGE_TYPE_ID[tier],
       name: DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_PAGE_LABEL[tier],
       tooltip:
-        'Double-click to bind this ledger into your pack. Adds one storage page (+6 slots). You can bind at most three.',
+        'Use this ledger to add one storage page (+6 slots). You can expand your pack at most three times.',
       rarity: tier,
       iconSpriteSheet:
         resolvingWorldPlazaInventoryStorageExpansionPageSpriteSheetIcon(tier),

@@ -9,6 +9,11 @@ import {
   gettingWorldPlazaRecipeAttachedSnapshot,
   resettingWorldPlazaRecipeDiscoveryStoreForTests,
 } from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
+import { DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_PAGE_TYPE_ID } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
+import {
+  acquiringWorldPlazaInventoryLiveGrantHandler,
+  resettingWorldPlazaInventoryLiveGrantStoreForTests,
+} from '@/components/world/inventory/domains/managingWorldPlazaInventoryLiveGrantStore';
 import {
   gettingWorldPlazaInventoryBonusStorageRows,
   initializingWorldPlazaInventoryStorageExpansionStore,
@@ -20,6 +25,7 @@ describe('claimingPlazaCodexMilestoneReward', () => {
   beforeEach(() => {
     resettingWorldPlazaRecipeDiscoveryStoreForTests();
     resettingWorldPlazaInventoryStorageExpansionStoreForTests();
+    resettingWorldPlazaInventoryLiveGrantStoreForTests();
     initializingWorldPlazaInventoryStorageExpansionStore('test-codex-expand');
   });
 
@@ -77,27 +83,66 @@ describe('claimingPlazaCodexMilestoneReward', () => {
     ).toBe(true);
   });
 
-  it('unlocks a bonus storage row from the herbarium Sighted 20% chest', () => {
+  it('grants a packing ledger into inventory without unlocking a row', () => {
+    const grantedTypeIds: string[] = [];
+    const release = acquiringWorldPlazaInventoryLiveGrantHandler(
+      (itemTypeId) => {
+        grantedTypeIds.push(itemTypeId);
+        return 'granted';
+      }
+    );
+
     const definition = resolvingPlazaCodexMilestoneRewardDefinition({
       sectionId: 'herbarium',
-      meterKind: 'discovered',
-      percent: 20,
+      meterKind: 'studied',
+      percent: 50,
     });
 
     expect(definition).not.toBeNull();
     if (!definition) {
+      release();
       return;
     }
 
-    expect(claimingPlazaCodexMilestoneReward(definition, true)).toBe(
-      'unlocked'
-    );
-    expect(gettingWorldPlazaInventoryBonusStorageRows()).toBe(1);
+    expect(claimingPlazaCodexMilestoneReward(definition, true)).toBe('granted');
+    expect(grantedTypeIds).toEqual([
+      DEFINING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_PAGE_TYPE_ID.rare,
+    ]);
+    expect(gettingWorldPlazaInventoryBonusStorageRows()).toBe(0);
     expect(
       checkingPlazaCodexMilestoneRewardClaimed(definition, new Set())
     ).toBe(true);
     expect(claimingPlazaCodexMilestoneReward(definition, true)).toBe(
       'already-claimed'
     );
+
+    release();
+  });
+
+  it('refuses packing-ledger claim when inventory is full', () => {
+    const release = acquiringWorldPlazaInventoryLiveGrantHandler(() => {
+      return 'inventory-full';
+    });
+
+    const definition = resolvingPlazaCodexMilestoneRewardDefinition({
+      sectionId: 'herbarium',
+      meterKind: 'studied',
+      percent: 50,
+    });
+
+    expect(definition).not.toBeNull();
+    if (!definition) {
+      release();
+      return;
+    }
+
+    expect(claimingPlazaCodexMilestoneReward(definition, true)).toBe(
+      'inventory-full'
+    );
+    expect(
+      checkingPlazaCodexMilestoneRewardClaimed(definition, new Set())
+    ).toBe(false);
+
+    release();
   });
 });

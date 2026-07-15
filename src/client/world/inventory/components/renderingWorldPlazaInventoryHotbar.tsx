@@ -160,7 +160,7 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
   readonly onStudyHotbarSlot?: (slotIndex: number) => void;
   /** Attach cookbook recipe page from a hotbar/storage slot. */
   readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
-  /** Bind a packing ledger for one bonus storage page. */
+  /** Use a packing ledger for one bonus storage page. */
   readonly onUnlockStorageRowHotbarSlot?: (slotIndex: number) => void;
   /** Deposit ore into a reachable bloomery / kiln / stove. */
   readonly onRefineHotbarSlot?: (slotIndex: number) => void;

@@ -130,8 +130,6 @@ export type RenderingWildlifeLayerProps = {
   tickConfigRef: React.RefObject<DefiningWildlifeSimulationTickConfig>;
 };
 
-const RENDERING_WILDLIFE_CONTACT_DISEASE_COOLDOWN_MS = 1000;
-
 type RenderingWildlifeInstanceSpriteProps = {
   instanceId: string;
   speciesId: string;
@@ -453,9 +451,6 @@ export function RenderingWildlifeLayer({
   const wildlifeNameTagLabelCacheRef = useRef(
     new Map<string, UpdatingWildlifeNameTagLabelCacheEntry>()
   );
-  const playerContactDiseaseLastRollAtMsByInstanceIdRef = useRef(
-    new Map<string, number>()
-  );
   const wildlifeImperativePresentationRegistryRef =
     useRef<SyncingWildlifeInstancesImperativePresentationRegistry>(new Map());
 
@@ -657,19 +652,8 @@ export function RenderingWildlifeLayer({
         }
 
         if (config.onPlayerContactWildlife) {
-          const cooldowns =
-            playerContactDiseaseLastRollAtMsByInstanceIdRef.current;
-
           for (const event of lastSimResult.playerContactEvents) {
-            const lastRollAtMs = cooldowns.get(event.instanceId) ?? 0;
-
-            if (
-              nowMs - lastRollAtMs >=
-              RENDERING_WILDLIFE_CONTACT_DISEASE_COOLDOWN_MS
-            ) {
-              cooldowns.set(event.instanceId, nowMs);
-              config.onPlayerContactWildlife(event, nowMs);
-            }
+            config.onPlayerContactWildlife(event, nowMs);
           }
         }
       }

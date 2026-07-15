@@ -8,24 +8,19 @@ import { notifyingPlazaHomeScreenButtonClicked } from '@/components/home/domains
 import { useUserData } from '@/components/hooks/useAuth';
 import { Icon } from '@/components/ui/icon';
 import { checkingWorldPlazaAvatarSkinAccessForUser } from '@/components/world/domains/checkingWorldPlazaAvatarSkinAccessForUser';
+import { DEFINING_WORLD_PLAZA_AVATAR_SKIN_OPTIONS } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import {
-  LABELING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_FILTER_PLACEHOLDER,
   LABELING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_START_LABEL,
   LABELING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_SUBTITLE,
   LABELING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_TITLE,
-  STYLING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_FILTER_INPUT_CLASS_NAME,
   STYLING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_LIST_CLASS_NAME,
   STYLING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_OPTION_BASE_CLASS_NAME,
   STYLING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_OPTION_IDLE_CLASS_NAME,
   STYLING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_OPTION_SELECTED_CLASS_NAME,
   STYLING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_START_DISABLED_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaPermaDeathLoadConstants';
-import { listingWorldPlazaAvatarSkinOptionsForUser } from '@/components/world/domains/listingWorldPlazaAvatarSkinOptionsForUser';
-import {
-  gettingWorldPlazaBestiaryStudyCountsSnapshot,
-  subscribingWorldPlazaBestiaryDiscovery,
-} from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
-import { useMemo, useState, useSyncExternalStore } from 'react';
+import { rollingWorldPlazaPermaDeathCharacterPickerOptions } from '@/components/world/domains/rollingWorldPlazaPermaDeathCharacterPickerOptions';
+import { useState } from 'react';
 
 export type RenderingPlazaPermaDeathCharacterPickerPanelProps = {
   onBack: () => void;
@@ -33,45 +28,33 @@ export type RenderingPlazaPermaDeathCharacterPickerPanelProps = {
 };
 
 /**
- * Searchable character picker shown before a new Perma Death run.
+ * Character picker shown before a new Perma Death run.
+ * Offers five random playable forms each time the panel mounts.
  */
 export function RenderingPlazaPermaDeathCharacterPickerPanel({
   onBack,
   onConfirmCharacter,
 }: RenderingPlazaPermaDeathCharacterPickerPanelProps): React.JSX.Element {
   const { data: userData } = useUserData();
-  const studyCountsBySpeciesId = useSyncExternalStore(
-    subscribingWorldPlazaBestiaryDiscovery,
-    gettingWorldPlazaBestiaryStudyCountsSnapshot,
-    gettingWorldPlazaBestiaryStudyCountsSnapshot
-  );
-  const [filterText, setFilterText] = useState('');
   const [selectedAvatarSkinId, setSelectedAvatarSkinId] = useState<
     string | null
   >(null);
-  const avatarSkinOptions = useMemo(
-    () =>
-      listingWorldPlazaAvatarSkinOptionsForUser(
-        userData?.username,
-        userData?.alias,
-        studyCountsBySpeciesId
-      ),
-    [studyCountsBySpeciesId, userData?.alias, userData?.username]
+  const [offeredAvatarSkinOptions] = useState(() =>
+    rollingWorldPlazaPermaDeathCharacterPickerOptions(
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN_OPTIONS.filter((skinOption) =>
+        checkingWorldPlazaAvatarSkinAccessForUser(
+          skinOption.skinId,
+          userData?.username,
+          userData?.alias
+        )
+      )
+    )
   );
-  const normalizedFilterText = filterText.trim().toLowerCase();
-  const filteredAvatarSkinOptions = useMemo(() => {
-    if (!normalizedFilterText) {
-      return avatarSkinOptions;
-    }
-
-    return avatarSkinOptions.filter(
-      (skinOption) =>
-        skinOption.label.toLowerCase().includes(normalizedFilterText) ||
-        skinOption.skinId.toLowerCase().includes(normalizedFilterText)
-    );
-  }, [avatarSkinOptions, normalizedFilterText]);
   const canStartRun =
     selectedAvatarSkinId !== null &&
+    offeredAvatarSkinOptions.some(
+      (skinOption) => skinOption.skinId === selectedAvatarSkinId
+    ) &&
     checkingWorldPlazaAvatarSkinAccessForUser(
       selectedAvatarSkinId,
       userData?.username,
@@ -112,31 +95,14 @@ export function RenderingPlazaPermaDeathCharacterPickerPanel({
         className="h-px bg-[linear-gradient(90deg,transparent,rgba(44,74,82,0.5),transparent)]"
       />
 
-      <input
-        type="search"
-        value={filterText}
-        onChange={(event) => {
-          setFilterText(event.currentTarget.value);
-        }}
-        placeholder={
-          LABELING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_FILTER_PLACEHOLDER
-        }
-        aria-label={
-          LABELING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_FILTER_PLACEHOLDER
-        }
-        className={
-          STYLING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_FILTER_INPUT_CLASS_NAME
-        }
-      />
-
       <div
         className={
           STYLING_WORLD_PLAZA_PERMA_DEATH_CHARACTER_PICKER_LIST_CLASS_NAME
         }
         role="listbox"
-        aria-label="Unlocked characters"
+        aria-label="Characters"
       >
-        {filteredAvatarSkinOptions.map((skinOption) => {
+        {offeredAvatarSkinOptions.map((skinOption) => {
           const isSelected = skinOption.skinId === selectedAvatarSkinId;
 
           return (

@@ -5,6 +5,8 @@
  */
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import type { DefiningWorldPlazaEntityHealthDamageOptions } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { encodingWorldPlazaEntityHealthDamageRollForcedTierValue } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthDamageRollForcedTier';
 import { DEFINING_WILDLIFE_MELEE_RANGE_GRID } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import { resolvingWildlifeSpeciesChargeConfig } from '@/components/world/wildlife/domains/definingWildlifeSpeciesChargeRegistry';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -114,6 +116,58 @@ export function checkingWildlifeIsInActiveCharge(
   );
 }
 
+/** True while sprinting or mid-charge for species with charge tuning. */
+export function checkingWildlifeChargeRunAttackActive(
+  instance: DefiningWildlifeInstance,
+  speciesId: DefiningWildlifeSpeciesId,
+  isRunning: boolean,
+  nowMs: number
+): boolean {
+  const chargeConfig = resolvingWildlifeSpeciesChargeConfig(speciesId);
+
+  if (!chargeConfig) {
+    return false;
+  }
+
+  return (
+    isRunning || checkingWildlifeIsInActiveCharge(instance, speciesId, nowMs)
+  );
+}
+
+/**
+ * Forces a critical EV roll when a charge species hits while sprinting /
+ * mid-charge and `runForcesCritical` is set.
+ */
+export function resolvingWildlifeChargeRunAttackDamageOptions(
+  instance: DefiningWildlifeInstance,
+  speciesId: DefiningWildlifeSpeciesId,
+  isRunning: boolean,
+  nowMs: number
+): Pick<
+  DefiningWorldPlazaEntityHealthDamageOptions,
+  'skipDamageRoll' | 'forcedDeviationScore'
+> | null {
+  const chargeConfig = resolvingWildlifeSpeciesChargeConfig(speciesId);
+
+  if (
+    !chargeConfig?.runForcesCritical ||
+    !checkingWildlifeChargeRunAttackActive(
+      instance,
+      speciesId,
+      isRunning,
+      nowMs
+    )
+  ) {
+    return null;
+  }
+
+  return {
+    skipDamageRoll: false,
+    forcedDeviationScore:
+      encodingWorldPlazaEntityHealthDamageRollForcedTierValue('critical'),
+  };
+}
+
 export function clearingWildlifeChargeWindupAfterStamina(
   speciesId: DefiningWildlifeSpeciesId,
   chargeWindupStartedAtMs: number | null,
@@ -159,9 +213,12 @@ export function resolvingWildlifeMeleeAttackPower(
     );
   }
 
-  const isChargeDamage =
-    isRunning ||
-    checkingWildlifeIsInActiveCharge(instance, species.speciesId, nowMs);
+  const isChargeDamage = checkingWildlifeChargeRunAttackActive(
+    instance,
+    species.speciesId,
+    isRunning,
+    nowMs
+  );
 
   if (!isChargeDamage) {
     return (

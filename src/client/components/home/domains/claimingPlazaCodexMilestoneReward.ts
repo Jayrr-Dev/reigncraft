@@ -1,5 +1,5 @@
 /**
- * Claims a Codex milestone reward (idempotent cookbook attach / storage unlock).
+ * Claims a Codex milestone reward (idempotent cookbook attach / packing ledger grant).
  *
  * @module components/home/domains/claimingPlazaCodexMilestoneReward
  */
@@ -9,21 +9,19 @@ import {
   attachingWorldPlazaRecipePage,
   type AttachingWorldPlazaRecipePageResult,
 } from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
-import {
-  checkingWorldPlazaInventoryStorageExpansionCodexClaimed,
-  claimingWorldPlazaInventoryStorageExpansionCodexReward,
-  type ClaimingWorldPlazaInventoryStorageExpansionCodexResult,
-} from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
+import { grantingWorldPlazaInventoryStorageExpansionCodexPage } from '@/components/world/inventory/domains/grantingWorldPlazaInventoryStorageExpansionCodexPage';
+import type { GrantingWorldPlazaInventoryStorageExpansionCodexPageResult } from '@/components/world/inventory/domains/grantingWorldPlazaInventoryStorageExpansionCodexPage';
+import { checkingWorldPlazaInventoryStorageExpansionCodexClaimed } from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
 
 export type ClaimingPlazaCodexMilestoneRewardResult =
   | AttachingWorldPlazaRecipePageResult
-  | ClaimingWorldPlazaInventoryStorageExpansionCodexResult
+  | GrantingWorldPlazaInventoryStorageExpansionCodexPageResult
   | 'not-ready';
 
 /**
  * Grants the milestone reward when the chest is reached.
  * Attach-recipe rewards unlock the cookbook page immediately.
- * Unlock-storage-row rewards add one bonus pack page (cap 3).
+ * Unlock-storage-row rewards put a packing ledger in the bag (or fail if full).
  *
  * @param definition - Registry row for the chest
  * @param isReached - Whether the meter has hit this chest threshold
@@ -41,10 +39,11 @@ export function claimingPlazaCodexMilestoneReward(
   }
 
   if (definition.reward.kind === 'unlock-storage-row') {
-    return claimingWorldPlazaInventoryStorageExpansionCodexReward({
+    return grantingWorldPlazaInventoryStorageExpansionCodexPage({
       sectionId: definition.sectionId,
       meterKind: definition.meterKind,
       percent: definition.percent,
+      pageTier: definition.reward.pageTier,
     });
   }
 
@@ -53,7 +52,7 @@ export function claimingPlazaCodexMilestoneReward(
 
 /**
  * True when an attach-recipe reward is already in the cookbook, or a
- * storage-expansion Codex chest was already claimed.
+ * packing-ledger Codex chest was already claimed.
  */
 export function checkingPlazaCodexMilestoneRewardClaimed(
   definition: PlazaCodexMilestoneRewardDefinition,

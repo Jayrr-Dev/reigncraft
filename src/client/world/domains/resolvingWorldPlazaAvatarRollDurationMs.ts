@@ -10,11 +10,13 @@ import {
 } from '@/components/world/domains/definingWorldPlazaAnimalAvatarCombatRegistry';
 import type { DefiningWorldPlazaAvatarSkinId } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_DURATION_MS } from '@/components/world/domains/definingWorldPlazaGirlSampleCombatMotionConstants';
+import { resolvingWorldPlazaAnimalAvatarRollAttackProfile } from '@/components/world/domains/resolvingWorldPlazaAnimalAvatarRollAttackProfile';
 
 /**
  * Roll travel / strip duration in ms for one avatar skin.
  *
- * Animal skins use Attack3 strip length. Others default to GirlSample timing.
+ * Animal skins use Attack3 strip length, scaled by roll-attack durationScale.
+ * Others default to GirlSample timing.
  */
 export function resolvingWorldPlazaAvatarRollDurationMs(
   skinId: DefiningWorldPlazaAvatarSkinId
@@ -23,7 +25,14 @@ export function resolvingWorldPlazaAvatarRollDurationMs(
     resolvingWorldPlazaAnimalAvatarCombatDefinition(skinId);
 
   if (animalCombatDefinition) {
-    return computingWorldPlazaAnimalAvatarRollDurationMs(animalCombatDefinition);
+    const baseDurationMs = computingWorldPlazaAnimalAvatarRollDurationMs(
+      animalCombatDefinition
+    );
+    const rollAttackProfile =
+      resolvingWorldPlazaAnimalAvatarRollAttackProfile(skinId);
+    const durationScale = rollAttackProfile?.durationScale ?? 1;
+
+    return Math.max(1, baseDurationMs * durationScale);
   }
 
   return DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_DURATION_MS;

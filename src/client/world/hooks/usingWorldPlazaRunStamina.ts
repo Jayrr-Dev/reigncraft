@@ -57,6 +57,11 @@ export interface UsingWorldPlazaRunStaminaParams {
   hungerMovementMultipliersRef?: React.RefObject<ResolvingWorldPlazaHungerMovementEffects>;
   /** Optional shared stamina state ref for other gameplay systems. */
   runStaminaStateRef?: React.RefObject<DefiningWorldPlazaRunStaminaState>;
+  /**
+   * Optional live multiplier on roll stamina cost (animal leap profiles).
+   * Composed with health / hunger jump-cost multipliers.
+   */
+  rollStaminaCostMultiplierRef?: React.RefObject<number>;
 }
 
 export interface UsingWorldPlazaRunStaminaResult {
@@ -96,6 +101,7 @@ export function usingWorldPlazaRunStamina({
   healthStateRef,
   hungerMovementMultipliersRef,
   runStaminaStateRef: externalRunStaminaStateRef,
+  rollStaminaCostMultiplierRef,
 }: UsingWorldPlazaRunStaminaParams): UsingWorldPlazaRunStaminaResult {
   const tryConsumingJumpStaminaRef = useRef<(isRunJump: boolean) => boolean>(
     () => false
@@ -225,7 +231,8 @@ export function usingWorldPlazaRunStamina({
         nowMs,
         staminaRollCostMultiplier:
           movementMultipliers.staminaJumpCostMultiplier *
-          hungerEffects.jumpCostMultiplier,
+          hungerEffects.jumpCostMultiplier *
+          (rollStaminaCostMultiplierRef?.current ?? 1),
       });
 
       if (!didConsume) {

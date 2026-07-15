@@ -77,6 +77,9 @@ export const LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_UNLOCKED_TOAST =
 export const LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_AT_CAP_TOAST =
   'Pack already holds the maximum extra pages.' as const;
 
+export const LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_INVENTORY_FULL_TOAST =
+  'Inventory Full' as const;
+
 /**
  * Resolves the localStorage key for storage-expansion unlocks.
  *

@@ -92,6 +92,7 @@ import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_FORWARD_GRID_DISTANCE,
   type DefiningWorldPlazaGirlSampleCombatMotionClipSuffix,
 } from '@/components/world/domains/definingWorldPlazaGirlSampleCombatMotionConstants';
+import { resolvingWorldPlazaAvatarRollForwardGridDistance } from '@/components/world/domains/resolvingWorldPlazaAnimalAvatarRollAttackProfile';
 import { DEFINING_WORLD_PLAZA_GIRL_SAMPLE_READY_IDLE_DURATION_MS } from '@/components/world/domains/definingWorldPlazaGirlSampleIdleConstants';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_ARC_PEAK_SCREEN_PX,
@@ -1173,15 +1174,18 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         );
       const rollStartLayer =
         resolvingWorldPlazaPlayerWorldLayer(playerPosition);
+      const rollForwardGridDistance =
+        resolvingWorldPlazaAvatarRollForwardGridDistance(
+          characterDefinition.skinId,
+          DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_FORWARD_GRID_DISTANCE
+        );
       const rollLandingGridPoint = {
         x:
           playerPosition.x +
-          rollGridDirection.x *
-            DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_FORWARD_GRID_DISTANCE,
+          rollGridDirection.x * rollForwardGridDistance,
         y:
           playerPosition.y +
-          rollGridDirection.y *
-            DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_FORWARD_GRID_DISTANCE,
+          rollGridDirection.y * rollForwardGridDistance,
       };
       const rollLandingTile =
         resolvingWorldPlazaIsometricTileIndexAtGridPoint(rollLandingGridPoint);
@@ -1195,7 +1199,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         resolvingWorldBuildingJumpForwardGridDistanceClampedToWall(
           playerPosition,
           rollGridDirection,
-          DEFINING_WORLD_PLAZA_GIRL_SAMPLE_ROLL_FORWARD_GRID_DISTANCE,
+          rollForwardGridDistance,
           scenePlacedBlocks,
           rollStartLayer,
           rollLandingSurfaceLayer,

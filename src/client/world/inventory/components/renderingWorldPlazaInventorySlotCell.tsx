@@ -107,7 +107,7 @@ export type RenderingWorldPlazaInventorySlotCellProps =
     readonly onStudyHotbarSlot?: (slotIndex: number) => void;
     /** Attach a cookbook recipe page from inventory. */
     readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
-    /** Bind a packing ledger for one bonus storage page. */
+    /** Use a packing ledger for one bonus storage page. */
     readonly onUnlockStorageRowHotbarSlot?: (slotIndex: number) => void;
     /** Drop action surfaced inside the item action popover. */
     readonly onDropHotbarSlot?: (slotIndex: number) => void;

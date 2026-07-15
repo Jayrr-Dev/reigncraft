@@ -7,6 +7,8 @@
 import { RenderingPlazaCodexMilestoneRewardClaimDialog } from '@/components/home/components/renderingPlazaCodexMilestoneRewardClaimDialog';
 import { claimingPlazaCodexMilestoneReward } from '@/components/home/domains/claimingPlazaCodexMilestoneReward';
 import type { PlazaCodexMilestoneRewardDefinition } from '@/components/home/domains/definingPlazaCodexMilestoneRewardRegistry';
+import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
+import { LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_INVENTORY_FULL_TOAST } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
 import {
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_FILL_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_MARKERS_CLASS_NAME,
@@ -172,11 +174,13 @@ function RenderingPlazaCodexStudyMilestoneRewardMarker({
               marker.rewardDefinition,
               marker.isReached
             );
-            if (
-              claimResult === 'attached' ||
-              claimResult === 'unlocked' ||
-              claimResult === 'at-cap'
-            ) {
+            if (claimResult === 'inventory-full') {
+              showingReigncraftToast(
+                LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_INVENTORY_FULL_TOAST
+              );
+              return;
+            }
+            if (claimResult === 'attached' || claimResult === 'granted') {
               playingWildlifeStudySfx({ sectionId: 'codex' });
               onRewardClaimed(marker.rewardDefinition);
               return;
