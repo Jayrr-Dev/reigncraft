@@ -31,7 +31,8 @@ export const DEFINING_PLAZA_OPEN_BOOK_PAGE_LAYOUT = {
 } as const;
 
 /** One page side on the open-book frame. */
-export type DefiningPlazaOpenBookPageSide = keyof typeof DEFINING_PLAZA_OPEN_BOOK_PAGE_LAYOUT;
+export type DefiningPlazaOpenBookPageSide =
+  keyof typeof DEFINING_PLAZA_OPEN_BOOK_PAGE_LAYOUT;
 
 /** Header / pager chrome shared by open-book dialogs. */
 export const DEFINING_PLAZA_OPEN_BOOK_CLOSE_BUTTON_CLASS_NAME =

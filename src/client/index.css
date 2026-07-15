@@ -3526,7 +3526,7 @@ video {
 
 .lore-book-illustration__canvas {
   width: 100%;
-  max-width: 15.5rem;
+  max-width: 11rem;
   height: auto;
   aspect-ratio: 200 / 116;
 }

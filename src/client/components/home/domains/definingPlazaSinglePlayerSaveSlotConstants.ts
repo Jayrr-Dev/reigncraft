@@ -18,7 +18,7 @@ export const DEFINING_PLAZA_SINGLE_PLAYER_PERMA_DEATH_SAVE_SLOT_INDEX =
 export const LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_COMING_SOON =
   'Coming soon' as const;
 
-/** Save-slot picker toggle: skip onboarding coachmarks for this session preference. */
+/** Save-slot picker toggle: skip onboarding coachmarks (persisted in localStorage). */
 export const LABELING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_TOGGLE =
   'Disable tutorial' as const;
 

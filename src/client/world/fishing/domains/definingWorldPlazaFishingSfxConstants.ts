@@ -57,12 +57,13 @@ export const DEFINING_WORLD_PLAZA_FISHING_SFX_JUNK_CATCH_PROFILE: DefiningWorldP
     fadeOutMs: 100,
   };
 
-/** Active cast reel click. */
+/** Active cast reel hold loop (`reel-winding.ogg`). */
 export const DEFINING_WORLD_PLAZA_FISHING_SFX_REEL_PROFILE: DefiningWorldPlazaFishingSfxPlaybackProfile =
   {
     clipId: 'reel_winding',
     peakVolume: 0.1,
-    durationSec: 0.32,
+    /** Unused for loop playback; kept for shared profile typing. */
+    durationSec: 0,
     fadeOutMs: 90,
   };
 

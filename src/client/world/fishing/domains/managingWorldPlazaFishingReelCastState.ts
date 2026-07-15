@@ -5,13 +5,13 @@
  */
 
 import { checkingWorldPlazaFishingReelOpportunityActive } from '@/components/world/fishing/domains/checkingWorldPlazaFishingReelOpportunityActive';
+import { computingWorldPlazaFishingReelHoldAccelerationExtraRatio } from '@/components/world/fishing/domains/computingWorldPlazaFishingReelHoldAccelerationExtraRatio';
 import {
   DEFINING_WORLD_PLAZA_FISHING_REEL_CLICK_COOLDOWN_MS,
   DEFINING_WORLD_PLAZA_FISHING_REEL_ESCAPE_REDUCTION_MAX,
   DEFINING_WORLD_PLAZA_FISHING_REEL_ESCAPE_REDUCTION_PER_CLICK,
 } from '@/components/world/fishing/domains/definingWorldPlazaFishingConstants';
 import type { DefiningWorldPlazaFishingReelOpportunityWindow } from '@/components/world/fishing/domains/definingWorldPlazaFishingReelOpportunityConstants';
-import { DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_ACCELERATION_EXTRA_RATIO } from '@/components/world/fishing/domains/definingWorldPlazaFishingReelOpportunityConstants';
 import { rollingWorldPlazaFishingReelOpportunityWindows } from '@/components/world/fishing/domains/rollingWorldPlazaFishingReelOpportunityWindows';
 import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
 
@@ -21,6 +21,8 @@ type ManagingWorldPlazaFishingReelCastState = {
   escapeReduction: number;
   lastReelClickAtMs: number;
   elapsedBonusMs: number;
+  /** Real ms spent holding during an active opportunity (resets on release). */
+  holdElapsedMs: number;
   isHoldingReel: boolean;
   /** True after the player starts holding during a ready window; lasts the cast. */
   hasCaughtReel: boolean;
@@ -40,6 +42,7 @@ const managingWorldPlazaFishingReelCastInitialState: ManagingWorldPlazaFishingRe
     escapeReduction: 0,
     lastReelClickAtMs: 0,
     elapsedBonusMs: 0,
+    holdElapsedMs: 0,
     isHoldingReel: false,
     hasCaughtReel: false,
     isInsideOpportunityWindow: false,
@@ -147,10 +150,18 @@ export function settingWorldPlazaFishingReelHold(isHoldingReel: boolean): void {
     isHoldingReel &&
     (managingWorldPlazaFishingReelCastState.isInsideOpportunityWindow ||
       managingWorldPlazaFishingReelCastState.hasCaughtReel);
+  const wasHoldingReel = managingWorldPlazaFishingReelCastState.isHoldingReel;
 
   managingWorldPlazaFishingReelCastState = {
     ...managingWorldPlazaFishingReelCastState,
     isHoldingReel,
+    // Fresh press restarts the accelerate → slow pull cycle.
+    holdElapsedMs:
+      isHoldingReel && !wasHoldingReel
+        ? 0
+        : isHoldingReel
+          ? managingWorldPlazaFishingReelCastState.holdElapsedMs
+          : 0,
     hasCaughtReel:
       managingWorldPlazaFishingReelCastState.hasCaughtReel || shouldCatchReel,
   };
@@ -253,10 +264,16 @@ export function tickingWorldPlazaFishingReelCastFrame(
     return;
   }
 
+  const nextHoldElapsedMs =
+    managingWorldPlazaFishingReelCastState.holdElapsedMs + deltaMs;
+  const extraRatio =
+    computingWorldPlazaFishingReelHoldAccelerationExtraRatio(nextHoldElapsedMs);
+
   managingWorldPlazaFishingReelCastState = {
     ...managingWorldPlazaFishingReelCastState,
+    holdElapsedMs: nextHoldElapsedMs,
     elapsedBonusMs:
       managingWorldPlazaFishingReelCastState.elapsedBonusMs +
-      deltaMs * DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_ACCELERATION_EXTRA_RATIO,
+      deltaMs * extraRatio,
   };
 }

@@ -37,10 +37,20 @@ export const DEFINING_WORLD_PLAZA_FISHING_REEL_OPPORTUNITY_WINDOW_END_CAST_RATIO
 export const DEFINING_WORLD_PLAZA_FISHING_REEL_OPPORTUNITY_WINDOW_PLACEMENT_ATTEMPTS = 24;
 
 /**
- * Extra elapsed cast time gained per real millisecond while holding reel
- * during an active opportunity window. 1 means effective 2x speed.
+ * One accelerate-then-slow pull cycle while holding reel (real ms).
+ * Hold longer than this repeats the ease bump.
  */
-export const DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_ACCELERATION_EXTRA_RATIO = 1;
+export const DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_SPEED_CYCLE_MS = 900;
+
+/**
+ * Soft floor extra ratio at pull start/end. 0.2 ≈ 1.2x cast speed.
+ */
+export const DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_ACCELERATION_EXTRA_RATIO_MIN = 0.2;
+
+/**
+ * Peak extra ratio mid-pull. 1 means effective 2x cast speed at the bump crest.
+ */
+export const DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_ACCELERATION_EXTRA_RATIO_MAX = 1;
 
 /** CSS class toggled while a reel opportunity window is active (green Reel text). */
 export const DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME =

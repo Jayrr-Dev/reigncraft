@@ -1,13 +1,13 @@
 'use client';
 
 /**
- * Book-styled lore reader: chapter contents on the left page, the active
- * entry on the right, with page-turn transitions and ambient candlelight.
+ * Open-book lore reader: contents on the left page, active entry on the right.
  *
  * @module components/home/components/renderingPlazaLoreBookPanel
  */
 
 import { RenderingPlazaLoreBookIllustration } from '@/components/home/components/renderingPlazaLoreBookIllustration';
+import { RenderingPlazaOpenBookFrame } from '@/components/home/components/renderingPlazaOpenBookFrame';
 import {
   DEFINING_PLAZA_BUTTON_SFX_KIND,
   definingPlazaButtonSfxDataAttributes,
@@ -18,6 +18,11 @@ import {
   LABELING_PLAZA_LORE_BOOK_CHAPTER_LIST,
   type PlazaLoreBookEntry,
 } from '@/components/home/domains/definingPlazaLoreBookConstants';
+import {
+  DEFINING_PLAZA_OPEN_BOOK_CLOSE_BUTTON_CLASS_NAME,
+  DEFINING_PLAZA_OPEN_BOOK_PAGE_INK_CLASS_NAME,
+  DEFINING_PLAZA_OPEN_BOOK_PAGER_BUTTON_CLASS_NAME,
+} from '@/components/home/domains/definingPlazaOpenBookUiConstants';
 import { playingPlazaBookSfx } from '@/components/home/domains/playingPlazaBookSfx';
 import type { PlazaLoreBookResolved } from '@/components/home/domains/resolvingPlazaLoreBookDefinition';
 import { resolvingPlazaLoreBookIllustration } from '@/components/home/domains/resolvingPlazaLoreBookIllustration';
@@ -31,17 +36,11 @@ import {
 import { Icon } from '@/components/ui/icon';
 import { useEffect, useMemo, useState } from 'react';
 
-const LORE_BOOK_HEADER_BUTTON_CLASS_NAME =
-  'plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]';
-
 const LORE_BOOK_CHAPTER_BUTTON_CLASS_NAME =
-  'flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left transition hover:bg-parchment/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40';
+  'flex w-full cursor-pointer items-center gap-1.5 rounded-sm px-1.5 py-1 text-left transition hover:bg-[#6b4e2e]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6b4e2e]/35';
 
 const LORE_BOOK_ENTRY_BUTTON_CLASS_NAME =
-  'flex w-full cursor-pointer items-baseline gap-2 rounded-sm py-1 pl-8 pr-2 text-left text-sm transition hover:bg-parchment/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40';
-
-const LORE_BOOK_PAGER_BUTTON_CLASS_NAME =
-  'flex cursor-pointer items-center gap-1 rounded-sm border border-poster-teal/25 bg-parchment/50 px-2 py-1 text-xs font-bold uppercase tracking-wide text-poster-teal-deep transition hover:bg-parchment/80 disabled:cursor-default disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40';
+  'flex w-full cursor-pointer items-baseline gap-1.5 rounded-sm py-0.5 pl-6 pr-1.5 text-left text-[11px] transition hover:bg-[#6b4e2e]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6b4e2e]/35 sm:text-xs';
 
 function checkingLoreBookEntrySealed(entry: PlazaLoreBookEntry): boolean {
   return entry.kind === 'sealed';
@@ -66,8 +65,10 @@ function RenderingPlazaLoreBookKindBadge({
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${
-        isSealed ? 'bg-red-950/70 text-red-200' : 'bg-ink/80 text-parchment/90'
+      className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide ${
+        isSealed
+          ? 'bg-red-950/70 text-red-200'
+          : 'bg-[#3d2a16]/85 text-parchment/90'
       }`}
     >
       <Icon
@@ -86,15 +87,21 @@ function RenderingPlazaLoreBookSealedBody({
   entry: PlazaLoreBookEntry;
 }): React.JSX.Element {
   return (
-    <div className="flex flex-col items-center justify-center gap-4 px-2 py-4 text-center">
-      <span className="lore-book-seal flex size-20 items-center justify-center rounded-full text-parchment">
-        <Icon icon={entry.icon} className="size-9 opacity-80" aria-hidden />
+    <div className="flex flex-col items-center justify-center gap-3 px-1 py-2 text-center">
+      <span className="lore-book-seal flex size-14 items-center justify-center rounded-full text-parchment sm:size-16">
+        <Icon
+          icon={entry.icon}
+          className="size-7 opacity-80 sm:size-8"
+          aria-hidden
+        />
       </span>
-      <p className="font-display text-2xl font-bold tracking-[0.3em] text-ink">
+      <p className="font-display text-lg font-bold tracking-[0.28em] text-[#3d2a16] sm:text-xl">
         {DEFINING_PLAZA_LORE_BOOK_SEALED_TITLE}
       </p>
       {entry.sealNote ? (
-        <p className="max-w-sm text-sm font-medium italic leading-relaxed text-ink-soft">
+        <p
+          className={`max-w-sm text-[11px] font-medium italic leading-relaxed sm:text-xs ${DEFINING_PLAZA_OPEN_BOOK_PAGE_INK_CLASS_NAME}`}
+        >
           {entry.sealNote}
         </p>
       ) : null}
@@ -111,7 +118,7 @@ function RenderingPlazaLoreBookEntryBody({
     const sealedIllustration = resolvingPlazaLoreBookIllustration(entry.id);
 
     return (
-      <div className="flex flex-1 flex-col gap-4">
+      <div className="flex flex-1 flex-col gap-3">
         {sealedIllustration ? (
           <RenderingPlazaLoreBookIllustration
             illustrationId={sealedIllustration.id}
@@ -127,7 +134,7 @@ function RenderingPlazaLoreBookEntryBody({
   const illustration = resolvingPlazaLoreBookIllustration(entry.id);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2.5">
       {illustration ? (
         <RenderingPlazaLoreBookIllustration
           illustrationId={illustration.id}
@@ -137,13 +144,13 @@ function RenderingPlazaLoreBookEntryBody({
       {entry.paragraphs.map((paragraph, paragraphIndex) => (
         <div key={`${entry.id}-paragraph-${paragraphIndex}`}>
           {isFragment && paragraphIndex > 0 ? (
-            <div className="lore-book-torn-gap mb-3" aria-hidden />
+            <div className="lore-book-torn-gap mb-2" aria-hidden />
           ) : null}
           <p
-            className={`text-sm leading-relaxed sm:text-[15px] ${
+            className={`text-[11px] leading-relaxed sm:text-xs ${
               isFragment
-                ? 'font-medium italic text-ink-soft'
-                : 'font-medium text-ink/90'
+                ? `font-medium italic ${DEFINING_PLAZA_OPEN_BOOK_PAGE_INK_CLASS_NAME}`
+                : 'font-medium text-[#3d2a16]/90'
             }`}
           >
             {paragraph}
@@ -151,20 +158,24 @@ function RenderingPlazaLoreBookEntryBody({
         </div>
       ))}
       {entry.quote ? (
-        <figure className="mt-1 border-l-2 border-poster-gold/70 pl-3">
-          <blockquote className="font-display text-sm font-bold leading-snug text-poster-teal-deep">
+        <figure className="mt-0.5 border-l-2 border-[#c4a35a]/80 pl-2.5">
+          <blockquote className="font-display text-xs font-bold leading-snug text-[#4a3518] sm:text-sm">
             &ldquo;{entry.quote.text}&rdquo;
           </blockquote>
-          <figcaption className="mt-1 text-xs font-medium italic text-ink-soft">
+          <figcaption
+            className={`mt-1 text-[10px] font-medium italic sm:text-[11px] ${DEFINING_PLAZA_OPEN_BOOK_PAGE_INK_CLASS_NAME}`}
+          >
             {entry.quote.attribution}
           </figcaption>
         </figure>
       ) : null}
       {entry.marginNote ? (
-        <p className="mt-1 flex items-start gap-1.5 text-xs font-medium italic text-ink-soft/90">
+        <p
+          className={`mt-0.5 flex items-start gap-1.5 text-[10px] font-medium italic sm:text-[11px] ${DEFINING_PLAZA_OPEN_BOOK_PAGE_INK_CLASS_NAME}`}
+        >
           <Icon
             icon="mdi:feather"
-            className="mt-0.5 size-3 shrink-0 text-poster-amber"
+            className="mt-0.5 size-3 shrink-0 text-[#a67c2a]"
             aria-hidden
           />
           {entry.marginNote}
@@ -183,8 +194,7 @@ export type RenderingPlazaLoreBookPanelProps = {
 };
 
 /**
- * One volume of the Codex Lore series: chapters as a table of contents,
- * entries as pages. Cover title and theme come from the selected book.
+ * One volume of the Corpus series on the shared pixel open-book frame.
  */
 export function RenderingPlazaLoreBookPanel({
   book,
@@ -197,11 +207,9 @@ export function RenderingPlazaLoreBookPanel({
   const [activeEntryId, setActiveEntryId] = useState<string>(
     pages[0]?.entry.id ?? ''
   );
-  const [isContentsOpenOnMobile, setIsContentsOpenOnMobile] = useState(true);
 
   useEffect(() => {
     setActiveEntryId(pages[0]?.entry.id ?? '');
-    setIsContentsOpenOnMobile(true);
   }, [book.id, pages]);
 
   const activePage: PlazaLoreBookPage | null =
@@ -225,7 +233,6 @@ export function RenderingPlazaLoreBookPanel({
     }
 
     setActiveEntryId(entryId);
-    setIsContentsOpenOnMobile(false);
   };
 
   const openingLoreBookChapter = (chapterId: string): void => {
@@ -240,70 +247,46 @@ export function RenderingPlazaLoreBookPanel({
   };
 
   return (
-    <div
-      data-theme={book.themeId}
-      className={`lore-book-cover plaza-pop-in flex h-[min(88dvh,42rem)] w-full max-w-4xl flex-col gap-3 overflow-hidden rounded-lg p-3 font-body sm:p-4 ${className}`.trim()}
-    >
-      <span
-        className="lore-book-mote left-[12%] top-[18%] size-1"
-        aria-hidden
-      />
-      <span
-        className="lore-book-mote left-[78%] top-[12%] size-1.5 [animation-delay:2.4s]"
-        aria-hidden
-      />
-      <span
-        className="lore-book-mote left-[46%] top-[8%] size-1 [animation-delay:5.1s]"
-        aria-hidden
-      />
-
-      <div className="relative flex shrink-0 items-center gap-3">
-        {onBackToShelf ? (
-          <button
-            type="button"
-            onClick={onBackToShelf}
-            aria-label={DEFINING_PLAZA_LORE_BOOK_SHELF_BACK_LABEL}
-            title={DEFINING_PLAZA_LORE_BOOK_SHELF_BACK_LABEL}
-            className={LORE_BOOK_HEADER_BUTTON_CLASS_NAME}
-          >
-            <Icon icon="mdi:arrow-left" className="size-5" aria-hidden />
-          </button>
-        ) : null}
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-md border-2 border-poster-gold/50 bg-black/25 text-poster-gold">
-          <Icon icon={book.icon} className="size-6" aria-hidden />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-parchment/55">
-            {book.volumeLabel}
-          </p>
-          <h2 className="font-display text-xl font-bold tracking-wide text-parchment">
-            {book.title}
-          </h2>
-          <p className="truncate text-xs font-medium italic text-parchment/65 sm:text-sm">
-            {book.subtitle}
-          </p>
+    <RenderingPlazaOpenBookFrame
+      className={className}
+      title={book.title}
+      subtitle={book.subtitle}
+      onClose={onClose}
+      headerLeading={
+        <div className="flex shrink-0 items-center gap-2">
+          {onBackToShelf ? (
+            <button
+              type="button"
+              onClick={onBackToShelf}
+              aria-label={DEFINING_PLAZA_LORE_BOOK_SHELF_BACK_LABEL}
+              title={DEFINING_PLAZA_LORE_BOOK_SHELF_BACK_LABEL}
+              {...definingPlazaButtonSfxDataAttributes(
+                DEFINING_PLAZA_BUTTON_SFX_KIND.none
+              )}
+              className={DEFINING_PLAZA_OPEN_BOOK_CLOSE_BUTTON_CLASS_NAME}
+            >
+              <Icon
+                icon="mdi:arrow-left"
+                className="size-4 sm:size-5"
+                aria-hidden
+              />
+            </button>
+          ) : null}
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-sm border border-parchment/35 bg-black/25 text-poster-gold sm:size-14">
+            <Icon icon={book.icon} className="size-7 sm:size-8" aria-hidden />
+          </span>
         </div>
-        {onClose ? (
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className={LORE_BOOK_HEADER_BUTTON_CLASS_NAME}
-          >
-            <Icon icon="mdi:close" className="size-5" aria-hidden />
-          </button>
-        ) : null}
-      </div>
-
-      <div className="relative flex min-h-0 flex-1 gap-1.5 overflow-hidden">
+      }
+      leftPage={
         <nav
           aria-label={LABELING_PLAZA_LORE_BOOK_CHAPTER_LIST}
-          className={`lore-book-page lore-book-page--left h-full min-h-0 flex-col gap-1 overflow-y-auto rounded-l-md rounded-r-sm p-3 sm:flex sm:w-64 sm:shrink-0 ${
-            isContentsOpenOnMobile ? 'flex flex-1' : 'hidden'
-          }`}
+          className="flex min-h-0 flex-1 flex-col gap-1"
         >
-          <p className="px-2 pb-1 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-ink-soft">
+          <p className="px-1 pb-0.5 font-display text-[10px] font-bold uppercase tracking-[0.18em] text-[#6b4e2e]/80">
             Contents
+          </p>
+          <p className="px-1 pb-1 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-[#6b4e2e]/60">
+            {book.volumeLabel}
           </p>
           {chapters.map((chapter) => {
             const isActiveChapter = activePage?.chapter.id === chapter.id;
@@ -318,23 +301,29 @@ export function RenderingPlazaLoreBookPanel({
                   onClick={() => openingLoreBookChapter(chapter.id)}
                   aria-expanded={isActiveChapter}
                   className={`${LORE_BOOK_CHAPTER_BUTTON_CLASS_NAME} ${
-                    isActiveChapter ? 'bg-parchment/70' : ''
+                    isActiveChapter ? 'bg-[#6b4e2e]/12' : ''
                   }`}
                 >
                   <span
-                    className={`flex size-7 shrink-0 items-center justify-center rounded-sm border ${
+                    className={`flex size-6 shrink-0 items-center justify-center rounded-sm border ${
                       isActiveChapter
-                        ? 'border-poster-gold/70 bg-poster-gold/20 text-poster-amber'
-                        : 'border-poster-teal/25 bg-parchment/40 text-poster-teal-deep'
+                        ? 'border-[#c4a35a]/70 bg-[#c4a35a]/20 text-[#a67c2a]'
+                        : 'border-[#6b4e2e]/25 bg-[#fff8e7]/50 text-[#4a3518]'
                     }`}
                   >
-                    <Icon icon={chapter.icon} className="size-4" aria-hidden />
+                    <Icon
+                      icon={chapter.icon}
+                      className="size-3.5"
+                      aria-hidden
+                    />
                   </span>
                   <span className="min-w-0">
-                    <span className="block font-display text-sm font-bold leading-tight text-ink">
+                    <span className="block font-display text-xs font-bold leading-tight text-[#3d2a16]">
                       {chapter.title}
                     </span>
-                    <span className="block truncate text-[11px] font-medium italic leading-tight text-ink-soft">
+                    <span
+                      className={`block truncate text-[10px] font-medium italic leading-tight ${DEFINING_PLAZA_OPEN_BOOK_PAGE_INK_CLASS_NAME}`}
+                    >
                       {chapter.blurb}
                     </span>
                   </span>
@@ -357,11 +346,11 @@ export function RenderingPlazaLoreBookPanel({
                           aria-current={isActiveEntry ? 'page' : undefined}
                           className={`${LORE_BOOK_ENTRY_BUTTON_CLASS_NAME} ${
                             isActiveEntry
-                              ? 'bg-poster-gold/15 font-bold text-ink'
-                              : 'font-medium text-ink-soft'
+                              ? 'bg-[#c4a35a]/20 font-bold text-[#3d2a16]'
+                              : `font-medium ${DEFINING_PLAZA_OPEN_BOOK_PAGE_INK_CLASS_NAME}`
                           }`}
                         >
-                          <span className="w-5 shrink-0 text-right font-mono text-[10px] text-ink-soft/70">
+                          <span className="w-4 shrink-0 text-right font-mono text-[9px] text-[#6b4e2e]/65">
                             {folioNumber}
                           </span>
                           <span className="min-w-0 flex-1 truncate">
@@ -382,99 +371,82 @@ export function RenderingPlazaLoreBookPanel({
             );
           })}
         </nav>
-
-        {activePage ? (
+      }
+      rightPage={
+        activePage ? (
           <article
             aria-label={resolvingLoreBookEntryListTitle(activePage.entry)}
-            className={`lore-book-page lore-book-page--right h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-r-md rounded-l-sm sm:flex ${
-              isContentsOpenOnMobile ? 'hidden' : 'flex'
-            }`}
+            className="lore-book-page-turn flex min-h-0 flex-1 flex-col gap-2"
           >
-            <div
-              key={activePage.entry.id}
-              className="lore-book-page-turn flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4 sm:p-5"
-            >
-              <header className="flex items-start gap-3">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-sm border border-poster-teal/30 bg-parchment/50 text-poster-teal-deep">
-                  <Icon
-                    icon={activePage.entry.icon}
-                    className="size-5"
-                    aria-hidden
+            <header className="flex items-start gap-2">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-sm border border-[#6b4e2e]/25 bg-[#fff8e7]/55 text-[#4a3518]">
+                <Icon
+                  icon={activePage.entry.icon}
+                  className="size-4"
+                  aria-hidden
+                />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <h3 className="font-display text-sm font-bold leading-tight tracking-wide text-[#3d2a16] sm:text-base">
+                    {resolvingLoreBookEntryListTitle(activePage.entry)}
+                  </h3>
+                  <RenderingPlazaLoreBookKindBadge
+                    kind={activePage.entry.kind}
                   />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-display text-lg font-bold leading-tight tracking-wide text-ink">
-                      {resolvingLoreBookEntryListTitle(activePage.entry)}
-                    </h3>
-                    <RenderingPlazaLoreBookKindBadge
-                      kind={activePage.entry.kind}
-                    />
-                  </div>
-                  <p className="text-xs font-medium italic text-ink-soft">
-                    {activePage.entry.subtitle}
-                  </p>
                 </div>
-              </header>
-
-              <div
-                aria-hidden
-                className="h-px shrink-0 bg-[linear-gradient(90deg,transparent,rgba(44,74,82,0.45),transparent)]"
-              />
-
-              <RenderingPlazaLoreBookEntryBody entry={activePage.entry} />
-            </div>
-
-            <footer className="flex shrink-0 items-center justify-between gap-2 border-t border-poster-teal/15 px-3 py-2">
-              <button
-                type="button"
-                {...definingPlazaButtonSfxDataAttributes(
-                  DEFINING_PLAZA_BUTTON_SFX_KIND.none
-                )}
-                onClick={() =>
-                  previousPage && turningLoreBookPage(previousPage.entry.id)
-                }
-                disabled={!previousPage}
-                className={LORE_BOOK_PAGER_BUTTON_CLASS_NAME}
-              >
-                <Icon icon="mdi:chevron-left" className="size-4" aria-hidden />
-                <span className="hidden sm:inline">Previous</span>
-              </button>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsContentsOpenOnMobile(true)}
-                  className={`${LORE_BOOK_PAGER_BUTTON_CLASS_NAME} sm:hidden`}
+                <p
+                  className={`text-[10px] font-medium italic sm:text-[11px] ${DEFINING_PLAZA_OPEN_BOOK_PAGE_INK_CLASS_NAME}`}
                 >
-                  <Icon
-                    icon="mdi:book-open-page-variant"
-                    className="size-4"
-                    aria-hidden
-                  />
-                  Contents
-                </button>
-                <span className="font-mono text-[11px] font-medium text-ink-soft">
-                  Page {activePage.folioNumber} of {pages.length}
-                </span>
+                  {activePage.entry.subtitle}
+                </p>
               </div>
-              <button
-                type="button"
-                {...definingPlazaButtonSfxDataAttributes(
-                  DEFINING_PLAZA_BUTTON_SFX_KIND.none
-                )}
-                onClick={() =>
-                  nextPage && turningLoreBookPage(nextPage.entry.id)
-                }
-                disabled={!nextPage}
-                className={LORE_BOOK_PAGER_BUTTON_CLASS_NAME}
-              >
-                <span className="hidden sm:inline">Next</span>
-                <Icon icon="mdi:chevron-right" className="size-4" aria-hidden />
-              </button>
-            </footer>
+            </header>
+
+            <div
+              aria-hidden
+              className="h-px shrink-0 bg-[linear-gradient(90deg,transparent,rgba(107,78,46,0.4),transparent)]"
+            />
+
+            <RenderingPlazaLoreBookEntryBody entry={activePage.entry} />
           </article>
-        ) : null}
-      </div>
-    </div>
+        ) : null
+      }
+      leftPageKey={`${book.id}-toc`}
+      rightPageKey={activePage?.entry.id ?? `${book.id}-empty`}
+      footer={
+        <footer className="flex items-center justify-center gap-3 sm:gap-4">
+          <button
+            type="button"
+            {...definingPlazaButtonSfxDataAttributes(
+              DEFINING_PLAZA_BUTTON_SFX_KIND.none
+            )}
+            onClick={() =>
+              previousPage && turningLoreBookPage(previousPage.entry.id)
+            }
+            disabled={!previousPage}
+            className={DEFINING_PLAZA_OPEN_BOOK_PAGER_BUTTON_CLASS_NAME}
+          >
+            <Icon icon="mdi:chevron-left" className="size-4" aria-hidden />
+            <span className="hidden sm:inline">Prev</span>
+          </button>
+          <span className="font-mono text-xs font-medium text-parchment/75 sm:text-sm">
+            {activePage ? `${activePage.folioNumber}/${pages.length}` : '-/-'}
+          </span>
+          <button
+            type="button"
+            {...definingPlazaButtonSfxDataAttributes(
+              DEFINING_PLAZA_BUTTON_SFX_KIND.none
+            )}
+            onClick={() => nextPage && turningLoreBookPage(nextPage.entry.id)}
+            disabled={!nextPage}
+            className={DEFINING_PLAZA_OPEN_BOOK_PAGER_BUTTON_CLASS_NAME}
+          >
+            <span className="hidden sm:inline">Next</span>
+            <Icon icon="mdi:chevron-right" className="size-4" aria-hidden />
+          </button>
+        </footer>
+      }
+    />
   );
 }

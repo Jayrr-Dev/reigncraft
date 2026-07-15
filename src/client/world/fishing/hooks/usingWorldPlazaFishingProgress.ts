@@ -93,6 +93,7 @@ export function usingWorldPlazaFishingProgress({
 
   const handlingFishingCastComplete = useCallback(
     (session: DefiningWorldPlazaFishingCastSessionContext): void => {
+      playingWorldPlazaFishingSfx({ actionId: 'reel_hold_stop' });
       resettingWorldPlazaFishingReelCastState();
       reelOpportunityActiveRef.current = false;
       onCastCompleteRef.current(session);
@@ -109,6 +110,7 @@ export function usingWorldPlazaFishingProgress({
 
   useEffect(() => {
     if (!snapshot.isActive) {
+      playingWorldPlazaFishingSfx({ actionId: 'reel_hold_stop' });
       reelOpportunityActiveRef.current = false;
       return;
     }
@@ -122,6 +124,7 @@ export function usingWorldPlazaFishingProgress({
     );
 
     return () => {
+      playingWorldPlazaFishingSfx({ actionId: 'reel_hold_stop' });
       unsubscribeDomOverlayFrame();
     };
   }, [snapshot.isActive]);
@@ -244,8 +247,6 @@ export function usingWorldPlazaFishingProgress({
         return 'cooldown';
       }
 
-      playingWorldPlazaFishingSfx({ actionId: 'reel' });
-
       return reelResult === 'capped' ? 'capped' : 'reeled';
     },
     [snapshot]
@@ -253,10 +254,12 @@ export function usingWorldPlazaFishingProgress({
 
   const startingFishingReelHold = useCallback((): void => {
     settingWorldPlazaFishingReelHold(true);
+    playingWorldPlazaFishingSfx({ actionId: 'reel_hold_start' });
   }, []);
 
   const stoppingFishingReelHold = useCallback((): void => {
     settingWorldPlazaFishingReelHold(false);
+    playingWorldPlazaFishingSfx({ actionId: 'reel_hold_stop' });
   }, []);
 
   return {

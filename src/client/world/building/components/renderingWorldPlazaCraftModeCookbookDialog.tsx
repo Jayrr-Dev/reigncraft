@@ -6,19 +6,18 @@
  * @module components/world/building/components/renderingWorldPlazaCraftModeCookbookDialog
  */
 
-import { playingPlazaBookSfx } from '@/components/home/domains/playingPlazaBookSfx';
+import { RenderingPlazaOpenBookFrame } from '@/components/home/components/renderingPlazaOpenBookFrame';
 import {
   DEFINING_PLAZA_BUTTON_SFX_KIND,
   definingPlazaButtonSfxDataAttributes,
 } from '@/components/home/domains/definingPlazaDefaultButtonSfxConstants';
+import { DEFINING_PLAZA_OPEN_BOOK_PAGER_BUTTON_CLASS_NAME } from '@/components/home/domains/definingPlazaOpenBookUiConstants';
+import { playingPlazaBookSfx } from '@/components/home/domains/playingPlazaBookSfx';
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import { Icon } from '@/components/ui/icon';
 import { RenderingWorldPlazaCraftModeRecipeSpreadLeftPage } from '@/components/world/building/components/renderingWorldPlazaCraftModeRecipeSpreadLeftPage';
 import { RenderingWorldPlazaCraftModeRecipeSpreadRightPage } from '@/components/world/building/components/renderingWorldPlazaCraftModeRecipeSpreadRightPage';
 import {
-  DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_OPEN_BOOK_ASPECT_RATIO,
-  DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_OPEN_BOOK_URL,
-  DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_PAGE_LAYOUT,
   LABELING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_BLANK_PAGE,
   resolvingWorldPlazaCraftModeCookbookSpriteSheetIcon,
   type DefiningWorldPlazaCraftModeCookbookDefinition,
@@ -38,27 +37,9 @@ import {
   useMemo,
   useState,
   useSyncExternalStore,
-  type CSSProperties,
   type SyntheticEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
-
-const COOKBOOK_CLOSE_BUTTON_CLASS_NAME =
-  'flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-sm border border-parchment/40 bg-parchment text-ink shadow-[0_2px_0_0_rgba(46,36,22,0.55)] transition hover:bg-parchment-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-parchment/60 sm:size-9';
-
-const COOKBOOK_PAGER_BUTTON_CLASS_NAME =
-  'flex cursor-pointer items-center gap-1 rounded-sm border border-parchment/40 bg-parchment px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-ink shadow-[0_2px_0_0_rgba(46,36,22,0.55)] transition hover:bg-parchment-100 disabled:cursor-default disabled:opacity-35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-parchment/60';
-
-function resolvingCookbookPageBoxStyle(side: 'left' | 'right'): CSSProperties {
-  const layout = DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_PAGE_LAYOUT[side];
-
-  return {
-    top: `${layout.topPercent}%`,
-    left: `${layout.leftPercent}%`,
-    width: `${layout.widthPercent}%`,
-    height: `${layout.heightPercent}%`,
-  };
-}
 
 function RenderingWorldPlazaCraftModeCookbookCoverGlyph({
   cookbookDefinition,
@@ -212,6 +193,24 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
       ? LABELING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_NO_RECIPES_PAGE
       : LABELING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_BLANK_PAGE;
 
+  const renderingBlankPage = (
+    iconClassName: string,
+    copyClassName: string
+  ): React.JSX.Element => (
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center">
+      <Icon
+        icon={cookbookDefinition.emblemIconifyIcon}
+        className={`size-7 sm:size-8 ${iconClassName}`}
+        aria-hidden
+      />
+      <p
+        className={`max-w-[16rem] text-[11px] font-medium italic leading-relaxed sm:text-xs ${copyClassName}`}
+      >
+        {blankPageCopy}
+      </p>
+    </div>
+  );
+
   return createPortal(
     <div
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
@@ -222,132 +221,72 @@ export function RenderingWorldPlazaCraftModeCookbookDialog({
       onPointerDown={stoppingPlazaWalkPointerPropagation}
       onClick={closingDialogOnBackdropClick}
     >
-      <div className="plaza-pop-in relative flex max-h-[calc(100dvh-3rem)] w-full max-w-[min(94vw,52rem)] flex-col items-center gap-3 overflow-y-auto font-body sm:gap-4">
-        <header className="flex w-full items-center gap-3 px-2 sm:px-4">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <RenderingWorldPlazaCraftModeCookbookCoverGlyph
-              cookbookDefinition={cookbookDefinition}
-            />
-            <div className="min-w-0">
-              <h2 className="font-display text-base font-bold uppercase leading-tight tracking-wide text-parchment sm:text-lg md:text-xl">
-                {cookbookDefinition.title}
-              </h2>
-              <p className="mt-1 text-xs font-medium italic leading-snug text-parchment/70 sm:text-sm">
-                {cookbookDefinition.subtitle}
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            {...definingPlazaButtonSfxDataAttributes(
-              DEFINING_PLAZA_BUTTON_SFX_KIND.none
-            )}
-            className={COOKBOOK_CLOSE_BUTTON_CLASS_NAME}
-          >
-            <Icon icon="mdi:close" className="size-4 sm:size-5" aria-hidden />
-          </button>
-        </header>
-
-        <div
-          className="relative w-full"
-          style={{
-            aspectRatio: String(
-              DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_OPEN_BOOK_ASPECT_RATIO
-            ),
-          }}
-        >
-          <img
-            src={DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_OPEN_BOOK_URL}
-            alt=""
-            draggable={false}
-            className="pointer-events-none absolute inset-0 size-full select-none object-contain [image-rendering:pixelated]"
-            aria-hidden
+      <RenderingPlazaOpenBookFrame
+        title={cookbookDefinition.title}
+        subtitle={cookbookDefinition.subtitle}
+        onClose={onClose}
+        headerLeading={
+          <RenderingWorldPlazaCraftModeCookbookCoverGlyph
+            cookbookDefinition={cookbookDefinition}
           />
-
-          <div
-            key={`${cookbookDefinition.id}-leaf-${leafIndex}-left`}
-            className="scrollbar-none absolute flex flex-col overflow-y-auto overscroll-contain p-2 sm:p-3"
-            style={resolvingCookbookPageBoxStyle('left')}
-          >
-            {activeRecipe ? (
-              <RenderingWorldPlazaCraftModeRecipeSpreadLeftPage
-                recipeDefinition={activeRecipe}
-              />
-            ) : (
-              <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center">
-                <Icon
-                  icon={cookbookDefinition.emblemIconifyIcon}
-                  className="size-7 text-[#6b4e2e]/25 sm:size-8"
-                  aria-hidden
-                />
-                <p className="max-w-[16rem] text-[11px] font-medium italic leading-relaxed text-[#6b4e2e]/70 sm:text-xs">
-                  {blankPageCopy}
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div
-            key={`${cookbookDefinition.id}-leaf-${leafIndex}-right`}
-            className="scrollbar-none absolute flex flex-col overflow-y-auto overscroll-contain p-2 sm:p-3"
-            style={resolvingCookbookPageBoxStyle('right')}
-          >
-            {activeRecipe ? (
-              <RenderingWorldPlazaCraftModeRecipeSpreadRightPage
-                recipeDefinition={activeRecipe}
-                inventoryState={inventoryState}
-                isCraftingEnabled={isCraftingEnabled}
-                onCraftRecipe={onCraftRecipe}
-              />
-            ) : (
-              <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center">
-                <Icon
-                  icon={cookbookDefinition.emblemIconifyIcon}
-                  className="size-7 text-[#6b4e2e]/20 sm:size-8"
-                  aria-hidden
-                />
-                <p className="max-w-[16rem] text-[11px] font-medium italic leading-relaxed text-[#6b4e2e]/60 sm:text-xs">
-                  {blankPageCopy}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {showCookbookPager ? (
-          <footer className="flex items-center justify-center gap-3 sm:gap-4">
-            <button
-              type="button"
-              onClick={() => turningCookbookLeaf(-1)}
-              disabled={leafIndex <= 0}
-              {...definingPlazaButtonSfxDataAttributes(
-                DEFINING_PLAZA_BUTTON_SFX_KIND.bookPageTurn
-              )}
-              className={COOKBOOK_PAGER_BUTTON_CLASS_NAME}
-            >
-              <Icon icon="mdi:chevron-left" className="size-4" aria-hidden />
-              <span className="hidden sm:inline">Prev</span>
-            </button>
-            <span className="font-mono text-xs font-medium text-parchment/75 sm:text-sm">
-              {leafIndex + 1}/{leafCount}
-            </span>
-            <button
-              type="button"
-              onClick={() => turningCookbookLeaf(1)}
-              disabled={leafIndex >= leafCount - 1}
-              {...definingPlazaButtonSfxDataAttributes(
-                DEFINING_PLAZA_BUTTON_SFX_KIND.bookPageTurn
-              )}
-              className={COOKBOOK_PAGER_BUTTON_CLASS_NAME}
-            >
-              <span className="hidden sm:inline">Next</span>
-              <Icon icon="mdi:chevron-right" className="size-4" aria-hidden />
-            </button>
-          </footer>
-        ) : null}
-      </div>
+        }
+        leftPage={
+          activeRecipe ? (
+            <RenderingWorldPlazaCraftModeRecipeSpreadLeftPage
+              recipeDefinition={activeRecipe}
+            />
+          ) : (
+            renderingBlankPage('text-[#6b4e2e]/25', 'text-[#6b4e2e]/70')
+          )
+        }
+        rightPage={
+          activeRecipe ? (
+            <RenderingWorldPlazaCraftModeRecipeSpreadRightPage
+              recipeDefinition={activeRecipe}
+              inventoryState={inventoryState}
+              isCraftingEnabled={isCraftingEnabled}
+              onCraftRecipe={onCraftRecipe}
+            />
+          ) : (
+            renderingBlankPage('text-[#6b4e2e]/20', 'text-[#6b4e2e]/60')
+          )
+        }
+        leftPageKey={`${cookbookDefinition.id}-leaf-${leafIndex}-left`}
+        rightPageKey={`${cookbookDefinition.id}-leaf-${leafIndex}-right`}
+        footer={
+          showCookbookPager ? (
+            <footer className="flex items-center justify-center gap-3 sm:gap-4">
+              <button
+                type="button"
+                onClick={() => turningCookbookLeaf(-1)}
+                disabled={leafIndex <= 0}
+                {...definingPlazaButtonSfxDataAttributes(
+                  DEFINING_PLAZA_BUTTON_SFX_KIND.bookPageTurn
+                )}
+                className={DEFINING_PLAZA_OPEN_BOOK_PAGER_BUTTON_CLASS_NAME}
+              >
+                <Icon icon="mdi:chevron-left" className="size-4" aria-hidden />
+                <span className="hidden sm:inline">Prev</span>
+              </button>
+              <span className="font-mono text-xs font-medium text-parchment/75 sm:text-sm">
+                {leafIndex + 1}/{leafCount}
+              </span>
+              <button
+                type="button"
+                onClick={() => turningCookbookLeaf(1)}
+                disabled={leafIndex >= leafCount - 1}
+                {...definingPlazaButtonSfxDataAttributes(
+                  DEFINING_PLAZA_BUTTON_SFX_KIND.bookPageTurn
+                )}
+                className={DEFINING_PLAZA_OPEN_BOOK_PAGER_BUTTON_CLASS_NAME}
+              >
+                <span className="hidden sm:inline">Next</span>
+                <Icon icon="mdi:chevron-right" className="size-4" aria-hidden />
+              </button>
+            </footer>
+          ) : null
+        }
+      />
     </div>,
     document.body
   );

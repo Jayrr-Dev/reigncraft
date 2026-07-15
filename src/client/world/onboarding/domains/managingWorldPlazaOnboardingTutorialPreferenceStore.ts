@@ -16,6 +16,9 @@ const managingWorldPlazaOnboardingTutorialState: {
   isEnabled: DEFINING_WORLD_PLAZA_ONBOARDING_TUTORIAL_DEFAULT_ENABLED,
 };
 
+/** True after the first client read from localStorage (or SSR skip). */
+let managingWorldPlazaOnboardingTutorialHasHydratedFromStorage = false;
+
 /** React subscribers notified when the preference changes. */
 const managingWorldPlazaOnboardingTutorialSubscribers = new Set<() => void>();
 
@@ -57,10 +60,35 @@ function writingWorldPlazaOnboardingTutorialEnabledToStorage(
 }
 
 /**
+ * Loads localStorage into module state once, without notifying subscribers.
+ *
+ * Safe to call from `getSnapshot` so the first paint matches the saved choice.
+ */
+function ensuringWorldPlazaOnboardingTutorialStoreHydratedFromStorage(): void {
+  if (managingWorldPlazaOnboardingTutorialHasHydratedFromStorage) {
+    return;
+  }
+
+  managingWorldPlazaOnboardingTutorialHasHydratedFromStorage = true;
+
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  managingWorldPlazaOnboardingTutorialState.isEnabled =
+    readingWorldPlazaOnboardingTutorialEnabledFromStorage();
+}
+
+/**
  * Hydrates tutorial preference from localStorage once on the client.
  */
 export function initializingWorldPlazaOnboardingTutorialStoreFromStorage(): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
   const storedEnabled = readingWorldPlazaOnboardingTutorialEnabledFromStorage();
+  managingWorldPlazaOnboardingTutorialHasHydratedFromStorage = true;
 
   if (managingWorldPlazaOnboardingTutorialState.isEnabled === storedEnabled) {
     return;
@@ -74,6 +102,7 @@ export function initializingWorldPlazaOnboardingTutorialStoreFromStorage(): void
  * Returns true when onboarding tutorial coachmarks are enabled.
  */
 export function checkingWorldPlazaOnboardingTutorialEnabled(): boolean {
+  ensuringWorldPlazaOnboardingTutorialStoreHydratedFromStorage();
   return managingWorldPlazaOnboardingTutorialState.isEnabled;
 }
 
@@ -85,6 +114,8 @@ export function checkingWorldPlazaOnboardingTutorialEnabled(): boolean {
 export function settingWorldPlazaOnboardingTutorialEnabled(
   isEnabled: boolean
 ): void {
+  ensuringWorldPlazaOnboardingTutorialStoreHydratedFromStorage();
+
   if (managingWorldPlazaOnboardingTutorialState.isEnabled === isEnabled) {
     return;
   }
