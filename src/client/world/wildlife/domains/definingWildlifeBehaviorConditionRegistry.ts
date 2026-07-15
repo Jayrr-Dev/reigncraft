@@ -6,6 +6,7 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
+import { checkingWorldPlazaInventoryItemIsSpritcore } from '@/components/world/spritcore/domains/checkingWorldPlazaInventoryItemIsSpritcore';
 import { checkingWildlifeShouldCompleteBluffReturn } from '@/components/world/wildlife/domains/advancingWildlifeBluffCharge';
 import { checkingWildlifeAggressiveHerbivoreMayFight } from '@/components/world/wildlife/domains/checkingWildlifeAggressiveHerbivoreMayFight';
 import { checkingWildlifeAlwaysFollowPlayerWithinRange } from '@/components/world/wildlife/domains/checkingWildlifeAlwaysFollowPlayerWithinRange';
@@ -15,11 +16,12 @@ import { checkingWildlifeHasSeparationAnxiety } from '@/components/world/wildlif
 import { checkingWildlifeHerbivoreIgnoresPlayerNearFood } from '@/components/world/wildlife/domains/checkingWildlifeHerbivoreIgnoresPlayerNearFood';
 import { checkingWildlifeInstanceHasProvokedWildlifeAggro } from '@/components/world/wildlife/domains/checkingWildlifeInstanceHasProvokedWildlifeAggro';
 import { checkingWildlifeInstanceIsDefendingYoung } from '@/components/world/wildlife/domains/checkingWildlifeInstanceMayDefendYoung';
-import { checkingWildlifeIsTakingEnvironmentalHeatDamage } from '@/components/world/wildlife/domains/checkingWildlifeIsTakingEnvironmentalHeatDamage';
 import {
   checkingWildlifeIsMotivatedToForageGroundFood,
   checkingWildlifeIsMotivatedToHunt,
 } from '@/components/world/wildlife/domains/checkingWildlifeIsMotivatedToHunt';
+import { checkingWildlifeIsStalkHuntTemperament } from '@/components/world/wildlife/domains/checkingWildlifeIsStalkHuntTemperament';
+import { checkingWildlifeIsTakingEnvironmentalHeatDamage } from '@/components/world/wildlife/domains/checkingWildlifeIsTakingEnvironmentalHeatDamage';
 import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildlife/domains/checkingWildlifeMayAggroPlayerOnSight';
 import { checkingWildlifePlayerOccludedByColumnRock } from '@/components/world/wildlife/domains/checkingWildlifePlayerOccludedByColumnRock';
 import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
@@ -28,10 +30,7 @@ import { checkingWildlifeShouldDocileApproachReact } from '@/components/world/wi
 import { checkingWildlifeSocialHunterMayHunt } from '@/components/world/wildlife/domains/checkingWildlifeSocialHunterMayHunt';
 import { checkingWildlifeSpeciesFavoriteFood } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesFavoriteFood';
 import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
-import { checkingWildlifeIsStalkHuntTemperament } from '@/components/world/wildlife/domains/checkingWildlifeIsStalkHuntTemperament';
 import { checkingWildlifeStalkPackmateMayAttackPrey } from '@/components/world/wildlife/domains/checkingWildlifeStalkPackmateMayAttackPrey';
-import { checkingWorldPlazaInventoryItemIsSpritcore } from '@/components/world/spritcore/domains/checkingWorldPlazaInventoryItemIsSpritcore';
-import { DEFINING_WILDLIFE_SPRITCORE_FEAST_DISTANCE_BIAS } from '@/components/world/wildlife/domains/definingWildlifeSpritcoreFeastConstants';
 import {
   checkingWildlifeStalkPhaseIsAttacking,
   checkingWildlifeStalkPhaseIsFleeing,
@@ -61,6 +60,7 @@ import {
   DEFINING_WILDLIFE_PREY_HUNT_RADIUS_GRID,
 } from '@/components/world/wildlife/domains/definingWildlifeHuntConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { DEFINING_WILDLIFE_SPRITCORE_FEAST_DISTANCE_BIAS } from '@/components/world/wildlife/domains/definingWildlifeSpritcoreFeastConstants';
 import type { DefiningWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/definingWildlifeStalkPreyTypes';
 import type {
   DefiningWildlifeHungerDriveLevel,
@@ -68,10 +68,11 @@ import type {
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
+import { resolvingWildlifeGroundFoodItemTypeId } from '@/components/world/wildlife/domains/resolvingWildlifeGroundFoodItemTypeId';
 import { resolvingWildlifeNearestEdibleGroundFlower } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundFlower';
+import { resolvingWildlifeNearestEdibleGroundFood } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundFood';
 import { resolvingWildlifeNearestEdibleGroundGrass } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundGrass';
 import { resolvingWildlifeNearestEdibleGroundShrub } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundShrub';
-import { resolvingWildlifeNearestEdibleGroundFood } from '@/components/world/wildlife/domains/resolvingWildlifeNearestEdibleGroundFood';
 import { resolvingWildlifePreyProximityAttackRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifePreyProximityAttackRadiusGrid';
 import { resolvingWildlifeSpeciesAggroRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesAggroRadiusGrid';
 import { resolvingWildlifeStalkPreyContext } from '@/components/world/wildlife/domains/resolvingWildlifeStalkPreyContext';
@@ -283,6 +284,19 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
   isWillingToForageSelectedGroundFood: (blackboard) => {
     if (blackboard.selectedGroundFoodItemId === null) {
       return false;
+    }
+
+    const selectedItemTypeId = resolvingWildlifeGroundFoodItemTypeId(
+      blackboard.selectedGroundFoodItemId,
+      blackboard.nowMs
+    );
+
+    // Spritcore is always worth interrupting satiety for.
+    if (
+      selectedItemTypeId &&
+      checkingWorldPlazaInventoryItemIsSpritcore(selectedItemTypeId)
+    ) {
+      return true;
     }
 
     if (
@@ -501,9 +515,7 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     });
   },
   isStalkPackFleeing: (blackboard) =>
-    checkingWildlifeIsStalkHuntTemperament(
-      blackboard.species.temperamentId
-    ) &&
+    checkingWildlifeIsStalkHuntTemperament(blackboard.species.temperamentId) &&
     ((blackboard.instance.packAlphaDeathScatterUntilMs !== null &&
       blackboard.instance.packAlphaDeathScatterUntilMs !== undefined &&
       blackboard.nowMs < blackboard.instance.packAlphaDeathScatterUntilMs) ||

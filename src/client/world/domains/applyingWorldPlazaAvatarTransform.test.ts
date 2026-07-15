@@ -1,12 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { applyingWorldPlazaAvatarTransform } from '@/components/world/domains/applyingWorldPlazaAvatarTransform';
+import {
+  applyingWorldPlazaAvatarTransform,
+  applyingWorldPlazaAvatarTransformDeathReset,
+} from '@/components/world/domains/applyingWorldPlazaAvatarTransform';
 import { DEFINING_WORLD_PLAZA_AVATAR_SKIN } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { DEFINING_WORLD_PLAZA_AVATAR_TRANSFORM_COOLDOWN_MS } from '@/components/world/domains/definingWorldPlazaAvatarTransformConstants';
 import {
   gettingWorldPlazaSelectedAvatarSkinId,
   initializingWorldPlazaAvatarSkinSelectionStore,
   resettingWorldPlazaAvatarSkinSelectionStoreForTests,
+  settingWorldPlazaSelectedAvatarSkin,
 } from '@/components/world/domains/managingWorldPlazaAvatarSkinSelectionStore';
 import {
   checkingWorldPlazaAvatarTransformIsOnCooldown,
@@ -102,6 +106,29 @@ describe('applyingWorldPlazaAvatarTransform', () => {
     ).toBe('unchanged');
     expect(checkingWorldPlazaAvatarTransformIsOnCooldown(3_000_000)).toBe(
       false
+    );
+  });
+
+  it('resets to Girl on death without clearing transform cooldown', () => {
+    const nowMs = 4_000_000;
+
+    expect(
+      applyingWorldPlazaAvatarTransform(
+        DEFINING_WORLD_PLAZA_AVATAR_SKIN.HUSKY,
+        nowMs
+      )
+    ).toBe('applied');
+    expect(applyingWorldPlazaAvatarTransformDeathReset()).toBe(true);
+    expect(gettingWorldPlazaSelectedAvatarSkinId()).toBe(
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+    );
+    expect(checkingWorldPlazaAvatarTransformIsOnCooldown(nowMs + 1)).toBe(true);
+    expect(applyingWorldPlazaAvatarTransformDeathReset()).toBe(false);
+
+    settingWorldPlazaSelectedAvatarSkin(DEFINING_WORLD_PLAZA_AVATAR_SKIN.HUSKY);
+    expect(applyingWorldPlazaAvatarTransformDeathReset()).toBe(true);
+    expect(gettingWorldPlazaSelectedAvatarSkinId()).toBe(
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
     );
   });
 });

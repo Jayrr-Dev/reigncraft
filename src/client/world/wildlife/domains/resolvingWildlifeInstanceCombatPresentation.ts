@@ -5,6 +5,7 @@
  */
 
 import { resolvingWorldPlazaEntityHealthMovementMultipliers } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthMovementMultipliers';
+import { resolvingWildlifeSpritcoreFeastAttackPowerMultiplier } from '@/components/world/wildlife/domains/applyingWildlifeSpritcoreFeast';
 import { checkingWildlifeIsAggressiveChicken } from '@/components/world/wildlife/domains/checkingWildlifeIsAggressiveChicken';
 import {
   DEFINING_WILDLIFE_AGGRESSIVE_CHICKEN_ATTACK_POWER_MULTIPLIER,

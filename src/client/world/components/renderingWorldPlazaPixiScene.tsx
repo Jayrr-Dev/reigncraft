@@ -221,6 +221,7 @@ import {
   DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_LAYER_Z_INDEX,
   DEFINING_WORLD_DEPTH_RENDER_PLANE_FLOOR_Z_INDEX,
 } from '@/components/world/depth';
+import { applyingWorldPlazaAvatarTransformDeathReset } from '@/components/world/domains/applyingWorldPlazaAvatarTransform';
 import { applyingWorldPlazaPlayerTeleportToWorldPoint } from '@/components/world/domains/applyingWorldPlazaPlayerTeleportToWorldPoint';
 import { attachingWorldPlazaAllCraftModeRecipesForDevQa } from '@/components/world/domains/attachingWorldPlazaAllCraftModeRecipesForDevQa';
 import {
@@ -619,6 +620,7 @@ import type {
 } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import type { ManagingWorldPlazaProjectileStore } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
 import { usingWorldPlazaProjectileEngine } from '@/components/world/projectile/hooks/usingWorldPlazaProjectileEngine';
+import { applyingWorldPlazaPlayerDeathSpritcorePenalty } from '@/components/world/spritcore/domains/applyingWorldPlazaPlayerDeathSpritcorePenalty';
 import { initializingWorldPlazaSpritcoreUpgradeStore } from '@/components/world/spritcore/domains/managingWorldPlazaSpritcoreUpgradeStore';
 import { usingWorldPlazaSpritcoreUpgradeBonuses } from '@/components/world/spritcore/hooks/usingWorldPlazaSpritcoreUpgradeBonuses';
 import { RenderingWorldPlazaTeaPotAddWaterInteractionLabels } from '@/components/world/tea-brewing/components/renderingWorldPlazaTeaPotAddWaterInteractionLabels';
@@ -6696,6 +6698,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     sendingWorldPlazaAudioLifecycleEvent(
       isPlayerDead ? 'PLAYER_DIED' : 'PLAYER_RESPAWNED'
     );
+
+    if (isPlayerDead) {
+      applyingWorldPlazaAvatarTransformDeathReset();
+    }
   }, [isPlayerDead]);
 
   isPlayerDeadRef.current = isPlayerDead;
@@ -7046,6 +7052,23 @@ function RenderingWorldPlazaPixiSceneConnected({
         nowMs: Date.now(),
         resolveSpecies: resolvingWildlifeSpeciesDefinition,
       });
+
+      const deathInventoryState = inventoryStateRef.current;
+
+      if (deathInventoryState) {
+        void applyingWorldPlazaPlayerDeathSpritcorePenalty({
+          inventoryState: deathInventoryState,
+          deathPosition,
+          localPersistenceOwnerId,
+          redditUserId,
+          saveSlotIndex: isSinglePlayerSession
+            ? singlePlayerSaveSlotIndex
+            : null,
+          onInventoryStateChange: (nextState) => {
+            updatingInventoryState(() => nextState);
+          },
+        });
+      }
     }
   }, [
     clearingCombatLock,
@@ -7055,9 +7078,13 @@ function RenderingWorldPlazaPixiSceneConnected({
     closingFriendsPanel,
     isLocalGameplayEnabled,
     isPlayerDead,
+    isSinglePlayerSession,
     localPersistenceOwnerId,
     onlineUserId,
     playerPositionRef,
+    redditUserId,
+    singlePlayerSaveSlotIndex,
+    updatingInventoryState,
     wildlifeStoreRef,
   ]);
 

@@ -144,7 +144,7 @@ export function resolvingWildlifeMeleeAttackPower(
   if (!chargeConfig) {
     return Math.round(
       baseAttackPower *
-        resolvingWildlifeInstanceAttackPowerMultiplier(species, instance)
+        resolvingWildlifeInstanceAttackPowerMultiplier(species, instance, nowMs)
     );
   }
 
@@ -155,13 +155,13 @@ export function resolvingWildlifeMeleeAttackPower(
   if (!isChargeDamage) {
     return Math.round(
       baseAttackPower *
-        resolvingWildlifeInstanceAttackPowerMultiplier(species, instance)
+        resolvingWildlifeInstanceAttackPowerMultiplier(species, instance, nowMs)
     );
   }
 
   return Math.round(
     baseAttackPower *
       chargeConfig.runDamageMultiplier *
-      resolvingWildlifeInstanceAttackPowerMultiplier(species, instance)
+      resolvingWildlifeInstanceAttackPowerMultiplier(species, instance, nowMs)
   );
 }

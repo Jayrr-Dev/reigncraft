@@ -4,13 +4,19 @@
  * @module components/world/wildlife/domains/advancingWildlifeHealthStatusTick
  */
 
+import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
 import {
   enqueueingWorldPlazaEntityHealthFloatText,
   pruningWorldPlazaEntityHealthFloatTexts,
 } from '@/components/world/health/domains/managingWorldPlazaEntityHealthFloatTexts';
 import { tickingWorldPlazaEntityHealthState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import {
+  advancingWildlifeSpritcoreFeastExpiry,
+  checkingWildlifeSpritcoreFeastBoostsRegen,
+} from '@/components/world/wildlife/domains/applyingWildlifeSpritcoreFeast';
 import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import { DEFINING_WILDLIFE_SPRITCORE_FEAST_REGEN_MULTIPLIER } from '@/components/world/wildlife/domains/definingWildlifeSpritcoreFeastConstants';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { notifyingWildlifeVocalSfxOnDeath } from '@/components/world/wildlife/domains/notifyingWildlifeVocalSfxOnDeath';
 
@@ -22,6 +28,7 @@ export type AdvancingWildlifeHealthStatusTickParams = {
 
 /**
  * Advances bleed, poison, potential damage, and other timed health effects.
+ * Spritcore feast temporarily enables fast passive regen until full HP.
  */
 export function advancingWildlifeHealthStatusTick({
   instance,
@@ -53,6 +60,7 @@ export function advancingWildlifeHealthStatusTick({
         instance.floatingTexts,
         nowMs
       ),
+      spritcoreFeast: null,
     };
   }
 
@@ -62,11 +70,24 @@ export function advancingWildlifeHealthStatusTick({
   );
   const previousHealth = instance.healthState.currentHealth;
   const previousShield = instance.healthState.shieldPoints;
+  const feastBoostsRegen = checkingWildlifeSpritcoreFeastBoostsRegen(instance);
+  const healthStateForTick = feastBoostsRegen
+    ? {
+        ...instance.healthState,
+        regen: {
+          ...instance.healthState.regen,
+          healthPerSecond:
+            instance.healthState.regen.healthPerSecond *
+            DEFINING_WILDLIFE_SPRITCORE_FEAST_REGEN_MULTIPLIER,
+          delayAfterDamageMs: 0,
+        },
+      }
+    : instance.healthState;
   const nextHealthState = tickingWorldPlazaEntityHealthState(
-    instance.healthState,
+    healthStateForTick,
     nowMs,
     deltaMs,
-    false
+    feastBoostsRegen
   );
   const healthLost = previousHealth - nextHealthState.currentHealth;
   const shieldLost = previousShield - nextHealthState.shieldPoints;
@@ -96,7 +117,7 @@ export function advancingWildlifeHealthStatusTick({
 
   const died = nextHealthState.currentHealth <= 0;
 
-  const nextInstance: DefiningWildlifeInstance = {
+  let nextInstance: DefiningWildlifeInstance = {
     ...instance,
     healthState: nextHealthState,
     floatingTexts: nextFloats,
@@ -107,6 +128,32 @@ export function advancingWildlifeHealthStatusTick({
       motionClip: died ? 'die' : instance.aiState.motionClip,
     },
   };
+
+  if (!died) {
+    nextInstance = advancingWildlifeSpritcoreFeastExpiry(nextInstance, nowMs);
+
+    // Clamp feast regen against effective max once more so expiry sees full HP.
+    const effectiveMax = computingWorldPlazaEntityHealthEffectiveMax(
+      nextInstance.healthState,
+      nowMs
+    );
+
+    if (nextInstance.healthState.currentHealth > effectiveMax) {
+      nextInstance = {
+        ...nextInstance,
+        healthState: {
+          ...nextInstance.healthState,
+          currentHealth: effectiveMax,
+        },
+      };
+      nextInstance = advancingWildlifeSpritcoreFeastExpiry(nextInstance, nowMs);
+    }
+  } else {
+    nextInstance = {
+      ...nextInstance,
+      spritcoreFeast: null,
+    };
+  }
 
   notifyingWildlifeVocalSfxOnDeath({
     instanceId: instance.instanceId,

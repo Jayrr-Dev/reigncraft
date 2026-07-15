@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFINING_WORLD_PLAZA_AVATAR_SKIN } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { resolvingWorldPlazaSpritcoreUpgradeStorageKey } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreLevelingConstants';
 import {
+  applyingWorldPlazaSpritcoreDeathCommittedPenalty,
   applyingWorldPlazaSpritcoreUpgradePurchase,
   gettingWorldPlazaSpritcoreUpgradeSnapshot,
   initializingWorldPlazaSpritcoreUpgradeStore,
@@ -118,6 +119,44 @@ describe('managingWorldPlazaSpritcoreUpgradeStore', () => {
     expect(gettingWorldPlazaSpritcoreUpgradeSnapshot().bonusAttackPower).toBe(
       0
     );
+  });
+
+  it('applies death committed penalty and persists weakened bonuses', () => {
+    localStorage.setItem(
+      resolvingWorldPlazaSpritcoreUpgradeStorageKey(
+        'spritcore-owner',
+        DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+      ),
+      JSON.stringify({
+        bonusMaxHealth: 1000,
+        bonusAttackPower: 100,
+        bonusAttackSpeed: 0.5,
+        totalSpritcoreInvested: 10_000,
+      })
+    );
+    initializingWorldPlazaSpritcoreUpgradeStore(
+      'spritcore-owner',
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+    );
+
+    expect(applyingWorldPlazaSpritcoreDeathCommittedPenalty()).toBe(1000);
+    expect(gettingWorldPlazaSpritcoreUpgradeSnapshot()).toEqual({
+      bonusMaxHealth: 900,
+      bonusAttackPower: 90,
+      bonusAttackSpeed: 0.45,
+      totalSpritcoreInvested: 9000,
+    });
+    expect(
+      readingWorldPlazaSpritcoreUpgradeFromStorage(
+        'spritcore-owner',
+        DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+      )
+    ).toEqual({
+      bonusMaxHealth: 900,
+      bonusAttackPower: 90,
+      bonusAttackSpeed: 0.45,
+      totalSpritcoreInvested: 9000,
+    });
   });
 
   it('migrates legacy owner-only saves onto the default Girl form', () => {

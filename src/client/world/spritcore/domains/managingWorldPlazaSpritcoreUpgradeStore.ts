@@ -7,6 +7,7 @@
  * @module components/world/spritcore/domains/managingWorldPlazaSpritcoreUpgradeStore
  */
 
+import { computingWorldPlazaSpritcoreDeathCommittedPenalty } from '@/components/world/spritcore/domains/computingWorldPlazaSpritcoreDeathCommittedPenalty';
 import {
   DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_ATTACK_SPEED_UPGRADE_STEP,
   DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_DAMAGE_UPGRADE_STEP,
@@ -132,6 +133,26 @@ export function applyingWorldPlazaSpritcoreUpgradePurchase(
   notifyingWorldPlazaSpritcoreUpgradeSubscribers();
 
   return 'applied';
+}
+
+/**
+ * Applies the death committed-Spritcore spill: scales bonuses down and returns
+ * how much invested SC spilled to the ground.
+ */
+export function applyingWorldPlazaSpritcoreDeathCommittedPenalty(): number {
+  const penalty = computingWorldPlazaSpritcoreDeathCommittedPenalty(
+    managingWorldPlazaSpritcoreUpgradeSnapshot
+  );
+
+  if (penalty.droppedQuantity <= 0) {
+    return 0;
+  }
+
+  managingWorldPlazaSpritcoreUpgradeSnapshot = penalty.nextBonuses;
+  persistingWorldPlazaSpritcoreUpgrade();
+  notifyingWorldPlazaSpritcoreUpgradeSubscribers();
+
+  return penalty.droppedQuantity;
 }
 
 /** Test-only reset helper. */

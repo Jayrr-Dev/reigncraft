@@ -5,7 +5,10 @@
  */
 
 import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
-import type { DefiningWorldPlazaAvatarSkinId } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
+import {
+  DEFINING_WORLD_PLAZA_AVATAR_SKIN_DEFAULT,
+  type DefiningWorldPlazaAvatarSkinId,
+} from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { LABELING_WORLD_PLAZA_AVATAR_TRANSFORM_COOLDOWN_TOAST } from '@/components/world/domains/definingWorldPlazaAvatarTransformConstants';
 import {
   gettingWorldPlazaSelectedAvatarSkinId,
@@ -47,4 +50,19 @@ export function applyingWorldPlazaAvatarTransform(
   startingWorldPlazaAvatarTransformCooldown(nowMs);
 
   return 'applied';
+}
+
+/**
+ * Forces the default Girl form on death. Does not stamp transform cooldown.
+ */
+export function applyingWorldPlazaAvatarTransformDeathReset(): boolean {
+  if (
+    gettingWorldPlazaSelectedAvatarSkinId() ===
+    DEFINING_WORLD_PLAZA_AVATAR_SKIN_DEFAULT
+  ) {
+    return false;
+  }
+
+  settingWorldPlazaSelectedAvatarSkin(DEFINING_WORLD_PLAZA_AVATAR_SKIN_DEFAULT);
+  return true;
 }
