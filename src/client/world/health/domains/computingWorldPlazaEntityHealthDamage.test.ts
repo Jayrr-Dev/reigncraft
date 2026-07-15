@@ -39,6 +39,49 @@ describe('computingWorldPlazaEntityHealthDamage', () => {
     );
   });
 
+  it('keeps health at minimum 1 while death immunity is active', () => {
+    const nowMs = 1_000;
+    const state = {
+      ...creatingWorldPlazaEntityHealthInitialState(),
+      currentHealth: 5,
+      isDeathImmune: true,
+    };
+
+    const result = computingWorldPlazaEntityHealthDamage({
+      state,
+      rawAmount: 100,
+      kind: 'physical',
+      nowMs,
+      options: COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_TEST_OPTIONS,
+    });
+
+    expect(result.state.currentHealth).toBe(1);
+    expect(result.state.isDead).toBe(false);
+    expect(result.appliedDamage.wasBlocked).toBe(false);
+    expect(result.appliedDamage.healthDamage).toBeGreaterThan(0);
+  });
+
+  it('blocks poison damage kinds listed on damageKindImmunities', () => {
+    const nowMs = 1_000;
+    const state = {
+      ...creatingWorldPlazaEntityHealthInitialState(),
+      damageKindImmunities: ['toxic', 'venomous', 'lethal'] as const,
+    };
+
+    const result = computingWorldPlazaEntityHealthDamage({
+      state,
+      rawAmount: 40,
+      kind: 'toxic',
+      nowMs,
+      options: COMPUTING_WORLD_PLAZA_ENTITY_HEALTH_DAMAGE_TEST_OPTIONS,
+    });
+
+    expect(result.appliedDamage.wasBlocked).toBe(true);
+    expect(result.state.currentHealth).toBe(
+      DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE.currentHealth
+    );
+  });
+
   it('absorbs physical damage with shield before health', () => {
     const nowMs = 1_000;
     const state = addingWorldPlazaEntityHealthShield(

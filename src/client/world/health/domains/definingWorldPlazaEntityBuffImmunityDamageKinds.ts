@@ -29,6 +29,10 @@ export function checkingWorldPlazaEntityDamageKindImmunityGroupIsActive(
   damageKindImmunities: readonly DefiningWorldPlazaEntityDamageKind[],
   kinds: readonly DefiningWorldPlazaEntityDamageKind[]
 ): boolean {
+  if (damageKindImmunities.length === 0) {
+    return false;
+  }
+
   return kinds.every((kind) => damageKindImmunities.includes(kind));
 }
 

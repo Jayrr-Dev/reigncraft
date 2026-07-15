@@ -148,6 +148,14 @@ export function resolvingWorldPlazaEntityBuffHudBonusDetailLines(
       return ['Heat immunity'];
     case 'toggle_cold_immunity':
       return ['Cold immunity'];
+    case 'toggle_poison_immunity':
+      return ['Poison immunity'];
+    case 'toggle_bleed_immunity':
+      return ['Bleed immunity'];
+    case 'toggle_fated_immunity':
+      return ['Fated immunity'];
+    case 'toggle_death_immunity':
+      return ['Minimum 1 HP'];
     case 'invincibility_toggle':
       return ['Invincible'];
     case 'heal_block':
