@@ -33,7 +33,13 @@ import {
   LABELING_WORLD_PLAZA_CRAFT_MODE_BEAT_HAMMER,
   LABELING_WORLD_PLAZA_CRAFT_MODE_BEAT_HINT,
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeBeatLaneConstants';
-import { computingWorldPlazaCraftModeRemainingMs } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeTimedCraftConstants';
+import {
+  formattingWorldPlazaCraftModeConfirmPlaceLabel,
+  LABELING_WORLD_PLAZA_CRAFT_MODE_CONFIRM_CANCEL,
+  LABELING_WORLD_PLAZA_CRAFT_MODE_CONFIRM_OK,
+  LABELING_WORLD_PLAZA_CRAFT_MODE_READY_STATUS,
+  computingWorldPlazaCraftModeRemainingMs,
+} from '@/components/world/crafting/domains/definingWorldPlazaCraftModeTimedCraftConstants';
 import { formattingWorldPlazaCraftModeInGameRemainingLabel } from '@/components/world/crafting/domains/formattingWorldPlazaCraftModeInGameRemainingLabel';
 import {
   checkingWorldPlazaCraftModeHudIsPaused,
@@ -48,7 +54,18 @@ export type RenderingWorldPlazaCraftModeTimedCraftProgressHudProps = {
   readonly activeCraft: DefiningWorldPlazaCraftModeActiveCraftHud | null;
   readonly onHammerHit: (strikeCombo: number) => boolean;
   readonly onCrackedHit: () => boolean;
+  readonly onConfirmCraft: () => void;
+  readonly onCancelCraft: () => void;
 };
+
+const DEFINING_WORLD_PLAZA_CRAFT_MODE_CONFIRM_ACTIONS_CLASS_NAME =
+  'mt-2 flex w-full gap-2' as const;
+
+const DEFINING_WORLD_PLAZA_CRAFT_MODE_CONFIRM_CANCEL_BUTTON_CLASS_NAME =
+  'inline-flex flex-1 items-center justify-center rounded-md border border-rose-300/70 bg-[linear-gradient(180deg,#6b2a2a_0%,#3a1515_100%)] px-2 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-rose-50 shadow-[0_0_0_1px_rgba(251,113,133,0.28),0_2px_8px_rgba(0,0,0,0.45)] transition-[transform,filter] hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300/70' as const;
+
+const DEFINING_WORLD_PLAZA_CRAFT_MODE_CONFIRM_PRIMARY_BUTTON_CLASS_NAME =
+  'inline-flex flex-1 items-center justify-center rounded-md border border-amber-300/70 bg-[linear-gradient(180deg,#8a5a1a_0%,#4a2e0c_100%)] px-2 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-amber-50 shadow-[0_0_0_1px_rgba(252,211,77,0.28),0_2px_8px_rgba(0,0,0,0.45)] transition-[transform,filter] hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70' as const;
 
 type DefiningWorldPlazaCraftModeBeatFloatPopup = {
   readonly popupId: number;
@@ -195,6 +212,8 @@ export function RenderingWorldPlazaCraftModeTimedCraftProgressHud({
   activeCraft,
   onHammerHit,
   onCrackedHit,
+  onConfirmCraft,
+  onCancelCraft,
 }: RenderingWorldPlazaCraftModeTimedCraftProgressHudProps): React.JSX.Element | null {
   const [notes, setNotes] = useState<
     readonly DefiningWorldPlazaCraftModeBeatLaneNote[]
@@ -230,20 +249,29 @@ export function RenderingWorldPlazaCraftModeTimedCraftProgressHud({
   onHammerHitRef.current = onHammerHit;
   onCrackedHitRef.current = onCrackedHit;
 
+  const isAwaitingConfirm = activeCraft?.phase === 'awaitingConfirm';
+
   useEffect(() => {
-    if (!activeCraft) {
-      setNotes([]);
-      strikeComboRef.current = 0;
-      setFloatPopups([]);
-      setHitZoneCenterPercent(
-        DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_HIT_ZONE_CENTER_PERCENT
-      );
-      hitZoneCenterPercentRef.current =
-        DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_HIT_ZONE_CENTER_PERCENT;
-      nextPatternAtMsRef.current = 0;
-      lastPatternIndexRef.current = -1;
-      waveSerialRef.current = 0;
-      tempoRef.current = 1;
+    if (!activeCraft || activeCraft.phase !== 'crafting') {
+      if (!activeCraft) {
+        setNotes([]);
+        strikeComboRef.current = 0;
+        setFloatPopups([]);
+        setHitZoneCenterPercent(
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_HIT_ZONE_CENTER_PERCENT
+        );
+        hitZoneCenterPercentRef.current =
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_HIT_ZONE_CENTER_PERCENT;
+        nextPatternAtMsRef.current = 0;
+        lastPatternIndexRef.current = -1;
+        waveSerialRef.current = 0;
+        tempoRef.current = 1;
+      } else {
+        setNotes([]);
+        setFloatPopups([]);
+        notesRef.current = [];
+        floatPopupsRef.current = [];
+      }
       return;
     }
 
@@ -268,6 +296,11 @@ export function RenderingWorldPlazaCraftModeTimedCraftProgressHud({
 
     const tickingLane = (): void => {
       if (!isActive) {
+        return;
+      }
+
+      const craftHud = activeCraftRef.current;
+      if (!craftHud || craftHud.phase !== 'crafting') {
         return;
       }
 
@@ -390,32 +423,26 @@ export function RenderingWorldPlazaCraftModeTimedCraftProgressHud({
         floatPopupElementsById: floatPopupElementsByIdRef.current,
       });
 
-      const craftHud = activeCraftRef.current;
-      if (craftHud) {
-        const progressRatio = computingWorldPlazaCraftModeHudProgressRatio(
-          craftHud,
-          nowMs
-        );
-        const remainingMs = computingWorldPlazaCraftModeRemainingMs({
-          nowMs,
-          endsAtMs: craftHud.endsAtMs,
-          pausedUntilMs: craftHud.pausedUntilMs,
-        });
-        const isPaused = checkingWorldPlazaCraftModeHudIsPaused(
-          craftHud,
-          nowMs
-        );
-        const progressBarElement = progressBarElementRef.current;
-        if (progressBarElement) {
-          progressBarElement.style.width = `${Math.min(100, Math.max(0, progressRatio * 100))}%`;
-          progressBarElement.classList.toggle('opacity-60', isPaused);
-        }
-        const remainingLabelElement = remainingLabelElementRef.current;
-        if (remainingLabelElement) {
-          remainingLabelElement.textContent = `${
-            isPaused ? 'Halted · ' : ''
-          }${formattingWorldPlazaCraftModeInGameRemainingLabel(remainingMs)}`;
-        }
+      const progressRatio = computingWorldPlazaCraftModeHudProgressRatio(
+        craftHud,
+        nowMs
+      );
+      const remainingMs = computingWorldPlazaCraftModeRemainingMs({
+        nowMs,
+        endsAtMs: craftHud.endsAtMs,
+        pausedUntilMs: craftHud.pausedUntilMs,
+      });
+      const isPaused = checkingWorldPlazaCraftModeHudIsPaused(craftHud, nowMs);
+      const progressBarElement = progressBarElementRef.current;
+      if (progressBarElement) {
+        progressBarElement.style.width = `${Math.min(100, Math.max(0, progressRatio * 100))}%`;
+        progressBarElement.classList.toggle('opacity-60', isPaused);
+      }
+      const remainingLabelElement = remainingLabelElementRef.current;
+      if (remainingLabelElement) {
+        remainingLabelElement.textContent = `${
+          isPaused ? 'Halted · ' : ''
+        }${formattingWorldPlazaCraftModeInGameRemainingLabel(remainingMs)}`;
       }
 
       frameId = window.requestAnimationFrame(tickingLane);
@@ -427,7 +454,7 @@ export function RenderingWorldPlazaCraftModeTimedCraftProgressHud({
       isActive = false;
       window.cancelAnimationFrame(frameId);
     };
-  }, [activeCraft?.recipeId]);
+  }, [activeCraft?.recipeId, activeCraft?.phase]);
 
   if (!activeCraft) {
     return null;
@@ -446,17 +473,27 @@ export function RenderingWorldPlazaCraftModeTimedCraftProgressHud({
     activeCraft,
     initialNowMs
   );
-  const initialRemainingLabel = `${
-    initialIsPaused ? 'Halted · ' : ''
-  }${formattingWorldPlazaCraftModeInGameRemainingLabel(
-    computingWorldPlazaCraftModeRemainingMs({
-      nowMs: initialNowMs,
-      endsAtMs: activeCraft.endsAtMs,
-      pausedUntilMs: activeCraft.pausedUntilMs,
-    })
-  )}`;
+  const initialRemainingLabel = isAwaitingConfirm
+    ? LABELING_WORLD_PLAZA_CRAFT_MODE_READY_STATUS
+    : `${
+        initialIsPaused ? 'Halted · ' : ''
+      }${formattingWorldPlazaCraftModeInGameRemainingLabel(
+        computingWorldPlazaCraftModeRemainingMs({
+          nowMs: initialNowMs,
+          endsAtMs: activeCraft.endsAtMs,
+          pausedUntilMs: activeCraft.pausedUntilMs,
+        })
+      )}`;
+  const confirmPrimaryLabel =
+    activeCraft.outcomeKind === 'entity'
+      ? formattingWorldPlazaCraftModeConfirmPlaceLabel(activeCraft.displayName)
+      : LABELING_WORLD_PLAZA_CRAFT_MODE_CONFIRM_OK;
 
   const handlingLanePointer = (): void => {
+    if (activeCraftRef.current?.phase !== 'crafting') {
+      return;
+    }
+
     const nowMs = Date.now();
     const zoneCenter = hitZoneCenterPercentRef.current;
     const hitTarget = resolvingWorldPlazaCraftModeBeatLaneHitTarget(
@@ -589,83 +626,120 @@ export function RenderingWorldPlazaCraftModeTimedCraftProgressHud({
             style={{ width: `${initialProgressPercent}%` }}
           />
         </div>
-        <button
-          type="button"
-          className="relative mt-2 h-12 w-full overflow-visible rounded-md bg-stone-900/90"
-          aria-label="Craft beat lane"
-          onClick={(event) => {
-            event.stopPropagation();
-            handlingLanePointer();
-          }}
-        >
-          <div
-            className="pointer-events-none absolute inset-y-1 border-x border-dashed border-amber-200/90 bg-amber-400/15 transition-[left] duration-300 ease-out"
-            style={{
-              left: `${hitZoneLeftPercent}%`,
-              width: `${hitZoneWidthPercent}%`,
-            }}
-          />
-          {notes.map((note) => {
-            const isCracked = note.kind === 'cracked';
-            const initialLeftPercent =
-              computingWorldPlazaCraftModeBeatNoteLeftPercent(note, Date.now());
-
-            return (
-              <span
-                key={note.noteId}
-                ref={(element) => attachingNoteElement(note.noteId, element)}
-                className={`${DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_NOTE_BASE_CLASS_NAME} ${resolvingWorldPlazaCraftModeBeatNoteOutClassName(isCracked)}`}
-                style={{ left: `${initialLeftPercent}%` }}
-                aria-hidden
-              >
-                <span
-                  ref={(element) =>
-                    attachingNoteIconElement(note.noteId, element)
-                  }
-                  className="absolute inset-0 flex items-center justify-center"
-                  style={{ visibility: 'hidden' }}
-                >
-                  <Icon
-                    icon={
-                      isCracked
-                        ? DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_CRACKED_ICON
-                        : DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_HAMMER_ICON
-                    }
-                    width={18}
-                    height={18}
-                  />
-                  {isCracked ? (
-                    <span className="pointer-events-none absolute inset-x-1 top-1/2 h-0.5 -translate-y-1/2 rotate-[-28deg] bg-rose-100/95" />
-                  ) : null}
-                </span>
-                <span className="sr-only">
-                  {isCracked
-                    ? LABELING_WORLD_PLAZA_CRAFT_MODE_BEAT_CRACKED
-                    : LABELING_WORLD_PLAZA_CRAFT_MODE_BEAT_HAMMER}
-                </span>
-              </span>
-            );
-          })}
-          {floatPopups.map((popup) => (
-            <span
-              key={popup.popupId}
-              ref={(element) =>
-                attachingFloatPopupElement(popup.popupId, element)
+        {isAwaitingConfirm ? (
+          <div className={DEFINING_WORLD_PLAZA_CRAFT_MODE_CONFIRM_ACTIONS_CLASS_NAME}>
+            <button
+              type="button"
+              className={
+                DEFINING_WORLD_PLAZA_CRAFT_MODE_CONFIRM_CANCEL_BUTTON_CLASS_NAME
               }
-              className={`pointer-events-none absolute z-20 -translate-x-1/2 text-[11px] font-black uppercase tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] ${popup.className}`}
-              style={{
-                left: `${popup.leftPercent}%`,
-                top: 'calc(50% + -8px)',
-                opacity: 1,
+              onClick={(event) => {
+                event.stopPropagation();
+                onCancelCraft();
               }}
             >
-              {popup.label}
-            </span>
-          ))}
-        </button>
-        <p className="mt-1 text-center text-[9px] text-stone-400">
-          {LABELING_WORLD_PLAZA_CRAFT_MODE_BEAT_HINT}
-        </p>
+              {LABELING_WORLD_PLAZA_CRAFT_MODE_CONFIRM_CANCEL}
+            </button>
+            <button
+              type="button"
+              autoFocus
+              className={
+                DEFINING_WORLD_PLAZA_CRAFT_MODE_CONFIRM_PRIMARY_BUTTON_CLASS_NAME
+              }
+              onClick={(event) => {
+                event.stopPropagation();
+                onConfirmCraft();
+              }}
+            >
+              {confirmPrimaryLabel}
+            </button>
+          </div>
+        ) : (
+          <>
+            <button
+              type="button"
+              className="relative mt-2 h-12 w-full overflow-visible rounded-md bg-stone-900/90"
+              aria-label="Craft beat lane"
+              onClick={(event) => {
+                event.stopPropagation();
+                handlingLanePointer();
+              }}
+            >
+              <div
+                className="pointer-events-none absolute inset-y-1 border-x border-dashed border-amber-200/90 bg-amber-400/15 transition-[left] duration-300 ease-out"
+                style={{
+                  left: `${hitZoneLeftPercent}%`,
+                  width: `${hitZoneWidthPercent}%`,
+                }}
+              />
+              {notes.map((note) => {
+                const isCracked = note.kind === 'cracked';
+                const initialLeftPercent =
+                  computingWorldPlazaCraftModeBeatNoteLeftPercent(
+                    note,
+                    Date.now()
+                  );
+
+                return (
+                  <span
+                    key={note.noteId}
+                    ref={(element) =>
+                      attachingNoteElement(note.noteId, element)
+                    }
+                    className={`${DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_NOTE_BASE_CLASS_NAME} ${resolvingWorldPlazaCraftModeBeatNoteOutClassName(isCracked)}`}
+                    style={{ left: `${initialLeftPercent}%` }}
+                    aria-hidden
+                  >
+                    <span
+                      ref={(element) =>
+                        attachingNoteIconElement(note.noteId, element)
+                      }
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{ visibility: 'hidden' }}
+                    >
+                      <Icon
+                        icon={
+                          isCracked
+                            ? DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_CRACKED_ICON
+                            : DEFINING_WORLD_PLAZA_CRAFT_MODE_BEAT_HAMMER_ICON
+                        }
+                        width={18}
+                        height={18}
+                      />
+                      {isCracked ? (
+                        <span className="pointer-events-none absolute inset-x-1 top-1/2 h-0.5 -translate-y-1/2 rotate-[-28deg] bg-rose-100/95" />
+                      ) : null}
+                    </span>
+                    <span className="sr-only">
+                      {isCracked
+                        ? LABELING_WORLD_PLAZA_CRAFT_MODE_BEAT_CRACKED
+                        : LABELING_WORLD_PLAZA_CRAFT_MODE_BEAT_HAMMER}
+                    </span>
+                  </span>
+                );
+              })}
+              {floatPopups.map((popup) => (
+                <span
+                  key={popup.popupId}
+                  ref={(element) =>
+                    attachingFloatPopupElement(popup.popupId, element)
+                  }
+                  className={`pointer-events-none absolute z-20 -translate-x-1/2 text-[11px] font-black uppercase tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] ${popup.className}`}
+                  style={{
+                    left: `${popup.leftPercent}%`,
+                    top: 'calc(50% + -8px)',
+                    opacity: 1,
+                  }}
+                >
+                  {popup.label}
+                </span>
+              ))}
+            </button>
+            <p className="mt-1 text-center text-[9px] text-stone-400">
+              {LABELING_WORLD_PLAZA_CRAFT_MODE_BEAT_HINT}
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

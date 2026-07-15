@@ -30,6 +30,26 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_BOOST_MIN_REMAINING_MS = 250;
 export const LABELING_WORLD_PLAZA_CRAFT_MODE_ALREADY_CRAFTING_TOAST =
   'Already crafting something.' as const;
 
+/** Status line when the beat timer finishes and confirm actions show. */
+export const LABELING_WORLD_PLAZA_CRAFT_MODE_READY_STATUS = 'Ready' as const;
+
+/** Cancel label on the post-craft confirm row. */
+export const LABELING_WORLD_PLAZA_CRAFT_MODE_CONFIRM_CANCEL = 'Cancel' as const;
+
+/** Confirm label for inventory-output crafts. */
+export const LABELING_WORLD_PLAZA_CRAFT_MODE_CONFIRM_OK = 'Ok' as const;
+
+/** Prefix for placeable crafts: `Place Campfire`. */
+export const LABELING_WORLD_PLAZA_CRAFT_MODE_CONFIRM_PLACE_PREFIX =
+  'Place' as const;
+
+/** Builds the Place action label for a finished placeable craft. */
+export function formattingWorldPlazaCraftModeConfirmPlaceLabel(
+  displayName: string
+): string {
+  return `${LABELING_WORLD_PLAZA_CRAFT_MODE_CONFIRM_PLACE_PREFIX} ${displayName}`;
+}
+
 /**
  * Maps recipe complexity (1–10) to craft duration in ms (5s–3min).
  */

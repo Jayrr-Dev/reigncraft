@@ -5,6 +5,7 @@ import {
   computingWorldPlazaCraftModeRemainingMs,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_DURATION_MS_MAX,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_DURATION_MS_MIN,
+  formattingWorldPlazaCraftModeConfirmPlaceLabel,
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeTimedCraftConstants';
 import { describe, expect, it } from 'vitest';
 
@@ -68,5 +69,11 @@ describe('craft mode timed craft constants', () => {
         pausedUntilMs: schedule.pausedUntilMs,
       })
     ).toBe(40_000);
+  });
+
+  it('formats post-craft Place labels from the recipe display name', () => {
+    expect(formattingWorldPlazaCraftModeConfirmPlaceLabel('Campfire')).toBe(
+      'Place Campfire'
+    );
   });
 });

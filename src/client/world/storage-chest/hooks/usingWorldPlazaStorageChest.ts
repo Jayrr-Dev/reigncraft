@@ -9,6 +9,8 @@
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
+import { notifyingWorldPlazaInventoryItemMoved } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemMoved';
+import { playingWorldPlazaInventoryBagSfx } from '@/components/world/inventory/domains/playingWorldPlazaInventoryBagSfx';
 import {
   applyingWorldPlazaStorageChestTransfer,
   resolvingWorldPlazaStorageChestDragLocationForItemId,
@@ -18,7 +20,24 @@ import {
   readingWorldPlazaLocalStorageChestContents,
   writingWorldPlazaLocalStorageChestContents,
 } from '@/components/world/storage-chest/domains/managingWorldPlazaLocalStorageChestContents';
-import { useCallback, useMemo, useState } from 'react';
+import { playingWorldPlazaStorageChestSfx } from '@/components/world/storage-chest/domains/playingWorldPlazaStorageChestSfx';
+import { useCallback, useMemo, useRef, useState } from 'react';
+
+/**
+ * Plays move when rearranging chest slots; quieter drop when depositing from
+ * the hotbar into the chest.
+ */
+function notifyingWorldPlazaStorageChestTransferSfx(
+  from: DefiningWorldPlazaStorageChestDragLocation,
+  to: DefiningWorldPlazaStorageChestDragLocation
+): void {
+  if (from.kind === 'hotbar' && to.kind === 'storage-chest') {
+    playingWorldPlazaInventoryBagSfx({ actionId: 'drop' });
+    return;
+  }
+
+  notifyingWorldPlazaInventoryItemMoved();
+}
 
 export type UsingWorldPlazaStorageChestParams = {
   readonly persistenceOwnerId: string | null;
@@ -41,15 +60,23 @@ export function usingWorldPlazaStorageChest({
   const [selectedBlock, setSelectedBlock] =
     useState<DefiningWorldBuildingPlacedBlock | null>(null);
   const [contentsRevision, setContentsRevision] = useState(0);
+  const selectedBlockRef = useRef(selectedBlock);
+  selectedBlockRef.current = selectedBlock;
 
   const selectingChest = useCallback(
     (block: DefiningWorldBuildingPlacedBlock): void => {
+      if (selectedBlockRef.current?.blockId !== block.blockId) {
+        playingWorldPlazaStorageChestSfx({ actionId: 'open' });
+      }
       setSelectedBlock(block);
     },
     []
   );
 
   const closingChest = useCallback((): void => {
+    if (selectedBlockRef.current) {
+      playingWorldPlazaStorageChestSfx({ actionId: 'close' });
+    }
     setSelectedBlock(null);
   }, []);
 
@@ -115,6 +142,7 @@ export function usingWorldPlazaStorageChest({
         setContentsRevision((value) => value + 1);
       }
 
+      notifyingWorldPlazaStorageChestTransferSfx(from, to);
       return true;
     },
     [

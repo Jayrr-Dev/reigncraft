@@ -5,6 +5,7 @@
  */
 
 import { DEFINING_WORLD_PLAZA_CHEST_DISPLAY_SCALE } from '@/components/world/chest/domains/definingWorldPlazaChestConstants';
+import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME } from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
 import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 
@@ -25,6 +26,16 @@ export const DEFINING_WORLD_PLAZA_STORAGE_CHEST_LOCAL_STORAGE_KEY_PREFIX =
 
 /** Player-facing panel title. */
 export const LABELING_WORLD_PLAZA_STORAGE_CHEST_PANEL = 'Chest' as const;
+
+/**
+ * Dark wood panel chrome — same shell paint as storage-page hotbar rows.
+ */
+export const STYLING_WORLD_PLAZA_STORAGE_CHEST_POPOVER_PANEL_CLASS_NAME =
+  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventoryHotbarShell} ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventoryHotbarShellStorage} ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.scope.lightTheme} pointer-events-auto absolute bottom-full left-1/2 z-50 mb-2 w-max max-w-none -translate-x-1/2 rounded-md` as const;
+
+/** Close control on the dark wood chest header. */
+export const STYLING_WORLD_PLAZA_STORAGE_CHEST_POPOVER_CLOSE_BUTTON_CLASS_NAME =
+  'rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-parchment/90 hover:bg-black/25' as const;
 
 /** Player-facing Open action label. */
 export const LABELING_WORLD_PLAZA_STORAGE_CHEST_OPEN_ACTION = 'Open' as const;

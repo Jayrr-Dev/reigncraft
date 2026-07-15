@@ -716,6 +716,7 @@ import { WORLD_PLAZA_SPRITCORE_UPGRADE_EMPTY_BONUSES } from '@/components/world/
 import { initializingWorldPlazaSpritcoreUpgradeStore } from '@/components/world/spritcore/domains/managingWorldPlazaSpritcoreUpgradeStore';
 import { usingWorldPlazaSpritcoreUpgradeBonuses } from '@/components/world/spritcore/hooks/usingWorldPlazaSpritcoreUpgradeBonuses';
 import { RenderingWorldPlazaStorageChestLayer } from '@/components/world/storage-chest/components/renderingWorldPlazaStorageChestLayer';
+import { RenderingWorldPlazaStorageChestSfx } from '@/components/world/storage-chest/components/renderingWorldPlazaStorageChestSfx';
 import { DEFINING_WORLD_PLAZA_STORAGE_CHEST_PLACEMENT_PREVIEW_BLOCK_ID } from '@/components/world/storage-chest/domains/definingWorldPlazaStorageChestConstants';
 import { checkingWorldBuildingBlockDefinitionIdIsStorageChest } from '@/components/world/storage-chest/domains/syncingWorldPlazaVisibleStorageChestLayer';
 import { usingWorldPlazaStorageChest } from '@/components/world/storage-chest/hooks/usingWorldPlazaStorageChest';
@@ -2321,6 +2322,8 @@ function RenderingWorldPlazaPixiSceneConnected({
       activeCraft={craftModeTimedCraft.activeCraftHud}
       onHammerHit={craftModeTimedCraft.boostingActiveCraft}
       onCrackedHit={craftModeTimedCraft.haltingActiveCraft}
+      onConfirmCraft={craftModeTimedCraft.confirmingActiveCraft}
+      onCancelCraft={craftModeTimedCraft.cancellingActiveCraft}
     />
   );
 
@@ -9287,6 +9290,7 @@ function RenderingWorldPlazaPixiSceneConnected({
             <RenderingWorldPlazaAvatarMeleeSfx />
             <RenderingWorldPlazaEquipmentSfx />
             <RenderingWorldPlazaInventoryBagSfx />
+            <RenderingWorldPlazaStorageChestSfx />
             <RenderingWorldPlazaFishingSfx />
             <RenderingWorldPlazaDeathSfx />
             <RenderingWorldPlazaGirlSampleVoiceSfx />

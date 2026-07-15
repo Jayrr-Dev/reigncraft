@@ -12,9 +12,19 @@ import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/cra
 import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+export type DefiningWorldPlazaCraftModeTimedCraftPhase =
+  | 'crafting'
+  | 'awaitingConfirm';
+
+export type DefiningWorldPlazaCraftModeTimedCraftOutcomeKind =
+  | 'entity'
+  | 'item';
+
 export type DefiningWorldPlazaCraftModeTimedCraftState = {
   readonly recipeId: DefiningWorldPlazaCraftModeRecipeId;
   readonly displayName: string;
+  readonly outcomeKind: DefiningWorldPlazaCraftModeTimedCraftOutcomeKind;
+  readonly phase: DefiningWorldPlazaCraftModeTimedCraftPhase;
   readonly startedAtMs: number;
   readonly endsAtMs: number;
   readonly baseDurationMs: number;
@@ -28,6 +38,8 @@ export type DefiningWorldPlazaCraftModeTimedCraftState = {
 export type DefiningWorldPlazaCraftModeActiveCraftHud = {
   readonly recipeId: DefiningWorldPlazaCraftModeRecipeId;
   readonly displayName: string;
+  readonly outcomeKind: DefiningWorldPlazaCraftModeTimedCraftOutcomeKind;
+  readonly phase: DefiningWorldPlazaCraftModeTimedCraftPhase;
   readonly startedAtMs: number;
   readonly endsAtMs: number;
   readonly baseDurationMs: number;
@@ -53,7 +65,7 @@ function schedulingWorldPlazaCraftModeCompletionCheck(params: {
     }
 
     const craftState = params.getCraftState();
-    if (!craftState) {
+    if (!craftState || craftState.phase !== 'crafting') {
       return;
     }
 
@@ -92,8 +104,8 @@ function schedulingWorldPlazaCraftModeCompletionCheck(params: {
 /**
  * Runs one cookbook craft on a complexity-scaled timer with beat-lane boost/halt.
  *
- * Completion uses scheduled timeouts (not a 100ms React clock). Live progress
- * belongs to the craft HUD leaf.
+ * When the timer finishes the HUD stays up in `awaitingConfirm` until the
+ * player picks Place / Ok or Cancel. Live progress belongs to the craft HUD leaf.
  */
 export function usingWorldPlazaCraftModeTimedCraft({
   onCraftComplete,
@@ -104,7 +116,7 @@ export function usingWorldPlazaCraftModeTimedCraft({
   activeCraftRef.current = activeCraft;
   const onCraftCompleteRef = useRef(onCraftComplete);
   onCraftCompleteRef.current = onCraftComplete;
-  const isCompletingRef = useRef(false);
+  const isConfirmingRef = useRef(false);
 
   const startingCraft = useCallback(
     (recipeId: DefiningWorldPlazaCraftModeRecipeId): boolean => {
@@ -127,12 +139,14 @@ export function usingWorldPlazaCraftModeTimedCraft({
       setActiveCraft({
         recipeId,
         displayName: recipeDefinition.title,
+        outcomeKind: recipeDefinition.outcome.kind,
+        phase: 'crafting',
         startedAtMs: nowMs,
         endsAtMs: nowMs + baseDurationMs,
         baseDurationMs,
         pausedUntilMs: null,
       });
-      isCompletingRef.current = false;
+      isConfirmingRef.current = false;
       return true;
     },
     []
@@ -142,7 +156,7 @@ export function usingWorldPlazaCraftModeTimedCraft({
     (strikeCombo: number = 1): boolean => {
       const craftState = activeCraftRef.current;
 
-      if (!craftState) {
+      if (!craftState || craftState.phase !== 'crafting') {
         return false;
       }
 
@@ -172,7 +186,7 @@ export function usingWorldPlazaCraftModeTimedCraft({
   const haltingActiveCraft = useCallback((): boolean => {
     const craftState = activeCraftRef.current;
 
-    if (!craftState) {
+    if (!craftState || craftState.phase !== 'crafting') {
       return false;
     }
 
@@ -194,11 +208,29 @@ export function usingWorldPlazaCraftModeTimedCraft({
 
   const cancellingActiveCraft = useCallback((): void => {
     setActiveCraft(null);
-    isCompletingRef.current = false;
+    isConfirmingRef.current = false;
+  }, []);
+
+  const confirmingActiveCraft = useCallback((): void => {
+    const craftState = activeCraftRef.current;
+
+    if (!craftState || craftState.phase !== 'awaitingConfirm') {
+      return;
+    }
+
+    if (isConfirmingRef.current) {
+      return;
+    }
+
+    isConfirmingRef.current = true;
+    const completedRecipeId = craftState.recipeId;
+    setActiveCraft(null);
+    onCraftCompleteRef.current(completedRecipeId);
+    isConfirmingRef.current = false;
   }, []);
 
   useEffect(() => {
-    if (!activeCraft) {
+    if (!activeCraft || activeCraft.phase !== 'crafting') {
       return;
     }
 
@@ -206,7 +238,7 @@ export function usingWorldPlazaCraftModeTimedCraft({
       getCraftState: () => activeCraftRef.current,
       onDue: () => {
         const craftState = activeCraftRef.current;
-        if (!craftState || isCompletingRef.current) {
+        if (!craftState || craftState.phase !== 'crafting') {
           return;
         }
 
@@ -219,11 +251,12 @@ export function usingWorldPlazaCraftModeTimedCraft({
           return;
         }
 
-        isCompletingRef.current = true;
-        const completedRecipeId = craftState.recipeId;
-        setActiveCraft(null);
-        onCraftCompleteRef.current(completedRecipeId);
-        isCompletingRef.current = false;
+        setActiveCraft({
+          ...craftState,
+          phase: 'awaitingConfirm',
+          pausedUntilMs: null,
+          endsAtMs: Math.min(craftState.endsAtMs, nowMs),
+        });
       },
     });
   }, [activeCraft]);
@@ -236,6 +269,8 @@ export function usingWorldPlazaCraftModeTimedCraft({
     return {
       recipeId: activeCraft.recipeId,
       displayName: activeCraft.displayName,
+      outcomeKind: activeCraft.outcomeKind,
+      phase: activeCraft.phase,
       startedAtMs: activeCraft.startedAtMs,
       endsAtMs: activeCraft.endsAtMs,
       baseDurationMs: activeCraft.baseDurationMs,
@@ -251,6 +286,7 @@ export function usingWorldPlazaCraftModeTimedCraft({
     boostingActiveCraft,
     haltingActiveCraft,
     cancellingActiveCraft,
+    confirmingActiveCraft,
   };
 }
 
@@ -258,6 +294,10 @@ export function computingWorldPlazaCraftModeHudProgressRatio(
   craftHud: DefiningWorldPlazaCraftModeActiveCraftHud,
   nowMs: number
 ): number {
+  if (craftHud.phase === 'awaitingConfirm') {
+    return 1;
+  }
+
   const remainingMs = computingWorldPlazaCraftModeRemainingMs({
     nowMs,
     endsAtMs: craftHud.endsAtMs,
@@ -271,6 +311,10 @@ export function checkingWorldPlazaCraftModeHudIsPaused(
   craftHud: DefiningWorldPlazaCraftModeActiveCraftHud,
   nowMs: number
 ): boolean {
+  if (craftHud.phase === 'awaitingConfirm') {
+    return false;
+  }
+
   return (
     craftHud.pausedUntilMs !== null && nowMs < craftHud.pausedUntilMs
   );
