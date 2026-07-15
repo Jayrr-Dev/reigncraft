@@ -245,4 +245,24 @@ describe('resolvingPlazaCodexMenuRewardReadySections', () => {
 
     expect([...ready].sort()).toEqual(['recipes']);
   });
+
+  it('marks biomes ready only for the Discovered max packing-ledger chest', () => {
+    expect(
+      resolvingPlazaCodexMenuRewardReadySections(
+        {},
+        {
+          biomes: { value: 10, max: 14 },
+        }
+      ).has('biomes')
+    ).toBe(false);
+
+    expect(
+      resolvingPlazaCodexMenuRewardReadySections(
+        {},
+        {
+          biomes: { value: 14, max: 14 },
+        }
+      ).has('biomes')
+    ).toBe(true);
+  });
 });

@@ -45,7 +45,7 @@ describe('definingPlazaCodexMilestoneRewardRegistry', () => {
     }
   });
 
-  it('staggers packing ledgers: herb Studied mid, lapidary Sighted max, bestiary Sighted max', () => {
+  it('staggers packing ledgers: herb Studied mid, biomes Discovered max, bestiary Sighted max', () => {
     expect(
       resolvingPlazaCodexMilestoneRewardDefinition({
         sectionId: 'herbarium',
@@ -58,7 +58,7 @@ describe('definingPlazaCodexMilestoneRewardRegistry', () => {
     });
     expect(
       resolvingPlazaCodexMilestoneRewardDefinition({
-        sectionId: 'lapidary',
+        sectionId: 'biomes',
         meterKind: 'discovered',
         percent: 100,
       })?.reward

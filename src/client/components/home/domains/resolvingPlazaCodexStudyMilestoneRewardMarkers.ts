@@ -157,26 +157,31 @@ export function resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
  */
 export function resolvingPlazaCodexDiscoveryMilestoneRewardMarkers(
   value: number,
-  max: number
+  max: number,
+  options?: ResolvingPlazaCodexOverallProgressMilestoneRewardMarkersOptions
 ): readonly PlazaCodexOverallMilestoneRewardMarker[] {
   return resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
     value,
     max,
-    DEFINING_PLAZA_CODEX_DISCOVERY_MILESTONE_REWARD_PERCENTS
+    DEFINING_PLAZA_CODEX_DISCOVERY_MILESTONE_REWARD_PERCENTS,
+    options
   );
 }
 
 /**
  * True when a discovery-only meter (Biomes / Recipes) has a reached chest.
+ * With section context, only defined unclaimed rewards count.
  */
 export function checkingPlazaCodexDiscoveryProgressHasRewardReady(
   value: number,
-  max: number
+  max: number,
+  options?: ResolvingPlazaCodexOverallProgressMilestoneRewardMarkersOptions
 ): boolean {
   return checkingPlazaCodexOverallProgressHasRewardReady(
     value,
     max,
-    DEFINING_PLAZA_CODEX_DISCOVERY_MILESTONE_REWARD_PERCENTS
+    DEFINING_PLAZA_CODEX_DISCOVERY_MILESTONE_REWARD_PERCENTS,
+    options
   );
 }
 

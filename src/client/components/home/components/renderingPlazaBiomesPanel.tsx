@@ -299,6 +299,7 @@ export function RenderingPlazaBiomesPanel({
         value={exploredCount}
         max={totalCount}
         ariaLabel="Biomes discovered"
+        sectionId="biomes"
       />
 
       <div

@@ -278,6 +278,7 @@ export function RenderingPlazaRecipesPanel({
         value={attachedCount}
         max={totalCount}
         ariaLabel="Recipes attached"
+        sectionId="recipes"
       />
 
       <div className={PLAZA_RECIPES_COOKBOOK_TAB_BAR_CLASS_NAME} role="tablist">

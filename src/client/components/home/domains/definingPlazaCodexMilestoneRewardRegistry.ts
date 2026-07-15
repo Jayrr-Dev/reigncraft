@@ -85,8 +85,7 @@ export const DEFINING_PLAZA_CODEX_MILESTONE_REWARD_REGISTRY = [
         'Pinned in your cookbook. Rebuild a wood rod when the tip snaps.',
     },
   },
-  // Packing ledgers stagger by pace: herb Studied mid (Sighted too easy) →
-  // lapidary Sighted max → bestiary Sighted max.
+  // Packing ledgers: herb Studied mid → biomes Discovered max → bestiary Sighted max.
   {
     sectionId: 'herbarium',
     meterKind: 'studied',
@@ -100,7 +99,7 @@ export const DEFINING_PLAZA_CODEX_MILESTONE_REWARD_REGISTRY = [
     },
   },
   {
-    sectionId: 'lapidary',
+    sectionId: 'biomes',
     meterKind: 'discovered',
     percent: 100,
     reward: {

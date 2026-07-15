@@ -205,7 +205,10 @@ import { checkingWorldPlazaCraftRecipeAffordable } from '@/components/world/craf
 import { checkingWorldPlazaCraftRecipeNearbyStationSatisfied } from '@/components/world/crafting/domains/checkingWorldPlazaCraftRecipeNearbyStationSatisfied';
 import { committingWorldPlazaCraftRecipePlaceablePlacement } from '@/components/world/crafting/domains/committingWorldPlazaCraftRecipePlaceablePlacement';
 import { resolvingWorldPlazaCraftModeRecipeDefinition } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry';
-import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
+import type {
+  DefiningWorldPlazaCraftModeRecipeDefinition,
+  DefiningWorldPlazaCraftModeRecipeId,
+} from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import {
   LABELING_WORLD_PLAZA_CRAFT_MODE_ALREADY_CRAFTING_TOAST,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_INVENTORY_FULL_TOAST,
@@ -1565,11 +1568,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     new Map<string, DefiningWorldPlazaCraftModeRecipeId>()
   );
   const showingCraftRefundFloatsRef = useRef<
-    (
-      recipeDefinition: NonNullable<
-        ReturnType<typeof resolvingWorldPlazaCraftModeRecipeDefinition>
-      >
-    ) => void
+    (recipeDefinition: DefiningWorldPlazaCraftModeRecipeDefinition) => void
   >(() => undefined);
   /** After exiting build with armed craft, skip refund UI once this session. */
   const craftPlacementCancelRefundWaivedForSessionRef = useRef(false);

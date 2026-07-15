@@ -135,10 +135,29 @@ export function resolvingPlazaCodexMenuRewardReadySections(
     WorldPlazaCodexSectionId,
     PlazaCodexMenuRewardReadyDiscoveryMeter | undefined,
   ][]) {
-    if (
-      meter &&
-      checkingPlazaCodexDiscoveryProgressHasRewardReady(meter.value, meter.max)
-    ) {
+    if (!meter) {
+      continue;
+    }
+
+    const definedRewards =
+      resolvingPlazaCodexMilestoneRewardsForSection(sectionId);
+    const discoveryReady =
+      definedRewards.length > 0
+        ? checkingPlazaCodexDiscoveryProgressHasRewardReady(
+            meter.value,
+            meter.max,
+            {
+              sectionId,
+              meterKind: 'discovered',
+              attachedRecipeIds,
+            }
+          )
+        : checkingPlazaCodexDiscoveryProgressHasRewardReady(
+            meter.value,
+            meter.max
+          );
+
+    if (discoveryReady) {
       ready.add(sectionId);
     }
   }
