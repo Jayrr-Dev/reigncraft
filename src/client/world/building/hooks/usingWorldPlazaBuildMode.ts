@@ -1,5 +1,6 @@
 'use client';
 
+import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import { applyingWorldBuildingBuildDraftBlockPlacement } from '@/components/world/building/domains/applyingWorldBuildingBuildDraftBlockPlacement';
 import { applyingWorldBuildingBuildDraftBlockRemoval } from '@/components/world/building/domains/applyingWorldBuildingBuildDraftBlockRemoval';
 import { applyingWorldBuildingBuildDraftPlotUnclaim } from '@/components/world/building/domains/applyingWorldBuildingBuildDraftPlotUnclaim';
@@ -24,6 +25,11 @@ import {
   DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT,
   resolvingWorldBuildingEffectiveBlockHeight,
 } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
+import {
+  checkingWorldBuildingBlockMaterialAffordable,
+  consumingWorldBuildingBlockMaterialCost,
+  formattingWorldBuildingBlockMaterialShortfallMessage,
+} from '@/components/world/building/domains/definingWorldBuildingBlockMaterialCostRegistry';
 import {
   checkingWorldBuildingBlockDefinitionAllowsSessionPlacementOutsideClaim,
   DEFINING_WORLD_BUILDING_DEFAULT_BLOCK_DEFINITION_ID,
@@ -61,6 +67,7 @@ import {
   resolvingWorldBuildingPlacedBlockWorldLayer,
   type DefiningWorldBuildingPlacedBlock,
 } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { LABELING_WORLD_BUILDING_PLACEMENT_BLOCKED_TILE_GENERIC } from '@/components/world/building/domains/definingWorldBuildingPlacementBlockedMessageConstants';
 import {
   findingWorldBuildingPlotBlockAtTilePosition,
   findingWorldBuildingPlotContainingTilePosition,
@@ -88,15 +95,14 @@ import {
   incrementingWorldBuildingWorldLayer,
 } from '@/components/world/building/domains/formattingWorldBuildingWorldLayerSummary';
 import { listingWorldBuildingPlacedBlocksFromPlots } from '@/components/world/building/domains/listingWorldBuildingPlacedBlocksFromPlots';
+import { resolvingWorldBuildingBlockPlacementBlockedMessage } from '@/components/world/building/domains/resolvingWorldBuildingBlockPlacementBlockedMessage';
 import type { DefiningWorldBuildingBuildModeTilePopoverMode } from '@/components/world/building/domains/resolvingWorldBuildingBuildModeTilePopoverMode';
 import { resolvingWorldBuildingBuildModeTilePopoverMode } from '@/components/world/building/domains/resolvingWorldBuildingBuildModeTilePopoverMode';
 import { resolvingWorldBuildingEditPaintActionAtTile } from '@/components/world/building/domains/resolvingWorldBuildingEditPaintActionAtTile';
 import { resolvingWorldBuildingHoverPlacementWorldLayer } from '@/components/world/building/domains/resolvingWorldBuildingHoverPlacementWorldLayer';
 import { resolvingWorldBuildingMinimumWorldLayerForBlockHeight } from '@/components/world/building/domains/resolvingWorldBuildingMinimumWorldLayerForBlockHeight';
-import { resolvingWorldBuildingBlockPlacementBlockedMessage } from '@/components/world/building/domains/resolvingWorldBuildingBlockPlacementBlockedMessage';
 import { resolvingWorldBuildingPlotOwnerLimits } from '@/components/world/building/domains/resolvingWorldBuildingPlotOwnerLimits';
 import type { RefetchingWorldBuildingPlotsResult } from '@/components/world/building/hooks/usingWorldPlazaPlacedBlocksQuery';
-import { LABELING_WORLD_BUILDING_PLACEMENT_BLOCKED_TILE_GENERIC } from '@/components/world/building/domains/definingWorldBuildingPlacementBlockedMessageConstants';
 import { clearingWorldBuildingDevPlacedObjects } from '@/components/world/building/repositories/clearingWorldBuildingDevPlacedObjects';
 import { persistingWorldBuildingBuildDraft } from '@/components/world/building/repositories/persistingWorldBuildingBuildDraft';
 import { removingWorldBuildingPlotPersistence } from '@/components/world/building/repositories/persistingWorldBuildingPlacedBlock';
@@ -235,6 +241,12 @@ export interface UsingWorldPlazaBuildModeParams {
   >;
   /** Optional toast / HUD feedback when a placement attempt is blocked. */
   onBuildFeedbackMessage?: (message: string) => void;
+  /** Live inventory snapshot for material affordability checks. */
+  inventoryStateRef?: MutableRefObject<DefiningInventoryState | null>;
+  /** Applies inventory mutations after a material block is placed. */
+  onInventoryStateCommittedRef?: MutableRefObject<
+    ((nextState: DefiningInventoryState) => void) | null
+  >;
 }
 
 /**
@@ -252,6 +264,8 @@ export function usingWorldPlazaBuildMode({
   onSuccessfulBlockPlacementRef,
   onBlockRemovedRef,
   onBuildFeedbackMessage,
+  inventoryStateRef,
+  onInventoryStateCommittedRef,
 }: UsingWorldPlazaBuildModeParams): UsingWorldPlazaBuildModeResult {
   const resolvedPlotOwnerLimits = useMemo(
     () => resolvingWorldBuildingPlotOwnerLimits(plotOwnerLimits),
@@ -669,9 +683,8 @@ export function usingWorldPlazaBuildMode({
         return false;
       }
 
-      const definition = resolvingWorldBuildingBlockDefinition(
-        selectedDefinitionId
-      );
+      const definition =
+        resolvingWorldBuildingBlockDefinition(selectedDefinitionId);
 
       if (!definition) {
         return false;
@@ -741,9 +754,8 @@ export function usingWorldPlazaBuildMode({
         return LABELING_WORLD_BUILDING_PLACEMENT_BLOCKED_TILE_GENERIC;
       }
 
-      const definition = resolvingWorldBuildingBlockDefinition(
-        selectedDefinitionId
-      );
+      const definition =
+        resolvingWorldBuildingBlockDefinition(selectedDefinitionId);
 
       if (!definition) {
         return LABELING_WORLD_BUILDING_PLACEMENT_BLOCKED_TILE_GENERIC;
@@ -951,6 +963,23 @@ export function usingWorldPlazaBuildMode({
         return;
       }
 
+      const inventoryState = inventoryStateRef?.current ?? null;
+
+      if (
+        inventoryState !== null &&
+        !checkingWorldBuildingBlockMaterialAffordable(
+          inventoryState,
+          selectedDefinitionId
+        )
+      ) {
+        const shortfallMessage =
+          formattingWorldBuildingBlockMaterialShortfallMessage(
+            selectedDefinitionId
+          );
+        reportingBuildErrorMessage(shortfallMessage);
+        return;
+      }
+
       setHoverTilePosition(tilePosition);
 
       const placementWorldLayer =
@@ -984,6 +1013,29 @@ export function usingWorldPlazaBuildMode({
 
       assigningBuildDraft(placementResult.draft);
       setBuildErrorMessage(null);
+
+      if (inventoryState !== null && onInventoryStateCommittedRef?.current) {
+        const consumeResult = consumingWorldBuildingBlockMaterialCost(
+          inventoryState,
+          selectedDefinitionId
+        );
+
+        if (consumeResult.outcome === 'missing-materials') {
+          assigningBuildDraft(buildDraft);
+          reportingBuildErrorMessage(
+            formattingWorldBuildingBlockMaterialShortfallMessage(
+              selectedDefinitionId
+            )
+          );
+          return;
+        }
+
+        if (inventoryStateRef) {
+          inventoryStateRef.current = consumeResult.nextState;
+        }
+
+        onInventoryStateCommittedRef.current(consumeResult.nextState);
+      }
 
       // Craft success exits edit in the same turn and clears the draft. Persist
       // + refetch must finish first or claimed kiln/bloomery (and session
@@ -1052,7 +1104,9 @@ export function usingWorldPlazaBuildMode({
       buildDraft,
       effectiveSelectedCutFootprintMask,
       effectiveSelectedCutGridAxisCellCount,
+      inventoryStateRef,
       isBuildPlacementSelectionActive,
+      onInventoryStateCommittedRef,
       onSuccessfulBlockPlacementRef,
       onlineUserId,
       plots,
@@ -1529,9 +1583,7 @@ export function usingWorldPlazaBuildMode({
             return;
           }
 
-          reportingBuildErrorMessage(
-            'Pick a material and block size first.'
-          );
+          reportingBuildErrorMessage('Pick a material and block size first.');
           return;
         }
 

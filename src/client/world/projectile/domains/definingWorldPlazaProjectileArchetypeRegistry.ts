@@ -1,3 +1,9 @@
+import {
+  DEFINING_WORLD_PLAZA_CYROBORN_ICE_BOLT_TRAIL,
+  DEFINING_WORLD_PLAZA_CYROBORN_ICE_SHARD_TRAIL,
+  DEFINING_WORLD_PLAZA_CYROBORN_ICE_SPHERE_TRAIL,
+  DEFINING_WORLD_PLAZA_CYROBORN_SHATTER_ORB_TRAIL,
+} from '@/components/world/projectile/domains/definingWorldPlazaCyrobornProjectileTrailConstants';
 import type { DefiningWorldPlazaProjectileArchetype } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 
 /**
@@ -278,11 +284,13 @@ const CYROBORN_ICE_BOLT: DefiningWorldPlazaProjectileArchetype = {
     renderPlane: 'effects',
     spriteRadiusPx: 14,
     alignRotationToVelocity: true,
+    trail: DEFINING_WORLD_PLAZA_CYROBORN_ICE_BOLT_TRAIL,
   },
 };
 
 /**
  * Cyroborn type 2: sharp straight ice spheres (physical).
+ * Bursts ice shards on hit or terrain impact.
  */
 const CYROBORN_ICE_SPHERE: DefiningWorldPlazaProjectileArchetype = {
   archetypeId: 'cyroborn-ice-sphere',
@@ -298,6 +306,13 @@ const CYROBORN_ICE_SPHERE: DefiningWorldPlazaProjectileArchetype = {
     damageKind: 'physical',
   },
   impact: { behaviorId: 'singleTarget' },
+  split: {
+    splitOnImpact: true,
+    count: 4,
+    childArchetypeId: 'cyroborn-ice-shard-burst',
+    spreadPattern: 'radial',
+    spreadRadians: Math.PI * 2,
+  },
   lifetimeMs: 4_000,
   visual: {
     clipId: 'cyroborn-ice-sphere',
@@ -305,11 +320,12 @@ const CYROBORN_ICE_SPHERE: DefiningWorldPlazaProjectileArchetype = {
     tint: 0xffffff,
     renderPlane: 'effects',
     spriteRadiusPx: 16,
+    trail: DEFINING_WORLD_PLAZA_CYROBORN_ICE_SPHERE_TRAIL,
   },
   blocksOnTerrain: true,
 };
 
-/** Tiny shards spawned when a shatter orb expires. */
+/** Tiny shards spawned when a shatter orb / ice sphere bursts. */
 const CYROBORN_ICE_SHARD_BURST: DefiningWorldPlazaProjectileArchetype = {
   archetypeId: 'cyroborn-ice-shard-burst',
   movement: {
@@ -332,12 +348,13 @@ const CYROBORN_ICE_SHARD_BURST: DefiningWorldPlazaProjectileArchetype = {
     renderPlane: 'effects',
     spriteRadiusPx: 10,
     alignRotationToVelocity: true,
+    trail: DEFINING_WORLD_PLAZA_CYROBORN_ICE_SHARD_TRAIL,
   },
 };
 
 /**
- * Cyroborn type 3: slow homing orb that shatters after 5s.
- * On hit: −200°C ice temp impulse + fated (potential) damage.
+ * Cyroborn type 3: slow homing orb that shatters after 5s or on hit.
+ * On hit: −200°C ice temp impulse + fated (potential) damage + shard burst.
  */
 const CYROBORN_SHATTER_ORB: DefiningWorldPlazaProjectileArchetype = {
   archetypeId: 'cyroborn-shatter-orb',
@@ -366,6 +383,7 @@ const CYROBORN_SHATTER_ORB: DefiningWorldPlazaProjectileArchetype = {
   impact: { behaviorId: 'singleTarget' },
   split: {
     afterMs: 5_000,
+    splitOnImpact: true,
     count: 5,
     childArchetypeId: 'cyroborn-ice-shard-burst',
     spreadPattern: 'radial',
@@ -378,6 +396,7 @@ const CYROBORN_SHATTER_ORB: DefiningWorldPlazaProjectileArchetype = {
     tint: 0xffffff,
     renderPlane: 'effects',
     spriteRadiusPx: 20,
+    trail: DEFINING_WORLD_PLAZA_CYROBORN_SHATTER_ORB_TRAIL,
   },
 };
 

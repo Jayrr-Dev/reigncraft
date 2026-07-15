@@ -7,6 +7,7 @@ import {
   type DefiningWorldBuildingBlockDefinition,
   type DefiningWorldBuildingBlockDefinitionId,
 } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
+import { creatingWorldBuildingBlockCssPaletteSurface } from '@/components/world/building/domains/definingWorldBuildingBlockPaletteSurface';
 import {
   creatingWorldBuildingCircleCollisionShape,
   DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
@@ -14,6 +15,10 @@ import {
   DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_JUMP_OVER,
 } from '@/components/world/building/domains/definingWorldBuildingCollisionShape';
 import { registeringWorldPlazaOreWallBlockDefinitions } from '@/components/world/building/domains/definingWorldPlazaOreWallBlockRegistry';
+import {
+  DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_TREE_PINE,
+  registeringWorldPlazaTreeFloorBlockDefinitions,
+} from '@/components/world/building/domains/definingWorldPlazaTreeFloorBlockRegistry';
 import {
   DEFINING_WORLD_PLAZA_TERRAIN_LARGE_ROCK_COLLISION_RADIUS_GRID,
   DEFINING_WORLD_PLAZA_TERRAIN_MEDIUM_ROCK_COLLISION_RADIUS_GRID,
@@ -154,6 +159,7 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
       strokeColor: 0x1864ab,
     },
   },
+  ...registeringWorldPlazaTreeFloorBlockDefinitions(),
   [DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE]: {
     id: DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE,
     name: 'Stone',
@@ -164,12 +170,16 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
       label: 'Wall',
       fillColor: 0x868e96,
       strokeColor: 0x343a40,
+      paletteSurface: creatingWorldBuildingBlockCssPaletteSurface(
+        'radial-gradient(circle at 28% 32%, #adb5bd 0 11%, transparent 12%), radial-gradient(circle at 68% 58%, #ced4da 0 10%, transparent 11%), radial-gradient(circle at 42% 78%, #6c757d 0 9%, transparent 10%), #868e96'
+      ),
     },
   },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_WOOD]: {
     id: DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_WOOD,
     name: 'Pine',
     category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC,
+    isPaletteVisible: false,
     collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
     isInteractive: false,
     visualConfig: {
@@ -338,7 +348,7 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
 
 /** Default block selected when entering build mode. */
 export const DEFINING_WORLD_BUILDING_DEFAULT_BLOCK_DEFINITION_ID =
-  DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_WOOD;
+  DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_TREE_PINE;
 
 /** Medium rock radius reused by natural rock variants in future expansions. */
 export const DEFINING_WORLD_BUILDING_MEDIUM_ROCK_COLLISION_RADIUS_GRID =

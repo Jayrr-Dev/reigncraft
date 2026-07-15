@@ -118,11 +118,27 @@ export type DefiningWorldPlazaProjectileSplitSpreadPattern =
   | 'forwardFan';
 
 export type DefiningWorldPlazaProjectileSplitConfig = {
-  readonly afterMs: number;
+  /** When set, spawn children once age reaches this (timer shatter). */
+  readonly afterMs?: number;
+  /** When true, also spawn children on first impact / despawn-on-hit. */
+  readonly splitOnImpact?: boolean;
   readonly count: number;
   readonly childArchetypeId: string;
   readonly spreadPattern: DefiningWorldPlazaProjectileSplitSpreadPattern;
   readonly spreadRadians?: number;
+};
+
+export type DefiningWorldPlazaProjectileTrailConfig = {
+  readonly tint: number;
+  readonly spawnIntervalMs: number;
+  readonly lifetimeMs: number;
+  readonly startRadiusPx: number;
+  readonly endRadiusPx: number;
+  readonly startAlpha: number;
+  readonly endAlpha: number;
+  readonly maxParticles: number;
+  /** Soft lateral jitter so the trail reads whispy, not a hard line. */
+  readonly swayPx: number;
 };
 
 export type DefiningWorldPlazaProjectileVisualConfig = {
@@ -136,6 +152,8 @@ export type DefiningWorldPlazaProjectileVisualConfig = {
    * (isometric screen space). Used for elongated bolts / shards.
    */
   readonly alignRotationToVelocity?: boolean;
+  /** Optional fading particle trail behind the projectile. */
+  readonly trail?: DefiningWorldPlazaProjectileTrailConfig;
 };
 
 export type DefiningWorldPlazaProjectileArchetype = {

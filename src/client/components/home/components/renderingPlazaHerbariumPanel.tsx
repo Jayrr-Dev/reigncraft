@@ -8,6 +8,11 @@ import { RenderingPlazaHerbariumGuideDetailView } from '@/components/home/compon
 import { RenderingPlazaHerbariumMushroomPortrait } from '@/components/home/components/renderingPlazaHerbariumMushroomPortrait';
 import { RenderingPlazaHerbariumTreePortrait } from '@/components/home/components/renderingPlazaHerbariumTreePortrait';
 import { computingPlazaCodexAggregateStudyProgress } from '@/components/home/domains/computingPlazaCodexAggregateStudyProgress';
+import {
+  checkingPlazaHerbariumEntryMatchesCategoryFilter,
+  DEFINING_PLAZA_HERBARIUM_CATEGORY_FILTERS,
+  type PlazaHerbariumCategoryFilterId,
+} from '@/components/home/domains/definingPlazaHerbariumCategoryFilter';
 import { DEFINING_PLAZA_HERBARIUM_PANEL_SUBTITLE } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
 import { resolvingPlazaHerbariumCodexStudyTrackId } from '@/components/home/domains/resolvingPlazaHerbariumCodexStudyTrackId';
 import {
@@ -61,25 +66,7 @@ const PLAZA_HERBARIUM_GUIDE_TILE_STAGE_CLASS_NAME =
 const PLAZA_HERBARIUM_GUIDE_TILE_NAME_CLASS_NAME =
   'block truncate border-t px-1 py-1 text-center font-display text-[10px] font-bold uppercase tracking-wide sm:text-[11px]';
 
-export type PlazaHerbariumCategoryFilterId =
-  | 'all'
-  | 'flower'
-  | 'clover'
-  | 'berry'
-  | 'mushroom'
-  | 'tree';
-
-const PLAZA_HERBARIUM_CATEGORY_FILTERS: readonly {
-  id: PlazaHerbariumCategoryFilterId;
-  label: string;
-}[] = [
-  { id: 'all', label: 'All' },
-  { id: 'flower', label: 'Flowers' },
-  { id: 'clover', label: 'Clovers' },
-  { id: 'berry', label: 'Berries' },
-  { id: 'mushroom', label: 'Mushrooms' },
-  { id: 'tree', label: 'Trees' },
-];
+export type { PlazaHerbariumCategoryFilterId };
 
 export type RenderingPlazaHerbariumPanelProps = {
   onBack?: () => void;
@@ -351,9 +338,12 @@ export function RenderingPlazaHerbariumPanel({
   );
   const filteredGuideEntries = useMemo(
     () =>
-      categoryFilterId === 'all'
-        ? guideEntries
-        : guideEntries.filter((entry) => entry.kind === categoryFilterId),
+      guideEntries.filter((entry) =>
+        checkingPlazaHerbariumEntryMatchesCategoryFilter(
+          entry,
+          categoryFilterId
+        )
+      ),
     [categoryFilterId, guideEntries]
   );
   const resolvingPlazaHerbariumEntryId = useCallback(
@@ -479,7 +469,7 @@ export function RenderingPlazaHerbariumPanel({
         role="tablist"
         aria-label="Category filters"
       >
-        {PLAZA_HERBARIUM_CATEGORY_FILTERS.map((filter) => {
+        {DEFINING_PLAZA_HERBARIUM_CATEGORY_FILTERS.map((filter) => {
           const isActive = filter.id === categoryFilterId;
 
           return (

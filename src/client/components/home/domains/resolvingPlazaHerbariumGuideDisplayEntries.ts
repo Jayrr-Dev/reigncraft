@@ -1,6 +1,7 @@
 import { LABELING_PLAZA_BIOMES_UNDISCOVERED_NAME } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
 import type { PlazaCodexStudyTierId } from '@/components/home/domains/definingPlazaCodexStudyTier';
 import type { PlazaCodexStudyTrackId } from '@/components/home/domains/definingPlazaCodexStudyTrackRegistry';
+import { checkingPlazaHerbariumBerryIsLeavesCategory } from '@/components/home/domains/definingPlazaHerbariumCategoryFilter';
 import {
   DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES,
   LABELING_PLAZA_HERBARIUM_UNDISCOVERED_BERRY_HINT,
@@ -458,65 +459,68 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
 
   const berryBiomeKinds = listingPlazaHerbariumFlowerBearingBiomeKinds();
 
-  const berryEntries: PlazaHerbariumGuideBerryDisplayEntry[] =
-    DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES.map(
-      (entry: DefiningPlazaHerbariumBerryEntry) => {
-        const studyCount = berryStudyCountsByLootKind[entry.berryLootKind] ?? 0;
-        const isSighted =
-          studyCount > 0 || sightedBerryLootKinds.has(entry.berryLootKind);
-        const discoveryState = resolvingPlazaHerbariumDiscoveryState(
-          sightedBerryLootKinds.has(entry.berryLootKind),
-          studyCount
-        );
-        const {
-          isStudied,
-          isPropertiesUnlocked,
-          isHabitatsUnlocked,
-          isFullyStudied,
-          studyTierId,
-        } = resolvingPlazaHerbariumStudyGates(
-          HERBARIUM_BERRY_TRACK,
-          studyCount
-        );
-        const rarity = resolvingPlazaHerbariumEntryRarity({
-          kind: 'berry',
-          berryLootKind: entry.berryLootKind,
-        });
-
-        return {
-          kind: 'berry',
-          berryLootKind: entry.berryLootKind,
-          icon: entry.icon,
-          discoveryState,
-          isSighted,
-          isStudied,
-          isFullyStudied,
-          studyCount,
-          studyTierId,
-          rarity,
-          rarityLabel: resolvingPlazaHerbariumEntryRarityLabel(rarity),
-          eatEffectStatRows: null,
-          displayName: isSighted
-            ? entry.displayName
-            : LABELING_PLAZA_HERBARIUM_UNDISCOVERED_NAME,
-          summary: isSighted
-            ? entry.summary
-            : LABELING_PLAZA_HERBARIUM_UNDISCOVERED_BERRY_HINT,
-          studiedSummary: entry.studiedSummary,
-          propertiesSummary: isPropertiesUnlocked
-            ? entry.propertiesSummary
-            : null,
-          apostleFlavor: isFullyStudied ? (entry.apostleFlavor ?? null) : null,
-          biomeKinds: berryBiomeKinds,
-          biomeChips: isHabitatsUnlocked
-            ? buildingPlazaHerbariumBiomeChips(
-                berryBiomeKinds,
-                exploredBiomeKinds
-              )
-            : [],
-        };
-      }
+  const buildingPlazaHerbariumBerryDisplayEntry = (
+    entry: DefiningPlazaHerbariumBerryEntry
+  ): PlazaHerbariumGuideBerryDisplayEntry => {
+    const studyCount = berryStudyCountsByLootKind[entry.berryLootKind] ?? 0;
+    const isSighted =
+      studyCount > 0 || sightedBerryLootKinds.has(entry.berryLootKind);
+    const discoveryState = resolvingPlazaHerbariumDiscoveryState(
+      sightedBerryLootKinds.has(entry.berryLootKind),
+      studyCount
     );
+    const {
+      isStudied,
+      isPropertiesUnlocked,
+      isHabitatsUnlocked,
+      isFullyStudied,
+      studyTierId,
+    } = resolvingPlazaHerbariumStudyGates(HERBARIUM_BERRY_TRACK, studyCount);
+    const rarity = resolvingPlazaHerbariumEntryRarity({
+      kind: 'berry',
+      berryLootKind: entry.berryLootKind,
+    });
+
+    return {
+      kind: 'berry',
+      berryLootKind: entry.berryLootKind,
+      icon: entry.icon,
+      discoveryState,
+      isSighted,
+      isStudied,
+      isFullyStudied,
+      studyCount,
+      studyTierId,
+      rarity,
+      rarityLabel: resolvingPlazaHerbariumEntryRarityLabel(rarity),
+      eatEffectStatRows: null,
+      displayName: isSighted
+        ? entry.displayName
+        : LABELING_PLAZA_HERBARIUM_UNDISCOVERED_NAME,
+      summary: isSighted
+        ? entry.summary
+        : LABELING_PLAZA_HERBARIUM_UNDISCOVERED_BERRY_HINT,
+      studiedSummary: entry.studiedSummary,
+      propertiesSummary: isPropertiesUnlocked ? entry.propertiesSummary : null,
+      apostleFlavor: isFullyStudied ? (entry.apostleFlavor ?? null) : null,
+      biomeKinds: berryBiomeKinds,
+      biomeChips: isHabitatsUnlocked
+        ? buildingPlazaHerbariumBiomeChips(berryBiomeKinds, exploredBiomeKinds)
+        : [],
+    };
+  };
+
+  const leafBerryEntries: PlazaHerbariumGuideBerryDisplayEntry[] = [];
+  const fruitBerryEntries: PlazaHerbariumGuideBerryDisplayEntry[] = [];
+
+  for (const entry of DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES) {
+    const displayEntry = buildingPlazaHerbariumBerryDisplayEntry(entry);
+    if (checkingPlazaHerbariumBerryIsLeavesCategory(entry.berryLootKind)) {
+      leafBerryEntries.push(displayEntry);
+    } else {
+      fruitBerryEntries.push(displayEntry);
+    }
+  }
 
   const mushroomEntries: PlazaHerbariumGuideMushroomDisplayEntry[] =
     DEFINING_PLAZA_HERBARIUM_MUSHROOM_GUIDE_ENTRIES.map(
@@ -593,7 +597,8 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
   return [
     ...flowerEntries,
     ...cloverEntries,
-    ...berryEntries,
+    ...leafBerryEntries,
+    ...fruitBerryEntries,
     ...mushroomEntries,
     ...treeEntries,
   ];

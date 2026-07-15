@@ -41,7 +41,10 @@ import {
   resolvingPlazaHerbariumTreeStudyDisplayName,
   resolvingPlazaLapidaryOreStudyDisplayName,
 } from '@/components/home/domains/resolvingPlazaStudySubjectDisplayName';
-import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
+import type {
+  DefiningInventoryItem,
+  DefiningInventoryState,
+} from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import { sendingWorldPlazaAudioLifecycleEvent } from '@/components/world/audio/lifecycle/managingWorldPlazaAudioLifecycleStore';
 import { RenderingSpiritedSpritesBetaLayer } from '@/components/world/beta/spirited/components/renderingSpiritedSpritesBetaLayer';
@@ -1418,6 +1421,10 @@ function RenderingWorldPlazaPixiSceneConnected({
     },
     []
   );
+  const inventoryStateRef = useRef<DefiningInventoryState | null>(null);
+  const onInventoryStateCommittedRef = useRef<
+    ((nextState: DefiningInventoryState) => void) | null
+  >(null);
   const pendingCraftRecipeIdRef =
     useRef<DefiningWorldPlazaCraftModeRecipeId | null>(null);
   const [
@@ -1514,6 +1521,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     onSuccessfulBlockPlacementRef,
     onBlockRemovedRef,
     onBuildFeedbackMessage: forwardingBuildFeedbackMessage,
+    inventoryStateRef,
+    onInventoryStateCommittedRef,
   });
 
   const { hudToolbarMode, selectingHudToolbarMode } =
@@ -1791,6 +1800,11 @@ function RenderingWorldPlazaPixiSceneConnected({
     saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
     seedDemoItems: false,
   });
+
+  inventoryStateRef.current = inventoryState;
+  onInventoryStateCommittedRef.current = (nextState) => {
+    updatingInventoryState(() => nextState);
+  };
 
   const equipment = usingWorldPlazaEquipment({ inventoryState });
   const equippedHeldItemPresentationRef =

@@ -9,11 +9,17 @@ import { computingWorldPlazaProjectileVisualLayout } from '@/components/world/pr
 import { DEFINING_WORLD_PLAZA_CYROBORN_PROJECTILE_CELL_SIZE_PX } from '@/components/world/projectile/domains/definingWorldPlazaCyrobornProjectileSpriteConstants';
 import { resolvingWorldPlazaProjectileArchetype } from '@/components/world/projectile/domains/definingWorldPlazaProjectileArchetypeRegistry';
 import type { DefiningWorldPlazaProjectileRenderPlane } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
+import { drawingWorldPlazaProjectileTrailParticlesOnGraphics } from '@/components/world/projectile/domains/drawingWorldPlazaProjectileTrailParticlesOnGraphics';
 import {
   peekingWorldPlazaCyrobornProjectileSpriteTexture,
   preloadingWorldPlazaCyrobornProjectileSpriteTextures,
 } from '@/components/world/projectile/domains/loadingWorldPlazaCyrobornProjectileSpriteTextures';
 import type { ManagingWorldPlazaProjectileStore } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
+import {
+  creatingWorldPlazaProjectileTrailState,
+  emittingWorldPlazaProjectileTrailParticle,
+  pruningWorldPlazaProjectileTrailParticles,
+} from '@/components/world/projectile/domains/managingWorldPlazaProjectileTrailParticles';
 import '@/components/world/projectile/domains/registeringWorldPlazaProjectileAnimationClips';
 import type { Container, Graphics } from 'pixi.js';
 import { Sprite } from 'pixi.js';
@@ -35,12 +41,20 @@ export function RenderingWorldPlazaProjectileVisualLayer({
   isEnabled,
 }: RenderingWorldPlazaProjectileVisualLayerProps): React.JSX.Element {
   const projectileGraphicsRef = useRef<Graphics | null>(null);
+  const trailGraphicsRef = useRef<Graphics | null>(null);
   const telegraphGraphicsRef = useRef<Graphics | null>(null);
   const spriteLayerRef = useRef<Container | null>(null);
   const spriteByProjectileIdRef = useRef<Map<string, Sprite>>(new Map());
+  const trailStateRef = useRef(creatingWorldPlazaProjectileTrailState());
 
   const drawingProjectileGraphics = useCallback((graphics: Graphics): void => {
     projectileGraphicsRef.current = graphics;
+    graphics.clear();
+    graphics.visible = false;
+  }, []);
+
+  const drawingTrailGraphics = useCallback((graphics: Graphics): void => {
+    trailGraphicsRef.current = graphics;
     graphics.clear();
     graphics.visible = false;
   }, []);
@@ -60,12 +74,14 @@ export function RenderingWorldPlazaProjectileVisualLayer({
         sprite.destroy();
       }
       sprites.clear();
+      trailStateRef.current = creatingWorldPlazaProjectileTrailState();
     };
   }, []);
 
   usingWorldPlazaSafeTick(() => {
     const store = projectileStoreRef.current;
     const projectileGraphics = projectileGraphicsRef.current;
+    const trailGraphics = trailGraphicsRef.current;
     const telegraphGraphics = telegraphGraphicsRef.current;
     const spriteLayer = spriteLayerRef.current;
 
@@ -76,6 +92,10 @@ export function RenderingWorldPlazaProjectileVisualLayer({
     if (!isEnabled) {
       projectileGraphics.clear();
       projectileGraphics.visible = false;
+      trailGraphics?.clear();
+      if (trailGraphics) {
+        trailGraphics.visible = false;
+      }
       telegraphGraphics?.clear();
       if (telegraphGraphics) {
         telegraphGraphics.visible = false;
@@ -94,6 +114,8 @@ export function RenderingWorldPlazaProjectileVisualLayer({
     projectileGraphics.clear();
     let drewProjectileCircle = false;
     const liveSpriteProjectileIds = new Set<string>();
+    const liveTrailProjectileIds = new Set<string>();
+    const trailState = trailStateRef.current;
 
     for (const instance of store.instances) {
       const archetype = resolvingWorldPlazaProjectileArchetype(
@@ -107,6 +129,22 @@ export function RenderingWorldPlazaProjectileVisualLayer({
         instance,
         archetype
       );
+
+      if (archetype.visual.trail) {
+        liveTrailProjectileIds.add(instance.projectileId);
+        emittingWorldPlazaProjectileTrailParticle({
+          state: trailState,
+          projectileId: instance.projectileId,
+          nowMs,
+          screenX: layout.screenX,
+          screenY: layout.screenY,
+          zIndex: layout.zIndex,
+          trail: archetype.visual.trail,
+          unitSample:
+            ((instance.seed * 17 + Math.floor(nowMs / 16) * 13) % 1000) / 1000,
+        });
+      }
+
       const spriteTexture = peekingWorldPlazaCyrobornProjectileSpriteTexture(
         archetype.visual.clipId
       );
@@ -154,6 +192,20 @@ export function RenderingWorldPlazaProjectileVisualLayer({
       });
       projectileGraphics.zIndex = layout.zIndex;
       drewProjectileCircle = true;
+    }
+
+    pruningWorldPlazaProjectileTrailParticles({
+      state: trailState,
+      nowMs,
+      liveProjectileIds: liveTrailProjectileIds,
+    });
+
+    if (trailGraphics) {
+      drawingWorldPlazaProjectileTrailParticlesOnGraphics(
+        trailGraphics,
+        trailState.particles,
+        nowMs
+      );
     }
 
     for (const [projectileId, sprite] of spriteByProjectileIdRef.current) {
@@ -223,6 +275,7 @@ export function RenderingWorldPlazaProjectileVisualLayer({
 
   return (
     <>
+      <pixiGraphics draw={drawingTrailGraphics} eventMode="none" />
       <pixiContainer
         ref={(container) => {
           spriteLayerRef.current = container;

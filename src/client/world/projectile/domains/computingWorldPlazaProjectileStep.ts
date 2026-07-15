@@ -9,6 +9,8 @@ import { resolvingWorldPlazaProjectileArchetype } from '@/components/world/proje
 import {
   checkingWorldPlazaProjectileAoeIncludesTarget,
   checkingWorldPlazaProjectileShouldDespawnAfterImpact,
+  checkingWorldPlazaProjectileShouldSplitByTimer,
+  checkingWorldPlazaProjectileShouldSplitOnImpact,
   resolvingWorldPlazaProjectileSplitSpawnRequests,
   resolvingWorldPlazaProjectileTelegraphStartAtMs,
 } from '@/components/world/projectile/domains/definingWorldPlazaProjectileImpactBehaviorRegistry';
@@ -104,8 +106,11 @@ export function computingWorldPlazaProjectileStep({
 
       if (
         archetype.split &&
-        !working.hasSplit &&
-        ageMs >= archetype.split.afterMs
+        checkingWorldPlazaProjectileShouldSplitByTimer(
+          archetype.split,
+          ageMs,
+          working.hasSplit
+        )
       ) {
         spawnRequests.push(
           ...resolvingWorldPlazaProjectileSplitSpawnRequests({
@@ -193,6 +198,24 @@ export function computingWorldPlazaProjectileStep({
             aoeRadiusGrid: archetype.impact.aoeRadiusGrid ?? null,
           });
         }
+
+        if (
+          archetype.split &&
+          checkingWorldPlazaProjectileShouldSplitOnImpact(
+            archetype.split,
+            true,
+            working.hasSplit
+          )
+        ) {
+          spawnRequests.push(
+            ...resolvingWorldPlazaProjectileSplitSpawnRequests({
+              instance: working,
+              split: archetype.split,
+              nowMs,
+            })
+          );
+        }
+
         continue;
       }
 
@@ -313,6 +336,23 @@ export function computingWorldPlazaProjectileStep({
           working.hasImpacted &&
           checkingWorldPlazaProjectileShouldDespawnAfterImpact(archetype.impact)
         ) {
+          if (
+            archetype.split &&
+            checkingWorldPlazaProjectileShouldSplitOnImpact(
+              archetype.split,
+              working.hasImpacted,
+              working.hasSplit
+            )
+          ) {
+            spawnRequests.push(
+              ...resolvingWorldPlazaProjectileSplitSpawnRequests({
+                instance: working,
+                split: archetype.split,
+                nowMs,
+              })
+            );
+          }
+
           continue;
         }
       }

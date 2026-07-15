@@ -21,7 +21,33 @@ export type ResolvingWorldPlazaProjectileSplitSpawnRequestsParams = {
 };
 
 /**
- * Builds child spawn requests when a split timer elapses.
+ * True when age reaches the optional timer threshold and the projectile has not split yet.
+ */
+export function checkingWorldPlazaProjectileShouldSplitByTimer(
+  split: DefiningWorldPlazaProjectileSplitConfig,
+  ageMs: number,
+  hasSplit: boolean
+): boolean {
+  if (hasSplit || split.afterMs === undefined) {
+    return false;
+  }
+
+  return ageMs >= split.afterMs;
+}
+
+/**
+ * True when impact should burst child projectiles and the parent has not split yet.
+ */
+export function checkingWorldPlazaProjectileShouldSplitOnImpact(
+  split: DefiningWorldPlazaProjectileSplitConfig,
+  hasImpacted: boolean,
+  hasSplit: boolean
+): boolean {
+  return Boolean(split.splitOnImpact) && hasImpacted && !hasSplit;
+}
+
+/**
+ * Builds child spawn requests when a split timer elapses or impact triggers a burst.
  */
 export function resolvingWorldPlazaProjectileSplitSpawnRequests({
   instance,

@@ -10,6 +10,7 @@ import {
   type DefiningWorldBuildingPlacedBlockTopFaceTextureKind,
 } from '@/components/world/building/domains/definingWorldBuildingPlacedBlockTopFaceTextureKind';
 import { checkingWorldBuildingBlockDefinitionIdIsOreWall } from '@/components/world/building/domains/definingWorldPlazaOreWallBlockRegistry';
+import { checkingWorldBuildingBlockDefinitionIdIsTreeFloor } from '@/components/world/building/domains/definingWorldPlazaTreeFloorBlockRegistry';
 
 /**
  * Maps block definition ids to procedural top-face texture kinds.
@@ -40,6 +41,10 @@ export function resolvingWorldBuildingPlacedBlockTopFaceTextureKind(
 ): DefiningWorldBuildingPlacedBlockTopFaceTextureKind | null {
   if (checkingWorldBuildingBlockDefinitionIdIsOreWall(definitionId)) {
     return DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_ORE_WALL;
+  }
+
+  if (checkingWorldBuildingBlockDefinitionIdIsTreeFloor(definitionId)) {
+    return DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_PINE_WOOD;
   }
 
   return (
