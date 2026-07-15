@@ -31,7 +31,7 @@ describe('resolvingPlazaCodexStudyMilestoneRewardMarkers', () => {
 
   it('scales aggregate panel markers to the Studied max', () => {
     const markers = resolvingPlazaCodexAggregateStudyMilestoneRewardMarkers(
-      880,
+      879,
       4400
     );
 
@@ -41,6 +41,9 @@ describe('resolvingPlazaCodexStudyMilestoneRewardMarkers', () => {
     expect(
       markers.find((marker) => marker.tierId === 'understanding')?.isReached
     ).toBe(true);
+    expect(
+      markers.find((marker) => marker.tierId === 'application')?.threshold
+    ).toBe(880);
     expect(
       markers.find((marker) => marker.tierId === 'application')?.isReached
     ).toBe(false);

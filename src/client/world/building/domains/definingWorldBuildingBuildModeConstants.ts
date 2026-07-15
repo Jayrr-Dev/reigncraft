@@ -61,7 +61,7 @@ export const DEFINING_WORLD_BUILDING_BLOCK_SWATCH_MATERIAL_ICON_CLASS_NAME =
 
 /** Category tab strip container classes. */
 export const DEFINING_WORLD_BUILDING_CATEGORY_TAB_GRID_CLASS_NAME =
-  'grid grid-cols-4 gap-1' as const;
+  'grid grid-cols-5 gap-1' as const;
 
 /** Category tab base classes. */
 export const DEFINING_WORLD_BUILDING_CATEGORY_TAB_CLASS_NAME =

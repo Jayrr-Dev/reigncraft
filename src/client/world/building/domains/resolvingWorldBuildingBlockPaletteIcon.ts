@@ -11,6 +11,7 @@ import {
   DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
   DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_NATURAL,
   DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_ORES,
+  DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_REFINED,
   type DefiningWorldBuildingBlockCategory,
 } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 
@@ -49,12 +50,16 @@ const RESOLVING_WORLD_BUILDING_BLOCK_PALETTE_CATEGORY_METADATA_BY_CATEGORY: Reco
     label: 'Ore',
     iconifyIcon: 'game-icons:stone-pile',
   },
+  [DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_REFINED]: {
+    label: 'Refined',
+    iconifyIcon: 'mdi:anvil',
+  },
   [DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL]: {
     label: 'Utility',
     iconifyIcon: 'mdi:snowflake',
   },
   [DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_DECORATIVE]: {
-    label: 'Decor',
+    label: 'Flowers',
     iconifyIcon: 'mdi:flower',
   },
 };
@@ -72,8 +77,7 @@ export function resolvingWorldBuildingBlockPaletteCategoryMetadata(
       category
     ] ?? {
       label: RESOLVING_WORLD_BUILDING_BLOCK_PALETTE_FALLBACK_CATEGORY_LABEL,
-      iconifyIcon:
-        RESOLVING_WORLD_BUILDING_BLOCK_PALETTE_FALLBACK_CATEGORY_ICON,
+      iconifyIcon: RESOLVING_WORLD_BUILDING_BLOCK_PALETTE_FALLBACK_CATEGORY_ICON,
     }
   );
 }

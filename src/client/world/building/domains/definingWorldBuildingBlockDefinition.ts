@@ -21,6 +21,10 @@ export const DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FLOORS = 'floors' as const;
 /** Solid mineral walls (stone and ore species). */
 export const DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_ORES = 'ores' as const;
 
+/** Smelted metal walls (ingot-cost blocks). */
+export const DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_REFINED =
+  'refined' as const;
+
 /** Interactive / utility blocks (doors, chests, ice, stations). */
 export const DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL =
   'functional' as const;
@@ -35,6 +39,7 @@ export type DefiningWorldBuildingBlockCategory =
   | typeof DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC
   | typeof DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FLOORS
   | typeof DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_ORES
+  | typeof DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_REFINED
   | typeof DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL
   | typeof DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_DECORATIVE;
 

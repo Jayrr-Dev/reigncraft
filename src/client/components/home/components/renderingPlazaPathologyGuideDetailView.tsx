@@ -111,6 +111,14 @@ export function RenderingPlazaPathologyGuideDetailView({
         ) : null}
       </div>
 
+      <RenderingPlazaCodexStudyMilestoneProgress
+        value={studyCount}
+        max={studyFullCount}
+        markers={studyMilestoneMarkers}
+        ariaLabel="Study milestone rewards"
+        className="shrink-0 px-0.5"
+      />
+
       <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 touch-pan-y">
         <article className="overflow-hidden rounded-md border border-poster-teal/35 bg-parchment/50 shadow-[0_2px_6px_rgba(28,25,18,0.18)]">
           <div className="relative flex h-28 items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_55%,#1a3038_100%)] sm:h-32">

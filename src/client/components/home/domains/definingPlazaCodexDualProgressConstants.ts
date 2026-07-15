@@ -6,7 +6,7 @@
 
 /** Outer parchment shell around the paired meters. */
 export const DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SHELL_CLASS_NAME =
-  'shrink-0 rounded-md border border-poster-teal/25 bg-parchment/45 px-3 py-1.5' as const;
+  'shrink-0 overflow-visible rounded-md border border-poster-teal/25 bg-parchment/45 px-3 py-2' as const;
 
 /** Horizontal row holding the two metric columns. */
 export const DEFINING_PLAZA_CODEX_DUAL_PROGRESS_ROW_CLASS_NAME =

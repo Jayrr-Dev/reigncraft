@@ -1,12 +1,30 @@
 /**
  * Declarative inventory cost for Materials palette block placement.
- * Each registered block consumes a fixed quantity per placed layer.
+ * Each registered block consumes one or more item requirements per placed layer.
  *
  * @module components/world/building/domains/definingWorldBuildingBlockMaterialCostRegistry
  */
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import { DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import {
+  formattingWorldPlazaDyedWoodFloorBlockDefinitionId,
+  resolvingWorldPlazaFlowerSpeciesIdFromDyedWoodFloorBlockDefinitionId,
+} from '@/components/world/building/domains/definingWorldPlazaDyedWoodFloorBlockRegistry';
+import {
+  DEFINING_WORLD_PLAZA_FLOWER_DYE_NAME_BY_SPECIES_ID,
+  DEFINING_WORLD_PLAZA_FLOWER_DYE_SPECIES_ORDER,
+} from '@/components/world/building/domains/definingWorldPlazaFlowerDyeConstants';
+import {
+  formattingWorldPlazaFlowerBlockDefinitionId,
+  resolvingWorldPlazaFlowerSpeciesIdFromBlockDefinitionId,
+} from '@/components/world/building/domains/definingWorldPlazaFlowerBlockRegistry';
+import {
+  formattingWorldPlazaIngotWallBlockDefinitionId,
+  type DefiningWorldPlazaIngotWallMetalId,
+  resolvingWorldPlazaIngotMetalIdFromWallBlockDefinitionId,
+} from '@/components/world/building/domains/definingWorldPlazaIngotWallBlockRegistry';
+import { DEFINING_WORLD_PLAZA_INGOT_WALL_SURFACE_REGISTRY } from '@/components/world/building/domains/definingWorldPlazaIngotWallSurfaceRegistry';
 import {
   formattingWorldPlazaOreWallBlockDefinitionId,
   resolvingWorldPlazaOreSpeciesIdFromWallBlockDefinitionId,
@@ -17,7 +35,14 @@ import {
 } from '@/components/world/building/domains/definingWorldPlazaTreeFloorBlockRegistry';
 import { countingWorldPlazaInventoryItemTypeQuantity } from '@/components/world/crafting/domains/countingWorldPlazaInventoryItemTypeQuantity';
 import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
+import { DEFINING_WORLD_PLAZA_FLOWER_SPECIES_TO_ITEM_TYPE_ID } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFlowerSpriteSheetConstants';
 import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_COPPER,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_GOLD,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_LEAD,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_SILVER,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_STEEL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_CLAY,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COAL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COPPER,
@@ -33,13 +58,20 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import type { WorldOreSpeciesId } from '../../../../shared/worldOreRarity';
 
-/** Inventory units consumed per placed block layer. */
+/** Inventory units consumed per placed block layer (primary materials). */
 export const DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER = 3;
 
-export type DefiningWorldBuildingBlockMaterialCostEntry = {
+/** Flower dye units consumed with wood for stained floors. */
+export const DEFINING_WORLD_BUILDING_BLOCK_DYE_FLOWER_QUANTITY_PER_LAYER = 1;
+
+export type DefiningWorldBuildingBlockMaterialCostRequirement = {
   readonly itemTypeId: string;
   readonly quantityPerLayer: number;
   readonly itemLabel: string;
+};
+
+export type DefiningWorldBuildingBlockMaterialCostEntry = {
+  readonly requirements: readonly DefiningWorldBuildingBlockMaterialCostRequirement[];
 };
 
 const DEFINING_WORLD_BUILDING_ORE_ITEM_TYPE_ID_BY_SPECIES_ID: Record<
@@ -58,16 +90,55 @@ const DEFINING_WORLD_BUILDING_ORE_ITEM_TYPE_ID_BY_SPECIES_ID: Record<
   sulfur: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_SULFUR,
 };
 
+const DEFINING_WORLD_BUILDING_INGOT_ITEM_TYPE_ID_BY_METAL_ID: Record<
+  DefiningWorldPlazaIngotWallMetalId,
+  string
+> = {
+  iron: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON,
+  copper: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_COPPER,
+  silver: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_SILVER,
+  gold: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_GOLD,
+  lead: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_LEAD,
+  steel: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_STEEL,
+};
+
+const DEFINING_WORLD_BUILDING_INGOT_ITEM_LABEL_BY_METAL_ID: Record<
+  DefiningWorldPlazaIngotWallMetalId,
+  string
+> = {
+  iron: 'Iron ingot',
+  copper: 'Copper ingot',
+  silver: 'Silver ingot',
+  gold: 'Gold ingot',
+  lead: 'Lead ingot',
+  steel: 'Steel ingot',
+};
+
+function creatingWorldBuildingSingleMaterialCostEntry(
+  itemTypeId: string,
+  itemLabel: string,
+  quantityPerLayer: number = DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER
+): DefiningWorldBuildingBlockMaterialCostEntry {
+  return {
+    requirements: [
+      {
+        itemTypeId,
+        quantityPerLayer,
+        itemLabel,
+      },
+    ],
+  };
+}
+
 const DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_BY_DEFINITION_ID: Record<
   string,
   DefiningWorldBuildingBlockMaterialCostEntry
 > = {
-  [DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE]: {
-    itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
-    quantityPerLayer:
-      DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER,
-    itemLabel: 'Stone',
-  },
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE]:
+    creatingWorldBuildingSingleMaterialCostEntry(
+      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
+      'Stone'
+    ),
 };
 
 function seedingWorldBuildingOreWallMaterialCosts(): void {
@@ -79,12 +150,24 @@ function seedingWorldBuildingOreWallMaterialCosts(): void {
     );
 
     DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_BY_DEFINITION_ID[definitionId] =
-      {
+      creatingWorldBuildingSingleMaterialCostEntry(
         itemTypeId,
-        quantityPerLayer:
-          DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER,
-        itemLabel: `${speciesId.charAt(0).toUpperCase()}${speciesId.slice(1)} ore`,
-      };
+        `${speciesId.charAt(0).toUpperCase()}${speciesId.slice(1)} ore`
+      );
+  }
+}
+
+function seedingWorldBuildingIngotWallMaterialCosts(): void {
+  for (const surface of DEFINING_WORLD_PLAZA_INGOT_WALL_SURFACE_REGISTRY) {
+    const definitionId = formattingWorldPlazaIngotWallBlockDefinitionId(
+      surface.metalId
+    );
+
+    DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_BY_DEFINITION_ID[definitionId] =
+      creatingWorldBuildingSingleMaterialCostEntry(
+        DEFINING_WORLD_BUILDING_INGOT_ITEM_TYPE_ID_BY_METAL_ID[surface.metalId],
+        DEFINING_WORLD_BUILDING_INGOT_ITEM_LABEL_BY_METAL_ID[surface.metalId]
+      );
   }
 }
 
@@ -93,17 +176,58 @@ function seedingWorldBuildingTreeFloorMaterialCosts(): void {
     const definitionId = `basic:floor:tree-${variant}`;
 
     DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_BY_DEFINITION_ID[definitionId] =
+      creatingWorldBuildingSingleMaterialCostEntry(
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+        'Wood'
+      );
+  }
+}
+
+function seedingWorldBuildingFlowerBlockMaterialCosts(): void {
+  for (const speciesId of DEFINING_WORLD_PLAZA_FLOWER_DYE_SPECIES_ORDER) {
+    const definitionId = formattingWorldPlazaFlowerBlockDefinitionId(speciesId);
+
+    DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_BY_DEFINITION_ID[definitionId] =
+      creatingWorldBuildingSingleMaterialCostEntry(
+        DEFINING_WORLD_PLAZA_FLOWER_SPECIES_TO_ITEM_TYPE_ID[speciesId],
+        DEFINING_WORLD_PLAZA_FLOWER_DYE_NAME_BY_SPECIES_ID[speciesId]
+      );
+  }
+}
+
+function seedingWorldBuildingDyedWoodFloorMaterialCosts(): void {
+  for (const speciesId of DEFINING_WORLD_PLAZA_FLOWER_DYE_SPECIES_ORDER) {
+    const definitionId =
+      formattingWorldPlazaDyedWoodFloorBlockDefinitionId(speciesId);
+    const flowerName =
+      DEFINING_WORLD_PLAZA_FLOWER_DYE_NAME_BY_SPECIES_ID[speciesId];
+
+    DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_BY_DEFINITION_ID[definitionId] =
       {
-        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
-        quantityPerLayer:
-          DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER,
-        itemLabel: 'Wood',
+        requirements: [
+          {
+            itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+            quantityPerLayer:
+              DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER,
+            itemLabel: 'Wood',
+          },
+          {
+            itemTypeId:
+              DEFINING_WORLD_PLAZA_FLOWER_SPECIES_TO_ITEM_TYPE_ID[speciesId],
+            quantityPerLayer:
+              DEFINING_WORLD_BUILDING_BLOCK_DYE_FLOWER_QUANTITY_PER_LAYER,
+            itemLabel: flowerName,
+          },
+        ],
       };
   }
 }
 
 seedingWorldBuildingTreeFloorMaterialCosts();
+seedingWorldBuildingDyedWoodFloorMaterialCosts();
 seedingWorldBuildingOreWallMaterialCosts();
+seedingWorldBuildingIngotWallMaterialCosts();
+seedingWorldBuildingFlowerBlockMaterialCosts();
 
 /**
  * Resolves inventory cost for one block definition id, if any.
@@ -119,12 +243,55 @@ export function resolvingWorldBuildingBlockMaterialCost(
   }
 
   if (checkingWorldBuildingBlockDefinitionIdIsTreeFloor(definitionId)) {
+    return creatingWorldBuildingSingleMaterialCostEntry(
+      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+      'Wood'
+    );
+  }
+
+  const dyedSpeciesId =
+    resolvingWorldPlazaFlowerSpeciesIdFromDyedWoodFloorBlockDefinitionId(
+      definitionId
+    );
+
+  if (dyedSpeciesId !== null) {
     return {
-      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
-      quantityPerLayer:
-        DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER,
-      itemLabel: 'Wood',
+      requirements: [
+        {
+          itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+          quantityPerLayer:
+            DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER,
+          itemLabel: 'Wood',
+        },
+        {
+          itemTypeId:
+            DEFINING_WORLD_PLAZA_FLOWER_SPECIES_TO_ITEM_TYPE_ID[dyedSpeciesId],
+          quantityPerLayer:
+            DEFINING_WORLD_BUILDING_BLOCK_DYE_FLOWER_QUANTITY_PER_LAYER,
+          itemLabel: DEFINING_WORLD_PLAZA_FLOWER_DYE_NAME_BY_SPECIES_ID[dyedSpeciesId],
+        },
+      ],
     };
+  }
+
+  const flowerSpeciesId =
+    resolvingWorldPlazaFlowerSpeciesIdFromBlockDefinitionId(definitionId);
+
+  if (flowerSpeciesId !== null) {
+    return creatingWorldBuildingSingleMaterialCostEntry(
+      DEFINING_WORLD_PLAZA_FLOWER_SPECIES_TO_ITEM_TYPE_ID[flowerSpeciesId],
+      DEFINING_WORLD_PLAZA_FLOWER_DYE_NAME_BY_SPECIES_ID[flowerSpeciesId]
+    );
+  }
+
+  const ingotMetalId =
+    resolvingWorldPlazaIngotMetalIdFromWallBlockDefinitionId(definitionId);
+
+  if (ingotMetalId !== null) {
+    return creatingWorldBuildingSingleMaterialCostEntry(
+      DEFINING_WORLD_BUILDING_INGOT_ITEM_TYPE_ID_BY_METAL_ID[ingotMetalId],
+      DEFINING_WORLD_BUILDING_INGOT_ITEM_LABEL_BY_METAL_ID[ingotMetalId]
+    );
   }
 
   const oreSpeciesId =
@@ -134,13 +301,10 @@ export function resolvingWorldBuildingBlockMaterialCost(
     return null;
   }
 
-  return {
-    itemTypeId:
-      DEFINING_WORLD_BUILDING_ORE_ITEM_TYPE_ID_BY_SPECIES_ID[oreSpeciesId],
-    quantityPerLayer:
-      DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER,
-    itemLabel: `${oreSpeciesId.charAt(0).toUpperCase()}${oreSpeciesId.slice(1)} ore`,
-  };
+  return creatingWorldBuildingSingleMaterialCostEntry(
+    DEFINING_WORLD_BUILDING_ORE_ITEM_TYPE_ID_BY_SPECIES_ID[oreSpeciesId],
+    `${oreSpeciesId.charAt(0).toUpperCase()}${oreSpeciesId.slice(1)} ore`
+  );
 }
 
 /**
@@ -156,11 +320,12 @@ export function checkingWorldBuildingBlockMaterialAffordable(
     return true;
   }
 
-  return (
-    countingWorldPlazaInventoryItemTypeQuantity(
-      inventoryState,
-      cost.itemTypeId
-    ) >= cost.quantityPerLayer
+  return cost.requirements.every(
+    (requirement) =>
+      countingWorldPlazaInventoryItemTypeQuantity(
+        inventoryState,
+        requirement.itemTypeId
+      ) >= requirement.quantityPerLayer
   );
 }
 
@@ -192,19 +357,25 @@ export function consumingWorldBuildingBlockMaterialCost(
     return { outcome: 'missing-materials' };
   }
 
-  const consumeResult = consumingWorldPlazaInventoryItemByType(
-    inventoryState,
-    cost.itemTypeId,
-    cost.quantityPerLayer
-  );
+  let nextState = inventoryState;
 
-  if (!consumeResult.consumed) {
-    return { outcome: 'missing-materials' };
+  for (const requirement of cost.requirements) {
+    const consumeResult = consumingWorldPlazaInventoryItemByType(
+      nextState,
+      requirement.itemTypeId,
+      requirement.quantityPerLayer
+    );
+
+    if (!consumeResult.consumed) {
+      return { outcome: 'missing-materials' };
+    }
+
+    nextState = consumeResult.nextState;
   }
 
   return {
     outcome: 'consumed',
-    nextState: consumeResult.nextState,
+    nextState,
   };
 }
 
@@ -220,7 +391,12 @@ export function formattingWorldBuildingBlockMaterialShortfallMessage(
     return 'Not enough materials.';
   }
 
-  return `Need ${cost.quantityPerLayer} ${cost.itemLabel}.`;
+  return `Need ${cost.requirements
+    .map(
+      (requirement) =>
+        `${requirement.quantityPerLayer} ${requirement.itemLabel}`
+    )
+    .join(' + ')}.`;
 }
 
 /** Lists every block definition id with a registered material cost. */

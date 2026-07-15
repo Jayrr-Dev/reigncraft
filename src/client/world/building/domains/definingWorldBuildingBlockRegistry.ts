@@ -5,6 +5,7 @@ import {
   DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
   DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_NATURAL,
   DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_ORES,
+  DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_REFINED,
   type DefiningWorldBuildingBlockCategory,
   type DefiningWorldBuildingBlockDefinition,
   type DefiningWorldBuildingBlockDefinitionId,
@@ -16,6 +17,9 @@ import {
   DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK,
   DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_JUMP_OVER,
 } from '@/components/world/building/domains/definingWorldBuildingCollisionShape';
+import { registeringWorldPlazaDyedWoodFloorBlockDefinitions } from '@/components/world/building/domains/definingWorldPlazaDyedWoodFloorBlockRegistry';
+import { registeringWorldPlazaFlowerBlockDefinitions } from '@/components/world/building/domains/definingWorldPlazaFlowerBlockRegistry';
+import { registeringWorldPlazaIngotWallBlockDefinitions } from '@/components/world/building/domains/definingWorldPlazaIngotWallBlockRegistry';
 import { registeringWorldPlazaOreWallBlockDefinitions } from '@/components/world/building/domains/definingWorldPlazaOreWallBlockRegistry';
 import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_TREE_PINE,
@@ -162,6 +166,7 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
     },
   },
   ...registeringWorldPlazaTreeFloorBlockDefinitions(),
+  ...registeringWorldPlazaDyedWoodFloorBlockDefinitions(),
   [DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE]: {
     id: DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_WALL_STONE,
     name: 'Stone',
@@ -346,6 +351,8 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
     },
   },
   ...registeringWorldPlazaOreWallBlockDefinitions(),
+  ...registeringWorldPlazaIngotWallBlockDefinitions(),
+  ...registeringWorldPlazaFlowerBlockDefinitions(),
 };
 
 /** Default block selected when entering build mode. */
@@ -361,10 +368,11 @@ const LISTING_WORLD_BUILDING_PALETTE_CATEGORY_ORDER: readonly DefiningWorldBuild
   [
     DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FLOORS,
     DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_ORES,
+    DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_REFINED,
+    DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_DECORATIVE,
     DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
     DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_NATURAL,
     DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC,
-    DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_DECORATIVE,
   ];
 
 /**
