@@ -1,19 +1,20 @@
 /**
  * Study-gated reveal flags for flower herb item inspect UI.
  *
- * Thresholds match Herbarium study tiers so bag tooltips unlock with the same
- * Study progress as the Guide dossier.
+ * Thresholds match Herbarium flower study tiers so bag tooltips unlock with the
+ * same Study progress as the Guide dossier.
  *
  * @module components/world/inventory/domains/definingWorldPlazaInventoryFlowerDetailRevealConstants
  */
 
-import type { PlazaHerbariumFlowerStudyTierId } from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
+import type { PlazaCodexStudyTierId } from '@/components/home/domains/definingPlazaCodexStudyTier';
+import { DEFINING_PLAZA_CODEX_INVENTORY_REVEAL_BY_TIER } from '@/components/world/inventory/domains/definingPlazaCodexInventoryRevealByTier';
 
 /** Which flower inspect fields are visible at one knowledge tier. */
 export type DefiningWorldPlazaInventoryFlowerDetailReveal = {
   /**
    * Flavor copy depth:
-   * 0 hidden, 1 sighting summary, 2 studied notes, 3 studied + properties line.
+   * 0 hidden, 1 sensory summary, 2 field notes, 3 studied + properties depth.
    */
   readonly descriptionTier: 0 | 1 | 2 | 3;
   readonly showStudyProgress: boolean;
@@ -28,84 +29,45 @@ export type DefiningWorldPlazaInventoryFlowerDetailReveal = {
   readonly showGenericItemMeta: boolean;
 };
 
+function resolvingFlowerDetailRevealFromBase(
+  tierId: PlazaCodexStudyTierId
+): DefiningWorldPlazaInventoryFlowerDetailReveal {
+  const base = DEFINING_PLAZA_CODEX_INVENTORY_REVEAL_BY_TIER[tierId];
+
+  return {
+    descriptionTier: base.descriptionTier,
+    showStudyProgress: base.showStudyProgress,
+    showPropertiesSummary: base.showPropertiesSummary,
+    showEatEffectLabels: base.showEffectLabels,
+    showEatEffectNumbers: base.showEffectNumbers,
+    showRawProcChance: base.showEffectChances,
+    showPetalSicknessName: base.showEffectLabels,
+    showPetalSicknessDetails: base.showEffectChances,
+    showFlowerDiseaseNames: base.showEffectLabels,
+    showFlowerDiseaseChances: base.showEffectChances,
+    showGenericItemMeta: base.showGenericItemMeta,
+  };
+}
+
 /**
- * Progressive flower inspect unlocks keyed by highest Herbarium study tier.
+ * Progressive flower inspect unlocks keyed by unified Herbarium study tier.
  *
- * - sighted (0): rarity + stack; study tease
- * - fieldNotes (1): sighting summary
- * - properties (5): field notes + vague eat hint
- * - habitats (15): effect labels, Petal Sickness name, disease names
- * - full (100): proc %, effect numbers, Petal Sickness details, disease odds
+ * - awareness (0): rarity + stack; study tease
+ * - familiarity (1): sensory summary
+ * - understanding (5): field notes
+ * - application (20): vague eat hint
+ * - proficiency (50): effect labels, Petal Sickness name, disease names
+ * - expertise (75): effect numbers
+ * - mastery (100): proc %, Petal Sickness details, disease odds
  */
 export const DEFINING_WORLD_PLAZA_INVENTORY_FLOWER_DETAIL_REVEAL_BY_TIER: Readonly<
-  Record<
-    PlazaHerbariumFlowerStudyTierId,
-    DefiningWorldPlazaInventoryFlowerDetailReveal
-  >
+  Record<PlazaCodexStudyTierId, DefiningWorldPlazaInventoryFlowerDetailReveal>
 > = {
-  sighted: {
-    descriptionTier: 0,
-    showStudyProgress: true,
-    showPropertiesSummary: false,
-    showEatEffectLabels: false,
-    showEatEffectNumbers: false,
-    showRawProcChance: false,
-    showPetalSicknessName: false,
-    showPetalSicknessDetails: false,
-    showFlowerDiseaseNames: false,
-    showFlowerDiseaseChances: false,
-    showGenericItemMeta: true,
-  },
-  fieldNotes: {
-    descriptionTier: 1,
-    showStudyProgress: true,
-    showPropertiesSummary: false,
-    showEatEffectLabels: false,
-    showEatEffectNumbers: false,
-    showRawProcChance: false,
-    showPetalSicknessName: false,
-    showPetalSicknessDetails: false,
-    showFlowerDiseaseNames: false,
-    showFlowerDiseaseChances: false,
-    showGenericItemMeta: true,
-  },
-  properties: {
-    descriptionTier: 2,
-    showStudyProgress: true,
-    showPropertiesSummary: true,
-    showEatEffectLabels: false,
-    showEatEffectNumbers: false,
-    showRawProcChance: false,
-    showPetalSicknessName: false,
-    showPetalSicknessDetails: false,
-    showFlowerDiseaseNames: false,
-    showFlowerDiseaseChances: false,
-    showGenericItemMeta: true,
-  },
-  habitats: {
-    descriptionTier: 3,
-    showStudyProgress: true,
-    showPropertiesSummary: true,
-    showEatEffectLabels: true,
-    showEatEffectNumbers: false,
-    showRawProcChance: false,
-    showPetalSicknessName: true,
-    showPetalSicknessDetails: false,
-    showFlowerDiseaseNames: true,
-    showFlowerDiseaseChances: false,
-    showGenericItemMeta: true,
-  },
-  full: {
-    descriptionTier: 3,
-    showStudyProgress: true,
-    showPropertiesSummary: true,
-    showEatEffectLabels: true,
-    showEatEffectNumbers: true,
-    showRawProcChance: true,
-    showPetalSicknessName: true,
-    showPetalSicknessDetails: true,
-    showFlowerDiseaseNames: true,
-    showFlowerDiseaseChances: true,
-    showGenericItemMeta: true,
-  },
+  awareness: resolvingFlowerDetailRevealFromBase('awareness'),
+  familiarity: resolvingFlowerDetailRevealFromBase('familiarity'),
+  understanding: resolvingFlowerDetailRevealFromBase('understanding'),
+  application: resolvingFlowerDetailRevealFromBase('application'),
+  proficiency: resolvingFlowerDetailRevealFromBase('proficiency'),
+  expertise: resolvingFlowerDetailRevealFromBase('expertise'),
+  mastery: resolvingFlowerDetailRevealFromBase('mastery'),
 };

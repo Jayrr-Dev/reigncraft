@@ -30,15 +30,15 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_PLACEMENT_SEED_SALT = 2711;
 export const DEFINING_WORLD_PLAZA_MUSHROOM_SPECIES_SEED_SALT = 2712;
 
 /**
- * Higher = rarer. One in N hash buckets may host a mushroom when biome+schedule match.
+ * Higher = rarer. One in N hash buckets may host a sparse mushroom when biome+schedule match.
  */
-export const DEFINING_WORLD_PLAZA_MUSHROOM_TILE_MODULUS = 47;
+export const DEFINING_WORLD_PLAZA_MUSHROOM_TILE_MODULUS = 130;
 
-/** Wood habitat anchor gate (rarer than sparse tiles). One in N tree tiles may host a cluster. */
-export const DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_MODULUS = 89;
+/** Wood habitat anchor gate. One in N tree tiles may host a cluster. */
+export const DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_MODULUS = 180;
 
 /** Pasture ring anchor gate. One in N pasture tiles may host a fairy ring. */
-export const DEFINING_WORLD_PLAZA_MUSHROOM_PASTURE_HABITAT_ANCHOR_MODULUS = 73;
+export const DEFINING_WORLD_PLAZA_MUSHROOM_PASTURE_HABITAT_ANCHOR_MODULUS = 260;
 
 /** Seed salt for wood habitat anchor gate. */
 export const DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_SEED_SALT = 2713;

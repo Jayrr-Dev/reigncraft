@@ -315,6 +315,14 @@ export function RenderingWorldPlazaActionBar({
                           }
                         : undefined
                     }
+                    onSelectGuideSection={
+                      onSelectCodexSection
+                        ? (section) => {
+                            setIsSoundMixerOpen(false);
+                            onSelectCodexSection(section);
+                          }
+                        : undefined
+                    }
                   />
                 </div>
                 {onSelectCodexSection ? (

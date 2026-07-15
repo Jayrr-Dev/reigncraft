@@ -41,22 +41,24 @@ describe('resolvingPlazaPathologyGuideDisplayEntries', () => {
     expect(salmonellosis?.displayName).toBe('Salmonellosis');
   });
 
-  it('unlocks carrier chips only after the habitats tier', () => {
+  it('unlocks carrier chips only after proficiency', () => {
     const lockedCarriers = resolvingPlazaPathologyGuideDisplayEntries(
       new Set(['trichinellosis']),
       { trichinellosis: 12 }
     ).find((entry) => entry.diseaseId === 'trichinellosis');
 
     expect(lockedCarriers?.studyCount).toBe(4);
+    expect(lockedCarriers?.isStudied).toBe(true);
     expect(lockedCarriers?.carrierChips).toBeNull();
 
     const unlockedCarriers = resolvingPlazaPathologyGuideDisplayEntries(
       new Set(['trichinellosis']),
       {},
-      { trichinellosis: 15 }
+      { trichinellosis: 50 }
     ).find((entry) => entry.diseaseId === 'trichinellosis');
 
-    expect(unlockedCarriers?.studyCount).toBe(15);
+    expect(unlockedCarriers?.studyCount).toBe(50);
+    expect(unlockedCarriers?.studyTierId).toBe('proficiency');
     expect(unlockedCarriers?.carrierChips?.length).toBeGreaterThan(0);
   });
 });

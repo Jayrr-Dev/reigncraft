@@ -1,24 +1,26 @@
 'use client';
 
+import {
+  PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME,
+  RenderingPlazaCodexBestiaryExtraDetailSection,
+  RenderingPlazaCodexStudyDetailSection,
+} from '@/components/home/components/renderingPlazaCodexStudyDetailSections';
 import { RenderingPlazaBestiarySpritePortrait } from '@/components/home/components/renderingPlazaBestiarySpritePortrait';
 import { DEFINING_PLAZA_BESTIARY_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaBestiarySpritePortraitConstants';
+import { LABELING_PLAZA_BESTIARY_PLAYABLE_UNLOCKED } from '@/components/home/domains/definingPlazaBestiaryStudyTier';
 import {
-  LABELING_PLAZA_BESTIARY_PLAYABLE_UNLOCKED,
-  LABELING_PLAZA_BESTIARY_STUDY_TIER_SECTION_TITLES,
-  LABELING_PLAZA_BESTIARY_STUDY_TIER_TEASERS,
-  type PlazaBestiaryStudyTierId,
-} from '@/components/home/domains/definingPlazaBestiaryStudyTier';
+  checkingPlazaCodexStudyTierUnlocked,
+  formattingPlazaCodexStudyCountProgress,
+  formattingPlazaCodexStudyProgressLabel,
+  resolvingPlazaCodexStudyTierBookIcon,
+} from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import type { PlazaBestiaryGuideDisplayEntry } from '@/components/home/domains/resolvingPlazaBestiaryGuideDisplayEntries';
-import {
-  checkingPlazaBestiaryStudyTierUnlocked,
-  formattingPlazaBestiaryKillProgressLabel,
-  formattingPlazaBestiaryStudyCountProgress,
-  resolvingPlazaBestiaryStudyTierBookIcon,
-} from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import { RenderingWorldPlazaEntityDiseaseIconGlyph } from '@/components/world/health/components/renderingWorldPlazaEntityDiseaseIconGlyph';
 import { cn } from '@/lib/utils';
+
+const BESTIARY_TRACK = 'bestiary' as const;
 
 const PLAZA_BESTIARY_DETAIL_HEADER_BUTTON_CLASS_NAME =
   'plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]';
@@ -26,44 +28,6 @@ const PLAZA_BESTIARY_DETAIL_HEADER_BUTTON_CLASS_NAME =
 const PLAZA_BESTIARY_DETAIL_STUDIED_BADGE_CLASS_NAME = `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.statusEffectBadge} flex items-center gap-1 border border-emerald-500/60 bg-emerald-950/88 py-0 pl-0.5 pr-1.5 shadow-md`;
 
 const PLAZA_BESTIARY_DETAIL_STUDIED_BADGE_SOCKET_CLASS_NAME = `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.statusEffectBadgeSocket} flex size-4 shrink-0 items-center justify-center rounded-[2px]`;
-
-const PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME =
-  'rounded-sm border border-poster-teal/20 bg-parchment/45 px-2 py-1.5 text-[11px]';
-
-const PLAZA_BESTIARY_DETAIL_SECTION_TITLE_CLASS_NAME =
-  'font-display text-[11px] font-bold uppercase tracking-wide text-poster-teal-deep';
-
-const PLAZA_BESTIARY_DETAIL_TEASER_CLASS_NAME =
-  'rounded-sm border border-dashed border-poster-teal/25 bg-parchment/35 px-3 py-2 text-[11px] font-medium italic text-ink-soft';
-
-type RenderingPlazaBestiaryGuideDetailSectionProps = {
-  tierId: Exclude<PlazaBestiaryStudyTierId, 'sighted'>;
-  killCount: number;
-  children: React.ReactNode;
-};
-
-function RenderingPlazaBestiaryGuideDetailSection({
-  tierId,
-  killCount,
-  children,
-}: RenderingPlazaBestiaryGuideDetailSectionProps): React.JSX.Element {
-  const isUnlocked = checkingPlazaBestiaryStudyTierUnlocked(tierId, killCount);
-
-  return (
-    <section className="mt-4">
-      <h3 className={PLAZA_BESTIARY_DETAIL_SECTION_TITLE_CLASS_NAME}>
-        {LABELING_PLAZA_BESTIARY_STUDY_TIER_SECTION_TITLES[tierId]}
-      </h3>
-      {isUnlocked ? (
-        <div className="mt-2">{children}</div>
-      ) : (
-        <p className={cn(PLAZA_BESTIARY_DETAIL_TEASER_CLASS_NAME, 'mt-2')}>
-          {LABELING_PLAZA_BESTIARY_STUDY_TIER_TEASERS[tierId]}
-        </p>
-      )}
-    </section>
-  );
-}
 
 export type RenderingPlazaBestiaryGuideDetailViewProps = {
   entry: PlazaBestiaryGuideDisplayEntry;
@@ -79,8 +43,15 @@ export function RenderingPlazaBestiaryGuideDetailView({
   onClose,
   className = '',
 }: RenderingPlazaBestiaryGuideDetailViewProps): React.JSX.Element {
-  const killProgressLabel = formattingPlazaBestiaryKillProgressLabel(
-    entry.killCount
+  const studyCount = entry.killCount;
+  const killProgressLabel = formattingPlazaCodexStudyProgressLabel(
+    BESTIARY_TRACK,
+    studyCount
+  );
+  const isFamiliarityUnlocked = checkingPlazaCodexStudyTierUnlocked(
+    BESTIARY_TRACK,
+    'familiarity',
+    studyCount
   );
 
   return (
@@ -102,15 +73,21 @@ export function RenderingPlazaBestiaryGuideDetailView({
           </h2>
           <p className="flex items-center gap-1.5 text-sm font-medium italic text-ink-soft">
             <Icon
-              icon={resolvingPlazaBestiaryStudyTierBookIcon(entry.killCount)}
+              icon={resolvingPlazaCodexStudyTierBookIcon(
+                BESTIARY_TRACK,
+                studyCount
+              )}
               className="size-4 shrink-0 text-poster-teal-deep"
               aria-hidden
             />
             <span className="font-mono not-italic tabular-nums text-poster-teal-deep">
-              {formattingPlazaBestiaryStudyCountProgress(entry.killCount)}
+              {formattingPlazaCodexStudyCountProgress(
+                BESTIARY_TRACK,
+                studyCount
+              )}
             </span>
             <span className="text-ink-soft/80">
-              · {entry.isStudied ? killProgressLabel : 'Sighted entry'}
+              · {isFamiliarityUnlocked ? killProgressLabel : 'Sighted entry'}
             </span>
           </p>
         </div>
@@ -181,35 +158,29 @@ export function RenderingPlazaBestiaryGuideDetailView({
           </div>
 
           <div className="border-t border-poster-teal/20 px-3 py-3 sm:px-4 sm:py-4">
-            <p className="text-sm font-medium leading-snug text-ink-soft">
-              {entry.isStudied ? entry.studiedSummary : entry.summary}
-            </p>
-
-            {entry.biomeChips.length > 0 ? (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {entry.biomeChips.map((chip) => (
-                  <span
-                    key={chip.kind}
-                    title={chip.isExplored ? chip.label : 'Undiscovered region'}
-                    className={
-                      chip.isExplored
-                        ? 'rounded-sm border border-poster-teal/25 bg-parchment/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-poster-teal-deep'
-                        : 'rounded-sm border border-poster-teal/15 bg-parchment/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ink-soft/55'
-                    }
-                  >
-                    {chip.label}
-                  </span>
-                ))}
-              </div>
+            {isFamiliarityUnlocked ? (
+              <p className="text-sm font-medium leading-snug text-ink-soft">
+                {entry.summary}
+              </p>
             ) : null}
 
-            <RenderingPlazaBestiaryGuideDetailSection
-              tierId="studied"
-              killCount={entry.killCount}
+            <RenderingPlazaCodexStudyDetailSection
+              trackId={BESTIARY_TRACK}
+              studyCount={studyCount}
+              tierId="understanding"
+            >
+              <p className="text-[11px] font-medium text-ink">
+                {entry.studiedSummary}
+              </p>
+            </RenderingPlazaCodexStudyDetailSection>
+
+            <RenderingPlazaCodexBestiaryExtraDetailSection
+              studyCount={studyCount}
+              sectionId="behavior"
             >
               <dl className="grid grid-cols-2 gap-2">
                 {entry.temperamentLabel ? (
-                  <div className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}>
+                  <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
                     <dt className="font-bold uppercase tracking-wide text-ink-soft">
                       Temperament
                     </dt>
@@ -219,7 +190,7 @@ export function RenderingPlazaBestiaryGuideDetailView({
                   </div>
                 ) : null}
                 {entry.diet ? (
-                  <div className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}>
+                  <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
                     <dt className="font-bold uppercase tracking-wide text-ink-soft">
                       Diet
                     </dt>
@@ -229,7 +200,7 @@ export function RenderingPlazaBestiaryGuideDetailView({
                   </div>
                 ) : null}
                 {entry.activityPatternLabel ? (
-                  <div className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}>
+                  <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
                     <dt className="font-bold uppercase tracking-wide text-ink-soft">
                       Activity
                     </dt>
@@ -239,15 +210,124 @@ export function RenderingPlazaBestiaryGuideDetailView({
                   </div>
                 ) : null}
               </dl>
-            </RenderingPlazaBestiaryGuideDetailSection>
+            </RenderingPlazaCodexBestiaryExtraDetailSection>
 
-            <RenderingPlazaBestiaryGuideDetailSection
-              tierId="combat"
-              killCount={entry.killCount}
+            <RenderingPlazaCodexBestiaryExtraDetailSection
+              studyCount={studyCount}
+              sectionId="ecology"
+            >
+              <div className="space-y-2">
+                {entry.biomeChips.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {entry.biomeChips.map((chip) => (
+                      <span
+                        key={chip.kind}
+                        title={
+                          chip.isExplored ? chip.label : 'Undiscovered region'
+                        }
+                        className={
+                          chip.isExplored
+                            ? 'rounded-sm border border-poster-teal/25 bg-parchment/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-poster-teal-deep'
+                            : 'rounded-sm border border-poster-teal/15 bg-parchment/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ink-soft/55'
+                        }
+                      >
+                        {chip.label}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                {entry.ecologyStats ? (
+                  <dl className="grid grid-cols-2 gap-2">
+                    {entry.ecologyStats.favoritePreyLabels.length > 0 ? (
+                      <div
+                        className={cn(
+                          PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME,
+                          'col-span-2'
+                        )}
+                      >
+                        <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                          Favorite prey
+                        </dt>
+                        <dd className="mt-0.5 font-medium text-ink">
+                          {entry.ecologyStats.favoritePreyLabels.join(', ')}
+                        </dd>
+                      </div>
+                    ) : null}
+                    {entry.ecologyStats.preyAllowLabels.length > 0 ? (
+                      <div
+                        className={cn(
+                          PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME,
+                          'col-span-2'
+                        )}
+                      >
+                        <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                          Hunts
+                        </dt>
+                        <dd className="mt-0.5 font-medium text-ink">
+                          {entry.ecologyStats.preyAllowLabels.join(', ')}
+                        </dd>
+                      </div>
+                    ) : null}
+                    <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
+                      <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                        Aggro radius
+                      </dt>
+                      <dd className="mt-0.5 font-mono tabular-nums font-medium text-ink">
+                        {entry.ecologyStats.aggroRadiusGrid} grid
+                      </dd>
+                    </div>
+                    <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
+                      <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                        Pack share
+                      </dt>
+                      <dd className="mt-0.5 font-mono tabular-nums font-medium text-ink">
+                        {entry.ecologyStats.packShareRadiusGrid} grid
+                      </dd>
+                    </div>
+                    <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
+                      <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                        Mass
+                      </dt>
+                      <dd className="mt-0.5 font-mono tabular-nums font-medium text-ink">
+                        {entry.ecologyStats.massKg} kg
+                      </dd>
+                    </div>
+                    <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
+                      <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                        Trophic tier
+                      </dt>
+                      <dd className="mt-0.5 font-mono tabular-nums font-medium text-ink">
+                        {entry.ecologyStats.trophicTier}
+                      </dd>
+                    </div>
+                    <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
+                      <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                        Stamina drain
+                      </dt>
+                      <dd className="mt-0.5 font-mono tabular-nums font-medium text-ink">
+                        {entry.ecologyStats.staminaDrainMultiplier}x
+                      </dd>
+                    </div>
+                    <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
+                      <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                        Stamina regen
+                      </dt>
+                      <dd className="mt-0.5 font-mono tabular-nums font-medium text-ink">
+                        {entry.ecologyStats.staminaRegenMultiplier}x
+                      </dd>
+                    </div>
+                  </dl>
+                ) : null}
+              </div>
+            </RenderingPlazaCodexBestiaryExtraDetailSection>
+
+            <RenderingPlazaCodexBestiaryExtraDetailSection
+              studyCount={studyCount}
+              sectionId="combat"
             >
               {entry.combatStats ? (
                 <dl className="grid grid-cols-2 gap-2">
-                  <div className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}>
+                  <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
                     <dt className="font-bold uppercase tracking-wide text-ink-soft">
                       Health
                     </dt>
@@ -255,7 +335,7 @@ export function RenderingPlazaBestiaryGuideDetailView({
                       {entry.combatStats.maxHealth}
                     </dd>
                   </div>
-                  <div className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}>
+                  <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
                     <dt className="font-bold uppercase tracking-wide text-ink-soft">
                       Attack
                     </dt>
@@ -263,7 +343,7 @@ export function RenderingPlazaBestiaryGuideDetailView({
                       {entry.combatStats.attackPower}
                     </dd>
                   </div>
-                  <div className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}>
+                  <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
                     <dt className="font-bold uppercase tracking-wide text-ink-soft">
                       Defense
                     </dt>
@@ -271,7 +351,7 @@ export function RenderingPlazaBestiaryGuideDetailView({
                       {entry.combatStats.defense}
                     </dd>
                   </div>
-                  <div className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}>
+                  <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
                     <dt className="font-bold uppercase tracking-wide text-ink-soft">
                       Attack speed
                     </dt>
@@ -279,7 +359,7 @@ export function RenderingPlazaBestiaryGuideDetailView({
                       {entry.combatStats.attackIntervalMs}ms
                     </dd>
                   </div>
-                  <div className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}>
+                  <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
                     <dt className="font-bold uppercase tracking-wide text-ink-soft">
                       Walk
                     </dt>
@@ -287,7 +367,7 @@ export function RenderingPlazaBestiaryGuideDetailView({
                       {entry.combatStats.walkSpeedGridPerSecond} grid/s
                     </dd>
                   </div>
-                  <div className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}>
+                  <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
                     <dt className="font-bold uppercase tracking-wide text-ink-soft">
                       Run
                     </dt>
@@ -297,11 +377,11 @@ export function RenderingPlazaBestiaryGuideDetailView({
                   </div>
                 </dl>
               ) : null}
-            </RenderingPlazaBestiaryGuideDetailSection>
+            </RenderingPlazaCodexBestiaryExtraDetailSection>
 
-            <RenderingPlazaBestiaryGuideDetailSection
-              tierId="procs"
-              killCount={entry.killCount}
+            <RenderingPlazaCodexBestiaryExtraDetailSection
+              studyCount={studyCount}
+              sectionId="attackEffects"
             >
               {entry.onHitProcRows && entry.onHitProcRows.length > 0 ? (
                 <ul className="space-y-1.5">
@@ -331,104 +411,16 @@ export function RenderingPlazaBestiaryGuideDetailView({
                   No on-hit effects recorded for this species.
                 </p>
               )}
-            </RenderingPlazaBestiaryGuideDetailSection>
+            </RenderingPlazaCodexBestiaryExtraDetailSection>
 
-            <RenderingPlazaBestiaryGuideDetailSection
-              tierId="ecology"
-              killCount={entry.killCount}
-            >
-              {entry.ecologyStats ? (
-                <dl className="grid grid-cols-2 gap-2">
-                  {entry.ecologyStats.favoritePreyLabels.length > 0 ? (
-                    <div
-                      className={cn(
-                        PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME,
-                        'col-span-2'
-                      )}
-                    >
-                      <dt className="font-bold uppercase tracking-wide text-ink-soft">
-                        Favorite prey
-                      </dt>
-                      <dd className="mt-0.5 font-medium text-ink">
-                        {entry.ecologyStats.favoritePreyLabels.join(', ')}
-                      </dd>
-                    </div>
-                  ) : null}
-                  {entry.ecologyStats.preyAllowLabels.length > 0 ? (
-                    <div
-                      className={cn(
-                        PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME,
-                        'col-span-2'
-                      )}
-                    >
-                      <dt className="font-bold uppercase tracking-wide text-ink-soft">
-                        Hunts
-                      </dt>
-                      <dd className="mt-0.5 font-medium text-ink">
-                        {entry.ecologyStats.preyAllowLabels.join(', ')}
-                      </dd>
-                    </div>
-                  ) : null}
-                  <div className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}>
-                    <dt className="font-bold uppercase tracking-wide text-ink-soft">
-                      Aggro radius
-                    </dt>
-                    <dd className="mt-0.5 font-mono tabular-nums font-medium text-ink">
-                      {entry.ecologyStats.aggroRadiusGrid} grid
-                    </dd>
-                  </div>
-                  <div className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}>
-                    <dt className="font-bold uppercase tracking-wide text-ink-soft">
-                      Pack share
-                    </dt>
-                    <dd className="mt-0.5 font-mono tabular-nums font-medium text-ink">
-                      {entry.ecologyStats.packShareRadiusGrid} grid
-                    </dd>
-                  </div>
-                  <div className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}>
-                    <dt className="font-bold uppercase tracking-wide text-ink-soft">
-                      Mass
-                    </dt>
-                    <dd className="mt-0.5 font-mono tabular-nums font-medium text-ink">
-                      {entry.ecologyStats.massKg} kg
-                    </dd>
-                  </div>
-                  <div className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}>
-                    <dt className="font-bold uppercase tracking-wide text-ink-soft">
-                      Trophic tier
-                    </dt>
-                    <dd className="mt-0.5 font-mono tabular-nums font-medium text-ink">
-                      {entry.ecologyStats.trophicTier}
-                    </dd>
-                  </div>
-                  <div className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}>
-                    <dt className="font-bold uppercase tracking-wide text-ink-soft">
-                      Stamina drain
-                    </dt>
-                    <dd className="mt-0.5 font-mono tabular-nums font-medium text-ink">
-                      {entry.ecologyStats.staminaDrainMultiplier}x
-                    </dd>
-                  </div>
-                  <div className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}>
-                    <dt className="font-bold uppercase tracking-wide text-ink-soft">
-                      Stamina regen
-                    </dt>
-                    <dd className="mt-0.5 font-mono tabular-nums font-medium text-ink">
-                      {entry.ecologyStats.staminaRegenMultiplier}x
-                    </dd>
-                  </div>
-                </dl>
-              ) : null}
-            </RenderingPlazaBestiaryGuideDetailSection>
-
-            <RenderingPlazaBestiaryGuideDetailSection
-              tierId="full"
-              killCount={entry.killCount}
+            <RenderingPlazaCodexBestiaryExtraDetailSection
+              studyCount={studyCount}
+              sectionId="lootAndRisk"
             >
               {entry.lootStats ? (
                 <div className="space-y-2">
                   <dl className="grid grid-cols-2 gap-2">
-                    <div className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}>
+                    <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
                       <dt className="font-bold uppercase tracking-wide text-ink-soft">
                         Loot
                       </dt>
@@ -439,9 +431,7 @@ export function RenderingPlazaBestiaryGuideDetailView({
                     </div>
                     {entry.lootStats.rawDiseaseLabel &&
                     entry.lootStats.rawDiseaseChancePercent !== null ? (
-                      <div
-                        className={PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME}
-                      >
+                      <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
                         <dt className="font-bold uppercase tracking-wide text-ink-soft">
                           Raw disease
                         </dt>
@@ -467,7 +457,7 @@ export function RenderingPlazaBestiaryGuideDetailView({
                     entry.lootStats.cookedWellFedChancePercent !== null ? (
                       <div
                         className={cn(
-                          PLAZA_BESTIARY_DETAIL_STAT_CELL_CLASS_NAME,
+                          PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME,
                           'col-span-2'
                         )}
                       >
@@ -513,16 +503,16 @@ export function RenderingPlazaBestiaryGuideDetailView({
                   ) : null}
                 </div>
               ) : null}
-            </RenderingPlazaBestiaryGuideDetailSection>
+            </RenderingPlazaCodexBestiaryExtraDetailSection>
 
-            <RenderingPlazaBestiaryGuideDetailSection
-              tierId="playable"
-              killCount={entry.killCount}
+            <RenderingPlazaCodexBestiaryExtraDetailSection
+              studyCount={studyCount}
+              sectionId="playable"
             >
               <p className="text-[11px] font-medium text-ink">
                 {LABELING_PLAZA_BESTIARY_PLAYABLE_UNLOCKED}
               </p>
-            </RenderingPlazaBestiaryGuideDetailSection>
+            </RenderingPlazaCodexBestiaryExtraDetailSection>
           </div>
         </article>
       </div>

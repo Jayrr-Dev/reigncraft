@@ -1,10 +1,10 @@
 /**
- * Study-gates animal playable avatar skins behind bestiary playable tier.
+ * Study-gates animal playable avatar skins behind bestiary mastery.
  *
  * @module components/world/domains/checkingWorldPlazaAnimalPlayableAvatarSkinStudyUnlocked
  */
 
-import { DEFINING_PLAZA_BESTIARY_STUDY_TIER_THRESHOLDS } from '@/components/home/domains/definingPlazaBestiaryStudyTier';
+import { checkingPlazaCodexStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import {
   checkingWorldPlazaAnimalPlayableAvatarSkinId,
   resolvingWorldPlazaAnimalPlayableAvatarSkinRow,
@@ -46,7 +46,7 @@ export function resolvingWorldPlazaAnimalPlayableAvatarUnlockWildlifeSpeciesId(
  * True when the skin is selectable for the current bestiary study progress.
  *
  * Non-animal skins always pass. Animal skins without a wildlife species stay
- * unlocked. Catalog animals need the playable study tier.
+ * unlocked. Catalog animals need mastery (100 studies).
  */
 export function checkingWorldPlazaAnimalPlayableAvatarSkinStudyUnlocked(
   skinId: DefiningWorldPlazaAvatarSkinId,
@@ -61,7 +61,9 @@ export function checkingWorldPlazaAnimalPlayableAvatarSkinStudyUnlocked(
 
   const studyCount = studyCountsBySpeciesId[unlockSpeciesId] ?? 0;
 
-  return (
-    studyCount >= DEFINING_PLAZA_BESTIARY_STUDY_TIER_THRESHOLDS.playable
+  return checkingPlazaCodexStudyTierUnlocked(
+    'bestiary',
+    'mastery',
+    studyCount
   );
 }

@@ -1,4 +1,6 @@
 import { computingPlazaPathologyTotalStudyPoints } from '@/components/home/domains/computingPlazaPathologyStudyPoints';
+import type { PlazaCodexStudyTierId } from '@/components/home/domains/definingPlazaCodexStudyTier';
+import type { PlazaCodexStudyTrackId } from '@/components/home/domains/definingPlazaCodexStudyTrackRegistry';
 import {
   DEFINING_PLAZA_PATHOLOGY_GUIDE_ENTRIES,
   LABELING_PLAZA_PATHOLOGY_FLOWER_SOURCE,
@@ -7,15 +9,14 @@ import {
   LABELING_PLAZA_PATHOLOGY_UNDISCOVERED_NAME,
   type DefiningPlazaPathologyGuideEntry,
 } from '@/components/home/domains/definingPlazaPathologyGuideConstants';
-import type { PlazaPathologyStudyTierId } from '@/components/home/domains/definingPlazaPathologyStudyTier';
 import {
   checkingPlazaPathologyDiseaseHasWildlifeCarriers,
   listingPlazaPathologySpeciesIdsCausingDisease,
 } from '@/components/home/domains/resolvingPlazaPathologyCreatureDiseaseLinks';
 import {
-  checkingPlazaPathologyStudyTierUnlocked,
-  resolvingPlazaPathologyStudyTierId,
-} from '@/components/home/domains/resolvingPlazaPathologyStudyTier';
+  checkingPlazaCodexStudyTierUnlocked,
+  resolvingPlazaCodexStudyTierId,
+} from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import {
   listingPlazaMechanicsDiseaseStageGuideEntries,
   resolvingPlazaMechanicsDiseaseTimelineGuide,
@@ -49,7 +50,7 @@ export type PlazaPathologyGuideDisplayEntry = {
    * 0 when not obtained.
    */
   studyCount: number;
-  studyTierId: PlazaPathologyStudyTierId;
+  studyTierId: PlazaCodexStudyTierId;
   severity: DefiningWorldPlazaEntityDiseaseSeverity;
   severityLabel: string;
   icon: MappingWorldPlazaEntityBuffHudIconName;
@@ -66,6 +67,8 @@ export type PlazaPathologyGuideDisplayEntry = {
   incubationRangeLabel: string | null;
   illnessDurationRangeLabel: string | null;
 };
+
+const PATHOLOGY_TRACK: PlazaCodexStudyTrackId = 'pathology';
 
 function resolvingPlazaPathologyCarrierChips(
   diseaseId: DefiningWorldPlazaEntityDiseaseId
@@ -126,20 +129,25 @@ export function resolvingPlazaPathologyGuideDisplayEntries(
         isObtained,
         studyCount
       );
-      const isStudied = checkingPlazaPathologyStudyTierUnlocked(
-        'fieldNotes',
+      const isStudied = checkingPlazaCodexStudyTierUnlocked(
+        PATHOLOGY_TRACK,
+        'familiarity',
         studyCount
       );
-      const isPropertiesUnlocked = checkingPlazaPathologyStudyTierUnlocked(
-        'properties',
+      const isPropertiesUnlocked = checkingPlazaCodexStudyTierUnlocked(
+        PATHOLOGY_TRACK,
+        'application',
         studyCount
       );
-      const isCarriersUnlocked = checkingPlazaPathologyStudyTierUnlocked(
-        'habitats',
+      // Symptoms / carriers stay at proficiency (legacy habitats title override).
+      const isCarriersUnlocked = checkingPlazaCodexStudyTierUnlocked(
+        PATHOLOGY_TRACK,
+        'proficiency',
         studyCount
       );
-      const isFullyStudied = checkingPlazaPathologyStudyTierUnlocked(
-        'full',
+      const isFullyStudied = checkingPlazaCodexStudyTierUnlocked(
+        PATHOLOGY_TRACK,
+        'mastery',
         studyCount
       );
       const timelineGuide = isFullyStudied
@@ -157,7 +165,10 @@ export function resolvingPlazaPathologyGuideDisplayEntries(
         linkedCreatureStudies,
         infectionStudyPoints,
         studyCount,
-        studyTierId: resolvingPlazaPathologyStudyTierId(studyCount),
+        studyTierId: resolvingPlazaCodexStudyTierId(
+          PATHOLOGY_TRACK,
+          studyCount
+        ),
         severity: entry.severity,
         severityLabel: LABELING_PLAZA_PATHOLOGY_SEVERITY[entry.severity],
         icon: entry.icon,
@@ -174,7 +185,7 @@ export function resolvingPlazaPathologyGuideDisplayEntries(
           ? entry.propertiesSummary
           : null,
         apostleFlavor: isFullyStudied ? (entry.apostleFlavor ?? null) : null,
-        stageGuideEntries: isPropertiesUnlocked
+        stageGuideEntries: isCarriersUnlocked
           ? listingPlazaMechanicsDiseaseStageGuideEntries(entry.diseaseId)
           : null,
         carrierChips: isCarriersUnlocked

@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import {
   checkingWorldPlazaMushroomCatalogCoversAllSpecies,
   checkingWorldPlazaMushroomDayScheduleMatches,
@@ -8,6 +7,7 @@ import {
 } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
 import { DEFINING_WORLD_PLAZA_MUSHROOM_SPECIES_IDS } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
 import { resolvingWildlifeMeatCookRecipeByRawItemTypeId } from '@/components/world/wildlife/domains/definingWildlifeMeatCookRecipes';
+import { describe, expect, it } from 'vitest';
 
 describe('definingWorldPlazaMushroomRegistry', () => {
   it('covers all 16 species with unique raw and cooked item ids', () => {
@@ -18,7 +18,9 @@ describe('definingWorldPlazaMushroomRegistry', () => {
       DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG.map((entry) => entry.rawItemTypeId)
     );
     const cookedIds = new Set(
-      DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG.map((entry) => entry.cookedItemTypeId)
+      DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG.map(
+        (entry) => entry.cookedItemTypeId
+      )
     );
 
     expect(rawIds.size).toBe(16);
@@ -32,20 +34,21 @@ describe('definingWorldPlazaMushroomRegistry', () => {
   });
 
   it('gates day parity and digit endings', () => {
-    const parasol = resolvingWorldPlazaMushroomCatalogEntryBySpeciesId(
-      'white-parasol'
-    )!;
-    const vomiter = resolvingWorldPlazaMushroomCatalogEntryBySpeciesId(
-      'green-vomiter'
-    )!;
-    const morel = resolvingWorldPlazaMushroomCatalogEntryBySpeciesId(
-      'honeycomb-morel'
-    )!;
+    const parasol =
+      resolvingWorldPlazaMushroomCatalogEntryBySpeciesId('white-parasol')!;
+    const vomiter =
+      resolvingWorldPlazaMushroomCatalogEntryBySpeciesId('green-vomiter')!;
+    const morel =
+      resolvingWorldPlazaMushroomCatalogEntryBySpeciesId('honeycomb-morel')!;
 
     expect(checkingWorldPlazaMushroomDayScheduleMatches(parasol, 2)).toBe(true);
-    expect(checkingWorldPlazaMushroomDayScheduleMatches(parasol, 3)).toBe(false);
+    expect(checkingWorldPlazaMushroomDayScheduleMatches(parasol, 3)).toBe(
+      false
+    );
     expect(checkingWorldPlazaMushroomDayScheduleMatches(vomiter, 3)).toBe(true);
-    expect(checkingWorldPlazaMushroomDayScheduleMatches(vomiter, 2)).toBe(false);
+    expect(checkingWorldPlazaMushroomDayScheduleMatches(vomiter, 2)).toBe(
+      false
+    );
     expect(checkingWorldPlazaMushroomDayScheduleMatches(morel, 4)).toBe(true);
     expect(checkingWorldPlazaMushroomDayScheduleMatches(morel, 7)).toBe(true);
     expect(checkingWorldPlazaMushroomDayScheduleMatches(morel, 5)).toBe(false);
@@ -59,6 +62,21 @@ describe('definingWorldPlazaMushroomRegistry', () => {
     expect(checkingWorldPlazaMushroomPhaseWindowMatches('day', 0.95)).toBe(
       false
     );
+  });
+
+  it('marks shelf-oyster as all-day and funeral-bell as night', () => {
+    expect(
+      resolvingWorldPlazaMushroomCatalogEntryBySpeciesId('shelf-oyster')
+        ?.timeOfDay
+    ).toBe('any');
+    expect(
+      resolvingWorldPlazaMushroomCatalogEntryBySpeciesId('funeral-bell')
+        ?.timeOfDay
+    ).toBe('night');
+    expect(
+      resolvingWorldPlazaMushroomCatalogEntryBySpeciesId('cloud-puff')
+        ?.timeOfDay
+    ).toBe('day');
   });
 
   it('registers campfire cook recipes for every raw mushroom', () => {

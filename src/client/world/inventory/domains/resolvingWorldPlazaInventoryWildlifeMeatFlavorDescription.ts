@@ -1,9 +1,9 @@
 /**
  * Study-gated flavor description tiers for wildlife meat inspect.
  *
- * Tier 1: sensory / vague (1 study)
- * Tier 2: cautious risk hint, no disease names (10 studies)
- * Tier 3: full authored copy with disease and buff flavor (50+ studies)
+ * Tier 1: sensory / vague (familiarity, 1 study)
+ * Tier 2: cautious risk hint, no disease names (understanding, 5 studies)
+ * Tier 3: full authored copy with disease and buff flavor (application, 20+)
  *
  * @module components/world/inventory/domains/resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription
  */

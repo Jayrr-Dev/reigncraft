@@ -5,12 +5,12 @@
  */
 
 import { DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaHerbariumBerryGuideConstants';
-import { DEFINING_PLAZA_HERBARIUM_BERRY_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumBerryStudyTier';
 import {
-  formattingPlazaHerbariumBerryStudyCountProgress,
-  resolvingPlazaHerbariumBerryNextStudyTierUnlockCount,
-  resolvingPlazaHerbariumBerryStudyTierId,
-} from '@/components/home/domains/resolvingPlazaHerbariumBerryStudyTier';
+  formattingPlazaCodexStudyCountProgress,
+  resolvingPlazaCodexNextStudyTierUnlockCount,
+  resolvingPlazaCodexStudyFullCount,
+  resolvingPlazaCodexStudyTierId,
+} from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import { resolvingWorldPlazaEntityBuffDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_BERRY_DETAIL_REVEAL_BY_TIER,
@@ -22,6 +22,8 @@ import type {
   DefiningWorldPlazaInventoryItemDetailInfoRow,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemDetailConstants';
 import type { WorldShrubBerryLootKind } from '../../../../shared/worldShrubBerryLoot';
+
+const HERBARIUM_BERRY_TRACK = 'herbarium-berry' as const;
 
 const WORLD_PLAZA_ITEM_TYPE_ID_TO_BERRY_LOOT_KIND = new Map<
   string,
@@ -53,7 +55,7 @@ export function resolvingWorldPlazaInventoryBerryDetailReveal(
   studyCount: number
 ): DefiningWorldPlazaInventoryBerryDetailReveal {
   return DEFINING_WORLD_PLAZA_INVENTORY_BERRY_DETAIL_REVEAL_BY_TIER[
-    resolvingPlazaHerbariumBerryStudyTierId(studyCount)
+    resolvingPlazaCodexStudyTierId(HERBARIUM_BERRY_TRACK, studyCount)
   ];
 }
 
@@ -128,18 +130,21 @@ export function resolvingWorldPlazaInventoryBerryDetailContent(
   }
 
   if (reveal.showStudyProgress) {
-    const nextUnlock = resolvingPlazaHerbariumBerryNextStudyTierUnlockCount(
+    const nextUnlock = resolvingPlazaCodexNextStudyTierUnlockCount(
+      HERBARIUM_BERRY_TRACK,
       options.studyCount
     );
-    const progressLabel = formattingPlazaHerbariumBerryStudyCountProgress(
+    const progressLabel = formattingPlazaCodexStudyCountProgress(
+      HERBARIUM_BERRY_TRACK,
       options.studyCount
     );
+    const fullCount = resolvingPlazaCodexStudyFullCount(HERBARIUM_BERRY_TRACK);
 
     infoRows.push({
       id: 'herbarium-study',
       label: 'Herbarium Study',
       value:
-        options.studyCount >= DEFINING_PLAZA_HERBARIUM_BERRY_STUDY_FULL_COUNT
+        options.studyCount >= fullCount
           ? `${progressLabel} · Full dossier`
           : nextUnlock !== null
             ? `${progressLabel} · next unlock ${nextUnlock}`

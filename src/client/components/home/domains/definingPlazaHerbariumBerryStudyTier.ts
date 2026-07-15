@@ -1,13 +1,26 @@
+/**
+ * Legacy Herbarium berry study tier ids (shim over flower / unified ladder).
+ *
+ * @module components/home/domains/definingPlazaHerbariumBerryStudyTier
+ */
+
 import {
   DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_FULL_COUNT,
   DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_TIER_BOOK_ICONS,
   DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_TIER_ORDER,
   DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_TIER_THRESHOLDS,
+  DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_TIER_TO_CODEX,
+  LABELING_PLAZA_HERBARIUM_FLOWER_STUDY_TIER_SECTION_TITLES,
+  LABELING_PLAZA_HERBARIUM_FLOWER_STUDY_TIER_TEASERS,
   type PlazaHerbariumFlowerStudyTierId,
 } from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
 
-/** Berry study reuses the flower tier ids and thresholds (0/1/5/15/100). */
+/** @deprecated Prefer PlazaCodexStudyTierId. Kept for existing call sites. */
 export type PlazaHerbariumBerryStudyTierId = PlazaHerbariumFlowerStudyTierId;
+
+/** Maps legacy berry tier ids onto the unified ladder. */
+export const DEFINING_PLAZA_HERBARIUM_BERRY_STUDY_TIER_TO_CODEX =
+  DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_TIER_TO_CODEX;
 
 /** Minimum Study points required to reach each berry study tier. */
 export const DEFINING_PLAZA_HERBARIUM_BERRY_STUDY_TIER_THRESHOLDS =
@@ -26,23 +39,9 @@ export const DEFINING_PLAZA_HERBARIUM_BERRY_STUDY_TIER_BOOK_ICONS =
   DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_TIER_BOOK_ICONS;
 
 /** Player-facing section titles for each berry tier block. */
-export const LABELING_PLAZA_HERBARIUM_BERRY_STUDY_TIER_SECTION_TITLES: Record<
-  Exclude<PlazaHerbariumBerryStudyTierId, 'sighted'>,
-  string
-> = {
-  fieldNotes: 'Field notes',
-  properties: 'Properties',
-  habitats: 'Habitats',
-  full: 'Full dossier',
-};
+export const LABELING_PLAZA_HERBARIUM_BERRY_STUDY_TIER_SECTION_TITLES =
+  LABELING_PLAZA_HERBARIUM_FLOWER_STUDY_TIER_SECTION_TITLES;
 
 /** One-line teasers shown before a berry tier unlocks. */
-export const LABELING_PLAZA_HERBARIUM_BERRY_STUDY_TIER_TEASERS: Record<
-  Exclude<PlazaHerbariumBerryStudyTierId, 'sighted'>,
-  string
-> = {
-  fieldNotes: 'Needs more study....',
-  properties: 'Needs more study....',
-  habitats: 'Needs more study....',
-  full: 'Needs more study....',
-};
+export const LABELING_PLAZA_HERBARIUM_BERRY_STUDY_TIER_TEASERS =
+  LABELING_PLAZA_HERBARIUM_FLOWER_STUDY_TIER_TEASERS;

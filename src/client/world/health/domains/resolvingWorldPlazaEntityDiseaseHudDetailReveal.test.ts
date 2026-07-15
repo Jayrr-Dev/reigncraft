@@ -19,7 +19,7 @@ describe('resolvingWorldPlazaEntityDiseaseHudDetailReveal', () => {
     });
   });
 
-  it('unlocks name and flavor at field notes (1)', () => {
+  it('unlocks name and flavor at familiarity (1)', () => {
     expect(resolvingWorldPlazaEntityDiseaseHudDetailReveal(1)).toEqual({
       showName: true,
       showSeverity: true,
@@ -28,7 +28,7 @@ describe('resolvingWorldPlazaEntityDiseaseHudDetailReveal', () => {
     });
   });
 
-  it('unlocks mechanical stages at properties (5)', () => {
+  it('unlocks mechanical stages at understanding (5)', () => {
     expect(resolvingWorldPlazaEntityDiseaseHudDetailReveal(5)).toEqual({
       showName: true,
       showSeverity: true,

@@ -5,13 +5,13 @@
  */
 
 import { DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaLapidaryGuideConstants';
-import { DEFINING_PLAZA_LAPIDARY_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaLapidaryStudyTier';
 import { resolvingPlazaLapidaryOreVeinStatRows } from '@/components/home/domains/resolvingPlazaLapidaryOreVeinStatRows';
 import {
-  formattingPlazaLapidaryStudyCountProgress,
-  resolvingPlazaLapidaryNextStudyTierUnlockCount,
-  resolvingPlazaLapidaryStudyTierId,
-} from '@/components/home/domains/resolvingPlazaLapidaryStudyTier';
+  formattingPlazaCodexStudyCountProgress,
+  resolvingPlazaCodexNextStudyTierUnlockCount,
+  resolvingPlazaCodexStudyFullCount,
+  resolvingPlazaCodexStudyTierId,
+} from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import { DEFINING_WORLD_PLAZA_ORE_SPECIES_HABITAT_LABEL } from '@/components/world/domains/definingWorldPlazaOreBiomeRarityConstants';
 import type {
   DefiningWorldPlazaInventoryItemDetailBadge,
@@ -22,6 +22,8 @@ import {
   type DefiningWorldPlazaInventoryOreDetailReveal,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreDetailRevealConstants';
 import type { WorldOreSpeciesId } from '../../../../shared/worldOreRarity';
+
+const LAPIDARY_TRACK = 'lapidary' as const;
 
 function resolvingLapidaryOreGuideEntry(speciesId: WorldOreSpeciesId) {
   return (
@@ -38,7 +40,7 @@ export function resolvingWorldPlazaInventoryOreDetailReveal(
   studyCount: number
 ): DefiningWorldPlazaInventoryOreDetailReveal {
   return DEFINING_WORLD_PLAZA_INVENTORY_ORE_DETAIL_REVEAL_BY_TIER[
-    resolvingPlazaLapidaryStudyTierId(studyCount)
+    resolvingPlazaCodexStudyTierId(LAPIDARY_TRACK, studyCount)
   ];
 }
 
@@ -79,18 +81,21 @@ export function resolvingWorldPlazaInventoryOreDetailContent(
   }
 
   if (reveal.showStudyProgress) {
-    const nextUnlock = resolvingPlazaLapidaryNextStudyTierUnlockCount(
+    const nextUnlock = resolvingPlazaCodexNextStudyTierUnlockCount(
+      LAPIDARY_TRACK,
       options.studyCount
     );
-    const progressLabel = formattingPlazaLapidaryStudyCountProgress(
+    const progressLabel = formattingPlazaCodexStudyCountProgress(
+      LAPIDARY_TRACK,
       options.studyCount
     );
+    const fullCount = resolvingPlazaCodexStudyFullCount(LAPIDARY_TRACK);
 
     infoRows.push({
       id: 'lapidary-study',
       label: 'Lapidary Study',
       value:
-        options.studyCount >= DEFINING_PLAZA_LAPIDARY_STUDY_FULL_COUNT
+        options.studyCount >= fullCount
           ? `${progressLabel} · Full dossier`
           : nextUnlock !== null
             ? `${progressLabel} · next unlock ${nextUnlock}`

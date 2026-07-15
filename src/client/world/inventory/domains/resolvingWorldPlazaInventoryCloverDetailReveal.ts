@@ -9,13 +9,13 @@ import {
   LABELING_PLAZA_HERBARIUM_CLOVER_LUCKY_ACTIVE_VAGUE_DESCRIPTION,
   LABELING_PLAZA_HERBARIUM_CLOVER_LUCKY_EFFECTS_LOCKED_TEASER,
 } from '@/components/home/domains/definingPlazaHerbariumCloverGuideConstants';
-import { DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumCloverStudyTier';
 import { resolvingPlazaHerbariumCloverLuckyEffectStatRows } from '@/components/home/domains/resolvingPlazaHerbariumCloverLuckyEffectStatRows';
 import {
-  formattingPlazaHerbariumCloverStudyCountProgress,
-  resolvingPlazaHerbariumCloverNextStudyTierUnlockCount,
-  resolvingPlazaHerbariumCloverStudyTierId,
-} from '@/components/home/domains/resolvingPlazaHerbariumCloverStudyTier';
+  formattingPlazaCodexStudyCountProgress,
+  resolvingPlazaCodexNextStudyTierUnlockCount,
+  resolvingPlazaCodexStudyFullCount,
+  resolvingPlazaCodexStudyTierId,
+} from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_CLOVER_DETAIL_REVEAL_BY_TIER,
   type DefiningWorldPlazaInventoryCloverDetailReveal,
@@ -29,6 +29,8 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLOVER_4_LEAF,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import type { WorldCloverSearchLootKind } from '../../../../shared/worldCloverSearchLoot';
+
+const HERBARIUM_CLOVER_TRACK = 'herbarium-clover' as const;
 
 export function parsingWorldPlazaCloverKindFromItemTypeId(
   itemTypeId: string
@@ -48,7 +50,7 @@ export function resolvingWorldPlazaInventoryCloverDetailReveal(
   studyCount: number
 ): DefiningWorldPlazaInventoryCloverDetailReveal {
   return DEFINING_WORLD_PLAZA_INVENTORY_CLOVER_DETAIL_REVEAL_BY_TIER[
-    resolvingPlazaHerbariumCloverStudyTierId(studyCount)
+    resolvingPlazaCodexStudyTierId(HERBARIUM_CLOVER_TRACK, studyCount)
   ];
 }
 
@@ -85,7 +87,12 @@ export function resolvingWorldPlazaInventoryCloverDetailContent(
   const infoRows: DefiningWorldPlazaInventoryItemDetailInfoRow[] = [];
 
   if (reveal.showStudyProgress) {
-    const nextUnlock = resolvingPlazaHerbariumCloverNextStudyTierUnlockCount(
+    const nextUnlock = resolvingPlazaCodexNextStudyTierUnlockCount(
+      HERBARIUM_CLOVER_TRACK,
+      options.studyCount
+    );
+    const progressLabel = formattingPlazaCodexStudyCountProgress(
+      HERBARIUM_CLOVER_TRACK,
       options.studyCount
     );
 
@@ -94,8 +101,8 @@ export function resolvingWorldPlazaInventoryCloverDetailContent(
       label: 'Herbarium study',
       value:
         nextUnlock === null
-          ? `${formattingPlazaHerbariumCloverStudyCountProgress(options.studyCount)} · Fully studied`
-          : `${formattingPlazaHerbariumCloverStudyCountProgress(options.studyCount)} · Next at ${nextUnlock}`,
+          ? `${progressLabel} · Fully studied`
+          : `${progressLabel} · Next at ${nextUnlock}`,
       tone: 'neutral',
     });
   }
@@ -120,8 +127,8 @@ export function resolvingWorldPlazaInventoryCloverDetailContent(
   }
 
   if (reveal.showPropertiesSummary && guideEntry) {
-    const isFullyStudied =
-      options.studyCount >= DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_FULL_COUNT;
+    const fullCount = resolvingPlazaCodexStudyFullCount(HERBARIUM_CLOVER_TRACK);
+    const isFullyStudied = options.studyCount >= fullCount;
     const propertiesSummary =
       cloverKind === 'four_leaf' && isFullyStudied
         ? (guideEntry.propertiesSummaryFull ?? guideEntry.propertiesSummary)

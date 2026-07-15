@@ -1,19 +1,20 @@
 import { LABELING_PLAZA_BIOMES_UNDISCOVERED_NAME } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
+import type { PlazaCodexStudyTierId } from '@/components/home/domains/definingPlazaCodexStudyTier';
+import type { PlazaCodexStudyTrackId } from '@/components/home/domains/definingPlazaCodexStudyTrackRegistry';
 import {
   DEFINING_PLAZA_LAPIDARY_ORE_GUIDE_ENTRIES,
   LABELING_PLAZA_LAPIDARY_UNDISCOVERED_HINT,
   LABELING_PLAZA_LAPIDARY_UNDISCOVERED_NAME,
   type DefiningPlazaLapidaryOreEntry,
 } from '@/components/home/domains/definingPlazaLapidaryGuideConstants';
-import type { PlazaLapidaryStudyTierId } from '@/components/home/domains/definingPlazaLapidaryStudyTier';
+import {
+  checkingPlazaCodexStudyTierUnlocked,
+  resolvingPlazaCodexStudyTierId,
+} from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import {
   resolvingPlazaLapidaryEntryRarity,
   resolvingPlazaLapidaryEntryRarityLabel,
 } from '@/components/home/domains/resolvingPlazaLapidaryRarity';
-import {
-  checkingPlazaLapidaryStudyTierUnlocked,
-  resolvingPlazaLapidaryStudyTierId,
-} from '@/components/home/domains/resolvingPlazaLapidaryStudyTier';
 import {
   resolvingPlazaLapidaryOreVeinStatRows,
   type PlazaLapidaryOreVeinStatRow,
@@ -42,7 +43,7 @@ export type PlazaLapidaryGuideDisplayEntry = {
   isStudied: boolean;
   isFullyStudied: boolean;
   studyCount: number;
-  studyTierId: PlazaLapidaryStudyTierId;
+  studyTierId: PlazaCodexStudyTierId;
   rarity: DefiningWorldPlazaInventoryItemRarity;
   rarityLabel: string;
   icon: string;
@@ -55,6 +56,8 @@ export type PlazaLapidaryGuideDisplayEntry = {
   biomeKinds: readonly DefiningWorldPlazaBiomeKind[];
   biomeChips: readonly PlazaLapidaryGuideBiomeChip[];
 };
+
+const LAPIDARY_TRACK: PlazaCodexStudyTrackId = 'lapidary';
 
 /** Biome kinds where column rocks (and ore veins) can appear. */
 function listingPlazaLapidaryOreBearingBiomeKinds(): readonly DefiningWorldPlazaBiomeKind[] {
@@ -118,16 +121,29 @@ export function resolvingPlazaLapidaryGuideDisplayEntries(
         sightedOreSpeciesIds.has(entry.speciesId),
         studyCount
       );
-      const isStudied = checkingPlazaLapidaryStudyTierUnlocked(
-        'fieldNotes',
+      const isStudied = checkingPlazaCodexStudyTierUnlocked(
+        LAPIDARY_TRACK,
+        'familiarity',
         studyCount
       );
-      const isPropertiesUnlocked = checkingPlazaLapidaryStudyTierUnlocked(
-        'properties',
+      const isPropertiesUnlocked = checkingPlazaCodexStudyTierUnlocked(
+        LAPIDARY_TRACK,
+        'application',
         studyCount
       );
-      const isFullyStudied = checkingPlazaLapidaryStudyTierUnlocked(
-        'full',
+      const isHabitatsUnlocked = checkingPlazaCodexStudyTierUnlocked(
+        LAPIDARY_TRACK,
+        'application',
+        studyCount
+      );
+      const isExpertiseUnlocked = checkingPlazaCodexStudyTierUnlocked(
+        LAPIDARY_TRACK,
+        'expertise',
+        studyCount
+      );
+      const isFullyStudied = checkingPlazaCodexStudyTierUnlocked(
+        LAPIDARY_TRACK,
+        'mastery',
         studyCount
       );
       const rarity = resolvingPlazaLapidaryEntryRarity(entry.speciesId);
@@ -141,10 +157,10 @@ export function resolvingPlazaLapidaryGuideDisplayEntries(
         isStudied,
         isFullyStudied,
         studyCount,
-        studyTierId: resolvingPlazaLapidaryStudyTierId(studyCount),
+        studyTierId: resolvingPlazaCodexStudyTierId(LAPIDARY_TRACK, studyCount),
         rarity,
         rarityLabel: resolvingPlazaLapidaryEntryRarityLabel(rarity),
-        veinStatRows: isFullyStudied
+        veinStatRows: isExpertiseUnlocked
           ? resolvingPlazaLapidaryOreVeinStatRows(entry.speciesId)
           : null,
         displayName: isSighted
@@ -159,10 +175,9 @@ export function resolvingPlazaLapidaryGuideDisplayEntries(
           : null,
         apostleFlavor: isFullyStudied ? (entry.apostleFlavor ?? null) : null,
         biomeKinds: oreBiomeKinds,
-        biomeChips: buildingPlazaLapidaryBiomeChips(
-          oreBiomeKinds,
-          exploredBiomeKinds
-        ),
+        biomeChips: isHabitatsUnlocked
+          ? buildingPlazaLapidaryBiomeChips(oreBiomeKinds, exploredBiomeKinds)
+          : [],
       };
     }
   );

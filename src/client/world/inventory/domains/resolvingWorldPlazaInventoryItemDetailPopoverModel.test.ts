@@ -129,7 +129,7 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel flower Study', () =
       unstudied?.infoRows.some((row) => row.id === 'flower-when-eaten')
     ).toBe(false);
 
-    const fieldNotes = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+    const familiarity = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       {
         id: 'calendula-1',
         itemTypeId: calendulaItemTypeId,
@@ -142,12 +142,12 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel flower Study', () =
       }
     );
 
-    expect(fieldNotes?.description.length).toBeGreaterThan(0);
+    expect(familiarity?.description.length).toBeGreaterThan(0);
     expect(
-      fieldNotes?.infoRows.some((row) => row.id === 'flower-when-eaten')
+      familiarity?.infoRows.some((row) => row.id === 'flower-when-eaten')
     ).toBe(false);
 
-    const properties = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+    const application = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       {
         id: 'calendula-1',
         itemTypeId: calendulaItemTypeId,
@@ -156,18 +156,18 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel flower Study', () =
       },
       {
         isEquipped: false,
-        flowerStudyCountsBySpeciesId: { calendula: 5 },
+        flowerStudyCountsBySpeciesId: { calendula: 20 },
       }
     );
 
     expect(
-      properties?.infoRows.some((row) => row.id === 'flower-when-eaten')
+      application?.infoRows.some((row) => row.id === 'flower-when-eaten')
     ).toBe(true);
     expect(
-      properties?.infoRows.some((row) => row.id === 'petal-sickness')
+      application?.infoRows.some((row) => row.id === 'petal-sickness')
     ).toBe(false);
 
-    const habitats = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+    const proficiency = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       {
         id: 'calendula-1',
         itemTypeId: calendulaItemTypeId,
@@ -176,18 +176,18 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel flower Study', () =
       },
       {
         isEquipped: false,
-        flowerStudyCountsBySpeciesId: { calendula: 15 },
+        flowerStudyCountsBySpeciesId: { calendula: 50 },
       }
     );
 
-    expect(habitats?.infoRows.some((row) => row.id === 'petal-sickness')).toBe(
-      true
-    );
-    expect(habitats?.infoRows.some((row) => row.id === 'flower-diseases')).toBe(
-      true
-    );
     expect(
-      habitats?.infoRows.find((row) => row.id === 'petal-sickness')?.value
+      proficiency?.infoRows.some((row) => row.id === 'petal-sickness')
+    ).toBe(true);
+    expect(
+      proficiency?.infoRows.some((row) => row.id === 'flower-diseases')
+    ).toBe(true);
+    expect(
+      proficiency?.infoRows.find((row) => row.id === 'petal-sickness')?.value
     ).not.toContain('3%');
 
     const full = resolvingWorldPlazaInventoryItemDetailPopoverModel(
@@ -242,7 +242,7 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel ore Study', () => {
       unstudied?.infoRows.some((row) => row.id === 'ore-when-worked')
     ).toBe(false);
 
-    const fieldNotes = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+    const familiarity = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       {
         id: 'iron-1',
         itemTypeId: ironItemTypeId,
@@ -255,12 +255,12 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel ore Study', () => {
       }
     );
 
-    expect(fieldNotes?.description.length).toBeGreaterThan(0);
+    expect(familiarity?.description.length).toBeGreaterThan(0);
     expect(
-      fieldNotes?.infoRows.some((row) => row.id === 'ore-when-worked')
+      familiarity?.infoRows.some((row) => row.id === 'ore-when-worked')
     ).toBe(false);
 
-    const properties = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+    const application = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       {
         id: 'iron-1',
         itemTypeId: ironItemTypeId,
@@ -269,18 +269,18 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel ore Study', () => {
       },
       {
         isEquipped: false,
-        oreStudyCountsBySpeciesId: { iron: 5 },
+        oreStudyCountsBySpeciesId: { iron: 20 },
       }
     );
 
     expect(
-      properties?.infoRows.some((row) => row.id === 'ore-when-worked')
+      application?.infoRows.some((row) => row.id === 'ore-when-worked')
     ).toBe(true);
-    expect(properties?.infoRows.some((row) => row.id === 'ore-habitat')).toBe(
+    expect(application?.infoRows.some((row) => row.id === 'ore-habitat')).toBe(
       false
     );
 
-    const habitats = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+    const proficiency = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       {
         id: 'iron-1',
         itemTypeId: ironItemTypeId,
@@ -289,18 +289,20 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel ore Study', () => {
       },
       {
         isEquipped: false,
-        oreStudyCountsBySpeciesId: { iron: 15 },
+        oreStudyCountsBySpeciesId: { iron: 50 },
       }
     );
 
-    expect(habitats?.infoRows.some((row) => row.id === 'ore-habitat')).toBe(
+    expect(proficiency?.infoRows.some((row) => row.id === 'ore-habitat')).toBe(
       true
     );
     expect(
-      habitats?.infoRows.some((row) => row.id.startsWith('ore-vein-label-'))
+      proficiency?.infoRows.some((row) => row.id.startsWith('ore-vein-label-'))
     ).toBe(true);
     expect(
-      habitats?.infoRows.some((row) => row.value.includes('ladder reference'))
+      proficiency?.infoRows.some((row) =>
+        row.value.includes('ladder reference')
+      )
     ).toBe(false);
 
     const full = resolvingWorldPlazaInventoryItemDetailPopoverModel(
@@ -419,7 +421,7 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel berry Study', () =>
     expect(model?.canStudy).toBe(false);
   });
 
-  it('hides hunger and heal until habitats, then unlocks by tier', () => {
+  it('hides hunger and heal until proficiency, then unlocks by tier', () => {
     const unstudied = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       {
         id: 'coffee-cherry-1',
@@ -442,7 +444,7 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel berry Study', () =>
       false
     );
 
-    const fieldNotes = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+    const familiarity = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       {
         id: 'coffee-cherry-1',
         itemTypeId: coffeeCherryItemTypeId,
@@ -455,10 +457,12 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel berry Study', () =>
       }
     );
 
-    expect(fieldNotes?.description.length).toBeGreaterThan(0);
-    expect(fieldNotes?.badges.some((badge) => badge.id === 'food')).toBe(false);
+    expect(familiarity?.description.length).toBeGreaterThan(0);
+    expect(familiarity?.badges.some((badge) => badge.id === 'food')).toBe(
+      false
+    );
 
-    const properties = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+    const application = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       {
         id: 'coffee-cherry-1',
         itemTypeId: coffeeCherryItemTypeId,
@@ -467,16 +471,18 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel berry Study', () =>
       },
       {
         isEquipped: false,
-        berryStudyCountsByLootKind: { red_berry: 5 },
+        berryStudyCountsByLootKind: { red_berry: 20 },
       }
     );
 
     expect(
-      properties?.infoRows.some((row) => row.id === 'berry-when-eaten')
+      application?.infoRows.some((row) => row.id === 'berry-when-eaten')
     ).toBe(true);
-    expect(properties?.badges.some((badge) => badge.id === 'food')).toBe(false);
+    expect(application?.badges.some((badge) => badge.id === 'food')).toBe(
+      false
+    );
 
-    const habitats = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+    const proficiency = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       {
         id: 'coffee-cherry-1',
         itemTypeId: coffeeCherryItemTypeId,
@@ -485,20 +491,20 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel berry Study', () =>
       },
       {
         isEquipped: false,
-        berryStudyCountsByLootKind: { red_berry: 15 },
+        berryStudyCountsByLootKind: { red_berry: 50 },
         playerEffectiveMaxHealth: 100,
       }
     );
 
-    expect(habitats?.badges.some((badge) => badge.id === 'food')).toBe(true);
-    expect(habitats?.badges.some((badge) => badge.id === 'food-heal')).toBe(
+    expect(proficiency?.badges.some((badge) => badge.id === 'food')).toBe(true);
+    expect(proficiency?.badges.some((badge) => badge.id === 'food-heal')).toBe(
       true
     );
     expect(
-      habitats?.infoRows.some((row) => row.id === 'berry-well-fed')
+      proficiency?.infoRows.some((row) => row.id === 'berry-well-fed')
     ).toBe(true);
     expect(
-      habitats?.infoRows.find((row) => row.id === 'berry-well-fed')?.value
+      proficiency?.infoRows.find((row) => row.id === 'berry-well-fed')?.value
     ).not.toMatch(/%/);
 
     const full = resolvingWorldPlazaInventoryItemDetailPopoverModel(

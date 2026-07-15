@@ -4,7 +4,8 @@
  * @module components/home/domains/resolvingPlazaBestiaryGuideTieredStats
  */
 
-import { checkingPlazaBestiaryStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
+import type { PlazaCodexStudyTrackId } from '@/components/home/domains/definingPlazaCodexStudyTrackRegistry';
+import { checkingPlazaCodexStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import { resolvingWorldPlazaScaledAttackIntervalMs } from '@/components/world/domains/resolvingWorldPlazaGlobalAttackSpeedScale';
 import { resolvingWorldPlazaEntityBleedSeverityDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBleedSeverityRegistry';
 import { resolvingWorldPlazaEntityBuffDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
@@ -20,6 +21,8 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { DEFINING_WILDLIFE_STAMINA_FATIGUE_TIER_CONFIG } from '@/components/world/wildlife/domains/definingWildlifeStaminaFatigueConstants';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+
+const BESTIARY_TRACK: PlazaCodexStudyTrackId = 'bestiary';
 
 export type PlazaBestiaryGuideCombatStats = {
   maxHealth: number;
@@ -156,12 +159,14 @@ function listingPlazaBestiaryHazardLabels(
   return labels;
 }
 
-/** Combat vitals unlocked at 10 studies. */
+/** Combat vitals unlocked at expertise (75 studies). */
 export function resolvingPlazaBestiaryGuideCombatStats(
   speciesId: DefiningWildlifeSpeciesId,
   killCount: number
 ): PlazaBestiaryGuideCombatStats | null {
-  if (!checkingPlazaBestiaryStudyTierUnlocked('combat', killCount)) {
+  if (
+    !checkingPlazaCodexStudyTierUnlocked(BESTIARY_TRACK, 'expertise', killCount)
+  ) {
     return null;
   }
 
@@ -183,12 +188,14 @@ export function resolvingPlazaBestiaryGuideCombatStats(
   };
 }
 
-/** On-hit proc rows unlocked at the procs study tier. */
+/** On-hit proc rows unlocked at expertise (75 studies). */
 export function resolvingPlazaBestiaryGuideOnHitProcRows(
   speciesId: DefiningWildlifeSpeciesId,
   killCount: number
 ): readonly PlazaBestiaryGuideOnHitProcRow[] | null {
-  if (!checkingPlazaBestiaryStudyTierUnlocked('procs', killCount)) {
+  if (
+    !checkingPlazaCodexStudyTierUnlocked(BESTIARY_TRACK, 'expertise', killCount)
+  ) {
     return null;
   }
 
@@ -197,12 +204,18 @@ export function resolvingPlazaBestiaryGuideOnHitProcRows(
   return rows.length > 0 ? rows : [];
 }
 
-/** Ecology and hunting stats unlocked at the ecology study tier. */
+/** Ecology and hunting stats unlocked at proficiency (50 studies). */
 export function resolvingPlazaBestiaryGuideEcologyStats(
   speciesId: DefiningWildlifeSpeciesId,
   killCount: number
 ): PlazaBestiaryGuideEcologyStats | null {
-  if (!checkingPlazaBestiaryStudyTierUnlocked('ecology', killCount)) {
+  if (
+    !checkingPlazaCodexStudyTierUnlocked(
+      BESTIARY_TRACK,
+      'proficiency',
+      killCount
+    )
+  ) {
     return null;
   }
 
@@ -230,12 +243,14 @@ export function resolvingPlazaBestiaryGuideEcologyStats(
   };
 }
 
-/** Loot and disease risk unlocked at the full study tier. */
+/** Loot and disease risk unlocked at mastery (100 studies). */
 export function resolvingPlazaBestiaryGuideLootStats(
   speciesId: DefiningWildlifeSpeciesId,
   killCount: number
 ): PlazaBestiaryGuideLootStats | null {
-  if (!checkingPlazaBestiaryStudyTierUnlocked('full', killCount)) {
+  if (
+    !checkingPlazaCodexStudyTierUnlocked(BESTIARY_TRACK, 'mastery', killCount)
+  ) {
     return null;
   }
 

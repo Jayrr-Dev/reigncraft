@@ -25,6 +25,10 @@ import {
   DEFINING_WORLD_PLAZA_MUSHROOM_PHASE_TWILIGHT_MIN_B,
 } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomConstants';
 import type {
+  DefiningWorldPlazaMushroomRarity,
+  DefiningWorldPlazaMushroomTimeOfDay,
+} from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpawnBalanceConstants';
+import type {
   DefiningWorldPlazaMushroomLookAlikePairId,
   DefiningWorldPlazaMushroomSpeciesId,
 } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
@@ -57,7 +61,12 @@ export type DefiningWorldPlazaMushroomCatalogEntry = {
   readonly dayParity: DefiningWorldPlazaMushroomDayParity;
   /** Empty = any day digit. Else day number last digit must match. */
   readonly dayDigitEnds: readonly number[];
+  /** Coarse day / night / anytime fruiting band. */
+  readonly timeOfDay: DefiningWorldPlazaMushroomTimeOfDay;
+  /** Finer phase window inside the coarse band. */
   readonly phaseWindow: DefiningWorldPlazaMushroomPhaseWindowId;
+  /** Spawn pick weight tier among eligible species. */
+  readonly rarity: DefiningWorldPlazaMushroomRarity;
   readonly rawHungerRestoreRatio: number;
   readonly cookedHungerRestoreRatio: number;
   readonly cookDurationMs: number;
@@ -93,13 +102,16 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
       polarity: 'good',
       rawDisplayName: 'Golden Chanter',
       cookedDisplayName: 'Cooked Golden Chanter',
-      rawItemTypeId: formattingWorldPlazaMushroomRawItemTypeId('golden-chanter'),
+      rawItemTypeId:
+        formattingWorldPlazaMushroomRawItemTypeId('golden-chanter'),
       cookedItemTypeId:
         formattingWorldPlazaMushroomCookedItemTypeId('golden-chanter'),
       biomeKinds: ['forest', 'flower_forest'],
       dayParity: 'odd',
       dayDigitEnds: [],
+      timeOfDay: 'day',
       phaseWindow: 'day',
+      rarity: 'uncommon',
       rawHungerRestoreRatio: 0.3,
       cookedHungerRestoreRatio: 0.4,
       cookDurationMs: COOK_MS,
@@ -118,7 +130,9 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
       biomeKinds: ['forest', 'flower_forest'],
       dayParity: 'even',
       dayDigitEnds: [],
+      timeOfDay: 'night',
       phaseWindow: 'dusk',
+      rarity: 'rare',
       rawHungerRestoreRatio: 0.08,
       cookedHungerRestoreRatio: 0.12,
       cookDurationMs: COOK_MS,
@@ -140,7 +154,9 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
       biomeKinds: ['forest', 'rocky', 'firelands'],
       dayParity: 'any',
       dayDigitEnds: [4, 7],
+      timeOfDay: 'day',
       phaseWindow: 'dawn_to_midday',
+      rarity: 'uncommon',
       rawHungerRestoreRatio: 0.22,
       cookedHungerRestoreRatio: 0.42,
       cookDurationMs: COOK_MS,
@@ -161,7 +177,9 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
       biomeKinds: ['forest', 'rocky'],
       dayParity: 'even',
       dayDigitEnds: [],
+      timeOfDay: 'day',
       phaseWindow: 'day',
+      rarity: 'rare',
       rawHungerRestoreRatio: 0.06,
       cookedHungerRestoreRatio: 0.1,
       cookDurationMs: COOK_MS,
@@ -182,7 +200,9 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
       biomeKinds: ['forest', 'plains'],
       dayParity: 'any',
       dayDigitEnds: [],
+      timeOfDay: 'day',
       phaseWindow: 'day',
+      rarity: 'uncommon',
       rawHungerRestoreRatio: 0.4,
       cookedHungerRestoreRatio: 0.58,
       cookDurationMs: COOK_MS,
@@ -201,7 +221,9 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
       biomeKinds: ['savanna', 'plains', 'badlands'],
       dayParity: 'odd',
       dayDigitEnds: [],
+      timeOfDay: 'day',
       phaseWindow: 'midday',
+      rarity: 'rare',
       rawHungerRestoreRatio: 0.1,
       cookedHungerRestoreRatio: 0.14,
       cookDurationMs: COOK_MS,
@@ -222,7 +244,9 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
       biomeKinds: ['plains', 'savanna', 'flower_forest'],
       dayParity: 'any',
       dayDigitEnds: [],
+      timeOfDay: 'day',
       phaseWindow: 'day',
+      rarity: 'common',
       rawHungerRestoreRatio: 0.4,
       cookedHungerRestoreRatio: 0.46,
       cookDurationMs: COOK_MS,
@@ -241,7 +265,9 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
       biomeKinds: ['forest', 'flower_forest', 'plains'],
       dayParity: 'any',
       dayDigitEnds: [4, 7],
+      timeOfDay: 'night',
       phaseWindow: 'twilight',
+      rarity: 'legendary',
       rawHungerRestoreRatio: 0.04,
       cookedHungerRestoreRatio: 0.04,
       cookDurationMs: COOK_MS,
@@ -262,7 +288,9 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
       biomeKinds: ['forest', 'swamp', 'jungle'],
       dayParity: 'odd',
       dayDigitEnds: [],
+      timeOfDay: 'day',
       phaseWindow: 'day',
+      rarity: 'common',
       rawHungerRestoreRatio: 0.18,
       cookedHungerRestoreRatio: 0.36,
       cookDurationMs: COOK_MS,
@@ -285,7 +313,9 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
       biomeKinds: ['forest', 'swamp', 'jungle'],
       dayParity: 'any',
       dayDigitEnds: [],
+      timeOfDay: 'night',
       phaseWindow: 'night',
+      rarity: 'rare',
       rawHungerRestoreRatio: 0.04,
       cookedHungerRestoreRatio: 0.04,
       cookDurationMs: COOK_MS,
@@ -306,7 +336,9 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
       biomeKinds: ['plains', 'savanna'],
       dayParity: 'even',
       dayDigitEnds: [],
+      timeOfDay: 'day',
       phaseWindow: 'day',
+      rarity: 'uncommon',
       rawHungerRestoreRatio: 0.44,
       cookedHungerRestoreRatio: 0.55,
       cookDurationMs: COOK_MS,
@@ -325,7 +357,9 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
       biomeKinds: ['plains', 'savanna', 'desert', 'beach'],
       dayParity: 'odd',
       dayDigitEnds: [],
+      timeOfDay: 'day',
       phaseWindow: 'day',
+      rarity: 'rare',
       rawHungerRestoreRatio: 0.06,
       cookedHungerRestoreRatio: 0.1,
       cookDurationMs: COOK_MS,
@@ -346,7 +380,9 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
       biomeKinds: ['plains', 'savanna'],
       dayParity: 'any',
       dayDigitEnds: [],
+      timeOfDay: 'day',
       phaseWindow: 'dawn',
+      rarity: 'common',
       rawHungerRestoreRatio: 0.35,
       cookedHungerRestoreRatio: 0.45,
       cookDurationMs: COOK_MS,
@@ -365,7 +401,9 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
       biomeKinds: ['plains', 'flower_forest'],
       dayParity: 'any',
       dayDigitEnds: [],
+      timeOfDay: 'day',
       phaseWindow: 'day',
+      rarity: 'uncommon',
       rawHungerRestoreRatio: 0.12,
       cookedHungerRestoreRatio: 0.16,
       cookDurationMs: COOK_MS,
@@ -386,7 +424,9 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
       biomeKinds: ['forest', 'swamp', 'jungle'],
       dayParity: 'any',
       dayDigitEnds: [],
+      timeOfDay: 'any',
       phaseWindow: 'any',
+      rarity: 'common',
       rawHungerRestoreRatio: 0.32,
       cookedHungerRestoreRatio: 0.48,
       cookDurationMs: COOK_MS,
@@ -405,7 +445,9 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
       biomeKinds: ['snowy_plains', 'forest', 'rocky'],
       dayParity: 'even',
       dayDigitEnds: [],
+      timeOfDay: 'night',
       phaseWindow: 'night_dawn',
+      rarity: 'rare',
       rawHungerRestoreRatio: 0.06,
       cookedHungerRestoreRatio: 0.08,
       cookDurationMs: COOK_MS,
@@ -417,10 +459,7 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG: readonly DefiningWorldPlazaM
   ] as const satisfies readonly DefiningWorldPlazaMushroomCatalogEntry[];
 
 const DEFINING_WORLD_PLAZA_MUSHROOM_BY_SPECIES_ID = Object.fromEntries(
-  DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG.map((entry) => [
-    entry.speciesId,
-    entry,
-  ])
+  DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG.map((entry) => [entry.speciesId, entry])
 ) as Record<
   DefiningWorldPlazaMushroomSpeciesId,
   DefiningWorldPlazaMushroomCatalogEntry
@@ -442,7 +481,9 @@ export function resolvingWorldPlazaMushroomCatalogEntryBySpeciesId(
 export function resolvingWorldPlazaMushroomCatalogEntryByRawItemTypeId(
   rawItemTypeId: string
 ): DefiningWorldPlazaMushroomCatalogEntry | null {
-  return DEFINING_WORLD_PLAZA_MUSHROOM_BY_RAW_ITEM_TYPE_ID[rawItemTypeId] ?? null;
+  return (
+    DEFINING_WORLD_PLAZA_MUSHROOM_BY_RAW_ITEM_TYPE_ID[rawItemTypeId] ?? null
+  );
 }
 
 export function listingWorldPlazaMushroomCatalogEntries(): readonly DefiningWorldPlazaMushroomCatalogEntry[] {

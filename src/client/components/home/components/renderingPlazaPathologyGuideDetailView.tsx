@@ -1,21 +1,21 @@
 'use client';
 
 import {
-  LABELING_PLAZA_PATHOLOGY_STUDY_TIER_SECTION_TITLES,
-  LABELING_PLAZA_PATHOLOGY_STUDY_TIER_TEASERS,
-  type PlazaPathologyStudyTierId,
-} from '@/components/home/domains/definingPlazaPathologyStudyTier';
-import type { PlazaPathologyGuideDisplayEntry } from '@/components/home/domains/resolvingPlazaPathologyGuideDisplayEntries';
+  PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME,
+  RenderingPlazaCodexStudyDetailSection,
+} from '@/components/home/components/renderingPlazaCodexStudyDetailSections';
 import {
-  checkingPlazaPathologyStudyTierUnlocked,
-  formattingPlazaPathologyStudyCountProgress,
-  formattingPlazaPathologyStudyProgressLabel,
-  resolvingPlazaPathologyStudyTierBookIcon,
-} from '@/components/home/domains/resolvingPlazaPathologyStudyTier';
+  checkingPlazaCodexStudyTierUnlocked,
+  formattingPlazaCodexStudyCountProgress,
+  formattingPlazaCodexStudyProgressLabel,
+  resolvingPlazaCodexStudyTierBookIcon,
+} from '@/components/home/domains/resolvingPlazaCodexStudyTier';
+import type { PlazaPathologyGuideDisplayEntry } from '@/components/home/domains/resolvingPlazaPathologyGuideDisplayEntries';
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import { RenderingWorldPlazaEntityDiseaseIconGlyph } from '@/components/world/health/components/renderingWorldPlazaEntityDiseaseIconGlyph';
-import { cn } from '@/lib/utils';
+
+const PATHOLOGY_TRACK = 'pathology' as const;
 
 const PLAZA_PATHOLOGY_DETAIL_HEADER_BUTTON_CLASS_NAME =
   'plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]';
@@ -23,47 +23,6 @@ const PLAZA_PATHOLOGY_DETAIL_HEADER_BUTTON_CLASS_NAME =
 const PLAZA_PATHOLOGY_DETAIL_STUDIED_BADGE_CLASS_NAME = `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.statusEffectBadge} flex items-center gap-1 border border-emerald-500/60 bg-emerald-950/88 py-0 pl-0.5 pr-1.5 shadow-md`;
 
 const PLAZA_PATHOLOGY_DETAIL_STUDIED_BADGE_SOCKET_CLASS_NAME = `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.statusEffectBadgeSocket} flex size-4 shrink-0 items-center justify-center rounded-[2px]`;
-
-const PLAZA_PATHOLOGY_DETAIL_STAT_CELL_CLASS_NAME =
-  'rounded-sm border border-poster-teal/20 bg-parchment/45 px-2 py-1.5 text-[11px]';
-
-const PLAZA_PATHOLOGY_DETAIL_SECTION_TITLE_CLASS_NAME =
-  'font-display text-[11px] font-bold uppercase tracking-wide text-poster-teal-deep';
-
-const PLAZA_PATHOLOGY_DETAIL_TEASER_CLASS_NAME =
-  'rounded-sm border border-dashed border-poster-teal/25 bg-parchment/35 px-3 py-2 text-[11px] font-medium italic text-ink-soft';
-
-type RenderingPlazaPathologyGuideDetailSectionProps = {
-  tierId: Exclude<PlazaPathologyStudyTierId, 'sighted'>;
-  studyCount: number;
-  children: React.ReactNode;
-};
-
-function RenderingPlazaPathologyGuideDetailSection({
-  tierId,
-  studyCount,
-  children,
-}: RenderingPlazaPathologyGuideDetailSectionProps): React.JSX.Element {
-  const isUnlocked = checkingPlazaPathologyStudyTierUnlocked(
-    tierId,
-    studyCount
-  );
-
-  return (
-    <section className="mt-4">
-      <h3 className={PLAZA_PATHOLOGY_DETAIL_SECTION_TITLE_CLASS_NAME}>
-        {LABELING_PLAZA_PATHOLOGY_STUDY_TIER_SECTION_TITLES[tierId]}
-      </h3>
-      {isUnlocked ? (
-        <div className="mt-2">{children}</div>
-      ) : (
-        <p className={cn(PLAZA_PATHOLOGY_DETAIL_TEASER_CLASS_NAME, 'mt-2')}>
-          {LABELING_PLAZA_PATHOLOGY_STUDY_TIER_TEASERS[tierId]}
-        </p>
-      )}
-    </section>
-  );
-}
 
 export type RenderingPlazaPathologyGuideDetailViewProps = {
   entry: PlazaPathologyGuideDisplayEntry;
@@ -79,8 +38,15 @@ export function RenderingPlazaPathologyGuideDetailView({
   onClose,
   className = '',
 }: RenderingPlazaPathologyGuideDetailViewProps): React.JSX.Element {
-  const studyProgressLabel = formattingPlazaPathologyStudyProgressLabel(
-    entry.studyCount
+  const studyCount = entry.studyCount;
+  const studyProgressLabel = formattingPlazaCodexStudyProgressLabel(
+    PATHOLOGY_TRACK,
+    studyCount
+  );
+  const isFamiliarityUnlocked = checkingPlazaCodexStudyTierUnlocked(
+    PATHOLOGY_TRACK,
+    'familiarity',
+    studyCount
   );
 
   return (
@@ -107,15 +73,21 @@ export function RenderingPlazaPathologyGuideDetailView({
               {entry.severityLabel}
             </span>
             <Icon
-              icon={resolvingPlazaPathologyStudyTierBookIcon(entry.studyCount)}
+              icon={resolvingPlazaCodexStudyTierBookIcon(
+                PATHOLOGY_TRACK,
+                studyCount
+              )}
               className="size-4 shrink-0 text-poster-teal-deep"
               aria-hidden
             />
             <span className="font-mono not-italic tabular-nums text-poster-teal-deep">
-              {formattingPlazaPathologyStudyCountProgress(entry.studyCount)}
+              {formattingPlazaCodexStudyCountProgress(
+                PATHOLOGY_TRACK,
+                studyCount
+              )}
             </span>
             <span className="text-ink-soft/80">
-              · {entry.isStudied ? studyProgressLabel : 'Logged entry'}
+              · {isFamiliarityUnlocked ? studyProgressLabel : 'Logged entry'}
             </span>
           </p>
         </div>
@@ -190,25 +162,29 @@ export function RenderingPlazaPathologyGuideDetailView({
           </div>
 
           <div className="border-t border-poster-teal/20 px-3 py-3 sm:px-4 sm:py-4">
-            <p className="text-sm font-medium leading-snug text-ink-soft">
-              {entry.summary}
-            </p>
+            {isFamiliarityUnlocked ? (
+              <p className="text-sm font-medium leading-snug text-ink-soft">
+                {entry.summary}
+              </p>
+            ) : null}
 
-            <RenderingPlazaPathologyGuideDetailSection
-              tierId="fieldNotes"
-              studyCount={entry.studyCount}
+            <RenderingPlazaCodexStudyDetailSection
+              trackId={PATHOLOGY_TRACK}
+              studyCount={studyCount}
+              tierId="understanding"
             >
               <p className="text-[11px] font-medium text-ink">
                 {entry.studiedSummary}
               </p>
-            </RenderingPlazaPathologyGuideDetailSection>
+            </RenderingPlazaCodexStudyDetailSection>
 
-            <RenderingPlazaPathologyGuideDetailSection
-              tierId="properties"
-              studyCount={entry.studyCount}
+            <RenderingPlazaCodexStudyDetailSection
+              trackId={PATHOLOGY_TRACK}
+              studyCount={studyCount}
+              tierId="application"
             >
               {entry.propertiesSummary ? (
-                <div className={PLAZA_PATHOLOGY_DETAIL_STAT_CELL_CLASS_NAME}>
+                <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
                   <dt className="font-bold uppercase tracking-wide text-ink-soft">
                     Course
                   </dt>
@@ -217,56 +193,75 @@ export function RenderingPlazaPathologyGuideDetailView({
                   </dd>
                 </div>
               ) : null}
-              {entry.stageGuideEntries && entry.stageGuideEntries.length > 0 ? (
-                <ul className="mt-2 space-y-1">
-                  {entry.stageGuideEntries.map((stageEntry, index) => (
-                    <li
-                      key={`${entry.diseaseId}-stage-${index}`}
-                      className="flex items-start gap-2 text-xs font-medium leading-snug text-ink-soft"
-                    >
-                      <span className="shrink-0 rounded bg-parchment/60 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-poster-teal-deep">
-                        {stageEntry.timingLabel}
-                      </span>
-                      <span>{stageEntry.effectLabel}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </RenderingPlazaPathologyGuideDetailSection>
+            </RenderingPlazaCodexStudyDetailSection>
 
-            <RenderingPlazaPathologyGuideDetailSection
-              tierId="habitats"
-              studyCount={entry.studyCount}
+            <RenderingPlazaCodexStudyDetailSection
+              trackId={PATHOLOGY_TRACK}
+              studyCount={studyCount}
+              tierId="proficiency"
             >
-              {entry.flowerSourceLabel ? (
-                <p className="text-[11px] font-medium text-ink">
-                  {entry.flowerSourceLabel}
-                </p>
-              ) : null}
-              {entry.carrierChips && entry.carrierChips.length > 0 ? (
-                <div className="flex flex-wrap gap-1.5">
-                  {entry.carrierChips.map((chip) => (
-                    <span
-                      key={chip.speciesId}
-                      className="rounded-sm border border-poster-teal/25 bg-parchment/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-poster-teal-deep"
-                    >
-                      {chip.label}
-                    </span>
-                  ))}
-                </div>
-              ) : !entry.flowerSourceLabel ? (
-                <p className="text-[11px] font-medium text-ink-soft">
-                  No wildlife carriers recorded for this illness.
-                </p>
-              ) : null}
-            </RenderingPlazaPathologyGuideDetailSection>
+              <div className="space-y-2">
+                {entry.stageGuideEntries &&
+                entry.stageGuideEntries.length > 0 ? (
+                  <ul className="space-y-1">
+                    {entry.stageGuideEntries.map((stageEntry, index) => (
+                      <li
+                        key={`${entry.diseaseId}-stage-${index}`}
+                        className="flex items-start gap-2 text-xs font-medium leading-snug text-ink-soft"
+                      >
+                        <span className="shrink-0 rounded bg-parchment/60 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-poster-teal-deep">
+                          {stageEntry.timingLabel}
+                        </span>
+                        <span>{stageEntry.effectLabel}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {entry.flowerSourceLabel ? (
+                  <p className="text-[11px] font-medium text-ink">
+                    {entry.flowerSourceLabel}
+                  </p>
+                ) : null}
+                {entry.carrierChips && entry.carrierChips.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {entry.carrierChips.map((chip) => (
+                      <span
+                        key={chip.speciesId}
+                        className="rounded-sm border border-poster-teal/25 bg-parchment/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-poster-teal-deep"
+                      >
+                        {chip.label}
+                      </span>
+                    ))}
+                  </div>
+                ) : !entry.flowerSourceLabel &&
+                  !(
+                    entry.stageGuideEntries &&
+                    entry.stageGuideEntries.length > 0
+                  ) ? (
+                  <p className="text-[11px] font-medium text-ink-soft">
+                    No wildlife carriers recorded for this illness.
+                  </p>
+                ) : null}
+              </div>
+            </RenderingPlazaCodexStudyDetailSection>
 
-            <RenderingPlazaPathologyGuideDetailSection
-              tierId="full"
-              studyCount={entry.studyCount}
+            <RenderingPlazaCodexStudyDetailSection
+              trackId={PATHOLOGY_TRACK}
+              studyCount={studyCount}
+              tierId="expertise"
+            >
+              <p className="text-[11px] font-medium text-ink-soft">
+                Mechanism notes unlock with further study of this illness.
+              </p>
+            </RenderingPlazaCodexStudyDetailSection>
+
+            <RenderingPlazaCodexStudyDetailSection
+              trackId={PATHOLOGY_TRACK}
+              studyCount={studyCount}
+              tierId="mastery"
             >
               <div className="grid grid-cols-2 gap-2">
-                <div className={PLAZA_PATHOLOGY_DETAIL_STAT_CELL_CLASS_NAME}>
+                <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
                   <dt className="font-bold uppercase tracking-wide text-ink-soft">
                     Incubation
                   </dt>
@@ -274,7 +269,7 @@ export function RenderingPlazaPathologyGuideDetailView({
                     {entry.incubationRangeLabel ?? 'Unknown'}
                   </dd>
                 </div>
-                <div className={PLAZA_PATHOLOGY_DETAIL_STAT_CELL_CLASS_NAME}>
+                <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
                   <dt className="font-bold uppercase tracking-wide text-ink-soft">
                     Illness
                   </dt>
@@ -288,7 +283,7 @@ export function RenderingPlazaPathologyGuideDetailView({
                   {entry.apostleFlavor}
                 </p>
               ) : null}
-            </RenderingPlazaPathologyGuideDetailSection>
+            </RenderingPlazaCodexStudyDetailSection>
           </div>
         </article>
       </div>

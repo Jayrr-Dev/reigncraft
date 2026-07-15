@@ -1,24 +1,25 @@
 'use client';
 
+import {
+  PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME,
+  RenderingPlazaCodexStudyDetailSection,
+} from '@/components/home/components/renderingPlazaCodexStudyDetailSections';
 import { RenderingPlazaLapidaryOrePortrait } from '@/components/home/components/renderingPlazaLapidaryOrePortrait';
 import { DEFINING_PLAZA_LAPIDARY_ORE_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaLapidaryOrePortraitConstants';
 import {
-  LABELING_PLAZA_LAPIDARY_STUDY_TIER_SECTION_TITLES,
-  LABELING_PLAZA_LAPIDARY_STUDY_TIER_TEASERS,
-  type PlazaLapidaryStudyTierId,
-} from '@/components/home/domains/definingPlazaLapidaryStudyTier';
+  checkingPlazaCodexStudyTierUnlocked,
+  formattingPlazaCodexStudyCountProgress,
+  formattingPlazaCodexStudyProgressLabel,
+  resolvingPlazaCodexStudyTierBookIcon,
+} from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import type { PlazaLapidaryGuideDisplayEntry } from '@/components/home/domains/resolvingPlazaLapidaryGuideDisplayEntries';
 import { resolvingPlazaLapidaryEntryRarityBadgeVariant } from '@/components/home/domains/resolvingPlazaLapidaryRarity';
-import {
-  checkingPlazaLapidaryStudyTierUnlocked,
-  formattingPlazaLapidaryStudyCountProgress,
-  formattingPlazaLapidaryStudyProgressLabel,
-  resolvingPlazaLapidaryStudyTierBookIcon,
-} from '@/components/home/domains/resolvingPlazaLapidaryStudyTier';
 import { Icon } from '@/components/ui/icon';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 import { resolvingWorldPlazaInventoryItemDetailBadgeShellClassName } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailBadgeShellClassName';
 import { cn } from '@/lib/utils';
+
+const LAPIDARY_TRACK = 'lapidary' as const;
 
 const PLAZA_LAPIDARY_DETAIL_HEADER_BUTTON_CLASS_NAME =
   'plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]';
@@ -26,47 +27,6 @@ const PLAZA_LAPIDARY_DETAIL_HEADER_BUTTON_CLASS_NAME =
 const PLAZA_LAPIDARY_DETAIL_STUDIED_BADGE_CLASS_NAME = `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.statusEffectBadge} flex items-center gap-1 border border-emerald-500/60 bg-emerald-950/88 py-0 pl-0.5 pr-1.5 shadow-md`;
 
 const PLAZA_LAPIDARY_DETAIL_STUDIED_BADGE_SOCKET_CLASS_NAME = `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.statusEffectBadgeSocket} flex size-4 shrink-0 items-center justify-center rounded-[2px]`;
-
-const PLAZA_LAPIDARY_DETAIL_STAT_CELL_CLASS_NAME =
-  'rounded-sm border border-poster-teal/20 bg-parchment/45 px-2 py-1.5 text-[11px]';
-
-const PLAZA_LAPIDARY_DETAIL_SECTION_TITLE_CLASS_NAME =
-  'font-display text-[11px] font-bold uppercase tracking-wide text-poster-teal-deep';
-
-const PLAZA_LAPIDARY_DETAIL_TEASER_CLASS_NAME =
-  'rounded-sm border border-dashed border-poster-teal/25 bg-parchment/35 px-3 py-2 text-[11px] font-medium italic text-ink-soft';
-
-type RenderingPlazaLapidaryGuideDetailSectionProps = {
-  tierId: Exclude<PlazaLapidaryStudyTierId, 'sighted'>;
-  studyCount: number;
-  children: React.ReactNode;
-};
-
-function RenderingPlazaLapidaryGuideDetailSection({
-  tierId,
-  studyCount,
-  children,
-}: RenderingPlazaLapidaryGuideDetailSectionProps): React.JSX.Element {
-  const isUnlocked = checkingPlazaLapidaryStudyTierUnlocked(
-    tierId,
-    studyCount
-  );
-
-  return (
-    <section className="mt-4">
-      <h3 className={PLAZA_LAPIDARY_DETAIL_SECTION_TITLE_CLASS_NAME}>
-        {LABELING_PLAZA_LAPIDARY_STUDY_TIER_SECTION_TITLES[tierId]}
-      </h3>
-      {isUnlocked ? (
-        <div className="mt-2">{children}</div>
-      ) : (
-        <p className={cn(PLAZA_LAPIDARY_DETAIL_TEASER_CLASS_NAME, 'mt-2')}>
-          {LABELING_PLAZA_LAPIDARY_STUDY_TIER_TEASERS[tierId]}
-        </p>
-      )}
-    </section>
-  );
-}
 
 export type RenderingPlazaLapidaryGuideDetailViewProps = {
   entry: PlazaLapidaryGuideDisplayEntry;
@@ -82,8 +42,15 @@ export function RenderingPlazaLapidaryGuideDetailView({
   onClose,
   className = '',
 }: RenderingPlazaLapidaryGuideDetailViewProps): React.JSX.Element {
-  const studyProgressLabel = formattingPlazaLapidaryStudyProgressLabel(
-    entry.studyCount
+  const studyCount = entry.studyCount;
+  const studyProgressLabel = formattingPlazaCodexStudyProgressLabel(
+    LAPIDARY_TRACK,
+    studyCount
+  );
+  const isFamiliarityUnlocked = checkingPlazaCodexStudyTierUnlocked(
+    LAPIDARY_TRACK,
+    'familiarity',
+    studyCount
   );
 
   return (
@@ -112,15 +79,21 @@ export function RenderingPlazaLapidaryGuideDetailView({
               {entry.rarityLabel}
             </span>
             <Icon
-              icon={resolvingPlazaLapidaryStudyTierBookIcon(entry.studyCount)}
+              icon={resolvingPlazaCodexStudyTierBookIcon(
+                LAPIDARY_TRACK,
+                studyCount
+              )}
               className="size-4 shrink-0 text-poster-teal-deep"
               aria-hidden
             />
             <span className="font-mono not-italic tabular-nums text-poster-teal-deep">
-              {formattingPlazaLapidaryStudyCountProgress(entry.studyCount)}
+              {formattingPlazaCodexStudyCountProgress(
+                LAPIDARY_TRACK,
+                studyCount
+              )}
             </span>
             <span className="text-ink-soft/80">
-              · {entry.isStudied ? studyProgressLabel : 'Sighted entry'}
+              · {isFamiliarityUnlocked ? studyProgressLabel : 'Sighted entry'}
             </span>
           </p>
         </div>
@@ -191,38 +164,26 @@ export function RenderingPlazaLapidaryGuideDetailView({
           </div>
 
           <div className="border-t border-poster-teal/20 px-3 py-3 sm:px-4 sm:py-4">
-            <p className="text-sm font-medium leading-snug text-ink-soft">
-              {entry.summary}
-            </p>
+            {isFamiliarityUnlocked ? (
+              <p className="text-sm font-medium leading-snug text-ink-soft">
+                {entry.summary}
+              </p>
+            ) : null}
 
-            <RenderingPlazaLapidaryGuideDetailSection
-              tierId="fieldNotes"
-              studyCount={entry.studyCount}
+            <RenderingPlazaCodexStudyDetailSection
+              trackId={LAPIDARY_TRACK}
+              studyCount={studyCount}
+              tierId="understanding"
             >
               <p className="text-[11px] font-medium text-ink">
                 {entry.studiedSummary}
               </p>
-            </RenderingPlazaLapidaryGuideDetailSection>
+            </RenderingPlazaCodexStudyDetailSection>
 
-            <RenderingPlazaLapidaryGuideDetailSection
-              tierId="properties"
-              studyCount={entry.studyCount}
-            >
-              {entry.propertiesSummary ? (
-                <div className={PLAZA_LAPIDARY_DETAIL_STAT_CELL_CLASS_NAME}>
-                  <dt className="font-bold uppercase tracking-wide text-ink-soft">
-                    Worked
-                  </dt>
-                  <dd className="mt-0.5 font-medium text-ink">
-                    {entry.propertiesSummary}
-                  </dd>
-                </div>
-              ) : null}
-            </RenderingPlazaLapidaryGuideDetailSection>
-
-            <RenderingPlazaLapidaryGuideDetailSection
-              tierId="habitats"
-              studyCount={entry.studyCount}
+            <RenderingPlazaCodexStudyDetailSection
+              trackId={LAPIDARY_TRACK}
+              studyCount={studyCount}
+              tierId="application"
             >
               {entry.biomeChips.length > 0 ? (
                 <div className="flex flex-wrap gap-1.5">
@@ -247,44 +208,67 @@ export function RenderingPlazaLapidaryGuideDetailView({
                   No habitat recorded for this ore.
                 </p>
               )}
-            </RenderingPlazaLapidaryGuideDetailSection>
+            </RenderingPlazaCodexStudyDetailSection>
 
-            <RenderingPlazaLapidaryGuideDetailSection
-              tierId="full"
-              studyCount={entry.studyCount}
+            <RenderingPlazaCodexStudyDetailSection
+              trackId={LAPIDARY_TRACK}
+              studyCount={studyCount}
+              tierId="proficiency"
             >
-              <div className="space-y-3">
-                {entry.apostleFlavor ? (
-                  <p className="border-l-2 border-poster-gold/50 pl-3 text-xs font-medium italic leading-snug text-ink-soft">
-                    {entry.apostleFlavor}
-                  </p>
-                ) : null}
-                {entry.veinStatRows && entry.veinStatRows.length > 0 ? (
-                  <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    {entry.veinStatRows.map((row) => (
-                      <div
-                        key={`${row.label}:${row.value}`}
-                        className={cn(
-                          PLAZA_LAPIDARY_DETAIL_STAT_CELL_CLASS_NAME,
-                          row.value.length > 42 ? 'sm:col-span-2' : null
-                        )}
-                      >
-                        <dt className="font-bold uppercase tracking-wide text-ink-soft">
-                          {row.label}
-                        </dt>
-                        <dd className="mt-0.5 font-mono text-[11px] tabular-nums font-medium leading-snug text-ink">
-                          {row.value}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-                ) : entry.apostleFlavor ? null : (
-                  <p className="text-[11px] font-medium text-ink">
-                    {entry.studiedSummary}
-                  </p>
-                )}
-              </div>
-            </RenderingPlazaLapidaryGuideDetailSection>
+              {entry.propertiesSummary ? (
+                <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
+                  <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                    Worked
+                  </dt>
+                  <dd className="mt-0.5 font-medium text-ink">
+                    {entry.propertiesSummary}
+                  </dd>
+                </div>
+              ) : null}
+            </RenderingPlazaCodexStudyDetailSection>
+
+            <RenderingPlazaCodexStudyDetailSection
+              trackId={LAPIDARY_TRACK}
+              studyCount={studyCount}
+              tierId="expertise"
+            >
+              {entry.veinStatRows && entry.veinStatRows.length > 0 ? (
+                <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {entry.veinStatRows.map((row) => (
+                    <div
+                      key={`${row.label}:${row.value}`}
+                      className={cn(
+                        PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME,
+                        row.value.length > 42 ? 'sm:col-span-2' : null
+                      )}
+                    >
+                      <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                        {row.label}
+                      </dt>
+                      <dd className="mt-0.5 font-mono text-[11px] tabular-nums font-medium leading-snug text-ink">
+                        {row.value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : null}
+            </RenderingPlazaCodexStudyDetailSection>
+
+            <RenderingPlazaCodexStudyDetailSection
+              trackId={LAPIDARY_TRACK}
+              studyCount={studyCount}
+              tierId="mastery"
+            >
+              {entry.apostleFlavor ? (
+                <p className="border-l-2 border-poster-gold/50 pl-3 text-xs font-medium italic leading-snug text-ink-soft">
+                  {entry.apostleFlavor}
+                </p>
+              ) : (
+                <p className="text-[11px] font-medium text-ink">
+                  {entry.studiedSummary}
+                </p>
+              )}
+            </RenderingPlazaCodexStudyDetailSection>
           </div>
         </article>
       </div>

@@ -1,4 +1,19 @@
-/** Study tier ids for clover entries in the Herbarium (shared progress pool). */
+/**
+ * Legacy Herbarium clover study tier ids (shim over unified codex ladder).
+ *
+ * @module components/home/domains/definingPlazaHerbariumCloverStudyTier
+ */
+
+import {
+  DEFINING_PLAZA_CODEX_STUDY_BASE_THRESHOLDS,
+  DEFINING_PLAZA_CODEX_STUDY_FULL_COUNT,
+  DEFINING_PLAZA_CODEX_STUDY_TIER_BOOK_ICONS,
+  LABELING_PLAZA_CODEX_STUDY_DEFAULT_TEASERS,
+  type PlazaCodexStudyTierId,
+} from '@/components/home/domains/definingPlazaCodexStudyTier';
+import { labelingPlazaCodexStudySectionTitle } from '@/components/home/domains/definingPlazaCodexStudyTrackRegistry';
+
+/** @deprecated Prefer PlazaCodexStudyTierId. Kept for existing call sites. */
 export type PlazaHerbariumCloverStudyTierId =
   | 'sighted'
   | 'fieldNotes'
@@ -6,16 +21,42 @@ export type PlazaHerbariumCloverStudyTierId =
   | 'habitats'
   | 'full';
 
+/** Maps legacy clover tier ids onto the unified ladder. */
+export const DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_TO_CODEX: Record<
+  PlazaHerbariumCloverStudyTierId,
+  PlazaCodexStudyTierId
+> = {
+  sighted: 'awareness',
+  fieldNotes: 'understanding',
+  properties: 'application',
+  habitats: 'proficiency',
+  full: 'mastery',
+};
+
 /** Minimum Study points required to reach each clover study tier. */
 export const DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_THRESHOLDS: Record<
   PlazaHerbariumCloverStudyTierId,
   number
 > = {
-  sighted: 0,
-  fieldNotes: 1,
-  properties: 5,
-  habitats: 15,
-  full: 100,
+  sighted:
+    DEFINING_PLAZA_CODEX_STUDY_BASE_THRESHOLDS[
+      DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_TO_CODEX.sighted
+    ],
+  fieldNotes:
+    DEFINING_PLAZA_CODEX_STUDY_BASE_THRESHOLDS[
+      DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_TO_CODEX.fieldNotes
+    ],
+  properties:
+    DEFINING_PLAZA_CODEX_STUDY_BASE_THRESHOLDS[
+      DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_TO_CODEX.properties
+    ],
+  habitats:
+    DEFINING_PLAZA_CODEX_STUDY_BASE_THRESHOLDS[
+      DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_TO_CODEX.habitats
+    ],
+  full: DEFINING_PLAZA_CODEX_STUDY_BASE_THRESHOLDS[
+    DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_TO_CODEX.full
+  ],
 };
 
 /** Ordered clover tiers from lowest to highest unlock. */
@@ -24,18 +65,32 @@ export const DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_ORDER: readonly PlazaHer
 
 /** Max combined clover study count shown in progress UI. */
 export const DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_FULL_COUNT =
-  DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_THRESHOLDS.full;
+  DEFINING_PLAZA_CODEX_STUDY_FULL_COUNT;
 
 /** Book icons by highest unlocked clover study tier. */
 export const DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_BOOK_ICONS: Record<
   PlazaHerbariumCloverStudyTierId,
   string
 > = {
-  sighted: 'mdi:book-outline',
-  fieldNotes: 'mdi:book-open-page-variant',
-  properties: 'mdi:book-open-page-variant',
-  habitats: 'mdi:book-open-page-variant',
-  full: 'mdi:book-check-outline',
+  sighted:
+    DEFINING_PLAZA_CODEX_STUDY_TIER_BOOK_ICONS[
+      DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_TO_CODEX.sighted
+    ],
+  fieldNotes:
+    DEFINING_PLAZA_CODEX_STUDY_TIER_BOOK_ICONS[
+      DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_TO_CODEX.fieldNotes
+    ],
+  properties:
+    DEFINING_PLAZA_CODEX_STUDY_TIER_BOOK_ICONS[
+      DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_TO_CODEX.properties
+    ],
+  habitats:
+    DEFINING_PLAZA_CODEX_STUDY_TIER_BOOK_ICONS[
+      DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_TO_CODEX.habitats
+    ],
+  full: DEFINING_PLAZA_CODEX_STUDY_TIER_BOOK_ICONS[
+    DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_TO_CODEX.full
+  ],
 };
 
 /** Player-facing section titles for each clover tier block. */
@@ -43,10 +98,19 @@ export const LABELING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_SECTION_TITLES: Record<
   Exclude<PlazaHerbariumCloverStudyTierId, 'sighted'>,
   string
 > = {
-  fieldNotes: 'Field notes',
-  properties: 'Properties',
-  habitats: 'Habitats',
-  full: 'Full dossier',
+  fieldNotes: labelingPlazaCodexStudySectionTitle(
+    'herbarium-clover',
+    'understanding'
+  ),
+  properties: labelingPlazaCodexStudySectionTitle(
+    'herbarium-clover',
+    'application'
+  ),
+  habitats: labelingPlazaCodexStudySectionTitle(
+    'herbarium-clover',
+    'proficiency'
+  ),
+  full: labelingPlazaCodexStudySectionTitle('herbarium-clover', 'mastery'),
 };
 
 /** One-line teasers shown before a clover tier unlocks. */
@@ -54,8 +118,8 @@ export const LABELING_PLAZA_HERBARIUM_CLOVER_STUDY_TIER_TEASERS: Record<
   Exclude<PlazaHerbariumCloverStudyTierId, 'sighted'>,
   string
 > = {
-  fieldNotes: 'Needs more study....',
-  properties: 'Needs more study....',
-  habitats: 'Needs more study....',
-  full: 'Needs more study....',
+  fieldNotes: LABELING_PLAZA_CODEX_STUDY_DEFAULT_TEASERS.understanding,
+  properties: LABELING_PLAZA_CODEX_STUDY_DEFAULT_TEASERS.application,
+  habitats: LABELING_PLAZA_CODEX_STUDY_DEFAULT_TEASERS.proficiency,
+  full: LABELING_PLAZA_CODEX_STUDY_DEFAULT_TEASERS.mastery,
 };

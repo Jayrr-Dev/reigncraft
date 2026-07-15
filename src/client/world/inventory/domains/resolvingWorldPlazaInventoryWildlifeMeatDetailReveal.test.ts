@@ -31,16 +31,16 @@ describe('resolvingWorldPlazaInventoryWildlifeMeatDetailReveal', () => {
       resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(1).descriptionTier
     ).toBe(1);
     expect(
-      resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(10).descriptionTier
+      resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(5).descriptionTier
     ).toBe(2);
     expect(
       resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(20).descriptionTier
     ).toBe(3);
   });
 
-  it('shows hunger at combat tier and disease names at ecology', () => {
+  it('shows hunger at application and disease names at proficiency', () => {
     expect(
-      resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(10).showHungerRestore
+      resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(20).showHungerRestore
     ).toBe(true);
     expect(
       resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(50).showDiseaseName
@@ -50,8 +50,8 @@ describe('resolvingWorldPlazaInventoryWildlifeMeatDetailReveal', () => {
     ).toBe(false);
   });
 
-  it('shows exact chances at full dossier', () => {
-    const reveal = resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(75);
+  it('shows exact chances at mastery', () => {
+    const reveal = resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(100);
 
     expect(reveal.showDiseaseChance).toBe(true);
     expect(reveal.showWellFedChance).toBe(true);
@@ -92,46 +92,35 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel wildlife meat', () 
     );
   });
 
-  it('shows cautious flavor at 10 studies', () => {
+  it('shows cautious flavor at understanding (5)', () => {
     const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       RAW_BOAR_MEAT_ITEM,
       {
         isEquipped: false,
-        studyCountsBySpeciesId: { boar: 10 },
+        studyCountsBySpeciesId: { boar: 5 },
       }
     );
 
     expect(model?.description).toBe(
       'Thick slabs from a tusked boar. Eating it raw is risky.'
     );
-    expect(
-      model?.infoRows.find((row) => row.id === 'hunger-restore')?.value
-    ).toBe('28%');
+    expect(model?.infoRows.some((row) => row.id === 'hunger-restore')).toBe(
+      false
+    );
     expect(model?.infoRows.some((row) => row.id === 'raw-disease')).toBe(false);
   });
 
-  it('shows full flavor at 20 studies', () => {
+  it('shows full flavor and hunger at application (20)', () => {
     const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       RAW_BOAR_MEAT_ITEM,
       {
         isEquipped: false,
         studyCountsBySpeciesId: { boar: 20 },
-      }
-    );
-
-    expect(model?.description.toLowerCase()).toContain('trichinellosis');
-  });
-
-  it('shows hunger restore at 10 studies', () => {
-    const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
-      RAW_BOAR_MEAT_ITEM,
-      {
-        isEquipped: false,
-        studyCountsBySpeciesId: { boar: 10 },
         playerEffectiveMaxHealth: 1400,
       }
     );
 
+    expect(model?.description.toLowerCase()).toContain('trichinellosis');
     expect(
       model?.infoRows.find((row) => row.id === 'hunger-restore')?.value
     ).toBe('28%');
@@ -142,7 +131,7 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel wildlife meat', () 
     expect(model?.infoRows.some((row) => row.id === 'raw-disease')).toBe(false);
   });
 
-  it('shows disease name without chance at 50 studies', () => {
+  it('shows disease name without chance at proficiency (50)', () => {
     const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       RAW_BOAR_MEAT_ITEM,
       {
@@ -156,19 +145,19 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel wildlife meat', () 
     );
   });
 
-  it('shows exact disease chance and well-fed buff at 75 studies', () => {
+  it('shows exact disease chance and well-fed buff at mastery (100)', () => {
     const rawModel = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       RAW_BOAR_MEAT_ITEM,
       {
         isEquipped: false,
-        studyCountsBySpeciesId: { boar: 75 },
+        studyCountsBySpeciesId: { boar: 100 },
       }
     );
     const cookedModel = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       COOKED_BOAR_MEAT_ITEM,
       {
         isEquipped: false,
-        studyCountsBySpeciesId: { boar: 75 },
+        studyCountsBySpeciesId: { boar: 100 },
       }
     );
 

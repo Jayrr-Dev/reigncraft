@@ -7,11 +7,11 @@
  * @module components/world/inventory/domains/definingWorldPlazaInventoryWildlifeMeatDetailRevealConstants
  */
 
-import type { PlazaBestiaryStudyTierId } from '@/components/home/domains/definingPlazaBestiaryStudyTier';
+import type { PlazaCodexStudyTierId } from '@/components/home/domains/definingPlazaCodexStudyTier';
 
 /** Which meat inspect fields are visible at one knowledge tier. */
 export type DefiningWorldPlazaInventoryWildlifeMeatDetailReveal = {
-  /** Flavor copy depth: 0 hidden, 1 vague, 2 cautious, 3 full. */
+  /** Flavor copy depth: 0 hidden, 1 sensory, 2 cautious, 3 full. */
   readonly descriptionTier: 0 | 1 | 2 | 3;
   readonly showHungerRestore: boolean;
   readonly showPreparationHint: boolean;
@@ -25,20 +25,23 @@ export type DefiningWorldPlazaInventoryWildlifeMeatDetailReveal = {
 };
 
 /**
- * Progressive meat inspect unlocks keyed by highest bestiary study tier.
+ * Progressive meat inspect unlocks keyed by unified Bestiary study tier.
  *
- * - sighted (0): title only
- * - studied (1): flavor tier 1 (vague sensory line)
- * - combat (10): flavor tier 2 (cautious risk hint) + hunger numbers
- * - procs (20): flavor tier 3 (full copy) + preparation hint
- * - ecology (50): disease and well-fed names without odds
- * - full (75): exact chances, residual risk, poison damage values
- * - playable (100): same meat inspect depth as full
+ * - awareness (0): title only
+ * - familiarity (1): sensory flavor
+ * - understanding (5): cautious risk hint
+ * - application (20): full flavor + hunger / heal + prep hint
+ * - proficiency (50): disease and well-fed names
+ * - expertise (75): poison damage values
+ * - mastery (100): exact chances, residual risk
  */
 export const DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER: Readonly<
-  Record<PlazaBestiaryStudyTierId, DefiningWorldPlazaInventoryWildlifeMeatDetailReveal>
+  Record<
+    PlazaCodexStudyTierId,
+    DefiningWorldPlazaInventoryWildlifeMeatDetailReveal
+  >
 > = {
-  sighted: {
+  awareness: {
     descriptionTier: 0,
     showHungerRestore: false,
     showPreparationHint: false,
@@ -50,7 +53,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER:
     showPoisonDamage: false,
     showGenericItemMeta: false,
   },
-  studied: {
+  familiarity: {
     descriptionTier: 1,
     showHungerRestore: false,
     showPreparationHint: false,
@@ -62,9 +65,9 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER:
     showPoisonDamage: false,
     showGenericItemMeta: false,
   },
-  combat: {
+  understanding: {
     descriptionTier: 2,
-    showHungerRestore: true,
+    showHungerRestore: false,
     showPreparationHint: false,
     showDiseaseName: false,
     showDiseaseChance: false,
@@ -72,9 +75,9 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER:
     showWellFedChance: false,
     showResidualDisease: false,
     showPoisonDamage: false,
-    showGenericItemMeta: true,
+    showGenericItemMeta: false,
   },
-  procs: {
+  application: {
     descriptionTier: 3,
     showHungerRestore: true,
     showPreparationHint: true,
@@ -86,7 +89,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER:
     showPoisonDamage: false,
     showGenericItemMeta: true,
   },
-  ecology: {
+  proficiency: {
     descriptionTier: 3,
     showHungerRestore: true,
     showPreparationHint: true,
@@ -98,19 +101,19 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER:
     showPoisonDamage: false,
     showGenericItemMeta: true,
   },
-  full: {
+  expertise: {
     descriptionTier: 3,
     showHungerRestore: true,
     showPreparationHint: true,
     showDiseaseName: true,
-    showDiseaseChance: true,
+    showDiseaseChance: false,
     showWellFedName: true,
-    showWellFedChance: true,
-    showResidualDisease: true,
+    showWellFedChance: false,
+    showResidualDisease: false,
     showPoisonDamage: true,
     showGenericItemMeta: true,
   },
-  playable: {
+  mastery: {
     descriptionTier: 3,
     showHungerRestore: true,
     showPreparationHint: true,

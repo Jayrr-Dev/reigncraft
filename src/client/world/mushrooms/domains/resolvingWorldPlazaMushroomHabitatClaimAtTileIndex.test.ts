@@ -61,7 +61,7 @@ function findingWorldPlazaWoodHabitatAnchorTile(
 function findingWorldPlazaPastureHabitatAnchorTile(
   startTileX: number,
   startTileY: number,
-  searchRadius: number = 32
+  searchRadius: number = 96
 ): { readonly tileX: number; readonly tileY: number } | null {
   for (
     let tileY = startTileY - searchRadius;
@@ -73,16 +73,30 @@ function findingWorldPlazaPastureHabitatAnchorTile(
       tileX <= startTileX + searchRadius;
       tileX += 1
     ) {
-      if (
-        checkingWorldPlazaMushroomHabitatAnchorGate(
-          tileX,
-          tileY,
-          DEFINING_WORLD_PLAZA_MUSHROOM_PASTURE_HABITAT_ANCHOR_MODULUS,
-          DEFINING_WORLD_PLAZA_MUSHROOM_PASTURE_HABITAT_ANCHOR_SEED_SALT
-        )
-      ) {
-        return { tileX, tileY };
+      const anchorUnit = computingWorldPlazaMushroomSeedUnitFromTileIndex(
+        tileX,
+        tileY,
+        DEFINING_WORLD_PLAZA_MUSHROOM_PASTURE_HABITAT_ANCHOR_SEED_SALT
+      );
+      const baseModulus =
+        DEFINING_WORLD_PLAZA_MUSHROOM_PASTURE_HABITAT_ANCHOR_MODULUS;
+
+      if (Math.floor(anchorUnit * baseModulus) !== 0) {
+        continue;
       }
+
+      // Match plains density thinning used by habitat claim.
+      const plainsDensity = 0.28;
+      const effectiveModulus = Math.max(
+        1,
+        Math.round(baseModulus / plainsDensity)
+      );
+
+      if (Math.floor(anchorUnit * effectiveModulus) !== 0) {
+        continue;
+      }
+
+      return { tileX, tileY };
     }
   }
 

@@ -1,7 +1,4 @@
-import { checkingPlazaHerbariumBerryStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaHerbariumBerryStudyTier';
-import { checkingPlazaHerbariumCloverStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaHerbariumCloverStudyTier';
-import { checkingPlazaHerbariumFlowerStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaHerbariumFlowerStudyTier';
-import { checkingPlazaLapidaryStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaLapidaryStudyTier';
+import { checkingPlazaCodexStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
 import { resolvingWorldPlazaEquipmentAttackEvModifier } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
@@ -174,7 +171,11 @@ function checkingWorldPlazaInventoryItemCanStudyFlower(
 
   const studyCount = flowerStudyCountsBySpeciesId?.[speciesId] ?? 0;
 
-  return !checkingPlazaHerbariumFlowerStudyTierUnlocked('full', studyCount);
+  return !checkingPlazaCodexStudyTierUnlocked(
+    'herbarium-flower',
+    'mastery',
+    studyCount
+  );
 }
 
 /**
@@ -198,7 +199,7 @@ function checkingWorldPlazaInventoryItemCanStudyOre(
 
   const studyCount = oreStudyCountsBySpeciesId?.[speciesId] ?? 0;
 
-  return !checkingPlazaLapidaryStudyTierUnlocked('full', studyCount);
+  return !checkingPlazaCodexStudyTierUnlocked('lapidary', 'mastery', studyCount);
 }
 
 /**
@@ -212,8 +213,9 @@ function checkingWorldPlazaInventoryItemCanStudyClover(
     return false;
   }
 
-  return !checkingPlazaHerbariumCloverStudyTierUnlocked(
-    'full',
+  return !checkingPlazaCodexStudyTierUnlocked(
+    'herbarium-clover',
+    'mastery',
     cloverStudyCount ?? 0
   );
 }
@@ -235,7 +237,11 @@ function checkingWorldPlazaInventoryItemCanStudyBerry(
 
   const studyCount = berryStudyCountsByLootKind?.[lootKind] ?? 0;
 
-  return !checkingPlazaHerbariumBerryStudyTierUnlocked('full', studyCount);
+  return !checkingPlazaCodexStudyTierUnlocked(
+    'herbarium-berry',
+    'mastery',
+    studyCount
+  );
 }
 
 /**

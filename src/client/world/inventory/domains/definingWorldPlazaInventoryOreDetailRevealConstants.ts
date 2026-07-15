@@ -7,13 +7,14 @@
  * @module components/world/inventory/domains/definingWorldPlazaInventoryOreDetailRevealConstants
  */
 
-import type { PlazaLapidaryStudyTierId } from '@/components/home/domains/definingPlazaLapidaryStudyTier';
+import type { PlazaCodexStudyTierId } from '@/components/home/domains/definingPlazaCodexStudyTier';
+import { DEFINING_PLAZA_CODEX_INVENTORY_REVEAL_BY_TIER } from '@/components/world/inventory/domains/definingPlazaCodexInventoryRevealByTier';
 
 /** Which ore inspect fields are visible at one knowledge tier. */
 export type DefiningWorldPlazaInventoryOreDetailReveal = {
   /**
    * Flavor copy depth:
-   * 0 hidden, 1 sighting summary, 2 studied notes, 3 studied + properties line.
+   * 0 hidden, 1 sensory summary, 2 field notes, 3 studied + properties line.
    */
   readonly descriptionTier: 0 | 1 | 2 | 3;
   readonly showStudyProgress: boolean;
@@ -24,61 +25,41 @@ export type DefiningWorldPlazaInventoryOreDetailReveal = {
   readonly showGenericItemMeta: boolean;
 };
 
+function resolvingOreDetailRevealFromBase(
+  tierId: PlazaCodexStudyTierId
+): DefiningWorldPlazaInventoryOreDetailReveal {
+  const base = DEFINING_PLAZA_CODEX_INVENTORY_REVEAL_BY_TIER[tierId];
+
+  return {
+    descriptionTier: base.descriptionTier,
+    showStudyProgress: base.showStudyProgress,
+    showPropertiesSummary: base.showPropertiesSummary,
+    showHabitatLabel: base.showEffectLabels,
+    showVeinStatLabels: base.showEffectLabels,
+    showVeinStatNumbers: base.showEffectNumbers || base.showEffectChances,
+    showGenericItemMeta: base.showGenericItemMeta,
+  };
+}
+
 /**
- * Progressive ore inspect unlocks keyed by highest Lapidary study tier.
+ * Progressive ore inspect unlocks keyed by unified Lapidary study tier.
  *
- * - sighted (0): rarity + stack; study tease
- * - fieldNotes (1): sighting summary
- * - properties (5): studied notes + work/use hint
- * - habitats (15): habitat line, vein labels without numbers
- * - full (25): full vein dossier numbers
+ * - awareness (0): rarity + stack; study tease
+ * - familiarity (1): sensory summary
+ * - understanding (5): field notes
+ * - application (20): work/use hint
+ * - proficiency (50): habitat line, vein labels without numbers
+ * - expertise (75): vein dossier numbers
+ * - mastery (100): full vein dossier
  */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ORE_DETAIL_REVEAL_BY_TIER: Readonly<
-  Record<PlazaLapidaryStudyTierId, DefiningWorldPlazaInventoryOreDetailReveal>
+  Record<PlazaCodexStudyTierId, DefiningWorldPlazaInventoryOreDetailReveal>
 > = {
-  sighted: {
-    descriptionTier: 0,
-    showStudyProgress: true,
-    showPropertiesSummary: false,
-    showHabitatLabel: false,
-    showVeinStatLabels: false,
-    showVeinStatNumbers: false,
-    showGenericItemMeta: true,
-  },
-  fieldNotes: {
-    descriptionTier: 1,
-    showStudyProgress: true,
-    showPropertiesSummary: false,
-    showHabitatLabel: false,
-    showVeinStatLabels: false,
-    showVeinStatNumbers: false,
-    showGenericItemMeta: true,
-  },
-  properties: {
-    descriptionTier: 2,
-    showStudyProgress: true,
-    showPropertiesSummary: true,
-    showHabitatLabel: false,
-    showVeinStatLabels: false,
-    showVeinStatNumbers: false,
-    showGenericItemMeta: true,
-  },
-  habitats: {
-    descriptionTier: 3,
-    showStudyProgress: true,
-    showPropertiesSummary: true,
-    showHabitatLabel: true,
-    showVeinStatLabels: true,
-    showVeinStatNumbers: false,
-    showGenericItemMeta: true,
-  },
-  full: {
-    descriptionTier: 3,
-    showStudyProgress: true,
-    showPropertiesSummary: true,
-    showHabitatLabel: true,
-    showVeinStatLabels: true,
-    showVeinStatNumbers: true,
-    showGenericItemMeta: true,
-  },
+  awareness: resolvingOreDetailRevealFromBase('awareness'),
+  familiarity: resolvingOreDetailRevealFromBase('familiarity'),
+  understanding: resolvingOreDetailRevealFromBase('understanding'),
+  application: resolvingOreDetailRevealFromBase('application'),
+  proficiency: resolvingOreDetailRevealFromBase('proficiency'),
+  expertise: resolvingOreDetailRevealFromBase('expertise'),
+  mastery: resolvingOreDetailRevealFromBase('mastery'),
 };

@@ -7,13 +7,14 @@
  * @module components/world/inventory/domains/definingWorldPlazaInventoryBerryDetailRevealConstants
  */
 
-import type { PlazaHerbariumBerryStudyTierId } from '@/components/home/domains/definingPlazaHerbariumBerryStudyTier';
+import type { PlazaCodexStudyTierId } from '@/components/home/domains/definingPlazaCodexStudyTier';
+import { DEFINING_PLAZA_CODEX_INVENTORY_REVEAL_BY_TIER } from '@/components/world/inventory/domains/definingPlazaCodexInventoryRevealByTier';
 
 /** Which berry/tea inspect fields are visible at one knowledge tier. */
 export type DefiningWorldPlazaInventoryBerryDetailReveal = {
   /**
    * Flavor copy depth:
-   * 0 hidden, 1 sighting summary, 2 studied notes.
+   * 0 hidden, 1 sensory summary, 2 field notes.
    */
   readonly descriptionTier: 0 | 1 | 2;
   readonly showStudyProgress: boolean;
@@ -27,64 +28,43 @@ export type DefiningWorldPlazaInventoryBerryDetailReveal = {
   readonly showGenericItemMeta: boolean;
 };
 
+function resolvingBerryDetailRevealFromBase(
+  tierId: PlazaCodexStudyTierId
+): DefiningWorldPlazaInventoryBerryDetailReveal {
+  const base = DEFINING_PLAZA_CODEX_INVENTORY_REVEAL_BY_TIER[tierId];
+  const descriptionTier =
+    base.descriptionTier >= 2 ? 2 : base.descriptionTier;
+
+  return {
+    descriptionTier,
+    showStudyProgress: base.showStudyProgress,
+    showPropertiesSummary: base.showPropertiesSummary,
+    showFoodHungerBadge: base.showEffectLabels,
+    showWellFedName: base.showEffectLabels,
+    showWellFedChance: base.showEffectChances,
+    showGenericItemMeta: base.showGenericItemMeta,
+  };
+}
+
 /**
- * Progressive berry inspect unlocks keyed by highest Herbarium study tier.
+ * Progressive berry inspect unlocks keyed by unified Herbarium study tier.
  *
- * - sighted (0): rarity + stack; study tease
- * - fieldNotes (1): sighting summary
- * - properties (5): gathered/eaten properties line
- * - habitats (15): hunger/heal badges + buzz name
- * - full (100): buzz chance percent
+ * - awareness (0): rarity + stack; study tease
+ * - familiarity (1): sensory summary
+ * - understanding (5): field notes
+ * - application (20): gathered/eaten properties line
+ * - proficiency (50): hunger/heal badges + buzz name
+ * - expertise (75): same as proficiency (numbers locked)
+ * - mastery (100): buzz chance percent
  */
 export const DEFINING_WORLD_PLAZA_INVENTORY_BERRY_DETAIL_REVEAL_BY_TIER: Readonly<
-  Record<
-    PlazaHerbariumBerryStudyTierId,
-    DefiningWorldPlazaInventoryBerryDetailReveal
-  >
+  Record<PlazaCodexStudyTierId, DefiningWorldPlazaInventoryBerryDetailReveal>
 > = {
-  sighted: {
-    descriptionTier: 0,
-    showStudyProgress: true,
-    showPropertiesSummary: false,
-    showFoodHungerBadge: false,
-    showWellFedName: false,
-    showWellFedChance: false,
-    showGenericItemMeta: true,
-  },
-  fieldNotes: {
-    descriptionTier: 1,
-    showStudyProgress: true,
-    showPropertiesSummary: false,
-    showFoodHungerBadge: false,
-    showWellFedName: false,
-    showWellFedChance: false,
-    showGenericItemMeta: true,
-  },
-  properties: {
-    descriptionTier: 2,
-    showStudyProgress: true,
-    showPropertiesSummary: true,
-    showFoodHungerBadge: false,
-    showWellFedName: false,
-    showWellFedChance: false,
-    showGenericItemMeta: true,
-  },
-  habitats: {
-    descriptionTier: 2,
-    showStudyProgress: true,
-    showPropertiesSummary: true,
-    showFoodHungerBadge: true,
-    showWellFedName: true,
-    showWellFedChance: false,
-    showGenericItemMeta: true,
-  },
-  full: {
-    descriptionTier: 2,
-    showStudyProgress: true,
-    showPropertiesSummary: true,
-    showFoodHungerBadge: true,
-    showWellFedName: true,
-    showWellFedChance: true,
-    showGenericItemMeta: true,
-  },
+  awareness: resolvingBerryDetailRevealFromBase('awareness'),
+  familiarity: resolvingBerryDetailRevealFromBase('familiarity'),
+  understanding: resolvingBerryDetailRevealFromBase('understanding'),
+  application: resolvingBerryDetailRevealFromBase('application'),
+  proficiency: resolvingBerryDetailRevealFromBase('proficiency'),
+  expertise: resolvingBerryDetailRevealFromBase('expertise'),
+  mastery: resolvingBerryDetailRevealFromBase('mastery'),
 };

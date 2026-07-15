@@ -4,7 +4,8 @@ import {
   LABELING_PLAZA_BESTIARY_UNDISCOVERED_NAME,
   type DefiningPlazaBestiaryGuideEntry,
 } from '@/components/home/domains/definingPlazaBestiaryGuideConstants';
-import type { PlazaBestiaryStudyTierId } from '@/components/home/domains/definingPlazaBestiaryStudyTier';
+import type { PlazaCodexStudyTierId } from '@/components/home/domains/definingPlazaCodexStudyTier';
+import type { PlazaCodexStudyTrackId } from '@/components/home/domains/definingPlazaCodexStudyTrackRegistry';
 import { LABELING_PLAZA_BIOMES_UNDISCOVERED_NAME } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
 import {
   resolvingPlazaBestiaryGuideCombatStats,
@@ -17,9 +18,9 @@ import {
   type PlazaBestiaryGuideOnHitProcRow,
 } from '@/components/home/domains/resolvingPlazaBestiaryGuideTieredStats';
 import {
-  checkingPlazaBestiaryStudyTierUnlocked,
-  resolvingPlazaBestiaryStudyTierId,
-} from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
+  checkingPlazaCodexStudyTierUnlocked,
+  resolvingPlazaCodexStudyTierId,
+} from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import { DEFINING_WORLD_PLAZA_BIOME_CATALOG } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -42,7 +43,7 @@ export type PlazaBestiaryGuideDisplayEntry = {
   isStudied: boolean;
   isFullyStudied: boolean;
   killCount: number;
-  studyTierId: PlazaBestiaryStudyTierId;
+  studyTierId: PlazaCodexStudyTierId;
   displayName: string;
   summary: string;
   studiedSummary: string;
@@ -57,6 +58,8 @@ export type PlazaBestiaryGuideDisplayEntry = {
   ecologyStats: PlazaBestiaryGuideEcologyStats | null;
   lootStats: PlazaBestiaryGuideLootStats | null;
 };
+
+const BESTIARY_TRACK: PlazaCodexStudyTrackId = 'bestiary';
 
 function formattingPlazaBestiaryTemperamentLabel(
   temperamentId: string | undefined
@@ -155,35 +158,52 @@ export function resolvingPlazaBestiaryGuideDisplayEntries(
         entry.speciesId,
         killCountsBySpeciesId
       );
-      const studyTierId = resolvingPlazaBestiaryStudyTierId(killCount);
+      const studyTierId = resolvingPlazaCodexStudyTierId(
+        BESTIARY_TRACK,
+        killCount
+      );
       const discoveryState = resolvingPlazaBestiaryGuideDiscoveryState(
         entry.speciesId,
         sightedSpeciesIds,
         killCount
       );
       const isSighted = discoveryState !== 'locked';
-      const isStudied = checkingPlazaBestiaryStudyTierUnlocked(
-        'studied',
+      const isStudied = checkingPlazaCodexStudyTierUnlocked(
+        BESTIARY_TRACK,
+        'familiarity',
         killCount
       );
-      const isFullyStudied = checkingPlazaBestiaryStudyTierUnlocked(
-        'full',
+      const isBehaviorUnlocked = checkingPlazaCodexStudyTierUnlocked(
+        BESTIARY_TRACK,
+        'application',
+        killCount
+      );
+      const isHabitatsUnlocked = checkingPlazaCodexStudyTierUnlocked(
+        BESTIARY_TRACK,
+        'application',
+        killCount
+      );
+      const isFullyStudied = checkingPlazaCodexStudyTierUnlocked(
+        BESTIARY_TRACK,
+        'mastery',
         killCount
       );
       const biomeKinds = resolvingWildlifeSpeciesBiomeMembership(
         entry.speciesId
       );
-      const biomeChips = biomeKinds.map((biomeKind) => {
-        const isExplored = exploredBiomeKinds.has(biomeKind);
+      const biomeChips = isHabitatsUnlocked
+        ? biomeKinds.map((biomeKind) => {
+            const isExplored = exploredBiomeKinds.has(biomeKind);
 
-        return {
-          kind: biomeKind,
-          isExplored,
-          label: isExplored
-            ? DEFINING_WORLD_PLAZA_BIOME_CATALOG[biomeKind].displayName
-            : LABELING_PLAZA_BIOMES_UNDISCOVERED_NAME,
-        };
-      });
+            return {
+              kind: biomeKind,
+              isExplored,
+              label: isExplored
+                ? DEFINING_WORLD_PLAZA_BIOME_CATALOG[biomeKind].displayName
+                : LABELING_PLAZA_BIOMES_UNDISCOVERED_NAME,
+            };
+          })
+        : [];
 
       return {
         speciesId: entry.speciesId,
@@ -204,15 +224,15 @@ export function resolvingPlazaBestiaryGuideDisplayEntries(
         apostleFlavor: isFullyStudied ? (entry.apostleFlavor ?? null) : null,
         biomeKinds,
         biomeChips,
-        diet: isStudied
+        diet: isBehaviorUnlocked
           ? formattingPlazaBestiaryDietLabel(speciesDefinition?.diet)
           : null,
-        temperamentLabel: isStudied
+        temperamentLabel: isBehaviorUnlocked
           ? formattingPlazaBestiaryTemperamentLabel(
               speciesDefinition?.temperamentId
             )
           : null,
-        activityPatternLabel: isStudied
+        activityPatternLabel: isBehaviorUnlocked
           ? formattingPlazaBestiaryActivityPatternLabel(
               speciesDefinition?.activityPattern
             )

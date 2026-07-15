@@ -4,7 +4,7 @@
  * @module components/world/inventory/domains/resolvingWorldPlazaInventoryWildlifeMeatDetailReveal
  */
 
-import { resolvingPlazaBestiaryStudyTierId } from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
+import { resolvingPlazaCodexStudyTierId } from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import { resolvingWorldPlazaEntityBuffDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 import {
   resolvingWorldPlazaEntityDiseaseDescriptor,
@@ -22,6 +22,8 @@ import {
 import { resolvingWorldPlazaInventoryFoodHealAmount } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealAmount';
 import type { DefiningWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryWildlifeMeatFlavorDescription';
+
+const BESTIARY_TRACK = 'bestiary' as const;
 
 function formattingChancePercent(chance: number): string {
   return `${Math.round(chance * 100)}%`;
@@ -70,7 +72,7 @@ export function resolvingWorldPlazaInventoryWildlifeMeatDetailReveal(
   studyCount: number
 ): DefiningWorldPlazaInventoryWildlifeMeatDetailReveal {
   return DEFINING_WORLD_PLAZA_INVENTORY_WILDLIFE_MEAT_DETAIL_REVEAL_BY_TIER[
-    resolvingPlazaBestiaryStudyTierId(studyCount)
+    resolvingPlazaCodexStudyTierId(BESTIARY_TRACK, studyCount)
   ];
 }
 

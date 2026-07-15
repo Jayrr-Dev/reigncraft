@@ -1,11 +1,8 @@
 'use client';
 
 import { DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaBestiaryGuideConstants';
-import {
-  DEFINING_PLAZA_BESTIARY_STUDY_TIER_THRESHOLDS,
-  type PlazaBestiaryStudyTierId,
-} from '@/components/home/domains/definingPlazaBestiaryStudyTier';
-import { resolvingPlazaBestiaryStudyTierId } from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
+import { DEFINING_PLAZA_CODEX_STUDY_BASE_THRESHOLDS } from '@/components/home/domains/definingPlazaCodexStudyTier';
+import { resolvingPlazaCodexStudyTierId } from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import {
   DEFINING_WORLD_PLAZA_DEV_MODE_BESTIARY_FULL_UNLOCK_KILL_COUNT,
   DEFINING_WORLD_PLAZA_DEV_MODE_BESTIARY_KILL_PRESETS,
@@ -65,7 +62,7 @@ function RenderingWorldPlazaDevModeBestiaryUnlockRow({
   isSighted,
   killCount,
 }: RenderingWorldPlazaDevModeBestiaryUnlockRowProps): React.JSX.Element {
-  const studyTierId = resolvingPlazaBestiaryStudyTierId(killCount);
+  const studyTierId = resolvingPlazaCodexStudyTierId('bestiary', killCount);
 
   return (
     <div className={RENDERING_WORLD_PLAZA_DEV_MODE_BESTIARY_ROW_CLASS_NAME}>
@@ -94,7 +91,7 @@ function RenderingWorldPlazaDevModeBestiaryUnlockRow({
           </span>
           {DEFINING_WORLD_PLAZA_DEV_MODE_BESTIARY_KILL_PRESETS.map((preset) => {
             const isActive =
-              studyTierId !== 'sighted' && preset.tierId === studyTierId;
+              studyTierId !== 'awareness' && preset.tierId === studyTierId;
 
             return (
               <button
@@ -119,8 +116,8 @@ function RenderingWorldPlazaDevModeBestiaryUnlockRow({
           })}
           <span className="ml-auto text-[9px] font-medium text-white/50">
             Tier: {studyTierId}
-            {studyTierId !== 'sighted'
-              ? ` (${DEFINING_PLAZA_BESTIARY_STUDY_TIER_THRESHOLDS[studyTierId as Exclude<PlazaBestiaryStudyTierId, 'sighted'>]}+)`
+            {studyTierId !== 'awareness'
+              ? ` (${DEFINING_PLAZA_CODEX_STUDY_BASE_THRESHOLDS[studyTierId]}+)`
               : ''}
           </span>
         </div>
@@ -192,8 +189,8 @@ export function RenderingWorldPlazaDevModeBestiaryUnlockControls(): React.JSX.El
       </span>
       <div className="rounded border border-white/10 bg-black/35 px-2 py-1.5 text-[9px] leading-snug text-white/60">
         Toggle sighted vs locked per species. Kill presets unlock study tiers at
-        1 / 10 / 20 / 50 / 75 / 100. Unlock all sights every catalog entry and sets
-        full study (playable unlock).
+        1 / 5 / 20 / 50 / 75 / 100. Unlock all sights every catalog entry and sets
+        mastery (playable unlock).
       </div>
       <div className="flex flex-wrap gap-1">
         <button

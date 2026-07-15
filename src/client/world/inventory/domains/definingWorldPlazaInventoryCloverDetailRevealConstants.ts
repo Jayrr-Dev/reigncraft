@@ -6,7 +6,8 @@
  * @module components/world/inventory/domains/definingWorldPlazaInventoryCloverDetailRevealConstants
  */
 
-import type { PlazaHerbariumCloverStudyTierId } from '@/components/home/domains/definingPlazaHerbariumCloverStudyTier';
+import type { PlazaCodexStudyTierId } from '@/components/home/domains/definingPlazaCodexStudyTier';
+import { DEFINING_PLAZA_CODEX_INVENTORY_REVEAL_BY_TIER } from '@/components/world/inventory/domains/definingPlazaCodexInventoryRevealByTier';
 
 /** Which clover inspect fields are visible at one knowledge tier. */
 export type DefiningWorldPlazaInventoryCloverDetailReveal = {
@@ -18,50 +19,34 @@ export type DefiningWorldPlazaInventoryCloverDetailReveal = {
   readonly showGenericItemMeta: boolean;
 };
 
+function resolvingCloverDetailRevealFromBase(
+  tierId: PlazaCodexStudyTierId
+): DefiningWorldPlazaInventoryCloverDetailReveal {
+  const base = DEFINING_PLAZA_CODEX_INVENTORY_REVEAL_BY_TIER[tierId];
+
+  return {
+    descriptionTier: base.descriptionTier,
+    showStudyProgress: base.showStudyProgress,
+    showPropertiesSummary: base.showPropertiesSummary,
+    showLuckyEffectLabels: base.showEffectLabels,
+    showLuckyEffectNumbers: base.showEffectNumbers || base.showEffectChances,
+    showGenericItemMeta: base.showGenericItemMeta,
+  };
+}
+
+/**
+ * Progressive clover inspect unlocks keyed by unified Herbarium study tier.
+ *
+ * Lucky effect numbers unlock at expertise; mastery keeps full depth.
+ */
 export const DEFINING_WORLD_PLAZA_INVENTORY_CLOVER_DETAIL_REVEAL_BY_TIER: Readonly<
-  Record<
-    PlazaHerbariumCloverStudyTierId,
-    DefiningWorldPlazaInventoryCloverDetailReveal
-  >
+  Record<PlazaCodexStudyTierId, DefiningWorldPlazaInventoryCloverDetailReveal>
 > = {
-  sighted: {
-    descriptionTier: 0,
-    showStudyProgress: true,
-    showPropertiesSummary: false,
-    showLuckyEffectLabels: false,
-    showLuckyEffectNumbers: false,
-    showGenericItemMeta: true,
-  },
-  fieldNotes: {
-    descriptionTier: 1,
-    showStudyProgress: true,
-    showPropertiesSummary: false,
-    showLuckyEffectLabels: false,
-    showLuckyEffectNumbers: false,
-    showGenericItemMeta: true,
-  },
-  properties: {
-    descriptionTier: 2,
-    showStudyProgress: true,
-    showPropertiesSummary: true,
-    showLuckyEffectLabels: false,
-    showLuckyEffectNumbers: false,
-    showGenericItemMeta: true,
-  },
-  habitats: {
-    descriptionTier: 3,
-    showStudyProgress: true,
-    showPropertiesSummary: true,
-    showLuckyEffectLabels: true,
-    showLuckyEffectNumbers: false,
-    showGenericItemMeta: true,
-  },
-  full: {
-    descriptionTier: 3,
-    showStudyProgress: true,
-    showPropertiesSummary: true,
-    showLuckyEffectLabels: true,
-    showLuckyEffectNumbers: true,
-    showGenericItemMeta: true,
-  },
+  awareness: resolvingCloverDetailRevealFromBase('awareness'),
+  familiarity: resolvingCloverDetailRevealFromBase('familiarity'),
+  understanding: resolvingCloverDetailRevealFromBase('understanding'),
+  application: resolvingCloverDetailRevealFromBase('application'),
+  proficiency: resolvingCloverDetailRevealFromBase('proficiency'),
+  expertise: resolvingCloverDetailRevealFromBase('expertise'),
+  mastery: resolvingCloverDetailRevealFromBase('mastery'),
 };

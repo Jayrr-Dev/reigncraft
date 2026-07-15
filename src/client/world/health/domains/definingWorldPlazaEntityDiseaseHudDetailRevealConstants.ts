@@ -4,15 +4,15 @@
  * Thresholds match Pathology study tiers so the in-run badge unlocks with the
  * same progress as the Guide dossier (infection hours + linked creature Study).
  *
- * Three player-facing stages:
- * - sighted (0): unknown illness, vague body note
- * - fieldNotes (1): name, severity, flavor
- * - properties+ (5): active / upcoming mechanical stage lines
+ * Player-facing stages on the unified ladder:
+ * - awareness (0): unknown illness, vague body note
+ * - familiarity (1): name, severity, flavor
+ * - understanding+ (5): active / upcoming mechanical stage lines
  *
  * @module components/world/health/domains/definingWorldPlazaEntityDiseaseHudDetailRevealConstants
  */
 
-import type { PlazaPathologyStudyTierId } from '@/components/home/domains/definingPlazaPathologyStudyTier';
+import type { PlazaCodexStudyTierId } from '@/components/home/domains/definingPlazaCodexStudyTier';
 
 /** Which disease HUD tooltip fields are visible at one Pathology knowledge tier. */
 export type DefiningWorldPlazaEntityDiseaseHudDetailReveal = {
@@ -22,7 +22,7 @@ export type DefiningWorldPlazaEntityDiseaseHudDetailReveal = {
   readonly showEffectLines: boolean;
 };
 
-/** Title when Pathology study has not reached field notes yet. */
+/** Title when Pathology study has not reached familiarity yet. */
 export const LABELING_WORLD_PLAZA_ENTITY_DISEASE_HUD_UNKNOWN_NAME =
   'Unknown Illness' as const;
 
@@ -35,38 +35,50 @@ export const LABELING_WORLD_PLAZA_ENTITY_DISEASE_HUD_EFFECTS_TEASER =
   'Needs more study....' as const;
 
 /**
- * Progressive disease HUD unlocks keyed by highest Pathology study tier.
+ * Progressive disease HUD unlocks keyed by unified Pathology study tier.
  *
- * Higher tiers past `properties` keep full mechanical depth.
+ * Higher tiers past understanding keep full mechanical depth.
  */
 export const DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_DETAIL_REVEAL_BY_TIER: Readonly<
-  Record<PlazaPathologyStudyTierId, DefiningWorldPlazaEntityDiseaseHudDetailReveal>
+  Record<PlazaCodexStudyTierId, DefiningWorldPlazaEntityDiseaseHudDetailReveal>
 > = {
-  sighted: {
+  awareness: {
     showName: false,
     showSeverity: false,
     showDescription: false,
     showEffectLines: false,
   },
-  fieldNotes: {
+  familiarity: {
     showName: true,
     showSeverity: true,
     showDescription: true,
     showEffectLines: false,
   },
-  properties: {
+  understanding: {
     showName: true,
     showSeverity: true,
     showDescription: true,
     showEffectLines: true,
   },
-  habitats: {
+  application: {
     showName: true,
     showSeverity: true,
     showDescription: true,
     showEffectLines: true,
   },
-  full: {
+  proficiency: {
+    showName: true,
+    showSeverity: true,
+    showDescription: true,
+    showEffectLines: true,
+  },
+  expertise: {
+    showName: true,
+    showSeverity: true,
+    showDescription: true,
+    showEffectLines: true,
+  },
+  mastery: {
     showName: true,
     showSeverity: true,
     showDescription: true,

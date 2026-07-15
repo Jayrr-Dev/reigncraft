@@ -5,7 +5,7 @@
  */
 
 import { computingPlazaPathologyTotalStudyPoints } from '@/components/home/domains/computingPlazaPathologyStudyPoints';
-import { resolvingPlazaPathologyStudyTierId } from '@/components/home/domains/resolvingPlazaPathologyStudyTier';
+import { resolvingPlazaCodexStudyTierId } from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import {
   gettingWorldPlazaPathologyInfectionStudyPointsSnapshot,
   gettingWorldPlazaPathologyLinkedCreatureStudiesSnapshot,
@@ -20,6 +20,8 @@ import {
 } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseHudDetailRevealConstants';
 import type { ResolvingWorldPlazaEntityDiseaseHudDetailLinesResult } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseHudDetailLines';
 
+const PATHOLOGY_TRACK = 'pathology' as const;
+
 /**
  * Resolves reveal flags for one Pathology study count.
  */
@@ -27,7 +29,7 @@ export function resolvingWorldPlazaEntityDiseaseHudDetailReveal(
   studyCount: number
 ): DefiningWorldPlazaEntityDiseaseHudDetailReveal {
   return DEFINING_WORLD_PLAZA_ENTITY_DISEASE_HUD_DETAIL_REVEAL_BY_TIER[
-    resolvingPlazaPathologyStudyTierId(studyCount)
+    resolvingPlazaCodexStudyTierId(PATHOLOGY_TRACK, studyCount)
   ];
 }
 

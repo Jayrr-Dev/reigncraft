@@ -21,7 +21,12 @@ import {
   DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG,
   type DefiningWorldPlazaMushroomCatalogEntry,
 } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
+import {
+  checkingWorldPlazaMushroomTimeOfDayMatches,
+  resolvingWorldPlazaMushroomEffectiveSpawnModulus,
+} from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpawnBalanceConstants';
 import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
+import { pickingWorldPlazaMushroomCatalogEntryByRarityWeight } from '@/components/world/mushrooms/domains/pickingWorldPlazaMushroomCatalogEntryByRarityWeight';
 import { resolvingWorldPlazaMushroomHabitatClaimAtTileIndex } from '@/components/world/mushrooms/domains/resolvingWorldPlazaMushroomHabitatClaimAtTileIndex';
 
 export type ResolvingWorldPlazaMushroomAtTileIndexParams = {
@@ -43,19 +48,25 @@ function resolvingWorldPlazaMushroomSparseAtTileIndex({
   readonly dayNumber: number;
   readonly cyclePhase: number;
 }): DefiningWorldPlazaMushroomCatalogEntry | null {
+  const biome = resolvingWorldPlazaBiomeAtTileIndex(tileX, tileY);
+  const effectiveModulus = resolvingWorldPlazaMushroomEffectiveSpawnModulus(
+    DEFINING_WORLD_PLAZA_MUSHROOM_TILE_MODULUS,
+    biome.kind
+  );
+
+  if (!Number.isFinite(effectiveModulus)) {
+    return null;
+  }
+
   const placementUnit = computingWorldPlazaMushroomSeedUnitFromTileIndex(
     tileX,
     tileY,
     DEFINING_WORLD_PLAZA_MUSHROOM_PLACEMENT_SEED_SALT
   );
 
-  if (
-    Math.floor(placementUnit * DEFINING_WORLD_PLAZA_MUSHROOM_TILE_MODULUS) !== 0
-  ) {
+  if (Math.floor(placementUnit * effectiveModulus) !== 0) {
     return null;
   }
-
-  const biome = resolvingWorldPlazaBiomeAtTileIndex(tileX, tileY);
 
   const eligible = DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG.filter((entry) => {
     if (checkingWorldPlazaMushroomHabitatSpeciesId(entry.speciesId)) {
@@ -67,6 +78,12 @@ function resolvingWorldPlazaMushroomSparseAtTileIndex({
     }
 
     if (!checkingWorldPlazaMushroomDayScheduleMatches(entry, dayNumber)) {
+      return false;
+    }
+
+    if (
+      !checkingWorldPlazaMushroomTimeOfDayMatches(entry.timeOfDay, cyclePhase)
+    ) {
       return false;
     }
 
@@ -91,9 +108,11 @@ function resolvingWorldPlazaMushroomSparseAtTileIndex({
     tileY,
     DEFINING_WORLD_PLAZA_MUSHROOM_SPECIES_SEED_SALT
   );
-  const pickIndex = Math.floor(speciesUnit * eligible.length) % eligible.length;
 
-  return eligible[pickIndex] ?? null;
+  return pickingWorldPlazaMushroomCatalogEntryByRarityWeight(
+    eligible,
+    speciesUnit
+  );
 }
 
 /**

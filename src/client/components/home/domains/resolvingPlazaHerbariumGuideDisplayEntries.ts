@@ -1,18 +1,16 @@
 import { LABELING_PLAZA_BIOMES_UNDISCOVERED_NAME } from '@/components/home/domains/definingPlazaBiomesGuideConstants';
+import type { PlazaCodexStudyTierId } from '@/components/home/domains/definingPlazaCodexStudyTier';
+import type { PlazaCodexStudyTrackId } from '@/components/home/domains/definingPlazaCodexStudyTrackRegistry';
 import {
   DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES,
   LABELING_PLAZA_HERBARIUM_UNDISCOVERED_BERRY_HINT,
   type DefiningPlazaHerbariumBerryEntry,
 } from '@/components/home/domains/definingPlazaHerbariumBerryGuideConstants';
-import type { PlazaHerbariumBerryStudyTierId } from '@/components/home/domains/definingPlazaHerbariumBerryStudyTier';
 import {
   DEFINING_PLAZA_HERBARIUM_CLOVER_GUIDE_ENTRIES,
   LABELING_PLAZA_HERBARIUM_UNDISCOVERED_CLOVER_HINT,
   type DefiningPlazaHerbariumCloverEntry,
 } from '@/components/home/domains/definingPlazaHerbariumCloverGuideConstants';
-import type { PlazaHerbariumCloverStudyTierId } from '@/components/home/domains/definingPlazaHerbariumCloverStudyTier';
-import { DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumCloverStudyTier';
-import type { PlazaHerbariumFlowerStudyTierId } from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
 import {
   DEFINING_PLAZA_HERBARIUM_FLOWER_GUIDE_ENTRIES,
   DEFINING_PLAZA_HERBARIUM_TREE_GUIDE_ENTRIES,
@@ -21,35 +19,22 @@ import {
   type DefiningPlazaHerbariumFlowerEntry,
   type DefiningPlazaHerbariumTreeEntry,
 } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
-import type { PlazaHerbariumStudyTierId } from '@/components/home/domains/definingPlazaHerbariumStudyTier';
 import {
-  checkingPlazaHerbariumBerryStudyTierUnlocked,
-  resolvingPlazaHerbariumBerryStudyTierId,
-} from '@/components/home/domains/resolvingPlazaHerbariumBerryStudyTier';
+  checkingPlazaCodexStudyTierUnlocked,
+  resolvingPlazaCodexStudyTierId,
+} from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import {
   resolvingPlazaHerbariumCloverLuckyEffectStatRows,
   type PlazaHerbariumCloverLuckyEffectStatRow,
 } from '@/components/home/domains/resolvingPlazaHerbariumCloverLuckyEffectStatRows';
 import {
-  checkingPlazaHerbariumCloverStudyTierUnlocked,
-  resolvingPlazaHerbariumCloverStudyTierId,
-} from '@/components/home/domains/resolvingPlazaHerbariumCloverStudyTier';
-import {
   resolvingPlazaHerbariumFlowerEatEffectStatRows,
   type PlazaHerbariumFlowerEatEffectStatRow,
 } from '@/components/home/domains/resolvingPlazaHerbariumFlowerEatEffectStatRows';
 import {
-  checkingPlazaHerbariumFlowerStudyTierUnlocked,
-  resolvingPlazaHerbariumFlowerStudyTierId,
-} from '@/components/home/domains/resolvingPlazaHerbariumFlowerStudyTier';
-import {
   resolvingPlazaHerbariumEntryRarity,
   resolvingPlazaHerbariumEntryRarityLabel,
 } from '@/components/home/domains/resolvingPlazaHerbariumRarity';
-import {
-  checkingPlazaHerbariumStudyTierUnlocked,
-  resolvingPlazaHerbariumStudyTierId,
-} from '@/components/home/domains/resolvingPlazaHerbariumStudyTier';
 import { DEFINING_WORLD_PLAZA_BIOME_CATALOG } from '@/components/world/domains/definingWorldPlazaBiomeConstants';
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import {
@@ -78,11 +63,7 @@ export type PlazaHerbariumGuideDisplayEntryBase = {
   isStudied: boolean;
   isFullyStudied: boolean;
   studyCount: number;
-  studyTierId:
-    | PlazaHerbariumFlowerStudyTierId
-    | PlazaHerbariumStudyTierId
-    | PlazaHerbariumCloverStudyTierId
-    | PlazaHerbariumBerryStudyTierId;
+  studyTierId: PlazaCodexStudyTierId;
   rarity: DefiningWorldPlazaInventoryItemRarity;
   rarityLabel: string;
   icon: string;
@@ -130,6 +111,11 @@ export type PlazaHerbariumGuideDisplayEntry =
   | PlazaHerbariumGuideTreeDisplayEntry
   | PlazaHerbariumGuideCloverDisplayEntry
   | PlazaHerbariumGuideBerryDisplayEntry;
+
+const HERBARIUM_FLOWER_TRACK: PlazaCodexStudyTrackId = 'herbarium-flower';
+const HERBARIUM_TREE_TRACK: PlazaCodexStudyTrackId = 'herbarium-tree';
+const HERBARIUM_CLOVER_TRACK: PlazaCodexStudyTrackId = 'herbarium-clover';
+const HERBARIUM_BERRY_TRACK: PlazaCodexStudyTrackId = 'herbarium-berry';
 
 /** Biome kinds that ever draw a pickable flower decoration. */
 function listingPlazaHerbariumFlowerBearingBiomeKinds(): readonly DefiningWorldPlazaBiomeKind[] {
@@ -187,6 +173,47 @@ function resolvingPlazaHerbariumDiscoveryState(
   return 'locked';
 }
 
+function resolvingPlazaHerbariumStudyGates(
+  trackId: PlazaCodexStudyTrackId,
+  studyCount: number
+): {
+  isStudied: boolean;
+  isPropertiesUnlocked: boolean;
+  isHabitatsUnlocked: boolean;
+  isExpertiseUnlocked: boolean;
+  isFullyStudied: boolean;
+  studyTierId: PlazaCodexStudyTierId;
+} {
+  return {
+    isStudied: checkingPlazaCodexStudyTierUnlocked(
+      trackId,
+      'familiarity',
+      studyCount
+    ),
+    isPropertiesUnlocked: checkingPlazaCodexStudyTierUnlocked(
+      trackId,
+      'application',
+      studyCount
+    ),
+    isHabitatsUnlocked: checkingPlazaCodexStudyTierUnlocked(
+      trackId,
+      'application',
+      studyCount
+    ),
+    isExpertiseUnlocked: checkingPlazaCodexStudyTierUnlocked(
+      trackId,
+      'expertise',
+      studyCount
+    ),
+    isFullyStudied: checkingPlazaCodexStudyTierUnlocked(
+      trackId,
+      'mastery',
+      studyCount
+    ),
+    studyTierId: resolvingPlazaCodexStudyTierId(trackId, studyCount),
+  };
+}
+
 /**
  * Merges herbarium catalog data with the player's discovery sets for the codex panel.
  *
@@ -220,17 +247,15 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
           isSighted,
           studyCount
         );
-        const isStudied = checkingPlazaHerbariumFlowerStudyTierUnlocked(
-          'fieldNotes',
-          studyCount
-        );
-        const isPropertiesUnlocked =
-          checkingPlazaHerbariumFlowerStudyTierUnlocked(
-            'properties',
-            studyCount
-          );
-        const isFullyStudied = checkingPlazaHerbariumFlowerStudyTierUnlocked(
-          'full',
+        const {
+          isStudied,
+          isPropertiesUnlocked,
+          isHabitatsUnlocked,
+          isExpertiseUnlocked,
+          isFullyStudied,
+          studyTierId,
+        } = resolvingPlazaHerbariumStudyGates(
+          HERBARIUM_FLOWER_TRACK,
           studyCount
         );
         const rarity = resolvingPlazaHerbariumEntryRarity({
@@ -247,10 +272,10 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
           isStudied,
           isFullyStudied,
           studyCount,
-          studyTierId: resolvingPlazaHerbariumFlowerStudyTierId(studyCount),
+          studyTierId,
           rarity,
           rarityLabel: resolvingPlazaHerbariumEntryRarityLabel(rarity),
-          eatEffectStatRows: isFullyStudied
+          eatEffectStatRows: isExpertiseUnlocked
             ? resolvingPlazaHerbariumFlowerEatEffectStatRows(entry.speciesId)
             : null,
           displayName: isSighted
@@ -265,10 +290,12 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
             : null,
           apostleFlavor: isFullyStudied ? (entry.apostleFlavor ?? null) : null,
           biomeKinds: flowerBiomeKinds,
-          biomeChips: buildingPlazaHerbariumBiomeChips(
-            flowerBiomeKinds,
-            exploredBiomeKinds
-          ),
+          biomeChips: isHabitatsUnlocked
+            ? buildingPlazaHerbariumBiomeChips(
+                flowerBiomeKinds,
+                exploredBiomeKinds
+              )
+            : [],
         };
       }
     );
@@ -283,18 +310,13 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
           sightedTreeVariants.has(entry.variant),
           studyCount
         );
-        const isStudied = checkingPlazaHerbariumStudyTierUnlocked(
-          'fieldNotes',
-          studyCount
-        );
-        const isPropertiesUnlocked = checkingPlazaHerbariumStudyTierUnlocked(
-          'properties',
-          studyCount
-        );
-        const isFullyStudied = checkingPlazaHerbariumStudyTierUnlocked(
-          'full',
-          studyCount
-        );
+        const {
+          isStudied,
+          isPropertiesUnlocked,
+          isHabitatsUnlocked,
+          isFullyStudied,
+          studyTierId,
+        } = resolvingPlazaHerbariumStudyGates(HERBARIUM_TREE_TRACK, studyCount);
         const biomeKinds = listingPlazaHerbariumTreeBiomeKinds(entry.variant);
         const rarity = resolvingPlazaHerbariumEntryRarity({
           kind: 'tree',
@@ -310,7 +332,7 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
           isStudied,
           isFullyStudied,
           studyCount,
-          studyTierId: resolvingPlazaHerbariumStudyTierId(studyCount),
+          studyTierId,
           rarity,
           rarityLabel: resolvingPlazaHerbariumEntryRarityLabel(rarity),
           eatEffectStatRows: null,
@@ -326,10 +348,9 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
             : null,
           apostleFlavor: isFullyStudied ? (entry.apostleFlavor ?? null) : null,
           biomeKinds,
-          biomeChips: buildingPlazaHerbariumBiomeChips(
-            biomeKinds,
-            exploredBiomeKinds
-          ),
+          biomeChips: isHabitatsUnlocked
+            ? buildingPlazaHerbariumBiomeChips(biomeKinds, exploredBiomeKinds)
+            : [],
         };
       }
     );
@@ -345,17 +366,15 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
           isSighted,
           studyCount
         );
-        const isStudied = checkingPlazaHerbariumCloverStudyTierUnlocked(
-          'fieldNotes',
-          studyCount
-        );
-        const isPropertiesUnlocked =
-          checkingPlazaHerbariumCloverStudyTierUnlocked(
-            'properties',
-            studyCount
-          );
-        const isFullyStudied = checkingPlazaHerbariumCloverStudyTierUnlocked(
-          'full',
+        const {
+          isStudied,
+          isPropertiesUnlocked,
+          isHabitatsUnlocked,
+          isExpertiseUnlocked,
+          isFullyStudied,
+          studyTierId,
+        } = resolvingPlazaHerbariumStudyGates(
+          HERBARIUM_CLOVER_TRACK,
           studyCount
         );
         const rarity = resolvingPlazaHerbariumEntryRarity({
@@ -377,12 +396,11 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
           isStudied,
           isFullyStudied,
           studyCount,
-          studyTierId: resolvingPlazaHerbariumCloverStudyTierId(studyCount),
+          studyTierId,
           rarity,
           rarityLabel: resolvingPlazaHerbariumEntryRarityLabel(rarity),
           luckyEffectStatRows:
-            entry.cloverKind === 'four_leaf' &&
-            studyCount >= DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_FULL_COUNT
+            entry.cloverKind === 'four_leaf' && isExpertiseUnlocked
               ? resolvingPlazaHerbariumCloverLuckyEffectStatRows()
               : null,
           displayName: isSighted
@@ -395,10 +413,12 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
           propertiesSummary,
           apostleFlavor: null,
           biomeKinds: cloverBiomeKinds,
-          biomeChips: buildingPlazaHerbariumBiomeChips(
-            cloverBiomeKinds,
-            exploredBiomeKinds
-          ),
+          biomeChips: isHabitatsUnlocked
+            ? buildingPlazaHerbariumBiomeChips(
+                cloverBiomeKinds,
+                exploredBiomeKinds
+              )
+            : [],
         };
       }
     );
@@ -416,18 +436,13 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
           sightedBerryLootKinds.has(entry.berryLootKind),
           studyCount
         );
-        const isStudied = checkingPlazaHerbariumBerryStudyTierUnlocked(
-          'fieldNotes',
-          studyCount
-        );
-        const isPropertiesUnlocked = checkingPlazaHerbariumBerryStudyTierUnlocked(
-          'properties',
-          studyCount
-        );
-        const isFullyStudied = checkingPlazaHerbariumBerryStudyTierUnlocked(
-          'full',
-          studyCount
-        );
+        const {
+          isStudied,
+          isPropertiesUnlocked,
+          isHabitatsUnlocked,
+          isFullyStudied,
+          studyTierId,
+        } = resolvingPlazaHerbariumStudyGates(HERBARIUM_BERRY_TRACK, studyCount);
         const rarity = resolvingPlazaHerbariumEntryRarity({
           kind: 'berry',
           berryLootKind: entry.berryLootKind,
@@ -442,7 +457,7 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
           isStudied,
           isFullyStudied,
           studyCount,
-          studyTierId: resolvingPlazaHerbariumBerryStudyTierId(studyCount),
+          studyTierId,
           rarity,
           rarityLabel: resolvingPlazaHerbariumEntryRarityLabel(rarity),
           eatEffectStatRows: null,
@@ -458,10 +473,12 @@ export function resolvingPlazaHerbariumGuideDisplayEntries(
             : null,
           apostleFlavor: isFullyStudied ? (entry.apostleFlavor ?? null) : null,
           biomeKinds: berryBiomeKinds,
-          biomeChips: buildingPlazaHerbariumBiomeChips(
-            berryBiomeKinds,
-            exploredBiomeKinds
-          ),
+          biomeChips: isHabitatsUnlocked
+            ? buildingPlazaHerbariumBiomeChips(
+                berryBiomeKinds,
+                exploredBiomeKinds
+              )
+            : [],
         };
       }
     );

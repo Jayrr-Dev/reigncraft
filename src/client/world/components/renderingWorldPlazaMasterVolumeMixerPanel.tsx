@@ -6,12 +6,16 @@
  * @module components/world/components/renderingWorldPlazaMasterVolumeMixerPanel
  */
 
+import { Icon } from '@/components/ui/icon';
 import {
   LABELING_WORLD_PLAZA_AMBIENCE_VOLUME_SLIDER,
   STYLING_WORLD_PLAZA_AMBIENCE_VOLUME_MIXER_SLIDER_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaAmbienceVolumeConstants';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import type { WorldPlazaCodexSectionId } from '@/components/world/domains/definingWorldPlazaCodexConstants';
+import { LABELING_WORLD_PLAZA_DANGER_SENSE_TOGGLE } from '@/components/world/domains/definingWorldPlazaDangerSenseHudConstants';
 import {
+  DEFINING_WORLD_PLAZA_SETTINGS_GUIDE_OPTIONS,
   LABELING_WORLD_PLAZA_MASTER_VOLUME_MIXER,
   LABELING_WORLD_PLAZA_MASTER_VOLUME_SLIDER,
   LABELING_WORLD_PLAZA_SETTINGS_EXIT_HOME,
@@ -19,10 +23,9 @@ import {
   STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_PANEL_CLASS_NAME,
   STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_SLIDER_CLASS_NAME,
   STYLING_WORLD_PLAZA_SETTINGS_EXIT_HOME_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_SETTINGS_GUIDE_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_SETTINGS_GUIDE_STACK_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaMasterVolumeConstants';
-import {
-  LABELING_WORLD_PLAZA_DANGER_SENSE_TOGGLE,
-} from '@/components/world/domains/definingWorldPlazaDangerSenseHudConstants';
 import {
   LABELING_WORLD_PLAZA_MINIMAP_TOGGLE,
   STYLING_WORLD_PLAZA_MINIMAP_CHECKBOX_CLASS_NAME,
@@ -57,6 +60,8 @@ export type RenderingWorldPlazaMasterVolumeMixerPanelProps = {
   isOpen: boolean;
   /** Opens the exit-to-home confirm flow when provided. */
   onRequestExitToHome?: () => void;
+  /** Opens a guide overlay (Controls / Mechanics / Lore) when provided. */
+  onSelectGuideSection?: (section: WorldPlazaCodexSectionId) => void;
 };
 
 /**
@@ -66,6 +71,7 @@ export type RenderingWorldPlazaMasterVolumeMixerPanelProps = {
 export function RenderingWorldPlazaMasterVolumeMixerPanel({
   isOpen,
   onRequestExitToHome,
+  onSelectGuideSection,
 }: RenderingWorldPlazaMasterVolumeMixerPanelProps): React.JSX.Element | null {
   const { masterVolume, settingMasterVolume } = usingWorldPlazaMasterVolume();
   const { ambienceVolume, settingAmbienceVolume } =
@@ -107,6 +113,27 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
         >
           {LABELING_WORLD_PLAZA_SETTINGS_EXIT_HOME}
         </button>
+      ) : null}
+      {onSelectGuideSection ? (
+        <div className={STYLING_WORLD_PLAZA_SETTINGS_GUIDE_STACK_CLASS_NAME}>
+          {DEFINING_WORLD_PLAZA_SETTINGS_GUIDE_OPTIONS.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              className={STYLING_WORLD_PLAZA_SETTINGS_GUIDE_BUTTON_CLASS_NAME}
+              onClick={() => {
+                onSelectGuideSection(option.id);
+              }}
+            >
+              <Icon
+                icon={option.icon}
+                className="size-4 shrink-0"
+                aria-hidden
+              />
+              <span>{option.label}</span>
+            </button>
+          ))}
+        </div>
       ) : null}
       <label
         className={STYLING_WORLD_PLAZA_MASTER_VOLUME_MIXER_LABEL_CLASS_NAME}

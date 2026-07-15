@@ -1,4 +1,19 @@
-/** Study tier ids unlocked by cumulative Study on one ore species. */
+/**
+ * Legacy Lapidary study tier ids (shim over unified codex ladder).
+ *
+ * @module components/home/domains/definingPlazaLapidaryStudyTier
+ */
+
+import {
+  DEFINING_PLAZA_CODEX_STUDY_BASE_THRESHOLDS,
+  DEFINING_PLAZA_CODEX_STUDY_FULL_COUNT,
+  DEFINING_PLAZA_CODEX_STUDY_TIER_BOOK_ICONS,
+  LABELING_PLAZA_CODEX_STUDY_DEFAULT_TEASERS,
+  type PlazaCodexStudyTierId,
+} from '@/components/home/domains/definingPlazaCodexStudyTier';
+import { labelingPlazaCodexStudySectionTitle } from '@/components/home/domains/definingPlazaCodexStudyTrackRegistry';
+
+/** @deprecated Prefer PlazaCodexStudyTierId. Kept for existing call sites. */
 export type PlazaLapidaryStudyTierId =
   | 'sighted'
   | 'fieldNotes'
@@ -6,16 +21,42 @@ export type PlazaLapidaryStudyTierId =
   | 'habitats'
   | 'full';
 
+/** Maps legacy lapidary tier ids onto the unified ladder. */
+export const DEFINING_PLAZA_LAPIDARY_STUDY_TIER_TO_CODEX: Record<
+  PlazaLapidaryStudyTierId,
+  PlazaCodexStudyTierId
+> = {
+  sighted: 'awareness',
+  fieldNotes: 'understanding',
+  properties: 'application',
+  habitats: 'proficiency',
+  full: 'mastery',
+};
+
 /** Minimum Study points required to reach each study tier. */
 export const DEFINING_PLAZA_LAPIDARY_STUDY_TIER_THRESHOLDS: Record<
   PlazaLapidaryStudyTierId,
   number
 > = {
-  sighted: 0,
-  fieldNotes: 1,
-  properties: 5,
-  habitats: 15,
-  full: 25,
+  sighted:
+    DEFINING_PLAZA_CODEX_STUDY_BASE_THRESHOLDS[
+      DEFINING_PLAZA_LAPIDARY_STUDY_TIER_TO_CODEX.sighted
+    ],
+  fieldNotes:
+    DEFINING_PLAZA_CODEX_STUDY_BASE_THRESHOLDS[
+      DEFINING_PLAZA_LAPIDARY_STUDY_TIER_TO_CODEX.fieldNotes
+    ],
+  properties:
+    DEFINING_PLAZA_CODEX_STUDY_BASE_THRESHOLDS[
+      DEFINING_PLAZA_LAPIDARY_STUDY_TIER_TO_CODEX.properties
+    ],
+  habitats:
+    DEFINING_PLAZA_CODEX_STUDY_BASE_THRESHOLDS[
+      DEFINING_PLAZA_LAPIDARY_STUDY_TIER_TO_CODEX.habitats
+    ],
+  full: DEFINING_PLAZA_CODEX_STUDY_BASE_THRESHOLDS[
+    DEFINING_PLAZA_LAPIDARY_STUDY_TIER_TO_CODEX.full
+  ],
 };
 
 /** Ordered tiers from lowest to highest unlock. */
@@ -24,18 +65,32 @@ export const DEFINING_PLAZA_LAPIDARY_STUDY_TIER_ORDER: readonly PlazaLapidaryStu
 
 /** Max study count shown in progress UI (full dossier unlock). */
 export const DEFINING_PLAZA_LAPIDARY_STUDY_FULL_COUNT =
-  DEFINING_PLAZA_LAPIDARY_STUDY_TIER_THRESHOLDS.full;
+  DEFINING_PLAZA_CODEX_STUDY_FULL_COUNT;
 
 /** Book icons by highest unlocked study tier. */
 export const DEFINING_PLAZA_LAPIDARY_STUDY_TIER_BOOK_ICONS: Record<
   PlazaLapidaryStudyTierId,
   string
 > = {
-  sighted: 'mdi:book-outline',
-  fieldNotes: 'mdi:book-open-page-variant',
-  properties: 'mdi:book-open-page-variant',
-  habitats: 'mdi:book-open-page-variant',
-  full: 'mdi:book-check-outline',
+  sighted:
+    DEFINING_PLAZA_CODEX_STUDY_TIER_BOOK_ICONS[
+      DEFINING_PLAZA_LAPIDARY_STUDY_TIER_TO_CODEX.sighted
+    ],
+  fieldNotes:
+    DEFINING_PLAZA_CODEX_STUDY_TIER_BOOK_ICONS[
+      DEFINING_PLAZA_LAPIDARY_STUDY_TIER_TO_CODEX.fieldNotes
+    ],
+  properties:
+    DEFINING_PLAZA_CODEX_STUDY_TIER_BOOK_ICONS[
+      DEFINING_PLAZA_LAPIDARY_STUDY_TIER_TO_CODEX.properties
+    ],
+  habitats:
+    DEFINING_PLAZA_CODEX_STUDY_TIER_BOOK_ICONS[
+      DEFINING_PLAZA_LAPIDARY_STUDY_TIER_TO_CODEX.habitats
+    ],
+  full: DEFINING_PLAZA_CODEX_STUDY_TIER_BOOK_ICONS[
+    DEFINING_PLAZA_LAPIDARY_STUDY_TIER_TO_CODEX.full
+  ],
 };
 
 /** Player-facing section titles for each tier block on the detail page. */
@@ -43,10 +98,10 @@ export const LABELING_PLAZA_LAPIDARY_STUDY_TIER_SECTION_TITLES: Record<
   Exclude<PlazaLapidaryStudyTierId, 'sighted'>,
   string
 > = {
-  fieldNotes: 'Field notes',
-  properties: 'Properties',
-  habitats: 'Habitats',
-  full: 'Full dossier',
+  fieldNotes: labelingPlazaCodexStudySectionTitle('lapidary', 'understanding'),
+  properties: labelingPlazaCodexStudySectionTitle('lapidary', 'application'),
+  habitats: labelingPlazaCodexStudySectionTitle('lapidary', 'proficiency'),
+  full: labelingPlazaCodexStudySectionTitle('lapidary', 'mastery'),
 };
 
 /** One-line teasers shown before a tier unlocks. */
@@ -54,8 +109,8 @@ export const LABELING_PLAZA_LAPIDARY_STUDY_TIER_TEASERS: Record<
   Exclude<PlazaLapidaryStudyTierId, 'sighted'>,
   string
 > = {
-  fieldNotes: 'Needs more study....',
-  properties: 'Needs more study....',
-  habitats: 'Needs more study....',
-  full: 'Needs more study....',
+  fieldNotes: LABELING_PLAZA_CODEX_STUDY_DEFAULT_TEASERS.understanding,
+  properties: LABELING_PLAZA_CODEX_STUDY_DEFAULT_TEASERS.application,
+  habitats: LABELING_PLAZA_CODEX_STUDY_DEFAULT_TEASERS.proficiency,
+  full: LABELING_PLAZA_CODEX_STUDY_DEFAULT_TEASERS.mastery,
 };

@@ -58,6 +58,7 @@ export type RenderingWorldPlazaWildlifeForageEatOverlaysProps = {
 
 type ForageEatOverlayElements = {
   wrapper: HTMLDivElement;
+  scaleShell: HTMLDivElement;
   progressCircle: SVGCircleElement;
 };
 
@@ -88,8 +89,9 @@ export function RenderingWorldPlazaWildlifeForageEatOverlays({
     const elementsByInstanceId = elementsByInstanceIdRef.current;
 
     for (const overlay of overlays) {
-      const progressCircle =
-        elementsByInstanceId.get(overlay.instanceId)?.progressCircle;
+      const progressCircle = elementsByInstanceId.get(
+        overlay.instanceId
+      )?.progressCircle;
 
       if (progressCircle) {
         progressCircle.style.strokeDasharray = `${RING_LAYOUT.ringCircumferencePx}`;
@@ -149,7 +151,7 @@ export function RenderingWorldPlazaWildlifeForageEatOverlays({
                 cameraWorldZoom
           );
           applyingWorldPlazaCameraZoomedDomOverlayScaleToElement(
-            elements.wrapper,
+            elements.scaleShell,
             cameraWorldZoom
           );
 
@@ -181,6 +183,12 @@ export function RenderingWorldPlazaWildlifeForageEatOverlays({
               return;
             }
 
+            const scaleShell = element.firstElementChild;
+
+            if (!(scaleShell instanceof HTMLDivElement)) {
+              return;
+            }
+
             const progressCircle = element.querySelector(
               '[data-wildlife-forage-eat-progress]'
             );
@@ -191,61 +199,74 @@ export function RenderingWorldPlazaWildlifeForageEatOverlays({
 
             elementsByInstanceId.set(overlay.instanceId, {
               wrapper: element,
+              scaleShell,
               progressCircle,
             });
-            element.style.transform =
-              RENDERING_WORLD_PLAZA_WILDLIFE_FORAGE_EAT_HIDDEN_TRANSFORM;
           }}
-          className={RENDERING_WORLD_PLAZA_WILDLIFE_FORAGE_EAT_WRAPPER_CLASS_NAME}
-          style={RENDERING_WORLD_PLAZA_WILDLIFE_FORAGE_EAT_INITIAL_SCALE_STYLE}
+          className={
+            RENDERING_WORLD_PLAZA_WILDLIFE_FORAGE_EAT_WRAPPER_CLASS_NAME
+          }
+          style={{
+            transform:
+              RENDERING_WORLD_PLAZA_WILDLIFE_FORAGE_EAT_HIDDEN_TRANSFORM,
+          }}
           aria-hidden="true"
         >
           <div
-            className={`world-plaza-timed-interaction-progress-indicator ${RENDERING_WORLD_PLAZA_WILDLIFE_FORAGE_EAT_SCALE_CLASS_NAME}`}
-            style={{
-              width: `${RING_LAYOUT.ringSizePx}px`,
-              height: `${RING_LAYOUT.ringSizePx}px`,
-            }}
+            className={
+              RENDERING_WORLD_PLAZA_WILDLIFE_FORAGE_EAT_SCALE_CLASS_NAME
+            }
+            style={
+              RENDERING_WORLD_PLAZA_WILDLIFE_FORAGE_EAT_INITIAL_SCALE_STYLE
+            }
           >
-            <svg
-              className="world-plaza-timed-interaction-progress-ring"
-              width={RING_LAYOUT.ringSizePx}
-              height={RING_LAYOUT.ringSizePx}
-              viewBox={`0 0 ${RING_LAYOUT.ringSizePx} ${RING_LAYOUT.ringSizePx}`}
-              aria-hidden="true"
-            >
-              <circle
-                className="world-plaza-timed-interaction-progress-ring-track"
-                cx={RING_LAYOUT.ringCenterPx}
-                cy={RING_LAYOUT.ringCenterPx}
-                r={RING_LAYOUT.ringRadiusPx}
-                fill="none"
-                strokeWidth={
-                  DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_RING_STROKE_PX
-                }
-              />
-              <circle
-                data-wildlife-forage-eat-progress=""
-                className="world-plaza-timed-interaction-progress-ring-progress"
-                cx={RING_LAYOUT.ringCenterPx}
-                cy={RING_LAYOUT.ringCenterPx}
-                r={RING_LAYOUT.ringRadiusPx}
-                fill="none"
-                strokeWidth={
-                  DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_RING_STROKE_PX
-                }
-                transform={`rotate(-90 ${RING_LAYOUT.ringCenterPx} ${RING_LAYOUT.ringCenterPx})`}
-              />
-            </svg>
-            <Icon
-              icon={overlay.progressIcon}
-              className="world-plaza-timed-interaction-progress-icon"
+            <div
+              className="world-plaza-timed-interaction-progress-indicator"
               style={{
-                width: `${DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_ICON_SIZE_PX}px`,
-                height: `${DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_ICON_SIZE_PX}px`,
+                width: `${RING_LAYOUT.ringSizePx}px`,
+                height: `${RING_LAYOUT.ringSizePx}px`,
               }}
-              aria-hidden="true"
-            />
+            >
+              <svg
+                className="world-plaza-timed-interaction-progress-ring"
+                width={RING_LAYOUT.ringSizePx}
+                height={RING_LAYOUT.ringSizePx}
+                viewBox={`0 0 ${RING_LAYOUT.ringSizePx} ${RING_LAYOUT.ringSizePx}`}
+                aria-hidden="true"
+              >
+                <circle
+                  className="world-plaza-timed-interaction-progress-ring-track"
+                  cx={RING_LAYOUT.ringCenterPx}
+                  cy={RING_LAYOUT.ringCenterPx}
+                  r={RING_LAYOUT.ringRadiusPx}
+                  fill="none"
+                  strokeWidth={
+                    DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_RING_STROKE_PX
+                  }
+                />
+                <circle
+                  data-wildlife-forage-eat-progress=""
+                  className="world-plaza-timed-interaction-progress-ring-progress"
+                  cx={RING_LAYOUT.ringCenterPx}
+                  cy={RING_LAYOUT.ringCenterPx}
+                  r={RING_LAYOUT.ringRadiusPx}
+                  fill="none"
+                  strokeWidth={
+                    DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_RING_STROKE_PX
+                  }
+                  transform={`rotate(-90 ${RING_LAYOUT.ringCenterPx} ${RING_LAYOUT.ringCenterPx})`}
+                />
+              </svg>
+              <Icon
+                icon={overlay.progressIcon}
+                className="world-plaza-timed-interaction-progress-icon"
+                style={{
+                  width: `${DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_ICON_SIZE_PX}px`,
+                  height: `${DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_ICON_SIZE_PX}px`,
+                }}
+                aria-hidden="true"
+              />
+            </div>
           </div>
         </div>
       ))}

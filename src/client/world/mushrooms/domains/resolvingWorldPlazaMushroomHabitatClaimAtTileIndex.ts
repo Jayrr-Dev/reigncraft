@@ -49,8 +49,13 @@ import {
   DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG,
   type DefiningWorldPlazaMushroomCatalogEntry,
 } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
+import {
+  checkingWorldPlazaMushroomTimeOfDayMatches,
+  resolvingWorldPlazaMushroomEffectiveSpawnModulus,
+} from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpawnBalanceConstants';
 import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
 import { listingWorldPlazaMushroomCandidateTilePositionsNearStump } from '@/components/world/mushrooms/domains/listingWorldPlazaMushroomCandidateTilePositionsNearStump';
+import { pickingWorldPlazaMushroomCatalogEntryByRarityWeight } from '@/components/world/mushrooms/domains/pickingWorldPlazaMushroomCatalogEntryByRarityWeight';
 
 type DefiningWorldPlazaMushroomHabitatSeat = {
   readonly tileX: number;
@@ -179,6 +184,10 @@ function checkingWorldPlazaMushroomHabitatAnchorGate(
   modulus: number,
   salt: number
 ): boolean {
+  if (!Number.isFinite(modulus) || !(modulus > 0)) {
+    return false;
+  }
+
   const anchorUnit = computingWorldPlazaMushroomSeedUnitFromTileIndex(
     anchorTileX,
     anchorTileY,
@@ -186,6 +195,41 @@ function checkingWorldPlazaMushroomHabitatAnchorGate(
   );
 
   return Math.floor(anchorUnit * modulus) === 0;
+}
+
+function checkingWorldPlazaMushroomHabitatAnchorGateWithBiomeDensity({
+  anchorTileX,
+  anchorTileY,
+  baseModulus,
+  salt,
+  biomeKind,
+}: {
+  readonly anchorTileX: number;
+  readonly anchorTileY: number;
+  readonly baseModulus: number;
+  readonly salt: number;
+  readonly biomeKind: DefiningWorldPlazaBiomeKind;
+}): boolean {
+  const anchorUnit = computingWorldPlazaMushroomSeedUnitFromTileIndex(
+    anchorTileX,
+    anchorTileY,
+    salt
+  );
+
+  if (Math.floor(anchorUnit * baseModulus) !== 0) {
+    return false;
+  }
+
+  const effectiveModulus = resolvingWorldPlazaMushroomEffectiveSpawnModulus(
+    baseModulus,
+    biomeKind
+  );
+
+  if (!Number.isFinite(effectiveModulus) || !(effectiveModulus > 0)) {
+    return false;
+  }
+
+  return Math.floor(anchorUnit * effectiveModulus) === 0;
 }
 
 function checkingWorldPlazaMushroomWoodHabitatEnabledByDefault(): boolean {
@@ -218,6 +262,7 @@ function listingWorldPlazaMushroomEligibleCatalogEntriesAtAnchor({
   cyclePhase,
   resolveBiomeKindAtTile,
   speciesFilter,
+  biomeKind: biomeKindOverride,
 }: {
   readonly anchorTileX: number;
   readonly anchorTileY: number;
@@ -230,8 +275,10 @@ function listingWorldPlazaMushroomEligibleCatalogEntriesAtAnchor({
   readonly speciesFilter: (
     speciesId: DefiningWorldPlazaMushroomSpeciesId
   ) => boolean;
+  readonly biomeKind?: DefiningWorldPlazaBiomeKind;
 }): readonly DefiningWorldPlazaMushroomCatalogEntry[] {
-  const biomeKind = resolveBiomeKindAtTile(anchorTileX, anchorTileY);
+  const biomeKind =
+    biomeKindOverride ?? resolveBiomeKindAtTile(anchorTileX, anchorTileY);
 
   return DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG.filter((entry) => {
     if (!speciesFilter(entry.speciesId)) {
@@ -243,6 +290,12 @@ function listingWorldPlazaMushroomEligibleCatalogEntriesAtAnchor({
     }
 
     if (!checkingWorldPlazaMushroomDayScheduleMatches(entry, dayNumber)) {
+      return false;
+    }
+
+    if (
+      !checkingWorldPlazaMushroomTimeOfDayMatches(entry.timeOfDay, cyclePhase)
+    ) {
       return false;
     }
 
@@ -264,18 +317,16 @@ function pickingWorldPlazaMushroomEligibleCatalogEntryAtAnchor(
   anchorTileY: number,
   eligible: readonly DefiningWorldPlazaMushroomCatalogEntry[]
 ): DefiningWorldPlazaMushroomCatalogEntry | null {
-  if (eligible.length === 0) {
-    return null;
-  }
-
   const speciesUnit = computingWorldPlazaMushroomSeedUnitFromTileIndex(
     anchorTileX,
     anchorTileY,
     DEFINING_WORLD_PLAZA_MUSHROOM_SPECIES_SEED_SALT
   );
-  const pickIndex = Math.floor(speciesUnit * eligible.length) % eligible.length;
 
-  return eligible[pickIndex] ?? null;
+  return pickingWorldPlazaMushroomCatalogEntryByRarityWeight(
+    eligible,
+    speciesUnit
+  );
 }
 
 function resolvingWorldPlazaMushroomWoodHabitatLayoutAtAnchor(
@@ -544,7 +595,7 @@ function resolvingWorldPlazaMushroomWoodHabitatClaimAtTileIndex(
       anchorTileX <= tileX + scanRadius;
       anchorTileX += 1
     ) {
-      // Gate first: ~1/89 neighbors continue; skip tree lookup for the rest.
+      // Gate first: ~1/180 neighbors continue; skip tree lookup for the rest.
       if (
         !checkingWorldPlazaMushroomHabitatAnchorGate(
           anchorTileX,
@@ -560,12 +611,28 @@ function resolvingWorldPlazaMushroomWoodHabitatClaimAtTileIndex(
         continue;
       }
 
+      const biomeKind = resolveBiomeKindAtTile(anchorTileX, anchorTileY);
+
+      if (
+        !checkingWorldPlazaMushroomHabitatAnchorGateWithBiomeDensity({
+          anchorTileX,
+          anchorTileY,
+          baseModulus:
+            DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_MODULUS,
+          salt: DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_SEED_SALT,
+          biomeKind,
+        })
+      ) {
+        continue;
+      }
+
       const eligible = listingWorldPlazaMushroomEligibleCatalogEntriesAtAnchor({
         anchorTileX,
         anchorTileY,
         dayNumber,
         cyclePhase,
         resolveBiomeKindAtTile,
+        biomeKind,
         speciesFilter: checkingWorldPlazaMushroomStumpHabitatSpeciesId,
       });
       const entry = pickingWorldPlazaMushroomEligibleCatalogEntryAtAnchor(
@@ -651,7 +718,7 @@ function resolvingWorldPlazaMushroomPastureHabitatClaimAtTileIndex(
       anchorTileX <= tileX + scanRadius;
       anchorTileX += 1
     ) {
-      // Gate first: ~1/73 neighbors continue; biome/tree only for those.
+      // Gate first: ~1/260 neighbors continue; biome/tree only for those.
       if (
         !checkingWorldPlazaMushroomHabitatAnchorGate(
           anchorTileX,
@@ -673,12 +740,26 @@ function resolvingWorldPlazaMushroomPastureHabitatClaimAtTileIndex(
         continue;
       }
 
+      if (
+        !checkingWorldPlazaMushroomHabitatAnchorGateWithBiomeDensity({
+          anchorTileX,
+          anchorTileY,
+          baseModulus:
+            DEFINING_WORLD_PLAZA_MUSHROOM_PASTURE_HABITAT_ANCHOR_MODULUS,
+          salt: DEFINING_WORLD_PLAZA_MUSHROOM_PASTURE_HABITAT_ANCHOR_SEED_SALT,
+          biomeKind,
+        })
+      ) {
+        continue;
+      }
+
       const eligible = listingWorldPlazaMushroomEligibleCatalogEntriesAtAnchor({
         anchorTileX,
         anchorTileY,
         dayNumber,
         cyclePhase,
         resolveBiomeKindAtTile,
+        biomeKind,
         speciesFilter: checkingWorldPlazaMushroomPastureHabitatSpeciesId,
       });
       const entry = pickingWorldPlazaMushroomEligibleCatalogEntryAtAnchor(

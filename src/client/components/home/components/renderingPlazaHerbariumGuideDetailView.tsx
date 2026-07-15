@@ -1,25 +1,24 @@
 'use client';
 
+import {
+  PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME,
+  RenderingPlazaCodexStudyDetailSection,
+} from '@/components/home/components/renderingPlazaCodexStudyDetailSections';
 import { RenderingPlazaHerbariumBerryPortrait } from '@/components/home/components/renderingPlazaHerbariumBerryPortrait';
 import { RenderingPlazaHerbariumCloverPortrait } from '@/components/home/components/renderingPlazaHerbariumCloverPortrait';
 import { RenderingPlazaHerbariumFlowerPortrait } from '@/components/home/components/renderingPlazaHerbariumFlowerPortrait';
 import { RenderingPlazaHerbariumTreePortrait } from '@/components/home/components/renderingPlazaHerbariumTreePortrait';
 import { DEFINING_PLAZA_HERBARIUM_BERRY_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumBerryPortraitConstants';
-import type { PlazaHerbariumBerryStudyTierId } from '@/components/home/domains/definingPlazaHerbariumBerryStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_CLOVER_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumCloverPortraitConstants';
-import type { PlazaHerbariumCloverStudyTierId } from '@/components/home/domains/definingPlazaHerbariumCloverStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_FLOWER_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumFlowerPortraitConstants';
-import type { PlazaHerbariumFlowerStudyTierId } from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
-import type { PlazaHerbariumStudyTierId } from '@/components/home/domains/definingPlazaHerbariumStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_TREE_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumTreePortraitConstants';
+import type { PlazaCodexStudyTrackId } from '@/components/home/domains/definingPlazaCodexStudyTrackRegistry';
 import {
-  checkingPlazaHerbariumEntryStudyTierUnlocked,
-  formattingPlazaHerbariumEntryStudyCountProgress,
-  formattingPlazaHerbariumEntryStudyProgressLabel,
-  labelingPlazaHerbariumEntryStudyTierSectionTitle,
-  labelingPlazaHerbariumEntryStudyTierTeaser,
-  resolvingPlazaHerbariumEntryStudyTierBookIcon,
-} from '@/components/home/domains/resolvingPlazaHerbariumEntryStudyPresentation';
+  checkingPlazaCodexStudyTierUnlocked,
+  formattingPlazaCodexStudyCountProgress,
+  formattingPlazaCodexStudyProgressLabel,
+  resolvingPlazaCodexStudyTierBookIcon,
+} from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import type { PlazaHerbariumGuideDisplayEntry } from '@/components/home/domains/resolvingPlazaHerbariumGuideDisplayEntries';
 import { resolvingPlazaHerbariumEntryRarityBadgeVariant } from '@/components/home/domains/resolvingPlazaHerbariumRarity';
 import { Icon } from '@/components/ui/icon';
@@ -35,51 +34,37 @@ const PLAZA_HERBARIUM_DETAIL_STUDIED_BADGE_CLASS_NAME = `${DEFINING_WORLD_PLAZA_
 
 const PLAZA_HERBARIUM_DETAIL_STUDIED_BADGE_SOCKET_CLASS_NAME = `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.statusEffectBadgeSocket} flex size-4 shrink-0 items-center justify-center rounded-[2px]`;
 
-const PLAZA_HERBARIUM_DETAIL_STAT_CELL_CLASS_NAME =
-  'rounded-sm border border-poster-teal/20 bg-parchment/45 px-2 py-1.5 text-[11px]';
+function resolvingPlazaHerbariumCodexStudyTrackId(
+  entry: PlazaHerbariumGuideDisplayEntry
+): PlazaCodexStudyTrackId {
+  switch (entry.kind) {
+    case 'flower':
+      return 'herbarium-flower';
+    case 'tree':
+      return 'herbarium-tree';
+    case 'clover':
+      return 'herbarium-clover';
+    case 'berry':
+      return 'herbarium-berry';
+  }
+}
 
-const PLAZA_HERBARIUM_DETAIL_SECTION_TITLE_CLASS_NAME =
-  'font-display text-[11px] font-bold uppercase tracking-wide text-poster-teal-deep';
+function labelingPlazaHerbariumPropertiesCellTitle(
+  entry: PlazaHerbariumGuideDisplayEntry
+): string {
+  if (entry.kind === 'flower') {
+    return 'Eaten';
+  }
 
-const PLAZA_HERBARIUM_DETAIL_TEASER_CLASS_NAME =
-  'rounded-sm border border-dashed border-poster-teal/25 bg-parchment/35 px-3 py-2 text-[11px] font-medium italic text-ink-soft';
+  if (entry.kind === 'clover') {
+    return entry.cloverKind === 'four_leaf' ? 'Held' : 'Forage';
+  }
 
-type HerbariumDetailTierId =
-  | Exclude<PlazaHerbariumFlowerStudyTierId, 'sighted'>
-  | Exclude<PlazaHerbariumCloverStudyTierId, 'sighted'>
-  | Exclude<PlazaHerbariumBerryStudyTierId, 'sighted'>
-  | Exclude<PlazaHerbariumStudyTierId, 'sighted'>;
+  if (entry.kind === 'berry') {
+    return entry.berryLootKind === 'tea_leaves' ? 'Gathered' : 'Eaten';
+  }
 
-type RenderingPlazaHerbariumGuideDetailSectionProps = {
-  entry: PlazaHerbariumGuideDisplayEntry;
-  tierId: HerbariumDetailTierId;
-  children: React.ReactNode;
-};
-
-function RenderingPlazaHerbariumGuideDetailSection({
-  entry,
-  tierId,
-  children,
-}: RenderingPlazaHerbariumGuideDetailSectionProps): React.JSX.Element {
-  const isUnlocked = checkingPlazaHerbariumEntryStudyTierUnlocked(
-    entry,
-    tierId
-  );
-
-  return (
-    <section className="mt-4">
-      <h3 className={PLAZA_HERBARIUM_DETAIL_SECTION_TITLE_CLASS_NAME}>
-        {labelingPlazaHerbariumEntryStudyTierSectionTitle(entry, tierId)}
-      </h3>
-      {isUnlocked ? (
-        <div className="mt-2">{children}</div>
-      ) : (
-        <p className={cn(PLAZA_HERBARIUM_DETAIL_TEASER_CLASS_NAME, 'mt-2')}>
-          {labelingPlazaHerbariumEntryStudyTierTeaser(entry, tierId)}
-        </p>
-      )}
-    </section>
-  );
+  return 'Wood';
 }
 
 export type RenderingPlazaHerbariumGuideDetailViewProps = {
@@ -96,8 +81,22 @@ export function RenderingPlazaHerbariumGuideDetailView({
   onClose,
   className = '',
 }: RenderingPlazaHerbariumGuideDetailViewProps): React.JSX.Element {
-  const studyProgressLabel =
-    formattingPlazaHerbariumEntryStudyProgressLabel(entry);
+  const trackId = resolvingPlazaHerbariumCodexStudyTrackId(entry);
+  const studyCount = entry.studyCount;
+  const studyProgressLabel = formattingPlazaCodexStudyProgressLabel(
+    trackId,
+    studyCount
+  );
+  const isFamiliarityUnlocked = checkingPlazaCodexStudyTierUnlocked(
+    trackId,
+    'familiarity',
+    studyCount
+  );
+  const isExpertiseUnlocked = checkingPlazaCodexStudyTierUnlocked(
+    trackId,
+    'expertise',
+    studyCount
+  );
   const rawFlowerProcChancePercent = Math.round(
     resolvingWorldPlazaFlowerEatEffectProcChance({ preparation: 'raw' }) * 100
   );
@@ -128,15 +127,15 @@ export function RenderingPlazaHerbariumGuideDetailView({
               {entry.rarityLabel}
             </span>
             <Icon
-              icon={resolvingPlazaHerbariumEntryStudyTierBookIcon(entry)}
+              icon={resolvingPlazaCodexStudyTierBookIcon(trackId, studyCount)}
               className="size-4 shrink-0 text-poster-teal-deep"
               aria-hidden
             />
             <span className="font-mono not-italic tabular-nums text-poster-teal-deep">
-              {formattingPlazaHerbariumEntryStudyCountProgress(entry)}
+              {formattingPlazaCodexStudyCountProgress(trackId, studyCount)}
             </span>
             <span className="text-ink-soft/80">
-              · {entry.isStudied ? studyProgressLabel : 'Sighted entry'}
+              · {isFamiliarityUnlocked ? studyProgressLabel : 'Sighted entry'}
             </span>
           </p>
         </div>
@@ -234,97 +233,91 @@ export function RenderingPlazaHerbariumGuideDetailView({
           </div>
 
           <div className="border-t border-poster-teal/20 px-3 py-3 sm:px-4 sm:py-4">
-            <p className="text-sm font-medium leading-snug text-ink-soft">
-              {entry.summary}
-            </p>
+            {isFamiliarityUnlocked ? (
+              <p className="text-sm font-medium leading-snug text-ink-soft">
+                {entry.summary}
+              </p>
+            ) : null}
 
-            <RenderingPlazaHerbariumGuideDetailSection
-              entry={entry}
-              tierId="fieldNotes"
+            <RenderingPlazaCodexStudyDetailSection
+              trackId={trackId}
+              studyCount={studyCount}
+              tierId="understanding"
             >
               <p className="text-[11px] font-medium text-ink">
                 {entry.studiedSummary}
               </p>
-            </RenderingPlazaHerbariumGuideDetailSection>
+            </RenderingPlazaCodexStudyDetailSection>
 
-            <RenderingPlazaHerbariumGuideDetailSection
-              entry={entry}
-              tierId="properties"
+            <RenderingPlazaCodexStudyDetailSection
+              trackId={trackId}
+              studyCount={studyCount}
+              tierId="application"
+            >
+              <div className="space-y-2">
+                {entry.propertiesSummary ? (
+                  <p className="text-[11px] font-medium text-ink">
+                    {entry.propertiesSummary}
+                  </p>
+                ) : null}
+                {entry.biomeChips.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {entry.biomeChips.map((chip) => (
+                      <span
+                        key={chip.kind}
+                        title={
+                          chip.isExplored ? chip.label : 'Undiscovered region'
+                        }
+                        className={
+                          chip.isExplored
+                            ? 'rounded-sm border border-poster-teal/25 bg-parchment/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-poster-teal-deep'
+                            : 'rounded-sm border border-poster-teal/15 bg-parchment/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ink-soft/55'
+                        }
+                      >
+                        {chip.label}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[11px] font-medium text-ink-soft">
+                    No habitat recorded for this species.
+                  </p>
+                )}
+              </div>
+            </RenderingPlazaCodexStudyDetailSection>
+
+            <RenderingPlazaCodexStudyDetailSection
+              trackId={trackId}
+              studyCount={studyCount}
+              tierId="proficiency"
             >
               {entry.propertiesSummary ? (
-                <div className="space-y-2">
-                  <div className={PLAZA_HERBARIUM_DETAIL_STAT_CELL_CLASS_NAME}>
-                    <dt className="font-bold uppercase tracking-wide text-ink-soft">
-                      {entry.kind === 'flower'
-                        ? 'Eaten'
-                        : entry.kind === 'clover'
-                          ? entry.cloverKind === 'four_leaf'
-                            ? 'Held'
-                            : 'Forage'
-                          : entry.kind === 'berry'
-                            ? entry.berryLootKind === 'tea_leaves'
-                              ? 'Gathered'
-                              : 'Eaten'
-                            : 'Wood'}
-                    </dt>
-                    <dd className="mt-0.5 font-medium text-ink">
-                      {entry.propertiesSummary}
-                    </dd>
-                  </div>
-                  {entry.kind === 'flower' ? (
-                    <div
-                      className={PLAZA_HERBARIUM_DETAIL_STAT_CELL_CLASS_NAME}
-                    >
-                      <dt className="font-bold uppercase tracking-wide text-ink-soft">
-                        Proc (raw)
-                      </dt>
-                      <dd className="mt-0.5 font-mono tabular-nums font-medium text-ink">
-                        {rawFlowerProcChancePercent}% when eaten raw
-                      </dd>
-                    </div>
-                  ) : null}
+                <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
+                  <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                    {labelingPlazaHerbariumPropertiesCellTitle(entry)}
+                  </dt>
+                  <dd className="mt-0.5 font-medium text-ink">
+                    {entry.propertiesSummary}
+                  </dd>
                 </div>
               ) : null}
-            </RenderingPlazaHerbariumGuideDetailSection>
+            </RenderingPlazaCodexStudyDetailSection>
 
-            <RenderingPlazaHerbariumGuideDetailSection
-              entry={entry}
-              tierId="habitats"
+            <RenderingPlazaCodexStudyDetailSection
+              trackId={trackId}
+              studyCount={studyCount}
+              tierId="expertise"
             >
-              {entry.biomeChips.length > 0 ? (
-                <div className="flex flex-wrap gap-1.5">
-                  {entry.biomeChips.map((chip) => (
-                    <span
-                      key={chip.kind}
-                      title={
-                        chip.isExplored ? chip.label : 'Undiscovered region'
-                      }
-                      className={
-                        chip.isExplored
-                          ? 'rounded-sm border border-poster-teal/25 bg-parchment/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-poster-teal-deep'
-                          : 'rounded-sm border border-poster-teal/15 bg-parchment/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ink-soft/55'
-                      }
-                    >
-                      {chip.label}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-[11px] font-medium text-ink-soft">
-                  No habitat recorded for this species.
-                </p>
-              )}
-            </RenderingPlazaHerbariumGuideDetailSection>
-
-            <RenderingPlazaHerbariumGuideDetailSection
-              entry={entry}
-              tierId="full"
-            >
-              <div className="space-y-3">
-                {entry.apostleFlavor ? (
-                  <p className="border-l-2 border-poster-gold/50 pl-3 text-xs font-medium italic leading-snug text-ink-soft">
-                    {entry.apostleFlavor}
-                  </p>
+              <div className="space-y-2">
+                {entry.kind === 'flower' && isExpertiseUnlocked ? (
+                  <div className={PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME}>
+                    <dt className="font-bold uppercase tracking-wide text-ink-soft">
+                      Proc (raw)
+                    </dt>
+                    <dd className="mt-0.5 font-mono tabular-nums font-medium text-ink">
+                      {rawFlowerProcChancePercent}% when eaten raw
+                    </dd>
+                  </div>
                 ) : null}
                 {entry.kind === 'flower' &&
                 entry.eatEffectStatRows &&
@@ -334,7 +327,7 @@ export function RenderingPlazaHerbariumGuideDetailView({
                       <div
                         key={`${row.label}:${row.value}`}
                         className={cn(
-                          PLAZA_HERBARIUM_DETAIL_STAT_CELL_CLASS_NAME,
+                          PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME,
                           row.value.length > 42 ? 'sm:col-span-2' : null
                         )}
                       >
@@ -347,15 +340,16 @@ export function RenderingPlazaHerbariumGuideDetailView({
                       </div>
                     ))}
                   </dl>
-                ) : entry.kind === 'clover' &&
-                  entry.luckyEffectStatRows &&
-                  entry.luckyEffectStatRows.length > 0 ? (
+                ) : null}
+                {entry.kind === 'clover' &&
+                entry.luckyEffectStatRows &&
+                entry.luckyEffectStatRows.length > 0 ? (
                   <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {entry.luckyEffectStatRows.map((row) => (
                       <div
                         key={`${row.label}:${row.value}`}
                         className={cn(
-                          PLAZA_HERBARIUM_DETAIL_STAT_CELL_CLASS_NAME,
+                          PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME,
                           row.value.length > 42 ? 'sm:col-span-2' : null
                         )}
                       >
@@ -368,13 +362,25 @@ export function RenderingPlazaHerbariumGuideDetailView({
                       </div>
                     ))}
                   </dl>
-                ) : entry.apostleFlavor ? null : (
-                  <p className="text-[11px] font-medium text-ink">
-                    {entry.studiedSummary}
-                  </p>
-                )}
+                ) : null}
               </div>
-            </RenderingPlazaHerbariumGuideDetailSection>
+            </RenderingPlazaCodexStudyDetailSection>
+
+            <RenderingPlazaCodexStudyDetailSection
+              trackId={trackId}
+              studyCount={studyCount}
+              tierId="mastery"
+            >
+              {entry.apostleFlavor ? (
+                <p className="border-l-2 border-poster-gold/50 pl-3 text-xs font-medium italic leading-snug text-ink-soft">
+                  {entry.apostleFlavor}
+                </p>
+              ) : (
+                <p className="text-[11px] font-medium text-ink">
+                  {entry.studiedSummary}
+                </p>
+              )}
+            </RenderingPlazaCodexStudyDetailSection>
           </div>
         </article>
       </div>
