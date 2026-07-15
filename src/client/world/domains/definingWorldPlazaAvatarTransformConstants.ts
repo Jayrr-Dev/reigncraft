@@ -22,6 +22,10 @@ export const DEFINING_WORLD_PLAZA_SELECTED_AVATAR_SKIN_STORAGE_KEY_PREFIX =
 export const LABELING_WORLD_PLAZA_AVATAR_TRANSFORM_COOLDOWN_TOAST =
   'Form locked. Wait 1 day before transforming again.' as const;
 
+/** Toast when the animal form still needs bestiary mastery. */
+export const LABELING_WORLD_PLAZA_AVATAR_TRANSFORM_STUDY_LOCKED_TOAST =
+  'Form locked. Fully research this animal in the Bestiary first.' as const;
+
 /**
  * Resolves the localStorage key for transform cooldown.
  *

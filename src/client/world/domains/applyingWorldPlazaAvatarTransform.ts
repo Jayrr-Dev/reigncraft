@@ -5,11 +5,16 @@
  */
 
 import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
+import { checkingWorldPlazaAnimalPlayableAvatarSkinStudyUnlocked } from '@/components/world/domains/checkingWorldPlazaAnimalPlayableAvatarSkinStudyUnlocked';
 import {
   DEFINING_WORLD_PLAZA_AVATAR_SKIN_DEFAULT,
   type DefiningWorldPlazaAvatarSkinId,
 } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
-import { LABELING_WORLD_PLAZA_AVATAR_TRANSFORM_COOLDOWN_TOAST } from '@/components/world/domains/definingWorldPlazaAvatarTransformConstants';
+import {
+  LABELING_WORLD_PLAZA_AVATAR_TRANSFORM_COOLDOWN_TOAST,
+  LABELING_WORLD_PLAZA_AVATAR_TRANSFORM_STUDY_LOCKED_TOAST,
+} from '@/components/world/domains/definingWorldPlazaAvatarTransformConstants';
+import { gettingWorldPlazaBestiaryStudyCountsSnapshot } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import {
   gettingWorldPlazaSelectedAvatarSkinId,
   settingWorldPlazaSelectedAvatarSkin,
@@ -22,14 +27,16 @@ import {
 export type ApplyingWorldPlazaAvatarTransformResult =
   | 'applied'
   | 'unchanged'
-  | 'cooldown';
+  | 'cooldown'
+  | 'study-locked';
 
 /**
  * Selects a new avatar form when transform is ready.
  *
  * Same-form picks are no-ops. Locked picks toast and leave the form alone.
- * Successful switches stamp the 1-day cooldown; Spritcore rehydrates via the
- * skin-selection subscriber in the plaza scene.
+ * Animal forms need bestiary mastery. Successful switches stamp the 1-day
+ * cooldown; Spritcore rehydrates via the skin-selection subscriber in the
+ * plaza scene.
  */
 export function applyingWorldPlazaAvatarTransform(
   skinId: DefiningWorldPlazaAvatarSkinId,
@@ -37,6 +44,18 @@ export function applyingWorldPlazaAvatarTransform(
 ): ApplyingWorldPlazaAvatarTransformResult {
   if (gettingWorldPlazaSelectedAvatarSkinId() === skinId) {
     return 'unchanged';
+  }
+
+  if (
+    !checkingWorldPlazaAnimalPlayableAvatarSkinStudyUnlocked(
+      skinId,
+      gettingWorldPlazaBestiaryStudyCountsSnapshot()
+    )
+  ) {
+    showingReigncraftToast(
+      LABELING_WORLD_PLAZA_AVATAR_TRANSFORM_STUDY_LOCKED_TOAST
+    );
+    return 'study-locked';
   }
 
   if (checkingWorldPlazaAvatarTransformIsOnCooldown(nowMs)) {

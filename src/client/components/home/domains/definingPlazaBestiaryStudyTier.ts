@@ -161,4 +161,4 @@ export const LABELING_PLAZA_BESTIARY_STUDY_TIER_TEASERS: Record<
 
 /** Unlocked copy for the playable-form section. */
 export const LABELING_PLAZA_BESTIARY_PLAYABLE_UNLOCKED =
-  'Unlocked. Choose this species in the Character selector.';
+  'Unlocked. Choose this species from Transform on the action bar.';
