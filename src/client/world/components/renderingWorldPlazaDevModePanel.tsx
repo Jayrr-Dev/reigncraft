@@ -17,6 +17,7 @@ import { RenderingWorldPlazaDevModeDayNightControls } from '@/components/world/c
 import { RenderingWorldPlazaDevModePanelViewSelect } from '@/components/world/components/renderingWorldPlazaDevModePanelViewSelect';
 import { RenderingWorldPlazaDevPanelCloseButton } from '@/components/world/components/renderingWorldPlazaDevPanelCloseButton';
 import { RenderingWorldPlazaFeaturesDebugControls } from '@/components/world/components/renderingWorldPlazaFeaturesDebugControls';
+import { RenderingWorldPlazaPerformanceDiagnosticsFpsReadout } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsFpsReadout';
 import { RenderingWorldPlazaPerformanceDiagnosticsOverlay } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsOverlay';
 import { RenderingWorldPlazaPerformanceDiagnosticsToggleButton } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsToggleButton';
 import { RenderingWorldPlazaPlayerWorldLayerDebugLabel } from '@/components/world/components/renderingWorldPlazaPlayerWorldLayerDebugLabel';
@@ -30,6 +31,7 @@ import {
   LABELING_WORLD_PLAZA_DEV_MODE_PANEL_CLOSE,
   LABELING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE,
   STYLING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER_BUTTON_CLASS_NAME,
+  STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_ACTIVE_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_HEADER_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME,
@@ -250,9 +252,8 @@ export function RenderingWorldPlazaDevModePanel(
         viewportHudScale,
         isMobile,
         isFullscreen,
-        isOpen,
       }),
-    [isFullscreen, isMobile, isOpen, viewportHudScale]
+    [isFullscreen, isMobile, viewportHudScale]
   );
   const [activeViewId, setActiveViewId] =
     useState<DefiningWorldPlazaDevModePanelViewId>(
@@ -268,18 +269,43 @@ export function RenderingWorldPlazaDevModePanel(
         style={viewportLayout.style}
         {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
       >
-        {onExitToHome ? (
+        <div
+          className={viewportLayout.toolbarClassName}
+          style={viewportLayout.toolbarStyle}
+        >
+          {onExitToHome ? (
+            <button
+              type="button"
+              aria-label={LABELING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER}
+              className={
+                STYLING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER_BUTTON_CLASS_NAME
+              }
+              onClick={onExitToHome}
+            >
+              {LABELING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER}
+            </button>
+          ) : null}
           <button
             type="button"
-            aria-label={LABELING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER}
+            aria-label={LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER}
+            aria-expanded={isOpen}
             className={
-              STYLING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER_BUTTON_CLASS_NAME
+              isOpen
+                ? STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_ACTIVE_CLASS_NAME
+                : STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME
             }
-            onClick={onExitToHome}
+            onClick={onToggle}
           >
-            {LABELING_WORLD_PLAZA_DEV_MODE_HOME_LAUNCHER}
+            Dev
           </button>
-        ) : null}
+          {isPerformanceDiagnosticsFeatureAvailable ? (
+            <RenderingWorldPlazaPerformanceDiagnosticsToggleButton
+              isVisible={isPerformanceDiagnosticsVisible}
+              onToggle={onTogglePerformanceDiagnostics}
+            />
+          ) : null}
+        </div>
+
         {isOpen ? (
           <div className={STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SHELL_CLASS_NAME}>
             <div
@@ -486,31 +512,20 @@ export function RenderingWorldPlazaDevModePanel(
               ) : null}
             </div>
           </div>
-        ) : (
-          <button
-            type="button"
-            aria-label={LABELING_WORLD_PLAZA_DEV_MODE_LAUNCHER}
-            aria-expanded={false}
-            className={STYLING_WORLD_PLAZA_DEV_MODE_LAUNCHER_BUTTON_CLASS_NAME}
-            onClick={onToggle}
-          >
-            Dev
-          </button>
-        )}
-
-        {isPerformanceDiagnosticsFeatureAvailable ? (
-          <RenderingWorldPlazaPerformanceDiagnosticsToggleButton
-            isVisible={isPerformanceDiagnosticsVisible}
-            onToggle={onTogglePerformanceDiagnostics}
-          />
         ) : null}
       </div>
 
       {isPerformanceDiagnosticsFeatureAvailable ? (
-        <RenderingWorldPlazaPerformanceDiagnosticsOverlay
-          isVisible={isPerformanceDiagnosticsVisible}
-          onClose={onTogglePerformanceDiagnostics}
-        />
+        <>
+          <RenderingWorldPlazaPerformanceDiagnosticsFpsReadout
+            viewportHudScale={viewportHudScale}
+            isMobile={isMobile}
+          />
+          <RenderingWorldPlazaPerformanceDiagnosticsOverlay
+            isVisible={isPerformanceDiagnosticsVisible}
+            onClose={onTogglePerformanceDiagnostics}
+          />
+        </>
       ) : null}
     </>
   );

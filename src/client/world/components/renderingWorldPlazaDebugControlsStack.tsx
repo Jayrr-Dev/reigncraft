@@ -2,6 +2,7 @@
 
 import { RenderingWorldPlazaAvatarSkinSelectorControl } from '@/components/world/components/renderingWorldPlazaAvatarSkinSelectorControl';
 import { RenderingWorldPlazaFeaturesDebugControls } from '@/components/world/components/renderingWorldPlazaFeaturesDebugControls';
+import { RenderingWorldPlazaPerformanceDiagnosticsFpsReadout } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsFpsReadout';
 import { RenderingWorldPlazaPerformanceDiagnosticsOverlay } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsOverlay';
 import { RenderingWorldPlazaPerformanceDiagnosticsToggleButton } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsToggleButton';
 import { RenderingWorldPlazaTerrainCollisionBlockerHitDebugLabel } from '@/components/world/components/renderingWorldPlazaTerrainCollisionBlockerHitDebugLabel';
@@ -87,10 +88,13 @@ export function RenderingWorldPlazaDebugControlsStack({
         />
       </div>
       {isPerformanceDiagnosticsFeatureAvailable ? (
-        <RenderingWorldPlazaPerformanceDiagnosticsOverlay
-          isVisible={isPerformanceDiagnosticsVisible}
-          onClose={onTogglePerformanceDiagnostics}
-        />
+        <>
+          <RenderingWorldPlazaPerformanceDiagnosticsFpsReadout />
+          <RenderingWorldPlazaPerformanceDiagnosticsOverlay
+            isVisible={isPerformanceDiagnosticsVisible}
+            onClose={onTogglePerformanceDiagnostics}
+          />
+        </>
       ) : null}
     </>
   );

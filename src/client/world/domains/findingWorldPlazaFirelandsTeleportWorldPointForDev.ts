@@ -1,8 +1,18 @@
 import { checkingWorldPlazaLavaAtTileIndex } from '@/components/world/domains/checkingWorldPlazaLavaAtTileIndex';
 import { checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTerrainElevationColumnBlocksPlayerAtTileIndex';
 import { checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex } from '@/components/world/domains/checkingWorldPlazaTileIsFirelandsBiomeAtTileIndex';
-import { computingWorldPlazaFirelandsStructureAnchorTileIndex } from '@/components/world/domains/computingWorldPlazaFirelandsStructureAnchorTileIndex';
-import { DEFINING_WORLD_PLAZA_FIRELANDS_SPAWN_CLEARING_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaFirelandsBiomeConstants';
+import {
+  DEFINING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_CENTRALITY_SEARCH_STEP_TILES,
+  DEFINING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_MIN_RADIUS_PADDING_TILES,
+  DEFINING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_SEARCH_RADIUS_TILES,
+  DEFINING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_VOLCANO_OFFSETS,
+} from '@/components/world/domains/definingWorldPlazaBiomeDevTeleportConstants';
+import {
+  DEFINING_WORLD_PLAZA_FIRELANDS_SPAWN_CLEARING_RADIUS_GRID,
+  DEFINING_WORLD_PLAZA_FIRELANDS_STRUCTURE_SPACING_ANCHOR_TILE,
+  DEFINING_WORLD_PLAZA_FIRELANDS_STRUCTURE_SPACING_CELL_TILES,
+  DEFINING_WORLD_PLAZA_FIRELANDS_VOLCANO_CENTRALITY_MIN,
+} from '@/components/world/domains/definingWorldPlazaFirelandsBiomeConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { resolvingWorldPlazaFirelandsCentralityAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFirelandsCentralityAtTileIndex';
 import {
@@ -18,25 +28,6 @@ import { checkingWorldPlazaGridPointOccupiesWalkingBlockedTile } from '@/compone
  *
  * @module components/world/domains/findingWorldPlazaFirelandsTeleportWorldPointForDev
  */
-
-/** Max Chebyshev radius scanned from the plaza origin. */
-const FINDING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_SEARCH_RADIUS_TILES = 2800;
-
-/** Step size while scanning for a Firelands region. */
-const FINDING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_SEARCH_STEP_TILES = 32;
-
-/** Tile offsets tried around a volcano anchor before falling back. */
-const FINDING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_VOLCANO_OFFSETS: readonly {
-  readonly tileX: number;
-  readonly tileY: number;
-}[] = [
-  { tileX: 5, tileY: 0 },
-  { tileX: -5, tileY: 0 },
-  { tileX: 0, tileY: 5 },
-  { tileX: 0, tileY: -5 },
-  { tileX: 4, tileY: 4 },
-  { tileX: -4, tileY: 4 },
-];
 
 /**
  * Returns true when a tile is a safe dev-teleport landing spot in Firelands.
@@ -113,44 +104,58 @@ function buildingWorldPlazaFirelandsDevTeleportWorldPointAtTileIndex(
 }
 
 /**
- * Tries to land beside a volcano centerpiece in the Firelands search window.
+ * Minimum Chebyshev radius where Firelands may appear for teleport search.
+ */
+function resolvingWorldPlazaFirelandsDevTeleportMinSearchRadiusTiles(): number {
+  return (
+    DEFINING_WORLD_PLAZA_FIRELANDS_SPAWN_CLEARING_RADIUS_GRID +
+    DEFINING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_MIN_RADIUS_PADDING_TILES
+  );
+}
+
+/**
+ * Tries to land beside a volcano centerpiece outside the spawn clearing.
  */
 function findingWorldPlazaFirelandsVolcanoTeleportWorldPointForDev(): DefiningWorldPlazaWorldPoint | null {
   const minRadius =
-    DEFINING_WORLD_PLAZA_FIRELANDS_SPAWN_CLEARING_RADIUS_GRID + 16;
+    resolvingWorldPlazaFirelandsDevTeleportMinSearchRadiusTiles();
+  const maxRadius =
+    DEFINING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_SEARCH_RADIUS_TILES;
+  const cellSize = DEFINING_WORLD_PLAZA_FIRELANDS_STRUCTURE_SPACING_CELL_TILES;
+  const anchorOffset =
+    DEFINING_WORLD_PLAZA_FIRELANDS_STRUCTURE_SPACING_ANCHOR_TILE;
+  const cellMin = Math.floor(-maxRadius / cellSize);
+  const cellMax = Math.floor(maxRadius / cellSize);
 
-  for (
-    let tileY = -FINDING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_SEARCH_RADIUS_TILES;
-    tileY <= FINDING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_SEARCH_RADIUS_TILES;
-    tileY += FINDING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_SEARCH_STEP_TILES
-  ) {
-    for (
-      let tileX =
-        -FINDING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_SEARCH_RADIUS_TILES;
-      tileX <= FINDING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_SEARCH_RADIUS_TILES;
-      tileX += FINDING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_SEARCH_STEP_TILES
-    ) {
-      if (Math.max(Math.abs(tileX), Math.abs(tileY)) < minRadius) {
-        continue;
-      }
-
-      const structureAnchor =
-        computingWorldPlazaFirelandsStructureAnchorTileIndex(tileX, tileY);
-      const volcanoAnchor =
-        resolvingWorldPlazaFirelandsVolcanoAnchorAtTileIndex(
-          structureAnchor.tileX,
-          structureAnchor.tileY
-        );
+  for (let cellY = cellMin; cellY <= cellMax; cellY += 1) {
+    for (let cellX = cellMin; cellX <= cellMax; cellX += 1) {
+      const structureAnchorTileX = cellX * cellSize + anchorOffset;
+      const structureAnchorTileY = cellY * cellSize + anchorOffset;
 
       if (
-        !volcanoAnchor ||
-        volcanoAnchor.tileX !== structureAnchor.tileX ||
-        volcanoAnchor.tileY !== structureAnchor.tileY
+        Math.max(
+          Math.abs(structureAnchorTileX),
+          Math.abs(structureAnchorTileY)
+        ) < minRadius
       ) {
         continue;
       }
 
-      for (const offset of FINDING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_VOLCANO_OFFSETS) {
+      const volcanoAnchor =
+        resolvingWorldPlazaFirelandsVolcanoAnchorAtTileIndex(
+          structureAnchorTileX,
+          structureAnchorTileY
+        );
+
+      if (
+        !volcanoAnchor ||
+        volcanoAnchor.tileX !== structureAnchorTileX ||
+        volcanoAnchor.tileY !== structureAnchorTileY
+      ) {
+        continue;
+      }
+
+      for (const offset of DEFINING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_VOLCANO_OFFSETS) {
         const landingTileX = volcanoAnchor.tileX + offset.tileX;
         const landingTileY = volcanoAnchor.tileY + offset.tileY;
 
@@ -173,68 +178,92 @@ function findingWorldPlazaFirelandsVolcanoTeleportWorldPointForDev(): DefiningWo
 }
 
 /**
- * Finds a high-centrality Firelands tile when no volcano landing is available.
+ * Walks expanding Chebyshev rings outside the spawn clearing for Firelands.
  */
 function findingWorldPlazaFirelandsCentralityTeleportWorldPointForDev(): DefiningWorldPlazaWorldPoint | null {
   const minRadius =
-    DEFINING_WORLD_PLAZA_FIRELANDS_SPAWN_CLEARING_RADIUS_GRID + 16;
+    resolvingWorldPlazaFirelandsDevTeleportMinSearchRadiusTiles();
+  const maxRadius =
+    DEFINING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_SEARCH_RADIUS_TILES;
+  const step =
+    DEFINING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_CENTRALITY_SEARCH_STEP_TILES;
   let bestTile: { tileX: number; tileY: number; centrality: number } | null =
     null;
 
-  for (
-    let tileY = -FINDING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_SEARCH_RADIUS_TILES;
-    tileY <= FINDING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_SEARCH_RADIUS_TILES;
-    tileY += 8
-  ) {
-    for (
-      let tileX =
-        -FINDING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_SEARCH_RADIUS_TILES;
-      tileX <= FINDING_WORLD_PLAZA_FIRELANDS_DEV_TELEPORT_SEARCH_RADIUS_TILES;
-      tileX += 8
-    ) {
-      if (Math.max(Math.abs(tileX), Math.abs(tileY)) < minRadius) {
-        continue;
-      }
+  for (let radius = minRadius; radius <= maxRadius; radius += step) {
+    for (let offset = -radius; offset <= radius; offset += step) {
+      const ringCandidates: readonly {
+        tileX: number;
+        tileY: number;
+      }[] = [
+        { tileX: offset, tileY: -radius },
+        { tileX: offset, tileY: radius },
+        { tileX: -radius, tileY: offset },
+        { tileX: radius, tileY: offset },
+      ];
 
-      if (
-        !checkingWorldPlazaFirelandsDevTeleportCandidateAtTileIndex(
-          tileX,
-          tileY
-        )
-      ) {
-        continue;
-      }
+      for (const candidate of ringCandidates) {
+        if (
+          (candidate.tileX === -radius || candidate.tileX === radius) &&
+          (candidate.tileY === -radius || candidate.tileY === radius) &&
+          offset !== -radius
+        ) {
+          continue;
+        }
 
-      const centrality = resolvingWorldPlazaFirelandsCentralityAtTileIndex(
-        tileX,
-        tileY
+        if (
+          !checkingWorldPlazaFirelandsDevTeleportCandidateAtTileIndex(
+            candidate.tileX,
+            candidate.tileY
+          )
+        ) {
+          continue;
+        }
+
+        const centrality = resolvingWorldPlazaFirelandsCentralityAtTileIndex(
+          candidate.tileX,
+          candidate.tileY
+        );
+
+        if (centrality <= 0) {
+          continue;
+        }
+
+        if (!bestTile || centrality > bestTile.centrality) {
+          bestTile = {
+            tileX: candidate.tileX,
+            tileY: candidate.tileY,
+            centrality,
+          };
+        }
+
+        if (
+          centrality >= DEFINING_WORLD_PLAZA_FIRELANDS_VOLCANO_CENTRALITY_MIN
+        ) {
+          return buildingWorldPlazaFirelandsDevTeleportWorldPointAtTileIndex(
+            candidate.tileX,
+            candidate.tileY
+          );
+        }
+      }
+    }
+
+    if (bestTile) {
+      return buildingWorldPlazaFirelandsDevTeleportWorldPointAtTileIndex(
+        bestTile.tileX,
+        bestTile.tileY
       );
-
-      if (centrality <= 0) {
-        continue;
-      }
-
-      if (!bestTile || centrality > bestTile.centrality) {
-        bestTile = { tileX, tileY, centrality };
-      }
     }
   }
 
-  if (!bestTile) {
-    return null;
-  }
-
-  return buildingWorldPlazaFirelandsDevTeleportWorldPointAtTileIndex(
-    bestTile.tileX,
-    bestTile.tileY
-  );
+  return null;
 }
 
 /**
  * Resolves a dev-teleport destination inside the nearest interesting Firelands region.
  *
  * Prefers a walkable tile beside a volcano centerpiece, then falls back to the
- * highest-centrality walkable Firelands tile in the search window.
+ * nearest high-centrality walkable Firelands tile outside the spawn clearing.
  */
 export function findingWorldPlazaFirelandsTeleportWorldPointForDev(): DefiningWorldPlazaWorldPoint | null {
   return (

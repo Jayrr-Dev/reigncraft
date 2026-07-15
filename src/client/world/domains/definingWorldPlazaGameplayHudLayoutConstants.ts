@@ -81,7 +81,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
   },
 
   regions: {
-    /** Top-left: Dev tools + Perf launcher (minimap drops from the action bar). */
+    /** Top-left: Dev / Perf toolbar; open Dev tools panel stacks below. */
     topLeft: {
       minimapStack: {
         anchorClassName:
@@ -89,9 +89,13 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
       },
       devModePanel: {
         // Top offset: action-bar row inset + small gap (see DevModePanel viewport layout).
-        // Collapsed Dev / Perf row width matches minimap canvas size.
+        // Toolbar row (Home / Dev / Perf) on top; open panel stacks below.
+        // Toolbar width is inline (minimap footprint) — do not use w-full or the
+        // open panel widens the column and stretches Home / Dev / Perf.
         anchorClassName:
-          'pointer-events-none absolute z-30 flex select-none flex-row items-stretch gap-0.5',
+          'pointer-events-none absolute z-30 flex select-none flex-col items-start gap-0.5',
+        toolbarRowClassName:
+          'pointer-events-none flex shrink-0 flex-row items-center gap-0.5',
         topWithStaminaBarClassName: '',
         topWithoutStaminaBarClassName: '',
       },
@@ -118,8 +122,17 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
       },
     },
 
-    /** Top-right: online room status, buff stack, and (desktop) open minimap. */
+    /** Top-right: online room status, buff stack, FPS readout, and (desktop) open minimap. */
     topRight: {
+      /** Corner FPS counter (green mono text). Desktop: top-right. Mobile: below action bar, right. */
+      performanceFpsReadout: {
+        desktopAnchorClassName:
+          'pointer-events-none absolute right-1 top-1 z-30 font-mono text-xs font-semibold tabular-nums text-green-400 drop-shadow-[0_1px_1px_rgba(0,0,0,0.85)]',
+        mobileAnchorClassName:
+          'pointer-events-none absolute right-1 z-30 font-mono text-xs font-semibold tabular-nums text-green-400 drop-shadow-[0_1px_1px_rgba(0,0,0,0.85)]',
+        /** Gap under the action bar shell on mobile so FPS does not sit on the bar. */
+        mobileBelowActionBarGapBasePx: 4,
+      },
       roomStatusHud: {
         anchorClassName:
           'pointer-events-none absolute right-1 top-1 hidden flex-col gap-1 md:flex',
@@ -265,3 +278,18 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_MINI_MAP_STACK_ANCHOR_CLASS_NAME 
 export const STYLING_WORLD_PLAZA_ROOM_STATUS_HUD_ANCHOR_CLASS_NAME =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight.roomStatusHud
     .anchorClassName;
+
+/** Top-right live FPS readout anchor (desktop corner). */
+export const STYLING_WORLD_PLAZA_PERFORMANCE_FPS_READOUT_ANCHOR_CLASS_NAME =
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight
+    .performanceFpsReadout.desktopAnchorClassName;
+
+/** Mobile FPS readout anchor (top set via occupied action-bar height). */
+export const STYLING_WORLD_PLAZA_PERFORMANCE_FPS_READOUT_MOBILE_ANCHOR_CLASS_NAME =
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight
+    .performanceFpsReadout.mobileAnchorClassName;
+
+/** Gap between action bar shell and mobile FPS readout. */
+export const DEFINING_WORLD_PLAZA_PERFORMANCE_FPS_READOUT_MOBILE_BELOW_ACTION_BAR_GAP_BASE_PX =
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topRight
+    .performanceFpsReadout.mobileBelowActionBarGapBasePx;

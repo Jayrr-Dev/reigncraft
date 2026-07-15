@@ -49,6 +49,19 @@ function checkingWorldPlazaMushroomPickStillInRange(
   return distance <= DEFINING_WORLD_PLAZA_MUSHROOM_PICK_PLAYER_RANGE_TILES;
 }
 
+function checkingWorldPlazaMushroomPickStillSelected(
+  selectedKeys: ReadonlySet<string>,
+  tileX: number,
+  tileY: number
+): boolean {
+  return selectedKeys.has(
+    formattingWorldPlazaInteractableMushroomSelectionKey(tileX, tileY)
+  );
+}
+
+/**
+ * Mushroom pick adapter over the shared timed interaction progress mechanic.
+ */
 export function usingWorldPlazaMushroomPickProgress({
   playerPositionRef,
   selectedInteractableBlockKeysRef,
@@ -86,36 +99,46 @@ export function usingWorldPlazaMushroomPickProgress({
         return false;
       }
 
-      playingWorldPlazaEquipmentSfx('harvest');
-
       return startingTimedInteraction({
-        target: entry,
+        targetKey: formattingWorldPlazaInteractableMushroomSelectionKey(
+          entry.tileX,
+          entry.tileY
+        ),
         durationMs: computingWorldPlazaMushroomPickDurationMs(),
+        context: entry,
         progressIcon:
           DEFINING_WORLD_PLAZA_MUSHROOM_PICK_TIMED_INTERACTION_PROGRESS_ICON,
-        stillValid: () => {
+        avatarToolAction: {
+          toolActionId: 'flower-pick',
+          targetGridX: entry.targetCenterX,
+          targetGridY: entry.targetCenterY,
+        },
+        checkingShouldContinue: () => {
           const currentPlayerPosition = playerPositionRef.current;
+          const selectedKeys = selectedInteractableBlockKeysRef.current;
 
           if (!currentPlayerPosition) {
             return false;
           }
 
-          if (
-            !selectedInteractableBlockKeysRef.current.has(
-              formattingWorldPlazaInteractableMushroomSelectionKey(
-                entry.tileX,
-                entry.tileY
-              )
+          return (
+            checkingWorldPlazaMushroomPickStillInRange(
+              currentPlayerPosition,
+              entry.targetCenterX,
+              entry.targetCenterY
+            ) &&
+            checkingWorldPlazaMushroomPickStillSelected(
+              selectedKeys,
+              entry.tileX,
+              entry.tileY
             )
-          ) {
-            return false;
-          }
-
-          return checkingWorldPlazaMushroomPickStillInRange(
-            currentPlayerPosition,
-            entry.targetCenterX,
-            entry.targetCenterY
           );
+        },
+        handlingMilestone: (milestone) => {
+          playingWorldPlazaEquipmentSfx({
+            toolActionId: 'flower-pick',
+            milestone,
+          });
         },
       });
     },
