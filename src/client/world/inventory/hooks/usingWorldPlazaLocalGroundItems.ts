@@ -3,6 +3,7 @@
 import { checkingWorldPlazaGroundItemIsLegacyDemoSeed } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemIsLegacyDemoSeed';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
 import {
+  markingWorldPlazaGroundItemPendingRemoved,
   mergingWorldPlazaGroundItemsWithPendingOptimistic,
   registeringWorldPlazaLocalGroundItemOptimisticHandlers,
 } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
@@ -92,6 +93,7 @@ export function usingWorldPlazaLocalGroundItems({
           const grantedQuantity = Math.min(quantity, existingItem.quantity);
 
           if (grantedQuantity >= existingItem.quantity) {
+            markingWorldPlazaGroundItemPendingRemoved(groundItemId);
             return items.filter((groundItem) => groundItem.id !== groundItemId);
           }
 
@@ -170,6 +172,7 @@ export function usingWorldPlazaLocalGroundItems({
         );
 
         if (grantedQuantity >= existingItem.quantity) {
+          markingWorldPlazaGroundItemPendingRemoved(groundItemId);
           return currentItems.filter(
             (groundItem) => groundItem.id !== groundItemId
           );

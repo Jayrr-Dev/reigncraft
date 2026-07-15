@@ -40,6 +40,8 @@ function creatingSnapshot(
     isEnabled: true,
     capturedAtMs: 1_000,
     framesPerSecond: 58,
+    sessionFramesPerSecond: 57,
+    sessionFrameCount: 120,
     frameAverageMs: 17.1,
     framePercentile95Ms,
     framePercentile99Ms: 26,

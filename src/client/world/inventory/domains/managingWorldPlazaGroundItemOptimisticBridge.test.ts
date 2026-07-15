@@ -1,7 +1,12 @@
 import { checkingWorldPlazaGroundItemIsExpired } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemIsExpired';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
-import { mergingWorldPlazaGroundItemsWithPendingOptimistic } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
-import { describe, expect, it } from 'vitest';
+import {
+  clearingWorldPlazaGroundItemOptimisticTracking,
+  markingWorldPlazaGroundItemPendingOptimisticDrop,
+  markingWorldPlazaGroundItemPendingRemoved,
+  mergingWorldPlazaGroundItemsWithPendingOptimistic,
+} from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
+import { afterEach, describe, expect, it } from 'vitest';
 import { WORLD_INVENTORY_DEVVIT_GROUND_ITEM_DESPAWN_MS } from '../../../../shared/worldInventoryDevvit';
 
 function buildingGroundItem(
@@ -45,6 +50,10 @@ describe('checkingWorldPlazaGroundItemIsExpired', () => {
 });
 
 describe('mergingWorldPlazaGroundItemsWithPendingOptimistic', () => {
+  afterEach(() => {
+    clearingWorldPlazaGroundItemOptimisticTracking();
+  });
+
   it('keeps pending optimistic drops that are still within lifetime', () => {
     const nowMs = 10_000;
     const polled = [
@@ -54,6 +63,7 @@ describe('mergingWorldPlazaGroundItemsWithPendingOptimistic', () => {
       buildingGroundItem({ id: 'polled', spawnedAt: nowMs - 1_000 }),
       buildingGroundItem({ id: 'pending', spawnedAt: nowMs - 500 }),
     ];
+    markingWorldPlazaGroundItemPendingOptimisticDrop('pending');
 
     expect(
       mergingWorldPlazaGroundItemsWithPendingOptimistic(
@@ -64,6 +74,18 @@ describe('mergingWorldPlazaGroundItemsWithPendingOptimistic', () => {
     ).toEqual(['polled', 'pending']);
   });
 
+  it('does not resurrect non-pending rows missing from the poll', () => {
+    const nowMs = 10_000;
+    const polled: DefiningWorldPlazaGroundItem[] = [];
+    const current = [
+      buildingGroundItem({ id: 'ghost', spawnedAt: nowMs - 500 }),
+    ];
+
+    expect(
+      mergingWorldPlazaGroundItemsWithPendingOptimistic(polled, current, nowMs)
+    ).toEqual([]);
+  });
+
   it('does not resurrect expired optimistic rows after the poll drops them', () => {
     const nowMs = 10_000;
     const expiredSpawnedAt =
@@ -72,9 +94,43 @@ describe('mergingWorldPlazaGroundItemsWithPendingOptimistic', () => {
     const current = [
       buildingGroundItem({ id: 'expired', spawnedAt: expiredSpawnedAt }),
     ];
+    markingWorldPlazaGroundItemPendingOptimisticDrop('expired');
 
     expect(
       mergingWorldPlazaGroundItemsWithPendingOptimistic(polled, current, nowMs)
     ).toEqual([]);
+  });
+
+  it('filters pending-removed ids out of a stale poll snapshot', () => {
+    const nowMs = 10_000;
+    const polled = [
+      buildingGroundItem({ id: 'picked', spawnedAt: nowMs - 1_000 }),
+      buildingGroundItem({ id: 'other', spawnedAt: nowMs - 1_000 }),
+    ];
+    markingWorldPlazaGroundItemPendingRemoved('picked');
+
+    expect(
+      mergingWorldPlazaGroundItemsWithPendingOptimistic(polled, [], nowMs).map(
+        (item) => item.id
+      )
+    ).toEqual(['other']);
+  });
+
+  it('clears pending-removed once the poll confirms the item is gone', () => {
+    const nowMs = 10_000;
+    markingWorldPlazaGroundItemPendingRemoved('picked');
+
+    expect(
+      mergingWorldPlazaGroundItemsWithPendingOptimistic([], [], nowMs)
+    ).toEqual([]);
+
+    // A later poll that somehow reintroduces the id should show it again.
+    expect(
+      mergingWorldPlazaGroundItemsWithPendingOptimistic(
+        [buildingGroundItem({ id: 'picked', spawnedAt: nowMs - 100 })],
+        [],
+        nowMs
+      ).map((item) => item.id)
+    ).toEqual(['picked']);
   });
 });

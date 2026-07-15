@@ -71,6 +71,22 @@ export function markingWildlifeGroundFlowerOptimisticPicked(
   ).add(formattingWorldPlazaPickedFlowerTileKey(tileX, tileY));
 }
 
+/** Clears one optimistic flower pick (failed / rejected player or wildlife pick). */
+export function clearingWildlifeGroundFlowerOptimisticPicked(
+  tileX: number,
+  tileY: number
+): void {
+  const tileKey = formattingWorldPlazaPickedFlowerTileKey(tileX, tileY);
+
+  if (!wildlifeOptimisticPickedFlowerTileKeys.has(tileKey)) {
+    return;
+  }
+
+  const next = new Set(wildlifeOptimisticPickedFlowerTileKeys);
+  next.delete(tileKey);
+  wildlifeOptimisticPickedFlowerTileKeys = next;
+}
+
 /**
  * Consumes one biome flower tile when wildlife is in melee range.
  * Returns false when out of range, already picked, or no bridge is registered.
@@ -110,9 +126,7 @@ export function consumingWildlifeGroundFlowerBridge(
     ) ?? false;
 
   if (!consumed) {
-    const next = new Set(wildlifeOptimisticPickedFlowerTileKeys);
-    next.delete(formattingWorldPlazaPickedFlowerTileKey(tile.tileX, tile.tileY));
-    wildlifeOptimisticPickedFlowerTileKeys = next;
+    clearingWildlifeGroundFlowerOptimisticPicked(tile.tileX, tile.tileY);
   }
 
   return consumed;

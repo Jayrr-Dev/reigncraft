@@ -1,5 +1,6 @@
 'use client';
 
+import { RenderingWorldPlazaPerformanceDiagnosticsFlagPresetBar } from '@/components/world/components/renderingWorldPlazaPerformanceDiagnosticsFlagPresetBar';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
   DEFINING_WORLD_PLAZA_GENERATION_FEATURE,
@@ -118,6 +119,8 @@ export function RenderingWorldPlazaPerformanceDiagnosticsFlagBadges(): React.JSX
           localStorage).
         </div>
       ) : null}
+
+      <RenderingWorldPlazaPerformanceDiagnosticsFlagPresetBar />
 
       <div className="mb-1.5 text-amber-100/65">
         Tap badges to isolate. Lime = on, muted = off.

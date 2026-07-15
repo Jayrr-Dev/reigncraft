@@ -13,7 +13,8 @@ export async function listingWorldHarvestDevvitPickedFlowers(
   scope: string
 ): Promise<WorldHarvestDevvitPickedFlowerRow[]> {
   const pickedFlowersKey = buildingWorldHarvestPickedFlowersRedisKey(scope);
-  const rawTiles = await redis.hGetAll(pickedFlowersKey);
+  // Devvit redis.hGetAll returns undefined when the hash does not exist yet.
+  const rawTiles = (await redis.hGetAll(pickedFlowersKey)) ?? {};
   const tiles: WorldHarvestDevvitPickedFlowerRow[] = [];
 
   for (const [tileKey, rawTileState] of Object.entries(rawTiles)) {

@@ -4,6 +4,10 @@ import type { DefiningInventoryState } from '@/components/inventory/domains/defi
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { recordingWorldPlazaHerbariumFlowerStudied } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import { resolvingWorldPlazaFlowerSpeciesAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaFlowerSpeciesAtTileIndex';
+import {
+  applyingWorldPlazaPickedFlowerOptimisticCache,
+  revertingWorldPlazaPickedFlowerOptimisticCache,
+} from '@/components/world/harvest/domains/applyingWorldPlazaPickedFlowerOptimisticCache';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import {
   checkingWorldPlazaFlowerPickEligibility,
@@ -11,16 +15,16 @@ import {
   pickingWorldPlazaLocalFlower,
 } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import type { ListingWorldPlazaFlowersInInteractionRangeEntry } from '@/components/world/harvest/hooks/usingWorldPlazaFlowerPickProgress';
-import {
-  checkingWorldPlazaPickedFlowersUseLocalPersistence,
-  DEFINING_WORLD_PLAZA_PICKED_FLOWERS_QUERY_KEY_ROOT,
-} from '@/components/world/harvest/hooks/usingWorldPlazaPickedFlowers';
+import { DEFINING_WORLD_PLAZA_PICKED_FLOWERS_QUERY_KEY_ROOT } from '@/components/world/harvest/domains/definingWorldPlazaFlowerPickConstants';
+import { checkingWorldPlazaPickedFlowersUseLocalPersistence } from '@/components/world/harvest/hooks/usingWorldPlazaPickedFlowers';
 import { pickingWorldHarvestDevvitFlower } from '@/components/world/harvest/repositories/callingWorldHarvestDevvitApi';
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import { resolvingWorldPlazaFlowerItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFlowerSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
+import { markingWildlifeGroundFlowerOptimisticPicked } from '@/components/world/wildlife/domains/managingWildlifeGroundFlowerBridge';
+import { clearingWildlifeGroundFlowerOptimisticPicked } from '@/components/world/wildlife/domains/managingWildlifeGroundFlowerBridge';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, type RefObject } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
@@ -184,6 +188,16 @@ export function usingWorldPlazaFlowerPickInteraction({
 
       isCompletionPendingRef.current = true;
 
+      const optimisticCacheParams = {
+        queryClient,
+        useLocalPersistence,
+        localPersistenceOwnerId,
+        redditUserId,
+        saveSlotIndex,
+        tileX: entry.tileX,
+        tileY: entry.tileY,
+      };
+
       try {
         const speciesId = resolvingWorldPlazaFlowerSpeciesAtTileIndex(
           entry.tileX,
@@ -201,6 +215,52 @@ export function usingWorldPlazaFlowerPickInteraction({
           )
         ) {
           showingGameplayHudToast('Your inventory is full.');
+          return;
+        }
+
+        // Hide petal immediately so fast re-picks / 504 polls cannot restore it.
+        markingWildlifeGroundFlowerOptimisticPicked(entry.tileX, entry.tileY);
+        applyingWorldPlazaPickedFlowerOptimisticCache(optimisticCacheParams);
+
+        const pickRequest = {
+          tileX: entry.tileX,
+          tileY: entry.tileY,
+          playerX: playerPosition.x,
+          playerY: playerPosition.y,
+        };
+
+        let pickResult;
+        try {
+          pickResult =
+            useLocalPersistence && localPersistenceOwnerId
+              ? pickingWorldPlazaLocalFlower(
+                  localPersistenceOwnerId,
+                  pickRequest
+                )
+              : await pickingWorldHarvestDevvitFlower(
+                  WORLD_HARVEST_DEVVIT_PICK_FLOWER_API_PATH,
+                  {
+                    ...pickRequest,
+                    saveSlotIndex,
+                  }
+                );
+        } catch {
+          revertingWorldPlazaPickedFlowerOptimisticCache(optimisticCacheParams);
+          showingGameplayHudToast('Could not pick that flower. Try again.');
+          return;
+        }
+
+        if (pickResult.outcome !== 'picked') {
+          revertingWorldPlazaPickedFlowerOptimisticCache(optimisticCacheParams);
+
+          if (pickResult.outcome === 'out-of-range') {
+            showingGameplayHudToast('Move closer to pick this flower.');
+          } else if (pickResult.outcome === 'already-picked') {
+            // Server already picked: keep cache marked picked.
+            applyingWorldPlazaPickedFlowerOptimisticCache(optimisticCacheParams);
+            showingGameplayHudToast('This flower is already picked.');
+          }
+
           return;
         }
 
@@ -237,34 +297,6 @@ export function usingWorldPlazaFlowerPickInteraction({
           quantity: quantityAccepted,
         });
 
-        const pickRequest = {
-          tileX: entry.tileX,
-          tileY: entry.tileY,
-          playerX: playerPosition.x,
-          playerY: playerPosition.y,
-        };
-
-        const pickResult =
-          useLocalPersistence && localPersistenceOwnerId
-            ? pickingWorldPlazaLocalFlower(localPersistenceOwnerId, pickRequest)
-            : await pickingWorldHarvestDevvitFlower(
-                WORLD_HARVEST_DEVVIT_PICK_FLOWER_API_PATH,
-                {
-                  ...pickRequest,
-                  saveSlotIndex,
-                }
-              );
-
-        if (pickResult.outcome !== 'picked') {
-          if (pickResult.outcome === 'out-of-range') {
-            showingGameplayHudToast('Move closer to pick this flower.');
-          } else if (pickResult.outcome === 'already-picked') {
-            showingGameplayHudToast('This flower is already picked.');
-          }
-
-          return;
-        }
-
         recordingWorldPlazaHerbariumFlowerStudied(speciesId);
 
         void queryClient.invalidateQueries({
@@ -279,6 +311,7 @@ export function usingWorldPlazaFlowerPickInteraction({
       persistenceOwnerId,
       playerPositionRef,
       queryClient,
+      redditUserId,
       saveSlotIndex,
       showingGameplayHudToast,
       updatingInventoryState,

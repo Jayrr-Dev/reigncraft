@@ -23,5 +23,9 @@ export const DEFINING_WORLD_PLAZA_FLOWER_PICK_POINTER_CANDIDATE_TILE_SEARCH_RADI
 export const DEFINING_WORLD_PLAZA_PICKED_FLOWERS_LOCAL_STORAGE_KEY_PREFIX =
   'world-plaza-picked-flowers' as const;
 
+/** React Query key root for picked-flower state. */
+export const DEFINING_WORLD_PLAZA_PICKED_FLOWERS_QUERY_KEY_ROOT =
+  'world-picked-flowers' as const;
+
 /** Eat channel duration for herbs (ms). */
 export const DEFINING_WORLD_PLAZA_FLOWER_EAT_DURATION_MS = 1_200;

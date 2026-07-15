@@ -10,6 +10,8 @@ function buildingMinimalDiagnosticsSnapshot(
     isEnabled: true,
     capturedAtMs: 1_700_000_000_000,
     framesPerSecond: 30,
+    sessionFramesPerSecond: 29,
+    sessionFrameCount: 60,
     frameAverageMs: 33,
     framePercentile95Ms: 40,
     framePercentile99Ms: 50,

@@ -2,9 +2,10 @@ import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE } from '@/component
 import {
   beginningWorldPlazaPerformanceSample,
   buildingWorldPlazaPerformanceDiagnosticsSnapshot,
+  markingWorldPlazaPerformanceDiagnosticsFrame,
   settingWorldPlazaPerformanceDiagnosticsEnabled,
 } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 describe('beginningWorldPlazaPerformanceSample', () => {
   afterEach(() => {
@@ -48,5 +49,27 @@ describe('beginningWorldPlazaPerformanceSample', () => {
           DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE.ONLINE_POLL_ROUND_TRIP
       )?.measurementCount
     ).toBe(2);
+  });
+
+  it('tracks session average fps across marked frames', () => {
+    settingWorldPlazaPerformanceDiagnosticsEnabled(true);
+
+    let nowMs = 1000;
+    const performanceNowSpy = vi
+      .spyOn(performance, 'now')
+      .mockImplementation(() => nowMs);
+
+    markingWorldPlazaPerformanceDiagnosticsFrame();
+    nowMs += 20;
+    markingWorldPlazaPerformanceDiagnosticsFrame();
+    nowMs += 10;
+    markingWorldPlazaPerformanceDiagnosticsFrame();
+
+    const snapshot = buildingWorldPlazaPerformanceDiagnosticsSnapshot();
+
+    expect(snapshot.sessionFrameCount).toBe(2);
+    expect(snapshot.sessionFramesPerSecond).toBeCloseTo(66.666, 1);
+
+    performanceNowSpy.mockRestore();
   });
 });

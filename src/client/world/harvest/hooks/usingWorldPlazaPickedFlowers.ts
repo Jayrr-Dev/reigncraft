@@ -1,16 +1,16 @@
 'use client';
 
+import { DEFINING_WORLD_PLAZA_PICKED_FLOWERS_QUERY_KEY_ROOT } from '@/components/world/harvest/domains/definingWorldPlazaFlowerPickConstants';
 import type { DefiningWorldPlazaPickedFlowerTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import { listingWorldPlazaLocalPickedFlowers } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedFlowers';
 import { fetchingWorldHarvestDevvitPickedFlowers } from '@/components/world/harvest/repositories/callingWorldHarvestDevvitApi';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
   WORLD_HARVEST_DEVVIT_PICKED_FLOWERS_API_PATH,
   WORLD_HARVEST_DEVVIT_PICKED_FLOWERS_POLL_INTERVAL_MS,
 } from '../../../../shared/worldHarvestDevvit';
 
-export const DEFINING_WORLD_PLAZA_PICKED_FLOWERS_QUERY_KEY_ROOT =
-  'world-picked-flowers' as const;
+export { DEFINING_WORLD_PLAZA_PICKED_FLOWERS_QUERY_KEY_ROOT };
 
 export type UsingWorldPlazaPickedFlowersParams = {
   readonly enabled: boolean;
@@ -96,6 +96,8 @@ export function usingWorldPlazaPickedFlowers({
     enabled: enabled && useLocalPersistence && Boolean(localPersistenceOwnerId),
     staleTime: 500,
     refetchInterval: WORLD_HARVEST_DEVVIT_PICKED_FLOWERS_POLL_INTERVAL_MS,
+    placeholderData: keepPreviousData,
+    retry: 1,
   });
 
   const devvitPickedFlowersQuery = useQuery({
@@ -115,6 +117,9 @@ export function usingWorldPlazaPickedFlowers({
     enabled: enabled && !useLocalPersistence && Boolean(redditUserId),
     staleTime: 500,
     refetchInterval: WORLD_HARVEST_DEVVIT_PICKED_FLOWERS_POLL_INTERVAL_MS,
+    // Keep last good snapshot across 504 / gateway blips after a pick.
+    placeholderData: keepPreviousData,
+    retry: 1,
   });
 
   if (useLocalPersistence) {

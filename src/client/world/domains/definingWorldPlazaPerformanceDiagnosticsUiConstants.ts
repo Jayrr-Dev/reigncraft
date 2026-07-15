@@ -35,3 +35,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_CLASS_NAME =
 /** Scrollable tab body inside the perf overlay (wheel scroll, no bar). */
 export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_TAB_BODY_CLASS_NAME =
   'scrollbar-none min-h-0 flex-1 overflow-y-auto' as const;
+
+/** Separator between live and session-average FPS in the overlay header. */
+export const LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_FPS_SEPARATOR =
+  ' · avg ' as const;

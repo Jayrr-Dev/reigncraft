@@ -80,6 +80,10 @@ export interface MeasuringWorldPlazaPerformanceDiagnosticsSnapshot {
   readonly isEnabled: boolean;
   readonly capturedAtMs: number;
   readonly framesPerSecond: number;
+  /** Mean FPS since diagnostics were last enabled or history reset. */
+  readonly sessionFramesPerSecond: number;
+  /** Frame deltas accumulated into `sessionFramesPerSecond`. */
+  readonly sessionFrameCount: number;
   readonly frameAverageMs: number;
   readonly framePercentile95Ms: number;
   readonly framePercentile99Ms: number;
@@ -153,6 +157,8 @@ interface MeasuringWorldPlazaPerformanceDiagnosticsState {
   recentSpikeLines: string[];
   lastSpikeLoggedAtMs: number;
   lastFrameMarkedAtMs: number;
+  sessionFrameDurationSumMs: number;
+  sessionFrameCount: number;
   isConsoleApiRegistered: boolean;
   renderLayerFlagsById: Map<
     DefiningWorldPlazaPerformanceDiagnosticsRenderLayerId,
@@ -193,6 +199,8 @@ const measuringWorldPlazaPerformanceDiagnosticsState: MeasuringWorldPlazaPerform
     recentSpikeLines: [],
     lastSpikeLoggedAtMs: 0,
     lastFrameMarkedAtMs: 0,
+    sessionFrameDurationSumMs: 0,
+    sessionFrameCount: 0,
     isConsoleApiRegistered: false,
     renderLayerFlagsById:
       initializingWorldPlazaPerformanceDiagnosticsRenderLayerFlags(),
@@ -422,6 +430,8 @@ export function resettingWorldPlazaPerformanceDiagnosticsMeasurementHistory(): v
   measuringWorldPlazaPerformanceDiagnosticsState.recentSpikeLines = [];
   measuringWorldPlazaPerformanceDiagnosticsState.lastSpikeLoggedAtMs = 0;
   measuringWorldPlazaPerformanceDiagnosticsState.lastFrameMarkedAtMs = 0;
+  measuringWorldPlazaPerformanceDiagnosticsState.sessionFrameDurationSumMs = 0;
+  measuringWorldPlazaPerformanceDiagnosticsState.sessionFrameCount = 0;
 }
 
 /**
@@ -451,6 +461,9 @@ export function markingWorldPlazaPerformanceDiagnosticsFrame(): void {
       frameDurationMs,
       DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FRAME_HISTORY_SIZE
     );
+    measuringWorldPlazaPerformanceDiagnosticsState.sessionFrameDurationSumMs +=
+      frameDurationMs;
+    measuringWorldPlazaPerformanceDiagnosticsState.sessionFrameCount += 1;
   }
 
   measuringWorldPlazaPerformanceDiagnosticsState.lastFrameMarkedAtMs = nowMs;
@@ -604,6 +617,15 @@ export function buildingWorldPlazaPerformanceDiagnosticsSnapshot(): MeasuringWor
   const frameAverageMs =
     computingMeasuringWorldPlazaPerformanceDiagnosticsAverage(frameDurationsMs);
   const framesPerSecond = frameAverageMs > 0 ? 1000 / frameAverageMs : 0;
+  const sessionFrameCount =
+    measuringWorldPlazaPerformanceDiagnosticsState.sessionFrameCount;
+  const sessionFrameAverageMs =
+    sessionFrameCount > 0
+      ? measuringWorldPlazaPerformanceDiagnosticsState.sessionFrameDurationSumMs /
+        sessionFrameCount
+      : 0;
+  const sessionFramesPerSecond =
+    sessionFrameAverageMs > 0 ? 1000 / sessionFrameAverageMs : 0;
 
   const samples =
     DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_SAMPLE_DISPLAY_ORDER.map(
@@ -648,6 +670,8 @@ export function buildingWorldPlazaPerformanceDiagnosticsSnapshot(): MeasuringWor
     isEnabled: measuringWorldPlazaPerformanceDiagnosticsState.isEnabled,
     capturedAtMs: performance.now(),
     framesPerSecond,
+    sessionFramesPerSecond,
+    sessionFrameCount,
     frameAverageMs,
     framePercentile95Ms:
       computingMeasuringWorldPlazaPerformanceDiagnosticsPercentile95(

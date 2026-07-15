@@ -3,6 +3,7 @@
 import { checkingWorldPlazaGroundItemIsLegacyDemoSeed } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemIsLegacyDemoSeed';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
 import {
+  markingWorldPlazaGroundItemPendingRemoved,
   mergingWorldPlazaGroundItemsWithPendingOptimistic,
   registeringWorldPlazaDevvitGroundItemOptimisticHandlers,
 } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
@@ -21,6 +22,49 @@ export {
   insertingWorldPlazaDevvitGroundItemOptimistically,
   reducingWorldPlazaDevvitGroundItemQuantityOptimistically,
 } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
+
+function checkingWorldInventoryGroundItemNotFoundError(
+  error: unknown
+): boolean {
+  return (
+    error instanceof Error &&
+    (error.message === 'Ground item not found.' ||
+      /Ground item not found/i.test(error.message) ||
+      /\(404\)/.test(error.message))
+  );
+}
+
+function reducingGroundItemsStateAfterPickup(
+  currentItems: readonly DefiningWorldPlazaGroundItem[],
+  groundItemId: string,
+  requestedQuantity: number
+): readonly DefiningWorldPlazaGroundItem[] {
+  const existingItem = currentItems.find(
+    (groundItem) => groundItem.id === groundItemId
+  );
+
+  if (!existingItem) {
+    return currentItems;
+  }
+
+  const grantedQuantity = Math.min(requestedQuantity, existingItem.quantity);
+
+  if (grantedQuantity >= existingItem.quantity) {
+    markingWorldPlazaGroundItemPendingRemoved(groundItemId);
+    return currentItems.filter(
+      (groundItem) => groundItem.id !== groundItemId
+    );
+  }
+
+  return currentItems.map((groundItem) =>
+    groundItem.id === groundItemId
+      ? {
+          ...groundItem,
+          quantity: groundItem.quantity - grantedQuantity,
+        }
+      : groundItem
+  );
+}
 
 /** Params for {@link usingWorldPlazaDevvitGroundItems}. */
 export type UsingWorldPlazaDevvitGroundItemsParams = {
@@ -103,31 +147,13 @@ export function usingWorldPlazaDevvitGroundItems({
         setIsReady(true);
       },
       (groundItemId, quantity) => {
-        setItems((currentItems) => {
-          const items = currentItems ?? [];
-          const existingItem = items.find(
-            (groundItem) => groundItem.id === groundItemId
-          );
-
-          if (!existingItem) {
-            return items;
-          }
-
-          const grantedQuantity = Math.min(quantity, existingItem.quantity);
-
-          if (grantedQuantity >= existingItem.quantity) {
-            return items.filter((groundItem) => groundItem.id !== groundItemId);
-          }
-
-          return items.map((groundItem) =>
-            groundItem.id === groundItemId
-              ? {
-                  ...groundItem,
-                  quantity: groundItem.quantity - grantedQuantity,
-                }
-              : groundItem
-          );
-        });
+        setItems((currentItems) =>
+          reducingGroundItemsStateAfterPickup(
+            currentItems ?? [],
+            groundItemId,
+            quantity
+          )
+        );
       }
     );
 
@@ -182,62 +208,53 @@ export function usingWorldPlazaDevvitGroundItems({
       playerX: number,
       playerY: number
     ): Promise<void> => {
-      const grant = await pickingUpWorldInventoryDevvitGroundItem(
-        WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_PICKUP_API_PATH,
-        {
-          groundItemId,
-          requestedQuantity,
-          playerX,
-          playerY,
-          saveSlotIndex,
-        }
-      );
-
-      if (
-        grant.type !== 'pickup-grant' ||
-        !grant.groundItemId ||
-        !grant.itemTypeId ||
-        grant.quantity === undefined
-      ) {
-        return;
-      }
-
-      onPickupGrantedRef.current({
-        groundItemId: grant.groundItemId,
-        itemTypeId: grant.itemTypeId,
-        quantity: grant.quantity,
-        ...(grant.metadata ? { metadata: grant.metadata } : {}),
-      });
-
-      setItems((currentItems) => {
-        const existingItem = currentItems.find(
-          (groundItem) => groundItem.id === groundItemId
+      try {
+        const grant = await pickingUpWorldInventoryDevvitGroundItem(
+          WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_PICKUP_API_PATH,
+          {
+            groundItemId,
+            requestedQuantity,
+            playerX,
+            playerY,
+            saveSlotIndex,
+          }
         );
 
-        if (!existingItem) {
-          return currentItems;
+        if (
+          grant.type !== 'pickup-grant' ||
+          !grant.groundItemId ||
+          !grant.itemTypeId ||
+          grant.quantity === undefined
+        ) {
+          return;
         }
 
-        const grantedQuantity = Math.min(
-          requestedQuantity,
-          existingItem.quantity
-        );
+        onPickupGrantedRef.current({
+          groundItemId: grant.groundItemId,
+          itemTypeId: grant.itemTypeId,
+          quantity: grant.quantity,
+          ...(grant.metadata ? { metadata: grant.metadata } : {}),
+        });
 
-        if (grantedQuantity >= existingItem.quantity) {
-          return currentItems.filter(
-            (groundItem) => groundItem.id !== groundItemId
+        setItems((currentItems) =>
+          reducingGroundItemsStateAfterPickup(
+            currentItems,
+            groundItemId,
+            grant.quantity ?? requestedQuantity
+          )
+        );
+      } catch (error) {
+        // Ghost / already-despawned stacks: drop locally, do not surface as range.
+        if (checkingWorldInventoryGroundItemNotFoundError(error)) {
+          markingWorldPlazaGroundItemPendingRemoved(groundItemId);
+          setItems((currentItems) =>
+            currentItems.filter((groundItem) => groundItem.id !== groundItemId)
           );
+          return;
         }
 
-        return currentItems.map((groundItem) =>
-          groundItem.id === groundItemId
-            ? {
-                ...groundItem,
-                quantity: groundItem.quantity - grantedQuantity,
-              }
-            : groundItem
-        );
-      });
+        throw error;
+      }
     },
     [saveSlotIndex]
   );

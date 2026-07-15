@@ -439,6 +439,10 @@ import { usingWorldPlazaMinedRocks } from '@/components/world/harvest/hooks/usin
 import { usingWorldPlazaPebblePickInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaPebblePickInteraction';
 import { usingWorldPlazaPebblePickProgress } from '@/components/world/harvest/hooks/usingWorldPlazaPebblePickProgress';
 import {
+  applyingWorldPlazaPickedFlowerOptimisticCache,
+  revertingWorldPlazaPickedFlowerOptimisticCache,
+} from '@/components/world/harvest/domains/applyingWorldPlazaPickedFlowerOptimisticCache';
+import {
   checkingWorldPlazaPickedFlowersUseLocalPersistence,
   DEFINING_WORLD_PLAZA_PICKED_FLOWERS_QUERY_KEY_ROOT,
   usingWorldPlazaPickedFlowers,
@@ -2536,6 +2540,17 @@ function RenderingWorldPlazaPixiSceneConnected({
             return false;
           }
 
+          applyingWorldPlazaPickedFlowerOptimisticCache({
+            queryClient,
+            useLocalPersistence: true,
+            localPersistenceOwnerId,
+            redditUserId,
+            saveSlotIndex: isSinglePlayerSession
+              ? singlePlayerSaveSlotIndex
+              : null,
+            tileX,
+            tileY,
+          });
           void queryClient.invalidateQueries({
             queryKey: [DEFINING_WORLD_PLAZA_PICKED_FLOWERS_QUERY_KEY_ROOT],
           });
@@ -2545,6 +2560,18 @@ function RenderingWorldPlazaPixiSceneConnected({
         if (!redditUserId) {
           return false;
         }
+
+        applyingWorldPlazaPickedFlowerOptimisticCache({
+          queryClient,
+          useLocalPersistence: false,
+          localPersistenceOwnerId,
+          redditUserId,
+          saveSlotIndex: isSinglePlayerSession
+            ? singlePlayerSaveSlotIndex
+            : null,
+          tileX,
+          tileY,
+        });
 
         void pickingWorldHarvestDevvitFlower(
           WORLD_HARVEST_DEVVIT_PICK_FLOWER_API_PATH,
@@ -2560,9 +2587,34 @@ function RenderingWorldPlazaPixiSceneConnected({
               void queryClient.invalidateQueries({
                 queryKey: [DEFINING_WORLD_PLAZA_PICKED_FLOWERS_QUERY_KEY_ROOT],
               });
+              return;
             }
+
+            revertingWorldPlazaPickedFlowerOptimisticCache({
+              queryClient,
+              useLocalPersistence: false,
+              localPersistenceOwnerId,
+              redditUserId,
+              saveSlotIndex: isSinglePlayerSession
+                ? singlePlayerSaveSlotIndex
+                : null,
+              tileX,
+              tileY,
+            });
           })
-          .catch(() => undefined);
+          .catch(() => {
+            revertingWorldPlazaPickedFlowerOptimisticCache({
+              queryClient,
+              useLocalPersistence: false,
+              localPersistenceOwnerId,
+              redditUserId,
+              saveSlotIndex: isSinglePlayerSession
+                ? singlePlayerSaveSlotIndex
+                : null,
+              tileX,
+              tileY,
+            });
+          });
 
         return true;
       },
