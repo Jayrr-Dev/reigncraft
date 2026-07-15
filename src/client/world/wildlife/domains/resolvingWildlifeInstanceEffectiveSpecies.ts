@@ -1,5 +1,5 @@
 /**
- * Species view for AI / aggro with instance overrides (god spawn temperament).
+ * Species view for AI / aggro with instance overrides (temperament / god spawn).
  *
  * @module components/world/wildlife/domains/resolvingWildlifeInstanceEffectiveSpecies
  */
@@ -24,29 +24,32 @@ export function resolvingWildlifeInstanceEffectiveTemperamentId(
 }
 
 /**
- * Returns a species snapshot with god-spawn temperament + always-aggro flags.
- * Identity-preserving when the instance is not a god spawn.
+ * Returns a species snapshot with instance temperament overrides applied.
+ * God spawns also force always-aggro sight flags.
  */
 export function resolvingWildlifeInstanceEffectiveSpecies(
   species: DefiningWildlifeSpeciesDefinition,
   instance: DefiningWildlifeInstanceSpeciesOverrideProfile
 ): DefiningWildlifeSpeciesDefinition {
-  if (!instance.isGodSpawn) {
-    return species;
-  }
-
   const temperamentId = resolvingWildlifeInstanceEffectiveTemperamentId(
     instance,
     species
   );
+  const temperamentChanged = temperamentId !== species.temperamentId;
+
+  if (!temperamentChanged && !instance.isGodSpawn) {
+    return species;
+  }
 
   return {
     ...species,
     temperamentId,
-    aggressionSpawn: {
-      ...species.aggressionSpawn,
-      alwaysAttacksPlayerOnSight: true,
-      aggressiveAttacksOnSight: true,
-    },
+    aggressionSpawn: instance.isGodSpawn
+      ? {
+          ...species.aggressionSpawn,
+          alwaysAttacksPlayerOnSight: true,
+          aggressiveAttacksOnSight: true,
+        }
+      : species.aggressionSpawn,
   };
 }

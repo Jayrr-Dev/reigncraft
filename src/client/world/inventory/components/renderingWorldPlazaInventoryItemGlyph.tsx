@@ -12,6 +12,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SPRITCORE_SPHERE,
   type DefiningWorldPlazaInventoryCustomItemIconId,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
+import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import {
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_EMOJI_CLASS,
   STYLING_WORLD_PLAZA_INVENTORY_SLOT_FALLBACK_TEXT_CLASS,
@@ -21,6 +22,11 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { resolvingWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemTypeDefinition';
 import { RenderingWorldPlazaSpritcoreSphereIcon } from '@/components/world/spritcore/components/renderingWorldPlazaSpritcoreSphereIcon';
+import { checkingWorldPlazaInventoryItemIsSpritcore } from '@/components/world/spritcore/domains/checkingWorldPlazaInventoryItemIsSpritcore';
+import {
+  resolvingWorldPlazaSpritcoreStackPresentation,
+  resolvingWorldPlazaSpritcoreStackPresentationForLegacyItemTypeId,
+} from '@/components/world/spritcore/domains/resolvingWorldPlazaSpritcoreStackPresentation';
 import { cn } from '@/lib/utils';
 import type * as React from 'react';
 import { memo } from 'react';
@@ -28,6 +34,8 @@ import { memo } from 'react';
 export type RenderingWorldPlazaInventoryItemGlyphProps = {
   readonly itemTypeId: string;
   readonly registry: DefiningInventoryItemRegistry;
+  /** Stack size; Spritcore art bands by this quantity. */
+  readonly quantity?: number;
   readonly iconStyle?: React.CSSProperties;
   readonly emojiStyle?: React.CSSProperties;
   readonly fallbackTextStyle?: React.CSSProperties;
@@ -56,6 +64,81 @@ function renderingWorldPlazaInventoryCustomItemIcon(
   return null;
 }
 
+function renderingWorldPlazaInventorySpriteSheetGlyph(params: {
+  readonly spriteSheet: DefiningWorldPlazaInventorySpriteSheetIcon;
+  readonly overlayColor: string | null | undefined;
+  readonly iconStyle: React.CSSProperties | undefined;
+  readonly iconClassName: string | undefined;
+}): React.JSX.Element {
+  const { spriteSheet, overlayColor, iconStyle, iconClassName } = params;
+  const backgroundPositionX =
+    spriteSheet.columnCount <= 1
+      ? 0
+      : (spriteSheet.columnIndex / (spriteSheet.columnCount - 1)) * 100;
+  const backgroundPositionY =
+    spriteSheet.rowCount <= 1
+      ? 0
+      : (spriteSheet.rowIndex / (spriteSheet.rowCount - 1)) * 100;
+  const backgroundPosition = `${backgroundPositionX}% ${backgroundPositionY}%`;
+  const backgroundSize = `${spriteSheet.columnCount * 100}% ${spriteSheet.rowCount * 100}%`;
+  const spriteSheetStyle: React.CSSProperties = {
+    backgroundImage: `url("${spriteSheet.spriteSheetUrl}")`,
+    backgroundPosition,
+    backgroundRepeat: 'no-repeat',
+    backgroundSize,
+    ...(spriteSheet.cssFilter ? { filter: spriteSheet.cssFilter } : {}),
+  };
+
+  if (!overlayColor) {
+    return (
+      <span
+        className={cn(
+          STYLING_WORLD_PLAZA_INVENTORY_SLOT_IMAGE_ICON_CLASS,
+          iconClassName
+        )}
+        style={{
+          ...iconStyle,
+          ...spriteSheetStyle,
+        }}
+        aria-hidden
+      />
+    );
+  }
+
+  return (
+    <span
+      className={cn(
+        STYLING_WORLD_PLAZA_INVENTORY_SLOT_IMAGE_ICON_CLASS,
+        'relative overflow-hidden',
+        iconClassName
+      )}
+      style={iconStyle}
+      aria-hidden
+    >
+      <span
+        className="absolute inset-0 bg-no-repeat [image-rendering:pixelated]"
+        style={spriteSheetStyle}
+      />
+      <span
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundColor: overlayColor,
+          mixBlendMode: 'color',
+          opacity: 0.92,
+          WebkitMaskImage: `url("${spriteSheet.spriteSheetUrl}")`,
+          maskImage: `url("${spriteSheet.spriteSheetUrl}")`,
+          WebkitMaskPosition: backgroundPosition,
+          maskPosition: backgroundPosition,
+          WebkitMaskSize: backgroundSize,
+          maskSize: backgroundSize,
+          WebkitMaskRepeat: 'no-repeat',
+          maskRepeat: 'no-repeat',
+        }}
+      />
+    </span>
+  );
+}
+
 /**
  * Renders Lucide, custom, emoji, or fallback glyphs for one item type.
  */
@@ -63,6 +146,7 @@ export const RenderingWorldPlazaInventoryItemGlyph = memo(
   function RenderingWorldPlazaInventoryItemGlyph({
     itemTypeId,
     registry,
+    quantity,
     iconStyle,
     emojiStyle,
     fallbackTextStyle,
@@ -80,74 +164,29 @@ export const RenderingWorldPlazaInventoryItemGlyph = memo(
       iconClassName
     );
 
+    if (checkingWorldPlazaInventoryItemIsSpritcore(itemTypeId)) {
+      const presentation =
+        typeof quantity === 'number' && quantity > 0
+          ? resolvingWorldPlazaSpritcoreStackPresentation(quantity)
+          : (resolvingWorldPlazaSpritcoreStackPresentationForLegacyItemTypeId(
+              itemTypeId
+            ) ?? resolvingWorldPlazaSpritcoreStackPresentation(1));
+
+      return renderingWorldPlazaInventorySpriteSheetGlyph({
+        spriteSheet: presentation.iconSpriteSheet,
+        overlayColor: presentation.overlayColor,
+        iconStyle,
+        iconClassName,
+      });
+    }
+
     if (plazaTypeDef?.iconSpriteSheet) {
-      const spriteSheet = plazaTypeDef.iconSpriteSheet;
-      const backgroundPositionX =
-        spriteSheet.columnCount <= 1
-          ? 0
-          : (spriteSheet.columnIndex / (spriteSheet.columnCount - 1)) * 100;
-      const backgroundPositionY =
-        spriteSheet.rowCount <= 1
-          ? 0
-          : (spriteSheet.rowIndex / (spriteSheet.rowCount - 1)) * 100;
-      const backgroundPosition = `${backgroundPositionX}% ${backgroundPositionY}%`;
-      const backgroundSize = `${spriteSheet.columnCount * 100}% ${spriteSheet.rowCount * 100}%`;
-      const spriteSheetStyle: React.CSSProperties = {
-        backgroundImage: `url("${spriteSheet.spriteSheetUrl}")`,
-        backgroundPosition,
-        backgroundRepeat: 'no-repeat',
-        backgroundSize,
-      };
-      const overlayColor = plazaTypeDef.iconSpriteOverlayColor;
-
-      if (!overlayColor) {
-        return (
-          <span
-            className={cn(
-              STYLING_WORLD_PLAZA_INVENTORY_SLOT_IMAGE_ICON_CLASS,
-              iconClassName
-            )}
-            style={{
-              ...iconStyle,
-              ...spriteSheetStyle,
-            }}
-            aria-hidden
-          />
-        );
-      }
-
-      return (
-        <span
-          className={cn(
-            STYLING_WORLD_PLAZA_INVENTORY_SLOT_IMAGE_ICON_CLASS,
-            'relative overflow-hidden',
-            iconClassName
-          )}
-          style={iconStyle}
-          aria-hidden
-        >
-          <span
-            className="absolute inset-0 bg-no-repeat [image-rendering:pixelated]"
-            style={spriteSheetStyle}
-          />
-          <span
-            className="pointer-events-none absolute inset-0"
-            style={{
-              backgroundColor: overlayColor,
-              mixBlendMode: 'color',
-              opacity: 0.92,
-              WebkitMaskImage: `url("${spriteSheet.spriteSheetUrl}")`,
-              maskImage: `url("${spriteSheet.spriteSheetUrl}")`,
-              WebkitMaskPosition: backgroundPosition,
-              maskPosition: backgroundPosition,
-              WebkitMaskSize: backgroundSize,
-              maskSize: backgroundSize,
-              WebkitMaskRepeat: 'no-repeat',
-              maskRepeat: 'no-repeat',
-            }}
-          />
-        </span>
-      );
+      return renderingWorldPlazaInventorySpriteSheetGlyph({
+        spriteSheet: plazaTypeDef.iconSpriteSheet,
+        overlayColor: plazaTypeDef.iconSpriteOverlayColor,
+        iconStyle,
+        iconClassName,
+      });
     }
 
     if (plazaTypeDef?.iconImageUrl) {

@@ -36,6 +36,8 @@ export type UsingWorldPlazaTimedInteractionProgressParams<TContext> = {
    * instead of returning false while the channel is already running.
    */
   readonly enableQueue?: boolean;
+  /** Optional bonus elapsed time folded into the active cast progress ratio. */
+  readonly resolvingExtraElapsedMs?: () => number;
 };
 
 export type UsingWorldPlazaTimedInteractionProgressResult<TContext> = {
@@ -72,6 +74,7 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
   onComplete,
   avatarToolActionRef,
   enableQueue = true,
+  resolvingExtraElapsedMs,
 }: UsingWorldPlazaTimedInteractionProgressParams<TContext>): UsingWorldPlazaTimedInteractionProgressResult<TContext> {
   const [snapshot, setSnapshot] =
     useState<DefiningWorldPlazaTimedInteractionProgressSnapshot>(
@@ -87,9 +90,11 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
   const pulseGenerationRef = useRef(0);
   const onCompleteRef = useRef(onComplete);
   const enableQueueRef = useRef(enableQueue);
+  const resolvingExtraElapsedMsRef = useRef(resolvingExtraElapsedMs);
 
   onCompleteRef.current = onComplete;
   enableQueueRef.current = enableQueue;
+  resolvingExtraElapsedMsRef.current = resolvingExtraElapsedMs;
 
   const clearingCancelFadeTimer = useCallback((): void => {
     if (cancelFadeTimerRef.current !== null) {
@@ -131,11 +136,7 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
       );
       cancelFadeTimerRef.current = null;
     }, DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_CANCEL_FADE_MS);
-  }, [
-    clearingAvatarToolAction,
-    clearingCancelFadeTimer,
-    clearingPendingQueue,
-  ]);
+  }, [clearingAvatarToolAction, clearingCancelFadeTimer, clearingPendingQueue]);
 
   const firingMilestone = useCallback(
     (
@@ -259,7 +260,7 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
     }
 
     const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
-      () => {
+      (_deltaMs, frameTimeMs) => {
         const activeInteraction = activeInteractionRef.current;
 
         if (!activeInteraction) {
@@ -271,8 +272,10 @@ export function usingWorldPlazaTimedInteractionProgress<TContext>({
           return;
         }
 
-        const nowMs = performance.now();
-        const elapsedMs = nowMs - activeInteraction.startedAtMs;
+        const nowMs = frameTimeMs;
+        const extraElapsedMs = resolvingExtraElapsedMsRef.current?.() ?? 0;
+        const elapsedMs =
+          nowMs - activeInteraction.startedAtMs + extraElapsedMs;
         const progressRatio = Math.min(
           1,
           elapsedMs / activeInteraction.durationMs

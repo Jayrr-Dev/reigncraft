@@ -30,4 +30,17 @@ describe('wildlife god spawn presentation helpers', () => {
     expect(effective.aggressionSpawn.alwaysAttacksPlayerOnSight).toBe(true);
     expect(chicken.temperamentId).not.toBe('stalker');
   });
+
+  it('applies temperamentOverrideId without god spawn flags', () => {
+    const bear = DEFINING_WILDLIFE_SPECIES_REGISTRY['brown-bear'];
+    const effective = resolvingWildlifeInstanceEffectiveSpecies(bear, {
+      isGodSpawn: false,
+      temperamentOverrideId: 'predator',
+    });
+
+    expect(effective.temperamentId).toBe('predator');
+    expect(effective.aggressionSpawn.alwaysAttacksPlayerOnSight).toBe(
+      bear.aggressionSpawn.alwaysAttacksPlayerOnSight
+    );
+  });
 });

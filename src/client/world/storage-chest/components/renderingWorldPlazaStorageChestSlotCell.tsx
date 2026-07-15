@@ -156,6 +156,7 @@ export function RenderingWorldPlazaStorageChestSlotCell({
           <RenderingWorldPlazaInventoryItemGlyph
             itemTypeId={item.itemTypeId}
             registry={registry}
+            quantity={item.quantity}
             iconStyle={viewportStyles.iconStyle}
             emojiStyle={viewportStyles.emojiStyle}
             fallbackTextStyle={viewportStyles.fallbackTextStyle}

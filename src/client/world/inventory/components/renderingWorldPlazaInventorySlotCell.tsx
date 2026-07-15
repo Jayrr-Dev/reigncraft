@@ -103,7 +103,7 @@ export type RenderingWorldPlazaInventorySlotCellProps =
     readonly onCloseItemDetailPopover?: () => void;
     /** Eat action surfaced inside the item action popover for food. */
     readonly onEatHotbarSlot?: (slotIndex: number) => void;
-    /** Study a specimen: herbs consume one; ore moves into a studied pile. */
+    /** Study a specimen (consumes one unit: herbs, ore, etc.). */
     readonly onStudyHotbarSlot?: (slotIndex: number) => void;
     /** Attach a cookbook recipe page from inventory. */
     readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
@@ -1051,6 +1051,7 @@ function RenderingWorldPlazaInventoryItemIcon({
       <RenderingWorldPlazaInventoryItemGlyph
         itemTypeId={item.itemTypeId}
         registry={registry}
+        quantity={item.quantity}
         iconStyle={viewportStyles.iconStyle}
         emojiStyle={viewportStyles.emojiStyle}
         fallbackTextStyle={viewportStyles.fallbackTextStyle}

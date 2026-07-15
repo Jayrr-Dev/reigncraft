@@ -116,6 +116,7 @@ function RenderingWorldPlazaInventoryBagSlotItemIcon({
       <RenderingWorldPlazaInventoryItemGlyph
         itemTypeId={item.itemTypeId}
         registry={registry}
+        quantity={item.quantity}
         iconStyle={viewportStyles.iconStyle}
         emojiStyle={viewportStyles.emojiStyle}
         fallbackTextStyle={viewportStyles.fallbackTextStyle}
@@ -254,7 +255,9 @@ export function RenderingWorldPlazaInventoryBagSlotCell({
         />
         {durabilitySnapshot ? (
           <span
-            className={STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_TRACK_CLASS}
+            className={
+              STYLING_WORLD_PLAZA_INVENTORY_SLOT_DURABILITY_TRACK_CLASS
+            }
             aria-hidden
           >
             <span

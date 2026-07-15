@@ -7,6 +7,7 @@
 import {
   LABELING_WILDLIFE_DOCILE_PET_CAT_TITLE,
   LABELING_WILDLIFE_DOCILE_PET_DOG_TITLE,
+  LABELING_WILDLIFE_DOCILE_PET_PINGUIN_TITLE,
   LABELING_WILDLIFE_DOCILE_PETTING_TITLE,
   type DefiningWildlifeDocilePetKind,
 } from '@/components/world/wildlife/domains/definingWildlifeDocilePetConstants';
@@ -17,9 +18,15 @@ import {
 export function resolvingWildlifeDocilePetIdleLabel(
   petKind: DefiningWildlifeDocilePetKind
 ): string {
-  return petKind === 'cat'
-    ? LABELING_WILDLIFE_DOCILE_PET_CAT_TITLE
-    : LABELING_WILDLIFE_DOCILE_PET_DOG_TITLE;
+  if (petKind === 'cat') {
+    return LABELING_WILDLIFE_DOCILE_PET_CAT_TITLE;
+  }
+
+  if (petKind === 'pinguin') {
+    return LABELING_WILDLIFE_DOCILE_PET_PINGUIN_TITLE;
+  }
+
+  return LABELING_WILDLIFE_DOCILE_PET_DOG_TITLE;
 }
 
 /**

@@ -58,4 +58,13 @@ export const DEFINING_WILDLIFE_DOCILE_PET_DOG_SPECIES_IDS = [
   'golden-retriever',
 ] as const;
 
-export type DefiningWildlifeDocilePetKind = 'cat' | 'dog';
+/** Species ids that use the pinguin pet label. */
+export const DEFINING_WILDLIFE_DOCILE_PET_PINGUIN_SPECIES_IDS = [
+  'pinguin',
+] as const;
+
+export type DefiningWildlifeDocilePetKind = 'cat' | 'dog' | 'pinguin';
+
+/** Outlined label while waiting to start a pet. */
+export const LABELING_WILDLIFE_DOCILE_PET_PINGUIN_TITLE =
+  'Pet the Pinguin' as const;

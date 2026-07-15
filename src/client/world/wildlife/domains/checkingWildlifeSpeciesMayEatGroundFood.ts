@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/checkingWildlifeSpeciesMayEatGroundFood
  */
 
+import { checkingWorldPlazaInventoryItemIsFishingCatchCreatureFood } from '@/components/world/fishing/domains/checkingWorldPlazaInventoryItemIsFishingCatchCreatureFood';
 import { resolvingWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { checkingWorldPlazaInventoryItemIsSpritcore } from '@/components/world/spritcore/domains/checkingWorldPlazaInventoryItemIsSpritcore';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -15,6 +16,14 @@ export function checkingWildlifeSpeciesMayEatGroundFood(
 ): boolean {
   // Spritcore is universal bait: every diet rushes it first.
   if (checkingWorldPlazaInventoryItemIsSpritcore(itemTypeId)) {
+    return true;
+  }
+
+  // Pinguins accept fishing catch food even though the catalog diet is herbivore.
+  if (
+    species.speciesId === 'pinguin' &&
+    checkingWorldPlazaInventoryItemIsFishingCatchCreatureFood(itemTypeId)
+  ) {
     return true;
   }
 

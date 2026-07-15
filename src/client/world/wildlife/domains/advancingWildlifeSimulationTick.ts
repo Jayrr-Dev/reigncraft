@@ -58,6 +58,7 @@ import {
 } from '@/components/world/wildlife/domains/advancingWildlifeChargeWindup';
 import { advancingWildlifeCorpseLifecycle } from '@/components/world/wildlife/domains/advancingWildlifeCorpseLifecycle';
 import { advancingWildlifeEnvironmentalDamageTick } from '@/components/world/wildlife/domains/advancingWildlifeEnvironmentalDamageTick';
+import { advancingWildlifeFishingCastEncounterTick } from '@/components/world/wildlife/domains/advancingWildlifeFishingCastEncounterTick';
 import { advancingWildlifeHealthStatusTick } from '@/components/world/wildlife/domains/advancingWildlifeHealthStatusTick';
 import { advancingWildlifeHungerTick } from '@/components/world/wildlife/domains/advancingWildlifeHungerTick';
 import { advancingWildlifeHunterKillFeedingTick } from '@/components/world/wildlife/domains/advancingWildlifeHunterKillFeedingTick';
@@ -113,6 +114,7 @@ import {
   attemptingWildlifeMeatGroundDropOnDeath,
   type DefiningWildlifeMeatDropContext,
 } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
+import { checkingWildlifeFishingCastEncounterBlocksPlayerDamage } from '@/components/world/wildlife/domains/checkingWildlifeFishingCastEncounterBlocksPlayerDamage';
 import { checkingWildlifeFleeTargetHasMeaningfulLegDistance } from '@/components/world/wildlife/domains/checkingWildlifeFleeTargetHasMeaningfulLegDistance';
 import { checkingWildlifeFleeTargetReachableFromPosition } from '@/components/world/wildlife/domains/checkingWildlifeFleeTargetReachableFromPosition';
 import { checkingWildlifeHazardAtPoint } from '@/components/world/wildlife/domains/checkingWildlifeHazardAtPoint';
@@ -197,6 +199,7 @@ import { notifyingWildlifeOmegaWolfSfxEvent } from '@/components/world/wildlife/
 import { notifyingWildlifeSpeciesSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeSpeciesSfxEvent';
 import { notifyingWildlifeSpeciesSfxOnIntentTransition } from '@/components/world/wildlife/domains/notifyingWildlifeSpeciesSfxFromSimulation';
 import { resolvingWildlifeBehaviorNeighborQueryRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeBehaviorNeighborQueryRadiusGrid';
+import { resolvingWorldPlazaFishingCastEncounterStalkIntent } from '@/components/world/fishing/domains/resolvingWorldPlazaFishingCastEncounterStalkIntent';
 import { resolvingWildlifeFairyDaybreakWanderAwayIntent } from '@/components/world/wildlife/domains/resolvingWildlifeFairyDaybreakWanderAwayIntent';
 import {
   resolvingWildlifeInstanceCollisionRadiusGrid,
@@ -945,80 +948,84 @@ function applyingWildlifeMeleeAttack(
     );
 
     if (playerDistance <= DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
-      const isOmegaWolf = checkingWildlifeOmegaWolfSpecies(
-        attackerSpecies.speciesId
-      );
-      const playerDamageAmount = isOmegaWolf
-        ? Math.round(
-            attackPower *
-              (1 + DEFINING_WILDLIFE_OMEGA_WOLF_OUTGOING_CRITICAL_BIAS * 0.5)
-          )
-        : attackPower;
-      const jumpScareFatal = checkingWildlifeJumpScareFatalMeleeArmed(
-        attacker,
-        nowMs
-      );
-      const chargeRunCriticalOptions = jumpScareFatal
-        ? null
-        : resolvingWildlifeChargeRunAttackDamageOptions(
-            attacker,
-            attackerSpecies.speciesId,
-            isRunning,
-            nowMs
-          );
-
-      onPlayerHitByWildlife({
-        instanceId: attacker.instanceId,
-        speciesId: attackerSpecies.speciesId,
-        damageAmount: playerDamageAmount,
-        aggressionLevel: attacker.aggressionLevel,
-        ...(jumpScareFatal
-          ? resolvingWildlifeJumpScareFatalDamageOptions()
-          : chargeRunCriticalOptions
-            ? {
-                forcedDeviationScore:
-                  chargeRunCriticalOptions.forcedDeviationScore,
-              }
-            : {}),
-      });
-
-      if (jumpScareFatal) {
-        attacker = clearingWildlifeJumpScareFatalArm(attacker);
-      }
-
       if (
-        isOmegaWolf &&
-        attacker.healthState.physicalDamageLifestealModifiers.length > 0
+        !checkingWildlifeFishingCastEncounterBlocksPlayerDamage(attacker, nowMs)
       ) {
-        const lifestealRatio =
-          attacker.healthState.physicalDamageLifestealModifiers.reduce(
-            (sum, mod) =>
-              mod.expiresAtMs === null || mod.expiresAtMs > nowMs
-                ? sum + mod.ratio
-                : sum,
-            0
-          );
-        const healAmount = Math.round(playerDamageAmount * lifestealRatio);
+        const isOmegaWolf = checkingWildlifeOmegaWolfSpecies(
+          attackerSpecies.speciesId
+        );
+        const playerDamageAmount = isOmegaWolf
+          ? Math.round(
+              attackPower *
+                (1 + DEFINING_WILDLIFE_OMEGA_WOLF_OUTGOING_CRITICAL_BIAS * 0.5)
+            )
+          : attackPower;
+        const jumpScareFatal = checkingWildlifeJumpScareFatalMeleeArmed(
+          attacker,
+          nowMs
+        );
+        const chargeRunCriticalOptions = jumpScareFatal
+          ? null
+          : resolvingWildlifeChargeRunAttackDamageOptions(
+              attacker,
+              attackerSpecies.speciesId,
+              isRunning,
+              nowMs
+            );
 
-        if (healAmount > 0) {
-          const effectiveMaxHealth =
-            attacker.healthState.baseMaxHealth *
-            attacker.healthState.maxHealthScale;
+        onPlayerHitByWildlife({
+          instanceId: attacker.instanceId,
+          speciesId: attackerSpecies.speciesId,
+          damageAmount: playerDamageAmount,
+          aggressionLevel: attacker.aggressionLevel,
+          ...(jumpScareFatal
+            ? resolvingWildlifeJumpScareFatalDamageOptions()
+            : chargeRunCriticalOptions
+              ? {
+                  forcedDeviationScore:
+                    chargeRunCriticalOptions.forcedDeviationScore,
+                }
+              : {}),
+        });
 
-          attacker = {
-            ...attacker,
-            healthState: {
-              ...attacker.healthState,
-              currentHealth: Math.min(
-                effectiveMaxHealth,
-                attacker.healthState.currentHealth + healAmount
-              ),
-            },
-          };
+        if (jumpScareFatal) {
+          attacker = clearingWildlifeJumpScareFatalArm(attacker);
         }
-      }
 
-      swingLanded = true;
+        if (
+          isOmegaWolf &&
+          attacker.healthState.physicalDamageLifestealModifiers.length > 0
+        ) {
+          const lifestealRatio =
+            attacker.healthState.physicalDamageLifestealModifiers.reduce(
+              (sum, mod) =>
+                mod.expiresAtMs === null || mod.expiresAtMs > nowMs
+                  ? sum + mod.ratio
+                  : sum,
+              0
+            );
+          const healAmount = Math.round(playerDamageAmount * lifestealRatio);
+
+          if (healAmount > 0) {
+            const effectiveMaxHealth =
+              attacker.healthState.baseMaxHealth *
+              attacker.healthState.maxHealthScale;
+
+            attacker = {
+              ...attacker,
+              healthState: {
+                ...attacker.healthState,
+                currentHealth: Math.min(
+                  effectiveMaxHealth,
+                  attacker.healthState.currentHealth + healAmount
+                ),
+              },
+            };
+          }
+        }
+
+        swingLanded = true;
+      }
     }
   }
 
@@ -1359,6 +1366,12 @@ export function advancingWildlifeSimulationTick({
   );
 
   if (isWildlifeAiEnabled && playerPosition && playerUserId) {
+    advancingWildlifeFishingCastEncounterTick({
+      store,
+      playerPosition,
+      playerUserId,
+      nowMs,
+    });
     advancingWildlifeStalkPlayerApproachTick({
       store,
       playerPosition,
@@ -1767,6 +1780,21 @@ export function advancingWildlifeSimulationTick({
             playerPosition,
             species,
             hazardSampling,
+          });
+        }
+
+        if (
+          checkingWildlifeFishingCastEncounterBlocksPlayerDamage(
+            nextInstance,
+            nowMs
+          ) &&
+          resolvedIntent.mode !== 'forageChase' &&
+          resolvedIntent.mode !== 'forageEat'
+        ) {
+          resolvedIntent = resolvingWorldPlazaFishingCastEncounterStalkIntent({
+            instancePosition: nextInstance.position,
+            playerUserId,
+            playerPosition,
           });
         }
 

@@ -77,10 +77,66 @@ describe('definingPlazaCodexMilestoneRewardRegistry', () => {
       kind: 'unlock-storage-row',
       pageTier: 'legendary',
     });
-    expect(resolvingPlazaCodexMilestoneRewardsForSection('pathology')).toEqual(
-      []
-    );
-    expect(DEFINING_PLAZA_CODEX_MILESTONE_REWARD_REGISTRY).toHaveLength(14);
+  });
+
+  it('fills every dual-meter and biomes chest; pathology is heal-forward', () => {
+    expect(
+      resolvingPlazaCodexMilestoneRewardsForSection('herbarium')
+    ).toHaveLength(15);
+    expect(
+      resolvingPlazaCodexMilestoneRewardsForSection('lapidary')
+    ).toHaveLength(15);
+    expect(
+      resolvingPlazaCodexMilestoneRewardsForSection('bestiary')
+    ).toHaveLength(15);
+    expect(
+      resolvingPlazaCodexMilestoneRewardsForSection('pathology')
+    ).toHaveLength(15);
+    expect(
+      resolvingPlazaCodexMilestoneRewardsForSection('biomes')
+    ).toHaveLength(4);
+
+    expect(
+      resolvingPlazaCodexMilestoneRewardDefinition({
+        sectionId: 'pathology',
+        meterKind: 'discovered',
+        percent: 5,
+      })?.reward
+    ).toMatchObject({
+      kind: 'attach-recipe',
+      recipeId:
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_LITTERBOX_GUT_DROPS,
+    });
+    expect(
+      resolvingPlazaCodexMilestoneRewardDefinition({
+        sectionId: 'lapidary',
+        meterKind: 'studied',
+        percent: 100,
+      })?.reward
+    ).toMatchObject({
+      kind: 'attach-recipe',
+      recipeId: DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.PICKAXE_GOLD,
+    });
+    expect(
+      resolvingPlazaCodexMilestoneRewardDefinition({
+        sectionId: 'biomes',
+        meterKind: 'discovered',
+        percent: 25,
+      })?.reward
+    ).toMatchObject({
+      kind: 'attach-recipe',
+      recipeId:
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.SURVIVAL_SHADE_LEAN_TO,
+    });
+
+    const attachRecipeIds =
+      DEFINING_PLAZA_CODEX_MILESTONE_REWARD_REGISTRY.filter(
+        (entry) => entry.reward.kind === 'attach-recipe'
+      ).map((entry) =>
+        entry.reward.kind === 'attach-recipe' ? entry.reward.recipeId : null
+      );
+    expect(new Set(attachRecipeIds).size).toBe(attachRecipeIds.length);
+    expect(DEFINING_PLAZA_CODEX_MILESTONE_REWARD_REGISTRY).toHaveLength(72);
   });
 
   it('grants eight attach-recipe rewards across Recipes Attached slices', () => {

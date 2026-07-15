@@ -24,6 +24,11 @@ import { resolvingWorldPlazaChestLockedHintToastMessage } from '@/components/wor
 import { resolvingWorldPlazaChestLootGrant } from '@/components/world/chest/domains/resolvingWorldPlazaChestLootGrant';
 import { countingWorldPlazaInventoryItemTypeQuantity } from '@/components/world/crafting/domains/countingWorldPlazaInventoryItemTypeQuantity';
 import { resolvingWorldPlazaCraftRecipePageItemTypeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
+import { DEFINING_WORLD_PLAZA_RECIPE_PAGE_LOOT_POOL_RECIPE_IDS } from '@/components/world/crafting/domains/definingWorldPlazaRecipePageLootPoolConstants';
+import {
+  resolvingWorldPlazaRecipePageLootDrop,
+  resolvingWorldPlazaRecipePageLootExcludedAttachedRecipeIds,
+} from '@/components/world/crafting/domains/resolvingWorldPlazaRecipePageLootDrop';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWorldPlazaRecipePageAttachedInStore } from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
 import { readingWorldPlazaRecipeDiscoveryFromStorage } from '@/components/world/domains/readingWorldPlazaRecipeDiscoveryFromStorage';
@@ -226,7 +231,35 @@ export function usingWorldPlazaChestOpenInteraction({
               },
             ]
           : [];
-      const allGrants = [...grants, ...firstChestRecipeGrants];
+      const excludedRecipePageLootIds =
+        resolvingWorldPlazaRecipePageLootExcludedAttachedRecipeIds();
+      for (const recipeId of DEFINING_WORLD_PLAZA_RECIPE_PAGE_LOOT_POOL_RECIPE_IDS) {
+        if (
+          countingWorldPlazaInventoryItemTypeQuantity(
+            inventoryStateRef.current,
+            resolvingWorldPlazaCraftRecipePageItemTypeId(recipeId)
+          ) > 0
+        ) {
+          excludedRecipePageLootIds.add(recipeId);
+        }
+      }
+      const recipePageLootDrop = resolvingWorldPlazaRecipePageLootDrop({
+        source: 'chest',
+        excludedRecipeIds: excludedRecipePageLootIds,
+      });
+      const recipePageLootGrants = recipePageLootDrop
+        ? [
+            {
+              itemTypeId: recipePageLootDrop.itemTypeId,
+              quantity: recipePageLootDrop.quantity,
+            },
+          ]
+        : [];
+      const allGrants = [
+        ...grants,
+        ...firstChestRecipeGrants,
+        ...recipePageLootGrants,
+      ];
 
       let inventoryProbeState = inventoryStateRef.current;
 

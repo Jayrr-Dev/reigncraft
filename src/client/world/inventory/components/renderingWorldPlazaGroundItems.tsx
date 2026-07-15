@@ -331,11 +331,7 @@ export function RenderingWorldPlazaGroundItems({
 
         return true;
       },
-      consumeGroundFoodQuantity: (
-        groundItemId,
-        quantity,
-        consumerPosition
-      ) => {
+      consumeGroundFoodQuantity: (groundItemId, quantity, consumerPosition) => {
         if (quantity <= 0) {
           return 0;
         }
@@ -829,6 +825,7 @@ export function RenderingWorldPlazaGroundItems({
               <RenderingWorldPlazaInventoryItemGlyph
                 itemTypeId={groundItem.itemTypeId}
                 registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
+                quantity={groundItem.quantity}
                 iconClassName={cn(
                   'shrink-0',
                   STYLING_WORLD_PLAZA_GROUND_ITEM_GLYPH_OUTLINE_CLASS_NAME

@@ -452,6 +452,30 @@ export type DefiningWildlifeInstance = {
   petBond?: DefiningWildlifePetBondState | null;
   /** Active Spritcore feast buff, or null / absent when none. */
   spritcoreFeast?: DefiningWildlifeSpritcoreFeastState | null;
+  /**
+   * Fishing cast surprise encounter (predator stalk, curious pinguin, fairy).
+   * Cleared when appeased, fled, armed fully into normal AI, or departed.
+   */
+  fishingCastEncounter?: DefiningWildlifeFishingCastEncounterState | null;
+};
+
+/** Cast-spawned wildlife surprise state attached at spawn. */
+export type DefiningWildlifeFishingCastEncounterState = {
+  readonly kind: 'predator' | 'pinguin' | 'fairy';
+  /** Predators may attack at/after this wall-clock time. */
+  readonly armedAtMs: number;
+  /** Player distance that cancels a predator stalk (grid). */
+  readonly fleeDistanceGrid: number;
+  /** Fairy / pinguin curiosity window end; null for predators. */
+  readonly expiresAtMs: number | null;
+  readonly phase:
+    | 'stalking'
+    | 'armed'
+    | 'appeased'
+    | 'fled'
+    | 'curious'
+    | 'following'
+    | 'departing';
 };
 
 /** Dead anchor waiting to respawn once the player leaves the kill site. */

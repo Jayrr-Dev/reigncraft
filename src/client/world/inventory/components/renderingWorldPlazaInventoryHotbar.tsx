@@ -40,11 +40,6 @@ import {
   LABELING_WORLD_PLAZA_INVENTORY_HOTBAR,
   STYLING_WORLD_PLAZA_INVENTORY_HOTBAR_ANCHOR_CLASS_NAME,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
-import {
-  gettingWorldPlazaInventoryBonusStorageRows,
-  subscribingWorldPlazaInventoryStorageExpansion,
-} from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
-import { resolvingWorldPlazaInventoryPageCount } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryCapacity';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import {
@@ -58,7 +53,12 @@ import {
   STYLING_WORLD_PLAZA_INVENTORY_SHELL_TEXT_CLASS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { handlingWorldPlazaInventoryBagAwareDragEnd } from '@/components/world/inventory/domains/handlingWorldPlazaInventoryBagAwareDragEnd';
+import {
+  gettingWorldPlazaInventoryBonusStorageRows,
+  subscribingWorldPlazaInventoryStorageExpansion,
+} from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
 import { resolvingWorldPlazaInventoryBagHotbarSlotIndexFromOverId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagHotbarSlotIndexFromOverId';
+import { resolvingWorldPlazaInventoryPageCount } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryCapacity';
 import { resolvingWorldPlazaInventoryDropLocationFromOverId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropLocationFromOverId';
 import { resolvingWorldPlazaInventoryHotbarDeviceScale } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarDeviceScale';
 import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
@@ -156,7 +156,7 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
   readonly isArmorItemEquipped?: (itemTypeId: string) => boolean;
   /** Eat action from the item action popover for food slots. */
   readonly onEatHotbarSlot?: (slotIndex: number) => void;
-  /** Study a flower specimen for the Herbarium (consumes one). */
+  /** Study a specimen for Herbarium / Lapidary / Bestiary (consumes one). */
   readonly onStudyHotbarSlot?: (slotIndex: number) => void;
   /** Attach cookbook recipe page from a hotbar/storage slot. */
   readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
@@ -598,9 +598,8 @@ export function RenderingWorldPlazaInventoryHotbar({
     gettingWorldPlazaInventoryBonusStorageRows,
     () => 0
   );
-  const storagePageCount = resolvingWorldPlazaInventoryPageCount(
-    bonusStorageRows
-  );
+  const storagePageCount =
+    resolvingWorldPlazaInventoryPageCount(bonusStorageRows);
 
   const handlingStoragePageIndexChange = useCallback(
     (nextPageIndex: number): void => {

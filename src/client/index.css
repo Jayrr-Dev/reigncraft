@@ -568,6 +568,42 @@ video {
   stroke-linecap: round;
 }
 
+.world-plaza-fishing-cast-progress-indicator {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.world-plaza-fishing-cast-progress-ring-track {
+  stroke: rgba(239, 68, 68, 0.28);
+}
+
+.world-plaza-fishing-cast-progress-ring-progress {
+  stroke-linecap: round;
+}
+
+@keyframes world-plaza-fishing-reel-ready-flash {
+  0%,
+  100% {
+    color: #ffffff;
+    filter: drop-shadow(0 0 2px rgba(250, 204, 21, 0.35));
+  }
+
+  50% {
+    color: #fde047;
+    filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.95));
+  }
+}
+
+.world-plaza-fishing-reel-ready-flash {
+  animation: world-plaza-fishing-reel-ready-flash 620ms ease-in-out infinite;
+}
+
+.world-plaza-fishing-reel-ready-flash.world-plaza-fishing-cast-progress-indicator {
+  filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.85));
+}
+
 .world-plaza-timed-interaction-progress-icon {
   position: relative;
   z-index: 1;

@@ -1,5 +1,10 @@
 'use client';
 
+import { droppingWorldPlazaRecipePageLootGroundItem } from '@/components/world/crafting/domains/droppingWorldPlazaRecipePageLootGroundItem';
+import {
+  resolvingWorldPlazaRecipePageLootDrop,
+  resolvingWorldPlazaRecipePageLootExcludedAttachedRecipeIds,
+} from '@/components/world/crafting/domains/resolvingWorldPlazaRecipePageLootDrop';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { droppingWorldPlazaTreeChopGroundItem } from '@/components/world/harvest/domains/droppingWorldPlazaTreeChopWoodGroundItem';
 import type { ListingWorldPlazaTreesInInteractionRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaTreesInInteractionRange';
@@ -218,6 +223,25 @@ export function usingWorldPlazaTreeChopInteraction({
           if (bonusDropResult.outcome === 'failed') {
             showingGameplayHudToast('Could not drop loot from this tree.');
           }
+        }
+
+        const recipePageLootDrop = resolvingWorldPlazaRecipePageLootDrop({
+          source: 'treeChop',
+          excludedRecipeIds:
+            resolvingWorldPlazaRecipePageLootExcludedAttachedRecipeIds(),
+        });
+
+        if (recipePageLootDrop) {
+          await droppingWorldPlazaRecipePageLootGroundItem({
+            localPersistenceOwnerId,
+            redditUserId,
+            saveSlotIndex,
+            tileX: entry.tileX,
+            tileY: entry.tileY,
+            layer: standingSurfaceLayer,
+            itemTypeId: recipePageLootDrop.itemTypeId,
+            playerPosition,
+          });
         }
 
         onTreeChopLayerSucceeded?.();

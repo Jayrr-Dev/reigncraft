@@ -4,7 +4,6 @@ import {
 } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import { DEFINING_INVENTORY_UNLIMITED_STACK_SIZE } from '@/components/inventory/domains/definingInventoryStackConstants';
 import { registeringWorldPlazaCraftRecipePageInventoryItems } from '@/components/world/crafting/domains/registeringWorldPlazaCraftRecipePageInventoryItems';
-import { registeringWorldPlazaInventoryStorageExpansionPageItems } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryStorageExpansionPageItems';
 import { DEFINING_WORLD_PLAZA_TOOL_TIER_STATS } from '@/components/world/equipment/domains/definingWorldPlazaToolTierConstants';
 import { registeringWorldPlazaFishingCatchInventoryItems } from '@/components/world/fishing/domains/registeringWorldPlazaFishingCatchInventoryItems';
 import {
@@ -70,6 +69,7 @@ import { registeringWorldPlazaInventoryHealerItemDefinitions } from '@/component
 import { registeringWorldPlazaInventoryIngotItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryIngotItemDefinitions';
 import { registeringWorldPlazaInventoryOreItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryOreItemDefinitions';
 import { registeringWorldPlazaInventorySiphonArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventorySiphonArmorItemDefinitions';
+import { registeringWorldPlazaInventoryStorageExpansionPageItems } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryStorageExpansionPageItems';
 import { registeringWorldPlazaInventorySurvivalItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventorySurvivalItemDefinitions';
 import { registeringWorldPlazaInventoryTallGrassItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryTallGrassItemDefinitions';
 import { registeringWorldPlazaInventoryWetClayItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryWetClayItemDefinitions';
@@ -380,7 +380,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       iconSpriteSheet:
         DEFINING_WORLD_PLAZA_INVENTORY_SPRITCORE_SPRITE_SHEET_ICON,
       maxStack: DEFINING_INVENTORY_UNLIMITED_STACK_SIZE,
-      isDroppable: false,
+      isDroppable: true,
       isStackable: true,
       stackQuantityDisplay:
         DEFINING_WORLD_PLAZA_SPRITCORE_STACK_QUANTITY_DISPLAY,

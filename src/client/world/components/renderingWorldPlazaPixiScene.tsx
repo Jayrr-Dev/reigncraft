@@ -409,8 +409,12 @@ import { usingWorldPlazaCampfireInteraction } from '@/components/world/fire/hook
 import { usingWorldPlazaFireCells } from '@/components/world/fire/hooks/usingWorldPlazaFireCells';
 import { usingWorldPlazaFlintIgnitionAttempt } from '@/components/world/fire/hooks/usingWorldPlazaFlintIgnitionAttempt';
 import { RenderingWorldPlazaFishingInteractionLabels } from '@/components/world/fishing/components/renderingWorldPlazaFishingInteractionLabels';
+import { RenderingWorldPlazaFishingSfx } from '@/components/world/fishing/components/renderingWorldPlazaFishingSfx';
 import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fishing/domains/checkingWorldPlazaFishingCastEligibility';
+import { computingWorldPlazaFishingCatchEscapeChance } from '@/components/world/fishing/domains/computingWorldPlazaFishingCatchEscapeChance';
+import { gettingWorldPlazaFishingReelEscapeReduction } from '@/components/world/fishing/domains/managingWorldPlazaFishingReelEscapeReduction';
 import { preparingWorldPlazaFishingCastSession } from '@/components/world/fishing/domains/preparingWorldPlazaFishingCastSession';
+import { spawningWorldPlazaFishingCastEncounter } from '@/components/world/fishing/domains/spawningWorldPlazaFishingCastEncounter';
 import { usingWorldPlazaFishingInteraction } from '@/components/world/fishing/hooks/usingWorldPlazaFishingInteraction';
 import { usingWorldPlazaFishingProgress } from '@/components/world/fishing/hooks/usingWorldPlazaFishingProgress';
 import { RenderingWorldPlazaFlowerInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaFlowerInteractionLabels';
@@ -601,7 +605,6 @@ import { checkingWorldPlazaInventoryItemHasStudiedOreMetadata } from '@/componen
 import { computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier';
 import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
 import { consumingWorldPlazaInventoryItemFromSlot } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemFromSlot';
-import { convertingWorldPlazaInventoryOreSlotToStudied } from '@/components/world/inventory/domains/convertingWorldPlazaInventoryOreSlotToStudied';
 import { parsingWorldPlazaFlowerSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
 import { DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import {
@@ -4206,17 +4209,43 @@ function RenderingWorldPlazaPixiSceneConnected({
   hasSeedsInInventoryRef.current = hasSeedsInInventory;
   proximityPlacedBlocksRef.current = activeScenePlacedBlocks;
 
+  const resolvingEquippedFishrodCatchEscapeChance = useCallback((): number => {
+    const equippedItem =
+      equipment.selectedSlotIndex === null
+        ? null
+        : inventoryState.slots[equipment.selectedSlotIndex];
+    const presentation = equippedItem
+      ? resolvingWorldPlazaHeldItemPresentationForItemTypeId(
+          equippedItem.itemTypeId
+        )
+      : null;
+    const tier = presentation?.tier ?? 'wood';
+    const harvestSpeed =
+      equipment.checkingEquippedToolKind('fishrod').harvestSpeedMultiplier;
+
+    return computingWorldPlazaFishingCatchEscapeChance(
+      tier,
+      harvestSpeed,
+      gettingWorldPlazaFishingReelEscapeReduction()
+    );
+  }, [equipment, inventoryState]);
+
   const { validatingFishingCastStart, completingFishingCast } =
     usingWorldPlazaFishingInteraction({
       playerPositionRef,
       updatingInventoryState,
       selectedSlotIndex: equipment.selectedSlotIndex,
+      resolvingEquippedFishrodCatchEscapeChance,
       showingGameplayHudToast,
       onWildlifeSpeciesSighted: grantingBestiarySightedRecipeRewardsIfEarned,
     });
 
   const completingFishingCastRef = useRef(completingFishingCast);
   completingFishingCastRef.current = completingFishingCast;
+
+  const fishingCastEncounterSpawnRef = useRef<
+    ((entry: { tileX: number; tileY: number }) => void) | null
+  >(null);
 
   const preparingFishingCastSessionForEntry = useCallback(
     (entry: { tileX: number; tileY: number }) => {
@@ -4260,7 +4289,11 @@ function RenderingWorldPlazaPixiSceneConnected({
   const {
     snapshot: fishingProgressSnapshot,
     progressRatioRef: fishingProgressRatioRef,
+    reelOpportunityActiveRef: fishingReelOpportunityActiveRef,
     startingFishingCast,
+    reelingFishingCast,
+    startingFishingReelHold,
+    stoppingFishingReelHold,
   } = usingWorldPlazaFishingProgress({
     playerPositionRef,
     selectedInteractableBlockKeysRef,
@@ -4270,6 +4303,17 @@ function RenderingWorldPlazaPixiSceneConnected({
       completingFishingCastRef.current(session);
     },
   });
+
+  const handlingFishingReel = useCallback(
+    (entry: Parameters<typeof reelingFishingCast>[0]): void => {
+      if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
+        return;
+      }
+
+      reelingFishingCast(entry);
+    },
+    [reelingFishingCast]
+  );
 
   const handlingFishingInteraction = useCallback(
     (entry: Parameters<typeof validatingFishingCastStart>[0]): void => {
@@ -4287,6 +4331,10 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
 
       const castOutcome = startingFishingCast(entry);
+
+      if (castOutcome === 'started') {
+        fishingCastEncounterSpawnRef.current?.(entry);
+      }
 
       if (castOutcome === 'nothing-bites') {
         showingGameplayHudToast('Nothing bites.');
@@ -5175,6 +5223,29 @@ function RenderingWorldPlazaPixiSceneConnected({
         }
       },
     });
+
+  fishingCastEncounterSpawnRef.current = (entry) => {
+    const playerCenter = playerPositionRef.current;
+
+    if (!playerCenter) {
+      return;
+    }
+
+    const biomeKind = resolvingWorldPlazaBiomeAtTileIndex(
+      entry.tileX,
+      entry.tileY
+    ).kind;
+
+    spawningWorldPlazaFishingCastEncounter({
+      store: wildlifeStoreRef.current,
+      playerCenter,
+      biomeKind,
+      nowMs: Date.now(),
+      isDaytime: dayNightSunState.isDaytime,
+      placedBlocks: placedBlocksRef.current.blocks,
+      showingToast: showingGameplayHudToast,
+    });
+  };
 
   applyingAnimalRollAttackOnContactRef.current = (event, nowMs) => {
     const rollProfile = animalRollAttackProfileRef.current;
@@ -7257,35 +7328,25 @@ function RenderingWorldPlazaPixiSceneConnected({
     (
       context: DefiningWorldPlazaInventorySpecimenStudyProgressContext
     ): void => {
+      let didConsume = false;
+
+      updatingInventoryState((currentState) => {
+        const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
+          currentState,
+          context.slotIndex,
+          1
+        );
+
+        didConsume = consumeResult.consumed;
+        return consumeResult.consumed ? consumeResult.nextState : null;
+      });
+
+      if (!didConsume) {
+        showingGameplayHudToast('Nothing left to study.');
+        return;
+      }
+
       if (context.studyKind === 'ore' && context.oreSpeciesId) {
-        let didConvertOre = false;
-
-        updatingInventoryState((currentState) => {
-          const convertResult = convertingWorldPlazaInventoryOreSlotToStudied(
-            currentState,
-            context.slotIndex
-          );
-
-          if (convertResult.outcome === 'converted') {
-            didConvertOre = true;
-            return convertResult.nextState;
-          }
-
-          if (convertResult.outcome === 'inventory-full') {
-            showingGameplayHudToast('Inventory is full.');
-          } else if (convertResult.outcome === 'already-studied') {
-            showingGameplayHudToast('That pile is already studied.');
-          } else {
-            showingGameplayHudToast('Nothing left to study.');
-          }
-
-          return null;
-        });
-
-        if (!didConvertOre) {
-          return;
-        }
-
         recordingWorldPlazaLapidaryOreStudied(context.oreSpeciesId);
         const studyCount =
           gettingWorldPlazaLapidaryOreStudyCountsSnapshot()[
@@ -7304,24 +7365,6 @@ function RenderingWorldPlazaPixiSceneConnected({
         if (!grantingLapidaryOreStudyRecipeRewardsIfEarned()) {
           playingWildlifeStudySfx();
         }
-        return;
-      }
-
-      let didConsume = false;
-
-      updatingInventoryState((currentState) => {
-        const consumeResult = consumingWorldPlazaInventoryItemFromSlot(
-          currentState,
-          context.slotIndex,
-          1
-        );
-
-        didConsume = consumeResult.consumed;
-        return consumeResult.consumed ? consumeResult.nextState : null;
-      });
-
-      if (!didConsume) {
-        showingGameplayHudToast('Nothing left to study.');
         return;
       }
 
@@ -9145,6 +9188,7 @@ function RenderingWorldPlazaPixiSceneConnected({
             <RenderingWorldPlazaAvatarMeleeSfx />
             <RenderingWorldPlazaEquipmentSfx />
             <RenderingWorldPlazaInventoryBagSfx />
+            <RenderingWorldPlazaFishingSfx />
             <RenderingWorldPlazaDeathSfx />
             <RenderingWorldPlazaGirlSampleVoiceSfx />
             <RenderingWildlifeOmegaWolfSfx
@@ -10008,9 +10052,13 @@ function RenderingWorldPlazaPixiSceneConnected({
                 }
                 timedInteractionProgressSnapshot={fishingProgressSnapshot}
                 timedInteractionProgressRatioRef={fishingProgressRatioRef}
+                reelOpportunityActiveRef={fishingReelOpportunityActiveRef}
                 cameraOffsetRef={cameraOffsetRef}
                 cameraWorldZoomRef={cameraWorldZoomRef}
                 onFish={handlingFishingInteraction}
+                onReel={handlingFishingReel}
+                onReelHoldStart={startingFishingReelHold}
+                onReelHoldEnd={stoppingFishingReelHold}
               />
               <RenderingWorldPlazaWetClayInteractionLabels
                 playerPositionRef={playerPositionRef}

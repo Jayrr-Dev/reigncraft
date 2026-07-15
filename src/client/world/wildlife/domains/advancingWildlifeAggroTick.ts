@@ -13,6 +13,7 @@ import { advancingWildlifeStalkerBehaviour } from '@/components/world/wildlife/d
 import { applyingWildlifeFavoritePreyPlayerRevengeAggro } from '@/components/world/wildlife/domains/applyingWildlifeFavoritePreyPlayerRevengeAggro';
 import { applyingWildlifeFavoritePreyThreatBoost } from '@/components/world/wildlife/domains/applyingWildlifeFavoritePreyThreatBoost';
 import { checkingWildlifeChaseShouldGiveUpWithoutDamage } from '@/components/world/wildlife/domains/checkingWildlifeChaseShouldGiveUpWithoutDamage';
+import { checkingWildlifeFishingCastEncounterBlocksPlayerDamage } from '@/components/world/wildlife/domains/checkingWildlifeFishingCastEncounterBlocksPlayerDamage';
 import { checkingWildlifeInstanceHasProvokedWildlifeAggro } from '@/components/world/wildlife/domains/checkingWildlifeInstanceHasProvokedWildlifeAggro';
 import { checkingWildlifeIsMotivatedToHunt } from '@/components/world/wildlife/domains/checkingWildlifeIsMotivatedToHunt';
 import { checkingWildlifeIsStalkHuntTemperament } from '@/components/world/wildlife/domains/checkingWildlifeIsStalkHuntTemperament';
@@ -169,6 +170,30 @@ export function advancingWildlifeAggroTick({
   nowMs,
   npcPreyTargets = [],
 }: AdvancingWildlifeAggroTickParams): DefiningWildlifeAggroState {
+  if (checkingWildlifeFishingCastEncounterBlocksPlayerDamage(instance, nowMs)) {
+    return {
+      ...instance.aggroState,
+      threats: playerUserId
+        ? instance.aggroState.threats.filter(
+            (entry) => entry.targetId !== playerUserId
+          )
+        : instance.aggroState.threats,
+      activeTargetId:
+        playerUserId && instance.aggroState.activeTargetId === playerUserId
+          ? null
+          : instance.aggroState.activeTargetId,
+      chaseEngagedAtMs: null,
+      stalkingPreySinceMs: null,
+      stalkLockedPreyTargetId:
+        playerUserId &&
+        instance.aggroState.stalkLockedPreyTargetId === playerUserId
+          ? null
+          : instance.aggroState.stalkLockedPreyTargetId,
+      stalkPhase: 'idle',
+      pendingStalkEvents: [],
+    };
+  }
+
   let stalkLockedPreyTargetId =
     instance.aggroState.stalkLockedPreyTargetId ?? null;
   const previousStalkLockedPreyTargetId = stalkLockedPreyTargetId;

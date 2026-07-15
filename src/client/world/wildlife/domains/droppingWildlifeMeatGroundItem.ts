@@ -1,4 +1,9 @@
 import { droppingWorldPlazaChestKeyGroundItem } from '@/components/world/chest/domains/droppingWorldPlazaChestKeyGroundItem';
+import { droppingWorldPlazaRecipePageLootGroundItem } from '@/components/world/crafting/domains/droppingWorldPlazaRecipePageLootGroundItem';
+import {
+  resolvingWorldPlazaRecipePageLootDrop,
+  resolvingWorldPlazaRecipePageLootExcludedAttachedRecipeIds,
+} from '@/components/world/crafting/domains/resolvingWorldPlazaRecipePageLootDrop';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWorldPlazaGroundItemsUseLocalPersistence } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemsUseLocalPersistence';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
@@ -138,6 +143,25 @@ export async function droppingWildlifeMeatGroundItem({
       instance,
       playerPosition,
     });
+
+    const recipePageLootDrop = resolvingWorldPlazaRecipePageLootDrop({
+      source: 'wildlifeKill',
+      excludedRecipeIds:
+        resolvingWorldPlazaRecipePageLootExcludedAttachedRecipeIds(),
+    });
+
+    if (recipePageLootDrop) {
+      await droppingWorldPlazaRecipePageLootGroundItem({
+        localPersistenceOwnerId,
+        redditUserId,
+        saveSlotIndex,
+        tileX,
+        tileY,
+        layer,
+        itemTypeId: recipePageLootDrop.itemTypeId,
+        playerPosition,
+      });
+    }
 
     await droppingWorldPlazaChestKeyGroundItem({
       localPersistenceOwnerId,

@@ -18,6 +18,7 @@ import type {
   DefiningWildlifeAggressionLevel,
   DefiningWildlifeAggroState,
   DefiningWildlifeAiState,
+  DefiningWildlifeFishingCastEncounterState,
   DefiningWildlifeHungerState,
   DefiningWildlifeInstance,
   DefiningWildlifePendingRespawn,
@@ -167,6 +168,8 @@ export type CreatingWildlifeInstanceAtPositionParams = {
   isGodSpawn?: boolean;
   /** Forced aggressive temperament when {@link isGodSpawn} is true. */
   temperamentOverrideId?: DefiningWildlifeTemperamentId | null;
+  /** Fishing cast surprise encounter state attached at spawn. */
+  fishingCastEncounter?: DefiningWildlifeFishingCastEncounterState | null;
 };
 
 /** Creates one wildlife instance at an explicit world position. */
@@ -186,6 +189,7 @@ export function creatingWildlifeInstanceAtPosition({
   customDisplayName = null,
   isGodSpawn = false,
   temperamentOverrideId = null,
+  fishingCastEncounter = null,
 }: CreatingWildlifeInstanceAtPositionParams): DefiningWildlifeInstance {
   const spawnHealthProfile = {
     speciesId: species.speciesId,
@@ -237,6 +241,7 @@ export function creatingWildlifeInstanceAtPosition({
     softDepartureStartedAtMs: null,
     softDepartureReason: null,
     petBond,
+    fishingCastEncounter,
   };
 }
 

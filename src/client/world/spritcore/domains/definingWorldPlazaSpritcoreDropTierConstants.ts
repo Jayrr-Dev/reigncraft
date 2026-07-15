@@ -1,11 +1,13 @@
 /**
  * Spritcore drop ladder: 4 orbs × color cycles (violet → crimson → gold).
+ * All payouts share one stack pool; sprite/overlay change by stack quantity.
  * Higher SC repeats the orb cycle with a color overlay (no new sprites).
  *
  * @module components/world/spritcore/domains/definingWorldPlazaSpritcoreDropTierConstants
  */
 
 import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE_BRIGHT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE_BRIGHT_CRIMSON,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE_BRIGHT_GOLD,
@@ -63,7 +65,12 @@ export type DefiningWorldPlazaSpritcoreDropTierDefinition = {
   readonly tier: DefiningWorldPlazaSpritcoreDropTierId;
   readonly orbStep: DefiningWorldPlazaSpritcoreOrbStepId;
   readonly cycleId: DefiningWorldPlazaSpritcoreColorCycleId;
+  /** Canonical stack pool id (always the shared Spritcore type). */
   readonly itemTypeId: string;
+  /**
+   * Pre-unified tier item ids kept for save/ground migration + is-spritcore checks.
+   */
+  readonly legacyItemTypeId: string;
   readonly displayName: string;
   readonly minDropAmountInclusive: number;
   readonly maxDropAmountInclusive: number;
@@ -118,7 +125,8 @@ export const DEFINING_WORLD_PLAZA_SPRITCORE_ORB_STEP_DEFINITIONS: readonly Defin
     },
   ] as const;
 
-const DEFINING_WORLD_PLAZA_SPRITCORE_ITEM_TYPE_ID_BY_CYCLE_AND_ORB: Readonly<
+/** Legacy per-tier item ids (pre-unified stack pool). */
+const DEFINING_WORLD_PLAZA_SPRITCORE_LEGACY_ITEM_TYPE_ID_BY_CYCLE_AND_ORB: Readonly<
   Record<
     DefiningWorldPlazaSpritcoreColorCycleId,
     Record<DefiningWorldPlazaSpritcoreOrbStepId, string>
@@ -161,8 +169,9 @@ function buildingWorldPlazaSpritcoreDropTierDefinitions(): DefiningWorldPlazaSpr
         tier: tierRank as DefiningWorldPlazaSpritcoreDropTierId,
         orbStep: orbStep.orbStep,
         cycleId: colorCycle.cycleId,
-        itemTypeId:
-          DEFINING_WORLD_PLAZA_SPRITCORE_ITEM_TYPE_ID_BY_CYCLE_AND_ORB[
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
+        legacyItemTypeId:
+          DEFINING_WORLD_PLAZA_SPRITCORE_LEGACY_ITEM_TYPE_ID_BY_CYCLE_AND_ORB[
             colorCycle.cycleId
           ][orbStep.orbStep],
         displayName: `${colorCycle.displayAdjective}${orbStep.baseName}`,
@@ -187,7 +196,8 @@ function buildingWorldPlazaSpritcoreDropTierDefinitions(): DefiningWorldPlazaSpr
 export const DEFINING_WORLD_PLAZA_SPRITCORE_DROP_TIER_DEFINITIONS: readonly DefiningWorldPlazaSpritcoreDropTierDefinition[] =
   buildingWorldPlazaSpritcoreDropTierDefinitions();
 
+/** Legacy tier item type ids still accepted from old saves / ground loot. */
 export const DEFINING_WORLD_PLAZA_SPRITCORE_TIERED_ITEM_TYPE_IDS =
   DEFINING_WORLD_PLAZA_SPRITCORE_DROP_TIER_DEFINITIONS.map(
-    (tierDefinition) => tierDefinition.itemTypeId
+    (tierDefinition) => tierDefinition.legacyItemTypeId
   );

@@ -1,6 +1,11 @@
 'use client';
 
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import { droppingWorldPlazaRecipePageLootGroundItem } from '@/components/world/crafting/domains/droppingWorldPlazaRecipePageLootGroundItem';
+import {
+  resolvingWorldPlazaRecipePageLootDrop,
+  resolvingWorldPlazaRecipePageLootExcludedAttachedRecipeIds,
+} from '@/components/world/crafting/domains/resolvingWorldPlazaRecipePageLootDrop';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { recordingWorldPlazaLapidaryOreStudied } from '@/components/world/domains/managingWorldPlazaLapidaryDiscoveryStore';
 import { droppingWorldPlazaRockMineStoneGroundItem } from '@/components/world/harvest/domains/droppingWorldPlazaRockMineStoneGroundItem';
@@ -212,6 +217,25 @@ export function usingWorldPlazaRockMineInteraction({
               ? 'Could not drop stone from this rock.'
               : 'Could not drop ore from this rock.'
           );
+        }
+
+        const recipePageLootDrop = resolvingWorldPlazaRecipePageLootDrop({
+          source: 'mining',
+          excludedRecipeIds:
+            resolvingWorldPlazaRecipePageLootExcludedAttachedRecipeIds(),
+        });
+
+        if (recipePageLootDrop) {
+          await droppingWorldPlazaRecipePageLootGroundItem({
+            localPersistenceOwnerId,
+            redditUserId,
+            saveSlotIndex,
+            tileX: entry.tileX,
+            tileY: entry.tileY,
+            layer: standingSurfaceLayer,
+            itemTypeId: recipePageLootDrop.itemTypeId,
+            playerPosition,
+          });
         }
 
         onRockMineLayerSucceeded?.();

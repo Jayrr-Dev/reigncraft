@@ -3,6 +3,7 @@
 import type { DefiningWorldPlazaAvatarToolAction } from '@/components/world/animation/domains/definingWorldPlazaAvatarToolActionAnimationRegistry';
 import { computingWorldPlazaGridChebyshevDistance } from '@/components/world/domains/computingWorldPlazaGridChebyshevDistance';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fishing/domains/checkingWorldPlazaFishingCastEligibility';
 import type { DefiningWorldPlazaFishingCastSessionContext } from '@/components/world/fishing/domains/definingWorldPlazaFishingCastSessionContext';
 import {
@@ -11,10 +12,21 @@ import {
 } from '@/components/world/fishing/domains/definingWorldPlazaFishingConstants';
 import { formattingWorldPlazaFishingTileSelectionKey } from '@/components/world/fishing/domains/formattingWorldPlazaFishingTileSelectionKey';
 import type { ListingWorldPlazaFishingTilesInInteractionRangeEntry } from '@/components/world/fishing/domains/listingWorldPlazaFishingTilesInInteractionRange';
+import {
+  applyingWorldPlazaFishingReelEscapeReduction,
+  beginningWorldPlazaFishingReelCastState,
+  gettingWorldPlazaFishingReelCastElapsedBonusMs,
+  gettingWorldPlazaFishingReelOpportunityActive,
+  resettingWorldPlazaFishingReelCastState,
+  settingWorldPlazaFishingReelHold,
+  tickingWorldPlazaFishingReelCastFrame,
+} from '@/components/world/fishing/domains/managingWorldPlazaFishingReelCastState';
+import { playingWorldPlazaFishingSfx } from '@/components/world/fishing/domains/playingWorldPlazaFishingSfx';
 import type { PreparingWorldPlazaFishingCastSessionResult } from '@/components/world/fishing/domains/preparingWorldPlazaFishingCastSession';
+import { checkingWorldPlazaTimedInteractionProgressMatchesTarget } from '@/components/world/interaction/domains/checkingWorldPlazaTimedInteractionProgressMatchesTarget';
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
 import { usingWorldPlazaTimedInteractionProgress } from '@/components/world/interaction/hooks/usingWorldPlazaTimedInteractionProgress';
-import { useCallback, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, type RefObject } from 'react';
 
 export type UsingWorldPlazaFishingProgressParams = {
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
@@ -35,12 +47,25 @@ export type StartingWorldPlazaFishingCastOutcome =
   | 'nothing-bites'
   | 'failed';
 
+export type ReelingWorldPlazaFishingCastOutcome =
+  | 'reeled'
+  | 'cooldown'
+  | 'capped'
+  | 'inactive'
+  | 'not-ready';
+
 export type UsingWorldPlazaFishingProgressResult = {
   readonly snapshot: DefiningWorldPlazaTimedInteractionProgressSnapshot;
   readonly progressRatioRef: RefObject<number>;
+  readonly reelOpportunityActiveRef: RefObject<boolean>;
   readonly startingFishingCast: (
     entry: ListingWorldPlazaFishingTilesInInteractionRangeEntry
   ) => StartingWorldPlazaFishingCastOutcome;
+  readonly reelingFishingCast: (
+    entry: ListingWorldPlazaFishingTilesInInteractionRangeEntry
+  ) => ReelingWorldPlazaFishingCastOutcome;
+  readonly startingFishingReelHold: () => void;
+  readonly stoppingFishingReelHold: () => void;
 };
 
 function checkingWorldPlazaFishingStillInRange(
@@ -68,11 +93,45 @@ export function usingWorldPlazaFishingProgress({
   preparingFishingCastSession,
   onCastComplete,
 }: UsingWorldPlazaFishingProgressParams): UsingWorldPlazaFishingProgressResult {
+  const reelOpportunityActiveRef = useRef(false);
+  const onCastCompleteRef = useRef(onCastComplete);
+
+  onCastCompleteRef.current = onCastComplete;
+
+  const handlingFishingCastComplete = useCallback(
+    (session: DefiningWorldPlazaFishingCastSessionContext): void => {
+      resettingWorldPlazaFishingReelCastState();
+      reelOpportunityActiveRef.current = false;
+      onCastCompleteRef.current(session);
+    },
+    []
+  );
+
   const { snapshot, progressRatioRef, startingTimedInteraction } =
     usingWorldPlazaTimedInteractionProgress({
-      onComplete: onCastComplete,
+      onComplete: handlingFishingCastComplete,
       avatarToolActionRef,
+      resolvingExtraElapsedMs: gettingWorldPlazaFishingReelCastElapsedBonusMs,
     });
+
+  useEffect(() => {
+    if (!snapshot.isActive) {
+      reelOpportunityActiveRef.current = false;
+      return;
+    }
+
+    const unsubscribeDomOverlayFrame = subscribingWorldPlazaDomOverlayFrame(
+      (deltaMs, frameTimeMs) => {
+        tickingWorldPlazaFishingReelCastFrame(deltaMs, frameTimeMs);
+        reelOpportunityActiveRef.current =
+          gettingWorldPlazaFishingReelOpportunityActive();
+      }
+    );
+
+    return () => {
+      unsubscribeDomOverlayFrame();
+    };
+  }, [snapshot.isActive]);
 
   const startingFishingCast = useCallback(
     (
@@ -141,6 +200,14 @@ export function usingWorldPlazaFishingProgress({
         return 'already-fishing';
       }
 
+      const castStartedAtMs = performance.now();
+      beginningWorldPlazaFishingReelCastState(
+        castStartedAtMs,
+        preparedSession.durationMs
+      );
+      reelOpportunityActiveRef.current = false;
+      playingWorldPlazaFishingSfx({ actionId: 'cast_start' });
+
       return 'started';
     },
     [
@@ -151,9 +218,57 @@ export function usingWorldPlazaFishingProgress({
     ]
   );
 
+  const reelingFishingCast = useCallback(
+    (
+      entry: ListingWorldPlazaFishingTilesInInteractionRangeEntry
+    ): ReelingWorldPlazaFishingCastOutcome => {
+      const targetKey = formattingWorldPlazaFishingTileSelectionKey(
+        entry.tileX,
+        entry.tileY
+      );
+
+      if (
+        !snapshot.isActive ||
+        !checkingWorldPlazaTimedInteractionProgressMatchesTarget(
+          snapshot,
+          targetKey
+        )
+      ) {
+        return 'inactive';
+      }
+
+      const reelResult = applyingWorldPlazaFishingReelEscapeReduction();
+
+      if (reelResult === 'not-ready') {
+        return 'not-ready';
+      }
+
+      if (reelResult === 'cooldown') {
+        return 'cooldown';
+      }
+
+      playingWorldPlazaFishingSfx({ actionId: 'reel' });
+
+      return reelResult === 'capped' ? 'capped' : 'reeled';
+    },
+    [snapshot]
+  );
+
+  const startingFishingReelHold = useCallback((): void => {
+    settingWorldPlazaFishingReelHold(true);
+  }, []);
+
+  const stoppingFishingReelHold = useCallback((): void => {
+    settingWorldPlazaFishingReelHold(false);
+  }, []);
+
   return {
     snapshot,
     progressRatioRef,
+    reelOpportunityActiveRef,
     startingFishingCast,
+    reelingFishingCast,
+    startingFishingReelHold,
+    stoppingFishingReelHold,
   };
 }

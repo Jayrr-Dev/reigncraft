@@ -294,6 +294,7 @@ export function RenderingWorldPlazaInventoryItemInfoDialog({
             <RenderingWorldPlazaInventoryItemGlyph
               itemTypeId={model.itemTypeId}
               registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
+              quantity={model.quantity}
               iconClassName={itemIconClassName}
               emojiClassName={itemIconClassName}
               fallbackClassName={itemIconClassName}

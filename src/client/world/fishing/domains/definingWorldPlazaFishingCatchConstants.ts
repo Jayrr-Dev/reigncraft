@@ -42,6 +42,29 @@ export const DEFINING_WORLD_PLAZA_FISHING_CATCH_COOK_DURATION_MS_BY_RARITY: Reco
 /** Carry weight for most catch and junk items. */
 export const DEFINING_WORLD_PLAZA_FISHING_CATCH_DEFAULT_CARRY_WEIGHT = 1.5;
 
+export type DefiningWorldPlazaFishingCatchSpritcoreAmountRange = {
+  readonly minInclusive: number;
+  readonly maxInclusive: number;
+};
+
+/**
+ * Spritcore roll range when landing a living catch (not junk), by rarity.
+ * Kept small vs wildlife kill payouts: fish are living but tiny.
+ */
+export const DEFINING_WORLD_PLAZA_FISHING_CATCH_SPRITCORE_AMOUNT_RANGE_BY_RARITY: Record<
+  DefiningWorldPlazaInventoryItemRarity,
+  DefiningWorldPlazaFishingCatchSpritcoreAmountRange
+> = {
+  basic: { minInclusive: 1, maxInclusive: 3 },
+  common: { minInclusive: 1, maxInclusive: 3 },
+  uncommon: { minInclusive: 2, maxInclusive: 6 },
+  rare: { minInclusive: 4, maxInclusive: 8 },
+  epic: { minInclusive: 7, maxInclusive: 13 },
+  mythic: { minInclusive: 12, maxInclusive: 20 },
+  legendary: { minInclusive: 18, maxInclusive: 30 },
+  godly: { minInclusive: 28, maxInclusive: 44 },
+};
+
 export type DefiningWorldPlazaFishingCastDurationRangeMs = {
   readonly minMs: number;
   readonly maxMs: number;

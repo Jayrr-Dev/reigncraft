@@ -10,6 +10,7 @@ import {
 import { checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId';
 import { checkingWorldPlazaInventoryItemHasStudiedOreMetadata } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemHasStudiedOreMetadata';
 import { findingWorldPlazaInventoryFirstEmptySlotForItemTypeId } from '@/components/world/inventory/domains/findingWorldPlazaInventoryFirstEmptySlotForItemTypeId';
+import { resolvingWorldPlazaSpritcoreCanonicalItemTypeId } from '@/components/world/spritcore/domains/resolvingWorldPlazaSpritcoreCanonicalItemTypeId';
 import { checkingWorldPlazaTeaBrewingMetadataStackCompatible } from '@/components/world/tea-brewing/domains/resolvingWorldPlazaTeaBrewingMetadata';
 import { checkingWorldPlazaInventoryItemHasAggroDeerMeatMetadata } from '@/components/world/wildlife/domains/checkingWorldPlazaInventoryItemHasAggroDeerMeatMetadata';
 
@@ -26,11 +27,17 @@ export function addingWorldPlazaInventoryItem(
   itemInput: DefiningInventoryItemInput,
   targetSlotIndex?: number
 ): DefiningInventoryState {
+  const canonicalItemInput = {
+    ...itemInput,
+    itemTypeId: resolvingWorldPlazaSpritcoreCanonicalItemTypeId(
+      itemInput.itemTypeId
+    ),
+  };
   const slotIndex =
     targetSlotIndex ??
     findingWorldPlazaInventoryFirstEmptySlotForItemTypeId(
       state,
-      itemInput.itemTypeId
+      canonicalItemInput.itemTypeId
     );
 
   if (slotIndex === null) {
@@ -40,13 +47,13 @@ export function addingWorldPlazaInventoryItem(
   if (
     !checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId(
       slotIndex,
-      itemInput.itemTypeId
+      canonicalItemInput.itemTypeId
     )
   ) {
     return state;
   }
 
-  return addingInventoryItem(state, itemInput, slotIndex);
+  return addingInventoryItem(state, canonicalItemInput, slotIndex);
 }
 
 /**
@@ -62,8 +69,15 @@ export function addingWorldPlazaInventoryItemWithStacking(
   itemInput: DefiningInventoryItemInput,
   registry: DefiningInventoryItemRegistry
 ): AddingInventoryItemWithStackingResult {
-  const typeDef = registry.resolvingItemType(itemInput.itemTypeId);
-  const requestedQuantity = Math.max(1, itemInput.quantity ?? 1);
+  const canonicalItemTypeId = resolvingWorldPlazaSpritcoreCanonicalItemTypeId(
+    itemInput.itemTypeId
+  );
+  const canonicalItemInput = {
+    ...itemInput,
+    itemTypeId: canonicalItemTypeId,
+  };
+  const typeDef = registry.resolvingItemType(canonicalItemTypeId);
+  const requestedQuantity = Math.max(1, canonicalItemInput.quantity ?? 1);
   let remainingQuantity = requestedQuantity;
   let nextState = state;
 
@@ -77,23 +91,23 @@ export function addingWorldPlazaInventoryItemWithStacking(
 
       if (
         slotItem === null ||
-        slotItem.itemTypeId !== itemInput.itemTypeId ||
+        slotItem.itemTypeId !== canonicalItemTypeId ||
         slotItem.quantity >= typeDef.maxStack ||
         checkingWorldPlazaInventoryItemHasAggroDeerMeatMetadata(
           slotItem.metadata
         ) !==
           checkingWorldPlazaInventoryItemHasAggroDeerMeatMetadata(
-            itemInput.metadata
+            canonicalItemInput.metadata
           ) ||
         checkingWorldPlazaInventoryItemHasStudiedOreMetadata(
           slotItem.metadata
         ) !==
           checkingWorldPlazaInventoryItemHasStudiedOreMetadata(
-            itemInput.metadata
+            canonicalItemInput.metadata
           ) ||
         !checkingWorldPlazaTeaBrewingMetadataStackCompatible(
           slotItem.metadata,
-          itemInput.metadata
+          canonicalItemInput.metadata
         )
       ) {
         continue;
@@ -121,7 +135,7 @@ export function addingWorldPlazaInventoryItemWithStacking(
     const emptySlotIndex =
       findingWorldPlazaInventoryFirstEmptySlotForItemTypeId(
         nextState,
-        itemInput.itemTypeId
+        canonicalItemTypeId
       );
 
     if (emptySlotIndex === null) {
@@ -134,9 +148,9 @@ export function addingWorldPlazaInventoryItemWithStacking(
       nextState,
       {
         id: crypto.randomUUID(),
-        itemTypeId: itemInput.itemTypeId,
+        itemTypeId: canonicalItemTypeId,
         quantity: stackQuantity,
-        metadata: itemInput.metadata,
+        metadata: canonicalItemInput.metadata,
       },
       emptySlotIndex
     );

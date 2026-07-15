@@ -54,6 +54,7 @@ import { resizingWorldPlazaInventoryStateToCapacity } from '@/components/world/i
 import { resolvingWorldPlazaInventoryCapacity } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryCapacity';
 import { creatingInventoryDevvitAdapter } from '@/components/world/inventory/repositories/creatingInventoryDevvitAdapter';
 import { creatingInventoryPlazaSinglePlayerSaveAdapter } from '@/components/world/inventory/repositories/creatingInventoryPlazaSinglePlayerSaveAdapter';
+import { normalizingWorldPlazaInventorySpritcoreStacks } from '@/components/world/spritcore/domains/normalizingWorldPlazaInventorySpritcoreStacks';
 import {
   useCallback,
   useEffect,
@@ -154,6 +155,7 @@ export function usingWorldPlazaInventory(
 
   const hasSeededRef = useRef(false);
   const hasNormalizedWeaponToolSlotRef = useRef(false);
+  const hasNormalizedSpritcoreStacksRef = useRef(false);
   const hasEnsuredCampfireRecipePageRef = useRef(false);
   const hasEnsuredLapidaryOreStudyRecipeRewardsRef = useRef(false);
   const hasEnsuredBestiarySightedRecipeRewardsRef = useRef(false);
@@ -341,6 +343,7 @@ export function usingWorldPlazaInventory(
       hasDevQaCraftSeededRef.current = true;
       hasSeededRef.current = true;
       hasNormalizedWeaponToolSlotRef.current = true;
+      hasNormalizedSpritcoreStacksRef.current = true;
       hasEnsuredCampfireRecipePageRef.current = true;
       hasEnsuredLapidaryOreStudyRecipeRewardsRef.current = true;
       hasEnsuredBestiarySightedRecipeRewardsRef.current = true;
@@ -381,6 +384,7 @@ export function usingWorldPlazaInventory(
       ) {
         hasSeededRef.current = true;
         hasNormalizedWeaponToolSlotRef.current = true;
+        hasNormalizedSpritcoreStacksRef.current = true;
 
         const seededState = seedingWorldPlazaInventoryItems(
           creatingEmptyInventoryState(unlockedCapacity),
@@ -402,6 +406,7 @@ export function usingWorldPlazaInventory(
       if (isEmpty) {
         hasSeededRef.current = true;
         hasNormalizedWeaponToolSlotRef.current = true;
+        hasNormalizedSpritcoreStacksRef.current = true;
 
         let seededState = creatingEmptyInventoryState(unlockedCapacity);
         seededState = seedingWorldPlazaInventoryItems(
@@ -430,6 +435,20 @@ export function usingWorldPlazaInventory(
 
       if (normalizedState !== state) {
         setState(normalizedState);
+        return;
+      }
+    }
+
+    if (!hasNormalizedSpritcoreStacksRef.current) {
+      hasNormalizedSpritcoreStacksRef.current = true;
+      const normalizedSpritcoreState =
+        normalizingWorldPlazaInventorySpritcoreStacks(
+          state,
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+        );
+
+      if (normalizedSpritcoreState !== state) {
+        setState(normalizedSpritcoreState);
         return;
       }
     }

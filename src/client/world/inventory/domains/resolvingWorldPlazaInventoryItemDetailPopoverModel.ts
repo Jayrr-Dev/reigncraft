@@ -95,6 +95,8 @@ import {
   resolvingWorldPlazaInventoryWildlifeMeatDetailReveal,
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryWildlifeMeatDetailReveal';
 import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
+import { checkingWorldPlazaInventoryItemIsSpritcore } from '@/components/world/spritcore/domains/checkingWorldPlazaInventoryItemIsSpritcore';
+import { resolvingWorldPlazaSpritcoreStackPresentation } from '@/components/world/spritcore/domains/resolvingWorldPlazaSpritcoreStackPresentation';
 import { DEFINING_WORLD_PLAZA_TEA_BREWING_POURS_PER_POT } from '@/components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingConstants';
 import {
   resolvingWorldPlazaTeaBrewingMetadata,
@@ -108,6 +110,7 @@ import type { WorldShrubBerryLootKind } from '../../../../shared/worldShrubBerry
 
 export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   readonly itemTypeId: string;
+  readonly quantity: number;
   readonly name: string;
   readonly description: string;
   readonly durabilityLabel: string | null;
@@ -204,7 +207,7 @@ function checkingWorldPlazaInventoryItemCanStudyFlower(
 }
 
 /**
- * True when an unstudied ore pile still has lapidary Study progress left.
+ * True when an ore stack still has lapidary Study progress left.
  */
 function checkingWorldPlazaInventoryItemCanStudyOre(
   item: DefiningInventoryItem,
@@ -409,16 +412,15 @@ function listingWorldPlazaInventoryItemDetailBadges(
     readonly isEquipped: boolean;
     readonly includeFoodHungerBadge?: boolean;
     readonly playerEffectiveMaxHealth?: number;
+    readonly rarityOverride?: DefiningWorldPlazaInventoryItemTypeDefinition['rarity'];
   }
 ): DefiningWorldPlazaInventoryItemDetailBadge[] {
+  const rarity = options.rarityOverride ?? definition.rarity;
   const badges: DefiningWorldPlazaInventoryItemDetailBadge[] = [
     {
       id: 'rarity',
-      label:
-        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_RARITY_LABELS[definition.rarity],
-      variant: resolvingWorldPlazaInventoryItemRarityBadgeVariant(
-        definition.rarity
-      ),
+      label: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_RARITY_LABELS[rarity],
+      variant: resolvingWorldPlazaInventoryItemRarityBadgeVariant(rarity),
     },
   ];
 
@@ -745,6 +747,12 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     return null;
   }
 
+  const spritcorePresentation = checkingWorldPlazaInventoryItemIsSpritcore(
+    item.itemTypeId
+  )
+    ? resolvingWorldPlazaSpritcoreStackPresentation(item.quantity)
+    : null;
+
   const foodDefinition = resolvingWorldPlazaInventoryFoodDefinition(
     item.itemTypeId
   );
@@ -892,6 +900,7 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
   if (wildlifeMeatContent && !includeGenericMeta) {
     return {
       itemTypeId: item.itemTypeId,
+      quantity: item.quantity,
       name: definition.name,
       description: wildlifeMeatContent.description,
       durabilityLabel: null,
@@ -915,9 +924,8 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
         item.itemTypeId
       ),
-      canUnlockStorageRow: checkingWorldPlazaInventoryItemIsStorageExpansionPage(
-        item.itemTypeId
-      ),
+      canUnlockStorageRow:
+        checkingWorldPlazaInventoryItemIsStorageExpansionPage(item.itemTypeId),
       canDrop: definition.isDroppable,
       dropActionLabel:
         resolvingWorldPlazaInventoryItemGroundActionLabel(definition),
@@ -953,6 +961,7 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       isEquipped: options.isEquipped,
       includeFoodHungerBadge,
       playerEffectiveMaxHealth: options.playerEffectiveMaxHealth,
+      rarityOverride: spritcorePresentation?.rarity,
     }
   );
   const genericInfoRows = listingWorldPlazaInventoryItemDetailInfoRows(
@@ -990,10 +999,12 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     ...genericInfoRows,
     ...(wildlifeMeatContent?.infoRows ?? []),
   ];
-  const baseDisplayName = teaOverrides?.name ?? definition.name;
+  const baseDisplayName =
+    teaOverrides?.name ?? spritcorePresentation?.displayName ?? definition.name;
 
   return {
     itemTypeId: item.itemTypeId,
+    quantity: item.quantity,
     name: isStudiedOrePile ? `${baseDisplayName} · Studied` : baseDisplayName,
     description:
       teaOverrides?.description ??

@@ -306,12 +306,13 @@ describe('resolvingPlazaCodexMenuRewardReadySections', () => {
     ).toBe(true);
   });
 
-  it('marks biomes ready only for the Discovered max packing-ledger chest', () => {
+  it('marks biomes ready from the first Discovered shelter chest', () => {
+    // Biomes chests: 25% / 50% / 75% / 100% of max 14 → thresholds 4, 7, 11, 14.
     expect(
       resolvingPlazaCodexMenuRewardReadySections(
         {},
         {
-          biomes: { value: 10, max: 14 },
+          biomes: { value: 3, max: 14 },
         }
       ).has('biomes')
     ).toBe(false);
@@ -320,7 +321,7 @@ describe('resolvingPlazaCodexMenuRewardReadySections', () => {
       resolvingPlazaCodexMenuRewardReadySections(
         {},
         {
-          biomes: { value: 14, max: 14 },
+          biomes: { value: 4, max: 14 },
         }
       ).has('biomes')
     ).toBe(true);

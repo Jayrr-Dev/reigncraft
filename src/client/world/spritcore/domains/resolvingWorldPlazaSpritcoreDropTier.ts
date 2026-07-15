@@ -1,9 +1,10 @@
 /**
- * Maps wildlife Spiritcore payout size to a drop tier and inventory item type.
+ * Maps wildlife Spiritcore payout size to a visual tier (shared stack pool).
  *
  * @module components/world/spritcore/domains/resolvingWorldPlazaSpritcoreDropTier
  */
 
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import {
   DEFINING_WORLD_PLAZA_SPRITCORE_DROP_TIER_DEFINITIONS,
   type DefiningWorldPlazaSpritcoreDropTierDefinition,
@@ -35,9 +36,12 @@ export function resolvingWorldPlazaSpritcoreDropTierId(
   return resolvingWorldPlazaSpritcoreDropTierDefinition(dropAmount).tier;
 }
 
-/** Resolves the inventory item type id granted for one kill payout. */
+/**
+ * Resolves the inventory item type id granted for one kill payout.
+ * Always the shared Spritcore pool; art bands by stack quantity.
+ */
 export function resolvingWorldPlazaSpritcoreDropItemTypeId(
-  dropAmount: number
+  _dropAmount: number
 ): string {
-  return resolvingWorldPlazaSpritcoreDropTierDefinition(dropAmount).itemTypeId;
+  return DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE;
 }
