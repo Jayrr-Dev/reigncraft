@@ -26,11 +26,23 @@ export const DEFINING_WORLD_PLAZA_FISHING_CATCH_RARITY_FLOAT_TEXT_COLOR: Readonl
   godly: '#ff4d5e',
 };
 
+/** Red X / escaped float label color. */
+export const DEFINING_WORLD_PLAZA_FISHING_CATCH_ESCAPED_FLOAT_TEXT_COLOR =
+  '#ff4d5e' as const;
+
 /**
- * Builds the rising float label, e.g. "Legendary Catch".
+ * Builds the rising float label.
+ * Landed: "Legendary Catch". Escaped: "Legendary".
  */
 export function formattingWorldPlazaFishingCatchRarityFloatLabel(
-  rarity: DefiningWorldPlazaInventoryItemRarity
+  rarity: DefiningWorldPlazaInventoryItemRarity,
+  escaped = false
 ): string {
-  return `${DEFINING_WORLD_PLAZA_INVENTORY_ITEM_RARITY_LABELS[rarity]} Catch`;
+  const rarityLabel = DEFINING_WORLD_PLAZA_INVENTORY_ITEM_RARITY_LABELS[rarity];
+
+  if (escaped) {
+    return rarityLabel;
+  }
+
+  return `${rarityLabel} Catch`;
 }

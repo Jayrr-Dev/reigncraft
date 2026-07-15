@@ -6,14 +6,22 @@
 
 import type { DefiningWorldPlazaInventoryItemRarity } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
 
+export type EnqueueingWorldPlazaFishingCatchRarityFloatOptions = {
+  readonly escaped?: boolean;
+};
+
+export type EnqueueingWorldPlazaFishingCatchRarityFloat = (
+  rarity: DefiningWorldPlazaInventoryItemRarity,
+  options?: EnqueueingWorldPlazaFishingCatchRarityFloatOptions
+) => void;
+
 /**
- * Calls the player HUD float hook for a successful catch rarity reveal.
+ * Calls the player HUD float hook for a catch or escaped rarity reveal.
  */
 export function enqueueingWorldPlazaFishingCatchRarityFloatFeedback(
-  enqueueFishingCatchRarityFloat: (
-    rarity: DefiningWorldPlazaInventoryItemRarity
-  ) => void,
-  rarity: DefiningWorldPlazaInventoryItemRarity
+  enqueueFishingCatchRarityFloat: EnqueueingWorldPlazaFishingCatchRarityFloat,
+  rarity: DefiningWorldPlazaInventoryItemRarity,
+  options?: EnqueueingWorldPlazaFishingCatchRarityFloatOptions
 ): void {
-  enqueueFishingCatchRarityFloat(rarity);
+  enqueueFishingCatchRarityFloat(rarity, options);
 }

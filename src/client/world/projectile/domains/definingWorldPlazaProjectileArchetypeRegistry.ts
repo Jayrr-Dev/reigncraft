@@ -264,14 +264,14 @@ const CYROBORN_ICE_BOLT: DefiningWorldPlazaProjectileArchetype = {
   archetypeId: 'cyroborn-ice-bolt',
   movement: {
     behaviorId: 'homingDirect',
-    speedGridPerSec: 11,
+    speedGridPerSec: 14,
     tracksLiveTarget: true,
   },
   hitbox: { radiusGrid: 0.14 },
   altitude: { mode: 'flying', flyingAltitudePx: 30 },
   dodge: { jumpDodgeable: false },
   payload: {
-    damageAmount: 10,
+    damageAmount: 16,
     damageKind: 'physical',
     statusEffects: [{ kind: 'buff', buffId: 'immobilized-debuff' }],
   },
@@ -296,13 +296,13 @@ const CYROBORN_ICE_SPHERE: DefiningWorldPlazaProjectileArchetype = {
   archetypeId: 'cyroborn-ice-sphere',
   movement: {
     behaviorId: 'linear',
-    speedGridPerSec: 8.5,
+    speedGridPerSec: 11,
   },
   hitbox: { radiusGrid: 0.16 },
   altitude: { mode: 'flying', flyingAltitudePx: 22 },
   dodge: { jumpDodgeable: true },
   payload: {
-    damageAmount: 16,
+    damageAmount: 24,
     damageKind: 'physical',
   },
   impact: { behaviorId: 'singleTarget' },
@@ -330,13 +330,13 @@ const CYROBORN_ICE_SHARD_BURST: DefiningWorldPlazaProjectileArchetype = {
   archetypeId: 'cyroborn-ice-shard-burst',
   movement: {
     behaviorId: 'linear',
-    speedGridPerSec: 5,
+    speedGridPerSec: 6.5,
   },
   hitbox: { radiusGrid: 0.1 },
   altitude: { mode: 'flying', flyingAltitudePx: 18 },
   dodge: { jumpDodgeable: true },
   payload: {
-    damageAmount: 4,
+    damageAmount: 7,
     damageKind: 'physical',
   },
   impact: { behaviorId: 'singleTarget' },
@@ -360,7 +360,7 @@ const CYROBORN_SHATTER_ORB: DefiningWorldPlazaProjectileArchetype = {
   archetypeId: 'cyroborn-shatter-orb',
   movement: {
     behaviorId: 'homingSoft',
-    speedGridPerSec: 3.2,
+    speedGridPerSec: 4.2,
     maxTurnRateRadiansPerSec: Math.PI * 0.85,
     homingLeadErrorRadians: 0.35,
     tracksLiveTarget: true,
@@ -369,13 +369,13 @@ const CYROBORN_SHATTER_ORB: DefiningWorldPlazaProjectileArchetype = {
   altitude: { mode: 'flying', flyingAltitudePx: 28 },
   dodge: { jumpDodgeable: false },
   payload: {
-    damageAmount: 8,
+    damageAmount: 14,
     damageKind: 'physical',
     statusEffects: [
       { kind: 'temperature', deltaCelsius: -200 },
       {
         kind: 'potentialDamage',
-        expectedDamage: 24,
+        expectedDamage: 36,
         resolveDelayMs: 2_000,
       },
     ],

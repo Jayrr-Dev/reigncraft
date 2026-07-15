@@ -48,7 +48,7 @@ describe('normalizingWorldPlazaInventorySpritcoreStacks', () => {
     expect(spritcoreSlots[0]?.quantity).toBe(30);
   });
 
-  it('is a no-op when only the canonical type is present', () => {
+  it('is a no-op when only one canonical stack is present', () => {
     const state = creatingEmptyInventoryState(4);
     const withCanonical = {
       ...state,
@@ -71,5 +71,44 @@ describe('normalizingWorldPlazaInventorySpritcoreStacks', () => {
         DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
       )
     ).toBe(withCanonical);
+  });
+
+  it('merges duplicate canonical stacks into one pool', () => {
+    const state = creatingEmptyInventoryState(8);
+    const withDuplicates = {
+      ...state,
+      slots: [
+        {
+          id: 'a',
+          itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
+          quantity: 11,
+          slotIndex: 0,
+        },
+        {
+          id: 'b',
+          itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
+          quantity: 84,
+          slotIndex: 1,
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
+    };
+
+    const normalized = normalizingWorldPlazaInventorySpritcoreStacks(
+      withDuplicates,
+      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+    );
+
+    const spritcoreSlots = normalized.slots.filter(
+      (slot) =>
+        slot?.itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE
+    );
+    expect(spritcoreSlots).toHaveLength(1);
+    expect(spritcoreSlots[0]?.quantity).toBe(95);
   });
 });

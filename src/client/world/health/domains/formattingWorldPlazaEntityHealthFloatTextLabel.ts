@@ -1,4 +1,9 @@
 import {
+  DEFINING_WORLD_PLAZA_FISHING_CATCH_ESCAPED_FLOAT_TEXT_COLOR,
+  DEFINING_WORLD_PLAZA_FISHING_CATCH_RARITY_FLOAT_TEXT_COLOR,
+  formattingWorldPlazaFishingCatchRarityFloatLabel,
+} from '@/components/world/fishing/domains/definingWorldPlazaFishingCatchRarityFloatConstants';
+import {
   DEFINING_WORLD_PLAZA_DAMAGE_OUTCOME_TIER_REGISTRY,
   resolvingWorldPlazaEntityHealthFloatTextKindDamageClassName,
   resolvingWorldPlazaEntityHealthFloatTextKindTierLabel,
@@ -15,10 +20,6 @@ import type {
   DefiningWorldPlazaDamageOutcomeTier,
   DefiningWorldPlazaEntityDamageKind,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
-import {
-  DEFINING_WORLD_PLAZA_FISHING_CATCH_RARITY_FLOAT_TEXT_COLOR,
-  formattingWorldPlazaFishingCatchRarityFloatLabel,
-} from '@/components/world/fishing/domains/definingWorldPlazaFishingCatchRarityFloatConstants';
 import type { DefiningWorldPlazaInventoryItemRarity } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
 
 function resolvingWorldPlazaEntityHealthBeneficialTierLabel(
@@ -60,9 +61,10 @@ export function formattingWorldPlazaEntityHealthFloatTextAmount({
   kind,
   amount,
   rarity,
+  escaped,
 }: Pick<
   DefiningWorldPlazaEntityHealthFloatText,
-  'kind' | 'amount' | 'rarity'
+  'kind' | 'amount' | 'rarity' | 'escaped'
 >): string | null {
   const roundedAmount = Math.max(0, Math.round(amount));
 
@@ -79,7 +81,10 @@ export function formattingWorldPlazaEntityHealthFloatTextAmount({
       return null;
     }
 
-    return formattingWorldPlazaFishingCatchRarityFloatLabel(rarity);
+    return formattingWorldPlazaFishingCatchRarityFloatLabel(
+      rarity,
+      Boolean(escaped)
+    );
   }
 
   if (kind === 'health_scale') {
@@ -113,14 +118,16 @@ export function formattingWorldPlazaEntityHealthFloatTextLabel({
   damageKind,
   outcomeTier,
   rarity,
+  escaped,
 }: Pick<
   DefiningWorldPlazaEntityHealthFloatText,
-  'kind' | 'amount' | 'damageKind' | 'outcomeTier' | 'rarity'
+  'kind' | 'amount' | 'damageKind' | 'outcomeTier' | 'rarity' | 'escaped'
 >): string {
   const amountLabel = formattingWorldPlazaEntityHealthFloatTextAmount({
     kind,
     amount,
     rarity,
+    escaped,
   });
 
   if (amountLabel === null) {
@@ -284,8 +291,13 @@ export function resolvingWorldPlazaEntityHealthFloatTextClassName(
  * Resolves the inline text color for a fishing rarity float.
  */
 export function resolvingWorldPlazaFishingCatchRarityFloatTextColor(
-  rarity: DefiningWorldPlazaInventoryItemRarity | null | undefined
+  rarity: DefiningWorldPlazaInventoryItemRarity | null | undefined,
+  escaped?: boolean | null
 ): string | null {
+  if (escaped) {
+    return DEFINING_WORLD_PLAZA_FISHING_CATCH_ESCAPED_FLOAT_TEXT_COLOR;
+  }
+
   if (rarity === null || rarity === undefined) {
     return null;
   }

@@ -12,13 +12,15 @@ import { checkingWorldPlazaInventoryItemIsSpritcore } from '@/components/world/s
 
 /**
  * Remaps every Spritcore stack onto `world-plaza-spritcore` and merges quantities.
- * No-op when inventory already uses only the canonical type.
+ * Also collapses duplicate canonical piles (shared pool should be one stack).
+ * No-op when inventory already has a single canonical Spritcore stack.
  */
 export function normalizingWorldPlazaInventorySpritcoreStacks(
   state: DefiningInventoryState,
   registry: DefiningInventoryItemRegistry
 ): DefiningInventoryState {
   let totalQuantity = 0;
+  let spritcoreStackCount = 0;
   let needsRemap = false;
 
   for (const slot of state.slots) {
@@ -31,6 +33,7 @@ export function normalizingWorldPlazaInventorySpritcoreStacks(
     }
 
     totalQuantity += slot.quantity;
+    spritcoreStackCount += 1;
 
     if (
       slot.itemTypeId !== DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE
@@ -39,7 +42,9 @@ export function normalizingWorldPlazaInventorySpritcoreStacks(
     }
   }
 
-  if (!needsRemap || totalQuantity <= 0) {
+  const needsCollapse = needsRemap || spritcoreStackCount > 1;
+
+  if (!needsCollapse || totalQuantity <= 0) {
     return state;
   }
 

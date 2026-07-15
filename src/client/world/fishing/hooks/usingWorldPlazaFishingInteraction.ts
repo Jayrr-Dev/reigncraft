@@ -8,6 +8,8 @@ import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fis
 import { rollingWorldPlazaFishingCatchEscaped } from '@/components/world/fishing/domains/computingWorldPlazaFishingCatchEscapeChance';
 import type { DefiningWorldPlazaFishingCastSessionContext } from '@/components/world/fishing/domains/definingWorldPlazaFishingCastSessionContext';
 import { DEFINING_WORLD_PLAZA_FISHING_CATCH_QUANTITY } from '@/components/world/fishing/domains/definingWorldPlazaFishingConstants';
+import type { EnqueueingWorldPlazaFishingCatchRarityFloat } from '@/components/world/fishing/domains/enqueueingWorldPlazaFishingCatchRarityFloatFeedback';
+import { enqueueingWorldPlazaFishingCatchRarityFloatFeedback } from '@/components/world/fishing/domains/enqueueingWorldPlazaFishingCatchRarityFloatFeedback';
 import type { ListingWorldPlazaFishingTilesInInteractionRangeEntry } from '@/components/world/fishing/domains/listingWorldPlazaFishingTilesInInteractionRange';
 import { resettingWorldPlazaFishingReelCastState } from '@/components/world/fishing/domains/managingWorldPlazaFishingReelCastState';
 import { playingWorldPlazaFishingSfx } from '@/components/world/fishing/domains/playingWorldPlazaFishingSfx';
@@ -31,6 +33,8 @@ export type UsingWorldPlazaFishingInteractionParams = {
   readonly showingGameplayHudToast: (message: string) => void;
   /** Fired when a creature catch records a Bestiary sighting. */
   readonly onWildlifeSpeciesSighted?: () => void;
+  /** Rising rarity float above the player (landed or escaped). */
+  readonly enqueueFishingCatchRarityFloat?: EnqueueingWorldPlazaFishingCatchRarityFloat;
 };
 
 export type UsingWorldPlazaFishingInteractionResult = {
@@ -52,6 +56,7 @@ export function usingWorldPlazaFishingInteraction({
   resolvingEquippedFishrodCatchEscapeChance,
   showingGameplayHudToast,
   onWildlifeSpeciesSighted,
+  enqueueFishingCatchRarityFloat,
 }: UsingWorldPlazaFishingInteractionParams): UsingWorldPlazaFishingInteractionResult {
   const validatingFishingCastStart = useCallback(
     (entry: ListingWorldPlazaFishingTilesInInteractionRangeEntry): boolean => {
@@ -126,6 +131,14 @@ export function usingWorldPlazaFishingInteraction({
             return wearResult.nextState;
           });
 
+          if (enqueueFishingCatchRarityFloat) {
+            enqueueingWorldPlazaFishingCatchRarityFloatFeedback(
+              enqueueFishingCatchRarityFloat,
+              catchEntry.rarity,
+              { escaped: true }
+            );
+          }
+
           if (didBreak) {
             showingGameplayHudToast('Your fishing rod broke.');
           } else {
@@ -193,6 +206,13 @@ export function usingWorldPlazaFishingInteraction({
             catchEntry,
           });
 
+          if (enqueueFishingCatchRarityFloat) {
+            enqueueingWorldPlazaFishingCatchRarityFloatFeedback(
+              enqueueFishingCatchRarityFloat,
+              catchEntry.rarity
+            );
+          }
+
           if (catchEntry.kind === 'creature') {
             recordingWorldPlazaBestiarySpeciesSighted(catchEntry.catchId);
             onWildlifeSpeciesSighted?.();
@@ -215,6 +235,7 @@ export function usingWorldPlazaFishingInteraction({
       }
     },
     [
+      enqueueFishingCatchRarityFloat,
       onWildlifeSpeciesSighted,
       playerPositionRef,
       resolvingEquippedFishrodCatchEscapeChance,

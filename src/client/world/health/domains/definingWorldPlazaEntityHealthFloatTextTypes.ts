@@ -36,6 +36,8 @@ export type DefiningWorldPlazaEntityHealthFloatText = {
   itemTypeId?: string | null;
   /** Catch rarity when {@link kind} is `fishing_catch_rarity`. */
   rarity?: DefiningWorldPlazaInventoryItemRarity | null;
+  /** True when the fish escaped: red X + rarity name (no "Catch"). */
+  escaped?: boolean | null;
   /** Outcome tier when heal/shield amounts were rolled statistically. */
   outcomeTier?: DefiningWorldPlazaDamageOutcomeTier | null;
   /** Standard-deviation distance from expected when the float came from a roll. */

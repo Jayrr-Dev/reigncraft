@@ -833,17 +833,17 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
     jump: definingWildlifeGroundedJumpConfig(),
   },
   cyroborn: {
-    walkSpeedGridPerSecond: 1.6,
-    runSpeedGridPerSecond: 3.4,
+    walkSpeedGridPerSecond: 2.4,
+    runSpeedGridPerSecond: 5.2,
     jump: {
       canJump: true,
       canPounce: false,
       maxJumpLayerReach: 8,
-      // Normal hop distance; high speed so the arc finishes fast.
-      maxJumpDistanceGrid: 2,
-      jumpSpeedGridPerSecond: 10,
-      jumpArcPeakPx: 18,
-      jumpCooldownMs: 1800,
+      // Long blink-hops; very high speed so the arc reads like a teleport.
+      maxJumpDistanceGrid: 4.5,
+      jumpSpeedGridPerSecond: 16,
+      jumpArcPeakPx: 12,
+      jumpCooldownMs: 850,
     },
   },
 
@@ -2648,9 +2648,9 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
     },
     vitals: {
       baseMaxHealth: 72,
-      attackPower: 14,
+      attackPower: 22,
       defense: 5,
-      attackIntervalMs: 1_100,
+      attackIntervalMs: 650,
     },
   },
   ...buildingWildlifeFishSpeciesDefinitions(),

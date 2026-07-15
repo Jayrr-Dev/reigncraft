@@ -112,6 +112,7 @@ import { resolvingWorldPlazaEntityHealthEffectiveTemperatureResistance } from '@
 import { resolvingWorldPlazaEntityTemperatureComfortBand } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureComfortBand';
 import { applyingWorldPlazaEntityTemperatureResistanceToEnvironmentalDamageRates } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureResistanceMultiplier';
 import { resolvingWorldPlazaEnvironmentalTemperatureForPlayerAtWorldPoint } from '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPoint';
+import type { DefiningWorldPlazaInventoryItemRarity } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
 
 import { computingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineDerivedStats';
 import {
@@ -251,6 +252,16 @@ export interface UsingWorldPlazaPlayerHealthResult {
    */
   enqueueItemGainFloatRef: React.RefObject<
     (itemTypeId: string, amount: number) => void
+  >;
+  /**
+   * Enqueues a rarity float after a fish lands or escapes.
+   * Landed: rarity glyph + "{Rarity} Catch". Escaped: red X + rarity name.
+   */
+  enqueueFishingCatchRarityFloatRef: React.RefObject<
+    (
+      rarity: DefiningWorldPlazaInventoryItemRarity,
+      options?: { readonly escaped?: boolean }
+    ) => void
   >;
   /**
    * Enqueues a green heal float for intentional heals (food, skills, etc.).
@@ -1106,6 +1117,12 @@ export function usingWorldPlazaPlayerHealth({
   const enqueueItemGainFloatRef = useRef<
     (itemTypeId: string, amount: number) => void
   >(() => undefined);
+  const enqueueFishingCatchRarityFloatRef = useRef<
+    (
+      rarity: DefiningWorldPlazaInventoryItemRarity,
+      options?: { readonly escaped?: boolean }
+    ) => void
+  >(() => undefined);
   const enqueueHealFloatRef = useRef<(amount: number) => void>(() => undefined);
   const healRef = useRef<(amount: number) => void>(() => undefined);
   const applyFallDamageRef = useRef<(layerDelta: number) => void>(
@@ -1182,6 +1199,7 @@ export function usingWorldPlazaPlayerHealth({
       applyStarvationDamageRef.current = () => undefined;
       enqueueMissFloatRef.current = () => undefined;
       enqueueItemGainFloatRef.current = () => undefined;
+      enqueueFishingCatchRarityFloatRef.current = () => undefined;
       enqueueHealFloatRef.current = () => undefined;
       pushingHudSnapshot(performance.now());
       return;
@@ -1207,6 +1225,21 @@ export function usingWorldPlazaPlayerHealth({
           amount,
           damageKind: null,
           itemTypeId,
+        },
+        nowMs
+      );
+      pushingHudSnapshot(nowMs);
+    };
+
+    enqueueFishingCatchRarityFloatRef.current = (rarity, options) => {
+      const nowMs = performance.now();
+      enqueueFloatText(
+        {
+          kind: 'fishing_catch_rarity',
+          amount: 1,
+          damageKind: null,
+          rarity,
+          escaped: options?.escaped === true,
         },
         nowMs
       );
@@ -1874,6 +1907,7 @@ export function usingWorldPlazaPlayerHealth({
     takeDamageRef,
     enqueueMissFloatRef,
     enqueueItemGainFloatRef,
+    enqueueFishingCatchRarityFloatRef,
     enqueueHealFloatRef,
     healRef,
     applyFallDamageRef,

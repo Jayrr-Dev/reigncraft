@@ -4230,6 +4230,12 @@ function RenderingWorldPlazaPixiSceneConnected({
     );
   }, [equipment, inventoryState]);
 
+  const enqueueFishingCatchRarityFloatBridgeRef = useRef<
+    NonNullable<
+      Parameters<typeof usingWorldPlazaFishingInteraction>[0]['enqueueFishingCatchRarityFloat']
+    >
+  >(() => undefined);
+
   const { validatingFishingCastStart, completingFishingCast } =
     usingWorldPlazaFishingInteraction({
       playerPositionRef,
@@ -4238,6 +4244,9 @@ function RenderingWorldPlazaPixiSceneConnected({
       resolvingEquippedFishrodCatchEscapeChance,
       showingGameplayHudToast,
       onWildlifeSpeciesSighted: grantingBestiarySightedRecipeRewardsIfEarned,
+      enqueueFishingCatchRarityFloat: (rarity) => {
+        enqueueFishingCatchRarityFloatBridgeRef.current(rarity);
+      },
     });
 
   const completingFishingCastRef = useRef(completingFishingCast);
@@ -4703,6 +4712,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     takeDamageRef,
     enqueueMissFloatRef,
     enqueueItemGainFloatRef,
+    enqueueFishingCatchRarityFloatRef,
     enqueueHealFloatRef,
     healRef,
     applyFallDamageRef,
@@ -4747,6 +4757,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     rollDodgeProgressRef,
     isRollingRef,
   });
+  enqueueFishingCatchRarityFloatBridgeRef.current = (rarity) => {
+    enqueueFishingCatchRarityFloatRef.current(rarity);
+  };
 
   const {
     loadoutState: armorLoadoutState,

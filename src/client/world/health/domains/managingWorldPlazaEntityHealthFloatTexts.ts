@@ -26,6 +26,7 @@ export type ManagingWorldPlazaEntityHealthFloatTextEnqueueParams = {
   damageKind?: DefiningWorldPlazaEntityDamageKind | null;
   itemTypeId?: string | null;
   rarity?: DefiningWorldPlazaInventoryItemRarity | null;
+  escaped?: boolean | null;
   outcomeTier?: DefiningWorldPlazaDamageOutcomeTier | null;
   deviationScore?: number | null;
   nowMs: number;
@@ -72,6 +73,7 @@ export function enqueueingWorldPlazaEntityHealthFloatText({
   damageKind = null,
   itemTypeId = null,
   rarity = null,
+  escaped = null,
   outcomeTier = null,
   deviationScore = null,
   nowMs,
@@ -135,6 +137,7 @@ export function enqueueingWorldPlazaEntityHealthFloatText({
     damageKind,
     itemTypeId: kind === 'item_gain' ? itemTypeId : null,
     rarity: kind === 'fishing_catch_rarity' ? rarity : null,
+    escaped: kind === 'fishing_catch_rarity' ? Boolean(escaped) : null,
     outcomeTier,
     deviationScore,
     createdAtMs: nowMs,

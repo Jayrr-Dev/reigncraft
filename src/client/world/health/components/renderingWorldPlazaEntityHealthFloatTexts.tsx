@@ -267,13 +267,19 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
             : null;
         const fishingRaritySpriteSheet =
           isFishingCatchRarityFloat &&
+          !floatText.escaped &&
           floatText.rarity !== null &&
           floatText.rarity !== undefined
             ? resolvingWorldPlazaFishingRaritySpriteSheetIcon(floatText.rarity)
             : null;
         const fishingCatchRarityTextColor = isFishingCatchRarityFloat
-          ? resolvingWorldPlazaFishingCatchRarityFloatTextColor(floatText.rarity)
+          ? resolvingWorldPlazaFishingCatchRarityFloatTextColor(
+              floatText.rarity,
+              floatText.escaped
+            )
           : null;
+        const isFishingCatchEscapedFloat =
+          isFishingCatchRarityFloat && Boolean(floatText.escaped);
 
         return (
           <div
@@ -353,7 +359,11 @@ export function RenderingWorldPlazaEntityHealthFloatTexts({
                 <Icon
                   icon={mappingWorldPlazaEntityHealthFloatTextIcon(floatText)}
                   aria-hidden
-                  className="shrink-0 text-current"
+                  className={`shrink-0 ${
+                    isFishingCatchEscapedFloat
+                      ? 'text-[#ff4d5e]'
+                      : 'text-current'
+                  }`}
                   width={iconSizePx}
                   height={iconSizePx}
                 />

@@ -62,6 +62,7 @@ const MAPPING_WORLD_PLAZA_ENTITY_HEALTH_FLOAT_TEXT_KIND_ICON: Partial<
   miss: 'mdi:close',
   study: 'mdi:book-open-page-variant',
   loyalty: 'mdi:paw',
+  fishing_catch_rarity: 'mdi:close',
 };
 
 function listingWorldPlazaEntityHealthFloatTextKindIconsFromTierRegistry(): Partial<
