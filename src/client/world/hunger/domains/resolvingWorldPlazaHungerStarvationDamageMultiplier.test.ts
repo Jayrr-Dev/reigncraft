@@ -1,14 +1,15 @@
 import { COMPUTING_WORLD_PLAZA_IN_GAME_HOUR_MS } from '@/components/world/domains/computingWorldPlazaInGameDurationMs';
+import { DEFINING_WORLD_PLAZA_HUNGER_STARVATION_DAMAGE_ESCALATION_BASE } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import {
   resolvingWorldPlazaHungerStarvationDamageMultiplier,
-  resolvingWorldPlazaHungerStarvationHoursWithoutFood,
+  resolvingWorldPlazaHungerStarvationElapsedInGameHours,
 } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerStarvationDamageMultiplier';
 import { describe, expect, it } from 'vitest';
 
 describe('resolvingWorldPlazaHungerStarvationDamageMultiplier', () => {
   it('returns 0 hours and 1× damage when starvation has not started', () => {
     expect(
-      resolvingWorldPlazaHungerStarvationHoursWithoutFood(null, 10_000)
+      resolvingWorldPlazaHungerStarvationElapsedInGameHours(null, 10_000)
     ).toBe(0);
     expect(
       resolvingWorldPlazaHungerStarvationDamageMultiplier({
@@ -18,26 +19,32 @@ describe('resolvingWorldPlazaHungerStarvationDamageMultiplier', () => {
     ).toBe(1);
   });
 
-  it('stays at 1× until a full in-game hour elapses', () => {
+  it('ramps continuously before a full in-game hour elapses', () => {
     const starvingSinceMs = 1_000;
-    const almostOneHour =
-      starvingSinceMs + COMPUTING_WORLD_PLAZA_IN_GAME_HOUR_MS - 1;
+    const halfHourMs =
+      starvingSinceMs + COMPUTING_WORLD_PLAZA_IN_GAME_HOUR_MS * 0.5;
 
     expect(
-      resolvingWorldPlazaHungerStarvationHoursWithoutFood(
+      resolvingWorldPlazaHungerStarvationElapsedInGameHours(
         starvingSinceMs,
-        almostOneHour
+        halfHourMs
       )
-    ).toBe(0);
+    ).toBeCloseTo(0.5, 10);
     expect(
       resolvingWorldPlazaHungerStarvationDamageMultiplier({
         starvingSinceMs,
-        nowMs: almostOneHour,
+        nowMs: halfHourMs,
       })
-    ).toBe(1);
+    ).toBeCloseTo(
+      Math.pow(
+        DEFINING_WORLD_PLAZA_HUNGER_STARVATION_DAMAGE_ESCALATION_BASE,
+        0.5
+      ),
+      10
+    );
   });
 
-  it('adds +1× per completed in-game hour without food', () => {
+  it('doubles each completed in-game hour without food', () => {
     const starvingSinceMs = 1_000;
 
     expect(
@@ -51,6 +58,6 @@ describe('resolvingWorldPlazaHungerStarvationDamageMultiplier', () => {
         starvingSinceMs,
         nowMs: starvingSinceMs + COMPUTING_WORLD_PLAZA_IN_GAME_HOUR_MS * 3,
       })
-    ).toBe(4);
+    ).toBe(8);
   });
 });

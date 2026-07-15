@@ -12,6 +12,7 @@ import {
   resolvingPlazaCodexStudyTierId,
 } from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import { resolvingWorldPlazaEntityBuffDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
+import { checkingWorldPlazaForageLootKindIsLeaf } from '@/components/world/inventory/domains/definingWorldPlazaForageLootKindMapping';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_BERRY_DETAIL_REVEAL_BY_TIER,
   type DefiningWorldPlazaInventoryBerryDetailReveal,
@@ -169,7 +170,14 @@ export function resolvingWorldPlazaInventoryBerryDetailContent(
   if (reveal.showWellFedName && wellFedLabels.length > 0) {
     infoRows.push({
       id: 'berry-well-fed',
-      label: berryLootKind === 'tea_leaves' ? 'Ease chance' : 'Buzz chance',
+      label:
+        berryLootKind === 'red_berry'
+          ? 'Buzz chance'
+          : berryLootKind === 'tea_leaves'
+            ? 'Ease chance'
+            : checkingWorldPlazaForageLootKindIsLeaf(berryLootKind)
+              ? 'Gather chance'
+              : 'Effect chance',
       value:
         reveal.showWellFedChance &&
         options.food?.cookedWellFedChance !== undefined

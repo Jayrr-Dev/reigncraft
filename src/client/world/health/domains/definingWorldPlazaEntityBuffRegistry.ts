@@ -2,7 +2,10 @@ import type { DefiningWorldPlazaEntityBuffCategoryId } from '@/components/world/
 import { DEFINING_WORLD_PLAZA_CONFUSION_DEFAULT_INTENSITY } from '@/components/world/health/domains/definingWorldPlazaEntityConfusionConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityDamageToHealConstants';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityHealAmplifierConstants';
-import type { DefiningWorldPlazaEntityHealthDamageRollModifierKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import type {
+  DefiningWorldPlazaEntityDamageKind,
+  DefiningWorldPlazaEntityHealthDamageRollModifierKind,
+} from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import {
   DEFINING_WORLD_PLAZA_DEEP_SLEEP_DEFAULT_DURATION_MS,
   DEFINING_WORLD_PLAZA_SLEEP_DEFAULT_DURATION_MS,
@@ -44,6 +47,7 @@ export type DefiningWorldPlazaEntityBuffEffect =
   | {
       kind: 'incoming_damage_multiplier';
       multiplier: number;
+      damageKinds?: readonly DefiningWorldPlazaEntityDamageKind[];
     }
   | {
       kind: 'physical_damage_lifesteal';
@@ -1631,6 +1635,144 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
       },
     },
     {
+      id: 'forage-bilberry-alert-buff',
+      label: 'Night Sight',
+      description: 'Dark bilberries sharpen your footing for a short run.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 40_000,
+      effect: {
+        kind: 'movement_modifier',
+        modifierKind: 'speed',
+        multiplier: 1.08,
+      },
+    },
+    {
+      id: 'forage-juniper-cold-comfort-buff',
+      label: 'Juniper Warmth',
+      description: 'Resinous berries take the edge off a cold wind.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 60_000,
+      effect: {
+        kind: 'cold_tolerance',
+        amountCelsius:
+          DEFINING_WORLD_PLAZA_TEMPERATURE_COLD_TOLERANCE_BONUS_CELSIUS,
+      },
+    },
+    {
+      id: 'forage-sea-buckthorn-heat-ward-buff',
+      label: 'Firethorn Guard',
+      description: 'Oily orange berries blunt scorching heat.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 45_000,
+      effect: {
+        kind: 'heat_resistance',
+        amount: 0.25,
+      },
+    },
+    {
+      id: 'forage-yew-aril-vital-buff',
+      label: 'Aril Pulse',
+      description:
+        'Sweet red flesh from a deadly tree. Brief lift, bitter aftertaste.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 30_000,
+      effect: {
+        kind: 'incoming_heal_amplifier',
+        ratio: 1.15,
+      },
+    },
+    {
+      id: 'forage-wolfberry-venom-ward-buff',
+      label: 'Wolf Blood',
+      description: 'Dried wolfberry dulls venom for a while.',
+      polarity: 'buff',
+      category: 'defence',
+      durationKind: 'timed',
+      durationMs: 90_000,
+      effect: {
+        kind: 'incoming_damage_multiplier',
+        multiplier: 0.7,
+        damageKinds: ['venomous'],
+      },
+    },
+    {
+      id: 'forage-lotus-trance-buff',
+      label: 'Lotus Haze',
+      description: 'The fruit drags the mind toward soft sleep.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 8_000,
+      effect: {
+        kind: 'incapacitate_sleep',
+        wakeBonusDamage: 0,
+        canWakeFromDamage: true,
+      },
+    },
+    {
+      id: 'forage-bay-laurel-brace-buff',
+      label: 'Laurel Brace',
+      description: 'Chewed bay steadies you against hard hits.',
+      polarity: 'buff',
+      category: 'defence',
+      durationKind: 'timed',
+      durationMs: 18_000,
+      effect: {
+        kind: 'damage_roll_modifiers',
+        side: 'defender',
+        modifiers: [{ kind: 'stability', value: 0.35 }],
+      },
+    },
+    {
+      id: 'forage-mistletoe-kiss-buff',
+      label: 'Kissleaf Bloom',
+      description: 'White berries ease pain, then sting.',
+      polarity: 'buff',
+      category: 'character',
+      durationKind: 'timed',
+      durationMs: 20_000,
+      effect: {
+        kind: 'incoming_heal_amplifier',
+        ratio: 1.12,
+      },
+    },
+    {
+      id: 'forage-olive-climate-ward-buff',
+      label: 'Olive Calm',
+      description: 'Silver leaves blunt heat and cold alike.',
+      polarity: 'buff',
+      category: 'defence',
+      durationKind: 'timed',
+      durationMs: 75_000,
+      effect: {
+        kind: 'incoming_damage_multiplier',
+        multiplier: 0.85,
+        damageKinds: ['environmental_heat', 'environmental_cold'],
+      },
+    },
+    {
+      id: 'forage-moly-circe-ward-buff',
+      label: 'Moly Ward',
+      description: 'White roots and black earth. Poison slides off easier.',
+      polarity: 'buff',
+      category: 'defence',
+      durationKind: 'timed',
+      durationMs: 90_000,
+      effect: {
+        kind: 'incoming_damage_multiplier',
+        multiplier: 0.5,
+        damageKinds: ['toxic', 'venomous'],
+      },
+    },
+    {
       id: 'well-fed-strength-buff',
       label: 'Predator Strength',
       description: 'Big-cat meat steadies your strikes.',
@@ -1907,8 +2049,7 @@ export const DEFINING_WORLD_PLAZA_ENTITY_BUFF_REGISTRY: Record<
     {
       id: 'broken-ankle-debuff',
       label: 'Broken Ankle',
-      description:
-        'The joint will not hold. Walk slower; cannot jump or roll.',
+      description: 'The joint will not hold. Walk slower; cannot jump or roll.',
       polarity: 'debuff',
       category: 'character',
       durationKind: 'toggle',

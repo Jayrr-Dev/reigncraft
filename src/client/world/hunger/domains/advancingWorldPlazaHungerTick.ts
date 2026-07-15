@@ -81,7 +81,8 @@ function resolvingActivityDrainMultiplier(
 /**
  * Advances hunger by one frame: accrues activity/metabolism drain, applies
  * discrete step drops when enough has accrued, then rolls a starvation damage
- * tick once hunger hits zero. Damage scales up each in-game hour without food.
+ * tick once hunger hits zero. Damage doubles each in-game hour without food
+ * (continuous fractional ramp).
  *
  * @param params - Previous state, frame delta, and activity/metabolism inputs.
  */

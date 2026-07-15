@@ -1,23 +1,21 @@
 import { resolvingWorldPlazaHerbariumDiscoveryStorageKey } from '@/components/world/domains/definingWorldPlazaHerbariumDiscoveryConstants';
 import type { DefiningWorldPlazaTreeVariantKind } from '@/components/world/domains/definingWorldPlazaTreeConstants';
-import { DEFINING_WORLD_PLAZA_MUSHROOM_SPECIES_IDS } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
 import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
+import { DEFINING_WORLD_PLAZA_MUSHROOM_SPECIES_IDS } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
 import type { WorldCloverSearchLootKind } from '../../../shared/worldCloverSearchLoot';
 import type { WorldFlowerSpeciesId } from '../../../shared/worldFlowerRarity';
 import { WORLD_FLOWER_SPECIES_RARITY_REGISTRY } from '../../../shared/worldFlowerRarity';
 import type { WorldShrubBerryLootKind } from '../../../shared/worldShrubBerryLoot';
+import { WORLD_SHRUB_BERRY_LOOT_REGISTRY } from '../../../shared/worldShrubBerryLoot';
 
 const DEFINING_WORLD_PLAZA_HERBARIUM_CLOVER_KIND_SET = new Set<string>([
   'three_leaf',
   'four_leaf',
 ]);
 
-const DEFINING_WORLD_PLAZA_HERBARIUM_BERRY_LOOT_KIND_SET = new Set<string>([
-  'red_berry',
-  'blue_berry',
-  'golden_berry',
-  'tea_leaves',
-]);
+const DEFINING_WORLD_PLAZA_HERBARIUM_BERRY_LOOT_KIND_SET = new Set<string>(
+  WORLD_SHRUB_BERRY_LOOT_REGISTRY.map((entry) => entry.itemKind)
+);
 
 const DEFINING_WORLD_PLAZA_HERBARIUM_MUSHROOM_SPECIES_ID_SET = new Set<string>(
   DEFINING_WORLD_PLAZA_MUSHROOM_SPECIES_IDS

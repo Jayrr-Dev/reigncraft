@@ -3150,6 +3150,154 @@ video {
     0 18px 40px rgba(0, 0, 0, 0.55);
 }
 
+/* Per-volume cover accents (Book I–VI). */
+.lore-book-cover[data-theme='lands'] {
+  background:
+    radial-gradient(
+      ellipse at 28% 18%,
+      rgba(120, 160, 90, 0.18),
+      transparent 55%
+    ),
+    linear-gradient(160deg, #2f3a24 0%, #24301c 55%, #1a2214 100%);
+  border-color: #c4a35a;
+}
+
+.lore-book-cover[data-theme='founder'] {
+  background:
+    radial-gradient(
+      ellipse at 30% 16%,
+      rgba(244, 211, 94, 0.2),
+      transparent 55%
+    ),
+    linear-gradient(160deg, #4a3518 0%, #342410 55%, #24180c 100%);
+  border-color: #e0b84a;
+}
+
+.lore-book-cover[data-theme='climb'] {
+  background:
+    radial-gradient(
+      ellipse at 32% 18%,
+      rgba(160, 110, 210, 0.22),
+      transparent 55%
+    ),
+    linear-gradient(160deg, #2e1f3a 0%, #22162c 55%, #181020 100%);
+  border-color: #b48ad4;
+}
+
+.lore-book-cover[data-theme='road'] {
+  background:
+    radial-gradient(
+      ellipse at 30% 20%,
+      rgba(220, 120, 60, 0.2),
+      transparent 55%
+    ),
+    linear-gradient(160deg, #3d2818 0%, #2c1c12 55%, #1e140e 100%);
+  border-color: #d4894a;
+}
+
+.lore-book-cover[data-theme='crown'] {
+  background:
+    radial-gradient(
+      ellipse at 30% 18%,
+      rgba(80, 140, 160, 0.2),
+      transparent 55%
+    ),
+    linear-gradient(160deg, #1e3340 0%, #162832 55%, #101c24 100%);
+  border-color: #d4b56a;
+}
+
+.lore-book-cover[data-theme='edges'] {
+  background:
+    radial-gradient(
+      ellipse at 22% 20%,
+      rgba(200, 70, 40, 0.18),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 78% 70%,
+      rgba(90, 160, 200, 0.14),
+      transparent 45%
+    ),
+    linear-gradient(160deg, #2a2224 0%, #1c181c 55%, #141214 100%);
+  border-color: #a87868;
+}
+
+/* Shelf volume cards: parchment row with themed spine accent. */
+.lore-book-shelf-spine {
+  border-color: rgba(44, 74, 82, 0.22);
+  background: rgba(255, 250, 230, 0.45);
+}
+
+.lore-book-shelf-spine:hover {
+  background: rgba(255, 250, 230, 0.75);
+}
+
+.lore-book-shelf-spine__icon {
+  border-color: rgba(44, 74, 82, 0.28);
+  background: rgba(255, 250, 230, 0.55);
+  color: #2c4a52;
+}
+
+.lore-book-shelf-spine[data-theme='lands'] {
+  border-left: 4px solid #6a8f4e;
+}
+
+.lore-book-shelf-spine[data-theme='lands'] .lore-book-shelf-spine__icon {
+  color: #4a6b34;
+  border-color: rgba(106, 143, 78, 0.45);
+  background: rgba(106, 143, 78, 0.12);
+}
+
+.lore-book-shelf-spine[data-theme='founder'] {
+  border-left: 4px solid #d4a24a;
+}
+
+.lore-book-shelf-spine[data-theme='founder'] .lore-book-shelf-spine__icon {
+  color: #a87820;
+  border-color: rgba(212, 162, 74, 0.5);
+  background: rgba(212, 162, 74, 0.14);
+}
+
+.lore-book-shelf-spine[data-theme='climb'] {
+  border-left: 4px solid #9b6ec4;
+}
+
+.lore-book-shelf-spine[data-theme='climb'] .lore-book-shelf-spine__icon {
+  color: #6e3f96;
+  border-color: rgba(155, 110, 196, 0.5);
+  background: rgba(155, 110, 196, 0.14);
+}
+
+.lore-book-shelf-spine[data-theme='road'] {
+  border-left: 4px solid #c86a32;
+}
+
+.lore-book-shelf-spine[data-theme='road'] .lore-book-shelf-spine__icon {
+  color: #9a4a1e;
+  border-color: rgba(200, 106, 50, 0.5);
+  background: rgba(200, 106, 50, 0.14);
+}
+
+.lore-book-shelf-spine[data-theme='crown'] {
+  border-left: 4px solid #3f7f94;
+}
+
+.lore-book-shelf-spine[data-theme='crown'] .lore-book-shelf-spine__icon {
+  color: #2c5f70;
+  border-color: rgba(63, 127, 148, 0.5);
+  background: rgba(63, 127, 148, 0.14);
+}
+
+.lore-book-shelf-spine[data-theme='edges'] {
+  border-left: 4px solid #a85a48;
+}
+
+.lore-book-shelf-spine[data-theme='edges'] .lore-book-shelf-spine__icon {
+  color: #7a3a30;
+  border-color: rgba(168, 90, 72, 0.5);
+  background: rgba(168, 90, 72, 0.14);
+}
+
 /* Warm candle glow that breathes behind the pages. */
 .lore-book-cover::before {
   content: '';

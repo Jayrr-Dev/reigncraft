@@ -11,6 +11,7 @@ import { RenderingPlazaHerbariumMushroomPortrait } from '@/components/home/compo
 import { RenderingPlazaHerbariumTreePortrait } from '@/components/home/components/renderingPlazaHerbariumTreePortrait';
 import type { PlazaCodexStudyTrackId } from '@/components/home/domains/definingPlazaCodexStudyTrackRegistry';
 import { DEFINING_PLAZA_HERBARIUM_BERRY_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumBerryPortraitConstants';
+import { checkingPlazaHerbariumBerryIsLeavesCategory } from '@/components/home/domains/definingPlazaHerbariumCategoryFilter';
 import { DEFINING_PLAZA_HERBARIUM_CLOVER_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumCloverPortraitConstants';
 import { DEFINING_PLAZA_HERBARIUM_FLOWER_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumFlowerPortraitConstants';
 import { DEFINING_PLAZA_HERBARIUM_MUSHROOM_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumMushroomPortraitConstants';
@@ -65,7 +66,9 @@ function labelingPlazaHerbariumPropertiesCellTitle(
   }
 
   if (entry.kind === 'berry') {
-    return entry.berryLootKind === 'tea_leaves' ? 'Gathered' : 'Eaten';
+    return checkingPlazaHerbariumBerryIsLeavesCategory(entry.berryLootKind)
+      ? 'Gathered'
+      : 'Eaten';
   }
 
   if (entry.kind === 'mushroom') {

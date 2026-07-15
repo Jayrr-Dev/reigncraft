@@ -1,10 +1,16 @@
+import {
+  DEFINING_WORLD_PLAZA_FORAGE_LOOT_KIND_TO_ITEM_TYPE_ID,
+  resolvingWorldPlazaForageItemTypeIdFromLootKind,
+} from '@/components/world/inventory/domains/definingWorldPlazaForageLootKindMapping';
+import { resolvingWorldPlazaInventoryExtendedBerrySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryExtendedBerrySpriteSheetConstants';
+import { resolvingWorldPlazaInventoryExtendedLeafSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryExtendedLeafSpriteSheetConstants';
 import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_BLUE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_GOLDEN,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { resolvingWorldPlazaInventoryTeaLeavesSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryTeaLeavesSpriteSheetConstants';
 import type { WorldShrubBerryLootKind } from '../../../../shared/worldShrubBerryLoot';
 
 /**
@@ -34,29 +40,17 @@ const DEFINING_WORLD_PLAZA_INVENTORY_BERRY_SPRITE_INDEX_BY_TYPE_ID = new Map<
   )
 );
 
-/**
- * Maps every shrub loot kind to its inventory item type id.
- *
- * Tea leaves live on a separate 1×1 sprite sheet (see
- * `definingWorldPlazaInventoryTeaLeavesSpriteSheetConstants`); this map only
- * resolves the item type id, not the icon crop.
- */
-export const DEFINING_WORLD_PLAZA_BERRY_LOOT_KIND_TO_ITEM_TYPE_ID: Record<
-  WorldShrubBerryLootKind,
-  | (typeof DEFINING_WORLD_PLAZA_INVENTORY_BERRY_SPRITE_SHEET_TYPE_IDS)[number]
-  | typeof DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES
-> = {
-  red_berry: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED,
-  blue_berry: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_BLUE,
-  golden_berry: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_GOLDEN,
-  tea_leaves: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES,
-};
+/** @deprecated Use DEFINING_WORLD_PLAZA_FORAGE_LOOT_KIND_TO_ITEM_TYPE_ID */
+export const DEFINING_WORLD_PLAZA_BERRY_LOOT_KIND_TO_ITEM_TYPE_ID =
+  DEFINING_WORLD_PLAZA_FORAGE_LOOT_KIND_TO_ITEM_TYPE_ID;
 
 export function resolvingWorldPlazaInventoryBerrySpriteSheetIcon(
   itemTypeId: string
 ): DefiningWorldPlazaInventorySpriteSheetIcon | null {
   const sheetIndex =
-    DEFINING_WORLD_PLAZA_INVENTORY_BERRY_SPRITE_INDEX_BY_TYPE_ID.get(itemTypeId);
+    DEFINING_WORLD_PLAZA_INVENTORY_BERRY_SPRITE_INDEX_BY_TYPE_ID.get(
+      itemTypeId
+    );
 
   if (sheetIndex === undefined) {
     return null;
@@ -77,8 +71,20 @@ export function resolvingWorldPlazaInventoryBerrySpriteSheetIcon(
   };
 }
 
+/** Resolves icon from legacy berry, extended berry, extended leaf, or tea sheets. */
+export function resolvingWorldPlazaInventoryForageSpriteSheetIcon(
+  itemTypeId: string
+): DefiningWorldPlazaInventorySpriteSheetIcon | null {
+  return (
+    resolvingWorldPlazaInventoryBerrySpriteSheetIcon(itemTypeId) ??
+    resolvingWorldPlazaInventoryExtendedBerrySpriteSheetIcon(itemTypeId) ??
+    resolvingWorldPlazaInventoryExtendedLeafSpriteSheetIcon(itemTypeId) ??
+    resolvingWorldPlazaInventoryTeaLeavesSpriteSheetIcon(itemTypeId)
+  );
+}
+
 export function resolvingWorldPlazaBerryItemTypeIdFromLootKind(
   lootKind: WorldShrubBerryLootKind
 ): string {
-  return DEFINING_WORLD_PLAZA_BERRY_LOOT_KIND_TO_ITEM_TYPE_ID[lootKind];
+  return resolvingWorldPlazaForageItemTypeIdFromLootKind(lootKind);
 }

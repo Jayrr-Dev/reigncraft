@@ -55,6 +55,7 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryThemeConstants';
 import { handlingWorldPlazaInventoryBagAwareDragEnd } from '@/components/world/inventory/domains/handlingWorldPlazaInventoryBagAwareDragEnd';
 import { resolvingWorldPlazaInventoryBagHotbarSlotIndexFromOverId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagHotbarSlotIndexFromOverId';
+import { resolvingWorldPlazaInventoryDropLocationFromOverId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryDropLocationFromOverId';
 import { resolvingWorldPlazaInventoryHotbarDeviceScale } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarDeviceScale';
 import { resolvingWorldPlazaInventoryHotbarViewportStyles } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryHotbarViewportStyles';
 import { resolvingWorldPlazaInventoryRetainedDragSlotIndices } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryRetainedDragSlotIndices';
@@ -64,6 +65,9 @@ import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usi
 import { usingWorldPlazaInventoryStoragePageDragHover } from '@/components/world/inventory/hooks/usingWorldPlazaInventoryStoragePageDragHover';
 import { usingWorldPlazaInventoryStoragePageWheel } from '@/components/world/inventory/hooks/usingWorldPlazaInventoryStoragePageWheel';
 import { DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
+import { RenderingWorldPlazaStorageChestPopover } from '@/components/world/storage-chest/components/renderingWorldPlazaStorageChestPopover';
+import type { DefiningWorldPlazaStorageChestDragLocation } from '@/components/world/storage-chest/domains/applyingWorldPlazaStorageChestTransfer';
+import { parsingWorldPlazaStorageChestSlotDroppableId } from '@/components/world/storage-chest/domains/definingWorldPlazaStorageChestDndIds';
 import { RenderingWorldPlazaTeaBrewingPopover } from '@/components/world/tea-brewing/components/renderingWorldPlazaTeaBrewingPopover';
 import { checkingWorldPlazaInventoryHasBrewedTeaPot } from '@/components/world/tea-brewing/domains/brewingWorldPlazaTeaPotAtCampfire';
 import { parsingWorldPlazaTeaBrewingSlotDroppableId } from '@/components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingDndIds';
@@ -92,6 +96,19 @@ export type RenderingWorldPlazaInventoryOreSmeltingStation = {
     inventorySlotIndex: number,
     slotKind: DefiningWorldPlazaOreSmeltingStationSlotKind
   ) => void;
+};
+
+export type RenderingWorldPlazaInventoryStorageChest = {
+  readonly blockId: string;
+  readonly contents: DefiningInventoryState;
+  readonly onClose: () => void;
+  readonly applyingDragTransfer: (
+    from: DefiningWorldPlazaStorageChestDragLocation,
+    to: DefiningWorldPlazaStorageChestDragLocation
+  ) => boolean;
+  readonly resolvingDragLocationForItemId: (
+    itemInstanceId: string
+  ) => DefiningWorldPlazaStorageChestDragLocation | null;
 };
 
 /** Props for {@link RenderingWorldPlazaInventoryHotbar}. */
@@ -155,6 +172,8 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
    * oreSmeltingStation). Gates Refine / Add Fuel action tower buttons.
    */
   readonly isNearOreSmeltingStation?: boolean;
+  /** Open craftable storage chest rendered inside the inventory DnD context. */
+  readonly storageChest?: RenderingWorldPlazaInventoryStorageChest | null;
 }
 
 type RenderingWorldPlazaInventoryHotbarInventoryShellProps = {
@@ -200,6 +219,7 @@ type RenderingWorldPlazaInventoryHotbarInventoryShellProps = {
   readonly playerEffectiveMaxHealth?: number;
   readonly oreSmeltingStation?: RenderingWorldPlazaInventoryOreSmeltingStation | null;
   readonly isOreSmeltingStationReachable?: boolean;
+  readonly storageChest?: RenderingWorldPlazaInventoryStorageChest | null;
 };
 
 /**
@@ -241,6 +261,7 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
     playerEffectiveMaxHealth,
     oreSmeltingStation,
     isOreSmeltingStationReachable = false,
+    storageChest = null,
   }: RenderingWorldPlazaInventoryHotbarInventoryShellProps): React.JSX.Element {
     const viewportStyles = useMemo(
       () => resolvingWorldPlazaInventoryHotbarViewportStyles(viewportHudScale),
@@ -458,6 +479,13 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
                       onCollectOutput={oreSmeltingStation.onCollectOutput}
                     />
                   ) : null}
+                  {storageChest ? (
+                    <RenderingWorldPlazaStorageChestPopover
+                      blockId={storageChest.blockId}
+                      contents={storageChest.contents}
+                      onClose={storageChest.onClose}
+                    />
+                  ) : null}
                   {openTeaPotIngredientSlots ? (
                     <RenderingWorldPlazaTeaBrewingPopover
                       ingredientSlots={openTeaPotIngredientSlots}
@@ -514,6 +542,7 @@ export function RenderingWorldPlazaInventoryHotbar({
   playerEffectiveMaxHealth,
   oreSmeltingStation = null,
   isNearOreSmeltingStation = false,
+  storageChest = null,
 }: RenderingWorldPlazaInventoryHotbarProps): React.JSX.Element {
   const { state, isLoading, handleDragEnd, moveItem, removeItem, updateState } =
     usingWorldPlazaInventory({
@@ -654,8 +683,9 @@ export function RenderingWorldPlazaInventoryHotbar({
   const handlingInventoryDragEnd = useCallback(
     (event: DragEndEvent): void => {
       const inventoryState = stateRef.current;
-      const smeltingSlotKind = event.over
-        ? parsingWorldPlazaOreSmeltingSlotDroppableId(String(event.over.id))
+      const overId = event.over ? String(event.over.id) : null;
+      const smeltingSlotKind = overId
+        ? parsingWorldPlazaOreSmeltingSlotDroppableId(overId)
         : null;
 
       if (smeltingSlotKind && oreSmeltingStation) {
@@ -677,8 +707,71 @@ export function RenderingWorldPlazaInventoryHotbar({
         return;
       }
 
-      const teaBrewingSlotIndex = event.over
-        ? parsingWorldPlazaTeaBrewingSlotDroppableId(String(event.over.id))
+      const storageChestSlot = overId
+        ? parsingWorldPlazaStorageChestSlotDroppableId(overId)
+        : null;
+      const activeItemId = parsingInventoryItemDraggableId(
+        String(event.active.id)
+      );
+
+      if (storageChest && activeItemId) {
+        const fromChestLocation =
+          storageChest.resolvingDragLocationForItemId(activeItemId);
+        const fromInventoryLocation =
+          resolvingWorldPlazaInventoryDragLocationForItemId(
+            inventoryState,
+            activeItemId,
+            DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+          );
+        const fromLocation: DefiningWorldPlazaStorageChestDragLocation | null =
+          fromChestLocation?.kind === 'storage-chest'
+            ? fromChestLocation
+            : fromInventoryLocation?.kind === 'hotbar'
+              ? {
+                  kind: 'hotbar',
+                  slotIndex: fromInventoryLocation.slotIndex,
+                }
+              : null;
+
+        if (fromLocation) {
+          let toLocation: DefiningWorldPlazaStorageChestDragLocation | null =
+            null;
+
+          if (storageChestSlot) {
+            toLocation = {
+              kind: 'storage-chest',
+              blockId: storageChestSlot.blockId,
+              slotIndex: storageChestSlot.slotIndex,
+            };
+          } else if (overId) {
+            const inventoryDrop =
+              resolvingWorldPlazaInventoryDropLocationFromOverId(
+                overId,
+                inventoryState,
+                DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+              );
+
+            if (inventoryDrop?.kind === 'hotbar') {
+              toLocation = {
+                kind: 'hotbar',
+                slotIndex: inventoryDrop.slotIndex,
+              };
+            }
+          }
+
+          if (
+            toLocation &&
+            (fromLocation.kind === 'storage-chest' ||
+              toLocation.kind === 'storage-chest')
+          ) {
+            storageChest.applyingDragTransfer(fromLocation, toLocation);
+            return;
+          }
+        }
+      }
+
+      const teaBrewingSlotIndex = overId
+        ? parsingWorldPlazaTeaBrewingSlotDroppableId(overId)
         : null;
 
       if (
@@ -764,17 +857,44 @@ export function RenderingWorldPlazaInventoryHotbar({
 
       handleDragEnd(event);
     },
-    [handleDragEnd, moveItem, oreSmeltingStation, removeItem, updateState]
+    [
+      handleDragEnd,
+      moveItem,
+      oreSmeltingStation,
+      removeItem,
+      storageChest,
+      updateState,
+    ]
   );
 
   const resolvingDraggedItemById = useCallback(
-    (itemId: string, inventoryState: DefiningInventoryState) =>
-      resolvingWorldPlazaInventoryDraggedItemById(
+    (itemId: string, inventoryState: DefiningInventoryState) => {
+      const fromInventory = resolvingWorldPlazaInventoryDraggedItemById(
         inventoryState,
         itemId,
         DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
-      ),
-    []
+      );
+
+      if (fromInventory) {
+        return fromInventory;
+      }
+
+      if (!storageChest) {
+        return null;
+      }
+
+      const chestSlotIndex = resolvingInventoryItemSlotIndex(
+        storageChest.contents,
+        itemId
+      );
+
+      if (chestSlotIndex === null) {
+        return null;
+      }
+
+      return storageChest.contents.slots[chestSlotIndex] ?? null;
+    },
+    [storageChest]
   );
 
   const handlingDropHotbarSlot = useCallback(
@@ -902,6 +1022,7 @@ export function RenderingWorldPlazaInventoryHotbar({
           isOreSmeltingStationReachable={
             Boolean(oreSmeltingStation) || isNearOreSmeltingStation
           }
+          storageChest={storageChest}
         />
       </div>
     </ProvidingWorldPlazaViewportHudScale>

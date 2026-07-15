@@ -13,6 +13,7 @@ import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CHEST_KEY } from '@/components
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
+import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
 
 export type GrantingWorldPlazaChestKeyToInventoryResult = {
   readonly state: DefiningInventoryState;
@@ -57,6 +58,7 @@ export function grantingWorldPlazaChestKeyToInventory(
     itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CHEST_KEY,
     quantity: addResult.quantityAccepted,
   });
+  playingWildlifeStudySfx({ sectionId: 'key' });
 
   return {
     state: addResult.state,

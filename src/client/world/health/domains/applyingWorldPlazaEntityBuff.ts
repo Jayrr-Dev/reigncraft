@@ -43,9 +43,9 @@ import {
   removingWorldPlazaEntityHealthPhysicalDamageLifestealModifier,
   removingWorldPlazaEntityHealthSleepEffect,
   removingWorldPlazaEntityHealthStunEffect,
+  togglingWorldPlazaEntityBleedImmunity,
   togglingWorldPlazaEntityColdComfortBonus,
   togglingWorldPlazaEntityColdImmunity,
-  togglingWorldPlazaEntityBleedImmunity,
   togglingWorldPlazaEntityDeathImmunity,
   togglingWorldPlazaEntityFatedImmunity,
   togglingWorldPlazaEntityHealthInvincible,
@@ -274,6 +274,7 @@ function applyingWorldPlazaEntityBuffDescriptor(
     return addingWorldPlazaEntityHealthIncomingDamageModifier(state, {
       id: descriptor.id,
       multiplier: effect.multiplier,
+      damageKinds: effect.damageKinds,
       expiresAtMs:
         descriptor.durationKind === 'timed' && descriptor.durationMs !== null
           ? nowMs + descriptor.durationMs
@@ -421,8 +422,7 @@ function applyingWorldPlazaEntityBuffDescriptor(
 
   if (effect.kind === 'heat_tolerance') {
     if (descriptor.durationKind === 'timed' && descriptor.durationMs !== null) {
-      const durationMs =
-        context.durationMsOverride ?? descriptor.durationMs;
+      const durationMs = context.durationMsOverride ?? descriptor.durationMs;
 
       return addingWorldPlazaEntityHealthTimedTemperatureModifier(
         state,
@@ -445,8 +445,7 @@ function applyingWorldPlazaEntityBuffDescriptor(
 
   if (effect.kind === 'cold_tolerance') {
     if (descriptor.durationKind === 'timed' && descriptor.durationMs !== null) {
-      const durationMs =
-        context.durationMsOverride ?? descriptor.durationMs;
+      const durationMs = context.durationMsOverride ?? descriptor.durationMs;
 
       return addingWorldPlazaEntityHealthTimedTemperatureModifier(
         state,

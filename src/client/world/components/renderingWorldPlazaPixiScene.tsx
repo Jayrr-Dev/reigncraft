@@ -74,6 +74,7 @@ import {
 import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import { DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
+  DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_CHEST_BASIC,
   DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BESSEMER_FORGE,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
@@ -535,6 +536,7 @@ import { usingWorldPlazaViewportHudScale } from '@/components/world/hooks/usingW
 import { usingWorldPlazaViewportProfileLayoutInputs } from '@/components/world/hooks/usingWorldPlazaViewportProfileLayoutInputs';
 import { usingWorldPlazaPlayerHunger } from '@/components/world/hunger/hooks/usingWorldPlazaPlayerHunger';
 import { checkingWorldPlazaInteractablePointerHoverTarget } from '@/components/world/interaction/domains/checkingWorldPlazaInteractablePointerHoverTarget';
+import { DEFINING_WORLD_PLAZA_INTERACTABLE_BLOCK_DEFAULT_PLAYER_RANGE_TILES } from '@/components/world/interaction/domains/definingWorldPlazaInteractableBlockClickActionRegistry';
 import {
   DEFINING_WORLD_PLAZA_CORPSE_POINTER_HOVER_CURSOR,
   DEFINING_WORLD_PLAZA_INTERACTABLE_POINTER_DEFAULT_CURSOR,
@@ -569,6 +571,7 @@ import { RenderingWorldPlazaInventoryBagSfx } from '@/components/world/inventory
 import { RenderingWorldPlazaInventoryDropItemOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropItemOverlay';
 import { RenderingWorldPlazaInventoryDropTileOutlinePreview } from '@/components/world/inventory/components/renderingWorldPlazaInventoryDropTileOutlinePreview';
 import { RenderingWorldPlazaInventoryFoodEatOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventoryFoodEatOverlay';
+import type { RenderingWorldPlazaInventoryStorageChest } from '@/components/world/inventory/components/renderingWorldPlazaInventoryHotbar';
 import { RenderingWorldPlazaInventoryHotbar } from '@/components/world/inventory/components/renderingWorldPlazaInventoryHotbar';
 import { RenderingWorldPlazaInventorySpecimenStudyOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventorySpecimenStudyOverlay';
 import { applyingWorldPlazaInventorySlotActiveEnchantmentUse } from '@/components/world/inventory/domains/applyingWorldPlazaInventorySlotActiveEnchantmentUse';
@@ -664,6 +667,7 @@ import type { WildlifePetSpritcoreUpgradeLaneId } from '@/components/world/sprit
 import { WORLD_PLAZA_SPRITCORE_UPGRADE_EMPTY_BONUSES } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
 import { initializingWorldPlazaSpritcoreUpgradeStore } from '@/components/world/spritcore/domains/managingWorldPlazaSpritcoreUpgradeStore';
 import { usingWorldPlazaSpritcoreUpgradeBonuses } from '@/components/world/spritcore/hooks/usingWorldPlazaSpritcoreUpgradeBonuses';
+import { usingWorldPlazaStorageChest } from '@/components/world/storage-chest/hooks/usingWorldPlazaStorageChest';
 import { RenderingWorldPlazaTeaPotAddWaterInteractionLabels } from '@/components/world/tea-brewing/components/renderingWorldPlazaTeaPotAddWaterInteractionLabels';
 import {
   brewingWorldPlazaTeaPotAtCampfire,
@@ -1942,6 +1946,63 @@ function RenderingWorldPlazaPixiSceneConnected({
     addingItemWithStacking: addItemWithStacking,
     showingToast: showingGameplayHudToast,
   });
+  const storageChestSession = usingWorldPlazaStorageChest({
+    persistenceOwnerId: localPersistenceOwnerId ?? onlineUserId,
+    inventoryState,
+    updatingInventoryState,
+  });
+  const selectingStorageChest = useCallback(
+    (block: DefiningWorldBuildingPlacedBlock): void => {
+      storageChestSession.selectingChest(block);
+      selectingHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS);
+    },
+    [selectingHudToolbarMode, storageChestSession.selectingChest]
+  );
+  useEffect(() => {
+    if (!storageChestSession.selectedBlock) {
+      return;
+    }
+
+    let isActive = true;
+    const unsubscribe = subscribingWorldPlazaDomOverlayFrame(() => {
+      if (!isActive) {
+        return;
+      }
+
+      const selected = storageChestSession.selectedBlock;
+      const player = playerPositionRef.current;
+      if (!selected || !player) {
+        return;
+      }
+
+      const dx = player.x - (selected.tilePosition.tileX + 0.5);
+      const dy = player.y - (selected.tilePosition.tileY + 0.5);
+      if (
+        Math.hypot(dx, dy) >
+        DEFINING_WORLD_PLAZA_INTERACTABLE_BLOCK_DEFAULT_PLAYER_RANGE_TILES +
+          0.35
+      ) {
+        storageChestSession.closingChest();
+      }
+    });
+
+    return () => {
+      isActive = false;
+      unsubscribe();
+    };
+  }, [storageChestSession.closingChest, storageChestSession.selectedBlock]);
+  const storageChestHotbar: RenderingWorldPlazaInventoryStorageChest | null =
+    storageChestSession.selectedBlock &&
+    storageChestSession.selectedChestContents
+      ? {
+          blockId: storageChestSession.selectedBlock.blockId,
+          contents: storageChestSession.selectedChestContents,
+          onClose: storageChestSession.closingChest,
+          applyingDragTransfer: storageChestSession.applyingDragTransfer,
+          resolvingDragLocationForItemId:
+            storageChestSession.resolvingDragLocationForItemId,
+        }
+      : null;
   const oreSmeltingPlacedBlocksRef = useRef(activeScenePlacedBlocks);
   oreSmeltingPlacedBlocksRef.current = activeScenePlacedBlocks;
   const selectedOreSmeltingStationBlockRef = useRef(
@@ -3110,6 +3171,8 @@ function RenderingWorldPlazaPixiSceneConnected({
           selectingOreSmeltingStationForInteractionLabel,
         [DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK]:
           selectingTreeForInteractionLabel,
+        [DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_CHEST_BASIC]:
+          selectingStorageChest,
       },
     });
 
@@ -9851,6 +9914,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                         isNearOreSmeltingStation={
                           oreSmeltingStationReachability.isNearOreSmeltingStation
                         }
+                        storageChest={storageChestHotbar}
                       />
                     ) : null}
                     {hudToolbarMode ===
@@ -10075,6 +10139,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                         isNearOreSmeltingStation={
                           oreSmeltingStationReachability.isNearOreSmeltingStation
                         }
+                        storageChest={storageChestHotbar}
                       />
                     ) : null}
                     {hudToolbarMode ===

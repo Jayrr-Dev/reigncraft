@@ -4,6 +4,8 @@
  * @module components/home/domains/definingPlazaHerbariumCategoryFilter
  */
 
+import { DEFINING_WORLD_PLAZA_FORAGE_LEAF_LOOT_KINDS } from '@/components/world/inventory/domains/definingWorldPlazaForageLootKindMapping';
+
 /** Panel tab ids for Herbarium flora groups. */
 export type PlazaHerbariumCategoryFilterId =
   | 'all'
@@ -27,9 +29,8 @@ export const DEFINING_PLAZA_HERBARIUM_CATEGORY_FILTERS: readonly {
 ] as const;
 
 /** Berry loot kinds that live under the Leaves tab with clovers. */
-export const DEFINING_PLAZA_HERBARIUM_LEAVES_BERRY_LOOT_KINDS = [
-  'tea_leaves',
-] as const;
+export const DEFINING_PLAZA_HERBARIUM_LEAVES_BERRY_LOOT_KINDS =
+  DEFINING_WORLD_PLAZA_FORAGE_LEAF_LOOT_KINDS;
 
 export type PlazaHerbariumLeavesBerryLootKind =
   (typeof DEFINING_PLAZA_HERBARIUM_LEAVES_BERRY_LOOT_KINDS)[number];

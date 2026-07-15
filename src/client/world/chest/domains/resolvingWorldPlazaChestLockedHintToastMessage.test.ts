@@ -19,7 +19,7 @@ function creatingChestInstance(
     state: 'locked',
     loot: { kind: 'pool', poolId: 'starter-forage' },
     collisionRadiusGrid: 0.28,
-    displayScale: 0.68,
+    displayScale: 0.4,
     ...overrides,
   };
 }

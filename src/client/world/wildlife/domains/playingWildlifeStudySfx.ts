@@ -2,13 +2,22 @@
  * @module components/world/wildlife/domains/playingWildlifeStudySfx
  */
 
-type PlayingWildlifeStudySfxHandler = () => void;
+import type { DefiningWildlifeStudySfxSectionId } from '@/components/world/wildlife/domains/definingWildlifeStudySfxConstants';
+
+export type PlayingWildlifeStudySfxRequest = {
+  /** Reward / learn section; defaults to study completion volume. */
+  readonly sectionId?: DefiningWildlifeStudySfxSectionId;
+};
+
+type PlayingWildlifeStudySfxHandler = (
+  request: PlayingWildlifeStudySfxRequest
+) => void;
 
 let playingWildlifeStudySfxHandler: PlayingWildlifeStudySfxHandler | null =
   null;
 
 /**
- * Registers study-complete playback from {@link usingWildlifeStudySfx}.
+ * Registers study / reward playback from {@link usingWildlifeStudySfx}.
  */
 export function registeringWildlifeStudySfxPlayback(
   handler: PlayingWildlifeStudySfxHandler
@@ -23,8 +32,10 @@ export function registeringWildlifeStudySfxPlayback(
 }
 
 /**
- * Plays the Fantasy UI clip when a corpse Study channel completes.
+ * Plays the Fantasy UI study clip for study completion or a reward grant.
  */
-export function playingWildlifeStudySfx(): void {
-  playingWildlifeStudySfxHandler?.();
+export function playingWildlifeStudySfx(
+  request: PlayingWildlifeStudySfxRequest = {}
+): void {
+  playingWildlifeStudySfxHandler?.(request);
 }

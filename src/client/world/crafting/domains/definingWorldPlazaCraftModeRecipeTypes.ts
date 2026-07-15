@@ -19,6 +19,7 @@ import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/wo
 /** Stable ids for craft-mode recipes. */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID = {
   CAMPFIRE: 'recipe-campfire',
+  STORAGE_CHEST: 'recipe-storage-chest',
   ANVIL: 'recipe-anvil',
   BLOOMERY: 'recipe-bloomery',
   BESSEMER_FORGE: 'recipe-bessemer-forge',

@@ -11,11 +11,18 @@ import type {
 import { formattingWorldPlazaChestSpriteUrl } from '@/components/world/chest/domains/formattingWorldPlazaChestSpriteUrl';
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME } from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
 
-/** Default display scale relative to one isometric tile width. */
-export const DEFINING_WORLD_PLAZA_CHEST_DISPLAY_SCALE = 0.68;
+/**
+ * Default display scale relative to one isometric tile width.
+ * Tuned as a personal loot chest (about knee-to-waist vs the player);
+ * anvil sits at 0.52 for waist-high comparison.
+ */
+export const DEFINING_WORLD_PLAZA_CHEST_DISPLAY_SCALE = 0.4;
+
+/** Optional large prop scale (old default) for hand placements that want a bulkier chest. */
+export const DEFINING_WORLD_PLAZA_CHEST_DISPLAY_SCALE_LARGE = 0.68;
 
 /** Default circle collision radius in grid units. */
-export const DEFINING_WORLD_PLAZA_CHEST_COLLISION_RADIUS_GRID = 0.28;
+export const DEFINING_WORLD_PLAZA_CHEST_COLLISION_RADIUS_GRID = 0.16;
 
 /** Max Euclidean distance from player to chest for Open. */
 export const DEFINING_WORLD_PLAZA_CHEST_INTERACT_REACH_GRID = 2;

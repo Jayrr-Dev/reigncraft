@@ -104,7 +104,9 @@ export function resolvingWorldPlazaInventoryFoodEatDurationMs(options: {
     itemTypeId === 'world-plaza-berry-red' ||
     itemTypeId === 'world-plaza-berry-blue' ||
     itemTypeId === 'world-plaza-berry-golden' ||
-    itemTypeId === 'world-plaza-tea-leaves'
+    itemTypeId === 'world-plaza-tea-leaves' ||
+    itemTypeId.startsWith('world-plaza-berry-') ||
+    itemTypeId.startsWith('world-plaza-leaf-')
   ) {
     return DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_BERRIES;
   }

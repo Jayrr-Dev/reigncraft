@@ -53,7 +53,7 @@ export function listingWorldPlazaHungerPanelStatusLines(
   }
 
   if (effects.isHealthDraining) {
-    lines.push('Health draining');
+    lines.push('Health draining faster over time');
   }
 
   return lines;

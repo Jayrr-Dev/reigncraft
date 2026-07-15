@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { filteringPlazaRecipesGuideDisplayEntriesByCookbook } from '@/components/home/domains/filteringPlazaRecipesGuideDisplayEntriesByCookbook';
 import { resolvingPlazaRecipesGuideDisplayEntries } from '@/components/home/domains/resolvingPlazaRecipesGuideDisplayEntries';
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID } from '@/components/world/building/domains/definingWorldPlazaCraftModeCookbookRegistry';
+import { DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry';
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { resolvingWorldPlazaRecipeDiscoveryStorageKey } from '@/components/world/domains/definingWorldPlazaRecipeDiscoveryConstants';
 import {
@@ -144,10 +145,28 @@ describe('managingWorldPlazaRecipeDiscoveryStore', () => {
       DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.CERAMICS
     );
 
-    expect(survivalOnly).toHaveLength(25);
-    // Stations/traps/tubes (6) + tiered tool recipes (24).
-    expect(blacksmithOnly).toHaveLength(30);
-    expect(ceramicsOnly).toHaveLength(9);
+    const expectedSurvivalCount =
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY.filter(
+        (recipe) =>
+          recipe.cookbookId ===
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.SURVIVAL
+      ).length;
+    const expectedBlacksmithCount =
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY.filter(
+        (recipe) =>
+          recipe.cookbookId ===
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.BLACKSMITH
+      ).length;
+    const expectedCeramicsCount =
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY.filter(
+        (recipe) =>
+          recipe.cookbookId ===
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.CERAMICS
+      ).length;
+
+    expect(survivalOnly).toHaveLength(expectedSurvivalCount);
+    expect(blacksmithOnly).toHaveLength(expectedBlacksmithCount);
+    expect(ceramicsOnly).toHaveLength(expectedCeramicsCount);
     expect(blacksmithOnly.every((entry) => entry.isAttached === false)).toBe(
       true
     );

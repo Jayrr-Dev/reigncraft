@@ -1,7 +1,5 @@
+import { checkingPlazaHerbariumEntryMatchesCategoryFilter } from '@/components/home/domains/definingPlazaHerbariumCategoryFilter';
 import { describe, expect, it } from 'vitest';
-import {
-  checkingPlazaHerbariumEntryMatchesCategoryFilter,
-} from '@/components/home/domains/definingPlazaHerbariumCategoryFilter';
 
 describe('checkingPlazaHerbariumEntryMatchesCategoryFilter', () => {
   it('puts clovers and tea leaves under Leaves', () => {
@@ -13,7 +11,7 @@ describe('checkingPlazaHerbariumEntryMatchesCategoryFilter', () => {
     ).toBe(true);
     expect(
       checkingPlazaHerbariumEntryMatchesCategoryFilter(
-        { kind: 'berry', berryLootKind: 'tea_leaves' },
+        { kind: 'berry', berryLootKind: 'nettle' },
         'leaves'
       )
     ).toBe(true);

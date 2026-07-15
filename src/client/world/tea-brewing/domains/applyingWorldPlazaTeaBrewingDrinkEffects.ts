@@ -4,14 +4,15 @@
  * @module components/world/tea-brewing/domains/applyingWorldPlazaTeaBrewingDrinkEffects
  */
 
+import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
 import { resolvingWorldPlazaEntityBuffDescriptor } from '@/components/world/health/domains/definingWorldPlazaEntityBuffRegistry';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEAL_AMPLIFIER_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityHealAmplifierConstants';
 import { creatingWorldPlazaEntityHealthDamageRollPresetModifierId } from '@/components/world/health/domains/definingWorldPlazaEntityHealthDamageRollPresets';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
-import { computingWorldPlazaEntityHealthEffectiveMax } from '@/components/world/health/domains/computingWorldPlazaEntityHealthEffectiveMax';
 import {
   addingWorldPlazaEntityHealthDamageOverTime,
   addingWorldPlazaEntityHealthDamageRollModifier,
+  addingWorldPlazaEntityHealthIncomingDamageModifier,
   addingWorldPlazaEntityHealthMovementModifier,
   addingWorldPlazaEntityHealthOutgoingHealAmplifier,
   addingWorldPlazaEntityHealthSleepEffect,
@@ -20,9 +21,9 @@ import {
   removingWorldPlazaEntityHealthConfusionEffect,
   removingWorldPlazaEntityHealthMovementModifier,
 } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 import { creatingWorldPlazaEntityHealthTimedTemperatureModifier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthEffectiveTemperatureResistance';
 import { shorteningWorldPlazaEntityDiseaseRemainingDuration } from '@/components/world/health/domains/shorteningWorldPlazaEntityDiseaseRemainingDuration';
-import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 import type {
   DefiningWorldPlazaTeaBrewingConcentrationBonus,
   DefiningWorldPlazaTeaBrewingMetadata,
@@ -215,6 +216,19 @@ function applyingScalableEffect(
           }
         )
       );
+    }
+    case 'incoming_damage_multiplier': {
+      const scaledMultiplier = Math.max(
+        0,
+        1 - (1 - effect.baseMultiplier) * scaledPotency
+      );
+
+      return addingWorldPlazaEntityHealthIncomingDamageModifier(state, {
+        id: `tea-incoming-dmg:${effectId}`,
+        multiplier: scaledMultiplier,
+        damageKinds: effect.damageKinds,
+        expiresAtMs: nowMs + Math.max(durationMs, 1_000),
+      });
     }
     default:
       return state;

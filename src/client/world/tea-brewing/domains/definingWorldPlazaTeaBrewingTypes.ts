@@ -4,6 +4,8 @@
  * @module components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingTypes
  */
 
+import type { DefiningWorldPlazaEntityDamageKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+
 export type DefiningWorldPlazaTeaBrewingTraitCategory =
   | 'heal'
   | 'stamina'
@@ -65,6 +67,12 @@ export type DefiningWorldPlazaTeaBrewingScalableEffect =
   | {
       readonly kind: 'infection_resist';
       readonly chanceMultiplier: number;
+    }
+  | {
+      readonly kind: 'incoming_damage_multiplier';
+      readonly damageKinds: readonly DefiningWorldPlazaEntityDamageKind[];
+      /** Multiplier at potency 1 (e.g. 0.5 → half damage). */
+      readonly baseMultiplier: number;
     };
 
 export type DefiningWorldPlazaTeaBrewingTraitDefinition = {

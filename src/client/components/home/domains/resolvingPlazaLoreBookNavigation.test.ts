@@ -1,4 +1,5 @@
 import { DEFINING_PLAZA_LORE_BOOK_CHAPTERS } from '@/components/home/domains/definingPlazaLoreBookConstants';
+import { resolvingPlazaLoreBookById } from '@/components/home/domains/resolvingPlazaLoreBookDefinition';
 import {
   listingPlazaLoreBookPages,
   resolvingPlazaLoreBookAdjacentPage,
@@ -21,7 +22,7 @@ describe('plaza lore book navigation', () => {
     );
   });
 
-  it('keeps entry ids unique across the whole book', () => {
+  it('keeps entry ids unique across the whole corpus', () => {
     const pages = listingPlazaLoreBookPages();
     const uniqueIds = new Set(pages.map((page) => page.entry.id));
 
@@ -36,26 +37,41 @@ describe('plaza lore book navigation', () => {
     expect(resolvingPlazaLoreBookPageByEntryId('not-a-real-entry')).toBeNull();
   });
 
-  it('walks next and previous across chapter boundaries', () => {
-    const pages = listingPlazaLoreBookPages();
-    const lastOfFirstChapter =
-      DEFINING_PLAZA_LORE_BOOK_CHAPTERS[0]!.entries.at(-1)!;
-    const firstOfSecondChapter =
-      DEFINING_PLAZA_LORE_BOOK_CHAPTERS[1]!.entries[0]!;
+  it('walks next and previous across chapter boundaries within a volume', () => {
+    const roadBook = resolvingPlazaLoreBookById('book-iv-road');
+    expect(roadBook).not.toBeNull();
+    const chapters = roadBook!.chapters;
+    const pages = listingPlazaLoreBookPages(chapters);
+    const lastOfFirstChapter = chapters[0]!.entries.at(-1)!;
+    const firstOfSecondChapter = chapters[1]!.entries[0]!;
 
     expect(
-      resolvingPlazaLoreBookAdjacentPage(lastOfFirstChapter.id, 'next')?.entry
-        .id
+      resolvingPlazaLoreBookAdjacentPage(
+        lastOfFirstChapter.id,
+        'next',
+        chapters
+      )?.entry.id
     ).toBe(firstOfSecondChapter.id);
     expect(
-      resolvingPlazaLoreBookAdjacentPage(firstOfSecondChapter.id, 'previous')
-        ?.entry.id
+      resolvingPlazaLoreBookAdjacentPage(
+        firstOfSecondChapter.id,
+        'previous',
+        chapters
+      )?.entry.id
     ).toBe(lastOfFirstChapter.id);
     expect(
-      resolvingPlazaLoreBookAdjacentPage(pages[0]!.entry.id, 'previous')
+      resolvingPlazaLoreBookAdjacentPage(
+        pages[0]!.entry.id,
+        'previous',
+        chapters
+      )
     ).toBeNull();
     expect(
-      resolvingPlazaLoreBookAdjacentPage(pages.at(-1)!.entry.id, 'next')
+      resolvingPlazaLoreBookAdjacentPage(
+        pages.at(-1)!.entry.id,
+        'next',
+        chapters
+      )
     ).toBeNull();
   });
 

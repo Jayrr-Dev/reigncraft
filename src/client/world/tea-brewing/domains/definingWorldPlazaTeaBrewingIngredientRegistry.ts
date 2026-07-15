@@ -23,6 +23,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_YARROW,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { DEFINING_WORLD_PLAZA_TEA_BREWING_FORAGE_INGREDIENT_REGISTRY } from '@/components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingForageIngredientRegistry';
 import type { DefiningWorldPlazaTeaBrewingIngredientDefinition } from '@/components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingTypes';
 
 export const DEFINING_WORLD_PLAZA_TEA_BREWING_INGREDIENT_REGISTRY: readonly DefiningWorldPlazaTeaBrewingIngredientDefinition[] =
@@ -351,6 +352,7 @@ export const DEFINING_WORLD_PLAZA_TEA_BREWING_INGREDIENT_REGISTRY: readonly Defi
         },
       ],
     },
+    ...DEFINING_WORLD_PLAZA_TEA_BREWING_FORAGE_INGREDIENT_REGISTRY,
   ];
 
 const DEFINING_WORLD_PLAZA_TEA_BREWING_INGREDIENT_BY_TYPE_ID = new Map(

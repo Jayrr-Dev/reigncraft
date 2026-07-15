@@ -14,12 +14,12 @@ import {
 } from '@/components/home/domains/definingPlazaDefaultButtonSfxConstants';
 import {
   DEFINING_PLAZA_LORE_BOOK_SEALED_TITLE,
-  DEFINING_PLAZA_LORE_BOOK_SUBTITLE,
-  DEFINING_PLAZA_LORE_BOOK_TITLE,
+  DEFINING_PLAZA_LORE_BOOK_SHELF_BACK_LABEL,
   LABELING_PLAZA_LORE_BOOK_CHAPTER_LIST,
   type PlazaLoreBookEntry,
 } from '@/components/home/domains/definingPlazaLoreBookConstants';
 import { playingPlazaBookSfx } from '@/components/home/domains/playingPlazaBookSfx';
+import type { PlazaLoreBookResolved } from '@/components/home/domains/resolvingPlazaLoreBookDefinition';
 import { resolvingPlazaLoreBookIllustration } from '@/components/home/domains/resolvingPlazaLoreBookIllustration';
 import {
   listingPlazaLoreBookPages,
@@ -29,7 +29,7 @@ import {
   type PlazaLoreBookPage,
 } from '@/components/home/domains/resolvingPlazaLoreBookNavigation';
 import { Icon } from '@/components/ui/icon';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 const LORE_BOOK_HEADER_BUTTON_CLASS_NAME =
   'plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]';
@@ -176,30 +176,47 @@ function RenderingPlazaLoreBookEntryBody({
 
 /** Props for {@link RenderingPlazaLoreBookPanel}. */
 export type RenderingPlazaLoreBookPanelProps = {
+  book: PlazaLoreBookResolved;
   onClose?: () => void;
+  onBackToShelf?: () => void;
   className?: string;
 };
 
 /**
- * The Codex Lore book: chapters as a table of contents, entries as pages.
+ * One volume of the Codex Lore series: chapters as a table of contents,
+ * entries as pages. Cover title and theme come from the selected book.
  */
 export function RenderingPlazaLoreBookPanel({
+  book,
   onClose,
+  onBackToShelf,
   className = '',
 }: RenderingPlazaLoreBookPanelProps): React.JSX.Element {
-  const pages = useMemo(() => listingPlazaLoreBookPages(), []);
+  const chapters = book.chapters;
+  const pages = useMemo(() => listingPlazaLoreBookPages(chapters), [chapters]);
   const [activeEntryId, setActiveEntryId] = useState<string>(
     pages[0]?.entry.id ?? ''
   );
   const [isContentsOpenOnMobile, setIsContentsOpenOnMobile] = useState(true);
 
+  useEffect(() => {
+    setActiveEntryId(pages[0]?.entry.id ?? '');
+    setIsContentsOpenOnMobile(true);
+  }, [book.id, pages]);
+
   const activePage: PlazaLoreBookPage | null =
-    resolvingPlazaLoreBookPageByEntryId(activeEntryId) ?? pages[0] ?? null;
+    resolvingPlazaLoreBookPageByEntryId(activeEntryId, chapters) ??
+    pages[0] ??
+    null;
   const previousPage = activePage
-    ? resolvingPlazaLoreBookAdjacentPage(activePage.entry.id, 'previous')
+    ? resolvingPlazaLoreBookAdjacentPage(
+        activePage.entry.id,
+        'previous',
+        chapters
+      )
     : null;
   const nextPage = activePage
-    ? resolvingPlazaLoreBookAdjacentPage(activePage.entry.id, 'next')
+    ? resolvingPlazaLoreBookAdjacentPage(activePage.entry.id, 'next', chapters)
     : null;
 
   const turningLoreBookPage = (entryId: string): void => {
@@ -212,20 +229,19 @@ export function RenderingPlazaLoreBookPanel({
   };
 
   const openingLoreBookChapter = (chapterId: string): void => {
-    const firstEntryId = resolvingPlazaLoreBookChapterFirstEntryId(chapterId);
+    const firstEntryId = resolvingPlazaLoreBookChapterFirstEntryId(
+      chapterId,
+      chapters
+    );
 
     if (firstEntryId) {
       turningLoreBookPage(firstEntryId);
     }
   };
 
-  const chapters = useMemo(
-    () => [...new Set(pages.map((page) => page.chapter))],
-    [pages]
-  );
-
   return (
     <div
+      data-theme={book.themeId}
       className={`lore-book-cover plaza-pop-in flex h-[min(88dvh,42rem)] w-full max-w-4xl flex-col gap-3 overflow-hidden rounded-lg p-3 font-body sm:p-4 ${className}`.trim()}
     >
       <span
@@ -242,19 +258,29 @@ export function RenderingPlazaLoreBookPanel({
       />
 
       <div className="relative flex shrink-0 items-center gap-3">
+        {onBackToShelf ? (
+          <button
+            type="button"
+            onClick={onBackToShelf}
+            aria-label={DEFINING_PLAZA_LORE_BOOK_SHELF_BACK_LABEL}
+            title={DEFINING_PLAZA_LORE_BOOK_SHELF_BACK_LABEL}
+            className={LORE_BOOK_HEADER_BUTTON_CLASS_NAME}
+          >
+            <Icon icon="mdi:arrow-left" className="size-5" aria-hidden />
+          </button>
+        ) : null}
         <span className="flex size-11 shrink-0 items-center justify-center rounded-md border-2 border-poster-gold/50 bg-black/25 text-poster-gold">
-          <Icon
-            icon="mdi:book-open-page-variant"
-            className="size-6"
-            aria-hidden
-          />
+          <Icon icon={book.icon} className="size-6" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-parchment/55">
+            {book.volumeLabel}
+          </p>
           <h2 className="font-display text-xl font-bold tracking-wide text-parchment">
-            {DEFINING_PLAZA_LORE_BOOK_TITLE}
+            {book.title}
           </h2>
           <p className="truncate text-xs font-medium italic text-parchment/65 sm:text-sm">
-            {DEFINING_PLAZA_LORE_BOOK_SUBTITLE}
+            {book.subtitle}
           </p>
         </div>
         {onClose ? (

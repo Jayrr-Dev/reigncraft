@@ -52,21 +52,53 @@ export type PlazaLoreBookChapter = {
   entries: readonly PlazaLoreBookEntry[];
 };
 
-/** Book title shown on the cover header. */
+/** Cover accent theme for a volume in the shelf and reader. */
+export type PlazaLoreBookThemeId =
+  | 'lands'
+  | 'founder'
+  | 'climb'
+  | 'road'
+  | 'crown'
+  | 'edges';
+
+/**
+ * One bound volume in the Wanderer's Corpus series. Chapters are referenced by
+ * id and resolved against {@link DEFINING_PLAZA_LORE_BOOK_CHAPTERS}.
+ */
+export type PlazaLoreBookDefinition = {
+  id: string;
+  /** Roman volume mark shown on the shelf (e.g. "Book I"). */
+  volumeLabel: string;
+  title: string;
+  subtitle: string;
+  /** One-line blurb on the shelf card. */
+  blurb: string;
+  icon: string;
+  themeId: PlazaLoreBookThemeId;
+  chapterIds: readonly string[];
+};
+
+/** Series title on the shelf header. */
 export const DEFINING_PLAZA_LORE_BOOK_TITLE = 'A Wanderer\u2019s Corpus';
 
-/** Book subtitle in the cover header. */
+/** Series subtitle on the shelf header. */
 export const DEFINING_PLAZA_LORE_BOOK_SUBTITLE =
   'Being a compendium of older accounts, set down by many hands. Not all the pages endured the copying.';
 
 /** Accessible label for the lore book dialog. */
 export const LABELING_PLAZA_LORE_BOOK_DIALOG = 'Lore book';
 
+/** Accessible label for the volume shelf. */
+export const LABELING_PLAZA_LORE_BOOK_SHELF = 'Lore book shelf';
+
 /** Accessible label for the chapter bookmark list. */
 export const LABELING_PLAZA_LORE_BOOK_CHAPTER_LIST = 'Lore book chapters';
 
 /** Title placeholder for sealed entries. */
 export const DEFINING_PLAZA_LORE_BOOK_SEALED_TITLE = '? ? ?';
+
+/** Back-control label when returning from a volume to the shelf. */
+export const DEFINING_PLAZA_LORE_BOOK_SHELF_BACK_LABEL = 'All books';
 
 /** Ordered chapters and entries of the lore book. */
 export const DEFINING_PLAZA_LORE_BOOK_CHAPTERS: readonly PlazaLoreBookChapter[] =
@@ -98,7 +130,8 @@ export const DEFINING_PLAZA_LORE_BOOK_CHAPTERS: readonly PlazaLoreBookChapter[] 
           id: 'the-bands',
           kind: 'account',
           title: 'The Bands',
-          subtitle: 'Of the fourteen countries, ordered by the length of the road',
+          subtitle:
+            'Of the fourteen countries, ordered by the length of the road',
           icon: 'ph:mountains',
           paragraphs: [
             'The lands lie in bands, and ever outward they run from the middle country. Nearest are the common grounds: the plains, the forest, and the snowy plains, where most of us first learned the cooking of meat, and where the first claims of the present age were staked. Beyond them lie the uncommon bands, the beach and the savanna and the bare rocky flats.',
@@ -248,8 +281,7 @@ export const DEFINING_PLAZA_LORE_BOOK_CHAPTERS: readonly PlazaLoreBookChapter[] 
             'Of the toll\u2019s exact measure the veterans dispute as cooks dispute over salt, and the lesson needs no measure at all: carry what you can bear to lose, and put no trust in a heavy purse as if it were mail.',
             'Some say that wealth itself has a scent, and that great beasts follow it. This copyist has met great beasts with empty pockets and small ones with full, and leaves the tale where it lies.',
           ],
-          marginNote:
-            'Gather your own spill if you may. Another surely will.',
+          marginNote: 'Gather your own spill if you may. Another surely will.',
         },
         {
           id: 'soulbreak',
@@ -574,3 +606,76 @@ export const DEFINING_PLAZA_LORE_BOOK_CHAPTERS: readonly PlazaLoreBookChapter[] 
       ],
     },
   ];
+
+/**
+ * Bound volumes of the series. Each book reuses the same reader UI with its
+ * own title, subtitle, cover theme, and chapter subset.
+ */
+export const DEFINING_PLAZA_LORE_BOOKS: readonly PlazaLoreBookDefinition[] = [
+  {
+    id: 'book-i-lands',
+    volumeLabel: 'Book I',
+    title: 'Of Lands and Airs',
+    subtitle:
+      'Concerning Corpus, its bands, and the weather that kills without apology.',
+    blurb: 'The world, the fourteen countries, heat and cold',
+    icon: 'mdi:earth',
+    themeId: 'lands',
+    chapterIds: ['the-world'],
+  },
+  {
+    id: 'book-ii-founder',
+    volumeLabel: 'Book II',
+    title: 'Of the Quiet Hand',
+    subtitle:
+      'Of Manus, who built the contest, and the gifts that never make the ladder needless.',
+    blurb: 'The Founder, his Addresses, and the succession he will not explain',
+    icon: 'game-icons:holy-symbol',
+    themeId: 'founder',
+    chapterIds: ['the-founder'],
+  },
+  {
+    id: 'book-iii-climb',
+    volumeLabel: 'Book III',
+    title: 'Of Climb and Core',
+    subtitle:
+      'That all things return, and that survival is counted in purple orbs.',
+    blurb: 'The ladder, Spritcore, the Spill, and Soulbreak',
+    icon: 'game-icons:ladder',
+    themeId: 'climb',
+    chapterIds: ['the-ladder', 'spritcore'],
+  },
+  {
+    id: 'book-iv-road',
+    volumeLabel: 'Book IV',
+    title: 'Of Fire and Flesh',
+    subtitle:
+      'Hunger, tools, claims, and the beasts whose temper is a covenant.',
+    blurb: 'Craft of the road, wildlife, the Cucco, and the pot',
+    icon: 'game-icons:campfire',
+    themeId: 'road',
+    chapterIds: ['the-craft', 'beasts-and-birds'],
+  },
+  {
+    id: 'book-v-crown',
+    volumeLabel: 'Book V',
+    title: 'Of Crown and Creed',
+    subtitle:
+      'Twelve stewards who own what you need, and the argument that will not end.',
+    blurb: 'The Apostles, Mereonism, and the Uncored',
+    icon: 'mdi:crown',
+    themeId: 'crown',
+    chapterIds: ['the-twelve', 'the-two-faiths'],
+  },
+  {
+    id: 'book-vi-edges',
+    volumeLabel: 'Book VI',
+    title: 'Of Ash, Ice, and Torn Leaves',
+    subtitle:
+      'Edges of the map, ruins that remember ambition, and pages the binding refused.',
+    blurb: 'Firelands, Frostsink, and the sealed remainder',
+    icon: 'solar:fire-bold',
+    themeId: 'edges',
+    chapterIds: ['legendary-ground', 'torn-pages'],
+  },
+] as const;

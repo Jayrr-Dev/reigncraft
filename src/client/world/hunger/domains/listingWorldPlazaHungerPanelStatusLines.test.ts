@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
 import { listingWorldPlazaHungerPanelStatusLines } from '@/components/world/hunger/domains/listingWorldPlazaHungerPanelStatusLines';
 import type { ResolvingWorldPlazaHungerMovementEffects } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerMovementEffects';
+import { describe, expect, it } from 'vitest';
 
 const NEUTRAL_EFFECTS: ResolvingWorldPlazaHungerMovementEffects = {
   speedMultiplier: 1,
@@ -32,7 +32,7 @@ describe('listingWorldPlazaHungerPanelStatusLines', () => {
       'Walk speed ×0.8',
       'Sprint locked',
       'Jump locked',
-      'Health draining',
+      'Health draining faster over time',
     ]);
   });
 });

@@ -233,7 +233,7 @@ describe('advancingWorldPlazaHungerTick', () => {
     );
   });
 
-  it('triples starvation damage after two in-game hours without eating', () => {
+  it('quadruples starvation damage after two in-game hours without eating', () => {
     const starvingSinceMs = 1_000;
     const nowMs = starvingSinceMs + COMPUTING_WORLD_PLAZA_IN_GAME_HOUR_MS * 2;
     const result = advancingWorldPlazaHungerTick({
@@ -253,7 +253,7 @@ describe('advancingWorldPlazaHungerTick', () => {
     expect(result.starvationDamagePercentOfMaxHealth).toBeCloseTo(
       DEFINING_WORLD_PLAZA_HUNGER_STARVATION_MAX_HEALTH_PERCENT_PER_TICK *
         DEFINING_WORLD_PLAZA_HUNGER_STARVATION_VARIANCE_MIN *
-        3,
+        4,
       10
     );
   });

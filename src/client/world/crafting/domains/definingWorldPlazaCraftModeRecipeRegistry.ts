@@ -38,6 +38,7 @@ import {
   DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_TILE,
 } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
+  DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_CHEST_BASIC,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BESSEMER_FORGE,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
@@ -134,6 +135,10 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_TEAPOT_WET_CLAY_COS
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_BOTTLE_WET_CLAY_COST = 1;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_BOWL_WET_CLAY_COST = 5;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_CROCK_WET_CLAY_COST = 8;
+
+/** Storage chest (Survival cookbook) ingredient counts. */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_STORAGE_CHEST_WOOD_COST = 8;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_STORAGE_CHEST_STONE_COST = 4;
 
 /** Berry porridge (Ceramics cookbook, needs nearby campfire). */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BOWL_OF_PORRIDGE_BERRY_COST = 3;
@@ -547,6 +552,37 @@ const DEFINING_WORLD_PLAZA_CRAFT_MODE_MANUAL_RECIPE_REGISTRY = [
     outcome: {
       kind: 'entity',
       blockDefinitionId: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
+      blockHeight: DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_TILE,
+    },
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.STORAGE_CHEST,
+    cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.SURVIVAL,
+    title: 'Storage Chest',
+    description:
+      'A wood-and-stone footlocker on claimed ground. Dump gear in the 6×6 grid; it stays put for you alone.',
+    recipeVisual: {
+      visualKind: 'iconify',
+      recipeEmblemIconifyIcon: 'mdi:treasure-chest',
+    },
+    ingredients: [
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_STORAGE_CHEST_WOOD_COST,
+      },
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_STORAGE_CHEST_STONE_COST,
+      },
+    ],
+    recipeType: 'entity',
+    complexity: 3,
+    outcome: {
+      kind: 'entity',
+      blockDefinitionId:
+        DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_CHEST_BASIC,
       blockHeight: DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_TILE,
     },
   },

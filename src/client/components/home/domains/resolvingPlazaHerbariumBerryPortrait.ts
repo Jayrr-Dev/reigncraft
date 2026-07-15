@@ -1,8 +1,8 @@
 import {
-  DEFINING_WORLD_PLAZA_BERRY_LOOT_KIND_TO_ITEM_TYPE_ID,
-  resolvingWorldPlazaInventoryBerrySpriteSheetIcon,
-} from '@/components/world/inventory/domains/definingWorldPlazaInventoryBerrySpriteSheetConstants';
-import { resolvingWorldPlazaInventoryTeaLeavesSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryTeaLeavesSpriteSheetConstants';
+  DEFINING_WORLD_PLAZA_FORAGE_LOOT_KIND_TO_ITEM_TYPE_ID,
+  resolvingWorldPlazaForageItemTypeIdFromLootKind,
+} from '@/components/world/inventory/domains/definingWorldPlazaForageLootKindMapping';
+import { resolvingWorldPlazaInventoryForageSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryBerrySpriteSheetConstants';
 import type { WorldShrubBerryLootKind } from '../../../../shared/worldShrubBerryLoot';
 
 export type PlazaHerbariumBerryPortrait = {
@@ -12,19 +12,14 @@ export type PlazaHerbariumBerryPortrait = {
 };
 
 /**
- * Resolves CSS crop for one berry/tea loot kind from the inventory sprite sheets.
- *
- * Tea leaves live on a separate 1x1 sheet; the other three kinds share the
- * 3x1 berry sheet.
+ * Resolves CSS crop for one berry/tea/leaf loot kind from inventory sprite sheets.
  */
 export function resolvingPlazaHerbariumBerryPortrait(
   berryLootKind: WorldShrubBerryLootKind
 ): PlazaHerbariumBerryPortrait | null {
   const itemTypeId =
-    DEFINING_WORLD_PLAZA_BERRY_LOOT_KIND_TO_ITEM_TYPE_ID[berryLootKind];
-  const icon =
-    resolvingWorldPlazaInventoryBerrySpriteSheetIcon(itemTypeId) ??
-    resolvingWorldPlazaInventoryTeaLeavesSpriteSheetIcon(itemTypeId);
+    DEFINING_WORLD_PLAZA_FORAGE_LOOT_KIND_TO_ITEM_TYPE_ID[berryLootKind];
+  const icon = resolvingWorldPlazaInventoryForageSpriteSheetIcon(itemTypeId);
 
   if (!icon) {
     return null;
@@ -39,4 +34,11 @@ export function resolvingPlazaHerbariumBerryPortrait(
     backgroundSizeCss: `${icon.columnCount * 100}% ${icon.rowCount * 100}%`,
     backgroundPositionCss: `${columnPercent}% ${rowPercent}%`,
   };
+}
+
+/** @deprecated Use resolvingWorldPlazaForageItemTypeIdFromLootKind */
+export function resolvingPlazaHerbariumBerryItemTypeIdFromLootKind(
+  lootKind: WorldShrubBerryLootKind
+): string {
+  return resolvingWorldPlazaForageItemTypeIdFromLootKind(lootKind);
 }

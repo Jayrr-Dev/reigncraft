@@ -1,3 +1,4 @@
+import { DEFINING_PLAZA_HERBARIUM_FORAGE_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaHerbariumForageGuideConstants';
 import type { WorldShrubBerryLootKind } from '../../../../shared/worldShrubBerryLoot';
 
 /** One berry or tea entry in the codex herbarium guide. */
@@ -57,7 +58,9 @@ export const DEFINING_PLAZA_HERBARIUM_BERRY_GUIDE_ENTRIES: readonly DefiningPlaz
       icon: 'mdi:leaf',
       summary: 'Dried leaves mixed in with the berries.',
       studiedSummary:
-        'Tea leaves turn up dried and curled among the berries on the same shrubs, like something already picked and left to dry. Nobody on Corpus has worked out a proper brew yet, so wanderers chew them raw when the run starts to wear them down.',
-      propertiesSummary: 'Eaten: dry leaves, sprint burns less.',
+        'Tea leaves turn up dried and curled among the berries on the same shrubs. Brew them in a clay teapot at a campfire for a calm cup, or chew them raw when the run starts to wear you down.',
+      propertiesSummary:
+        'Eaten: dry leaves, sprint burns less. Brew: calm stamina.',
     },
+    ...DEFINING_PLAZA_HERBARIUM_FORAGE_GUIDE_ENTRIES,
   ] as const;

@@ -14,13 +14,16 @@ import {
 import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/world/domains/unlockingWorldPlazaBiomeMusicFromUserGesture';
 import { buildingWildlifeStudyStarAudioManifest } from '@/components/world/wildlife/domains/buildingWildlifeStudyStarAudioManifest';
 import { computingWildlifeStudySfxEffectiveVolume } from '@/components/world/wildlife/domains/computingWildlifeStudySfxEffectiveVolume';
-import { registeringWildlifeStudySfxPlayback } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
+import {
+  registeringWildlifeStudySfxPlayback,
+  type PlayingWildlifeStudySfxRequest,
+} from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
 import { resolvingWildlifeStudySfxStarAudioId } from '@/components/world/wildlife/domains/resolvingWildlifeStudySfxStarAudioId';
 import { useEffect, useRef } from 'react';
 import type { StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
- * Preloads corpse Study completion clips and wires playback.
+ * Preloads Fantasy UI study / reward clips and wires sectioned playback.
  *
  * @module components/world/wildlife/hooks/usingWildlifeStudySfx
  */
@@ -38,12 +41,14 @@ export function usingWildlifeStudySfx(): void {
       settingWorldPlazaStarAudioSfxGroupVolume(1);
     };
 
-    const playingStudyComplete = (): void => {
+    const playingStudyComplete = ({
+      sectionId = 'study',
+    }: PlayingWildlifeStudySfxRequest = {}): void => {
       if (!isPreloadReadyRef.current || starAudio.state === 'locked') {
         return;
       }
 
-      const volume = computingWildlifeStudySfxEffectiveVolume();
+      const volume = computingWildlifeStudySfxEffectiveVolume(sectionId);
 
       if (volume <= 0) {
         return;

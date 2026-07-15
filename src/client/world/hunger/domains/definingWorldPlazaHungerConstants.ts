@@ -58,11 +58,11 @@ export const DEFINING_WORLD_PLAZA_HUNGER_STARVATION_VARIANCE_MIN = 0.7;
 export const DEFINING_WORLD_PLAZA_HUNGER_STARVATION_VARIANCE_MAX = 1.4;
 
 /**
- * Extra starvation damage multiplier gained per completed in-game hour of
- * continuous starvation (not eating while hunger is at 0).
- * Tick damage scale is `1 + hours × this` (hour 0 = 1×, hour 1 = 2×, …).
+ * Exponential starvation damage ramp while hunger stays at 0 without eating.
+ * Tick damage scale is `base ^ elapsedInGameHours` (hour 0 = 1×, hour 1 = 2×,
+ * hour 2 = 4×, …). Uses fractional hours so the ramp climbs every tick.
  */
-export const DEFINING_WORLD_PLAZA_HUNGER_STARVATION_DAMAGE_MULTIPLIER_PER_IN_GAME_HOUR = 1;
+export const DEFINING_WORLD_PLAZA_HUNGER_STARVATION_DAMAGE_ESCALATION_BASE = 2;
 
 /** Hunger tier thresholds (ratio, inclusive lower bound). */
 export const DEFINING_WORLD_PLAZA_HUNGER_TIER_THRESHOLD = {

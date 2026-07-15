@@ -179,6 +179,7 @@ export function computingWorldPlazaEntityHealthDamage({
       nowMs,
       currentHealth: state.currentHealth,
       effectiveMaxHealth: effectiveMax,
+      damageKind: kind,
     }) *
     (options.ephemeralIncomingDamageMultiplier ?? 1);
 

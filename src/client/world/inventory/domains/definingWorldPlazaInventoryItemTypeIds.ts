@@ -309,6 +309,46 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_GOLDEN =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES =
   'world-plaza-tea-leaves' as const;
 
+/** Extended shrub forage berries (sprite sheet order). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_CRANBERRY =
+  'world-plaza-berry-cranberry' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_BLACKBERRY =
+  'world-plaza-berry-blackberry' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RASPBERRY =
+  'world-plaza-berry-raspberry' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_BILBERRY =
+  'world-plaza-berry-bilberry' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_JUNIPER =
+  'world-plaza-berry-juniper' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_SEA_BUCKTHORN =
+  'world-plaza-berry-sea-buckthorn' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_YEW_ARIL =
+  'world-plaza-berry-yew-aril' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_WOLFBERRY =
+  'world-plaza-berry-wolfberry' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_LOTUS_FRUIT =
+  'world-plaza-berry-lotus-fruit' as const;
+
+/** Extended shrub forage leaves (sprite sheet order). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_LEAF_NETTLE =
+  'world-plaza-leaf-nettle' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_LEAF_LEMON_BALM =
+  'world-plaza-leaf-lemon-balm' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_LEAF_SAGE =
+  'world-plaza-leaf-sage' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_LEAF_MUGWORT =
+  'world-plaza-leaf-mugwort' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_LEAF_BAY_LAUREL =
+  'world-plaza-leaf-bay-laurel' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_LEAF_HOLLY =
+  'world-plaza-leaf-holly' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_LEAF_MISTLETOE =
+  'world-plaza-leaf-mistletoe' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_LEAF_OLIVE =
+  'world-plaza-leaf-olive' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_LEAF_MOLY =
+  'world-plaza-leaf-moly' as const;
+
 /** Universal key that unlocks procedural locked chests. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CHEST_KEY =
   'world-plaza-chest-key' as const;

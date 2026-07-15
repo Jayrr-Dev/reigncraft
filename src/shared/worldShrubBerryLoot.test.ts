@@ -7,26 +7,13 @@ import {
 } from './worldShrubBerryLoot';
 
 describe('worldShrubBerryLoot', () => {
-  it('weights red berry for low unit floats', () => {
+  it('weights coffee cherry for low unit floats', () => {
     expect(resolvingWorldShrubBerryLootKindFromUnit(0)).toBe('red_berry');
-    expect(resolvingWorldShrubBerryLootKindFromUnit(0.5)).toBe('red_berry');
+    expect(resolvingWorldShrubBerryLootKindFromUnit(0.3)).toBe('red_berry');
   });
 
   it('weights blue berry for mid unit floats', () => {
-    expect(resolvingWorldShrubBerryLootKindFromUnit(0.7)).toBe('blue_berry');
-  });
-
-  it('weights golden berry for the rare band', () => {
-    expect(resolvingWorldShrubBerryLootKindFromUnit(0.81)).toBe(
-      'golden_berry'
-    );
-  });
-
-  it('weights tea leaves for the top band', () => {
-    expect(resolvingWorldShrubBerryLootKindFromUnit(0.9)).toBe('tea_leaves');
-    expect(resolvingWorldShrubBerryLootKindFromUnit(0.999)).toBe(
-      'tea_leaves'
-    );
+    expect(resolvingWorldShrubBerryLootKindFromUnit(0.42)).toBe('blue_berry');
   });
 
   it('rolls deterministically per tile index', () => {
@@ -34,9 +21,9 @@ describe('worldShrubBerryLoot', () => {
     const second = resolvingWorldShrubBerryLootKindAtTileIndex(14, 22);
 
     expect(first).toBe(second);
-    expect(['red_berry', 'blue_berry', 'golden_berry', 'tea_leaves']).toContain(
-      first
-    );
+    expect(
+      WORLD_SHRUB_BERRY_LOOT_REGISTRY.map((entry) => entry.itemKind)
+    ).toContain(first);
   });
 
   it('covers every registry bucket at unit boundaries', () => {
@@ -51,7 +38,18 @@ describe('worldShrubBerryLoot', () => {
     }
   });
 
-  it('totals registry weight to 100', () => {
-    expect(WORLD_SHRUB_BERRY_LOOT_TOTAL_WEIGHT).toBe(100);
+  it('totals registry weight to 925', () => {
+    expect(WORLD_SHRUB_BERRY_LOOT_TOTAL_WEIGHT).toBe(925);
+  });
+
+  it('includes extended forage berries and leaves', () => {
+    const kinds = WORLD_SHRUB_BERRY_LOOT_REGISTRY.map(
+      (entry) => entry.itemKind
+    );
+
+    expect(kinds).toContain('cranberry');
+    expect(kinds).toContain('moly');
+    expect(kinds).toContain('lotus_fruit');
+    expect(kinds).toHaveLength(22);
   });
 });

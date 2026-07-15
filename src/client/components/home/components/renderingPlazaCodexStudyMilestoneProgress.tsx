@@ -6,6 +6,7 @@
 
 import { RenderingPlazaCodexMilestoneRewardClaimDialog } from '@/components/home/components/renderingPlazaCodexMilestoneRewardClaimDialog';
 import { claimingPlazaCodexMilestoneReward } from '@/components/home/domains/claimingPlazaCodexMilestoneReward';
+import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
 import type { PlazaCodexMilestoneRewardDefinition } from '@/components/home/domains/definingPlazaCodexMilestoneRewardRegistry';
 import {
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_FILL_CLASS_NAME,
@@ -141,6 +142,7 @@ function RenderingPlazaCodexStudyMilestoneRewardMarker({
               marker.isReached
             );
             if (claimResult === 'attached') {
+              playingWildlifeStudySfx({ sectionId: 'codex' });
               onRewardClaimed(marker.rewardDefinition);
               return;
             }

@@ -85,9 +85,10 @@ export const LABELING_WORLD_PLAZA_HUNGER_PANEL_TIER_BLURB: Record<
   content: 'Comfortable. No hunger penalties.',
   peckish: 'Getting empty. Sprint and jumps cost more.',
   hungry: 'Low fuel. Slower walk, and sprint is locked.',
-  starving: 'Empty. Health drains, and jump is locked.',
+  starving:
+    'Empty. Health drains faster the longer you wait, and jump is locked.',
 };
 
 /** Warning copy while starvation damage is active. */
 export const LABELING_WORLD_PLAZA_HUNGER_PANEL_STARVING_WARNING =
-  'Starvation is draining your health.' as const;
+  'Starvation is draining your health. It worsens over time.' as const;

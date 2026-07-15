@@ -25,6 +25,7 @@ import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { removingWorldPlazaInventoryItemQuantityByTypeId } from '@/components/world/inventory/domains/removingWorldPlazaInventoryItemQuantityByTypeId';
 import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
+import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
 import { useCallback, useRef } from 'react';
 
 export type UsingWorldPlazaChestOpenInteractionParams = {
@@ -270,6 +271,7 @@ export function usingWorldPlazaChestOpenInteraction({
         }
 
         openingWorldPlazaLocalChest(persistenceOwnerId, entry.chestId);
+        playingWildlifeStudySfx({ sectionId: 'chest' });
       } finally {
         isCompletionPendingRef.current = false;
       }

@@ -85,7 +85,8 @@ export const DEFINING_WORLD_PLAZA_INTERACTABLE_BLOCK_CLICK_ACTION_REGISTRY: Read
   },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_FUNCTIONAL_CHEST_BASIC]: {
     dispatch: 'immediate',
-    hitTest: 'tile',
+    hitTest: 'forgiving',
+    pointerHitRadiusTiles: 0.7,
     playerRangeTiles:
       DEFINING_WORLD_PLAZA_INTERACTABLE_BLOCK_DEFAULT_PLAYER_RANGE_TILES,
     requiresPlotOwner: true,

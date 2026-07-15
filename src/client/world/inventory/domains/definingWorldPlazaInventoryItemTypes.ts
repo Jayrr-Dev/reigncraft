@@ -63,6 +63,7 @@ import { registeringWorldPlazaInventoryCloverItemDefinitions } from '@/component
 import { registeringWorldPlazaInventoryCoffeeItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCoffeeItemDefinitions';
 import { registeringWorldPlazaInventoryCraftablePlateArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCraftablePlateArmorItemDefinitions';
 import { registeringWorldPlazaInventoryFlowerItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryFlowerItemDefinitions';
+import { registeringWorldPlazaInventoryForageItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryForageItemDefinitions';
 import { registeringWorldPlazaInventoryGlassVeilArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryGlassVeilArmorItemDefinitions';
 import { registeringWorldPlazaInventoryHealerItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryHealerItemDefinitions';
 import { registeringWorldPlazaInventoryIngotItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryIngotItemDefinitions';
@@ -311,6 +312,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     ...registeringWorldPlazaInventoryTallGrassItemDefinitions(),
     ...registeringWorldPlazaInventoryChestKeyItemDefinitions(),
     ...registeringWorldPlazaInventoryBerryItemDefinitions(),
+    ...registeringWorldPlazaInventoryForageItemDefinitions(),
     ...registeringWorldPlazaMushroomInventoryItems(),
     ...registeringWorldPlazaFishingCatchInventoryItems(),
     ...registeringWorldPlazaInventoryCoffeeItemDefinitions(),

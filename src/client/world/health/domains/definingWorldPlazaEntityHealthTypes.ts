@@ -89,6 +89,8 @@ export type DefiningWorldPlazaEntityHealthIncomingDamageModifier = {
   id: string;
   multiplier: number;
   expiresAtMs: number | null;
+  /** When set, only applies to these damage kinds. */
+  damageKinds?: readonly DefiningWorldPlazaEntityDamageKind[];
 };
 
 /** Converts a fraction of physical damage dealt into healing. */
