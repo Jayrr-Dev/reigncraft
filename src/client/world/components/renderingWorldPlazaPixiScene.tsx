@@ -250,6 +250,7 @@ import {
 } from '@/components/world/domains/computingWorldPlazaEmbeddedHostSizeStyle';
 import { computingWorldPlazaGirlSampleMeleePresentationTiming } from '@/components/world/domains/computingWorldPlazaGirlSampleMeleePresentationTiming';
 import { computingWorldPlazaViewportRenderResolution } from '@/components/world/domains/computingWorldPlazaViewportRenderResolution';
+import type { DefiningWorldPlazaAnimalAvatarRollAttackProfile } from '@/components/world/domains/definingWorldPlazaAnimalAvatarRollAttackConstants';
 import type {
   DefiningWorldPlazaAvatarBlockReactionPresentationState,
   DefiningWorldPlazaAvatarDamagedPresentationState,
@@ -1275,9 +1276,8 @@ function RenderingWorldPlazaPixiSceneConnected({
   const animalRollAttackHitInstanceIdsRef = useRef(new Set<string>());
   const rollStaminaCostMultiplierRef = useRef(1);
   const animalRollAttackDamageRef = useRef(0);
-  const animalRollAttackProfileRef = useRef<ReturnType<
-    typeof resolvingWorldPlazaAnimalAvatarRollAttackProfile
-  >(null);
+  const animalRollAttackProfileRef =
+    useRef<DefiningWorldPlazaAnimalAvatarRollAttackProfile | null>(null);
   const applyingAnimalRollAttackOnContactRef = useRef<
     | ((
         event: {
