@@ -370,11 +370,6 @@ export function usingWorldPlazaOreSmeltingStations({
     }
   }, [addingItemWithStacking, showingToast, stationStateByBlockId]);
 
-  const hasActiveStation = [...stationStateByBlockId.values()].some(
-    (state) => state.endsAtMs !== null
-  );
-  void hasActiveStation;
-
   useEffect(() => {
     const timeoutMap = completionTimeoutByBlockIdRef.current;
     return () => {

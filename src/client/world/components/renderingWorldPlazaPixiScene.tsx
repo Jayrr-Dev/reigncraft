@@ -1849,7 +1849,6 @@ function RenderingWorldPlazaPixiSceneConnected({
           stationBlockDefinitionId:
             oreSmeltingStations.selectedStationBlock.definitionId,
           stationState: oreSmeltingStations.selectedStationState,
-          progressRatio: oreSmeltingStations.progressRatio,
           onClose: oreSmeltingStations.closingStation,
           onCollectOutput: oreSmeltingStations.collectingSelectedStationOutput,
           onDropInventorySlot:

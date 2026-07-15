@@ -78,7 +78,6 @@ export type RenderingWorldPlazaInventoryOreSmeltingStation = {
   readonly stationName: string;
   readonly stationBlockDefinitionId: string;
   readonly stationState: DefiningWorldPlazaOreSmeltingStationState;
-  readonly progressRatio: number;
   readonly onClose: () => void;
   readonly onCollectOutput: () => void;
   readonly onDropInventorySlot: (
@@ -425,7 +424,6 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
                         oreSmeltingStation.stationBlockDefinitionId
                       }
                       stationState={oreSmeltingStation.stationState}
-                      progressRatio={oreSmeltingStation.progressRatio}
                       onClose={oreSmeltingStation.onClose}
                       onCollectOutput={oreSmeltingStation.onCollectOutput}
                     />
