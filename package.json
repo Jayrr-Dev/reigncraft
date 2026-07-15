@@ -33,6 +33,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@hono/node-server": "2.0.5",
     "@iconify-icons/fluent-emoji": "^1.2.11",
+    "@iconify-icons/fluent-emoji-high-contrast": "^1.2.7",
     "@iconify-icons/game-icons": "^1.2.1",
     "@iconify-icons/mdi": "^1.2.48",
     "@iconify-icons/ph": "^1.2.5",
