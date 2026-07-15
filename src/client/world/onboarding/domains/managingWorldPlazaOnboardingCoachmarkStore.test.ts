@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARKS_STORAGE_KEY_PREFIX,
+  DEFINING_WORLD_PLAZA_ONBOARDING_CORE_FINISHED_STORAGE_KEY_PREFIX,
   resolvingWorldPlazaOnboardingCoachmarksStorageKey,
+  resolvingWorldPlazaOnboardingCoreFinishedStorageKey,
 } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
 import {
   beginningWorldPlazaOnboardingCoachmarkPlaySession,
@@ -10,6 +12,7 @@ import {
   gettingWorldPlazaOnboardingCoachmarkSnapshot,
   initializingWorldPlazaOnboardingCoachmarkStore,
   notifyingWorldPlazaOnboardingClaimModeSelected,
+  resettingWorldPlazaOnboardingCoachmarkProgress,
   resettingWorldPlazaOnboardingCoachmarkStoreForTests,
 } from '@/components/world/onboarding/domains/managingWorldPlazaOnboardingCoachmarkStore';
 
@@ -116,5 +119,76 @@ describe('managingWorldPlazaOnboardingCoachmarkStore', () => {
       gettingWorldPlazaOnboardingCoachmarkSnapshot().sessionSignals
         .hasClaimModeSelected
     ).toBe(false);
+  });
+
+  it('seeds core tips from the durable finished flag after a refresh', () => {
+    localStorage.setItem(
+      resolvingWorldPlazaOnboardingCoreFinishedStorageKey(
+        'single-player:slot-0'
+      ),
+      'true'
+    );
+
+    beginningWorldPlazaOnboardingCoachmarkPlaySession('single-player:slot-0');
+
+    const completedStepIds =
+      gettingWorldPlazaOnboardingCoachmarkSnapshot().completedStepIds;
+
+    expect(completedStepIds.has('move')).toBe(true);
+    expect(completedStepIds.has('hotbar')).toBe(true);
+    expect(completedStepIds.has('action-bar')).toBe(true);
+    expect(
+      localStorage.getItem(
+        resolvingWorldPlazaOnboardingCoachmarksStorageKey(
+          'single-player:slot-0'
+        )
+      )
+    ).toContain('move');
+  });
+
+  it('writes the durable finished flag when core tips complete', () => {
+    initializingWorldPlazaOnboardingCoachmarkStore('single-player:slot-0');
+    completingWorldPlazaOnboardingCoachmarkStep('move');
+    completingWorldPlazaOnboardingCoachmarkStep('hotbar');
+    completingWorldPlazaOnboardingCoachmarkStep('action-bar');
+
+    expect(
+      localStorage.getItem(
+        resolvingWorldPlazaOnboardingCoreFinishedStorageKey(
+          'single-player:slot-0'
+        )
+      )
+    ).toBe('true');
+
+    resettingWorldPlazaOnboardingCoachmarkStoreForTests();
+    beginningWorldPlazaOnboardingCoachmarkPlaySession('single-player:slot-0');
+
+    expect(
+      gettingWorldPlazaOnboardingCoachmarkSnapshot().completedStepIds.has(
+        'move'
+      )
+    ).toBe(true);
+  });
+
+  it('clears the durable finished flag when tutorial progress resets', () => {
+    initializingWorldPlazaOnboardingCoachmarkStore('single-player:slot-0');
+    completingWorldPlazaOnboardingCoachmarkStep('move');
+    completingWorldPlazaOnboardingCoachmarkStep('hotbar');
+    completingWorldPlazaOnboardingCoachmarkStep('action-bar');
+
+    resettingWorldPlazaOnboardingCoachmarkProgress();
+
+    expect(
+      localStorage.getItem(
+        resolvingWorldPlazaOnboardingCoreFinishedStorageKey(
+          'single-player:slot-0'
+        )
+      )
+    ).toBeNull();
+    expect(
+      localStorage.getItem(
+        DEFINING_WORLD_PLAZA_ONBOARDING_CORE_FINISHED_STORAGE_KEY_PREFIX
+      )
+    ).toBeNull();
   });
 });

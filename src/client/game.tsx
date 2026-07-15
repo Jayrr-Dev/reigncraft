@@ -19,6 +19,7 @@ import {
 } from '@/components/world/audio/lifecycle/managingWorldPlazaSessionAudioLoadingStore';
 import { usingWorldPlazaSessionAudioLoading } from '@/components/world/audio/lifecycle/usingWorldPlazaSessionAudioLoading';
 import { recordingWorldPlazaClientError } from '@/components/world/domains/loggingWorldPlazaClientErrors';
+import { invalidatingWorldPlazaAvatarSkinSelectionStoreHydration } from '@/components/world/domains/managingWorldPlazaAvatarSkinSelectionStore';
 import {
   checkingWorldPlazaDevQaLoadEnabled,
   disablingWorldPlazaDevQaLoad,
@@ -26,6 +27,7 @@ import {
   syncingWorldPlazaDevQaGenerationFeatureBlankSlateIfEnabled,
 } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
+  checkingWorldPlazaPermaDeathLoadEnabled,
   disablingWorldPlazaPermaDeathLoad,
   enablingWorldPlazaPermaDeathLoad,
 } from '@/components/world/domains/managingWorldPlazaPermaDeathLoadStore';
@@ -375,11 +377,15 @@ export const App = () => {
     }
 
     if (checkingPlazaSinglePlayerPermaDeathLoadSession(gameSession)) {
-      enablingWorldPlazaPermaDeathLoad(
-        gameSession.mode === 'single-player'
-          ? (gameSession.startingAvatarSkinId ?? null)
-          : null
-      );
+      // Start handler already stamped the pending skin; do not re-enable with
+      // the same starting id or ensure() can re-apply it after a mid-run transform.
+      if (!checkingWorldPlazaPermaDeathLoadEnabled()) {
+        enablingWorldPlazaPermaDeathLoad(
+          gameSession.mode === 'single-player'
+            ? (gameSession.startingAvatarSkinId ?? null)
+            : null
+        );
+      }
     } else {
       disablingWorldPlazaPermaDeathLoad();
     }
@@ -397,13 +403,25 @@ export const App = () => {
   }, [gameSession]);
 
   const handlingExitToHome = (): void => {
-    disablingWorldPlazaDevQaLoad();
-    disablingWorldPlazaRandomAnimalLoad();
-    disablingWorldPlazaPermaDeathLoad();
+    // Unmount the plaza scene first. Disabling Random Animal / Perma Death
+    // while the scene is still mounted lets the study-lock skin guard write
+    // girl-sample over the persisted animal form.
     sendingWorldPlazaAudioLifecycleEvent('EXIT_HOME');
     resettingWorldPlazaSessionAudioLoading();
     setGameSession(null);
   };
+
+  // Clear session-scoped load flags only after the scene has unmounted.
+  useEffect(() => {
+    if (gameSession) {
+      return;
+    }
+
+    disablingWorldPlazaDevQaLoad();
+    disablingWorldPlazaRandomAnimalLoad();
+    disablingWorldPlazaPermaDeathLoad();
+    invalidatingWorldPlazaAvatarSkinSelectionStoreHydration();
+  }, [gameSession]);
 
   const sessionConfig = useMemo(() => {
     if (!gameSession) {
@@ -459,10 +477,13 @@ export const App = () => {
     );
   }
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <RenderingPlazaBookSfx />
-      <div className="flex h-dvh min-h-0 w-full flex-col bg-gray-950">
+    return (
+      <QueryClientProvider client={queryClient}>
+        <RenderingPlazaBookSfx />
+        <RenderingPlazaHomeScreenButtonSfx
+          trackDefaultButtonPresses={false}
+        />
+        <div className="flex h-dvh min-h-0 w-full flex-col bg-gray-950">
         <div className="relative min-h-0 flex-1 p-2">
           <PlazaWorldErrorBoundary>
             <PlazaWorldBootGate isHydratingSave={isHydratingSinglePlayerSave}>

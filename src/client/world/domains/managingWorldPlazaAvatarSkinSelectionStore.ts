@@ -67,6 +67,24 @@ export function gettingWorldPlazaSelectedAvatarSkinId(): DefiningWorldPlazaAvata
 }
 
 /**
+ * Returns the persistence owner the skin store is currently hydrated for.
+ */
+export function gettingWorldPlazaAvatarSkinSelectionStorageOwnerId():
+  | string
+  | null {
+  return managingWorldPlazaAvatarSkinSelectionState.storageOwnerId;
+}
+
+/**
+ * Marks the store as needing a fresh localStorage read on the next init.
+ *
+ * Keeps the in-memory selection so an in-flight frame does not flash default.
+ */
+export function invalidatingWorldPlazaAvatarSkinSelectionStoreHydration(): void {
+  managingWorldPlazaAvatarSkinSelectionState.hasHydratedOwner = false;
+}
+
+/**
  * Selects an avatar skin and notifies subscribers when it changes.
  *
  * @param skinId - Skin id to activate for the local avatar.

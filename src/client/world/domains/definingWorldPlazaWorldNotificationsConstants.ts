@@ -7,20 +7,23 @@
  */
 
 /** How long a named realm discovery name stays fully visible (ms). */
-export const DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_VISIBLE_MS =
-  4_500;
+export const DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_VISIBLE_MS = 4_500;
 
 /** Fade-in duration for named realm discovery names (ms). */
-export const DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_FADE_IN_MS =
-  900;
+export const DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_FADE_IN_MS = 900;
 
 /** Fade-out duration after the visible window (ms). */
-export const DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_FADE_OUT_MS =
-  1_200;
+export const DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_FADE_OUT_MS = 1_200;
 
 /** How long the boot controls hint stays visible before fading out (ms). */
-export const DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_CONTROLS_HINT_VISIBLE_MS =
-  6_000;
+export const DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_CONTROLS_HINT_VISIBLE_MS = 6_000;
+
+/**
+ * localStorage key: boot controls hint already shown once on this device.
+ * Prevents the keyboard/touch tip from replaying on every refresh.
+ */
+export const DEFINING_WORLD_PLAZA_CONTROLS_HINT_SEEN_STORAGE_KEY =
+  'world-plaza-controls-hint-seen' as const;
 
 /** Large display classes for first-discovery named realm titles. */
 export const DEFINING_WORLD_PLAZA_WORLD_NOTIFICATION_REALM_NAME_CLASS_NAME =

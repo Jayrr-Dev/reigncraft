@@ -39,7 +39,10 @@ import { resolvingWorldPlazaGroundItemsLocalStorageKey } from '@/components/worl
 import { resolvingWorldPlazaInventoryStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import { resolvingWorldPlazaInventoryStorageExpansionStorageKey } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
 import { clearingWorldPlazaInventoryStorageExpansionStoreForOwner } from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
-import { resolvingWorldPlazaOnboardingCoachmarksStorageKey } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
+import {
+  resolvingWorldPlazaOnboardingCoachmarksStorageKey,
+  resolvingWorldPlazaOnboardingCoreFinishedStorageKey,
+} from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
 import { clearingWorldPlazaOnboardingCoachmarkStoreForOwner } from '@/components/world/onboarding/domains/managingWorldPlazaOnboardingCoachmarkStore';
 import {
   DEFINING_WORLD_PLAZA_SPRITCORE_UPGRADE_STORAGE_KEY_PREFIX,
@@ -80,6 +83,7 @@ export function clearingPlazaSinglePlayerSaveSlotLocalStorage(
     resolvingWorldPlazaSelectedAvatarSkinStorageKey(persistenceOwnerId),
     resolvingWorldPlazaSpritcoreUpgradeStorageKey(persistenceOwnerId),
     resolvingWorldPlazaOnboardingCoachmarksStorageKey(persistenceOwnerId),
+    resolvingWorldPlazaOnboardingCoreFinishedStorageKey(persistenceOwnerId),
   ];
 
   for (const storageKey of storageKeys) {

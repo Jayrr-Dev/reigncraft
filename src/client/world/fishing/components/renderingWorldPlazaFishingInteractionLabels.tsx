@@ -10,7 +10,7 @@ import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/de
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 import { DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME } from '@/components/world/fire/domains/definingWorldPlazaCampfireInteractionLabelUiConstants';
 import {
-  DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_GLOW_CLASS_NAME,
+  DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_CLASS_NAME,
   DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME,
   DEFINING_WORLD_PLAZA_FISHING_REEL_READY_YELLOW_ONCE_CLASS_NAME,
 } from '@/components/world/fishing/domains/definingWorldPlazaFishingReelOpportunityConstants';
@@ -192,10 +192,6 @@ export function RenderingWorldPlazaFishingInteractionLabels({
           const isReelReady =
             isCasting && reelOpportunityActiveRef.current === true;
           const isReelHeld = isReelReady && gettingWorldPlazaFishingReelHold();
-          const isYellowReadyFlash =
-            isReelReady &&
-            !isReelHeld &&
-            gettingWorldPlazaFishingReelReadyFlashVisible();
           const shouldShowLabel = !isCasting || isReelReady;
 
           reelButtonElement.hidden = !shouldShowLabel;
@@ -206,10 +202,12 @@ export function RenderingWorldPlazaFishingInteractionLabels({
           );
           reelButtonElement.classList.toggle(
             DEFINING_WORLD_PLAZA_FISHING_REEL_READY_YELLOW_ONCE_CLASS_NAME,
-            isYellowReadyFlash
+            isReelReady &&
+              !isReelHeld &&
+              gettingWorldPlazaFishingReelReadyFlashVisible()
           );
           reelButtonElement.classList.toggle(
-            DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_GLOW_CLASS_NAME,
+            DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_CLASS_NAME,
             isReelHeld
           );
         }
@@ -283,14 +281,20 @@ export function RenderingWorldPlazaFishingInteractionLabels({
                 type="button"
                 ref={(element) => {
                   if (element) {
+                    const wasMissing =
+                      !reelButtonElementByTileKeyRef.current.has(tileKey);
                     reelButtonElementByTileKeyRef.current.set(tileKey, element);
-                    // Overlay frame owns label text/visibility; seed Fish until first tick.
-                    if (isCasting) {
-                      element.hidden = true;
-                      element.textContent = '';
-                    } else {
-                      element.hidden = false;
-                      element.textContent = 'Fish';
+                    // Overlay frame owns label text/visibility after mount.
+                    // Seed once only — inline refs re-run every render and would
+                    // hide/clear "Reel" mid-cast (flicker + lost pointer hold).
+                    if (wasMissing) {
+                      if (isCasting) {
+                        element.hidden = true;
+                        element.textContent = '';
+                      } else {
+                        element.hidden = false;
+                        element.textContent = 'Fish';
+                      }
                     }
                     return;
                   }
@@ -310,6 +314,7 @@ export function RenderingWorldPlazaFishingInteractionLabels({
 
                   event.preventDefault();
                   event.stopPropagation();
+                  event.currentTarget.setPointerCapture(event.pointerId);
                   onReelHoldStartRef.current();
                 }}
                 onPointerUp={(event) => {
@@ -319,15 +324,9 @@ export function RenderingWorldPlazaFishingInteractionLabels({
 
                   event.preventDefault();
                   event.stopPropagation();
-                  onReelHoldEndRef.current();
-                }}
-                onPointerLeave={(event) => {
-                  if (!isCasting) {
-                    return;
+                  if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                    event.currentTarget.releasePointerCapture(event.pointerId);
                   }
-
-                  event.preventDefault();
-                  event.stopPropagation();
                   onReelHoldEndRef.current();
                 }}
                 onPointerCancel={(event) => {
@@ -337,6 +336,9 @@ export function RenderingWorldPlazaFishingInteractionLabels({
 
                   event.preventDefault();
                   event.stopPropagation();
+                  if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                    event.currentTarget.releasePointerCapture(event.pointerId);
+                  }
                   onReelHoldEndRef.current();
                 }}
                 onClick={(event) => {

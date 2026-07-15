@@ -382,6 +382,7 @@ import {
   checkingWorldPlazaDomOverlayFrameShouldUpdate,
   subscribingWorldPlazaDomOverlayFrame,
 } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
+import { seedingWorldPlazaCodexDiscoveryAllForDevQa } from '@/components/world/domains/seedingWorldPlazaCodexDiscoveryAllForDevQa';
 import { settlingWorldPlazaMeleeSwingDamage } from '@/components/world/domains/settlingWorldPlazaMeleeSwingDamage';
 import { RenderingWorldPlazaEquipmentSfx } from '@/components/world/equipment/components/renderingWorldPlazaEquipmentSfx';
 import type { DefiningWorldPlazaArmorSlotId } from '@/components/world/equipment/domains/definingWorldPlazaArmorSlotRegistry';
@@ -859,7 +860,14 @@ import { Application } from '@pixi/react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Container } from 'pixi.js';
 import { CullerPlugin } from 'pixi.js';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type {
   PlazaDevvitOnlineOwnedPetSnapshot,
   PlazaDevvitOnlineWildlifeDamageEvent,
@@ -7950,7 +7958,10 @@ function RenderingWorldPlazaPixiSceneConnected({
       gettingWorldPlazaSelectedAvatarSkinId()
     );
     // Single-player starts with an empty cookbook; recipe pages unlock crafts.
-    if (!isSinglePlayerSession) {
+    // Dev QA is single-player but needs the full cookbook + Guide unlocks.
+    if (checkingWorldPlazaDevQaLoadEnabled()) {
+      seedingWorldPlazaCodexDiscoveryAllForDevQa();
+    } else if (!isSinglePlayerSession) {
       ensuringWorldPlazaSurvivalCookbookRecipesAttached();
       attachingWorldPlazaAllCraftModeRecipesForDevQa();
     }
@@ -7962,7 +7973,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     selectedAvatarSkinId,
   ]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const storageOwnerId = onlineUserId ?? localPersistenceOwnerId;
     beginningWorldPlazaOnboardingCoachmarkPlaySession(storageOwnerId);
   }, [localPersistenceOwnerId, onlineUserId]);

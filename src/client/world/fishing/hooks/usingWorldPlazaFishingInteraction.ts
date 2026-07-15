@@ -210,8 +210,6 @@ export function usingWorldPlazaFishingInteraction({
               localPersistenceOwnerId,
               redditUserId,
               saveSlotIndex,
-              tileX: session.tileX,
-              tileY: session.tileY,
               layer: playerPosition.layer ?? 1,
               spritcoreDrop,
               playerPosition,

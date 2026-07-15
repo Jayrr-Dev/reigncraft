@@ -72,3 +72,21 @@ export const DEFINING_WORLD_BUILDING_PLOT_OTHER_OWNER_TOP_FILL_ALPHA = 0.28;
 /** Minimap CSS color for other-owner plot tiles. */
 export const DEFINING_WORLD_BUILDING_PLOT_OTHER_OWNER_MINI_MAP_FILL_COLOR =
   'rgba(192, 132, 252, 0.55)' as const;
+
+/**
+ * Inventory bag "move" clip volume scale when painting a claim tile.
+ * `1` matches a normal inventory slot rearrange.
+ */
+export const DEFINING_WORLD_BUILDING_PLOT_CLAIM_PLACE_SFX_VOLUME_MULTIPLIER = 1;
+
+/**
+ * Inventory bag "move" clip volume scale when unclaiming a tile.
+ * Quieter than place so drag-unclaim paint stays less harsh.
+ */
+export const DEFINING_WORLD_BUILDING_PLOT_CLAIM_REMOVE_SFX_VOLUME_MULTIPLIER = 0.55;
+
+/**
+ * Start-screen chest-close button clip volume scale for claim plot card clicks.
+ * Quieter than home menu so claim list feedback stays soft.
+ */
+export const DEFINING_WORLD_BUILDING_CLAIM_BOX_BUTTON_SFX_VOLUME_MULTIPLIER = 0.55;

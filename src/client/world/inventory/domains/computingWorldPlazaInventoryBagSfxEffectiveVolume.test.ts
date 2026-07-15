@@ -13,4 +13,10 @@ describe('computingWorldPlazaInventoryBagSfxEffectiveVolume', () => {
       0.28
     );
   });
+
+  it('applies an optional clip volume multiplier', () => {
+    expect(
+      computingWorldPlazaInventoryBagSfxEffectiveVolume('move', 0.55)
+    ).toBeCloseTo(0.154);
+  });
 });

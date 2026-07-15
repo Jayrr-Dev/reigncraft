@@ -21,3 +21,9 @@ export const DEFINING_PLAZA_HOME_SCREEN_BUTTON_SFX_CLIP_VARIANTS: readonly Defin
 
 /** Base one-shot volume before the SFX volume slider is applied. */
 export const DEFINING_PLAZA_HOME_SCREEN_BUTTON_SFX_TARGET_VOLUME = 0.55;
+
+/**
+ * Volume scale for in-world HUD / panel buttons that reuse this clip.
+ * Quieter than the home menu so plaza UI clicks stay soft.
+ */
+export const DEFINING_PLAZA_HOME_SCREEN_BUTTON_SFX_WORLD_UI_VOLUME_MULTIPLIER = 0.55;

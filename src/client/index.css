@@ -592,27 +592,63 @@ video {
     0 0 8px rgba(74, 222, 128, 0.55);
 }
 
+.world-plaza-fishing-reel-ready-flash:hover {
+  color: #facc15;
+}
+
 .world-plaza-fishing-reel-ready-flash.world-plaza-fishing-cast-progress-indicator {
   color: inherit;
   text-shadow: none;
   filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.75));
 }
 
+.world-plaza-fishing-reel-ready-flash.world-plaza-fishing-cast-progress-indicator:hover
+  .world-plaza-timed-interaction-progress-icon {
+  color: #facc15;
+}
+
 .world-plaza-fishing-reel-ready-yellow-once {
   filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.75));
+}
+
+.world-plaza-fishing-reel-ready-yellow-once:hover {
+  color: #fde047;
 }
 
 .world-plaza-fishing-reel-ready-yellow-once.world-plaza-fishing-cast-progress-indicator {
   filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.85));
 }
 
-.world-plaza-fishing-reel-hold-glow {
+.world-plaza-fishing-reel-ready-yellow-once.world-plaza-fishing-cast-progress-indicator:hover
+  .world-plaza-timed-interaction-progress-icon {
+  color: #fde047;
+}
+
+.world-plaza-fishing-reel-hold {
   animation: none;
-  color: #4ade80;
-  filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.95));
-  text-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.65),
-    0 0 10px rgba(74, 222, 128, 0.85);
+  color: #facc15;
+  filter: none;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.65);
+}
+
+.world-plaza-fishing-reel-hold:hover {
+  color: #fde047;
+}
+
+.world-plaza-fishing-reel-hold.world-plaza-fishing-cast-progress-indicator {
+  color: inherit;
+  text-shadow: none;
+  filter: none;
+}
+
+.world-plaza-fishing-reel-hold.world-plaza-fishing-cast-progress-indicator
+  .world-plaza-timed-interaction-progress-icon {
+  color: #facc15;
+}
+
+.world-plaza-fishing-reel-hold.world-plaza-fishing-cast-progress-indicator:hover
+  .world-plaza-timed-interaction-progress-icon {
+  color: #fde047;
 }
 
 .world-plaza-timed-interaction-progress-icon {

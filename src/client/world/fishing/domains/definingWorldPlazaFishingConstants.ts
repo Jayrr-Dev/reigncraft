@@ -53,6 +53,21 @@ export const DEFINING_WORLD_PLAZA_FISHING_REEL_CLICK_COOLDOWN_MS = 180;
 export const DEFINING_WORLD_PLAZA_FISHING_CATCH_QUANTITY = 1;
 
 /**
+ * Chebyshev ring around the player for fishing ground drops (spritcore).
+ * Excludes the player tile; only the eight neighbors.
+ */
+export const DEFINING_WORLD_PLAZA_FISHING_CATCH_GROUND_DROP_NEIGHBOR_OFFSETS = [
+  { offsetX: 0, offsetY: -1 },
+  { offsetX: 1, offsetY: 0 },
+  { offsetX: 0, offsetY: 1 },
+  { offsetX: -1, offsetY: 0 },
+  { offsetX: 1, offsetY: -1 },
+  { offsetX: 1, offsetY: 1 },
+  { offsetX: -1, offsetY: 1 },
+  { offsetX: -1, offsetY: -1 },
+] as const;
+
+/**
  * Local health / name / stamina chrome fade while fishing (ms).
  * Hide on cast start; fade back in when cast ends or cancels.
  */

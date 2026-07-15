@@ -5,10 +5,14 @@ import { Icon } from '@/components/ui/icon';
 import { subscribingWorldPlazaDomOverlayFrame } from '@/components/world/domains/schedulingWorldPlazaDomOverlayFrame';
 
 import {
+  DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_CLASS_NAME,
   DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME,
   DEFINING_WORLD_PLAZA_FISHING_REEL_READY_YELLOW_ONCE_CLASS_NAME,
 } from '@/components/world/fishing/domains/definingWorldPlazaFishingReelOpportunityConstants';
-import { gettingWorldPlazaFishingReelReadyFlashVisible } from '@/components/world/fishing/domains/managingWorldPlazaFishingReelCastState';
+import {
+  gettingWorldPlazaFishingReelHold,
+  gettingWorldPlazaFishingReelReadyFlashVisible,
+} from '@/components/world/fishing/domains/managingWorldPlazaFishingReelCastState';
 
 import {
   computingWorldPlazaTimedInteractionProgressRingLayout,
@@ -158,14 +162,21 @@ export const RenderingWorldPlazaFishingCastProgressRing = memo(
             : '1';
 
           const isReelReady = reelOpportunityActiveRef.current;
+          const isReelHeld = isReelReady && gettingWorldPlazaFishingReelHold();
 
           wrapperElement.classList.toggle(
             DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME,
-            isReelReady
+            isReelReady && !isReelHeld
           );
           wrapperElement.classList.toggle(
             DEFINING_WORLD_PLAZA_FISHING_REEL_READY_YELLOW_ONCE_CLASS_NAME,
-            isReelReady && gettingWorldPlazaFishingReelReadyFlashVisible()
+            isReelReady &&
+              !isReelHeld &&
+              gettingWorldPlazaFishingReelReadyFlashVisible()
+          );
+          wrapperElement.classList.toggle(
+            DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_CLASS_NAME,
+            isReelHeld
           );
         }
       };
@@ -204,37 +215,29 @@ export const RenderingWorldPlazaFishingCastProgressRing = memo(
         aria-label="Reel in"
         onPointerDown={(event) => {
           event.preventDefault();
-
           event.stopPropagation();
-
+          event.currentTarget.setPointerCapture(event.pointerId);
           onReelHoldStartRef.current();
         }}
         onPointerUp={(event) => {
           event.preventDefault();
-
           event.stopPropagation();
-
-          onReelHoldEndRef.current();
-        }}
-        onPointerLeave={(event) => {
-          event.preventDefault();
-
-          event.stopPropagation();
-
+          if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+            event.currentTarget.releasePointerCapture(event.pointerId);
+          }
           onReelHoldEndRef.current();
         }}
         onPointerCancel={(event) => {
           event.preventDefault();
-
           event.stopPropagation();
-
+          if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+            event.currentTarget.releasePointerCapture(event.pointerId);
+          }
           onReelHoldEndRef.current();
         }}
         onClick={(event) => {
           event.preventDefault();
-
           event.stopPropagation();
-
           onReelRef.current();
         }}
       >

@@ -95,6 +95,10 @@ import {
   incrementingWorldBuildingWorldLayer,
 } from '@/components/world/building/domains/formattingWorldBuildingWorldLayerSummary';
 import { listingWorldBuildingPlacedBlocksFromPlots } from '@/components/world/building/domains/listingWorldBuildingPlacedBlocksFromPlots';
+import {
+  notifyingWorldBuildingPlotClaimPainted,
+  notifyingWorldBuildingPlotClaimRemoved,
+} from '@/components/world/building/domains/notifyingWorldBuildingPlotClaimPaintSfx';
 import { resolvingWorldBuildingBlockPlacementBlockedMessage } from '@/components/world/building/domains/resolvingWorldBuildingBlockPlacementBlockedMessage';
 import type { DefiningWorldBuildingBuildModeTilePopoverMode } from '@/components/world/building/domains/resolvingWorldBuildingBuildModeTilePopoverMode';
 import { resolvingWorldBuildingBuildModeTilePopoverMode } from '@/components/world/building/domains/resolvingWorldBuildingBuildModeTilePopoverMode';
@@ -1204,6 +1208,7 @@ export function usingWorldPlazaBuildMode({
 
     assigningBuildDraft(provisionResult.draft);
     setBuildErrorMessage(null);
+    notifyingWorldBuildingPlotClaimPainted();
   }, [
     buildDraft,
     onlineUserId,
@@ -1250,6 +1255,7 @@ export function usingWorldPlazaBuildMode({
 
       assigningBuildDraft(unclaimResult.draft);
       setBuildErrorMessage(null);
+      notifyingWorldBuildingPlotClaimRemoved();
 
       if (!isLocalPlot) {
         try {
@@ -1294,6 +1300,7 @@ export function usingWorldPlazaBuildMode({
 
       assigningBuildDraft(unclaimResult.draft);
       setBuildErrorMessage(null);
+      notifyingWorldBuildingPlotClaimRemoved();
     },
     [buildDraft, onlineUserId, plots]
   );
@@ -1340,6 +1347,7 @@ export function usingWorldPlazaBuildMode({
         if (!('errorMessage' in starterPlotProvisionResult)) {
           assigningBuildDraft(starterPlotProvisionResult.draft);
           setBuildErrorMessage(null);
+          notifyingWorldBuildingPlotClaimPainted();
           return;
         }
       }
@@ -1365,6 +1373,7 @@ export function usingWorldPlazaBuildMode({
 
         assigningBuildDraft(temporaryPlotProvisionResult.draft);
         setBuildErrorMessage(null);
+        notifyingWorldBuildingPlotClaimPainted();
         return;
       }
 

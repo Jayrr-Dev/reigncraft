@@ -66,6 +66,11 @@ function resolvingWorldPlazaFishingReelCastElapsedMs(nowMs: number): number {
 function firingWorldPlazaFishingReelOpportunityStudyCues(
   castElapsedMs: number
 ): void {
+  // Caught reel stays ready for rest of cast — no more ready bells.
+  if (managingWorldPlazaFishingReelCastState.hasCaughtReel) {
+    return;
+  }
+
   for (
     let windowIndex = 0;
     windowIndex < managingWorldPlazaFishingReelCastState.windows.length;
@@ -233,8 +238,7 @@ export function tickingWorldPlazaFishingReelCastFrame(
     firstWindow !== undefined &&
     castElapsedMs >= firstWindow.startMs &&
     castElapsedMs < firstWindow.startMs + firstWindow.durationMs;
-  const isReadyFlashVisible =
-    isInsideFirstOpportunityWindow && !hasCaughtReel && !isHoldingReel;
+  const isReadyFlashVisible = isInsideFirstOpportunityWindow;
 
   managingWorldPlazaFishingReelCastState = {
     ...managingWorldPlazaFishingReelCastState,

@@ -6,6 +6,8 @@ import type { DefiningPlazaHomeScreenButtonSfxClipId } from '@/components/home/d
 
 export type PlayingPlazaHomeScreenButtonSfxRequest = {
   readonly clipId: DefiningPlazaHomeScreenButtonSfxClipId;
+  /** Optional scale on top of the base target volume (default 1). */
+  readonly volumeMultiplier?: number;
 };
 
 type PlayingPlazaHomeScreenButtonSfxHandler = (

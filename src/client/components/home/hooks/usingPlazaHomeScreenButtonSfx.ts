@@ -24,12 +24,30 @@ import { registeringWorldPlazaBiomeMusicUserGestureUnlock } from '@/components/w
 import { useLayoutEffect, useRef } from 'react';
 import type { StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
+export type UsingPlazaHomeScreenButtonSfxOptions = {
+  /**
+   * When true, capture every button click for the default chest-close clip
+   * (or a declared custom / silent kind).
+   */
+  readonly trackDefaultButtonPresses?: boolean;
+  /**
+   * Volume scale for tracked default chest-close presses.
+   * Home keeps `1`; in-world HUD uses the quieter world UI multiplier.
+   */
+  readonly defaultButtonPressVolumeMultiplier?: number;
+};
+
 /**
  * Preloads home screen button clips and wires chest-close click playback.
  *
  * @module components/home/hooks/usingPlazaHomeScreenButtonSfx
  */
-export function usingPlazaHomeScreenButtonSfx(): void {
+export function usingPlazaHomeScreenButtonSfx(
+  options: UsingPlazaHomeScreenButtonSfxOptions = {}
+): void {
+  const trackDefaultButtonPresses = options.trackDefaultButtonPresses ?? true;
+  const defaultButtonPressVolumeMultiplier =
+    options.defaultButtonPressVolumeMultiplier ?? 1;
   const starAudioRef = useRef<StarAudio | null>(null);
   const isPreloadReadyRef = useRef(false);
 
@@ -44,9 +62,11 @@ export function usingPlazaHomeScreenButtonSfx(): void {
     };
 
     const playingButtonClip = (
-      clipId: DefiningPlazaHomeScreenButtonSfxClipId
+      clipId: DefiningPlazaHomeScreenButtonSfxClipId,
+      volumeMultiplier = 1
     ): void => {
-      const volume = computingPlazaHomeScreenButtonSfxEffectiveVolume();
+      const volume =
+        computingPlazaHomeScreenButtonSfxEffectiveVolume(volumeMultiplier);
 
       if (volume <= 0) {
         return;
@@ -60,6 +80,7 @@ export function usingPlazaHomeScreenButtonSfx(): void {
 
     const playingButtonInteraction = ({
       clipId,
+      volumeMultiplier = 1,
     }: PlayingPlazaHomeScreenButtonSfxRequest): void => {
       void (async () => {
         if (!isPreloadReadyRef.current) {
@@ -71,7 +92,7 @@ export function usingPlazaHomeScreenButtonSfx(): void {
           await starAudio.unlock();
         }
 
-        playingButtonClip(clipId);
+        playingButtonClip(clipId, volumeMultiplier);
       })();
     };
 
@@ -97,8 +118,11 @@ export function usingPlazaHomeScreenButtonSfx(): void {
       );
     const unregisterPlaybackBridge =
       registeringPlazaHomeScreenButtonSfxPlayback(playingButtonInteraction);
-    const unregisterDefaultButtonPressTracking =
-      trackingPlazaDefaultButtonPressSfx();
+    const unregisterDefaultButtonPressTracking = trackDefaultButtonPresses
+      ? trackingPlazaDefaultButtonPressSfx({
+          volumeMultiplier: defaultButtonPressVolumeMultiplier,
+        })
+      : () => {};
 
     return () => {
       unregisterDefaultButtonPressTracking();
@@ -109,5 +133,5 @@ export function usingPlazaHomeScreenButtonSfx(): void {
       starAudioRef.current = null;
       isPreloadReadyRef.current = false;
     };
-  }, []);
+  }, [defaultButtonPressVolumeMultiplier, trackDefaultButtonPresses]);
 }

@@ -8,6 +8,13 @@
 export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARKS_STORAGE_KEY_PREFIX =
   'world-plaza-onboarding-coachmarks' as const;
 
+/**
+ * localStorage key prefix for "core tutorial finished" (move / hotbar / action-bar).
+ * Survives step-list loss so core tips never replay after the player finishes them.
+ */
+export const DEFINING_WORLD_PLAZA_ONBOARDING_CORE_FINISHED_STORAGE_KEY_PREFIX =
+  'world-plaza-onboarding-core-finished' as const;
+
 /** DOM attribute used to locate HUD targets for coachmark glow + tip placement. */
 export const DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE =
   'data-plaza-onboarding-anchor' as const;
@@ -114,6 +121,21 @@ export function resolvingWorldPlazaOnboardingCoachmarksStorageKey(
   }
 
   return DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARKS_STORAGE_KEY_PREFIX;
+}
+
+/**
+ * Resolves the localStorage key for the durable core-tutorial-finished flag.
+ *
+ * @param storageOwnerId - Session owner id, or null for the legacy global key.
+ */
+export function resolvingWorldPlazaOnboardingCoreFinishedStorageKey(
+  storageOwnerId: string | null
+): string {
+  if (storageOwnerId) {
+    return `${DEFINING_WORLD_PLAZA_ONBOARDING_CORE_FINISHED_STORAGE_KEY_PREFIX}:${storageOwnerId}`;
+  }
+
+  return DEFINING_WORLD_PLAZA_ONBOARDING_CORE_FINISHED_STORAGE_KEY_PREFIX;
 }
 
 /** Pulse ring applied to the active coachmark anchor element. */

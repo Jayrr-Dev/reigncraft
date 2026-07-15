@@ -3,6 +3,7 @@
 import { useUserData } from '@/components/hooks/useAuth';
 import { checkingWorldPlazaAnimalPlayableAvatarSkinStudyUnlocked } from '@/components/world/domains/checkingWorldPlazaAnimalPlayableAvatarSkinStudyUnlocked';
 import { checkingWorldPlazaAvatarSkinAccessForUser } from '@/components/world/domains/checkingWorldPlazaAvatarSkinAccessForUser';
+import { checkingWorldPlazaSpecialLoadSlotAvatarSkinShouldPersist } from '@/components/world/domains/checkingWorldPlazaSpecialLoadSlotAvatarSkinShouldPersist';
 import { DEFINING_WORLD_PLAZA_AVATAR_SKIN_DEFAULT } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import {
   gettingWorldPlazaSelectedAvatarSkinId,
@@ -24,6 +25,10 @@ import { useEffect, useSyncExternalStore } from 'react';
 
 /**
  * Clears a restricted avatar skin when allowlist or bestiary mastery fails.
+ *
+ * Random Animal and Perma Death loads skip the study gate. Dedicated slot
+ * owners also keep their form when session flags clear on the way home, so
+ * leave / refresh cannot overwrite the persisted animal with girl-sample.
  */
 export function usingWorldPlazaGuardingAvatarSkinAccess(): void {
   const { data: userData } = useUserData();
@@ -45,6 +50,10 @@ export function usingWorldPlazaGuardingAvatarSkinAccess(): void {
 
   useEffect(() => {
     if (isRandomAnimalLoadEnabled || isPermaDeathLoadEnabled) {
+      return;
+    }
+
+    if (checkingWorldPlazaSpecialLoadSlotAvatarSkinShouldPersist()) {
       return;
     }
 

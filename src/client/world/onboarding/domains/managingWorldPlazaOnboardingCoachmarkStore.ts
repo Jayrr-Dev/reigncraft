@@ -1,9 +1,13 @@
 import {
   resolvingWorldPlazaOnboardingCoachmarksStorageKey,
+  resolvingWorldPlazaOnboardingCoreFinishedStorageKey,
   type WorldPlazaOnboardingCoachmarkStepId,
 } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
+import { DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_CORE_ORDER } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkRegistry';
 import { readingWorldPlazaOnboardingCoachmarksFromStorage } from '@/components/world/onboarding/domains/readingWorldPlazaOnboardingCoachmarksFromStorage';
+import { readingWorldPlazaOnboardingCoreFinishedFromStorage } from '@/components/world/onboarding/domains/readingWorldPlazaOnboardingCoreFinishedFromStorage';
 import { writingWorldPlazaOnboardingCoachmarksToStorage } from '@/components/world/onboarding/domains/writingWorldPlazaOnboardingCoachmarksToStorage';
+import { writingWorldPlazaOnboardingCoreFinishedToStorage } from '@/components/world/onboarding/domains/writingWorldPlazaOnboardingCoreFinishedToStorage';
 
 export type WorldPlazaOnboardingCoachmarkSessionSignals = {
   readonly hasMoved: boolean;
@@ -96,6 +100,35 @@ function notifyingWorldPlazaOnboardingCoachmarkSubscribers(): void {
   }
 }
 
+function checkingWorldPlazaOnboardingCoreStepsComplete(
+  completedStepIds: ReadonlySet<WorldPlazaOnboardingCoachmarkStepId>
+): boolean {
+  return DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_CORE_ORDER.every((stepId) =>
+    completedStepIds.has(stepId)
+  );
+}
+
+function seedingWorldPlazaOnboardingCoreStepsIfFinished(
+  storageOwnerId: string,
+  completedStepIds: ReadonlySet<WorldPlazaOnboardingCoachmarkStepId>
+): Set<WorldPlazaOnboardingCoachmarkStepId> {
+  const isCoreFinished =
+    readingWorldPlazaOnboardingCoreFinishedFromStorage(storageOwnerId) ||
+    readingWorldPlazaOnboardingCoreFinishedFromStorage(null);
+
+  if (!isCoreFinished) {
+    return new Set(completedStepIds);
+  }
+
+  const seededStepIds = new Set(completedStepIds);
+
+  for (const stepId of DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_CORE_ORDER) {
+    seededStepIds.add(stepId);
+  }
+
+  return seededStepIds;
+}
+
 function persistingWorldPlazaOnboardingCoachmarkCompletedSteps(): void {
   if (managingWorldPlazaOnboardingCoachmarkStorageOwnerId === null) {
     return;
@@ -105,6 +138,17 @@ function persistingWorldPlazaOnboardingCoachmarkCompletedSteps(): void {
     managingWorldPlazaOnboardingCoachmarkStorageOwnerId,
     managingWorldPlazaOnboardingCoachmarkCompletedStepIds
   );
+
+  if (
+    checkingWorldPlazaOnboardingCoreStepsComplete(
+      managingWorldPlazaOnboardingCoachmarkCompletedStepIds
+    )
+  ) {
+    writingWorldPlazaOnboardingCoreFinishedToStorage(
+      managingWorldPlazaOnboardingCoachmarkStorageOwnerId,
+      true
+    );
+  }
 }
 
 function mergingWorldPlazaOnboardingCoachmarkCompletedStepsFromStorage(
@@ -115,20 +159,47 @@ function mergingWorldPlazaOnboardingCoachmarkCompletedStepsFromStorage(
   const legacyGuestStepIds =
     readingWorldPlazaOnboardingCoachmarksFromStorage(null);
 
-  if (legacyGuestStepIds.size === 0) {
-    return new Set(ownedStepIds);
-  }
-
-  const mergedStepIds = new Set([...ownedStepIds, ...legacyGuestStepIds]);
+  let mergedStepIds =
+    legacyGuestStepIds.size === 0
+      ? new Set(ownedStepIds)
+      : new Set([...ownedStepIds, ...legacyGuestStepIds]);
 
   // Progress dismissed before the owner id was ready used the unsuffixed key.
   // Fold it into the owner key once so leave/re-enter cannot revive those tips.
-  writingWorldPlazaOnboardingCoachmarksToStorage(storageOwnerId, mergedStepIds);
-
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem(
-      resolvingWorldPlazaOnboardingCoachmarksStorageKey(null)
+  if (legacyGuestStepIds.size > 0) {
+    writingWorldPlazaOnboardingCoachmarksToStorage(
+      storageOwnerId,
+      mergedStepIds
     );
+
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(
+        resolvingWorldPlazaOnboardingCoachmarksStorageKey(null)
+      );
+    }
+  }
+
+  const seededStepIds = seedingWorldPlazaOnboardingCoreStepsIfFinished(
+    storageOwnerId,
+    mergedStepIds
+  );
+
+  if (seededStepIds.size !== mergedStepIds.size) {
+    writingWorldPlazaOnboardingCoachmarksToStorage(
+      storageOwnerId,
+      seededStepIds
+    );
+    writingWorldPlazaOnboardingCoreFinishedToStorage(storageOwnerId, true);
+
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(
+        resolvingWorldPlazaOnboardingCoreFinishedStorageKey(null)
+      );
+    }
+
+    mergedStepIds = seededStepIds;
+  } else if (checkingWorldPlazaOnboardingCoreStepsComplete(mergedStepIds)) {
+    writingWorldPlazaOnboardingCoreFinishedToStorage(storageOwnerId, true);
   }
 
   return mergedStepIds;
@@ -431,7 +502,18 @@ export function resettingWorldPlazaOnboardingCoachmarkProgress(): void {
   managingWorldPlazaOnboardingCoachmarkCompletedStepIds = new Set();
   managingWorldPlazaOnboardingCoachmarkSessionSignals =
     MANAGING_WORLD_PLAZA_ONBOARDING_COACHMARK_EMPTY_SESSION_SIGNALS;
-  persistingWorldPlazaOnboardingCoachmarkCompletedSteps();
+
+  if (managingWorldPlazaOnboardingCoachmarkStorageOwnerId !== null) {
+    writingWorldPlazaOnboardingCoachmarksToStorage(
+      managingWorldPlazaOnboardingCoachmarkStorageOwnerId,
+      managingWorldPlazaOnboardingCoachmarkCompletedStepIds
+    );
+    writingWorldPlazaOnboardingCoreFinishedToStorage(
+      managingWorldPlazaOnboardingCoachmarkStorageOwnerId,
+      false
+    );
+  }
+
   refreshingWorldPlazaOnboardingCoachmarkSnapshotCache();
   notifyingWorldPlazaOnboardingCoachmarkSubscribers();
 }
@@ -453,6 +535,9 @@ export function clearingWorldPlazaOnboardingCoachmarkStoreForOwner(
   if (typeof window !== 'undefined') {
     localStorage.removeItem(
       resolvingWorldPlazaOnboardingCoachmarksStorageKey(storageOwnerId)
+    );
+    localStorage.removeItem(
+      resolvingWorldPlazaOnboardingCoreFinishedStorageKey(storageOwnerId)
     );
   }
 

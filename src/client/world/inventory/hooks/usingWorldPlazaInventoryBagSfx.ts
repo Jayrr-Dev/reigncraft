@@ -1,5 +1,6 @@
 'use client';
 
+import type { StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 import {
   initializingWorldPlazaSfxVolumeStoreFromStorage,
   subscribingWorldPlazaSfxVolume,
@@ -21,7 +22,6 @@ import {
 } from '@/components/world/inventory/domains/playingWorldPlazaInventoryBagSfx';
 import { resolvingWorldPlazaInventoryBagSfxStarAudioId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBagSfxStarAudioId';
 import { useEffect, useRef } from 'react';
-import type { StarAudio } from '@/components/world/audio/definingWorldPlazaAudioTypes';
 
 /**
  * Preloads inventory pickup/drop/move clips and wires grant, rearrange, and drop playback.
@@ -44,13 +44,16 @@ export function usingWorldPlazaInventoryBagSfx(): void {
 
     const playingBagInteraction = ({
       actionId,
+      volumeMultiplier = 1,
     }: PlayingWorldPlazaInventoryBagSfxRequest): void => {
       if (!isPreloadReadyRef.current || starAudio.state === 'locked') {
         return;
       }
 
-      const volume =
-        computingWorldPlazaInventoryBagSfxEffectiveVolume(actionId);
+      const volume = computingWorldPlazaInventoryBagSfxEffectiveVolume(
+        actionId,
+        volumeMultiplier
+      );
 
       if (volume <= 0) {
         return;

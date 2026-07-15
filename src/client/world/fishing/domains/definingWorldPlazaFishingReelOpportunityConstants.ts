@@ -50,6 +50,6 @@ export const DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME =
 export const DEFINING_WORLD_PLAZA_FISHING_REEL_READY_YELLOW_ONCE_CLASS_NAME =
   'world-plaza-fishing-reel-ready-yellow-once' as const;
 
-/** CSS class toggled while the player is holding reel during a ready window. */
-export const DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_GLOW_CLASS_NAME =
-  'world-plaza-fishing-reel-hold-glow' as const;
+/** CSS class toggled while holding reel: text color only, no glow. */
+export const DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_CLASS_NAME =
+  'world-plaza-fishing-reel-hold' as const;

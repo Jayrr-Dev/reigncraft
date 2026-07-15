@@ -67,6 +67,7 @@ import type { ManagingWildlifeInstanceStore } from '@/components/world/wildlife/
 import {
   useEffect,
   useEffectEvent,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -191,7 +192,7 @@ export function usingWorldPlazaOnboardingCoachmarks({
     useState(false);
   const [isHostileWildlifeNearby, setIsHostileWildlifeNearby] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isEnabled) {
       return;
     }

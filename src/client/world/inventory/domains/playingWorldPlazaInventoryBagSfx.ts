@@ -6,6 +6,8 @@ import type { DefiningWorldPlazaInventoryBagSfxActionId } from '@/components/wor
 
 export type PlayingWorldPlazaInventoryBagSfxRequest = {
   readonly actionId: DefiningWorldPlazaInventoryBagSfxActionId;
+  /** Optional scale on top of the action's base target volume (default 1). */
+  readonly volumeMultiplier?: number;
 };
 
 type PlayingWorldPlazaInventoryBagSfxHandler = (

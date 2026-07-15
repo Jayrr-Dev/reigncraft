@@ -8,7 +8,8 @@ import { selectingPlazaHomeScreenButtonSfxClipId } from '@/components/home/domai
  * Plays the resolved chest-close or custom book clip for one button press.
  */
 export function notifyingPlazaDefaultButtonPressed(
-  kind: DefiningPlazaButtonSfxKind
+  kind: DefiningPlazaButtonSfxKind,
+  volumeMultiplier = 1
 ): void {
   switch (kind) {
     case DEFINING_PLAZA_BUTTON_SFX_KIND.none:
@@ -25,6 +26,7 @@ export function notifyingPlazaDefaultButtonPressed(
     default:
       playingPlazaHomeScreenButtonSfx({
         clipId: selectingPlazaHomeScreenButtonSfxClipId(),
+        volumeMultiplier,
       });
   }
 }

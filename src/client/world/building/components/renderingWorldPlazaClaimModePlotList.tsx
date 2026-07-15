@@ -22,6 +22,7 @@ import { resolvingWorldBuildingPlotBiomeIconDefinition } from '@/components/worl
 import type { DefiningWorldBuildingPlotBounds } from '@/components/world/building/domains/definingWorldBuildingPlotBounds';
 import { type DefiningWorldBuildingPlotRegistryOwnerGroup } from '@/components/world/building/domains/groupingWorldBuildingPlotRegistryEntriesByOwner';
 import { formattingWorldBuildingPlotRegistryContiguousRegionLabel } from '@/components/world/building/domains/groupingWorldBuildingPlotRegistryTilesIntoContiguousRegions';
+import { notifyingWorldBuildingClaimBoxButtonPressed } from '@/components/world/building/domains/notifyingWorldBuildingClaimBoxButtonPressed';
 import { resolvingWorldBuildingPlotBoundsBiome } from '@/components/world/building/domains/resolvingWorldBuildingPlotBoundsBiome';
 import {
   LABELING_WORLD_PLOT_VISIT_CLAIM_LIST_PENDING_BUTTON,
@@ -256,6 +257,7 @@ export function RenderingWorldPlazaClaimModePlotList({
                       aria-label={`Teleport to ${regionLabel}`}
                       title={`Teleport to ${regionLabel}`}
                       onClick={() => {
+                        notifyingWorldBuildingClaimBoxButtonPressed();
                         onTeleportToPlotBounds(contiguousRegion.bounds);
                       }}
                       className={
@@ -282,6 +284,7 @@ export function RenderingWorldPlazaClaimModePlotList({
                         onRequestingFriendPlotVisit === undefined
                       }
                       onClick={() => {
+                        notifyingWorldBuildingClaimBoxButtonPressed();
                         onRequestingFriendPlotVisit?.(
                           ownerGroup.ownerUserId,
                           ownerGroup.ownerDisplayLabel,
@@ -316,6 +319,7 @@ export function RenderingWorldPlazaClaimModePlotList({
                       aria-label={`Teleport to ${regionLabel}`}
                       title={`Teleport to ${regionLabel}`}
                       onClick={() => {
+                        notifyingWorldBuildingClaimBoxButtonPressed();
                         onTeleportingToApprovedFriendPlot(
                           contiguousRegion.bounds,
                           visitActionState.requestId as string

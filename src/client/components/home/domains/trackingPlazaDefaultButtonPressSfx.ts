@@ -1,14 +1,23 @@
 import { notifyingPlazaDefaultButtonPressed } from '@/components/home/domains/notifyingPlazaDefaultButtonPressed';
 import { resolvingPlazaDefaultButtonSfxKindFromElement } from '@/components/home/domains/resolvingPlazaDefaultButtonSfxKindFromElement';
 
+export type TrackingPlazaDefaultButtonPressSfxOptions = {
+  /** Scale applied to the default chest-close clip (book kinds ignore this). */
+  readonly volumeMultiplier?: number;
+};
+
 /**
- * Capture clicks on home UI buttons and play the default chest-close clip unless
+ * Capture clicks on UI buttons and play the default chest-close clip unless
  * the button declares a custom or silent press sound.
  */
-export function trackingPlazaDefaultButtonPressSfx(): () => void {
+export function trackingPlazaDefaultButtonPressSfx(
+  options: TrackingPlazaDefaultButtonPressSfxOptions = {}
+): () => void {
   if (typeof window === 'undefined') {
     return () => {};
   }
+
+  const volumeMultiplier = options.volumeMultiplier ?? 1;
 
   const handlingButtonPress = (event: MouseEvent): void => {
     if (event.button !== 0) {
@@ -25,7 +34,7 @@ export function trackingPlazaDefaultButtonPressSfx(): () => void {
       return;
     }
 
-    notifyingPlazaDefaultButtonPressed(resolvedPress.kind);
+    notifyingPlazaDefaultButtonPressed(resolvedPress.kind, volumeMultiplier);
   };
 
   window.addEventListener('click', handlingButtonPress, { capture: true });

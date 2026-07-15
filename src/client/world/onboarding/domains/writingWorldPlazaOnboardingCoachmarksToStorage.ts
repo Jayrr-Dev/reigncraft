@@ -17,8 +17,12 @@ export function writingWorldPlazaOnboardingCoachmarksToStorage(
     return;
   }
 
-  localStorage.setItem(
-    resolvingWorldPlazaOnboardingCoachmarksStorageKey(storageOwnerId),
-    JSON.stringify([...completedStepIds])
-  );
+  try {
+    localStorage.setItem(
+      resolvingWorldPlazaOnboardingCoachmarksStorageKey(storageOwnerId),
+      JSON.stringify([...completedStepIds])
+    );
+  } catch {
+    // Private mode / quota: skip; in-memory progress still applies this session.
+  }
 }

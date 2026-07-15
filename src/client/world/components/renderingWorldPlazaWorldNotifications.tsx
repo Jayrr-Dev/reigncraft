@@ -20,6 +20,8 @@ import {
   subscribingWorldPlazaWorldNotifications,
   type DefiningWorldPlazaWorldNotification,
 } from '@/components/world/domains/managingWorldPlazaWorldNotificationsStore';
+import { readingWorldPlazaControlsHintSeenFromStorage } from '@/components/world/domains/readingWorldPlazaControlsHintSeenFromStorage';
+import { writingWorldPlazaControlsHintSeenToStorage } from '@/components/world/domains/writingWorldPlazaControlsHintSeenToStorage';
 import { checkingWorldPlazaOnboardingShouldSuppressControlsHint } from '@/components/world/onboarding/domains/checkingWorldPlazaOnboardingShouldSuppressControlsHint';
 import { subscribingWorldPlazaOnboardingCoachmarks } from '@/components/world/onboarding/domains/managingWorldPlazaOnboardingCoachmarkStore';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
@@ -62,7 +64,13 @@ export function RenderingWorldPlazaWorldNotifications({
       return;
     }
 
+    if (readingWorldPlazaControlsHintSeenFromStorage()) {
+      didEnqueueControlsHintRef.current = true;
+      return;
+    }
+
     didEnqueueControlsHintRef.current = true;
+    writingWorldPlazaControlsHintSeenToStorage();
     enqueueingWorldPlazaWorldNotification(
       'controls-hint',
       isMobile
