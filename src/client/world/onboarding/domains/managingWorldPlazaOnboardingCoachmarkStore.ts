@@ -342,6 +342,20 @@ export function notifyingWorldPlazaOnboardingPetsOpened(): void {
   });
 }
 
+/**
+ * Clears completed coachmark steps and session signals for the active owner.
+ *
+ * Used when the player turns Tutorial back on in Settings so tips can run again.
+ */
+export function resettingWorldPlazaOnboardingCoachmarkProgress(): void {
+  managingWorldPlazaOnboardingCoachmarkCompletedStepIds = new Set();
+  managingWorldPlazaOnboardingCoachmarkSessionSignals =
+    MANAGING_WORLD_PLAZA_ONBOARDING_COACHMARK_EMPTY_SESSION_SIGNALS;
+  persistingWorldPlazaOnboardingCoachmarkCompletedSteps();
+  refreshingWorldPlazaOnboardingCoachmarkSnapshotCache();
+  notifyingWorldPlazaOnboardingCoachmarkSubscribers();
+}
+
 /** Clears onboarding coachmark progress for one persistence owner. */
 export function clearingWorldPlazaOnboardingCoachmarkStoreForOwner(
   storageOwnerId: string

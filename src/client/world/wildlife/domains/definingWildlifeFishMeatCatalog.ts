@@ -19,7 +19,7 @@ export const DEFINING_WILDLIFE_FISH_MEAT_CATALOG: readonly DefiningWildlifeMeatC
     cookedDisplayName: entry.cookedDisplayName,
     rawHungerRestoreRatio: entry.rawHungerRestoreRatio,
     cookedHungerRestoreRatio: entry.cookedHungerRestoreRatio,
-    lootQuantity: 0,
+    lootQuantity: 1,
     cookDurationMs: entry.cookDurationMs,
     rawDiseaseId: entry.rawDiseaseId ?? 'salmonellosis',
     rawDiseaseChance: entry.rawDiseaseChance ?? 0,

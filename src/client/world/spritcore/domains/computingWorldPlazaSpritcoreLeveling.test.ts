@@ -52,19 +52,19 @@ describe('computingWorldPlazaSpritcoreEquivalentValue', () => {
 describe('computingWorldPlazaSpritcoreOffensiveUpgradePrice', () => {
   it('prices combined damage and speed through multiplied DPS', () => {
     const combinedPrice = computingWorldPlazaSpritcoreOffensiveUpgradePrice(
-      300,
+      100,
       1,
       10,
       0.05
     );
     const damageOnlyPrice = computingWorldPlazaSpritcoreOffensiveUpgradePrice(
-      300,
+      100,
       1,
       10,
       0
     );
     const speedOnlyPrice = computingWorldPlazaSpritcoreOffensiveUpgradePrice(
-      300,
+      100,
       1,
       0,
       0.05
@@ -77,16 +77,16 @@ describe('computingWorldPlazaSpritcoreOffensiveUpgradePrice', () => {
 });
 
 describe('computingWorldPlazaSpritcoreCombatPower', () => {
-  it('returns 1 for the starting character and 40 for the doc monster example', () => {
-    expect(computingWorldPlazaSpritcoreCombatPower(1_000, 300, 1)).toBeCloseTo(
+  it('returns 1 for the starting character and scales with HP/DPS', () => {
+    expect(computingWorldPlazaSpritcoreCombatPower(1_000, 100, 1)).toBeCloseTo(
       1,
       5
     );
     expect(computingWorldPlazaSpritcoreCombatPower(5_000, 500, 2)).toBeCloseTo(
-      16.666666666666668,
+      50,
       5
     );
-    expect(computingWorldPlazaSpritcoreCombatPower(20_000, 300, 1)).toBeCloseTo(
+    expect(computingWorldPlazaSpritcoreCombatPower(20_000, 100, 1)).toBeCloseTo(
       20,
       5
     );
@@ -95,16 +95,16 @@ describe('computingWorldPlazaSpritcoreCombatPower', () => {
 
 describe('computingWorldPlazaSpritcoreDisplayLevel', () => {
   it('maps combat power to max(1, floor(P))', () => {
-    expect(computingWorldPlazaSpritcoreDisplayLevel(1_000, 300, 1)).toBe(1);
-    expect(computingWorldPlazaSpritcoreDisplayLevel(20_000, 300, 1)).toBe(20);
-    expect(computingWorldPlazaSpritcoreDisplayLevel(5_000, 500, 2)).toBe(16);
-    expect(computingWorldPlazaSpritcoreDisplayLevel(500, 150, 1)).toBe(1);
+    expect(computingWorldPlazaSpritcoreDisplayLevel(1_000, 100, 1)).toBe(1);
+    expect(computingWorldPlazaSpritcoreDisplayLevel(20_000, 100, 1)).toBe(20);
+    expect(computingWorldPlazaSpritcoreDisplayLevel(5_000, 500, 2)).toBe(50);
+    expect(computingWorldPlazaSpritcoreDisplayLevel(500, 50, 1)).toBe(1);
   });
 });
 
 describe('resolvingWorldPlazaSpritcoreWildlifeDrop', () => {
   it('drops 80 SC for the calibrated baseline monster profile', () => {
-    const drop = computingWorldPlazaSpritcoreMonsterCombatValue(1_000, 300, 1);
+    const drop = computingWorldPlazaSpritcoreMonsterCombatValue(1_000, 100, 1);
 
     expect(drop).toBeCloseTo(1_600, 5);
     expect(Math.round(drop * 0.05)).toBe(80);
@@ -127,9 +127,9 @@ describe('resolvingWorldPlazaSpritcoreWildlifeDrop', () => {
       resolvingWorldPlazaSpritcoreMonsterAttacksPerSecond(1_500)
     );
 
-    expect(chickenDrop).toBe(7);
-    expect(greyWolfDrop).toBe(33);
-    expect(grizzlyDrop).toBe(144);
+    expect(chickenDrop).toBe(9);
+    expect(greyWolfDrop).toBe(62);
+    expect(grizzlyDrop).toBe(209);
   });
 
   it('uses the global attack-speed scale for wildlife APS', () => {

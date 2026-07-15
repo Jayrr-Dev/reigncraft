@@ -9,7 +9,7 @@ import { computingWorldPlazaSpritcoreCombatPower } from '@/components/world/spri
 /**
  * Derives a display level from combat power.
  * Level = max(1, floor(P)) where P = (H / BASE_HP) × (DPS / BASE_DPS).
- * Starting Girl (1000 HP, 300 atk, 1 APS) is level 1.
+ * Starting Girl (1000 HP, 100 atk, 1 APS) is level 1.
  */
 export function computingWorldPlazaSpritcoreDisplayLevel(
   health: number,

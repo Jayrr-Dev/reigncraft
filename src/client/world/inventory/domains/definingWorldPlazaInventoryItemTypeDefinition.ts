@@ -1,5 +1,6 @@
 import type { DefiningInventoryItemTypeDefinition } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
+import type { DefiningWorldPlazaArmorSlotId } from '@/components/world/equipment/domains/definingWorldPlazaArmorSlotRegistry';
 import type { DefiningWorldPlazaEquipmentItemCapabilities } from '@/components/world/equipment/domains/definingWorldPlazaEquipmentToolKind';
 import type { DefiningWorldPlazaInventoryItemCost } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemResolvedCost';
 import type { DefiningWorldPlazaInventoryCustomItemIconId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
@@ -34,6 +35,11 @@ export type DefiningWorldPlazaInventoryItemFoodBehavior = {
 /** Tool capabilities granted when a hotbar item is equipped. */
 export type DefiningWorldPlazaInventoryItemEquipmentBehavior =
   DefiningWorldPlazaEquipmentItemCapabilities;
+
+/** Profile armor slot wear behavior for survival trail gear. */
+export type DefiningWorldPlazaInventoryItemArmorBehavior = {
+  readonly slotId: DefiningWorldPlazaArmorSlotId;
+};
 
 /** Extra inventory grid granted when the bag popover is open. */
 export type DefiningWorldPlazaInventoryItemContainerBehavior = {
@@ -70,6 +76,7 @@ export type DefiningWorldPlazaInventoryItemTypeDefinition =
   DefiningInventoryItemTypeDefinition & {
     readonly food?: DefiningWorldPlazaInventoryItemFoodBehavior;
     readonly equipment?: DefiningWorldPlazaInventoryItemEquipmentBehavior;
+    readonly armor?: DefiningWorldPlazaInventoryItemArmorBehavior;
     readonly container?: DefiningWorldPlazaInventoryItemContainerBehavior;
     readonly durability?: DefiningWorldPlazaInventoryItemDurabilityBehavior;
     readonly defaultEnchantments?: readonly string[];

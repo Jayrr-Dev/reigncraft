@@ -1,7 +1,7 @@
 /**
  * Declarative Spritcore leveling curve and upgrade step sizes.
  *
- * Calibrated to live combat (1000 HP, 300 atk EV @ 1 nominal APS).
+ * Calibrated to live combat (1000 HP, 100 atk EV @ 1 nominal APS).
  *
  * @module components/world/spritcore/domains/definingWorldPlazaSpritcoreLevelingConstants
  */
@@ -24,14 +24,14 @@ export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_BASE_HP = 1_000;
 /** Theoretical max health approached by the leveling curve. */
 export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_MAX_HP = 100_000;
 
-/** Starting player DPS on the leveling curve (300 atk EV x 1 nominal APS). */
-export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_BASE_DPS = 300;
+/** Starting player DPS on the leveling curve (100 atk EV x 1 nominal APS). */
+export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_BASE_DPS = 100;
 
 /**
  * Theoretical max DPS approached by the leveling curve.
  * Preserves the live baseline HP:TTK ratio at every wealth tier.
  */
-export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_MAX_DPS = 30_000;
+export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_MAX_DPS = 10_000;
 
 /** Fraction of monster combat value granted as a Spiritcore drop. */
 export const DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_MONSTER_DROP_RATE = 0.05;

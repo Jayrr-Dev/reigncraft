@@ -615,6 +615,7 @@ import {
   notifyingWorldPlazaOnboardingMineStarted,
   notifyingWorldPlazaOnboardingStudyStarted,
 } from '@/components/world/onboarding/domains/managingWorldPlazaOnboardingCoachmarkStore';
+import { usingWorldPlazaOnboardingTutorialEnabled } from '@/components/world/onboarding/hooks/usingWorldPlazaOnboardingTutorialEnabled';
 import { RenderingWorldPlotVisitApprovedPlazaModal } from '@/components/world/plotVisit/components/renderingWorldPlotVisitApprovedPlazaModal';
 import { RenderingWorldPlotVisitRequestPlazaModal } from '@/components/world/plotVisit/components/renderingWorldPlotVisitRequestPlazaModal';
 import { WORLD_PLOT_VISIT_REQUESTS_OUTGOING_QUERY_KEY } from '@/components/world/plotVisit/domains/definingWorldPlotVisitRequest';
@@ -1337,10 +1338,12 @@ function RenderingWorldPlazaPixiSceneConnected({
     generationFeatureFlags[
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_WORLD_ANCHORS
     ];
+  const { isOnboardingTutorialEnabled } =
+    usingWorldPlazaOnboardingTutorialEnabled();
   const isHudOnboardingCoachmarksEnabled =
     generationFeatureFlags[
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_ONBOARDING_COACHMARKS
-    ];
+    ] && isOnboardingTutorialEnabled;
   const isTeaBrewingEnabled =
     generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TEA_BREWING];
 

@@ -33,7 +33,7 @@ const DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GIRL_SAMPLE: DefiningWorldPlazaChara
     vitals: { baseMaxHealth: 1000 },
     massKg: DEFINING_WORLD_PLAZA_CHARACTER_DEFAULT_MASS_KG,
     stats: {
-      attackPower: 300,
+      attackPower: 100,
       attackSpeed: 1,
       defense: 5,
       hungerDrainMultiplier: 1,

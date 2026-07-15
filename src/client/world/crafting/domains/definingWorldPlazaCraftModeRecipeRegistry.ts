@@ -56,7 +56,7 @@ import {
   type DefiningWorldPlazaCraftModeRecipeId,
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { DEFINING_WORLD_PLAZA_CRAFT_RECIPE_NEARBY_STATION_RANGE_TILES } from '@/components/world/crafting/domains/definingWorldPlazaCraftRecipeNearbyStationConstants';
-import { registeringWorldPlazaCraftModeToolRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaCraftModeToolRecipes';
+import { registeringWorldPlazaSurvivalCraftModeRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaSurvivalCraftModeRecipes';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
   DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_ROW_COUNT,
@@ -920,6 +920,7 @@ const DEFINING_WORLD_PLAZA_CRAFT_MODE_MANUAL_RECIPE_REGISTRY = [
   ...DEFINING_WORLD_PLAZA_HEALER_RECIPE_REGISTRY.map(
     creatingWorldPlazaHealerRecipe
   ),
+  ...registeringWorldPlazaSurvivalCraftModeRecipes(),
 ] as const satisfies readonly DefiningWorldPlazaCraftModeRecipeDefinition[];
 
 /**

@@ -22,6 +22,12 @@ import { registeringWorldPlazaFlowerBlockDefinitions } from '@/components/world/
 import { registeringWorldPlazaIngotWallBlockDefinitions } from '@/components/world/building/domains/definingWorldPlazaIngotWallBlockRegistry';
 import { registeringWorldPlazaOreWallBlockDefinitions } from '@/components/world/building/domains/definingWorldPlazaOreWallBlockRegistry';
 import {
+  DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_BRUSH_WINDBREAK_HEAT_LEVEL_CELSIUS,
+  DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_CLAIM_BEDROLL_HEAT_LEVEL_CELSIUS,
+  DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_SCOUT_TENT_HEAT_LEVEL_CELSIUS,
+  DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_SHADE_LEAN_TO_COLD_LEVEL_CELSIUS,
+} from '@/components/world/equipment/domains/definingWorldPlazaSurvivalShelterTemperatureConstants';
+import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_BASIC_FLOOR_TREE_PINE,
   registeringWorldPlazaTreeFloorBlockDefinitions,
 } from '@/components/world/building/domains/definingWorldPlazaTreeFloorBlockRegistry';
@@ -110,6 +116,18 @@ export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE =
 /** Ice block id. Emits cold that freezes nearby surface water. */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ICE_BLOCK =
   'utility:ice-block' as const;
+
+/** Survival shelter utility blocks. */
+export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_SURVIVAL_SHADE_LEAN_TO =
+  'utility:survival-shade-lean-to' as const;
+export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_SURVIVAL_BRUSH_WINDBREAK =
+  'utility:survival-brush-windbreak' as const;
+export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_SURVIVAL_SCOUT_TENT =
+  'utility:survival-scout-tent' as const;
+export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_SURVIVAL_CLAIM_BEDROLL =
+  'utility:survival-claim-bedroll' as const;
+export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_SURVIVAL_SMOKE_RACK =
+  'utility:survival-smoke-rack' as const;
 
 /** Decorative flower patch block id. */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_DECORATIVE_FLOWER_PATCH =
@@ -348,6 +366,92 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
       label: 'Ice',
       fillColor: 0xa8d8ea,
       strokeColor: 0x4a7c9b,
+    },
+  },
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_SURVIVAL_SHADE_LEAN_TO]: {
+    id: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_SURVIVAL_SHADE_LEAN_TO,
+    name: 'Shade lean-to',
+    category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
+    isPaletteVisible: false,
+    placementFootprintTileWidth: 1,
+    placementFootprintTileHeight: 2,
+    collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
+    isInteractive: false,
+    environmentalTemperature: {
+      coldLevelCelsius:
+        DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_SHADE_LEAN_TO_COLD_LEVEL_CELSIUS,
+    },
+    visualConfig: {
+      label: 'Lean-to',
+      fillColor: 0x8b7355,
+      strokeColor: 0x4a3f2f,
+    },
+  },
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_SURVIVAL_BRUSH_WINDBREAK]: {
+    id: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_SURVIVAL_BRUSH_WINDBREAK,
+    name: 'Brush windbreak',
+    category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
+    isPaletteVisible: false,
+    collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK,
+    isInteractive: false,
+    environmentalTemperature: {
+      heatLevelCelsius:
+        DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_BRUSH_WINDBREAK_HEAT_LEVEL_CELSIUS,
+    },
+    visualConfig: {
+      label: 'Windbreak',
+      fillColor: 0x6b8e4e,
+      strokeColor: 0x3d522c,
+    },
+  },
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_SURVIVAL_SCOUT_TENT]: {
+    id: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_SURVIVAL_SCOUT_TENT,
+    name: 'Scout tent',
+    category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
+    isPaletteVisible: false,
+    placementFootprintTileWidth: 2,
+    placementFootprintTileHeight: 2,
+    collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
+    isInteractive: false,
+    environmentalTemperature: {
+      heatLevelCelsius:
+        DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_SCOUT_TENT_HEAT_LEVEL_CELSIUS,
+    },
+    visualConfig: {
+      label: 'Tent',
+      fillColor: 0xc4a574,
+      strokeColor: 0x6b5438,
+    },
+  },
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_SURVIVAL_CLAIM_BEDROLL]: {
+    id: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_SURVIVAL_CLAIM_BEDROLL,
+    name: 'Claim bedroll',
+    category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
+    isPaletteVisible: false,
+    allowsSessionPlacementOutsideClaim: true,
+    collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
+    isInteractive: false,
+    environmentalTemperature: {
+      heatLevelCelsius:
+        DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_CLAIM_BEDROLL_HEAT_LEVEL_CELSIUS,
+    },
+    visualConfig: {
+      label: 'Bedroll',
+      fillColor: 0x9c7b5c,
+      strokeColor: 0x5c4635,
+    },
+  },
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_SURVIVAL_SMOKE_RACK]: {
+    id: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_SURVIVAL_SMOKE_RACK,
+    name: 'Smoke rack',
+    category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
+    isPaletteVisible: false,
+    collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
+    isInteractive: false,
+    visualConfig: {
+      label: 'Smoke rack',
+      fillColor: 0x7a5c3e,
+      strokeColor: 0x3f2d1f,
     },
   },
   ...registeringWorldPlazaOreWallBlockDefinitions(),

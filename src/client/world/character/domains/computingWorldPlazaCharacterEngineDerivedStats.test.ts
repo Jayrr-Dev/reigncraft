@@ -15,7 +15,7 @@ describe('computingWorldPlazaCharacterEngineDerivedStats', () => {
 
     expect(girl.scaling.growthLaneLevelOffset).toBeUndefined();
     expect(derived.effectiveMaxHealth).toBe(1000);
-    expect(derived.attackPower).toBe(300);
+    expect(derived.attackPower).toBe(100);
     expect(derived.defense).toBe(5);
     expect(derived.level).toBe(1);
     expect(derived.massKg).toBe(DEFINING_WORLD_PLAZA_CHARACTER_DEFAULT_MASS_KG);

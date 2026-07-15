@@ -47,7 +47,7 @@ describe('computingWorldPlazaStrengthIndexScore', () => {
 
     const bumps: Partial<DefiningWorldPlazaStrengthProfile>[] = [
       { maxHealth: 2000 },
-      { attackPower: 20 },
+      { attackPower: 200 },
       { defense: 30 },
       { runSpeedGridPerSecond: 4.5 },
       { attacksPerSecond: 2 },

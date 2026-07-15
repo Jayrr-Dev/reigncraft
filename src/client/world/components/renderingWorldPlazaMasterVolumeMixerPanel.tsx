@@ -62,6 +62,8 @@ import { LABELING_WORLD_PLAZA_HIDE_ACTIONS_TOGGLE } from '@/components/world/int
 import { usingWorldPlazaHideActionsEnabled } from '@/components/world/interaction/hooks/usingWorldPlazaHideActionsEnabled';
 import { LABELING_WORLD_PLAZA_GROUND_ITEM_AUTO_PICKUP_TOGGLE } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemAutoPickupPreferenceConstants';
 import { usingWorldPlazaGroundItemAutoPickupEnabled } from '@/components/world/inventory/hooks/usingWorldPlazaGroundItemAutoPickupEnabled';
+import { LABELING_WORLD_PLAZA_ONBOARDING_TUTORIAL_TOGGLE } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingTutorialPreferenceConstants';
+import { usingWorldPlazaOnboardingTutorialEnabled } from '@/components/world/onboarding/hooks/usingWorldPlazaOnboardingTutorialEnabled';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
@@ -103,6 +105,8 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
     usingWorldPlazaDangerSenseEnabled();
   const { isFahrenheitDisplayEnabled, settingFahrenheitDisplayEnabled } =
     usingWorldPlazaTemperatureDisplayUnit();
+  const { isOnboardingTutorialEnabled, settingOnboardingTutorialEnabled } =
+    usingWorldPlazaOnboardingTutorialEnabled();
 
   if (!isOpen) {
     return null;
@@ -292,6 +296,21 @@ export function RenderingWorldPlazaMasterVolumeMixerPanel({
 
         {activeViewId === 'toggles' ? (
           <>
+            <label
+              className={STYLING_WORLD_PLAZA_MINIMAP_TOGGLE_ROW_CLASS_NAME}
+              htmlFor="world-plaza-onboarding-tutorial-enabled"
+            >
+              <input
+                id="world-plaza-onboarding-tutorial-enabled"
+                type="checkbox"
+                checked={isOnboardingTutorialEnabled}
+                className={STYLING_WORLD_PLAZA_MINIMAP_CHECKBOX_CLASS_NAME}
+                onChange={(event) => {
+                  settingOnboardingTutorialEnabled(event.currentTarget.checked);
+                }}
+              />
+              <span>{LABELING_WORLD_PLAZA_ONBOARDING_TUTORIAL_TOGGLE}</span>
+            </label>
             <label
               className={STYLING_WORLD_PLAZA_MINIMAP_TOGGLE_ROW_CLASS_NAME}
               htmlFor="world-plaza-minimap-enabled"

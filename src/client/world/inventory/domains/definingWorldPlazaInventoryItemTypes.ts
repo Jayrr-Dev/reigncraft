@@ -60,6 +60,7 @@ import { registeringWorldPlazaInventoryCloverItemDefinitions } from '@/component
 import { registeringWorldPlazaInventoryCoffeeItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCoffeeItemDefinitions';
 import { registeringWorldPlazaInventoryFlowerItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryFlowerItemDefinitions';
 import { registeringWorldPlazaInventoryHealerItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryHealerItemDefinitions';
+import { registeringWorldPlazaInventorySurvivalItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventorySurvivalItemDefinitions';
 import { registeringWorldPlazaInventoryIngotItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryIngotItemDefinitions';
 import { registeringWorldPlazaInventoryOreItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryOreItemDefinitions';
 import { registeringWorldPlazaInventoryTallGrassItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryTallGrassItemDefinitions';
@@ -301,6 +302,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     ...registeringWorldPlazaInventoryCoffeeItemDefinitions(),
     ...registeringWorldPlazaInventoryCeramicsItemDefinitions(),
     ...registeringWorldPlazaInventoryHealerItemDefinitions(),
+    ...registeringWorldPlazaInventorySurvivalItemDefinitions(),
     ...registeringWorldPlazaInventoryOreItemDefinitions(),
     ...registeringWorldPlazaInventoryWetClayItemDefinitions(),
     ...registeringWorldPlazaInventoryIngotItemDefinitions(),

@@ -75,7 +75,7 @@ export const DEFINING_WORLD_PLAZA_STRENGTH_BASELINE_REFERENCE = {
   maxHealth: 1000,
   healthRegenPerSecond: 2,
   defense: 5,
-  attackPower: 300,
+  attackPower: 100,
   attacksPerSecond: 1,
   runSpeedGridPerSecond: 3,
 } as const;

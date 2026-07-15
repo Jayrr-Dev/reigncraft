@@ -71,7 +71,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_REGISTRY = [
   {
     id: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.SURVIVAL,
     title: 'Survival Cookbook',
-    subtitle: 'Field rations, foraged fare, and campfire staples.',
+    subtitle: 'Trail wear, build mats, and soft shelters for the field.',
     ariaLabel: 'Open the Survival Cookbook',
     spriteColumnIndex: 0,
     emblemIconifyIcon: 'mdi:campfire',

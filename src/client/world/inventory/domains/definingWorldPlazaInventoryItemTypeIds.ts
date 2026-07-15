@@ -344,6 +344,27 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOTTLE =
 /** Fired empty clay bottle (kiln output from wet bottle). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOTTLE =
   'world-plaza-empty-clay-bottle' as const;
+/** Clay bottle filled at shore (drinkable; returns empty bottle). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_BOTTLE =
+  'world-plaza-watered-clay-bottle' as const;
+/** Unfired clay bowl shaped from wet clay (fire in kiln). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOWL =
+  'world-plaza-wet-clay-bowl' as const;
+/** Fired empty clay bowl (kiln output; campfire porridge vessel). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOWL =
+  'world-plaza-empty-clay-bowl' as const;
+/** Berry porridge cooked in a clay bowl at a campfire. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BOWL_OF_PORRIDGE =
+  'world-plaza-bowl-of-porridge' as const;
+/** Unfired clay crock shaped from wet clay (fire in kiln). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CROCK =
+  'world-plaza-wet-clay-crock' as const;
+/** Fired empty clay crock (kiln output; smoke-oil vessel). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CROCK =
+  'world-plaza-empty-clay-crock' as const;
+/** Rendered fat + niter sealed in a clay crock (cold resistance). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SMOKE_OIL_CROCK =
+  'world-plaza-smoke-oil-crock' as const;
 
 /** Healer's Cookbook consumables (sprite sheet order). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_HEALER_ITEM_TYPE_IDS = [
@@ -442,3 +463,65 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP =
 /** Placeable caltrops (one-shot walk-over slow + bleed). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CALTROPS =
   'world-plaza-caltrops' as const;
+
+/** Survival trail wear and build mats (sprite sheet order). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_SURVIVAL_ITEM_TYPE_IDS = [
+  'world-plaza-survival-straw-sun-hat',
+  'world-plaza-survival-wool-neck-wrap',
+  'world-plaza-survival-frost-glare-lenses',
+  'world-plaza-survival-swamp-mesh-veil',
+  'world-plaza-survival-hide-trail-vest',
+  'world-plaza-survival-fur-shoulder-cape',
+  'world-plaza-survival-palm-leaf-poncho',
+  'world-plaza-survival-bark-bracers',
+  'world-plaza-survival-fingerless-work-mitts',
+  'world-plaza-survival-cloth-leg-wraps',
+  'world-plaza-survival-hide-trail-boots',
+  'world-plaza-survival-split-planks',
+  'world-plaza-survival-wattle-panel',
+  'world-plaza-survival-adobe-brick',
+  'world-plaza-survival-rope-coil',
+  'world-plaza-survival-peg-stake-pack',
+  'world-plaza-survival-reed-mat',
+  'world-plaza-survival-clay-daub-mix',
+  'world-plaza-survival-lashing-twine-spool',
+] as const;
+
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_STRAW_SUN_HAT =
+  'world-plaza-survival-straw-sun-hat' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_WOOL_NECK_WRAP =
+  'world-plaza-survival-wool-neck-wrap' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_FROST_GLARE_LENSES =
+  'world-plaza-survival-frost-glare-lenses' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_SWAMP_MESH_VEIL =
+  'world-plaza-survival-swamp-mesh-veil' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_HIDE_TRAIL_VEST =
+  'world-plaza-survival-hide-trail-vest' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_FUR_SHOULDER_CAPE =
+  'world-plaza-survival-fur-shoulder-cape' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_PALM_LEAF_PONCHO =
+  'world-plaza-survival-palm-leaf-poncho' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_BARK_BRACERS =
+  'world-plaza-survival-bark-bracers' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_FINGERLESS_WORK_MITTS =
+  'world-plaza-survival-fingerless-work-mitts' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_CLOTH_LEG_WRAPS =
+  'world-plaza-survival-cloth-leg-wraps' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_HIDE_TRAIL_BOOTS =
+  'world-plaza-survival-hide-trail-boots' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_SPLIT_PLANKS =
+  'world-plaza-survival-split-planks' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_WATTLE_PANEL =
+  'world-plaza-survival-wattle-panel' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_ADOBE_BRICK =
+  'world-plaza-survival-adobe-brick' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_ROPE_COIL =
+  'world-plaza-survival-rope-coil' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_PEG_STAKE_PACK =
+  'world-plaza-survival-peg-stake-pack' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_REED_MAT =
+  'world-plaza-survival-reed-mat' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_CLAY_DAUB_MIX =
+  'world-plaza-survival-clay-daub-mix' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SURVIVAL_LASHING_TWINE_SPOOL =
+  'world-plaza-survival-lashing-twine-spool' as const;
