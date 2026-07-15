@@ -64,6 +64,6 @@ describe('resolvingWorldPlazaProceduralChestAtTileIndex', () => {
     if (first?.keySource === 'wildlife-species') {
       expect(first?.keyWildlifeSpeciesId).toBeTruthy();
     }
-    expect(first?.loot).toEqual({ kind: 'pool', poolId: 'starter-forage' });
+    expect(first?.loot).toEqual({ kind: 'pool', poolId: 'packs-and-tools' });
   });
 });

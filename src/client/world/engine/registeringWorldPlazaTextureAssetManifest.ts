@@ -2,6 +2,7 @@ import {
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_ACTIVE_WORLD_SPRITE_URL,
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL,
 } from '@/components/world/building/domains/definingWorldPlazaBlacksmithUtilitySpriteConstants';
+import { DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_WORLD_SPRITE_URL } from '@/components/world/building/domains/definingWorldPlazaSurvivalShelterSpriteConstants';
 import { DEFINING_WORLD_PLAZA_CHEST_SPRITE_URLS } from '@/components/world/chest/domains/definingWorldPlazaChestConstants';
 import type { DefiningWorldPlazaFirelandsPropKind } from '@/components/world/domains/definingWorldPlazaFirelandsRuinBlueprintConstants';
 import { DEFINING_WORLD_PLAZA_LONG_GRASS_SPRITE_URLS } from '@/components/world/domains/definingWorldPlazaLongGrassConstants';
@@ -434,6 +435,7 @@ const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_SPRITE_URLS = [
     ...Object.values(
       DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_ACTIVE_WORLD_SPRITE_URL
     ),
+    ...Object.values(DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_WORLD_SPRITE_URL),
   ]),
 ];
 

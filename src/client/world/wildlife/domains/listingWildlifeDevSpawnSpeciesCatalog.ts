@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
+import { checkingWildlifeFishMeatSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeFishMeatCatalog';
 import {
   listingWildlifeSpeciesIds,
   resolvingWildlifeSpeciesDefinition,
@@ -34,6 +35,7 @@ function normalizingWildlifeDevSpawnSearchQuery(query: string): string {
 /** Full species list sorted by display name. */
 export function listingWildlifeDevSpawnSpeciesCatalog(): readonly DefiningWildlifeDevSpawnSpeciesCatalogEntry[] {
   return listingWildlifeSpeciesIds()
+    .filter((speciesId) => !checkingWildlifeFishMeatSpeciesId(speciesId))
     .map((speciesId) => {
       const species = resolvingWildlifeSpeciesDefinition(speciesId);
 

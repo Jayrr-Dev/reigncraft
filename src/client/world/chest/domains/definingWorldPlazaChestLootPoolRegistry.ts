@@ -6,9 +6,29 @@
 
 import type { DefiningWorldPlazaChestLootPoolEntry } from '@/components/world/chest/domains/definingWorldPlazaChestTypes';
 import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_GOLD,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_IRON,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_STEEL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_GOLDEN,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLOVER_3_LEAF,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EXPEDITION_BAG,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_IRON,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_WOOD,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_IRON,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_WOOD,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PACK,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE_IRON,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE_STEEL,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_POUCH,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RUCKSACK,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SCYTHE_WOOD,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_IRON,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 
 export const DEFINING_WORLD_PLAZA_CHEST_LOOT_POOL_REGISTRY = {
@@ -27,6 +47,116 @@ export const DEFINING_WORLD_PLAZA_CHEST_LOOT_POOL_REGISTRY = {
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_GOLDEN,
       quantity: 1,
       weight: 10,
+    },
+  ],
+  /**
+   * Locked / procedural chests: bag tiers + tools.
+   * Bigger bags and higher tool tiers weigh less.
+   */
+  'packs-and-tools': [
+    // Bags (weight ~50 total)
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_POUCH,
+      quantity: 1,
+      weight: 16,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SATCHEL,
+      quantity: 1,
+      weight: 14,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PACK,
+      quantity: 1,
+      weight: 10,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RUCKSACK,
+      quantity: 1,
+      weight: 7,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EXPEDITION_BAG,
+      quantity: 1,
+      weight: 3,
+    },
+    // Wood / starter tools
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
+      quantity: 1,
+      weight: 6,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
+      quantity: 1,
+      weight: 5,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE,
+      quantity: 1,
+      weight: 5,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_WOOD,
+      quantity: 1,
+      weight: 4,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SCYTHE_WOOD,
+      quantity: 1,
+      weight: 4,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_WOOD,
+      quantity: 1,
+      weight: 4,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD,
+      quantity: 1,
+      weight: 4,
+    },
+    // Iron tools
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_IRON,
+      quantity: 1,
+      weight: 2,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE_IRON,
+      quantity: 1,
+      weight: 2,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_HOE_IRON,
+      quantity: 1,
+      weight: 2,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_IRON,
+      quantity: 1,
+      weight: 2,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISHROD_IRON,
+      quantity: 1,
+      weight: 2,
+    },
+    // Rare steel / gold
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_STEEL,
+      quantity: 1,
+      weight: 1,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_PICKAXE_STEEL,
+      quantity: 1,
+      weight: 1,
+    },
+    {
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_GOLD,
+      quantity: 1,
+      weight: 1,
     },
   ],
 } as const satisfies Record<

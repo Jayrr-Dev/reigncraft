@@ -22,6 +22,8 @@ export type WorldPlazaInventoryHotbarSlotInteractions = {
   readonly openItemDetailSlotIndex: number | null;
   readonly openBagHotbarSlotIndex: number | null;
   readonly onSelectHotbarSlot?: (slotIndex: number) => void;
+  readonly onEquipArmorHotbarSlot?: (slotIndex: number) => void;
+  readonly isArmorItemEquipped?: (itemTypeId: string) => boolean;
   readonly onEatHotbarSlot?: (slotIndex: number) => void;
   readonly onStudyHotbarSlot?: (slotIndex: number) => void;
   readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
@@ -97,6 +99,8 @@ export const RenderingWorldPlazaInventoryHotbarSlotCell = memo(
       openItemDetailSlotIndex,
       openBagHotbarSlotIndex,
       onSelectHotbarSlot,
+      onEquipArmorHotbarSlot,
+      isArmorItemEquipped,
       onEatHotbarSlot,
       onStudyHotbarSlot,
       onAttachRecipePageHotbarSlot,
@@ -120,7 +124,13 @@ export const RenderingWorldPlazaInventoryHotbarSlotCell = memo(
       <RenderingWorldPlazaInventorySlotCell
         {...props}
         isEquipped={props.slotIndex === selectedSlotIndex}
+        isArmorEquipped={
+          props.item
+            ? (isArmorItemEquipped?.(props.item.itemTypeId) ?? false)
+            : false
+        }
         onEquipSlot={onSelectHotbarSlot}
+        onEquipArmorSlot={onEquipArmorHotbarSlot}
         onOpenItemDetailPopover={togglingItemActionPopover}
         isItemDetailPopoverOpen={openItemDetailSlotIndex === props.slotIndex}
         onCloseItemDetailPopover={closingItemActionPopover}
@@ -166,6 +176,8 @@ export function usingWorldPlazaInventoryHotbarSlotInteractionsValue(
       input.openTeaPotHotbarSlotIndex,
       input.onStudyHotbarSlot,
       input.onSelectHotbarSlot,
+      input.onEquipArmorHotbarSlot,
+      input.isArmorItemEquipped,
       input.onUseActiveEnchantment,
       input.openBagHotbarSlotIndex,
       input.openItemDetailSlotIndex,

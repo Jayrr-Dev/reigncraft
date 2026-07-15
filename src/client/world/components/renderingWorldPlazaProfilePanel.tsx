@@ -80,7 +80,12 @@ import {
   type ResolvingWorldPlazaProfilePanelVitalRow,
 } from '@/components/world/domains/resolvingWorldPlazaProfilePanelSections';
 import type { DefiningWorldPlazaArmorSlotDefinition } from '@/components/world/equipment/domains/definingWorldPlazaArmorSlotRegistry';
+import type { DefiningWorldPlazaArmorLoadoutState } from '@/components/world/equipment/domains/definingWorldPlazaArmorLoadoutTypes';
+import { creatingEmptyWorldPlazaArmorLoadoutState } from '@/components/world/equipment/domains/definingWorldPlazaArmorLoadoutTypes';
+import type { DefiningWorldPlazaArmorSlotId } from '@/components/world/equipment/domains/definingWorldPlazaArmorSlotRegistry';
 import { resolvingWorldPlazaArmorSlotsForAvatarSkin } from '@/components/world/equipment/domains/resolvingWorldPlazaArmorSlotsForAvatarSkin';
+import { RenderingWorldPlazaInventoryItemGlyph } from '@/components/world/inventory/components/renderingWorldPlazaInventoryItemGlyph';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { RenderingWorldPlazaEntityDiseaseIconGlyph } from '@/components/world/health/components/renderingWorldPlazaEntityDiseaseIconGlyph';
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
 import type { UsingWorldPlazaPlayerHealthHudSnapshot } from '@/components/world/health/hooks/usingWorldPlazaPlayerHealth';
@@ -108,6 +113,10 @@ export interface RenderingWorldPlazaProfilePanelProps {
   naturalRunSpeed?: number;
   onInventoryStateChange?: (nextState: DefiningInventoryState) => void;
   onShowToast?: (message: string) => void;
+  /** Equipped survival armor keyed by slot id. */
+  armorLoadoutState?: DefiningWorldPlazaArmorLoadoutState;
+  /** Unequips one armor slot back into inventory. */
+  onUnequipArmorSlot?: (slotId: DefiningWorldPlazaArmorSlotId) => void;
 }
 
 function RenderingWorldPlazaProfilePanelVitalRows({
@@ -173,8 +182,12 @@ function RenderingWorldPlazaProfilePanelVitalRows({
 
 function RenderingWorldPlazaProfilePanelArmorSlots({
   slots,
+  loadoutState,
+  onUnequipArmorSlot,
 }: {
   slots: readonly DefiningWorldPlazaArmorSlotDefinition[];
+  loadoutState: DefiningWorldPlazaArmorLoadoutState;
+  onUnequipArmorSlot?: (slotId: DefiningWorldPlazaArmorSlotId) => void;
 }): React.JSX.Element {
   return (
     <div
@@ -183,32 +196,59 @@ function RenderingWorldPlazaProfilePanelArmorSlots({
         gridTemplateColumns: `repeat(${slots.length}, minmax(0, 1fr))`,
       }}
     >
-      {slots.map((slot) => (
-        <div
-          key={slot.id}
-          className={
-            STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_CELL_CLASS_NAME
-          }
-          aria-label={`${slot.label} armor slot (empty)`}
-        >
-          <Icon
-            icon={slot.iconName}
-            width={DEFINING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_SIZE_PX}
-            height={DEFINING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_SIZE_PX}
+      {slots.map((slot) => {
+        const equipped = loadoutState[slot.id];
+
+        return (
+          <button
+            key={slot.id}
+            type="button"
             className={
-              STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_CLASS_NAME
+              STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_CELL_CLASS_NAME
             }
-            aria-hidden
-          />
-          <span
-            className={
-              STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_LABEL_CLASS_NAME
+            aria-label={
+              equipped
+                ? `${slot.label} armor slot (${equipped.itemTypeId}), click to unequip`
+                : `${slot.label} armor slot (empty)`
             }
+            disabled={!equipped || !onUnequipArmorSlot}
+            onClick={() => {
+              if (equipped) {
+                onUnequipArmorSlot?.(slot.id);
+              }
+            }}
           >
-            {slot.label}
-          </span>
-        </div>
-      ))}
+            {equipped ? (
+              <RenderingWorldPlazaInventoryItemGlyph
+                itemTypeId={equipped.itemTypeId}
+                registry={DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY}
+                iconClassName={
+                  STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_CLASS_NAME
+                }
+              />
+            ) : (
+              <Icon
+                icon={slot.iconName}
+                width={DEFINING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_SIZE_PX}
+                height={
+                  DEFINING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_SIZE_PX
+                }
+                className={
+                  STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_ICON_CLASS_NAME
+                }
+                aria-hidden
+              />
+            )}
+            <span
+              className={
+                STYLING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SLOT_LABEL_CLASS_NAME
+              }
+            >
+              {slot.label}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -307,6 +347,8 @@ export function RenderingWorldPlazaProfilePanel({
   naturalRunSpeed,
   onInventoryStateChange,
   onShowToast,
+  armorLoadoutState = creatingEmptyWorldPlazaArmorLoadoutState(),
+  onUnequipArmorSlot,
 }: RenderingWorldPlazaProfilePanelProps): React.JSX.Element | null {
   const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();
   const isSpritcoreUpgradeEnabled = checkingWorldPlazaGenerationFeatureEnabled(
@@ -520,7 +562,11 @@ export function RenderingWorldPlazaProfilePanel({
                 >
                   {LABELING_WORLD_PLAZA_PROFILE_PANEL_ARMOR_SECTION}
                 </h3>
-                <RenderingWorldPlazaProfilePanelArmorSlots slots={armorSlots} />
+                <RenderingWorldPlazaProfilePanelArmorSlots
+                  slots={armorSlots}
+                  loadoutState={armorLoadoutState}
+                  onUnequipArmorSlot={onUnequipArmorSlot}
+                />
               </section>
 
               <section

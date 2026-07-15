@@ -1,4 +1,7 @@
-import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
+import {
+  DEFINING_WILDLIFE_MEAT_CATALOG,
+  resolvingWildlifeMeatCatalogEntry,
+} from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import {
   DEFINING_WILDLIFE_SPECIES_REGISTRY,
   listingWildlifeSpeciesIds,
@@ -12,9 +15,7 @@ describe('definingWildlifeMeatRegistry', () => {
     expect(speciesIds.length).toBeGreaterThan(0);
 
     for (const speciesId of speciesIds) {
-      const catalogEntry = DEFINING_WILDLIFE_MEAT_CATALOG.find(
-        (entry) => entry.speciesId === speciesId
-      );
+      const catalogEntry = resolvingWildlifeMeatCatalogEntry(speciesId);
 
       expect(
         catalogEntry,

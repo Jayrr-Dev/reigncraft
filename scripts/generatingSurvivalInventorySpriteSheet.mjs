@@ -144,5 +144,39 @@ async function packingShelterUtilities() {
   }
 }
 
+async function packingShelterRecipeSheet() {
+  const COLS_SHELTER = 5;
+  const hues = [35, 28, 42, 55, 18];
+  const composites = [];
+
+  for (let index = 0; index < SHELTER_UTILITIES.length; index += 1) {
+    const cell = await drawingIconCell(hues[index]);
+    composites.push({ input: cell, left: index * CELL, top: 0 });
+  }
+
+  const sheet = await sharp({
+    create: {
+      width: COLS_SHELTER * CELL,
+      height: CELL,
+      channels: 4,
+      background: KEY,
+    },
+  })
+    .composite(composites)
+    .webp({ lossless: true, effort: 6 })
+    .toBuffer();
+
+  const outPath = path.join(
+    ROOT,
+    'public',
+    'inventory',
+    'sprites',
+    'inventory-survival-shelter-sprites.webp'
+  );
+  await writeFile(outPath, sheet);
+  console.log(`Wrote ${outPath}`);
+}
+
 await packingInventorySheet();
 await packingShelterUtilities();
+await packingShelterRecipeSheet();

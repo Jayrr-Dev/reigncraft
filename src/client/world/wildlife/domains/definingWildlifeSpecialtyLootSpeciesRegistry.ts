@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/definingWildlifeSpecialtyLootSpeciesRegistry
  */
 
+import { listingWorldPlazaFishingCatchCreatures } from '@/components/world/fishing/domains/definingWorldPlazaFishingCatchRegistry';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type DefiningWildlifeSpecialtyLootRoll = {
@@ -40,12 +41,18 @@ export const DEFINING_WILDLIFE_SPECIALTY_LOOT_SPECIES_REGISTRY: readonly Definin
     // farm
     {
       speciesId: 'cow',
-      common: { itemTypeId: 'world-plaza-wildlife-milk', dropChance: C.farmCommon },
+      common: {
+        itemTypeId: 'world-plaza-wildlife-milk',
+        dropChance: C.farmCommon,
+      },
       rare: { itemTypeId: 'world-plaza-wildlife-hide', dropChance: C.farmRare },
     },
     {
       speciesId: 'cow-brown',
-      common: { itemTypeId: 'world-plaza-wildlife-milk', dropChance: C.farmCommon },
+      common: {
+        itemTypeId: 'world-plaza-wildlife-milk',
+        dropChance: C.farmCommon,
+      },
       rare: {
         itemTypeId: 'world-plaza-wildlife-brown-hide',
         dropChance: C.farmRare,
@@ -53,7 +60,10 @@ export const DEFINING_WILDLIFE_SPECIALTY_LOOT_SPECIES_REGISTRY: readonly Definin
     },
     {
       speciesId: 'sheep',
-      common: { itemTypeId: 'world-plaza-wildlife-wool', dropChance: C.farmCommon },
+      common: {
+        itemTypeId: 'world-plaza-wildlife-wool',
+        dropChance: C.farmCommon,
+      },
       rare: {
         itemTypeId: 'world-plaza-wildlife-sheep-skin',
         dropChance: C.farmRare,
@@ -80,7 +90,10 @@ export const DEFINING_WILDLIFE_SPECIALTY_LOOT_SPECIES_REGISTRY: readonly Definin
     },
     {
       speciesId: 'bull',
-      common: { itemTypeId: 'world-plaza-wildlife-hide', dropChance: C.wildCommon },
+      common: {
+        itemTypeId: 'world-plaza-wildlife-hide',
+        dropChance: C.wildCommon,
+      },
       rare: { itemTypeId: 'world-plaza-wildlife-horn', dropChance: C.wildRare },
     },
     {
@@ -186,7 +199,10 @@ export const DEFINING_WILDLIFE_SPECIALTY_LOOT_SPECIES_REGISTRY: readonly Definin
         itemTypeId: 'world-plaza-wildlife-soft-hide',
         dropChance: C.wildCommon,
       },
-      rare: { itemTypeId: 'world-plaza-wildlife-tendon', dropChance: C.wildRare },
+      rare: {
+        itemTypeId: 'world-plaza-wildlife-tendon',
+        dropChance: C.wildRare,
+      },
     },
     {
       speciesId: 'stag',
@@ -194,7 +210,10 @@ export const DEFINING_WILDLIFE_SPECIALTY_LOOT_SPECIES_REGISTRY: readonly Definin
         itemTypeId: 'world-plaza-wildlife-soft-hide',
         dropChance: C.wildCommon,
       },
-      rare: { itemTypeId: 'world-plaza-wildlife-antler', dropChance: C.wildRare },
+      rare: {
+        itemTypeId: 'world-plaza-wildlife-antler',
+        dropChance: C.wildRare,
+      },
     },
     {
       speciesId: 'zebra',
@@ -210,7 +229,10 @@ export const DEFINING_WILDLIFE_SPECIALTY_LOOT_SPECIES_REGISTRY: readonly Definin
         itemTypeId: 'world-plaza-wildlife-thin-hide',
         dropChance: C.wildCommon,
       },
-      rare: { itemTypeId: 'world-plaza-wildlife-tendon', dropChance: C.wildRare },
+      rare: {
+        itemTypeId: 'world-plaza-wildlife-tendon',
+        dropChance: C.wildRare,
+      },
     },
     {
       speciesId: 'oryx',
@@ -605,6 +627,28 @@ export const DEFINING_WILDLIFE_SPECIALTY_LOOT_SPECIES_REGISTRY: readonly Definin
         dropChance: C.fairyRare,
       },
     },
+    {
+      speciesId: 'cyroborn',
+      common: {
+        itemTypeId: 'world-plaza-wildlife-scale',
+        dropChance: C.predatorCommon,
+      },
+      rare: {
+        itemTypeId: 'world-plaza-wildlife-ember-scale',
+        dropChance: C.apexRare,
+      },
+    },
+    ...listingWorldPlazaFishingCatchCreatures().map((creature) => ({
+      speciesId: creature.catchId,
+      common: {
+        itemTypeId: 'world-plaza-wildlife-scale',
+        dropChance: C.wildCommon,
+      },
+      rare: {
+        itemTypeId: 'world-plaza-wildlife-shell-scute',
+        dropChance: C.wildRare,
+      },
+    })),
   ];
 
 const DEFINING_WILDLIFE_SPECIALTY_LOOT_BY_SPECIES_ID = Object.fromEntries(

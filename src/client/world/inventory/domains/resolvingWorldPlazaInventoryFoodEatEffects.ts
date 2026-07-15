@@ -10,12 +10,18 @@ import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/hea
 import {
   addingWorldPlazaEntityHealthDamageOverTime,
   healingWorldPlazaEntityHealthWithAmplifiers,
+  removingWorldPlazaEntityHealthConfusionEffect,
+  removingWorldPlazaEntityHealthMovementModifier,
 } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { resolvingWorldPlazaEntityDiseaseWorldEpochMs } from '@/components/world/health/domains/resolvingWorldPlazaEntityDiseaseWorldEpochMs';
 import { applyingWorldPlazaInventoryFlowerEatEffects } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryFlowerEatEffects';
 import { parsingWorldPlazaFlowerSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
 import { applyingWorldPlazaInventoryHealerConsumableEffects } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryHealerConsumableEffects';
 import { resolvingWorldPlazaHealerConsumableEffectKind } from '@/components/world/inventory/domains/definingWorldPlazaHealerConsumableEffectRegistry';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CUP_OF_TEA,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_BOTTLE,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { resolvingWorldPlazaInventoryFoodHealAmount } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealAmount';
 import type { DefiningWorldPlazaInventoryFoodDefinition } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
 import { resolvingWorldPlazaPlayerHeldLuckyFoodBuffChanceMultiplier } from '@/components/world/inventory/domains/resolvingWorldPlazaPlayerHeldLuckyFoodBuffChanceMultiplier';
@@ -23,7 +29,6 @@ import { applyingWorldPlazaTeaBrewingDrinkEffects } from '@/components/world/tea
 import { resolvingWorldPlazaTeaBrewingMetadata } from '@/components/world/tea-brewing/domains/resolvingWorldPlazaTeaBrewingMetadata';
 import { DEFINING_WILDLIFE_FOOD_SICKNESS_HUNGER_MULTIPLIER } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import { resolvingWildlifeAggroDeerMeatCookedResidualDiseaseChance } from '@/components/world/wildlife/domains/resolvingWildlifeAggroDeerMeatCookedResidualDiseaseChance';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CUP_OF_TEA } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 
 export const DEFINING_WORLD_PLAZA_FOOD_SICKNESS_DEBUFF_ID =
   'food-sickness-debuff' as const;
@@ -315,6 +320,53 @@ export function resolvingWorldPlazaInventoryFoodEatEffects({
       didRollSickness: false,
       didRollDisease: false,
       didRollWellFedBuff: brew !== null,
+    };
+  }
+
+  if (
+    foodDefinition.itemTypeId ===
+    DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_BOTTLE
+  ) {
+    let bottleHealthState = removingWorldPlazaEntityHealthMovementModifier(
+      nextHealthState,
+      DEFINING_WORLD_PLAZA_FOOD_SICKNESS_DEBUFF_ID
+    );
+    bottleHealthState = removingWorldPlazaEntityHealthConfusionEffect(
+      bottleHealthState,
+      'petal-sickness-debuff'
+    );
+    bottleHealthState = removingWorldPlazaEntityHealthMovementModifier(
+      bottleHealthState,
+      'petal-sickness-stamina-debuff'
+    );
+    bottleHealthState = removingWorldPlazaEntityHealthMovementModifier(
+      bottleHealthState,
+      'disease-nausea-slow-debuff'
+    );
+
+    const healthHealAmount = resolvingWorldPlazaInventoryFoodHealAmount({
+      healthHeal: foodDefinition.healthHeal,
+      effectiveMaxHealth: computingWorldPlazaEntityHealthEffectiveMax(
+        bottleHealthState,
+        nowMs
+      ),
+    });
+
+    if (healthHealAmount > 0) {
+      bottleHealthState = healingWorldPlazaEntityHealthWithAmplifiers({
+        receiverState: bottleHealthState,
+        baseHealAmount: healthHealAmount,
+        nowMs,
+      }).state;
+    }
+
+    return {
+      effectiveHungerRestoreRatio: foodDefinition.hungerRestoreRatio,
+      healthHealAmount,
+      nextHealthState: bottleHealthState,
+      didRollSickness: false,
+      didRollDisease: false,
+      didRollWellFedBuff: false,
     };
   }
 

@@ -147,7 +147,7 @@ describe('managingWorldPlazaRecipeDiscoveryStore', () => {
     expect(survivalOnly).toHaveLength(1);
     // Stations/traps/tubes (6) + tiered tool recipes (24).
     expect(blacksmithOnly).toHaveLength(30);
-    expect(ceramicsOnly).toHaveLength(5);
+    expect(ceramicsOnly).toHaveLength(9);
     expect(blacksmithOnly.every((entry) => entry.isAttached === false)).toBe(
       true
     );

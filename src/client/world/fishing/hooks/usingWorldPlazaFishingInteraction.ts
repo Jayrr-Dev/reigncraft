@@ -2,8 +2,9 @@
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import { addingInventoryItemWithStacking } from '@/components/inventory/domains/reducingInventoryState';
-import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { recordingWorldPlazaBestiarySpeciesSighted } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
+import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fishing/domains/checkingWorldPlazaFishingCastEligibility';
 import { DEFINING_WORLD_PLAZA_FISHING_CATCH_QUANTITY } from '@/components/world/fishing/domains/definingWorldPlazaFishingConstants';
@@ -157,6 +158,10 @@ export function usingWorldPlazaFishingInteraction({
 
       if (quantityAccepted > 0) {
         notifyingWorldPlazaInventoryItemAdded(quantityAccepted);
+
+        if (catchEntry.kind === 'creature') {
+          recordingWorldPlazaBestiarySpeciesSighted(catchEntry.catchId);
+        }
       }
 
       if (didBreak) {

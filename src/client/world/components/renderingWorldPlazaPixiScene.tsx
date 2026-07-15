@@ -55,6 +55,7 @@ import {
 } from '@/components/world/beta/spirited/domains/managingSpiritedSpritesBetaSpawnStore';
 import { spawningSpiritedSpritesBetaNearPoint } from '@/components/world/beta/spirited/domains/spawningSpiritedSpritesBetaNearPoint';
 import { RenderingWorldPlazaBlacksmithUtilityLayer } from '@/components/world/building/components/renderingWorldPlazaBlacksmithUtilityLayer';
+import { RenderingWorldPlazaSurvivalShelterUtilityLayer } from '@/components/world/building/components/renderingWorldPlazaSurvivalShelterUtilityLayer';
 import { RenderingWorldPlazaBlockPlacementPreview } from '@/components/world/building/components/renderingWorldPlazaBlockPlacementPreview';
 import { RenderingWorldPlazaBlockRemovalHoverHighlight } from '@/components/world/building/components/renderingWorldPlazaBlockRemovalHoverHighlight';
 import { RenderingWorldPlazaBuildModeDiscardDialog } from '@/components/world/building/components/renderingWorldPlazaBuildModeDiscardDialog';
@@ -106,6 +107,10 @@ import {
   checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility,
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID,
 } from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
+import {
+  checkingWorldBuildingBlockDefinitionIdIsSurvivalShelter,
+  DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_PLACEMENT_PREVIEW_BLOCK_ID,
+} from '@/components/world/building/domains/syncingWorldPlazaVisibleSurvivalShelterUtilityLayer';
 import { usingWorldPlazaBuildMode } from '@/components/world/building/hooks/usingWorldPlazaBuildMode';
 import { usingWorldPlazaClaimModePlotRegistryQuery } from '@/components/world/building/hooks/usingWorldPlazaClaimModePlotRegistryQuery';
 import { usingWorldPlazaLocalhostDevEnvironment } from '@/components/world/building/hooks/usingWorldPlazaLocalhostDevEnvironment';
@@ -351,6 +356,8 @@ import { resolvingWorldPlazaEquippedAttackEv } from '@/components/world/equipmen
 import { resolvingWorldPlazaEquippedHeldItemPresentation } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedHeldItemPresentation';
 import { resolvingWorldPlazaHeldItemPresentationForItemTypeId } from '@/components/world/equipment/domains/resolvingWorldPlazaHeldItemPresentationForItemTypeId';
 import { usingWorldPlazaEquipment } from '@/components/world/equipment/hooks/usingWorldPlazaEquipment';
+import type { DefiningWorldPlazaArmorSlotId } from '@/components/world/equipment/domains/definingWorldPlazaArmorSlotRegistry';
+import { usingWorldPlazaArmorLoadout } from '@/components/world/equipment/hooks/usingWorldPlazaArmorLoadout';
 import { RenderingWorldPlazaFarmingInteractionLabels } from '@/components/world/farming/components/renderingWorldPlazaFarmingInteractionLabels';
 import { RenderingWorldPlazaFarmlandGroundMarkers } from '@/components/world/farming/components/renderingWorldPlazaFarmlandGroundMarkers';
 import { listingWorldPlazaFarmlandTilesInInteractionRange } from '@/components/world/farming/domains/listingWorldPlazaFarmlandTilesInInteractionRange';
@@ -561,6 +568,7 @@ import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inven
 import { consumingWorldPlazaInventoryItemFromSlot } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemFromSlot';
 import { parsingWorldPlazaFlowerSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { parsingWorldPlazaOreSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { disarmingWorldPlazaInventorySlotArmedHarvestEnchantments } from '@/components/world/inventory/domains/disarmingWorldPlazaInventorySlotArmedHarvestEnchantments';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
@@ -585,6 +593,7 @@ import {
   usingWorldPlazaInventorySpecimenStudyProgress,
   type DefiningWorldPlazaInventorySpecimenStudyProgressContext,
 } from '@/components/world/inventory/hooks/usingWorldPlazaInventorySpecimenStudyProgress';
+import { addingInventoryItemWithStacking } from '@/components/inventory/domains/reducingInventoryState';
 import { RenderingWorldPlazaLightingDarknessLayer } from '@/components/world/lighting/components/renderingWorldPlazaLightingDarknessLayer';
 import { RenderingWorldPlazaLightSourcesGroundGlow } from '@/components/world/lighting/components/renderingWorldPlazaLightSourcesGroundGlow';
 import { RenderingWorldPlazaMushroomInteractionLabels } from '@/components/world/mushrooms/components/renderingWorldPlazaMushroomInteractionLabels';
@@ -646,6 +655,12 @@ import {
 } from '@/components/world/tea-brewing/domains/brewingWorldPlazaTeaPotAtCampfire';
 import { checkingWorldPlazaTeaPotAddWaterEligibility } from '@/components/world/tea-brewing/domains/checkingWorldPlazaTeaPotAddWaterEligibility';
 import { checkingWorldPlazaInventoryHasEmptyClayTeaPot } from '@/components/world/tea-brewing/domains/fillingWorldPlazaTeaPotWithWater';
+import { listingWorldPlazaTeaPotAddWaterTilesInInteractionRange } from '@/components/world/tea-brewing/domains/listingWorldPlazaTeaPotAddWaterTilesInInteractionRange';
+import {
+  checkingWorldPlazaInventoryHasEmptyClayBottle,
+  fillingWorldPlazaClayBottleWithWater,
+} from '@/components/world/ceramics/domains/fillingWorldPlazaClayBottleWithWater';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOTTLE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { pouringWorldPlazaTeaFromBrewedPot } from '@/components/world/tea-brewing/domains/pouringWorldPlazaTeaFromBrewedPot';
 import { usingWorldPlazaTeaPotAddWaterInteraction } from '@/components/world/tea-brewing/hooks/usingWorldPlazaTeaPotAddWaterInteraction';
 import { usingWorldPlazaTeaPotCampfireBrewProgress } from '@/components/world/tea-brewing/hooks/usingWorldPlazaTeaPotCampfireBrewProgress';
@@ -1346,6 +1361,14 @@ function RenderingWorldPlazaPixiSceneConnected({
     ] && isOnboardingTutorialEnabled;
   const isTeaBrewingEnabled =
     generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TEA_BREWING];
+  const isSurvivalArmorEnabled =
+    generationFeatureFlags[
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SURVIVAL_ARMOR
+    ];
+  const isSurvivalSheltersEnabled =
+    generationFeatureFlags[
+      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SURVIVAL_SHELTERS
+    ];
 
   useEffect(() => {
     if (!isPerformanceDiagnosticsFeatureAvailable) {
@@ -1723,6 +1746,47 @@ function RenderingWorldPlazaPixiSceneConnected({
       blockHeight: previewBlockHeight,
       ownerId:
         DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID,
+      placedAt: '1970-01-01T00:00:00.000Z',
+    });
+  }, [
+    isBuildPlacementSelectionActive,
+    isClaimModeActive,
+    isEditSessionActive,
+    pendingCraftPlacementPreviewDefinitionId,
+    previewBlockHeight,
+    previewTilePosition,
+    previewWorldLayer,
+    selectedBuildPaintAction,
+    selectedDefinitionId,
+  ]);
+
+  const survivalShelterUtilityPlacementPreviewBlock = useMemo(() => {
+    const isPlacementPreviewVisible =
+      isEditSessionActive &&
+      !isClaimModeActive &&
+      ((selectedBuildPaintAction === 'place' &&
+        isBuildPlacementSelectionActive) ||
+        pendingCraftPlacementPreviewDefinitionId !== null);
+    const definitionId =
+      pendingCraftPlacementPreviewDefinitionId ?? selectedDefinitionId;
+
+    if (
+      !isPlacementPreviewVisible ||
+      !previewTilePosition ||
+      !definitionId ||
+      !checkingWorldBuildingBlockDefinitionIdIsSurvivalShelter(definitionId)
+    ) {
+      return null;
+    }
+
+    return creatingWorldBuildingPlacedBlock({
+      blockId: DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_PLACEMENT_PREVIEW_BLOCK_ID,
+      plotId: DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_PLACEMENT_PREVIEW_BLOCK_ID,
+      definitionId,
+      tilePosition: previewTilePosition,
+      worldLayer: previewWorldLayer,
+      blockHeight: previewBlockHeight,
+      ownerId: DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_PLACEMENT_PREVIEW_BLOCK_ID,
       placedAt: '1970-01-01T00:00:00.000Z',
     });
   }, [
@@ -3808,6 +3872,10 @@ function RenderingWorldPlazaPixiSceneConnected({
   const hasClayInInventory = checkingWorldPlazaInventoryHasClay(inventoryState);
   const hasEmptyTeaPotInInventory =
     checkingWorldPlazaInventoryHasEmptyClayTeaPot(inventoryState);
+  const hasEmptyClayBottleInInventory =
+    checkingWorldPlazaInventoryHasEmptyClayBottle(inventoryState);
+  const hasEmptyShoreFillVesselInInventory =
+    hasEmptyTeaPotInInventory || hasEmptyClayBottleInInventory;
   const hasBrewableTeaPotInInventory =
     checkingWorldPlazaInventoryHasBrewableTeaPot(inventoryState);
   const hasEquippedHoe = equipment.checkingEquippedToolKind('hoe').hasToolKind;
@@ -3822,6 +3890,9 @@ function RenderingWorldPlazaPixiSceneConnected({
   const hasEquippedFishrodRef = useRef(hasEquippedFishrod);
   const hasClayInInventoryRef = useRef(hasClayInInventory);
   const hasEmptyTeaPotInInventoryRef = useRef(hasEmptyTeaPotInInventory);
+  const hasEmptyShoreFillVesselInInventoryRef = useRef(
+    hasEmptyShoreFillVesselInInventory
+  );
   const hasBrewableTeaPotInInventoryRef = useRef(hasBrewableTeaPotInInventory);
   const hasEquippedHoeRef = useRef(hasEquippedHoe);
   const hasEquippedScytheRef = useRef(hasEquippedScythe);
@@ -3830,6 +3901,8 @@ function RenderingWorldPlazaPixiSceneConnected({
   hasEquippedFishrodRef.current = hasEquippedFishrod;
   hasClayInInventoryRef.current = hasClayInInventory;
   hasEmptyTeaPotInInventoryRef.current = hasEmptyTeaPotInInventory;
+  hasEmptyShoreFillVesselInInventoryRef.current =
+    hasEmptyShoreFillVesselInInventory;
   hasBrewableTeaPotInInventoryRef.current = hasBrewableTeaPotInInventory;
   hasEquippedHoeRef.current = hasEquippedHoe;
   hasEquippedScytheRef.current = hasEquippedScythe;
@@ -3985,20 +4058,57 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      if (!hasEmptyTeaPotInInventory) {
-        showingGameplayHudToast('Need an empty clay teapot.');
+      if (!hasEmptyShoreFillVesselInInventory) {
+        showingGameplayHudToast('Need an empty clay bottle or teapot.');
         return;
       }
 
-      if (!validatingTeaPotAddWaterStart(entry)) {
+      if (hasEmptyTeaPotInInventory) {
+        if (!validatingTeaPotAddWaterStart(entry)) {
+          return;
+        }
+
+        completingTeaPotAddWaterRef.current(entry);
         return;
       }
 
-      completingTeaPotAddWaterRef.current(entry);
+      const eligibility = checkingWorldPlazaTeaPotAddWaterEligibility(
+        playerPositionRef.current!,
+        entry.tileX,
+        entry.tileY
+      );
+
+      if (!eligibility.isEligible) {
+        if (eligibility.reason) {
+          showingGameplayHudToast(eligibility.reason);
+        }
+        return;
+      }
+
+      updatingInventoryState((currentState) => {
+        const result = fillingWorldPlazaClayBottleWithWater(currentState);
+
+        if (result.outcome === 'filled') {
+          showingGameplayHudToast('Bottle filled with water.');
+          notifyingWorldPlazaInventoryItemAdded(1);
+          return result.nextState;
+        }
+
+        if (result.outcome === 'inventory-full') {
+          showingGameplayHudToast('Inventory is full.');
+        } else {
+          showingGameplayHudToast('Need an empty clay bottle.');
+        }
+
+        return null;
+      });
     },
     [
+      hasEmptyShoreFillVesselInInventory,
       hasEmptyTeaPotInInventory,
+      playerPositionRef,
       showingGameplayHudToast,
+      updatingInventoryState,
       validatingTeaPotAddWaterStart,
     ]
   );
@@ -4116,7 +4226,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         }
       }
 
-      if (isTeaBrewingEnabled && hasEmptyTeaPotInInventory) {
+      if (isTeaBrewingEnabled && hasEmptyShoreFillVesselInInventory) {
         const teaPotAddWaterEligibility =
           checkingWorldPlazaTeaPotAddWaterEligibility(
             playerPosition,
@@ -4157,7 +4267,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     [
       hasEquippedFishrod,
       hasClayInInventory,
-      hasEmptyTeaPotInInventory,
+      hasEmptyShoreFillVesselInInventory,
       hasEquippedHoe,
       hasEquippedScythe,
       hasSeedsInInventory,
@@ -4265,6 +4375,18 @@ function RenderingWorldPlazaPixiSceneConnected({
     isRollDodgeActiveRef,
     rollDodgeProgressRef,
     isRollingRef,
+  });
+
+  const {
+    loadoutState: armorLoadoutState,
+    equippingArmorItem,
+    unequippingArmorSlot,
+    isArmorItemEquipped,
+  } = usingWorldPlazaArmorLoadout({
+    localPersistenceOwnerId,
+    saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
+    healthStateRef,
+    syncingHealthHudFromStateRef,
   });
 
   usingWorldPlazaHeldFourLeafCloverCharm({
@@ -6407,7 +6529,29 @@ function RenderingWorldPlazaPixiSceneConnected({
           1
         );
 
-        return consumeResult.consumed ? consumeResult.nextState : null;
+        if (!consumeResult.consumed) {
+          return null;
+        }
+
+        const returnItemTypeId = context.foodDefinition.returnItemTypeId;
+
+        if (!returnItemTypeId) {
+          return consumeResult.nextState;
+        }
+
+        const addResult = addingInventoryItemWithStacking(
+          consumeResult.nextState,
+          {
+            id: `food-vessel-return-${returnItemTypeId}`,
+            itemTypeId: returnItemTypeId,
+            quantity: 1,
+          },
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+        );
+
+        return addResult.quantityAccepted > 0
+          ? addResult.state
+          : consumeResult.nextState;
       });
     },
     [
@@ -6436,6 +6580,63 @@ function RenderingWorldPlazaPixiSceneConnected({
     avatarToolActionRef: localAvatarToolActionRef,
     onEatComplete: handlingFoodEatComplete,
   });
+
+  const handlingEquipArmorHotbarSlot = useCallback(
+    (slotIndex: number): void => {
+      if (!isSurvivalArmorEnabled) {
+        return;
+      }
+
+      const item = inventoryState.slots[slotIndex];
+
+      if (!item) {
+        return;
+      }
+
+      updatingInventoryState((currentState) => {
+        const result = equippingArmorItem(currentState, item);
+
+        if (result.errorMessage) {
+          showingGameplayHudToast(result.errorMessage);
+          return null;
+        }
+
+        return result.inventoryState;
+      });
+    },
+    [
+      equippingArmorItem,
+      inventoryState.slots,
+      isSurvivalArmorEnabled,
+      showingGameplayHudToast,
+      updatingInventoryState,
+    ]
+  );
+
+  const handlingUnequipArmorSlot = useCallback(
+    (slotId: DefiningWorldPlazaArmorSlotId) => {
+      if (!isSurvivalArmorEnabled) {
+        return;
+      }
+
+      updatingInventoryState((currentState) => {
+        const result = unequippingArmorSlot(currentState, slotId);
+
+        if (result.errorMessage) {
+          showingGameplayHudToast(result.errorMessage);
+          return null;
+        }
+
+        return result.inventoryState;
+      });
+    },
+    [
+      isSurvivalArmorEnabled,
+      showingGameplayHudToast,
+      unequippingArmorSlot,
+      updatingInventoryState,
+    ]
+  );
 
   const handlingEatHotbarSlot = useCallback(
     (slotIndex: number): void => {
@@ -6496,9 +6697,62 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
+      const slotItem = inventoryState.slots[slotIndex];
+
+      if (
+        slotItem?.itemTypeId ===
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOTTLE
+      ) {
+        const playerPosition = playerPositionRef.current;
+
+        if (!playerPosition) {
+          showingGameplayHudToast('Move closer to the water.');
+          return;
+        }
+
+        const eligibleTiles =
+          listingWorldPlazaTeaPotAddWaterTilesInInteractionRange(
+            playerPosition
+          );
+
+        if (eligibleTiles.length === 0) {
+          showingGameplayHudToast('Move closer to the water.');
+          return;
+        }
+
+        updatingInventoryState((currentState) => {
+          const result = fillingWorldPlazaClayBottleWithWater(
+            currentState,
+            slotIndex
+          );
+
+          if (result.outcome === 'filled') {
+            showingGameplayHudToast('Bottle filled with water.');
+            notifyingWorldPlazaInventoryItemAdded(1);
+            return result.nextState;
+          }
+
+          if (result.outcome === 'inventory-full') {
+            showingGameplayHudToast('Inventory is full.');
+          } else {
+            showingGameplayHudToast('Need an empty clay bottle.');
+          }
+
+          return null;
+        });
+        return;
+      }
+
       completingTeaPotAddWaterFromHotbarSlot(slotIndex);
     },
-    [completingTeaPotAddWaterFromHotbarSlot, isTeaBrewingEnabled]
+    [
+      completingTeaPotAddWaterFromHotbarSlot,
+      inventoryState.slots,
+      isTeaBrewingEnabled,
+      playerPositionRef,
+      showingGameplayHudToast,
+      updatingInventoryState,
+    ]
   );
 
   const handlingPourTeaHotbarSlot = useCallback(
@@ -8514,6 +8768,15 @@ function RenderingWorldPlazaPixiSceneConnected({
                     }
                     entityLayerRef={terrainTrunkLayerRef}
                   />
+                  {isSurvivalSheltersEnabled ? (
+                    <RenderingWorldPlazaSurvivalShelterUtilityLayer
+                      placedBlocks={activeScenePlacedBlocks}
+                      placementPreviewBlock={
+                        survivalShelterUtilityPlacementPreviewBlock
+                      }
+                      entityLayerRef={terrainTrunkLayerRef}
+                    />
+                  ) : null}
                   <RenderingWorldPlazaClaimModePlotOwnershipOverlay
                     isVisible={isClaimModeActive}
                     overlayPlots={claimModeOverlayPlots}
@@ -9148,7 +9411,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   selectedInteractableBlockKeysRef={
                     selectedInteractableBlockKeysRef
                   }
-                  hasEmptyTeaPotInInventory={hasEmptyTeaPotInInventory}
+                  hasEmptyTeaPotInInventory={hasEmptyShoreFillVesselInInventory}
                   cameraOffsetRef={cameraOffsetRef}
                   cameraWorldZoomRef={cameraWorldZoomRef}
                   onAddWater={handlingTeaPotAddWaterInteraction}
@@ -9384,6 +9647,16 @@ function RenderingWorldPlazaPixiSceneConnected({
                         inventoryDropPlacement={inventoryDropPlacement}
                         selectedSlotIndex={equipment.selectedSlotIndex}
                         onSelectHotbarSlot={equipment.selectingHotbarSlot}
+                        onEquipArmorHotbarSlot={
+                          isSurvivalArmorEnabled
+                            ? handlingEquipArmorHotbarSlot
+                            : undefined
+                        }
+                        isArmorItemEquipped={
+                          isSurvivalArmorEnabled
+                            ? isArmorItemEquipped
+                            : undefined
+                        }
                         onEatHotbarSlot={handlingEatHotbarSlot}
                         onStudyHotbarSlot={handlingStudyHotbarSlot}
                         onAttachRecipePageHotbarSlot={
@@ -9598,6 +9871,16 @@ function RenderingWorldPlazaPixiSceneConnected({
                         inventoryDropPlacement={inventoryDropPlacement}
                         selectedSlotIndex={equipment.selectedSlotIndex}
                         onSelectHotbarSlot={equipment.selectingHotbarSlot}
+                        onEquipArmorHotbarSlot={
+                          isSurvivalArmorEnabled
+                            ? handlingEquipArmorHotbarSlot
+                            : undefined
+                        }
+                        isArmorItemEquipped={
+                          isSurvivalArmorEnabled
+                            ? isArmorItemEquipped
+                            : undefined
+                        }
                         onEatHotbarSlot={handlingEatHotbarSlot}
                         onStudyHotbarSlot={handlingStudyHotbarSlot}
                         onAttachRecipePageHotbarSlot={
@@ -9676,6 +9959,10 @@ function RenderingWorldPlazaPixiSceneConnected({
               updatingInventoryState(() => nextState);
             }}
             onShowToast={showingGameplayHudToast}
+            armorLoadoutState={armorLoadoutState}
+            onUnequipArmorSlot={
+              isSurvivalArmorEnabled ? handlingUnequipArmorSlot : undefined
+            }
           />
           <RenderingWildlifePetRosterPanel
             isOpen={isPetRosterPanelOpen}

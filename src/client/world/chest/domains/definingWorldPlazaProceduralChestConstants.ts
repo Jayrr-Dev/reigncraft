@@ -48,7 +48,7 @@ export const LABELING_WORLD_PLAZA_CHEST_LOCKED_HINT_LONG_GRASS =
 
 /** Loot pool granted when a locked chest is unlocked/opened. */
 export const DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_LOOT_POOL_ID: DefiningWorldPlazaChestLootPoolId =
-  'starter-forage';
+  'packs-and-tools';
 
 /**
  * Chance [0, 1] to drop a universal chest key from an active source

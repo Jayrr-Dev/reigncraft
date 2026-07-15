@@ -30,6 +30,11 @@ export type DefiningWorldPlazaInventoryItemFoodBehavior = {
   readonly cookedWellFedChance?: number;
   readonly cookedResidualDiseaseId?: string;
   readonly cookedResidualDiseaseChance?: number;
+  /**
+   * When set, eating consumes this food then grants one `returnItemTypeId`
+   * (reusable clay vessels: bottle, bowl, crock).
+   */
+  readonly returnItemTypeId?: string;
 };
 
 /** Tool capabilities granted when a hotbar item is equipped. */

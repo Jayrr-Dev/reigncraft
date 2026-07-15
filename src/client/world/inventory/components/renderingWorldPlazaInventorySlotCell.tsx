@@ -94,7 +94,9 @@ import {
 export type RenderingWorldPlazaInventorySlotCellProps =
   RenderingInventorySlotCellProps & {
     readonly isEquipped?: boolean;
+    readonly isArmorEquipped?: boolean;
     readonly onEquipSlot?: (slotIndex: number) => void;
+  readonly onEquipArmorSlot?: (slotIndex: number) => void;
     /** Opens the item action popover for this slot. */
     readonly onOpenItemDetailPopover?: (slotIndex: number) => void;
     readonly isItemDetailPopoverOpen?: boolean;
@@ -234,10 +236,12 @@ export function RenderingWorldPlazaInventorySlotCell({
   item,
   registry,
   isEquipped = false,
+  isArmorEquipped = false,
   isDropTarget = false,
   isValidDrop: isValidDropOverride,
   activeDragItemId = null,
   onEquipSlot,
+  onEquipArmorSlot,
   onOpenItemDetailPopover,
   isItemDetailPopoverOpen = false,
   onCloseItemDetailPopover,
@@ -356,12 +360,14 @@ export function RenderingWorldPlazaInventorySlotCell({
       registry={registry}
       viewportStyles={viewportStyles}
       isEquipped={isEquipped}
+      isArmorEquipped={isArmorEquipped}
       isDropTarget={isDropTarget}
       isValidDrop={isValidDrop}
       activeDragItemId={activeDragItemId}
       setDropRef={setDropRef}
       showDropHighlight={showDropHighlight}
       onEquipSlot={onEquipSlot}
+      onEquipArmorSlot={onEquipArmorSlot}
       onOpenItemDetailPopover={onOpenItemDetailPopover}
       isItemDetailPopoverOpen={isItemDetailPopoverOpen}
       onCloseItemDetailPopover={onCloseItemDetailPopover}
@@ -392,12 +398,14 @@ type InventoryPlazaSlotItemProps = {
   readonly registry: DefiningInventoryItemRegistry;
   readonly viewportStyles: DefiningWorldPlazaInventoryHotbarViewportStyles;
   readonly isEquipped?: boolean;
+  readonly isArmorEquipped?: boolean;
   readonly isDropTarget?: boolean;
   readonly isValidDrop?: boolean;
   readonly activeDragItemId?: string | null;
   readonly setDropRef: (node: HTMLElement | null) => void;
   readonly showDropHighlight: boolean;
   readonly onEquipSlot?: (slotIndex: number) => void;
+  readonly onEquipArmorSlot?: (slotIndex: number) => void;
   readonly onOpenItemDetailPopover?: (slotIndex: number) => void;
   readonly isItemDetailPopoverOpen?: boolean;
   readonly onCloseItemDetailPopover?: () => void;
@@ -428,11 +436,13 @@ function InventoryPlazaSlotItem({
   registry,
   viewportStyles,
   isEquipped = false,
+  isArmorEquipped = false,
   isValidDrop = true,
   activeDragItemId = null,
   setDropRef,
   showDropHighlight,
   onEquipSlot,
+  onEquipArmorSlot,
   onOpenItemDetailPopover,
   isItemDetailPopoverOpen = false,
   onCloseItemDetailPopover,
@@ -514,6 +524,7 @@ function InventoryPlazaSlotItem({
     () =>
       resolvingWorldPlazaInventoryItemDetailPopoverModel(item, {
         isEquipped,
+        isArmorEquipped,
         studyCountsBySpeciesId,
         flowerStudyCountsBySpeciesId,
         cloverStudyCount,
@@ -530,6 +541,7 @@ function InventoryPlazaSlotItem({
       flowerStudyCountsBySpeciesId,
       hasBrewedTeaPot,
       isEquipped,
+      isArmorEquipped,
       isOreSmeltingStationReachable,
       item,
       mushroomStudyCountsBySpeciesId,
@@ -608,6 +620,11 @@ function InventoryPlazaSlotItem({
     onEquipSlot?.(slotIndex);
     onCloseItemDetailPopover?.();
   }, [onCloseItemDetailPopover, onEquipSlot, slotIndex]);
+
+  const handlingEquipArmorFromDetailPopover = useCallback((): void => {
+    onEquipArmorSlot?.(slotIndex);
+    onCloseItemDetailPopover?.();
+  }, [onCloseItemDetailPopover, onEquipArmorSlot, slotIndex]);
 
   const handlingOpenBagFromDetailPopover = useCallback((): void => {
     onOpenBagPopover?.(slotIndex);
@@ -920,6 +937,11 @@ function InventoryPlazaSlotItem({
           onEquipItem={
             detailPopoverModel.canEquip && onEquipSlot
               ? handlingEquipFromDetailPopover
+              : undefined
+          }
+          onEquipArmorItem={
+            detailPopoverModel.canEquipArmor && onEquipArmorSlot
+              ? handlingEquipArmorFromDetailPopover
               : undefined
           }
           onOpenBag={

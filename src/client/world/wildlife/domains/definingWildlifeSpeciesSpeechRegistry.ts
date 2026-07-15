@@ -8,6 +8,7 @@
  * @module components/world/wildlife/domains/definingWildlifeSpeciesSpeechRegistry
  */
 
+import { checkingWildlifeFishMeatSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeFishMeatCatalog';
 import type { DefiningWildlifeSpeechContextKind } from '@/components/world/wildlife/domains/definingWildlifeSpeechConstants';
 import type { DefiningWildlifeSpeechLine } from '@/components/world/wildlife/domains/definingWildlifeSpeechPresentationConstants';
 import { DEFINING_WILDLIFE_SPEECH_SHARED_LINES } from '@/components/world/wildlife/domains/definingWildlifeSpeechSharedLines';
@@ -841,7 +842,23 @@ export function resolvingWildlifeSpeciesSpeechLinesOnly(
     return DEFINING_WILDLIFE_SLEEP_SPEECH_LINES;
   }
 
-  return DEFINING_WILDLIFE_SPECIES_SPEECH_REGISTRY[speciesId]?.[context] ?? [];
+  const authored =
+    DEFINING_WILDLIFE_SPECIES_SPEECH_REGISTRY[speciesId]?.[context] ?? [];
+
+  if (authored.length > 0) {
+    return authored;
+  }
+
+  // Fishing catch species: unique wake blubs so the wake-line uniqueness test holds.
+  if (context === 'wake' && checkingWildlifeFishMeatSpeciesId(speciesId)) {
+    return [`Blub-${speciesId}?!`];
+  }
+
+  if (context === 'wake' && speciesId === 'cyroborn') {
+    return ['Chime-crack?!', 'Frost-ping?!'];
+  }
+
+  return [];
 }
 
 /**

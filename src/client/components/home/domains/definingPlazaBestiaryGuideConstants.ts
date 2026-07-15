@@ -1,3 +1,4 @@
+import { DEFINING_PLAZA_BESTIARY_FISH_GUIDE_ENTRIES } from '@/components/home/domains/definingPlazaBestiaryFishGuideEntries';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 /** One wildlife entry in the codex bestiary guide. */
@@ -456,4 +457,5 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
       apostleFlavor:
         'Rockless Fellus wants every mountain tidy. The mammoth was already mining ice.',
     },
+    ...DEFINING_PLAZA_BESTIARY_FISH_GUIDE_ENTRIES,
   ] as const;

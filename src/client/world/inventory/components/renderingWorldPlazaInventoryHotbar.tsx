@@ -121,6 +121,10 @@ export interface RenderingWorldPlazaInventoryHotbarProps {
   readonly selectedSlotIndex?: number | null;
   /** Selects or toggles a hotbar slot as equipped. */
   readonly onSelectHotbarSlot?: (slotIndex: number) => void;
+  /** Equip survival armor from a hotbar slot. */
+  readonly onEquipArmorHotbarSlot?: (slotIndex: number) => void;
+  /** True when the given item type id is worn in an armor slot. */
+  readonly isArmorItemEquipped?: (itemTypeId: string) => boolean;
   /** Eat action from the item action popover for food slots. */
   readonly onEatHotbarSlot?: (slotIndex: number) => void;
   /** Study a flower specimen for the Herbarium (consumes one). */
@@ -161,6 +165,8 @@ type RenderingWorldPlazaInventoryHotbarInventoryShellProps = {
   readonly storagePageIndex: number;
   readonly onStoragePageIndexChange: (nextPageIndex: number) => void;
   readonly onSelectHotbarSlot?: (slotIndex: number) => void;
+  readonly onEquipArmorHotbarSlot?: (slotIndex: number) => void;
+  readonly isArmorItemEquipped?: (itemTypeId: string) => boolean;
   readonly onEatHotbarSlot?: (slotIndex: number) => void;
   readonly onStudyHotbarSlot?: (slotIndex: number) => void;
   readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;
@@ -208,6 +214,8 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
     storagePageIndex,
     onStoragePageIndexChange,
     onSelectHotbarSlot,
+    onEquipArmorHotbarSlot,
+    isArmorItemEquipped,
     onEatHotbarSlot,
     onStudyHotbarSlot,
     onAttachRecipePageHotbarSlot,
@@ -367,6 +375,8 @@ const RenderingWorldPlazaInventoryHotbarInventoryShell = memo(
         openItemDetailSlotIndex,
         openBagHotbarSlotIndex,
         onSelectHotbarSlot,
+        onEquipArmorHotbarSlot,
+        isArmorItemEquipped,
         onEatHotbarSlot,
         onStudyHotbarSlot,
         onAttachRecipePageHotbarSlot,
@@ -490,6 +500,8 @@ export function RenderingWorldPlazaInventoryHotbar({
   inventoryDropPlacement,
   selectedSlotIndex = null,
   onSelectHotbarSlot: _onSelectHotbarSlot,
+  onEquipArmorHotbarSlot,
+  isArmorItemEquipped,
   onEatHotbarSlot,
   onStudyHotbarSlot,
   onAttachRecipePageHotbarSlot,
@@ -861,6 +873,8 @@ export function RenderingWorldPlazaInventoryHotbar({
           storagePageIndex={storagePageIndex}
           onStoragePageIndexChange={handlingStoragePageIndexChange}
           onSelectHotbarSlot={handlingEquipHotbarSlot}
+          onEquipArmorHotbarSlot={onEquipArmorHotbarSlot}
+          isArmorItemEquipped={isArmorItemEquipped}
           onEatHotbarSlot={onEatHotbarSlot}
           onStudyHotbarSlot={onStudyHotbarSlot}
           onAttachRecipePageHotbarSlot={onAttachRecipePageHotbarSlot}

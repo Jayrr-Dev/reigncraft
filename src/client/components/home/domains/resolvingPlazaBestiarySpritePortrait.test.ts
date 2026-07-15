@@ -42,6 +42,17 @@ describe('resolvingPlazaBestiarySpritePortrait', () => {
     });
   });
 
+  it('uses an emoji portrait for fishing catch species', () => {
+    const portrait = resolvingPlazaBestiarySpritePortrait('largemouth-bass');
+
+    expect(portrait?.kind).toBe('emoji');
+    if (portrait?.kind !== 'emoji') {
+      return;
+    }
+
+    expect(portrait.emoji.length).toBeGreaterThan(0);
+  });
+
   it('resolves a portrait for every bestiary entry', () => {
     for (const entry of DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES) {
       expect(

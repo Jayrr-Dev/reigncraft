@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaEntityHealthDamageRollModifierKind } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { buildingWildlifeFishSpeciesDefinitions } from '@/components/world/wildlife/domains/buildingWildlifeFishSpeciesDefinitions';
 import { DEFINING_WILDLIFE_TIGER_CHASE_GIVE_UP_WITHOUT_DAMAGE_MS } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import { DEFINING_WILDLIFE_DIFFICULTY_LEVERS } from '@/components/world/wildlife/domains/definingWildlifeDifficultyLevers';
 import { DEFINING_WILDLIFE_FAIRY_ALWAYS_FOLLOW_MAX_DISTANCE_GRID } from '@/components/world/wildlife/domains/definingWildlifeFairyConstants';
@@ -1046,6 +1047,11 @@ export type DefiningWildlifeSpeciesDefinition = {
    * procedural circle and skips texture loading.
    */
   presentationKind?: DefiningWildlifeSpeciesPresentationKind;
+  /**
+   * Optional emoji used by the bestiary portrait when no sprite sheet exists
+   * (fishing catch species).
+   */
+  portraitEmoji?: string;
   /**
    * When true, the docile follow-player branch stays active without a timed
    * follow window. Used by companion species like the fairy. Pair with
@@ -2647,6 +2653,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackIntervalMs: 1_100,
     },
   },
+  ...buildingWildlifeFishSpeciesDefinitions(),
 };
 
 /** Starter roster covering every AI archetype. */

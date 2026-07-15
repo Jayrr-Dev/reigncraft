@@ -1,6 +1,14 @@
+import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
+import { checkingWorldBuildingPlacedBlockIsPassableTile } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
+import { resolvingWorldBuildingBlockDefinition } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
 import { checkingWorldBuildingPlacedBlockIsFootprintSatellite } from '@/components/world/building/domains/definingWorldBuildingPlacementFootprint';
 import { DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX } from '@/components/world/building/domains/definingWorldBuildingBuildModeConstants';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import {
+  resolvingWorldBuildingPlacedBlockBlockHeight,
+  resolvingWorldBuildingPlacedBlockWorldLayer,
+} from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { resolvingWorldBuildingBlockPlacementFootprint } from '@/components/world/building/domains/definingWorldBuildingPlacementFootprint';
 import {
   DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_DISPLAY_SCALE,
   DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_FOOT_SINK_PX,
@@ -8,11 +16,12 @@ import {
   resolvingWorldPlazaSurvivalShelterKindForBlockDefinitionId,
 } from '@/components/world/building/domains/definingWorldPlazaSurvivalShelterSpriteConstants';
 import { peekingWorldPlazaSurvivalShelterSpriteTextureForKind } from '@/components/world/building/domains/loadingWorldPlazaSurvivalShelterSpriteTextures';
-import {
-  applyingWorldPlazaBlacksmithUtilityToSprite,
-  resolvingWorldPlazaBlacksmithUtilityDepthSortGridPoint,
-} from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
-import type { Sprite } from 'pixi.js';
+import { resolvingWorldPlazaBlacksmithUtilityDepthSortGridPoint } from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
+import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
+import { DEFINING_WORLD_DEPTH_BLACKSMITH_UTILITY_ENTITY_DEPTH_BIAS } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
+import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
+import { DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX } from '@/components/world/domains/definingWorldPlazaIsometricTileLayoutConstants';
+import type { Sprite, Texture } from 'pixi.js';
 
 export const DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_PLACEMENT_PREVIEW_BLOCK_ID =
   'placement-preview-survival-shelter' as const;
@@ -28,6 +37,49 @@ export function checkingWorldBuildingBlockDefinitionIdIsSurvivalShelter(
     resolvingWorldPlazaSurvivalShelterKindForBlockDefinitionId(definitionId) !==
     null
   );
+}
+
+function applyingWorldPlazaSurvivalShelterToSprite(
+  sprite: Sprite,
+  block: DefiningWorldBuildingPlacedBlock,
+  texture: Texture
+): void {
+  const definition = resolvingWorldBuildingBlockDefinition(block.definitionId);
+  const footprint = definition
+    ? resolvingWorldBuildingBlockPlacementFootprint(definition)
+    : { tileWidth: 1, tileHeight: 1 };
+  const worldLayer = resolvingWorldBuildingPlacedBlockWorldLayer(block);
+  const blockHeight = resolvingWorldBuildingPlacedBlockBlockHeight(block);
+  const depthSortGridPoint = resolvingWorldPlazaBlacksmithUtilityDepthSortGridPoint(
+    block.tilePosition.tileX,
+    block.tilePosition.tileY,
+    footprint.tileWidth,
+    footprint.tileHeight
+  );
+  const screenPoint =
+    convertingWorldPlazaGridPointToIsometricScreenPoint(depthSortGridPoint);
+  const layerOffsetY = checkingWorldBuildingPlacedBlockIsPassableTile(blockHeight)
+    ? computingWorldBuildingWorldLayerScreenOffsetPx(worldLayer)
+    : computingWorldBuildingWorldLayerScreenOffsetPx(worldLayer - 1);
+  const targetWidth =
+    DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX *
+    DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_DISPLAY_SCALE;
+  const textureScale = targetWidth / Math.max(texture.width, 1);
+
+  sprite.texture = texture;
+  sprite.visible = true;
+  sprite.anchor.set(0.5, 1);
+  sprite.scale.set(textureScale);
+  sprite.position.set(
+    screenPoint.x,
+    screenPoint.y + layerOffsetY + DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_FOOT_SINK_PX
+  );
+  sprite.zIndex =
+    computingWorldDepthSortKey(
+      depthSortGridPoint.x,
+      depthSortGridPoint.y,
+      worldLayer
+    ) + DEFINING_WORLD_DEPTH_BLACKSMITH_UTILITY_ENTITY_DEPTH_BIAS;
 }
 
 export function syncingWorldPlazaVisibleSurvivalShelterUtilityLayer(input: {
@@ -77,17 +129,10 @@ export function syncingWorldPlazaVisibleSurvivalShelterUtilityLayer(input: {
 
     if (existingSprite) {
       const previousZIndex = existingSprite.zIndex;
-      applyingWorldPlazaBlacksmithUtilityToSprite(
+      applyingWorldPlazaSurvivalShelterToSprite(
         existingSprite,
         block,
-        shelterKind,
-        texture,
-        {
-          displayScale: DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_DISPLAY_SCALE,
-          footSinkPx: DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_FOOT_SINK_PX,
-          depthSortGridPointResolver:
-            resolvingWorldPlazaBlacksmithUtilityDepthSortGridPoint,
-        }
+        texture
       );
       existingSprite.alpha = isPlacementPreview
         ? DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_PLACEMENT_PREVIEW_ALPHA
@@ -103,18 +148,7 @@ export function syncingWorldPlazaVisibleSurvivalShelterUtilityLayer(input: {
     }
 
     const sprite = input.creatingSprite();
-    applyingWorldPlazaBlacksmithUtilityToSprite(
-      sprite,
-      block,
-      shelterKind,
-      texture,
-      {
-        displayScale: DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_DISPLAY_SCALE,
-        footSinkPx: DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_FOOT_SINK_PX,
-        depthSortGridPointResolver:
-          resolvingWorldPlazaBlacksmithUtilityDepthSortGridPoint,
-      }
-    );
+    applyingWorldPlazaSurvivalShelterToSprite(sprite, block, texture);
     sprite.alpha = isPlacementPreview
       ? DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_PLACEMENT_PREVIEW_ALPHA
       : 1;

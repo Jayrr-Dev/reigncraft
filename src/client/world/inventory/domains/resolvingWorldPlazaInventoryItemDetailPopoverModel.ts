@@ -8,6 +8,7 @@ import { resolvingWorldPlazaEquipmentAttackEvModifier } from '@/components/world
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import { checkingWorldPlazaInventoryItemIsWeaponOrTool } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsWeaponOrTool';
+import { checkingWorldPlazaInventoryItemIsSurvivalWear } from '@/components/world/equipment/domains/definingWorldPlazaSurvivalWearBuffRegistry';
 import { computingWorldPlazaInventoryItemResolvedCost } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemResolvedCost';
 import {
   checkingWorldPlazaInventoryItemIsFlowerHerb,
@@ -26,6 +27,7 @@ import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_CLAY_TEAPOT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CUP_OF_TEA,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOTTLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT,
@@ -115,6 +117,7 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
   /** Drop for loose loot; Place for world-set gear (traps). */
   readonly dropActionLabel: string;
   readonly canEquip: boolean;
+  readonly canEquipArmor: boolean;
   readonly canOpenBag: boolean;
   readonly canRefine: boolean;
   readonly canAddFuel: boolean;
@@ -125,6 +128,7 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModel = {
 
 export type ResolvingWorldPlazaInventoryItemDetailPopoverModelOptions = {
   readonly isEquipped: boolean;
+  readonly isArmorEquipped?: boolean;
   readonly nowMs?: number;
   /** Per-species corpse Study totals; gates wildlife meat inspect detail. */
   readonly studyCountsBySpeciesId?: Readonly<
@@ -540,7 +544,8 @@ function resolvingWorldPlazaInventoryItemDetailTeaActions(
 } {
   return {
     canAddWater:
-      itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT,
+      itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT ||
+      itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOTTLE,
     canOpenTeapot:
       itemTypeId ===
       DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT,
@@ -868,6 +873,9 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       canEquip:
         !options.isEquipped &&
         checkingWorldPlazaInventoryItemIsWeaponOrTool(item.itemTypeId),
+      canEquipArmor:
+        !options.isArmorEquipped &&
+        checkingWorldPlazaInventoryItemIsSurvivalWear(item.itemTypeId),
       canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),
       canRefine:
         Boolean(options.isOreSmeltingStationReachable) &&
@@ -960,6 +968,9 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     canEquip:
       !options.isEquipped &&
       checkingWorldPlazaInventoryItemIsWeaponOrTool(item.itemTypeId),
+    canEquipArmor:
+      !options.isArmorEquipped &&
+      checkingWorldPlazaInventoryItemIsSurvivalWear(item.itemTypeId),
     canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),
     canRefine:
       Boolean(options.isOreSmeltingStationReachable) &&

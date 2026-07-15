@@ -56,6 +56,7 @@ import {
   type DefiningWorldPlazaCraftModeRecipeId,
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { DEFINING_WORLD_PLAZA_CRAFT_RECIPE_NEARBY_STATION_RANGE_TILES } from '@/components/world/crafting/domains/definingWorldPlazaCraftRecipeNearbyStationConstants';
+import { registeringWorldPlazaCraftModeToolRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaCraftModeToolRecipes';
 import { registeringWorldPlazaSurvivalCraftModeRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaSurvivalCraftModeRecipes';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
@@ -66,15 +67,24 @@ import { resolvingWorldPlazaInventoryHealerSpriteSheetIcon } from '@/components/
 import { DEFINING_WORLD_PLAZA_INVENTORY_IRON_TUBE_SPRITE_SHEET_ICON } from '@/components/world/inventory/domains/definingWorldPlazaInventoryIronTubeSpriteSheetConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_BLUE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BOWL_OF_PORRIDGE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CALTROPS,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOWL,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CROCK,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_COPPER,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_TUBE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_CLAY,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COAL,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_NITER,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SMOKE_OIL_CROCK,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOWL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOTTLE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CROCK,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CUP,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
@@ -120,6 +130,16 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CLAY_STOVE_IRON_INGOT_COST =
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_CUP_WET_CLAY_COST = 3;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_TEAPOT_WET_CLAY_COST = 9;
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_BOTTLE_WET_CLAY_COST = 1;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_BOWL_WET_CLAY_COST = 5;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_CROCK_WET_CLAY_COST = 8;
+
+/** Berry porridge (Ceramics cookbook, needs nearby campfire). */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BOWL_OF_PORRIDGE_BERRY_COST = 3;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BOWL_OF_PORRIDGE_TEA_LEAVES_COST = 1;
+
+/** Smoke-oil crock (Ceramics cookbook, needs nearby campfire). */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_SMOKE_OIL_CROCK_PIG_FAT_COST = 1;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_SMOKE_OIL_CROCK_NITER_COST = 1;
 
 /** Bear trap smith recipe ingredient counts (requires nearby anvil). */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BEAR_TRAP_IRON_INGOT_COST = 3;
@@ -914,6 +934,168 @@ const DEFINING_WORLD_PLAZA_CRAFT_MODE_MANUAL_RECIPE_REGISTRY = [
     outcome: {
       kind: 'item',
       itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOTTLE,
+      quantity: 1,
+    },
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_BOWL,
+    cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.CERAMICS,
+    title: 'Wet Clay Bowl',
+    description:
+      'Press wet clay into a wide bowl. Fire the greenware in a kiln with coal before cooking porridge.',
+    recipeVisual: {
+      visualKind: 'sprite-sheet',
+      spriteSheetIcon: {
+        spriteSheetUrl:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
+        columnCount:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
+        rowCount:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_ROW_COUNT,
+        columnIndex: 2,
+        rowIndex: 1,
+      },
+    },
+    ingredients: [
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_BOWL_WET_CLAY_COST,
+      },
+    ],
+    recipeType: 'item',
+    complexity: 3,
+    outcome: {
+      kind: 'item',
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOWL,
+      quantity: 1,
+    },
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_CROCK,
+    cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.CERAMICS,
+    title: 'Wet Clay Crock',
+    description:
+      'Shape wet clay into a lidded crock. Fire it in a kiln with coal before sealing smoke-oil.',
+    recipeVisual: {
+      visualKind: 'sprite-sheet',
+      spriteSheetIcon: {
+        spriteSheetUrl:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
+        columnCount:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
+        rowCount:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_ROW_COUNT,
+        columnIndex: 1,
+        rowIndex: 2,
+      },
+    },
+    ingredients: [
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_WET_CLAY_CROCK_WET_CLAY_COST,
+      },
+    ],
+    recipeType: 'item',
+    complexity: 4,
+    outcome: {
+      kind: 'item',
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CROCK,
+      quantity: 1,
+    },
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.BOWL_OF_PORRIDGE,
+    cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.CERAMICS,
+    title: 'Bowl of Berry Porridge',
+    description:
+      'Simmer blue berries and tea leaves in a fired clay bowl at a campfire. Better trail fill than raw berries. Eating returns the bowl.',
+    recipeVisual: {
+      visualKind: 'sprite-sheet',
+      spriteSheetIcon: {
+        spriteSheetUrl:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
+        columnCount:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
+        rowCount:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_ROW_COUNT,
+        columnIndex: 0,
+        rowIndex: 2,
+      },
+    },
+    ingredients: [
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOWL,
+        quantity: 1,
+      },
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_BLUE,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BOWL_OF_PORRIDGE_BERRY_COST,
+      },
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BOWL_OF_PORRIDGE_TEA_LEAVES_COST,
+      },
+    ],
+    recipeType: 'item',
+    complexity: 3,
+    requiredNearbyBlockDefinitionId:
+      DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
+    requiredNearbyBlockRangeTiles:
+      DEFINING_WORLD_PLAZA_CRAFT_RECIPE_NEARBY_STATION_RANGE_TILES,
+    outcome: {
+      kind: 'item',
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BOWL_OF_PORRIDGE,
+      quantity: 1,
+    },
+  },
+  {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.SMOKE_OIL_CROCK,
+    cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.CERAMICS,
+    title: 'Smoke-Oil Crock',
+    description:
+      'Render pig fat with niter in a fired clay crock at a campfire. Taste for cold resistance. Crock returns empty.',
+    recipeVisual: {
+      visualKind: 'sprite-sheet',
+      spriteSheetIcon: {
+        spriteSheetUrl:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_URL,
+        columnCount:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
+        rowCount:
+          DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_ROW_COUNT,
+        columnIndex: 3,
+        rowIndex: 2,
+      },
+    },
+    ingredients: [
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CROCK,
+        quantity: 1,
+      },
+      {
+        itemTypeId: 'world-plaza-wildlife-pig-fat',
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_SMOKE_OIL_CROCK_PIG_FAT_COST,
+      },
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_NITER,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_SMOKE_OIL_CROCK_NITER_COST,
+      },
+    ],
+    recipeType: 'item',
+    complexity: 4,
+    requiredNearbyBlockDefinitionId:
+      DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
+    requiredNearbyBlockRangeTiles:
+      DEFINING_WORLD_PLAZA_CRAFT_RECIPE_NEARBY_STATION_RANGE_TILES,
+    outcome: {
+      kind: 'item',
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SMOKE_OIL_CROCK,
       quantity: 1,
     },
   },

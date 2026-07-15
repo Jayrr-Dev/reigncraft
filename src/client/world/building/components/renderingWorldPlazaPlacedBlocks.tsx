@@ -12,6 +12,7 @@ import {
 } from '@/components/world/building/domains/groupingWorldBuildingPlacedBlocksByTileColumn';
 import { resolvingWorldBuildingPlacedBlockColumnEntityZIndex } from '@/components/world/building/domains/resolvingWorldBuildingPlacedBlockColumnEntityZIndex';
 import { checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility } from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
+import { checkingWorldBuildingBlockDefinitionIdIsSurvivalShelter } from '@/components/world/building/domains/syncingWorldPlazaVisibleSurvivalShelterUtilityLayer';
 import { DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_RENDER_LAYER } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsRenderLayerConstants';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import {
@@ -117,6 +118,9 @@ export function RenderingWorldPlazaPlacedBlocks({
         (block) =>
           !checkingWorldBuildingPlacedBlockUsesProceduralTreeRendering(block) &&
           !checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility(
+            block.definitionId
+          ) &&
+          !checkingWorldBuildingBlockDefinitionIdIsSurvivalShelter(
             block.definitionId
           )
       ),

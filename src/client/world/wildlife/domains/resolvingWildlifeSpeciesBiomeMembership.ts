@@ -7,6 +7,7 @@
 import type { DefiningWorldPlazaBiomeKind } from '@/components/world/domains/definingWorldPlazaBiomeKind';
 import { DEFINING_WILDLIFE_BIOME_SPAWN_TABLE } from '@/components/world/wildlife/domains/definingWildlifeBiomeSpawnTable';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { resolvingWildlifeFishSpeciesBiomeMembership } from '@/components/world/wildlife/domains/resolvingWildlifeFishSpeciesBiomeMembership';
 
 const wildlifeSpeciesBiomeMembershipCache = new Map<
   DefiningWildlifeSpeciesId,
@@ -21,6 +22,13 @@ export function resolvingWildlifeSpeciesBiomeMembership(
 
   if (cached) {
     return cached;
+  }
+
+  const fishHabitats = resolvingWildlifeFishSpeciesBiomeMembership(speciesId);
+
+  if (fishHabitats) {
+    wildlifeSpeciesBiomeMembershipCache.set(speciesId, fishHabitats);
+    return fishHabitats;
   }
 
   const biomes: DefiningWorldPlazaBiomeKind[] = [];

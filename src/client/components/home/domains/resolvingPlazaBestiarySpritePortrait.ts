@@ -44,11 +44,17 @@ export type PlazaBestiaryGlowOrbPortrait = {
 
 export type PlazaBestiarySpritePortrait =
   | PlazaBestiarySpriteSheetPortrait
-  | PlazaBestiaryGlowOrbPortrait;
+  | PlazaBestiaryGlowOrbPortrait
+  | PlazaBestiaryEmojiPortrait;
+
+export type PlazaBestiaryEmojiPortrait = {
+  kind: 'emoji';
+  emoji: string;
+};
 
 /**
- * Builds the CSS sprite crop or glow-orb stand-in for one species portrait,
- * or null when the species has no registered presentation.
+ * Builds the CSS sprite crop, glow-orb, or emoji stand-in for one species
+ * portrait, or null when the species has no registered presentation.
  */
 export function resolvingPlazaBestiarySpritePortrait(
   speciesId: DefiningWildlifeSpeciesId
@@ -57,6 +63,13 @@ export function resolvingPlazaBestiarySpritePortrait(
 
   if (!speciesDefinition) {
     return null;
+  }
+
+  if (speciesDefinition.portraitEmoji) {
+    return {
+      kind: 'emoji',
+      emoji: speciesDefinition.portraitEmoji,
+    };
   }
 
   if (checkingWildlifeSpeciesUsesGlowOrbPresentation(speciesDefinition)) {

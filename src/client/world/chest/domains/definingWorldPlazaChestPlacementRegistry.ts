@@ -31,7 +31,7 @@ import type { DefiningWorldPlazaChestPlacement } from '@/components/world/chest/
  *   facing: 's',
  *   variant: 'b',
  *   initialState: 'locked',
- *   loot: { kind: 'pool', poolId: 'starter-forage' },
+ *   loot: { kind: 'pool', poolId: 'packs-and-tools' },
  * },
  * ```
  */

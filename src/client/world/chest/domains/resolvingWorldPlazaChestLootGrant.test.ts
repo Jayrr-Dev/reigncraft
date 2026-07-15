@@ -65,6 +65,29 @@ describe('resolvingWorldPlazaChestLootGrant', () => {
     expect(grantsA[0]!.quantity).toBeGreaterThan(0);
   });
 
+  it('rolls a deterministic packs-and-tools pool entry for a chestId', () => {
+    const grantsA = resolvingWorldPlazaChestLootGrant(
+      { kind: 'pool', poolId: 'packs-and-tools' },
+      'chest-demo-packs-a'
+    );
+    const grantsB = resolvingWorldPlazaChestLootGrant(
+      { kind: 'pool', poolId: 'packs-and-tools' },
+      'chest-demo-packs-a'
+    );
+
+    expect(grantsA).toEqual(grantsB);
+    expect(grantsA).toHaveLength(1);
+
+    const allowedItemTypeIds = new Set<string>(
+      DEFINING_WORLD_PLAZA_CHEST_LOOT_POOL_REGISTRY['packs-and-tools'].map(
+        (entry) => entry.itemTypeId
+      )
+    );
+
+    expect(allowedItemTypeIds.has(grantsA[0]!.itemTypeId)).toBe(true);
+    expect(grantsA[0]!.quantity).toBe(1);
+  });
+
   it('can produce different pool rolls for different chest ids', () => {
     const seeds = [
       hashingWorldPlazaChestIdToSeed('chest-a'),
@@ -80,7 +103,12 @@ describe('resolvingWorldPlazaChestLootGrant', () => {
       DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_GOLDEN,
     ];
 
-    const rolls = ['chest-roll-1', 'chest-roll-2', 'chest-roll-3', 'chest-roll-4'].map(
+    const rolls = [
+      'chest-roll-1',
+      'chest-roll-2',
+      'chest-roll-3',
+      'chest-roll-4',
+    ].map(
       (chestId) =>
         resolvingWorldPlazaChestLootGrant(
           { kind: 'pool', poolId: 'starter-forage' },

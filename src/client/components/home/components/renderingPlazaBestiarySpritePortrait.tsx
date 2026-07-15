@@ -72,6 +72,28 @@ export function RenderingPlazaBestiarySpritePortrait({
     );
   }
 
+  if (portrait.kind === 'emoji') {
+    const isSilhouette = variant === 'silhouette';
+
+    return (
+      <span
+        className={`pointer-events-none flex items-center justify-center ${className}`.trim()}
+        aria-hidden
+        style={{
+          transform: `scale(${zoom})`,
+          filter: isSilhouette
+            ? DEFINING_PLAZA_BESTIARY_PORTRAIT_SILHOUETTE_FILTER
+            : 'drop-shadow(0 2px 3px rgba(0,0,0,0.45))',
+          fontSize: '1.75rem',
+          lineHeight: 1,
+          opacity: isSilhouette ? 0.85 : 1,
+        }}
+      >
+        {portrait.emoji}
+      </span>
+    );
+  }
+
   return (
     <span
       className={`pointer-events-none block ${className}`.trim()}

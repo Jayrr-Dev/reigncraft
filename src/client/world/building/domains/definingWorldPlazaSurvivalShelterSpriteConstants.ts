@@ -40,6 +40,7 @@ const DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_SPRITE_COLUMN_BY_KIND = {
 
 export const DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_DISPLAY_SCALE = 0.85;
 export const DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_FOOT_SINK_PX = 6;
+export const DEFINING_WORLD_PLAZA_SURVIVAL_SHELTER_PLACEMENT_PREVIEW_ALPHA = 0.55;
 
 export function resolvingWorldPlazaSurvivalShelterSpriteSheetIcon(
   shelterKind: DefiningWorldPlazaSurvivalShelterKind

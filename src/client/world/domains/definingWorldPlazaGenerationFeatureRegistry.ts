@@ -51,6 +51,8 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE = {
   PONDS: 'ponds',
   SWAMP_PONDS: 'swamp-ponds',
   TEA_BREWING: 'tea-brewing',
+  SURVIVAL_ARMOR: 'survival-armor',
+  SURVIVAL_SHELTERS: 'survival-shelters',
   DODGE_ZERO_DAMAGE: 'dodge-zero-damage',
   SPRITCORE_LEVELING: 'spritcore-leveling',
 } as const;
@@ -396,6 +398,20 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
         'Teapot water fill, ingredient popover, campfire brew, and pour labels.',
     },
     {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SURVIVAL_ARMOR,
+      groupId: 'systems',
+      label: 'Survival armor',
+      description:
+        'Trail wear equip slots, worn temperature comfort, and profile armor UI.',
+    },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SURVIVAL_SHELTERS,
+      groupId: 'systems',
+      label: 'Survival shelters',
+      description:
+        'Shade lean-to, windbreak, tent, bedroll, and smoke rack placeables.',
+    },
+    {
       featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.DODGE_ZERO_DAMAGE,
       groupId: 'systems',
       label: 'Dodge = 0 damage',
@@ -458,6 +474,8 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS: Readonly<
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.PONDS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SWAMP_PONDS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TEA_BREWING]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SURVIVAL_ARMOR]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SURVIVAL_SHELTERS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.DODGE_ZERO_DAMAGE]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SPRITCORE_LEVELING]: true,
 };

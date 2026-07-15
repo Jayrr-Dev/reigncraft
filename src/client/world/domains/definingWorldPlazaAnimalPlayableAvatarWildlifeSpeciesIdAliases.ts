@@ -18,4 +18,6 @@ export const DEFINING_WORLD_PLAZA_ANIMAL_PLAYABLE_SPRITE_FOLDER_TO_WILDLIFE_SPEC
   toirtois: 'tortoise',
   lama: 'llama',
   'elite-wolf': 'omega-wolf',
+  // Recolor pack; no bestiary species row. Gate + SFX share tiger.
+  'white-tiger': 'tiger',
 };

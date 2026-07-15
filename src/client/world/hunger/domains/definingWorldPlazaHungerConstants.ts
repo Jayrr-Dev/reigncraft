@@ -123,6 +123,15 @@ export const DEFINING_WORLD_PLAZA_TEA_LEAVES_CALM_CHANCE = 1 / 3;
 /** Hunger ratio restored by drinking brewed coffee. */
 export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BREWED_COFFEE = 0.08;
 
+/** Hunger ratio restored by drinking a clay bottle of shore water. */
+export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_CLAY_BOTTLE_WATER = 0.04;
+
+/** Hunger ratio restored by eating berry porridge from a clay bowl. */
+export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BOWL_OF_PORRIDGE = 0.14;
+
+/** Hunger ratio restored by tasting smoke-oil from a clay crock. */
+export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_SMOKE_OIL_CROCK = 0.06;
+
 /** Hunger ratio restored by eating an apple. */
 export const DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE = 0.25;
 

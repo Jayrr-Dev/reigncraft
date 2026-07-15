@@ -21,6 +21,7 @@ export type DefiningWorldPlazaInventoryFoodDefinition = {
   readonly cookedWellFedChance?: number;
   readonly cookedResidualDiseaseId?: string;
   readonly cookedResidualDiseaseChance?: number;
+  readonly returnItemTypeId?: string;
 };
 
 /**
@@ -54,6 +55,7 @@ export function resolvingWorldPlazaInventoryFoodDefinition(
     cookedWellFedChance: definition.food.cookedWellFedChance,
     cookedResidualDiseaseId: definition.food.cookedResidualDiseaseId,
     cookedResidualDiseaseChance: definition.food.cookedResidualDiseaseChance,
+    returnItemTypeId: definition.food.returnItemTypeId,
   };
 }
 

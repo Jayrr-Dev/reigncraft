@@ -111,7 +111,10 @@ export function resolvingWorldPlazaInventoryFoodEatDurationMs(options: {
 
   if (
     itemTypeId === 'world-plaza-brewed-coffee' ||
-    itemTypeId === 'world-plaza-cup-of-tea'
+    itemTypeId === 'world-plaza-cup-of-tea' ||
+    itemTypeId === 'world-plaza-watered-clay-bottle' ||
+    itemTypeId === 'world-plaza-bowl-of-porridge' ||
+    itemTypeId === 'world-plaza-smoke-oil-crock'
   ) {
     return DEFINING_WORLD_PLAZA_FOOD_EAT_DURATION_MS_BREWED_COFFEE;
   }

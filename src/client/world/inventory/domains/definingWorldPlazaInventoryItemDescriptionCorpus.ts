@@ -16,6 +16,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_BLUE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_GOLDEN,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BOWL_OF_PORRIDGE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_CLAY_TEAPOT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_COFFEE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CHEST_KEY,
@@ -23,14 +24,20 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_COCONUT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CUP_OF_TEA,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOWL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOTTLE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CROCK,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SMOKE_OIL_CROCK,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_BOTTLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOWL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOTTLE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CROCK,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CUP,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
@@ -169,7 +176,42 @@ const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DESCRIPTION_STATIC_ENTRIES: readonly D
     {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOTTLE,
       description:
-        'Fired terracotta bottle. Ready for water, oil, or whatever you dare to cork.',
+        'Fired terracotta bottle. Fill it at a shore, drink on the trail, then fill again.',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_BOTTLE,
+      description:
+        'Shore water corked in clay. Drink for a light fill and a rinse against food sickness. Bottle returns empty.',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOWL,
+      description:
+        'Unfired clay bowl. Fire it in a kiln with coal before it can hold porridge.',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOWL,
+      description:
+        'Fired terracotta bowl. Cook berry porridge at a campfire, then eat and keep the bowl.',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BOWL_OF_PORRIDGE,
+      description:
+        'Warm berry mash cooked in clay at a campfire. Better trail food than raw berries. Bowl returns empty.',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CROCK,
+      description:
+        'Unfired lidded crock. Fire it in a kiln with coal before sealing smoke-oil inside.',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CROCK,
+      description:
+        'Fired terracotta crock. Render pig fat with niter at a campfire into warming smoke-oil.',
+    },
+    {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SMOKE_OIL_CROCK,
+      description:
+        'Rendered fat and niter sealed in clay. Taste for cold resistance. Crock returns empty.',
     },
   ];
 

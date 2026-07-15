@@ -33,6 +33,7 @@ export type RenderingWorldPlazaInventoryItemDetailPopoverProps = {
   readonly onAttachRecipePage?: () => void;
   readonly onDropItem?: () => void;
   readonly onEquipItem?: () => void;
+  readonly onEquipArmorItem?: () => void;
   readonly onOpenBag?: () => void;
   readonly onRefineItem?: () => void;
   readonly onAddFuelItem?: () => void;
@@ -52,6 +53,7 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
   onAttachRecipePage,
   onDropItem,
   onEquipItem,
+  onEquipArmorItem,
   onOpenBag,
   onRefineItem,
   onAddFuelItem,
@@ -110,6 +112,17 @@ export function RenderingWorldPlazaInventoryItemDetailPopover({
               aria-hidden
             />
           </button>
+
+          {model.canEquipArmor && onEquipArmorItem ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={actionTowerClassNames.button}
+              onClick={onEquipArmorItem}
+            >
+              Wear
+            </button>
+          ) : null}
 
           {model.canEquip && onEquipItem ? (
             <button
