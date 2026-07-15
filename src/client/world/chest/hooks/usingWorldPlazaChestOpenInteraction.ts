@@ -6,22 +6,24 @@
 
 'use client';
 
-import {
-  DEFINING_WORLD_PLAZA_CHEST_INTERACT_REACH_GRID,
-} from '@/components/world/chest/domains/definingWorldPlazaChestConstants';
+import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
+import { DEFINING_WORLD_PLAZA_CHEST_INTERACT_REACH_GRID } from '@/components/world/chest/domains/definingWorldPlazaChestConstants';
 import type { ListingWorldPlazaChestsInInteractionRangeEntry } from '@/components/world/chest/domains/listingWorldPlazaChestsInInteractionRange';
 import {
   gettingWorldPlazaChestInstance,
   openingWorldPlazaChest,
+  unlockingAndOpeningWorldPlazaChest,
 } from '@/components/world/chest/domains/managingWorldPlazaChestInstanceStore';
 import { openingWorldPlazaLocalChest } from '@/components/world/chest/domains/managingWorldPlazaLocalOpenedChests';
 import { resolvingWorldPlazaChestLootGrant } from '@/components/world/chest/domains/resolvingWorldPlazaChestLootGrant';
-import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
+import { countingWorldPlazaInventoryItemQuantityByTypeId } from '@/components/world/inventory/domains/countingWorldPlazaInventoryItemQuantityByTypeId';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CHEST_KEY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
-import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
+import { removingWorldPlazaInventoryItemQuantityByTypeId } from '@/components/world/inventory/domains/removingWorldPlazaInventoryItemQuantityByTypeId';
+import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
 import { useCallback, useRef } from 'react';
 
 export type UsingWorldPlazaChestOpenInteractionParams = {
@@ -73,6 +75,42 @@ function probingWorldPlazaChestInventoryCapacity(
   return true;
 }
 
+function grantingWorldPlazaChestLootToInventory(
+  inventoryState: DefiningInventoryState,
+  grants: readonly { readonly itemTypeId: string; readonly quantity: number }[]
+): DefiningInventoryState | null {
+  let nextState = inventoryState;
+
+  for (const grant of grants) {
+    if (grant.quantity <= 0) {
+      continue;
+    }
+
+    const addResult = addingWorldPlazaInventoryItemWithStacking(
+      nextState,
+      {
+        id: crypto.randomUUID(),
+        itemTypeId: grant.itemTypeId,
+        quantity: grant.quantity,
+      },
+      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+    );
+
+    if (addResult.quantityAccepted < grant.quantity) {
+      return null;
+    }
+
+    notifyingWorldPlazaInventoryItemAdded(addResult.quantityAccepted);
+    showingWorldPlazaInventoryItemPickupToast({
+      itemTypeId: grant.itemTypeId,
+      quantity: addResult.quantityAccepted,
+    });
+    nextState = addResult.state;
+  }
+
+  return nextState;
+}
+
 /**
  * Validates range / capacity and opens a closed chest once.
  */
@@ -90,15 +128,17 @@ export function usingWorldPlazaChestOpenInteraction({
 
   const openingChest = useCallback(
     (entry: ListingWorldPlazaChestsInInteractionRangeEntry): void => {
-      if (entry.isDisabled || entry.action !== 'open') {
+      if (entry.isDisabled) {
+        return;
+      }
+
+      if (entry.action !== 'open' && entry.action !== 'unlock') {
         return;
       }
 
       if (isCompletionPendingRef.current || !persistenceOwnerId) {
         if (!persistenceOwnerId) {
-          showingGameplayHudToast(
-            'Chests are unavailable in this session.'
-          );
+          showingGameplayHudToast('Chests are unavailable in this session.');
         }
         return;
       }
@@ -111,7 +151,15 @@ export function usingWorldPlazaChestOpenInteraction({
 
       const instance = gettingWorldPlazaChestInstance(entry.chestId);
 
-      if (!instance || instance.state !== 'closed') {
+      if (!instance) {
+        return;
+      }
+
+      if (entry.action === 'open' && instance.state !== 'closed') {
+        return;
+      }
+
+      if (entry.action === 'unlock' && instance.state !== 'locked') {
         return;
       }
 
@@ -120,7 +168,11 @@ export function usingWorldPlazaChestOpenInteraction({
       const reach = DEFINING_WORLD_PLAZA_CHEST_INTERACT_REACH_GRID;
 
       if (dx * dx + dy * dy > reach * reach) {
-        showingGameplayHudToast('Move closer to open this chest.');
+        showingGameplayHudToast(
+          entry.action === 'unlock'
+            ? 'Move closer to unlock this chest.'
+            : 'Move closer to open this chest.'
+        );
         return;
       }
 
@@ -129,12 +181,36 @@ export function usingWorldPlazaChestOpenInteraction({
         instance.chestId
       );
 
+      let inventoryProbeState = inventoryStateRef.current;
+
+      if (entry.action === 'unlock') {
+        const keyCount = countingWorldPlazaInventoryItemQuantityByTypeId(
+          inventoryProbeState,
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CHEST_KEY
+        );
+
+        if (keyCount < 1) {
+          showingGameplayHudToast('You need a chest key.');
+          return;
+        }
+
+        const keyRemovalProbe = removingWorldPlazaInventoryItemQuantityByTypeId(
+          inventoryProbeState,
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CHEST_KEY,
+          1
+        );
+
+        if (!keyRemovalProbe) {
+          showingGameplayHudToast('You need a chest key.');
+          return;
+        }
+
+        inventoryProbeState = keyRemovalProbe.state;
+      }
+
       if (
         grants.length > 0 &&
-        !probingWorldPlazaChestInventoryCapacity(
-          inventoryStateRef.current,
-          grants
-        )
+        !probingWorldPlazaChestInventoryCapacity(inventoryProbeState, grants)
       ) {
         showingGameplayHudToast('Your inventory is full.');
         return;
@@ -143,42 +219,47 @@ export function usingWorldPlazaChestOpenInteraction({
       isCompletionPendingRef.current = true;
 
       try {
-        for (const grant of grants) {
-          let quantityAccepted = 0;
+        let didApplyInventoryUpdate = false;
 
-          updatingInventoryState((currentState) => {
-            const addResult = addingWorldPlazaInventoryItemWithStacking(
-              currentState,
-              {
-                id: crypto.randomUUID(),
-                itemTypeId: grant.itemTypeId,
-                quantity: grant.quantity,
-              },
-              DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
+        updatingInventoryState((currentState) => {
+          let nextState = currentState;
+
+          if (entry.action === 'unlock') {
+            const keyRemoval = removingWorldPlazaInventoryItemQuantityByTypeId(
+              nextState,
+              DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CHEST_KEY,
+              1
             );
 
-            quantityAccepted = addResult.quantityAccepted;
-
-            if (addResult.quantityAccepted < grant.quantity) {
+            if (!keyRemoval) {
               return null;
             }
 
-            return addResult.state;
-          });
-
-          if (quantityAccepted < grant.quantity) {
-            showingGameplayHudToast('Your inventory is full.');
-            return;
+            nextState = keyRemoval.state;
           }
 
-          notifyingWorldPlazaInventoryItemAdded(quantityAccepted);
-          showingWorldPlazaInventoryItemPickupToast({
-            itemTypeId: grant.itemTypeId,
-            quantity: quantityAccepted,
-          });
+          const grantedState = grantingWorldPlazaChestLootToInventory(
+            nextState,
+            grants
+          );
+
+          if (!grantedState) {
+            return null;
+          }
+
+          didApplyInventoryUpdate = true;
+          return grantedState;
+        });
+
+        if (!didApplyInventoryUpdate) {
+          showingGameplayHudToast('Your inventory is full.');
+          return;
         }
 
-        const opened = openingWorldPlazaChest(entry.chestId);
+        const opened =
+          entry.action === 'unlock'
+            ? unlockingAndOpeningWorldPlazaChest(entry.chestId)
+            : openingWorldPlazaChest(entry.chestId);
 
         if (!opened) {
           return;

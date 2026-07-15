@@ -143,6 +143,7 @@ import mdiHumanMaleHeight from '@iconify-icons/mdi/human-male-height';
 import mdiImageFilterHdr from '@iconify-icons/mdi/image-filter-hdr';
 import mdiInformationOutline from '@iconify-icons/mdi/information-outline';
 import mdiJump from '@iconify-icons/mdi/jump';
+import mdiKeyVariant from '@iconify-icons/mdi/key-variant';
 import mdiLandPlots from '@iconify-icons/mdi/land-plots';
 import mdiLayersTriple from '@iconify-icons/mdi/layers-triple';
 import mdiLeaf from '@iconify-icons/mdi/leaf';
@@ -394,6 +395,7 @@ const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'mdi:home': mdiHome,
   'mdi:human-male-height': mdiHumanMaleHeight,
   'mdi:jump': mdiJump,
+  'mdi:key-variant': mdiKeyVariant,
   'mdi:image-filter-hdr': mdiImageFilterHdr,
   'mdi:information-outline': mdiInformationOutline,
   'mdi:land-plots': mdiLandPlots,

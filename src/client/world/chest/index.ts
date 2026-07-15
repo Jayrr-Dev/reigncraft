@@ -13,6 +13,7 @@ export {
   DEFINING_WORLD_PLAZA_CHEST_SPRITE_URLS,
   LABELING_WORLD_PLAZA_CHEST_LOCKED_ACTION,
   LABELING_WORLD_PLAZA_CHEST_OPEN_ACTION,
+  LABELING_WORLD_PLAZA_CHEST_UNLOCK_ACTION,
 } from '@/components/world/chest/domains/definingWorldPlazaChestConstants';
 export { DEFINING_WORLD_PLAZA_CHEST_LOOT_POOL_REGISTRY } from '@/components/world/chest/domains/definingWorldPlazaChestLootPoolRegistry';
 export { DEFINING_WORLD_PLAZA_CHEST_PLACEMENT_REGISTRY } from '@/components/world/chest/domains/definingWorldPlazaChestPlacementRegistry';
@@ -20,6 +21,7 @@ export type {
   DefiningWorldPlazaChestFacing,
   DefiningWorldPlazaChestId,
   DefiningWorldPlazaChestInstance,
+  DefiningWorldPlazaChestKeySource,
   DefiningWorldPlazaChestLoot,
   DefiningWorldPlazaChestPlacement,
   DefiningWorldPlazaChestState,

@@ -15,6 +15,12 @@ export type DefiningWorldPlazaChestState = 'open' | 'locked' | 'closed';
 /** Visual sprite state (locked reuses the closed art). */
 export type DefiningWorldPlazaChestSpriteVisualState = 'closed' | 'open';
 
+/** Where the universal chest key for a locked chest can drop. */
+export type DefiningWorldPlazaChestKeySource =
+  | 'wildlife'
+  | 'shrub'
+  | 'long-grass';
+
 export type DefiningWorldPlazaChestLootItem = {
   readonly kind: 'item';
   readonly itemTypeId: string;
@@ -43,6 +49,8 @@ export type DefiningWorldPlazaChestPlacement = {
   readonly collisionRadiusGrid?: number;
   /** Display scale relative to one isometric tile width. */
   readonly displayScale?: number;
+  /** Required for locked procedural chests: where its key can drop. */
+  readonly keySource?: DefiningWorldPlazaChestKeySource;
 };
 
 export type DefiningWorldPlazaChestInstance = {
@@ -54,6 +62,7 @@ export type DefiningWorldPlazaChestInstance = {
   readonly loot: DefiningWorldPlazaChestLoot;
   readonly collisionRadiusGrid: number;
   readonly displayScale: number;
+  readonly keySource?: DefiningWorldPlazaChestKeySource;
 };
 
 export type DefiningWorldPlazaChestLootGrant = {

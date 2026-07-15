@@ -1,7 +1,7 @@
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
+import { computingWorldPlazaInventoryDurabilityWearPerUse } from '@/components/world/inventory/domains/computingWorldPlazaInventoryDurabilityWearPerUse';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_DEFAULT_BREAK_CHANCE_AT_ZERO,
-  DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_DEFAULT_WEAR_PER_USE,
   DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_METADATA_KEY,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryDurabilityConstants';
 import {
@@ -70,7 +70,8 @@ export function applyingWorldPlazaInventorySlotDurabilityUse(
     };
   }
 
-  const durabilitySnapshot = resolvingWorldPlazaInventoryItemDurability(slotItem);
+  const durabilitySnapshot =
+    resolvingWorldPlazaInventoryItemDurability(slotItem);
 
   if (!durabilitySnapshot) {
     return {
@@ -83,7 +84,7 @@ export function applyingWorldPlazaInventorySlotDurabilityUse(
 
   const wearPerUse =
     durabilityBehavior.wearPerUse ??
-    DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_DEFAULT_WEAR_PER_USE;
+    computingWorldPlazaInventoryDurabilityWearPerUse(random);
   const breakChanceAtZero =
     durabilityBehavior.breakChanceAtZero ??
     DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_DEFAULT_BREAK_CHANCE_AT_ZERO;
@@ -103,7 +104,11 @@ export function applyingWorldPlazaInventorySlotDurabilityUse(
       broken: true,
       nextState: {
         capacity: state.capacity,
-        slots: cloningInventorySlotsWithSlotUpdate(state.slots, slotIndex, null),
+        slots: cloningInventorySlotsWithSlotUpdate(
+          state.slots,
+          slotIndex,
+          null
+        ),
       },
       remainingDurability: 0,
     };
@@ -118,7 +123,8 @@ export function applyingWorldPlazaInventorySlotDurabilityUse(
         ...slotItem,
         metadata: {
           ...slotItem.metadata,
-          [DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_METADATA_KEY]: nextRemaining,
+          [DEFINING_WORLD_PLAZA_INVENTORY_DURABILITY_METADATA_KEY]:
+            nextRemaining,
         },
       }),
     },

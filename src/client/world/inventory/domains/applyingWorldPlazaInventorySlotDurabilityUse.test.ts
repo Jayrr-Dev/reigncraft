@@ -83,12 +83,35 @@ describe('applyingWorldPlazaInventorySlotDurabilityUse', () => {
       ],
     };
 
-    const result = applyingWorldPlazaInventorySlotDurabilityUse(state, 0);
+    // random() → 0 maps to wear amount 1 in the default 1–3 roll.
+    const result = applyingWorldPlazaInventorySlotDurabilityUse(
+      state,
+      0,
+      () => 0
+    );
 
     expect(result.applied).toBe(true);
     expect(result.remainingDurability).toBe(
       DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY - 1
     );
+  });
+
+  it('rolls default wear between 1 and 3 when wearPerUse is unset', () => {
+    const state = creatingAxeInventoryState(10);
+
+    const wearOne = applyingWorldPlazaInventorySlotDurabilityUse(
+      state,
+      0,
+      () => 0
+    );
+    const wearThree = applyingWorldPlazaInventorySlotDurabilityUse(
+      state,
+      0,
+      () => 0.99
+    );
+
+    expect(wearOne.remainingDurability).toBe(9);
+    expect(wearThree.remainingDurability).toBe(7);
   });
 
   it('ignores empty slots', () => {

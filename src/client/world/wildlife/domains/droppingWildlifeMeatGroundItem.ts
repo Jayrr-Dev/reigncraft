@@ -1,3 +1,4 @@
+import { droppingWorldPlazaChestKeyGroundItem } from '@/components/world/chest/domains/droppingWorldPlazaChestKeyGroundItem';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWorldPlazaGroundItemsUseLocalPersistence } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemsUseLocalPersistence';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
@@ -131,6 +132,14 @@ export async function droppingWildlifeMeatGroundItem({
     );
 
     await droppingWildlifeSpecialtyGroundItems({
+      localPersistenceOwnerId,
+      redditUserId,
+      saveSlotIndex,
+      instance,
+      playerPosition,
+    });
+
+    await droppingWorldPlazaChestKeyGroundItem({
       localPersistenceOwnerId,
       redditUserId,
       saveSlotIndex,

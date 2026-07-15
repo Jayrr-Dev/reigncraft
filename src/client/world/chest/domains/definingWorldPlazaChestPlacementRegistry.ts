@@ -1,7 +1,8 @@
 /**
  * Fixed world placements for plaza chest props.
  *
- * Registry defaults to empty — add rows by hand. Chests do not spawn procedurally.
+ * Registry defaults to empty — hand placements only. Procedural locked chests
+ * spawn from tile seeds when the player enters view (see procedural chest sync).
  *
  * @module components/world/chest/domains/definingWorldPlazaChestPlacementRegistry
  */

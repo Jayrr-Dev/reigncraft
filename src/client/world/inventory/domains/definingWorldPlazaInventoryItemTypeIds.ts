@@ -283,6 +283,10 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_GOLDEN =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES =
   'world-plaza-tea-leaves' as const;
 
+/** Universal key that unlocks procedural locked chests. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CHEST_KEY =
+  'world-plaza-chest-key' as const;
+
 /** Coffee processing chain from coffee cherries. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COFFEE_BEANS =
   'world-plaza-coffee-beans' as const;

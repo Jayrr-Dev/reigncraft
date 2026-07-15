@@ -6,11 +6,13 @@
 
 'use client';
 
+import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import {
   DEFINING_WORLD_PLAZA_CHEST_INTERACTION_LABEL_BUTTON_CLASS_NAME,
   DEFINING_WORLD_PLAZA_CHEST_INTERACTION_LABEL_DISABLED_BUTTON_CLASS_NAME,
   LABELING_WORLD_PLAZA_CHEST_LOCKED_ACTION,
   LABELING_WORLD_PLAZA_CHEST_OPEN_ACTION,
+  LABELING_WORLD_PLAZA_CHEST_UNLOCK_ACTION,
 } from '@/components/world/chest/domains/definingWorldPlazaChestConstants';
 import {
   listingWorldPlazaChestsInInteractionRange,
@@ -30,6 +32,8 @@ import {
   DEFINING_WORLD_PLAZA_TIMED_INTERACTION_PROGRESS_INITIAL_SNAPSHOT,
   type DefiningWorldPlazaTimedInteractionProgressSnapshot,
 } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
+import { countingWorldPlazaInventoryItemQuantityByTypeId } from '@/components/world/inventory/domains/countingWorldPlazaInventoryItemQuantityByTypeId';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CHEST_KEY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { useLayoutEffect, useRef, useState } from 'react';
 
 const RENDERING_WORLD_PLAZA_CHEST_INTERACTION_LABEL_HIDDEN_TRANSFORM =
@@ -44,6 +48,7 @@ export type RenderingWorldPlazaChestInteractionLabelsProps = {
   >;
   readonly cameraOffsetRef: React.RefObject<DefiningWorldPlazaCameraOffset>;
   readonly cameraWorldZoomRef: React.RefObject<number>;
+  readonly inventoryStateRef: React.RefObject<DefiningInventoryState | null>;
   readonly onOpenChest: (
     entry: ListingWorldPlazaChestsInInteractionRangeEntry
   ) => void;
@@ -56,6 +61,7 @@ export function RenderingWorldPlazaChestInteractionLabels({
   selectedInteractableBlockKeysRef,
   cameraOffsetRef,
   cameraWorldZoomRef,
+  inventoryStateRef,
   onOpenChest,
 }: RenderingWorldPlazaChestInteractionLabelsProps): React.JSX.Element {
   const enabled = checkingWorldPlazaGenerationFeatureEnabled(
@@ -97,8 +103,18 @@ export function RenderingWorldPlazaChestInteractionLabels({
         return;
       }
 
+      const inventoryState = inventoryStateRef.current;
+
+      const playerHasChestKey =
+        inventoryState !== null &&
+        countingWorldPlazaInventoryItemQuantityByTypeId(
+          inventoryState,
+          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CHEST_KEY
+        ) > 0;
+
       const nextSelectedChests = listingWorldPlazaChestsInInteractionRange(
-        selectedInteractableBlockKeysRef.current
+        selectedInteractableBlockKeysRef.current,
+        playerHasChestKey
       );
 
       const currentEntries = selectedChestsRef.current;
@@ -170,6 +186,7 @@ export function RenderingWorldPlazaChestInteractionLabels({
     cameraOffsetRef,
     cameraWorldZoomRef,
     enabled,
+    inventoryStateRef,
     selectedInteractableBlockKeysRef,
   ]);
 
@@ -183,7 +200,9 @@ export function RenderingWorldPlazaChestInteractionLabels({
         const label =
           entry.action === 'locked'
             ? LABELING_WORLD_PLAZA_CHEST_LOCKED_ACTION
-            : LABELING_WORLD_PLAZA_CHEST_OPEN_ACTION;
+            : entry.action === 'unlock'
+              ? LABELING_WORLD_PLAZA_CHEST_UNLOCK_ACTION
+              : LABELING_WORLD_PLAZA_CHEST_OPEN_ACTION;
         const buttonClassName = entry.isDisabled
           ? DEFINING_WORLD_PLAZA_CHEST_INTERACTION_LABEL_DISABLED_BUTTON_CLASS_NAME
           : DEFINING_WORLD_PLAZA_CHEST_INTERACTION_LABEL_BUTTON_CLASS_NAME;

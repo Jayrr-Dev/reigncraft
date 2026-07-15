@@ -8352,6 +8352,8 @@ function RenderingWorldPlazaPixiSceneConnected({
                   {isChestGenerationEnabled ? (
                     <RenderingWorldPlazaChestLayer
                       chestStoreRef={chestStoreRef}
+                      playerPositionRef={playerPositionRef}
+                      localPersistenceOwnerId={localPersistenceOwnerId}
                     />
                   ) : null}
                   {isTrapGenerationEnabled ? (
@@ -8936,6 +8938,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   }
                   cameraOffsetRef={cameraOffsetRef}
                   cameraWorldZoomRef={cameraWorldZoomRef}
+                  inventoryStateRef={inventoryStateRef}
                   onOpenChest={openingChest}
                 />
               ) : null}

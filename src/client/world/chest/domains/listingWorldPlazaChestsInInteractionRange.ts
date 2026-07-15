@@ -4,9 +4,11 @@
  * @module components/world/chest/domains/listingWorldPlazaChestsInInteractionRange
  */
 
-import { formattingWorldPlazaInteractableChestSelectionKey } from '@/components/world/chest/domains/formattingWorldPlazaInteractableChestSelectionKey';
-import { parsingWorldPlazaInteractableChestSelectionKey } from '@/components/world/chest/domains/formattingWorldPlazaInteractableChestSelectionKey';
 import type { DefiningWorldPlazaChestInstance } from '@/components/world/chest/domains/definingWorldPlazaChestTypes';
+import {
+  formattingWorldPlazaInteractableChestSelectionKey,
+  parsingWorldPlazaInteractableChestSelectionKey,
+} from '@/components/world/chest/domains/formattingWorldPlazaInteractableChestSelectionKey';
 import {
   gettingWorldPlazaChestInstance,
   listingWorldPlazaChestInstances,
@@ -15,6 +17,7 @@ import {
 
 export type ListingWorldPlazaChestsInInteractionRangeAction =
   | 'open'
+  | 'unlock'
   | 'locked';
 
 export type ListingWorldPlazaChestsInInteractionRangeEntry = {
@@ -32,12 +35,14 @@ export type ListingWorldPlazaChestsInInteractionRangeEntry = {
  */
 export function listingWorldPlazaChestsInInteractionRange(
   selectedInteractableKeys: ReadonlySet<string>,
+  playerHasChestKey: boolean = false,
   store?: ManagingWorldPlazaChestInstanceStore
 ): readonly ListingWorldPlazaChestsInInteractionRangeEntry[] {
   const entries: ListingWorldPlazaChestsInInteractionRangeEntry[] = [];
 
   for (const selectionKey of selectedInteractableKeys) {
-    const chestId = parsingWorldPlazaInteractableChestSelectionKey(selectionKey);
+    const chestId =
+      parsingWorldPlazaInteractableChestSelectionKey(selectionKey);
 
     if (!chestId) {
       continue;
@@ -49,7 +54,10 @@ export function listingWorldPlazaChestsInInteractionRange(
       continue;
     }
 
-    const entry = resolvingWorldPlazaChestInteractionLabelEntry(instance);
+    const entry = resolvingWorldPlazaChestInteractionLabelEntry(
+      instance,
+      playerHasChestKey
+    );
 
     if (entry) {
       entries.push(entry);
@@ -61,14 +69,19 @@ export function listingWorldPlazaChestsInInteractionRange(
 
 /** Builds a label entry for one chest instance, or null when already open. */
 export function resolvingWorldPlazaChestInteractionLabelEntry(
-  instance: DefiningWorldPlazaChestInstance
+  instance: DefiningWorldPlazaChestInstance,
+  playerHasChestKey: boolean = false
 ): ListingWorldPlazaChestsInInteractionRangeEntry | null {
   if (instance.state === 'open') {
     return null;
   }
 
   const action: ListingWorldPlazaChestsInInteractionRangeAction =
-    instance.state === 'locked' ? 'locked' : 'open';
+    instance.state === 'locked'
+      ? playerHasChestKey
+        ? 'unlock'
+        : 'locked'
+      : 'open';
 
   return {
     chestId: instance.chestId,

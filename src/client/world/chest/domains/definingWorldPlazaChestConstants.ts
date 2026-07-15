@@ -33,6 +33,9 @@ export const LABELING_WORLD_PLAZA_CHEST_OPEN_ACTION = 'Open' as const;
 /** Player-facing Locked action label (disabled). */
 export const LABELING_WORLD_PLAZA_CHEST_LOCKED_ACTION = 'Locked' as const;
 
+/** Player-facing Unlock action label (enabled when player holds a chest key). */
+export const LABELING_WORLD_PLAZA_CHEST_UNLOCK_ACTION = 'Unlock' as const;
+
 /** Clickable Open button chrome (campfire outlined text). */
 export const DEFINING_WORLD_PLAZA_CHEST_INTERACTION_LABEL_BUTTON_CLASS_NAME =
   DEFINING_WORLD_PLAZA_CAMPFIRE_INTERACTION_LABEL_BUTTON_CLASS_NAME;

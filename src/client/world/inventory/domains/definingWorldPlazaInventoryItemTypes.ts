@@ -55,6 +55,7 @@ import { DEFINING_WORLD_PLAZA_WOOD_AXE_INVENTORY_ICON_URL } from '@/components/w
 import { registeringWorldPlazaInventoryBagItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryBagItemDefinitions';
 import { registeringWorldPlazaInventoryBerryItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryBerryItemDefinitions';
 import { registeringWorldPlazaInventoryCeramicsItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCeramicsItemDefinitions';
+import { registeringWorldPlazaInventoryChestKeyItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryChestKeyItemDefinitions';
 import { registeringWorldPlazaInventoryCloverItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCloverItemDefinitions';
 import { registeringWorldPlazaInventoryCoffeeItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCoffeeItemDefinitions';
 import { registeringWorldPlazaInventoryFlowerItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryFlowerItemDefinitions';
@@ -289,6 +290,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     ...registeringWorldPlazaWildlifeSpecialtyLootInventoryItems(),
     ...registeringWorldPlazaInventoryFlowerItemDefinitions(),
     ...registeringWorldPlazaInventoryCloverItemDefinitions(),
+    ...registeringWorldPlazaInventoryChestKeyItemDefinitions(),
     ...registeringWorldPlazaInventoryBerryItemDefinitions(),
     ...registeringWorldPlazaMushroomInventoryItems(),
     ...registeringWorldPlazaInventoryCoffeeItemDefinitions(),

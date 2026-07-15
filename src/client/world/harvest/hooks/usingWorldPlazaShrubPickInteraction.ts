@@ -1,6 +1,7 @@
 'use client';
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
+import { grantingWorldPlazaChestKeyToInventory } from '@/components/world/chest/domains/grantingWorldPlazaChestKeyToInventory';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { recordingWorldPlazaHerbariumBerrySighted } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import type { DefiningWorldPlazaPickedShrubTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalPickedShrubs';
@@ -15,8 +16,8 @@ import type { ListingWorldPlazaShrubsInInteractionRangeEntry } from '@/component
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import { resolvingWorldPlazaBerryItemTypeIdFromLootKind } from '@/components/world/inventory/domains/definingWorldPlazaInventoryBerrySpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
-import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
+import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, type RefObject } from 'react';
 import {
@@ -245,7 +246,12 @@ export function usingWorldPlazaShrubPickInteraction({
             return null;
           }
 
-          return addResult.state;
+          const keyGrant = grantingWorldPlazaChestKeyToInventory(
+            addResult.state,
+            'shrub'
+          );
+
+          return keyGrant.state;
         });
 
         if (quantityAccepted < berryQuantity) {

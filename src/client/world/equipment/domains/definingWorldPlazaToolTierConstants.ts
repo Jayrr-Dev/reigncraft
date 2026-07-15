@@ -21,25 +21,25 @@ export const DEFINING_WORLD_PLAZA_TOOL_TIER_STATS: Record<
   wood: {
     meleeDamageMultiplier: 1,
     harvestSpeedMultiplier: 1,
-    maxDurability: 60,
+    maxDurability: 40,
     displayNameSuffix: 'Wood',
   },
   iron: {
     meleeDamageMultiplier: 1.15,
     harvestSpeedMultiplier: 1.2,
-    maxDurability: 100,
+    maxDurability: 67,
     displayNameSuffix: 'Iron',
   },
   steel: {
     meleeDamageMultiplier: 1.3,
     harvestSpeedMultiplier: 1.4,
-    maxDurability: 150,
+    maxDurability: 100,
     displayNameSuffix: 'Steel',
   },
   gold: {
     meleeDamageMultiplier: 1.45,
     harvestSpeedMultiplier: 1.6,
-    maxDurability: 200,
+    maxDurability: 133,
     displayNameSuffix: 'Gold',
   },
 };

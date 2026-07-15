@@ -12,12 +12,16 @@ import { DEFINING_WORLD_PLAZA_CHEST_PLACEMENT_REGISTRY } from '@/components/worl
 import type {
   DefiningWorldPlazaChestId,
   DefiningWorldPlazaChestInstance,
+  DefiningWorldPlazaChestKeySource,
   DefiningWorldPlazaChestPlacement,
 } from '@/components/world/chest/domains/definingWorldPlazaChestTypes';
 import { checkingWorldPlazaLocalChestIsOpened } from '@/components/world/chest/domains/managingWorldPlazaLocalOpenedChests';
 
 export type ManagingWorldPlazaChestInstanceStore = {
-  readonly instances: Map<DefiningWorldPlazaChestId, DefiningWorldPlazaChestInstance>;
+  readonly instances: Map<
+    DefiningWorldPlazaChestId,
+    DefiningWorldPlazaChestInstance
+  >;
 };
 
 type ManagingWorldPlazaChestInstanceListener = () => void;
@@ -44,6 +48,7 @@ function creatingWorldPlazaChestInstanceFromPlacement(
       DEFINING_WORLD_PLAZA_CHEST_COLLISION_RADIUS_GRID,
     displayScale:
       placement.displayScale ?? DEFINING_WORLD_PLAZA_CHEST_DISPLAY_SCALE,
+    keySource: placement.keySource,
   };
 }
 
@@ -107,6 +112,47 @@ export function gettingWorldPlazaChestInstance(
 }
 
 /**
+ * Inserts a chest from placement when missing. Existing instances are unchanged.
+ * Returns true when a new instance was added.
+ */
+export function upsertingWorldPlazaChestInstanceFromPlacement(
+  placement: DefiningWorldPlazaChestPlacement,
+  persistenceOwnerId: string | null,
+  store: ManagingWorldPlazaChestInstanceStore = chestInstanceStore
+): boolean {
+  if (store.instances.has(placement.chestId)) {
+    return false;
+  }
+
+  const instance = creatingWorldPlazaChestInstanceFromPlacement(
+    placement,
+    persistenceOwnerId
+  );
+
+  store.instances.set(instance.chestId, instance);
+  notifyingWorldPlazaChestInstanceListeners();
+
+  return true;
+}
+
+/** Key sources that still have at least one locked chest in the store. */
+export function listingWorldPlazaActiveLockedChestKeySources(
+  store: ManagingWorldPlazaChestInstanceStore = chestInstanceStore
+): ReadonlySet<DefiningWorldPlazaChestKeySource> {
+  const activeSources = new Set<DefiningWorldPlazaChestKeySource>();
+
+  for (const instance of store.instances.values()) {
+    if (instance.state !== 'locked' || !instance.keySource) {
+      continue;
+    }
+
+    activeSources.add(instance.keySource);
+  }
+
+  return activeSources;
+}
+
+/**
  * Opens a closed chest. Locked and already-open chests are unchanged.
  * Returns the updated instance, or null when missing / not closed.
  */
@@ -117,6 +163,31 @@ export function openingWorldPlazaChest(
   const instance = store.instances.get(chestId);
 
   if (!instance || instance.state !== 'closed') {
+    return null;
+  }
+
+  const next: DefiningWorldPlazaChestInstance = {
+    ...instance,
+    state: 'open',
+  };
+
+  store.instances.set(chestId, next);
+  notifyingWorldPlazaChestInstanceListeners();
+
+  return next;
+}
+
+/**
+ * Unlocks and opens a locked chest. Closed and already-open chests are unchanged.
+ * Returns the updated instance, or null when missing / not locked.
+ */
+export function unlockingAndOpeningWorldPlazaChest(
+  chestId: DefiningWorldPlazaChestId,
+  store: ManagingWorldPlazaChestInstanceStore = chestInstanceStore
+): DefiningWorldPlazaChestInstance | null {
+  const instance = store.instances.get(chestId);
+
+  if (!instance || instance.state !== 'locked') {
     return null;
   }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
+import { grantingWorldPlazaChestKeyToInventory } from '@/components/world/chest/domains/grantingWorldPlazaChestKeyToInventory';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { recordingWorldPlazaHerbariumCloverStudied } from '@/components/world/domains/managingWorldPlazaHerbariumDiscoveryStore';
 import type { DefiningWorldPlazaClearedLongGrassTileState } from '@/components/world/harvest/domains/managingWorldPlazaLocalClearedLongGrass';
@@ -15,8 +16,8 @@ import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/in
 import { DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_PICKED_AT_MS_METADATA_KEY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverConstants';
 import { resolvingWorldPlazaCloverItemTypeIdFromLootKind } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
-import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
+import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, type RefObject } from 'react';
 import {
@@ -249,7 +250,12 @@ export function usingWorldPlazaLongGrassSearchInteraction({
             return null;
           }
 
-          return addResult.state;
+          const keyGrant = grantingWorldPlazaChestKeyToInventory(
+            addResult.state,
+            'long-grass'
+          );
+
+          return keyGrant.state;
         });
 
         if (quantityAccepted < lootQuantity) {

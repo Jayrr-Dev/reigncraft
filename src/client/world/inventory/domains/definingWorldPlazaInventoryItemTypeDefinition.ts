@@ -54,7 +54,7 @@ export type DefiningWorldPlazaInventorySpriteSheetIcon = {
 export type DefiningWorldPlazaInventoryItemDurabilityBehavior = {
   /** Starting durability for a fresh item instance. */
   readonly max: number;
-  /** Durability lost per successful use (default 1). */
+  /** Fixed durability lost per successful use. When unset, rolls default 1–3. */
   readonly wearPerUse?: number;
   /** Chance [0, 1] the item is destroyed on each use while already at zero. */
   readonly breakChanceAtZero?: number;
