@@ -10,10 +10,7 @@ import {
   DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME,
   DEFINING_WORLD_PLAZA_FISHING_REEL_READY_YELLOW_ONCE_CLASS_NAME,
 } from '@/components/world/fishing/domains/definingWorldPlazaFishingReelOpportunityConstants';
-import {
-  gettingWorldPlazaFishingReelHold,
-  gettingWorldPlazaFishingReelReadyFlashVisible,
-} from '@/components/world/fishing/domains/managingWorldPlazaFishingReelCastState';
+import { gettingWorldPlazaFishingReelHold } from '@/components/world/fishing/domains/managingWorldPlazaFishingReelCastState';
 
 import {
   computingWorldPlazaTimedInteractionProgressRingLayout,
@@ -169,11 +166,8 @@ export const RenderingWorldPlazaFishingCastProgressRing = memo(
             DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME,
             isReelReady && !isReelHeld
           );
-          wrapperElement.classList.toggle(
-            DEFINING_WORLD_PLAZA_FISHING_REEL_READY_YELLOW_ONCE_CLASS_NAME,
-            isReelReady &&
-              !isReelHeld &&
-              gettingWorldPlazaFishingReelReadyFlashVisible()
+          wrapperElement.classList.remove(
+            DEFINING_WORLD_PLAZA_FISHING_REEL_READY_YELLOW_ONCE_CLASS_NAME
           );
           wrapperElement.classList.toggle(
             DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_CLASS_NAME,

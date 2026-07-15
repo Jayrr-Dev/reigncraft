@@ -17,10 +17,7 @@ import {
 import { formattingWorldPlazaFishingTileSelectionKey } from '@/components/world/fishing/domains/formattingWorldPlazaFishingTileSelectionKey';
 import type { ListingWorldPlazaFishingTilesInInteractionRangeEntry } from '@/components/world/fishing/domains/listingWorldPlazaFishingTilesInInteractionRange';
 import { listingWorldPlazaFishingTilesInInteractionRange } from '@/components/world/fishing/domains/listingWorldPlazaFishingTilesInInteractionRange';
-import {
-  gettingWorldPlazaFishingReelHold,
-  gettingWorldPlazaFishingReelReadyFlashVisible,
-} from '@/components/world/fishing/domains/managingWorldPlazaFishingReelCastState';
+import { gettingWorldPlazaFishingReelHold } from '@/components/world/fishing/domains/managingWorldPlazaFishingReelCastState';
 import { checkingWorldPlazaTimedInteractionProgressRingVisible } from '@/components/world/interaction/domains/checkingWorldPlazaTimedInteractionProgressMatchesTarget';
 import { DEFINING_WORLD_PLAZA_TIMED_INTERACTION_LABEL_ROW_CLASS_NAME } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionLabelUiConstants';
 import type { DefiningWorldPlazaTimedInteractionProgressSnapshot } from '@/components/world/interaction/domains/definingWorldPlazaTimedInteractionProgressSnapshot';
@@ -200,11 +197,9 @@ export function RenderingWorldPlazaFishingInteractionLabels({
             DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME,
             isReelReady && !isReelHeld
           );
-          reelButtonElement.classList.toggle(
-            DEFINING_WORLD_PLAZA_FISHING_REEL_READY_YELLOW_ONCE_CLASS_NAME,
-            isReelReady &&
-              !isReelHeld &&
-              gettingWorldPlazaFishingReelReadyFlashVisible()
+          // Yellow glow class retired — keep removed so hover/class churn cannot flicker.
+          reelButtonElement.classList.remove(
+            DEFINING_WORLD_PLAZA_FISHING_REEL_READY_YELLOW_ONCE_CLASS_NAME
           );
           reelButtonElement.classList.toggle(
             DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_CLASS_NAME,

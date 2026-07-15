@@ -22,7 +22,15 @@ export const LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_COMING_SOON =
 export const LABELING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_TOGGLE =
   'Disable tutorial' as const;
 
-/** Row wrapping the disable-tutorial switch under the panel header. */
+/** Save-slot picker toggle: hide danger-sense rim vignette (same preference as Settings). */
+export const LABELING_PLAZA_SINGLE_PLAYER_DISABLE_DANGER_SENSE_TOGGLE =
+  'Disable danger sense' as const;
+
+/** Stack of preference switches under the panel header. */
+export const STYLING_PLAZA_SINGLE_PLAYER_PREFERENCE_TOGGLES_STACK_CLASS_NAME =
+  'flex w-full flex-col gap-2' as const;
+
+/** Row wrapping a preference switch under the panel header. */
 export const STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_ROW_CLASS_NAME =
   'flex w-full cursor-pointer items-center justify-between gap-3 text-xs font-semibold text-ink sm:text-sm' as const;
 

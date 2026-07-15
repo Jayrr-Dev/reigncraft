@@ -9,12 +9,14 @@ import {
 import {
   DEFINING_PLAZA_SINGLE_PLAYER_PERMA_DEATH_SAVE_SLOT_INDEX,
   DEFINING_PLAZA_SINGLE_PLAYER_RANDOM_ANIMAL_SAVE_SLOT_INDEX,
+  LABELING_PLAZA_SINGLE_PLAYER_DISABLE_DANGER_SENSE_TOGGLE,
   LABELING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_TOGGLE,
   LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_COMING_SOON,
   STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_ROW_CLASS_NAME,
   STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_INPUT_CLASS_NAME,
   STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_THUMB_CLASS_NAME,
   STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_TRACK_CLASS_NAME,
+  STYLING_PLAZA_SINGLE_PLAYER_PREFERENCE_TOGGLES_STACK_CLASS_NAME,
   STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_LOCKED_PILL_CLASS_NAME,
   STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_LOCKED_ROW_CLASS_NAME,
   STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_LOCKED_SELECT_BUTTON_CLASS_NAME,
@@ -49,6 +51,7 @@ import {
   LABELING_WORLD_PLAZA_RANDOM_ANIMAL_LOAD_SLOT_SUBTITLE_NEW,
   LABELING_WORLD_PLAZA_RANDOM_ANIMAL_LOAD_SLOT_TITLE,
 } from '@/components/world/domains/definingWorldPlazaRandomAnimalLoadConstants';
+import { usingWorldPlazaDangerSenseEnabled } from '@/components/world/hooks/usingWorldPlazaDangerSenseEnabled';
 import { usingWorldPlazaOnboardingTutorialEnabled } from '@/components/world/onboarding/hooks/usingWorldPlazaOnboardingTutorialEnabled';
 import { useCallback, useState } from 'react';
 import {
@@ -77,9 +80,12 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
     usingPlazaSinglePlayerSaveSlotDeleteMutation();
   const { isOnboardingTutorialEnabled, settingOnboardingTutorialEnabled } =
     usingWorldPlazaOnboardingTutorialEnabled();
+  const { isDangerSenseEnabled, settingDangerSenseEnabled } =
+    usingWorldPlazaDangerSenseEnabled();
   const [confirmingDeleteSaveSlotIndex, setConfirmingDeleteSaveSlotIndex] =
     useState<PlazaSaveSlotIndex | null>(null);
   const isTutorialDisabled = !isOnboardingTutorialEnabled;
+  const isDangerSenseDisabled = !isDangerSenseEnabled;
 
   const handlingRequestDeleteSaveSlot = useCallback(
     (saveSlotIndex: PlazaSaveSlotIndex): void => {
@@ -137,40 +143,85 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
           </div>
         </div>
 
-        <label
+        <div
           className={
-            STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_ROW_CLASS_NAME
+            STYLING_PLAZA_SINGLE_PLAYER_PREFERENCE_TOGGLES_STACK_CLASS_NAME
           }
-          htmlFor="plaza-single-player-disable-tutorial"
         >
-          <span>{LABELING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_TOGGLE}</span>
-          <span
+          <label
             className={
-              STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_TRACK_CLASS_NAME
+              STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_ROW_CLASS_NAME
             }
+            htmlFor="plaza-single-player-disable-tutorial"
           >
-            <input
-              id="plaza-single-player-disable-tutorial"
-              type="checkbox"
-              role="switch"
-              checked={isTutorialDisabled}
-              aria-checked={isTutorialDisabled}
-              className={
-                STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_INPUT_CLASS_NAME
-              }
-              onChange={(event) => {
-                notifyingPlazaHomeScreenButtonClicked();
-                settingOnboardingTutorialEnabled(!event.currentTarget.checked);
-              }}
-            />
+            <span>{LABELING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_TOGGLE}</span>
             <span
-              aria-hidden
               className={
-                STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_THUMB_CLASS_NAME
+                STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_TRACK_CLASS_NAME
               }
-            />
-          </span>
-        </label>
+            >
+              <input
+                id="plaza-single-player-disable-tutorial"
+                type="checkbox"
+                role="switch"
+                checked={isTutorialDisabled}
+                aria-checked={isTutorialDisabled}
+                className={
+                  STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_INPUT_CLASS_NAME
+                }
+                onChange={(event) => {
+                  notifyingPlazaHomeScreenButtonClicked();
+                  settingOnboardingTutorialEnabled(
+                    !event.currentTarget.checked
+                  );
+                }}
+              />
+              <span
+                aria-hidden
+                className={
+                  STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_THUMB_CLASS_NAME
+                }
+              />
+            </span>
+          </label>
+
+          <label
+            className={
+              STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_ROW_CLASS_NAME
+            }
+            htmlFor="plaza-single-player-disable-danger-sense"
+          >
+            <span>
+              {LABELING_PLAZA_SINGLE_PLAYER_DISABLE_DANGER_SENSE_TOGGLE}
+            </span>
+            <span
+              className={
+                STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_TRACK_CLASS_NAME
+              }
+            >
+              <input
+                id="plaza-single-player-disable-danger-sense"
+                type="checkbox"
+                role="switch"
+                checked={isDangerSenseDisabled}
+                aria-checked={isDangerSenseDisabled}
+                className={
+                  STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_INPUT_CLASS_NAME
+                }
+                onChange={(event) => {
+                  notifyingPlazaHomeScreenButtonClicked();
+                  settingDangerSenseEnabled(!event.currentTarget.checked);
+                }}
+              />
+              <span
+                aria-hidden
+                className={
+                  STYLING_PLAZA_SINGLE_PLAYER_DISABLE_TUTORIAL_SWITCH_THUMB_CLASS_NAME
+                }
+              />
+            </span>
+          </label>
+        </div>
       </div>
 
       <div

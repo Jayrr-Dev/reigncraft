@@ -583,72 +583,67 @@ video {
   stroke-linecap: round;
 }
 
-.world-plaza-fishing-reel-ready-flash {
+/* Solid color only — no glow / filter. Hover matches base so moving overlays
+   do not flicker when the pointer jitters across the label edge. */
+.world-plaza-fishing-reel-ready-flash,
+.world-plaza-fishing-reel-ready-flash:hover {
   animation: none;
   color: #4ade80;
-  filter: drop-shadow(0 0 6px rgba(74, 222, 128, 0.55));
-  text-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.65),
-    0 0 8px rgba(74, 222, 128, 0.55);
-}
-
-.world-plaza-fishing-reel-ready-flash:hover {
-  color: #facc15;
-}
-
-.world-plaza-fishing-reel-ready-flash.world-plaza-fishing-cast-progress-indicator {
-  color: inherit;
-  text-shadow: none;
-  filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.75));
-}
-
-.world-plaza-fishing-reel-ready-flash.world-plaza-fishing-cast-progress-indicator:hover
-  .world-plaza-timed-interaction-progress-icon {
-  color: #facc15;
-}
-
-.world-plaza-fishing-reel-ready-yellow-once {
-  filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.75));
-}
-
-.world-plaza-fishing-reel-ready-yellow-once:hover {
-  color: #fde047;
-}
-
-.world-plaza-fishing-reel-ready-yellow-once.world-plaza-fishing-cast-progress-indicator {
-  filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.85));
-}
-
-.world-plaza-fishing-reel-ready-yellow-once.world-plaza-fishing-cast-progress-indicator:hover
-  .world-plaza-timed-interaction-progress-icon {
-  color: #fde047;
-}
-
-.world-plaza-fishing-reel-hold {
-  animation: none;
-  color: #facc15;
   filter: none;
+  opacity: 1;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.65);
 }
 
-.world-plaza-fishing-reel-hold:hover {
-  color: #fde047;
-}
-
-.world-plaza-fishing-reel-hold.world-plaza-fishing-cast-progress-indicator {
+.world-plaza-fishing-reel-ready-flash.world-plaza-fishing-cast-progress-indicator,
+.world-plaza-fishing-reel-ready-flash.world-plaza-fishing-cast-progress-indicator:hover {
   color: inherit;
   text-shadow: none;
   filter: none;
+  opacity: 1;
+}
+
+.world-plaza-fishing-reel-ready-flash.world-plaza-fishing-cast-progress-indicator
+  .world-plaza-timed-interaction-progress-icon,
+.world-plaza-fishing-reel-ready-flash.world-plaza-fishing-cast-progress-indicator:hover
+  .world-plaza-timed-interaction-progress-icon {
+  color: #4ade80;
+}
+
+/* Kept for class toggles; no yellow glow — same solid green as ready. */
+.world-plaza-fishing-reel-ready-yellow-once,
+.world-plaza-fishing-reel-ready-yellow-once:hover {
+  filter: none;
+  opacity: 1;
+}
+
+.world-plaza-fishing-reel-ready-yellow-once.world-plaza-fishing-cast-progress-indicator,
+.world-plaza-fishing-reel-ready-yellow-once.world-plaza-fishing-cast-progress-indicator:hover {
+  filter: none;
+  opacity: 1;
+}
+
+.world-plaza-fishing-reel-hold,
+.world-plaza-fishing-reel-hold:hover {
+  animation: none;
+  color: #facc15;
+  filter: none;
+  opacity: 1;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.65);
+}
+
+.world-plaza-fishing-reel-hold.world-plaza-fishing-cast-progress-indicator,
+.world-plaza-fishing-reel-hold.world-plaza-fishing-cast-progress-indicator:hover {
+  color: inherit;
+  text-shadow: none;
+  filter: none;
+  opacity: 1;
 }
 
 .world-plaza-fishing-reel-hold.world-plaza-fishing-cast-progress-indicator
-  .world-plaza-timed-interaction-progress-icon {
-  color: #facc15;
-}
-
+  .world-plaza-timed-interaction-progress-icon,
 .world-plaza-fishing-reel-hold.world-plaza-fishing-cast-progress-indicator:hover
   .world-plaza-timed-interaction-progress-icon {
-  color: #fde047;
+  color: #facc15;
 }
 
 .world-plaza-timed-interaction-progress-icon {
@@ -677,6 +672,14 @@ video {
 
 .world-plaza-campfire-interaction-label-button:active {
   opacity: 0.8;
+}
+
+/* Reel labels: beat campfire hover opacity so edge jitter cannot flicker. */
+.world-plaza-campfire-interaction-label-button.world-plaza-fishing-reel-ready-flash,
+.world-plaza-campfire-interaction-label-button.world-plaza-fishing-reel-ready-flash:hover,
+.world-plaza-campfire-interaction-label-button.world-plaza-fishing-reel-hold,
+.world-plaza-campfire-interaction-label-button.world-plaza-fishing-reel-hold:hover {
+  opacity: 1;
 }
 
 /* Companion Name? / pet name: same outline chrome, green hover + pointer. */

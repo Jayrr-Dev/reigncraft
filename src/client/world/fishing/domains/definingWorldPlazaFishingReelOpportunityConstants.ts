@@ -52,14 +52,17 @@ export const DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_ACCELERATION_EXTRA_RATIO_MIN
  */
 export const DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_ACCELERATION_EXTRA_RATIO_MAX = 1;
 
-/** CSS class toggled while a reel opportunity window is active (green Reel text). */
+/** CSS class toggled while a reel opportunity window is active (solid green). */
 export const DEFINING_WORLD_PLAZA_FISHING_REEL_READY_FLASH_CLASS_NAME =
   'world-plaza-fishing-reel-ready-flash' as const;
 
-/** Yellow glow: only the first ready window of a cast. */
+/**
+ * Legacy yellow-glow class id. Kept so old DOM nodes can be cleared; unused for
+ * new toggles (glow removed).
+ */
 export const DEFINING_WORLD_PLAZA_FISHING_REEL_READY_YELLOW_ONCE_CLASS_NAME =
   'world-plaza-fishing-reel-ready-yellow-once' as const;
 
-/** CSS class toggled while holding reel: text color only, no glow. */
+/** CSS class toggled while holding reel: solid yellow, no glow. */
 export const DEFINING_WORLD_PLAZA_FISHING_REEL_HOLD_CLASS_NAME =
   'world-plaza-fishing-reel-hold' as const;
