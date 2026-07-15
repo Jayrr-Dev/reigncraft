@@ -1,5 +1,8 @@
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
-import { DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
+import {
+  DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FLOORS,
+  DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_ORES,
+} from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import {
   checkingWorldBuildingBlockMaterialAffordable,
   DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER,
@@ -31,15 +34,19 @@ function creatingInventoryStateWithQuantity(
 }
 
 describe('definingWorldBuildingBlockMaterialCostRegistry', () => {
-  it('registers a cost for every visible basic palette block', () => {
-    const visibleBasicBlocks =
-      listingWorldBuildingPaletteBlockDefinitionsByCategory(
-        DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC
-      ).filter(checkingWorldBuildingBlockDefinitionIsPaletteVisible);
+  it('registers a cost for every visible wood and ore palette block', () => {
+    const visibleMaterialBlocks = [
+      ...listingWorldBuildingPaletteBlockDefinitionsByCategory(
+        DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FLOORS
+      ),
+      ...listingWorldBuildingPaletteBlockDefinitionsByCategory(
+        DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_ORES
+      ),
+    ].filter(checkingWorldBuildingBlockDefinitionIsPaletteVisible);
 
-    expect(visibleBasicBlocks.length).toBeGreaterThan(0);
+    expect(visibleMaterialBlocks.length).toBeGreaterThan(0);
 
-    for (const definition of visibleBasicBlocks) {
+    for (const definition of visibleMaterialBlocks) {
       const cost = resolvingWorldBuildingBlockMaterialCost(definition.id);
 
       expect(cost).not.toBeNull();

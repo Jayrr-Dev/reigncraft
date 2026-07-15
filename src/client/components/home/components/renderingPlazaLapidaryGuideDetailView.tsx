@@ -4,12 +4,15 @@ import {
   PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME,
   RenderingPlazaCodexStudyDetailSection,
 } from '@/components/home/components/renderingPlazaCodexStudyDetailSections';
+import { RenderingPlazaCodexStudyMilestoneProgress } from '@/components/home/components/renderingPlazaCodexStudyMilestoneProgress';
 import { RenderingPlazaLapidaryOrePortrait } from '@/components/home/components/renderingPlazaLapidaryOrePortrait';
 import { DEFINING_PLAZA_LAPIDARY_ORE_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaLapidaryOrePortraitConstants';
+import { resolvingPlazaCodexStudyMilestoneRewardMarkers } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
 import {
   checkingPlazaCodexStudyTierUnlocked,
   formattingPlazaCodexStudyCountProgress,
   formattingPlazaCodexStudyProgressLabel,
+  resolvingPlazaCodexStudyFullCount,
   resolvingPlazaCodexStudyTierBookIcon,
 } from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import type { PlazaLapidaryGuideDisplayEntry } from '@/components/home/domains/resolvingPlazaLapidaryGuideDisplayEntries';
@@ -43,6 +46,11 @@ export function RenderingPlazaLapidaryGuideDetailView({
   className = '',
 }: RenderingPlazaLapidaryGuideDetailViewProps): React.JSX.Element {
   const studyCount = entry.studyCount;
+  const studyFullCount = resolvingPlazaCodexStudyFullCount(LAPIDARY_TRACK);
+  const studyMilestoneMarkers = resolvingPlazaCodexStudyMilestoneRewardMarkers(
+    LAPIDARY_TRACK,
+    studyCount
+  );
   const studyProgressLabel = formattingPlazaCodexStudyProgressLabel(
     LAPIDARY_TRACK,
     studyCount
@@ -108,6 +116,14 @@ export function RenderingPlazaLapidaryGuideDetailView({
           </button>
         ) : null}
       </div>
+
+      <RenderingPlazaCodexStudyMilestoneProgress
+        value={studyCount}
+        max={studyFullCount}
+        markers={studyMilestoneMarkers}
+        ariaLabel="Study milestone rewards"
+        className="shrink-0 px-0.5"
+      />
 
       <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 touch-pan-y">
         <article className="overflow-hidden rounded-md border border-poster-teal/35 bg-parchment/50 shadow-[0_2px_6px_rgba(28,25,18,0.18)]">

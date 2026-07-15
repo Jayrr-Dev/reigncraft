@@ -30,6 +30,7 @@ describe('definingWorldPlazaTreeFloorBlockRegistry', () => {
       const definition = definitions[definitionId];
 
       expect(definition).toBeDefined();
+      expect(definition?.category).toBe('floors');
       expect(definition?.collisionShape).toBe(
         DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE
       );

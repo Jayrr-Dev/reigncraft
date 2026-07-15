@@ -4,10 +4,13 @@ import {
   PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME,
   RenderingPlazaCodexStudyDetailSection,
 } from '@/components/home/components/renderingPlazaCodexStudyDetailSections';
+import { RenderingPlazaCodexStudyMilestoneProgress } from '@/components/home/components/renderingPlazaCodexStudyMilestoneProgress';
+import { resolvingPlazaCodexStudyMilestoneRewardMarkers } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
 import {
   checkingPlazaCodexStudyTierUnlocked,
   formattingPlazaCodexStudyCountProgress,
   formattingPlazaCodexStudyProgressLabel,
+  resolvingPlazaCodexStudyFullCount,
   resolvingPlazaCodexStudyTierBookIcon,
 } from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import type { PlazaPathologyGuideDisplayEntry } from '@/components/home/domains/resolvingPlazaPathologyGuideDisplayEntries';
@@ -39,6 +42,11 @@ export function RenderingPlazaPathologyGuideDetailView({
   className = '',
 }: RenderingPlazaPathologyGuideDetailViewProps): React.JSX.Element {
   const studyCount = entry.studyCount;
+  const studyFullCount = resolvingPlazaCodexStudyFullCount(PATHOLOGY_TRACK);
+  const studyMilestoneMarkers = resolvingPlazaCodexStudyMilestoneRewardMarkers(
+    PATHOLOGY_TRACK,
+    studyCount
+  );
   const studyProgressLabel = formattingPlazaCodexStudyProgressLabel(
     PATHOLOGY_TRACK,
     studyCount

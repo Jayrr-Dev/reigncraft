@@ -4,6 +4,7 @@ import {
   PLAZA_CODEX_DETAIL_STAT_CELL_CLASS_NAME,
   RenderingPlazaCodexStudyDetailSection,
 } from '@/components/home/components/renderingPlazaCodexStudyDetailSections';
+import { RenderingPlazaCodexStudyMilestoneProgress } from '@/components/home/components/renderingPlazaCodexStudyMilestoneProgress';
 import { RenderingPlazaHerbariumBerryPortrait } from '@/components/home/components/renderingPlazaHerbariumBerryPortrait';
 import { RenderingPlazaHerbariumCloverPortrait } from '@/components/home/components/renderingPlazaHerbariumCloverPortrait';
 import { RenderingPlazaHerbariumFlowerPortrait } from '@/components/home/components/renderingPlazaHerbariumFlowerPortrait';
@@ -15,10 +16,12 @@ import { DEFINING_PLAZA_HERBARIUM_FLOWER_PORTRAIT_DETAIL_ZOOM } from '@/componen
 import { DEFINING_PLAZA_HERBARIUM_MUSHROOM_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumMushroomPortraitConstants';
 import { DEFINING_PLAZA_HERBARIUM_TREE_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaHerbariumTreePortraitConstants';
 import type { PlazaCodexStudyTrackId } from '@/components/home/domains/definingPlazaCodexStudyTrackRegistry';
+import { resolvingPlazaCodexStudyMilestoneRewardMarkers } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
 import {
   checkingPlazaCodexStudyTierUnlocked,
   formattingPlazaCodexStudyCountProgress,
   formattingPlazaCodexStudyProgressLabel,
+  resolvingPlazaCodexStudyFullCount,
   resolvingPlazaCodexStudyTierBookIcon,
 } from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import type { PlazaHerbariumGuideDisplayEntry } from '@/components/home/domains/resolvingPlazaHerbariumGuideDisplayEntries';
@@ -91,6 +94,11 @@ export function RenderingPlazaHerbariumGuideDetailView({
 }: RenderingPlazaHerbariumGuideDetailViewProps): React.JSX.Element {
   const trackId = resolvingPlazaHerbariumCodexStudyTrackId(entry);
   const studyCount = entry.studyCount;
+  const studyFullCount = resolvingPlazaCodexStudyFullCount(trackId);
+  const studyMilestoneMarkers = resolvingPlazaCodexStudyMilestoneRewardMarkers(
+    trackId,
+    studyCount
+  );
   const studyProgressLabel = formattingPlazaCodexStudyProgressLabel(
     trackId,
     studyCount
@@ -158,6 +166,14 @@ export function RenderingPlazaHerbariumGuideDetailView({
           </button>
         ) : null}
       </div>
+
+      <RenderingPlazaCodexStudyMilestoneProgress
+        value={studyCount}
+        max={studyFullCount}
+        markers={studyMilestoneMarkers}
+        ariaLabel="Study milestone rewards"
+        className="shrink-0 px-0.5"
+      />
 
       <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 touch-pan-y">
         <article className="overflow-hidden rounded-md border border-poster-teal/35 bg-parchment/50 shadow-[0_2px_6px_rgba(28,25,18,0.18)]">

@@ -80,7 +80,7 @@ export const DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_REGISTRY = [
     boardId: DEFINING_WORLD_PLAZA_HUD_MODE_TOOL_BOARD_ID.BUILD,
     label: 'Materials',
     ariaLabel: 'Materials palette',
-    iconifyIcon: 'mdi:cube-outline',
+    iconifyIcon: 'mdi:layers-triple',
   },
   {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.BLOCKS,

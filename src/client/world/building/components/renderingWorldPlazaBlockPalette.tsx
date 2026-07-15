@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 
+import { Icon } from '@/components/ui/icon';
 import { RenderingWorldBuildingBlockPaletteMaterialIcon } from '@/components/world/building/components/renderingWorldBuildingBlockPaletteMaterialIcon';
 import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import { resolvingWorldBuildingBlockPaletteSurfaceStyle } from '@/components/world/building/domains/definingWorldBuildingBlockPaletteSurface';
@@ -87,7 +88,7 @@ export function RenderingWorldPlazaBlockPalette({
             const isActiveCategory = resolvedActiveCategory === category;
             const categoryLabel =
               resolvingWorldBuildingBlockPaletteCategoryLabel(category);
-            const CategoryIcon =
+            const categoryIcon =
               resolvingWorldBuildingBlockPaletteCategoryIcon(category);
 
             return (
@@ -107,7 +108,8 @@ export function RenderingWorldPlazaBlockPalette({
                     : DEFINING_WORLD_BUILDING_CATEGORY_TAB_CLASS_NAME
                 }
               >
-                <CategoryIcon
+                <Icon
+                  icon={categoryIcon}
                   className={
                     isActiveCategory
                       ? DEFINING_WORLD_BUILDING_CATEGORY_TAB_ICON_SELECTED_CLASS_NAME

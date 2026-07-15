@@ -44,17 +44,17 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_SHELL_PADDING_BASE_PX = 4 as const;
  */
 export const DEFINING_WORLD_PLAZA_INVENTORY_SHELL_BORDER_PX = 2 as const;
 
-/** Base quantity badge height in px. */
+/** Base quantity badge height in px (kept small so the item sprite stays visible). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_BASE_HEIGHT_PX =
-  12 as const;
+  9 as const;
 
 /** Base horizontal padding inside quantity badges in px. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_PADDING_X_BASE_PX =
-  2 as const;
+  1.5 as const;
 
 /** Base quantity badge label size in px. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_QUANTITY_BADGE_TEXT_BASE_PX =
-  9 as const;
+  7 as const;
 
 /** Base loading label size in px. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_LOADING_TEXT_BASE_PX = 20 as const;

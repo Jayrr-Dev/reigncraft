@@ -152,7 +152,7 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE = {
     notification:
       'pointer-events-none absolute -right-1 -top-1 flex items-center justify-center rounded-full border-2 border-parchment bg-poster-orange font-display font-semibold leading-none text-parchment',
     quantity:
-      'pointer-events-none absolute bottom-0.5 right-0.5 z-20 flex min-w-0 items-center justify-center rounded-full bg-poster-teal-deep font-display font-bold leading-none text-parchment',
+      'pointer-events-none absolute bottom-0 right-0 z-20 flex min-w-0 items-center justify-center rounded-full bg-poster-teal-deep font-display font-bold leading-none text-parchment',
     statusEffectRow:
       'plaza-status-effect-badge flex items-center gap-1 py-0.5 pl-0.5 pr-2 backdrop-blur-sm',
     statusEffectRowMobile: 'gap-0.5 py-0 pl-0.5 pr-1',

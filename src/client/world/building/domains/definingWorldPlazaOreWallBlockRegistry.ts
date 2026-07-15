@@ -6,7 +6,7 @@
  */
 
 import type { DefiningWorldBuildingBlockDefinition } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
-import { DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
+import { DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_ORES } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import { DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK } from '@/components/world/building/domains/definingWorldBuildingCollisionShape';
 import {
   DEFINING_WORLD_PLAZA_ORE_WALL_SURFACE_REGISTRY,
@@ -124,7 +124,7 @@ export function registeringWorldPlazaOreWallBlockDefinitions(): Record<
     definitions[definitionId] = {
       id: definitionId,
       name: DEFINING_WORLD_PLAZA_ORE_WALL_NAME_BY_SPECIES_ID[surface.speciesId],
-      category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC,
+      category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_ORES,
       collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK,
       isInteractive: false,
       visualConfig: {

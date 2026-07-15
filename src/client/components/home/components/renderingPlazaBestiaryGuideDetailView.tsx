@@ -5,13 +5,16 @@ import {
   RenderingPlazaCodexBestiaryExtraDetailSection,
   RenderingPlazaCodexStudyDetailSection,
 } from '@/components/home/components/renderingPlazaCodexStudyDetailSections';
+import { RenderingPlazaCodexStudyMilestoneProgress } from '@/components/home/components/renderingPlazaCodexStudyMilestoneProgress';
 import { RenderingPlazaBestiarySpritePortrait } from '@/components/home/components/renderingPlazaBestiarySpritePortrait';
 import { DEFINING_PLAZA_BESTIARY_PORTRAIT_DETAIL_ZOOM } from '@/components/home/domains/definingPlazaBestiarySpritePortraitConstants';
 import { LABELING_PLAZA_BESTIARY_PLAYABLE_UNLOCKED } from '@/components/home/domains/definingPlazaBestiaryStudyTier';
+import { resolvingPlazaCodexStudyMilestoneRewardMarkers } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
 import {
   checkingPlazaCodexStudyTierUnlocked,
   formattingPlazaCodexStudyCountProgress,
   formattingPlazaCodexStudyProgressLabel,
+  resolvingPlazaCodexStudyFullCount,
   resolvingPlazaCodexStudyTierBookIcon,
 } from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import type { PlazaBestiaryGuideDisplayEntry } from '@/components/home/domains/resolvingPlazaBestiaryGuideDisplayEntries';
@@ -44,6 +47,11 @@ export function RenderingPlazaBestiaryGuideDetailView({
   className = '',
 }: RenderingPlazaBestiaryGuideDetailViewProps): React.JSX.Element {
   const studyCount = entry.killCount;
+  const studyFullCount = resolvingPlazaCodexStudyFullCount(BESTIARY_TRACK);
+  const studyMilestoneMarkers = resolvingPlazaCodexStudyMilestoneRewardMarkers(
+    BESTIARY_TRACK,
+    studyCount
+  );
   const killProgressLabel = formattingPlazaCodexStudyProgressLabel(
     BESTIARY_TRACK,
     studyCount
@@ -102,6 +110,14 @@ export function RenderingPlazaBestiaryGuideDetailView({
           </button>
         ) : null}
       </div>
+
+      <RenderingPlazaCodexStudyMilestoneProgress
+        value={studyCount}
+        max={studyFullCount}
+        markers={studyMilestoneMarkers}
+        ariaLabel="Study milestone rewards"
+        className="shrink-0 px-0.5"
+      />
 
       <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 touch-pan-y">
         <article className="overflow-hidden rounded-md border border-poster-teal/35 bg-parchment/50 shadow-[0_2px_6px_rgba(28,25,18,0.18)]">

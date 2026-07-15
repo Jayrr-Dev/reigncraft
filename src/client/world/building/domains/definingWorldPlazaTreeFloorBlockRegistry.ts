@@ -6,7 +6,7 @@
  */
 
 import type { DefiningWorldBuildingBlockDefinition } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
-import { DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
+import { DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FLOORS } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import { creatingWorldBuildingBlockCssPaletteSurface } from '@/components/world/building/domains/definingWorldBuildingBlockPaletteSurface';
 import { DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE } from '@/components/world/building/domains/definingWorldBuildingCollisionShape';
 import { formattingWorldBuildingBlockSwatchColor } from '@/components/world/building/domains/formattingWorldBuildingBlockSwatchColor';
@@ -150,7 +150,7 @@ export function registeringWorldPlazaTreeFloorBlockDefinitions(): Record<
     definitions[definitionId] = {
       id: definitionId,
       name: DEFINING_WORLD_PLAZA_TREE_FLOOR_NAME_BY_VARIANT[variant],
-      category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC,
+      category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FLOORS,
       collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_PASSABLE,
       isInteractive: false,
       visualConfig: {

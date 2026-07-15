@@ -1,59 +1,61 @@
 /**
- * Maps build palette categories to Lucide icons and labels for the category tab strip.
+ * Maps build palette categories to Iconify icons and labels for the category tab strip.
  *
  * @module components/world/building/domains/resolvingWorldBuildingBlockPaletteIcon
  */
 
 import {
-  Blocks as BlocksIcon,
-  Cog as CogIcon,
-  Flower2 as Flower2Icon,
-  Leaf as LeafIcon,
-  type LucideIcon,
-} from "lucide-react";
-
-import {
   DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC,
   DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_DECORATIVE,
+  DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FLOORS,
   DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
   DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_NATURAL,
+  DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_ORES,
   type DefiningWorldBuildingBlockCategory,
-} from "@/components/world/building/domains/definingWorldBuildingBlockDefinition";
+} from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 
-/** Fallback Lucide icon when a category has no explicit mapping. */
+/** Fallback Iconify icon when a category has no explicit mapping. */
 const RESOLVING_WORLD_BUILDING_BLOCK_PALETTE_FALLBACK_CATEGORY_ICON =
-  BlocksIcon;
+  'mdi:view-grid-outline' as const;
 
 /** Fallback label when a category has no explicit mapping. */
 const RESOLVING_WORLD_BUILDING_BLOCK_PALETTE_FALLBACK_CATEGORY_LABEL =
-  "Blocks" as const;
+  'Blocks' as const;
 
 /** Metadata for one palette category tab. */
-export interface ResolvingWorldBuildingBlockPaletteCategoryMetadata {
+export type ResolvingWorldBuildingBlockPaletteCategoryMetadata = {
   readonly label: string;
-  readonly icon: LucideIcon;
-}
+  readonly iconifyIcon: string;
+};
 
-/** Label and Lucide icon shown per palette category tab. */
+/** Label and Iconify icon shown per palette category tab. */
 const RESOLVING_WORLD_BUILDING_BLOCK_PALETTE_CATEGORY_METADATA_BY_CATEGORY: Record<
   DefiningWorldBuildingBlockCategory,
   ResolvingWorldBuildingBlockPaletteCategoryMetadata
 > = {
   [DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_NATURAL]: {
-    label: "Natural",
-    icon: LeafIcon,
+    label: 'Natural',
+    iconifyIcon: 'mdi:leaf',
   },
   [DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC]: {
-    label: "Basic",
-    icon: BlocksIcon,
+    label: 'Basic',
+    iconifyIcon: 'mdi:view-grid-outline',
+  },
+  [DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FLOORS]: {
+    label: 'Wood',
+    iconifyIcon: 'mdi:pine-tree',
+  },
+  [DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_ORES]: {
+    label: 'Ore',
+    iconifyIcon: 'game-icons:stone-pile',
   },
   [DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL]: {
-    label: "Functional",
-    icon: CogIcon,
+    label: 'Utility',
+    iconifyIcon: 'mdi:snowflake',
   },
   [DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_DECORATIVE]: {
-    label: "Decorative",
-    icon: Flower2Icon,
+    label: 'Decor',
+    iconifyIcon: 'mdi:flower',
   },
 };
 
@@ -63,27 +65,29 @@ const RESOLVING_WORLD_BUILDING_BLOCK_PALETTE_CATEGORY_METADATA_BY_CATEGORY: Reco
  * @param category - Palette category.
  */
 export function resolvingWorldBuildingBlockPaletteCategoryMetadata(
-  category: DefiningWorldBuildingBlockCategory,
+  category: DefiningWorldBuildingBlockCategory
 ): ResolvingWorldBuildingBlockPaletteCategoryMetadata {
   return (
     RESOLVING_WORLD_BUILDING_BLOCK_PALETTE_CATEGORY_METADATA_BY_CATEGORY[
       category
     ] ?? {
       label: RESOLVING_WORLD_BUILDING_BLOCK_PALETTE_FALLBACK_CATEGORY_LABEL,
-      icon: RESOLVING_WORLD_BUILDING_BLOCK_PALETTE_FALLBACK_CATEGORY_ICON,
+      iconifyIcon:
+        RESOLVING_WORLD_BUILDING_BLOCK_PALETTE_FALLBACK_CATEGORY_ICON,
     }
   );
 }
 
 /**
- * Resolves the Lucide icon component for a palette category tab.
+ * Resolves the Iconify icon id for a palette category tab.
  *
  * @param category - Palette category.
  */
 export function resolvingWorldBuildingBlockPaletteCategoryIcon(
-  category: DefiningWorldBuildingBlockCategory,
-): LucideIcon {
-  return resolvingWorldBuildingBlockPaletteCategoryMetadata(category).icon;
+  category: DefiningWorldBuildingBlockCategory
+): string {
+  return resolvingWorldBuildingBlockPaletteCategoryMetadata(category)
+    .iconifyIcon;
 }
 
 /**
@@ -92,7 +96,7 @@ export function resolvingWorldBuildingBlockPaletteCategoryIcon(
  * @param category - Palette category.
  */
 export function resolvingWorldBuildingBlockPaletteCategoryLabel(
-  category: DefiningWorldBuildingBlockCategory,
+  category: DefiningWorldBuildingBlockCategory
 ): string {
   return resolvingWorldBuildingBlockPaletteCategoryMetadata(category).label;
 }

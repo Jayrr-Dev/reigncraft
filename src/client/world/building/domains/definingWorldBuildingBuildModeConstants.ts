@@ -71,11 +71,11 @@ export const DEFINING_WORLD_BUILDING_CATEGORY_TAB_CLASS_NAME =
 export const DEFINING_WORLD_BUILDING_CATEGORY_TAB_SELECTED_CLASS_NAME =
   'flex h-6 items-center justify-center rounded-md border border-[#f4d35e]/70 bg-[#f4d35e]/20 text-[12px] leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f4d35e]/70' as const;
 
-/** Lucide icon size and tint for palette category tabs. */
+/** Iconify icon size and tint for palette category tabs. */
 export const DEFINING_WORLD_BUILDING_CATEGORY_TAB_ICON_CLASS_NAME =
   'h-3.5 w-3.5 text-white/80' as const;
 
-/** Lucide icon tint when its category tab is selected. */
+/** Iconify icon tint when its category tab is selected. */
 export const DEFINING_WORLD_BUILDING_CATEGORY_TAB_ICON_SELECTED_CLASS_NAME =
   'h-3.5 w-3.5 text-[#f4d35e]' as const;
 

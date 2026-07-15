@@ -39,6 +39,7 @@ describe('definingWorldPlazaOreWallBlockRegistry', () => {
       const definition = definitions[definitionId];
 
       expect(definition).toBeDefined();
+      expect(definition?.category).toBe('ores');
       expect(definition?.collisionShape).toBe(
         DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK
       );

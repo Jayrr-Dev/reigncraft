@@ -72,7 +72,7 @@ export const DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_REGISTRY = [
     sessionModeId: DEFINING_WORLD_PLAZA_EDIT_MODE_SESSION_MODE_ID.BUILD,
     label: 'Materials',
     ariaLabel: 'Materials palette',
-    iconifyIcon: 'mdi:cube-outline',
+    iconifyIcon: 'mdi:layers-triple',
   },
   {
     id: DEFINING_WORLD_PLAZA_EDIT_MODE_FUNCTION_ID.BLOCKS,

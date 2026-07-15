@@ -12,10 +12,16 @@ import type { DefiningWorldPlazaEnvironmentalTemperatureLevel } from '@/componen
 export const DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_NATURAL =
   'natural' as const;
 
-/** Structural building blocks (walls, floors). */
+/** Structural building blocks (legacy / uncategorized walls and floors). */
 export const DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC = 'basic' as const;
 
-/** Interactive blocks (doors, chests, signs). */
+/** Walkable wood floors (tree-species plank variants). */
+export const DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FLOORS = 'floors' as const;
+
+/** Solid mineral walls (stone and ore species). */
+export const DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_ORES = 'ores' as const;
+
+/** Interactive / utility blocks (doors, chests, ice, stations). */
 export const DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL =
   'functional' as const;
 
@@ -27,6 +33,8 @@ export const DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_DECORATIVE =
 export type DefiningWorldBuildingBlockCategory =
   | typeof DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_NATURAL
   | typeof DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_BASIC
+  | typeof DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FLOORS
+  | typeof DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_ORES
   | typeof DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL
   | typeof DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_DECORATIVE;
 
