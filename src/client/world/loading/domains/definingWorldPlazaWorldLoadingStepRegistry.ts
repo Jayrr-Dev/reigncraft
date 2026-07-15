@@ -85,4 +85,14 @@ export const DEFINING_WORLD_PLAZA_WORLD_LOADING_STEP_REGISTRY: readonly Defining
         await preloadingWorldPlazaFireSpriteTextures();
       },
     },
+    {
+      stepId: 'cyroborn-projectile-sprites',
+      weight: 0.25,
+      load: async () => {
+        const { preloadingWorldPlazaCyrobornProjectileSpriteTextures } =
+          await import('@/components/world/projectile/domains/loadingWorldPlazaCyrobornProjectileSpriteTextures');
+
+        await preloadingWorldPlazaCyrobornProjectileSpriteTextures();
+      },
+    },
   ];

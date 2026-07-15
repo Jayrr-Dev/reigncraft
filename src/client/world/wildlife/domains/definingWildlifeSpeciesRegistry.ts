@@ -2635,7 +2635,7 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       baseMaxHealth: 72,
       attackPower: 14,
       defense: 5,
-      attackIntervalMs: 1_800,
+      attackIntervalMs: 1_100,
     },
   },
 };

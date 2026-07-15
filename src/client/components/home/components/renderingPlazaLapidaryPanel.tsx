@@ -3,6 +3,7 @@
 import { RenderingPlazaCodexDualProgress } from '@/components/home/components/renderingPlazaCodexDualProgress';
 import { RenderingPlazaLapidaryGuideDetailView } from '@/components/home/components/renderingPlazaLapidaryGuideDetailView';
 import { RenderingPlazaLapidaryOrePortrait } from '@/components/home/components/renderingPlazaLapidaryOrePortrait';
+import { computingPlazaCodexAggregateStudyProgress } from '@/components/home/domains/computingPlazaCodexAggregateStudyProgress';
 import { DEFINING_PLAZA_LAPIDARY_PANEL_SUBTITLE } from '@/components/home/domains/definingPlazaLapidaryGuideConstants';
 import {
   resolvingPlazaLapidaryGuideDisplayEntries,
@@ -206,8 +207,13 @@ export function RenderingPlazaLapidaryPanel({
     setSelectedEntryId(null);
   }, []);
   const sightedCount = guideEntries.filter((entry) => entry.isSighted).length;
-  const studiedCount = guideEntries.filter((entry) => entry.isStudied).length;
   const totalCount = guideEntries.length;
+  const studiedProgress = computingPlazaCodexAggregateStudyProgress(
+    guideEntries.map((entry) => ({
+      trackId: 'lapidary' as const,
+      studyCount: entry.studyCount,
+    }))
+  );
 
   if (selectedEntry?.isSighted) {
     return (
@@ -264,9 +270,9 @@ export function RenderingPlazaLapidaryPanel({
         }}
         right={{
           label: 'Studied',
-          value: studiedCount,
-          max: totalCount,
-          ariaLabel: 'Ores studied',
+          value: studiedProgress.value,
+          max: studiedProgress.max,
+          ariaLabel: 'Ore study points',
         }}
       />
 

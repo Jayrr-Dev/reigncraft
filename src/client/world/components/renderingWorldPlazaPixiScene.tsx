@@ -4395,7 +4395,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         redditUserId,
         saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
         playerPosition: playerPositionRef.current,
-        playerTargetId: localPlayerProjectileTargetId,
+        playerTargetId: localHealthEntityUserId,
       }
     : null;
 
@@ -5627,8 +5627,11 @@ function RenderingWorldPlazaPixiSceneConnected({
         selectedAvatarCharacterDefinition,
         'melee'
       );
+      const rangedCastAttackSpeedMultiplier =
+        rangedCombatProfile?.castAttackSpeedMultiplier ?? 1;
       const meleeTiming = computingWorldPlazaGirlSampleMeleePresentationTiming(
         selectedCharacterEngineDerivedStats.attackSpeed *
+          rangedCastAttackSpeedMultiplier *
           resolvingWorldPlazaEntityHealthAttackSpeedMultiplier(
             healthStateRef.current,
             nowMs
@@ -5665,6 +5668,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                 layer: playerPosition.layer,
               },
               nowMs,
+              spawnerUserId: localPlayerProjectileTargetId,
             })
           );
         }
@@ -5716,6 +5720,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       healthStateRef,
       inventoryState,
       localAvatarMotionStateRef,
+      localPlayerProjectileTargetId,
       playerPositionRef,
       playerTransformWildlifeSpeciesIdRef,
       selectedAvatarCharacterDefinition,
@@ -5767,6 +5772,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         origin: playerPosition,
         targetPoint,
         nowMs: roll.startedAtMs,
+        spawnerUserId: localPlayerProjectileTargetId,
       })
     );
   };

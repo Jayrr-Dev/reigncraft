@@ -7,7 +7,9 @@ import { RenderingPlazaHerbariumFlowerPortrait } from '@/components/home/compone
 import { RenderingPlazaHerbariumGuideDetailView } from '@/components/home/components/renderingPlazaHerbariumGuideDetailView';
 import { RenderingPlazaHerbariumMushroomPortrait } from '@/components/home/components/renderingPlazaHerbariumMushroomPortrait';
 import { RenderingPlazaHerbariumTreePortrait } from '@/components/home/components/renderingPlazaHerbariumTreePortrait';
+import { computingPlazaCodexAggregateStudyProgress } from '@/components/home/domains/computingPlazaCodexAggregateStudyProgress';
 import { DEFINING_PLAZA_HERBARIUM_PANEL_SUBTITLE } from '@/components/home/domains/definingPlazaHerbariumGuideConstants';
+import { resolvingPlazaHerbariumCodexStudyTrackId } from '@/components/home/domains/resolvingPlazaHerbariumCodexStudyTrackId';
 import {
   formattingPlazaHerbariumEntryStudyCountProgress,
   resolvingPlazaHerbariumEntryStudyTierBookIcon,
@@ -403,10 +405,13 @@ export function RenderingPlazaHerbariumPanel({
   const sightedCount = filteredGuideEntries.filter(
     (entry) => entry.isSighted
   ).length;
-  const studiedCount = filteredGuideEntries.filter(
-    (entry) => entry.isStudied
-  ).length;
   const totalCount = filteredGuideEntries.length;
+  const studiedProgress = computingPlazaCodexAggregateStudyProgress(
+    filteredGuideEntries.map((entry) => ({
+      trackId: resolvingPlazaHerbariumCodexStudyTrackId(entry.kind),
+      studyCount: entry.studyCount,
+    }))
+  );
 
   if (selectedEntry?.isSighted) {
     return (
@@ -463,9 +468,9 @@ export function RenderingPlazaHerbariumPanel({
         }}
         right={{
           label: 'Studied',
-          value: studiedCount,
-          max: totalCount,
-          ariaLabel: 'Flora studied',
+          value: studiedProgress.value,
+          max: studiedProgress.max,
+          ariaLabel: 'Flora study points',
         }}
       />
 

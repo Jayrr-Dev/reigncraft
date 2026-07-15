@@ -25,6 +25,11 @@ export type DefiningWorldPlazaPlayableAvatarRangedCombatProfile = {
   readonly rollCastArchetypeId?: string;
   /** Skip contact melee damage while this skin is active. */
   readonly suppressMelee: boolean;
+  /**
+   * Multiplies derived attack speed for cast gate / swing timing only.
+   * Does not change wildlife AI cadence.
+   */
+  readonly castAttackSpeedMultiplier?: number;
 };
 
 const CYROBORN_RANGED_COMBAT: DefiningWorldPlazaPlayableAvatarRangedCombatProfile =
@@ -38,6 +43,8 @@ const CYROBORN_RANGED_COMBAT: DefiningWorldPlazaPlayableAvatarRangedCombatProfil
     ],
     rollCastArchetypeId: 'cyroborn-ice-bolt',
     suppressMelee: true,
+    // Wildlife interval is slow; playable casts should feel snappy.
+    castAttackSpeedMultiplier: 2.4,
   };
 
 export const DEFINING_WORLD_PLAZA_PLAYABLE_AVATAR_RANGED_COMBAT_REGISTRY: Readonly<

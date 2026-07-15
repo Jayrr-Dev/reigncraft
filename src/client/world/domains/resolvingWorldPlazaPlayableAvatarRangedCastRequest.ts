@@ -9,12 +9,15 @@ import type { SpawningWorldPlazaProjectileRequest } from '@/components/world/pro
 
 /**
  * Origin = player, aim = target point (or facing fallback handled by caller).
+ * `spawnerUserId` must match the local projectile target id so self-hits are skipped.
  */
 export function resolvingWorldPlazaPlayableAvatarRangedCastRequest(params: {
   archetypeId: string;
   origin: DefiningWorldPlazaWorldPoint;
   targetPoint: DefiningWorldPlazaWorldPoint;
   nowMs: number;
+  /** Local player projectile target id (`onlineUserId` or `'local-player'`). */
+  spawnerUserId: string;
   seed?: number;
 }): SpawningWorldPlazaProjectileRequest {
   return {
@@ -31,6 +34,6 @@ export function resolvingWorldPlazaPlayableAvatarRangedCastRequest(params: {
     },
     spawnedAtMs: params.nowMs,
     seed: params.seed ?? Math.floor(params.nowMs),
-    spawnerUserId: null,
+    spawnerUserId: params.spawnerUserId,
   };
 }

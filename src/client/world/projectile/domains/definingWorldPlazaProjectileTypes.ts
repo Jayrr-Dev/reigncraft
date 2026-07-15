@@ -131,6 +131,11 @@ export type DefiningWorldPlazaProjectileVisualConfig = {
   readonly tint?: number;
   readonly renderPlane: DefiningWorldPlazaProjectileRenderPlane;
   readonly spriteRadiusPx: number;
+  /**
+   * When true, rotate the sprite so authored +X faces travel direction
+   * (isometric screen space). Used for elongated bolts / shards.
+   */
+  readonly alignRotationToVelocity?: boolean;
 };
 
 export type DefiningWorldPlazaProjectileArchetype = {

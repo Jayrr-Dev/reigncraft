@@ -145,8 +145,6 @@ export async function droppingWildlifeMeatGroundItem({
       instance,
       species,
       playerPosition,
-      playerTargetId,
-      killContext,
     });
 
     return { outcome: 'dropped', groundItem };

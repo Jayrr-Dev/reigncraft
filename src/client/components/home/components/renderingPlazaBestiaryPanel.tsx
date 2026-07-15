@@ -3,6 +3,7 @@
 import { RenderingPlazaBestiaryGuideDetailView } from '@/components/home/components/renderingPlazaBestiaryGuideDetailView';
 import { RenderingPlazaBestiarySpritePortrait } from '@/components/home/components/renderingPlazaBestiarySpritePortrait';
 import { RenderingPlazaCodexDualProgress } from '@/components/home/components/renderingPlazaCodexDualProgress';
+import { computingPlazaCodexAggregateStudyProgress } from '@/components/home/domains/computingPlazaCodexAggregateStudyProgress';
 import { DEFINING_PLAZA_BESTIARY_PANEL_SUBTITLE } from '@/components/home/domains/definingPlazaBestiaryGuideConstants';
 import { filteringPlazaBestiaryGuideDisplayEntriesByBiome } from '@/components/home/domains/filteringPlazaBestiaryGuideDisplayEntriesByBiome';
 import { resolvingPlazaBestiaryBiomeFilterDisplayEntries } from '@/components/home/domains/resolvingPlazaBestiaryBiomeFilterDisplayEntries';
@@ -215,8 +216,13 @@ export function RenderingPlazaBestiaryPanel({
     setSelectedSpeciesId(null);
   }, []);
   const sightedCount = guideEntries.filter((entry) => entry.isSighted).length;
-  const studiedCount = guideEntries.filter((entry) => entry.isStudied).length;
   const totalCount = guideEntries.length;
+  const studiedProgress = computingPlazaCodexAggregateStudyProgress(
+    guideEntries.map((entry) => ({
+      trackId: 'bestiary' as const,
+      studyCount: entry.killCount,
+    }))
+  );
 
   if (selectedEntry?.isSighted) {
     return (
@@ -273,9 +279,9 @@ export function RenderingPlazaBestiaryPanel({
         }}
         right={{
           label: 'Studied',
-          value: studiedCount,
-          max: totalCount,
-          ariaLabel: 'Wildlife studied',
+          value: studiedProgress.value,
+          max: studiedProgress.max,
+          ariaLabel: 'Wildlife study points',
         }}
       />
 

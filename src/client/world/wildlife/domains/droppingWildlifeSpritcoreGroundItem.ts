@@ -11,7 +11,6 @@ import { insertingWorldPlazaGroundItemOptimistically } from '@/components/world/
 import { droppingWorldPlazaLocalGroundItem } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
 import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
 import { resolvingWorldPlazaSpritcoreWildlifeKillDrop } from '@/components/world/spritcore/domains/resolvingWorldPlazaSpritcoreWildlifeKillDrop';
-import type { DefiningWildlifeMeatDropKillContext } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { DEFINING_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX } from '@/components/world/wildlife/domains/droppingWildlifeMeatGroundItem';
@@ -25,8 +24,6 @@ export type DroppingWildlifeSpritcoreGroundItemParams = {
   readonly instance: DefiningWildlifeInstance;
   readonly species: DefiningWildlifeSpeciesDefinition;
   readonly playerPosition: DefiningWorldPlazaWorldPoint;
-  readonly playerTargetId: string | null;
-  readonly killContext?: DefiningWildlifeMeatDropKillContext | null;
 };
 
 export type DroppingWildlifeSpritcoreGroundItemResult =
@@ -37,7 +34,7 @@ export type DroppingWildlifeSpritcoreGroundItemResult =
   | { readonly outcome: 'none' | 'failed' };
 
 /**
- * Drops a large Spritcore quantity stack at the corpse when the player got the kill.
+ * Drops a Spritcore quantity stack at the corpse (Magiccore-style ground loot).
  */
 export async function droppingWildlifeSpritcoreGroundItem({
   localPersistenceOwnerId,
@@ -46,14 +43,8 @@ export async function droppingWildlifeSpritcoreGroundItem({
   instance,
   species,
   playerPosition,
-  playerTargetId,
-  killContext = null,
 }: DroppingWildlifeSpritcoreGroundItemParams): Promise<DroppingWildlifeSpritcoreGroundItemResult> {
-  const killDrop = resolvingWorldPlazaSpritcoreWildlifeKillDrop({
-    species,
-    killContext,
-    playerTargetId,
-  });
+  const killDrop = resolvingWorldPlazaSpritcoreWildlifeKillDrop(species);
 
   if (!killDrop) {
     return { outcome: 'none' };

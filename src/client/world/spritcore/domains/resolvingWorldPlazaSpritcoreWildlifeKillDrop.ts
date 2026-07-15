@@ -1,5 +1,5 @@
 /**
- * Resolves a Spritcore ground-drop payload when the local player kills wildlife.
+ * Resolves a Spritcore ground-drop payload for a wildlife corpse.
  *
  * @module components/world/spritcore/domains/resolvingWorldPlazaSpritcoreWildlifeKillDrop
  */
@@ -8,7 +8,6 @@ import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/doma
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { resolvingWorldPlazaSpritcoreDropTierDefinition } from '@/components/world/spritcore/domains/resolvingWorldPlazaSpritcoreDropTier';
 import { resolvingWorldPlazaSpritcoreWildlifeDrop } from '@/components/world/spritcore/domains/resolvingWorldPlazaSpritcoreWildlifeDrop';
-import type { DefiningWildlifeMeatDropKillContext } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 
 export type ResolvingWorldPlazaSpritcoreWildlifeKillDrop = {
@@ -17,17 +16,11 @@ export type ResolvingWorldPlazaSpritcoreWildlifeKillDrop = {
   readonly displayName: string;
 };
 
-export type ResolvingWorldPlazaSpritcoreWildlifeKillDropInput = {
-  readonly species: DefiningWildlifeSpeciesDefinition;
-  readonly killContext?: DefiningWildlifeMeatDropKillContext | null;
-  readonly playerTargetId: string | null;
-};
-
 /**
- * Returns the tiered Spritcore stack for a player kill, or null when no drop.
+ * Returns the tiered Spritcore stack for one wildlife death, or null when disabled.
  */
 export function resolvingWorldPlazaSpritcoreWildlifeKillDrop(
-  input: ResolvingWorldPlazaSpritcoreWildlifeKillDropInput
+  species: DefiningWildlifeSpeciesDefinition
 ): ResolvingWorldPlazaSpritcoreWildlifeKillDrop | null {
   if (
     !checkingWorldPlazaGenerationFeatureEnabled(
@@ -37,17 +30,7 @@ export function resolvingWorldPlazaSpritcoreWildlifeKillDrop(
     return null;
   }
 
-  const killerTargetId = input.killContext?.killerTargetId;
-
-  if (
-    !killerTargetId ||
-    !input.playerTargetId ||
-    killerTargetId !== input.playerTargetId
-  ) {
-    return null;
-  }
-
-  const dropAmount = resolvingWorldPlazaSpritcoreWildlifeDrop(input.species);
+  const dropAmount = resolvingWorldPlazaSpritcoreWildlifeDrop(species);
 
   if (dropAmount <= 0) {
     return null;

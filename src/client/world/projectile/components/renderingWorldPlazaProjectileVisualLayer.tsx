@@ -4,13 +4,20 @@ import { computingWorldDepthSortKey } from '@/components/world/depth/domains/com
 import { DEFINING_WORLD_DEPTH_PROJECTILE_AOE_TELEGRAPH_Z_INDEX_OFFSET } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
+import { computingWorldPlazaProjectileScreenRotationRadians } from '@/components/world/projectile/domains/computingWorldPlazaProjectileScreenRotationRadians';
 import { computingWorldPlazaProjectileVisualLayout } from '@/components/world/projectile/domains/computingWorldPlazaProjectileVisualLayout';
+import { DEFINING_WORLD_PLAZA_CYROBORN_PROJECTILE_CELL_SIZE_PX } from '@/components/world/projectile/domains/definingWorldPlazaCyrobornProjectileSpriteConstants';
 import { resolvingWorldPlazaProjectileArchetype } from '@/components/world/projectile/domains/definingWorldPlazaProjectileArchetypeRegistry';
 import type { DefiningWorldPlazaProjectileRenderPlane } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
+import {
+  peekingWorldPlazaCyrobornProjectileSpriteTexture,
+  preloadingWorldPlazaCyrobornProjectileSpriteTextures,
+} from '@/components/world/projectile/domains/loadingWorldPlazaCyrobornProjectileSpriteTextures';
 import type { ManagingWorldPlazaProjectileStore } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
 import '@/components/world/projectile/domains/registeringWorldPlazaProjectileAnimationClips';
-import type { Graphics } from 'pixi.js';
-import { useCallback, useRef } from 'react';
+import type { Container, Graphics } from 'pixi.js';
+import { Sprite } from 'pixi.js';
+import { useCallback, useEffect, useRef } from 'react';
 
 export type RenderingWorldPlazaProjectileVisualLayerProps = {
   readonly renderPlane: DefiningWorldPlazaProjectileRenderPlane;
@@ -20,6 +27,7 @@ export type RenderingWorldPlazaProjectileVisualLayerProps = {
 
 /**
  * Draws projectiles and AoE telegraphs for one render plane.
+ * Cyroborn ice clips use sprite textures; other archetypes fall back to tinted circles.
  */
 export function RenderingWorldPlazaProjectileVisualLayer({
   renderPlane,
@@ -28,6 +36,8 @@ export function RenderingWorldPlazaProjectileVisualLayer({
 }: RenderingWorldPlazaProjectileVisualLayerProps): React.JSX.Element {
   const projectileGraphicsRef = useRef<Graphics | null>(null);
   const telegraphGraphicsRef = useRef<Graphics | null>(null);
+  const spriteLayerRef = useRef<Container | null>(null);
+  const spriteByProjectileIdRef = useRef<Map<string, Sprite>>(new Map());
 
   const drawingProjectileGraphics = useCallback((graphics: Graphics): void => {
     projectileGraphicsRef.current = graphics;
@@ -41,10 +51,23 @@ export function RenderingWorldPlazaProjectileVisualLayer({
     graphics.visible = false;
   }, []);
 
+  useEffect(() => {
+    void preloadingWorldPlazaCyrobornProjectileSpriteTextures();
+
+    return () => {
+      const sprites = spriteByProjectileIdRef.current;
+      for (const sprite of sprites.values()) {
+        sprite.destroy();
+      }
+      sprites.clear();
+    };
+  }, []);
+
   usingWorldPlazaSafeTick(() => {
     const store = projectileStoreRef.current;
     const projectileGraphics = projectileGraphicsRef.current;
     const telegraphGraphics = telegraphGraphicsRef.current;
+    const spriteLayer = spriteLayerRef.current;
 
     if (!store || !projectileGraphics) {
       return;
@@ -57,12 +80,20 @@ export function RenderingWorldPlazaProjectileVisualLayer({
       if (telegraphGraphics) {
         telegraphGraphics.visible = false;
       }
+      if (spriteLayer) {
+        spriteLayer.visible = false;
+      }
       return;
+    }
+
+    if (spriteLayer) {
+      spriteLayer.visible = true;
     }
 
     const nowMs = performance.now();
     projectileGraphics.clear();
-    let drewProjectile = false;
+    let drewProjectileCircle = false;
+    const liveSpriteProjectileIds = new Set<string>();
 
     for (const instance of store.instances) {
       const archetype = resolvingWorldPlazaProjectileArchetype(
@@ -76,6 +107,39 @@ export function RenderingWorldPlazaProjectileVisualLayer({
         instance,
         archetype
       );
+      const spriteTexture = peekingWorldPlazaCyrobornProjectileSpriteTexture(
+        archetype.visual.clipId
+      );
+
+      if (spriteTexture && spriteLayer) {
+        liveSpriteProjectileIds.add(instance.projectileId);
+        let sprite = spriteByProjectileIdRef.current.get(instance.projectileId);
+
+        if (!sprite) {
+          sprite = new Sprite(spriteTexture);
+          sprite.anchor.set(0.5);
+          sprite.eventMode = 'none';
+          spriteLayer.addChild(sprite);
+          spriteByProjectileIdRef.current.set(instance.projectileId, sprite);
+        }
+
+        sprite.texture = spriteTexture;
+        sprite.visible = true;
+        sprite.position.set(layout.screenX, layout.screenY);
+        sprite.zIndex = layout.zIndex;
+        sprite.tint = layout.tint;
+        const displayDiameterPx = layout.radiusPx * 2;
+        const uniformScale =
+          (displayDiameterPx /
+            DEFINING_WORLD_PLAZA_CYROBORN_PROJECTILE_CELL_SIZE_PX) *
+          archetype.visual.scale;
+        sprite.scale.set(uniformScale);
+        sprite.rotation = archetype.visual.alignRotationToVelocity
+          ? computingWorldPlazaProjectileScreenRotationRadians(instance)
+          : 0;
+        continue;
+      }
+
       const red = (layout.tint >> 16) & 0xff;
       const green = (layout.tint >> 8) & 0xff;
       const blue = layout.tint & 0xff;
@@ -89,11 +153,27 @@ export function RenderingWorldPlazaProjectileVisualLayer({
         alpha: 0.95,
       });
       projectileGraphics.zIndex = layout.zIndex;
-      drewProjectile = true;
+      drewProjectileCircle = true;
+    }
+
+    for (const [projectileId, sprite] of spriteByProjectileIdRef.current) {
+      if (liveSpriteProjectileIds.has(projectileId)) {
+        continue;
+      }
+
+      if (sprite.parent === spriteLayer) {
+        spriteLayer?.removeChild(sprite);
+      }
+      sprite.destroy();
+      spriteByProjectileIdRef.current.delete(projectileId);
+    }
+
+    if (spriteLayer) {
+      spriteLayer.sortableChildren = true;
     }
 
     projectileGraphics.position.set(0, 0);
-    projectileGraphics.visible = drewProjectile;
+    projectileGraphics.visible = drewProjectileCircle;
 
     if (!telegraphGraphics || renderPlane !== 'effects') {
       return;
@@ -143,6 +223,13 @@ export function RenderingWorldPlazaProjectileVisualLayer({
 
   return (
     <>
+      <pixiContainer
+        ref={(container) => {
+          spriteLayerRef.current = container;
+        }}
+        sortableChildren
+        eventMode="none"
+      />
       <pixiGraphics draw={drawingProjectileGraphics} eventMode="none" />
       {renderPlane === 'effects' ? (
         <pixiGraphics draw={drawingTelegraphGraphics} eventMode="none" />

@@ -2643,7 +2643,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         drawingWildlifeCyrobornGlowOrbOnGraphics(glowOrbGraphics, {
           nowMs,
           alphaScale: 1,
-          isDead: false,
+          isDead: isPlayerDead,
         });
       } else {
         glowOrbGraphics.visible = false;

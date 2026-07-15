@@ -272,11 +272,12 @@ const CYROBORN_ICE_BOLT: DefiningWorldPlazaProjectileArchetype = {
   impact: { behaviorId: 'singleTarget' },
   lifetimeMs: 7_000,
   visual: {
-    clipId: 'projectile-magic-orb',
-    scale: 0.85,
-    tint: 0x9fe8ff,
+    clipId: 'cyroborn-ice-bolt',
+    scale: 1,
+    tint: 0xffffff,
     renderPlane: 'effects',
-    spriteRadiusPx: 7,
+    spriteRadiusPx: 14,
+    alignRotationToVelocity: true,
   },
 };
 
@@ -299,11 +300,11 @@ const CYROBORN_ICE_SPHERE: DefiningWorldPlazaProjectileArchetype = {
   impact: { behaviorId: 'singleTarget' },
   lifetimeMs: 4_000,
   visual: {
-    clipId: 'projectile-cluster',
+    clipId: 'cyroborn-ice-sphere',
     scale: 1,
-    tint: 0xb8f0ff,
+    tint: 0xffffff,
     renderPlane: 'effects',
-    spriteRadiusPx: 10,
+    spriteRadiusPx: 16,
   },
   blocksOnTerrain: true,
 };
@@ -325,11 +326,12 @@ const CYROBORN_ICE_SHARD_BURST: DefiningWorldPlazaProjectileArchetype = {
   impact: { behaviorId: 'singleTarget' },
   lifetimeMs: 900,
   visual: {
-    clipId: 'projectile-cluster',
-    scale: 0.55,
-    tint: 0x7ec8ff,
+    clipId: 'cyroborn-ice-shard',
+    scale: 0.85,
+    tint: 0xffffff,
     renderPlane: 'effects',
-    spriteRadiusPx: 5,
+    spriteRadiusPx: 10,
+    alignRotationToVelocity: true,
   },
 };
 
@@ -371,11 +373,11 @@ const CYROBORN_SHATTER_ORB: DefiningWorldPlazaProjectileArchetype = {
   },
   lifetimeMs: 5_200,
   visual: {
-    clipId: 'projectile-gravity-ball',
-    scale: 1.15,
-    tint: 0x5ad1ff,
+    clipId: 'cyroborn-shatter-orb',
+    scale: 1.1,
+    tint: 0xffffff,
     renderPlane: 'effects',
-    spriteRadiusPx: 13,
+    spriteRadiusPx: 20,
   },
 };
 

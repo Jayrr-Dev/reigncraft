@@ -2,6 +2,7 @@
 
 import { RenderingPlazaCodexDualProgress } from '@/components/home/components/renderingPlazaCodexDualProgress';
 import { RenderingPlazaPathologyGuideDetailView } from '@/components/home/components/renderingPlazaPathologyGuideDetailView';
+import { computingPlazaCodexAggregateStudyProgress } from '@/components/home/domains/computingPlazaCodexAggregateStudyProgress';
 import { DEFINING_PLAZA_PATHOLOGY_PANEL_SUBTITLE } from '@/components/home/domains/definingPlazaPathologyGuideConstants';
 import {
   resolvingPlazaPathologyGuideDisplayEntries,
@@ -194,8 +195,13 @@ export function RenderingPlazaPathologyPanel({
     setSelectedEntryId(null);
   }, []);
   const obtainedCount = guideEntries.filter((entry) => entry.isObtained).length;
-  const studiedCount = guideEntries.filter((entry) => entry.isStudied).length;
   const totalCount = guideEntries.length;
+  const studiedProgress = computingPlazaCodexAggregateStudyProgress(
+    guideEntries.map((entry) => ({
+      trackId: 'pathology' as const,
+      studyCount: entry.studyCount,
+    }))
+  );
 
   if (selectedEntry?.isObtained) {
     return (
@@ -252,9 +258,9 @@ export function RenderingPlazaPathologyPanel({
         }}
         right={{
           label: 'Studied',
-          value: studiedCount,
-          max: totalCount,
-          ariaLabel: 'Diseases studied',
+          value: studiedProgress.value,
+          max: studiedProgress.max,
+          ariaLabel: 'Disease study points',
         }}
       />
 
