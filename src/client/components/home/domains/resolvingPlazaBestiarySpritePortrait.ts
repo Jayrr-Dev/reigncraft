@@ -11,11 +11,13 @@ import {
   DEFINING_PLAZA_BESTIARY_PORTRAIT_FRAME_ROW_INDEX,
 } from '@/components/home/domains/definingPlazaBestiarySpritePortraitConstants';
 import { formattingWorldPlazaPixiColorToCssHex } from '@/components/world/domains/formattingWorldPlazaPixiColorToCssHex';
+import { resolvingWorldPlazaFishingCatchRawSpriteSheetIcon } from '@/components/world/fishing/domains/definingWorldPlazaFishingCatchSpriteSheetConstants';
 import { checkingWildlifeSpeciesUsesGlowOrbPresentation } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesUsesGlowOrbPresentation';
 import {
   DEFINING_WILDLIFE_FAIRY_AURA_COLOR,
   DEFINING_WILDLIFE_FAIRY_BODY_COLOR,
 } from '@/components/world/wildlife/domains/definingWildlifeFairyConstants';
+import { checkingWildlifeFishMeatSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeFishMeatCatalog';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import {
   buildingWildlifeMotionSheetUrls,
@@ -63,6 +65,29 @@ export function resolvingPlazaBestiarySpritePortrait(
 
   if (!speciesDefinition) {
     return null;
+  }
+
+  if (checkingWildlifeFishMeatSpeciesId(speciesId)) {
+    const fishIcon =
+      resolvingWorldPlazaFishingCatchRawSpriteSheetIcon(speciesId);
+
+    if (fishIcon) {
+      const columnPercent =
+        fishIcon.columnCount <= 1
+          ? 0
+          : (fishIcon.columnIndex / (fishIcon.columnCount - 1)) * 100;
+      const rowPercent =
+        fishIcon.rowCount <= 1
+          ? 0
+          : (fishIcon.rowIndex / (fishIcon.rowCount - 1)) * 100;
+
+      return {
+        kind: 'spriteSheet',
+        sheetUrl: fishIcon.spriteSheetUrl,
+        backgroundSizeCss: `${fishIcon.columnCount * 100}% ${fishIcon.rowCount * 100}%`,
+        backgroundPositionCss: `${columnPercent}% ${rowPercent}%`,
+      };
+    }
   }
 
   if (speciesDefinition.portraitEmoji) {

@@ -42,15 +42,15 @@ describe('resolvingPlazaBestiarySpritePortrait', () => {
     });
   });
 
-  it('uses an emoji portrait for fishing catch species', () => {
+  it('uses a raw fish sprite-sheet portrait for fishing catch species', () => {
     const portrait = resolvingPlazaBestiarySpritePortrait('largemouth-bass');
 
-    expect(portrait?.kind).toBe('emoji');
-    if (portrait?.kind !== 'emoji') {
+    expect(portrait?.kind).toBe('spriteSheet');
+    if (portrait?.kind !== 'spriteSheet') {
       return;
     }
 
-    expect(portrait.emoji.length).toBeGreaterThan(0);
+    expect(portrait.sheetUrl).toContain('fish-raw-color-a-sprites.webp');
   });
 
   it('resolves a portrait for every bestiary entry', () => {

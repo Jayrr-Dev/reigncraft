@@ -10,18 +10,29 @@ import {
   type DefiningWorldPlazaFishingCatchCreatureEntry,
   type DefiningWorldPlazaFishingCatchJunkEntry,
 } from '@/components/world/fishing/domains/definingWorldPlazaFishingCatchRegistry';
+import {
+  resolvingWorldPlazaFishingCatchCookedSpriteSheetIcon,
+  resolvingWorldPlazaFishingCatchRawSpriteSheetIcon,
+} from '@/components/world/fishing/domains/definingWorldPlazaFishingCatchSpriteSheetConstants';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import { resolvingWorldPlazaInventoryFoodHealDeclaration } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealDeclaration';
 
 function registeringCreatureItems(
   entry: DefiningWorldPlazaFishingCatchCreatureEntry
 ): DefiningWorldPlazaInventoryItemTypeDefinition[] {
+  const rawSpriteSheet = resolvingWorldPlazaFishingCatchRawSpriteSheetIcon(
+    entry.catchId
+  );
+  const cookedSpriteSheet =
+    resolvingWorldPlazaFishingCatchCookedSpriteSheetIcon(entry.catchId);
+
   return [
     {
       typeId: entry.rawItemTypeId,
       name: entry.rawDisplayName,
       rarity: entry.rarity,
       iconEmoji: entry.rawIconEmoji,
+      iconSpriteSheet: rawSpriteSheet ?? undefined,
       maxStack: 99,
       isDroppable: true,
       isStackable: true,
@@ -42,6 +53,7 @@ function registeringCreatureItems(
       name: entry.cookedDisplayName,
       rarity: entry.rarity,
       iconEmoji: entry.cookedIconEmoji,
+      iconSpriteSheet: cookedSpriteSheet ?? undefined,
       maxStack: 99,
       isDroppable: true,
       isStackable: true,
