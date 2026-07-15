@@ -6,6 +6,7 @@ import {
 } from '@/components/world/domains/definingWorldPlazaBestiaryDiscoveryConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import {
+  gettingWorldPlazaBestiarySightedSpeciesSnapshot,
   initializingWorldPlazaBestiaryDiscoveryStore,
   recordingWorldPlazaBestiarySpeciesSighted,
 } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
@@ -24,6 +25,8 @@ export type UsingWorldPlazaRecordingBestiarySightingsOptions = {
   cloudSaveSlotIndex?: PlazaSaveSlotIndex | null;
   playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint | null>;
   wildlifeStoreRef: RefObject<ManagingWildlifeInstanceStore>;
+  /** Fired when a new wildlife species is sighted (trap recipe unlocks, etc.). */
+  readonly onWildlifeSpeciesSighted?: () => void;
 };
 
 /**
@@ -35,6 +38,7 @@ export function usingWorldPlazaRecordingBestiarySightings({
   cloudSaveSlotIndex = null,
   playerPositionRef,
   wildlifeStoreRef,
+  onWildlifeSpeciesSighted,
 }: UsingWorldPlazaRecordingBestiarySightingsOptions): void {
   useEffect(() => {
     initializingWorldPlazaBestiaryDiscoveryStore(storageOwnerId, {
@@ -53,6 +57,9 @@ export function usingWorldPlazaRecordingBestiarySightings({
       if (!playerPosition) {
         return;
       }
+
+      const sightedCountBefore =
+        gettingWorldPlazaBestiarySightedSpeciesSnapshot().length;
 
       for (const instance of listingWildlifeInstances(
         wildlifeStoreRef.current
@@ -73,6 +80,13 @@ export function usingWorldPlazaRecordingBestiarySightings({
 
         recordingWorldPlazaBestiarySpeciesSighted(instance.speciesId);
       }
+
+      if (
+        gettingWorldPlazaBestiarySightedSpeciesSnapshot().length >
+        sightedCountBefore
+      ) {
+        onWildlifeSpeciesSighted?.();
+      }
     };
 
     recordingNearbyWildlifeSightings();
@@ -85,5 +99,10 @@ export function usingWorldPlazaRecordingBestiarySightings({
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [isEnabled, playerPositionRef, wildlifeStoreRef]);
+  }, [
+    isEnabled,
+    onWildlifeSpeciesSighted,
+    playerPositionRef,
+    wildlifeStoreRef,
+  ]);
 }

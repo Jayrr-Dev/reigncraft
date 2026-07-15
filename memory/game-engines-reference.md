@@ -182,15 +182,15 @@ The plaza hook wires Redis/save-slot persistence and optional demo seed. World f
 
 **Purpose:** Declarative craft recipes in cookbooks. Pages attach once from inventory; craft only after attach. Each recipe has `complexity` 1–10 (5s–3min craft timer). Bottom HUD progress + beat lane (notes rush right→left): hammer hits speed craft, cracked hammers halt ~2.5s, misses do nothing. Patterns: single / double / triple / trap mixes.
 
-| Piece                                    | Path                                                                                  |
-| ---------------------------------------- | ------------------------------------------------------------------------------------- |
-| Types (`recipeType: 'entity' \| 'item'`) | `crafting/domains/definingWorldPlazaCraftModeRecipeTypes.ts`                          |
-| Registry (add recipes here)              | `crafting/domains/definingWorldPlazaCraftModeRecipeRegistry.ts`                       |
-| Cookbook UI                              | `building/components/renderingWorldPlazaCraftModeCookbookDialog.tsx`                  |
-| Attach store                             | `domains/managingWorldPlazaRecipeDiscoveryStore.ts` (`attachingWorldPlazaRecipePage`) |
-| Recipe-page items (auto from registry)   | `crafting/domains/registeringWorldPlazaCraftRecipePageInventoryItems.ts`              |
+| Piece                                    | Path                                                                                                                                                                                                             |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Types (`recipeType: 'entity' \| 'item'`) | `crafting/domains/definingWorldPlazaCraftModeRecipeTypes.ts`                                                                                                                                                     |
+| Registry (add recipes here)              | `crafting/domains/definingWorldPlazaCraftModeRecipeRegistry.ts`                                                                                                                                                  |
+| Cookbook UI                              | `building/components/renderingWorldPlazaCraftModeCookbookDialog.tsx`                                                                                                                                             |
+| Attach store                             | `domains/managingWorldPlazaRecipeDiscoveryStore.ts` (`attachingWorldPlazaRecipePage`)                                                                                                                            |
+| Recipe-page items (auto from registry)   | `crafting/domains/registeringWorldPlazaCraftRecipePageInventoryItems.ts`                                                                                                                                         |
 | Dev QA: attach all + 99× ingredients/ore | `attachingWorldPlazaAllCraftModeRecipesForDevQa.ts`, `listingWorldPlazaCraftModeRecipeIngredientSeedItems.ts`, `listingWorldPlazaOreItemSeedItems.ts` (wired from Pixi recipe init + `usingWorldPlazaInventory`) |
-| Nearby station gate (anvil smithing)     | `requiredNearbyBlockDefinitionId` on recipe + `checkingWorldPlazaCraftRecipeNearbyStationSatisfied.ts` |
+| Nearby station gate (anvil smithing)     | `requiredNearbyBlockDefinitionId` on recipe + `checkingWorldPlazaCraftRecipeNearbyStationSatisfied.ts`                                                                                                           |
 
 **Extend (new recipe):**
 
@@ -199,30 +199,30 @@ The plaza hook wires Redis/save-slot persistence and optional demo seed. World f
 3. Optional: set `requiredNearbyBlockDefinitionId` (e.g. anvil) so craft only works within station reach.
 4. Recipe-page inventory item + Recipes guide entry appear automatically.
 5. Player double-clicks the page item to attach (second attach refused). Cookbook only lists attached recipes.
-6. Dev QA load auto-attaches every registry recipe and seeds 99 of each unique craft ingredient plus every ore type (no extra wiring).
+6. Online / non–single-player boot may auto-attach Survival + Chaos Armour recipes, and Dev QA (when enabled) attaches every registry recipe. Single-player boot never auto-attaches; pages unlock crafts. Dev QA inventory seed still grants 99× ingredients/ore when that load flag is on.
 
 ### 4c. Ore smelting stations
 
 **Purpose:** Bloomery, clay kiln, and clay stove accept one item plus fuel (1 coal or 3 wood), run a four-second timer, then add the matching output (scarlet ore produces mercury; kiln fires wet clay ware).
 
-| Piece | Path |
-| ----- | ---- |
-| Ore/fuel/output registry | `crafting/domains/definingWorldPlazaOreSmeltingRegistry.ts` |
-| Timed station state hook | `crafting/hooks/usingWorldPlazaOreSmeltingStations.ts` |
-| Inventory DnD popover | `inventory/components/renderingWorldPlazaOreSmeltingPopover.tsx` |
-| Reach + auto-close at 5 tiles | `crafting/hooks/usingWorldPlazaOreSmeltingStationReachability.ts` |
-| Active glow + bloomery smoke | `building/components/renderingWorldPlazaBlacksmithUtilityLayer.tsx` |
+| Piece                         | Path                                                                |
+| ----------------------------- | ------------------------------------------------------------------- |
+| Ore/fuel/output registry      | `crafting/domains/definingWorldPlazaOreSmeltingRegistry.ts`         |
+| Timed station state hook      | `crafting/hooks/usingWorldPlazaOreSmeltingStations.ts`              |
+| Inventory DnD popover         | `inventory/components/renderingWorldPlazaOreSmeltingPopover.tsx`    |
+| Reach + auto-close at 5 tiles | `crafting/hooks/usingWorldPlazaOreSmeltingStationReachability.ts`   |
+| Active glow + bloomery smoke  | `building/components/renderingWorldPlazaBlacksmithUtilityLayer.tsx` |
 
 ### 4d. Traps (bear + caltrop)
 
 **Purpose:** Player-placed ground traps under generation feature `TRAPS`.
 
-| Piece | Path |
-| ----- | ---- |
+| Piece                             | Path                                                                                                             |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | Bear trap store / trigger / layer | `trap/domains/*BearTrap*`, `trap/hooks/usingWorldPlazaBearTrap*`, `trap/components/renderingWorldPlazaBearTrap*` |
-| Caltrop store / trigger / layer | `trap/domains/*Caltrop*`, `trap/hooks/usingWorldPlazaCaltrop*`, `trap/components/renderingWorldPlazaCaltrop*` |
-| Drop placement | `inventory/hooks/trackingWorldPlazaInventoryDropPlacement.ts` (special-case item type ids) |
-| Craft (anvil) | `recipe-bear-trap`, `recipe-caltrops` in craft registry |
+| Caltrop store / trigger / layer   | `trap/domains/*Caltrop*`, `trap/hooks/usingWorldPlazaCaltrop*`, `trap/components/renderingWorldPlazaCaltrop*`    |
+| Drop placement                    | `inventory/hooks/trackingWorldPlazaInventoryDropPlacement.ts` (special-case item type ids)                       |
+| Craft (anvil)                     | `recipe-bear-trap`, `recipe-caltrops` in craft registry                                                          |
 
 **Caltrops:** one-shot walk-over → remove + `sluggish-debuff` + bleed (`bleeding`, 8 dmg). Pick up while still on ground. Item id `world-plaza-caltrops`.
 

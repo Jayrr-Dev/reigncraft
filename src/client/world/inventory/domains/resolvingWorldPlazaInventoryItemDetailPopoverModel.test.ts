@@ -1,8 +1,8 @@
 import { DEFINING_PLAZA_HERBARIUM_BERRY_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumBerryStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumCloverStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
-import { DEFINING_PLAZA_HERBARIUM_MUSHROOM_STUDY_FULL_COUNT } from '@/components/home/domains/resolvingPlazaHerbariumMushroomStudyTier';
 import { DEFINING_PLAZA_LAPIDARY_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaLapidaryStudyTier';
+import { DEFINING_PLAZA_HERBARIUM_MUSHROOM_STUDY_FULL_COUNT } from '@/components/home/domains/resolvingPlazaHerbariumMushroomStudyTier';
 import { resolvingWorldPlazaCloverItemTypeIdFromLootKind } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverSpriteSheetConstants';
 import { resolvingWorldPlazaFlowerItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFlowerSpriteSheetConstants';
 import {
@@ -13,6 +13,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { resolvingWorldPlazaOreItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_ORE_STUDIED_METADATA_KEY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreStudyMetadataConstants';
 import { resolvingWorldPlazaInventoryItemDetailPopoverModel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDetailPopoverModel';
 import { describe, expect, it } from 'vitest';
 
@@ -326,6 +327,30 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel ore Study', () => {
     expect(full?.canStudy).toBe(false);
     expect(
       full?.infoRows.some((row) => row.value.includes('ladder reference'))
+    ).toBe(true);
+  });
+
+  it('hides Study on studied ore piles and labels them Studied', () => {
+    const studied = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'iron-studied-1',
+        itemTypeId: ironItemTypeId,
+        quantity: 2,
+        slotIndex: 0,
+        metadata: {
+          [DEFINING_WORLD_PLAZA_INVENTORY_ORE_STUDIED_METADATA_KEY]: true,
+        },
+      },
+      {
+        isEquipped: false,
+        oreStudyCountsBySpeciesId: { iron: 1 },
+      }
+    );
+
+    expect(studied?.canStudy).toBe(false);
+    expect(studied?.name).toContain('Studied');
+    expect(
+      studied?.badges.some((badge) => badge.id === 'ore-studied-pile')
     ).toBe(true);
   });
 });
@@ -650,17 +675,15 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel mushroom Study', ()
       }
     );
 
-    expect(proficiency?.badges.find((badge) => badge.id === 'food')?.label).toBe(
-      'Fills hunger'
-    );
+    expect(
+      proficiency?.badges.find((badge) => badge.id === 'food')?.label
+    ).toBe('Fills hunger');
     expect(
       proficiency?.badges.find((badge) => badge.id === 'food-heal')?.label
     ).toBe('Heals');
-    expect(
-      proficiency?.badges.some((badge) =>
-        badge.label.includes('%')
-      )
-    ).toBe(false);
+    expect(proficiency?.badges.some((badge) => badge.label.includes('%'))).toBe(
+      false
+    );
 
     const expertise = resolvingWorldPlazaInventoryItemDetailPopoverModel(
       {
@@ -677,9 +700,9 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel mushroom Study', ()
     );
 
     expect(expertise?.badges.some((badge) => badge.id === 'food')).toBe(true);
-    expect(expertise?.badges.find((badge) => badge.id === 'food')?.label).toMatch(
-      /% hunger/
-    );
+    expect(
+      expertise?.badges.find((badge) => badge.id === 'food')?.label
+    ).toMatch(/% hunger/);
     expect(expertise?.badges.some((badge) => badge.id === 'food-heal')).toBe(
       true
     );
@@ -708,7 +731,8 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel mushroom Study', ()
 });
 
 describe('resolvingWorldPlazaInventoryItemDetailPopoverModel ore smelting actions', () => {
-  const ironOreItemTypeId = resolvingWorldPlazaOreItemTypeIdFromSpeciesId('iron');
+  const ironOreItemTypeId =
+    resolvingWorldPlazaOreItemTypeIdFromSpeciesId('iron');
 
   it('hides Refine and Add Fuel when no smelting station is reachable', () => {
     const oreModel = resolvingWorldPlazaInventoryItemDetailPopoverModel(

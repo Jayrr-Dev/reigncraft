@@ -12,6 +12,7 @@ import { computingWildlifeInstanceDefenseMitigatedDamage } from '@/components/wo
 import { checkingWildlifeOmegaWolfSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
+import type { DefiningWorldPlazaEntityHealthDamageOptions } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { notifyingWildlifeOmegaWolfSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeOmegaWolfSfxEvent';
 import { notifyingWildlifeSpeciesSfxEvent } from '@/components/world/wildlife/domains/notifyingWildlifeSpeciesSfxEvent';
@@ -54,6 +55,11 @@ export type ApplyingWildlifeInstancePhysicalDamageParams = {
    * Ignored when `attacker` is set (always flat) or sleep/special options win.
    */
   outgoingDamageStyle?: ApplyingWildlifeOutgoingPhysicalDamageStyle;
+  /** Player buff + specialty-weapon attacker roll crumbs for EV hits. */
+  playerOutgoingDamageOptions?: Pick<
+    DefiningWorldPlazaEntityHealthDamageOptions,
+    'attackerDamageRollModifiers' | 'forcedRollMode'
+  > | null;
 };
 
 /**
@@ -66,6 +72,7 @@ export function applyingWildlifeInstancePhysicalDamage({
   wakeContext = null,
   attacker = null,
   outgoingDamageStyle = 'player-ev',
+  playerOutgoingDamageOptions = null,
 }: ApplyingWildlifeInstancePhysicalDamageParams): DefiningWildlifeInstance {
   const sleepAmbushOptions =
     resolvingWildlifeSleepAmbushHealthDamageOptions(instance);
@@ -86,7 +93,11 @@ export function applyingWildlifeInstancePhysicalDamage({
     obeseIncomingOptions ??
     (useWildlifeFlatOutgoing
       ? { skipDamageRoll: true }
-      : resolvingWildlifePlayerOutgoingPhysicalDamageOptions());
+      : resolvingWildlifePlayerOutgoingPhysicalDamageOptions({
+          attackerDamageRollModifiers:
+            playerOutgoingDamageOptions?.attackerDamageRollModifiers,
+          forcedRollMode: playerOutgoingDamageOptions?.forcedRollMode,
+        }));
   const wasSleeping = sleepAmbushOptions !== null;
   const canWakeFromDamage =
     checkingWorldPlazaEntityHealthSleepCanWakeFromDamage(

@@ -359,9 +359,11 @@ import { settlingWorldPlazaMeleeSwingDamage } from '@/components/world/domains/s
 import { RenderingWorldPlazaEquipmentSfx } from '@/components/world/equipment/components/renderingWorldPlazaEquipmentSfx';
 import type { DefiningWorldPlazaArmorSlotId } from '@/components/world/equipment/domains/definingWorldPlazaArmorSlotRegistry';
 import type { DefiningWorldPlazaHeldItemPresentation } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemPresentationRegistry';
+import { checkingWorldPlazaInventoryItemIsSpecialtyWeapon } from '@/components/world/equipment/domains/definingWorldPlazaSpecialtyWeaponRegistry';
 import { resolvingWorldPlazaEquippedAttackEv } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
 import { resolvingWorldPlazaEquippedHeldItemPresentation } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedHeldItemPresentation';
 import { resolvingWorldPlazaHeldItemPresentationForItemTypeId } from '@/components/world/equipment/domains/resolvingWorldPlazaHeldItemPresentationForItemTypeId';
+import { syncingWorldPlazaEquippedSpecialtyWeaponModifiers } from '@/components/world/equipment/domains/syncingWorldPlazaEquippedSpecialtyWeaponModifiers';
 import { usingWorldPlazaArmorLoadout } from '@/components/world/equipment/hooks/usingWorldPlazaArmorLoadout';
 import { usingWorldPlazaEquipment } from '@/components/world/equipment/hooks/usingWorldPlazaEquipment';
 import { RenderingWorldPlazaFarmingInteractionLabels } from '@/components/world/farming/components/renderingWorldPlazaFarmingInteractionLabels';
@@ -569,10 +571,13 @@ import { RenderingWorldPlazaInventoryFoodEatOverlay } from '@/components/world/i
 import { RenderingWorldPlazaInventoryHotbar } from '@/components/world/inventory/components/renderingWorldPlazaInventoryHotbar';
 import { RenderingWorldPlazaInventorySpecimenStudyOverlay } from '@/components/world/inventory/components/renderingWorldPlazaInventorySpecimenStudyOverlay';
 import { applyingWorldPlazaInventorySlotActiveEnchantmentUse } from '@/components/world/inventory/domains/applyingWorldPlazaInventorySlotActiveEnchantmentUse';
+import { checkingWorldPlazaInventoryItemHasStudiedOreMetadata } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemHasStudiedOreMetadata';
 import { computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier';
 import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
 import { consumingWorldPlazaInventoryItemFromSlot } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemFromSlot';
+import { convertingWorldPlazaInventoryOreSlotToStudied } from '@/components/world/inventory/domains/convertingWorldPlazaInventoryOreSlotToStudied';
 import { parsingWorldPlazaFlowerSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
+import { DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOTTLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED,
@@ -580,6 +585,8 @@ import {
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { parsingWorldPlazaOreSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { disarmingWorldPlazaInventorySlotArmedHarvestEnchantments } from '@/components/world/inventory/domains/disarmingWorldPlazaInventorySlotArmedHarvestEnchantments';
+import { ensuringWorldPlazaInventoryBestiarySightedRecipeRewards } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryBestiarySightedRecipeRewards';
+import { ensuringWorldPlazaInventoryLapidaryOreStudyRecipeRewards } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryLapidaryOreStudyRecipeRewards';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { parsingWorldPlazaBerryLootKindFromItemTypeId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryBerryDetailReveal';
 import { parsingWorldPlazaCloverKindFromItemTypeId } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryCloverDetailReveal';
@@ -3486,6 +3493,54 @@ function RenderingWorldPlazaPixiSceneConnected({
     ]
   );
 
+  const grantingLapidaryOreStudyRecipeRewardsIfEarned =
+    useCallback((): void => {
+      let rewardToasts: readonly string[] = [];
+      updatingInventoryState((currentState) => {
+        const lapidaryRewards =
+          ensuringWorldPlazaInventoryLapidaryOreStudyRecipeRewards(
+            currentState,
+            {
+              storageOwnerId: onlineUserId ?? localPersistenceOwnerId,
+            }
+          );
+        rewardToasts = lapidaryRewards.rewardToasts;
+        return lapidaryRewards.grantedRecipeIds.length > 0
+          ? lapidaryRewards.state
+          : null;
+      });
+      for (const toast of rewardToasts) {
+        showingGameplayHudToast(toast);
+      }
+    }, [
+      localPersistenceOwnerId,
+      onlineUserId,
+      showingGameplayHudToast,
+      updatingInventoryState,
+    ]);
+
+  const grantingBestiarySightedRecipeRewardsIfEarned = useCallback((): void => {
+    let rewardToasts: readonly string[] = [];
+    updatingInventoryState((currentState) => {
+      const bestiaryRewards =
+        ensuringWorldPlazaInventoryBestiarySightedRecipeRewards(currentState, {
+          storageOwnerId: onlineUserId ?? localPersistenceOwnerId,
+        });
+      rewardToasts = bestiaryRewards.rewardToasts;
+      return bestiaryRewards.grantedRecipeIds.length > 0
+        ? bestiaryRewards.state
+        : null;
+    });
+    for (const toast of rewardToasts) {
+      showingGameplayHudToast(toast);
+    }
+  }, [
+    localPersistenceOwnerId,
+    onlineUserId,
+    showingGameplayHudToast,
+    updatingInventoryState,
+  ]);
+
   const { validatingRockMineStart, completingRockMineLayer } =
     usingWorldPlazaRockMineInteraction({
       localPersistenceOwnerId,
@@ -3495,7 +3550,10 @@ function RenderingWorldPlazaPixiSceneConnected({
       playerPositionRef,
       showingGameplayHudToast,
       resolvingHarvestToolTier: resolvingEquippedPickaxeHarvestToolTier,
-      onRockMineLayerSucceeded: wearingEquippedPickaxeDurability,
+      onRockMineLayerSucceeded: () => {
+        wearingEquippedPickaxeDurability();
+        grantingLapidaryOreStudyRecipeRewardsIfEarned();
+      },
     });
 
   const completingRockMineLayerRef = useRef(completingRockMineLayer);
@@ -3918,6 +3976,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       updatingInventoryState,
       selectedSlotIndex: equipment.selectedSlotIndex,
       showingGameplayHudToast,
+      onWildlifeSpeciesSighted: grantingBestiarySightedRecipeRewardsIfEarned,
     });
 
   const completingFishingCastRef = useRef(completingFishingCast);
@@ -4359,6 +4418,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     damageFlashUntilMsRef,
     defensiveReactionUntilMsRef,
     healthStateRef,
+    attackerDamageRollModifiersRef,
     localTemperatureCelsiusRef,
     characterEngineDefenseRef,
   } = usingWorldPlazaPlayerHealth({
@@ -4391,6 +4451,40 @@ function RenderingWorldPlazaPixiSceneConnected({
     healthStateRef,
     syncingHealthHudFromStateRef,
   });
+
+  const equippedWeaponSlotItem =
+    inventoryState.slots[DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX];
+  const equippedSpecialtyWeaponItemTypeId =
+    equippedWeaponSlotItem &&
+    checkingWorldPlazaInventoryItemIsSpecialtyWeapon(
+      equippedWeaponSlotItem.itemTypeId
+    )
+      ? equippedWeaponSlotItem.itemTypeId
+      : null;
+  const playerEquippedSpecialtyWeaponItemTypeIdRef = useRef<string | null>(
+    equippedSpecialtyWeaponItemTypeId
+  );
+  playerEquippedSpecialtyWeaponItemTypeIdRef.current =
+    equippedSpecialtyWeaponItemTypeId;
+
+  useEffect(() => {
+    if (!isLocalGameplayEnabled) {
+      return;
+    }
+
+    const nowMs = performance.now();
+    healthStateRef.current = syncingWorldPlazaEquippedSpecialtyWeaponModifiers(
+      healthStateRef.current,
+      equippedSpecialtyWeaponItemTypeId,
+      nowMs
+    );
+    syncingHealthHudFromStateRef.current();
+  }, [
+    equippedSpecialtyWeaponItemTypeId,
+    healthStateRef,
+    isLocalGameplayEnabled,
+    syncingHealthHudFromStateRef,
+  ]);
 
   usingWorldPlazaHeldFourLeafCloverCharm({
     enabled: isLocalGameplayEnabled,
@@ -4687,6 +4781,16 @@ function RenderingWorldPlazaPixiSceneConnected({
       playerPositionRef,
       localAvatarMotionStateRef,
       playerHealthStateRef: healthStateRef,
+      playerAttackerDamageRollModifiersRef: attackerDamageRollModifiersRef,
+      playerEquippedSpecialtyWeaponItemTypeIdRef,
+      onPlayerSiphonHealFromWildlifeHit: (healAmount) => {
+        if (healAmount > 0) {
+          enqueueHealFloatRef.current?.(healAmount);
+        }
+      },
+      onPlayerHealthMutatedFromWildlifeCombat: () => {
+        syncingHealthHudFromStateRef.current();
+      },
       playerRunStaminaStateRef: playerRunStaminaStateRef,
       playerStillDurationMsRef,
       isPlayerWalkingRef: isWalkingRef,
@@ -5383,8 +5487,14 @@ function RenderingWorldPlazaPixiSceneConnected({
 
       recordingWorldPlazaBestiarySpeciesStudied(pending.speciesId, studyPoints);
       playingWildlifeStudySfx();
+      grantingBestiarySightedRecipeRewardsIfEarned();
     },
-    [wildlifeStoreRef, onlineUserId, localPersistenceOwnerId]
+    [
+      grantingBestiarySightedRecipeRewardsIfEarned,
+      wildlifeStoreRef,
+      onlineUserId,
+      localPersistenceOwnerId,
+    ]
   );
 
   const {
@@ -5500,10 +5610,12 @@ function RenderingWorldPlazaPixiSceneConnected({
           progressLabel: formattingPlazaBestiaryStudyCountProgress(studyCount),
         })
       );
+      grantingBestiarySightedRecipeRewardsIfEarned();
       clearingInteractableBlockClickSelection();
     },
     [
       clearingInteractableBlockClickSelection,
+      grantingBestiarySightedRecipeRewardsIfEarned,
       showingGameplayHudToast,
       wildlifeStoreRef,
     ]
@@ -6796,6 +6908,58 @@ function RenderingWorldPlazaPixiSceneConnected({
     (
       context: DefiningWorldPlazaInventorySpecimenStudyProgressContext
     ): void => {
+      if (context.studyKind === 'ore' && context.oreSpeciesId) {
+        let oreConvertOutcome:
+          | 'converted'
+          | 'nothing-to-study'
+          | 'already-studied'
+          | 'inventory-full' = 'nothing-to-study';
+
+        updatingInventoryState((currentState) => {
+          const convertResult = convertingWorldPlazaInventoryOreSlotToStudied(
+            currentState,
+            context.slotIndex
+          );
+          oreConvertOutcome = convertResult.outcome;
+          return convertResult.outcome === 'converted'
+            ? convertResult.nextState
+            : null;
+        });
+
+        if (oreConvertOutcome === 'inventory-full') {
+          showingGameplayHudToast('Inventory is full.');
+          return;
+        }
+
+        if (oreConvertOutcome === 'already-studied') {
+          showingGameplayHudToast('That pile is already studied.');
+          return;
+        }
+
+        if (oreConvertOutcome !== 'converted') {
+          showingGameplayHudToast('Nothing left to study.');
+          return;
+        }
+
+        recordingWorldPlazaLapidaryOreStudied(context.oreSpeciesId);
+        const studyCount =
+          gettingWorldPlazaLapidaryOreStudyCountsSnapshot()[
+            context.oreSpeciesId
+          ] ?? 1;
+        showingGameplayHudToast(
+          formattingPlazaStudyCompleteToastMessage({
+            subjectDisplayName: resolvingPlazaLapidaryOreStudyDisplayName(
+              context.oreSpeciesId
+            ),
+            codexLabel: 'Lapidary',
+            progressLabel:
+              formattingPlazaLapidaryStudyCountProgress(studyCount),
+          })
+        );
+        grantingLapidaryOreStudyRecipeRewardsIfEarned();
+        return;
+      }
+
       let didConsume = false;
 
       updatingInventoryState((currentState) => {
@@ -6828,25 +6992,6 @@ function RenderingWorldPlazaPixiSceneConnected({
             codexLabel: 'Herbarium',
             progressLabel:
               formattingPlazaHerbariumFlowerStudyCountProgress(studyCount),
-          })
-        );
-        return;
-      }
-
-      if (context.studyKind === 'ore' && context.oreSpeciesId) {
-        recordingWorldPlazaLapidaryOreStudied(context.oreSpeciesId);
-        const studyCount =
-          gettingWorldPlazaLapidaryOreStudyCountsSnapshot()[
-            context.oreSpeciesId
-          ] ?? 1;
-        showingGameplayHudToast(
-          formattingPlazaStudyCompleteToastMessage({
-            subjectDisplayName: resolvingPlazaLapidaryOreStudyDisplayName(
-              context.oreSpeciesId
-            ),
-            codexLabel: 'Lapidary',
-            progressLabel:
-              formattingPlazaLapidaryStudyCountProgress(studyCount),
           })
         );
         return;
@@ -6906,7 +7051,11 @@ function RenderingWorldPlazaPixiSceneConnected({
         );
       }
     },
-    [showingGameplayHudToast, updatingInventoryState]
+    [
+      grantingLapidaryOreStudyRecipeRewardsIfEarned,
+      showingGameplayHudToast,
+      updatingInventoryState,
+    ]
   );
 
   const {
@@ -6989,6 +7138,13 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
 
       if (oreSpeciesId) {
+        if (
+          checkingWorldPlazaInventoryItemHasStudiedOreMetadata(item.metadata)
+        ) {
+          showingGameplayHudToast('That pile is already studied.');
+          return;
+        }
+
         const currentStudyCount =
           gettingWorldPlazaLapidaryOreStudyCountsSnapshot()[oreSpeciesId] ?? 0;
 
@@ -7237,6 +7393,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     cloudSaveSlotIndex: discoveryCloudSaveSlotIndex,
     playerPositionRef,
     wildlifeStoreRef,
+    onWildlifeSpeciesSighted: grantingBestiarySightedRecipeRewardsIfEarned,
   });
 
   usingWorldPlazaRecordingHerbariumSightings({
@@ -7253,6 +7410,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     playerPositionRef,
     inventoryState,
     minedRockStateByTileKey,
+    onOreSpeciesSighted: grantingLapidaryOreStudyRecipeRewardsIfEarned,
   });
 
   usingWorldPlazaRecordingPathologyDiscovery({
@@ -7277,10 +7435,14 @@ function RenderingWorldPlazaPixiSceneConnected({
       gettingWorldPlazaSelectedAvatarSkinId()
     );
     initializingWorldPlazaOnboardingCoachmarkStore(storageOwnerId);
-    ensuringWorldPlazaSurvivalCookbookRecipesAttached();
-    attachingWorldPlazaAllCraftModeRecipesForDevQa();
+    // Single-player starts with an empty cookbook; recipe pages unlock crafts.
+    if (!isSinglePlayerSession) {
+      ensuringWorldPlazaSurvivalCookbookRecipesAttached();
+      attachingWorldPlazaAllCraftModeRecipesForDevQa();
+    }
   }, [
     discoveryCloudSaveSlotIndex,
+    isSinglePlayerSession,
     localPersistenceOwnerId,
     onlineUserId,
     selectedAvatarSkinId,

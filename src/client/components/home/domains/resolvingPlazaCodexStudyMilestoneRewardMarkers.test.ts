@@ -9,6 +9,7 @@ import {
   resolvingPlazaCodexOverallProgressMilestoneRewardMarkers,
   resolvingPlazaCodexStudyMilestoneRewardPopoverLabel,
 } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
+import { DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeToolRecipeIds';
 import { describe, expect, it } from 'vitest';
 
 describe('resolvingPlazaCodexOverallProgressMilestoneRewardMarkers', () => {
@@ -49,6 +50,45 @@ describe('resolvingPlazaCodexOverallProgressMilestoneRewardMarkers', () => {
       markers.find((marker) => marker.percent === 20)?.remainingNeeded
     ).toBe(1);
   });
+
+  it('marks herbarium Sighted 5% as unclaimed wood axe until attached', () => {
+    const markers = resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
+      2,
+      44,
+      undefined,
+      {
+        sectionId: 'herbarium',
+        meterKind: 'discovered',
+        attachedRecipeIds: new Set(),
+      }
+    );
+
+    const first = markers.find((marker) => marker.percent === 5);
+    expect(first?.hasUnclaimedReward).toBe(true);
+    expect(first?.rewardDefinition?.reward.recipeId).toBe(
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.AXE_WOOD
+    );
+
+    const claimed = resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
+      2,
+      44,
+      undefined,
+      {
+        sectionId: 'herbarium',
+        meterKind: 'discovered',
+        attachedRecipeIds: new Set([
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.AXE_WOOD,
+        ]),
+      }
+    );
+
+    expect(
+      claimed.find((marker) => marker.percent === 5)?.hasUnclaimedReward
+    ).toBe(false);
+    expect(claimed.find((marker) => marker.percent === 5)?.isClaimed).toBe(
+      true
+    );
+  });
 });
 
 describe('resolvingPlazaCodexStudyMilestoneRewardPopoverLabel', () => {
@@ -61,10 +101,24 @@ describe('resolvingPlazaCodexStudyMilestoneRewardPopoverLabel', () => {
     );
   });
 
-  it('shows ready when milestone is reached', () => {
+  it('shows ready when milestone is reached without a defined grant', () => {
     expect(resolvingPlazaCodexStudyMilestoneRewardPopoverLabel(0, true)).toBe(
       'Reward ready'
     );
+  });
+
+  it('shows claim and claimed labels for defined grants', () => {
+    expect(
+      resolvingPlazaCodexStudyMilestoneRewardPopoverLabel(0, true, {
+        rewardLabel: 'Wood Axe recipe',
+        hasUnclaimedReward: true,
+      })
+    ).toBe('Claim Wood Axe recipe');
+    expect(
+      resolvingPlazaCodexStudyMilestoneRewardPopoverLabel(0, true, {
+        isClaimed: true,
+      })
+    ).toBe('Claimed');
   });
 });
 
@@ -104,32 +158,64 @@ describe('resolvingPlazaCodexDiscoveryMilestoneRewardMarkers', () => {
 });
 
 describe('resolvingPlazaCodexMenuRewardReadySections', () => {
-  it('marks sections when either dual meter has a reached chest', () => {
+  it('marks herbarium/bestiary/lapidary only for defined unclaimed Sighted rewards', () => {
     expect(
-      checkingPlazaCodexDualMetersHaveRewardReady({
-        discoveredValue: 0,
-        discoveredMax: 40,
-        studiedValue: 0,
-        studiedMax: 4000,
-      })
+      checkingPlazaCodexDualMetersHaveRewardReady(
+        {
+          discoveredValue: 0,
+          discoveredMax: 40,
+          studiedValue: 0,
+          studiedMax: 4000,
+        },
+        'herbarium'
+      )
     ).toBe(false);
 
-    const ready = resolvingPlazaCodexMenuRewardReadySections({
-      bestiary: {
-        discoveredValue: 13,
-        discoveredMax: 57,
-        studiedValue: 0,
-        studiedMax: 5700,
+    const ready = resolvingPlazaCodexMenuRewardReadySections(
+      {
+        bestiary: {
+          discoveredValue: 13,
+          discoveredMax: 57,
+          studiedValue: 0,
+          studiedMax: 5700,
+        },
+        pathology: {
+          discoveredValue: 0,
+          discoveredMax: 20,
+          studiedValue: 0,
+          studiedMax: 2000,
+        },
       },
-      pathology: {
-        discoveredValue: 0,
-        discoveredMax: 20,
-        studiedValue: 0,
-        studiedMax: 2000,
-      },
-    });
+      {},
+      new Set()
+    );
 
     expect([...ready]).toEqual(['bestiary']);
+  });
+
+  it('clears herbarium ready after wood axe recipe is attached', () => {
+    const meters = {
+      discoveredValue: 3,
+      discoveredMax: 40,
+      studiedValue: 0,
+      studiedMax: 4000,
+    };
+
+    expect(
+      checkingPlazaCodexDualMetersHaveRewardReady(
+        meters,
+        'herbarium',
+        new Set()
+      )
+    ).toBe(true);
+
+    expect(
+      checkingPlazaCodexDualMetersHaveRewardReady(
+        meters,
+        'herbarium',
+        new Set([DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.AXE_WOOD])
+      )
+    ).toBe(false);
   });
 
   it('marks discovery-only sections with four-chest thresholds', () => {

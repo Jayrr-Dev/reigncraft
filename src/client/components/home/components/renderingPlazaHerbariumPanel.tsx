@@ -450,6 +450,7 @@ export function RenderingPlazaHerbariumPanel({
       </div>
 
       <RenderingPlazaCodexDualProgress
+        sectionId="herbarium"
         left={{
           label: 'Sighted',
           value: sightedCount,

@@ -86,6 +86,12 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID = {
   SURVIVAL_SCOUT_TENT: 'recipe-survival-scout-tent',
   SURVIVAL_CLAIM_BEDROLL: 'recipe-survival-claim-bedroll',
   SURVIVAL_SMOKE_RACK: 'recipe-survival-smoke-rack',
+  WEAPON_CHAOS_DIE: 'recipe-weapon-chaos-die',
+  WEAPON_QUIET_HAND: 'recipe-weapon-quiet-hand',
+  WEAPON_GLASS_NEEDLE: 'recipe-weapon-glass-needle',
+  WEAPON_SIPHON_FANG: 'recipe-weapon-siphon-fang',
+  WEAPON_FATED_LEDGER: 'recipe-weapon-fated-ledger',
+  WEAPON_SOFT_CLAY_CLEAVER: 'recipe-weapon-soft-clay-cleaver',
   ...DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID,
 } as const;
 

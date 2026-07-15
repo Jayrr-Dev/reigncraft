@@ -67,6 +67,10 @@ export function usingWildlifeSimulation(
         playerHealthStateRef,
         playerRunStaminaStateRef,
         playerStillDurationMsRef,
+        playerAttackerDamageRollModifiersRef,
+        playerEquippedSpecialtyWeaponItemTypeIdRef,
+        onPlayerSiphonHealFromWildlifeHit,
+        onPlayerHealthMutatedFromWildlifeCombat,
       } = tickConfigRef.current;
 
       if (!localUserId) {
@@ -132,7 +136,23 @@ export function usingWildlifeSimulation(
           playerStillDurationMs: playerStillDurationMsRef?.current ?? 0,
         },
         tickConfigRef.current.playerTransformWildlifeSpeciesIdRef?.current ??
-          null
+          null,
+        {
+          attackerDamageRollModifiers:
+            playerAttackerDamageRollModifiersRef?.current ?? [],
+          specialtyWeaponItemTypeId:
+            playerEquippedSpecialtyWeaponItemTypeIdRef?.current ?? null,
+          playerHealthState: playerHealthState ?? null,
+          onPlayerHealthUpdated: (nextState) => {
+            if (playerHealthStateRef) {
+              playerHealthStateRef.current = nextState;
+            }
+            onPlayerHealthMutatedFromWildlifeCombat?.();
+          },
+          onSiphonHeal: (healAmount) => {
+            onPlayerSiphonHealFromWildlifeHit?.(healAmount);
+          },
+        }
       );
     },
     []

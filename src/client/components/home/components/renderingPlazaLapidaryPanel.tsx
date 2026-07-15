@@ -262,6 +262,7 @@ export function RenderingPlazaLapidaryPanel({
       </div>
 
       <RenderingPlazaCodexDualProgress
+        sectionId="lapidary"
         left={{
           label: 'Sighted',
           value: sightedCount,

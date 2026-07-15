@@ -8,6 +8,7 @@ import {
   type AddingInventoryItemWithStackingResult,
 } from '@/components/inventory/domains/reducingInventoryState';
 import { checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryHotbarSlotAcceptsItemTypeId';
+import { checkingWorldPlazaInventoryItemHasStudiedOreMetadata } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemHasStudiedOreMetadata';
 import { findingWorldPlazaInventoryFirstEmptySlotForItemTypeId } from '@/components/world/inventory/domains/findingWorldPlazaInventoryFirstEmptySlotForItemTypeId';
 import { checkingWorldPlazaTeaBrewingMetadataStackCompatible } from '@/components/world/tea-brewing/domains/resolvingWorldPlazaTeaBrewingMetadata';
 import { checkingWorldPlazaInventoryItemHasAggroDeerMeatMetadata } from '@/components/world/wildlife/domains/checkingWorldPlazaInventoryItemHasAggroDeerMeatMetadata';
@@ -82,6 +83,12 @@ export function addingWorldPlazaInventoryItemWithStacking(
           slotItem.metadata
         ) !==
           checkingWorldPlazaInventoryItemHasAggroDeerMeatMetadata(
+            itemInput.metadata
+          ) ||
+        checkingWorldPlazaInventoryItemHasStudiedOreMetadata(
+          slotItem.metadata
+        ) !==
+          checkingWorldPlazaInventoryItemHasStudiedOreMetadata(
             itemInput.metadata
           ) ||
         !checkingWorldPlazaTeaBrewingMetadataStackCompatible(

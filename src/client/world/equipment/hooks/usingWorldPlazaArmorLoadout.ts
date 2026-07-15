@@ -1,11 +1,14 @@
 'use client';
 
-import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
-import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
+import type {
+  DefiningInventoryItem,
+  DefiningInventoryState,
+} from '@/components/inventory/domains/definingInventoryItem';
 import {
   creatingEmptyWorldPlazaArmorLoadoutState,
   type DefiningWorldPlazaArmorLoadoutState,
 } from '@/components/world/equipment/domains/definingWorldPlazaArmorLoadoutTypes';
+import type { DefiningWorldPlazaArmorSlotId } from '@/components/world/equipment/domains/definingWorldPlazaArmorSlotRegistry';
 import {
   equippingWorldPlazaArmorItemFromInventory,
   unequippingWorldPlazaArmorSlotToInventory,
@@ -15,13 +18,13 @@ import {
   resolvingWorldPlazaArmorLoadoutStorageKey,
   writingWorldPlazaArmorLoadoutToStorage,
 } from '@/components/world/equipment/domains/managingWorldPlazaArmorLoadoutStore';
-import type { DefiningWorldPlazaArmorSlotId } from '@/components/world/equipment/domains/definingWorldPlazaArmorSlotRegistry';
 import { resolvingWorldPlazaArmorSlotsForAvatarSkin } from '@/components/world/equipment/domains/resolvingWorldPlazaArmorSlotsForAvatarSkin';
+import { syncingWorldPlazaArmorWornCombatModifiers } from '@/components/world/equipment/domains/syncingWorldPlazaArmorWornCombatModifiers';
 import { syncingWorldPlazaArmorWornTemperatureModifiers } from '@/components/world/equipment/domains/syncingWorldPlazaArmorWornTemperatureModifiers';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
-import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 export type UsingWorldPlazaArmorLoadoutParams = {
   readonly localPersistenceOwnerId: string | null;
@@ -59,7 +62,8 @@ export function usingWorldPlazaArmorLoadout({
 }: UsingWorldPlazaArmorLoadoutParams): UsingWorldPlazaArmorLoadoutResult {
   const selectedAvatarSkinId = usingWorldPlazaSelectedAvatarSkin();
   const bodyPlanId = useMemo(() => {
-    const slots = resolvingWorldPlazaArmorSlotsForAvatarSkin(selectedAvatarSkinId);
+    const slots =
+      resolvingWorldPlazaArmorSlotsForAvatarSkin(selectedAvatarSkinId);
     return slots.some((slot) => slot.id === 'torso') ? 'animal' : 'humanoid';
   }, [selectedAvatarSkinId]);
 
@@ -85,11 +89,17 @@ export function usingWorldPlazaArmorLoadout({
   const applyingLoadoutTemperatureModifiers = useCallback(
     (nextLoadout: DefiningWorldPlazaArmorLoadoutState) => {
       const nowMs = performance.now();
-      healthStateRef.current = syncingWorldPlazaArmorWornTemperatureModifiers(
+      let nextHealth = syncingWorldPlazaArmorWornTemperatureModifiers(
         healthStateRef.current,
         nextLoadout,
         nowMs
       );
+      nextHealth = syncingWorldPlazaArmorWornCombatModifiers(
+        nextHealth,
+        nextLoadout,
+        nowMs
+      );
+      healthStateRef.current = nextHealth;
       syncingHealthHudFromStateRef.current(healthStateRef.current);
     },
     [healthStateRef, syncingHealthHudFromStateRef]

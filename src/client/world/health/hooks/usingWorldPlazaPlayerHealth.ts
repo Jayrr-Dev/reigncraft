@@ -126,6 +126,14 @@ import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DAMAGED_DURATION_MS,
 } from '@/components/world/domains/definingWorldPlazaGirlSampleCombatMotionConstants';
 import {
+  checkingWorldPlazaChaosArmorFullSetMarkerIsActive,
+  resolvingWorldPlazaChaosArmorFullSetOnHitEphemeralModifiers,
+} from '@/components/world/equipment/domains/resolvingWorldPlazaChaosArmorSetCombatModifiers';
+import {
+  checkingWorldPlazaGlassVeilArmorFullSetMarkerIsActive,
+  resolvingWorldPlazaGlassVeilFullSetOnHitEphemeralModifiers,
+} from '@/components/world/equipment/domains/resolvingWorldPlazaGlassVeilArmorSetCombatModifiers';
+import {
   gettingWorldPlazaSpritcoreUpgradeSnapshot,
   subscribingWorldPlazaSpritcoreUpgrade,
 } from '@/components/world/spritcore/domains/managingWorldPlazaSpritcoreUpgradeStore';
@@ -211,6 +219,10 @@ export interface UsingWorldPlazaPlayerHealthParams {
 
 export interface UsingWorldPlazaPlayerHealthResult {
   healthStateRef: React.RefObject<DefiningWorldPlazaEntityHealthState>;
+  /** Attacker-side roll modifiers from buffs (True Strike, All-or-Nothing, etc.). */
+  attackerDamageRollModifiersRef: React.RefObject<
+    DefiningWorldPlazaEntityHealthState['damageRollModifiers']
+  >;
   /** Smoothed local temperature used for environmental damage and frost slow. */
   localTemperatureCelsiusRef: React.RefObject<number | null>;
   healthSyncSnapshotRef: React.RefObject<DefiningWorldPlazaEntityHealthSyncSnapshot>;
@@ -488,6 +500,7 @@ export function usingWorldPlazaPlayerHealth({
   const environmentalTemperatureLastTickAtMsRef = useRef<number | null>(null);
   const postRespawnInvincibilityUntilMsRef = useRef(0);
   const characterEngineDefenseRef = useRef(0);
+  const glassVeilInstinctLastProcAtMsRef = useRef(0);
 
   isDaytimeRef.current = isDaytime;
 
@@ -553,6 +566,26 @@ export function usingWorldPlazaPlayerHealth({
               characterEngineDefenseRef.current
             )
           : amount;
+      const chaosOnHitModifiers =
+        resolvingWorldPlazaChaosArmorFullSetOnHitEphemeralModifiers({
+          hasFullSetMarker: checkingWorldPlazaChaosArmorFullSetMarkerIsActive(
+            state.damageRollModifiers
+          ),
+          damageKind: kind,
+        });
+      const glassVeilInstinct =
+        resolvingWorldPlazaGlassVeilFullSetOnHitEphemeralModifiers({
+          hasFullSetMarker:
+            checkingWorldPlazaGlassVeilArmorFullSetMarkerIsActive(
+              state.damageRollModifiers
+            ),
+          damageKind: kind,
+          nowMs,
+          lastInstinctProcAtMs: glassVeilInstinctLastProcAtMsRef.current,
+        });
+      if (glassVeilInstinct.didProc) {
+        glassVeilInstinctLastProcAtMsRef.current = nowMs;
+      }
       const damageResult = computingWorldPlazaEntityHealthDamageWithSleepWake({
         state,
         rawAmount: mitigatedAmount,
@@ -564,6 +597,10 @@ export function usingWorldPlazaPlayerHealth({
           baseOptions: {
             ...options,
             attackerDamageRollModifiers: attackerDamageRollModifiersRef.current,
+            ephemeralDefenderDamageRollModifiers: [
+              ...chaosOnHitModifiers,
+              ...glassVeilInstinct.modifiers,
+            ],
           },
         }),
       });
@@ -1815,6 +1852,7 @@ export function usingWorldPlazaPlayerHealth({
 
   return {
     healthStateRef,
+    attackerDamageRollModifiersRef,
     localTemperatureCelsiusRef,
     healthSyncSnapshotRef,
     applyStarvationDamageRef,

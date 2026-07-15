@@ -4,6 +4,7 @@ import {
 } from '@/components/inventory/domains/definingInventoryItemRegistry';
 import { DEFINING_INVENTORY_UNLIMITED_STACK_SIZE } from '@/components/inventory/domains/definingInventoryStackConstants';
 import { registeringWorldPlazaCraftRecipePageInventoryItems } from '@/components/world/crafting/domains/registeringWorldPlazaCraftRecipePageInventoryItems';
+import { registeringWorldPlazaFishingCatchInventoryItems } from '@/components/world/fishing/domains/registeringWorldPlazaFishingCatchInventoryItems';
 import {
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_APPLE,
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_BERRIES,
@@ -54,23 +55,26 @@ import {
 import { DEFINING_WORLD_PLAZA_WOOD_AXE_INVENTORY_ICON_URL } from '@/components/world/inventory/domains/definingWorldPlazaToolInventoryIconConstants';
 import { registeringWorldPlazaInventoryBagItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryBagItemDefinitions';
 import { registeringWorldPlazaInventoryBerryItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryBerryItemDefinitions';
+import { registeringWorldPlazaInventoryBessemerArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryBessemerArmorItemDefinitions';
 import { registeringWorldPlazaInventoryCeramicsItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCeramicsItemDefinitions';
+import { registeringWorldPlazaInventoryChaosArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryChaosArmorItemDefinitions';
 import { registeringWorldPlazaInventoryChestKeyItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryChestKeyItemDefinitions';
+import { registeringWorldPlazaInventoryGlassVeilArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryGlassVeilArmorItemDefinitions';
 import { registeringWorldPlazaInventoryCloverItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCloverItemDefinitions';
 import { registeringWorldPlazaInventoryCoffeeItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCoffeeItemDefinitions';
 import { registeringWorldPlazaInventoryFlowerItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryFlowerItemDefinitions';
 import { registeringWorldPlazaInventoryHealerItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryHealerItemDefinitions';
-import { registeringWorldPlazaInventorySurvivalItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventorySurvivalItemDefinitions';
 import { registeringWorldPlazaInventoryIngotItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryIngotItemDefinitions';
 import { registeringWorldPlazaInventoryOreItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryOreItemDefinitions';
+import { registeringWorldPlazaInventorySurvivalItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventorySurvivalItemDefinitions';
 import { registeringWorldPlazaInventoryTallGrassItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryTallGrassItemDefinitions';
 import { registeringWorldPlazaInventoryWetClayItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryWetClayItemDefinitions';
+import { registeringWorldPlazaSpecialtyWeaponInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaSpecialtyWeaponInventoryItems';
 import { registeringWorldPlazaSpritcoreTierItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaSpritcoreTierItemDefinitions';
 import { registeringWorldPlazaTieredToolInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaTieredToolInventoryItems';
 import { registeringWorldPlazaWildlifeMeatInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems';
 import { registeringWorldPlazaWildlifeSpecialtyLootInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeSpecialtyLootInventoryItems';
 import { resolvingWorldPlazaInventoryFoodHealDeclaration } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealDeclaration';
-import { registeringWorldPlazaFishingCatchInventoryItems } from '@/components/world/fishing/domains/registeringWorldPlazaFishingCatchInventoryItems';
 import { registeringWorldPlazaMushroomInventoryItems } from '@/components/world/mushrooms/domains/registeringWorldPlazaMushroomInventoryItems';
 import {
   DEFINING_WORLD_PLAZA_SPRITCORE_ITEM_NAME,
@@ -303,6 +307,10 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     ...registeringWorldPlazaInventoryCeramicsItemDefinitions(),
     ...registeringWorldPlazaInventoryHealerItemDefinitions(),
     ...registeringWorldPlazaInventorySurvivalItemDefinitions(),
+    ...registeringWorldPlazaInventoryChaosArmorItemDefinitions(),
+    ...registeringWorldPlazaInventoryBessemerArmorItemDefinitions(),
+    ...registeringWorldPlazaInventoryGlassVeilArmorItemDefinitions(),
+    ...registeringWorldPlazaSpecialtyWeaponInventoryItems(),
     ...registeringWorldPlazaInventoryOreItemDefinitions(),
     ...registeringWorldPlazaInventoryWetClayItemDefinitions(),
     ...registeringWorldPlazaInventoryIngotItemDefinitions(),

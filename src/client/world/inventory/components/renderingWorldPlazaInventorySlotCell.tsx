@@ -96,14 +96,14 @@ export type RenderingWorldPlazaInventorySlotCellProps =
     readonly isEquipped?: boolean;
     readonly isArmorEquipped?: boolean;
     readonly onEquipSlot?: (slotIndex: number) => void;
-  readonly onEquipArmorSlot?: (slotIndex: number) => void;
+    readonly onEquipArmorSlot?: (slotIndex: number) => void;
     /** Opens the item action popover for this slot. */
     readonly onOpenItemDetailPopover?: (slotIndex: number) => void;
     readonly isItemDetailPopoverOpen?: boolean;
     readonly onCloseItemDetailPopover?: () => void;
     /** Eat action surfaced inside the item action popover for food. */
     readonly onEatHotbarSlot?: (slotIndex: number) => void;
-    /** Study a flower specimen for the Herbarium (consumes one). */
+    /** Study a specimen: herbs consume one; ore moves into a studied pile. */
     readonly onStudyHotbarSlot?: (slotIndex: number) => void;
     /** Attach a cookbook recipe page from inventory. */
     readonly onAttachRecipePageHotbarSlot?: (slotIndex: number) => void;

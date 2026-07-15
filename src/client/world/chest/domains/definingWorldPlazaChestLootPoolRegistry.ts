@@ -6,6 +6,7 @@
 
 import type { DefiningWorldPlazaChestLootPoolEntry } from '@/components/world/chest/domains/definingWorldPlazaChestTypes';
 import {
+  DEFINING_WORLD_PLAZA_EARLY_UNIQUE_WEAPON_ITEM_TYPE_IDS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_GOLD,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_IRON,
@@ -29,6 +30,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_IRON,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SWORD_WOOD,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TOOL,
+  DEFINING_WORLD_PLAZA_UNIQUE_ARMOR_SET_ITEM_TYPE_IDS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 
 export const DEFINING_WORLD_PLAZA_CHEST_LOOT_POOL_REGISTRY = {
@@ -158,7 +160,46 @@ export const DEFINING_WORLD_PLAZA_CHEST_LOOT_POOL_REGISTRY = {
       quantity: 1,
       weight: 1,
     },
+    // Early unique find-only weapons (rare among packs-and-tools rolls)
+    ...DEFINING_WORLD_PLAZA_EARLY_UNIQUE_WEAPON_ITEM_TYPE_IDS.map(
+      (itemTypeId) => ({
+        itemTypeId,
+        quantity: 1,
+        weight: 1,
+      })
+    ),
+    // Unique armour set pieces (Chaos / Bessemer / Glass Veil)
+    ...DEFINING_WORLD_PLAZA_UNIQUE_ARMOR_SET_ITEM_TYPE_IDS.map(
+      (itemTypeId) => ({
+        itemTypeId,
+        quantity: 1,
+        weight: 1,
+      })
+    ),
   ],
+  /**
+   * Dedicated early unique weapon pool (equal weight).
+   * Use for fixed chests that should always grant one early unique.
+   */
+  'early-unique-weapons':
+    DEFINING_WORLD_PLAZA_EARLY_UNIQUE_WEAPON_ITEM_TYPE_IDS.map(
+      (itemTypeId) => ({
+        itemTypeId,
+        quantity: 1,
+        weight: 1,
+      })
+    ),
+  /**
+   * Dedicated unique armour pool (equal weight across Chaos / Bessemer / Glass Veil).
+   * Use for fixed chests that should always grant one unique armour piece.
+   */
+  'unique-armor-sets': DEFINING_WORLD_PLAZA_UNIQUE_ARMOR_SET_ITEM_TYPE_IDS.map(
+    (itemTypeId) => ({
+      itemTypeId,
+      quantity: 1,
+      weight: 1,
+    })
+  ),
 } as const satisfies Record<
   string,
   readonly DefiningWorldPlazaChestLootPoolEntry[]

@@ -8,6 +8,7 @@ import {
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { listingWorldPlazaColumnRockMiniMapFootprintsInTileWindow } from '@/components/world/domains/listingWorldPlazaColumnRockMiniMapFootprintsInTileWindow';
 import {
+  gettingWorldPlazaLapidarySightedOreSpeciesSnapshot,
   initializingWorldPlazaLapidaryDiscoveryStore,
   recordingWorldPlazaLapidaryOreSighted,
 } from '@/components/world/domains/managingWorldPlazaLapidaryDiscoveryStore';
@@ -27,6 +28,8 @@ export type UsingWorldPlazaRecordingLapidarySightingsOptions = {
     string,
     DefiningWorldPlazaMinedRockTileState
   > | null;
+  /** Fired when a new ore species is sighted (Anvil recipe unlock, etc.). */
+  readonly onOreSpeciesSighted?: () => void;
 };
 
 /**
@@ -40,6 +43,7 @@ export function usingWorldPlazaRecordingLapidarySightings({
   playerPositionRef,
   inventoryState = null,
   minedRockStateByTileKey = null,
+  onOreSpeciesSighted,
 }: UsingWorldPlazaRecordingLapidarySightingsOptions): void {
   useEffect(() => {
     initializingWorldPlazaLapidaryDiscoveryStore(storageOwnerId);
@@ -80,6 +84,9 @@ export function usingWorldPlazaRecordingLapidarySightings({
         sightRadiusGrid
       );
 
+      const sightedCountBefore =
+        gettingWorldPlazaLapidarySightedOreSpeciesSnapshot().length;
+
       for (const rock of nearbyRocks) {
         if (!rock.oreSpeciesId) {
           continue;
@@ -94,6 +101,13 @@ export function usingWorldPlazaRecordingLapidarySightings({
 
         recordingWorldPlazaLapidaryOreSighted(rock.oreSpeciesId);
       }
+
+      if (
+        gettingWorldPlazaLapidarySightedOreSpeciesSnapshot().length >
+        sightedCountBefore
+      ) {
+        onOreSpeciesSighted?.();
+      }
     };
 
     recordingNearbyOreVeinSightings();
@@ -106,5 +120,5 @@ export function usingWorldPlazaRecordingLapidarySightings({
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [isEnabled, playerPositionRef]);
+  }, [isEnabled, onOreSpeciesSighted, playerPositionRef]);
 }

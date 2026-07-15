@@ -19,6 +19,15 @@ import { beginningWorldPlazaPerformanceSample } from '@/components/world/domains
 import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
 import { resolvingWorldPlazaSurfaceLayerAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaSurfaceLayerAtTileIndex';
+import { applyingWorldPlazaSpecialtyWeaponMeleeHitSideEffects } from '@/components/world/equipment/domains/applyingWorldPlazaSpecialtyWeaponMeleeHitSideEffects';
+import { resolvingWorldPlazaSpecialtyWeaponDefinition } from '@/components/world/equipment/domains/definingWorldPlazaSpecialtyWeaponRegistry';
+import { resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions } from '@/components/world/equipment/domains/resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions';
+import {
+  computingWorldPlazaEntityHealthDamageToHealAmount,
+  resolvingWorldPlazaEntityHealthDamageToHealRatio,
+} from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageToHeal';
+import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
+import { healingWorldPlazaEntityHealthWithAmplifiers } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { resolvingWorldPlazaEntityHealthAttackSpeedMultiplier } from '@/components/world/health/domains/resolvingWorldPlazaEntityHealthAttackSpeedMultiplier';
 import { checkingWildlifeMayHuntNpcPrey } from '@/components/world/npc/domains/checkingWildlifeMayHuntNpcPrey';
 import { resolvingNpcSpeciesDefinition } from '@/components/world/npc/domains/definingNpcSpeciesRegistry';
@@ -2691,6 +2700,16 @@ export function advancingWildlifeSimulationTick({
   };
 }
 
+export type ApplyingWildlifePlayerOutgoingCombatContext = {
+  readonly attackerDamageRollModifiers?: DefiningWorldPlazaEntityHealthState['damageRollModifiers'];
+  readonly specialtyWeaponItemTypeId?: string | null;
+  readonly playerHealthState?: DefiningWorldPlazaEntityHealthState | null;
+  readonly onPlayerHealthUpdated?: (
+    state: DefiningWorldPlazaEntityHealthState
+  ) => void;
+  readonly onSiphonHeal?: (healAmount: number) => void;
+};
+
 /**
  * Applies player or remote damage to one wildlife instance.
  */
@@ -2709,7 +2728,8 @@ export function applyingWildlifeInstanceDamage(
     ResolvingWildlifeStalkShadowingAtDamageContextParams,
     'preyTargetId' | 'nearbyInstances'
   > | null = null,
-  attackerTransformSpeciesId: DefiningWildlifeSpeciesId | null = null
+  attackerTransformSpeciesId: DefiningWildlifeSpeciesId | null = null,
+  playerOutgoingCombat: ApplyingWildlifePlayerOutgoingCombatContext | null = null
 ): DefiningWildlifeInstance | null {
   const instance = store.instances.get(instanceId);
 
@@ -2742,6 +2762,16 @@ export function applyingWildlifeInstanceDamage(
   const projectileArchetype = projectileArchetypeId
     ? resolvingWorldPlazaProjectileArchetype(projectileArchetypeId)
     : null;
+  const specialtyHitOptions =
+    !projectileArchetype && !attackerTransformSpeciesId
+      ? resolvingWorldPlazaSpecialtyWeaponOutgoingHitOptions({
+          itemTypeId: playerOutgoingCombat?.specialtyWeaponItemTypeId,
+        })
+      : null;
+  const mergedAttackerModifiers = [
+    ...(playerOutgoingCombat?.attackerDamageRollModifiers ?? []),
+    ...(specialtyHitOptions?.attackerDamageRollModifiers ?? []),
+  ];
   const damageAppliedInstance = projectileArchetype
     ? applyingWildlifeInstanceHealthPayload({
         instance,
@@ -2757,6 +2787,15 @@ export function applyingWildlifeInstanceDamage(
         outgoingDamageStyle: attackerTransformSpeciesId
           ? 'wildlife-flat'
           : 'player-ev',
+        playerOutgoingDamageOptions:
+          !attackerTransformSpeciesId &&
+          (mergedAttackerModifiers.length > 0 ||
+            specialtyHitOptions?.forcedRollMode)
+            ? {
+                attackerDamageRollModifiers: mergedAttackerModifiers,
+                forcedRollMode: specialtyHitOptions?.forcedRollMode,
+              }
+            : null,
       });
 
   const transformProcInstance =
@@ -2771,13 +2810,81 @@ export function applyingWildlifeInstanceDamage(
         })
       : damageAppliedInstance;
 
-  const died = transformProcInstance.isDead;
+  const specialtyWeapon = playerOutgoingCombat?.specialtyWeaponItemTypeId
+    ? resolvingWorldPlazaSpecialtyWeaponDefinition(
+        playerOutgoingCombat.specialtyWeaponItemTypeId
+      )
+    : null;
+  const specialtySideEffects =
+    !projectileArchetype &&
+    !attackerTransformSpeciesId &&
+    specialtyHitOptions &&
+    specialtyWeapon &&
+    playerOutgoingCombat?.playerHealthState
+      ? applyingWorldPlazaSpecialtyWeaponMeleeHitSideEffects({
+          instance: transformProcInstance,
+          playerHealthState: playerOutgoingCombat.playerHealthState,
+          swingEv: damageAmount,
+          nowMs,
+          potentialDamageProc: specialtyHitOptions.potentialDamageProc,
+          selfCurseProc: specialtyHitOptions.selfCurseProc,
+          bleedProc: specialtyHitOptions.bleedProc,
+          temperatureProc: specialtyHitOptions.temperatureProc,
+          weaponId: specialtyWeapon.weaponId,
+        })
+      : null;
+
+  if (
+    specialtySideEffects &&
+    specialtySideEffects.playerHealthState !==
+      playerOutgoingCombat?.playerHealthState
+  ) {
+    playerOutgoingCombat?.onPlayerHealthUpdated?.(
+      specialtySideEffects.playerHealthState
+    );
+  }
+
+  const afterSpecialtyInstance =
+    specialtySideEffects?.instance ?? transformProcInstance;
+
+  const died = afterSpecialtyInstance.isDead;
   const appliedHealthDamage = Math.max(
     0,
     instance.healthState.currentHealth -
-      transformProcInstance.healthState.currentHealth
+      afterSpecialtyInstance.healthState.currentHealth
   );
-  let behaviorResponseInstance = transformProcInstance;
+
+  if (
+    appliedHealthDamage > 0 &&
+    !attackerTransformSpeciesId &&
+    !projectileArchetype &&
+    playerOutgoingCombat?.playerHealthState
+  ) {
+    const lifestealRatio = resolvingWorldPlazaEntityHealthDamageToHealRatio(
+      playerOutgoingCombat.playerHealthState.physicalDamageLifestealModifiers,
+      nowMs
+    );
+    const healAmount = Math.round(
+      computingWorldPlazaEntityHealthDamageToHealAmount(
+        appliedHealthDamage,
+        lifestealRatio
+      )
+    );
+
+    if (healAmount > 0) {
+      const healed = healingWorldPlazaEntityHealthWithAmplifiers({
+        receiverState:
+          specialtySideEffects?.playerHealthState ??
+          playerOutgoingCombat.playerHealthState,
+        baseHealAmount: healAmount,
+        nowMs,
+      });
+      playerOutgoingCombat.onPlayerHealthUpdated?.(healed.state);
+      playerOutgoingCombat.onSiphonHeal?.(healed.amplifiedHealAmount);
+    }
+  }
+
+  let behaviorResponseInstance = afterSpecialtyInstance;
 
   if (
     !died &&

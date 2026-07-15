@@ -35,6 +35,16 @@ export type DefiningWildlifeSimulationTickConfig = {
   playerPositionRef: React.RefObject<DefiningWorldPlazaWorldPoint>;
   localAvatarMotionStateRef?: React.RefObject<DefiningWorldPlazaAvatarMotionState>;
   playerHealthStateRef?: React.RefObject<DefiningWorldPlazaEntityHealthState>;
+  /** Attacker-side damage-roll modifiers from player buffs (True Strike, etc.). */
+  playerAttackerDamageRollModifiersRef?: React.RefObject<
+    DefiningWorldPlazaEntityHealthState['damageRollModifiers']
+  >;
+  /** Equipped specialty weapon item type id in the reserved sword slot, if any. */
+  playerEquippedSpecialtyWeaponItemTypeIdRef?: React.RefObject<string | null>;
+  /** Heal float after player deal-side lifesteal. */
+  onPlayerSiphonHealFromWildlifeHit?: (healAmount: number) => void;
+  /** HUD refresh after wildlife combat mutates player health (siphon / self-curse). */
+  onPlayerHealthMutatedFromWildlifeCombat?: () => void;
   playerRunStaminaStateRef?: React.RefObject<DefiningWorldPlazaRunStaminaState>;
   isPlayerRunningRef?: React.RefObject<boolean>;
   isPlayerWalkingRef?: React.RefObject<boolean>;

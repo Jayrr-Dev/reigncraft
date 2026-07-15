@@ -4,11 +4,15 @@ import {
   checkingWorldPlazaOreSmeltingFuelItemTypeId,
   resolvingWorldPlazaOreSmeltingRecipe,
 } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingRegistry';
+import { checkingWorldPlazaInventoryItemIsBessemerArmor } from '@/components/world/equipment/domains/definingWorldPlazaBessemerArmorSetRegistry';
+import { checkingWorldPlazaInventoryItemIsChaosArmor } from '@/components/world/equipment/domains/definingWorldPlazaChaosArmorSetRegistry';
+import { checkingWorldPlazaInventoryItemIsGlassVeilArmor } from '@/components/world/equipment/domains/definingWorldPlazaGlassVeilArmorSetRegistry';
+import { checkingWorldPlazaInventoryItemIsSurvivalWear } from '@/components/world/equipment/domains/definingWorldPlazaSurvivalWearBuffRegistry';
 import { resolvingWorldPlazaEquipmentAttackEvModifier } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
+import { checkingWorldPlazaInventoryItemHasStudiedOreMetadata } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemHasStudiedOreMetadata';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import { checkingWorldPlazaInventoryItemIsWeaponOrTool } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsWeaponOrTool';
-import { checkingWorldPlazaInventoryItemIsSurvivalWear } from '@/components/world/equipment/domains/definingWorldPlazaSurvivalWearBuffRegistry';
 import { computingWorldPlazaInventoryItemResolvedCost } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemResolvedCost';
 import {
   checkingWorldPlazaInventoryItemIsFlowerHerb,
@@ -192,19 +196,25 @@ function checkingWorldPlazaInventoryItemCanStudyFlower(
 }
 
 /**
- * True when an ore specimen still has lapidary Study progress left.
+ * True when an unstudied ore pile still has lapidary Study progress left.
  */
 function checkingWorldPlazaInventoryItemCanStudyOre(
-  itemTypeId: string,
+  item: DefiningInventoryItem,
   oreStudyCountsBySpeciesId:
     | Readonly<Partial<Record<WorldOreSpeciesId, number>>>
     | undefined
 ): boolean {
-  if (!checkingWorldPlazaInventoryItemIsOre(itemTypeId)) {
+  if (!checkingWorldPlazaInventoryItemIsOre(item.itemTypeId)) {
     return false;
   }
 
-  const speciesId = parsingWorldPlazaOreSpeciesIdFromItemTypeId(itemTypeId);
+  if (checkingWorldPlazaInventoryItemHasStudiedOreMetadata(item.metadata)) {
+    return false;
+  }
+
+  const speciesId = parsingWorldPlazaOreSpeciesIdFromItemTypeId(
+    item.itemTypeId
+  );
 
   if (!speciesId) {
     return false;
@@ -290,7 +300,7 @@ function checkingWorldPlazaInventoryItemCanStudyMushroom(
  * True when the item can be Studied for Herbarium or Lapidary progress.
  */
 function checkingWorldPlazaInventoryItemCanStudy(
-  itemTypeId: string,
+  item: DefiningInventoryItem,
   flowerStudyCountsBySpeciesId:
     | Readonly<Partial<Record<WorldFlowerSpeciesId, number>>>
     | undefined,
@@ -307,23 +317,23 @@ function checkingWorldPlazaInventoryItemCanStudy(
 ): boolean {
   return (
     checkingWorldPlazaInventoryItemCanStudyFlower(
-      itemTypeId,
+      item.itemTypeId,
       flowerStudyCountsBySpeciesId
     ) ||
     checkingWorldPlazaInventoryItemCanStudyOre(
-      itemTypeId,
+      item,
       oreStudyCountsBySpeciesId
     ) ||
     checkingWorldPlazaInventoryItemCanStudyClover(
-      itemTypeId,
+      item.itemTypeId,
       cloverStudyCount
     ) ||
     checkingWorldPlazaInventoryItemCanStudyBerry(
-      itemTypeId,
+      item.itemTypeId,
       berryStudyCountsByLootKind
     ) ||
     checkingWorldPlazaInventoryItemCanStudyMushroom(
-      itemTypeId,
+      item.itemTypeId,
       mushroomStudyCountsBySpeciesId
     )
   );
@@ -544,7 +554,8 @@ function resolvingWorldPlazaInventoryItemDetailTeaActions(
 } {
   return {
     canAddWater:
-      itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT ||
+      itemTypeId ===
+        DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT ||
       itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOTTLE,
     canOpenTeapot:
       itemTypeId ===
@@ -779,6 +790,9 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
   const oreReveal = oreSpeciesId
     ? resolvingWorldPlazaInventoryOreDetailReveal(oreStudyCount)
     : null;
+  const isStudiedOrePile =
+    oreSpeciesId !== null &&
+    checkingWorldPlazaInventoryItemHasStudiedOreMetadata(item.metadata);
   const oreContent = oreSpeciesId
     ? resolvingWorldPlazaInventoryOreDetailContent(oreSpeciesId, {
         studyCount: oreStudyCount,
@@ -857,7 +871,7 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       activeEnchantments: [],
       canEat: checkingWorldPlazaInventoryItemIsFood(item.itemTypeId),
       canStudy: checkingWorldPlazaInventoryItemCanStudy(
-        item.itemTypeId,
+        item,
         options.flowerStudyCountsBySpeciesId,
         options.oreStudyCountsBySpeciesId,
         options.cloverStudyCount,
@@ -875,7 +889,10 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
         checkingWorldPlazaInventoryItemIsWeaponOrTool(item.itemTypeId),
       canEquipArmor:
         !options.isArmorEquipped &&
-        checkingWorldPlazaInventoryItemIsSurvivalWear(item.itemTypeId),
+        (checkingWorldPlazaInventoryItemIsSurvivalWear(item.itemTypeId) ||
+          checkingWorldPlazaInventoryItemIsChaosArmor(item.itemTypeId) ||
+          checkingWorldPlazaInventoryItemIsBessemerArmor(item.itemTypeId) ||
+          checkingWorldPlazaInventoryItemIsGlassVeilArmor(item.itemTypeId)),
       canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),
       canRefine:
         Boolean(options.isOreSmeltingStationReachable) &&
@@ -904,7 +921,16 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     }
   );
 
+  const studiedOreBadge: DefiningWorldPlazaInventoryItemDetailBadge | null =
+    isStudiedOrePile
+      ? {
+          id: 'ore-studied-pile',
+          label: 'Studied',
+          variant: 'positive',
+        }
+      : null;
   const mergedBadges = [
+    ...(studiedOreBadge ? [studiedOreBadge] : []),
     ...genericBadges,
     ...(wildlifeMeatContent?.badges ?? []),
     ...(flowerContent?.badges ?? []),
@@ -922,10 +948,11 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     ...genericInfoRows,
     ...(wildlifeMeatContent?.infoRows ?? []),
   ];
+  const baseDisplayName = teaOverrides?.name ?? definition.name;
 
   return {
     itemTypeId: item.itemTypeId,
-    name: teaOverrides?.name ?? definition.name,
+    name: isStudiedOrePile ? `${baseDisplayName} · Studied` : baseDisplayName,
     description:
       teaOverrides?.description ??
       (flowerSpeciesId
@@ -952,7 +979,7 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
     activeEnchantments,
     canEat: checkingWorldPlazaInventoryItemIsFood(item.itemTypeId),
     canStudy: checkingWorldPlazaInventoryItemCanStudy(
-      item.itemTypeId,
+      item,
       options.flowerStudyCountsBySpeciesId,
       options.oreStudyCountsBySpeciesId,
       options.cloverStudyCount,
@@ -970,7 +997,10 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       checkingWorldPlazaInventoryItemIsWeaponOrTool(item.itemTypeId),
     canEquipArmor:
       !options.isArmorEquipped &&
-      checkingWorldPlazaInventoryItemIsSurvivalWear(item.itemTypeId),
+      (checkingWorldPlazaInventoryItemIsSurvivalWear(item.itemTypeId) ||
+        checkingWorldPlazaInventoryItemIsChaosArmor(item.itemTypeId) ||
+        checkingWorldPlazaInventoryItemIsBessemerArmor(item.itemTypeId) ||
+        checkingWorldPlazaInventoryItemIsGlassVeilArmor(item.itemTypeId)),
     canOpenBag: checkingWorldPlazaInventoryItemIsBag(item.itemTypeId),
     canRefine:
       Boolean(options.isOreSmeltingStationReachable) &&

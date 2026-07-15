@@ -29,6 +29,8 @@ export type UsingWorldPlazaFishingInteractionParams = {
   readonly updatingInventoryState: UpdatingWorldPlazaFishingInventoryState;
   readonly selectedSlotIndex: number | null;
   readonly showingGameplayHudToast: (message: string) => void;
+  /** Fired when a creature catch records a Bestiary sighting. */
+  readonly onWildlifeSpeciesSighted?: () => void;
 };
 
 export type UsingWorldPlazaFishingInteractionResult = {
@@ -48,6 +50,7 @@ export function usingWorldPlazaFishingInteraction({
   updatingInventoryState,
   selectedSlotIndex,
   showingGameplayHudToast,
+  onWildlifeSpeciesSighted,
 }: UsingWorldPlazaFishingInteractionParams): UsingWorldPlazaFishingInteractionResult {
   const validatingFishingCastStart = useCallback(
     (entry: ListingWorldPlazaFishingTilesInInteractionRangeEntry): boolean => {
@@ -161,6 +164,7 @@ export function usingWorldPlazaFishingInteraction({
 
         if (catchEntry.kind === 'creature') {
           recordingWorldPlazaBestiarySpeciesSighted(catchEntry.catchId);
+          onWildlifeSpeciesSighted?.();
         }
       }
 
@@ -173,6 +177,7 @@ export function usingWorldPlazaFishingInteraction({
       }
     },
     [
+      onWildlifeSpeciesSighted,
       playerPositionRef,
       selectedSlotIndex,
       showingGameplayHudToast,

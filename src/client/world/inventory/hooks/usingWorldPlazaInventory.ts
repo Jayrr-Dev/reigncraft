@@ -38,6 +38,8 @@ import {
   readingWorldPlazaDevQaLoadRevision,
 } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import { listingWorldPlazaOreItemSeedItems } from '@/components/world/inventory/domains/listingWorldPlazaOreItemSeedItems';
+import { ensuringWorldPlazaInventoryBestiarySightedRecipeRewards } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryBestiarySightedRecipeRewards';
+import { ensuringWorldPlazaInventoryLapidaryOreStudyRecipeRewards } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryLapidaryOreStudyRecipeRewards';
 import { ensuringWorldPlazaInventoryCampfireRecipePage } from '@/components/world/inventory/domains/ensuringWorldPlazaInventoryCampfireRecipePage';
 import { movingWorldPlazaInventoryItemToSlot } from '@/components/world/inventory/domains/movingWorldPlazaInventoryItemToSlot';
 import { normalizingWorldPlazaInventoryWeaponToolSlot } from '@/components/world/inventory/domains/normalizingWorldPlazaInventoryWeaponToolSlot';
@@ -140,6 +142,8 @@ export function usingWorldPlazaInventory(
   const hasSeededRef = useRef(false);
   const hasNormalizedWeaponToolSlotRef = useRef(false);
   const hasEnsuredCampfireRecipePageRef = useRef(false);
+  const hasEnsuredLapidaryOreStudyRecipeRewardsRef = useRef(false);
+  const hasEnsuredBestiarySightedRecipeRewardsRef = useRef(false);
   const hasKingpinSeededRef = useRef(false);
   const hasDevQaCraftSeededRef = useRef(false);
   const isKingpinAccount =
@@ -262,6 +266,8 @@ export function usingWorldPlazaInventory(
       hasSeededRef.current = true;
       hasNormalizedWeaponToolSlotRef.current = true;
       hasEnsuredCampfireRecipePageRef.current = true;
+      hasEnsuredLapidaryOreStudyRecipeRewardsRef.current = true;
+      hasEnsuredBestiarySightedRecipeRewardsRef.current = true;
 
       const devQaSeedKey = `${persistenceOwnerId}:${readingWorldPlazaDevQaLoadRevision()}`;
 
@@ -365,6 +371,32 @@ export function usingWorldPlazaInventory(
 
       if (withCampfirePage !== state) {
         setState(withCampfirePage);
+        return;
+      }
+    }
+
+    if (!hasEnsuredLapidaryOreStudyRecipeRewardsRef.current) {
+      hasEnsuredLapidaryOreStudyRecipeRewardsRef.current = true;
+      const lapidaryRewards =
+        ensuringWorldPlazaInventoryLapidaryOreStudyRecipeRewards(state, {
+          storageOwnerId: persistenceOwnerId,
+        });
+
+      if (lapidaryRewards.grantedRecipeIds.length > 0) {
+        setState(lapidaryRewards.state);
+        return;
+      }
+    }
+
+    if (!hasEnsuredBestiarySightedRecipeRewardsRef.current) {
+      hasEnsuredBestiarySightedRecipeRewardsRef.current = true;
+      const bestiaryRewards =
+        ensuringWorldPlazaInventoryBestiarySightedRecipeRewards(state, {
+          storageOwnerId: persistenceOwnerId,
+        });
+
+      if (bestiaryRewards.grantedRecipeIds.length > 0) {
+        setState(bestiaryRewards.state);
       }
     }
   }, [

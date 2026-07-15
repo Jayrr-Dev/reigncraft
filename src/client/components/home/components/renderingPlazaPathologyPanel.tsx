@@ -250,6 +250,7 @@ export function RenderingPlazaPathologyPanel({
       </div>
 
       <RenderingPlazaCodexDualProgress
+        sectionId="pathology"
         left={{
           label: 'Logged',
           value: obtainedCount,

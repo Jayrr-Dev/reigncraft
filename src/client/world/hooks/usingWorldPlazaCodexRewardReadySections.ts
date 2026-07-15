@@ -263,7 +263,8 @@ export function usingWorldPlazaCodexRewardReadySections(): ReadonlySet<WorldPlaz
           ).length,
           max: DEFINING_PLAZA_RECIPES_GUIDE_ENTRIES.length,
         },
-      }
+      },
+      new Set(attachedRecipeIds)
     );
   }, [
     attachedRecipeIds,

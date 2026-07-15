@@ -4,6 +4,8 @@
  * @module components/home/domains/resolvingPlazaCodexMenuRewardReadySections
  */
 
+import { checkingPlazaCodexMilestoneRewardClaimed } from '@/components/home/domains/claimingPlazaCodexMilestoneReward';
+import { resolvingPlazaCodexMilestoneRewardsForSection } from '@/components/home/domains/definingPlazaCodexMilestoneRewardRegistry';
 import {
   checkingPlazaCodexDiscoveryProgressHasRewardReady,
   checkingPlazaCodexOverallProgressHasRewardReady,
@@ -24,12 +26,61 @@ export type PlazaCodexMenuRewardReadyDiscoveryMeter = {
   readonly max: number;
 };
 
+function checkingPlazaCodexDefinedDualMeterRewardReady(
+  meters: PlazaCodexMenuRewardReadyMeterPair,
+  sectionId: WorldPlazaCodexSectionId,
+  attachedRecipeIds: ReadonlySet<string>
+): boolean {
+  const definitions = resolvingPlazaCodexMilestoneRewardsForSection(sectionId);
+
+  return definitions.some((definition) => {
+    const value =
+      definition.meterKind === 'discovered'
+        ? meters.discoveredValue
+        : meters.studiedValue;
+    const max =
+      definition.meterKind === 'discovered'
+        ? meters.discoveredMax
+        : meters.studiedMax;
+
+    if (max <= 0) {
+      return false;
+    }
+
+    const threshold = Math.round((definition.percent / 100) * max);
+    if (value < threshold) {
+      return false;
+    }
+
+    return !checkingPlazaCodexMilestoneRewardClaimed(
+      definition,
+      attachedRecipeIds
+    );
+  });
+}
+
 /**
- * True when either overall meter has a reached milestone chest.
+ * True when either overall meter has a claimable reward.
+ * Sections with registry rows only light for defined unclaimed grants.
+ * Sections without rows keep placeholder "any reached chest" behavior.
  */
 export function checkingPlazaCodexDualMetersHaveRewardReady(
-  meters: PlazaCodexMenuRewardReadyMeterPair
+  meters: PlazaCodexMenuRewardReadyMeterPair,
+  sectionId?: WorldPlazaCodexSectionId,
+  attachedRecipeIds: ReadonlySet<string> = new Set()
 ): boolean {
+  if (sectionId) {
+    const definedRewards =
+      resolvingPlazaCodexMilestoneRewardsForSection(sectionId);
+    if (definedRewards.length > 0) {
+      return checkingPlazaCodexDefinedDualMeterRewardReady(
+        meters,
+        sectionId,
+        attachedRecipeIds
+      );
+    }
+  }
+
   return (
     checkingPlazaCodexOverallProgressHasRewardReady(
       meters.discoveredValue,
@@ -55,7 +106,8 @@ export function resolvingPlazaCodexMenuRewardReadySections(
     Partial<
       Record<WorldPlazaCodexSectionId, PlazaCodexMenuRewardReadyDiscoveryMeter>
     >
-  > = {}
+  > = {},
+  attachedRecipeIds: ReadonlySet<string> = new Set()
 ): ReadonlySet<WorldPlazaCodexSectionId> {
   const ready = new Set<WorldPlazaCodexSectionId>();
 
@@ -65,7 +117,14 @@ export function resolvingPlazaCodexMenuRewardReadySections(
     WorldPlazaCodexSectionId,
     PlazaCodexMenuRewardReadyMeterPair | undefined,
   ][]) {
-    if (meters && checkingPlazaCodexDualMetersHaveRewardReady(meters)) {
+    if (
+      meters &&
+      checkingPlazaCodexDualMetersHaveRewardReady(
+        meters,
+        sectionId,
+        attachedRecipeIds
+      )
+    ) {
       ready.add(sectionId);
     }
   }

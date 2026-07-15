@@ -1,9 +1,10 @@
 /**
- * Overall panel progress track with placeholder chest circles at milestones.
+ * Overall panel progress track with chest circles at milestones.
  *
  * @module components/home/components/renderingPlazaCodexStudyMilestoneProgress
  */
 
+import { claimingPlazaCodexMilestoneReward } from '@/components/home/domains/claimingPlazaCodexMilestoneReward';
 import {
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_FILL_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_MARKERS_CLASS_NAME,
@@ -42,7 +43,7 @@ function computingPlazaCodexStudyMilestoneProgressPercent(
   return Math.min(100, Math.round((value / max) * 100));
 }
 
-/** Progress bar with chest-circle placeholders at overall collection milestones. */
+/** Progress bar with chest circles at overall collection milestones. */
 export function RenderingPlazaCodexStudyMilestoneProgress({
   value,
   max,
@@ -86,13 +87,19 @@ export function RenderingPlazaCodexStudyMilestoneProgress({
         }
       >
         {markers.map((marker) => {
-          const nodeClassName = marker.isReached
+          const showAsReached = marker.isReached && !marker.isClaimed;
+          const nodeClassName = showAsReached
             ? DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_REACHED_CLASS_NAME
             : DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_LOCKED_CLASS_NAME;
           const popoverLabel =
             resolvingPlazaCodexStudyMilestoneRewardPopoverLabel(
               marker.remainingNeeded,
-              marker.isReached
+              marker.isReached,
+              {
+                rewardLabel: marker.rewardDefinition?.reward.label ?? null,
+                isClaimed: marker.isClaimed,
+                hasUnclaimedReward: marker.hasUnclaimedReward,
+              }
             );
           const isPopoverOpen = openMarkerId === marker.id;
 
@@ -105,6 +112,12 @@ export function RenderingPlazaCodexStudyMilestoneProgress({
               aria-label={popoverLabel}
               aria-expanded={isPopoverOpen}
               onClick={() => {
+                if (marker.hasUnclaimedReward && marker.rewardDefinition) {
+                  claimingPlazaCodexMilestoneReward(
+                    marker.rewardDefinition,
+                    marker.isReached
+                  );
+                }
                 togglingMarkerPopover(marker.id);
               }}
             >
@@ -114,7 +127,7 @@ export function RenderingPlazaCodexStudyMilestoneProgress({
                   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_ICON_CLASS_NAME
                 }
               />
-              {marker.isReached ? (
+              {marker.hasUnclaimedReward ? (
                 <span
                   className={
                     DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NOTIFICATION_BADGE_CLASS_NAME

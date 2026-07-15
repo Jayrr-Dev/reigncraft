@@ -57,6 +57,7 @@ import {
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { DEFINING_WORLD_PLAZA_CRAFT_RECIPE_NEARBY_STATION_RANGE_TILES } from '@/components/world/crafting/domains/definingWorldPlazaCraftRecipeNearbyStationConstants';
 import { registeringWorldPlazaCraftModeToolRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaCraftModeToolRecipes';
+import { registeringWorldPlazaSpecialtyWeaponCraftModeRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaSpecialtyWeaponCraftModeRecipes';
 import { registeringWorldPlazaSurvivalCraftModeRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaSurvivalCraftModeRecipes';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_CERAMICS_SPRITE_SHEET_COLUMN_COUNT,
@@ -82,8 +83,8 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_STONE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_TEA_LEAVES,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOWL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOTTLE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOWL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CROCK,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CUP,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT,
@@ -1103,6 +1104,7 @@ const DEFINING_WORLD_PLAZA_CRAFT_MODE_MANUAL_RECIPE_REGISTRY = [
     creatingWorldPlazaHealerRecipe
   ),
   ...registeringWorldPlazaSurvivalCraftModeRecipes(),
+  ...registeringWorldPlazaSpecialtyWeaponCraftModeRecipes(),
 ] as const satisfies readonly DefiningWorldPlazaCraftModeRecipeDefinition[];
 
 /**

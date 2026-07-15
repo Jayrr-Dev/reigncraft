@@ -1,8 +1,8 @@
 /**
  * Auto-attaches every Survival cookbook recipe on session start.
  *
- * Survival is the foundation trail cookbook: wear, mats, and shelters ship
- * unlocked. Other cookbooks still require recipe pages.
+ * Used for online / non–single-player sessions only. Single-player boot skips
+ * this so the cookbook stays empty until recipe pages are attached.
  *
  * @module components/world/domains/ensuringWorldPlazaSurvivalCookbookRecipesAttached
  */

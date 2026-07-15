@@ -271,6 +271,7 @@ export function RenderingPlazaBestiaryPanel({
       </div>
 
       <RenderingPlazaCodexDualProgress
+        sectionId="bestiary"
         left={{
           label: 'Sighted',
           value: sightedCount,

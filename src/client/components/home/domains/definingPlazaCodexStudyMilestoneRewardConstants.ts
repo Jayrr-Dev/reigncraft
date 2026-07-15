@@ -1,6 +1,7 @@
 /**
- * Placeholder overall collection milestone rewards on codex panel progress bars.
+ * Overall collection milestone chest positions on codex panel progress bars.
  * Applies to Sighted/Logged (discovered) and Studied meters — not per-entry detail.
+ * Concrete grants live in `definingPlazaCodexMilestoneRewardRegistry`.
  *
  * @module components/home/domains/definingPlazaCodexStudyMilestoneRewardConstants
  */

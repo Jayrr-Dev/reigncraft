@@ -11,6 +11,8 @@ import { attachingWorldPlazaRecipePage } from '@/components/world/domains/managi
 /**
  * Idempotently attaches all craft registry recipes when dev mode is enabled.
  * No-op when {@link detectingWorldPlazaDevEnvironment} is false.
+ * Single-player boot skips this call so solo saves stay cookbook-empty until
+ * the player attaches recipe pages.
  */
 export function attachingWorldPlazaAllCraftModeRecipesForDevQa(): void {
   if (!detectingWorldPlazaDevEnvironment()) {

@@ -1,6 +1,6 @@
 /**
  * Side-by-side codex progress meters (Sighted + Studied, or Logged + Studied).
- * Both meters show placeholder chest circles at overall collection milestones.
+ * Both meters show chest circles at overall collection milestones.
  *
  * @module components/home/components/renderingPlazaCodexDualProgress
  */
@@ -14,7 +14,14 @@ import {
   DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SEPARATOR_CLASS_NAME,
   DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SHELL_CLASS_NAME,
 } from '@/components/home/domains/definingPlazaCodexDualProgressConstants';
+import type { PlazaCodexMilestoneRewardMeterKind } from '@/components/home/domains/definingPlazaCodexMilestoneRewardRegistry';
 import { resolvingPlazaCodexOverallProgressMilestoneRewardMarkers } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
+import type { WorldPlazaCodexSectionId } from '@/components/world/domains/definingWorldPlazaCodexConstants';
+import {
+  gettingWorldPlazaRecipeAttachedSnapshot,
+  subscribingWorldPlazaRecipeDiscovery,
+} from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
+import { useSyncExternalStore } from 'react';
 
 export type PlazaCodexDualProgressMetric = {
   label: string;
@@ -26,16 +33,32 @@ export type PlazaCodexDualProgressMetric = {
 export type RenderingPlazaCodexDualProgressProps = {
   left: PlazaCodexDualProgressMetric;
   right: PlazaCodexDualProgressMetric;
+  /** Codex section that owns these meters (keys milestone reward registry). */
+  sectionId?: WorldPlazaCodexSectionId;
 };
 
 function RenderingPlazaCodexDualProgressMeter({
   metric,
+  sectionId,
+  meterKind,
+  attachedRecipeIds,
 }: {
   metric: PlazaCodexDualProgressMetric;
+  sectionId?: WorldPlazaCodexSectionId;
+  meterKind: PlazaCodexMilestoneRewardMeterKind;
+  attachedRecipeIds: ReadonlySet<string>;
 }) {
   const markers = resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
     metric.value,
-    metric.max
+    metric.max,
+    undefined,
+    sectionId
+      ? {
+          sectionId,
+          meterKind,
+          attachedRecipeIds,
+        }
+      : undefined
   );
 
   return (
@@ -60,16 +83,34 @@ function RenderingPlazaCodexDualProgressMeter({
 export function RenderingPlazaCodexDualProgress({
   left,
   right,
+  sectionId,
 }: RenderingPlazaCodexDualProgressProps) {
+  const attachedRecipeIdsList = useSyncExternalStore(
+    subscribingWorldPlazaRecipeDiscovery,
+    gettingWorldPlazaRecipeAttachedSnapshot,
+    () => []
+  );
+  const attachedRecipeIds = new Set(attachedRecipeIdsList);
+
   return (
     <div className={DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SHELL_CLASS_NAME}>
       <div className={DEFINING_PLAZA_CODEX_DUAL_PROGRESS_ROW_CLASS_NAME}>
-        <RenderingPlazaCodexDualProgressMeter metric={left} />
+        <RenderingPlazaCodexDualProgressMeter
+          metric={left}
+          sectionId={sectionId}
+          meterKind="discovered"
+          attachedRecipeIds={attachedRecipeIds}
+        />
         <div
           aria-hidden
           className={DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SEPARATOR_CLASS_NAME}
         />
-        <RenderingPlazaCodexDualProgressMeter metric={right} />
+        <RenderingPlazaCodexDualProgressMeter
+          metric={right}
+          sectionId={sectionId}
+          meterKind="studied"
+          attachedRecipeIds={attachedRecipeIds}
+        />
       </div>
     </div>
   );
