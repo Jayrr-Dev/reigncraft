@@ -104,7 +104,7 @@ export function RenderingPlazaPathologyGuideDetailView({
       </div>
 
       <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 touch-pan-y">
-        <article className="overflow-hidden rounded-md border border-poster-teal/35 bg-parchment/50 shadow-[0_2px_6px_rgba(28,25,18,0.18)]">
+        <article className="overflow-hidden rounded-md bg-parchment/50 shadow-[inset_0_0_0_1px_rgba(44,74,82,0.35),0_2px_6px_rgba(28,25,18,0.18)]">
           <div className="relative flex h-28 items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_55%,#1a3038_100%)] sm:h-32">
             <div className="absolute inset-0 bg-[repeating-linear-gradient(135deg,transparent_0_12px,rgba(255,255,255,0.03)_12px_24px)]" />
             <span

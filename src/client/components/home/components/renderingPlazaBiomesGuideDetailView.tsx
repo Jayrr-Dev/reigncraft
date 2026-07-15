@@ -61,7 +61,7 @@ export function RenderingPlazaBiomesGuideDetailView({
       </div>
 
       <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 touch-pan-y">
-        <article className="overflow-hidden rounded-md border border-poster-teal/35 bg-parchment/50 shadow-[0_2px_6px_rgba(28,25,18,0.18)]">
+        <article className="overflow-hidden rounded-md bg-parchment/50 shadow-[inset_0_0_0_1px_rgba(44,74,82,0.35),0_2px_6px_rgba(28,25,18,0.18)]">
           <div
             className={cn(
               'relative h-28 overflow-hidden sm:h-32',

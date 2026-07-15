@@ -1,0 +1,86 @@
+{
+  "tabId": "movement",
+  "notes": [
+    "Verified against movement-stamina mechanics, world-layer constants, keyboard/click/touch input hooks, and onboarding coachmarks.",
+    "tile-gravity mechanics.md is gravity wells (pull), not height layers; left world-layers as vertical height copy.",
+    "Kept all 5 section IDs (demos keyed in renderingPlazaHowToPlayPanel.tsx).",
+    "run-jump desktop: added hold-click sprint+steer alongside double-click and Shift+WASD/arrows; Space jump unchanged.",
+    "run-jump mobile: fixed stale 'tap again to keep running' (tap-while-running is a jump); hold-to-run is primary; mention jump button + optional Auto jump.",
+    "sprint-stamina: removed em dash; clarified empty-bar lockout then refill gate; jumps/rolls still spend stamina.",
+    "world-layers / climb-blocks: same rules (ground layer 1, walk +1, jump +4, walls 2+ block); tightened wording, no dashes."
+  ],
+  "preferKeepSectionIds": true,
+  "newSectionIdsNeeded": [],
+  "desktop": {
+    "id": "movement",
+    "label": "Movement",
+    "sections": [
+      {
+        "id": "move-around",
+        "title": "Move Around",
+        "description": "Click any walkable tile to path there. WASD and arrow keys work too.",
+        "icon": "ph:person-simple-run"
+      },
+      {
+        "id": "run-jump",
+        "title": "Run & Jump",
+        "description": "Double-click a destination to run, or hold click briefly to sprint while you steer. Hold Shift with WASD or arrows to sprint. Press Space to jump.",
+        "icon": "mdi:arrow-up-bold"
+      },
+      {
+        "id": "sprint-stamina",
+        "title": "Sprint & Stamina",
+        "description": "Sprinting drains the green stamina bar under your health. Stop to refill. Empty the bar and sprint locks for a moment, then until the bar climbs back high enough. Jumping and rolling spend stamina too.",
+        "icon": "mdi:run-fast"
+      },
+      {
+        "id": "world-layers",
+        "title": "World Layers",
+        "description": "Every tile has a height layer. Ground is layer 1; blocks and hills stack higher. Your avatar stands on its current layer and drops when you walk off a ledge.",
+        "icon": "mdi:layers-triple"
+      },
+      {
+        "id": "climb-blocks",
+        "title": "Climb & Jump Up",
+        "description": "Walk onto a one-layer step to climb up. Jump (Space) to reach ledges up to 4 layers above you. Walls two or more layers taller block you until you find another way up.",
+        "icon": "mdi:stairs-up"
+      }
+    ]
+  },
+  "mobile": {
+    "id": "movement",
+    "label": "Movement",
+    "sections": [
+      {
+        "id": "move-around",
+        "title": "Move Around",
+        "description": "Tap any walkable tile to path there. Your avatar walks automatically.",
+        "icon": "ph:person-simple-run"
+      },
+      {
+        "id": "run-jump",
+        "title": "Run & Jump",
+        "description": "Hold on a destination to sprint and steer, or double-tap to run there. Use the jump button to leap. While already running, tap again to jump. Auto jump in Settings can clear water gaps for you.",
+        "icon": "mdi:arrow-up-bold"
+      },
+      {
+        "id": "sprint-stamina",
+        "title": "Sprint & Stamina",
+        "description": "Sprinting drains the green stamina bar under your health. Stop to refill. Empty the bar and sprint locks for a moment, then until the bar climbs back high enough. Jumping and rolling spend stamina too.",
+        "icon": "mdi:run-fast"
+      },
+      {
+        "id": "world-layers",
+        "title": "World Layers",
+        "description": "Every tile has a height layer. Ground is layer 1; blocks and hills stack higher. Your avatar stands on its current layer and drops when you walk off a ledge.",
+        "icon": "mdi:layers-triple"
+      },
+      {
+        "id": "climb-blocks",
+        "title": "Climb & Jump Up",
+        "description": "Walk onto a one-layer step to climb up. Use the jump button to reach ledges up to 4 layers above you. Walls two or more layers taller block you until you find another way up.",
+        "icon": "mdi:stairs-up"
+      }
+    ]
+  }
+}

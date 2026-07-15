@@ -1,0 +1,48 @@
+{
+  "tabId": "combat",
+  "notes": [
+    "Verified: R key desktop roll; mobile roll button; WASD move direction else facing; right-click face is desktop-only.",
+    "Verified: roll dodge window mid-anim mitigates physical only (~75% to 95% stripped); cancels hit stagger; blocked by sleep/stun; ~18.75% stamina; no re-roll until clip ends.",
+    "Verified: click/tap live animal locks combat, chase if beyond ~1.8 grid, auto-melee in reach; cancel empty ground / corpse / other interactable / chat / death; amber lock marker.",
+    "Old melee copy was wrong: implied must already be in range and one-shot click strike; no lock-on, chase, auto-swing, cancel, or sword EV.",
+    "Kept roll-dodge + melee-attack IDs for demos. Skipped new sections: EV tiers live in Mechanics Guide; wildlife aggro / docile Betray? too deep for How to Play; player ranged is skin-specific."
+  ],
+  "preferKeepSectionIds": true,
+  "newSectionIdsNeeded": [],
+  "desktop": {
+    "id": "combat",
+    "label": "Combat",
+    "sections": [
+      {
+        "id": "roll-dodge",
+        "title": "Roll Dodge",
+        "description": "Press R to dodge-roll. While holding WASD, you roll in your move direction; otherwise you roll the way you face (hold right-click to aim facing). Mid-roll, physical hits take far less damage for a short window. You can roll out of a hit stagger. Sleep and stun block rolls. Costs about 19% of your stamina bar, and you cannot roll again until the animation finishes.",
+        "icon": "ph:person-simple-run"
+      },
+      {
+        "id": "melee-attack",
+        "title": "Melee Attack",
+        "description": "Click a live animal to lock on (amber marker). If you are out of reach, you run in and auto-swing once close. Swings keep repeating until you cancel: click empty ground, a corpse, or another interactable, or open chat. Hold right-click to face the mouse. Damage rolls from your attack power; an equipped hotbar sword boosts it.",
+        "icon": "boxicons:sword-filled"
+      }
+    ]
+  },
+  "mobile": {
+    "id": "combat",
+    "label": "Combat",
+    "sections": [
+      {
+        "id": "roll-dodge",
+        "title": "Roll Dodge",
+        "description": "Tap the roll button to dodge-roll in the direction you face. Mid-roll, physical hits take far less damage for a short window. You can roll out of a hit stagger. Sleep and stun block rolls. Costs about 19% of your stamina bar, and you cannot roll again until the animation finishes.",
+        "icon": "ph:person-simple-run"
+      },
+      {
+        "id": "melee-attack",
+        "title": "Melee Attack",
+        "description": "Tap a live animal to lock on (amber marker). If you are out of reach, you run in and auto-swing once close. Swings keep repeating until you cancel: tap empty ground, a corpse, or another interactable. Damage rolls from your attack power; an equipped hotbar sword boosts it.",
+        "icon": "boxicons:sword-filled"
+      }
+    ]
+  }
+}

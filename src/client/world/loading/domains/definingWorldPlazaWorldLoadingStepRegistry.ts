@@ -44,10 +44,11 @@ export const DEFINING_WORLD_PLAZA_WORLD_LOADING_STEP_REGISTRY: readonly Defining
       stepId: 'terrain-textures',
       weight: 2,
       load: async () => {
-        const { preloadingWorldPlazaTerrainTextureAssetManifest } =
-          await import('@/components/world/engine/registeringWorldPlazaTextureAssetManifest');
+        // Via boot wrapper: scene already static-imports the manifest for peeks.
+        const { preloadingWorldPlazaBootTerrainTextures } =
+          await import('@/components/world/engine/preloadingWorldPlazaBootTerrainTextures');
 
-        await preloadingWorldPlazaTerrainTextureAssetManifest();
+        await preloadingWorldPlazaBootTerrainTextures();
       },
     },
     {

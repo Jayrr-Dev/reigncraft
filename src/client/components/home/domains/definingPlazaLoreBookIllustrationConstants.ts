@@ -57,7 +57,11 @@ export const DEFINING_PLAZA_LORE_BOOK_ILLUSTRATIONS_BY_ENTRY_ID: Readonly<
   },
   'the-core': {
     id: 'spritcore-orb',
-    caption: 'Money, mana, experience, rank',
+    caption: 'Loot, Commit, climb',
+  },
+  'the-spill': {
+    id: 'spritcore-orb',
+    caption: 'Death skims the pouch',
   },
   'the-stewards': {
     id: 'apostle-circle',
@@ -75,9 +79,17 @@ export const DEFINING_PLAZA_LORE_BOOK_ILLUSTRATIONS_BY_ENTRY_ID: Readonly<
     id: 'beast-tiers',
     caption: 'Read the name before the teeth',
   },
+  'reading-temper': {
+    id: 'beast-tiers',
+    caption: 'Temper is a contract',
+  },
   'the-cucco': {
     id: 'cucco',
     caption: 'Assume, and walk wide',
+  },
+  'the-study': {
+    id: 'beast-tiers',
+    caption: 'Sight is cheap. Study costs time.',
   },
   'the-forgewrights': {
     id: 'firelands',
@@ -90,6 +102,10 @@ export const DEFINING_PLAZA_LORE_BOOK_ILLUSTRATIONS_BY_ENTRY_ID: Readonly<
   'the-dark-doors': {
     id: 'dark-doors',
     caption: 'Gate structures, all of them dark',
+  },
+  'the-frostsink': {
+    id: 'biome-rings',
+    caption: 'Ice bowl around a Cryocore',
   },
   'the-far-shore': {
     id: 'far-shore',

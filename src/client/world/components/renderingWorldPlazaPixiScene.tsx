@@ -3458,6 +3458,11 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
+      if (!equipment.checkingEquippedToolKind('axe').hasToolKind) {
+        showingGameplayHudToast('Equip an axe to chop trees.');
+        return;
+      }
+
       if (!validatingTreeChopStart(entry)) {
         return;
       }
@@ -3484,7 +3489,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       }
     },
     [
-      equipment.selectedSlotIndex,
+      equipment,
       resolvingEquippedAxeHarvestSpeedMultiplier,
       showingGameplayHudToast,
       startingTreeChop,

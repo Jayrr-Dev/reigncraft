@@ -1,9 +1,12 @@
 'use client';
 
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { usingWorldPlazaGameplayHudControlledPopoverDismiss } from '@/components/world/hooks/usingWorldPlazaGameplayHudPopoverOpenState';
+import { computingWorldPlazaOnboardingCoachmarkTipLayout } from '@/components/world/onboarding/domains/computingWorldPlazaOnboardingCoachmarkTipLayout';
 import type { WorldPlazaOnboardingCoachmarkDefinition } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
 import {
   DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE,
+  DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_OFFSET_PX,
   STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_DISMISS_BUTTON_CLASS_NAME,
   STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_GLOW_CLASS_NAME,
   STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_ACTIONS_CLASS_NAME,
@@ -11,7 +14,7 @@ import {
   STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_CLASS_NAME,
   STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_TITLE_CLASS_NAME,
 } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
-import { useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 export type RenderingWorldPlazaOnboardingCoachmarkProps = {
   readonly definition: WorldPlazaOnboardingCoachmarkDefinition;
@@ -27,8 +30,6 @@ type CoachmarkTipPosition = {
 const RENDERING_WORLD_PLAZA_ONBOARDING_COACHMARK_LAYER_CLASS_NAME =
   'pointer-events-none fixed inset-0 z-[70]' as const;
 
-const RENDERING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_OFFSET_PX = 12;
-
 function resolvingWorldPlazaOnboardingCoachmarkAnchorElement(
   targetAnchorId: WorldPlazaOnboardingCoachmarkDefinition['targetAnchorId']
 ): HTMLElement | null {
@@ -41,7 +42,17 @@ function resolvingWorldPlazaOnboardingCoachmarkAnchorElement(
   );
 }
 
-function computingWorldPlazaOnboardingCoachmarkTipPosition(
+function resolvingWorldPlazaOnboardingCoachmarkRootFontSizePx(): number {
+  const parsedFontSizePx = Number.parseFloat(
+    window.getComputedStyle(document.documentElement).fontSize
+  );
+
+  return Number.isFinite(parsedFontSizePx) && parsedFontSizePx > 0
+    ? parsedFontSizePx
+    : 16;
+}
+
+function computingWorldPlazaOnboardingCoachmarkPreferredTipPosition(
   definition: WorldPlazaOnboardingCoachmarkDefinition
 ): CoachmarkTipPosition {
   const anchorElement = resolvingWorldPlazaOnboardingCoachmarkAnchorElement(
@@ -68,7 +79,7 @@ function computingWorldPlazaOnboardingCoachmarkTipPosition(
     return {
       top:
         anchorRect.bottom +
-        RENDERING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_OFFSET_PX,
+        DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_OFFSET_PX,
       left: anchorRect.left + anchorRect.width / 2,
     };
   }
@@ -82,22 +93,49 @@ function computingWorldPlazaOnboardingCoachmarkTipPosition(
 
   return {
     top:
-      anchorRect.top - RENDERING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_OFFSET_PX,
+      anchorRect.top - DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_OFFSET_PX,
     left: anchorRect.left + anchorRect.width / 2,
+  };
+}
+
+function computingWorldPlazaOnboardingCoachmarkClampedTipPosition(
+  definition: WorldPlazaOnboardingCoachmarkDefinition,
+  tipHeightPx: number = 0
+): CoachmarkTipPosition {
+  const preferred =
+    computingWorldPlazaOnboardingCoachmarkPreferredTipPosition(definition);
+  const layout = computingWorldPlazaOnboardingCoachmarkTipLayout({
+    preferredCenterXPx: preferred.left,
+    preferredTopPx: preferred.top,
+    tipPlacement: definition.tipPlacement,
+    viewportWidthPx: window.innerWidth,
+    viewportHeightPx: window.innerHeight,
+    rootFontSizePx: resolvingWorldPlazaOnboardingCoachmarkRootFontSizePx(),
+    tipHeightPx,
+  });
+
+  return {
+    top: layout.topPx,
+    left: layout.leftPx,
   };
 }
 
 /**
  * Soft coachmark tip + anchor glow. Does not block gameplay outside the tip card.
+ * Dismiss matches gameplay HUD popover open patterns: outside pointer / Escape closes
+ * and completes the step so the tip does not reopen.
  */
 export function RenderingWorldPlazaOnboardingCoachmark({
   definition,
   isMobile,
   onDismiss,
 }: RenderingWorldPlazaOnboardingCoachmarkProps): React.JSX.Element {
+  const tipRef = useRef<HTMLDivElement | null>(null);
   const [tipPosition, setTipPosition] = useState<CoachmarkTipPosition>(() =>
-    computingWorldPlazaOnboardingCoachmarkTipPosition(definition)
+    computingWorldPlazaOnboardingCoachmarkClampedTipPosition(definition)
   );
+
+  usingWorldPlazaGameplayHudControlledPopoverDismiss(tipRef, true, onDismiss);
 
   useLayoutEffect(() => {
     const anchorElement = resolvingWorldPlazaOnboardingCoachmarkAnchorElement(
@@ -111,8 +149,12 @@ export function RenderingWorldPlazaOnboardingCoachmark({
     }
 
     const updatingTipPosition = (): void => {
+      const measuredTipHeightPx = tipRef.current?.offsetHeight ?? 0;
       setTipPosition(
-        computingWorldPlazaOnboardingCoachmarkTipPosition(definition)
+        computingWorldPlazaOnboardingCoachmarkClampedTipPosition(
+          definition,
+          measuredTipHeightPx
+        )
       );
     };
 
@@ -139,10 +181,7 @@ export function RenderingWorldPlazaOnboardingCoachmark({
   const tipTransform =
     definition.tipPlacement === 'below'
       ? 'translate(-50%, 0)'
-      : definition.tipPlacement === 'center' &&
-          definition.targetAnchorId === null
-        ? 'translate(-50%, -100%)'
-        : 'translate(-50%, -100%)';
+      : 'translate(-50%, -100%)';
 
   return (
     <div
@@ -150,6 +189,7 @@ export function RenderingWorldPlazaOnboardingCoachmark({
       aria-live="polite"
     >
       <div
+        ref={tipRef}
         role="dialog"
         aria-label={definition.title}
         className={STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_CLASS_NAME}

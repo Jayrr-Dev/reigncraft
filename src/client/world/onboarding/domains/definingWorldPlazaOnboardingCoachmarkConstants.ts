@@ -120,9 +120,24 @@ export function resolvingWorldPlazaOnboardingCoachmarksStorageKey(
 export const STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_GLOW_CLASS_NAME =
   'plaza-onboarding-coachmark-glow' as const;
 
+/** Gap between tip card and its HUD / interaction anchor. */
+export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_OFFSET_PX =
+  12 as const;
+
+/**
+ * Authored tip width: `min(18rem, 100vw - 1.5rem)`.
+ * Explicit width (not max-width) so abspos shrink-to-fit cannot crush the card
+ * when the anchor sits near the right edge of a narrow mobile viewport.
+ */
+export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_MAX_WIDTH_REM =
+  18 as const;
+
+export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_VIEWPORT_GUTTER_REM =
+  1.5 as const;
+
 /** Tip card shell (compact parchment panel). */
 export const STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_CLASS_NAME =
-  'pointer-events-auto select-none rounded-md border-2 border-poster-wood/70 bg-[linear-gradient(165deg,#f0e2c4_0%,#e3d1a8_100%)] px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,250,230,0.6),0_6px_16px_rgba(20,28,26,0.45)] max-w-[min(18rem,calc(100vw-1.5rem))]' as const;
+  'pointer-events-auto select-none rounded-md border-2 border-poster-wood/70 bg-[linear-gradient(165deg,#f0e2c4_0%,#e3d1a8_100%)] px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,250,230,0.6),0_6px_16px_rgba(20,28,26,0.45)] w-[min(18rem,calc(100vw-1.5rem))] box-border opacity-[0.99]' as const;
 
 export const STYLING_WORLD_PLAZA_ONBOARDING_COACHMARK_TIP_TITLE_CLASS_NAME =
   'font-display text-sm font-semibold text-poster-wood' as const;

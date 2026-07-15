@@ -43,9 +43,17 @@ export default defineConfig({
       client: {
         build: {
           emptyOutDir: false,
+          // Devvit defaults sourcemap:true (~30MB of .map in dist/client). Off for
+          // upload/publish so review installs are less likely to choke on package size.
+          sourcemap: false,
           // During playtest, public/ is copied once by scripts/startDevvitPlaytest.mjs.
           // Skipping per-rebuild copies avoids EBUSY when Devvit uploads dist/client.
           copyPublicDir: process.env.DEVVIT_PLAYTEST_SKIP_PUBLIC_COPY !== '1',
+        },
+      },
+      server: {
+        build: {
+          sourcemap: false,
         },
       },
     }),

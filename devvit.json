@@ -78,7 +78,7 @@
   },
   "scripts": {
     "dev": "vite build --watch",
-    "build": "vite build"
+    "build": "node scripts/syncPublicToDist.mjs && vite build"
   },
   "dev": {
     "subreddit": "Reigncraft"

@@ -1,0 +1,85 @@
+{
+  "tabId": "realm",
+  "notes": [
+    "Verified against gameplay/mechanics/building/mechanics.md, plot constants (3 plots / 64 tiles / 256 blocks), claim paint tools, saved-coords max 3, teleport fade, and friend Visit → approve → Teleport flow.",
+    "Temporary tile claims exist in code but WORLD_BUILDING_DEVVIT_TEMPORARY_PLOT_FEATURE_ENABLED is false; removed temporary-claim copy from player tutorial.",
+    "Minimap/claim overlay owned land is orange (#f97316), not gold; old copy said gold.",
+    "Save Coords is placement mode (Save Coords button, then click/tap a tile) or tile popover via double-click/double-tap; old desktop 'while hovering' and mobile 'tile you are standing on' were wrong.",
+    "Claim rules: first permanent claim almost anywhere (3-tile buffer from other owners); expand beside owned land, or start another plot up to the plot cap.",
+    "Kept all 5 section IDs (plots-and-claims, save-coords, track-coords, teleport-plots, build-realm)."
+  ],
+  "preferKeepSectionIds": true,
+  "newSectionIdsNeeded": [],
+  "desktop": {
+    "id": "realm",
+    "label": "Realm",
+    "sections": [
+      {
+        "id": "plots-and-claims",
+        "title": "Plots & Claims",
+        "description": "Open Claim mode (C). Arm the Claim tool, then click sky-blue claimable tiles to paint land. Your first plot can start almost anywhere; later claims expand beside owned land, or open a new plot if you still have slots. Default caps are 3 plots and 64 tiles (badges at the top of the claim list). Owned land is orange on the minimap and in Claim mode. Stay at least 3 tiles away from other players' plots. Double-click a tile for Claim, Unclaim, or Save Coords.",
+        "icon": "mdi:crosshairs-gps"
+      },
+      {
+        "id": "save-coords",
+        "title": "Save Coords",
+        "description": "In Claim mode, press Save Coords, then click the tile you want to bookmark. You can save up to 3 locations. Bookmarks appear under Saved Coords. You can also double-click a tile and choose Save Coords from the popover.",
+        "icon": "mdi:content-save"
+      },
+      {
+        "id": "track-coords",
+        "title": "Track Coords",
+        "description": "In Claim mode, press Track on a saved coordinate. A direction arrow points the way and a star marks the tile in the world. Press Track again to stop following it.",
+        "icon": "mdi:compass"
+      },
+      {
+        "id": "teleport-plots",
+        "title": "Teleport",
+        "description": "In Claim mode, press Teleport on one of your plot cards to jump there. The screen fades out and back in. On a friend's plot, press Visit; once they approve, Teleport works the same way.",
+        "icon": "mdi:door-open"
+      },
+      {
+        "id": "build-realm",
+        "title": "Build Your Realm",
+        "description": "Switch to Build mode (B) on land you own. Use Place to set blocks and Remove to clear them. Pick materials and block types from the build hotbar. Each plot holds up to 256 blocks.",
+        "icon": "mdi:hammer"
+      }
+    ]
+  },
+  "mobile": {
+    "id": "realm",
+    "label": "Realm",
+    "sections": [
+      {
+        "id": "plots-and-claims",
+        "title": "Plots & Claims",
+        "description": "Open Claim mode from the action bar. Arm the Claim tool, then tap sky-blue claimable tiles to paint land. Your first plot can start almost anywhere; later claims expand beside owned land, or open a new plot if you still have slots. Default caps are 3 plots and 64 tiles (badges at the top of the claim list). Owned land is orange on the minimap and in Claim mode. Stay at least 3 tiles away from other players' plots. Double-tap a tile for Claim, Unclaim, or Save Coords.",
+        "icon": "mdi:crosshairs-gps"
+      },
+      {
+        "id": "save-coords",
+        "title": "Save Coords",
+        "description": "In Claim mode, tap Save Coords, then tap the tile you want to bookmark. You can save up to 3 locations. Bookmarks appear under Saved Coords. You can also double-tap a tile and choose Save Coords from the popover.",
+        "icon": "mdi:content-save"
+      },
+      {
+        "id": "track-coords",
+        "title": "Track Coords",
+        "description": "In Claim mode, tap Track on a saved coordinate. A direction arrow points the way and a star marks the tile in the world. Tap Track again to stop following it.",
+        "icon": "mdi:compass"
+      },
+      {
+        "id": "teleport-plots",
+        "title": "Teleport",
+        "description": "In Claim mode, tap Teleport on one of your plot cards to jump there. The screen fades out and back in. On a friend's plot, tap Visit; once they approve, Teleport works the same way.",
+        "icon": "mdi:door-open"
+      },
+      {
+        "id": "build-realm",
+        "title": "Build Your Realm",
+        "description": "Switch to Build mode from the action bar on land you own. Use Place to set blocks and Remove to clear them. Pick materials and block types from the build hotbar. Each plot holds up to 256 blocks.",
+        "icon": "mdi:hammer"
+      }
+    ]
+  }
+}

@@ -31,8 +31,9 @@ const PLAZA_PATHOLOGY_PANEL_EMPTY_STUDY_COUNTS: Readonly<
 const PLAZA_PATHOLOGY_PANEL_HEADER_BUTTON_CLASS_NAME =
   'plaza-btn-3d flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-poster-gold/60 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-parchment shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]';
 
+/* Border + radius + overflow:hidden on one node = Chromium corner stubs. */
 const PLAZA_PATHOLOGY_GUIDE_TILE_BASE_CLASS_NAME =
-  'flex w-full flex-col overflow-hidden rounded-md border';
+  'flex w-full flex-col rounded-md border';
 
 const PLAZA_PATHOLOGY_GUIDE_TILE_STAGE_CLASS_NAME =
   'relative flex aspect-square w-full items-center justify-center overflow-hidden';

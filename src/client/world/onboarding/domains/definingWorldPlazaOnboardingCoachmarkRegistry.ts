@@ -76,9 +76,9 @@ export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_REGISTRY: readonly WorldP
       phase: 'contextual',
       title: 'Chop wood',
       descriptionDesktop:
-        'Stand next to a tree and click Chop. An axe speeds it up but is not required.',
+        'Equip an axe in your fist slot, stand next to a tree, then click Chop.',
       descriptionMobile:
-        'Stand next to a tree and tap Chop. An axe speeds it up but is not required.',
+        'Equip an axe in your fist slot, stand next to a tree, then tap Chop.',
       targetAnchorId: 'chop-interaction',
       advanceEvent: 'chop-start',
       tipPlacement: 'above',

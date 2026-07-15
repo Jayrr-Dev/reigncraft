@@ -29,9 +29,7 @@ import {
   DEFINING_PLAZA_MECHANICS_TABS,
   DEFINING_PLAZA_MECHANICS_WORLD_SECTIONS,
 } from '@/components/home/domains/definingPlazaMechanicsConstants';
-import {
-  filteringPlazaMechanicsBuffBadgeGuideGroupsBySearchQuery,
-} from '@/components/home/domains/filteringPlazaMechanicsBadgeGuideEntriesBySearchQuery';
+import { filteringPlazaMechanicsBuffBadgeGuideGroupsBySearchQuery } from '@/components/home/domains/filteringPlazaMechanicsBadgeGuideEntriesBySearchQuery';
 import type { PlazaMechanicsBuffBadgeGuideEntry } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeGuideEntries';
 import { listingPlazaMechanicsBuffBadgeGuideEntriesByCategory } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgeGuideEntries';
 import { resolvingPlazaMechanicsBuffBadgePlayerImpact } from '@/components/home/domains/resolvingPlazaMechanicsBuffBadgePlayerImpact';
@@ -63,10 +61,10 @@ const PLAZA_MECHANICS_BADGE_LIST_BUTTON_CLASS_NAME =
   'flex w-full items-center gap-3 px-3 py-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poster-teal/40';
 
 const PLAZA_MECHANICS_BADGE_ACCORDION_ITEM_CLASS_NAME =
-  'overflow-hidden rounded-md border border-poster-teal/20 bg-parchment/35 transition-colors';
+  'overflow-hidden rounded-md bg-parchment/35 shadow-[inset_0_0_0_1px_rgba(44,74,82,0.2)] transition-colors';
 
 const PLAZA_MECHANICS_BADGE_ACCORDION_ITEM_EXPANDED_CLASS_NAME =
-  'border-poster-teal/40 bg-parchment/55';
+  'bg-parchment/55 shadow-[inset_0_0_0_1px_rgba(44,74,82,0.4)]';
 
 const PLAZA_MECHANICS_WORLD_SECTION_DEMOS: Record<
   PlazaMechanicsWorldSectionId,

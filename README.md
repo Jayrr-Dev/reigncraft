@@ -121,12 +121,15 @@ pnpm run launch
 
 # After approval, install on a sub you moderate
 npx devvit install <subreddit>
+# Then use mod menu: Create a new post (install no longer auto-creates a post)
 
 # Public directory listing (only when ready for any mod to install)
 npx devvit publish --public
 ```
 
 Requires Node 22+, Devvit CLI login (`pnpm run login`), and moderation rights on the target subreddit.
+
+Before submit for review: confirm `npx devvit upload` then `npx devvit install <your-test-sub>` succeeds, and the Create a new post menu opens the splash.
 
 ## Changelog
 
@@ -136,3 +139,4 @@ Requires Node 22+, Devvit CLI login (`pnpm run login`), and moderation rights on
 - Multiplayer plaza shards via Devvit + Convex
 - Mobile and desktop controls; tall splash + expanded game entrypoints
 - Unlisted publish for closed playtesting (not App Directory listed)
+- Install trigger is side-effect free (no auto post); mods use Create a new post

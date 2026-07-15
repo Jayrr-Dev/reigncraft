@@ -507,6 +507,26 @@ export function usingWorldPlazaOnboardingCoachmarks({
         )
       : null;
 
+  const forageCoachmarkSeenRef = useRef(false);
+
+  useEffect(() => {
+    if (activeCoachmark?.id === 'forage') {
+      forageCoachmarkSeenRef.current = true;
+    }
+  }, [activeCoachmark?.id]);
+
+  useEffect(() => {
+    if (
+      !forageCoachmarkSeenRef.current ||
+      isForageLabelVisible ||
+      onboardingSnapshot.completedStepIds.has('forage')
+    ) {
+      return;
+    }
+
+    completingWorldPlazaOnboardingCoachmarkStep('forage');
+  }, [isForageLabelVisible, onboardingSnapshot.completedStepIds]);
+
   const completingActiveCoachmarkIfNeeded = useEffectEvent(() => {
     if (activeCoachmark === null) {
       return;

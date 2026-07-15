@@ -45,8 +45,9 @@ const PLAZA_BESTIARY_BIOME_TAB_BUTTON_CLASS_NAME =
 const PLAZA_BESTIARY_BIOME_TAB_BUTTON_ACTIVE_CLASS_NAME =
   'border-poster-teal/30 bg-poster-teal/15 text-poster-teal-deep shadow-sm';
 
+/* Border + radius + overflow:hidden on one node = Chromium corner stubs. */
 const PLAZA_BESTIARY_GUIDE_TILE_BASE_CLASS_NAME =
-  'flex w-full flex-col overflow-hidden rounded-md border';
+  'flex w-full flex-col rounded-md border';
 
 const PLAZA_BESTIARY_GUIDE_TILE_STAGE_CLASS_NAME =
   'relative flex aspect-square w-full items-center justify-center overflow-hidden';

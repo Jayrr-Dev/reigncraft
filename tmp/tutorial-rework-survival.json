@@ -1,0 +1,125 @@
+{
+  "tabId": "survival",
+  "notes": [
+    "Verified hotbar is 6 slots (COLUMNS=6), not five; slot 0 is weapons/tools only.",
+    "Verified eat is a timed channel (1–10s by food); cancel on walk/jump/roll/damage; double-click desktop / double-tap mobile within 500ms.",
+    "Hunger: walk ×1.15 / sprint ×2 drain; regen blocked at ≤30%; Hungry (≤20%) no sprint; Starving (<5%) slower + no jump; at 0% HP ticks every 2s.",
+    "Disease: silent incubation then badge under health; food restore ×0.5 while symptomatic; deer/cow cooked still tiny prion residual; well-fed buff is a separate cooked roll.",
+    "Study: corpse ~60s; Study channel 3–10s; awards 1–3 points; Bestiary mastery at 100 (unified codex ladder, not legacy 200).",
+    "Meal theft: contested pickup 2–10s + hard aggro until death.",
+    "Minimap colors confirmed: you yellow (#f4d35e), others blue (#3b82f6), owned plots orange.",
+    "Status stack (top-right) covers bleed/poison/heat/cold/lava/frostbite/shields; buff badges (under HP) gold buff / red debuff / disease-colored (lime common, purple prions, others by disease).",
+    "No new sections: frostbite/fire/fishing stay in Mechanics Guide; campfire cook kept under cook-wild-meat.",
+    "preferKeepSectionIds: kept all eight; no reorder."
+  ],
+  "preferKeepSectionIds": true,
+  "newSectionIdsNeeded": [],
+  "desktop": {
+    "id": "survival",
+    "label": "Survival",
+    "sections": [
+      {
+        "id": "stay-alive",
+        "title": "Stay Alive",
+        "description": "Your health bar sits above your avatar. Avoid wildlife hits, lava, and cold damage. Health only regenerates when hunger is above 30%. Watch floating damage numbers and the top-right status icons when something is ticking you down.",
+        "icon": "solar:heart-pulse-bold"
+      },
+      {
+        "id": "manage-hunger",
+        "title": "Manage Hunger",
+        "description": "Hunger drains over time, faster while walking (×1.15) and much faster while sprinting (×2). Double-click food in your hotbar to eat (a short hold, about 1 to 10 seconds by food). Walk, jump, roll, or take a hit to cancel mid-bite with no consume. Below 20% you cannot sprint; below 5% you also cannot jump and move slower. At 0% hunger you take damage every 2 seconds until you eat.",
+        "icon": "mdi:food-drumstick"
+      },
+      {
+        "id": "cook-wild-meat",
+        "title": "Cook Wild Meat",
+        "description": "Raw wildlife meat can infect you. Infection incubates silently for in-game hours or days (no badge yet), then symptoms appear: nausea, poison, confusion, sleep, or locked sprint, jump, or roll. While sick, food restores only half hunger. Light a campfire, keep raw meat in inventory, stay within 2 tiles, and use Cook (about 2 to 12 seconds by animal). Cooked meat is usually safe and may roll a short well-fed buff. Deer and cow cooked cuts still have a small prion residual risk.",
+        "icon": "mdi:biohazard"
+      },
+      {
+        "id": "study-wildlife",
+        "title": "Study Wildlife",
+        "description": "After a kill, the body stays about 60 seconds. Click the corpse and press Study. Larger animals take longer (3 to 10 seconds) and grant 1 to 3 study points. Open Codex, then Bestiary, to track each species toward 100. Higher study unlocks deeper dossier lines and clearer meat item details.",
+        "icon": "mdi:book-open-page-variant"
+      },
+      {
+        "id": "read-minimap",
+        "title": "Mini Map",
+        "description": "The map in the top-left shows nearby terrain, biome, and coordinates. You are the yellow dot, other players are blue, and your claimed land is highlighted in orange.",
+        "icon": "mdi:compass"
+      },
+      {
+        "id": "use-inventory",
+        "title": "Inventory",
+        "description": "Your six-slot hotbar sits at the bottom center. The far-left slot is weapons and tools only (empty shows a fist). Click a slot for item actions, drag to rearrange, and drag items out to drop them. Walk over ground loot to pick it up. Snatching a stack while an animal is still eating it takes 2 to 10 seconds and makes that animal fight you until one of you dies.",
+        "icon": "mdi:bag-personal"
+      },
+      {
+        "id": "track-status-effects",
+        "title": "Status Effects",
+        "description": "Icons on the top-right track active conditions: bleed, poison, heat, cold, lava burn, frostbite stacks, shields, and similar DoTs. Numbers show remaining damage, stacks, or time left. Tap or hover a row when you need the summary line.",
+        "icon": "mdi:shield-half-full"
+      },
+      {
+        "id": "track-buff-badges",
+        "title": "Buff Badges",
+        "description": "Small icons below your health bar show combat buffs, debuffs, and diseases. Gold borders are buffs; red borders are debuffs; disease badges use their own colors (often lime, purple for prions). Click a badge for details and countdown. Disease badges only appear after incubation ends.",
+        "icon": "mdi:shield-plus"
+      }
+    ]
+  },
+  "mobile": {
+    "id": "survival",
+    "label": "Survival",
+    "sections": [
+      {
+        "id": "stay-alive",
+        "title": "Stay Alive",
+        "description": "Your health bar sits above your avatar. Avoid wildlife hits, lava, and cold damage. Health only regenerates when hunger is above 30%. Watch floating damage numbers and the top-right status icons when something is ticking you down.",
+        "icon": "solar:heart-pulse-bold"
+      },
+      {
+        "id": "manage-hunger",
+        "title": "Manage Hunger",
+        "description": "Hunger drains over time, faster while walking (×1.15) and much faster while sprinting (×2). Double-tap food in your hotbar to eat (a short hold, about 1 to 10 seconds by food). Walk, jump, roll, or take a hit to cancel mid-bite with no consume. Below 20% you cannot sprint; below 5% you also cannot jump and move slower. At 0% hunger you take damage every 2 seconds until you eat.",
+        "icon": "mdi:food-drumstick"
+      },
+      {
+        "id": "cook-wild-meat",
+        "title": "Cook Wild Meat",
+        "description": "Raw wildlife meat can infect you. Infection incubates silently for in-game hours or days (no badge yet), then symptoms appear: nausea, poison, confusion, sleep, or locked sprint, jump, or roll. While sick, food restores only half hunger. Light a campfire, keep raw meat in inventory, stay within 2 tiles, and use Cook (about 2 to 12 seconds by animal). Cooked meat is usually safe and may roll a short well-fed buff. Deer and cow cooked cuts still have a small prion residual risk.",
+        "icon": "mdi:biohazard"
+      },
+      {
+        "id": "study-wildlife",
+        "title": "Study Wildlife",
+        "description": "After a kill, the body stays about 60 seconds. Tap the corpse and press Study. Larger animals take longer (3 to 10 seconds) and grant 1 to 3 study points. Open Codex, then Bestiary, to track each species toward 100. Higher study unlocks deeper dossier lines and clearer meat item details.",
+        "icon": "mdi:book-open-page-variant"
+      },
+      {
+        "id": "read-minimap",
+        "title": "Mini Map",
+        "description": "The map in the top-left shows nearby terrain, biome, and coordinates. You are the yellow dot, other players are blue, and your claimed land is highlighted in orange.",
+        "icon": "mdi:compass"
+      },
+      {
+        "id": "use-inventory",
+        "title": "Inventory",
+        "description": "Your six-slot hotbar sits at the bottom center. The far-left slot is weapons and tools only (empty shows a fist). Tap a slot for item actions, drag to rearrange, and drag items out to drop them. Walk over ground loot to pick it up. Snatching a stack while an animal is still eating it takes 2 to 10 seconds and makes that animal fight you until one of you dies.",
+        "icon": "mdi:bag-personal"
+      },
+      {
+        "id": "track-status-effects",
+        "title": "Status Effects",
+        "description": "Icons on the top-right track active conditions: bleed, poison, heat, cold, lava burn, frostbite stacks, shields, and similar DoTs. Numbers show remaining damage, stacks, or time left. Tap a row when you need the summary line.",
+        "icon": "mdi:shield-half-full"
+      },
+      {
+        "id": "track-buff-badges",
+        "title": "Buff Badges",
+        "description": "Small icons below your health bar show combat buffs, debuffs, and diseases. Gold borders are buffs; red borders are debuffs; disease badges use their own colors (often lime, purple for prions). Tap a badge for details and countdown. Disease badges only appear after incubation ends.",
+        "icon": "mdi:shield-plus"
+      }
+    ]
+  }
+}

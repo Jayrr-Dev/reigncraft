@@ -190,7 +190,10 @@ export function checkingWorldPlazaOnboardingCoachmarkAdvanceSatisfied(
     case 'codex-open':
       return liveSignals.sessionSignals.hasCodexOpened;
     case 'herbarium-codex-open':
-      return liveSignals.sessionSignals.hasHerbariumCodexOpened;
+      return (
+        liveSignals.sessionSignals.hasHerbariumCodexOpened ||
+        liveSignals.sessionSignals.hasCodexOpened
+      );
     case 'study-start':
       return liveSignals.sessionSignals.hasStudyStarted;
     case 'transform-open':
