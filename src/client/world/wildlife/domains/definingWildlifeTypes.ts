@@ -385,6 +385,16 @@ export type DefiningWildlifeInstance = {
    * Player hits on docile stock demote one step (tame → normal → aggressive).
    */
   aggressionLevel: DefiningWildlifeAggressionLevel;
+  /**
+   * Distance-scaled elite: gold tint, always player-aggro, stacked combat buffs,
+   * human taunt speech. Rolled once at spawn from origin distance.
+   */
+  isGodSpawn?: boolean;
+  /**
+   * Forced aggressive temperament for god spawns (overrides species.temperamentId).
+   * A chicken may run stalker or pack_hunter AI.
+   */
+  temperamentOverrideId?: DefiningWildlifeTemperamentId | null;
   /** Standard-normal sleep schedule roll; stable from spawn anchor. */
   sleepScheduleSample: number;
   /** Standard-normal size roll; stable from spawn anchor. */
