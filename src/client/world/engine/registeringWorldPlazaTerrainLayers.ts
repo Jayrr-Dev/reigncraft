@@ -893,6 +893,10 @@ export function registeringWorldPlazaTerrainLayers(
       createRuntimeState:
         (): RunningWorldPlazaMushroomDecorationsLayerState => ({
           spriteByKey: new Map(),
+          candidateCache: {
+            cacheKey: '',
+            candidates: [],
+          },
         }),
       sync: (context, runtimeState) => {
         const state =
@@ -908,6 +912,7 @@ export function registeringWorldPlazaTerrainLayers(
             bounds: context.floorBounds,
             spriteByKey: state.spriteByKey,
             burntGrassTileKeys: context.burntGrassTileKeys,
+            candidateCache: state.candidateCache,
             maxBuildsPerCall:
               context.performanceProfile
                 .terrainElevationChunkBuildBudgetPerFrame *
@@ -946,6 +951,8 @@ export function registeringWorldPlazaTerrainLayers(
         }
 
         state.spriteByKey.clear();
+        state.candidateCache.cacheKey = '';
+        state.candidateCache.candidates = [];
       },
       destroyRuntimeState: (_context, runtimeState) => {
         const state =
@@ -957,6 +964,8 @@ export function registeringWorldPlazaTerrainLayers(
         }
 
         state.spriteByKey.clear();
+        state.candidateCache.cacheKey = '';
+        state.candidateCache.candidates = [];
       },
     },
     {
