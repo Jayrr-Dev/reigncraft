@@ -42,4 +42,17 @@ describe('checkingWildlifeMayAggroPlayerOnSight', () => {
       checkingWildlifeMayAggroPlayerOnSight(sunhead, 'tame', 'sated')
     ).toBe(false);
   });
+
+  it('blocks same-species animal transforms from on-sight combat', () => {
+    const wolf = DEFINING_WILDLIFE_SPECIES_REGISTRY['grey-wolf'];
+
+    expect(
+      checkingWildlifeMayAggroPlayerOnSight(
+        wolf,
+        'aggressive',
+        'sated',
+        'grey-wolf'
+      )
+    ).toBe(false);
+  });
 });

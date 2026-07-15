@@ -113,6 +113,7 @@ import { checkingWildlifeMayMeleeWildlifeTarget } from '@/components/world/wildl
 import { checkingWildlifePackHunterShadowingAtDamage } from '@/components/world/wildlife/domains/checkingWildlifePackHunterShadowingAtDamage';
 import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
 import { checkingWildlifeProximityPreyInterrupt } from '@/components/world/wildlife/domains/checkingWildlifeProximityPreyInterrupt';
+import { checkingWildlifeSharesPlayerTransformSpecies } from '@/components/world/wildlife/domains/checkingWildlifeSharesPlayerTransformSpecies';
 import { checkingWildlifeSpeciesIsDocile } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsDocile';
 import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
 import { checkingWildlifeSpeciesWandersAwayAtDaybreak } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesWandersAwayAtDaybreak';
@@ -263,6 +264,8 @@ export type AdvancingWildlifeSimulationTickParams = {
   isPlayerRunning?: boolean;
   isPlayerJumping?: boolean;
   playerPreviousPosition?: DefiningWorldPlazaWorldPoint | null;
+  /** Local player's animal transform species; same type stays friendly. */
+  playerTransformWildlifeSpeciesId?: DefiningWildlifeSpeciesId | null;
   resolveSpecies: (
     speciesId: string
   ) => DefiningWildlifeSpeciesDefinition | null;
@@ -312,7 +315,8 @@ function resolvingWildlifePlayerCollision(
   spatialGrid: ManagingWildlifeSpatialGrid,
   nowMs: number,
   isPlayerStartling: boolean,
-  hazardSampling: ResolvingWildlifeSteeringHazardSampling
+  hazardSampling: ResolvingWildlifeSteeringHazardSampling,
+  playerTransformWildlifeSpeciesId: DefiningWildlifeSpeciesId | null = null
 ): {
   playerPushOut: { x: number; y: number } | null;
   contactEvents: readonly DefiningWildlifePlayerContactEvent[];
@@ -394,8 +398,14 @@ function resolvingWildlifePlayerCollision(
             })
           );
         } else {
+          const isFriendlySameSpeciesAsPlayer =
+            checkingWildlifeSharesPlayerTransformSpecies(
+              species.speciesId,
+              playerTransformWildlifeSpeciesId
+            );
           const shouldStartle =
             isPlayerStartling &&
+            !isFriendlySameSpeciesAsPlayer &&
             checkingWildlifeFleesFromPlayerCollision(
               species.temperamentId,
               liveInstance.aggressionLevel
@@ -1186,6 +1196,7 @@ export function advancingWildlifeSimulationTick({
   isPlayerJumping = false,
   isPlayerWalking = false,
   playerPreviousPosition = null,
+  playerTransformWildlifeSpeciesId = null,
   npcPreyTargets = [],
 }: AdvancingWildlifeSimulationTickParams): AdvancingWildlifeSimulationTickResult {
   // Dev QA blank slate defaults Wildlife AI off: keep manually spawned animals
@@ -1281,7 +1292,8 @@ export function advancingWildlifeSimulationTick({
           followerSpatialGrid,
           nowMs,
           isPlayerStartling,
-          hazardSampling
+          hazardSampling,
+          playerTransformWildlifeSpeciesId
         )
       : null;
 
@@ -1456,6 +1468,10 @@ export function advancingWildlifeSimulationTick({
         !isFeedingOnKill &&
         !isSleeping &&
         !checkingWildlifeIsHuntingPlayer(nextInstance, playerUserId) &&
+        !checkingWildlifeSharesPlayerTransformSpecies(
+          species.speciesId,
+          playerTransformWildlifeSpeciesId
+        ) &&
         Boolean(playerPosition) &&
         checkingWildlifeFleesFromPlayerCollision(
           species.temperamentId,
@@ -1643,6 +1659,7 @@ export function advancingWildlifeSimulationTick({
             playerStaminaRatio,
             playerStaminaIsDepleted,
             playerStillDurationMs,
+            playerTransformWildlifeSpeciesId,
             deltaSeconds: thinkElapsedSeconds,
             nowMs,
             npcPreyTargets,
@@ -1667,6 +1684,7 @@ export function advancingWildlifeSimulationTick({
           playerStaminaRatio,
           playerStaminaIsDepleted,
           playerStillDurationMs,
+          playerTransformWildlifeSpeciesId,
           isNightCyclePhase: checkingWildlifeIsNightCyclePhase(cyclePhase),
           resolveSpecies,
         };
@@ -2635,7 +2653,8 @@ export function advancingWildlifeSimulationTick({
         spatialGrid,
         nowMs,
         isPlayerStartling,
-        hazardSampling
+        hazardSampling,
+        playerTransformWildlifeSpeciesId
       )
     : null;
   finishPlayerCollisionSample();

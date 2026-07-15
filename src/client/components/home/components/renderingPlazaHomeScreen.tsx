@@ -18,37 +18,35 @@ import {
   useState,
   type CSSProperties,
 } from 'react';
-import type {
-  PlazaGameSession,
-  PlazaSaveSlotIndex,
-} from '../../../../shared/plazaGameSession';
 import {
   PLAZA_DEVVIT_ONLINE_MAX_PLAYERS,
   PLAZA_DEVVIT_ONLINE_MIN_PLAYERS,
 } from '../../../../shared/plazaDevvitOnline';
+import {
+  PLAZA_SINGLE_PLAYER_RANDOM_ANIMAL_SAVE_SLOT_INDEX,
+  type PlazaGameSession,
+  type PlazaSaveSlotIndex,
+} from '../../../../shared/plazaGameSession';
 
 // Sub-panels stay out of the initial home bundle; the tutorial demo library
 // alone is ~70 KB of source and only needed after a menu choice.
 const RenderingPlazaSinglePlayerSaveSlotsPanel = lazy(async () => {
-  const panelModule = await import(
-    '@/components/home/components/renderingPlazaSinglePlayerSaveSlotsPanel'
-  );
+  const panelModule =
+    await import('@/components/home/components/renderingPlazaSinglePlayerSaveSlotsPanel');
 
   return { default: panelModule.RenderingPlazaSinglePlayerSaveSlotsPanel };
 });
 
 const RenderingPlazaMultiplayerRoomBrowserPanel = lazy(async () => {
-  const panelModule = await import(
-    '@/components/home/components/renderingPlazaMultiplayerRoomBrowserPanel'
-  );
+  const panelModule =
+    await import('@/components/home/components/renderingPlazaMultiplayerRoomBrowserPanel');
 
   return { default: panelModule.RenderingPlazaMultiplayerRoomBrowserPanel };
 });
 
 const RenderingPlazaTutorialPanel = lazy(async () => {
-  const panelModule = await import(
-    '@/components/home/components/renderingPlazaTutorialPanel'
-  );
+  const panelModule =
+    await import('@/components/home/components/renderingPlazaTutorialPanel');
 
   return { default: panelModule.RenderingPlazaTutorialPanel };
 });
@@ -138,17 +136,18 @@ export function RenderingPlazaHomeScreen({
   };
 
   const handlingSelectSaveSlot = (saveSlotIndex: PlazaSaveSlotIndex): void => {
+    if (saveSlotIndex === PLAZA_SINGLE_PLAYER_RANDOM_ANIMAL_SAVE_SLOT_INDEX) {
+      onStartSession({
+        mode: 'single-player',
+        saveSlotIndex,
+        loadProfile: 'random-animal',
+      });
+      return;
+    }
+
     onStartSession({
       mode: 'single-player',
       saveSlotIndex,
-    });
-  };
-
-  const handlingSelectDevQaLoad = (): void => {
-    onStartSession({
-      mode: 'single-player',
-      saveSlotIndex: 1,
-      loadProfile: 'dev-qa',
     });
   };
 
@@ -266,8 +265,8 @@ export function RenderingPlazaHomeScreen({
                     Multiplayer
                   </span>
                   <span className="mt-0.5 block text-sm font-medium italic text-parchment/85">
-                   Fellowship of {PLAZA_DEVVIT_ONLINE_MIN_PLAYERS}
-                    -{PLAZA_DEVVIT_ONLINE_MAX_PLAYERS} travelers
+                    Fellowship of {PLAZA_DEVVIT_ONLINE_MIN_PLAYERS}-
+                    {PLAZA_DEVVIT_ONLINE_MAX_PLAYERS} travelers
                   </span>
                 </span>
                 <Icon
@@ -315,7 +314,6 @@ export function RenderingPlazaHomeScreen({
             <RenderingPlazaSinglePlayerSaveSlotsPanel
               onBack={handlingBackToModeSelect}
               onSelectSaveSlot={handlingSelectSaveSlot}
-              onSelectDevQaLoad={handlingSelectDevQaLoad}
             />
           </Suspense>
         ) : null}

@@ -26,6 +26,7 @@ import { checkingWildlifeMayAggroPlayerOnSight } from '@/components/world/wildli
 import { checkingWildlifePlayerOccludedByColumnRock } from '@/components/world/wildlife/domains/checkingWildlifePlayerOccludedByColumnRock';
 import { checkingWildlifePlayerStartlesWildlife } from '@/components/world/wildlife/domains/checkingWildlifePlayerStartlesWildlife';
 import { checkingWildlifeSelectedGroundFoodIsFavorite } from '@/components/world/wildlife/domains/checkingWildlifeSelectedGroundFoodIsFavorite';
+import { checkingWildlifeSharesPlayerTransformSpecies } from '@/components/world/wildlife/domains/checkingWildlifeSharesPlayerTransformSpecies';
 import { checkingWildlifeShouldDocileApproachReact } from '@/components/world/wildlife/domains/checkingWildlifeShouldDocileApproachReact';
 import { checkingWildlifeSocialHunterMayHunt } from '@/components/world/wildlife/domains/checkingWildlifeSocialHunterMayHunt';
 import { checkingWildlifeSpeciesFavoriteFood } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesFavoriteFood';
@@ -65,6 +66,7 @@ import type { DefiningWildlifeStalkPreyContext } from '@/components/world/wildli
 import type {
   DefiningWildlifeHungerDriveLevel,
   DefiningWildlifeInstance,
+  DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { listingWildlifeGroundFoodItems } from '@/components/world/wildlife/domains/managingWildlifeGroundFoodBridge';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
@@ -96,6 +98,8 @@ export type DefiningWildlifeBehaviorBlackboard = {
   playerStaminaRatio: number | null;
   playerStaminaIsDepleted: boolean;
   playerStillDurationMs: number;
+  /** Local player's animal transform species; same type stays friendly. */
+  playerTransformWildlifeSpeciesId?: DefiningWildlifeSpeciesId | null;
   /**
    * True during the shared night window (sunset → sunrise). Always-follow
    * companions only trail while this is true. Defaults to night when omitted
@@ -227,7 +231,8 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
       !checkingWildlifeMayAggroPlayerOnSight(
         blackboard.species,
         blackboard.instance.aggressionLevel,
-        blackboard.instance.hungerState.driveLevel
+        blackboard.instance.hungerState.driveLevel,
+        blackboard.playerTransformWildlifeSpeciesId ?? null
       )
     ) {
       return false;
@@ -357,6 +362,15 @@ const DEFINING_WILDLIFE_CONDITION_REGISTRY: Record<
     }),
   isPlayerTooClose: (blackboard) => {
     if (!blackboard.playerPosition) {
+      return false;
+    }
+
+    if (
+      checkingWildlifeSharesPlayerTransformSpecies(
+        blackboard.species.speciesId,
+        blackboard.playerTransformWildlifeSpeciesId
+      )
+    ) {
       return false;
     }
 

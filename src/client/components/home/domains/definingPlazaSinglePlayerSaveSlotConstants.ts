@@ -1,8 +1,13 @@
+import { DEFINING_WORLD_PLAZA_RANDOM_ANIMAL_SAVE_SLOT_INDEX } from '@/components/world/domains/definingWorldPlazaRandomAnimalLoadConstants';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 
 /** Save slots that are visible but not selectable yet. */
 export const DEFINING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_TEMPORARILY_LOCKED_SLOT_INDICES =
-  [2, 3] as const satisfies readonly PlazaSaveSlotIndex[];
+  [3] as const satisfies readonly PlazaSaveSlotIndex[];
+
+/** Save slot that boots the Random Animal load profile. */
+export const DEFINING_PLAZA_SINGLE_PLAYER_RANDOM_ANIMAL_SAVE_SLOT_INDEX =
+  DEFINING_WORLD_PLAZA_RANDOM_ANIMAL_SAVE_SLOT_INDEX;
 
 /** Locked slot subtitle and action pill copy. */
 export const LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_COMING_SOON =

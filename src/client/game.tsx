@@ -25,6 +25,10 @@ import {
   enablingWorldPlazaDevQaLoad,
   syncingWorldPlazaDevQaGenerationFeatureBlankSlateIfEnabled,
 } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
+import {
+  disablingWorldPlazaRandomAnimalLoad,
+  enablingWorldPlazaRandomAnimalLoad,
+} from '@/components/world/domains/managingWorldPlazaRandomAnimalLoadStore';
 import { resolvingWorldPlazaOnlineRoomDisplayName } from '@/components/world/domains/resolvingWorldPlazaOnlineRoomDisplayName';
 import { usingWorldPlazaClientErrorCapture } from '@/components/world/hooks/usingWorldPlazaClientErrorCapture';
 import { RenderingWorldPlazaWorldLoadingBiomeMusic } from '@/components/world/loading/components/renderingWorldPlazaWorldLoadingBiomeMusic';
@@ -52,6 +56,7 @@ import { PLAZA_DEVVIT_ONLINE_DEFAULT_MAX_PLAYERS } from '../shared/plazaDevvitOn
 import type { PlazaGameSession } from '../shared/plazaGameSession';
 import {
   checkingPlazaSinglePlayerDevQaLoadSession,
+  checkingPlazaSinglePlayerRandomAnimalLoadSession,
   resolvingPlazaSinglePlayerDevQaSessionOwnerId,
   resolvingPlazaSinglePlayerSessionOwnerId,
 } from '../shared/plazaGameSession';
@@ -89,8 +94,7 @@ function PlazaWorldBootGate({
     sessionAudioLoading.status === 'complete' &&
     !isHydratingSave;
   const percentLoaded = Math.round(
-    worldLoading.percentLoaded * 0.8 +
-      sessionAudioLoading.percentLoaded * 0.2
+    worldLoading.percentLoaded * 0.8 + sessionAudioLoading.percentLoaded * 0.2
   );
   const errorMessage =
     worldLoading.errorMessage ?? sessionAudioLoading.errorMessage;
@@ -330,6 +334,12 @@ export const App = () => {
       disablingWorldPlazaDevQaLoad();
     }
 
+    if (checkingPlazaSinglePlayerRandomAnimalLoadSession(session)) {
+      enablingWorldPlazaRandomAnimalLoad();
+    } else {
+      disablingWorldPlazaRandomAnimalLoad();
+    }
+
     sendingWorldPlazaAudioLifecycleEvent('SESSION_STARTED');
     void startingWorldPlazaSessionAudioLoading();
     setGameSession(session);
@@ -341,6 +351,12 @@ export const App = () => {
   useEffect(() => {
     if (!gameSession) {
       return;
+    }
+
+    if (checkingPlazaSinglePlayerRandomAnimalLoadSession(gameSession)) {
+      enablingWorldPlazaRandomAnimalLoad();
+    } else {
+      disablingWorldPlazaRandomAnimalLoad();
     }
 
     if (checkingPlazaSinglePlayerDevQaLoadSession(gameSession)) {
@@ -357,6 +373,7 @@ export const App = () => {
 
   const handlingExitToHome = (): void => {
     disablingWorldPlazaDevQaLoad();
+    disablingWorldPlazaRandomAnimalLoad();
     sendingWorldPlazaAudioLifecycleEvent('EXIT_HOME');
     resettingWorldPlazaSessionAudioLoading();
     setGameSession(null);

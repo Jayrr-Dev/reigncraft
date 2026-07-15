@@ -6,6 +6,7 @@
 
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWildlifePointIsInsideTerritoryAnchor } from '@/components/world/wildlife/domains/checkingWildlifePointIsInsideTerritoryAnchor';
+import { checkingWildlifeSharesPlayerTransformSpecies } from '@/components/world/wildlife/domains/checkingWildlifeSharesPlayerTransformSpecies';
 import { DEFINING_WILDLIFE_AGGRO_THREAT_THRESHOLD } from '@/components/world/wildlife/domains/definingWildlifeAggroConstants';
 import type { DefiningWildlifeBehaviorBlackboard } from '@/components/world/wildlife/domains/definingWildlifeBehaviorConditionRegistry';
 import type {
@@ -79,6 +80,15 @@ export function checkingWildlifeShouldTerritoryWarn(
   }
 
   if (blackboard.instance.aggressionLevel === 'tame') {
+    return false;
+  }
+
+  if (
+    checkingWildlifeSharesPlayerTransformSpecies(
+      blackboard.species.speciesId,
+      blackboard.playerTransformWildlifeSpeciesId
+    )
+  ) {
     return false;
   }
 

@@ -4,8 +4,14 @@ export const PLAZA_SINGLE_PLAYER_SAVE_SLOT_COUNT = 3;
 /** Valid save slot indices for single-player mode. */
 export type PlazaSaveSlotIndex = 1 | 2 | 3;
 
+/** Save slot used for the Random Animal single-player mode. */
+export const PLAZA_SINGLE_PLAYER_RANDOM_ANIMAL_SAVE_SLOT_INDEX = 2;
+
 /** Single-player world load profile chosen on the home screen. */
-export type PlazaSinglePlayerLoadProfile = 'standard' | 'dev-qa';
+export type PlazaSinglePlayerLoadProfile =
+  | 'standard'
+  | 'dev-qa'
+  | 'random-animal';
 
 /** Active plaza session chosen on the home screen. */
 export type PlazaGameSession =
@@ -62,4 +68,17 @@ export function checkingPlazaSinglePlayerDevQaLoadSession(
   session: PlazaGameSession | null
 ): boolean {
   return session?.mode === 'single-player' && session.loadProfile === 'dev-qa';
+}
+
+/**
+ * Returns true when the session starts the player as a random animal.
+ *
+ * @param session - Active plaza session, or null.
+ */
+export function checkingPlazaSinglePlayerRandomAnimalLoadSession(
+  session: PlazaGameSession | null
+): boolean {
+  return (
+    session?.mode === 'single-player' && session.loadProfile === 'random-animal'
+  );
 }

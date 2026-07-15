@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { DEFINING_PLAZA_CODEX_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaCodexStudyTier';
 import {
   applyingWorldPlazaAvatarTransform,
   applyingWorldPlazaAvatarTransformDeathReset,
@@ -17,6 +18,12 @@ import {
   initializingWorldPlazaAvatarTransformCooldownStore,
   resettingWorldPlazaAvatarTransformCooldownStoreForTests,
 } from '@/components/world/domains/managingWorldPlazaAvatarTransformCooldownStore';
+import {
+  initializingWorldPlazaBestiaryDiscoveryStore,
+  recordingWorldPlazaBestiarySpeciesStudied,
+  resettingWorldPlazaBestiaryDiscoveryStoreForTests,
+} from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
+import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 vi.mock('@/components/ui/domains/showingReigncraftToast', () => ({
   showingReigncraftToast: vi.fn(),
@@ -47,18 +54,32 @@ function creatingTestLocalStorage(): Storage {
   };
 }
 
+function unlockingPlayableAnimalForms(
+  ...speciesIds: readonly DefiningWildlifeSpeciesId[]
+): void {
+  for (const speciesId of speciesIds) {
+    recordingWorldPlazaBestiarySpeciesStudied(
+      speciesId,
+      DEFINING_PLAZA_CODEX_STUDY_FULL_COUNT
+    );
+  }
+}
+
 describe('applyingWorldPlazaAvatarTransform', () => {
   beforeEach(() => {
     vi.stubGlobal('localStorage', creatingTestLocalStorage());
     vi.stubGlobal('window', globalThis);
     resettingWorldPlazaAvatarSkinSelectionStoreForTests();
     resettingWorldPlazaAvatarTransformCooldownStoreForTests();
+    resettingWorldPlazaBestiaryDiscoveryStoreForTests();
     initializingWorldPlazaAvatarSkinSelectionStore('transform-owner');
     initializingWorldPlazaAvatarTransformCooldownStore('transform-owner');
+    initializingWorldPlazaBestiaryDiscoveryStore('transform-owner');
   });
 
   it('applies a new form and starts the 1-day cooldown', () => {
     const nowMs = 1_000_000;
+    unlockingPlayableAnimalForms('husky');
 
     expect(
       applyingWorldPlazaAvatarTransform(
@@ -79,6 +100,7 @@ describe('applyingWorldPlazaAvatarTransform', () => {
 
   it('blocks another transform while cooldown is active', () => {
     const nowMs = 2_000_000;
+    unlockingPlayableAnimalForms('husky', 'grizzly');
 
     expect(
       applyingWorldPlazaAvatarTransform(
@@ -97,6 +119,21 @@ describe('applyingWorldPlazaAvatarTransform', () => {
     );
   });
 
+  it('blocks animal forms until bestiary mastery', () => {
+    expect(
+      applyingWorldPlazaAvatarTransform(
+        DEFINING_WORLD_PLAZA_AVATAR_SKIN.HUSKY,
+        2_500_000
+      )
+    ).toBe('study-locked');
+    expect(gettingWorldPlazaSelectedAvatarSkinId()).toBe(
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+    );
+    expect(checkingWorldPlazaAvatarTransformIsOnCooldown(2_500_000)).toBe(
+      false
+    );
+  });
+
   it('treats selecting the active form as unchanged', () => {
     expect(
       applyingWorldPlazaAvatarTransform(
@@ -111,6 +148,7 @@ describe('applyingWorldPlazaAvatarTransform', () => {
 
   it('resets to Girl on death without clearing transform cooldown', () => {
     const nowMs = 4_000_000;
+    unlockingPlayableAnimalForms('husky');
 
     expect(
       applyingWorldPlazaAvatarTransform(

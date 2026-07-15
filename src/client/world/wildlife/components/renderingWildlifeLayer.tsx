@@ -607,6 +607,8 @@ export function RenderingWildlifeLayer({
               isPlayerWalking: config.isPlayerWalkingRef?.current ?? false,
               isPlayerRunning: config.isPlayerRunningRef?.current ?? false,
               isPlayerJumping: config.isPlayerJumpingRef?.current ?? false,
+              playerTransformWildlifeSpeciesId:
+                config.playerTransformWildlifeSpeciesIdRef?.current ?? null,
               resolveSpecies: resolvingWildlifeSpeciesDefinition,
               deltaSeconds: DEFINING_WILDLIFE_SIMULATION_TICK_MS / 1000,
               nowMs,

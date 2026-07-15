@@ -289,6 +289,7 @@ import {
   DEFINING_WORLD_PLAZA_HOST_FULLSCREEN_CLASS_NAME,
   DEFINING_WORLD_PLAZA_VIEWPORT_FRAME_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaViewportFullscreenConstants';
+import { ensuringWorldPlazaRandomAnimalAvatarSkin } from '@/components/world/domains/ensuringWorldPlazaRandomAnimalAvatarSkin';
 import { findingWorldPlazaBiomeTeleportWorldPointForDev } from '@/components/world/domains/findingWorldPlazaBiomeTeleportWorldPointForDev';
 import {
   gettingWorldPlazaSelectedAvatarSkinId,
@@ -317,6 +318,7 @@ import {
   recordingWorldPlazaLapidaryOreStudied,
 } from '@/components/world/domains/managingWorldPlazaLapidaryDiscoveryStore';
 import { settingWorldPlazaOnlineRoomId } from '@/components/world/domains/managingWorldPlazaOnlineRoomIdStore';
+import { checkingWorldPlazaRandomAnimalLoadEnabled } from '@/components/world/domains/managingWorldPlazaRandomAnimalLoadStore';
 import {
   attachingWorldPlazaRecipePage,
   checkingWorldPlazaRecipePageAttachedInStore,
@@ -7003,6 +7005,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     const storageOwnerId = onlineUserId ?? localPersistenceOwnerId;
 
     initializingWorldPlazaAvatarSkinSelectionStore(storageOwnerId);
+    if (checkingWorldPlazaRandomAnimalLoadEnabled()) {
+      ensuringWorldPlazaRandomAnimalAvatarSkin();
+    }
     initializingWorldPlazaAvatarTransformCooldownStore(storageOwnerId);
     initializingWorldPlazaRecipeDiscoveryStore(storageOwnerId, {
       cloudSaveSlotIndex: discoveryCloudSaveSlotIndex,

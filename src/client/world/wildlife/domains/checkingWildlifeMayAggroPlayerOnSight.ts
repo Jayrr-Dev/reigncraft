@@ -6,10 +6,12 @@
 
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
+import { checkingWildlifeSharesPlayerTransformSpecies } from '@/components/world/wildlife/domains/checkingWildlifeSharesPlayerTransformSpecies';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type {
   DefiningWildlifeAggressionLevel,
   DefiningWildlifeHungerDriveLevel,
+  DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wildlife/domains/resolvingWildlifeAggressionLevelFromAnchor';
 
@@ -19,11 +21,21 @@ import { resolvingWildlifeAggressionLevelProfile } from '@/components/world/wild
 export function checkingWildlifeMayAggroPlayerOnSight(
   species: DefiningWildlifeSpeciesDefinition,
   aggressionLevel: DefiningWildlifeAggressionLevel,
-  hungerDriveLevel: DefiningWildlifeHungerDriveLevel
+  hungerDriveLevel: DefiningWildlifeHungerDriveLevel,
+  playerTransformWildlifeSpeciesId: DefiningWildlifeSpeciesId | null = null
 ): boolean {
   if (
     !checkingWorldPlazaGenerationFeatureEnabled(
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.WILDLIFE_AI
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    checkingWildlifeSharesPlayerTransformSpecies(
+      species.speciesId,
+      playerTransformWildlifeSpeciesId
     )
   ) {
     return false;

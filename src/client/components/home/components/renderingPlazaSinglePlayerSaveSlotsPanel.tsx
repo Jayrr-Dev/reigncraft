@@ -7,6 +7,7 @@ import {
   definingPlazaButtonSfxDataAttributes,
 } from '@/components/home/domains/definingPlazaDefaultButtonSfxConstants';
 import {
+  DEFINING_PLAZA_SINGLE_PLAYER_RANDOM_ANIMAL_SAVE_SLOT_INDEX,
   LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_COMING_SOON,
   STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_LOCKED_PILL_CLASS_NAME,
   STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_LOCKED_ROW_CLASS_NAME,
@@ -30,9 +31,9 @@ import { usingPlazaSinglePlayerSaveSlotDeleteMutation } from '@/components/home/
 import { usingPlazaSinglePlayerSaveSlotsQuery } from '@/components/home/hooks/usingPlazaSinglePlayerSaveSlotsQuery';
 import { Icon } from '@/components/ui/icon';
 import {
-  LABELING_WORLD_PLAZA_DEV_QA_LOAD_BUTTON,
-  LABELING_WORLD_PLAZA_DEV_QA_LOAD_SUBTITLE,
-} from '@/components/world/domains/definingWorldPlazaDevQaLoadConstants';
+  LABELING_WORLD_PLAZA_RANDOM_ANIMAL_LOAD_SLOT_SUBTITLE_NEW,
+  LABELING_WORLD_PLAZA_RANDOM_ANIMAL_LOAD_SLOT_TITLE,
+} from '@/components/world/domains/definingWorldPlazaRandomAnimalLoadConstants';
 import { useCallback, useState } from 'react';
 import {
   checkingPlazaSaveSlotIndex,
@@ -42,7 +43,6 @@ import {
 export type RenderingPlazaSinglePlayerSaveSlotsPanelProps = {
   onBack: () => void;
   onSelectSaveSlot: (saveSlotIndex: PlazaSaveSlotIndex) => void;
-  onSelectDevQaLoad: () => void;
 };
 
 /**
@@ -51,7 +51,6 @@ export type RenderingPlazaSinglePlayerSaveSlotsPanelProps = {
 export function RenderingPlazaSinglePlayerSaveSlotsPanel({
   onBack,
   onSelectSaveSlot,
-  onSelectDevQaLoad,
 }: RenderingPlazaSinglePlayerSaveSlotsPanelProps): React.JSX.Element {
   const { saveSlotSummaries } = usingPlazaSinglePlayerSaveSlotsQuery();
   const { deleteSaveSlotAsync, isDeletingSaveSlot } =
@@ -129,6 +128,9 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
 
           const isTemporarilyLocked =
             checkingPlazaSinglePlayerSaveSlotIsTemporarilyLocked(saveSlotIndex);
+          const isRandomAnimalSlot =
+            saveSlotIndex ===
+            DEFINING_PLAZA_SINGLE_PLAYER_RANDOM_ANIMAL_SAVE_SLOT_INDEX;
 
           return (
             <li
@@ -164,7 +166,9 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
                       STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_TITLE_CLASS_NAME
                     }
                   >
-                    Slot {saveSlotIndex}
+                    {isRandomAnimalSlot
+                      ? LABELING_WORLD_PLAZA_RANDOM_ANIMAL_LOAD_SLOT_TITLE
+                      : `Slot ${saveSlotIndex}`}
                   </span>
                   <span
                     className={
@@ -173,9 +177,11 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
                   >
                     {isTemporarilyLocked
                       ? LABELING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_COMING_SOON
-                      : formattingPlazaSinglePlayerSaveSlotLastPlayedLabel(
-                          saveSlotSummary.lastPlayedAtMs
-                        )}
+                      : isRandomAnimalSlot && !saveSlotSummary.hasSaveData
+                        ? LABELING_WORLD_PLAZA_RANDOM_ANIMAL_LOAD_SLOT_SUBTITLE_NEW
+                        : formattingPlazaSinglePlayerSaveSlotLastPlayedLabel(
+                            saveSlotSummary.lastPlayedAtMs
+                          )}
                   </span>
                 </span>
                 {isTemporarilyLocked ? (
@@ -197,7 +203,11 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
                         : STYLING_PLAZA_SINGLE_PLAYER_SAVE_SLOT_NEW_GAME_PILL_CLASS_NAME
                     }`}
                   >
-                    <Icon icon="mdi:play" className="size-3.5" aria-hidden />
+                    <Icon
+                      icon={isRandomAnimalSlot ? 'mdi:paw' : 'mdi:play'}
+                      className="size-3.5"
+                      aria-hidden
+                    />
                     <span className="hidden sm:inline">
                       {saveSlotSummary.hasSaveData ? 'Continue' : 'New Game'}
                     </span>
@@ -233,40 +243,6 @@ export function RenderingPlazaSinglePlayerSaveSlotsPanel({
           );
         })}
       </ul>
-
-      <div
-        aria-hidden
-        className="h-px bg-[linear-gradient(90deg,transparent,rgba(44,74,82,0.5),transparent)]"
-      />
-
-      <button
-        type="button"
-        {...definingPlazaButtonSfxDataAttributes(
-          DEFINING_PLAZA_BUTTON_SFX_KIND.none
-        )}
-        onClick={() => {
-          notifyingPlazaHomeScreenButtonClicked();
-          onSelectDevQaLoad();
-        }}
-        className="plaza-btn-3d flex w-full cursor-pointer items-center gap-3 rounded-md border-2 border-poster-gold/50 bg-[linear-gradient(180deg,#3a5a62_0%,#2c4a52_100%)] px-4 py-3 text-left shadow-[0_4px_0_0_#14252b] [--plaza-edge:#14252b]"
-      >
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-md border border-parchment/30 bg-ink/30 text-parchment">
-          <Icon icon="mdi:hammer" className="size-5" aria-hidden />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block font-display text-base font-bold tracking-wide text-parchment">
-            {LABELING_WORLD_PLAZA_DEV_QA_LOAD_BUTTON}
-          </span>
-          <span className="mt-0.5 block text-xs font-medium italic text-parchment/80">
-            {LABELING_WORLD_PLAZA_DEV_QA_LOAD_SUBTITLE}
-          </span>
-        </span>
-        <Icon
-          icon="mdi:chevron-right"
-          className="size-5 shrink-0 text-parchment/70"
-          aria-hidden
-        />
-      </button>
 
       <RenderingPlazaSinglePlayerSaveSlotDeleteConfirmDialog
         saveSlotIndex={confirmingDeleteSaveSlotIndex}

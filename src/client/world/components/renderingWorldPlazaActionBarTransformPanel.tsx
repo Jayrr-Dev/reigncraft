@@ -6,6 +6,7 @@
  * @module components/world/components/renderingWorldPlazaActionBarTransformPanel
  */
 
+import { useUserData } from '@/components/hooks/useAuth';
 import { Icon } from '@/components/ui/icon';
 import { applyingWorldPlazaAvatarTransform } from '@/components/world/domains/applyingWorldPlazaAvatarTransform';
 import {
@@ -24,15 +25,17 @@ import {
   STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_PANEL_CLASS_NAME,
   STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_SCROLL_ARROW_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaActionBarConstants';
-import {
-  DEFINING_WORLD_PLAZA_AVATAR_SKIN_OPTIONS,
-  type DefiningWorldPlazaAvatarSkinId,
-} from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
+import type { DefiningWorldPlazaAvatarSkinId } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
+import { listingWorldPlazaAvatarSkinOptionsForUser } from '@/components/world/domains/listingWorldPlazaAvatarSkinOptionsForUser';
 import {
   gettingWorldPlazaAvatarTransformCooldownReadyAtMs,
   subscribingWorldPlazaAvatarTransformCooldown,
 } from '@/components/world/domains/managingWorldPlazaAvatarTransformCooldownStore';
+import {
+  gettingWorldPlazaBestiaryStudyCountsSnapshot,
+  subscribingWorldPlazaBestiaryDiscovery,
+} from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { cn } from '@/lib/utils';
 import {
   useEffect,
@@ -49,11 +52,14 @@ export type RenderingWorldPlazaActionBarTransformPanelProps = {
 
 /**
  * Character transform menu with filter + arrow-driven scrolling.
+ *
+ * Animal forms only appear after bestiary mastery for that species.
  */
 export function RenderingWorldPlazaActionBarTransformPanel({
   selectedAvatarSkinId,
   onSelectSkin,
 }: RenderingWorldPlazaActionBarTransformPanelProps): React.JSX.Element {
+  const { data: userData } = useUserData();
   const listRef = useRef<HTMLDivElement | null>(null);
   const [filterText, setFilterText] = useState('');
   const [canScrollUp, setCanScrollUp] = useState(false);
@@ -63,20 +69,35 @@ export function RenderingWorldPlazaActionBarTransformPanel({
     gettingWorldPlazaAvatarTransformCooldownReadyAtMs,
     gettingWorldPlazaAvatarTransformCooldownReadyAtMs
   );
+  const studyCountsBySpeciesId = useSyncExternalStore(
+    subscribingWorldPlazaBestiaryDiscovery,
+    gettingWorldPlazaBestiaryStudyCountsSnapshot,
+    gettingWorldPlazaBestiaryStudyCountsSnapshot
+  );
   const isTransformOnCooldown = transformReadyAtMs > Date.now();
+
+  const unlockedSkinOptions = useMemo(
+    () =>
+      listingWorldPlazaAvatarSkinOptionsForUser(
+        userData?.username,
+        userData?.alias,
+        studyCountsBySpeciesId
+      ),
+    [studyCountsBySpeciesId, userData?.alias, userData?.username]
+  );
 
   const normalizedFilterText = filterText.trim().toLowerCase();
   const filteredSkinOptions = useMemo(() => {
     if (!normalizedFilterText) {
-      return DEFINING_WORLD_PLAZA_AVATAR_SKIN_OPTIONS;
+      return unlockedSkinOptions;
     }
 
-    return DEFINING_WORLD_PLAZA_AVATAR_SKIN_OPTIONS.filter(
+    return unlockedSkinOptions.filter(
       (skinOption) =>
         skinOption.label.toLowerCase().includes(normalizedFilterText) ||
         skinOption.skinId.toLowerCase().includes(normalizedFilterText)
     );
-  }, [normalizedFilterText]);
+  }, [normalizedFilterText, unlockedSkinOptions]);
 
   const updatingScrollAffordances = (): void => {
     const listElement = listRef.current;
@@ -189,7 +210,7 @@ export function RenderingWorldPlazaActionBarTransformPanel({
                   skinOption.skinId
                 );
 
-                if (result === 'cooldown') {
+                if (result === 'cooldown' || result === 'study-locked') {
                   return;
                 }
 
