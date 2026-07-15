@@ -12,6 +12,7 @@
 
 import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import type { DefiningWorldPlazaCraftModeCookbookId } from '@/components/world/building/domains/definingWorldPlazaCraftModeCookbookRegistry';
+import { DEFINING_WORLD_PLAZA_CRAFTABLE_PLATE_ARMOR_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftablePlateArmorRecipeIds';
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeToolRecipeIds';
 import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 
@@ -33,11 +34,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID = {
   BEAR_TRAP: 'recipe-bear-trap',
   CALTROPS: 'recipe-caltrops',
   IRON_TUBE: 'recipe-iron-tube',
-  IRON_PLATE_CASQUE: 'recipe-iron-plate-casque',
-  IRON_PLATE_GAUNTLETS: 'recipe-iron-plate-gauntlets',
-  IRON_PLATE_BREASTPLATE: 'recipe-iron-plate-breastplate',
-  IRON_PLATE_GREAVES: 'recipe-iron-plate-greaves',
-  IRON_PLATE_SABATONS: 'recipe-iron-plate-sabatons',
+  ...DEFINING_WORLD_PLAZA_CRAFTABLE_PLATE_ARMOR_RECIPE_ID,
   HEALER_YARROW_PRESSURE_DRESSING: 'recipe-healer-yarrow-pressure-dressing',
   HEALER_CALENDULA_WOUND_SALVE: 'recipe-healer-calendula-wound-salve',
   HEALER_CHAMOMILE_COMPRESS: 'recipe-healer-chamomile-compress',

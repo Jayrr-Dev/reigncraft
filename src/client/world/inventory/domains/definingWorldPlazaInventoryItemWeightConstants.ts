@@ -7,13 +7,13 @@
  * @module components/world/inventory/domains/definingWorldPlazaInventoryItemWeightConstants
  */
 
+import { DEFINING_WORLD_PLAZA_CRAFTABLE_PLATE_ARMOR_ITEM_TYPE_IDS } from '@/components/world/equipment/domains/definingWorldPlazaCraftablePlateArmorSetRegistry';
 import {
   DEFINING_WORLD_PLAZA_EARLY_UNIQUE_WEAPON_ITEM_TYPE_IDS,
   DEFINING_WORLD_PLAZA_INVENTORY_BESSEMER_ARMOR_ITEM_TYPE_IDS,
   DEFINING_WORLD_PLAZA_INVENTORY_CHAOS_ARMOR_ITEM_TYPE_IDS,
   DEFINING_WORLD_PLAZA_INVENTORY_GLASS_VEIL_ARMOR_ITEM_TYPE_IDS,
   DEFINING_WORLD_PLAZA_INVENTORY_HEALER_ITEM_TYPE_IDS,
-  DEFINING_WORLD_PLAZA_INVENTORY_IRON_PLATE_ARMOR_ITEM_TYPE_IDS,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_AXE_GOLD,
@@ -121,8 +121,8 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
   DEFINING_WORLD_PLAZA_INVENTORY_SURVIVAL_ITEM_TYPE_IDS,
+  DEFINING_WORLD_PLAZA_LATE_UNIQUE_WEAPON_ITEM_TYPE_IDS,
   DEFINING_WORLD_PLAZA_MID_UNIQUE_WEAPON_ITEM_TYPE_IDS,
-  DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ITEM_TYPE_IDS,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 
 /** Lightest carry weight (berries, seeds, spritcore). */
@@ -204,16 +204,24 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_WEIGHT_BY_TYPE_ID: Readonly<
     )
   ),
   ...Object.fromEntries(
-    DEFINING_WORLD_PLAZA_INVENTORY_IRON_PLATE_ARMOR_ITEM_TYPE_IDS.map(
-      (typeId) => [
-        typeId,
-        typeId.includes('breastplate')
-          ? 4
-          : typeId.includes('greaves')
-            ? 3.5
-            : 3,
-      ]
-    )
+    DEFINING_WORLD_PLAZA_CRAFTABLE_PLATE_ARMOR_ITEM_TYPE_IDS.map((typeId) => [
+      typeId,
+      typeId.includes('leather-plate')
+        ? typeId.includes('breastplate')
+          ? 2.5
+          : 2
+        : typeId.includes('gold-plate')
+          ? typeId.includes('breastplate')
+            ? 4.5
+            : typeId.includes('greaves')
+              ? 4
+              : 3.5
+          : typeId.includes('breastplate')
+            ? 4
+            : typeId.includes('greaves')
+              ? 3.5
+              : 3,
+    ])
   ),
   ...Object.fromEntries(
     DEFINING_WORLD_PLAZA_INVENTORY_GLASS_VEIL_ARMOR_ITEM_TYPE_IDS.map(
@@ -236,15 +244,10 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_WEIGHT_BY_TYPE_ID: Readonly<
     ])
   ),
   ...Object.fromEntries(
-    DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ITEM_TYPE_IDS.filter(
-      (typeId) =>
-        !(
-          DEFINING_WORLD_PLAZA_EARLY_UNIQUE_WEAPON_ITEM_TYPE_IDS as readonly string[]
-        ).includes(typeId) &&
-        !(
-          DEFINING_WORLD_PLAZA_MID_UNIQUE_WEAPON_ITEM_TYPE_IDS as readonly string[]
-        ).includes(typeId)
-    ).map((typeId) => [typeId, 3.5])
+    DEFINING_WORLD_PLAZA_LATE_UNIQUE_WEAPON_ITEM_TYPE_IDS.map((typeId) => [
+      typeId,
+      3.5,
+    ])
   ),
   [DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRIES]: 0.5,
   [DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED]: 0.5,

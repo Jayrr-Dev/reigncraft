@@ -2,14 +2,14 @@ import { DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL } from '@/components/wor
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID } from '@/components/world/building/domains/definingWorldPlazaCraftModeCookbookRegistry';
 import { resolvingWorldPlazaCraftModeRecipeDefinition } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry';
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
-import { registeringWorldPlazaIronPlateArmorCraftModeRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaIronPlateArmorCraftModeRecipes';
+import { registeringWorldPlazaCraftablePlateArmorCraftModeRecipes } from '@/components/world/crafting/domains/registeringWorldPlazaCraftablePlateArmorCraftModeRecipes';
 import { describe, expect, it } from 'vitest';
 
-describe('registeringWorldPlazaIronPlateArmorCraftModeRecipes', () => {
-  it('registers five Blacksmith anvil item recipes', () => {
-    const recipes = registeringWorldPlazaIronPlateArmorCraftModeRecipes();
+describe('registeringWorldPlazaCraftablePlateArmorCraftModeRecipes', () => {
+  it('registers five tiers × five pieces for Blacksmith anvil', () => {
+    const recipes = registeringWorldPlazaCraftablePlateArmorCraftModeRecipes();
 
-    expect(recipes).toHaveLength(5);
+    expect(recipes).toHaveLength(25);
     expect(
       recipes.every(
         (recipe) =>
@@ -22,15 +22,28 @@ describe('registeringWorldPlazaIronPlateArmorCraftModeRecipes', () => {
     ).toBe(true);
   });
 
-  it('wires breastplate into the craft registry', () => {
+  it('wires gold breastplate into the craft registry', () => {
     const recipe = resolvingWorldPlazaCraftModeRecipeDefinition(
-      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.IRON_PLATE_BREASTPLATE
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.GOLD_PLATE_BREASTPLATE
     );
 
-    expect(recipe?.title).toBe('Iron Breastplate');
+    expect(recipe?.title).toBe('Gold Breastplate');
     expect(recipe?.outcome).toEqual({
       kind: 'item',
-      itemTypeId: 'world-plaza-iron-plate-breastplate',
+      itemTypeId: 'world-plaza-gold-plate-breastplate',
+      quantity: 1,
+    });
+  });
+
+  it('wires leather cap into the craft registry', () => {
+    const recipe = resolvingWorldPlazaCraftModeRecipeDefinition(
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.LEATHER_PLATE_CASQUE
+    );
+
+    expect(recipe?.title).toBe('Leather Cap');
+    expect(recipe?.outcome).toEqual({
+      kind: 'item',
+      itemTypeId: 'world-plaza-leather-plate-casque',
       quantity: 1,
     });
   });

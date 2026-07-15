@@ -13,8 +13,8 @@ import {
   resolvingWorldPlazaBessemerArmorSetCombatModifiers,
 } from '@/components/world/equipment/domains/resolvingWorldPlazaBessemerArmorSetCombatModifiers';
 import { resolvingWorldPlazaChaosArmorSetCombatModifiers } from '@/components/world/equipment/domains/resolvingWorldPlazaChaosArmorSetCombatModifiers';
+import { resolvingWorldPlazaCraftablePlateArmorSetCombatModifiers } from '@/components/world/equipment/domains/resolvingWorldPlazaCraftablePlateArmorSetCombatModifiers';
 import { resolvingWorldPlazaGlassVeilArmorSetCombatModifiers } from '@/components/world/equipment/domains/resolvingWorldPlazaGlassVeilArmorSetCombatModifiers';
-import { resolvingWorldPlazaIronPlateArmorSetCombatModifiers } from '@/components/world/equipment/domains/resolvingWorldPlazaIronPlateArmorSetCombatModifiers';
 import { resolvingWorldPlazaSiphonArmorSetCombatBundle } from '@/components/world/equipment/domains/resolvingWorldPlazaSiphonArmorSetCombatModifiers';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import {
@@ -51,7 +51,7 @@ function clearingWorldPlazaArmorSetCombatModifiers(
 }
 
 /**
- * Clears prior armor-set combat modifiers, then applies Chaos + Bessemer + Glass Veil + Iron Plate + Siphon + Apostle Clay.
+ * Clears prior armor-set combat modifiers, then applies Chaos + Bessemer + Glass Veil + craftable plate + Siphon + Apostle Clay.
  */
 export function syncingWorldPlazaArmorWornCombatModifiers(
   state: DefiningWorldPlazaEntityHealthState,
@@ -64,7 +64,7 @@ export function syncingWorldPlazaArmorWornCombatModifiers(
     ...resolvingWorldPlazaChaosArmorSetCombatModifiers(loadout, nowMs),
     ...resolvingWorldPlazaBessemerArmorSetCombatModifiers(loadout, nowMs),
     ...resolvingWorldPlazaGlassVeilArmorSetCombatModifiers(loadout, nowMs),
-    ...resolvingWorldPlazaIronPlateArmorSetCombatModifiers(loadout, nowMs),
+    ...resolvingWorldPlazaCraftablePlateArmorSetCombatModifiers(loadout, nowMs),
     ...resolvingWorldPlazaApostleClayArmorSetCombatModifiers(loadout, nowMs),
   ];
 

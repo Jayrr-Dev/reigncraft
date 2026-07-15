@@ -62,11 +62,11 @@ import { registeringWorldPlazaInventoryChaosArmorItemDefinitions } from '@/compo
 import { registeringWorldPlazaInventoryChestKeyItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryChestKeyItemDefinitions';
 import { registeringWorldPlazaInventoryCloverItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCloverItemDefinitions';
 import { registeringWorldPlazaInventoryCoffeeItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCoffeeItemDefinitions';
+import { registeringWorldPlazaInventoryCraftablePlateArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCraftablePlateArmorItemDefinitions';
 import { registeringWorldPlazaInventoryFlowerItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryFlowerItemDefinitions';
 import { registeringWorldPlazaInventoryGlassVeilArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryGlassVeilArmorItemDefinitions';
 import { registeringWorldPlazaInventoryHealerItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryHealerItemDefinitions';
 import { registeringWorldPlazaInventoryIngotItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryIngotItemDefinitions';
-import { registeringWorldPlazaInventoryIronPlateArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryIronPlateArmorItemDefinitions';
 import { registeringWorldPlazaInventoryOreItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryOreItemDefinitions';
 import { registeringWorldPlazaInventorySiphonArmorItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventorySiphonArmorItemDefinitions';
 import { registeringWorldPlazaInventorySurvivalItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventorySurvivalItemDefinitions';
@@ -314,7 +314,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     ...registeringWorldPlazaInventoryBessemerArmorItemDefinitions(),
     ...registeringWorldPlazaInventoryGlassVeilArmorItemDefinitions(),
     ...registeringWorldPlazaInventorySiphonArmorItemDefinitions(),
-    ...registeringWorldPlazaInventoryIronPlateArmorItemDefinitions(),
+    ...registeringWorldPlazaInventoryCraftablePlateArmorItemDefinitions(),
     ...registeringWorldPlazaInventoryApostleClayArmorItemDefinitions(),
     ...registeringWorldPlazaSpecialtyWeaponInventoryItems(),
     ...registeringWorldPlazaInventoryOreItemDefinitions(),

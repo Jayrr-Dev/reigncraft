@@ -606,26 +606,6 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SIPHON_GREAVES =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SIPHON_TREADS =
   'world-plaza-siphon-treads' as const;
 
-/** Iron Plate set (sprite sheet order: helm, arm, body, leg, foot). Craftable at anvil. */
-export const DEFINING_WORLD_PLAZA_INVENTORY_IRON_PLATE_ARMOR_ITEM_TYPE_IDS = [
-  'world-plaza-iron-plate-casque',
-  'world-plaza-iron-plate-gauntlets',
-  'world-plaza-iron-plate-breastplate',
-  'world-plaza-iron-plate-greaves',
-  'world-plaza-iron-plate-sabatons',
-] as const;
-
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_PLATE_CASQUE =
-  'world-plaza-iron-plate-casque' as const;
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_PLATE_GAUNTLETS =
-  'world-plaza-iron-plate-gauntlets' as const;
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_PLATE_BREASTPLATE =
-  'world-plaza-iron-plate-breastplate' as const;
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_PLATE_GREAVES =
-  'world-plaza-iron-plate-greaves' as const;
-export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_PLATE_SABATONS =
-  'world-plaza-iron-plate-sabatons' as const;
-
 /** Apostle Clay set (sprite sheet order: helm, arm, body, leg, foot). */
 export const DEFINING_WORLD_PLAZA_INVENTORY_APOSTLE_CLAY_ARMOR_ITEM_TYPE_IDS = [
   'world-plaza-apostle-clay-mask',
@@ -701,10 +681,8 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WEAPON_CHOIR_BLADE =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WEAPON_VENOM_BARB =
   'world-plaza-weapon-venom-barb' as const;
 
-/** Specialty unique weapons (early + mid find-only, late craftable). */
-export const DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ITEM_TYPE_IDS = [
-  ...DEFINING_WORLD_PLAZA_EARLY_UNIQUE_WEAPON_ITEM_TYPE_IDS,
-  ...DEFINING_WORLD_PLAZA_MID_UNIQUE_WEAPON_ITEM_TYPE_IDS,
+/** Late unique weapons (craftable; inventory-late-weapon-sprites.webp order). */
+export const DEFINING_WORLD_PLAZA_LATE_UNIQUE_WEAPON_ITEM_TYPE_IDS = [
   'world-plaza-weapon-chaos-die',
   'world-plaza-weapon-quiet-hand',
   'world-plaza-weapon-glass-needle',
@@ -725,3 +703,10 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WEAPON_FATED_LEDGER =
   'world-plaza-weapon-fated-ledger' as const;
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WEAPON_SOFT_CLAY_CLEAVER =
   'world-plaza-weapon-soft-clay-cleaver' as const;
+
+/** Specialty unique weapons (early + mid find-only, late craftable). */
+export const DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ITEM_TYPE_IDS = [
+  ...DEFINING_WORLD_PLAZA_EARLY_UNIQUE_WEAPON_ITEM_TYPE_IDS,
+  ...DEFINING_WORLD_PLAZA_MID_UNIQUE_WEAPON_ITEM_TYPE_IDS,
+  ...DEFINING_WORLD_PLAZA_LATE_UNIQUE_WEAPON_ITEM_TYPE_IDS,
+] as const;

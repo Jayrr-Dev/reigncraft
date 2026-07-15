@@ -7,6 +7,7 @@
 import { DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_REGISTRY } from '@/components/world/equipment/domains/definingWorldPlazaSpecialtyWeaponRegistry';
 import { resolvingWorldPlazaInventoryEarlyWeaponSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryEarlyWeaponSpriteSheetConstants';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
+import { resolvingWorldPlazaInventoryLateWeaponSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryLateWeaponSpriteSheetConstants';
 import { resolvingWorldPlazaInventoryMidWeaponSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryMidWeaponSpriteSheetConstants';
 
 export function registeringWorldPlazaSpecialtyWeaponInventoryItems(): readonly DefiningWorldPlazaInventoryItemTypeDefinition[] {
@@ -15,7 +16,8 @@ export function registeringWorldPlazaSpecialtyWeaponInventoryItems(): readonly D
       resolvingWorldPlazaInventoryEarlyWeaponSpriteSheetIcon(
         weapon.itemTypeId
       ) ??
-      resolvingWorldPlazaInventoryMidWeaponSpriteSheetIcon(weapon.itemTypeId);
+      resolvingWorldPlazaInventoryMidWeaponSpriteSheetIcon(weapon.itemTypeId) ??
+      resolvingWorldPlazaInventoryLateWeaponSpriteSheetIcon(weapon.itemTypeId);
 
     return {
       typeId: weapon.itemTypeId,

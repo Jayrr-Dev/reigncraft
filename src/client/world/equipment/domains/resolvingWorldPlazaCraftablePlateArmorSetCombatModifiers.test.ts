@@ -1,14 +1,14 @@
 import { creatingEmptyWorldPlazaArmorLoadoutState } from '@/components/world/equipment/domains/definingWorldPlazaArmorLoadoutTypes';
 import {
-  countingWorldPlazaIronPlateArmorPiecesWorn,
-  resolvingWorldPlazaIronPlateArmorSetCombatModifiers,
-} from '@/components/world/equipment/domains/resolvingWorldPlazaIronPlateArmorSetCombatModifiers';
+  countingWorldPlazaCraftablePlateArmorPiecesWorn,
+  resolvingWorldPlazaCraftablePlateArmorSetCombatModifiers,
+} from '@/components/world/equipment/domains/resolvingWorldPlazaCraftablePlateArmorSetCombatModifiers';
 import { syncingWorldPlazaArmorWornCombatModifiers } from '@/components/world/equipment/domains/syncingWorldPlazaArmorWornCombatModifiers';
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { describe, expect, it } from 'vitest';
 
-describe('Iron Plate set combat modifiers', () => {
-  it('applies piece crumbs and 2-piece set bonus when two pieces worn', () => {
+describe('craftable plate armor set combat modifiers', () => {
+  it('applies iron-plate piece crumbs and 2-piece set bonus', () => {
     const loadout = {
       ...creatingEmptyWorldPlazaArmorLoadoutState(),
       helm: {
@@ -25,9 +25,9 @@ describe('Iron Plate set combat modifiers', () => {
       },
     };
 
-    expect(countingWorldPlazaIronPlateArmorPiecesWorn(loadout)).toBe(2);
+    expect(countingWorldPlazaCraftablePlateArmorPiecesWorn(loadout)).toBe(2);
 
-    const modifiers = resolvingWorldPlazaIronPlateArmorSetCombatModifiers(
+    const modifiers = resolvingWorldPlazaCraftablePlateArmorSetCombatModifiers(
       loadout,
       1000
     );
@@ -35,20 +35,17 @@ describe('Iron Plate set combat modifiers', () => {
     expect(modifiers.some((modifier) => modifier.kind === 'expected')).toBe(
       true
     );
-    expect(modifiers.some((modifier) => modifier.kind === 'stability')).toBe(
-      true
-    );
     expect(
       modifiers.filter((modifier) => modifier.kind === 'stability')
     ).toHaveLength(2);
   });
 
-  it('syncs full-set expected crumb at 4 pieces', () => {
+  it('does not mix set bonuses across tiers', () => {
     const loadout = {
       ...creatingEmptyWorldPlazaArmorLoadoutState(),
       helm: {
         id: 'a',
-        itemTypeId: 'world-plaza-iron-plate-casque',
+        itemTypeId: 'world-plaza-copper-plate-casque',
         quantity: 1,
         slotIndex: -1,
       },
@@ -58,15 +55,42 @@ describe('Iron Plate set combat modifiers', () => {
         quantity: 1,
         slotIndex: -1,
       },
+    };
+
+    const modifiers = resolvingWorldPlazaCraftablePlateArmorSetCombatModifiers(
+      loadout,
+      1000
+    );
+
+    expect(modifiers.some((modifier) => modifier.id.includes(':set-2-'))).toBe(
+      false
+    );
+  });
+
+  it('syncs steel full-set expected crumb at 4 pieces', () => {
+    const loadout = {
+      ...creatingEmptyWorldPlazaArmorLoadoutState(),
+      helm: {
+        id: 'a',
+        itemTypeId: 'world-plaza-steel-plate-casque',
+        quantity: 1,
+        slotIndex: -1,
+      },
+      arm: {
+        id: 'b',
+        itemTypeId: 'world-plaza-steel-plate-gauntlets',
+        quantity: 1,
+        slotIndex: -1,
+      },
       body: {
         id: 'c',
-        itemTypeId: 'world-plaza-iron-plate-breastplate',
+        itemTypeId: 'world-plaza-steel-plate-breastplate',
         quantity: 1,
         slotIndex: -1,
       },
       foot: {
         id: 'd',
-        itemTypeId: 'world-plaza-iron-plate-sabatons',
+        itemTypeId: 'world-plaza-steel-plate-sabatons',
         quantity: 1,
         slotIndex: -1,
       },
@@ -81,9 +105,9 @@ describe('Iron Plate set combat modifiers', () => {
     expect(
       synced.damageRollModifiers.some(
         (modifier) =>
-          modifier.id.includes('iron-plate:set-4') &&
+          modifier.id.includes('steel-plate:set-4') &&
           modifier.kind === 'expected' &&
-          modifier.value === 0.93
+          modifier.value === 0.9
       )
     ).toBe(true);
   });
