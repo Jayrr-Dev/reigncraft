@@ -1,6 +1,7 @@
 import type { WorldFlowerPickTileState } from './worldFlowerPick';
 import type { WorldPebblePickTileState } from './worldPebblePick';
 import type { WorldRockMineTileState } from './worldRockMine';
+import type { WorldToolHarvestTier } from './worldToolHarvestYield';
 import type { WorldTreeChopTileState } from './worldTreeChop';
 
 /** Client poll interval for shared chopped-tree state (ms). */
@@ -65,6 +66,8 @@ export type WorldHarvestDevvitChopTreeRequest = {
   playerY: number;
   currentVisualLayer: number;
   standingSurfaceLayer: number;
+  /** Equipped axe/pickaxe material tier; drives layers + yield. */
+  toolTier?: WorldToolHarvestTier | null;
   /** Single-player save slot; scopes chopped trees per user instead of the shared room. */
   saveSlotIndex?: number | null;
 };
@@ -111,6 +114,8 @@ export type WorldHarvestDevvitMineRockRequest = {
   playerY: number;
   currentVisualLayer: number;
   standingSurfaceLayer: number;
+  /** Equipped pickaxe material tier; drives layers + yield. */
+  toolTier?: WorldToolHarvestTier | null;
   /** Single-player save slot; scopes mined rocks per user instead of the shared room. */
   saveSlotIndex?: number | null;
 };

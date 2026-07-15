@@ -3289,6 +3289,36 @@ function RenderingWorldPlazaPixiSceneConnected({
     [showingGameplayHudToast, updatingInventoryState]
   );
 
+  const resolvingEquippedAxeHarvestToolTier = useCallback(():
+    | 'wood'
+    | 'iron'
+    | 'steel'
+    | 'gold'
+    | null => {
+    const equippedTool = equipment.checkingEquippedToolKind('axe');
+
+    if (!equippedTool.hasToolKind) {
+      return 'wood';
+    }
+
+    return equippedTool.heldItemTier ?? 'wood';
+  }, [equipment]);
+
+  const resolvingEquippedPickaxeHarvestToolTier = useCallback(():
+    | 'wood'
+    | 'iron'
+    | 'steel'
+    | 'gold'
+    | null => {
+    const equippedTool = equipment.checkingEquippedToolKind('pickaxe');
+
+    if (!equippedTool.hasToolKind) {
+      return 'wood';
+    }
+
+    return equippedTool.heldItemTier ?? 'wood';
+  }, [equipment]);
+
   const { validatingTreeChopStart, completingTreeChopLayer } =
     usingWorldPlazaTreeChopInteraction({
       localPersistenceOwnerId,
@@ -3297,6 +3327,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       choppedTreeStateByTileKey,
       playerPositionRef,
       showingGameplayHudToast,
+      resolvingHarvestToolTier: resolvingEquippedAxeHarvestToolTier,
       onTreeChopLayerSucceeded: wearingEquippedAxeDurability,
     });
 
@@ -3368,6 +3399,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       minedRockStateByTileKey,
       playerPositionRef,
       showingGameplayHudToast,
+      resolvingHarvestToolTier: resolvingEquippedPickaxeHarvestToolTier,
       onRockMineLayerSucceeded: wearingEquippedPickaxeDurability,
     });
 

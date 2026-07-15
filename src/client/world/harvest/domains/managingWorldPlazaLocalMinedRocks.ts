@@ -1,3 +1,4 @@
+import { DEFINING_WORLD_PLAZA_MINED_ROCKS_LOCAL_STORAGE_KEY_PREFIX } from '@/components/world/harvest/domains/definingWorldPlazaRockMineConstants';
 import {
   checkingWorldRockMineLayerEligibility,
   computingWorldRockMineLayerMutation,
@@ -6,9 +7,6 @@ import {
   type CheckingWorldRockMineLayerEligibilityResult,
   type WorldRockMineTileState,
 } from '../../../../shared/worldRockMine';
-import {
-  DEFINING_WORLD_PLAZA_MINED_ROCKS_LOCAL_STORAGE_KEY_PREFIX,
-} from '@/components/world/harvest/domains/definingWorldPlazaRockMineConstants';
 
 /**
  * Per-tile mine persistence for column rocks.
@@ -218,6 +216,8 @@ export type MiningWorldPlazaLocalRockLayerRequest = {
   readonly playerY: number;
   readonly currentVisualLayer: number;
   readonly standingSurfaceLayer: number;
+  readonly layersPerSwing?: number;
+  readonly resourcePerLayer?: number;
 };
 
 export type CheckingWorldPlazaRockMineLayerEligibilityRequest =
@@ -237,7 +237,9 @@ export function checkingWorldPlazaRockMineLayerEligibility(
 ): CheckingWorldPlazaRockMineLayerEligibilityResult {
   const existingTileState =
     request.existingTileState ??
-    loadingWorldPlazaLocalMinedRocksState(request.persistenceOwnerId).byTileKey.get(
+    loadingWorldPlazaLocalMinedRocksState(
+      request.persistenceOwnerId
+    ).byTileKey.get(
       formattingWorldPlazaMinedRockTileKey(request.tileX, request.tileY)
     );
 

@@ -40,7 +40,7 @@ describe('checkingWorldTreeChopLayerEligibility', () => {
 });
 
 describe('computingWorldTreeChopLayerMutation', () => {
-  it('removes three layers and grants two wood per layer', () => {
+  it('defaults to wood baseline: one layer and one wood', () => {
     const result = computingWorldTreeChopLayerMutation({
       tileX: 4,
       tileY: 7,
@@ -53,12 +53,38 @@ describe('computingWorldTreeChopLayerMutation', () => {
     expect(result).toEqual({
       outcome: 'chopped',
       nextTileState: {
+        remainingVisualLayer: 6,
+        isStump: false,
+      },
+      remainingVisualLayer: 6,
+      layersRemoved: WORLD_TREE_CHOP_LAYERS_PER_SWING,
+      woodQuantity:
+        WORLD_TREE_CHOP_LAYERS_PER_SWING * WORLD_TREE_CHOP_WOOD_PER_LAYER,
+      isFullyFelled: false,
+    });
+  });
+
+  it('honors steel swing yield of three layers and three wood per layer', () => {
+    const result = computingWorldTreeChopLayerMutation({
+      tileX: 4,
+      tileY: 7,
+      playerX: 4.5,
+      playerY: 7.5,
+      currentVisualLayer: 7,
+      standingSurfaceLayer: 1,
+      layersPerSwing: 3,
+      resourcePerLayer: 3,
+    });
+
+    expect(result).toEqual({
+      outcome: 'chopped',
+      nextTileState: {
         remainingVisualLayer: 4,
         isStump: false,
       },
       remainingVisualLayer: 4,
-      layersRemoved: WORLD_TREE_CHOP_LAYERS_PER_SWING,
-      woodQuantity: WORLD_TREE_CHOP_LAYERS_PER_SWING * WORLD_TREE_CHOP_WOOD_PER_LAYER,
+      layersRemoved: 3,
+      woodQuantity: 9,
       isFullyFelled: false,
     });
   });
@@ -75,6 +101,8 @@ describe('computingWorldTreeChopLayerMutation', () => {
         remainingVisualLayer: 3,
         isStump: false,
       },
+      layersPerSwing: 3,
+      resourcePerLayer: 2,
     });
 
     expect(result).toEqual({
@@ -105,8 +133,8 @@ describe('parsingWorldTreeChopTileState', () => {
         JSON.stringify({
           remainingVisualLayer: 1,
           isStump: true,
-        }),
-      ),
+        })
+      )
     ).toEqual({
       remainingVisualLayer: 1,
       isStump: true,

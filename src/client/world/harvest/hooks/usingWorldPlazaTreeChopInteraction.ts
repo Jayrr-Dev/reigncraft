@@ -20,6 +20,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, type RefObject } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 import { WORLD_HARVEST_DEVVIT_CHOP_TREE_API_PATH } from '../../../../shared/worldHarvestDevvit';
+import {
+  resolvingWorldToolHarvestSwingYield,
+  type WorldToolHarvestTier,
+} from '../../../../shared/worldToolHarvestYield';
 
 export type UsingWorldPlazaTreeChopInteractionParams = {
   readonly localPersistenceOwnerId: string | null;
@@ -31,6 +35,8 @@ export type UsingWorldPlazaTreeChopInteractionParams = {
   >;
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
   readonly showingGameplayHudToast: (message: string) => void;
+  /** Equipped axe tier; missing → wood baseline yield. */
+  readonly resolvingHarvestToolTier?: () => WorldToolHarvestTier | null;
   /** Called after a tree layer is successfully chopped. */
   readonly onTreeChopLayerSucceeded?: () => void;
 };
@@ -54,6 +60,7 @@ export function usingWorldPlazaTreeChopInteraction({
   choppedTreeStateByTileKey,
   playerPositionRef,
   showingGameplayHudToast,
+  resolvingHarvestToolTier,
   onTreeChopLayerSucceeded,
 }: UsingWorldPlazaTreeChopInteractionParams): UsingWorldPlazaTreeChopInteractionResult {
   const queryClient = useQueryClient();
@@ -140,7 +147,8 @@ export function usingWorldPlazaTreeChopInteraction({
         const standingSurfaceLayer = entry.tree.standingSurfaceLayer ?? 1;
         const currentVisualLayer =
           entry.tree.visualSurfaceLayer ?? standingSurfaceLayer;
-        const chopRequest = {
+        const toolTier = resolvingHarvestToolTier?.() ?? null;
+        const baseChopRequest = {
           tileX: entry.tileX,
           tileY: entry.tileY,
           playerX: playerPosition.x,
@@ -151,14 +159,15 @@ export function usingWorldPlazaTreeChopInteraction({
 
         const chopResult =
           useLocalPersistence && localPersistenceOwnerId
-            ? choppingWorldPlazaLocalTreeLayer(
-                localPersistenceOwnerId,
-                chopRequest
-              )
+            ? choppingWorldPlazaLocalTreeLayer(localPersistenceOwnerId, {
+                ...baseChopRequest,
+                ...resolvingWorldToolHarvestSwingYield(toolTier),
+              })
             : await choppingWorldHarvestDevvitTreeLayer(
                 WORLD_HARVEST_DEVVIT_CHOP_TREE_API_PATH,
                 {
-                  ...chopRequest,
+                  ...baseChopRequest,
+                  toolTier,
                   saveSlotIndex,
                 }
               );
@@ -226,6 +235,7 @@ export function usingWorldPlazaTreeChopInteraction({
       playerPositionRef,
       queryClient,
       redditUserId,
+      resolvingHarvestToolTier,
       saveSlotIndex,
       showingGameplayHudToast,
       onTreeChopLayerSucceeded,

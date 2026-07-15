@@ -1,15 +1,15 @@
 import { redis } from '@devvit/web/server';
+import type { WorldHarvestDevvitMinedRockRow } from '../../shared/worldHarvestDevvit';
 import {
   computingWorldRockMineLayerMutation,
   formattingWorldRockMineTileKey,
   parsingWorldRockMineTileState,
   type WorldRockMineTileState,
 } from '../../shared/worldRockMine';
-import type { WorldHarvestDevvitMinedRockRow } from '../../shared/worldHarvestDevvit';
 import { buildingWorldHarvestMinedRocksRedisKey } from './buildingWorldHarvestDevvitRedisKeys';
 
 export async function listingWorldHarvestDevvitMinedRocks(
-  scope: string,
+  scope: string
 ): Promise<WorldHarvestDevvitMinedRockRow[]> {
   const minedRocksKey = buildingWorldHarvestMinedRocksRedisKey(scope);
   const rawTiles = await redis.hGetAll(minedRocksKey);
@@ -35,7 +35,7 @@ export async function listingWorldHarvestDevvitMinedRocks(
 export async function readingWorldHarvestDevvitMinedRockState(
   scope: string,
   tileX: number,
-  tileY: number,
+  tileY: number
 ): Promise<WorldRockMineTileState | undefined> {
   const minedRocksKey = buildingWorldHarvestMinedRocksRedisKey(scope);
   const tileKey = formattingWorldRockMineTileKey(tileX, tileY);
@@ -57,6 +57,8 @@ export type MiningWorldHarvestDevvitRockLayerRequest = {
   readonly playerY: number;
   readonly currentVisualLayer: number;
   readonly standingSurfaceLayer: number;
+  readonly layersPerSwing?: number;
+  readonly resourcePerLayer?: number;
 };
 
 export type MiningWorldHarvestDevvitRockLayerResult =
@@ -75,12 +77,12 @@ export type MiningWorldHarvestDevvitRockLayerResult =
  */
 export async function miningWorldHarvestDevvitRockLayer(
   scope: string,
-  request: MiningWorldHarvestDevvitRockLayerRequest,
+  request: MiningWorldHarvestDevvitRockLayerRequest
 ): Promise<MiningWorldHarvestDevvitRockLayerResult> {
   const existingTileState = await readingWorldHarvestDevvitMinedRockState(
     scope,
     request.tileX,
-    request.tileY,
+    request.tileY
   );
   const mutation = computingWorldRockMineLayerMutation({
     ...request,

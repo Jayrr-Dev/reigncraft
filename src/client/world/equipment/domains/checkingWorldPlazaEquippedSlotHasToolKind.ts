@@ -1,5 +1,6 @@
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldPlazaEquipmentToolKind } from '@/components/world/equipment/domains/definingWorldPlazaEquipmentToolKind';
+import type { DefiningWorldPlazaHeldItemTier } from '@/components/world/equipment/domains/definingWorldPlazaHeldItemTypes';
 import {
   checkingWorldPlazaItemTypeHasEquipmentToolKind,
   resolvingWorldPlazaEquipmentCapabilitiesForItemTypeId,
@@ -9,6 +10,7 @@ export type CheckingWorldPlazaEquippedSlotHasToolKindResult = {
   readonly hasToolKind: boolean;
   readonly equippedItemTypeId: string | null;
   readonly harvestSpeedMultiplier: number;
+  readonly heldItemTier: DefiningWorldPlazaHeldItemTier | null;
 };
 
 /**
@@ -24,6 +26,7 @@ export function checkingWorldPlazaEquippedSlotHasToolKind(
       hasToolKind: false,
       equippedItemTypeId: null,
       harvestSpeedMultiplier: 1,
+      heldItemTier: null,
     };
   }
 
@@ -34,6 +37,7 @@ export function checkingWorldPlazaEquippedSlotHasToolKind(
       hasToolKind: false,
       equippedItemTypeId: null,
       harvestSpeedMultiplier: 1,
+      heldItemTier: null,
     };
   }
 
@@ -48,5 +52,6 @@ export function checkingWorldPlazaEquippedSlotHasToolKind(
     ),
     equippedItemTypeId: slot.itemTypeId,
     harvestSpeedMultiplier: capabilities?.harvestSpeedMultiplier ?? 1,
+    heldItemTier: capabilities?.heldItemTier ?? null,
   };
 }

@@ -4,11 +4,11 @@
  * @module components/world/harvest/domains/definingWorldPlazaTreeChopConstants
  */
 
-/** Wood granted per world layer removed from a tree. */
-export const DEFINING_WORLD_PLAZA_TREE_CHOP_WOOD_PER_LAYER = 2;
+/** Wood granted per world layer when no tool tier is supplied (wood baseline). */
+export const DEFINING_WORLD_PLAZA_TREE_CHOP_WOOD_PER_LAYER = 1;
 
-/** Visual layers removed per completed chop swing. */
-export const DEFINING_WORLD_PLAZA_TREE_CHOP_LAYERS_PER_SWING = 3;
+/** Visual layers removed per swing when no tool tier is supplied (wood baseline). */
+export const DEFINING_WORLD_PLAZA_TREE_CHOP_LAYERS_PER_SWING = 1;
 
 /** Base swing duration before layer scaling (ms). */
 export const DEFINING_WORLD_PLAZA_TREE_CHOP_BASE_DURATION_MS = 500;

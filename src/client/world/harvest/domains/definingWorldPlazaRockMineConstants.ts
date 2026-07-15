@@ -4,11 +4,11 @@
  * @module components/world/harvest/domains/definingWorldPlazaRockMineConstants
  */
 
-/** Stone granted per world layer removed from a boulder. */
-export const DEFINING_WORLD_PLAZA_ROCK_MINE_STONE_PER_LAYER = 2;
+/** Stone granted per world layer when no tool tier is supplied (wood baseline). */
+export const DEFINING_WORLD_PLAZA_ROCK_MINE_STONE_PER_LAYER = 1;
 
-/** Visual layers removed per completed mine swing. */
-export const DEFINING_WORLD_PLAZA_ROCK_MINE_LAYERS_PER_SWING = 3;
+/** Visual layers removed per swing when no tool tier is supplied (wood baseline). */
+export const DEFINING_WORLD_PLAZA_ROCK_MINE_LAYERS_PER_SWING = 1;
 
 /** Base swing duration before layer scaling (ms). */
 export const DEFINING_WORLD_PLAZA_ROCK_MINE_BASE_DURATION_MS = 500;

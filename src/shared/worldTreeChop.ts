@@ -1,8 +1,8 @@
-/** Wood granted per world layer removed from a tree. */
-export const WORLD_TREE_CHOP_WOOD_PER_LAYER = 2;
+/** Wood granted per world layer removed when no tool tier is supplied (wood baseline). */
+export const WORLD_TREE_CHOP_WOOD_PER_LAYER = 1;
 
-/** Visual layers removed per completed chop swing. */
-export const WORLD_TREE_CHOP_LAYERS_PER_SWING = 3;
+/** Visual layers removed per completed chop swing when no tool tier is supplied. */
+export const WORLD_TREE_CHOP_LAYERS_PER_SWING = 1;
 
 /** Max Chebyshev distance from player to tree tile center. */
 export const WORLD_TREE_CHOP_PLAYER_RANGE_TILES = 2;
@@ -18,7 +18,7 @@ export type WorldTreeChopTileState = {
  */
 export function formattingWorldTreeChopTileKey(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): string {
   return `${tileX},${tileY}`;
 }
@@ -27,7 +27,7 @@ function computingWorldTreeChopChebyshevDistance(
   fromX: number,
   fromY: number,
   toX: number,
-  toY: number,
+  toY: number
 ): number {
   return Math.max(Math.abs(fromX - toX), Math.abs(fromY - toY));
 }
@@ -51,13 +51,13 @@ export type CheckingWorldTreeChopLayerEligibilityResult =
  * Validates whether a tree layer can be chopped without mutating state.
  */
 export function checkingWorldTreeChopLayerEligibility(
-  request: CheckingWorldTreeChopLayerEligibilityRequest,
+  request: CheckingWorldTreeChopLayerEligibilityRequest
 ): CheckingWorldTreeChopLayerEligibilityResult {
   const playerDistance = computingWorldTreeChopChebyshevDistance(
     request.playerX,
     request.playerY,
     request.tileX + 0.5,
-    request.tileY + 0.5,
+    request.tileY + 0.5
   );
 
   if (playerDistance > WORLD_TREE_CHOP_PLAYER_RANGE_TILES) {
@@ -88,6 +88,10 @@ export type ComputingWorldTreeChopLayerMutationRequest = {
   readonly currentVisualLayer: number;
   readonly standingSurfaceLayer: number;
   readonly existingTileState?: WorldTreeChopTileState;
+  /** Max layers removed this swing (from equipped tool tier). */
+  readonly layersPerSwing?: number;
+  /** Wood granted per layer removed this swing (from equipped tool tier). */
+  readonly resourcePerLayer?: number;
 };
 
 export type ComputingWorldTreeChopLayerMutationResult =
@@ -106,7 +110,7 @@ export type ComputingWorldTreeChopLayerMutationResult =
  * Computes the next chop state for one tree tile without persisting it.
  */
 export function computingWorldTreeChopLayerMutation(
-  request: ComputingWorldTreeChopLayerMutationRequest,
+  request: ComputingWorldTreeChopLayerMutationRequest
 ): ComputingWorldTreeChopLayerMutationResult {
   const eligibility = checkingWorldTreeChopLayerEligibility(request);
 
@@ -118,10 +122,15 @@ export function computingWorldTreeChopLayerMutation(
   const currentRemaining =
     existing?.remainingVisualLayer ?? request.currentVisualLayer;
   const choppableLayers = currentRemaining - request.standingSurfaceLayer;
-  const layersRemoved = Math.min(
-    WORLD_TREE_CHOP_LAYERS_PER_SWING,
-    choppableLayers,
+  const layersPerSwing = Math.max(
+    1,
+    Math.floor(request.layersPerSwing ?? WORLD_TREE_CHOP_LAYERS_PER_SWING)
   );
+  const resourcePerLayer = Math.max(
+    0,
+    Math.floor(request.resourcePerLayer ?? WORLD_TREE_CHOP_WOOD_PER_LAYER)
+  );
+  const layersRemoved = Math.min(layersPerSwing, choppableLayers);
   const nextRemaining = currentRemaining - layersRemoved;
   const isFullyFelled = nextRemaining <= request.standingSurfaceLayer;
   const nextTileState: WorldTreeChopTileState = isFullyFelled
@@ -141,7 +150,7 @@ export function computingWorldTreeChopLayerMutation(
       ? request.standingSurfaceLayer
       : nextRemaining,
     layersRemoved,
-    woodQuantity: layersRemoved * WORLD_TREE_CHOP_WOOD_PER_LAYER,
+    woodQuantity: layersRemoved * resourcePerLayer,
     isFullyFelled,
   };
 }
@@ -150,7 +159,7 @@ export function computingWorldTreeChopLayerMutation(
  * Parses one persisted chopped-tree tile row from Redis or localStorage.
  */
 export function parsingWorldTreeChopTileState(
-  rawValue: string,
+  rawValue: string
 ): WorldTreeChopTileState | null {
   try {
     const parsed = JSON.parse(rawValue) as unknown;
@@ -171,8 +180,7 @@ export function parsingWorldTreeChopTileState(
     ) {
       return {
         remainingVisualLayer: Math.round(parsed.remainingVisualLayer),
-        isStump:
-          'isStump' in parsed && parsed.isStump === true ? true : false,
+        isStump: 'isStump' in parsed && parsed.isStump === true ? true : false,
       };
     }
 

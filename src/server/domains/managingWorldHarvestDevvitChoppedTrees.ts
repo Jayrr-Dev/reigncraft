@@ -1,15 +1,15 @@
 import { redis } from '@devvit/web/server';
+import type { WorldHarvestDevvitChoppedTreeRow } from '../../shared/worldHarvestDevvit';
 import {
   computingWorldTreeChopLayerMutation,
   formattingWorldTreeChopTileKey,
   parsingWorldTreeChopTileState,
   type WorldTreeChopTileState,
 } from '../../shared/worldTreeChop';
-import type { WorldHarvestDevvitChoppedTreeRow } from '../../shared/worldHarvestDevvit';
 import { buildingWorldHarvestChoppedTreesRedisKey } from './buildingWorldHarvestDevvitRedisKeys';
 
 export async function listingWorldHarvestDevvitChoppedTrees(
-  scope: string,
+  scope: string
 ): Promise<WorldHarvestDevvitChoppedTreeRow[]> {
   const choppedTreesKey = buildingWorldHarvestChoppedTreesRedisKey(scope);
   const rawTiles = await redis.hGetAll(choppedTreesKey);
@@ -35,7 +35,7 @@ export async function listingWorldHarvestDevvitChoppedTrees(
 export async function readingWorldHarvestDevvitChoppedTreeState(
   scope: string,
   tileX: number,
-  tileY: number,
+  tileY: number
 ): Promise<WorldTreeChopTileState | undefined> {
   const choppedTreesKey = buildingWorldHarvestChoppedTreesRedisKey(scope);
   const tileKey = formattingWorldTreeChopTileKey(tileX, tileY);
@@ -55,6 +55,8 @@ export type ChoppingWorldHarvestDevvitTreeLayerRequest = {
   readonly playerY: number;
   readonly currentVisualLayer: number;
   readonly standingSurfaceLayer: number;
+  readonly layersPerSwing?: number;
+  readonly resourcePerLayer?: number;
 };
 
 export type ChoppingWorldHarvestDevvitTreeLayerResult =
@@ -73,12 +75,12 @@ export type ChoppingWorldHarvestDevvitTreeLayerResult =
  */
 export async function choppingWorldHarvestDevvitTreeLayer(
   scope: string,
-  request: ChoppingWorldHarvestDevvitTreeLayerRequest,
+  request: ChoppingWorldHarvestDevvitTreeLayerRequest
 ): Promise<ChoppingWorldHarvestDevvitTreeLayerResult> {
   const existingTileState = await readingWorldHarvestDevvitChoppedTreeState(
     scope,
     request.tileX,
-    request.tileY,
+    request.tileY
   );
   const mutation = computingWorldTreeChopLayerMutation({
     ...request,

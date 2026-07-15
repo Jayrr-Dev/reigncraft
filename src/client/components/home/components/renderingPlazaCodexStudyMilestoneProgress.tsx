@@ -20,7 +20,9 @@ import {
   resolvingPlazaCodexStudyMilestoneRewardPopoverLabel,
   type PlazaCodexOverallMilestoneRewardMarker,
 } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
+import { usingPlazaCodexStudyMilestoneRewardPopoverOpenState } from '@/components/home/hooks/usingPlazaCodexStudyMilestoneRewardPopoverOpenState';
 import { Icon } from '@/components/ui/icon';
+import { useRef } from 'react';
 
 export type RenderingPlazaCodexStudyMilestoneProgressProps = {
   value: number;
@@ -52,6 +54,9 @@ export function RenderingPlazaCodexStudyMilestoneProgress({
     value,
     max
   );
+  const markersRef = useRef<HTMLDivElement>(null);
+  const { openMarkerId, togglingMarkerPopover } =
+    usingPlazaCodexStudyMilestoneRewardPopoverOpenState(markersRef);
 
   return (
     <div
@@ -75,6 +80,7 @@ export function RenderingPlazaCodexStudyMilestoneProgress({
         />
       </div>
       <div
+        ref={markersRef}
         className={
           DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_MARKERS_CLASS_NAME
         }
@@ -88,6 +94,7 @@ export function RenderingPlazaCodexStudyMilestoneProgress({
               marker.remainingNeeded,
               marker.isReached
             );
+          const isPopoverOpen = openMarkerId === marker.id;
 
           return (
             <button
@@ -96,6 +103,10 @@ export function RenderingPlazaCodexStudyMilestoneProgress({
               className={nodeClassName}
               style={{ left: `${marker.percent}%` }}
               aria-label={popoverLabel}
+              aria-expanded={isPopoverOpen}
+              onClick={() => {
+                togglingMarkerPopover(marker.id);
+              }}
             >
               <Icon
                 icon={DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CHEST_ICON}

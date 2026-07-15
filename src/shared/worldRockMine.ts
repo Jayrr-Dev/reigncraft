@@ -1,8 +1,8 @@
-/** Stone granted per world layer removed from a boulder. */
-export const WORLD_ROCK_MINE_STONE_PER_LAYER = 2;
+/** Stone granted per world layer removed when no tool tier is supplied (wood baseline). */
+export const WORLD_ROCK_MINE_STONE_PER_LAYER = 1;
 
-/** Visual layers removed per completed mine swing. */
-export const WORLD_ROCK_MINE_LAYERS_PER_SWING = 3;
+/** Visual layers removed per completed mine swing when no tool tier is supplied. */
+export const WORLD_ROCK_MINE_LAYERS_PER_SWING = 1;
 
 /** Max Chebyshev distance from player to boulder footprint center. */
 export const WORLD_ROCK_MINE_PLAYER_RANGE_TILES = 2;
@@ -18,7 +18,7 @@ export type WorldRockMineTileState = {
  */
 export function formattingWorldRockMineTileKey(
   tileX: number,
-  tileY: number,
+  tileY: number
 ): string {
   return `${tileX},${tileY}`;
 }
@@ -27,7 +27,7 @@ function computingWorldRockMineChebyshevDistance(
   fromX: number,
   fromY: number,
   toX: number,
-  toY: number,
+  toY: number
 ): number {
   return Math.max(Math.abs(fromX - toX), Math.abs(fromY - toY));
 }
@@ -54,13 +54,13 @@ export type CheckingWorldRockMineLayerEligibilityResult =
  * Validates whether a rock layer can be mined without mutating state.
  */
 export function checkingWorldRockMineLayerEligibility(
-  request: CheckingWorldRockMineLayerEligibilityRequest,
+  request: CheckingWorldRockMineLayerEligibilityRequest
 ): CheckingWorldRockMineLayerEligibilityResult {
   const playerDistance = computingWorldRockMineChebyshevDistance(
     request.playerX,
     request.playerY,
     request.targetCenterX,
-    request.targetCenterY,
+    request.targetCenterY
   );
 
   if (playerDistance > WORLD_ROCK_MINE_PLAYER_RANGE_TILES) {
@@ -93,6 +93,10 @@ export type ComputingWorldRockMineLayerMutationRequest = {
   readonly currentVisualLayer: number;
   readonly standingSurfaceLayer: number;
   readonly existingTileState?: WorldRockMineTileState;
+  /** Max layers removed this swing (from equipped tool tier). */
+  readonly layersPerSwing?: number;
+  /** Stone granted per layer removed this swing (from equipped tool tier). */
+  readonly resourcePerLayer?: number;
 };
 
 export type ComputingWorldRockMineLayerMutationResult =
@@ -111,7 +115,7 @@ export type ComputingWorldRockMineLayerMutationResult =
  * Computes the next mine state for one rock anchor without persisting it.
  */
 export function computingWorldRockMineLayerMutation(
-  request: ComputingWorldRockMineLayerMutationRequest,
+  request: ComputingWorldRockMineLayerMutationRequest
 ): ComputingWorldRockMineLayerMutationResult {
   const eligibility = checkingWorldRockMineLayerEligibility(request);
 
@@ -123,10 +127,15 @@ export function computingWorldRockMineLayerMutation(
   const currentRemaining =
     existing?.remainingVisualLayer ?? request.currentVisualLayer;
   const mineableLayers = currentRemaining - request.standingSurfaceLayer;
-  const layersRemoved = Math.min(
-    WORLD_ROCK_MINE_LAYERS_PER_SWING,
-    mineableLayers,
+  const layersPerSwing = Math.max(
+    1,
+    Math.floor(request.layersPerSwing ?? WORLD_ROCK_MINE_LAYERS_PER_SWING)
   );
+  const resourcePerLayer = Math.max(
+    0,
+    Math.floor(request.resourcePerLayer ?? WORLD_ROCK_MINE_STONE_PER_LAYER)
+  );
+  const layersRemoved = Math.min(layersPerSwing, mineableLayers);
   const nextRemaining = currentRemaining - layersRemoved;
   const isFullyDepleted = nextRemaining <= request.standingSurfaceLayer;
   const nextTileState: WorldRockMineTileState = isFullyDepleted
@@ -146,7 +155,7 @@ export function computingWorldRockMineLayerMutation(
       ? request.standingSurfaceLayer
       : nextRemaining,
     layersRemoved,
-    stoneQuantity: layersRemoved * WORLD_ROCK_MINE_STONE_PER_LAYER,
+    stoneQuantity: layersRemoved * resourcePerLayer,
     isFullyDepleted,
   };
 }
@@ -155,7 +164,7 @@ export function computingWorldRockMineLayerMutation(
  * Parses one persisted mined-rock tile row from Redis or localStorage.
  */
 export function parsingWorldRockMineTileState(
-  rawValue: string,
+  rawValue: string
 ): WorldRockMineTileState | null {
   try {
     const parsed = JSON.parse(rawValue) as unknown;

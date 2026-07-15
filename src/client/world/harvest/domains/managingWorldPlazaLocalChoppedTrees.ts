@@ -1,3 +1,4 @@
+import { DEFINING_WORLD_PLAZA_CHOPPED_TREES_LOCAL_STORAGE_KEY_PREFIX } from '@/components/world/harvest/domains/definingWorldPlazaTreeChopConstants';
 import {
   checkingWorldTreeChopLayerEligibility,
   computingWorldTreeChopLayerMutation,
@@ -6,9 +7,6 @@ import {
   type CheckingWorldTreeChopLayerEligibilityResult,
   type WorldTreeChopTileState,
 } from '../../../../shared/worldTreeChop';
-import {
-  DEFINING_WORLD_PLAZA_CHOPPED_TREES_LOCAL_STORAGE_KEY_PREFIX,
-} from '@/components/world/harvest/domains/definingWorldPlazaTreeChopConstants';
 
 /**
  * Per-tile chop persistence for procedural and placed trees.
@@ -216,6 +214,8 @@ export type ChoppingWorldPlazaLocalTreeLayerRequest = {
   readonly playerY: number;
   readonly currentVisualLayer: number;
   readonly standingSurfaceLayer: number;
+  readonly layersPerSwing?: number;
+  readonly resourcePerLayer?: number;
 };
 
 export type CheckingWorldPlazaTreeChopLayerEligibilityRequest =
@@ -235,7 +235,9 @@ export function checkingWorldPlazaTreeChopLayerEligibility(
 ): CheckingWorldPlazaTreeChopLayerEligibilityResult {
   const existingTileState =
     request.existingTileState ??
-    loadingWorldPlazaLocalChoppedTreesState(request.persistenceOwnerId).byTileKey.get(
+    loadingWorldPlazaLocalChoppedTreesState(
+      request.persistenceOwnerId
+    ).byTileKey.get(
       formattingWorldPlazaChoppedTreeTileKey(request.tileX, request.tileY)
     );
 

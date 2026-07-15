@@ -22,6 +22,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, type RefObject } from 'react';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
 import { WORLD_HARVEST_DEVVIT_MINE_ROCK_API_PATH } from '../../../../shared/worldHarvestDevvit';
+import {
+  resolvingWorldToolHarvestSwingYield,
+  type WorldToolHarvestTier,
+} from '../../../../shared/worldToolHarvestYield';
 
 export type UsingWorldPlazaRockMineInteractionParams = {
   readonly localPersistenceOwnerId: string | null;
@@ -33,6 +37,8 @@ export type UsingWorldPlazaRockMineInteractionParams = {
   >;
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
   readonly showingGameplayHudToast: (message: string) => void;
+  /** Equipped pickaxe tier; missing → wood baseline yield. */
+  readonly resolvingHarvestToolTier?: () => WorldToolHarvestTier | null;
   /** Called after a rock layer is successfully mined. */
   readonly onRockMineLayerSucceeded?: () => void;
 };
@@ -56,6 +62,7 @@ export function usingWorldPlazaRockMineInteraction({
   minedRockStateByTileKey,
   playerPositionRef,
   showingGameplayHudToast,
+  resolvingHarvestToolTier,
   onRockMineLayerSucceeded,
 }: UsingWorldPlazaRockMineInteractionParams): UsingWorldPlazaRockMineInteractionResult {
   const queryClient = useQueryClient();
@@ -140,7 +147,8 @@ export function usingWorldPlazaRockMineInteraction({
       try {
         const standingSurfaceLayer = DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND;
         const currentVisualLayer = entry.metadata.surfaceWorldLayer;
-        const mineRequest = {
+        const toolTier = resolvingHarvestToolTier?.() ?? null;
+        const baseMineRequest = {
           tileX: entry.tileX,
           tileY: entry.tileY,
           targetCenterX: entry.targetCenterX,
@@ -153,14 +161,15 @@ export function usingWorldPlazaRockMineInteraction({
 
         const mineResult =
           useLocalPersistence && localPersistenceOwnerId
-            ? miningWorldPlazaLocalRockLayer(
-                localPersistenceOwnerId,
-                mineRequest
-              )
+            ? miningWorldPlazaLocalRockLayer(localPersistenceOwnerId, {
+                ...baseMineRequest,
+                ...resolvingWorldToolHarvestSwingYield(toolTier),
+              })
             : await miningWorldHarvestDevvitRockLayer(
                 WORLD_HARVEST_DEVVIT_MINE_ROCK_API_PATH,
                 {
-                  ...mineRequest,
+                  ...baseMineRequest,
+                  toolTier,
                   saveSlotIndex,
                 }
               );
@@ -220,6 +229,7 @@ export function usingWorldPlazaRockMineInteraction({
       playerPositionRef,
       queryClient,
       redditUserId,
+      resolvingHarvestToolTier,
       saveSlotIndex,
       showingGameplayHudToast,
       onRockMineLayerSucceeded,

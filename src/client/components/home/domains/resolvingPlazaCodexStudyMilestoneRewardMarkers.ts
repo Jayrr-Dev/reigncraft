@@ -33,6 +33,19 @@ export function resolvingPlazaCodexStudyMilestoneRewardPopoverLabel(
 }
 
 /**
+ * True when any overall milestone chest on this meter is reached (reward ready).
+ */
+export function checkingPlazaCodexOverallProgressHasRewardReady(
+  value: number,
+  max: number
+): boolean {
+  return resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
+    value,
+    max
+  ).some((marker) => marker.isReached);
+}
+
+/**
  * Builds chest markers for one overall panel meter (discovered or studied).
  * Thresholds scale to that meter's max.
  */

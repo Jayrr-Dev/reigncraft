@@ -16,6 +16,10 @@ import {
   type WorldHarvestDevvitPickPebbleResponse,
 } from '../../shared/worldHarvestDevvit';
 import {
+  checkingWorldToolHarvestTier,
+  resolvingWorldToolHarvestSwingYield,
+} from '../../shared/worldToolHarvestYield';
+import {
   choppingWorldHarvestDevvitTreeLayer,
   listingWorldHarvestDevvitChoppedTrees,
 } from '../domains/managingWorldHarvestDevvitChoppedTrees';
@@ -73,6 +77,12 @@ function parsingWorldHarvestDevvitChopTreeRequest(
     return null;
   }
 
+  const toolTier =
+    typeof payload.toolTier === 'string' &&
+    checkingWorldToolHarvestTier(payload.toolTier)
+      ? payload.toolTier
+      : null;
+
   return {
     tileX: payload.tileX,
     tileY: payload.tileY,
@@ -80,6 +90,7 @@ function parsingWorldHarvestDevvitChopTreeRequest(
     playerY: payload.playerY,
     currentVisualLayer: payload.currentVisualLayer,
     standingSurfaceLayer: payload.standingSurfaceLayer,
+    toolTier,
     saveSlotIndex:
       typeof payload.saveSlotIndex === 'number' ? payload.saveSlotIndex : null,
   };
@@ -107,6 +118,12 @@ function parsingWorldHarvestDevvitMineRockRequest(
     return null;
   }
 
+  const toolTier =
+    typeof payload.toolTier === 'string' &&
+    checkingWorldToolHarvestTier(payload.toolTier)
+      ? payload.toolTier
+      : null;
+
   return {
     tileX: payload.tileX,
     tileY: payload.tileY,
@@ -116,6 +133,7 @@ function parsingWorldHarvestDevvitMineRockRequest(
     playerY: payload.playerY,
     currentVisualLayer: payload.currentVisualLayer,
     standingSurfaceLayer: payload.standingSurfaceLayer,
+    toolTier,
     saveSlotIndex:
       typeof payload.saveSlotIndex === 'number' ? payload.saveSlotIndex : null,
   };
@@ -212,10 +230,17 @@ worldHarvest.post('/chop-tree', async (c) => {
     chopRequest.saveSlotIndex,
     resolvingPlazaDevvitOnlineRoomScopeFromRequest(c)
   );
-  const chopResult = await choppingWorldHarvestDevvitTreeLayer(
-    harvestScope,
-    chopRequest
-  );
+  const swingYield = resolvingWorldToolHarvestSwingYield(chopRequest.toolTier);
+  const chopResult = await choppingWorldHarvestDevvitTreeLayer(harvestScope, {
+    tileX: chopRequest.tileX,
+    tileY: chopRequest.tileY,
+    playerX: chopRequest.playerX,
+    playerY: chopRequest.playerY,
+    currentVisualLayer: chopRequest.currentVisualLayer,
+    standingSurfaceLayer: chopRequest.standingSurfaceLayer,
+    layersPerSwing: swingYield.layersPerSwing,
+    resourcePerLayer: swingYield.resourcePerLayer,
+  });
 
   if (chopResult.outcome === 'out-of-range') {
     return c.json<WorldHarvestDevvitChopTreeResponse>({
@@ -299,10 +324,19 @@ worldHarvest.post('/mine-rock', async (c) => {
     mineRequest.saveSlotIndex,
     resolvingPlazaDevvitOnlineRoomScopeFromRequest(c)
   );
-  const mineResult = await miningWorldHarvestDevvitRockLayer(
-    harvestScope,
-    mineRequest
-  );
+  const swingYield = resolvingWorldToolHarvestSwingYield(mineRequest.toolTier);
+  const mineResult = await miningWorldHarvestDevvitRockLayer(harvestScope, {
+    tileX: mineRequest.tileX,
+    tileY: mineRequest.tileY,
+    targetCenterX: mineRequest.targetCenterX,
+    targetCenterY: mineRequest.targetCenterY,
+    playerX: mineRequest.playerX,
+    playerY: mineRequest.playerY,
+    currentVisualLayer: mineRequest.currentVisualLayer,
+    standingSurfaceLayer: mineRequest.standingSurfaceLayer,
+    layersPerSwing: swingYield.layersPerSwing,
+    resourcePerLayer: swingYield.resourcePerLayer,
+  });
 
   if (mineResult.outcome === 'out-of-range') {
     return c.json<WorldHarvestDevvitMineRockResponse>({
