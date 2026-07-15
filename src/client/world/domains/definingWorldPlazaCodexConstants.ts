@@ -36,18 +36,6 @@ export type WorldPlazaCodexMenuOption = {
 export const DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS: readonly WorldPlazaCodexMenuOption[] =
   [
     {
-      id: 'controls',
-      label: 'Controls',
-      icon: 'solar:gamepad-bold',
-      description: 'Movement, build, and combat',
-    },
-    {
-      id: 'mechanics',
-      label: 'Mechanics',
-      icon: 'mdi:hammer',
-      description: 'Damage, status effects, world, and buff badges',
-    },
-    {
       id: 'biomes',
       label: 'Biomes',
       icon: 'mdi:pine-tree',
@@ -82,12 +70,6 @@ export const DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS: readonly WorldPlazaCodexMe
       label: 'Recipes',
       icon: 'mdi:book-outline',
       description: 'Cookbook pages and craft recipes',
-    },
-    {
-      id: 'lore',
-      label: 'Lore',
-      icon: 'mdi:book-open-page-variant',
-      description: 'Corpus, the Founder, and the ladder',
     },
   ] as const;
 

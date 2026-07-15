@@ -8,6 +8,7 @@ describe('computingWorldPlazaPerformanceDiagnosticsAbDelta', () => {
         label: 'A',
         framesPerSecond: 50,
         sessionFramesPerSecond: 48,
+        sessionMinimumFramesPerSecond: 30,
         capturedAtMs: 1,
         presetName: 'Baseline',
       },
@@ -15,6 +16,7 @@ describe('computingWorldPlazaPerformanceDiagnosticsAbDelta', () => {
         label: 'B',
         framesPerSecond: 56,
         sessionFramesPerSecond: 55,
+        sessionMinimumFramesPerSecond: 40,
         capturedAtMs: 2,
         presetName: 'Light',
       }
@@ -34,6 +36,7 @@ describe('computingWorldPlazaPerformanceDiagnosticsAbDelta', () => {
         label: 'A',
         framesPerSecond: 60,
         sessionFramesPerSecond: 60,
+        sessionMinimumFramesPerSecond: 50,
         capturedAtMs: 1,
         presetName: null,
       },
@@ -41,6 +44,7 @@ describe('computingWorldPlazaPerformanceDiagnosticsAbDelta', () => {
         label: 'B',
         framesPerSecond: 52.5,
         sessionFramesPerSecond: 53,
+        sessionMinimumFramesPerSecond: 40,
         capturedAtMs: 2,
         presetName: null,
       }
@@ -58,6 +62,7 @@ describe('computingWorldPlazaPerformanceDiagnosticsAbDelta', () => {
         label: 'A',
         framesPerSecond: 0,
         sessionFramesPerSecond: 0,
+        sessionMinimumFramesPerSecond: 0,
         capturedAtMs: 1,
         presetName: null,
       },
@@ -65,6 +70,7 @@ describe('computingWorldPlazaPerformanceDiagnosticsAbDelta', () => {
         label: 'B',
         framesPerSecond: 40,
         sessionFramesPerSecond: 40,
+        sessionMinimumFramesPerSecond: 30,
         capturedAtMs: 2,
         presetName: null,
       }

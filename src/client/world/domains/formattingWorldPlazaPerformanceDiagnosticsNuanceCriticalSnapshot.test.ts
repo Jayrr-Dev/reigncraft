@@ -11,6 +11,7 @@ function buildingMinimalDiagnosticsSnapshot(
     capturedAtMs: 1_700_000_000_000,
     framesPerSecond: 30,
     sessionFramesPerSecond: 29,
+    sessionMinimumFramesPerSecond: 16,
     sessionFrameCount: 60,
     frameAverageMs: 33,
     framePercentile95Ms: 40,

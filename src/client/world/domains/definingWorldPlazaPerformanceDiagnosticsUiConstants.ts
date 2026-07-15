@@ -39,3 +39,7 @@ export const DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_TAB_BODY_CLASS
 /** Separator between live and session-average FPS in the overlay header. */
 export const LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_FPS_SEPARATOR =
   ' · avg ' as const;
+
+/** Separator before session-minimum FPS in the overlay header. */
+export const LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_FPS_MIN_SEPARATOR =
+  ' · min ' as const;

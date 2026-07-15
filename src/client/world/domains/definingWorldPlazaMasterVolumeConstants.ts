@@ -5,6 +5,7 @@
  */
 
 import { STYLING_WORLD_PLAZA_ACTION_BAR_DROPDOWN_LEFT_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaActionBarConstants';
+import type { WorldPlazaCodexSectionId } from '@/components/world/domains/definingWorldPlazaCodexConstants';
 import { DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
 
 /** localStorage key for the master volume preference (0–1). */
@@ -46,3 +47,38 @@ export const LABELING_WORLD_PLAZA_SETTINGS_EXIT_HOME = 'Home' as const;
 /** Settings mixer top row: simple full-width exit-to-home control. */
 export const STYLING_WORLD_PLAZA_SETTINGS_EXIT_HOME_BUTTON_CLASS_NAME =
   'mb-1 w-full rounded border border-ink/25 bg-parchment px-2 py-2 text-center text-sm font-bold text-ink max-md:min-h-11 max-md:py-2.5 max-md:text-base' as const;
+
+/** Guide sections opened from Settings (not the Guide book menu). */
+export type WorldPlazaSettingsGuideOption = {
+  id: Extract<WorldPlazaCodexSectionId, 'controls' | 'mechanics' | 'lore'>;
+  label: string;
+  icon: string;
+};
+
+/** Ordered Controls / Mechanics / Lore links in the settings mixer. */
+export const DEFINING_WORLD_PLAZA_SETTINGS_GUIDE_OPTIONS: readonly WorldPlazaSettingsGuideOption[] =
+  [
+    {
+      id: 'controls',
+      label: 'Controls',
+      icon: 'solar:gamepad-bold',
+    },
+    {
+      id: 'mechanics',
+      label: 'Mechanics',
+      icon: 'mdi:hammer',
+    },
+    {
+      id: 'lore',
+      label: 'Lore',
+      icon: 'mdi:book-open-page-variant',
+    },
+  ] as const;
+
+/** Full-width settings row that opens a guide overlay. */
+export const STYLING_WORLD_PLAZA_SETTINGS_GUIDE_BUTTON_CLASS_NAME =
+  'flex w-full items-center justify-center gap-2 rounded border border-ink/25 bg-parchment px-2 py-2 text-center text-sm font-bold text-ink max-md:min-h-11 max-md:py-2.5 max-md:text-base' as const;
+
+/** Stack wrapping the settings guide openers under Home. */
+export const STYLING_WORLD_PLAZA_SETTINGS_GUIDE_STACK_CLASS_NAME =
+  'mb-1 flex w-full flex-col gap-1' as const;

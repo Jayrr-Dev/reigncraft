@@ -51,7 +51,7 @@ describe('beginningWorldPlazaPerformanceSample', () => {
     ).toBe(2);
   });
 
-  it('tracks session average fps across marked frames', () => {
+  it('tracks session average and minimum fps across marked frames', () => {
     settingWorldPlazaPerformanceDiagnosticsEnabled(true);
 
     let nowMs = 1000;
@@ -69,6 +69,7 @@ describe('beginningWorldPlazaPerformanceSample', () => {
 
     expect(snapshot.sessionFrameCount).toBe(2);
     expect(snapshot.sessionFramesPerSecond).toBeCloseTo(66.666, 1);
+    expect(snapshot.sessionMinimumFramesPerSecond).toBeCloseTo(50, 1);
 
     performanceNowSpy.mockRestore();
   });

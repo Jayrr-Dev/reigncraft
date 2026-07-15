@@ -11,6 +11,7 @@ function buildingFakeDiagnosticsSnapshot(): MeasuringWorldPlazaPerformanceDiagno
     capturedAtMs: 1000,
     framesPerSecond: 58.2,
     sessionFramesPerSecond: 57.5,
+    sessionMinimumFramesPerSecond: 32,
     sessionFrameCount: 240,
     frameAverageMs: 17.15,
     framePercentile95Ms: 22.4,

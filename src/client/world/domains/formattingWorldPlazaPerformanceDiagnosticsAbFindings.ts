@@ -27,7 +27,7 @@ function formattingWorldPlazaPerformanceDiagnosticsAbCaptureLine(
   const capturedAtIso = new Date(capture.capturedAtMs).toISOString();
 
   return [
-    `${slotLabel}: ${capture.framesPerSecond.toFixed(1)} fps live · ${capture.sessionFramesPerSecond.toFixed(1)} fps session avg${presetSuffix}`,
+    `${slotLabel}: ${capture.framesPerSecond.toFixed(1)} fps live · ${capture.sessionFramesPerSecond.toFixed(1)} fps session avg · ${capture.sessionMinimumFramesPerSecond.toFixed(1)} fps session min${presetSuffix}`,
     `  captured ${capturedAtIso}`,
   ].join('\n');
 }
@@ -45,7 +45,7 @@ export function formattingWorldPlazaPerformanceDiagnosticsAbFindings({
 
   if (currentSnapshot) {
     lines.push(
-      `Current: ${currentSnapshot.framesPerSecond.toFixed(1)} fps live · ${currentSnapshot.sessionFramesPerSecond.toFixed(1)} fps session avg`
+      `Current: ${currentSnapshot.framesPerSecond.toFixed(1)} fps live · ${currentSnapshot.sessionFramesPerSecond.toFixed(1)} fps session avg · ${currentSnapshot.sessionMinimumFramesPerSecond.toFixed(1)} fps session min`
     );
 
     if (activePresetName) {

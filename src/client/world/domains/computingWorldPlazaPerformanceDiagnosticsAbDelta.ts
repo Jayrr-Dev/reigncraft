@@ -8,6 +8,7 @@ export type ComputingWorldPlazaPerformanceDiagnosticsAbCapture = {
   readonly label: string;
   readonly framesPerSecond: number;
   readonly sessionFramesPerSecond: number;
+  readonly sessionMinimumFramesPerSecond: number;
   readonly capturedAtMs: number;
   readonly presetName: string | null;
 };

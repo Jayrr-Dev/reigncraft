@@ -22,6 +22,7 @@ import {
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_CLASS_NAME,
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_TAB_BODY_CLASS_NAME,
+  LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_FPS_MIN_SEPARATOR,
   LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_FPS_SEPARATOR,
 } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsUiConstants';
 import {
@@ -137,7 +138,11 @@ export function RenderingWorldPlazaPerformanceDiagnosticsOverlay({
         <div className="font-semibold text-amber-200">
           Plaza perf ({snapshot.framesPerSecond.toFixed(0)} fps
           {LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_FPS_SEPARATOR}
-          {snapshot.sessionFramesPerSecond.toFixed(0)})
+          {snapshot.sessionFramesPerSecond.toFixed(0)}
+          {
+            LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_FPS_MIN_SEPARATOR
+          }
+          {snapshot.sessionMinimumFramesPerSecond.toFixed(0)})
         </div>
         <RenderingWorldPlazaDevPanelCloseButton
           ariaLabel={LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_CLOSE}

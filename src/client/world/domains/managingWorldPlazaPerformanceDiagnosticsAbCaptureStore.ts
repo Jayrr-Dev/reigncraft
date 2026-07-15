@@ -75,6 +75,7 @@ export function capturingWorldPlazaPerformanceDiagnosticsAbSlot(
     label,
     framesPerSecond: snapshot.framesPerSecond,
     sessionFramesPerSecond: snapshot.sessionFramesPerSecond,
+    sessionMinimumFramesPerSecond: snapshot.sessionMinimumFramesPerSecond,
     capturedAtMs: snapshot.capturedAtMs,
     presetName,
   };

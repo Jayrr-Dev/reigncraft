@@ -753,7 +753,7 @@ export function dumpingWorldPlazaPerformanceDiagnosticsToConsole(): MeasuringWor
   console.info(
     [
       '[world-plaza-perf] snapshot',
-      `FPS ${snapshot.framesPerSecond.toFixed(1)} | frame avg ${snapshot.frameAverageMs.toFixed(2)}ms | p95 ${snapshot.framePercentile95Ms.toFixed(2)}ms | p99 ${snapshot.framePercentile99Ms.toFixed(2)}ms | max ${snapshot.frameMaxMs.toFixed(2)}ms | slow ${snapshot.slowFrameCount} | very slow ${snapshot.verySlowFrameCount} | samples sum ${snapshot.sampleAverageSumMs.toFixed(2)}ms | unaccounted ${snapshot.unaccountedFrameAverageMs.toFixed(2)}ms${snapshot.jsHeapUsedMb !== null ? ` | heap ${snapshot.jsHeapUsedMb.toFixed(1)}MB` : ''}`,
+      `FPS ${snapshot.framesPerSecond.toFixed(1)} | session avg ${snapshot.sessionFramesPerSecond.toFixed(1)} | session min ${snapshot.sessionMinimumFramesPerSecond.toFixed(1)} | frame avg ${snapshot.frameAverageMs.toFixed(2)}ms | p95 ${snapshot.framePercentile95Ms.toFixed(2)}ms | p99 ${snapshot.framePercentile99Ms.toFixed(2)}ms | max ${snapshot.frameMaxMs.toFixed(2)}ms | slow ${snapshot.slowFrameCount} | very slow ${snapshot.verySlowFrameCount} | samples sum ${snapshot.sampleAverageSumMs.toFixed(2)}ms | unaccounted ${snapshot.unaccountedFrameAverageMs.toFixed(2)}ms${snapshot.jsHeapUsedMb !== null ? ` | heap ${snapshot.jsHeapUsedMb.toFixed(1)}MB` : ''}`,
       'Samples:',
       sampleLines || '  (no samples yet)',
       'Gauges:',

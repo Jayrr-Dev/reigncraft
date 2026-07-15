@@ -289,13 +289,17 @@ export function RenderingWorldPlazaPerformanceDiagnosticsFlagPresetBar(): React.
 
         {captureA ? (
           <div className="mb-0.5 text-[9px] text-amber-100/70">
-            A: {captureA.framesPerSecond.toFixed(1)} fps
+            A: {captureA.framesPerSecond.toFixed(1)} fps · avg{' '}
+            {captureA.sessionFramesPerSecond.toFixed(1)} · min{' '}
+            {captureA.sessionMinimumFramesPerSecond.toFixed(1)}
             {captureA.presetName ? ` (${captureA.presetName})` : ''}
           </div>
         ) : null}
         {captureB ? (
           <div className="mb-0.5 text-[9px] text-amber-100/70">
-            B: {captureB.framesPerSecond.toFixed(1)} fps
+            B: {captureB.framesPerSecond.toFixed(1)} fps · avg{' '}
+            {captureB.sessionFramesPerSecond.toFixed(1)} · min{' '}
+            {captureB.sessionMinimumFramesPerSecond.toFixed(1)}
             {captureB.presetName ? ` (${captureB.presetName})` : ''}
           </div>
         ) : null}
