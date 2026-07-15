@@ -10,6 +10,7 @@ import {
   resolvingWorldPlazaFishingCatchGrant,
   resolvingWorldPlazaFishingCatchRoll,
 } from '@/components/world/fishing/domains/resolvingWorldPlazaFishingCatchRoll';
+import { describe, expect, it } from 'vitest';
 
 describe('resolvingWorldPlazaFishingCatchRoll', () => {
   it('lists lake catches for plains', () => {

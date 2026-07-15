@@ -1,14 +1,14 @@
 import { checkingPlazaCodexStudyTierUnlocked } from '@/components/home/domains/resolvingPlazaCodexStudyTier';
 import type { DefiningInventoryItem } from '@/components/inventory/domains/definingInventoryItem';
+import {
+  checkingWorldPlazaOreSmeltingFuelItemTypeId,
+  resolvingWorldPlazaOreSmeltingRecipe,
+} from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingRegistry';
 import { resolvingWorldPlazaEquipmentAttackEvModifier } from '@/components/world/equipment/domains/resolvingWorldPlazaEquippedAttackEv';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_BASE_MAX } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
 import { checkingWorldPlazaInventoryItemIsBag } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsBag';
 import { checkingWorldPlazaInventoryItemIsWeaponOrTool } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsWeaponOrTool';
 import { computingWorldPlazaInventoryItemResolvedCost } from '@/components/world/inventory/domains/computingWorldPlazaInventoryItemResolvedCost';
-import {
-  checkingWorldPlazaOreSmeltingFuelItemTypeId,
-  resolvingWorldPlazaOreSmeltingRecipe,
-} from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingRegistry';
 import {
   checkingWorldPlazaInventoryItemIsFlowerHerb,
   parsingWorldPlazaFlowerSpeciesIdFromItemTypeId,
@@ -23,6 +23,13 @@ import {
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_RARITY_LABELS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemRarityConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_SPECIAL_TAG_LABELS } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemSpecialTagConstants';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_CLAY_TEAPOT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CUP_OF_TEA,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import {
   checkingWorldPlazaInventoryItemIsOre,
   parsingWorldPlazaOreSpeciesIdFromItemTypeId,
@@ -45,7 +52,6 @@ import {
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFlowerDetailReveal';
 import { resolvingWorldPlazaInventoryFoodHealAmount } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealAmount';
 import { resolvingWorldPlazaInventoryItemDescription } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDescription';
-import { resolvingWorldPlazaInventoryItemGroundActionLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemGroundActionLabel';
 import { resolvingWorldPlazaInventoryItemDurability } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemDurability';
 import {
   partitioningWorldPlazaInventoryItemEnchantmentRows,
@@ -56,6 +62,7 @@ import {
   checkingWorldPlazaInventoryItemIsFood,
   resolvingWorldPlazaInventoryFoodDefinition,
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemFood';
+import { resolvingWorldPlazaInventoryItemGroundActionLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryItemGroundActionLabel';
 import {
   formattingWorldPlazaInventoryItemEvModifierLabel,
   resolvingWorldPlazaInventoryItemCreatedBy,
@@ -78,20 +85,12 @@ import {
   resolvingWorldPlazaInventoryWildlifeMeatDetailReveal,
 } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryWildlifeMeatDetailReveal';
 import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
-import {
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_CLAY_TEAPOT,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CUP_OF_TEA,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT,
-  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT,
-} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
-import {
-  DEFINING_WORLD_PLAZA_TEA_BREWING_POURS_PER_POT,
-} from '@/components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingConstants';
+import { DEFINING_WORLD_PLAZA_TEA_BREWING_POURS_PER_POT } from '@/components/world/tea-brewing/domains/definingWorldPlazaTeaBrewingConstants';
 import {
   resolvingWorldPlazaTeaBrewingMetadata,
   resolvingWorldPlazaTeaPotRemainingPours,
 } from '@/components/world/tea-brewing/domains/resolvingWorldPlazaTeaBrewingMetadata';
+import { checkingWildlifeFishMeatSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeFishMeatCatalog';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 import type { WorldOreSpeciesId } from '../../../../shared/worldOreRarity';
@@ -209,7 +208,11 @@ function checkingWorldPlazaInventoryItemCanStudyOre(
 
   const studyCount = oreStudyCountsBySpeciesId?.[speciesId] ?? 0;
 
-  return !checkingPlazaCodexStudyTierUnlocked('lapidary', 'mastery', studyCount);
+  return !checkingPlazaCodexStudyTierUnlocked(
+    'lapidary',
+    'mastery',
+    studyCount
+  );
 }
 
 /**
@@ -263,7 +266,8 @@ function checkingWorldPlazaInventoryItemCanStudyMushroom(
     | Readonly<Partial<Record<DefiningWorldPlazaMushroomSpeciesId, number>>>
     | undefined
 ): boolean {
-  const speciesId = parsingWorldPlazaMushroomSpeciesIdFromItemTypeId(itemTypeId);
+  const speciesId =
+    parsingWorldPlazaMushroomSpeciesIdFromItemTypeId(itemTypeId);
 
   if (!speciesId) {
     return false;
@@ -306,7 +310,10 @@ function checkingWorldPlazaInventoryItemCanStudy(
       itemTypeId,
       oreStudyCountsBySpeciesId
     ) ||
-    checkingWorldPlazaInventoryItemCanStudyClover(itemTypeId, cloverStudyCount) ||
+    checkingWorldPlazaInventoryItemCanStudyClover(
+      itemTypeId,
+      cloverStudyCount
+    ) ||
     checkingWorldPlazaInventoryItemCanStudyBerry(
       itemTypeId,
       berryStudyCountsByLootKind
@@ -330,7 +337,16 @@ function resolvingWildlifeMeatStudyCount(
     | Readonly<Partial<Record<DefiningWildlifeSpeciesId, number>>>
     | undefined
 ): number {
-  if (!wildlifeSpeciesId || !studyCountsBySpeciesId) {
+  if (!wildlifeSpeciesId) {
+    return 0;
+  }
+
+  // Caught fish are already "studied" by reeling them in; no land bestiary corpse yet.
+  if (checkingWildlifeFishMeatSpeciesId(wildlifeSpeciesId)) {
+    return 200;
+  }
+
+  if (!studyCountsBySpeciesId) {
     return 0;
   }
 
@@ -489,7 +505,8 @@ function resolvingWorldPlazaTeaBrewingDetailOverrides(
   }
 
   if (
-    item.itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_CLAY_TEAPOT &&
+    item.itemTypeId ===
+      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BREWED_CLAY_TEAPOT &&
     brew
   ) {
     const remainingPours =
@@ -525,7 +542,8 @@ function resolvingWorldPlazaInventoryItemDetailTeaActions(
     canAddWater:
       itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT,
     canOpenTeapot:
-      itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT,
+      itemTypeId ===
+      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WATERED_CLAY_TEAPOT,
     canPourTea:
       itemTypeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_CUP &&
       Boolean(options.hasBrewedTeaPot),
@@ -900,21 +918,22 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
   return {
     itemTypeId: item.itemTypeId,
     name: teaOverrides?.name ?? definition.name,
-    description: teaOverrides?.description ??
+    description:
+      teaOverrides?.description ??
       (flowerSpeciesId
-      ? (flowerContent?.description ?? '')
-      : cloverKind
-        ? (cloverContent?.description ?? '')
-        : berryLootKind
-          ? (berryContent?.description ?? '')
-          : mushroomSpeciesId
-            ? (mushroomContent?.description ?? '')
-            : oreSpeciesId
-              ? (oreContent?.description ?? '')
-              : (wildlifeMeatContent?.description ??
-                resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
-                  fallbackName: definition.name,
-                }))),
+        ? (flowerContent?.description ?? '')
+        : cloverKind
+          ? (cloverContent?.description ?? '')
+          : berryLootKind
+            ? (berryContent?.description ?? '')
+            : mushroomSpeciesId
+              ? (mushroomContent?.description ?? '')
+              : oreSpeciesId
+                ? (oreContent?.description ?? '')
+                : (wildlifeMeatContent?.description ??
+                  resolvingWorldPlazaInventoryItemDescription(item.itemTypeId, {
+                    fallbackName: definition.name,
+                  }))),
     durabilityLabel: formattingWorldPlazaInventoryItemDurabilityLabel(item),
     durabilityRatio: durabilitySnapshot?.ratio ?? null,
     badges: mergedBadges,

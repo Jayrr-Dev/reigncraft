@@ -5,6 +5,7 @@
  */
 
 import type { DefiningWorldPlazaEntityDiseaseId } from '@/components/world/health/domains/definingWorldPlazaEntityDiseaseRegistry';
+import { DEFINING_WILDLIFE_FISH_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeFishMeatCatalog';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeVariantMeatRegistry';
 
@@ -931,13 +932,17 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
   ];
 
 const DEFINING_WILDLIFE_MEAT_BY_SPECIES = Object.fromEntries(
-  DEFINING_WILDLIFE_MEAT_CATALOG.map((entry) => [entry.speciesId, entry])
+  [
+    ...DEFINING_WILDLIFE_MEAT_CATALOG,
+    ...DEFINING_WILDLIFE_FISH_MEAT_CATALOG,
+  ].map((entry) => [entry.speciesId, entry])
 ) as Record<DefiningWildlifeSpeciesId, DefiningWildlifeMeatCatalogEntry>;
 
 const DEFINING_WILDLIFE_ALL_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalogEntry[] =
   [
     ...DEFINING_WILDLIFE_MEAT_CATALOG,
     ...DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG,
+    ...DEFINING_WILDLIFE_FISH_MEAT_CATALOG,
   ];
 
 const DEFINING_WILDLIFE_RAW_MEAT_ITEM_TYPE_IDS = new Set(

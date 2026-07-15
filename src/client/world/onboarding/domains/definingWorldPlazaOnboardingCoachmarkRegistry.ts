@@ -11,13 +11,21 @@ export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_CORE_ORDER: readonly Worl
 export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_CONTEXTUAL_ORDER: readonly WorldPlazaOnboardingCoachmarkStepId[] =
   [
     'chop',
+    'forage',
+    'mine',
     'loot',
     'equip-tool',
+    'melee',
     'hunger',
     'temperature',
+    'stamina',
+    'status-effects',
     'craft',
+    'cook',
     'codex',
+    'herbarium',
     'study',
+    'minimap',
     'build',
     'claim',
     'spritcore',
@@ -75,6 +83,30 @@ export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_REGISTRY: readonly WorldP
       tipPlacement: 'above',
     },
     {
+      id: 'forage',
+      phase: 'contextual',
+      title: 'Gather forage',
+      descriptionDesktop:
+        'Click flowers, mushrooms, or pebbles to pick them. Berries and herbs go in your hotbar and can be studied in the Herbarium.',
+      descriptionMobile:
+        'Tap flowers, mushrooms, or pebbles to pick them. Berries and herbs go in your hotbar and can be studied in the Herbarium.',
+      targetAnchorId: 'forage-interaction',
+      advanceEvent: 'forage-pick',
+      tipPlacement: 'above',
+    },
+    {
+      id: 'mine',
+      phase: 'contextual',
+      title: 'Mine stone and ore',
+      descriptionDesktop:
+        'Equip a pickaxe in your fist slot, click a rock, then press Mine. Ore fills the Lapidary in your Codex.',
+      descriptionMobile:
+        'Equip a pickaxe in your fist slot, tap a rock, then press Mine. Ore fills the Lapidary in your Codex.',
+      targetAnchorId: 'mine-interaction',
+      advanceEvent: 'mine-start',
+      tipPlacement: 'above',
+    },
+    {
       id: 'loot',
       phase: 'contextual',
       title: 'Picked up loot',
@@ -96,6 +128,18 @@ export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_REGISTRY: readonly WorldP
         'Tap a tool in your hotbar to move it into the left fist slot. That is what you swing and harvest with.',
       targetAnchorId: 'equip-tool-slot',
       advanceEvent: 'equip-tool',
+      tipPlacement: 'above',
+    },
+    {
+      id: 'melee',
+      phase: 'contextual',
+      title: 'Fight back',
+      descriptionDesktop:
+        'Hostile wildlife is nearby. Equip a weapon and click the animal to swing. Watch the red danger rim if you need a bearing.',
+      descriptionMobile:
+        'Hostile wildlife is nearby. Equip a weapon and tap the animal to swing. Watch the red danger rim if you need a bearing.',
+      targetAnchorId: 'equip-tool-slot',
+      advanceEvent: 'melee-swing',
       tipPlacement: 'above',
     },
     {
@@ -123,6 +167,30 @@ export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_REGISTRY: readonly WorldP
       tipPlacement: 'below',
     },
     {
+      id: 'stamina',
+      phase: 'contextual',
+      title: 'Run stamina',
+      descriptionDesktop:
+        'The green bar under your health is stamina. Hold Shift or double-click to run. It refills when you stop, but drains fast on ice.',
+      descriptionMobile:
+        'The green bar under your health is stamina. Hold to run or use the jump button. It refills when you stop, but drains fast on ice.',
+      targetAnchorId: 'stamina-bar',
+      advanceEvent: 'stamina-sprint',
+      tipPlacement: 'above',
+    },
+    {
+      id: 'status-effects',
+      phase: 'contextual',
+      title: 'Status effects',
+      descriptionDesktop:
+        'Debuffs stack in the top-right corner. Click a badge to read what it does and how long it lasts.',
+      descriptionMobile:
+        'Debuffs stack in the top-right corner. Tap a badge to read what it does and how long it lasts.',
+      targetAnchorId: 'status-effect-stack',
+      advanceEvent: 'status-effect-click',
+      tipPlacement: 'below',
+    },
+    {
       id: 'craft',
       phase: 'contextual',
       title: 'Crafting',
@@ -132,6 +200,18 @@ export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_REGISTRY: readonly WorldP
         'Tap Craft above your hotbar to open recipes. Pick a recipe, gather materials, then craft tools, campfires, and placeables.',
       targetAnchorId: 'hud-toolbar-craft',
       advanceEvent: 'craft-mode-select',
+      tipPlacement: 'above',
+    },
+    {
+      id: 'cook',
+      phase: 'contextual',
+      title: 'Cook raw meat',
+      descriptionDesktop:
+        'Raw meat can make you sick. Light a campfire, stand beside it, and press Cook. Cooked meat is safer and restores more hunger.',
+      descriptionMobile:
+        'Raw meat can make you sick. Light a campfire, stand beside it, and tap Cook. Cooked meat is safer and restores more hunger.',
+      targetAnchorId: 'hotbar',
+      advanceEvent: 'cook-start',
       tipPlacement: 'above',
     },
     {
@@ -147,6 +227,18 @@ export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_REGISTRY: readonly WorldP
       tipPlacement: 'below',
     },
     {
+      id: 'herbarium',
+      phase: 'contextual',
+      title: 'Herbarium study',
+      descriptionDesktop:
+        'Open the Codex and pick Herbarium. Study flowers and mushrooms from your inventory to unlock effects, rarity, and where they grow.',
+      descriptionMobile:
+        'Open the Codex and pick Herbarium. Study flowers and mushrooms from your inventory to unlock effects, rarity, and where they grow.',
+      targetAnchorId: 'codex-book',
+      advanceEvent: 'herbarium-codex-open',
+      tipPlacement: 'below',
+    },
+    {
       id: 'study',
       phase: 'contextual',
       title: 'Study corpses',
@@ -157,6 +249,18 @@ export const DEFINING_WORLD_PLAZA_ONBOARDING_COACHMARK_REGISTRY: readonly WorldP
       targetAnchorId: 'study-interaction',
       advanceEvent: 'study-start',
       tipPlacement: 'above',
+    },
+    {
+      id: 'minimap',
+      phase: 'contextual',
+      title: 'Minimap',
+      descriptionDesktop:
+        'Click the compass orb on the action bar to open your minimap. It tracks you, owned land, and nearby players.',
+      descriptionMobile:
+        'Tap the compass orb on the action bar to open your minimap. It tracks you, owned land, and nearby players.',
+      targetAnchorId: 'minimap-orb',
+      advanceEvent: 'minimap-open',
+      tipPlacement: 'below',
     },
     {
       id: 'build',

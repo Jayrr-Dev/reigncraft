@@ -51,6 +51,27 @@ const DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_FAMILY_OFFSET: Record<
 };
 
 /**
+ * CSS filters that shift the shared brown fishrod toward each material set.
+ * Wood keeps the pack colors; metal tiers approximate iron / copper-steel / gold.
+ */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_FISHROD_TIER_CSS_FILTER: Record<
+  DefiningWorldPlazaHeldItemTier,
+  string | undefined
+> = {
+  wood: undefined,
+  iron: 'saturate(0.2) brightness(1.18) contrast(1.12)',
+  steel: 'sepia(0.6) saturate(1.9) hue-rotate(-22deg) brightness(1.02)',
+  gold: 'sepia(0.9) saturate(2.6) hue-rotate(8deg) brightness(1.18)',
+};
+
+/**
+ * Pack "gold" set reads copper/red; push heads toward bright yellow gold.
+ * Applied to every gold-tier tool recipe (pickaxe, sword, axe, …).
+ */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_GOLD_TOOL_CSS_FILTER =
+  'sepia(1) saturate(3.2) hue-rotate(18deg) brightness(1.22)' as const;
+
+/**
  * Resolves the cookbook / Guides sprite-sheet cell for one tool recipe.
  */
 export function resolvingWorldPlazaCraftModeToolRecipeSpriteSheetIcon(
@@ -70,6 +91,12 @@ export function resolvingWorldPlazaCraftModeToolRecipeSpriteSheetIcon(
     linearIndex /
       DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_SPRITE_SHEET_COLUMN_COUNT
   );
+  const cssFilter =
+    family === 'fishrod'
+      ? DEFINING_WORLD_PLAZA_CRAFT_MODE_FISHROD_TIER_CSS_FILTER[tier]
+      : tier === 'gold'
+        ? DEFINING_WORLD_PLAZA_CRAFT_MODE_GOLD_TOOL_CSS_FILTER
+        : undefined;
 
   return {
     spriteSheetUrl:
@@ -80,5 +107,6 @@ export function resolvingWorldPlazaCraftModeToolRecipeSpriteSheetIcon(
       DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_SPRITE_SHEET_ROW_COUNT,
     columnIndex,
     rowIndex,
+    ...(cssFilter ? { cssFilter } : {}),
   };
 }

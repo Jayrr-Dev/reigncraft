@@ -44,6 +44,9 @@ export function RenderingWorldPlazaCraftModeRecipeSpriteSheetPreview({
         backgroundSize: `${spriteSheetIcon.columnCount * 100}% ${spriteSheetIcon.rowCount * 100}%`,
         backgroundPosition: `${columnPercent}% ${rowPercent}%`,
         imageRendering: 'pixelated',
+        ...(spriteSheetIcon.cssFilter
+          ? { filter: spriteSheetIcon.cssFilter }
+          : {}),
         ...style,
       }}
       aria-hidden

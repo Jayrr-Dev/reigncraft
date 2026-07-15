@@ -48,6 +48,8 @@ export type DefiningWorldPlazaInventorySpriteSheetIcon = {
   readonly rowCount: number;
   readonly columnIndex: number;
   readonly rowIndex: number;
+  /** Optional CSS `filter` for tier tinting (e.g. shared fishrod cell). */
+  readonly cssFilter?: string;
 };
 
 /** Wear-and-break rules for reusable tools (axe, build tool, etc.). */

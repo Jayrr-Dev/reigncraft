@@ -36,6 +36,7 @@ import {
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { DEFINING_WORLD_PLAZA_INVENTORY_RESOURCE_ITEM_DESCRIPTION_ENTRIES } from '@/components/world/inventory/domains/definingWorldPlazaInventoryResourceItemDescriptionCorpus';
 import { DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
+import { DEFINING_WILDLIFE_FISH_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeFishMeatCatalog';
 import { resolvingWildlifeMeatItemDescriptionEntry } from '@/components/world/wildlife/domains/definingWildlifeMeatItemDescriptionCorpus';
 import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import { resolvingWildlifeVariantMeatItemDescriptionEntry } from '@/components/world/wildlife/domains/definingWildlifeVariantMeatItemDescriptionCorpus';
@@ -175,7 +176,10 @@ const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_DESCRIPTION_STATIC_ENTRIES: readonly D
 function listingWildlifeMeatDescriptionEntries(): DefiningWorldPlazaInventoryItemDescriptionEntry[] {
   const entries: DefiningWorldPlazaInventoryItemDescriptionEntry[] = [];
 
-  for (const meatEntry of DEFINING_WILDLIFE_MEAT_CATALOG) {
+  for (const meatEntry of [
+    ...DEFINING_WILDLIFE_MEAT_CATALOG,
+    ...DEFINING_WILDLIFE_FISH_MEAT_CATALOG,
+  ]) {
     const meatDescription = resolvingWildlifeMeatItemDescriptionEntry(
       meatEntry.speciesId
     );

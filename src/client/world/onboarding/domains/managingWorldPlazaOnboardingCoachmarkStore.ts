@@ -10,12 +10,21 @@ export type WorldPlazaOnboardingCoachmarkSessionSignals = {
   readonly hasHotbarClicked: boolean;
   readonly hasActionBarClicked: boolean;
   readonly hasChopStarted: boolean;
+  readonly hasForagePicked: boolean;
+  readonly hasMineStarted: boolean;
   readonly hasLootPickup: boolean;
+  readonly hasMeleeSwung: boolean;
   readonly hasHungerClicked: boolean;
   readonly hasTemperatureClicked: boolean;
+  readonly hasSprinted: boolean;
+  readonly hasStaminaDepleted: boolean;
+  readonly hasStatusEffectClicked: boolean;
   readonly hasCraftModeSelected: boolean;
+  readonly hasCookStarted: boolean;
   readonly hasCodexOpened: boolean;
+  readonly hasHerbariumCodexOpened: boolean;
   readonly hasStudyStarted: boolean;
+  readonly hasMinimapOpened: boolean;
   readonly hasBuildModeSelected: boolean;
   readonly hasClaimModeSelected: boolean;
   readonly hasProfileOpened: boolean;
@@ -34,12 +43,21 @@ const MANAGING_WORLD_PLAZA_ONBOARDING_COACHMARK_EMPTY_SESSION_SIGNALS: WorldPlaz
     hasHotbarClicked: false,
     hasActionBarClicked: false,
     hasChopStarted: false,
+    hasForagePicked: false,
+    hasMineStarted: false,
     hasLootPickup: false,
+    hasMeleeSwung: false,
     hasHungerClicked: false,
     hasTemperatureClicked: false,
+    hasSprinted: false,
+    hasStaminaDepleted: false,
+    hasStatusEffectClicked: false,
     hasCraftModeSelected: false,
+    hasCookStarted: false,
     hasCodexOpened: false,
+    hasHerbariumCodexOpened: false,
     hasStudyStarted: false,
+    hasMinimapOpened: false,
     hasBuildModeSelected: false,
     hasClaimModeSelected: false,
     hasProfileOpened: false,

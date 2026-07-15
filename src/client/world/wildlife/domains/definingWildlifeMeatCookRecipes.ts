@@ -4,12 +4,12 @@
  * @module components/world/wildlife/domains/definingWildlifeMeatCookRecipes
  */
 
-import { listingWorldPlazaFishingCatchCreatures } from '@/components/world/fishing/domains/definingWorldPlazaFishingCatchRegistry';
-import { DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COCONUT,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COOKED_COCONUT,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
+import { DEFINING_WILDLIFE_FISH_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeFishMeatCatalog';
 import { DEFINING_WILDLIFE_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeMeatRegistry';
 import { DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG } from '@/components/world/wildlife/domains/definingWildlifeVariantMeatRegistry';
 
@@ -35,12 +35,6 @@ const DEFINING_WORLD_PLAZA_FORAGE_COOK_RECIPES: readonly DefiningWildlifeMeatCoo
       cookedDisplayName: entry.cookedDisplayName,
       cookDurationMs: entry.cookDurationMs,
     })),
-    ...listingWorldPlazaFishingCatchCreatures().map((entry) => ({
-      rawItemTypeId: entry.rawItemTypeId,
-      cookedItemTypeId: entry.cookedItemTypeId,
-      cookedDisplayName: entry.cookedDisplayName,
-      cookDurationMs: entry.cookDurationMs,
-    })),
   ];
 
 export const DEFINING_WILDLIFE_MEAT_COOK_RECIPES: readonly DefiningWildlifeMeatCookRecipe[] =
@@ -48,6 +42,7 @@ export const DEFINING_WILDLIFE_MEAT_COOK_RECIPES: readonly DefiningWildlifeMeatC
     ...[
       ...DEFINING_WILDLIFE_MEAT_CATALOG,
       ...DEFINING_WILDLIFE_VARIANT_MEAT_CATALOG,
+      ...DEFINING_WILDLIFE_FISH_MEAT_CATALOG,
     ].map((entry) => ({
       rawItemTypeId: entry.rawItemTypeId,
       cookedItemTypeId: entry.cookedItemTypeId,

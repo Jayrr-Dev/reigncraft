@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/definingWildlifeMeatItemDescriptionCorpus
  */
 
+import { resolvingWildlifeFishMeatItemDescriptionEntry } from '@/components/world/wildlife/domains/definingWildlifeFishMeatItemDescriptionCorpus';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type DefiningWildlifeMeatItemDescriptionEntry = {
@@ -426,9 +427,12 @@ const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_BY_SPECIES = Object.fromEntries(
   DefiningWildlifeMeatItemDescriptionEntry
 >;
 
-/** Resolves flavor copy for one wildlife meat species. */
+/** Resolves flavor copy for one wildlife meat species (land or fish catch). */
 export function resolvingWildlifeMeatItemDescriptionEntry(
   speciesId: DefiningWildlifeSpeciesId
 ): DefiningWildlifeMeatItemDescriptionEntry | null {
-  return DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_BY_SPECIES[speciesId] ?? null;
+  return (
+    DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_BY_SPECIES[speciesId] ??
+    resolvingWildlifeFishMeatItemDescriptionEntry(speciesId)
+  );
 }

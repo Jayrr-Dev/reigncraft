@@ -19,7 +19,9 @@ export const DEFINING_WORLD_PLAZA_FISHING_CATCH_WEIGHT_BY_RARITY: Record<
   uncommon: 28,
   rare: 9,
   epic: 6,
+  mythic: 4,
   legendary: 2,
+  godly: 1,
 };
 
 /** Default campfire cook channel for common fish (ms). */
@@ -32,7 +34,9 @@ export const DEFINING_WORLD_PLAZA_FISHING_CATCH_COOK_DURATION_MS_BY_RARITY: Reco
   uncommon: 2_200,
   rare: 2_500,
   epic: 2_800,
+  mythic: 3_000,
   legendary: 3_200,
+  godly: 3_500,
 };
 
 /** Carry weight for most catch and junk items. */
