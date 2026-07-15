@@ -7,14 +7,14 @@
 import { RenderingPlazaCodexMilestoneRewardClaimDialog } from '@/components/home/components/renderingPlazaCodexMilestoneRewardClaimDialog';
 import { claimingPlazaCodexMilestoneReward } from '@/components/home/domains/claimingPlazaCodexMilestoneReward';
 import type { PlazaCodexMilestoneRewardDefinition } from '@/components/home/domains/definingPlazaCodexMilestoneRewardRegistry';
-import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
-import { LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_INVENTORY_FULL_TOAST } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
 import {
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_FILL_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_MARKERS_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_SHELL_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_PROGRESS_TRACK_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CHEST_ICON,
+  DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CLAIMED_BADGE_CLASS_NAME,
+  DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CLAIMED_BADGE_ICON_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CLAIMED_ICON,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_ICON_CLASS_NAME,
   DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_CLAIMED_CLASS_NAME,
@@ -30,12 +30,14 @@ import {
   type PlazaCodexOverallMilestoneRewardMarker,
 } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
 import { usingPlazaCodexStudyMilestoneRewardPopoverOpenState } from '@/components/home/hooks/usingPlazaCodexStudyMilestoneRewardPopoverOpenState';
+import { showingReigncraftToast } from '@/components/ui/domains/showingReigncraftToast';
 import { Icon } from '@/components/ui/icon';
 import { RenderingWorldPlazaCraftModeRecipeSpriteSheetPreview } from '@/components/world/building/components/renderingWorldPlazaCraftModeRecipeSpriteSheetPreview';
 import { resolvingWorldPlazaCraftModeRecipeDefinition } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry';
 import type { DefiningWorldPlazaCraftModeRecipeVisual } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { usingWorldPlazaAnchoredPopoverViewportShiftX } from '@/components/world/hooks/usingWorldPlazaAnchoredPopoverViewportShiftX';
 import type { DefiningWorldPlazaInventorySpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
+import { LABELING_WORLD_PLAZA_INVENTORY_STORAGE_EXPANSION_INVENTORY_FULL_TOAST } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
 import { resolvingWorldPlazaInventoryStorageExpansionPageSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionPageSpriteSheetConstants';
 import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/playingWildlifeStudySfx';
 import { useCallback, useRef, useState } from 'react';
@@ -130,9 +132,6 @@ function RenderingPlazaCodexStudyMilestoneRewardMarker({
     : marker.isReached
       ? DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_REACHED_CLASS_NAME
       : DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_LOCKED_CLASS_NAME;
-  const nodeIcon = marker.isClaimed
-    ? DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CLAIMED_ICON
-    : DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CHEST_ICON;
   const rewardLabel = marker.rewardDefinition?.reward.label ?? null;
   const popoverLabel = resolvingPlazaCodexStudyMilestoneRewardPopoverLabel(
     marker.remainingNeeded,
@@ -190,7 +189,7 @@ function RenderingPlazaCodexStudyMilestoneRewardMarker({
         }}
       >
         <Icon
-          icon={nodeIcon}
+          icon={DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CHEST_ICON}
           className={
             DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_ICON_CLASS_NAME
           }
@@ -202,6 +201,20 @@ function RenderingPlazaCodexStudyMilestoneRewardMarker({
             }
             aria-hidden
           />
+        ) : marker.isClaimed ? (
+          <span
+            className={
+              DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CLAIMED_BADGE_CLASS_NAME
+            }
+            aria-hidden
+          >
+            <Icon
+              icon={DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CLAIMED_ICON}
+              className={
+                DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CLAIMED_BADGE_ICON_CLASS_NAME
+              }
+            />
+          </span>
         ) : null}
       </button>
       {isPopoverOpen ? (

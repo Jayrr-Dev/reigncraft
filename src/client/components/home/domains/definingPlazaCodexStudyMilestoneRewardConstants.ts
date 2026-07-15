@@ -35,11 +35,11 @@ export const DEFINING_PLAZA_CODEX_RECIPES_MILESTONE_REWARD_PERCENTS = [
   13, 25, 38, 50, 63, 75, 88, 100,
 ] as const;
 
-/** Iconify id for locked / unclaimed milestone chest placeholders. */
+/** Iconify id for locked / unclaimed / claimed milestone chest placeholders. */
 export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CHEST_ICON =
   'mdi:treasure-chest' as const;
 
-/** Iconify id for claimed (unlocked) milestone markers. */
+/** Iconify id for the corner check pip on a claimed chest. */
 export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CLAIMED_ICON =
   'mdi:check-bold' as const;
 
@@ -67,7 +67,7 @@ export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_LOCKED_CLASS_NAME 
 export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_REACHED_CLASS_NAME =
   'absolute top-1/2 flex size-4 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-poster-gold/70 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-poster-gold shadow-[0_1px_0_0_#14252b] outline-none before:absolute before:-inset-2 before:content-[""]' as const;
 
-/** Claimed milestone circle: gold check instead of chest. */
+/** Claimed milestone circle: chest stays, corner check pip marks grant gotten. */
 export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NODE_CLAIMED_CLASS_NAME =
   'absolute top-1/2 flex size-4 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-poster-gold/70 bg-[linear-gradient(180deg,#2c4a52_0%,#223a42_100%)] text-poster-gold shadow-[0_1px_0_0_#14252b] outline-none before:absolute before:-inset-2 before:content-[""]' as const;
 
@@ -78,6 +78,14 @@ export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_ICON_CLASS_NAME =
 /** Orange corner pip on a reached chest (reward ready). */
 export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_NOTIFICATION_BADGE_CLASS_NAME =
   'pointer-events-none absolute -right-0.5 -top-0.5 z-10 size-1.5 rounded-full border border-parchment bg-poster-orange shadow-[0_0_0_1px_rgba(20,37,43,0.35)]' as const;
+
+/** Teal corner check pip on a claimed chest (packing ledger / recipe gotten). */
+export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CLAIMED_BADGE_CLASS_NAME =
+  'pointer-events-none absolute -right-1 -top-1 z-10 flex size-2.5 items-center justify-center rounded-full border border-parchment bg-poster-teal text-parchment shadow-[0_0_0_1px_rgba(20,37,43,0.35)]' as const;
+
+/** Check glyph inside the claimed corner pip. */
+export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CLAIMED_BADGE_ICON_CLASS_NAME =
+  'size-1.5 shrink-0' as const;
 
 /**
  * Click popover above a chest: reward label (+ item icon) or "N more".

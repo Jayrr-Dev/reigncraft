@@ -18,7 +18,14 @@ import {
   gettingWorldPlazaRecipeAttachedSnapshot,
   subscribingWorldPlazaRecipeDiscovery,
 } from '@/components/world/domains/managingWorldPlazaRecipeDiscoveryStore';
+import {
+  gettingWorldPlazaInventoryStorageExpansionClaimedSnapshot,
+  subscribingWorldPlazaInventoryStorageExpansion,
+} from '@/components/world/inventory/domains/managingWorldPlazaInventoryStorageExpansionStore';
 import { useMemo, useSyncExternalStore } from 'react';
+
+const RENDERING_PLAZA_CODEX_DISCOVERY_MILESTONE_EMPTY_CLAIMED_SNAPSHOT: readonly string[] =
+  [];
 
 export type RenderingPlazaCodexDiscoveryMilestoneProgressProps = {
   label: string;
@@ -47,6 +54,12 @@ export function RenderingPlazaCodexDiscoveryMilestoneProgress({
   const attachedRecipeIdSet = useMemo(
     () => new Set(attachedRecipeIds),
     [attachedRecipeIds]
+  );
+  // Re-render when packing-ledger Codex claims change claimed-chest state.
+  useSyncExternalStore(
+    subscribingWorldPlazaInventoryStorageExpansion,
+    gettingWorldPlazaInventoryStorageExpansionClaimedSnapshot,
+    () => RENDERING_PLAZA_CODEX_DISCOVERY_MILESTONE_EMPTY_CLAIMED_SNAPSHOT
   );
 
   const markers = resolvingPlazaCodexDiscoveryMilestoneRewardMarkers(
