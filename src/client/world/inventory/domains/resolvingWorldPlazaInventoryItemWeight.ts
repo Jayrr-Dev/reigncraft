@@ -4,6 +4,7 @@
  * @module components/world/inventory/domains/resolvingWorldPlazaInventoryItemWeight
  */
 
+import { DEFINING_WORLD_PLAZA_FISHING_CATCH_CATALOG } from '@/components/world/fishing/domains/definingWorldPlazaFishingCatchRegistry';
 import { computingWorldPlazaMeatItemWeightFromSpeciesMassKg } from '@/components/world/inventory/domains/computingWorldPlazaMeatItemWeightFromSpeciesMassKg';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_WEIGHT_BY_TYPE_ID,
@@ -15,11 +16,26 @@ import {
 } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
+const DEFINING_WORLD_PLAZA_FISHING_CATCH_WEIGHT_BY_TYPE_ID: Readonly<
+  Record<string, number>
+> = Object.fromEntries(
+  DEFINING_WORLD_PLAZA_FISHING_CATCH_CATALOG.flatMap((entry) => {
+    if (entry.kind === 'junk') {
+      return [[entry.itemTypeId, entry.carryWeight]] as const;
+    }
+
+    return [
+      [entry.rawItemTypeId, entry.carryWeight],
+      [entry.cookedItemTypeId, entry.carryWeight * 0.9],
+    ] as const;
+  })
+);
+
 /**
  * Resolves unitless carry weight for one item type id.
  *
  * Explicit registry rows win. Wildlife meat falls back to species mass.
- * Unknown types use the default weight.
+ * Fishing catch uses catalog carry weights. Unknown types use the default weight.
  */
 export function resolvingWorldPlazaInventoryItemWeight(
   itemTypeId: string
@@ -29,6 +45,13 @@ export function resolvingWorldPlazaInventoryItemWeight(
 
   if (explicitWeight !== undefined) {
     return explicitWeight;
+  }
+
+  const fishingCatchWeight =
+    DEFINING_WORLD_PLAZA_FISHING_CATCH_WEIGHT_BY_TYPE_ID[itemTypeId];
+
+  if (fishingCatchWeight !== undefined) {
+    return fishingCatchWeight;
   }
 
   const definition = resolvingWorldPlazaInventoryItemTypeDefinition(itemTypeId);

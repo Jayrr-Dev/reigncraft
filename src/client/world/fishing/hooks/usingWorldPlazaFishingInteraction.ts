@@ -2,11 +2,16 @@
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import { addingInventoryItemWithStacking } from '@/components/inventory/domains/reducingInventoryState';
+import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fishing/domains/checkingWorldPlazaFishingCastEligibility';
 import { DEFINING_WORLD_PLAZA_FISHING_CATCH_QUANTITY } from '@/components/world/fishing/domains/definingWorldPlazaFishingConstants';
 import type { ListingWorldPlazaFishingTilesInInteractionRangeEntry } from '@/components/world/fishing/domains/listingWorldPlazaFishingTilesInInteractionRange';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISH } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import {
+  resolvingWorldPlazaFishingCatchGrant,
+  resolvingWorldPlazaFishingCatchRoll,
+} from '@/components/world/fishing/domains/resolvingWorldPlazaFishingCatchRoll';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { wearingWorldPlazaEquippedInventoryToolDurability } from '@/components/world/inventory/domains/wearingWorldPlazaEquippedInventoryToolDurability';
@@ -88,6 +93,32 @@ export function usingWorldPlazaFishingInteraction({
         return;
       }
 
+      const waterTile = resolvingWorldPlazaWaterAtTileIndex(
+        entry.tileX,
+        entry.tileY
+      );
+
+      if (!waterTile) {
+        return;
+      }
+
+      const biomeKind = resolvingWorldPlazaBiomeAtTileIndex(
+        entry.tileX,
+        entry.tileY
+      ).kind;
+
+      const catchEntry = resolvingWorldPlazaFishingCatchRoll({
+        waterKind: waterTile.kind,
+        biomeKind,
+      });
+
+      if (!catchEntry) {
+        showingGameplayHudToast('Nothing bites.');
+        return;
+      }
+
+      const grant = resolvingWorldPlazaFishingCatchGrant(catchEntry);
+
       let didBreak = false;
       let quantityAccepted = 0;
       let wasInventoryFull = false;
@@ -99,24 +130,24 @@ export function usingWorldPlazaFishingInteraction({
           'fishrod'
         );
 
-        const withFish = addingInventoryItemWithStacking(
+        const withCatch = addingInventoryItemWithStacking(
           wearResult.nextState,
           {
-            id: `fishing-catch-${entry.tileX}-${entry.tileY}`,
-            itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FISH,
+            id: `fishing-catch-${catchEntry.catchId}-${entry.tileX}-${entry.tileY}`,
+            itemTypeId: grant.itemTypeId,
             quantity: DEFINING_WORLD_PLAZA_FISHING_CATCH_QUANTITY,
           },
           DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY
         );
 
-        if (withFish.quantityOverflow > 0) {
+        if (withCatch.quantityOverflow > 0) {
           wasInventoryFull = true;
           return null;
         }
 
         didBreak = wearResult.broken;
-        quantityAccepted = withFish.quantityAccepted;
-        return withFish.state;
+        quantityAccepted = withCatch.quantityAccepted;
+        return withCatch.state;
       });
 
       if (wasInventoryFull) {
@@ -130,8 +161,10 @@ export function usingWorldPlazaFishingInteraction({
 
       if (didBreak) {
         showingGameplayHudToast('Your fishing rod broke.');
+      } else if (catchEntry.kind === 'junk') {
+        showingGameplayHudToast(`Fished up ${grant.displayName}.`);
       } else {
-        showingGameplayHudToast('Caught a fish.');
+        showingGameplayHudToast(`Caught ${grant.displayName}.`);
       }
     },
     [

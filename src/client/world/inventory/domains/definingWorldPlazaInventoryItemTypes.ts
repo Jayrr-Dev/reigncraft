@@ -297,6 +297,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     ...registeringWorldPlazaInventoryChestKeyItemDefinitions(),
     ...registeringWorldPlazaInventoryBerryItemDefinitions(),
     ...registeringWorldPlazaMushroomInventoryItems(),
+    ...registeringWorldPlazaFishingCatchInventoryItems(),
     ...registeringWorldPlazaInventoryCoffeeItemDefinitions(),
     ...registeringWorldPlazaInventoryCeramicsItemDefinitions(),
     ...registeringWorldPlazaInventoryHealerItemDefinitions(),
