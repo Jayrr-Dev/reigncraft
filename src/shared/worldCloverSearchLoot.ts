@@ -1,5 +1,7 @@
 /**
- * Clover loot rolls when a player searches a long-grass clump.
+ * Clover loot kinds and helpers (herbarium / lucky charm).
+ * Long-grass search rolls the full material + clover table in
+ * {@link ./worldLongGrassSearchLoot}.
  *
  * @module shared/worldCloverSearchLoot
  */

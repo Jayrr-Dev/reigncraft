@@ -1,7 +1,12 @@
 'use client';
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
+import {
+  DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID,
+  type DefiningWorldPlazaHudToolbarModeId,
+} from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import type { DefiningWorldPlazaEntityTemperatureComfortBand } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
 import { checkingWorldPlazaInventoryItemIsWeaponOrTool } from '@/components/world/inventory/domains/checkingWorldPlazaInventoryItemIsWeaponOrTool';
 import { DEFINING_WORLD_PLAZA_INVENTORY_WEAPON_TOOL_SLOT_INDEX } from '@/components/world/inventory/domains/definingWorldPlazaInventoryConstants';
 import {
@@ -18,17 +23,27 @@ import {
   gettingWorldPlazaOnboardingCoachmarkSnapshot,
   initializingWorldPlazaOnboardingCoachmarkStore,
   notifyingWorldPlazaOnboardingActionBarClicked,
+  notifyingWorldPlazaOnboardingBuildModeSelected,
+  notifyingWorldPlazaOnboardingClaimModeSelected,
+  notifyingWorldPlazaOnboardingCodexOpened,
+  notifyingWorldPlazaOnboardingCraftModeSelected,
   notifyingWorldPlazaOnboardingHotbarClicked,
+  notifyingWorldPlazaOnboardingHungerClicked,
   notifyingWorldPlazaOnboardingLootPickup,
+  notifyingWorldPlazaOnboardingPetsOpened,
   notifyingWorldPlazaOnboardingPlayerMoved,
+  notifyingWorldPlazaOnboardingProfileOpened,
+  notifyingWorldPlazaOnboardingTemperatureClicked,
   subscribingWorldPlazaOnboardingCoachmarks,
 } from '@/components/world/onboarding/domains/managingWorldPlazaOnboardingCoachmarkStore';
 import {
   checkingWorldPlazaOnboardingChopLabelVisibleFromSelectionKeys,
   checkingWorldPlazaOnboardingCoachmarkAdvanceSatisfied,
+  checkingWorldPlazaOnboardingCorpseStudyLabelVisibleFromSelectionKeys,
   resolvingWorldPlazaOnboardingActiveCoachmark,
   type ResolvingWorldPlazaOnboardingCoachmarkLiveSignals,
 } from '@/components/world/onboarding/domains/resolvingWorldPlazaOnboardingActiveCoachmark';
+import { countingWorldPlazaSpritcoreInventoryQuantity } from '@/components/world/spritcore/domains/countingWorldPlazaSpritcoreInventoryQuantity';
 import {
   useEffect,
   useEffectEvent,
@@ -44,6 +59,12 @@ export type UsingWorldPlazaOnboardingCoachmarksParams = {
   readonly playerPositionRef: RefObject<DefiningWorldPlazaWorldPoint>;
   readonly selectedInteractableBlockKeysRef: RefObject<ReadonlySet<string>>;
   readonly inventoryState: DefiningInventoryState;
+  readonly hudToolbarMode: DefiningWorldPlazaHudToolbarModeId;
+  readonly isEditEnabled: boolean;
+  readonly hungerRatio: number | null;
+  readonly localTemperatureCelsius: number | null;
+  readonly temperatureComfortBand: DefiningWorldPlazaEntityTemperatureComfortBand | null;
+  readonly hasAnyPets: boolean;
 };
 
 export type UsingWorldPlazaOnboardingCoachmarksResult = {
@@ -87,6 +108,12 @@ export function usingWorldPlazaOnboardingCoachmarks({
   playerPositionRef,
   selectedInteractableBlockKeysRef,
   inventoryState,
+  hudToolbarMode,
+  isEditEnabled,
+  hungerRatio,
+  localTemperatureCelsius,
+  temperatureComfortBand,
+  hasAnyPets,
 }: UsingWorldPlazaOnboardingCoachmarksParams): UsingWorldPlazaOnboardingCoachmarksResult {
   const onboardingSnapshot = useSyncExternalStore(
     subscribingWorldPlazaOnboardingCoachmarks,
@@ -102,6 +129,8 @@ export function usingWorldPlazaOnboardingCoachmarks({
   const spawnPositionRef = useRef<DefiningWorldPlazaWorldPoint | null>(null);
   const initialInventoryQuantityRef = useRef<number | null>(null);
   const [isChopLabelVisible, setIsChopLabelVisible] = useState(false);
+  const [isCorpseStudyLabelVisible, setIsCorpseStudyLabelVisible] =
+    useState(false);
 
   useEffect(() => {
     if (!isEnabled) {
@@ -132,10 +161,36 @@ export function usingWorldPlazaOnboardingCoachmarks({
       return;
     }
 
+    if (hudToolbarMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CRAFT) {
+      notifyingWorldPlazaOnboardingCraftModeSelected();
+    }
+
+    if (hudToolbarMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD) {
+      notifyingWorldPlazaOnboardingBuildModeSelected();
+    }
+
+    if (hudToolbarMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM) {
+      notifyingWorldPlazaOnboardingClaimModeSelected();
+    }
+  }, [hudToolbarMode, isEnabled]);
+
+  useEffect(() => {
+    if (!isEnabled) {
+      return;
+    }
+
     const intervalId = window.setInterval(() => {
+      const selectedInteractableBlockKeys =
+        selectedInteractableBlockKeysRef.current;
+
       setIsChopLabelVisible(
         checkingWorldPlazaOnboardingChopLabelVisibleFromSelectionKeys(
-          selectedInteractableBlockKeysRef.current
+          selectedInteractableBlockKeys
+        )
+      );
+      setIsCorpseStudyLabelVisible(
+        checkingWorldPlazaOnboardingCorpseStudyLabelVisibleFromSelectionKeys(
+          selectedInteractableBlockKeys
         )
       );
 
@@ -206,6 +261,68 @@ export function usingWorldPlazaOnboardingCoachmarks({
       ) {
         notifyingWorldPlazaOnboardingActionBarClicked();
       }
+
+      if (
+        target.closest(
+          `[${DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE}="hunger-orb"]`
+        )
+      ) {
+        notifyingWorldPlazaOnboardingHungerClicked();
+      }
+
+      if (
+        target.closest(
+          `[${DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE}="temperature-orb"]`
+        )
+      ) {
+        notifyingWorldPlazaOnboardingTemperatureClicked();
+      }
+
+      if (
+        target.closest(
+          `[${DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE}="codex-book"]`
+        )
+      ) {
+        notifyingWorldPlazaOnboardingCodexOpened();
+      }
+
+      if (
+        target.closest(
+          `[${DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE}="profile-panel"]`
+        )
+      ) {
+        notifyingWorldPlazaOnboardingProfileOpened();
+      }
+
+      if (
+        target.closest(
+          `[${DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE}="pets-roster"]`
+        )
+      ) {
+        notifyingWorldPlazaOnboardingPetsOpened();
+      }
+
+      if (
+        target.closest(
+          `[${DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE}="hud-toolbar-craft"]`
+        )
+      ) {
+        notifyingWorldPlazaOnboardingCraftModeSelected();
+      }
+
+      if (
+        target.closest(
+          `[${DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE}="hud-toolbar-build-claim"]`
+        )
+      ) {
+        if (hudToolbarMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.BUILD) {
+          notifyingWorldPlazaOnboardingBuildModeSelected();
+        }
+
+        if (hudToolbarMode === DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CLAIM) {
+          notifyingWorldPlazaOnboardingClaimModeSelected();
+        }
+      }
     };
 
     document.addEventListener('click', handlingDocumentClick, true);
@@ -213,16 +330,26 @@ export function usingWorldPlazaOnboardingCoachmarks({
     return () => {
       document.removeEventListener('click', handlingDocumentClick, true);
     };
-  }, [isEnabled]);
+  }, [hudToolbarMode, isEnabled]);
 
   const hasUnequippedTool =
     checkingWorldPlazaInventoryHasUnequippedTool(inventoryState);
   const hasEquippedTool =
     checkingWorldPlazaInventoryHasEquippedTool(inventoryState);
+  const spritcoreInventoryQuantity =
+    countingWorldPlazaSpritcoreInventoryQuantity(inventoryState);
 
   const liveSignals: ResolvingWorldPlazaOnboardingCoachmarkLiveSignals = {
     sessionSignals: onboardingSnapshot.sessionSignals,
+    hudToolbarMode,
+    isEditEnabled,
+    hungerRatio,
+    localTemperatureCelsius,
+    temperatureComfortBand,
+    spritcoreInventoryQuantity,
+    hasAnyPets,
     isChopLabelVisible,
+    isCorpseStudyLabelVisible,
     hasUnequippedTool,
     hasEquippedTool,
   };
@@ -254,14 +381,31 @@ export function usingWorldPlazaOnboardingCoachmarks({
     completingActiveCoachmarkIfNeeded();
   }, [
     activeCoachmark,
-    liveSignals.hasEquippedTool,
-    liveSignals.hasUnequippedTool,
-    liveSignals.isChopLabelVisible,
+    hasAnyPets,
+    hasEquippedTool,
+    hasUnequippedTool,
+    hudToolbarMode,
+    hungerRatio,
+    isChopLabelVisible,
+    isCorpseStudyLabelVisible,
+    isEditEnabled,
+    localTemperatureCelsius,
+    spritcoreInventoryQuantity,
+    temperatureComfortBand,
     liveSignals.sessionSignals.hasActionBarClicked,
+    liveSignals.sessionSignals.hasBuildModeSelected,
     liveSignals.sessionSignals.hasChopStarted,
+    liveSignals.sessionSignals.hasClaimModeSelected,
+    liveSignals.sessionSignals.hasCodexOpened,
+    liveSignals.sessionSignals.hasCraftModeSelected,
     liveSignals.sessionSignals.hasHotbarClicked,
+    liveSignals.sessionSignals.hasHungerClicked,
     liveSignals.sessionSignals.hasLootPickup,
     liveSignals.sessionSignals.hasMoved,
+    liveSignals.sessionSignals.hasPetsOpened,
+    liveSignals.sessionSignals.hasProfileOpened,
+    liveSignals.sessionSignals.hasStudyStarted,
+    liveSignals.sessionSignals.hasTemperatureClicked,
   ]);
 
   const dismissingActiveCoachmark = useEffectEvent(() => {

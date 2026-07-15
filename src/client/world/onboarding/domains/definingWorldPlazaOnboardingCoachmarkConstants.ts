@@ -19,7 +19,16 @@ export type WorldPlazaOnboardingCoachmarkStepId =
   | 'action-bar'
   | 'chop'
   | 'loot'
-  | 'equip-tool';
+  | 'equip-tool'
+  | 'hunger'
+  | 'temperature'
+  | 'craft'
+  | 'codex'
+  | 'study'
+  | 'build'
+  | 'claim'
+  | 'spritcore'
+  | 'pets';
 
 /** DOM anchor ids referenced by coachmark steps. */
 export type WorldPlazaOnboardingCoachmarkAnchorId =
@@ -27,7 +36,15 @@ export type WorldPlazaOnboardingCoachmarkAnchorId =
   | 'hotbar'
   | 'action-bar'
   | 'chop-interaction'
-  | 'equip-tool-slot';
+  | 'equip-tool-slot'
+  | 'hunger-orb'
+  | 'temperature-orb'
+  | 'hud-toolbar-craft'
+  | 'hud-toolbar-build-claim'
+  | 'codex-book'
+  | 'study-interaction'
+  | 'profile-panel'
+  | 'pets-roster';
 
 export type WorldPlazaOnboardingCoachmarkPhase = 'core' | 'contextual';
 
@@ -37,7 +54,16 @@ export type WorldPlazaOnboardingCoachmarkAdvanceEvent =
   | 'action-bar-click'
   | 'chop-start'
   | 'loot-pickup'
-  | 'equip-tool';
+  | 'equip-tool'
+  | 'hunger-click'
+  | 'temperature-click'
+  | 'craft-mode-select'
+  | 'codex-open'
+  | 'study-start'
+  | 'build-mode-select'
+  | 'claim-mode-select'
+  | 'spritcore-view'
+  | 'pets-open';
 
 export type WorldPlazaOnboardingCoachmarkDefinition = {
   readonly id: WorldPlazaOnboardingCoachmarkStepId;

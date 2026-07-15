@@ -59,15 +59,17 @@ import { registeringWorldPlazaInventoryChestKeyItemDefinitions } from '@/compone
 import { registeringWorldPlazaInventoryCloverItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCloverItemDefinitions';
 import { registeringWorldPlazaInventoryCoffeeItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryCoffeeItemDefinitions';
 import { registeringWorldPlazaInventoryFlowerItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryFlowerItemDefinitions';
-import { registeringWorldPlazaInventoryIngotItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryIngotItemDefinitions';
 import { registeringWorldPlazaInventoryHealerItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryHealerItemDefinitions';
+import { registeringWorldPlazaInventoryIngotItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryIngotItemDefinitions';
 import { registeringWorldPlazaInventoryOreItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryOreItemDefinitions';
+import { registeringWorldPlazaInventoryTallGrassItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryTallGrassItemDefinitions';
 import { registeringWorldPlazaInventoryWetClayItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaInventoryWetClayItemDefinitions';
 import { registeringWorldPlazaSpritcoreTierItemDefinitions } from '@/components/world/inventory/domains/registeringWorldPlazaSpritcoreTierItemDefinitions';
 import { registeringWorldPlazaTieredToolInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaTieredToolInventoryItems';
 import { registeringWorldPlazaWildlifeMeatInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeMeatInventoryItems';
 import { registeringWorldPlazaWildlifeSpecialtyLootInventoryItems } from '@/components/world/inventory/domains/registeringWorldPlazaWildlifeSpecialtyLootInventoryItems';
 import { resolvingWorldPlazaInventoryFoodHealDeclaration } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryFoodHealDeclaration';
+import { registeringWorldPlazaFishingCatchInventoryItems } from '@/components/world/fishing/domains/registeringWorldPlazaFishingCatchInventoryItems';
 import { registeringWorldPlazaMushroomInventoryItems } from '@/components/world/mushrooms/domains/registeringWorldPlazaMushroomInventoryItems';
 import {
   DEFINING_WORLD_PLAZA_SPRITCORE_ITEM_NAME,
@@ -291,6 +293,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
     ...registeringWorldPlazaWildlifeSpecialtyLootInventoryItems(),
     ...registeringWorldPlazaInventoryFlowerItemDefinitions(),
     ...registeringWorldPlazaInventoryCloverItemDefinitions(),
+    ...registeringWorldPlazaInventoryTallGrassItemDefinitions(),
     ...registeringWorldPlazaInventoryChestKeyItemDefinitions(),
     ...registeringWorldPlazaInventoryBerryItemDefinitions(),
     ...registeringWorldPlazaMushroomInventoryItems(),

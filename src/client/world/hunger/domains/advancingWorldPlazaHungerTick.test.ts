@@ -1,7 +1,10 @@
+import { COMPUTING_WORLD_PLAZA_IN_GAME_HOUR_MS } from '@/components/world/domains/computingWorldPlazaInGameDurationMs';
 import { advancingWorldPlazaHungerTick } from '@/components/world/hunger/domains/advancingWorldPlazaHungerTick';
 import {
   DEFINING_WORLD_PLAZA_HUNGER_DRAIN_STEP_RATIO,
   DEFINING_WORLD_PLAZA_HUNGER_IDLE_DRAIN_PER_SECOND,
+  DEFINING_WORLD_PLAZA_HUNGER_STARVATION_MAX_HEALTH_PERCENT_PER_TICK,
+  DEFINING_WORLD_PLAZA_HUNGER_STARVATION_VARIANCE_MIN,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { DEFINING_WORLD_PLAZA_HUNGER_INITIAL_STATE } from '@/components/world/hunger/domains/definingWorldPlazaHungerTypes';
 import { describe, expect, it } from 'vitest';
@@ -117,6 +120,7 @@ describe('advancingWorldPlazaHungerTick', () => {
         hungerRatio: 0.001,
         pendingDrainRatio: 0,
         lastStarvationTickAtMs: null,
+        starvingSinceMs: null,
       },
       deltaSeconds: 9_999,
       nowMs: 1_000,
@@ -133,6 +137,7 @@ describe('advancingWorldPlazaHungerTick', () => {
         hungerRatio: 0,
         pendingDrainRatio: 0,
         lastStarvationTickAtMs: null,
+        starvingSinceMs: null,
       },
       deltaSeconds: 1,
       nowMs: 5_000,
@@ -143,6 +148,7 @@ describe('advancingWorldPlazaHungerTick', () => {
 
     expect(result.state.hungerRatio).toBe(0);
     expect(result.state.lastStarvationTickAtMs).toBe(5_000);
+    expect(result.state.starvingSinceMs).toBe(5_000);
     expect(result.starvationDamagePercentOfMaxHealth).toBeGreaterThan(0);
   });
 
@@ -152,6 +158,7 @@ describe('advancingWorldPlazaHungerTick', () => {
         hungerRatio: 0,
         pendingDrainRatio: 0,
         lastStarvationTickAtMs: 5_000,
+        starvingSinceMs: 5_000,
       },
       deltaSeconds: 1,
       nowMs: 5_100,
@@ -161,6 +168,7 @@ describe('advancingWorldPlazaHungerTick', () => {
 
     expect(result.starvationDamagePercentOfMaxHealth).toBe(0);
     expect(result.state.lastStarvationTickAtMs).toBe(5_000);
+    expect(result.state.starvingSinceMs).toBe(5_000);
   });
 
   it('rolls a fresh starvation tick once the interval has elapsed again', () => {
@@ -169,6 +177,7 @@ describe('advancingWorldPlazaHungerTick', () => {
         hungerRatio: 0,
         pendingDrainRatio: 0,
         lastStarvationTickAtMs: 5_000,
+        starvingSinceMs: 5_000,
       },
       deltaSeconds: 1,
       nowMs: 10_000,
@@ -187,6 +196,7 @@ describe('advancingWorldPlazaHungerTick', () => {
         hungerRatio: 0.5,
         pendingDrainRatio: 0,
         lastStarvationTickAtMs: 5_000,
+        starvingSinceMs: 5_000,
       },
       deltaSeconds: 0.0001,
       nowMs: 5_100,
@@ -195,5 +205,56 @@ describe('advancingWorldPlazaHungerTick', () => {
     });
 
     expect(result.state.lastStarvationTickAtMs).toBeNull();
+    expect(result.state.starvingSinceMs).toBeNull();
+  });
+
+  it('doubles starvation damage after one in-game hour without eating', () => {
+    const starvingSinceMs = 1_000;
+    const nowMs = starvingSinceMs + COMPUTING_WORLD_PLAZA_IN_GAME_HOUR_MS;
+    const result = advancingWorldPlazaHungerTick({
+      state: {
+        hungerRatio: 0,
+        pendingDrainRatio: 0,
+        lastStarvationTickAtMs: null,
+        starvingSinceMs,
+      },
+      deltaSeconds: 1,
+      nowMs,
+      isWalking: false,
+      isSprinting: false,
+      rollingVariance: () => 0,
+    });
+
+    expect(result.starvationDamagePercentOfMaxHealth).toBeCloseTo(
+      DEFINING_WORLD_PLAZA_HUNGER_STARVATION_MAX_HEALTH_PERCENT_PER_TICK *
+        DEFINING_WORLD_PLAZA_HUNGER_STARVATION_VARIANCE_MIN *
+        2,
+      10
+    );
+  });
+
+  it('triples starvation damage after two in-game hours without eating', () => {
+    const starvingSinceMs = 1_000;
+    const nowMs = starvingSinceMs + COMPUTING_WORLD_PLAZA_IN_GAME_HOUR_MS * 2;
+    const result = advancingWorldPlazaHungerTick({
+      state: {
+        hungerRatio: 0,
+        pendingDrainRatio: 0,
+        lastStarvationTickAtMs: null,
+        starvingSinceMs,
+      },
+      deltaSeconds: 1,
+      nowMs,
+      isWalking: false,
+      isSprinting: false,
+      rollingVariance: () => 0,
+    });
+
+    expect(result.starvationDamagePercentOfMaxHealth).toBeCloseTo(
+      DEFINING_WORLD_PLAZA_HUNGER_STARVATION_MAX_HEALTH_PERCENT_PER_TICK *
+        DEFINING_WORLD_PLAZA_HUNGER_STARVATION_VARIANCE_MIN *
+        3,
+      10
+    );
   });
 });

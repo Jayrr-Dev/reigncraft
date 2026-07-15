@@ -17,6 +17,11 @@ export type DefiningWorldPlazaHungerState = {
   pendingDrainRatio: number;
   /** Wall-clock ms of the last starvation damage tick; null when not starving. */
   lastStarvationTickAtMs: number | null;
+  /**
+   * Wall-clock ms when continuous starvation began (hunger hit 0).
+   * Null when not starving. Used to escalate damage each in-game hour without food.
+   */
+  starvingSinceMs: number | null;
 };
 
 /** Hunger starts full and unstarved. */
@@ -25,4 +30,5 @@ export const DEFINING_WORLD_PLAZA_HUNGER_INITIAL_STATE: DefiningWorldPlazaHunger
     hungerRatio: DEFINING_WORLD_PLAZA_HUNGER_INITIAL_RATIO,
     pendingDrainRatio: 0,
     lastStarvationTickAtMs: null,
+    starvingSinceMs: null,
   };

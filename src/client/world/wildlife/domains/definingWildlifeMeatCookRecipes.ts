@@ -4,6 +4,7 @@
  * @module components/world/wildlife/domains/definingWildlifeMeatCookRecipes
  */
 
+import { listingWorldPlazaFishingCatchCreatures } from '@/components/world/fishing/domains/definingWorldPlazaFishingCatchRegistry';
 import { DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_COCONUT,
@@ -29,6 +30,12 @@ const DEFINING_WORLD_PLAZA_FORAGE_COOK_RECIPES: readonly DefiningWildlifeMeatCoo
       cookDurationMs: 2_000,
     },
     ...DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG.map((entry) => ({
+      rawItemTypeId: entry.rawItemTypeId,
+      cookedItemTypeId: entry.cookedItemTypeId,
+      cookedDisplayName: entry.cookedDisplayName,
+      cookDurationMs: entry.cookDurationMs,
+    })),
+    ...listingWorldPlazaFishingCatchCreatures().map((entry) => ({
       rawItemTypeId: entry.rawItemTypeId,
       cookedItemTypeId: entry.cookedItemTypeId,
       cookedDisplayName: entry.cookedDisplayName,

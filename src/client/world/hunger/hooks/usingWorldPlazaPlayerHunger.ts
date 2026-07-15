@@ -210,6 +210,7 @@ export function usingWorldPlazaPlayerHunger({
           hungerStateRef.current.hungerRatio + hungerRestoreRatio
         ),
         lastStarvationTickAtMs: null,
+        starvingSinceMs: null,
       };
       pushingHudSnapshot();
 

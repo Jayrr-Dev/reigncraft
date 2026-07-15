@@ -1,3 +1,4 @@
+import { DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID } from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
 import { resolvingWorldPlazaOnboardingCoachmarkDefinition } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkRegistry';
 import {
   checkingWorldPlazaOnboardingCoachmarkAdvanceSatisfied,
@@ -5,22 +6,53 @@ import {
 } from '@/components/world/onboarding/domains/resolvingWorldPlazaOnboardingActiveCoachmark';
 import { describe, expect, it } from 'vitest';
 
+const RESOLVING_WORLD_PLAZA_ONBOARDING_TEST_EMPTY_SESSION_SIGNALS = {
+  hasMoved: false,
+  hasHotbarClicked: false,
+  hasActionBarClicked: false,
+  hasChopStarted: false,
+  hasLootPickup: false,
+  hasHungerClicked: false,
+  hasTemperatureClicked: false,
+  hasCraftModeSelected: false,
+  hasCodexOpened: false,
+  hasStudyStarted: false,
+  hasBuildModeSelected: false,
+  hasClaimModeSelected: false,
+  hasProfileOpened: false,
+  hasPetsOpened: false,
+} as const;
+
+function buildingWorldPlazaOnboardingTestLiveSignals(
+  overrides: Partial<
+    Parameters<typeof resolvingWorldPlazaOnboardingActiveCoachmark>[1]
+  > = {}
+) {
+  return {
+    sessionSignals: RESOLVING_WORLD_PLAZA_ONBOARDING_TEST_EMPTY_SESSION_SIGNALS,
+    hudToolbarMode: DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS,
+    isEditEnabled: false,
+    hungerRatio: 1,
+    localTemperatureCelsius: 20,
+    temperatureComfortBand: {
+      comfortLowCelsius: 10,
+      comfortHighCelsius: 28,
+    },
+    spritcoreInventoryQuantity: 0,
+    hasAnyPets: false,
+    isChopLabelVisible: false,
+    isCorpseStudyLabelVisible: false,
+    hasUnequippedTool: false,
+    hasEquippedTool: false,
+    ...overrides,
+  };
+}
+
 describe('resolvingWorldPlazaOnboardingActiveCoachmark', () => {
   it('returns the first incomplete core step before contextual tips', () => {
     const activeCoachmark = resolvingWorldPlazaOnboardingActiveCoachmark(
       new Set(['move']),
-      {
-        sessionSignals: {
-          hasMoved: true,
-          hasHotbarClicked: false,
-          hasActionBarClicked: false,
-          hasChopStarted: false,
-          hasLootPickup: false,
-        },
-        isChopLabelVisible: true,
-        hasUnequippedTool: true,
-        hasEquippedTool: false,
-      }
+      buildingWorldPlazaOnboardingTestLiveSignals()
     );
 
     expect(activeCoachmark?.id).toBe('hotbar');
@@ -29,21 +61,55 @@ describe('resolvingWorldPlazaOnboardingActiveCoachmark', () => {
   it('shows contextual chop only after core steps are complete', () => {
     const activeCoachmark = resolvingWorldPlazaOnboardingActiveCoachmark(
       new Set(['move', 'hotbar', 'action-bar']),
-      {
-        sessionSignals: {
-          hasMoved: true,
-          hasHotbarClicked: true,
-          hasActionBarClicked: true,
-          hasChopStarted: false,
-          hasLootPickup: false,
-        },
+      buildingWorldPlazaOnboardingTestLiveSignals({
         isChopLabelVisible: true,
-        hasUnequippedTool: false,
-        hasEquippedTool: false,
-      }
+      })
     );
 
     expect(activeCoachmark?.id).toBe('chop');
+  });
+
+  it('shows craft guidance before the player enters craft mode', () => {
+    const activeCoachmark = resolvingWorldPlazaOnboardingActiveCoachmark(
+      new Set([
+        'move',
+        'hotbar',
+        'action-bar',
+        'chop',
+        'loot',
+        'equip-tool',
+        'hunger',
+        'temperature',
+      ]),
+      buildingWorldPlazaOnboardingTestLiveSignals()
+    );
+
+    expect(activeCoachmark?.id).toBe('craft');
+  });
+
+  it('shows spritcore guidance when orbs are in inventory', () => {
+    const activeCoachmark = resolvingWorldPlazaOnboardingActiveCoachmark(
+      new Set([
+        'move',
+        'hotbar',
+        'action-bar',
+        'chop',
+        'loot',
+        'equip-tool',
+        'hunger',
+        'temperature',
+        'craft',
+        'codex',
+        'study',
+        'build',
+        'claim',
+      ]),
+      buildingWorldPlazaOnboardingTestLiveSignals({
+        spritcoreInventoryQuantity: 3,
+      })
+    );
+
+    expect(activeCoachmark?.id).toBe('spritcore');
   });
 });
 
@@ -53,18 +119,30 @@ describe('checkingWorldPlazaOnboardingCoachmarkAdvanceSatisfied', () => {
       resolvingWorldPlazaOnboardingCoachmarkDefinition('equip-tool');
 
     expect(
-      checkingWorldPlazaOnboardingCoachmarkAdvanceSatisfied(definition, {
-        sessionSignals: {
-          hasMoved: false,
-          hasHotbarClicked: false,
-          hasActionBarClicked: false,
-          hasChopStarted: false,
-          hasLootPickup: false,
-        },
-        isChopLabelVisible: false,
-        hasUnequippedTool: true,
-        hasEquippedTool: true,
-      })
+      checkingWorldPlazaOnboardingCoachmarkAdvanceSatisfied(
+        definition,
+        buildingWorldPlazaOnboardingTestLiveSignals({
+          hasUnequippedTool: true,
+          hasEquippedTool: true,
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('completes codex when the book menu was opened', () => {
+    const definition =
+      resolvingWorldPlazaOnboardingCoachmarkDefinition('codex');
+
+    expect(
+      checkingWorldPlazaOnboardingCoachmarkAdvanceSatisfied(
+        definition,
+        buildingWorldPlazaOnboardingTestLiveSignals({
+          sessionSignals: {
+            ...RESOLVING_WORLD_PLAZA_ONBOARDING_TEST_EMPTY_SESSION_SIGNALS,
+            hasCodexOpened: true,
+          },
+        })
+      )
     ).toBe(true);
   });
 });

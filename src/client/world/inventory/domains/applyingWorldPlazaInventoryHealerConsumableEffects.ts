@@ -4,9 +4,7 @@ import { clearingWorldPlazaEntityDiseaseEffectsByMaxSeverity } from '@/component
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { shorteningWorldPlazaEntityDiseaseRemainingDuration } from '@/components/world/health/domains/shorteningWorldPlazaEntityDiseaseRemainingDuration';
 import { applyingWorldPlazaInventoryFlowerEatEffects } from '@/components/world/inventory/domains/applyingWorldPlazaInventoryFlowerEatEffects';
-import {
-  resolvingWorldPlazaHealerConsumableEffectKind,
-} from '@/components/world/inventory/domains/definingWorldPlazaHealerConsumableEffectRegistry';
+import { resolvingWorldPlazaHealerConsumableEffectKind } from '@/components/world/inventory/domains/definingWorldPlazaHealerConsumableEffectRegistry';
 import {
   DEFINING_WORLD_PLAZA_HEALER_BELLADONNA_PURGE_SUCCESS_CHANCE,
   DEFINING_WORLD_PLAZA_HEALER_EFFECT_PROC_ROLL_ALWAYS,
@@ -38,14 +36,22 @@ function shorteningWolfFeverOrAllDiseases(
   state: DefiningWorldPlazaEntityHealthState,
   worldEpochMs: number
 ): DefiningWorldPlazaEntityHealthState {
-  if (!state.diseaseEffects.some((effect) => effect.diseaseId === 'wolf-fever')) {
-    return shorteningWorldPlazaEntityDiseaseRemainingDuration(state, worldEpochMs);
+  if (
+    !state.diseaseEffects.some((effect) => effect.diseaseId === 'wolf-fever')
+  ) {
+    return shorteningWorldPlazaEntityDiseaseRemainingDuration(
+      state,
+      worldEpochMs
+    );
   }
 
   return {
     ...state,
     diseaseEffects: state.diseaseEffects.map((effect) => {
-      if (effect.diseaseId !== 'wolf-fever' || effect.expiresAtMs <= worldEpochMs) {
+      if (
+        effect.diseaseId !== 'wolf-fever' ||
+        effect.expiresAtMs <= worldEpochMs
+      ) {
         return effect;
       }
 
@@ -53,8 +59,7 @@ function shorteningWolfFeverOrAllDiseases(
         ...effect,
         symptomsStartAtMs:
           effect.symptomsStartAtMs > worldEpochMs
-            ? worldEpochMs +
-              (effect.symptomsStartAtMs - worldEpochMs) * 0.6
+            ? worldEpochMs + (effect.symptomsStartAtMs - worldEpochMs) * 0.6
             : effect.symptomsStartAtMs,
         expiresAtMs: worldEpochMs + (effect.expiresAtMs - worldEpochMs) * 0.6,
       };
@@ -140,12 +145,13 @@ export function applyingWorldPlazaInventoryHealerConsumableEffects({
         worldEpochMs
       );
     case 'foxgloveGamble':
+      // Flower path succeeds when foxgloveRoll < flower threshold; force win/lose from healer odds.
       return applyingHealerFlowerEffect(
         healthState,
         'foxglove',
         nowMs,
         worldEpochMs,
-        effectRoll / DEFINING_WORLD_PLAZA_HEALER_FOXGLOVE_SUCCESS_CHANCE
+        effectRoll < DEFINING_WORLD_PLAZA_HEALER_FOXGLOVE_SUCCESS_CHANCE ? 0 : 1
       );
     case 'frostbiteClearAndBraced':
       return applyingBraced(
@@ -156,10 +162,11 @@ export function applyingWorldPlazaInventoryHealerConsumableEffects({
         }).state
       );
     case 'purgeByMaxSeverityModerate': {
-      const purgedModerate = clearingWorldPlazaEntityDiseaseEffectsByMaxSeverity(
-        healthState,
-        'moderate'
-      );
+      const purgedModerate =
+        clearingWorldPlazaEntityDiseaseEffectsByMaxSeverity(
+          healthState,
+          'moderate'
+        );
       return effectRoll < DEFINING_WORLD_PLAZA_HEALER_GRADED_PURGE_SEVERE_CHANCE
         ? clearingWorldPlazaEntityDiseaseEffectsByMaxSeverity(
             purgedModerate,
@@ -168,7 +175,8 @@ export function applyingWorldPlazaInventoryHealerConsumableEffects({
         : purgedModerate;
     }
     case 'purgeSevereGamble':
-      return effectRoll < DEFINING_WORLD_PLAZA_HEALER_BELLADONNA_PURGE_SUCCESS_CHANCE
+      return effectRoll <
+        DEFINING_WORLD_PLAZA_HEALER_BELLADONNA_PURGE_SUCCESS_CHANCE
         ? clearingWorldPlazaEntityDiseaseEffectsByMaxSeverity(
             healthState,
             'critical'

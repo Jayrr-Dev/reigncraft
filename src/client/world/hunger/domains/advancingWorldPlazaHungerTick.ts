@@ -16,6 +16,7 @@ import {
   DEFINING_WORLD_PLAZA_HUNGER_WALK_DRAIN_MULTIPLIER,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import type { DefiningWorldPlazaHungerState } from '@/components/world/hunger/domains/definingWorldPlazaHungerTypes';
+import { resolvingWorldPlazaHungerStarvationDamageMultiplier } from '@/components/world/hunger/domains/resolvingWorldPlazaHungerStarvationDamageMultiplier';
 
 export type AdvancingWorldPlazaHungerTickParams = {
   /** Hunger state from the previous frame. */
@@ -80,7 +81,7 @@ function resolvingActivityDrainMultiplier(
 /**
  * Advances hunger by one frame: accrues activity/metabolism drain, applies
  * discrete step drops when enough has accrued, then rolls a starvation damage
- * tick once hunger hits zero.
+ * tick once hunger hits zero. Damage scales up each in-game hour without food.
  *
  * @param params - Previous state, frame delta, and activity/metabolism inputs.
  */
@@ -120,11 +121,13 @@ export function advancingWorldPlazaHungerTick({
         hungerRatio: nextRatio,
         pendingDrainRatio,
         lastStarvationTickAtMs: null,
+        starvingSinceMs: null,
       },
       starvationDamagePercentOfMaxHealth: 0,
     };
   }
 
+  const starvingSinceMs = state.starvingSinceMs ?? nowMs;
   const lastTickAtMs = state.lastStarvationTickAtMs;
 
   if (
@@ -137,6 +140,7 @@ export function advancingWorldPlazaHungerTick({
         hungerRatio: 0,
         pendingDrainRatio: 0,
         lastStarvationTickAtMs: lastTickAtMs,
+        starvingSinceMs,
       },
       starvationDamagePercentOfMaxHealth: 0,
     };
@@ -148,15 +152,21 @@ export function advancingWorldPlazaHungerTick({
     varianceRoll *
       (DEFINING_WORLD_PLAZA_HUNGER_STARVATION_VARIANCE_MAX -
         DEFINING_WORLD_PLAZA_HUNGER_STARVATION_VARIANCE_MIN);
+  const hoursMultiplier = resolvingWorldPlazaHungerStarvationDamageMultiplier({
+    starvingSinceMs,
+    nowMs,
+  });
 
   return {
     state: {
       hungerRatio: 0,
       pendingDrainRatio: 0,
       lastStarvationTickAtMs: nowMs,
+      starvingSinceMs,
     },
     starvationDamagePercentOfMaxHealth:
       DEFINING_WORLD_PLAZA_HUNGER_STARVATION_MAX_HEALTH_PERCENT_PER_TICK *
-      varianceMultiplier,
+      varianceMultiplier *
+      hoursMultiplier,
   };
 }

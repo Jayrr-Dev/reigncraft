@@ -9,9 +9,9 @@
 
 import { DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS } from '@/components/world/domains/definingWorldPlazaDayNightCycleConstants';
 
-/** Real-time duration to drain a full hunger bar while idle (60 real minutes = 1.5 in-game days). */
+/** Real-time duration to drain a full hunger bar while idle (30 real minutes = 0.75 in-game days). */
 export const DEFINING_WORLD_PLAZA_HUNGER_IDLE_DRAIN_DURATION_MS =
-  DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS * 1.5;
+  DEFINING_WORLD_PLAZA_DAY_NIGHT_CYCLE_DURATION_MS * 0.75;
 
 /** Baseline hunger drained per second while idle (ratio units). */
 export const DEFINING_WORLD_PLAZA_HUNGER_IDLE_DRAIN_PER_SECOND =
@@ -30,10 +30,10 @@ export const DEFINING_WORLD_PLAZA_HUNGER_WALK_DRAIN_MULTIPLIER = 1.15;
 export const DEFINING_WORLD_PLAZA_HUNGER_SPRINT_DRAIN_MULTIPLIER = 2.0;
 
 /** Hunger consumed by a standing/walk jump (ratio units), mirrors jump stamina cost scale. */
-export const DEFINING_WORLD_PLAZA_HUNGER_JUMP_COST_RATIO = 0.004;
+export const DEFINING_WORLD_PLAZA_HUNGER_JUMP_COST_RATIO = 0.008;
 
 /** Hunger consumed by a run jump (ratio units). */
-export const DEFINING_WORLD_PLAZA_HUNGER_RUN_JUMP_COST_RATIO = 0.006;
+export const DEFINING_WORLD_PLAZA_HUNGER_RUN_JUMP_COST_RATIO = 0.012;
 
 /** Hunger ratio above which passive health regen is allowed. */
 export const DEFINING_WORLD_PLAZA_HUNGER_HEALTH_REGEN_MIN_RATIO = 0.3;
@@ -56,6 +56,13 @@ export const DEFINING_WORLD_PLAZA_HUNGER_STARVATION_VARIANCE_MIN = 0.7;
 
 /** Maximum per-tick starvation damage variance multiplier. */
 export const DEFINING_WORLD_PLAZA_HUNGER_STARVATION_VARIANCE_MAX = 1.4;
+
+/**
+ * Extra starvation damage multiplier gained per completed in-game hour of
+ * continuous starvation (not eating while hunger is at 0).
+ * Tick damage scale is `1 + hours × this` (hour 0 = 1×, hour 1 = 2×, …).
+ */
+export const DEFINING_WORLD_PLAZA_HUNGER_STARVATION_DAMAGE_MULTIPLIER_PER_IN_GAME_HOUR = 1;
 
 /** Hunger tier thresholds (ratio, inclusive lower bound). */
 export const DEFINING_WORLD_PLAZA_HUNGER_TIER_THRESHOLD = {

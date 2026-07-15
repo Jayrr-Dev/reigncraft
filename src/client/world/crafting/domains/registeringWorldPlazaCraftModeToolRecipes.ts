@@ -15,6 +15,7 @@ import {
   DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_TIER_COST,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_TIERS,
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeToolRecipeConstants';
+import { resolvingWorldPlazaCraftModeToolRecipeSpriteSheetIcon } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeToolRecipeIconConstants';
 import { DEFINING_WORLD_PLAZA_CRAFT_RECIPE_NEARBY_STATION_RANGE_TILES } from '@/components/world/crafting/domains/definingWorldPlazaCraftRecipeNearbyStationConstants';
 import { DEFINING_WORLD_PLAZA_TOOL_TIER_STATS } from '@/components/world/equipment/domains/definingWorldPlazaToolTierConstants';
 import {
@@ -91,8 +92,9 @@ export function registeringWorldPlazaCraftModeToolRecipes(): readonly DefiningWo
         title: `${DEFINING_WORLD_PLAZA_TOOL_TIER_STATS[tier].displayNameSuffix} ${familySpec.displayBaseName}`,
         description: familySpec.descriptionByTier[tier],
         recipeVisual: {
-          visualKind: 'iconify',
-          recipeEmblemIconifyIcon: familySpec.iconifyIcon,
+          visualKind: 'sprite-sheet',
+          spriteSheetIcon:
+            resolvingWorldPlazaCraftModeToolRecipeSpriteSheetIcon(family, tier),
         },
         ingredients,
         recipeType: 'item',

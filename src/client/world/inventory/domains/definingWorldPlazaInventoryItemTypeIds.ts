@@ -271,6 +271,32 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLOVER_3_LEAF =
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CLOVER_4_LEAF =
   'world-plaza-clover-4-leaf' as const;
 
+/** Craft materials from searching long-grass clumps (sprite sheet order). */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_THATCH_BUNDLE =
+  'world-plaza-thatch-bundle' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_GRASS_FIBER =
+  'world-plaza-grass-fiber' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SOFT_DOWN =
+  'world-plaza-soft-down' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CHIRPER_SHELL =
+  'world-plaza-chirper-shell' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_MEADOW_MITE_HUSK =
+  'world-plaza-meadow-mite-husk' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WILD_OAT_HEAD =
+  'world-plaza-wild-oat-head' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_KNOTWEED_STEM =
+  'world-plaza-knotweed-stem' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEW_CAUGHT_SEED =
+  'world-plaza-dew-caught-seed' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_LOST_STITCH_SCRAP =
+  'world-plaza-lost-stitch-scrap' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FIELD_SNAIL_TRAIL =
+  'world-plaza-field-snail-trail' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BURROW_FLUFF =
+  'world-plaza-burrow-fluff' as const;
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_RUSTED_CLASP =
+  'world-plaza-rusted-clasp' as const;
+
 /** Berry loot from picking berry shrubs. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BERRY_RED =
   'world-plaza-berry-red' as const;

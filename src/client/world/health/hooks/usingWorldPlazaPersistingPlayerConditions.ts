@@ -105,6 +105,7 @@ export function usingWorldPlazaPersistingPlayerConditions({
         ...hungerStateRef.current,
         hungerRatio: restoredPlayerConditions.hungerRatio,
         lastStarvationTickAtMs: null,
+        starvingSinceMs: null,
       };
     }
 

@@ -11,6 +11,15 @@ export type WorldPlazaOnboardingCoachmarkSessionSignals = {
   readonly hasActionBarClicked: boolean;
   readonly hasChopStarted: boolean;
   readonly hasLootPickup: boolean;
+  readonly hasHungerClicked: boolean;
+  readonly hasTemperatureClicked: boolean;
+  readonly hasCraftModeSelected: boolean;
+  readonly hasCodexOpened: boolean;
+  readonly hasStudyStarted: boolean;
+  readonly hasBuildModeSelected: boolean;
+  readonly hasClaimModeSelected: boolean;
+  readonly hasProfileOpened: boolean;
+  readonly hasPetsOpened: boolean;
 };
 
 export type WorldPlazaOnboardingCoachmarkSnapshot = {
@@ -26,6 +35,15 @@ const MANAGING_WORLD_PLAZA_ONBOARDING_COACHMARK_EMPTY_SESSION_SIGNALS: WorldPlaz
     hasActionBarClicked: false,
     hasChopStarted: false,
     hasLootPickup: false,
+    hasHungerClicked: false,
+    hasTemperatureClicked: false,
+    hasCraftModeSelected: false,
+    hasCodexOpened: false,
+    hasStudyStarted: false,
+    hasBuildModeSelected: false,
+    hasClaimModeSelected: false,
+    hasProfileOpened: false,
+    hasPetsOpened: false,
   };
 
 const managingWorldPlazaOnboardingCoachmarkSubscribers = new Set<() => void>();
@@ -40,7 +58,8 @@ let managingWorldPlazaOnboardingCoachmarkSnapshotCache: WorldPlazaOnboardingCoac
   {
     storageOwnerId: null,
     completedStepIds: new Set(),
-    sessionSignals: MANAGING_WORLD_PLAZA_ONBOARDING_COACHMARK_EMPTY_SESSION_SIGNALS,
+    sessionSignals:
+      MANAGING_WORLD_PLAZA_ONBOARDING_COACHMARK_EMPTY_SESSION_SIGNALS,
   };
 
 function refreshingWorldPlazaOnboardingCoachmarkSnapshotCache(): void {
@@ -72,15 +91,14 @@ function persistingWorldPlazaOnboardingCoachmarkCompletedSteps(): void {
 export function initializingWorldPlazaOnboardingCoachmarkStore(
   storageOwnerId: string | null
 ): void {
-  if (
-    managingWorldPlazaOnboardingCoachmarkStorageOwnerId === storageOwnerId
-  ) {
+  if (managingWorldPlazaOnboardingCoachmarkStorageOwnerId === storageOwnerId) {
     return;
   }
 
   managingWorldPlazaOnboardingCoachmarkStorageOwnerId = storageOwnerId;
-  managingWorldPlazaOnboardingCoachmarkCompletedStepIds =
-    new Set(readingWorldPlazaOnboardingCoachmarksFromStorage(storageOwnerId));
+  managingWorldPlazaOnboardingCoachmarkCompletedStepIds = new Set(
+    readingWorldPlazaOnboardingCoachmarksFromStorage(storageOwnerId)
+  );
   managingWorldPlazaOnboardingCoachmarkSessionSignals =
     MANAGING_WORLD_PLAZA_ONBOARDING_COACHMARK_EMPTY_SESSION_SIGNALS;
   refreshingWorldPlazaOnboardingCoachmarkSnapshotCache();
@@ -177,6 +195,69 @@ export function notifyingWorldPlazaOnboardingChopStarted(): void {
 export function notifyingWorldPlazaOnboardingLootPickup(): void {
   patchingWorldPlazaOnboardingCoachmarkSessionSignals({
     hasLootPickup: true,
+  });
+}
+
+/** Records a hunger orb interaction during this session. */
+export function notifyingWorldPlazaOnboardingHungerClicked(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasHungerClicked: true,
+  });
+}
+
+/** Records a temperature orb interaction during this session. */
+export function notifyingWorldPlazaOnboardingTemperatureClicked(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasTemperatureClicked: true,
+  });
+}
+
+/** Records that Craft mode was selected during this session. */
+export function notifyingWorldPlazaOnboardingCraftModeSelected(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasCraftModeSelected: true,
+  });
+}
+
+/** Records that the Codex menu was opened during this session. */
+export function notifyingWorldPlazaOnboardingCodexOpened(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasCodexOpened: true,
+  });
+}
+
+/** Records that a corpse Study interaction started during this session. */
+export function notifyingWorldPlazaOnboardingStudyStarted(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasStudyStarted: true,
+  });
+}
+
+/** Records that Build mode was selected during this session. */
+export function notifyingWorldPlazaOnboardingBuildModeSelected(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasBuildModeSelected: true,
+  });
+}
+
+/** Records that Claim mode was selected during this session. */
+export function notifyingWorldPlazaOnboardingClaimModeSelected(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasClaimModeSelected: true,
+  });
+}
+
+/** Records that the profile panel was opened during this session. */
+export function notifyingWorldPlazaOnboardingProfileOpened(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasProfileOpened: true,
+  });
+}
+
+/** Records that the pet roster was opened during this session. */
+export function notifyingWorldPlazaOnboardingPetsOpened(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasPetsOpened: true,
   });
 }
 

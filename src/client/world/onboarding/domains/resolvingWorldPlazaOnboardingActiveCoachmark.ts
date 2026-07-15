@@ -1,4 +1,8 @@
+import type { DefiningWorldPlazaHudToolbarModeId } from '@/components/world/domains/definingWorldPlazaHudToolbarModeRegistry';
+import type { DefiningWorldPlazaEntityTemperatureComfortBand } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
 import { DEFINING_WORLD_PLAZA_INTERACTABLE_TREE_SELECTION_KEY_PREFIX } from '@/components/world/interaction/domains/formattingWorldPlazaInteractableTreeSelectionKey';
+import { checkingWorldPlazaOnboardingCorpseStudyLabelVisible } from '@/components/world/onboarding/domains/checkingWorldPlazaOnboardingCorpseStudyLabelVisible';
+import { checkingWorldPlazaOnboardingTemperatureOutsideComfort } from '@/components/world/onboarding/domains/checkingWorldPlazaOnboardingTemperatureOutsideComfort';
 import type {
   WorldPlazaOnboardingCoachmarkDefinition,
   WorldPlazaOnboardingCoachmarkStepId,
@@ -12,10 +16,20 @@ import type { WorldPlazaOnboardingCoachmarkSessionSignals } from '@/components/w
 
 export type ResolvingWorldPlazaOnboardingCoachmarkLiveSignals = {
   readonly sessionSignals: WorldPlazaOnboardingCoachmarkSessionSignals;
+  readonly hudToolbarMode: DefiningWorldPlazaHudToolbarModeId;
+  readonly isEditEnabled: boolean;
+  readonly hungerRatio: number | null;
+  readonly localTemperatureCelsius: number | null;
+  readonly temperatureComfortBand: DefiningWorldPlazaEntityTemperatureComfortBand | null;
+  readonly spritcoreInventoryQuantity: number;
+  readonly hasAnyPets: boolean;
   readonly isChopLabelVisible: boolean;
+  readonly isCorpseStudyLabelVisible: boolean;
   readonly hasUnequippedTool: boolean;
   readonly hasEquippedTool: boolean;
 };
+
+const RESOLVING_WORLD_PLAZA_ONBOARDING_HUNGER_TIP_RATIO_THRESHOLD = 0.98;
 
 function checkingWorldPlazaOnboardingContextualStepEligible(
   stepId: WorldPlazaOnboardingCoachmarkStepId,
@@ -28,6 +42,37 @@ function checkingWorldPlazaOnboardingContextualStepEligible(
       return liveSignals.sessionSignals.hasLootPickup;
     case 'equip-tool':
       return liveSignals.hasUnequippedTool;
+    case 'hunger':
+      return (
+        liveSignals.hungerRatio !== null &&
+        liveSignals.hungerRatio <
+          RESOLVING_WORLD_PLAZA_ONBOARDING_HUNGER_TIP_RATIO_THRESHOLD
+      );
+    case 'temperature':
+      return checkingWorldPlazaOnboardingTemperatureOutsideComfort(
+        liveSignals.localTemperatureCelsius,
+        liveSignals.temperatureComfortBand
+      );
+    case 'craft':
+      return !liveSignals.sessionSignals.hasCraftModeSelected;
+    case 'codex':
+      return liveSignals.sessionSignals.hasActionBarClicked;
+    case 'study':
+      return liveSignals.isCorpseStudyLabelVisible;
+    case 'build':
+      return (
+        liveSignals.isEditEnabled &&
+        !liveSignals.sessionSignals.hasBuildModeSelected
+      );
+    case 'claim':
+      return (
+        liveSignals.isEditEnabled &&
+        !liveSignals.sessionSignals.hasClaimModeSelected
+      );
+    case 'spritcore':
+      return liveSignals.spritcoreInventoryQuantity > 0;
+    case 'pets':
+      return liveSignals.hasAnyPets;
     default:
       return false;
   }
@@ -51,7 +96,9 @@ export function resolvingWorldPlazaOnboardingActiveCoachmark(
       continue;
     }
 
-    if (checkingWorldPlazaOnboardingContextualStepEligible(stepId, liveSignals)) {
+    if (
+      checkingWorldPlazaOnboardingContextualStepEligible(stepId, liveSignals)
+    ) {
       return resolvingWorldPlazaOnboardingCoachmarkDefinition(stepId);
     }
   }
@@ -79,6 +126,24 @@ export function checkingWorldPlazaOnboardingCoachmarkAdvanceSatisfied(
       return liveSignals.sessionSignals.hasLootPickup;
     case 'equip-tool':
       return liveSignals.hasEquippedTool;
+    case 'hunger-click':
+      return liveSignals.sessionSignals.hasHungerClicked;
+    case 'temperature-click':
+      return liveSignals.sessionSignals.hasTemperatureClicked;
+    case 'craft-mode-select':
+      return liveSignals.sessionSignals.hasCraftModeSelected;
+    case 'codex-open':
+      return liveSignals.sessionSignals.hasCodexOpened;
+    case 'study-start':
+      return liveSignals.sessionSignals.hasStudyStarted;
+    case 'build-mode-select':
+      return liveSignals.sessionSignals.hasBuildModeSelected;
+    case 'claim-mode-select':
+      return liveSignals.sessionSignals.hasClaimModeSelected;
+    case 'spritcore-view':
+      return liveSignals.sessionSignals.hasProfileOpened;
+    case 'pets-open':
+      return liveSignals.sessionSignals.hasPetsOpened;
     default:
       return false;
   }
@@ -101,4 +166,15 @@ export function checkingWorldPlazaOnboardingChopLabelVisibleFromSelectionKeys(
   }
 
   return false;
+}
+
+/**
+ * Returns true when a wildlife corpse Study label should be visible.
+ */
+export function checkingWorldPlazaOnboardingCorpseStudyLabelVisibleFromSelectionKeys(
+  selectedInteractableBlockKeys: ReadonlySet<string>
+): boolean {
+  return checkingWorldPlazaOnboardingCorpseStudyLabelVisible(
+    selectedInteractableBlockKeys
+  );
 }

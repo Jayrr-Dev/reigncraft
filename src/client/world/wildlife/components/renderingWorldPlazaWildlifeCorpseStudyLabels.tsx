@@ -156,7 +156,7 @@ export function RenderingWorldPlazaWildlifeCorpseStudyLabels({
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-visible">
-      {selectedCorpses.map((entry) => {
+      {selectedCorpses.map((entry, corpseIndex) => {
         const selectionKey = formattingWildlifeCorpseStudySelectionKey(
           entry.instanceId
         );
@@ -182,6 +182,9 @@ export function RenderingWorldPlazaWildlifeCorpseStudyLabels({
               targetKey={selectionKey}
               progressSnapshot={timedInteractionProgressSnapshot}
               progressRatioRef={timedInteractionProgressRatioRef}
+              onboardingAnchorId={
+                corpseIndex === 0 ? 'study-interaction' : undefined
+              }
               rowRef={(element) => {
                 if (element) {
                   rowElementByKeyRef.current.set(selectionKey, element);

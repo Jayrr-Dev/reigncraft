@@ -11,6 +11,7 @@ import { usingWorldPlazaViewportHudScaleContext } from '@/components/world/compo
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
   DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BADGE_REGISTRY,
+  DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID,
   LABELING_WORLD_PLAZA_HUD_TOOLBAR_MODE_SWITCHER,
   STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BUTTON_ACTIVE_CLASS_NAME,
   STYLING_WORLD_PLAZA_HUD_TOOLBAR_MODE_BUTTON_CLASS_NAME,
@@ -28,6 +29,7 @@ import {
   resolvingWorldPlazaHudToolbarBuildClaimToggleNextMode,
 } from '@/components/world/domains/resolvingWorldPlazaHudToolbarBuildClaimToggle';
 import { resolvingWorldPlazaHudToolbarModeBadgesViewportStyles } from '@/components/world/domains/resolvingWorldPlazaHudToolbarModeBadgesViewportStyles';
+import { DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE } from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCallback, useMemo, type SyntheticEvent } from 'react';
 
@@ -87,7 +89,11 @@ export function RenderingWorldPlazaHudToolbarModeBadges({
                 <button
                   key="build-claim-toggle"
                   type="button"
-                  {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+                  {...{
+                    [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true,
+                    [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]:
+                      'hud-toolbar-build-claim',
+                  }}
                   aria-label={toggleFace.ariaLabel}
                   aria-pressed={isActive}
                   disabled={isDisabled}
@@ -150,7 +156,16 @@ export function RenderingWorldPlazaHudToolbarModeBadges({
               <button
                 key={badgeDefinition.id}
                 type="button"
-                {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+                {...{
+                  [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true,
+                  ...(badgeDefinition.id ===
+                  DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.CRAFT
+                    ? {
+                        [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]:
+                          'hud-toolbar-craft',
+                      }
+                    : {}),
+                }}
                 aria-label={badgeDefinition.ariaLabel}
                 aria-pressed={isActive}
                 disabled={isDisabled}

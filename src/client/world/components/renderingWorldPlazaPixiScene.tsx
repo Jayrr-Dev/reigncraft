@@ -606,6 +606,7 @@ import { RenderingWorldPlazaOnboardingCoachmarkLayer } from '@/components/world/
 import {
   initializingWorldPlazaOnboardingCoachmarkStore,
   notifyingWorldPlazaOnboardingChopStarted,
+  notifyingWorldPlazaOnboardingStudyStarted,
 } from '@/components/world/onboarding/domains/managingWorldPlazaOnboardingCoachmarkStore';
 import { RenderingWorldPlotVisitApprovedPlazaModal } from '@/components/world/plotVisit/components/renderingWorldPlotVisitApprovedPlazaModal';
 import { RenderingWorldPlotVisitRequestPlazaModal } from '@/components/world/plotVisit/components/renderingWorldPlotVisitRequestPlazaModal';
@@ -5377,7 +5378,9 @@ function RenderingWorldPlazaPixiSceneConnected({
 
       const didStart = startingCorpseStudy(entry);
 
-      if (!didStart) {
+      if (didStart) {
+        notifyingWorldPlazaOnboardingStudyStarted();
+      } else {
         showingGameplayHudToast('Already studying a corpse.');
       }
     },
@@ -8690,6 +8693,14 @@ function RenderingWorldPlazaPixiSceneConnected({
                 selectedInteractableBlockKeysRef
               }
               inventoryState={inventoryState}
+              hudToolbarMode={hudToolbarMode}
+              isEditEnabled={isBuildModeEnabled}
+              hungerRatio={hungerHudSnapshot.hungerRatio}
+              localTemperatureCelsius={
+                playerHealthHudSnapshot.localTemperatureCelsius
+              }
+              temperatureComfortBand={temperatureComfortBand}
+              hasAnyPets={hasAnyPets}
             />
           ) : null}
           {isHudStatusEnabled && isLocalGameplayEnabled ? (

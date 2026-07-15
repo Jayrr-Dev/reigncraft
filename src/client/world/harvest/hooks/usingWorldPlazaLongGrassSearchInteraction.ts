@@ -14,16 +14,17 @@ import { checkingWorldPlazaRuntimeLongGrassIsCleared } from '@/components/world/
 import type { ListingWorldPlazaLongGrassInInteractionRangeEntry } from '@/components/world/harvest/hooks/usingWorldPlazaLongGrassSearchProgress';
 import { addingWorldPlazaInventoryItemWithStacking } from '@/components/world/inventory/domains/addingWorldPlazaInventoryItemWithStacking';
 import { DEFINING_WORLD_PLAZA_FOUR_LEAF_CLOVER_PICKED_AT_MS_METADATA_KEY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverConstants';
-import { resolvingWorldPlazaCloverItemTypeIdFromLootKind } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
+import { resolvingWorldPlazaLongGrassItemTypeIdFromLootKind } from '@/components/world/inventory/domains/definingWorldPlazaInventoryTallGrassSpriteSheetConstants';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, type RefObject } from 'react';
 import {
-  resolvingWorldCloverSearchLootKindAtTileIndex,
-  WORLD_CLOVER_SEARCH_LOOT_QUANTITY,
-} from '../../../../shared/worldCloverSearchLoot';
+  checkingWorldLongGrassSearchLootIsClover,
+  resolvingWorldLongGrassSearchLootKindAtTileIndex,
+  WORLD_LONG_GRASS_SEARCH_LOOT_QUANTITY,
+} from '../../../../shared/worldLongGrassSearchLoot';
 
 export const DEFINING_WORLD_PLAZA_CLEARED_LONG_GRASS_QUERY_KEY_ROOT =
   'world-plaza-cleared-long-grass' as const;
@@ -106,12 +107,12 @@ export function usingWorldPlazaLongGrassSearchInteraction({
         entry.tileX,
         entry.tileY
       );
-      const lootKind = resolvingWorldCloverSearchLootKindAtTileIndex(
+      const lootKind = resolvingWorldLongGrassSearchLootKindAtTileIndex(
         entry.tileX,
         entry.tileY
       );
       const itemTypeId =
-        resolvingWorldPlazaCloverItemTypeIdFromLootKind(lootKind);
+        resolvingWorldPlazaLongGrassItemTypeIdFromLootKind(lootKind);
 
       if (
         checkingWorldPlazaRuntimeLongGrassIsCleared(entry.tileX, entry.tileY)
@@ -143,7 +144,7 @@ export function usingWorldPlazaLongGrassSearchInteraction({
         !probingWorldPlazaLongGrassSearchInventoryCapacity(
           inventoryStateRef.current,
           itemTypeId,
-          WORLD_CLOVER_SEARCH_LOOT_QUANTITY
+          WORLD_LONG_GRASS_SEARCH_LOOT_QUANTITY
         )
       ) {
         showingGameplayHudToast('Your inventory is full.');
@@ -204,13 +205,13 @@ export function usingWorldPlazaLongGrassSearchInteraction({
           return;
         }
 
-        const lootKind = resolvingWorldCloverSearchLootKindAtTileIndex(
+        const lootKind = resolvingWorldLongGrassSearchLootKindAtTileIndex(
           entry.tileX,
           entry.tileY
         );
         const itemTypeId =
-          resolvingWorldPlazaCloverItemTypeIdFromLootKind(lootKind);
-        const lootQuantity = WORLD_CLOVER_SEARCH_LOOT_QUANTITY;
+          resolvingWorldPlazaLongGrassItemTypeIdFromLootKind(lootKind);
+        const lootQuantity = WORLD_LONG_GRASS_SEARCH_LOOT_QUANTITY;
 
         if (
           !probingWorldPlazaLongGrassSearchInventoryCapacity(
@@ -287,7 +288,9 @@ export function usingWorldPlazaLongGrassSearchInteraction({
           return;
         }
 
-        recordingWorldPlazaHerbariumCloverStudied(lootKind);
+        if (checkingWorldLongGrassSearchLootIsClover(lootKind)) {
+          recordingWorldPlazaHerbariumCloverStudied(lootKind);
+        }
 
         queryClient.setQueryData(
           [

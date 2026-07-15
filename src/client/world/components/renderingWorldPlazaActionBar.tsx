@@ -336,6 +336,10 @@ export function RenderingWorldPlazaActionBar({
                 </div>
                 {onSelectCodexSection ? (
                   <div
+                    {...{
+                      [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]:
+                        'codex-book',
+                    }}
                     className={
                       STYLING_WORLD_PLAZA_ACTION_BAR_CODEX_ANCHOR_CLASS_NAME
                     }
@@ -465,6 +469,10 @@ export function RenderingWorldPlazaActionBar({
                 {onToggleProfile ? (
                   <button
                     type="button"
+                    {...{
+                      [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]:
+                        'profile-panel',
+                    }}
                     aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_PROFILE}
                     aria-pressed={isProfileOpen}
                     onClick={onToggleProfile}
@@ -484,6 +492,10 @@ export function RenderingWorldPlazaActionBar({
                 {onTogglePets ? (
                   <button
                     type="button"
+                    {...{
+                      [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]:
+                        'pets-roster',
+                    }}
                     aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_PETS}
                     aria-pressed={isPetsOpen}
                     onClick={onTogglePets}
@@ -555,6 +567,10 @@ export function RenderingWorldPlazaActionBar({
 
                 {hungerHud ? (
                   <div
+                    {...{
+                      [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]:
+                        'hunger-orb',
+                    }}
                     className={
                       STYLING_WORLD_PLAZA_ACTION_BAR_HUNGER_ANCHOR_CLASS_NAME
                     }
@@ -589,6 +605,10 @@ export function RenderingWorldPlazaActionBar({
                 {temperatureHud &&
                 temperatureHud.localTemperatureCelsius !== null ? (
                   <div
+                    {...{
+                      [DEFINING_WORLD_PLAZA_ONBOARDING_ANCHOR_ATTRIBUTE]:
+                        'temperature-orb',
+                    }}
                     className={
                       STYLING_WORLD_PLAZA_ACTION_BAR_TEMPERATURE_ANCHOR_CLASS_NAME
                     }
