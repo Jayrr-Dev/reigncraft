@@ -5662,8 +5662,6 @@ function RenderingWorldPlazaPixiSceneConnected({
         localAvatarMotionStateRef.current.facingDirection
       );
 
-      clearingWalkTarget();
-
       if (rangedCombatProfile?.suppressMelee) {
         const archetypeId =
           resolvingWorldPlazaPlayableAvatarRangedNormalAttackArchetypeId(
@@ -5687,7 +5685,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           );
         }
 
-        // Cast animation + attack-interval gate; no contact melee damage.
+        // Cast gate only; keep walk / keyboard move free for ranged skins.
         meleeAttackStateRef.current = {
           direction: attackDirection,
           startedAtMs: nowMs,
@@ -5698,11 +5696,14 @@ function RenderingWorldPlazaPixiSceneConnected({
           durationMs: meleeTiming.durationMs,
           animationFps: meleeTiming.animationFps,
           damageRegistered: true,
+          locksLocomotion: false,
         };
 
         playingWorldPlazaAvatarMeleeSwingSfx();
         return true;
       }
+
+      clearingWalkTarget();
 
       meleeAttackStateRef.current = {
         direction: attackDirection,
@@ -5722,6 +5723,7 @@ function RenderingWorldPlazaPixiSceneConnected({
         durationMs: meleeTiming.durationMs,
         animationFps: meleeTiming.animationFps,
         damageRegistered: false,
+        locksLocomotion: true,
       };
 
       playingWorldPlazaAvatarMeleeSwingSfx();

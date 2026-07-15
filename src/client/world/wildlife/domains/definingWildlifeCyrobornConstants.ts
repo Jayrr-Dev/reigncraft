@@ -10,6 +10,14 @@
 /** Species id registered in the wildlife catalog. */
 export const DEFINING_WILDLIFE_CYROBORN_SPECIES_ID = 'cyroborn' as const;
 
+/**
+ * Extra playable/wildlife status immunities beyond hazard temperature flags.
+ * Crystal body has no blood — bleed stacks do not apply.
+ */
+export const DEFINING_WILDLIFE_CYROBORN_EXTRA_CHARACTER_IMMUNITIES = [
+  'bleed',
+] as const;
+
 /** Body sprite shipped for Cyroborn (64×64 crystal orb). */
 export const DEFINING_WILDLIFE_CYROBORN_BODY_SPRITE_URL =
   '/creatures/sprites/species/cyroborn/cyroborn-body.webp';

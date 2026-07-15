@@ -25,6 +25,11 @@ export type DefiningWorldPlazaAvatarMeleePresentationState = {
   readonly durationMs: number;
   readonly animationFps: number;
   damageRegistered: boolean;
+  /**
+   * When false, keyboard / click locomotion stays free during the swing
+   * (ranged casts). Defaults to true when omitted.
+   */
+  readonly locksLocomotion?: boolean;
 };
 
 /** Push-into-obstacle reaction. */

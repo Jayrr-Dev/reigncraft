@@ -66,6 +66,27 @@ describe('resolvingWorldPlazaProjectileMissReason', () => {
     ).toBe('jump_dodge');
   });
 
+  it('hits grounded wildlife with a flying jump-dodgeable ice sphere', () => {
+    const iceSphere =
+      DEFINING_WORLD_PLAZA_PROJECTILE_ARCHETYPE_REGISTRY['cyroborn-ice-sphere'];
+
+    expect(
+      resolvingWorldPlazaProjectileMissReason({
+        instance: creatingTestProjectileInstance({
+          archetypeId: 'cyroborn-ice-sphere',
+          altitudePx: iceSphere.altitude.flyingAltitudePx ?? 22,
+        }),
+        archetype: iceSphere,
+        target: {
+          targetId: 'wildlife:jaguar:1',
+          point: { x: 0.1, y: 0, layer: 1 },
+          collisionRadiusGrid: 0.35,
+          jumpArcOffsetPx: 0,
+        },
+      })
+    ).toBe('none');
+  });
+
   it('does not classify jump dodge for non-jump-dodgeable projectiles', () => {
     expect(
       resolvingWorldPlazaProjectileMissReason({

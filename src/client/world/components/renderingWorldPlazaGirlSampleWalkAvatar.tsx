@@ -899,6 +899,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       activeMeleeState &&
       nowMs - activeMeleeState.startedAtMs < activeMeleeState.durationMs
     );
+    const isMeleeLocomotionLocked =
+      isMeleeAttacking && activeMeleeState?.locksLocomotion !== false;
 
     if (supportsCombatPresentation) {
       if (
@@ -1023,7 +1025,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       isPlayerAsleep ||
       isPlayerStunned ||
       isRolling ||
-      isMeleeAttacking ||
+      isMeleeLocomotionLocked ||
       isDamagedReacting;
 
     if (
@@ -1137,7 +1139,7 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       !isJumping &&
       !isFalling &&
       !isPlayerDead &&
-      !isMeleeAttacking &&
+      !isMeleeLocomotionLocked &&
       !isEatingToolAction &&
       !isPlayerAsleep &&
       !isPlayerStunned &&

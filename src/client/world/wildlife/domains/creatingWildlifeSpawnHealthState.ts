@@ -5,16 +5,29 @@
  */
 
 import { DEFINING_WORLD_PLAZA_ENTITY_DAMAGE_TO_HEAL_DEFAULT_RATIO } from '@/components/world/health/domains/definingWorldPlazaEntityDamageToHealConstants';
+import { DEFINING_WORLD_PLAZA_ENTITY_BLEED_IMMUNITY_DAMAGE_KINDS } from '@/components/world/health/domains/definingWorldPlazaEntityBuffImmunityDamageKinds';
 import type {
+  DefiningWorldPlazaEntityDamageKind,
   DefiningWorldPlazaEntityHealthDamageRollModifier,
   DefiningWorldPlazaEntityHealthState,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { settingWorldPlazaEntityTemperatureResistance } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
 import { creatingWildlifeLargeSizeFrameHealthState } from '@/components/world/wildlife/domains/creatingWildlifeLargeSizeFrameHealthState';
 import type { DefiningWildlifeLargeSizeFrame } from '@/components/world/wildlife/domains/definingWildlifeLargeSizeFrameConstants';
+import { DEFINING_WILDLIFE_CYROBORN_SPECIES_ID } from '@/components/world/wildlife/domains/definingWildlifeCyrobornConstants';
 import { checkingWildlifeOmegaWolfSpecies } from '@/components/world/wildlife/domains/definingWildlifeOmegaWolfConstants';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import { resolvingWildlifeSpeciesTemperatureComfortBand } from '@/components/world/wildlife/domains/definingWildlifeSpeciesTemperatureComfortRegistry';
+
+function resolvingWildlifeSpawnDamageKindImmunities(
+  species: DefiningWildlifeSpeciesDefinition
+): readonly DefiningWorldPlazaEntityDamageKind[] {
+  if (species.speciesId === DEFINING_WILDLIFE_CYROBORN_SPECIES_ID) {
+    return DEFINING_WORLD_PLAZA_ENTITY_BLEED_IMMUNITY_DAMAGE_KINDS;
+  }
+
+  return [];
+}
 
 function mappingWildlifeSpeciesPassiveDamageRollModifiers(
   species: DefiningWildlifeSpeciesDefinition
@@ -74,14 +87,17 @@ export function creatingWildlifeSpawnHealthState(
       ]
     : [];
 
+  const damageKindImmunities =
+    resolvingWildlifeSpawnDamageKindImmunities(species);
   const hasMods = speciesModifiers.length > 0 || lifestealModifiers.length > 0;
 
-  if (!hasMods) {
+  if (!hasMods && damageKindImmunities.length === 0) {
     return temperatureSeededState;
   }
 
   return {
     ...temperatureSeededState,
+    ...(damageKindImmunities.length > 0 ? { damageKindImmunities } : {}),
     damageRollModifiers: [
       ...temperatureSeededState.damageRollModifiers,
       ...speciesModifiers,

@@ -172,7 +172,7 @@ export function advancingWorldPlazaGirlSampleCombatPresentation(
           presentation.sheetLayout.frameCount,
           'once'
         ),
-        blocksLocomotion: true,
+        blocksLocomotion: params.meleeState.locksLocomotion !== false,
       };
     }
   }

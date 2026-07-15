@@ -14,6 +14,10 @@ import type { DefiningWorldPlazaAnimalPlayableAvatarSkinRow } from '@/components
 import { DEFINING_WORLD_PLAZA_ANIMAL_PLAYABLE_SPRITE_FOLDER_TO_WILDLIFE_SPECIES_ID } from '@/components/world/domains/definingWorldPlazaAnimalPlayableAvatarWildlifeSpeciesIdAliases';
 import { DEFINING_WORLD_PLAZA_STRENGTH_PLAYER_BASELINE_ATTACK_INTERVAL_MS } from '@/components/world/strength/domains/definingWorldPlazaStrengthIndexConstants';
 import {
+  DEFINING_WILDLIFE_CYROBORN_EXTRA_CHARACTER_IMMUNITIES,
+  DEFINING_WILDLIFE_CYROBORN_SPECIES_ID,
+} from '@/components/world/wildlife/domains/definingWildlifeCyrobornConstants';
+import {
   resolvingWildlifeSpeciesDefinition,
   type DefiningWildlifeSpeciesDefinition,
 } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -70,6 +74,14 @@ function resolvingWorldPlazaAnimalCharacterEngineImmunities(
 
   if (!species.hazards.treatsLavaAsLethal) {
     immunities.push('lava');
+  }
+
+  if (species.speciesId === DEFINING_WILDLIFE_CYROBORN_SPECIES_ID) {
+    for (const immunity of DEFINING_WILDLIFE_CYROBORN_EXTRA_CHARACTER_IMMUNITIES) {
+      if (!immunities.includes(immunity)) {
+        immunities.push(immunity);
+      }
+    }
   }
 
   return immunities;

@@ -60,19 +60,27 @@ export function resolvingWorldPlazaProjectileMissReason({
     return 'layer';
   }
 
-  const hitBandPx = archetype.dodge.jumpDodgeable
-    ? DEFINING_WORLD_PLAZA_PROJECTILE_JUMP_DODGE_HIT_BAND_PX
-    : DEFINING_WORLD_PLAZA_PROJECTILE_FULL_HEIGHT_HIT_BAND_PX;
+  // Jump-dodgeable: standing / low targets always connect; dodging requires
+  // jumping high enough to clear the projectile's flight altitude.
+  // (Old co-altitude band made flying ice spheres miss every grounded mob.)
+  if (archetype.dodge.jumpDodgeable) {
+    const targetLiftPx = Math.abs(target.jumpArcOffsetPx);
+    const clearThresholdPx =
+      instance.altitudePx +
+      DEFINING_WORLD_PLAZA_PROJECTILE_JUMP_DODGE_HIT_BAND_PX;
+
+    if (targetLiftPx > clearThresholdPx) {
+      return 'jump_dodge';
+    }
+
+    return 'none';
+  }
 
   const targetVerticalPx = -target.jumpArcOffsetPx;
   const verticalDelta = Math.abs(instance.altitudePx - targetVerticalPx);
 
-  if (verticalDelta <= hitBandPx) {
+  if (verticalDelta <= DEFINING_WORLD_PLAZA_PROJECTILE_FULL_HEIGHT_HIT_BAND_PX) {
     return 'none';
-  }
-
-  if (archetype.dodge.jumpDodgeable) {
-    return 'jump_dodge';
   }
 
   return 'no_overlap';
