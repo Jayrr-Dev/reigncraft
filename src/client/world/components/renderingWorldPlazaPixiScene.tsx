@@ -610,7 +610,6 @@ import type {
 } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import type { ManagingWorldPlazaProjectileStore } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
 import { usingWorldPlazaProjectileEngine } from '@/components/world/projectile/hooks/usingWorldPlazaProjectileEngine';
-import type { GrantingWorldPlazaSpritcoreOnWildlifeKillGrant } from '@/components/world/spritcore/domains/grantingWorldPlazaSpritcoreOnWildlifeKill';
 import { initializingWorldPlazaSpritcoreUpgradeStore } from '@/components/world/spritcore/domains/managingWorldPlazaSpritcoreUpgradeStore';
 import { usingWorldPlazaSpritcoreUpgradeBonuses } from '@/components/world/spritcore/hooks/usingWorldPlazaSpritcoreUpgradeBonuses';
 import { RenderingWorldPlazaTeaPotAddWaterInteractionLabels } from '@/components/world/tea-brewing/components/renderingWorldPlazaTeaPotAddWaterInteractionLabels';
@@ -4388,28 +4387,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     saveSlotIndex: PlazaSaveSlotIndex | null;
     playerPosition: DefiningWorldPlazaWorldPoint;
     playerTargetId: string;
-    onSpritcoreGrant: (
-      grant: GrantingWorldPlazaSpritcoreOnWildlifeKillGrant
-    ) => void;
   } | null>(null);
-  const grantingSpritcoreOnWildlifeKillRef = useRef<
-    (grant: GrantingWorldPlazaSpritcoreOnWildlifeKillGrant) => void
-  >(() => {});
-  grantingSpritcoreOnWildlifeKillRef.current = (
-    grant: GrantingWorldPlazaSpritcoreOnWildlifeKillGrant
-  ): void => {
-    const grantResult = addItemWithStacking({
-      id: crypto.randomUUID(),
-      itemTypeId: grant.itemTypeId,
-      quantity: grant.amount,
-    });
-
-    if (grantResult.quantityAccepted > 0) {
-      showingGameplayHudToast(
-        `+${grantResult.quantityAccepted} ${grant.displayName}`
-      );
-    }
-  };
 
   wildlifeMeatDropContextRef.current = playerPositionRef.current
     ? {
@@ -4418,9 +4396,6 @@ function RenderingWorldPlazaPixiSceneConnected({
         saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
         playerPosition: playerPositionRef.current,
         playerTargetId: localPlayerProjectileTargetId,
-        onSpritcoreGrant: (grant) => {
-          grantingSpritcoreOnWildlifeKillRef.current(grant);
-        },
       }
     : null;
 

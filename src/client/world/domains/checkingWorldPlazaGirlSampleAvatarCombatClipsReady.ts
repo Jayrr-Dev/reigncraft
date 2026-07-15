@@ -3,6 +3,7 @@ import {
   type DefiningWorldPlazaAvatarMotionClipSuffix,
 } from '@/components/world/animation/domains/formattingWorldPlazaAnimationClipIds';
 import { resolvingWorldPlazaAnimationClip } from '@/components/world/animation/domains/registeringWorldPlazaAnimationClip';
+import { checkingWorldPlazaAvatarUsesGlowOrbPresentation } from '@/components/world/domains/checkingWorldPlazaAvatarUsesGlowOrbPresentation';
 import type { DefiningWorldPlazaAvatarSkinId } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { DEFINING_WORLD_PLAZA_GIRL_SAMPLE_COMBAT_MOTION_CLIP_SUFFIXES } from '@/components/world/domains/definingWorldPlazaGirlSampleCombatMotionConstants';
 import type { DefiningWorldPlazaGirlSampleCharacterTextures } from '@/components/world/domains/loadingWorldPlazaGirlSampleCharacterTextures';
@@ -41,6 +42,11 @@ export function checkingWorldPlazaGirlSampleAvatarRollClipReady(
   skinId: DefiningWorldPlazaAvatarSkinId,
   textures: DefiningWorldPlazaGirlSampleCharacterTextures | undefined
 ): boolean {
+  // Procedural glow-orb skins have no Attack3 sheet; roll still lunges + casts.
+  if (checkingWorldPlazaAvatarUsesGlowOrbPresentation(skinId)) {
+    return true;
+  }
+
   if (!textures?.roll) {
     return false;
   }

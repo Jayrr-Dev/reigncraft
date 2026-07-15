@@ -1,7 +1,7 @@
 /**
- * Grants Spiritcore to the player when they kill wildlife.
+ * Resolves a Spritcore ground-drop payload when the local player kills wildlife.
  *
- * @module components/world/spritcore/domains/grantingWorldPlazaSpritcoreOnWildlifeKill
+ * @module components/world/spritcore/domains/resolvingWorldPlazaSpritcoreWildlifeKillDrop
  */
 
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
@@ -11,33 +11,30 @@ import { resolvingWorldPlazaSpritcoreWildlifeDrop } from '@/components/world/spr
 import type { DefiningWildlifeMeatDropKillContext } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 
-export type GrantingWorldPlazaSpritcoreOnWildlifeKillGrant = {
+export type ResolvingWorldPlazaSpritcoreWildlifeKillDrop = {
   readonly amount: number;
   readonly itemTypeId: string;
   readonly displayName: string;
 };
 
-export type GrantingWorldPlazaSpritcoreOnWildlifeKillInput = {
+export type ResolvingWorldPlazaSpritcoreWildlifeKillDropInput = {
   readonly species: DefiningWildlifeSpeciesDefinition;
   readonly killContext?: DefiningWildlifeMeatDropKillContext | null;
   readonly playerTargetId: string | null;
-  readonly onGrant: (
-    grant: GrantingWorldPlazaSpritcoreOnWildlifeKillGrant
-  ) => void;
 };
 
 /**
- * Grants Spiritcore when the local player killed the wildlife instance.
+ * Returns the tiered Spritcore stack for a player kill, or null when no drop.
  */
-export function grantingWorldPlazaSpritcoreOnWildlifeKill(
-  input: GrantingWorldPlazaSpritcoreOnWildlifeKillInput
-): number {
+export function resolvingWorldPlazaSpritcoreWildlifeKillDrop(
+  input: ResolvingWorldPlazaSpritcoreWildlifeKillDropInput
+): ResolvingWorldPlazaSpritcoreWildlifeKillDrop | null {
   if (
     !checkingWorldPlazaGenerationFeatureEnabled(
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SPRITCORE_LEVELING
     )
   ) {
-    return 0;
+    return null;
   }
 
   const killerTargetId = input.killContext?.killerTargetId;
@@ -47,23 +44,21 @@ export function grantingWorldPlazaSpritcoreOnWildlifeKill(
     !input.playerTargetId ||
     killerTargetId !== input.playerTargetId
   ) {
-    return 0;
+    return null;
   }
 
   const dropAmount = resolvingWorldPlazaSpritcoreWildlifeDrop(input.species);
 
   if (dropAmount <= 0) {
-    return 0;
+    return null;
   }
 
   const tierDefinition =
     resolvingWorldPlazaSpritcoreDropTierDefinition(dropAmount);
 
-  input.onGrant({
+  return {
     amount: dropAmount,
     itemTypeId: tierDefinition.itemTypeId,
     displayName: tierDefinition.displayName,
-  });
-
-  return dropAmount;
+  };
 }

@@ -43,12 +43,15 @@ import {
   checkingWorldPlazaAvatarCombatPresentationSupported,
   resolvingWorldPlazaAnimalCombatMotionClipSuffix,
 } from '@/components/world/domains/checkingWorldPlazaAvatarCombatPresentationSupported';
+import { checkingWorldPlazaAvatarUsesGlowOrbPresentation } from '@/components/world/domains/checkingWorldPlazaAvatarUsesGlowOrbPresentation';
 import { checkingWorldPlazaGirlSampleAvatarRollClipReady } from '@/components/world/domains/checkingWorldPlazaGirlSampleAvatarCombatClipsReady';
 import { checkingWorldPlazaGirlSampleRollCanChainIntoNext } from '@/components/world/domains/checkingWorldPlazaGirlSampleRollCanChainIntoNext';
 import { checkingWorldPlazaGirlSampleRollDodgeWindowIsActive } from '@/components/world/domains/checkingWorldPlazaGirlSampleRollDodgeWindowIsActive';
 import { checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead } from '@/components/world/domains/checkingWorldPlazaPlayerMobileAutoJumpWaterGapAhead';
 import { checkingWorldPlazaPlayerShouldSlideOnIceAfterRun } from '@/components/world/domains/checkingWorldPlazaPlayerShouldSlideOnIceAfterRun';
 import { checkingWorldPlazaWaterIsFrozenAtTileIndex } from '@/components/world/domains/checkingWorldPlazaWaterIsFrozenAtTileIndex';
+import { DEFINING_WORLD_PLAZA_CYROBORN_DEATH_IMPLODE_DURATION_MS } from '@/components/world/domains/definingWorldPlazaCyrobornScalePulseConstants';
+import { resolvingWorldPlazaCyrobornScalePulseMultiplier } from '@/components/world/domains/resolvingWorldPlazaCyrobornScalePulseMultiplier';
 import { computingWorldPlazaAcceleratedRunSpeed } from '@/components/world/domains/computingWorldPlazaAcceleratedRunSpeed';
 import { computingWorldPlazaAvatarGroundShadowSizeScale } from '@/components/world/domains/computingWorldPlazaAvatarGroundShadowSizeScale';
 import { computingWorldPlazaGirlSampleFallDurationMs } from '@/components/world/domains/computingWorldPlazaGirlSampleFallDurationMs';
@@ -145,8 +148,6 @@ import { notifyingWorldPlazaAvatarMotionSfxEvent } from '@/components/world/doma
 import { recordingWorldPlazaPlayerPerformanceDiagnostics } from '@/components/world/domains/recordingWorldPlazaPlayerPerformanceDiagnostics';
 import { resolvingWorldPlazaAvatarClipPresentation } from '@/components/world/domains/resolvingWorldPlazaAvatarClipPresentation';
 import { resolvingWorldPlazaAvatarRollDurationMs } from '@/components/world/domains/resolvingWorldPlazaAvatarRollDurationMs';
-import { DEFINING_WORLD_PLAZA_CYROBORN_DEATH_IMPLODE_DURATION_MS } from '@/components/world/domains/definingWorldPlazaCyrobornScalePulseConstants';
-import { resolvingWorldPlazaCyrobornScalePulseMultiplier } from '@/components/world/domains/resolvingWorldPlazaCyrobornScalePulseMultiplier';
 import { resolvingWorldPlazaGirlSampleCombatSpritePresentation } from '@/components/world/domains/resolvingWorldPlazaGirlSampleCombatSpritePresentation';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import { resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection';
@@ -195,6 +196,8 @@ import {
   resolvingWorldPlazaNavigationWalkPlan,
 } from '@/components/world/navigation';
 import type { DefiningWorldPlazaPlayerProjectileDodgeState } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
+import { drawingWildlifeCyrobornGlowOrbOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeCyrobornGlowOrbOnGraphics';
+import { resolvingWildlifeGlowOrbHoverOffsetPx } from '@/components/world/wildlife/domains/resolvingWildlifeGlowOrbHoverOffsetPx';
 import { useQuery } from '@tanstack/react-query';
 import type { Container, Graphics, Sprite, Ticker } from 'pixi.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -407,8 +410,12 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   const avatarLavaHeatProximityGlowGraphicsRef = useRef<Graphics | null>(null);
   const avatarContainerRef = useRef<Container | null>(null);
   const avatarSpriteRef = useRef<Sprite | null>(null);
+  const avatarGlowOrbGraphicsRef = useRef<Graphics | null>(null);
   const avatarLavaSinkCoverBackGraphicsRef = useRef<Graphics | null>(null);
   const avatarLavaSinkCoverFrontGraphicsRef = useRef<Graphics | null>(null);
+  const usesGlowOrbPresentation = checkingWorldPlazaAvatarUsesGlowOrbPresentation(
+    characterDefinition.skinId
+  );
   const animationTimeRef = useRef(0);
   const jumpStateRef = useRef<DefiningWorldPlazaJumpState | null>(null);
   const fallStateRef = useRef<DefiningWorldPlazaFallState | null>(null);
@@ -467,6 +474,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
   const { data: coreCharacterTextures } = useQuery({
     queryKey: characterDefinition.texturesQueryKey,
     queryFn: characterDefinition.loadTextures,
+    // Glow-orb skins (Cyroborn) draw procedurally like wildlife fairies; skip sheets.
+    enabled: !usesGlowOrbPresentation,
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
@@ -843,9 +852,8 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     if (
       !shadowContainer ||
       !container ||
-      !sprite ||
       !playerPosition ||
-      !characterTextures
+      (!usesGlowOrbPresentation && (!sprite || !characterTextures))
     ) {
       finishAvatarTickSample();
       return;
@@ -2422,11 +2430,6 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
         characterDefinition
       ) * characterEngineDerivedStats.sizeScale;
 
-    sprite.anchor.set(
-      combatSpritePresentation.anchorXNormalized,
-      combatSpritePresentation.anchorYNormalized
-    );
-
     const activeMeleeForScale = meleeAttackStateRef?.current ?? null;
     const attackProgressForScale =
       activeMeleeForScale && activeMeleeForScale.durationMs > 0
@@ -2451,18 +2454,25 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       attackProgress: attackProgressForScale,
       deathProgress: deathProgressForScale,
     });
-    sprite.scale.set(
-      effectiveSpriteScale * cyrobornScalePulse.scaleMultiplier
-    );
-    sprite.visible = !cyrobornScalePulse.hideBody;
 
-    applyingWorldPlazaGirlSampleAvatarMotionToSpriteWithFallback({
-      sprite,
-      skinId: characterDefinition.skinId,
-      motionSuffix: activeMotionSuffix,
-      direction: activeDirection,
-      frameIndex: animationFrameIndex,
-    });
+    if (sprite && !usesGlowOrbPresentation) {
+      sprite.anchor.set(
+        combatSpritePresentation.anchorXNormalized,
+        combatSpritePresentation.anchorYNormalized
+      );
+      sprite.scale.set(
+        effectiveSpriteScale * cyrobornScalePulse.scaleMultiplier
+      );
+      sprite.visible = !cyrobornScalePulse.hideBody;
+
+      applyingWorldPlazaGirlSampleAvatarMotionToSpriteWithFallback({
+        sprite,
+        skinId: characterDefinition.skinId,
+        motionSuffix: activeMotionSuffix,
+        direction: activeDirection,
+        frameIndex: animationFrameIndex,
+      });
+    }
 
     const standingLayerOffsetPx = activeJumpState
       ? computingWorldBuildingWorldLayerScreenOffsetPx(
@@ -2567,9 +2577,12 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       avatarShadowZIndexRef
     );
     shadowContainer.visible =
-      container.visible && (lavaSinkBaseOffsetPx === 0 || isLavaHeatProximate);
+      !usesGlowOrbPresentation &&
+      container.visible &&
+      (lavaSinkBaseOffsetPx === 0 || isLavaHeatProximate);
     if (avatarGroundShadowGraphicsRef.current) {
-      avatarGroundShadowGraphicsRef.current.visible = !isLavaHeatProximate;
+      avatarGroundShadowGraphicsRef.current.visible =
+        !usesGlowOrbPresentation && !isLavaHeatProximate;
     }
     container.position.set(screenPoint.x, anchoredScreenY);
     container.rotation = isPlayerStunned
@@ -2583,23 +2596,61 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
       avatarBodyEntityZIndex,
       avatarBodyZIndexRef
     );
-    sprite.visible = !isLavaSubmergedPastAvatarHeight;
-    sprite.position.set(
-      0,
-      jumpArcOffsetPx +
-        fallVerticalOffsetPx +
-        lavaSinkOffsetPx +
-        combatSpriteOffsetBelowGridAnchorPx
-    );
     const respawnInvincibilityBlinkAlpha =
       computingWorldPlazaEntityRespawnInvincibilityBlinkAlpha(
         postRespawnInvincibilityUntilMsRef?.current ?? 0,
         performance.now()
       );
-    sprite.alpha = respawnInvincibilityBlinkAlpha;
-    sprite.tint = computingWorldPlazaFrostbiteAvatarTint(
-      healthStateRef?.current?.frostbite?.stackCount ?? 0
-    );
+    const bodyLiftPx =
+      jumpArcOffsetPx +
+      fallVerticalOffsetPx +
+      lavaSinkOffsetPx +
+      combatSpriteOffsetBelowGridAnchorPx;
+
+    if (sprite) {
+      if (usesGlowOrbPresentation) {
+        sprite.visible = false;
+      } else {
+        sprite.visible =
+          !isLavaSubmergedPastAvatarHeight && !cyrobornScalePulse.hideBody;
+        sprite.position.set(0, bodyLiftPx);
+        sprite.alpha = respawnInvincibilityBlinkAlpha;
+        sprite.tint = computingWorldPlazaFrostbiteAvatarTint(
+          healthStateRef?.current?.frostbite?.stackCount ?? 0
+        );
+      }
+    }
+
+    const glowOrbGraphics = avatarGlowOrbGraphicsRef.current;
+    if (glowOrbGraphics) {
+      if (usesGlowOrbPresentation) {
+        const hoverOffset = resolvingWildlifeGlowOrbHoverOffsetPx(
+          characterDefinition.skinId,
+          localUserId ?? 'local-cyroborn',
+          nowMs,
+          isPlayerDead
+        );
+        glowOrbGraphics.visible =
+          !isLavaSubmergedPastAvatarHeight && !cyrobornScalePulse.hideBody;
+        glowOrbGraphics.position.set(
+          hoverOffset.x,
+          bodyLiftPx + hoverOffset.y
+        );
+        glowOrbGraphics.scale.set(
+          effectiveSpriteScale * cyrobornScalePulse.scaleMultiplier
+        );
+        glowOrbGraphics.alpha = respawnInvincibilityBlinkAlpha;
+        drawingWildlifeCyrobornGlowOrbOnGraphics(glowOrbGraphics, {
+          nowMs,
+          alphaScale: 1,
+          isDead: false,
+        });
+      } else {
+        glowOrbGraphics.visible = false;
+        glowOrbGraphics.scale.set(1);
+      }
+    }
+
     shadowContainer.alpha = respawnInvincibilityBlinkAlpha;
     const heldItemSwingProfile = activeToolAction
       ? DEFINING_WORLD_PLAZA_HELD_ITEM_SWING_PROFILE_BY_TOOL_ACTION[
@@ -2704,7 +2755,17 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
           visible={false}
           eventMode="none"
         />
-        <pixiSprite ref={attachingAvatarSprite} />
+        <pixiSprite
+          ref={attachingAvatarSprite}
+          visible={!usesGlowOrbPresentation}
+        />
+        <pixiGraphics
+          ref={(graphics) => {
+            avatarGlowOrbGraphicsRef.current = graphics;
+          }}
+          eventMode="none"
+          visible={usesGlowOrbPresentation}
+        />
         <RenderingWorldPlazaAvatarCharacterSwitchEffect
           skinId={characterDefinition.skinId}
           footOffsetBelowGridAnchorPx={

@@ -1,8 +1,4 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
-import {
-  grantingWorldPlazaSpritcoreOnWildlifeKill,
-  type GrantingWorldPlazaSpritcoreOnWildlifeKillGrant,
-} from '@/components/world/spritcore/domains/grantingWorldPlazaSpritcoreOnWildlifeKill';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { droppingWildlifeMeatGroundItem } from '@/components/world/wildlife/domains/droppingWildlifeMeatGroundItem';
@@ -17,9 +13,6 @@ export type DefiningWildlifeMeatDropContext = {
   readonly saveSlotIndex: PlazaSaveSlotIndex | null;
   readonly playerPosition: DefiningWorldPlazaWorldPoint;
   readonly playerTargetId: string | null;
-  readonly onSpritcoreGrant?: (
-    grant: GrantingWorldPlazaSpritcoreOnWildlifeKillGrant
-  ) => void;
 };
 
 export type DefiningWildlifeMeatDropKillContext = {
@@ -33,6 +26,9 @@ export type DefiningWildlifeMeatDropKillContext = {
  *
  * Persistent companions stay on the roster (undeployed, HP 0) so a future
  * revive can restore them, while freeing a living-active slot immediately.
+ *
+ * Spritcore stacks spawn as ground loot beside meat when the local player
+ * got the kill (Magiccore-style corpse piles).
  */
 export function attemptingWildlifeMeatGroundDropOnDeath(
   store: ManagingWildlifeInstanceStore,
@@ -61,15 +57,6 @@ export function attemptingWildlifeMeatGroundDropOnDeath(
 
   replacingWildlifeInstance(store, markedInstance);
 
-  if (meatDropContext.onSpritcoreGrant) {
-    grantingWorldPlazaSpritcoreOnWildlifeKill({
-      species,
-      killContext,
-      playerTargetId: meatDropContext.playerTargetId,
-      onGrant: meatDropContext.onSpritcoreGrant,
-    });
-  }
-
   void droppingWildlifeMeatGroundItem({
     localPersistenceOwnerId: meatDropContext.localPersistenceOwnerId,
     redditUserId: meatDropContext.redditUserId,
@@ -77,6 +64,7 @@ export function attemptingWildlifeMeatGroundDropOnDeath(
     instance: markedInstance,
     species,
     playerPosition: meatDropContext.playerPosition,
+    playerTargetId: meatDropContext.playerTargetId,
     killContext,
   }).then((result) => {
     if (result.outcome === 'dropped') {

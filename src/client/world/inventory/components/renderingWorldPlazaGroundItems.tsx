@@ -32,7 +32,6 @@ import {
   STYLING_WORLD_PLAZA_GROUND_ITEM_TOO_FAR_HINT_CLASS_NAME,
 } from '@/components/world/inventory/domains/definingWorldPlazaGroundItemConstants';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
-import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
 import {
   checkingWorldPlazaGroundItemAutoPickupEligible,
   syncingWorldPlazaGroundItemAutoPickupEligibility,
@@ -47,6 +46,8 @@ import {
 } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
 import { consumingWorldPlazaLocalGroundFoodUnit } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
 import { resolvingWorldPlazaGroundItemScreenPoint } from '@/components/world/inventory/domains/resolvingWorldPlazaGroundItemScreenPoint';
+import { resolvingWorldPlazaInventoryStackQuantityLabel } from '@/components/world/inventory/domains/resolvingWorldPlazaInventoryStackQuantityLabel';
+import { showingWorldPlazaInventoryItemPickupToast } from '@/components/world/inventory/domains/showingWorldPlazaInventoryItemPickupToast';
 import { usingWorldPlazaGroundItemPickupProgress } from '@/components/world/inventory/hooks/usingWorldPlazaGroundItemPickupProgress';
 import { usingWorldPlazaGroundItems } from '@/components/world/inventory/hooks/usingWorldPlazaGroundItems';
 import { usingWorldPlazaInventory } from '@/components/world/inventory/hooks/usingWorldPlazaInventory';
@@ -767,7 +768,10 @@ export function RenderingWorldPlazaGroundItems({
               <span
                 className={STYLING_WORLD_PLAZA_GROUND_ITEM_QUANTITY_CLASS_NAME}
               >
-                {groundItem.quantity}
+                {resolvingWorldPlazaInventoryStackQuantityLabel(
+                  groundItem.itemTypeId,
+                  groundItem.quantity
+                )}
               </span>
             ) : null}
           </div>

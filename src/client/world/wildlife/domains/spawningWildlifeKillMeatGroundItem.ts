@@ -123,6 +123,7 @@ export function spawningWildlifeKillMeatGroundItem({
     instance,
     species,
     playerPosition: meatDropContext.playerPosition,
+    playerTargetId: meatDropContext.playerTargetId,
   }).then((dropResult) => {
     if (dropResult.outcome !== 'dropped') {
       return;

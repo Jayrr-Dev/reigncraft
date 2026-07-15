@@ -1,96 +1,81 @@
+/**
+ * Spawns a Spritcore stack as a ground item on a wildlife corpse.
+ *
+ * @module components/world/wildlife/domains/droppingWildlifeSpritcoreGroundItem
+ */
+
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWorldPlazaGroundItemsUseLocalPersistence } from '@/components/world/inventory/domains/checkingWorldPlazaGroundItemsUseLocalPersistence';
 import type { DefiningWorldPlazaGroundItem } from '@/components/world/inventory/domains/definingWorldPlazaGroundItem';
 import { insertingWorldPlazaGroundItemOptimistically } from '@/components/world/inventory/domains/managingWorldPlazaGroundItemOptimisticBridge';
 import { droppingWorldPlazaLocalGroundItem } from '@/components/world/inventory/domains/managingWorldPlazaLocalGroundItems';
 import { droppingWorldInventoryDevvitGroundItem } from '@/components/world/inventory/repositories/callingWorldInventoryDevvitApi';
+import { resolvingWorldPlazaSpritcoreWildlifeKillDrop } from '@/components/world/spritcore/domains/resolvingWorldPlazaSpritcoreWildlifeKillDrop';
 import type { DefiningWildlifeMeatDropKillContext } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { droppingWildlifeSpecialtyGroundItems } from '@/components/world/wildlife/domains/droppingWildlifeSpecialtyGroundItems';
-import { droppingWildlifeSpritcoreGroundItem } from '@/components/world/wildlife/domains/droppingWildlifeSpritcoreGroundItem';
-import { resolvingWildlifeMeatDropQuantity } from '@/components/world/wildlife/domains/resolvingWildlifeLargeSizeFrameMeatDropQuantity';
-import { resolvingWildlifeMeatDropRawItemTypeId } from '@/components/world/wildlife/domains/resolvingWildlifeMeatCatalogEntryForInstance';
-import { resolvingWildlifeMeatDropMetadata } from '@/components/world/wildlife/domains/resolvingWildlifeMeatDropMetadata';
+import { DEFINING_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX } from '@/components/world/wildlife/domains/droppingWildlifeMeatGroundItem';
 import type { PlazaSaveSlotIndex } from '../../../../shared/plazaGameSession';
-import {
-  WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH,
-  WORLD_INVENTORY_DEVVIT_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX,
-} from '../../../../shared/worldInventoryDevvit';
+import { WORLD_INVENTORY_DEVVIT_GROUND_ITEMS_DROP_API_PATH } from '../../../../shared/worldInventoryDevvit';
 
-/** Sentinel slot index for wildlife loot ground drops. */
-export const DEFINING_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX =
-  WORLD_INVENTORY_DEVVIT_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX;
-
-export type DroppingWildlifeMeatGroundItemParams = {
+export type DroppingWildlifeSpritcoreGroundItemParams = {
   readonly localPersistenceOwnerId: string | null;
   readonly redditUserId: string | null;
   readonly saveSlotIndex: PlazaSaveSlotIndex | null;
   readonly instance: DefiningWildlifeInstance;
   readonly species: DefiningWildlifeSpeciesDefinition;
   readonly playerPosition: DefiningWorldPlazaWorldPoint;
-  readonly playerTargetId?: string | null;
+  readonly playerTargetId: string | null;
   readonly killContext?: DefiningWildlifeMeatDropKillContext | null;
 };
 
-export type DroppingWildlifeMeatGroundItemResult =
+export type DroppingWildlifeSpritcoreGroundItemResult =
   | {
       readonly outcome: 'dropped';
       readonly groundItem: DefiningWorldPlazaGroundItem;
     }
-  | { readonly outcome: 'failed' };
+  | { readonly outcome: 'none' | 'failed' };
 
 /**
- * Spawns raw meat from a dead animal as a ground item at the corpse tile.
+ * Drops a large Spritcore quantity stack at the corpse when the player got the kill.
  */
-export async function droppingWildlifeMeatGroundItem({
+export async function droppingWildlifeSpritcoreGroundItem({
   localPersistenceOwnerId,
   redditUserId,
   saveSlotIndex,
   instance,
   species,
   playerPosition,
-  playerTargetId = null,
+  playerTargetId,
   killContext = null,
-}: DroppingWildlifeMeatGroundItemParams): Promise<DroppingWildlifeMeatGroundItemResult> {
-  const rawMeatItemTypeId = resolvingWildlifeMeatDropRawItemTypeId(
-    instance,
-    species.loot.rawMeatItemTypeId
-  );
-  const quantity = resolvingWildlifeMeatDropQuantity(instance, species);
-
-  if (quantity <= 0) {
-    return { outcome: 'failed' };
-  }
-
-  const playerUserId = redditUserId ?? localPersistenceOwnerId;
-  const meatMetadata = resolvingWildlifeMeatDropMetadata({
-    instance,
+}: DroppingWildlifeSpritcoreGroundItemParams): Promise<DroppingWildlifeSpritcoreGroundItemResult> {
+  const killDrop = resolvingWorldPlazaSpritcoreWildlifeKillDrop({
     species,
-    killerTargetId: killContext?.killerTargetId,
-    playerUserId,
-    nowMs: killContext?.nowMs ?? Date.now(),
+    killContext,
+    playerTargetId,
   });
+
+  if (!killDrop) {
+    return { outcome: 'none' };
+  }
 
   const tileX = Math.floor(instance.position.x);
   const tileY = Math.floor(instance.position.y);
   const layer = instance.position.layer ?? 1;
-
   const useLocalPersistence = checkingWorldPlazaGroundItemsUseLocalPersistence(
     localPersistenceOwnerId,
     redditUserId
   );
 
   const dropRequest = {
-    itemTypeId: rawMeatItemTypeId,
-    quantity,
+    itemTypeId: killDrop.itemTypeId,
+    quantity: killDrop.amount,
     gridX: tileX,
     gridY: tileY,
     layer,
     slotIndex: DEFINING_WILDLIFE_MEAT_GROUND_DROP_SLOT_INDEX,
     playerX: playerPosition.x,
     playerY: playerPosition.y,
-    metadata: meatMetadata,
   };
 
   try {
@@ -112,42 +97,20 @@ export async function droppingWildlifeMeatGroundItem({
       return { outcome: 'failed' };
     }
 
-    const groundItemId = ack.groundItemId;
-
     const groundItem: DefiningWorldPlazaGroundItem = {
-      id: groundItemId,
-      itemTypeId: rawMeatItemTypeId,
-      quantity,
+      id: ack.groundItemId,
+      itemTypeId: killDrop.itemTypeId,
+      quantity: killDrop.amount,
       gridX: tileX,
       gridY: tileY,
       layer,
       spawnedAt: Date.now(),
-      metadata: meatMetadata,
     };
 
     insertingWorldPlazaGroundItemOptimistically(
       groundItem,
       useLocalPersistence
     );
-
-    await droppingWildlifeSpecialtyGroundItems({
-      localPersistenceOwnerId,
-      redditUserId,
-      saveSlotIndex,
-      instance,
-      playerPosition,
-    });
-
-    await droppingWildlifeSpritcoreGroundItem({
-      localPersistenceOwnerId,
-      redditUserId,
-      saveSlotIndex,
-      instance,
-      species,
-      playerPosition,
-      playerTargetId,
-      killContext,
-    });
 
     return { outcome: 'dropped', groundItem };
   } catch {
