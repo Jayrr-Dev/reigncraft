@@ -25,19 +25,19 @@ export const DEFINING_WORLD_PLAZA_DISTANCE_DANGER_AGGRESSION_MEAN_SHIFT_PER_BAND
 export const DEFINING_WORLD_PLAZA_DISTANCE_DANGER_SIZE_MEAN_SHIFT_PER_BAND = 0.28;
 
 /** Predator spawn-weight multiplier growth per band (1 + rate * band). */
-export const DEFINING_WORLD_PLAZA_DISTANCE_DANGER_PREDATOR_WEIGHT_BONUS_PER_BAND = 0.18;
+export const DEFINING_WORLD_PLAZA_DISTANCE_DANGER_PREDATOR_WEIGHT_BONUS_PER_BAND = 0.22;
 
 /** Prey spawn-weight multiplier decay per band (1 - rate * band, floored). */
-export const DEFINING_WORLD_PLAZA_DISTANCE_DANGER_PREY_WEIGHT_PENALTY_PER_BAND = 0.08;
+export const DEFINING_WORLD_PLAZA_DISTANCE_DANGER_PREY_WEIGHT_PENALTY_PER_BAND = 0.14;
 
 /**
- * Extra weight decay for docile / passive (friendly) temperaments per band,
- * stacked on the prey penalty.
+ * Extra weight decay for weak temperaments (docile / passive / skittish)
+ * per band, stacked on the prey penalty.
  */
-export const DEFINING_WORLD_PLAZA_DISTANCE_DANGER_FRIENDLY_WEIGHT_PENALTY_PER_BAND = 0.12;
+export const DEFINING_WORLD_PLAZA_DISTANCE_DANGER_FRIENDLY_WEIGHT_PENALTY_PER_BAND = 0.2;
 
 /** Floor for prey / friendly weight multipliers so pools never fully vanish. */
-export const DEFINING_WORLD_PLAZA_DISTANCE_DANGER_MIN_SPAWN_WEIGHT_MULTIPLIER = 0.15;
+export const DEFINING_WORLD_PLAZA_DISTANCE_DANGER_MIN_SPAWN_WEIGHT_MULTIPLIER = 0.08;
 
 /**
  * Chance to replace an easy biome with a harder neighbor, per danger band.

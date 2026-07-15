@@ -56,8 +56,8 @@ export function resolvingWildlifeDistanceDangerSizeMeanShift(
 }
 
 /**
- * Extra spawn-weight multiplier for friendly temperaments (docile / passive).
- * Stacks on prey role scaling.
+ * Extra spawn-weight multiplier for weak temperaments (docile / passive /
+ * skittish). Stacks on prey role scaling so soft animals thin faster up layers.
  */
 export function resolvingWildlifeDistanceDangerFriendlyTemperamentWeightMultiplier(
   dangerBand: number,
@@ -65,7 +65,9 @@ export function resolvingWildlifeDistanceDangerFriendlyTemperamentWeightMultipli
 ): number {
   if (
     dangerBand <= 0 ||
-    (temperamentId !== 'docile' && temperamentId !== 'passive')
+    (temperamentId !== 'docile' &&
+      temperamentId !== 'passive' &&
+      temperamentId !== 'skittish')
   ) {
     return 1;
   }

@@ -42,7 +42,7 @@ describe('resolvingWildlifeDistanceDangerLevers', () => {
     expect(levers.spawnWeightByRole.prey).toBeLessThan(1);
   });
 
-  it('thins friendly temperaments farther out', () => {
+  it('thins weak temperaments farther out', () => {
     expect(
       resolvingWildlifeDistanceDangerFriendlyTemperamentWeightMultiplier(
         0,
@@ -53,6 +53,12 @@ describe('resolvingWildlifeDistanceDangerLevers', () => {
       resolvingWildlifeDistanceDangerFriendlyTemperamentWeightMultiplier(
         3,
         'docile'
+      )
+    ).toBeLessThan(1);
+    expect(
+      resolvingWildlifeDistanceDangerFriendlyTemperamentWeightMultiplier(
+        3,
+        'skittish'
       )
     ).toBeLessThan(1);
     expect(

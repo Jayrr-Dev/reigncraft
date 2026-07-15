@@ -1360,7 +1360,8 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
   chicken: {
     ...definingWildlifePassiveFarmSpecies('chicken', 'Chicken', 'chicken', 3),
     aggressionSpawn: {
-      bellCurveMeanShift: -0.45,
+      // ~6.7% aggro near origin (was ~3.6% at -0.45); still rare.
+      bellCurveMeanShift: -0.15,
       aggressiveAttacksOnSight: true,
     },
     sizeScale: 0.9,

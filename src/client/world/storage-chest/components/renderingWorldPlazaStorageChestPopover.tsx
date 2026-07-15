@@ -26,6 +26,7 @@ import {
 } from '@/components/world/storage-chest/domains/definingWorldPlazaStorageChestConstants';
 import type * as React from 'react';
 import { useMemo } from 'react';
+import { createPortal } from 'react-dom';
 
 export type RenderingWorldPlazaStorageChestPopoverProps = {
   readonly blockId: string;
@@ -49,7 +50,12 @@ export function RenderingWorldPlazaStorageChestPopover({
     [viewportHudScale]
   );
 
-  return (
+  if (typeof document === 'undefined') {
+    return <></>;
+  }
+
+  // Portal escapes hotbar shell transform containing-block (same as kiln/teapot).
+  return createPortal(
     <div
       {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: '' }}
       className={STYLING_WORLD_PLAZA_STORAGE_CHEST_POPOVER_PANEL_CLASS_NAME}
@@ -95,6 +101,7 @@ export function RenderingWorldPlazaStorageChestPopover({
           />
         ))}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

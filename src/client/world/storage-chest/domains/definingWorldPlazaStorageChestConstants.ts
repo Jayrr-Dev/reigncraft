@@ -28,10 +28,11 @@ export const DEFINING_WORLD_PLAZA_STORAGE_CHEST_LOCAL_STORAGE_KEY_PREFIX =
 export const LABELING_WORLD_PLAZA_STORAGE_CHEST_PANEL = 'Chest' as const;
 
 /**
- * Dark wood panel chrome — same shell paint as storage-page hotbar rows.
+ * Dark wood panel chrome — viewport-centered (portaled), storage-row paint.
+ * Keep paint on `.plaza-storage-chest-popover-shell` (not hotbar shell classes).
  */
 export const STYLING_WORLD_PLAZA_STORAGE_CHEST_POPOVER_PANEL_CLASS_NAME =
-  `${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventoryHotbarShell} ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.cssShell.inventoryHotbarShellStorage} ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.scope.lightTheme} pointer-events-auto absolute bottom-full left-1/2 z-50 mb-2 w-max max-w-none -translate-x-1/2 rounded-md` as const;
+  `plaza-storage-chest-popover-shell ${DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.scope.lightTheme} pointer-events-auto fixed left-1/2 top-1/2 z-50 w-max max-w-none -translate-x-1/2 -translate-y-1/2 rounded-md` as const;
 
 /** Close control on the dark wood chest header. */
 export const STYLING_WORLD_PLAZA_STORAGE_CHEST_POPOVER_CLOSE_BUTTON_CLASS_NAME =

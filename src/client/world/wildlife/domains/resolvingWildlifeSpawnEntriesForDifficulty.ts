@@ -85,7 +85,7 @@ export function resolvingWildlifeSpawnEffectiveDensityThreshold(
  * Filters temperament toggles and scales spawn weights and pack sizes.
  * Returns an empty array when every entry is disabled.
  *
- * @param dangerBand - Optional distance-danger band; thins friendly temperaments.
+ * @param dangerBand - Optional distance-danger band; thins weak temperaments.
  */
 export function resolvingWildlifeSpawnEntriesForDifficulty(
   entries: readonly DefiningWildlifeBiomeSpawnEntry[],
