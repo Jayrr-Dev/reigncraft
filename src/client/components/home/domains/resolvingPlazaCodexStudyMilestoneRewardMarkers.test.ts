@@ -65,9 +65,12 @@ describe('resolvingPlazaCodexOverallProgressMilestoneRewardMarkers', () => {
 
     const first = markers.find((marker) => marker.percent === 5);
     expect(first?.hasUnclaimedReward).toBe(true);
-    expect(first?.rewardDefinition?.reward.recipeId).toBe(
-      DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.AXE_WOOD
-    );
+    expect(first?.rewardDefinition?.reward.kind).toBe('attach-recipe');
+    if (first?.rewardDefinition?.reward.kind === 'attach-recipe') {
+      expect(first.rewardDefinition.reward.recipeId).toBe(
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.AXE_WOOD
+      );
+    }
 
     const claimed = resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
       2,
