@@ -13,8 +13,35 @@ import {
 import {
   DEFINING_PLAZA_CODEX_DISCOVERY_MILESTONE_REWARD_PERCENTS,
   DEFINING_PLAZA_CODEX_OVERALL_MILESTONE_REWARD_PERCENTS,
+  DEFINING_PLAZA_CODEX_RECIPES_MILESTONE_REWARD_PERCENTS,
+  DEFINING_PLAZA_CODEX_STUDIED_MILESTONE_REWARD_PERCENTS,
 } from '@/components/home/domains/definingPlazaCodexStudyMilestoneRewardConstants';
 import type { WorldPlazaCodexSectionId } from '@/components/world/domains/definingWorldPlazaCodexConstants';
+
+/**
+ * Discovery-meter chest percents for a Codex section.
+ * Recipes uses eight slices; Biomes and other discovery meters use four.
+ */
+export function resolvingPlazaCodexDiscoveryMilestoneRewardPercents(
+  sectionId?: WorldPlazaCodexSectionId
+): readonly number[] {
+  if (sectionId === 'recipes') {
+    return DEFINING_PLAZA_CODEX_RECIPES_MILESTONE_REWARD_PERCENTS;
+  }
+
+  return DEFINING_PLAZA_CODEX_DISCOVERY_MILESTONE_REWARD_PERCENTS;
+}
+
+/**
+ * Dual-progress meter chest percents: Sighted/Logged (5) vs Studied (10, front-loaded).
+ */
+export function resolvingPlazaCodexDualMeterMilestoneRewardPercents(
+  meterKind: PlazaCodexMilestoneRewardMeterKind
+): readonly number[] {
+  return meterKind === 'studied'
+    ? DEFINING_PLAZA_CODEX_STUDIED_MILESTONE_REWARD_PERCENTS
+    : DEFINING_PLAZA_CODEX_OVERALL_MILESTONE_REWARD_PERCENTS;
+}
 
 export type PlazaCodexOverallMilestoneRewardMarker = {
   /** Stable key from percent position. */
@@ -153,7 +180,7 @@ export function resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
 }
 
 /**
- * Four discovery-only chests for Biomes / Recipes single meters.
+ * Discovery-only chests for Biomes (4) / Recipes (8) single meters.
  */
 export function resolvingPlazaCodexDiscoveryMilestoneRewardMarkers(
   value: number,
@@ -163,7 +190,7 @@ export function resolvingPlazaCodexDiscoveryMilestoneRewardMarkers(
   return resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
     value,
     max,
-    DEFINING_PLAZA_CODEX_DISCOVERY_MILESTONE_REWARD_PERCENTS,
+    resolvingPlazaCodexDiscoveryMilestoneRewardPercents(options?.sectionId),
     options
   );
 }
@@ -180,7 +207,7 @@ export function checkingPlazaCodexDiscoveryProgressHasRewardReady(
   return checkingPlazaCodexOverallProgressHasRewardReady(
     value,
     max,
-    DEFINING_PLAZA_CODEX_DISCOVERY_MILESTONE_REWARD_PERCENTS,
+    resolvingPlazaCodexDiscoveryMilestoneRewardPercents(options?.sectionId),
     options
   );
 }
@@ -192,6 +219,7 @@ export function resolvingPlazaCodexAggregateStudyMilestoneRewardMarkers(
 ): readonly PlazaCodexOverallMilestoneRewardMarker[] {
   return resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
     studyValue,
-    studyMax
+    studyMax,
+    DEFINING_PLAZA_CODEX_STUDIED_MILESTONE_REWARD_PERCENTS
   );
 }

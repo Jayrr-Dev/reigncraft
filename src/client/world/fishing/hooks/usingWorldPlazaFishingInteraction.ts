@@ -4,15 +4,11 @@ import type { DefiningInventoryState } from '@/components/inventory/domains/defi
 import { addingInventoryItemWithStacking } from '@/components/inventory/domains/reducingInventoryState';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { recordingWorldPlazaBestiarySpeciesSighted } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
-import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
-import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fishing/domains/checkingWorldPlazaFishingCastEligibility';
+import type { DefiningWorldPlazaFishingCastSessionContext } from '@/components/world/fishing/domains/definingWorldPlazaFishingCastSessionContext';
 import { DEFINING_WORLD_PLAZA_FISHING_CATCH_QUANTITY } from '@/components/world/fishing/domains/definingWorldPlazaFishingConstants';
 import type { ListingWorldPlazaFishingTilesInInteractionRangeEntry } from '@/components/world/fishing/domains/listingWorldPlazaFishingTilesInInteractionRange';
-import {
-  resolvingWorldPlazaFishingCatchGrant,
-  resolvingWorldPlazaFishingCatchRoll,
-} from '@/components/world/fishing/domains/resolvingWorldPlazaFishingCatchRoll';
+import { resolvingWorldPlazaFishingCatchGrant } from '@/components/world/fishing/domains/resolvingWorldPlazaFishingCatchRoll';
 import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_REGISTRY } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypes';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
 import { wearingWorldPlazaEquippedInventoryToolDurability } from '@/components/world/inventory/domains/wearingWorldPlazaEquippedInventoryToolDurability';
@@ -38,7 +34,7 @@ export type UsingWorldPlazaFishingInteractionResult = {
     entry: ListingWorldPlazaFishingTilesInInteractionRangeEntry
   ) => boolean;
   readonly completingFishingCast: (
-    entry: ListingWorldPlazaFishingTilesInInteractionRangeEntry
+    session: DefiningWorldPlazaFishingCastSessionContext
   ) => void;
 };
 
@@ -80,7 +76,7 @@ export function usingWorldPlazaFishingInteraction({
   );
 
   const completingFishingCast = useCallback(
-    (entry: ListingWorldPlazaFishingTilesInInteractionRangeEntry): void => {
+    (session: DefiningWorldPlazaFishingCastSessionContext): void => {
       const playerPosition = playerPositionRef.current;
 
       if (!playerPosition) {
@@ -89,38 +85,15 @@ export function usingWorldPlazaFishingInteraction({
 
       const eligibility = checkingWorldPlazaFishingCastEligibility(
         playerPosition,
-        entry.tileX,
-        entry.tileY
+        session.tileX,
+        session.tileY
       );
 
       if (!eligibility.isEligible) {
         return;
       }
 
-      const waterTile = resolvingWorldPlazaWaterAtTileIndex(
-        entry.tileX,
-        entry.tileY
-      );
-
-      if (!waterTile) {
-        return;
-      }
-
-      const biomeKind = resolvingWorldPlazaBiomeAtTileIndex(
-        entry.tileX,
-        entry.tileY
-      ).kind;
-
-      const catchEntry = resolvingWorldPlazaFishingCatchRoll({
-        waterKind: waterTile.kind,
-        biomeKind,
-      });
-
-      if (!catchEntry) {
-        showingGameplayHudToast('Nothing bites.');
-        return;
-      }
-
+      const catchEntry = session.pendingCatch;
       const grant = resolvingWorldPlazaFishingCatchGrant(catchEntry);
 
       let didBreak = false;
@@ -137,7 +110,7 @@ export function usingWorldPlazaFishingInteraction({
         const withCatch = addingInventoryItemWithStacking(
           wearResult.nextState,
           {
-            id: `fishing-catch-${catchEntry.catchId}-${entry.tileX}-${entry.tileY}`,
+            id: `fishing-catch-${catchEntry.catchId}-${session.tileX}-${session.tileY}`,
             itemTypeId: grant.itemTypeId,
             quantity: DEFINING_WORLD_PLAZA_FISHING_CATCH_QUANTITY,
           },

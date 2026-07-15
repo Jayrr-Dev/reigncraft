@@ -11,7 +11,10 @@ import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/
 import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
 import { deletingPlazaSinglePlayerSaveSlot } from '@/components/home/domains/deletingPlazaSinglePlayerSaveSlot';
 import { formattingPlazaStudyCompleteToastMessage } from '@/components/home/domains/formattingPlazaStudyCompleteToastMessage';
-import { formattingPlazaBestiaryStudyCountProgress } from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
+import {
+  checkingPlazaBestiaryStudyTierUnlocked,
+  formattingPlazaBestiaryStudyCountProgress,
+} from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
 import {
   checkingPlazaHerbariumBerryStudyTierUnlocked,
   formattingPlazaHerbariumBerryStudyCountProgress,
@@ -362,12 +365,14 @@ import {
   resolvingWorldPlazaAvatarRollStaminaCostMultiplier,
 } from '@/components/world/domains/resolvingWorldPlazaAnimalAvatarRollAttackProfile';
 import { resolvingWorldPlazaAvatarClipPresentation } from '@/components/world/domains/resolvingWorldPlazaAvatarClipPresentation';
+import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
 import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirection';
 import { resolvingWorldPlazaInitialPlayerSpawnWorldPoint } from '@/components/world/domains/resolvingWorldPlazaInitialPlayerSpawnWorldPoint';
 import type { DefiningWorldPlazaPixiViewportSize } from '@/components/world/domains/resolvingWorldPlazaPixiViewportSize';
 import { resolvingWorldPlazaPlayableAvatarRangedCastRequest } from '@/components/world/domains/resolvingWorldPlazaPlayableAvatarRangedCastRequest';
 import { resolvingWorldPlazaPlayerCombatLockTick } from '@/components/world/domains/resolvingWorldPlazaPlayerCombatLockTick';
 import { resolvingWorldPlazaSavedCoordsById } from '@/components/world/domains/resolvingWorldPlazaSavedCoordsListFromStorage';
+import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import { resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport } from '@/components/world/domains/resolvingWorldPlazaWorldPointNearPlotBoundsForTeleport';
 import {
   checkingWorldPlazaDomOverlayFrameShouldUpdate,
@@ -405,7 +410,7 @@ import { usingWorldPlazaFireCells } from '@/components/world/fire/hooks/usingWor
 import { usingWorldPlazaFlintIgnitionAttempt } from '@/components/world/fire/hooks/usingWorldPlazaFlintIgnitionAttempt';
 import { RenderingWorldPlazaFishingInteractionLabels } from '@/components/world/fishing/components/renderingWorldPlazaFishingInteractionLabels';
 import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fishing/domains/checkingWorldPlazaFishingCastEligibility';
-import { computingWorldPlazaFishingCastDurationMs } from '@/components/world/fishing/domains/computingWorldPlazaFishingCastDurationMs';
+import { preparingWorldPlazaFishingCastSession } from '@/components/world/fishing/domains/preparingWorldPlazaFishingCastSession';
 import { usingWorldPlazaFishingInteraction } from '@/components/world/fishing/hooks/usingWorldPlazaFishingInteraction';
 import { usingWorldPlazaFishingProgress } from '@/components/world/fishing/hooks/usingWorldPlazaFishingProgress';
 import { RenderingWorldPlazaFlowerInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaFlowerInteractionLabels';
@@ -756,6 +761,7 @@ import { computingWildlifeCorpseStudyPoints } from '@/components/world/wildlife/
 import { cookingWildlifeMeatAtCampfire } from '@/components/world/wildlife/domains/cookingWildlifeMeatAtCampfire';
 import { resolvingWildlifeDiseaseTransmissionProfile } from '@/components/world/wildlife/domains/definingWildlifeDiseaseTransmissionRegistry';
 import { DEFINING_WILDLIFE_DOCILE_PET_STUDY_POINTS } from '@/components/world/wildlife/domains/definingWildlifeDocilePetConstants';
+import { parsingWildlifeFishMeatSpeciesIdFromItemTypeId } from '@/components/world/wildlife/domains/definingWildlifeFishMeatCatalog';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
 import type { DefiningWildlifeForageEatOverlay } from '@/components/world/wildlife/domains/definingWildlifeForageEatOverlayTypes';
 import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife/domains/definingWildlifeNameTagTypes';
@@ -4212,8 +4218,21 @@ function RenderingWorldPlazaPixiSceneConnected({
   const completingFishingCastRef = useRef(completingFishingCast);
   completingFishingCastRef.current = completingFishingCast;
 
-  const resolvingEquippedFishrodCastDurationMs = useCallback(
-    (_entry: { tileX: number; tileY: number }): number => {
+  const preparingFishingCastSessionForEntry = useCallback(
+    (entry: { tileX: number; tileY: number }) => {
+      const waterTile = resolvingWorldPlazaWaterAtTileIndex(
+        entry.tileX,
+        entry.tileY
+      );
+
+      if (!waterTile) {
+        return null;
+      }
+
+      const biomeKind = resolvingWorldPlazaBiomeAtTileIndex(
+        entry.tileX,
+        entry.tileY
+      ).kind;
       const equippedItem =
         equipment.selectedSlotIndex === null
           ? null
@@ -4227,7 +4246,13 @@ function RenderingWorldPlazaPixiSceneConnected({
       const harvestSpeed =
         equipment.checkingEquippedToolKind('fishrod').harvestSpeedMultiplier;
 
-      return computingWorldPlazaFishingCastDurationMs(tier, harvestSpeed);
+      return preparingWorldPlazaFishingCastSession({
+        entry,
+        waterKind: waterTile.kind,
+        biomeKind,
+        tier,
+        harvestSpeedMultiplier: harvestSpeed,
+      });
     },
     [equipment, inventoryState]
   );
@@ -4240,9 +4265,9 @@ function RenderingWorldPlazaPixiSceneConnected({
     playerPositionRef,
     selectedInteractableBlockKeysRef,
     avatarToolActionRef: localAvatarToolActionRef,
-    resolvingCastDurationMs: resolvingEquippedFishrodCastDurationMs,
-    onCastComplete: (entry) => {
-      completingFishingCastRef.current(entry);
+    preparingFishingCastSession: preparingFishingCastSessionForEntry,
+    onCastComplete: (session) => {
+      completingFishingCastRef.current(session);
     },
   });
 
@@ -4261,9 +4286,14 @@ function RenderingWorldPlazaPixiSceneConnected({
         return;
       }
 
-      const didStart = startingFishingCast(entry);
+      const castOutcome = startingFishingCast(entry);
 
-      if (!didStart) {
+      if (castOutcome === 'nothing-bites') {
+        showingGameplayHudToast('Nothing bites.');
+        return;
+      }
+
+      if (castOutcome === 'already-fishing') {
         showingGameplayHudToast('Already fishing.');
       }
     },
@@ -7370,9 +7400,32 @@ function RenderingWorldPlazaPixiSceneConnected({
           })
         );
         playingWildlifeStudySfx();
+        return;
+      }
+
+      if (context.studyKind === 'fish' && context.fishSpeciesId) {
+        recordingWorldPlazaBestiarySpeciesStudied(context.fishSpeciesId);
+        const studyCount =
+          gettingWorldPlazaBestiaryStudyCountsSnapshot()[
+            context.fishSpeciesId
+          ] ?? 1;
+        showingGameplayHudToast(
+          formattingPlazaStudyCompleteToastMessage({
+            subjectDisplayName: resolvingPlazaBestiarySpeciesStudyDisplayName(
+              context.fishSpeciesId
+            ),
+            codexLabel: 'Bestiary',
+            progressLabel:
+              formattingPlazaBestiaryStudyCountProgress(studyCount),
+          })
+        );
+        if (!grantingBestiarySightedRecipeRewardsIfEarned()) {
+          playingWildlifeStudySfx();
+        }
       }
     },
     [
+      grantingBestiarySightedRecipeRewardsIfEarned,
       grantingLapidaryOreStudyRecipeRewardsIfEarned,
       showingGameplayHudToast,
       updatingInventoryState,
@@ -7556,6 +7609,31 @@ function RenderingWorldPlazaPixiSceneConnected({
           slotIndex,
           studyKind: 'mushroom',
           mushroomSpeciesId,
+        });
+
+        if (!didStart) {
+          showingGameplayHudToast('Already studying.');
+        }
+        return;
+      }
+
+      const fishSpeciesId = parsingWildlifeFishMeatSpeciesIdFromItemTypeId(
+        item.itemTypeId
+      );
+
+      if (fishSpeciesId) {
+        const currentStudyCount =
+          gettingWorldPlazaBestiaryStudyCountsSnapshot()[fishSpeciesId] ?? 0;
+
+        if (checkingPlazaBestiaryStudyTierUnlocked('full', currentStudyCount)) {
+          showingGameplayHudToast('Already fully studied.');
+          return;
+        }
+
+        const didStart = startingSpecimenStudy({
+          slotIndex,
+          studyKind: 'fish',
+          fishSpeciesId,
         });
 
         if (!didStart) {

@@ -55,6 +55,32 @@ describe('claimingPlazaCodexMilestoneReward', () => {
     );
   });
 
+  it('attaches the wood sword recipe when Recipes Attached 13% chest is reached', () => {
+    const definition = resolvingPlazaCodexMilestoneRewardDefinition({
+      sectionId: 'recipes',
+      meterKind: 'discovered',
+      percent: 13,
+    });
+
+    expect(definition).not.toBeNull();
+    if (!definition) {
+      return;
+    }
+
+    expect(claimingPlazaCodexMilestoneReward(definition, false)).toBe(
+      'not-ready'
+    );
+    expect(claimingPlazaCodexMilestoneReward(definition, true)).toBe(
+      'attached'
+    );
+    expect(gettingWorldPlazaRecipeAttachedSnapshot()).toContain(
+      DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.SWORD_WOOD
+    );
+    expect(claimingPlazaCodexMilestoneReward(definition, true)).toBe(
+      'already-attached'
+    );
+  });
+
   it('treats cookbook attach as claimed', () => {
     const definition = resolvingPlazaCodexMilestoneRewardDefinition({
       sectionId: 'bestiary',
@@ -95,7 +121,7 @@ describe('claimingPlazaCodexMilestoneReward', () => {
     const definition = resolvingPlazaCodexMilestoneRewardDefinition({
       sectionId: 'herbarium',
       meterKind: 'studied',
-      percent: 50,
+      percent: 51,
     });
 
     expect(definition).not.toBeNull();
@@ -127,7 +153,7 @@ describe('claimingPlazaCodexMilestoneReward', () => {
     const definition = resolvingPlazaCodexMilestoneRewardDefinition({
       sectionId: 'herbarium',
       meterKind: 'studied',
-      percent: 50,
+      percent: 51,
     });
 
     expect(definition).not.toBeNull();

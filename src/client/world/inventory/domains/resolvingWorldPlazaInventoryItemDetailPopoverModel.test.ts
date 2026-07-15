@@ -1,8 +1,10 @@
+import { DEFINING_PLAZA_BESTIARY_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaBestiaryStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_BERRY_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumBerryStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_CLOVER_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumCloverStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_FLOWER_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaHerbariumFlowerStudyTier';
 import { DEFINING_PLAZA_LAPIDARY_STUDY_FULL_COUNT } from '@/components/home/domains/definingPlazaLapidaryStudyTier';
 import { DEFINING_PLAZA_HERBARIUM_MUSHROOM_STUDY_FULL_COUNT } from '@/components/home/domains/resolvingPlazaHerbariumMushroomStudyTier';
+import { listingWorldPlazaFishingCatchCreatures } from '@/components/world/fishing/domains/definingWorldPlazaFishingCatchRegistry';
 import { resolvingWorldPlazaCloverItemTypeIdFromLootKind } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCloverSpriteSheetConstants';
 import { resolvingWorldPlazaFlowerItemTypeIdFromSpeciesId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryFlowerSpriteSheetConstants';
 import {
@@ -727,6 +729,116 @@ describe('resolvingWorldPlazaInventoryItemDetailPopoverModel mushroom Study', ()
     expect(
       cookedFull?.infoRows.find((row) => row.id === 'cooked-well-fed')?.value
     ).toMatch(/%/);
+  });
+});
+
+describe('resolvingWorldPlazaInventoryItemDetailPopoverModel fish Study', () => {
+  const softShellClam = listingWorldPlazaFishingCatchCreatures().find(
+    (entry) => entry.catchId === 'soft-shell-clam'
+  );
+  const rawSoftShellClamItemTypeId = softShellClam?.rawItemTypeId ?? '';
+  const cookedSoftShellClamItemTypeId = softShellClam?.cookedItemTypeId ?? '';
+
+  it('allows Study on unstudied fish meat for every catch creature', () => {
+    for (const creature of listingWorldPlazaFishingCatchCreatures()) {
+      const model = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+        {
+          id: `fish-${creature.catchId}`,
+          itemTypeId: creature.rawItemTypeId,
+          quantity: 1,
+          slotIndex: 0,
+        },
+        {
+          isEquipped: false,
+          studyCountsBySpeciesId: { [creature.catchId]: 0 },
+        }
+      );
+
+      expect(model?.canStudy).toBe(true);
+    }
+  });
+
+  it('gates disease detail by bestiary study tier', () => {
+    expect(softShellClam).toBeDefined();
+
+    const unstudied = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'clam-1',
+        itemTypeId: rawSoftShellClamItemTypeId,
+        quantity: 1,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        studyCountsBySpeciesId: { 'soft-shell-clam': 0 },
+        playerEffectiveMaxHealth: 100,
+      }
+    );
+
+    expect(unstudied?.canStudy).toBe(true);
+    expect(unstudied?.badges.some((badge) => badge.id === 'food')).toBe(false);
+    expect(
+      unstudied?.infoRows.some((row) => row.id === 'raw-disease')
+    ).toBe(false);
+
+    const proficiency = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'clam-1',
+        itemTypeId: rawSoftShellClamItemTypeId,
+        quantity: 1,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        studyCountsBySpeciesId: { 'soft-shell-clam': 50 },
+        playerEffectiveMaxHealth: 100,
+      }
+    );
+
+    expect(
+      proficiency?.infoRows.find((row) => row.id === 'raw-disease')?.value
+    ).toMatch(/Vibrio/i);
+    expect(
+      proficiency?.infoRows.find((row) => row.id === 'raw-disease')?.value
+    ).not.toMatch(/%/);
+
+    const mastery = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'clam-1',
+        itemTypeId: rawSoftShellClamItemTypeId,
+        quantity: 1,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        studyCountsBySpeciesId: {
+          'soft-shell-clam': DEFINING_PLAZA_BESTIARY_STUDY_FULL_COUNT,
+        },
+        playerEffectiveMaxHealth: 100,
+      }
+    );
+
+    expect(mastery?.canStudy).toBe(false);
+    expect(
+      mastery?.infoRows.find((row) => row.id === 'raw-disease')?.value
+    ).toMatch(/%/);
+
+    const cookedFull = resolvingWorldPlazaInventoryItemDetailPopoverModel(
+      {
+        id: 'clam-cooked-1',
+        itemTypeId: cookedSoftShellClamItemTypeId,
+        quantity: 1,
+        slotIndex: 0,
+      },
+      {
+        isEquipped: false,
+        studyCountsBySpeciesId: {
+          'soft-shell-clam': DEFINING_PLAZA_BESTIARY_STUDY_FULL_COUNT,
+        },
+      }
+    );
+
+    expect(cookedFull?.canStudy).toBe(false);
   });
 });
 

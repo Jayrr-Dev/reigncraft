@@ -31,7 +31,24 @@ const FISH_MEAT_SPECIES_IDS = new Set(
   DEFINING_WILDLIFE_FISH_MEAT_CATALOG.map((entry) => entry.speciesId)
 );
 
+const FISH_MEAT_SPECIES_ID_BY_ITEM_TYPE_ID = new Map(
+  DEFINING_WILDLIFE_FISH_MEAT_CATALOG.flatMap((entry) => [
+    [entry.rawItemTypeId, entry.speciesId],
+    [entry.cookedItemTypeId, entry.speciesId],
+  ])
+);
+
 /** True when species id is a fishing catch creature, not a land wildlife spawn. */
 export function checkingWildlifeFishMeatSpeciesId(speciesId: string): boolean {
   return FISH_MEAT_SPECIES_IDS.has(speciesId);
+}
+
+/**
+ * Resolves fishing-catch species id from a raw or cooked fish meat item type.
+ * Junk catch items are not fish meat and return null.
+ */
+export function parsingWildlifeFishMeatSpeciesIdFromItemTypeId(
+  itemTypeId: string
+): string | null {
+  return FISH_MEAT_SPECIES_ID_BY_ITEM_TYPE_ID.get(itemTypeId) ?? null;
 }

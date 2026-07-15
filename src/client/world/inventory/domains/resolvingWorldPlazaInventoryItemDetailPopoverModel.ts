@@ -100,7 +100,7 @@ import {
   resolvingWorldPlazaTeaBrewingMetadata,
   resolvingWorldPlazaTeaPotRemainingPours,
 } from '@/components/world/tea-brewing/domains/resolvingWorldPlazaTeaBrewingMetadata';
-import { checkingWildlifeFishMeatSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeFishMeatCatalog';
+import { parsingWildlifeFishMeatSpeciesIdFromItemTypeId } from '@/components/world/wildlife/domains/definingWildlifeFishMeatCatalog';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity';
 import type { WorldOreSpeciesId } from '../../../../shared/worldOreRarity';
@@ -139,7 +139,10 @@ export type ResolvingWorldPlazaInventoryItemDetailPopoverModelOptions = {
   readonly isEquipped: boolean;
   readonly isArmorEquipped?: boolean;
   readonly nowMs?: number;
-  /** Per-species corpse Study totals; gates wildlife meat inspect detail. */
+  /**
+   * Per-species Bestiary Study totals; gates wildlife meat inspect detail.
+   * Land meats advance via corpses; fish meats via inventory Study.
+   */
   readonly studyCountsBySpeciesId?: Readonly<
     Partial<Record<DefiningWildlifeSpeciesId, number>>
   >;
@@ -302,7 +305,32 @@ function checkingWorldPlazaInventoryItemCanStudyMushroom(
 }
 
 /**
- * True when the item can be Studied for Herbarium or Lapidary progress.
+ * True when a fish meat specimen still has bestiary Study progress left.
+ * Land wildlife meat studies via corpses; fish have no corpse channel.
+ */
+function checkingWorldPlazaInventoryItemCanStudyFish(
+  itemTypeId: string,
+  studyCountsBySpeciesId:
+    | Readonly<Partial<Record<DefiningWildlifeSpeciesId, number>>>
+    | undefined
+): boolean {
+  const speciesId = parsingWildlifeFishMeatSpeciesIdFromItemTypeId(itemTypeId);
+
+  if (!speciesId) {
+    return false;
+  }
+
+  const studyCount = studyCountsBySpeciesId?.[speciesId] ?? 0;
+
+  return !checkingPlazaCodexStudyTierUnlocked(
+    'bestiary',
+    'mastery',
+    studyCount
+  );
+}
+
+/**
+ * True when the item can be Studied for Herbarium, Lapidary, or Bestiary progress.
  */
 function checkingWorldPlazaInventoryItemCanStudy(
   item: DefiningInventoryItem,
@@ -318,6 +346,9 @@ function checkingWorldPlazaInventoryItemCanStudy(
     | undefined,
   mushroomStudyCountsBySpeciesId:
     | Readonly<Partial<Record<DefiningWorldPlazaMushroomSpeciesId, number>>>
+    | undefined,
+  studyCountsBySpeciesId:
+    | Readonly<Partial<Record<DefiningWildlifeSpeciesId, number>>>
     | undefined
 ): boolean {
   return (
@@ -340,6 +371,10 @@ function checkingWorldPlazaInventoryItemCanStudy(
     checkingWorldPlazaInventoryItemCanStudyMushroom(
       item.itemTypeId,
       mushroomStudyCountsBySpeciesId
+    ) ||
+    checkingWorldPlazaInventoryItemCanStudyFish(
+      item.itemTypeId,
+      studyCountsBySpeciesId
     )
   );
 }
@@ -360,18 +395,11 @@ function resolvingWildlifeMeatStudyCount(
     return 0;
   }
 
-  // Caught fish are already "studied" by reeling them in; no land bestiary corpse yet.
-  if (checkingWildlifeFishMeatSpeciesId(wildlifeSpeciesId)) {
-    return 200;
-  }
-
   if (!studyCountsBySpeciesId) {
     return 0;
   }
 
-  return (
-    studyCountsBySpeciesId[wildlifeSpeciesId as DefiningWildlifeSpeciesId] ?? 0
-  );
+  return studyCountsBySpeciesId[wildlifeSpeciesId] ?? 0;
 }
 
 function listingWorldPlazaInventoryItemDetailBadges(
@@ -881,7 +909,8 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
         options.oreStudyCountsBySpeciesId,
         options.cloverStudyCount,
         options.berryStudyCountsByLootKind,
-        options.mushroomStudyCountsBySpeciesId
+        options.mushroomStudyCountsBySpeciesId,
+        options.studyCountsBySpeciesId
       ),
       canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
         item.itemTypeId
@@ -997,7 +1026,8 @@ export function resolvingWorldPlazaInventoryItemDetailPopoverModel(
       options.oreStudyCountsBySpeciesId,
       options.cloverStudyCount,
       options.berryStudyCountsByLootKind,
-      options.mushroomStudyCountsBySpeciesId
+      options.mushroomStudyCountsBySpeciesId,
+      options.studyCountsBySpeciesId
     ),
     canAttachRecipePage: checkingWorldPlazaInventoryItemIsRecipePage(
       item.itemTypeId

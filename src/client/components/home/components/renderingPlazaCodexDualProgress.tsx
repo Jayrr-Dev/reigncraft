@@ -1,6 +1,6 @@
 /**
- * Side-by-side codex progress meters (Sighted + Studied, or Logged + Studied).
- * Both meters show chest circles at overall collection milestones.
+ * Stacked codex progress meters (Sighted + Studied, or Logged + Studied).
+ * Sighted/Logged uses five chests; Studied uses ten front-loaded chests.
  *
  * @module components/home/components/renderingPlazaCodexDualProgress
  */
@@ -11,11 +11,13 @@ import {
   DEFINING_PLAZA_CODEX_DUAL_PROGRESS_COUNT_CLASS_NAME,
   DEFINING_PLAZA_CODEX_DUAL_PROGRESS_LABEL_CLASS_NAME,
   DEFINING_PLAZA_CODEX_DUAL_PROGRESS_ROW_CLASS_NAME,
-  DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SEPARATOR_CLASS_NAME,
   DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SHELL_CLASS_NAME,
 } from '@/components/home/domains/definingPlazaCodexDualProgressConstants';
 import type { PlazaCodexMilestoneRewardMeterKind } from '@/components/home/domains/definingPlazaCodexMilestoneRewardRegistry';
-import { resolvingPlazaCodexOverallProgressMilestoneRewardMarkers } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
+import {
+  resolvingPlazaCodexDualMeterMilestoneRewardPercents,
+  resolvingPlazaCodexOverallProgressMilestoneRewardMarkers,
+} from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
 import type { WorldPlazaCodexSectionId } from '@/components/world/domains/definingWorldPlazaCodexConstants';
 import {
   gettingWorldPlazaRecipeAttachedSnapshot,
@@ -58,7 +60,7 @@ function RenderingPlazaCodexDualProgressMeter({
   const markers = resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
     metric.value,
     metric.max,
-    undefined,
+    resolvingPlazaCodexDualMeterMilestoneRewardPercents(meterKind),
     sectionId
       ? {
           sectionId,
@@ -86,7 +88,7 @@ function RenderingPlazaCodexDualProgressMeter({
   );
 }
 
-/** Two progress meters on one row for codex collection panels. */
+/** Two stacked progress meters for codex collection panels. */
 export function RenderingPlazaCodexDualProgress({
   left,
   right,
@@ -113,10 +115,6 @@ export function RenderingPlazaCodexDualProgress({
           sectionId={sectionId}
           meterKind="discovered"
           attachedRecipeIds={attachedRecipeIds}
-        />
-        <div
-          aria-hidden
-          className={DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SEPARATOR_CLASS_NAME}
         />
         <RenderingPlazaCodexDualProgressMeter
           metric={right}

@@ -19,6 +19,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import { resolvingWorldPlazaInventoryLateWeaponSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryLateWeaponSpriteSheetConstants';
 
 const DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_RECIPE_BY_ITEM_TYPE_ID: Record<
   string,
@@ -155,14 +156,21 @@ export function registeringWorldPlazaSpecialtyWeaponCraftModeRecipes(): readonly
       throw new Error(`Missing specialty weapon recipe: ${weapon.itemTypeId}`);
     }
 
+    const spriteSheetIcon =
+      resolvingWorldPlazaInventoryLateWeaponSpriteSheetIcon(weapon.itemTypeId);
+
+    if (!spriteSheetIcon) {
+      throw new Error(`Missing specialty weapon sprite: ${weapon.itemTypeId}`);
+    }
+
     return {
       id: seed.recipeId,
       cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.BLACKSMITH,
       title: weapon.displayName,
       description: weapon.tooltip,
       recipeVisual: {
-        visualKind: 'iconify',
-        recipeEmblemIconifyIcon: weapon.iconifyIcon,
+        visualKind: 'sprite-sheet',
+        spriteSheetIcon,
       },
       ingredients: seed.ingredients,
       recipeType: 'item',

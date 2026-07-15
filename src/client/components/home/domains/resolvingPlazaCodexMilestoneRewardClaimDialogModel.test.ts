@@ -35,7 +35,7 @@ describe('resolvingPlazaCodexMilestoneRewardClaimDialogModel', () => {
     const definition = resolvingPlazaCodexMilestoneRewardDefinition({
       sectionId: 'herbarium',
       meterKind: 'studied',
-      percent: 50,
+      percent: 51,
     });
 
     expect(definition).not.toBeNull();

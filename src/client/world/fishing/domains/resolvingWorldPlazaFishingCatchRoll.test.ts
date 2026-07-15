@@ -20,9 +20,9 @@ describe('resolvingWorldPlazaFishingCatchRoll', () => {
     });
 
     expect(eligible.length).toBeGreaterThan(0);
-    expect(
-      eligible.every((entry) => entry.waterKinds.includes('lake'))
-    ).toBe(true);
+    expect(eligible.every((entry) => entry.waterKinds.includes('lake'))).toBe(
+      true
+    );
     expect(
       eligible.every(
         (entry) =>
@@ -39,9 +39,9 @@ describe('resolvingWorldPlazaFishingCatchRoll', () => {
       biomeKind: 'beach',
     });
 
-    expect(
-      eligible.some((entry) => entry.catchId === 'striped-bass')
-    ).toBe(true);
+    expect(eligible.some((entry) => entry.catchId === 'striped-bass')).toBe(
+      true
+    );
   });
 
   it('excludes beach-only catches on plains lakes', () => {
@@ -50,9 +50,9 @@ describe('resolvingWorldPlazaFishingCatchRoll', () => {
       biomeKind: 'plains',
     });
 
-    expect(
-      eligible.some((entry) => entry.catchId === 'striped-bass')
-    ).toBe(false);
+    expect(eligible.some((entry) => entry.catchId === 'striped-bass')).toBe(
+      false
+    );
   });
 
   it('rolls a grantable catch', () => {
@@ -73,5 +73,29 @@ describe('resolvingWorldPlazaFishingCatchRoll', () => {
     const grant = resolvingWorldPlazaFishingCatchGrant(entry);
     expect(grant.itemTypeId.length).toBeGreaterThan(0);
     expect(grant.displayName.length).toBeGreaterThan(0);
+  });
+
+  it('prefers creatures over junk on the first roll ticket', () => {
+    const entry = resolvingWorldPlazaFishingCatchRoll(
+      {
+        waterKind: DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
+        biomeKind: 'plains',
+      },
+      () => 0.5
+    );
+
+    expect(entry?.kind).toBe('creature');
+  });
+
+  it('can roll junk when the kind ticket lands in the junk band', () => {
+    const entry = resolvingWorldPlazaFishingCatchRoll(
+      {
+        waterKind: DEFINING_WORLD_PLAZA_WATER_KIND_LAKE,
+        biomeKind: 'plains',
+      },
+      () => 0.99
+    );
+
+    expect(entry?.kind).toBe('junk');
   });
 });

@@ -61,7 +61,10 @@ export type DefiningWorldPlazaFishingCatchCatalogEntry =
   | DefiningWorldPlazaFishingCatchCreatureEntry
   | DefiningWorldPlazaFishingCatchJunkEntry;
 
-const COLD_BIOMES = ['snowy_plains', 'frostsink'] as const satisfies readonly DefiningWorldPlazaBiomeKind[];
+const COLD_BIOMES = [
+  'snowy_plains',
+  'frostsink',
+] as const satisfies readonly DefiningWorldPlazaBiomeKind[];
 
 function formattingCatchItemTypeId(
   catchId: string,
@@ -112,7 +115,8 @@ function creatingCreatureCatch(params: {
     cookedWellFedBuffId: params.cookedWellFedBuffId,
     cookedWellFedChance: params.cookedWellFedChance,
     carryWeight:
-      params.carryWeight ?? DEFINING_WORLD_PLAZA_FISHING_CATCH_DEFAULT_CARRY_WEIGHT,
+      params.carryWeight ??
+      DEFINING_WORLD_PLAZA_FISHING_CATCH_DEFAULT_CARRY_WEIGHT,
     rawIconEmoji: params.rawIconEmoji ?? '🐟',
     cookedIconEmoji: params.cookedIconEmoji ?? '🍖',
   };
@@ -136,7 +140,8 @@ function creatingJunkCatch(params: {
     displayName: params.displayName,
     itemTypeId: formattingCatchItemTypeId(params.catchId, 'junk'),
     carryWeight:
-      params.carryWeight ?? DEFINING_WORLD_PLAZA_FISHING_CATCH_DEFAULT_CARRY_WEIGHT,
+      params.carryWeight ??
+      DEFINING_WORLD_PLAZA_FISHING_CATCH_DEFAULT_CARRY_WEIGHT,
     iconEmoji: params.iconEmoji ?? '🧹',
   };
 }
@@ -334,6 +339,30 @@ export const DEFINING_WORLD_PLAZA_FISHING_CATCH_CATALOG: readonly DefiningWorldP
       iconEmoji: '🪨',
       carryWeight: 2.5,
     }),
+    creatingJunkCatch({
+      catchId: 'driftwood-splinter',
+      rarity: 'common',
+      waterKinds: [DEFINING_WORLD_PLAZA_WATER_KIND_LAKE],
+      displayName: 'Driftwood Splinter',
+      iconEmoji: '🪵',
+      carryWeight: 0.75,
+    }),
+    creatingJunkCatch({
+      catchId: 'barnacle-crusted-locket',
+      rarity: 'uncommon',
+      waterKinds: [DEFINING_WORLD_PLAZA_WATER_KIND_LAKE],
+      displayName: 'Barnacle-Crusted Locket',
+      iconEmoji: '📿',
+      carryWeight: 0.5,
+    }),
+    creatingJunkCatch({
+      catchId: 'quiet-hand-offering-coin',
+      rarity: 'rare',
+      waterKinds: [DEFINING_WORLD_PLAZA_WATER_KIND_LAKE],
+      displayName: 'Quiet Hand Offering Coin',
+      iconEmoji: '🪙',
+      carryWeight: 0.25,
+    }),
 
     // —— River ——
     creatingCreatureCatch({
@@ -526,6 +555,30 @@ export const DEFINING_WORLD_PLAZA_FISHING_CATCH_CATALOG: readonly DefiningWorldP
       displayName: 'Smooth River Glass',
       iconEmoji: '🪟',
       carryWeight: 0.75,
+    }),
+    creatingJunkCatch({
+      catchId: 'rusted-river-chain',
+      rarity: 'common',
+      waterKinds: [DEFINING_WORLD_PLAZA_WATER_KIND_RIVER],
+      displayName: 'Rusted River Chain',
+      iconEmoji: '⛓️',
+      carryWeight: 1.5,
+    }),
+    creatingJunkCatch({
+      catchId: 'carnegus-trade-bead',
+      rarity: 'uncommon',
+      waterKinds: [DEFINING_WORLD_PLAZA_WATER_KIND_RIVER],
+      displayName: 'Carnegus Trade Bead',
+      iconEmoji: '📿',
+      carryWeight: 0.25,
+    }),
+    creatingJunkCatch({
+      catchId: 'drowned-prayer-charm',
+      rarity: 'rare',
+      waterKinds: [DEFINING_WORLD_PLAZA_WATER_KIND_RIVER],
+      displayName: 'Drowned Prayer Charm',
+      iconEmoji: '🧿',
+      carryWeight: 0.5,
     }),
 
     // —— Stream ——
@@ -720,6 +773,30 @@ export const DEFINING_WORLD_PLAZA_FISHING_CATCH_CATALOG: readonly DefiningWorldP
       iconEmoji: '🌿',
       carryWeight: 0.75,
     }),
+    creatingJunkCatch({
+      catchId: 'mossy-creek-pebble',
+      rarity: 'common',
+      waterKinds: [DEFINING_WORLD_PLAZA_WATER_KIND_STREAM],
+      displayName: 'Mossy Creek Pebble',
+      iconEmoji: '🪨',
+      carryWeight: 0.5,
+    }),
+    creatingJunkCatch({
+      catchId: 'tarnished-sinker-set',
+      rarity: 'uncommon',
+      waterKinds: [DEFINING_WORLD_PLAZA_WATER_KIND_STREAM],
+      displayName: 'Tarnished Sinker Set',
+      iconEmoji: '⚙️',
+      carryWeight: 1,
+    }),
+    creatingJunkCatch({
+      catchId: 'mereon-script-scrap',
+      rarity: 'rare',
+      waterKinds: [DEFINING_WORLD_PLAZA_WATER_KIND_STREAM],
+      displayName: 'Mereon Script Scrap',
+      iconEmoji: '📜',
+      carryWeight: 0.25,
+    }),
 
     // —— Pond ——
     creatingCreatureCatch({
@@ -870,6 +947,31 @@ export const DEFINING_WORLD_PLAZA_FISHING_CATCH_CATALOG: readonly DefiningWorldP
       iconEmoji: '⛵',
       carryWeight: 0.75,
     }),
+    creatingJunkCatch({
+      catchId: 'sunken-cork-float',
+      rarity: 'common',
+      waterKinds: [DEFINING_WORLD_PLAZA_WATER_KIND_POND],
+      displayName: 'Sunken Cork Float',
+      iconEmoji: '🟤',
+      carryWeight: 0.25,
+    }),
+    creatingJunkCatch({
+      catchId: 'ladder-rime-shard',
+      rarity: 'uncommon',
+      waterKinds: [DEFINING_WORLD_PLAZA_WATER_KIND_POND],
+      biomeKinds: [...COLD_BIOMES],
+      displayName: 'Ladder Rime Shard',
+      iconEmoji: '❄️',
+      carryWeight: 0.5,
+    }),
+    creatingJunkCatch({
+      catchId: 'spritcore-dulled-pebble',
+      rarity: 'rare',
+      waterKinds: [DEFINING_WORLD_PLAZA_WATER_KIND_POND],
+      displayName: 'Spritcore-Dulled Pebble',
+      iconEmoji: '🟣',
+      carryWeight: 0.75,
+    }),
 
     // —— Swamp pond ——
     creatingCreatureCatch({
@@ -974,6 +1076,30 @@ export const DEFINING_WORLD_PLAZA_FISHING_CATCH_CATALOG: readonly DefiningWorldP
       waterKinds: [DEFINING_WORLD_PLAZA_WATER_KIND_SWAMP_POND],
       displayName: 'Empty Medicine Vial',
       iconEmoji: '🧪',
+      carryWeight: 0.5,
+    }),
+    creatingJunkCatch({
+      catchId: 'bog-iron-scrap',
+      rarity: 'common',
+      waterKinds: [DEFINING_WORLD_PLAZA_WATER_KIND_SWAMP_POND],
+      displayName: 'Bog Iron Scrap',
+      iconEmoji: '🔩',
+      carryWeight: 1.5,
+    }),
+    creatingJunkCatch({
+      catchId: 'uncored-wax-seal',
+      rarity: 'uncommon',
+      waterKinds: [DEFINING_WORLD_PLAZA_WATER_KIND_SWAMP_POND],
+      displayName: 'Uncored Wax Seal',
+      iconEmoji: '🕯️',
+      carryWeight: 0.25,
+    }),
+    creatingJunkCatch({
+      catchId: 'red-choir-bell-fragment',
+      rarity: 'rare',
+      waterKinds: [DEFINING_WORLD_PLAZA_WATER_KIND_SWAMP_POND],
+      displayName: 'Red-Choir Bell Fragment',
+      iconEmoji: '🔔',
       carryWeight: 0.5,
     }),
   ];

@@ -6,19 +6,15 @@
 
 /** Outer parchment shell around the paired meters. */
 export const DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SHELL_CLASS_NAME =
-  'relative z-10 shrink-0 overflow-visible rounded-md border border-poster-teal/25 bg-parchment/45 px-3 py-2' as const;
+  'relative z-10 shrink-0 overflow-visible rounded-md border border-poster-teal/25 bg-parchment/45 px-3 py-1' as const;
 
-/** Horizontal row holding the two metric columns. */
+/** Stacked column holding the two metric rows. */
 export const DEFINING_PLAZA_CODEX_DUAL_PROGRESS_ROW_CLASS_NAME =
-  'flex items-stretch gap-3' as const;
+  'flex flex-col gap-1.5' as const;
 
-/** Vertical rule between the two metric columns. */
-export const DEFINING_PLAZA_CODEX_DUAL_PROGRESS_SEPARATOR_CLASS_NAME =
-  'w-px shrink-0 self-stretch bg-poster-teal/25' as const;
-
-/** One metric column (label + bar). */
+/** One metric row (label + bar). */
 export const DEFINING_PLAZA_CODEX_DUAL_PROGRESS_COLUMN_CLASS_NAME =
-  'min-w-0 flex-1' as const;
+  'min-w-0 w-full' as const;
 
 /** Uppercase metric label row. */
 export const DEFINING_PLAZA_CODEX_DUAL_PROGRESS_LABEL_CLASS_NAME =

@@ -17,13 +17,15 @@ import type { WorldFlowerSpeciesId } from '../../../../shared/worldFlowerRarity'
 import type { WorldOreSpeciesId } from '../../../../shared/worldOreRarity';
 import type { WorldShrubBerryLootKind } from '../../../../shared/worldShrubBerryLoot';
 import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
+import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 
 export type DefiningWorldPlazaInventorySpecimenStudyKind =
   | 'flower'
   | 'ore'
   | 'clover'
   | 'berry'
-  | 'mushroom';
+  | 'mushroom'
+  | 'fish';
 
 export type DefiningWorldPlazaInventorySpecimenStudyProgressContext = {
   readonly slotIndex: number;
@@ -33,6 +35,8 @@ export type DefiningWorldPlazaInventorySpecimenStudyProgressContext = {
   readonly cloverKind?: WorldCloverSearchLootKind;
   readonly berryLootKind?: WorldShrubBerryLootKind;
   readonly mushroomSpeciesId?: DefiningWorldPlazaMushroomSpeciesId;
+  /** Fishing catch species id when studying raw/cooked fish meat. */
+  readonly fishSpeciesId?: DefiningWildlifeSpeciesId;
   readonly damageBaselineMs: number | null;
 };
 

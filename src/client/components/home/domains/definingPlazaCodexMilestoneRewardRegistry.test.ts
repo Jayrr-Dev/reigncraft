@@ -3,6 +3,7 @@ import {
   resolvingPlazaCodexMilestoneRewardDefinition,
   resolvingPlazaCodexMilestoneRewardsForSection,
 } from '@/components/home/domains/definingPlazaCodexMilestoneRewardRegistry';
+import { DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeToolRecipeIds';
 import { describe, expect, it } from 'vitest';
 
@@ -50,7 +51,7 @@ describe('definingPlazaCodexMilestoneRewardRegistry', () => {
       resolvingPlazaCodexMilestoneRewardDefinition({
         sectionId: 'herbarium',
         meterKind: 'studied',
-        percent: 50,
+        percent: 51,
       })?.reward
     ).toMatchObject({
       kind: 'unlock-storage-row',
@@ -79,6 +80,39 @@ describe('definingPlazaCodexMilestoneRewardRegistry', () => {
     expect(resolvingPlazaCodexMilestoneRewardsForSection('pathology')).toEqual(
       []
     );
-    expect(DEFINING_PLAZA_CODEX_MILESTONE_REWARD_REGISTRY).toHaveLength(6);
+    expect(DEFINING_PLAZA_CODEX_MILESTONE_REWARD_REGISTRY).toHaveLength(14);
+  });
+
+  it('grants eight attach-recipe rewards across Recipes Attached slices', () => {
+    const expected = [
+      [13, DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.SWORD_WOOD],
+      [25, DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_BOWL],
+      [38, DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CLAY_STOVE],
+      [
+        50,
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_YARROW_PRESSURE_DRESSING,
+      ],
+      [63, DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.SWORD_IRON],
+      [75, DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.IRON_TUBE],
+      [88, DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WEAPON_SOFT_CLAY_CLEAVER],
+      [100, DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WEAPON_FATED_LEDGER],
+    ] as const;
+
+    for (const [percent, recipeId] of expected) {
+      expect(
+        resolvingPlazaCodexMilestoneRewardDefinition({
+          sectionId: 'recipes',
+          meterKind: 'discovered',
+          percent,
+        })?.reward
+      ).toMatchObject({
+        kind: 'attach-recipe',
+        recipeId,
+      });
+    }
+
+    expect(
+      resolvingPlazaCodexMilestoneRewardsForSection('recipes')
+    ).toHaveLength(8);
   });
 });

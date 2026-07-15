@@ -41,3 +41,33 @@ export const DEFINING_WORLD_PLAZA_FISHING_CATCH_COOK_DURATION_MS_BY_RARITY: Reco
 
 /** Carry weight for most catch and junk items. */
 export const DEFINING_WORLD_PLAZA_FISHING_CATCH_DEFAULT_CARRY_WEIGHT = 1.5;
+
+export type DefiningWorldPlazaFishingCastDurationRangeMs = {
+  readonly minMs: number;
+  readonly maxMs: number;
+};
+
+/**
+ * Uniform cast channel range per rarity before rod tier / harvest speed.
+ * Seconds: basic/common 1–10, uncommon 3–15, rare 6–20, epic 10–28,
+ * mythic 14–35, legendary 18–45, godly 25–60.
+ */
+export const DEFINING_WORLD_PLAZA_FISHING_CAST_DURATION_RANGE_MS_BY_RARITY: Record<
+  DefiningWorldPlazaInventoryItemRarity,
+  DefiningWorldPlazaFishingCastDurationRangeMs
+> = {
+  basic: { minMs: 1_000, maxMs: 10_000 },
+  common: { minMs: 1_000, maxMs: 10_000 },
+  uncommon: { minMs: 3_000, maxMs: 15_000 },
+  rare: { minMs: 6_000, maxMs: 20_000 },
+  epic: { minMs: 10_000, maxMs: 28_000 },
+  mythic: { minMs: 14_000, maxMs: 35_000 },
+  legendary: { minMs: 18_000, maxMs: 45_000 },
+  godly: { minMs: 25_000, maxMs: 60_000 },
+};
+
+/** Relative pick weights for creature vs junk before rarity weighting. */
+export const DEFINING_WORLD_PLAZA_FISHING_CATCH_KIND_WEIGHT = {
+  creature: 88,
+  junk: 12,
+} as const;

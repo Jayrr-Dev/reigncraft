@@ -351,10 +351,10 @@ export const DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_REGISTRY: readonly DefiningWo
     {
       weaponId: DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ID.CHAOS_DIE,
       itemTypeId: 'world-plaza-weapon-chaos-die',
-      displayName: 'Chaos Die',
+      displayName: 'Chaos Diceblade',
       tooltip:
         'Dice-plate blade. Lower mean, wilder swings, chaotic rolls. Sometimes spikes lethal, locks true, or plants a fated echo.',
-      iconifyIcon: 'game-icons:two-coins',
+      iconifyIcon: 'game-icons:broadsword',
       rarity: 'epic',
       obtainMethod: 'craft',
       heldItemTier: 'gold',
@@ -379,10 +379,10 @@ export const DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_REGISTRY: readonly DefiningWo
     {
       weaponId: DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ID.QUIET_HAND,
       itemTypeId: 'world-plaza-weapon-quiet-hand',
-      displayName: 'Quiet Hand',
+      displayName: 'Quiet Hand Blade',
       tooltip:
         'Manus-calm steel. Slightly lower EV, tighter rolls. Many swings lock true to expected damage.',
-      iconifyIcon: 'game-icons:holy-symbol',
+      iconifyIcon: 'game-icons:broadsword',
       rarity: 'epic',
       obtainMethod: 'craft',
       heldItemTier: 'gold',
@@ -397,7 +397,7 @@ export const DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_REGISTRY: readonly DefiningWo
     {
       weaponId: DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ID.GLASS_NEEDLE,
       itemTypeId: 'world-plaza-weapon-glass-needle',
-      displayName: 'Glass Needle',
+      displayName: 'Glass Needle Stiletto',
       tooltip:
         'Thin greed. Lower EV, faster swings, strong critical bias. Hits hard when the roll spikes.',
       iconifyIcon: 'game-icons:backstab',
@@ -413,7 +413,7 @@ export const DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_REGISTRY: readonly DefiningWo
     {
       weaponId: DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ID.SIPHON_FANG,
       itemTypeId: 'world-plaza-weapon-siphon-fang',
-      displayName: 'Siphon Fang',
+      displayName: 'Siphon Fang Dagger',
       tooltip:
         'Leech edge. Slightly lower EV. Heals you for a cut of physical damage you deal.',
       iconifyIcon: 'game-icons:broken-heart',
@@ -429,10 +429,10 @@ export const DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_REGISTRY: readonly DefiningWo
     {
       weaponId: DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_ID.FATED_LEDGER,
       itemTypeId: 'world-plaza-weapon-fated-ledger',
-      displayName: 'Fated Ledger',
+      displayName: 'Fated Ledger Blade',
       tooltip:
         'Writes death late. Weak first cut; every hit plants fated damage that lands after a short delay.',
-      iconifyIcon: 'game-icons:scroll-unfurled',
+      iconifyIcon: 'game-icons:broadsword',
       rarity: 'legendary',
       obtainMethod: 'craft',
       heldItemTier: 'gold',
@@ -454,7 +454,7 @@ export const DEFINING_WORLD_PLAZA_SPECIALTY_WEAPON_REGISTRY: readonly DefiningWo
       displayName: 'Soft Clay Cleaver',
       tooltip:
         'Apostle-cursed cut. High EV and wild variance. Sometimes marks you Exposed for the next blows.',
-      iconifyIcon: 'game-icons:clay-brick',
+      iconifyIcon: 'game-icons:wood-axe',
       rarity: 'legendary',
       obtainMethod: 'craft',
       heldItemTier: 'gold',

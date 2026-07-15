@@ -6,6 +6,7 @@
  */
 
 import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
+import { DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeToolRecipeIds';
 import type { WorldPlazaCodexSectionId } from '@/components/world/domains/definingWorldPlazaCodexConstants';
 import type { DefiningWorldPlazaInventoryStorageExpansionPageTier } from '@/components/world/inventory/domains/definingWorldPlazaInventoryStorageExpansionConstants';
@@ -39,7 +40,11 @@ export type PlazaCodexMilestoneRewardGrant =
 export type PlazaCodexMilestoneRewardDefinition = {
   readonly sectionId: WorldPlazaCodexSectionId;
   readonly meterKind: PlazaCodexMilestoneRewardMeterKind;
-  /** Matches a value in `DEFINING_PLAZA_CODEX_OVERALL_MILESTONE_REWARD_PERCENTS`. */
+  /**
+   * Matches a chest percent for this meter:
+   * discovered → overall / discovery / recipes arrays;
+   * studied → `DEFINING_PLAZA_CODEX_STUDIED_MILESTONE_REWARD_PERCENTS`.
+   */
   readonly percent: number;
   readonly reward: PlazaCodexMilestoneRewardGrant;
 };
@@ -85,11 +90,11 @@ export const DEFINING_PLAZA_CODEX_MILESTONE_REWARD_REGISTRY = [
         'Pinned in your cookbook. Rebuild a wood rod when the tip snaps.',
     },
   },
-  // Packing ledgers: herb Studied mid → biomes Discovered max → bestiary Sighted max.
+  // Packing ledgers: herb Studied mid (51%) → biomes Discovered max → bestiary Sighted max.
   {
     sectionId: 'herbarium',
     meterKind: 'studied',
-    percent: 50,
+    percent: 51,
     reward: {
       kind: 'unlock-storage-row',
       pageTier: 'rare',
@@ -120,6 +125,106 @@ export const DEFINING_PLAZA_CODEX_MILESTONE_REWARD_REGISTRY = [
       label: 'Legendary Packing Ledger',
       description:
         'Added to your bag. Use it to unlock one storage page (+6 slots). At most three ledgers can expand your pack.',
+    },
+  },
+  // Recipes Attached (8 slices): wood → ceramics → stove → healer → iron blade →
+  // tube → soft clay cleaver → fated ledger blade.
+  {
+    sectionId: 'recipes',
+    meterKind: 'discovered',
+    percent: 13,
+    reward: {
+      kind: 'attach-recipe',
+      recipeId: DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.SWORD_WOOD,
+      label: 'Wood Sword recipe',
+      description:
+        'Pinned in your cookbook. Carve a spare blade from wood when your starter sword fails.',
+    },
+  },
+  {
+    sectionId: 'recipes',
+    meterKind: 'discovered',
+    percent: 25,
+    reward: {
+      kind: 'attach-recipe',
+      recipeId: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WET_CLAY_BOWL,
+      label: 'Wet Clay Bowl recipe',
+      description:
+        'Pinned in your cookbook. Shape a wet clay bowl for kilns and kitchen work.',
+    },
+  },
+  {
+    sectionId: 'recipes',
+    meterKind: 'discovered',
+    percent: 38,
+    reward: {
+      kind: 'attach-recipe',
+      recipeId: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.CLAY_STOVE,
+      label: 'Clay Stove recipe',
+      description:
+        'Pinned in your cookbook. Build a clay stove for cooking and tea once you have the materials.',
+    },
+  },
+  {
+    sectionId: 'recipes',
+    meterKind: 'discovered',
+    percent: 50,
+    reward: {
+      kind: 'attach-recipe',
+      recipeId:
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.HEALER_YARROW_PRESSURE_DRESSING,
+      label: 'Yarrow Pressure Dressing recipe',
+      description:
+        'Pinned in your cookbook. Bind a yarrow dressing for field wounds.',
+    },
+  },
+  {
+    sectionId: 'recipes',
+    meterKind: 'discovered',
+    percent: 63,
+    reward: {
+      kind: 'attach-recipe',
+      recipeId: DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.SWORD_IRON,
+      label: 'Iron Sword recipe',
+      description:
+        'Pinned in your cookbook. Forge an iron blade when wood stops cutting.',
+    },
+  },
+  {
+    sectionId: 'recipes',
+    meterKind: 'discovered',
+    percent: 75,
+    reward: {
+      kind: 'attach-recipe',
+      recipeId: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.IRON_TUBE,
+      label: 'Iron Tube recipe',
+      description:
+        'Pinned in your cookbook. Forge iron tubes for bessemer forges and other advanced builds.',
+    },
+  },
+  {
+    sectionId: 'recipes',
+    meterKind: 'discovered',
+    percent: 88,
+    reward: {
+      kind: 'attach-recipe',
+      recipeId:
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WEAPON_SOFT_CLAY_CLEAVER,
+      label: 'Soft Clay Cleaver recipe',
+      description:
+        'Pinned in your cookbook. Craft the Soft Clay Cleaver, a specialty blade from ceramics work.',
+    },
+  },
+  {
+    sectionId: 'recipes',
+    meterKind: 'discovered',
+    percent: 100,
+    reward: {
+      kind: 'attach-recipe',
+      recipeId: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WEAPON_FATED_LEDGER,
+      label: 'Fated Ledger Blade recipe',
+      description:
+        'Pinned in your cookbook. Craft the Fated Ledger Blade, a specialty weapon bound to written fate.',
     },
   },
 ] as const satisfies readonly PlazaCodexMilestoneRewardDefinition[];

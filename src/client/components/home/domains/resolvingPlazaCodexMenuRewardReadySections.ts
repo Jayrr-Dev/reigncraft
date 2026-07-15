@@ -9,6 +9,7 @@ import { resolvingPlazaCodexMilestoneRewardsForSection } from '@/components/home
 import {
   checkingPlazaCodexDiscoveryProgressHasRewardReady,
   checkingPlazaCodexOverallProgressHasRewardReady,
+  resolvingPlazaCodexDualMeterMilestoneRewardPercents,
 } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
 import type { WorldPlazaCodexSectionId } from '@/components/world/domains/definingWorldPlazaCodexConstants';
 
@@ -84,11 +85,13 @@ export function checkingPlazaCodexDualMetersHaveRewardReady(
   return (
     checkingPlazaCodexOverallProgressHasRewardReady(
       meters.discoveredValue,
-      meters.discoveredMax
+      meters.discoveredMax,
+      resolvingPlazaCodexDualMeterMilestoneRewardPercents('discovered')
     ) ||
     checkingPlazaCodexOverallProgressHasRewardReady(
       meters.studiedValue,
-      meters.studiedMax
+      meters.studiedMax,
+      resolvingPlazaCodexDualMeterMilestoneRewardPercents('studied')
     )
   );
 }

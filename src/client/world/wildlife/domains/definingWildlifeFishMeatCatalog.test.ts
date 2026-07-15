@@ -8,6 +8,7 @@ import { listingWorldPlazaFishingCatchCreatures } from '@/components/world/fishi
 import {
   checkingWildlifeFishMeatSpeciesId,
   DEFINING_WILDLIFE_FISH_MEAT_CATALOG,
+  parsingWildlifeFishMeatSpeciesIdFromItemTypeId,
 } from '@/components/world/wildlife/domains/definingWildlifeFishMeatCatalog';
 import { resolvingWildlifeFishMeatItemDescriptionEntry } from '@/components/world/wildlife/domains/definingWildlifeFishMeatItemDescriptionCorpus';
 import { resolvingWildlifeMeatCookRecipeByRawItemTypeId } from '@/components/world/wildlife/domains/definingWildlifeMeatCookRecipes';
@@ -22,6 +23,14 @@ describe('definingWildlifeFishMeatCatalog', () => {
 
     for (const creature of creatures) {
       expect(checkingWildlifeFishMeatSpeciesId(creature.catchId)).toBe(true);
+      expect(
+        parsingWildlifeFishMeatSpeciesIdFromItemTypeId(creature.rawItemTypeId)
+      ).toBe(creature.catchId);
+      expect(
+        parsingWildlifeFishMeatSpeciesIdFromItemTypeId(
+          creature.cookedItemTypeId
+        )
+      ).toBe(creature.catchId);
 
       const meat = resolvingWildlifeMeatCatalogEntry(creature.catchId);
       expect(meat?.rawItemTypeId).toBe(creature.rawItemTypeId);
@@ -34,5 +43,11 @@ describe('definingWildlifeFishMeatCatalog', () => {
           ?.rawDescription
       ).toBeTruthy();
     }
+  });
+
+  it('ignores non-fish item types', () => {
+    expect(
+      parsingWildlifeFishMeatSpeciesIdFromItemTypeId('world-plaza-raw-boar-meat')
+    ).toBeNull();
   });
 });

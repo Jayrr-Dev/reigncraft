@@ -6,6 +6,7 @@ import {
   checkingPlazaCodexDiscoveryProgressHasRewardReady,
   checkingPlazaCodexOverallProgressHasRewardReady,
   resolvingPlazaCodexDiscoveryMilestoneRewardMarkers,
+  resolvingPlazaCodexDualMeterMilestoneRewardPercents,
   resolvingPlazaCodexOverallProgressMilestoneRewardMarkers,
   resolvingPlazaCodexStudyMilestoneRewardPopoverLabel,
 } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
@@ -30,10 +31,35 @@ describe('resolvingPlazaCodexOverallProgressMilestoneRewardMarkers', () => {
     expect(markers[4]?.remainingNeeded).toBe(31);
   });
 
+  it('places ten front-loaded Studied chests', () => {
+    const percents =
+      resolvingPlazaCodexDualMeterMilestoneRewardPercents('studied');
+    expect(percents).toEqual([2, 5, 9, 14, 20, 28, 38, 51, 69, 100]);
+
+    const markers = resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
+      879,
+      4400,
+      percents
+    );
+
+    expect(markers).toHaveLength(10);
+    expect(markers.find((marker) => marker.percent === 2)?.threshold).toBe(88);
+    expect(markers.find((marker) => marker.percent === 20)?.threshold).toBe(
+      880
+    );
+    expect(markers.find((marker) => marker.percent === 20)?.isReached).toBe(
+      false
+    );
+    expect(
+      markers.find((marker) => marker.percent === 20)?.remainingNeeded
+    ).toBe(1);
+  });
+
   it('scales studied-point milestones to the panel max', () => {
     const markers = resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
       879,
-      4400
+      4400,
+      resolvingPlazaCodexDualMeterMilestoneRewardPercents('studied')
     );
 
     expect(markers.find((marker) => marker.percent === 5)?.threshold).toBe(220);
@@ -151,7 +177,7 @@ describe('checkingPlazaCodexOverallProgressHasRewardReady', () => {
 });
 
 describe('resolvingPlazaCodexDiscoveryMilestoneRewardMarkers', () => {
-  it('places four chests on discovery-only meters', () => {
+  it('places four chests on default discovery-only meters', () => {
     const markers = resolvingPlazaCodexDiscoveryMilestoneRewardMarkers(3, 14);
 
     expect(markers.map((marker) => marker.percent)).toEqual([25, 50, 75, 100]);
@@ -160,6 +186,19 @@ describe('resolvingPlazaCodexDiscoveryMilestoneRewardMarkers', () => {
     expect(markers[0]?.remainingNeeded).toBe(1);
     expect(markers[3]?.threshold).toBe(14);
     expect(markers[3]?.isReached).toBe(false);
+  });
+
+  it('places eight chests on Recipes Attached meters', () => {
+    const markers = resolvingPlazaCodexDiscoveryMilestoneRewardMarkers(0, 116, {
+      sectionId: 'recipes',
+      meterKind: 'discovered',
+    });
+
+    expect(markers.map((marker) => marker.percent)).toEqual([
+      13, 25, 38, 50, 63, 75, 88, 100,
+    ]);
+    expect(markers).toHaveLength(8);
+    expect(markers[0]?.threshold).toBe(15);
   });
 
   it('marks reward ready from the first discovery chest', () => {
@@ -244,6 +283,27 @@ describe('resolvingPlazaCodexMenuRewardReadySections', () => {
     );
 
     expect([...ready].sort()).toEqual(['recipes']);
+  });
+
+  it('marks recipes ready only for defined unclaimed Discovered chests', () => {
+    // First Recipes chest is 13% of 116 ≈ 15 attached.
+    expect(
+      resolvingPlazaCodexMenuRewardReadySections(
+        {},
+        {
+          recipes: { value: 14, max: 116 },
+        }
+      ).has('recipes')
+    ).toBe(false);
+
+    expect(
+      resolvingPlazaCodexMenuRewardReadySections(
+        {},
+        {
+          recipes: { value: 15, max: 116 },
+        }
+      ).has('recipes')
+    ).toBe(true);
   });
 
   it('marks biomes ready only for the Discovered max packing-ledger chest', () => {

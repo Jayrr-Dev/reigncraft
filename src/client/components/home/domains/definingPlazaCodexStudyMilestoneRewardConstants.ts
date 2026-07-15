@@ -6,16 +6,33 @@
  * @module components/home/domains/definingPlazaCodexStudyMilestoneRewardConstants
  */
 
-/** Relative positions along dual-progress meters (Sighted/Logged + Studied). */
+/**
+ * Five chests on Sighted/Logged (discovered) dual-progress meters.
+ */
 export const DEFINING_PLAZA_CODEX_OVERALL_MILESTONE_REWARD_PERCENTS = [
   5, 20, 50, 75, 100,
 ] as const;
 
 /**
- * Four chests on discovery-only meters (Biomes Discovered, Recipes Attached).
+ * Ten Studied chests, denser early then stretching toward mastery.
+ * Gaps grow ~2,3,4,5,6,8,10,13,18,31.
+ */
+export const DEFINING_PLAZA_CODEX_STUDIED_MILESTONE_REWARD_PERCENTS = [
+  2, 5, 9, 14, 20, 28, 38, 51, 69, 100,
+] as const;
+
+/**
+ * Four chests on Biomes Discovered (and other default discovery-only meters).
  */
 export const DEFINING_PLAZA_CODEX_DISCOVERY_MILESTONE_REWARD_PERCENTS = [
   25, 50, 75, 100,
+] as const;
+
+/**
+ * Eight equal slices on Recipes Attached (~12.5% steps, rounded).
+ */
+export const DEFINING_PLAZA_CODEX_RECIPES_MILESTONE_REWARD_PERCENTS = [
+  13, 25, 38, 50, 63, 75, 88, 100,
 ] as const;
 
 /** Iconify id for locked / unclaimed milestone chest placeholders. */

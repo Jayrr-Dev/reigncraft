@@ -1,5 +1,5 @@
 /**
- * Single discovery meter with four milestone chest placeholders (Biomes / Recipes).
+ * Single discovery meter with milestone chests (Biomes: 4, Recipes: 8).
  *
  * @module components/home/components/renderingPlazaCodexDiscoveryMilestoneProgress
  */
@@ -30,7 +30,7 @@ export type RenderingPlazaCodexDiscoveryMilestoneProgressProps = {
   meterKind?: PlazaCodexMilestoneRewardMeterKind;
 };
 
-/** Discovered/Attached progress bar with four reward chests. */
+/** Discovered/Attached progress bar with section-scoped reward chests. */
 export function RenderingPlazaCodexDiscoveryMilestoneProgress({
   label,
   value,

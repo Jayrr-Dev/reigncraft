@@ -1,5 +1,5 @@
 /**
- * Timed Study channel for inventory specimens (flowers, clovers, ores).
+ * Timed Study channel for inventory specimens (flowers, clovers, ores, fish).
  *
  * Duration rolls between instant and one second so stacks stay clickable
  * without feeling like corpse Study.

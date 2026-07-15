@@ -9,9 +9,6 @@ import type { DefiningWorldPlazaHeldItemTier } from '@/components/world/equipmen
 /** Max Chebyshev distance from player foot to water tile for casting. */
 export const DEFINING_WORLD_PLAZA_FISHING_PLAYER_RANGE_TILES = 2;
 
-/** Base cast channel duration before tier speed (ms). */
-export const DEFINING_WORLD_PLAZA_FISHING_BASE_CAST_DURATION_MS = 2200;
-
 /** Channel duration multiplier per tier (lower = faster). */
 export const DEFINING_WORLD_PLAZA_FISHING_CAST_DURATION_MULTIPLIER_BY_TIER: Record<
   DefiningWorldPlazaHeldItemTier,

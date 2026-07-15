@@ -12,7 +12,7 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_LATE_WEAPON_SPRITE_SHEET_URL =
 export const DEFINING_WORLD_PLAZA_INVENTORY_LATE_WEAPON_SPRITE_SHEET_COLUMN_COUNT = 6;
 export const DEFINING_WORLD_PLAZA_INVENTORY_LATE_WEAPON_SPRITE_SHEET_ROW_COUNT = 1;
 
-/** Sheet order: Chaos Die, Quiet Hand, Glass Needle, Siphon Fang, Fated Ledger, Soft Clay Cleaver. */
+/** Sheet order: Chaos Diceblade, Quiet Hand Blade, Glass Needle Stiletto, Siphon Fang Dagger, Fated Ledger Blade, Soft Clay Cleaver. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_LATE_WEAPON_SPRITE_SHEET_TYPE_IDS =
   [
     'world-plaza-weapon-chaos-die',
