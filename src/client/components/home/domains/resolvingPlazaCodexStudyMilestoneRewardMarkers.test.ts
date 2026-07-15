@@ -1,4 +1,9 @@
 import {
+  checkingPlazaCodexDualMetersHaveRewardReady,
+  resolvingPlazaCodexMenuRewardReadySections,
+} from '@/components/home/domains/resolvingPlazaCodexMenuRewardReadySections';
+import {
+  checkingPlazaCodexOverallProgressHasRewardReady,
   resolvingPlazaCodexOverallProgressMilestoneRewardMarkers,
   resolvingPlazaCodexStudyMilestoneRewardPopoverLabel,
 } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
@@ -58,5 +63,47 @@ describe('resolvingPlazaCodexStudyMilestoneRewardPopoverLabel', () => {
     expect(resolvingPlazaCodexStudyMilestoneRewardPopoverLabel(0, true)).toBe(
       'Reward ready'
     );
+  });
+});
+
+describe('checkingPlazaCodexOverallProgressHasRewardReady', () => {
+  it('is false before the first milestone', () => {
+    expect(checkingPlazaCodexOverallProgressHasRewardReady(0, 44)).toBe(false);
+    expect(checkingPlazaCodexOverallProgressHasRewardReady(1, 44)).toBe(false);
+  });
+
+  it('is true once any milestone threshold is reached', () => {
+    expect(checkingPlazaCodexOverallProgressHasRewardReady(2, 44)).toBe(true);
+    expect(checkingPlazaCodexOverallProgressHasRewardReady(13, 57)).toBe(true);
+  });
+});
+
+describe('resolvingPlazaCodexMenuRewardReadySections', () => {
+  it('marks sections when either dual meter has a reached chest', () => {
+    expect(
+      checkingPlazaCodexDualMetersHaveRewardReady({
+        discoveredValue: 0,
+        discoveredMax: 40,
+        studiedValue: 0,
+        studiedMax: 4000,
+      })
+    ).toBe(false);
+
+    const ready = resolvingPlazaCodexMenuRewardReadySections({
+      bestiary: {
+        discoveredValue: 13,
+        discoveredMax: 57,
+        studiedValue: 0,
+        studiedMax: 5700,
+      },
+      pathology: {
+        discoveredValue: 0,
+        discoveredMax: 20,
+        studiedValue: 0,
+        studiedMax: 2000,
+      },
+    });
+
+    expect([...ready]).toEqual(['bestiary']);
   });
 });

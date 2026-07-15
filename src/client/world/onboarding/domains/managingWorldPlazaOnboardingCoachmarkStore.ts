@@ -1,0 +1,200 @@
+import {
+  resolvingWorldPlazaOnboardingCoachmarksStorageKey,
+  type WorldPlazaOnboardingCoachmarkStepId,
+} from '@/components/world/onboarding/domains/definingWorldPlazaOnboardingCoachmarkConstants';
+import { readingWorldPlazaOnboardingCoachmarksFromStorage } from '@/components/world/onboarding/domains/readingWorldPlazaOnboardingCoachmarksFromStorage';
+import { writingWorldPlazaOnboardingCoachmarksToStorage } from '@/components/world/onboarding/domains/writingWorldPlazaOnboardingCoachmarksToStorage';
+
+export type WorldPlazaOnboardingCoachmarkSessionSignals = {
+  readonly hasMoved: boolean;
+  readonly hasHotbarClicked: boolean;
+  readonly hasActionBarClicked: boolean;
+  readonly hasChopStarted: boolean;
+  readonly hasLootPickup: boolean;
+};
+
+export type WorldPlazaOnboardingCoachmarkSnapshot = {
+  readonly storageOwnerId: string | null;
+  readonly completedStepIds: ReadonlySet<WorldPlazaOnboardingCoachmarkStepId>;
+  readonly sessionSignals: WorldPlazaOnboardingCoachmarkSessionSignals;
+};
+
+const MANAGING_WORLD_PLAZA_ONBOARDING_COACHMARK_EMPTY_SESSION_SIGNALS: WorldPlazaOnboardingCoachmarkSessionSignals =
+  {
+    hasMoved: false,
+    hasHotbarClicked: false,
+    hasActionBarClicked: false,
+    hasChopStarted: false,
+    hasLootPickup: false,
+  };
+
+const managingWorldPlazaOnboardingCoachmarkSubscribers = new Set<() => void>();
+
+let managingWorldPlazaOnboardingCoachmarkStorageOwnerId: string | null = null;
+let managingWorldPlazaOnboardingCoachmarkCompletedStepIds =
+  new Set<WorldPlazaOnboardingCoachmarkStepId>();
+let managingWorldPlazaOnboardingCoachmarkSessionSignals: WorldPlazaOnboardingCoachmarkSessionSignals =
+  MANAGING_WORLD_PLAZA_ONBOARDING_COACHMARK_EMPTY_SESSION_SIGNALS;
+
+let managingWorldPlazaOnboardingCoachmarkSnapshotCache: WorldPlazaOnboardingCoachmarkSnapshot =
+  {
+    storageOwnerId: null,
+    completedStepIds: new Set(),
+    sessionSignals: MANAGING_WORLD_PLAZA_ONBOARDING_COACHMARK_EMPTY_SESSION_SIGNALS,
+  };
+
+function refreshingWorldPlazaOnboardingCoachmarkSnapshotCache(): void {
+  managingWorldPlazaOnboardingCoachmarkSnapshotCache = {
+    storageOwnerId: managingWorldPlazaOnboardingCoachmarkStorageOwnerId,
+    completedStepIds: managingWorldPlazaOnboardingCoachmarkCompletedStepIds,
+    sessionSignals: managingWorldPlazaOnboardingCoachmarkSessionSignals,
+  };
+}
+
+function notifyingWorldPlazaOnboardingCoachmarkSubscribers(): void {
+  for (const onStoreChange of managingWorldPlazaOnboardingCoachmarkSubscribers) {
+    onStoreChange();
+  }
+}
+
+function persistingWorldPlazaOnboardingCoachmarkCompletedSteps(): void {
+  writingWorldPlazaOnboardingCoachmarksToStorage(
+    managingWorldPlazaOnboardingCoachmarkStorageOwnerId,
+    managingWorldPlazaOnboardingCoachmarkCompletedStepIds
+  );
+}
+
+/**
+ * Hydrates onboarding coachmark progress from localStorage for one session owner.
+ *
+ * @param storageOwnerId - Session owner id, or null for guest sessions.
+ */
+export function initializingWorldPlazaOnboardingCoachmarkStore(
+  storageOwnerId: string | null
+): void {
+  if (
+    managingWorldPlazaOnboardingCoachmarkStorageOwnerId === storageOwnerId
+  ) {
+    return;
+  }
+
+  managingWorldPlazaOnboardingCoachmarkStorageOwnerId = storageOwnerId;
+  managingWorldPlazaOnboardingCoachmarkCompletedStepIds =
+    new Set(readingWorldPlazaOnboardingCoachmarksFromStorage(storageOwnerId));
+  managingWorldPlazaOnboardingCoachmarkSessionSignals =
+    MANAGING_WORLD_PLAZA_ONBOARDING_COACHMARK_EMPTY_SESSION_SIGNALS;
+  refreshingWorldPlazaOnboardingCoachmarkSnapshotCache();
+  notifyingWorldPlazaOnboardingCoachmarkSubscribers();
+}
+
+/** Subscribes to onboarding coachmark store changes. */
+export function subscribingWorldPlazaOnboardingCoachmarks(
+  onStoreChange: () => void
+): () => void {
+  managingWorldPlazaOnboardingCoachmarkSubscribers.add(onStoreChange);
+
+  return () => {
+    managingWorldPlazaOnboardingCoachmarkSubscribers.delete(onStoreChange);
+  };
+}
+
+/** Returns the latest onboarding coachmark snapshot. */
+export function gettingWorldPlazaOnboardingCoachmarkSnapshot(): WorldPlazaOnboardingCoachmarkSnapshot {
+  return managingWorldPlazaOnboardingCoachmarkSnapshotCache;
+}
+
+/**
+ * Marks one coachmark step complete and persists when newly completed.
+ */
+export function completingWorldPlazaOnboardingCoachmarkStep(
+  stepId: WorldPlazaOnboardingCoachmarkStepId
+): void {
+  if (managingWorldPlazaOnboardingCoachmarkCompletedStepIds.has(stepId)) {
+    return;
+  }
+
+  managingWorldPlazaOnboardingCoachmarkCompletedStepIds = new Set([
+    ...managingWorldPlazaOnboardingCoachmarkCompletedStepIds,
+    stepId,
+  ]);
+  persistingWorldPlazaOnboardingCoachmarkCompletedSteps();
+  refreshingWorldPlazaOnboardingCoachmarkSnapshotCache();
+  notifyingWorldPlazaOnboardingCoachmarkSubscribers();
+}
+
+function patchingWorldPlazaOnboardingCoachmarkSessionSignals(
+  patch: Partial<WorldPlazaOnboardingCoachmarkSessionSignals>
+): void {
+  const nextSignals = {
+    ...managingWorldPlazaOnboardingCoachmarkSessionSignals,
+    ...patch,
+  };
+
+  const didChange = (
+    Object.keys(patch) as (keyof WorldPlazaOnboardingCoachmarkSessionSignals)[]
+  ).some(
+    (key) =>
+      nextSignals[key] !==
+      managingWorldPlazaOnboardingCoachmarkSessionSignals[key]
+  );
+
+  if (!didChange) {
+    return;
+  }
+
+  managingWorldPlazaOnboardingCoachmarkSessionSignals = nextSignals;
+  refreshingWorldPlazaOnboardingCoachmarkSnapshotCache();
+  notifyingWorldPlazaOnboardingCoachmarkSubscribers();
+}
+
+/** Records that the player moved during this session. */
+export function notifyingWorldPlazaOnboardingPlayerMoved(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({ hasMoved: true });
+}
+
+/** Records a hotbar interaction during this session. */
+export function notifyingWorldPlazaOnboardingHotbarClicked(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasHotbarClicked: true,
+  });
+}
+
+/** Records an action-bar interaction during this session. */
+export function notifyingWorldPlazaOnboardingActionBarClicked(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasActionBarClicked: true,
+  });
+}
+
+/** Records that a tree chop interaction started during this session. */
+export function notifyingWorldPlazaOnboardingChopStarted(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasChopStarted: true,
+  });
+}
+
+/** Records the first loot pickup during this session. */
+export function notifyingWorldPlazaOnboardingLootPickup(): void {
+  patchingWorldPlazaOnboardingCoachmarkSessionSignals({
+    hasLootPickup: true,
+  });
+}
+
+/** Clears onboarding coachmark progress for one persistence owner. */
+export function clearingWorldPlazaOnboardingCoachmarkStoreForOwner(
+  storageOwnerId: string
+): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(
+      resolvingWorldPlazaOnboardingCoachmarksStorageKey(storageOwnerId)
+    );
+  }
+
+  if (managingWorldPlazaOnboardingCoachmarkStorageOwnerId === storageOwnerId) {
+    managingWorldPlazaOnboardingCoachmarkCompletedStepIds = new Set();
+    managingWorldPlazaOnboardingCoachmarkSessionSignals =
+      MANAGING_WORLD_PLAZA_ONBOARDING_COACHMARK_EMPTY_SESSION_SIGNALS;
+    refreshingWorldPlazaOnboardingCoachmarkSnapshotCache();
+    notifyingWorldPlazaOnboardingCoachmarkSubscribers();
+  }
+}

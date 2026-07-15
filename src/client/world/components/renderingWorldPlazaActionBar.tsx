@@ -41,7 +41,9 @@ import {
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
   LABELING_WORLD_PLAZA_ACTION_BAR_CODEX,
+  LABELING_WORLD_PLAZA_CODEX_REWARD_READY,
   STYLING_WORLD_PLAZA_ACTION_BAR_CODEX_ANCHOR_CLASS_NAME,
+  STYLING_WORLD_PLAZA_CODEX_BOOK_REWARD_READY_BADGE_CLASS_NAME,
   type WorldPlazaCodexSectionId,
 } from '@/components/world/domains/definingWorldPlazaCodexConstants';
 import { STYLING_WORLD_PLAZA_ACTION_BAR_DAY_NIGHT_ANCHOR_CLASS_NAME } from '@/components/world/domains/definingWorldPlazaDayNightIndicatorConstants';
@@ -62,6 +64,7 @@ import { RenderingWorldPlazaTemperatureIndicator } from '@/components/world/heal
 import { RenderingWorldPlazaTemperaturePanel } from '@/components/world/health/components/renderingWorldPlazaTemperaturePanel';
 import { STYLING_WORLD_PLAZA_ACTION_BAR_TEMPERATURE_ANCHOR_CLASS_NAME } from '@/components/world/health/domains/definingWorldPlazaTemperatureIndicatorConstants';
 import type { DefiningWorldPlazaTemperatureDisplayUnit } from '@/components/world/health/domains/definingWorldPlazaTemperatureTypes';
+import { usingWorldPlazaCodexRewardReadySections } from '@/components/world/hooks/usingWorldPlazaCodexRewardReadySections';
 import { usingWorldPlazaMinimapEnabled } from '@/components/world/hooks/usingWorldPlazaMinimapEnabled';
 import { usingWorldPlazaSelectedAvatarSkin } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarSkin';
 import { RenderingWorldPlazaHungerIndicator } from '@/components/world/hunger/components/renderingWorldPlazaHungerIndicator';
@@ -209,6 +212,8 @@ export function RenderingWorldPlazaActionBar({
   const [isSoundMixerOpen, setIsSoundMixerOpen] = useState(false);
   const [isCodexMenuOpen, setIsCodexMenuOpen] = useState(false);
   const [isExitHomeConfirmOpen, setIsExitHomeConfirmOpen] = useState(false);
+  const rewardReadySectionIds = usingWorldPlazaCodexRewardReadySections();
+  const hasCodexRewardReady = rewardReadySectionIds.size > 0;
 
   useEffect(() => {
     if (!isChatOpen) {
@@ -333,7 +338,11 @@ export function RenderingWorldPlazaActionBar({
                   >
                     <button
                       type="button"
-                      aria-label={LABELING_WORLD_PLAZA_ACTION_BAR_CODEX}
+                      aria-label={
+                        hasCodexRewardReady
+                          ? `${LABELING_WORLD_PLAZA_ACTION_BAR_CODEX}. ${LABELING_WORLD_PLAZA_CODEX_REWARD_READY}`
+                          : LABELING_WORLD_PLAZA_ACTION_BAR_CODEX
+                      }
                       aria-pressed={isCodexMenuOpen}
                       aria-expanded={isCodexMenuOpen}
                       onClick={() => {
@@ -345,8 +354,9 @@ export function RenderingWorldPlazaActionBar({
                         settingMinimapEnabled(false);
                         setIsCodexMenuOpen((wasOpen) => !wasOpen);
                       }}
-                      className={stylingWorldPlazaActionBarButton(
-                        isCodexMenuOpen
+                      className={cn(
+                        stylingWorldPlazaActionBarButton(isCodexMenuOpen),
+                        'relative'
                       )}
                       style={viewportStyles.buttonStyle}
                     >
@@ -357,9 +367,19 @@ export function RenderingWorldPlazaActionBar({
                         style={viewportStyles.iconStyle}
                         aria-hidden="true"
                       />
+                      {hasCodexRewardReady ? (
+                        <span
+                          className={
+                            STYLING_WORLD_PLAZA_CODEX_BOOK_REWARD_READY_BADGE_CLASS_NAME
+                          }
+                          style={viewportStyles.notificationBadgeStyle}
+                          aria-hidden="true"
+                        />
+                      ) : null}
                     </button>
                     <RenderingWorldPlazaCodexMenuPanel
                       isOpen={isCodexMenuOpen}
+                      rewardReadySectionIds={rewardReadySectionIds}
                       onSelectSection={(section) => {
                         setIsCodexMenuOpen(false);
                         onSelectCodexSection(section);

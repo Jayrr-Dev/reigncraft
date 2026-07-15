@@ -99,6 +99,17 @@ export const STYLING_WORLD_PLAZA_CODEX_MENU_OPTION_ACTIVE_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_CODEX_MENU_OPTION_INACTIVE_CLASS_NAME =
   STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_INACTIVE_CLASS_NAME;
 
+/** Orange corner pip on a Codex menu row with a reward-ready milestone. */
+export const STYLING_WORLD_PLAZA_CODEX_MENU_REWARD_READY_BADGE_CLASS_NAME =
+  'pointer-events-none absolute right-2 top-1/2 z-10 size-2 -translate-y-1/2 rounded-full border border-parchment bg-poster-orange shadow-[0_0_0_1px_rgba(20,37,43,0.35)] max-md:right-2.5' as const;
+
+/** Orange corner pip on the Codex book button when any section has a reward ready. */
+export const STYLING_WORLD_PLAZA_CODEX_BOOK_REWARD_READY_BADGE_CLASS_NAME =
+  DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.badge.notification;
+
+/** Accessible hint appended when a Codex control has a reward ready. */
+export const LABELING_WORLD_PLAZA_CODEX_REWARD_READY = 'Reward ready' as const;
+
 /** Modal overlay classes for codex section panels (lore book). */
 export const DEFINING_WORLD_PLAZA_CODEX_OVERLAY_CLASS_NAME =
   'pointer-events-auto fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6' as const;

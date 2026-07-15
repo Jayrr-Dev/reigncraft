@@ -8,23 +8,25 @@ describe('resolvingWorldPlazaProceduralChestAtTileIndex', () => {
   it('returns null for most tiles under the sparse modulus gate', () => {
     let matchCount = 0;
 
-    for (let tileX = 0; tileX < 40; tileX += 1) {
-      for (let tileY = 0; tileY < 40; tileY += 1) {
+    for (let tileX = -200; tileX < 200; tileX += 1) {
+      for (let tileY = -200; tileY < 200; tileY += 1) {
         if (resolvingWorldPlazaProceduralChestAtTileIndex(tileX, tileY)) {
           matchCount += 1;
         }
       }
     }
 
+    const totalTilesScanned = 400 * 400;
+
     expect(matchCount).toBeGreaterThan(0);
-    expect(matchCount).toBeLessThan(40);
+    expect(matchCount / totalTilesScanned).toBeLessThan(1 / 3000);
   });
 
   it('is deterministic for chest id, key source, and facing', () => {
     let resolvedTile: { tileX: number; tileY: number } | null = null;
 
-    for (let tileX = -20; tileX < 20; tileX += 1) {
-      for (let tileY = -20; tileY < 20; tileY += 1) {
+    for (let tileX = -200; tileX < 200; tileX += 1) {
+      for (let tileY = -200; tileY < 200; tileY += 1) {
         if (resolvingWorldPlazaProceduralChestAtTileIndex(tileX, tileY)) {
           resolvedTile = { tileX, tileY };
           break;

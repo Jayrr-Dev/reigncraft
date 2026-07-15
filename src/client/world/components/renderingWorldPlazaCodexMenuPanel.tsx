@@ -29,9 +29,11 @@ import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domai
 import {
   DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS,
   LABELING_WORLD_PLAZA_CODEX_MENU,
+  LABELING_WORLD_PLAZA_CODEX_REWARD_READY,
   STYLING_WORLD_PLAZA_CODEX_MENU_OPTION_BASE_CLASS_NAME,
   STYLING_WORLD_PLAZA_CODEX_MENU_OPTION_INACTIVE_CLASS_NAME,
   STYLING_WORLD_PLAZA_CODEX_MENU_PANEL_CLASS_NAME,
+  STYLING_WORLD_PLAZA_CODEX_MENU_REWARD_READY_BADGE_CLASS_NAME,
   type WorldPlazaCodexSectionId,
 } from '@/components/world/domains/definingWorldPlazaCodexConstants';
 import {
@@ -75,6 +77,8 @@ export type RenderingWorldPlazaCodexMenuPanelProps = {
   isOpen: boolean;
   /** Called when the player picks a codex section. */
   onSelectSection: (section: WorldPlazaCodexSectionId) => void;
+  /** Sections with a reached milestone chest (reward ready). */
+  rewardReadySectionIds?: ReadonlySet<WorldPlazaCodexSectionId>;
 };
 
 /**
@@ -83,6 +87,7 @@ export type RenderingWorldPlazaCodexMenuPanelProps = {
 export function RenderingWorldPlazaCodexMenuPanel({
   isOpen,
   onSelectSection,
+  rewardReadySectionIds,
 }: RenderingWorldPlazaCodexMenuPanelProps): React.JSX.Element | null {
   const exploredBiomeKinds = useSyncExternalStore(
     subscribingWorldPlazaExploredBiomes,
@@ -261,37 +266,55 @@ export function RenderingWorldPlazaCodexMenuPanel({
       role="menu"
       aria-label={LABELING_WORLD_PLAZA_CODEX_MENU}
     >
-      {DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS.map((option) => (
-        <button
-          key={option.id}
-          type="button"
-          role="menuitem"
-          onClick={() => {
-            onSelectSection(option.id);
-          }}
-          className={cn(
-            STYLING_WORLD_PLAZA_CODEX_MENU_OPTION_BASE_CLASS_NAME,
-            STYLING_WORLD_PLAZA_CODEX_MENU_OPTION_INACTIVE_CLASS_NAME
-          )}
-        >
-          <Icon
-            icon={option.icon}
-            className="size-3.5 shrink-0 max-md:size-4"
-            aria-hidden
-          />
-          <span className="min-w-0">
-            <span className="block text-xs font-semibold leading-tight max-md:text-sm">
-              {option.label}
+      {DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS.map((option) => {
+        const hasRewardReady = rewardReadySectionIds?.has(option.id) ?? false;
+
+        return (
+          <button
+            key={option.id}
+            type="button"
+            role="menuitem"
+            aria-label={
+              hasRewardReady
+                ? `${option.label}. ${LABELING_WORLD_PLAZA_CODEX_REWARD_READY}`
+                : undefined
+            }
+            onClick={() => {
+              onSelectSection(option.id);
+            }}
+            className={cn(
+              STYLING_WORLD_PLAZA_CODEX_MENU_OPTION_BASE_CLASS_NAME,
+              STYLING_WORLD_PLAZA_CODEX_MENU_OPTION_INACTIVE_CLASS_NAME,
+              'relative pr-5 max-md:pr-6'
+            )}
+          >
+            <Icon
+              icon={option.icon}
+              className="size-3.5 shrink-0 max-md:size-4"
+              aria-hidden
+            />
+            <span className="min-w-0">
+              <span className="block text-xs font-semibold leading-tight max-md:text-sm">
+                {option.label}
+              </span>
+              <span className="block text-[10px] font-medium leading-tight opacity-70 max-md:text-[11px]">
+                {resolvingCodexMenuOptionDescription(
+                  option.id,
+                  option.description
+                )}
+              </span>
             </span>
-            <span className="block text-[10px] font-medium leading-tight opacity-70 max-md:text-[11px]">
-              {resolvingCodexMenuOptionDescription(
-                option.id,
-                option.description
-              )}
-            </span>
-          </span>
-        </button>
-      ))}
+            {hasRewardReady ? (
+              <span
+                className={
+                  STYLING_WORLD_PLAZA_CODEX_MENU_REWARD_READY_BADGE_CLASS_NAME
+                }
+                aria-hidden
+              />
+            ) : null}
+          </button>
+        );
+      })}
     </div>
   );
 }

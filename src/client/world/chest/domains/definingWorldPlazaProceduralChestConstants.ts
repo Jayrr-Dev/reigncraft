@@ -7,7 +7,7 @@
 import type { DefiningWorldPlazaChestLootPoolId } from '@/components/world/chest/domains/definingWorldPlazaChestLootPoolRegistry';
 
 /** Sparse placement: roughly one candidate tile per this many land tiles. */
-export const DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_TILE_MODULUS = 220;
+export const DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_TILE_MODULUS = 4800;
 
 /** Seed salt for procedural chest placement gate. */
 export const DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_PLACEMENT_SEED_SALT = 881;
@@ -32,4 +32,4 @@ export const DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_LOOT_POOL_ID: DefiningWorldPl
 export const DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_KEY_DROP_CHANCE = 0.03;
 
 /** Tile radius around the player used to materialize procedural chest instances. */
-export const DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_SYNC_RADIUS_TILES = 48;
+export const DEFINING_WORLD_PLAZA_PROCEDURAL_CHEST_SYNC_RADIUS_TILES = 28;
