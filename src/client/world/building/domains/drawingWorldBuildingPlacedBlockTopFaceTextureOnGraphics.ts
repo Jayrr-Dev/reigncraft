@@ -16,6 +16,8 @@ import {
   DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_WATER_STREAM,
 } from '@/components/world/building/domains/definingWorldBuildingPlacedBlockTopFaceTextureKind';
 import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
+import { resolvingWorldPlazaIngotMetalIdFromWallBlockDefinitionId } from '@/components/world/building/domains/definingWorldPlazaIngotWallBlockRegistry';
+import { resolvingWorldPlazaIngotWallSurfaceEntry } from '@/components/world/building/domains/definingWorldPlazaIngotWallSurfaceRegistry';
 import { resolvingWorldPlazaOreSpeciesIdFromWallBlockDefinitionId } from '@/components/world/building/domains/definingWorldPlazaOreWallBlockRegistry';
 import { resolvingWorldPlazaOreWallSurfaceEntry } from '@/components/world/building/domains/definingWorldPlazaOreWallSurfaceRegistry';
 import {
@@ -223,9 +225,26 @@ export function drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics(
     const oreSpeciesId =
       resolvingWorldPlazaOreSpeciesIdFromWallBlockDefinitionId(definition.id);
 
-    if (!oreSpeciesId) {
+    if (oreSpeciesId) {
+      drawingWorldBuildingOreWallTopFaceTextureOnGraphics(
+        graphics,
+        tileX,
+        tileY,
+        center.x,
+        topCenterY,
+        resolvingWorldPlazaOreWallSurfaceEntry(oreSpeciesId)
+      );
       return;
     }
+
+    const ingotMetalId =
+      resolvingWorldPlazaIngotMetalIdFromWallBlockDefinitionId(definition.id);
+
+    if (!ingotMetalId) {
+      return;
+    }
+
+    const ingotSurface = resolvingWorldPlazaIngotWallSurfaceEntry(ingotMetalId);
 
     drawingWorldBuildingOreWallTopFaceTextureOnGraphics(
       graphics,
@@ -233,7 +252,14 @@ export function drawingWorldBuildingPlacedBlockTopFaceTextureOnGraphics(
       tileY,
       center.x,
       topCenterY,
-      resolvingWorldPlazaOreWallSurfaceEntry(oreSpeciesId)
+      {
+        speciesId: 'iron',
+        pattern: ingotSurface.pattern,
+        fillColor: ingotSurface.fillColor,
+        accentColor: ingotSurface.accentColor,
+        secondaryAccentColor: ingotSurface.secondaryAccentColor,
+        paletteSurface: ingotSurface.paletteSurface,
+      }
     );
   }
 }

@@ -1,6 +1,9 @@
 /**
  * Module-level store for purchased Spritcore stat upgrades.
  *
+ * Bonuses are scoped per avatar form so transform characters keep their own
+ * Spiritcore investment.
+ *
  * @module components/world/spritcore/domains/managingWorldPlazaSpritcoreUpgradeStore
  */
 
@@ -21,6 +24,7 @@ import { writingWorldPlazaSpritcoreUpgradeToStorage } from '@/components/world/s
 const managingWorldPlazaSpritcoreUpgradeSubscribers = new Set<() => void>();
 
 let managingWorldPlazaSpritcoreUpgradeStorageOwnerId: string | null = null;
+let managingWorldPlazaSpritcoreUpgradeAvatarSkinId: string | null = null;
 let managingWorldPlazaSpritcoreUpgradeSnapshot: WorldPlazaSpritcoreUpgradeBonuses =
   WORLD_PLAZA_SPRITCORE_UPGRADE_EMPTY_BONUSES;
 
@@ -33,23 +37,29 @@ function notifyingWorldPlazaSpritcoreUpgradeSubscribers(): void {
 function persistingWorldPlazaSpritcoreUpgrade(): void {
   writingWorldPlazaSpritcoreUpgradeToStorage(
     managingWorldPlazaSpritcoreUpgradeStorageOwnerId,
-    managingWorldPlazaSpritcoreUpgradeSnapshot
+    managingWorldPlazaSpritcoreUpgradeSnapshot,
+    managingWorldPlazaSpritcoreUpgradeAvatarSkinId
   );
 }
 
 /**
- * Hydrates Spritcore upgrade bonuses from localStorage for one session owner.
+ * Hydrates Spritcore upgrade bonuses from localStorage for one owner + form.
  */
 export function initializingWorldPlazaSpritcoreUpgradeStore(
-  storageOwnerId: string | null
+  storageOwnerId: string | null,
+  avatarSkinId: string | null = null
 ): void {
-  if (managingWorldPlazaSpritcoreUpgradeStorageOwnerId === storageOwnerId) {
+  if (
+    managingWorldPlazaSpritcoreUpgradeStorageOwnerId === storageOwnerId &&
+    managingWorldPlazaSpritcoreUpgradeAvatarSkinId === avatarSkinId
+  ) {
     return;
   }
 
   managingWorldPlazaSpritcoreUpgradeStorageOwnerId = storageOwnerId;
+  managingWorldPlazaSpritcoreUpgradeAvatarSkinId = avatarSkinId;
   managingWorldPlazaSpritcoreUpgradeSnapshot =
-    readingWorldPlazaSpritcoreUpgradeFromStorage(storageOwnerId);
+    readingWorldPlazaSpritcoreUpgradeFromStorage(storageOwnerId, avatarSkinId);
   notifyingWorldPlazaSpritcoreUpgradeSubscribers();
 }
 
@@ -127,6 +137,7 @@ export function applyingWorldPlazaSpritcoreUpgradePurchase(
 /** Test-only reset helper. */
 export function resettingWorldPlazaSpritcoreUpgradeStoreForTests(): void {
   managingWorldPlazaSpritcoreUpgradeStorageOwnerId = null;
+  managingWorldPlazaSpritcoreUpgradeAvatarSkinId = null;
   managingWorldPlazaSpritcoreUpgradeSnapshot =
     WORLD_PLAZA_SPRITCORE_UPGRADE_EMPTY_BONUSES;
   notifyingWorldPlazaSpritcoreUpgradeSubscribers();

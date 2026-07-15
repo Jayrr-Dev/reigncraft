@@ -8,18 +8,19 @@ import { resolvingWorldPlazaSpritcoreUpgradeStorageKey } from '@/components/worl
 import type { WorldPlazaSpritcoreUpgradeBonuses } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
 
 /**
- * Writes purchased Spritcore bonuses for one session owner.
+ * Writes purchased Spritcore bonuses for one session owner + avatar form.
  */
 export function writingWorldPlazaSpritcoreUpgradeToStorage(
   storageOwnerId: string | null,
-  bonuses: WorldPlazaSpritcoreUpgradeBonuses
+  bonuses: WorldPlazaSpritcoreUpgradeBonuses,
+  avatarSkinId: string | null = null
 ): void {
   if (typeof window === 'undefined') {
     return;
   }
 
   localStorage.setItem(
-    resolvingWorldPlazaSpritcoreUpgradeStorageKey(storageOwnerId),
+    resolvingWorldPlazaSpritcoreUpgradeStorageKey(storageOwnerId, avatarSkinId),
     JSON.stringify({
       bonusMaxHealth:
         bonuses.bonusMaxHealth > 0 ? bonuses.bonusMaxHealth : undefined,

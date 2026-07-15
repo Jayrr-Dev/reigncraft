@@ -1,4 +1,5 @@
 import { computingWorldPlazaSpritcoreCombatPower } from '@/components/world/spritcore/domains/computingWorldPlazaSpritcoreCombatPower';
+import { computingWorldPlazaSpritcoreDisplayLevel } from '@/components/world/spritcore/domains/computingWorldPlazaSpritcoreDisplayLevel';
 import {
   computingWorldPlazaSpritcoreEquivalentValue,
   computingWorldPlazaSpritcoreStatFromEquivalentValue,
@@ -89,6 +90,15 @@ describe('computingWorldPlazaSpritcoreCombatPower', () => {
       20,
       5
     );
+  });
+});
+
+describe('computingWorldPlazaSpritcoreDisplayLevel', () => {
+  it('maps combat power to max(1, floor(P))', () => {
+    expect(computingWorldPlazaSpritcoreDisplayLevel(1_000, 300, 1)).toBe(1);
+    expect(computingWorldPlazaSpritcoreDisplayLevel(20_000, 300, 1)).toBe(20);
+    expect(computingWorldPlazaSpritcoreDisplayLevel(5_000, 500, 2)).toBe(16);
+    expect(computingWorldPlazaSpritcoreDisplayLevel(500, 150, 1)).toBe(1);
   });
 });
 

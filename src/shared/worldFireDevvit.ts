@@ -215,7 +215,31 @@ export function parsingWorldFireDevvitTileKey(
 export function resolvingWorldFireDevvitMaterialProperties(
   definitionId: string
 ): WorldFireDevvitMaterialProperties | null {
-  return WORLD_FIRE_DEVVIT_MATERIAL_PROPERTIES[definitionId] ?? null;
+  const directProperties =
+    WORLD_FIRE_DEVVIT_MATERIAL_PROPERTIES[definitionId] ?? null;
+
+  if (directProperties) {
+    return directProperties;
+  }
+
+  if (definitionId.startsWith('decorative:flower:')) {
+    return {
+      flammability: 0.5,
+      burnDurationMs: 5_000,
+    };
+  }
+
+  if (
+    definitionId.startsWith('basic:floor:tree-') ||
+    definitionId.startsWith('basic:floor:dyed-')
+  ) {
+    return {
+      flammability: 0.35,
+      burnDurationMs: 12_000,
+    };
+  }
+
+  return null;
 }
 
 /**

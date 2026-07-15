@@ -1,40 +1,26 @@
 /**
- * Maps total Spiritcore invested into a player-facing level label.
+ * Maps combat power into a player-facing level label.
  *
  * @module components/world/spritcore/domains/computingWorldPlazaSpritcoreDisplayLevel
  */
 
-import { computingWorldPlazaSpritcoreStatFromEquivalentValue } from '@/components/world/spritcore/domains/computingWorldPlazaSpritcoreEquivalentValue';
-import {
-  DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_BASE_HP,
-  DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_MAX_HP,
-} from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreLevelingConstants';
-
-/** Legacy per-level HP gain used only for display mapping. */
-const COMPUTING_WORLD_PLAZA_SPRITCORE_DISPLAY_LEVEL_HP_PER_LEVEL = 50;
+import { computingWorldPlazaSpritcoreCombatPower } from '@/components/world/spritcore/domains/computingWorldPlazaSpritcoreCombatPower';
 
 /**
- * Derives a display level from total Spiritcore invested through the health curve.
+ * Derives a display level from combat power.
+ * Level = max(1, floor(P)) where P = (H / BASE_HP) × (DPS / BASE_DPS).
+ * Starting Girl (1000 HP, 300 atk, 1 APS) is level 1.
  */
 export function computingWorldPlazaSpritcoreDisplayLevel(
-  totalSpritcoreInvested: number
+  health: number,
+  damage: number,
+  attackSpeed: number
 ): number {
-  if (totalSpritcoreInvested <= 0) {
-    return 1;
-  }
-
-  const equivalentHealth = computingWorldPlazaSpritcoreStatFromEquivalentValue(
-    totalSpritcoreInvested,
-    DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_BASE_HP,
-    DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_MAX_HP
+  const combatPower = computingWorldPlazaSpritcoreCombatPower(
+    health,
+    damage,
+    attackSpeed
   );
 
-  return Math.max(
-    1,
-    1 +
-      Math.floor(
-        (equivalentHealth - DEFINING_WORLD_PLAZA_SPRITCORE_LEVELING_BASE_HP) /
-          COMPUTING_WORLD_PLAZA_SPRITCORE_DISPLAY_LEVEL_HP_PER_LEVEL
-      )
-  );
+  return Math.max(1, Math.floor(combatPower));
 }

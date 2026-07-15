@@ -1,23 +1,14 @@
 /**
- * Placeholder study-milestone reward markers along codex progress tracks.
+ * Placeholder overall collection milestone rewards on codex panel progress bars.
+ * Applies to Sighted/Logged (discovered) and Studied meters — not per-entry detail.
  *
  * @module components/home/domains/definingPlazaCodexStudyMilestoneRewardConstants
  */
 
-import type { PlazaCodexStudyTierId } from '@/components/home/domains/definingPlazaCodexStudyTier';
-
-/**
- * Study tiers that will grant a chest reward (placeholder UI until loot wires in).
- * Skips awareness (0) and familiarity (1) — too early for a reward beat.
- */
-export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_TIERS: readonly PlazaCodexStudyTierId[] =
-  [
-    'understanding',
-    'application',
-    'proficiency',
-    'expertise',
-    'mastery',
-  ] as const;
+/** Relative positions along an overall panel progress bar (0–100). */
+export const DEFINING_PLAZA_CODEX_OVERALL_MILESTONE_REWARD_PERCENTS = [
+  5, 20, 50, 75, 100,
+] as const;
 
 /** Iconify id for locked/unlocked milestone chest placeholders. */
 export const DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_CHEST_ICON =

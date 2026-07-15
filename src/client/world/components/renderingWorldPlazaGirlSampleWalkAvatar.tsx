@@ -96,7 +96,6 @@ import {
 import { DEFINING_WORLD_PLAZA_GIRL_SAMPLE_READY_IDLE_DURATION_MS } from '@/components/world/domains/definingWorldPlazaGirlSampleIdleConstants';
 import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_ARC_PEAK_SCREEN_PX,
-  DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_DURATION_MS,
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_FORWARD_GRID_DISTANCE,
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_JUMP_ARC_PEAK_SCREEN_PX,
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_RUN_JUMP_FORWARD_GRID_DISTANCE,
@@ -153,6 +152,7 @@ import { resolvingWorldPlazaGirlSampleWalkDirection } from '@/components/world/d
 import { resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection } from '@/components/world/domains/resolvingWorldPlazaGirlSampleWalkDirectionToGridDirection';
 import { resolvingWorldPlazaIceSlideFrozenRunFrameIndex } from '@/components/world/domains/resolvingWorldPlazaIceSlideFrozenRunFrameIndex';
 import { resolvingWorldPlazaIsometricTileIndexAtGridPoint } from '@/components/world/domains/resolvingWorldPlazaIsometricTileIndexAtGridPoint';
+import { resolvingWorldPlazaJumpDurationMs } from '@/components/world/domains/resolvingWorldPlazaJumpDurationMs';
 import { resolvingWorldPlazaJumpLandingGridPointAlongPath } from '@/components/world/domains/resolvingWorldPlazaJumpLandingGridPointAlongPath';
 import {
   checkingWorldPlazaLavaHeatProximityAtGridPoint,
@@ -1501,11 +1501,13 @@ export function RenderingWorldPlazaGirlSampleWalkAvatar({
     }
 
     let activeFallState = fallStateRef.current;
+    const jumpDurationMs = resolvingWorldPlazaJumpDurationMs(
+      characterEngineDerivedStats.jumpSpeedScale
+    );
     const jumpProgress = activeJumpState
       ? Math.min(
           1,
-          (performance.now() - activeJumpState.startedAtMs) /
-            DEFINING_WORLD_PLAZA_GIRL_SAMPLE_JUMP_DURATION_MS
+          (performance.now() - activeJumpState.startedAtMs) / jumpDurationMs
         )
       : 0;
     const isLocomoting = Boolean(

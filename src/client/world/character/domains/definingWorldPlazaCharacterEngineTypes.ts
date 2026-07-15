@@ -39,6 +39,11 @@ export type DefiningWorldPlazaCharacterEngineDefinition = {
     readonly walkSpeedGridPerSecond?: number;
     readonly runSpeedGridPerSecond?: number;
     readonly jumpDistanceScale?: number;
+    /**
+     * Multiplier on shared jump travel speed (1 = girl-sample duration).
+     * Higher = faster arc over the same distance.
+     */
+    readonly jumpSpeedScale?: number;
     /** Max upward world layers this character can jump onto. Defaults to 4. */
     readonly maxJumpLayerReach?: number;
   };
@@ -83,8 +88,9 @@ export type DefiningWorldPlazaCharacterEngineDefinition = {
   readonly skillIds: readonly string[];
 };
 
-/** Effective stats after level scaling. */
+/** Effective stats after scaling + Spritcore bonuses. */
 export type ComputingWorldPlazaCharacterEngineDerivedStats = {
+  /** Display level from combat power: max(1, floor(P)). */
   readonly level: number;
   readonly effectiveMaxHealth: number;
   readonly attackPower: number;
@@ -96,6 +102,7 @@ export type ComputingWorldPlazaCharacterEngineDerivedStats = {
   readonly walkSpeedGridPerSecond: number;
   readonly runSpeedGridPerSecond: number;
   readonly jumpDistanceScale: number;
+  readonly jumpSpeedScale: number;
   readonly maxJumpLayerReach: number;
   readonly healthRegenPerSecond: number;
   readonly hungerDrainMultiplier: number;

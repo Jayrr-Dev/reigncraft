@@ -17,7 +17,23 @@ describe('computingWorldPlazaCharacterEngineDerivedStats', () => {
     expect(derived.effectiveMaxHealth).toBe(1000);
     expect(derived.attackPower).toBe(300);
     expect(derived.defense).toBe(5);
+    expect(derived.level).toBe(1);
     expect(derived.massKg).toBe(DEFINING_WORLD_PLAZA_CHARACTER_DEFAULT_MASS_KG);
+  });
+
+  it('raises display level from Spritcore bonuses via combat power', () => {
+    const girl = resolvingWorldPlazaCharacterEngineDefinition(
+      DEFINING_WORLD_PLAZA_AVATAR_SKIN.GIRL_SAMPLE
+    );
+    const derived = computingWorldPlazaCharacterEngineDerivedStats(girl, {
+      bonusMaxHealth: 19_000,
+      bonusAttackPower: 0,
+      bonusAttackSpeed: 0,
+      totalSpritcoreInvested: 1,
+    });
+
+    expect(derived.effectiveMaxHealth).toBe(20_000);
+    expect(derived.level).toBe(20);
   });
 
   it('matches wildlife counterpart HP, attack, defense, and mass at level 1', () => {

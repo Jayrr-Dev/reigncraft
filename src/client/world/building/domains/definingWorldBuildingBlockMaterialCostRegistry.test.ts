@@ -1,10 +1,13 @@
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import {
+  DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_DECORATIVE,
   DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FLOORS,
   DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_ORES,
+  DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_REFINED,
 } from '@/components/world/building/domains/definingWorldBuildingBlockDefinition';
 import {
   checkingWorldBuildingBlockMaterialAffordable,
+  DEFINING_WORLD_BUILDING_BLOCK_DYE_FLOWER_QUANTITY_PER_LAYER,
   DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER,
   listingWorldBuildingBlockMaterialCostDefinitionIds,
   resolvingWorldBuildingBlockMaterialCost,
@@ -13,34 +16,43 @@ import {
   checkingWorldBuildingBlockDefinitionIsPaletteVisible,
   listingWorldBuildingPaletteBlockDefinitionsByCategory,
 } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_ROSE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { describe, expect, it } from 'vitest';
 
-function creatingInventoryStateWithQuantity(
-  itemTypeId: string,
-  quantity: number
+function creatingInventoryStateWithSlots(
+  slots: readonly {
+    readonly itemTypeId: string;
+    readonly quantity: number;
+  }[]
 ): DefiningInventoryState {
   return {
     capacity: 36,
-    slots: [
-      {
-        id: 'test-slot-item',
-        itemTypeId,
-        quantity,
-        slotIndex: 0,
-      },
-    ],
+    slots: slots.map((slot, index) => ({
+      id: `test-slot-${index}`,
+      itemTypeId: slot.itemTypeId,
+      quantity: slot.quantity,
+      slotIndex: index,
+    })),
   };
 }
 
 describe('definingWorldBuildingBlockMaterialCostRegistry', () => {
-  it('registers a cost for every visible wood and ore palette block', () => {
+  it('registers a cost for every visible wood, ore, refined, and flower palette block', () => {
     const visibleMaterialBlocks = [
       ...listingWorldBuildingPaletteBlockDefinitionsByCategory(
         DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FLOORS
       ),
       ...listingWorldBuildingPaletteBlockDefinitionsByCategory(
         DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_ORES
+      ),
+      ...listingWorldBuildingPaletteBlockDefinitionsByCategory(
+        DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_REFINED
+      ),
+      ...listingWorldBuildingPaletteBlockDefinitionsByCategory(
+        DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_DECORATIVE
       ),
     ].filter(checkingWorldBuildingBlockDefinitionIsPaletteVisible);
 
@@ -50,46 +62,107 @@ describe('definingWorldBuildingBlockMaterialCostRegistry', () => {
       const cost = resolvingWorldBuildingBlockMaterialCost(definition.id);
 
       expect(cost).not.toBeNull();
-      expect(cost?.quantityPerLayer).toBe(
-        DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER
-      );
-      expect(cost?.itemTypeId.length).toBeGreaterThan(0);
+      expect(cost?.requirements.length).toBeGreaterThan(0);
+
+      for (const requirement of cost?.requirements ?? []) {
+        expect(requirement.itemTypeId.length).toBeGreaterThan(0);
+        expect(requirement.quantityPerLayer).toBeGreaterThan(0);
+      }
     }
   });
 
-  it('lists tree floors, stone, and ore walls in the cost registry', () => {
+  it('lists tree floors, dyed wood, stone, ore, ingot, and flower blocks in the cost registry', () => {
     const costIds = listingWorldBuildingBlockMaterialCostDefinitionIds();
 
     expect(costIds).toContain('basic:floor:tree-oak');
+    expect(costIds).toContain('basic:floor:dyed-rose');
     expect(costIds).toContain('basic:wall:stone');
     expect(costIds).toContain('basic:wall:ore-iron');
+    expect(costIds).toContain('basic:wall:ingot-iron');
+    expect(costIds).toContain('decorative:flower:rose');
   });
 
   it('requires three wood for a tree floor placement', () => {
     const definitionId = 'basic:floor:tree-oak';
     const cost = resolvingWorldBuildingBlockMaterialCost(definitionId);
 
-    expect(cost?.itemTypeId).toBe(
-      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD
-    );
-    expect(cost?.quantityPerLayer).toBe(3);
+    expect(cost?.requirements).toEqual([
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+        quantityPerLayer:
+          DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER,
+        itemLabel: 'Wood',
+      },
+    ]);
 
     expect(
       checkingWorldBuildingBlockMaterialAffordable(
-        creatingInventoryStateWithQuantity(
-          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
-          2
-        ),
+        creatingInventoryStateWithSlots([
+          {
+            itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+            quantity: 2,
+          },
+        ]),
         definitionId
       )
     ).toBe(false);
 
     expect(
       checkingWorldBuildingBlockMaterialAffordable(
-        creatingInventoryStateWithQuantity(
-          DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
-          3
-        ),
+        creatingInventoryStateWithSlots([
+          {
+            itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+            quantity: 3,
+          },
+        ]),
+        definitionId
+      )
+    ).toBe(true);
+  });
+
+  it('requires wood plus flower dye for stained wood floors', () => {
+    const definitionId = 'basic:floor:dyed-rose';
+    const cost = resolvingWorldBuildingBlockMaterialCost(definitionId);
+
+    expect(cost?.requirements).toEqual([
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+        quantityPerLayer:
+          DEFINING_WORLD_BUILDING_BLOCK_MATERIAL_COST_QUANTITY_PER_LAYER,
+        itemLabel: 'Wood',
+      },
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_ROSE,
+        quantityPerLayer:
+          DEFINING_WORLD_BUILDING_BLOCK_DYE_FLOWER_QUANTITY_PER_LAYER,
+        itemLabel: 'Rose',
+      },
+    ]);
+
+    expect(
+      checkingWorldBuildingBlockMaterialAffordable(
+        creatingInventoryStateWithSlots([
+          {
+            itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+            quantity: 3,
+          },
+        ]),
+        definitionId
+      )
+    ).toBe(false);
+
+    expect(
+      checkingWorldBuildingBlockMaterialAffordable(
+        creatingInventoryStateWithSlots([
+          {
+            itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD,
+            quantity: 3,
+          },
+          {
+            itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_FLOWER_ROSE,
+            quantity: 1,
+          },
+        ]),
         definitionId
       )
     ).toBe(true);

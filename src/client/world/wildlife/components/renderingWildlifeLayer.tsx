@@ -119,6 +119,7 @@ import {
   updatingWildlifeNameTagsOverlayRef,
   type UpdatingWildlifeNameTagLabelCacheEntry,
 } from '@/components/world/wildlife/domains/updatingWildlifeNameTagsOverlayRef';
+import { updatingWildlifeStatusHudOverlaysRef } from '@/components/world/wildlife/domains/updatingWildlifeStatusHudOverlaysRef';
 import type { Graphics, Sprite } from 'pixi.js';
 import { memo, useEffect, useRef, useState } from 'react';
 
@@ -895,6 +896,27 @@ export function RenderingWildlifeLayer({
           config.wildlifeNameTagsMountRevisionRef
         ) {
           config.wildlifeNameTagsMountRevisionRef.current += 1;
+        }
+
+        if (config.wildlifeStatusHudOverlaysOutRef?.current) {
+          const statusHudUpdate = updatingWildlifeStatusHudOverlaysRef({
+            outRef: config.wildlifeStatusHudOverlaysOutRef.current,
+            instances: nameTagInstances,
+            playerPosition,
+            nowMs,
+            hoveredInstanceId:
+              config.wildlifeHoveredInstanceIdRef?.current ?? null,
+            combatLockedInstanceId:
+              config.wildlifeCombatLockedInstanceIdRef?.current ?? null,
+            resolveSpecies: resolvingWildlifeSpeciesDefinition,
+          });
+
+          if (
+            statusHudUpdate.didMountSetChange &&
+            config.wildlifeStatusHudOverlaysMountRevisionRef
+          ) {
+            config.wildlifeStatusHudOverlaysMountRevisionRef.current += 1;
+          }
         }
       }
     }

@@ -1,84 +1,52 @@
 /**
- * Resolves study-milestone chest marker positions along a progress track.
+ * Resolves overall panel milestone chest markers for Sighted/Logged and Studied.
  *
  * @module components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers
  */
 
-import { DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_TIERS } from '@/components/home/domains/definingPlazaCodexStudyMilestoneRewardConstants';
-import type { PlazaCodexStudyTierId } from '@/components/home/domains/definingPlazaCodexStudyTier';
-import type { PlazaCodexStudyTrackId } from '@/components/home/domains/definingPlazaCodexStudyTrackRegistry';
-import {
-  resolvingPlazaCodexStudyFullCount,
-  resolvingPlazaCodexStudyTierThreshold,
-} from '@/components/home/domains/resolvingPlazaCodexStudyTier';
+import { DEFINING_PLAZA_CODEX_OVERALL_MILESTONE_REWARD_PERCENTS } from '@/components/home/domains/definingPlazaCodexStudyMilestoneRewardConstants';
 
-export type PlazaCodexStudyMilestoneRewardMarker = {
-  tierId: PlazaCodexStudyTierId;
-  /** Absolute study threshold for this track/entry. */
+export type PlazaCodexOverallMilestoneRewardMarker = {
+  /** Stable key from percent position. */
+  id: string;
+  /** Absolute value on the meter needed to reach this chest. */
   threshold: number;
   /** 0–100 position along the progress track. */
   percent: number;
-  /** True when current study points have reached this milestone. */
+  /** True when current meter value has reached this milestone. */
   isReached: boolean;
 };
 
 /**
- * Builds chest markers for one study track.
- * Positions scale with mastery so 2x/3x entries still sit at the right spots.
+ * Builds chest markers for one overall panel meter (discovered or studied).
+ * Thresholds scale to that meter's max.
  */
-export function resolvingPlazaCodexStudyMilestoneRewardMarkers(
-  trackId: PlazaCodexStudyTrackId,
-  studyCount: number,
-  entryScaleMultiplier = 1
-): readonly PlazaCodexStudyMilestoneRewardMarker[] {
-  const fullCount = resolvingPlazaCodexStudyFullCount(
-    trackId,
-    entryScaleMultiplier
-  );
-
-  if (fullCount <= 0) {
+export function resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
+  value: number,
+  max: number
+): readonly PlazaCodexOverallMilestoneRewardMarker[] {
+  if (max <= 0) {
     return [];
   }
 
-  return DEFINING_PLAZA_CODEX_STUDY_MILESTONE_REWARD_TIERS.map((tierId) => {
-    const threshold = resolvingPlazaCodexStudyTierThreshold(
-      trackId,
-      tierId,
-      entryScaleMultiplier
-    );
-    const percent = Math.min(100, Math.round((threshold / fullCount) * 100));
-
+  return DEFINING_PLAZA_CODEX_OVERALL_MILESTONE_REWARD_PERCENTS.map((percent) => {
+    const threshold = Math.round((percent / 100) * max);
     return {
-      tierId,
+      id: `milestone-${percent}`,
       threshold,
       percent,
-      isReached: studyCount >= threshold,
+      isReached: value >= threshold,
     };
   });
 }
 
-/**
- * Builds chest markers for an aggregate Studied meter (panel dual progress).
- * Uses the same relative milestone ratios as a 1x study track.
- */
+/** @deprecated Prefer {@link resolvingPlazaCodexOverallProgressMilestoneRewardMarkers}. */
 export function resolvingPlazaCodexAggregateStudyMilestoneRewardMarkers(
   studyValue: number,
   studyMax: number
-): readonly PlazaCodexStudyMilestoneRewardMarker[] {
-  if (studyMax <= 0) {
-    return [];
-  }
-
-  return resolvingPlazaCodexStudyMilestoneRewardMarkers(
-    'herbarium-flower',
-    0,
-    1
-  ).map((marker) => {
-    const threshold = Math.round((marker.percent / 100) * studyMax);
-    return {
-      ...marker,
-      threshold,
-      isReached: studyValue >= threshold,
-    };
-  });
+): readonly PlazaCodexOverallMilestoneRewardMarker[] {
+  return resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
+    studyValue,
+    studyMax
+  );
 }

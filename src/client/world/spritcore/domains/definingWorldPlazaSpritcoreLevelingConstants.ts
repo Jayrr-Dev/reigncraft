@@ -56,11 +56,20 @@ export const DEFINING_WORLD_PLAZA_SPRITCORE_UPGRADE_STORAGE_KEY_PREFIX =
 /**
  * Resolves the localStorage key for Spritcore upgrade progress.
  *
+ * Prefer `ownerId:avatarSkinId` so each transform form keeps its own spend.
+ * Omitting `avatarSkinId` resolves the legacy owner-only key used for migration.
+ *
  * @param storageOwnerId - Session owner id, or null for the legacy global key.
+ * @param avatarSkinId - Active avatar form id when scoping per character.
  */
 export function resolvingWorldPlazaSpritcoreUpgradeStorageKey(
-  storageOwnerId: string | null
+  storageOwnerId: string | null,
+  avatarSkinId?: string | null
 ): string {
+  if (storageOwnerId && avatarSkinId) {
+    return `${DEFINING_WORLD_PLAZA_SPRITCORE_UPGRADE_STORAGE_KEY_PREFIX}:${storageOwnerId}:${avatarSkinId}`;
+  }
+
   if (storageOwnerId) {
     return `${DEFINING_WORLD_PLAZA_SPRITCORE_UPGRADE_STORAGE_KEY_PREFIX}:${storageOwnerId}`;
   }

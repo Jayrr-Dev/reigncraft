@@ -7,6 +7,7 @@
  */
 
 import { Icon } from '@/components/ui/icon';
+import { applyingWorldPlazaAvatarTransform } from '@/components/world/domains/applyingWorldPlazaAvatarTransform';
 import {
   DEFINING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_LIST_SCROLL_STEP_PX,
   LABELING_WORLD_PLAZA_ACTION_BAR_TRANSFORM,
@@ -18,6 +19,7 @@ import {
   STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_LIST_CLASS_NAME,
   STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_ACTIVE_CLASS_NAME,
   STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_BASE_CLASS_NAME,
+  STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_DISABLED_CLASS_NAME,
   STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_INACTIVE_CLASS_NAME,
   STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_PANEL_CLASS_NAME,
   STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_SCROLL_ARROW_CLASS_NAME,
@@ -27,9 +29,13 @@ import {
   type DefiningWorldPlazaAvatarSkinId,
 } from '@/components/world/domains/definingWorldPlazaAvatarSkinConstants';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
-import { settingWorldPlazaSelectedAvatarSkin } from '@/components/world/domains/managingWorldPlazaAvatarSkinSelectionStore';
+import {
+  checkingWorldPlazaAvatarTransformIsOnCooldown,
+  gettingWorldPlazaAvatarTransformCooldownReadyAtMs,
+  subscribingWorldPlazaAvatarTransformCooldown,
+} from '@/components/world/domains/managingWorldPlazaAvatarTransformCooldownStore';
 import { cn } from '@/lib/utils';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 
 export type RenderingWorldPlazaActionBarTransformPanelProps = {
   readonly selectedAvatarSkinId: DefiningWorldPlazaAvatarSkinId;
@@ -47,6 +53,14 @@ export function RenderingWorldPlazaActionBarTransformPanel({
   const [filterText, setFilterText] = useState('');
   const [canScrollUp, setCanScrollUp] = useState(false);
   const [canScrollDown, setCanScrollDown] = useState(false);
+  const transformReadyAtMs = useSyncExternalStore(
+    subscribingWorldPlazaAvatarTransformCooldown,
+    gettingWorldPlazaAvatarTransformCooldownReadyAtMs,
+    gettingWorldPlazaAvatarTransformCooldownReadyAtMs
+  );
+  const isTransformOnCooldown =
+    checkingWorldPlazaAvatarTransformIsOnCooldown(Date.now()) ||
+    transformReadyAtMs > Date.now();
 
   const normalizedFilterText = filterText.trim().toLowerCase();
   const filteredSkinOptions = useMemo(() => {
@@ -158,6 +172,7 @@ export function RenderingWorldPlazaActionBarTransformPanel({
       >
         {filteredSkinOptions.map((skinOption) => {
           const isActiveSkin = skinOption.skinId === selectedAvatarSkinId;
+          const isOptionLocked = isTransformOnCooldown && !isActiveSkin;
 
           return (
             <button
@@ -165,15 +180,26 @@ export function RenderingWorldPlazaActionBarTransformPanel({
               type="button"
               role="menuitemradio"
               aria-checked={isActiveSkin}
+              aria-disabled={isOptionLocked}
               onClick={() => {
-                settingWorldPlazaSelectedAvatarSkin(skinOption.skinId);
+                const result = applyingWorldPlazaAvatarTransform(
+                  skinOption.skinId
+                );
+
+                if (result === 'cooldown') {
+                  return;
+                }
+
                 onSelectSkin();
               }}
               className={cn(
                 STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_BASE_CLASS_NAME,
                 isActiveSkin
                   ? STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_ACTIVE_CLASS_NAME
-                  : STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_INACTIVE_CLASS_NAME
+                  : STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_INACTIVE_CLASS_NAME,
+                isOptionLocked
+                  ? STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_DISABLED_CLASS_NAME
+                  : null
               )}
               {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
             >

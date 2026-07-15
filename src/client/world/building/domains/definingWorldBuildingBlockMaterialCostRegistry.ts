@@ -12,19 +12,21 @@ import {
   resolvingWorldPlazaFlowerSpeciesIdFromDyedWoodFloorBlockDefinitionId,
 } from '@/components/world/building/domains/definingWorldPlazaDyedWoodFloorBlockRegistry';
 import {
-  DEFINING_WORLD_PLAZA_FLOWER_DYE_NAME_BY_SPECIES_ID,
-  DEFINING_WORLD_PLAZA_FLOWER_DYE_SPECIES_ORDER,
-} from '@/components/world/building/domains/definingWorldPlazaFlowerDyeConstants';
-import {
   formattingWorldPlazaFlowerBlockDefinitionId,
   resolvingWorldPlazaFlowerSpeciesIdFromBlockDefinitionId,
 } from '@/components/world/building/domains/definingWorldPlazaFlowerBlockRegistry';
 import {
+  DEFINING_WORLD_PLAZA_FLOWER_DYE_NAME_BY_SPECIES_ID,
+  DEFINING_WORLD_PLAZA_FLOWER_DYE_SPECIES_ORDER,
+} from '@/components/world/building/domains/definingWorldPlazaFlowerDyeConstants';
+import {
   formattingWorldPlazaIngotWallBlockDefinitionId,
-  type DefiningWorldPlazaIngotWallMetalId,
   resolvingWorldPlazaIngotMetalIdFromWallBlockDefinitionId,
 } from '@/components/world/building/domains/definingWorldPlazaIngotWallBlockRegistry';
-import { DEFINING_WORLD_PLAZA_INGOT_WALL_SURFACE_REGISTRY } from '@/components/world/building/domains/definingWorldPlazaIngotWallSurfaceRegistry';
+import {
+  DEFINING_WORLD_PLAZA_INGOT_WALL_SURFACE_REGISTRY,
+  type DefiningWorldPlazaIngotWallMetalId,
+} from '@/components/world/building/domains/definingWorldPlazaIngotWallSurfaceRegistry';
 import {
   formattingWorldPlazaOreWallBlockDefinitionId,
   resolvingWorldPlazaOreSpeciesIdFromWallBlockDefinitionId,
@@ -268,7 +270,8 @@ export function resolvingWorldBuildingBlockMaterialCost(
             DEFINING_WORLD_PLAZA_FLOWER_SPECIES_TO_ITEM_TYPE_ID[dyedSpeciesId],
           quantityPerLayer:
             DEFINING_WORLD_BUILDING_BLOCK_DYE_FLOWER_QUANTITY_PER_LAYER,
-          itemLabel: DEFINING_WORLD_PLAZA_FLOWER_DYE_NAME_BY_SPECIES_ID[dyedSpeciesId],
+          itemLabel:
+            DEFINING_WORLD_PLAZA_FLOWER_DYE_NAME_BY_SPECIES_ID[dyedSpeciesId],
         },
       ],
     };

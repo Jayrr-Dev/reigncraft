@@ -658,6 +658,7 @@ import { RenderingWorldPlazaWildlifeCorpseStudyLabels } from '@/components/world
 import { RenderingWorldPlazaWildlifeForageEatOverlays } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeForageEatOverlays';
 import { RenderingWorldPlazaWildlifeHealthFloatTexts } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeHealthFloatTexts';
 import { RenderingWorldPlazaWildlifeNameTags } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeNameTags';
+import { RenderingWorldPlazaWildlifeStatusHudOverlays } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeStatusHudOverlays';
 import { RenderingWorldPlazaWildlifeSpeechBubbles } from '@/components/world/wildlife/components/renderingWorldPlazaWildlifeSpeechBubbles';
 import { applyingWildlifeDocilePetComplete } from '@/components/world/wildlife/domains/applyingWildlifeDocilePetComplete';
 import { applyingWildlifePlayerMeleeHitSideEffects } from '@/components/world/wildlife/domains/applyingWildlifePlayerMeleeHitSideEffects';
@@ -672,6 +673,7 @@ import { DEFINING_WILDLIFE_DOCILE_PET_STUDY_POINTS } from '@/components/world/wi
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
 import type { DefiningWildlifeForageEatOverlay } from '@/components/world/wildlife/domains/definingWildlifeForageEatOverlayTypes';
 import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife/domains/definingWildlifeNameTagTypes';
+import type { DefiningWildlifeStatusHudOverlay } from '@/components/world/wildlife/domains/definingWildlifeStatusHudOverlayTypes';
 import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wildlife/domains/definingWildlifeSpeechBubbleTypes';
 import type {
   DefiningWildlifeAggressionLevel,
@@ -4287,6 +4289,12 @@ function RenderingWorldPlazaPixiSceneConnected({
   const wildlifeNameTagsRef = useRef<DefiningWildlifeNameTagOverlay[]>([]);
   const wildlifeNameTagsMountRevisionRef = useRef(0);
   const lastSyncedWildlifeNameTagsMountRevisionRef = useRef(0);
+  const wildlifeStatusHudOverlaysRef = useRef<DefiningWildlifeStatusHudOverlay[]>(
+    []
+  );
+  const wildlifeStatusHudOverlaysMountRevisionRef = useRef(0);
+  const lastSyncedWildlifeStatusHudOverlaysMountRevisionRef = useRef(0);
+  const wildlifeCombatLockedInstanceIdRef = useRef<string | null>(null);
   const wildlifeHoveredInstanceIdRef = useRef<string | null>(null);
   const interactablePointerHoverCursorRef = useRef<string>(
     DEFINING_WORLD_PLAZA_INTERACTABLE_POINTER_DEFAULT_CURSOR
@@ -4296,6 +4304,9 @@ function RenderingWorldPlazaPixiSceneConnected({
   );
   const [wildlifeNameTags, setWildlifeNameTags] = useState<
     readonly DefiningWildlifeNameTagOverlay[]
+  >([]);
+  const [wildlifeStatusHudOverlays, setWildlifeStatusHudOverlays] = useState<
+    readonly DefiningWildlifeStatusHudOverlay[]
   >([]);
 
   useEffect(() => {
@@ -4312,9 +4323,14 @@ function RenderingWorldPlazaPixiSceneConnected({
       wildlifeNameTagsRef.current.length = 0;
       wildlifeNameTagsMountRevisionRef.current = 0;
       lastSyncedWildlifeNameTagsMountRevisionRef.current = 0;
+      wildlifeStatusHudOverlaysRef.current.length = 0;
+      wildlifeStatusHudOverlaysMountRevisionRef.current = 0;
+      lastSyncedWildlifeStatusHudOverlaysMountRevisionRef.current = 0;
+      wildlifeCombatLockedInstanceIdRef.current = null;
       wildlifeHoveredInstanceIdRef.current = null;
       wildlifeDamagedPlayerAtMsByInstanceIdRef.current.clear();
       setWildlifeNameTags([]);
+      setWildlifeStatusHudOverlays([]);
       return;
     }
 
@@ -4391,6 +4407,19 @@ function RenderingWorldPlazaPixiSceneConnected({
         lastSyncedWildlifeNameTagsMountRevisionRef.current =
           wildlifeNameTagsMountRevisionRef.current;
         setWildlifeNameTags([...nextNameTags]);
+      }
+
+      wildlifeCombatLockedInstanceIdRef.current =
+        combatLockRef.current?.targetInstanceId ?? null;
+
+      const nextStatusHudOverlays = wildlifeStatusHudOverlaysRef.current;
+      if (
+        lastSyncedWildlifeStatusHudOverlaysMountRevisionRef.current !==
+        wildlifeStatusHudOverlaysMountRevisionRef.current
+      ) {
+        lastSyncedWildlifeStatusHudOverlaysMountRevisionRef.current =
+          wildlifeStatusHudOverlaysMountRevisionRef.current;
+        setWildlifeStatusHudOverlays([...nextStatusHudOverlays]);
       }
     });
   }, [isLocalGameplayEnabled]);

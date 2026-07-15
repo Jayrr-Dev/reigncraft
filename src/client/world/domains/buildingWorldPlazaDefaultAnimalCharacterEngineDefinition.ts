@@ -15,6 +15,7 @@ import { DEFINING_WORLD_PLAZA_ANIMAL_PLAYABLE_SPRITE_FOLDER_TO_WILDLIFE_SPECIES_
 import { DEFINING_WORLD_PLAZA_STRENGTH_PLAYER_BASELINE_ATTACK_INTERVAL_MS } from '@/components/world/strength/domains/definingWorldPlazaStrengthIndexConstants';
 import {
   DEFINING_WILDLIFE_CYROBORN_EXTRA_CHARACTER_IMMUNITIES,
+  DEFINING_WILDLIFE_CYROBORN_JUMP_SPEED_SCALE,
   DEFINING_WILDLIFE_CYROBORN_SPECIES_ID,
 } from '@/components/world/wildlife/domains/definingWildlifeCyrobornConstants';
 import {
@@ -164,6 +165,9 @@ export function buildingWorldPlazaDefaultAnimalCharacterEngineDefinition(
       walkSpeedGridPerSecond: vitals.walkSpeedGridPerSecond,
       runSpeedGridPerSecond: vitals.runSpeedGridPerSecond,
       maxJumpLayerReach: jump.maxJumpLayerReach,
+      ...(species.speciesId === DEFINING_WILDLIFE_CYROBORN_SPECIES_ID
+        ? { jumpSpeedScale: DEFINING_WILDLIFE_CYROBORN_JUMP_SPEED_SCALE }
+        : {}),
     },
     vitals: { baseMaxHealth: vitals.baseMaxHealth },
     massKg: species.massKg,

@@ -1,51 +1,37 @@
-import {
-  resolvingPlazaCodexAggregateStudyMilestoneRewardMarkers,
-  resolvingPlazaCodexStudyMilestoneRewardMarkers,
-} from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
+import { resolvingPlazaCodexOverallProgressMilestoneRewardMarkers } from '@/components/home/domains/resolvingPlazaCodexStudyMilestoneRewardMarkers';
 import { describe, expect, it } from 'vitest';
 
-describe('resolvingPlazaCodexStudyMilestoneRewardMarkers', () => {
-  it('places chests at study reward thresholds', () => {
-    const markers = resolvingPlazaCodexStudyMilestoneRewardMarkers(
-      'bestiary',
-      20
+describe('resolvingPlazaCodexOverallProgressMilestoneRewardMarkers', () => {
+  it('places chests along overall discovered or studied meters', () => {
+    const markers = resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
+      13,
+      44
     );
 
-    expect(markers.map((marker) => marker.tierId)).toEqual([
-      'understanding',
-      'application',
-      'proficiency',
-      'expertise',
-      'mastery',
-    ]);
     expect(markers.map((marker) => marker.percent)).toEqual([
       5, 20, 50, 75, 100,
     ]);
-    expect(
-      markers.find((marker) => marker.tierId === 'application')?.isReached
-    ).toBe(true);
-    expect(
-      markers.find((marker) => marker.tierId === 'proficiency')?.isReached
-    ).toBe(false);
+    expect(markers[0]?.threshold).toBe(2);
+    expect(markers[0]?.isReached).toBe(true);
+    expect(markers[4]?.threshold).toBe(44);
+    expect(markers[4]?.isReached).toBe(false);
   });
 
-  it('scales aggregate panel markers to the Studied max', () => {
-    const markers = resolvingPlazaCodexAggregateStudyMilestoneRewardMarkers(
+  it('scales studied-point milestones to the panel max', () => {
+    const markers = resolvingPlazaCodexOverallProgressMilestoneRewardMarkers(
       879,
       4400
     );
 
-    expect(
-      markers.find((marker) => marker.tierId === 'understanding')?.threshold
-    ).toBe(220);
-    expect(
-      markers.find((marker) => marker.tierId === 'understanding')?.isReached
-    ).toBe(true);
-    expect(
-      markers.find((marker) => marker.tierId === 'application')?.threshold
-    ).toBe(880);
-    expect(
-      markers.find((marker) => marker.tierId === 'application')?.isReached
-    ).toBe(false);
+    expect(markers.find((marker) => marker.percent === 5)?.threshold).toBe(220);
+    expect(markers.find((marker) => marker.percent === 5)?.isReached).toBe(
+      true
+    );
+    expect(markers.find((marker) => marker.percent === 20)?.threshold).toBe(
+      880
+    );
+    expect(markers.find((marker) => marker.percent === 20)?.isReached).toBe(
+      false
+    );
   });
 });

@@ -11,6 +11,12 @@
 export const DEFINING_WILDLIFE_CYROBORN_SPECIES_ID = 'cyroborn' as const;
 
 /**
+ * Playable jump travel speed vs girl-sample baseline (1 = normal duration).
+ * Same forward distance; shorter air time.
+ */
+export const DEFINING_WILDLIFE_CYROBORN_JUMP_SPEED_SCALE = 2;
+
+/**
  * Extra playable/wildlife status immunities beyond hazard temperature flags.
  * Crystal body has no blood — bleed stacks do not apply.
  */

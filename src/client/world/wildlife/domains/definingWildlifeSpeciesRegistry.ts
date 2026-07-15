@@ -834,7 +834,16 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
   cyroborn: {
     walkSpeedGridPerSecond: 1.6,
     runSpeedGridPerSecond: 3.4,
-    jump: definingWildlifeGroundedJumpConfig(),
+    jump: {
+      canJump: true,
+      canPounce: false,
+      maxJumpLayerReach: 8,
+      // Normal hop distance; high speed so the arc finishes fast.
+      maxJumpDistanceGrid: 2,
+      jumpSpeedGridPerSecond: 10,
+      jumpArcPeakPx: 18,
+      jumpCooldownMs: 1800,
+    },
   },
 
   // Desert and highland stock — rams hop ledges; camels never hurry.

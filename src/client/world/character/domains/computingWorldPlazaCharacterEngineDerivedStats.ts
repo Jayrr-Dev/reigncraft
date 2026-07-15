@@ -53,35 +53,36 @@ export function computingWorldPlazaCharacterEngineDerivedStats(
     0.25,
     stats.attackSpeed + spritcoreBonuses.bonusAttackSpeed
   );
-  const displayLevel =
-    spritcoreBonuses.totalSpritcoreInvested > 0
-      ? computingWorldPlazaSpritcoreDisplayLevel(
-          spritcoreBonuses.totalSpritcoreInvested
-        )
-      : scalingLevel;
+  const effectiveMaxHealth = Math.max(
+    DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GROWTH_LANE_MIN_EFFECTIVE_MAX_HEALTH,
+    vitals.baseMaxHealth +
+      computingWorldPlazaCharacterEngineLevelBonus(
+        scaling.healthPerLevel,
+        scalingLevel,
+        growthLaneLevelOffset
+      ) +
+      spritcoreBonuses.bonusMaxHealth
+  );
+  const attackPower = Math.max(
+    DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GROWTH_LANE_MIN_ATTACK_POWER,
+    stats.attackPower +
+      computingWorldPlazaCharacterEngineLevelBonus(
+        scaling.attackPerLevel,
+        scalingLevel,
+        growthLaneLevelOffset
+      ) +
+      spritcoreBonuses.bonusAttackPower
+  );
+  const displayLevel = computingWorldPlazaSpritcoreDisplayLevel(
+    effectiveMaxHealth,
+    attackPower,
+    nominalAttackSpeed
+  );
 
   return {
     level: displayLevel,
-    effectiveMaxHealth: Math.max(
-      DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GROWTH_LANE_MIN_EFFECTIVE_MAX_HEALTH,
-      vitals.baseMaxHealth +
-        computingWorldPlazaCharacterEngineLevelBonus(
-          scaling.healthPerLevel,
-          scalingLevel,
-          growthLaneLevelOffset
-        ) +
-        spritcoreBonuses.bonusMaxHealth
-    ),
-    attackPower: Math.max(
-      DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GROWTH_LANE_MIN_ATTACK_POWER,
-      stats.attackPower +
-        computingWorldPlazaCharacterEngineLevelBonus(
-          scaling.attackPerLevel,
-          scalingLevel,
-          growthLaneLevelOffset
-        ) +
-        spritcoreBonuses.bonusAttackPower
-    ),
+    effectiveMaxHealth,
+    attackPower,
     attackSpeed: resolvingWorldPlazaScaledAttackSpeed(nominalAttackSpeed),
     defense: Math.max(
       DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GROWTH_LANE_MIN_DEFENSE,
@@ -106,6 +107,7 @@ export function computingWorldPlazaCharacterEngineDerivedStats(
       locomotion.runSpeedGridPerSecond ??
       DEFINING_WORLD_PLAZA_ISOMETRIC_GRID_RUN_SPEED_PER_SECOND,
     jumpDistanceScale: locomotion.jumpDistanceScale ?? 1,
+    jumpSpeedScale: Math.max(0.25, locomotion.jumpSpeedScale ?? 1),
     maxJumpLayerReach: Math.max(
       0,
       Math.floor(

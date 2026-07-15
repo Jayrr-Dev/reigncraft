@@ -22,6 +22,7 @@ const DEFINING_PROFILE_PANEL_TEST_DERIVED_STATS: ComputingWorldPlazaCharacterEng
     walkSpeedGridPerSecond: 2,
     runSpeedGridPerSecond: 3,
     jumpDistanceScale: 1,
+    jumpSpeedScale: 1,
     maxJumpLayerReach: 4,
     healthRegenPerSecond: 2,
     hungerDrainMultiplier: 1,

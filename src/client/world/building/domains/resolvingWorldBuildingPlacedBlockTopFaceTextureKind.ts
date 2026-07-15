@@ -9,6 +9,8 @@ import {
   DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_WATER_STREAM,
   type DefiningWorldBuildingPlacedBlockTopFaceTextureKind,
 } from '@/components/world/building/domains/definingWorldBuildingPlacedBlockTopFaceTextureKind';
+import { checkingWorldBuildingBlockDefinitionIdIsDyedWoodFloor } from '@/components/world/building/domains/definingWorldPlazaDyedWoodFloorBlockRegistry';
+import { checkingWorldBuildingBlockDefinitionIdIsIngotWall } from '@/components/world/building/domains/definingWorldPlazaIngotWallBlockRegistry';
 import { checkingWorldBuildingBlockDefinitionIdIsOreWall } from '@/components/world/building/domains/definingWorldPlazaOreWallBlockRegistry';
 import { checkingWorldBuildingBlockDefinitionIdIsTreeFloor } from '@/components/world/building/domains/definingWorldPlazaTreeFloorBlockRegistry';
 
@@ -39,11 +41,17 @@ const RESOLVING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_BY_DEFINITION_
 export function resolvingWorldBuildingPlacedBlockTopFaceTextureKind(
   definitionId: DefiningWorldBuildingBlockDefinitionId
 ): DefiningWorldBuildingPlacedBlockTopFaceTextureKind | null {
-  if (checkingWorldBuildingBlockDefinitionIdIsOreWall(definitionId)) {
+  if (
+    checkingWorldBuildingBlockDefinitionIdIsOreWall(definitionId) ||
+    checkingWorldBuildingBlockDefinitionIdIsIngotWall(definitionId)
+  ) {
     return DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_ORE_WALL;
   }
 
-  if (checkingWorldBuildingBlockDefinitionIdIsTreeFloor(definitionId)) {
+  if (
+    checkingWorldBuildingBlockDefinitionIdIsTreeFloor(definitionId) ||
+    checkingWorldBuildingBlockDefinitionIdIsDyedWoodFloor(definitionId)
+  ) {
     return DEFINING_WORLD_BUILDING_PLACED_BLOCK_TOP_FACE_TEXTURE_KIND_PINE_WOOD;
   }
 

@@ -19,6 +19,7 @@ import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wild
 import type { DefiningWildlifeForageEatOverlay } from '@/components/world/wildlife/domains/definingWildlifeForageEatOverlayTypes';
 import type { DefiningWildlifeNameTagOverlay } from '@/components/world/wildlife/domains/definingWildlifeNameTagTypes';
 import type { DefiningWildlifeSpeechBubbleOverlay } from '@/components/world/wildlife/domains/definingWildlifeSpeechBubbleTypes';
+import type { DefiningWildlifeStatusHudOverlay } from '@/components/world/wildlife/domains/definingWildlifeStatusHudOverlayTypes';
 import type {
   DefiningWildlifeDamageEvent,
   DefiningWildlifeNetworkSnapshot,
@@ -62,8 +63,16 @@ export type DefiningWildlifeSimulationTickConfig = {
   wildlifeForageEatOverlaysOutRef?: React.RefObject<
     DefiningWildlifeForageEatOverlay[]
   >;
+  /** Live status / debuff icons above engaged wildlife. */
+  wildlifeStatusHudOverlaysOutRef?: React.RefObject<
+    DefiningWildlifeStatusHudOverlay[]
+  >;
   /** Bumped when visible wildlife name-tag mounts or label metadata changes. */
   wildlifeNameTagsMountRevisionRef?: React.RefObject<number>;
+  /** Bumped when engaged wildlife status-icon mounts change. */
+  wildlifeStatusHudOverlaysMountRevisionRef?: React.RefObject<number>;
+  /** Local combat-lock wildlife instance id, if any. */
+  wildlifeCombatLockedInstanceIdRef?: React.RefObject<string | null>;
   /** Wildlife instance id under the viewport pointer, if any. */
   wildlifeHoveredInstanceIdRef?: React.RefObject<string | null>;
   /** Last time each wildlife instance melee-hit the local player (ms). */

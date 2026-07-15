@@ -176,6 +176,10 @@ export const STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_ACTIVE_CLASS_NAME =
 export const STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_INACTIVE_CLASS_NAME =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.interactive.inactiveInkHover;
 
+/** Classes applied to transform options while the 1-day cooldown is active. */
+export const STYLING_WORLD_PLAZA_ACTION_BAR_TRANSFORM_OPTION_DISABLED_CLASS_NAME =
+  'cursor-not-allowed opacity-45 hover:bg-transparent' as const;
+
 /** Notification badge on the friends action button (size via inline viewport styles). */
 export const STYLING_WORLD_PLAZA_ACTION_BAR_FRIENDS_NOTIFICATION_BADGE =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_STYLE.badge.notification;
