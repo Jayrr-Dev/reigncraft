@@ -12,12 +12,13 @@ import { computingWorldPlazaGridChebyshevDistance } from '@/components/world/dom
 import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import { formattingWorldPlazaDayNightDayNumber } from '@/components/world/domains/formattingWorldPlazaDayNightDayNumber';
+import { listingWorldPlazaTileIndicesInBounds } from '@/components/world/domains/listingWorldPlazaTileIndicesInBounds';
+import { listingWorldPlazaTreesInTileBounds } from '@/components/world/domains/listingWorldPlazaTreesInTileBounds';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { checkingWorldPlazaProceduralTreesAndRocksFeatureEnabled } from '@/components/world/domains/managingWorldPlazaProceduralTreesAndRocksFeatureStore';
-import { listingWorldPlazaTileIndicesInBounds } from '@/components/world/domains/listingWorldPlazaTileIndicesInBounds';
 import { resolvingWorldPlazaBiomeAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBiomeAtTileIndex';
-import { resolvingWorldPlazaDayNightCyclePhase } from '@/components/world/domains/resolvingWorldPlazaDayNightCyclePhase';
 import { checkingWorldPlazaGrassFloorTileIsBurntAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBurntGrassFloorTileFillColorAtTileIndex';
+import { resolvingWorldPlazaDayNightCyclePhase } from '@/components/world/domains/resolvingWorldPlazaDayNightCyclePhase';
 import { resolvingWorldPlazaWaterAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaWaterAtTileIndex';
 import {
   checkingWorldPlazaMushroomPastureBiomeKind,
@@ -34,24 +35,24 @@ import {
   DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_SEED_SALT,
 } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomConstants';
 import {
-  checkingWorldPlazaMushroomTimeOfDayMatches,
-  resolvingWorldPlazaMushroomEffectiveSpawnModulus,
-} from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpawnBalanceConstants';
-import {
   checkingWorldPlazaMushroomDayScheduleMatches,
   checkingWorldPlazaMushroomPhaseWindowMatches,
   DEFINING_WORLD_PLAZA_MUSHROOM_CATALOG,
   type DefiningWorldPlazaMushroomCatalogEntry,
 } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomRegistry';
+import {
+  checkingWorldPlazaMushroomTimeOfDayMatches,
+  resolvingWorldPlazaMushroomEffectiveSpawnModulus,
+} from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpawnBalanceConstants';
+import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
 import { resolvingWorldPlazaMushroomSpeciesSheetIndex } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpriteSheetConstants';
+import { pickingWorldPlazaMushroomCatalogEntryByRarityWeight } from '@/components/world/mushrooms/domains/pickingWorldPlazaMushroomCatalogEntryByRarityWeight';
+import { checkingWorldPlazaRuntimeMushroomIsPicked } from '@/components/world/mushrooms/domains/registeringWorldPlazaPickedMushroomsLookup';
+import { resolvingWorldPlazaMushroomSparseAtTileIndex } from '@/components/world/mushrooms/domains/resolvingWorldPlazaMushroomAtTileIndex';
 import {
   resolvingWorldPlazaMushroomPastureHabitatLayoutSeatsAtAnchor,
   resolvingWorldPlazaMushroomWoodHabitatLayoutSeatsAtAnchor,
 } from '@/components/world/mushrooms/domains/resolvingWorldPlazaMushroomHabitatLayoutSeatsAtAnchor';
-import { resolvingWorldPlazaMushroomSparseAtTileIndex } from '@/components/world/mushrooms/domains/resolvingWorldPlazaMushroomAtTileIndex';
-import { pickingWorldPlazaMushroomCatalogEntryByRarityWeight } from '@/components/world/mushrooms/domains/pickingWorldPlazaMushroomCatalogEntryByRarityWeight';
-import { checkingWorldPlazaRuntimeMushroomIsPicked } from '@/components/world/mushrooms/domains/registeringWorldPlazaPickedMushroomsLookup';
-import type { DefiningWorldPlazaMushroomSpeciesId } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomSpeciesIds';
 
 export type ListingWorldPlazaMushroomDecorationCandidate = {
   readonly tileX: number;
@@ -247,109 +248,116 @@ export function listingWorldPlazaMushroomDecorationCandidatesInBounds(
     ListingWorldPlazaMushroomHabitatSeatClaim
   >();
 
-  const anchorMinTileX = bounds.minTileX - scanRadius;
-  const anchorMaxTileX = bounds.maxTileX + scanRadius;
-  const anchorMinTileY = bounds.minTileY - scanRadius;
-  const anchorMaxTileY = bounds.maxTileY + scanRadius;
+  const anchorBounds: DefiningWorldPlazaVisibleTileBounds = {
+    minTileX: bounds.minTileX - scanRadius,
+    maxTileX: bounds.maxTileX + scanRadius,
+    minTileY: bounds.minTileY - scanRadius,
+    maxTileY: bounds.maxTileY + scanRadius,
+  };
 
-  for (let anchorTileY = anchorMinTileY; anchorTileY <= anchorMaxTileY; anchorTileY += 1) {
-    for (
-      let anchorTileX = anchorMinTileX;
-      anchorTileX <= anchorMaxTileX;
-      anchorTileX += 1
-    ) {
-      if (resolvingWorldPlazaWaterAtTileIndex(anchorTileX, anchorTileY)) {
-        continue;
-      }
+  // Wood: only visit real tree tiles (spacing grid), never every floor tile.
+  if (woodHabitatEnabled) {
+    const trees = listingWorldPlazaTreesInTileBounds(
+      anchorBounds,
+      Number.POSITIVE_INFINITY
+    );
 
-      const hasTree = checkingWorldPlazaTreeBlocksGridTile(
+    for (const tree of trees) {
+      const anchorTileX = tree.tileX;
+      const anchorTileY = tree.tileY;
+      const woodUnit = computingWorldPlazaMushroomSeedUnitFromTileIndex(
         anchorTileX,
-        anchorTileY
+        anchorTileY,
+        DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_SEED_SALT
       );
 
-      if (woodHabitatEnabled && hasTree) {
-        const woodUnit = computingWorldPlazaMushroomSeedUnitFromTileIndex(
-          anchorTileX,
-          anchorTileY,
-          DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_SEED_SALT
-        );
-
-        if (
-          Math.floor(
-            woodUnit * DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_MODULUS
-          ) === 0
-        ) {
-          const biomeKind = resolvingWorldPlazaBiomeAtTileIndex(
-            anchorTileX,
-            anchorTileY
-          ).kind;
-
-          if (
-            checkingWorldPlazaMushroomHabitatAnchorPasses({
-              anchorTileX,
-              anchorTileY,
-              baseModulus:
-                DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_MODULUS,
-              salt: DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_SEED_SALT,
-              biomeKind,
-            })
-          ) {
-            const eligible = listingWorldPlazaMushroomEligibleHabitatEntriesAtAnchor(
-              {
-                biomeKind,
-                dayNumber,
-                cyclePhase,
-                speciesFilter: checkingWorldPlazaMushroomStumpHabitatSpeciesId,
-              }
-            );
-            const entry = pickingWorldPlazaMushroomCatalogEntryByRarityWeight(
-              eligible,
-              computingWorldPlazaMushroomSeedUnitFromTileIndex(
-                anchorTileX,
-                anchorTileY,
-                DEFINING_WORLD_PLAZA_MUSHROOM_SPECIES_SEED_SALT
-              )
-            );
-
-            if (entry) {
-              const seats =
-                resolvingWorldPlazaMushroomWoodHabitatLayoutSeatsAtAnchor(
-                  anchorTileX,
-                  anchorTileY,
-                  entry
-                );
-
-              for (const seat of seats) {
-                stampingWorldPlazaMushroomHabitatSeatClaim(
-                  claimByTileKey,
-                  seat.tileX,
-                  seat.tileY,
-                  {
-                    entry,
-                    priority: LISTING_WORLD_PLAZA_MUSHROOM_HABITAT_PRIORITY_WOOD,
-                    anchorDistanceTiles: computingWorldPlazaGridChebyshevDistance(
-                      anchorTileX,
-                      anchorTileY,
-                      seat.tileX,
-                      seat.tileY
-                    ),
-                    tieBreakSeed: woodUnit,
-                  },
-                  bounds.minTileX,
-                  bounds.maxTileX,
-                  bounds.minTileY,
-                  bounds.maxTileY
-                );
-              }
-            }
-          }
-        }
-      }
-
-      if (hasTree) {
+      if (
+        Math.floor(
+          woodUnit * DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_MODULUS
+        ) !== 0
+      ) {
         continue;
       }
 
+      const biomeKind = resolvingWorldPlazaBiomeAtTileIndex(
+        anchorTileX,
+        anchorTileY
+      ).kind;
+
+      if (
+        !checkingWorldPlazaMushroomHabitatAnchorPasses({
+          anchorTileX,
+          anchorTileY,
+          baseModulus:
+            DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_MODULUS,
+          salt: DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_SEED_SALT,
+          biomeKind,
+        })
+      ) {
+        continue;
+      }
+
+      const eligible = listingWorldPlazaMushroomEligibleHabitatEntriesAtAnchor({
+        biomeKind,
+        dayNumber,
+        cyclePhase,
+        speciesFilter: checkingWorldPlazaMushroomStumpHabitatSpeciesId,
+      });
+      const entry = pickingWorldPlazaMushroomCatalogEntryByRarityWeight(
+        eligible,
+        computingWorldPlazaMushroomSeedUnitFromTileIndex(
+          anchorTileX,
+          anchorTileY,
+          DEFINING_WORLD_PLAZA_MUSHROOM_SPECIES_SEED_SALT
+        )
+      );
+
+      if (!entry) {
+        continue;
+      }
+
+      const seats = resolvingWorldPlazaMushroomWoodHabitatLayoutSeatsAtAnchor(
+        anchorTileX,
+        anchorTileY,
+        entry
+      );
+
+      for (const seat of seats) {
+        stampingWorldPlazaMushroomHabitatSeatClaim(
+          claimByTileKey,
+          seat.tileX,
+          seat.tileY,
+          {
+            entry,
+            priority: LISTING_WORLD_PLAZA_MUSHROOM_HABITAT_PRIORITY_WOOD,
+            anchorDistanceTiles: computingWorldPlazaGridChebyshevDistance(
+              anchorTileX,
+              anchorTileY,
+              seat.tileX,
+              seat.tileY
+            ),
+            tieBreakSeed: woodUnit,
+          },
+          bounds.minTileX,
+          bounds.maxTileX,
+          bounds.minTileY,
+          bounds.maxTileY
+        );
+      }
+    }
+  }
+
+  // Pasture: cheap modulus gate first; tree/biome only on rare hits.
+  for (
+    let anchorTileY = anchorBounds.minTileY;
+    anchorTileY <= anchorBounds.maxTileY;
+    anchorTileY += 1
+  ) {
+    for (
+      let anchorTileX = anchorBounds.minTileX;
+      anchorTileX <= anchorBounds.maxTileX;
+      anchorTileX += 1
+    ) {
       const pastureUnit = computingWorldPlazaMushroomSeedUnitFromTileIndex(
         anchorTileX,
         anchorTileY,
@@ -362,6 +370,14 @@ export function listingWorldPlazaMushroomDecorationCandidatesInBounds(
             DEFINING_WORLD_PLAZA_MUSHROOM_PASTURE_HABITAT_ANCHOR_MODULUS
         ) !== 0
       ) {
+        continue;
+      }
+
+      if (checkingWorldPlazaTreeBlocksGridTile(anchorTileX, anchorTileY)) {
+        continue;
+      }
+
+      if (resolvingWorldPlazaWaterAtTileIndex(anchorTileX, anchorTileY)) {
         continue;
       }
 
@@ -406,11 +422,12 @@ export function listingWorldPlazaMushroomDecorationCandidatesInBounds(
         continue;
       }
 
-      const seats = resolvingWorldPlazaMushroomPastureHabitatLayoutSeatsAtAnchor(
-        anchorTileX,
-        anchorTileY,
-        entry
-      );
+      const seats =
+        resolvingWorldPlazaMushroomPastureHabitatLayoutSeatsAtAnchor(
+          anchorTileX,
+          anchorTileY,
+          entry
+        );
 
       for (const seat of seats) {
         stampingWorldPlazaMushroomHabitatSeatClaim(
@@ -474,7 +491,9 @@ export function listingWorldPlazaMushroomDecorationCandidatesInBounds(
     candidates.push({
       tileX,
       tileY,
-      speciesIndex: resolvingWorldPlazaMushroomSpeciesSheetIndex(entry.speciesId),
+      speciesIndex: resolvingWorldPlazaMushroomSpeciesSheetIndex(
+        entry.speciesId
+      ),
     });
   }
 

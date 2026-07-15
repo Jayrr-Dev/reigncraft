@@ -3,12 +3,10 @@ import { computingWorldPlazaMushroomSeedUnitFromTileIndex } from '@/components/w
 import {
   DEFINING_WORLD_PLAZA_MUSHROOM_PASTURE_HABITAT_ANCHOR_MODULUS,
   DEFINING_WORLD_PLAZA_MUSHROOM_PASTURE_HABITAT_ANCHOR_SEED_SALT,
-  DEFINING_WORLD_PLAZA_MUSHROOM_PLACEMENT_SEED_SALT,
-  DEFINING_WORLD_PLAZA_MUSHROOM_TILE_MODULUS,
   DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_MODULUS,
   DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_SEED_SALT,
 } from '@/components/world/mushrooms/domains/definingWorldPlazaMushroomConstants';
-import { resolvingWorldPlazaMushroomAtTileIndex } from '@/components/world/mushrooms/domains/resolvingWorldPlazaMushroomAtTileIndex';
+import { resolvingWorldPlazaMushroomSparseAtTileIndex } from '@/components/world/mushrooms/domains/resolvingWorldPlazaMushroomAtTileIndex';
 import { resolvingWorldPlazaMushroomHabitatClaimAtTileIndex } from '@/components/world/mushrooms/domains/resolvingWorldPlazaMushroomHabitatClaimAtTileIndex';
 import { describe, expect, it } from 'vitest';
 
@@ -215,25 +213,11 @@ describe('resolvingWorldPlazaMushroomHabitatClaimAtTileIndex', () => {
   });
 });
 
-describe('resolvingWorldPlazaMushroomAtTileIndex', () => {
+describe('resolvingWorldPlazaMushroomSparseAtTileIndex', () => {
   it('never returns habitat species from the sparse path', () => {
     for (let tileX = -20; tileX <= 20; tileX += 1) {
       for (let tileY = -20; tileY <= 20; tileY += 1) {
-        const placementUnit = computingWorldPlazaMushroomSeedUnitFromTileIndex(
-          tileX,
-          tileY,
-          DEFINING_WORLD_PLAZA_MUSHROOM_PLACEMENT_SEED_SALT
-        );
-
-        if (
-          Math.floor(
-            placementUnit * DEFINING_WORLD_PLAZA_MUSHROOM_TILE_MODULUS
-          ) !== 0
-        ) {
-          continue;
-        }
-
-        const entry = resolvingWorldPlazaMushroomAtTileIndex({
+        const entry = resolvingWorldPlazaMushroomSparseAtTileIndex({
           tileX,
           tileY,
           dayNumber: 1,
@@ -241,20 +225,6 @@ describe('resolvingWorldPlazaMushroomAtTileIndex', () => {
         });
 
         if (!entry) {
-          continue;
-        }
-
-        if (
-          resolvingWorldPlazaMushroomHabitatClaimAtTileIndex({
-            tileX,
-            tileY,
-            dayNumber: 1,
-            cyclePhase: 0.5,
-            checkingTreeAtTile: () => false,
-            resolveBiomeKindAtTile: () => 'plains',
-            checkingWaterAtTile: () => false,
-          })
-        ) {
           continue;
         }
 
