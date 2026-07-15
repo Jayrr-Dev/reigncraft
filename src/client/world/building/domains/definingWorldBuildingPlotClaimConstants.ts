@@ -84,9 +84,3 @@ export const DEFINING_WORLD_BUILDING_PLOT_CLAIM_PLACE_SFX_VOLUME_MULTIPLIER = 1;
  * Quieter than place so drag-unclaim paint stays less harsh.
  */
 export const DEFINING_WORLD_BUILDING_PLOT_CLAIM_REMOVE_SFX_VOLUME_MULTIPLIER = 0.55;
-
-/**
- * Start-screen chest-close button clip volume scale for claim plot card clicks.
- * Quieter than home menu so claim list feedback stays soft.
- */
-export const DEFINING_WORLD_BUILDING_CLAIM_BOX_BUTTON_SFX_VOLUME_MULTIPLIER = 0.55;

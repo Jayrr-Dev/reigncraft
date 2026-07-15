@@ -478,13 +478,15 @@ export const App = () => {
     );
   }
 
-    return (
-      <QueryClientProvider client={queryClient}>
-        <RenderingPlazaBookSfx />
-        <RenderingPlazaHomeScreenButtonSfx
-          trackDefaultButtonPresses={false}
-        />
-        <div className="flex h-dvh min-h-0 w-full flex-col bg-gray-950">
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RenderingPlazaBookSfx />
+      <RenderingPlazaHomeScreenButtonSfx
+        defaultButtonPressVolumeMultiplier={
+          DEFINING_PLAZA_HOME_SCREEN_BUTTON_SFX_WORLD_UI_VOLUME_MULTIPLIER
+        }
+      />
+      <div className="flex h-dvh min-h-0 w-full flex-col bg-gray-950">
         <div className="relative min-h-0 flex-1 p-2">
           <PlazaWorldErrorBoundary>
             <PlazaWorldBootGate isHydratingSave={isHydratingSinglePlayerSave}>
