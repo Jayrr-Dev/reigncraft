@@ -35,10 +35,9 @@ function resolvingWorldPlazaEntityHealthBarGridPoint({
   playerPositionRef,
   remotePlayerRegistryRef,
   playerRenderPositionRegistryRef,
-  remotePlayers,
 }: Omit<
   ResolvingWorldPlazaEntityHealthBarScreenPointParams,
-  'cameraOffset' | 'cameraWorldZoom'
+  'cameraOffset' | 'cameraWorldZoom' | 'remotePlayers'
 >): DefiningWorldPlazaWorldPoint {
   if (userId === localUserId) {
     const localPosition = playerPositionRef.current;
@@ -60,12 +59,8 @@ function resolvingWorldPlazaEntityHealthBarGridPoint({
     return { x: remotePlayer.x, y: remotePlayer.y };
   }
 
-  const rosterPlayer = remotePlayers.find((player) => player.userId === userId);
-
-  if (rosterPlayer) {
-    return { x: rosterPlayer.x, y: rosterPlayer.y };
-  }
-
+  // Prefer live registries over an O(n) roster scan on the overlay hot path.
+  // Anchor grid is refreshed from room state when entries remount/reconcile.
   return { x: anchorGridX, y: anchorGridY };
 }
 

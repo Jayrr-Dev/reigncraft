@@ -25,7 +25,7 @@ export function computingWorldPlazaMiniMapStackTopPx(
 
 /**
  * Vertical footprint reserved for a corner minimap (unused; map is a dropdown).
- * Kept at chrome-only so Dev tools can sit on the top-left edge.
+ * Kept at chrome-only; Dev tools clear the action bar via occupied height instead.
  */
 export function computingWorldPlazaMiniMapStackOccupiedHeightPx(
   viewportHudScale: number,

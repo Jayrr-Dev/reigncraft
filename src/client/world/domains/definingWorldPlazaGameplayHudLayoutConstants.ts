@@ -81,14 +81,14 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
   },
 
   regions: {
-    /** Top-left: Dev / Perf toolbar; open Dev tools panel stacks below. */
+    /** Top-left: Dev / Perf toolbar under the action bar; open panel stacks below. */
     topLeft: {
       minimapStack: {
         anchorClassName:
           'pointer-events-none absolute z-20 flex flex-col items-start select-none',
       },
       devModePanel: {
-        // Top offset: action-bar row inset + small gap (see DevModePanel viewport layout).
+        // Top offset: below action bar + gap (see DevModePanel viewport layout).
         // Toolbar row (Home / Dev / Perf) on top; open panel stacks below.
         // Toolbar width is inline (minimap footprint) — do not use w-full or the
         // open panel widens the column and stretches Home / Dev / Perf.

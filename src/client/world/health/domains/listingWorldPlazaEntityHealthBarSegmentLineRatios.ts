@@ -40,3 +40,20 @@ export function computingWorldPlazaEntityHealthBarSegmentCount(
 
   return Math.ceil(effectiveMaxHealth / segmentHealth);
 }
+
+/**
+ * Single-layer CSS background for segment tick marks (avoids N flex child nodes).
+ *
+ * @returns `null` when the bar is one segment and needs no dividers.
+ */
+export function computingWorldPlazaEntityHealthBarSegmentDividerBackgroundImage(
+  segmentCount: number
+): string | null {
+  if (segmentCount <= 1) {
+    return null;
+  }
+
+  const segmentPercent = 100 / segmentCount;
+
+  return `repeating-linear-gradient(to right, transparent 0, transparent calc(${segmentPercent}% - 1px), rgba(0,0,0,0.45) calc(${segmentPercent}% - 1px), rgba(0,0,0,0.45) ${segmentPercent}%)`;
+}

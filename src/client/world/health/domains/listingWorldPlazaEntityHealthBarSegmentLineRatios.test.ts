@@ -1,5 +1,6 @@
 import {
   computingWorldPlazaEntityHealthBarSegmentCount,
+  computingWorldPlazaEntityHealthBarSegmentDividerBackgroundImage,
   listingWorldPlazaEntityHealthBarSegmentLineRatios,
 } from '@/components/world/health/domains/listingWorldPlazaEntityHealthBarSegmentLineRatios';
 import { describe, expect, it } from 'vitest';
@@ -31,5 +32,19 @@ describe('computingWorldPlazaEntityHealthBarSegmentCount', () => {
 
   it('returns one segment when max health fits in one chunk', () => {
     expect(computingWorldPlazaEntityHealthBarSegmentCount(100, 100)).toBe(1);
+  });
+});
+
+describe('computingWorldPlazaEntityHealthBarSegmentDividerBackgroundImage', () => {
+  it('returns null for a single-segment bar', () => {
+    expect(
+      computingWorldPlazaEntityHealthBarSegmentDividerBackgroundImage(1)
+    ).toBeNull();
+  });
+
+  it('builds a repeating gradient for multi-segment bars', () => {
+    expect(
+      computingWorldPlazaEntityHealthBarSegmentDividerBackgroundImage(10)
+    ).toContain('repeating-linear-gradient');
   });
 });

@@ -34,6 +34,39 @@ export const DEFINING_WORLD_PLAZA_MUSHROOM_SPECIES_SEED_SALT = 2712;
  */
 export const DEFINING_WORLD_PLAZA_MUSHROOM_TILE_MODULUS = 47;
 
+/** Wood habitat anchor gate (rarer than sparse tiles). One in N tree tiles may host a cluster. */
+export const DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_MODULUS = 89;
+
+/** Pasture ring anchor gate. One in N pasture tiles may host a fairy ring. */
+export const DEFINING_WORLD_PLAZA_MUSHROOM_PASTURE_HABITAT_ANCHOR_MODULUS = 73;
+
+/** Seed salt for wood habitat anchor gate. */
+export const DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_HABITAT_ANCHOR_SEED_SALT = 2713;
+
+/** Seed salt for pasture habitat anchor gate. */
+export const DEFINING_WORLD_PLAZA_MUSHROOM_PASTURE_HABITAT_ANCHOR_SEED_SALT = 2714;
+
+/** Seed salt for wood layout mode (bunch vs ring for honey). */
+export const DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_LAYOUT_MODE_SEED_SALT = 2715;
+
+/** Seed salt for wood bunch seat count. */
+export const DEFINING_WORLD_PLAZA_MUSHROOM_WOOD_BUNCH_COUNT_SEED_SALT = 2716;
+
+/** Seed salt for ring seat count (wood honey + pasture). */
+export const DEFINING_WORLD_PLAZA_MUSHROOM_RING_COUNT_SEED_SALT = 2717;
+
+/** Seed salt for near-tree ghost-wing seat count. */
+export const DEFINING_WORLD_PLAZA_MUSHROOM_NEAR_TREE_COUNT_SEED_SALT = 2718;
+
+/** Seed salt for ring start angle. */
+export const DEFINING_WORLD_PLAZA_MUSHROOM_RING_ANGLE_SEED_SALT = 2719;
+
+/** Max Chebyshev scan radius when reverse-looking up habitat anchors. */
+export const DEFINING_WORLD_PLAZA_MUSHROOM_HABITAT_ANCHOR_SCAN_RADIUS_TILES = 4;
+
+/** cluster-honey ring mode when layout unit is below this threshold. */
+export const DEFINING_WORLD_PLAZA_MUSHROOM_CLUSTER_HONEY_RING_MODE_THRESHOLD = 0.25;
+
 /** World sprite display scale vs isometric tile width. */
 export const DEFINING_WORLD_PLAZA_MUSHROOM_DISPLAY_SCALE = 0.42;
 

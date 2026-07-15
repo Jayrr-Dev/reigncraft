@@ -196,8 +196,6 @@ export function RenderingPlazaPathologyPanel({
   const obtainedCount = guideEntries.filter((entry) => entry.isObtained).length;
   const studiedCount = guideEntries.filter((entry) => entry.isStudied).length;
   const totalCount = guideEntries.length;
-  const progressPercent =
-    totalCount > 0 ? Math.round((obtainedCount / totalCount) * 100) : 0;
 
   if (selectedEntry?.isObtained) {
     return (
@@ -245,35 +243,20 @@ export function RenderingPlazaPathologyPanel({
         ) : null}
       </div>
 
-      <div className="shrink-0 rounded-md border border-poster-teal/25 bg-parchment/45 px-3 py-1.5">
-        <div className="flex items-center justify-between gap-2 text-[10px] font-bold uppercase tracking-wide text-ink-soft">
-          <span>
-            Logged{' '}
-            <span className="font-mono tabular-nums text-poster-teal-deep">
-              {obtainedCount}/{totalCount}
-            </span>
-          </span>
-          <span>
-            Studied{' '}
-            <span className="font-mono tabular-nums text-poster-teal-deep">
-              {studiedCount}
-            </span>
-          </span>
-        </div>
-        <div
-          className="mt-1 h-1.5 overflow-hidden rounded-full border border-poster-teal/25 bg-poster-teal-deep/15"
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={totalCount}
-          aria-valuenow={obtainedCount}
-          aria-label="Diseases logged"
-        >
-          <div
-            className="h-full rounded-full bg-[linear-gradient(90deg,#c98a2d_0%,#d9a441_100%)] transition-[width] duration-500"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-      </div>
+      <RenderingPlazaCodexDualProgress
+        left={{
+          label: 'Logged',
+          value: obtainedCount,
+          max: totalCount,
+          ariaLabel: 'Diseases logged',
+        }}
+        right={{
+          label: 'Studied',
+          value: studiedCount,
+          max: totalCount,
+          ariaLabel: 'Diseases studied',
+        }}
+      />
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 touch-pan-y">
         <div className="grid grid-cols-2 content-start gap-1.5 sm:grid-cols-3 sm:gap-2">

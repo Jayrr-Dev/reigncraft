@@ -70,6 +70,9 @@ export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_TICK_INTERVAL_MS = 100;
 /** Minimum health-ratio delta worth a HUD re-render. */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_EPSILON = 0.005;
 
+/** Minimum local-temperature delta (°C) worth a HUD re-render. */
+export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_TEMPERATURE_EPSILON = 0.25;
+
 /** Default initial health state for a new player. */
 export const DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE: DefiningWorldPlazaEntityHealthState =
   {

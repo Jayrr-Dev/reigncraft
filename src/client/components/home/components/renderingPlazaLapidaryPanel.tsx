@@ -84,10 +84,7 @@ function RenderingPlazaLapidaryGuideCard({
           'border-poster-teal/20 bg-parchment/30'
         )}
       >
-        <div
-          className={PLAZA_LAPIDARY_GUIDE_TILE_STAGE_CLASS_NAME}
-          aria-hidden
-        >
+        <div className={PLAZA_LAPIDARY_GUIDE_TILE_STAGE_CLASS_NAME} aria-hidden>
           <RenderingPlazaLapidaryOrePortrait
             speciesId={entry.speciesId}
             variant="silhouette"
@@ -187,8 +184,7 @@ export function RenderingPlazaLapidaryPanel({
     [exploredKinds, oreStudyCountsBySpeciesId, sightedOreSet]
   );
   const resolvingPlazaLapidaryEntryId = useCallback(
-    (entry: PlazaLapidaryGuideDisplayEntry): string =>
-      `ore:${entry.speciesId}`,
+    (entry: PlazaLapidaryGuideDisplayEntry): string => `ore:${entry.speciesId}`,
     []
   );
   const selectedEntry = useMemo(

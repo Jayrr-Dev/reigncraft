@@ -28,8 +28,8 @@ export const STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TOOLBAR_ROW_CLASS_NAME =
   DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT.regions.topLeft.devModePanel
     .toolbarRowClassName;
 
-/** Gap between the minimap card and the Dev tools row. */
-export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_BELOW_MINIMAP_GAP_BASE_PX =
+/** Gap between the action bar shell and the Dev tools row. */
+export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_BELOW_ACTION_BAR_GAP_BASE_PX =
   DEFINING_WORLD_PLAZA_MINI_MAP_STACK_LAYOUT.belowMinimapGapBasePx;
 
 /** Collapsed dev launcher button. */
@@ -140,10 +140,10 @@ export const LABELING_WORLD_PLAZA_DEV_MODE_PANEL_VIEW_SELECT =
   'Dev tools section' as const;
 
 /**
- * Resolves top offset for the dev panel below gameplay HUD chrome.
- * Dev tools sit at the top-left corner; kept for callers that still pass stamina context.
+ * Resolves top offset class for the dev panel (inline top is used instead).
+ * Kept for callers that still pass stamina context.
  *
- * @param _hasStaminaBar - Unused; layout is fixed at top-left.
+ * @param _hasStaminaBar - Unused; layout is fixed top-left under the action bar.
  */
 export function resolvingWorldPlazaDevModePanelAnchorTopClassName(
   _hasStaminaBar: boolean

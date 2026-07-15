@@ -293,9 +293,7 @@ export function RenderingPlazaBestiaryPanel({
               type="button"
               role="tab"
               aria-selected={isActive}
-              title={
-                filter.isExplored ? filter.label : 'Undiscovered region'
-              }
+              title={filter.isExplored ? filter.label : 'Undiscovered region'}
               className={cn(
                 PLAZA_BESTIARY_BIOME_TAB_BUTTON_CLASS_NAME,
                 isActive && PLAZA_BESTIARY_BIOME_TAB_BUTTON_ACTIVE_CLASS_NAME,

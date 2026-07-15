@@ -6387,6 +6387,18 @@ function RenderingWorldPlazaPixiSceneConnected({
     runStaminaStateRef: playerRunStaminaStateRef,
   });
 
+  const localStaminaHudForHealthBars = useMemo(
+    () =>
+      isHudStaminaEnabled
+        ? {
+            staminaRatio,
+            isRunning: isRunningHud,
+            isDepleted: isStaminaDepleted,
+          }
+        : null,
+    [isHudStaminaEnabled, isRunningHud, isStaminaDepleted, staminaRatio]
+  );
+
   const isPlayerDead = playerHealthHudSnapshot.isDead;
   const temperatureComfortBand = useMemo(
     () =>
@@ -8327,15 +8339,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               healthBarEntries={playerHealthBarEntries}
               localUserId={localHealthEntityUserId}
               localHudSnapshot={playerHealthHudSnapshot}
-              localStaminaHud={
-                isHudStaminaEnabled
-                  ? {
-                      staminaRatio,
-                      isRunning: isRunningHud,
-                      isDepleted: isStaminaDepleted,
-                    }
-                  : null
-              }
+              localStaminaHud={localStaminaHudForHealthBars}
               isHealthTrackVisible={isHudHealthEnabled}
               playerPositionRef={playerPositionRef}
               remotePlayerRegistryRef={remotePlayerRegistryRef}

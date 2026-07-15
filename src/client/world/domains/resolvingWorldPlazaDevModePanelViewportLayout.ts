@@ -1,13 +1,13 @@
+import { computingWorldPlazaActionBarOccupiedHeightPx } from '@/components/world/domains/computingWorldPlazaActionBarOccupiedHeightPx';
 import { computingWorldPlazaViewportHudScaledPx } from '@/components/world/domains/computingWorldPlazaViewportHudScale';
 import {
-  DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_BELOW_MINIMAP_GAP_BASE_PX,
+  DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_BELOW_ACTION_BAR_GAP_BASE_PX,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_ANCHOR_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TOOLBAR_ROW_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
 import {
   computingWorldPlazaMiniMapStackLeftInsetPx,
   computingWorldPlazaMiniMapStackOccupiedWidthPx,
-  computingWorldPlazaMiniMapStackTopPx,
 } from '@/components/world/domains/resolvingWorldPlazaMiniMapStackViewportStyles';
 import type { CSSProperties } from 'react';
 
@@ -20,7 +20,7 @@ export type DefiningWorldPlazaDevModePanelViewportLayout = {
 
 /**
  * Resolves anchor classes and offsets for the Dev tools panel.
- * Sits in the top-left corner (minimap now drops from the action bar).
+ * Sits top-left, just under the action bar so a wide bar cannot cover Home/Dev/Perf.
  *
  * Home / Dev / Perf stay on a compact toolbar row; the open panel stacks below.
  * Toolbar width matches the minimap canvas footprint.
@@ -37,9 +37,9 @@ export function resolvingWorldPlazaDevModePanelViewportLayout({
   isOpen?: boolean;
 }): DefiningWorldPlazaDevModePanelViewportLayout {
   const topPx =
-    computingWorldPlazaMiniMapStackTopPx(viewportHudScale, isMobile) +
+    computingWorldPlazaActionBarOccupiedHeightPx(viewportHudScale, isMobile) +
     computingWorldPlazaViewportHudScaledPx(
-      DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_BELOW_MINIMAP_GAP_BASE_PX,
+      DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_BELOW_ACTION_BAR_GAP_BASE_PX,
       viewportHudScale
     );
   const leftInsetPx = computingWorldPlazaMiniMapStackLeftInsetPx(

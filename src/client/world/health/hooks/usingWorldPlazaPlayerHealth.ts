@@ -45,6 +45,7 @@ import { DEFINING_WORLD_PLAZA_ENTITY_DISEASE_DEV_PREVIEW_DURATION_SCALE } from '
 import {
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_EPSILON,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_PUSH_INTERVAL_MS,
+  DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_TEMPERATURE_EPSILON,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_RESPAWN_INVINCIBILITY_MS,
   DEFINING_WORLD_PLAZA_ENTITY_HEALTH_TICK_INTERVAL_MS,
 } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
@@ -786,8 +787,14 @@ export function usingWorldPlazaPlayerHealth({
           previous.activePotentialDamageCount ===
             nextSnapshot.activePotentialDamageCount &&
           previous.floatingTexts === nextSnapshot.floatingTexts &&
-          previous.localTemperatureCelsius ===
-            nextSnapshot.localTemperatureCelsius &&
+          ((previous.localTemperatureCelsius === null &&
+            nextSnapshot.localTemperatureCelsius === null) ||
+            (previous.localTemperatureCelsius !== null &&
+              nextSnapshot.localTemperatureCelsius !== null &&
+              Math.abs(
+                previous.localTemperatureCelsius -
+                  nextSnapshot.localTemperatureCelsius
+              ) < DEFINING_WORLD_PLAZA_ENTITY_HEALTH_HUD_TEMPERATURE_EPSILON)) &&
           previous.temperatureDisplayUnit ===
             nextSnapshot.temperatureDisplayUnit &&
           previous.temperatureResistance ===
