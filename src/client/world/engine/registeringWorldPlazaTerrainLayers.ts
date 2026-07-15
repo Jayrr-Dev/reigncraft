@@ -41,7 +41,6 @@ import {
 } from '@/components/world/domains/syncingWorldPlazaVisibleLavaOverlayLayer';
 import { syncingWorldPlazaVisibleLongGrassDecorationLayer } from '@/components/world/domains/syncingWorldPlazaVisibleLongGrassDecorationLayer';
 import { syncingWorldPlazaVisibleShrubDecorationLayer } from '@/components/world/domains/syncingWorldPlazaVisibleShrubDecorationLayer';
-import { syncingWorldPlazaVisibleMushroomDecorationLayer } from '@/components/world/mushrooms/domains/syncingWorldPlazaVisibleMushroomDecorationLayer';
 import {
   ensuringWorldPlazaVisibleStoneDecorationLayer,
   updatingWorldPlazaVisibleStoneDecorationLayer,
@@ -67,6 +66,7 @@ import {
 } from '@/components/world/domains/syncingWorldPlazaVisibleWaterSurfaceGraphicsLayer';
 import {
   buildingWorldPlazaBurntGrassTileKeysCacheKey,
+  buildingWorldPlazaClearedLongGrassCacheKey,
   buildingWorldPlazaPickedFlowersCacheKey,
   buildingWorldPlazaPickedPebblesCacheKey,
 } from '@/components/world/engine/buildingWorldPlazaTerrainLayerCacheKeys';
@@ -81,6 +81,7 @@ import {
   type RunningWorldPlazaTerrainLayerEngineHandle,
 } from '@/components/world/engine/runningWorldPlazaTerrainLayerEngine';
 import { updatingWorldPlazaVisibleTreeShakeOffsets } from '@/components/world/harvest/domains/updatingWorldPlazaVisibleTreeShakeOffsets';
+import { syncingWorldPlazaVisibleMushroomDecorationLayer } from '@/components/world/mushrooms/domains/syncingWorldPlazaVisibleMushroomDecorationLayer';
 import type { Graphics, Sprite } from 'pixi.js';
 import { parsingWorldFireDevvitTileKey } from '../../../shared/worldFireDevvit';
 
@@ -711,10 +712,18 @@ export function registeringWorldPlazaTerrainLayers(
             centerTileX: Math.round(context.playerPosition.x),
             centerTileY: Math.round(context.playerPosition.y),
             burntGrassTileKeys: context.burntGrassTileKeys,
+            listingCacheKey: [
+              context.floorBoundsKey,
+              buildingWorldPlazaClearedLongGrassCacheKey(
+                context.clearedLongGrassByTileKey
+              ),
+              buildingWorldPlazaBurntGrassTileKeysCacheKey(
+                context.burntGrassTileKeys
+              ),
+            ].join('|'),
+            // Match tree budget so grass sprites stream in instead of hitching.
             maxBuildsPerCall:
-              context.performanceProfile
-                .terrainElevationChunkBuildBudgetPerFrame *
-              context.performanceProfile.floorChunkSizeTiles,
+              context.performanceProfile.treeBuildBudgetPerFrame,
             shouldSortChildrenImmediately: false,
           });
 
@@ -873,9 +882,10 @@ export function registeringWorldPlazaTerrainLayers(
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.DAY_NUMBER,
         DEFINING_WORLD_PLAZA_TERRAIN_DEPENDENCY_KEY.MUSHROOM_TEXTURES_READY,
       ],
-      createRuntimeState: (): RunningWorldPlazaMushroomDecorationsLayerState => ({
-        spriteByKey: new Map(),
-      }),
+      createRuntimeState:
+        (): RunningWorldPlazaMushroomDecorationsLayerState => ({
+          spriteByKey: new Map(),
+        }),
       sync: (context, runtimeState) => {
         const state =
           runtimeState as RunningWorldPlazaMushroomDecorationsLayerState;

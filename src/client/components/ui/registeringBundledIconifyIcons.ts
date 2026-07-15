@@ -201,6 +201,8 @@ import solarFireBold from '@iconify-icons/solar/fire-bold';
 import solarGamepadBold from '@iconify-icons/solar/gamepad-bold';
 import solarHeartPulseBold from '@iconify-icons/solar/heart-pulse-bold';
 import boxiconsIconSet from '@iconify-json/boxicons/icons.json';
+import fluentEmojiHighContrastIconSet from '@iconify-json/fluent-emoji-high-contrast/icons.json';
+import pepiconsPopIconSet from '@iconify-json/pepicons-pop/icons.json';
 import { addIcon } from '@iconify/react';
 import type { IconifyIcon } from '@iconify/types';
 
@@ -214,6 +216,18 @@ const boxiconsSwordFilled: IconifyIcon = {
   ...boxiconsIconSet.icons['sword-filled'],
   width: 24,
   height: 24,
+};
+
+const fluentEmojiHighContrastPhoenixBird: IconifyIcon = {
+  ...fluentEmojiHighContrastIconSet.icons['phoenix-bird'],
+  width: fluentEmojiHighContrastIconSet.width ?? 32,
+  height: fluentEmojiHighContrastIconSet.height ?? 32,
+};
+
+const pepiconsPopNoEntryCircleOff: IconifyIcon = {
+  ...pepiconsPopIconSet.icons['no-entry-circle-off'],
+  width: pepiconsPopIconSet.width ?? 26,
+  height: pepiconsPopIconSet.height ?? 26,
 };
 
 /**
@@ -230,6 +244,8 @@ const roentgenCompass: IconifyIcon = {
 const bundledIconifyIcons: Record<string, IconifyIcon> = {
   'boxicons:sword-filled': boxiconsSwordFilled,
   'boxicons:target': boxiconsTarget,
+  'fluent-emoji-high-contrast:phoenix-bird': fluentEmojiHighContrastPhoenixBird,
+  'pepicons-pop:no-entry-circle-off': pepiconsPopNoEntryCircleOff,
   'roentgen:compass': roentgenCompass,
   'fluent-emoji:bacon': fluentEmojiBacon,
   'fluent-emoji:bear': fluentEmojiBear,

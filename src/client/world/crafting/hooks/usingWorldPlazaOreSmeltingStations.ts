@@ -66,7 +66,6 @@ export function usingWorldPlazaOreSmeltingStations({
   >(new Map());
   const stationStateByBlockIdRef = useRef(stationStateByBlockId);
   stationStateByBlockIdRef.current = stationStateByBlockId;
-  const [, setClockRevision] = useState(0);
   const completionTimeoutByBlockIdRef = useRef(
     new Map<string, ReturnType<typeof setTimeout>>()
   );
@@ -374,20 +373,7 @@ export function usingWorldPlazaOreSmeltingStations({
   const hasActiveStation = [...stationStateByBlockId.values()].some(
     (state) => state.endsAtMs !== null
   );
-
-  useEffect(() => {
-    if (!hasActiveStation) {
-      return;
-    }
-
-    const intervalId = setInterval(() => {
-      setClockRevision((revision) => revision + 1);
-    }, 100);
-
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [hasActiveStation]);
+  void hasActiveStation;
 
   useEffect(() => {
     const timeoutMap = completionTimeoutByBlockIdRef.current;
@@ -413,26 +399,11 @@ export function usingWorldPlazaOreSmeltingStations({
     ? (stationStateByBlockId.get(selectedStationBlock.blockId) ??
       DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE)
     : null;
-  const progressRatio =
-    selectedStationState?.startedAtMs !== null &&
-    selectedStationState?.startedAtMs !== undefined &&
-    selectedStationState.endsAtMs !== null
-      ? Math.min(
-          1,
-          Math.max(
-            0,
-            (Date.now() - selectedStationState.startedAtMs) /
-              (selectedStationState.endsAtMs -
-                selectedStationState.startedAtMs)
-          )
-        )
-      : 0;
 
   return {
     selectedStationBlock,
     selectedStationState,
     activeBlockIds,
-    progressRatio,
     selectingStation,
     closingStation,
     collectingSelectedStationOutput,

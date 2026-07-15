@@ -123,53 +123,150 @@ export function checkingWorldLongGrassBunchAnchorSpawnsAtTileIndex(
 }
 
 /**
- * Lists world tile offsets that belong to one seeded grass bunch.
+ * Resolves seeded bunch size for one anchor (inclusive of the anchor tile).
  */
-export function listingWorldLongGrassBunchMemberOffsets(
+function resolvingWorldLongGrassBunchSizeAtAnchor(
   anchorX: number,
   anchorY: number
-): readonly (readonly [number, number])[] {
+): number {
   const unit = seedingWorldLongGrassUnitFromTileIndex(
     anchorX,
     anchorY,
     WORLD_LONG_GRASS_BUNCH_SHAPE_SEED_SALT
   );
-  const bunchSize =
+
+  return (
     WORLD_LONG_GRASS_BUNCH_MIN_TILE_COUNT +
     Math.floor(
       unit *
         (WORLD_LONG_GRASS_BUNCH_MAX_TILE_COUNT -
           WORLD_LONG_GRASS_BUNCH_MIN_TILE_COUNT +
           1)
-    );
+    )
+  );
+}
 
-  const rankedOffsets = [...WORLD_LONG_GRASS_BUNCH_CANDIDATE_OFFSETS].sort(
-    (offsetA, offsetB) => {
-      const seedA = seedingWorldLongGrassUnitFromTileIndex(
-        anchorX + offsetA[0],
-        anchorY + offsetA[1],
-        WORLD_LONG_GRASS_BUNCH_SHAPE_SEED_SALT + 1
-      );
-      const seedB = seedingWorldLongGrassUnitFromTileIndex(
-        anchorX + offsetB[0],
-        anchorY + offsetB[1],
-        WORLD_LONG_GRASS_BUNCH_SHAPE_SEED_SALT + 1
-      );
+/**
+ * Offset shape-seed for one candidate relative to its bunch anchor.
+ */
+function seedingWorldLongGrassBunchOffsetUnit(
+  anchorX: number,
+  anchorY: number,
+  offsetX: number,
+  offsetY: number
+): number {
+  return seedingWorldLongGrassUnitFromTileIndex(
+    anchorX + offsetX,
+    anchorY + offsetY,
+    WORLD_LONG_GRASS_BUNCH_SHAPE_SEED_SALT + 1
+  );
+}
 
-      return seedA - seedB;
-    }
+/**
+ * True when rival offset ranks ahead of target (lower seed, then catalog order).
+ */
+function checkingWorldLongGrassBunchOffsetRanksAhead(
+  anchorX: number,
+  anchorY: number,
+  rivalOffsetX: number,
+  rivalOffsetY: number,
+  rivalCatalogIndex: number,
+  targetOffsetX: number,
+  targetOffsetY: number,
+  targetCatalogIndex: number
+): boolean {
+  const rivalSeed = seedingWorldLongGrassBunchOffsetUnit(
+    anchorX,
+    anchorY,
+    rivalOffsetX,
+    rivalOffsetY
+  );
+  const targetSeed = seedingWorldLongGrassBunchOffsetUnit(
+    anchorX,
+    anchorY,
+    targetOffsetX,
+    targetOffsetY
   );
 
-  const anchorOffset = rankedOffsets.find(
-    ([dx, dy]) => dx === 0 && dy === 0
-  ) ?? [0, 0];
-  const otherOffsets = rankedOffsets.filter(([dx, dy]) => dx !== 0 || dy !== 0);
+  if (rivalSeed !== targetSeed) {
+    return rivalSeed < targetSeed;
+  }
 
-  return [anchorOffset, ...otherOffsets].slice(0, bunchSize);
+  return rivalCatalogIndex < targetCatalogIndex;
+}
+
+/**
+ * Lists world tile offsets that belong to one seeded grass bunch.
+ */
+export function listingWorldLongGrassBunchMemberOffsets(
+  anchorX: number,
+  anchorY: number
+): readonly (readonly [number, number])[] {
+  const bunchSize = resolvingWorldLongGrassBunchSizeAtAnchor(anchorX, anchorY);
+  const rankedEntries: {
+    readonly offset: readonly [number, number];
+    readonly catalogIndex: number;
+  }[] = [];
+
+  for (
+    let catalogIndex = 0;
+    catalogIndex < WORLD_LONG_GRASS_BUNCH_CANDIDATE_OFFSETS.length;
+    catalogIndex += 1
+  ) {
+    const offset = WORLD_LONG_GRASS_BUNCH_CANDIDATE_OFFSETS[catalogIndex];
+
+    if (!offset || (offset[0] === 0 && offset[1] === 0)) {
+      continue;
+    }
+
+    rankedEntries.push({ offset, catalogIndex });
+  }
+
+  rankedEntries.sort((entryA, entryB) => {
+    if (
+      checkingWorldLongGrassBunchOffsetRanksAhead(
+        anchorX,
+        anchorY,
+        entryA.offset[0],
+        entryA.offset[1],
+        entryA.catalogIndex,
+        entryB.offset[0],
+        entryB.offset[1],
+        entryB.catalogIndex
+      )
+    ) {
+      return -1;
+    }
+
+    if (
+      checkingWorldLongGrassBunchOffsetRanksAhead(
+        anchorX,
+        anchorY,
+        entryB.offset[0],
+        entryB.offset[1],
+        entryB.catalogIndex,
+        entryA.offset[0],
+        entryA.offset[1],
+        entryA.catalogIndex
+      )
+    ) {
+      return 1;
+    }
+
+    return 0;
+  });
+
+  return [[0, 0] as const, ...rankedEntries.map((entry) => entry.offset)].slice(
+    0,
+    bunchSize
+  );
 }
 
 /**
  * True when a tile belongs to a seeded long-grass bunch.
+ *
+ * Hot-path: no per-call array allocation or sort. Anchor tile is always a
+ * member when the bunch spawns; other offsets compete for remaining slots.
  */
 export function checkingWorldLongGrassPlacementAtTileIndex(
   tileX: number,
@@ -196,10 +293,72 @@ export function checkingWorldLongGrassPlacementAtTileIndex(
     return false;
   }
 
-  return listingWorldLongGrassBunchMemberOffsets(anchorX, anchorY).some(
-    ([offsetX, offsetY]) =>
-      anchorX + offsetX === tileX && anchorY + offsetY === tileY
-  );
+  const offsetX = tileX - anchorX;
+  const offsetY = tileY - anchorY;
+
+  if (offsetX === 0 && offsetY === 0) {
+    return true;
+  }
+
+  let targetCatalogIndex = -1;
+
+  for (
+    let catalogIndex = 0;
+    catalogIndex < WORLD_LONG_GRASS_BUNCH_CANDIDATE_OFFSETS.length;
+    catalogIndex += 1
+  ) {
+    const offset = WORLD_LONG_GRASS_BUNCH_CANDIDATE_OFFSETS[catalogIndex];
+
+    if (offset && offset[0] === offsetX && offset[1] === offsetY) {
+      targetCatalogIndex = catalogIndex;
+      break;
+    }
+  }
+
+  if (targetCatalogIndex < 0) {
+    return false;
+  }
+
+  const bunchSize = resolvingWorldLongGrassBunchSizeAtAnchor(anchorX, anchorY);
+  const otherSlots = bunchSize - 1;
+  let betterNonAnchorCount = 0;
+
+  for (
+    let catalogIndex = 0;
+    catalogIndex < WORLD_LONG_GRASS_BUNCH_CANDIDATE_OFFSETS.length;
+    catalogIndex += 1
+  ) {
+    if (catalogIndex === targetCatalogIndex) {
+      continue;
+    }
+
+    const offset = WORLD_LONG_GRASS_BUNCH_CANDIDATE_OFFSETS[catalogIndex];
+
+    if (!offset || (offset[0] === 0 && offset[1] === 0)) {
+      continue;
+    }
+
+    if (
+      checkingWorldLongGrassBunchOffsetRanksAhead(
+        anchorX,
+        anchorY,
+        offset[0],
+        offset[1],
+        catalogIndex,
+        offsetX,
+        offsetY,
+        targetCatalogIndex
+      )
+    ) {
+      betterNonAnchorCount += 1;
+
+      if (betterNonAnchorCount >= otherSlots) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 /**

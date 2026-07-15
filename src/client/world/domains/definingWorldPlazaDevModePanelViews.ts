@@ -14,11 +14,10 @@ export type DefiningWorldPlazaDevModePanelGroupId =
   | 'debug';
 
 export type DefiningWorldPlazaDevModePanelViewId =
-  | 'world-status'
-  | 'world-travel'
+  | 'world-status-time'
+  | 'world-biome'
   | 'player-vitals'
   | 'player-diseases'
-  | 'player-frostbite'
   | 'player-climate'
   | 'combat-rolls'
   | 'combat-force-tier'
@@ -44,24 +43,24 @@ export type DefiningWorldPlazaDevModePanelView = {
 };
 
 export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_DEFAULT_VIEW_ID: DefiningWorldPlazaDevModePanelViewId =
-  'world-status';
+  'world-status-time';
 
 /** Ordered leaf views shown across per-section dropdown bars. */
 export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_VIEWS: readonly DefiningWorldPlazaDevModePanelView[] =
   [
     {
-      id: 'world-status',
+      id: 'world-status-time',
       groupId: 'world',
       groupLabel: 'World',
-      label: 'Status',
-      leafId: 'status',
+      label: 'Status & time',
+      leafId: 'status-time',
     },
     {
-      id: 'world-travel',
+      id: 'world-biome',
       groupId: 'world',
       groupLabel: 'World',
-      label: 'Time & travel',
-      leafId: 'state',
+      label: 'Biome teleports',
+      leafId: 'biome',
     },
     {
       id: 'player-vitals',
@@ -78,18 +77,11 @@ export const DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_VIEWS: readonly DefiningWorldPl
       leafId: 'diseases',
     },
     {
-      id: 'player-frostbite',
-      groupId: 'player',
-      groupLabel: 'Player',
-      label: 'Frostbite',
-      leafId: 'frostbite',
-    },
-    {
       id: 'player-climate',
       groupId: 'player',
       groupLabel: 'Player',
-      label: 'Climate',
-      leafId: 'climate',
+      label: 'Frostbite & climate',
+      leafId: 'frostbite-climate',
     },
     {
       id: 'combat-rolls',

@@ -17,6 +17,9 @@ import { checkingWorldLongGrassPlacementAtTileIndex } from '../../../shared/worl
 /**
  * True when a tile would draw a long-grass sprite clump.
  *
+ * Cheap placement / biome gates run before cliff, lava, and shore rings so the
+ * visible-bounds sync scan does not pay neighborhood walks on empty tiles.
+ *
  * Tiles within the cliff-edge clearance stay bare so clumps do not hang over
  * extruded slope faces.
  */
@@ -33,6 +36,24 @@ export function checkingWorldPlazaLongGrassDecorationAtTileIndex(
   }
 
   if (resolvingWorldPlazaWaterAtTileIndex(tileX, tileY)) {
+    return false;
+  }
+
+  const biome = resolvingWorldPlazaBiomeAtTileIndex(tileX, tileY);
+
+  if (biome.longGrassTileModulus === null) {
+    return false;
+  }
+
+  const hasLongGrassPlacement =
+    checkingWorldPlazaRareShrubTallGrassCompanionAtTileIndex(tileX, tileY) ||
+    checkingWorldLongGrassPlacementAtTileIndex(
+      tileX,
+      tileY,
+      biome.longGrassTileModulus
+    );
+
+  if (!hasLongGrassPlacement) {
     return false;
   }
 
@@ -64,18 +85,5 @@ export function checkingWorldPlazaLongGrassDecorationAtTileIndex(
     return false;
   }
 
-  const biome = resolvingWorldPlazaBiomeAtTileIndex(tileX, tileY);
-
-  if (biome.longGrassTileModulus === null) {
-    return false;
-  }
-
-  return (
-    checkingWorldPlazaRareShrubTallGrassCompanionAtTileIndex(tileX, tileY) ||
-    checkingWorldLongGrassPlacementAtTileIndex(
-      tileX,
-      tileY,
-      biome.longGrassTileModulus
-    )
-  );
+  return true;
 }

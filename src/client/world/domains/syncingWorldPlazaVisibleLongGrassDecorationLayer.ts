@@ -14,7 +14,10 @@ import { DEFINING_WORLD_PLAZA_LONG_GRASS_DISPLAY_SCALE } from '@/components/worl
 import type { DefiningWorldPlazaVisibleTileBounds } from '@/components/world/domains/definingWorldPlazaVisibleTileBounds';
 import { formattingWorldPlazaTileIndexCacheKey } from '@/components/world/domains/formattingWorldPlazaTileIndexCacheKey';
 import { listingWorldPlazaTileIndicesInBounds } from '@/components/world/domains/listingWorldPlazaTileIndicesInBounds';
-import { peekingWorldPlazaLongGrassSpriteTextureForUrl } from '@/components/world/domains/loadingWorldPlazaLongGrassSpriteTextures';
+import {
+  peekingWorldPlazaLongGrassSpriteTextureForUrl,
+  peekingWorldPlazaLongGrassSpriteTextures,
+} from '@/components/world/domains/loadingWorldPlazaLongGrassSpriteTextures';
 import { markingWorldPlazaPixiDisplayObjectCullable } from '@/components/world/domains/markingWorldPlazaPixiDisplayObjectCullable';
 import { checkingWorldPlazaGrassFloorTileIsBurntAtTileIndex } from '@/components/world/domains/resolvingWorldPlazaBurntGrassFloorTileFillColorAtTileIndex';
 import { checkingWorldPlazaRuntimeLongGrassIsCleared } from '@/components/world/harvest/domains/registeringWorldPlazaClearedLongGrassLookup';
@@ -48,6 +51,8 @@ export type SyncingWorldPlazaVisibleLongGrassDecorationLayerInput = {
   readonly centerTileX: number;
   readonly centerTileY: number;
   readonly burntGrassTileKeys?: ReadonlySet<string>;
+  /** Invalidates the candidate listing cache when bounds / clears / burns change. */
+  readonly listingCacheKey?: string;
   readonly maxBuildsPerCall?: number;
   readonly shouldSortChildrenImmediately?: boolean;
 };
@@ -64,11 +69,23 @@ type DefiningWorldPlazaLongGrassTileInstance = {
   readonly spriteUrl: string;
 };
 
+type SyncingWorldPlazaLongGrassCandidateListingCache = {
+  readonly listingCacheKey: string;
+  readonly candidates: readonly DefiningWorldPlazaLongGrassTileInstance[];
+};
+
 /** Last applied long-grass sprite URL; skip rebuild when variant/facing unchanged. */
 const SYNCING_WORLD_PLAZA_LONG_GRASS_APPLIED_SPRITE_URL_BY_SPRITE = new WeakMap<
   Sprite,
   string
 >();
+
+/** Reuse candidate listings across incremental builds for the same window. */
+const SYNCING_WORLD_PLAZA_LONG_GRASS_CANDIDATE_LISTING_BY_SPRITE_MAP =
+  new WeakMap<
+    Map<string, Sprite>,
+    SyncingWorldPlazaLongGrassCandidateListingCache
+  >();
 
 function listingWorldPlazaVisibleLongGrassCandidatesInBounds(
   bounds: DefiningWorldPlazaVisibleTileBounds,
@@ -104,6 +121,37 @@ function listingWorldPlazaVisibleLongGrassCandidatesInBounds(
       spriteUrl: formattingWorldLongGrassSpriteUrl(sizeVariant, facing),
     });
   }
+
+  return candidates;
+}
+
+function resolvingWorldPlazaVisibleLongGrassCandidates(
+  input: SyncingWorldPlazaVisibleLongGrassDecorationLayerInput
+): readonly DefiningWorldPlazaLongGrassTileInstance[] {
+  const listingCacheKey =
+    input.listingCacheKey ??
+    `${input.bounds.minTileX}:${input.bounds.maxTileX}:${input.bounds.minTileY}:${input.bounds.maxTileY}`;
+  const cachedListing =
+    SYNCING_WORLD_PLAZA_LONG_GRASS_CANDIDATE_LISTING_BY_SPRITE_MAP.get(
+      input.spriteByKey
+    );
+
+  if (cachedListing && cachedListing.listingCacheKey === listingCacheKey) {
+    return cachedListing.candidates;
+  }
+
+  const candidates = listingWorldPlazaVisibleLongGrassCandidatesInBounds(
+    input.bounds,
+    input.burntGrassTileKeys
+  );
+
+  SYNCING_WORLD_PLAZA_LONG_GRASS_CANDIDATE_LISTING_BY_SPRITE_MAP.set(
+    input.spriteByKey,
+    {
+      listingCacheKey,
+      candidates,
+    }
+  );
 
   return candidates;
 }
@@ -174,6 +222,15 @@ function applyingWorldPlazaLongGrassTileToSprite(
 export function syncingWorldPlazaVisibleLongGrassDecorationLayer(
   input: SyncingWorldPlazaVisibleLongGrassDecorationLayerInput
 ): SyncingWorldPlazaVisibleLongGrassDecorationLayerResult {
+  // Textures load async. Do not scan the full floor window every frame while waiting.
+  if (!peekingWorldPlazaLongGrassSpriteTextures()) {
+    return {
+      isComplete: false,
+      propsBuilt: 0,
+      needsChildSort: false,
+    };
+  }
+
   const buildBudget = Math.max(
     1,
     input.maxBuildsPerCall ??
@@ -181,10 +238,7 @@ export function syncingWorldPlazaVisibleLongGrassDecorationLayer(
   );
   const shouldSortChildrenImmediately =
     input.shouldSortChildrenImmediately ?? false;
-  const candidates = listingWorldPlazaVisibleLongGrassCandidatesInBounds(
-    input.bounds,
-    input.burntGrassTileKeys
-  );
+  const candidates = resolvingWorldPlazaVisibleLongGrassCandidates(input);
   const neededKeys = new Set<string>();
   const missingCandidates: DefiningWorldPlazaLongGrassTileInstance[] = [];
   let didMutateChildren = false;

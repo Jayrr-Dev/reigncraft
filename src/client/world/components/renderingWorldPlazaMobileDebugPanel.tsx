@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  DEFINING_WORLD_PLAZA_MOBILE_DEBUG_HUD_REFRESH_MS,
   LABELING_WORLD_PLAZA_MOBILE_DEBUG_COPY_REPORT_BUTTON,
   STYLING_WORLD_PLAZA_MOBILE_DEBUG_COPY_BUTTON_CLASS_NAME,
   STYLING_WORLD_PLAZA_MOBILE_DEBUG_HIDE_BUTTON_CLASS_NAME,
@@ -12,34 +13,81 @@ import {
   subscribingWorldPlazaClientLog,
 } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import type { ManagingWorldPlazaMobileDebugFrameStats } from '@/components/world/domains/managingWorldPlazaMobileDebugSampler';
-import { useSyncExternalStore } from 'react';
+import type { RefObject } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 
 export type RenderingWorldPlazaMobileDebugPanelProps = {
   readonly isVisible: boolean;
   readonly performanceProfile: DefiningWorldPlazaPerformanceProfile;
-  readonly frameStats: ManagingWorldPlazaMobileDebugFrameStats | null;
-  readonly uptimeSec: number;
+  readonly frameStatsRef: RefObject<ManagingWorldPlazaMobileDebugFrameStats | null>;
+  readonly uptimeSecRef: RefObject<number>;
   readonly onCopyReport: () => void;
   readonly onHide: () => void;
 };
 
+function formattingWorldPlazaMobileDebugLiveStatsLine(params: {
+  readonly frameStats: ManagingWorldPlazaMobileDebugFrameStats | null;
+  readonly uptimeSec: number;
+}): string {
+  const { frameStats, uptimeSec } = params;
+
+  if (!frameStats) {
+    return `uptime ${uptimeSec}s`;
+  }
+
+  return `fps ${frameStats.framesPerSecond.toFixed(0)} · p95 ${frameStats.framePercentile95Ms.toFixed(0)}ms · ${uptimeSec}s`;
+}
+
 /**
  * Compact mobile debug HUD with live stats and a one-tap copy button.
+ *
+ * Live fps/uptime text updates imperatively so the sampler never re-renders
+ * the plaza tree.
  */
 export function RenderingWorldPlazaMobileDebugPanel({
   isVisible,
   performanceProfile,
-  frameStats,
-  uptimeSec,
+  frameStatsRef,
+  uptimeSecRef,
   onCopyReport,
   onHide,
 }: RenderingWorldPlazaMobileDebugPanelProps): React.JSX.Element | null {
+  const liveStatsLineRef = useRef<HTMLDivElement>(null);
   const logSnapshot = useSyncExternalStore(
     subscribingWorldPlazaClientLog,
     gettingWorldPlazaClientLogSnapshot,
     gettingWorldPlazaClientLogSnapshot
   );
+
+  useEffect(() => {
+    if (!isVisible) {
+      return;
+    }
+
+    const liveStatsLineElement = liveStatsLineRef.current;
+    if (!liveStatsLineElement) {
+      return;
+    }
+
+    const publishingLiveStatsLine = (): void => {
+      liveStatsLineElement.textContent =
+        formattingWorldPlazaMobileDebugLiveStatsLine({
+          frameStats: frameStatsRef.current,
+          uptimeSec: uptimeSecRef.current,
+        });
+    };
+
+    publishingLiveStatsLine();
+    const intervalId = window.setInterval(
+      publishingLiveStatsLine,
+      DEFINING_WORLD_PLAZA_MOBILE_DEBUG_HUD_REFRESH_MS
+    );
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [frameStatsRef, isVisible, uptimeSecRef]);
 
   if (!isVisible) {
     return null;
@@ -47,9 +95,6 @@ export function RenderingWorldPlazaMobileDebugPanel({
 
   const summaryLines = [
     `tier ${performanceProfile.tier} · res ${performanceProfile.renderResolutionMax}x`,
-    frameStats
-      ? `fps ${frameStats.framesPerSecond.toFixed(0)} · p95 ${frameStats.framePercentile95Ms.toFixed(0)}ms · ${uptimeSec}s`
-      : `uptime ${uptimeSec}s`,
     ...logSnapshot.statusLines.slice(-2),
     ...logSnapshot.errorLines.slice(-1),
   ].filter((line) => line.length > 0);
@@ -66,6 +111,13 @@ export function RenderingWorldPlazaMobileDebugPanel({
               {line}
             </div>
           ))}
+          <div
+            ref={liveStatsLineRef}
+            className="truncate text-cyan-50/95"
+            aria-live="polite"
+          >
+            uptime 0s
+          </div>
         </div>
         <button
           type="button"

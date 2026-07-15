@@ -15,6 +15,7 @@ vi.mock(
   '@/components/world/domains/loadingWorldPlazaLongGrassSpriteTextures',
   () => ({
     peekingWorldPlazaLongGrassSpriteTextureForUrl: vi.fn(),
+    peekingWorldPlazaLongGrassSpriteTextures: vi.fn(),
   })
 );
 
@@ -48,11 +49,15 @@ vi.mock(
   })
 );
 
-import { peekingWorldPlazaLongGrassSpriteTextureForUrl } from '@/components/world/domains/loadingWorldPlazaLongGrassSpriteTextures';
+import {
+  peekingWorldPlazaLongGrassSpriteTextureForUrl,
+  peekingWorldPlazaLongGrassSpriteTextures,
+} from '@/components/world/domains/loadingWorldPlazaLongGrassSpriteTextures';
 
 const peekTextureMock = vi.mocked(
   peekingWorldPlazaLongGrassSpriteTextureForUrl
 );
+const peekTexturesMock = vi.mocked(peekingWorldPlazaLongGrassSpriteTextures);
 
 function creatingFakeTexture(width: number, height: number): Texture {
   return {
@@ -64,9 +69,11 @@ function creatingFakeTexture(width: number, height: number): Texture {
 describe('syncingWorldPlazaVisibleLongGrassDecorationLayer', () => {
   beforeEach(() => {
     peekTextureMock.mockReset();
+    peekTexturesMock.mockReset();
   });
 
   it('stays incomplete and creates no sprites when textures are missing', () => {
+    peekTexturesMock.mockReturnValue(null);
     peekTextureMock.mockReturnValue(null);
 
     const parentContainer = new Container();
@@ -93,7 +100,11 @@ describe('syncingWorldPlazaVisibleLongGrassDecorationLayer', () => {
   });
 
   it('builds a visible sprite once textures are ready', () => {
-    peekTextureMock.mockReturnValue(creatingFakeTexture(64, 48));
+    const texture = creatingFakeTexture(64, 48);
+    peekTexturesMock.mockReturnValue({
+      '/environment/sprites/flora/long-grass/long-grass-b1-n.webp': texture,
+    });
+    peekTextureMock.mockReturnValue(texture);
 
     const parentContainer = new Container();
     const spriteByKey = new Map<string, Sprite>();

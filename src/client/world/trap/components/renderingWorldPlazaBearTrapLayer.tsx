@@ -14,10 +14,8 @@ import { DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX } from '@/components/world
 import { resolvingWorldPlazaPlayerWorldLayer } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import { peekingWorldPlazaBearTrapSpriteTextureForFrameFromManifest } from '@/components/world/engine/registeringWorldPlazaTextureAssetManifest';
-import {
-  DEFINING_WORLD_PLAZA_BEAR_TRAP_DISPLAY_SCALE,
-  DEFINING_WORLD_PLAZA_BEAR_TRAP_SNAP_DURATION_MS,
-} from '@/components/world/trap/domains/definingWorldPlazaBearTrapConstants';
+import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
+import { DEFINING_WORLD_PLAZA_BEAR_TRAP_DISPLAY_SCALE } from '@/components/world/trap/domains/definingWorldPlazaBearTrapConstants';
 import type { DefiningWorldPlazaBearTrapInstance } from '@/components/world/trap/domains/definingWorldPlazaBearTrapTypes';
 import {
   listingWorldPlazaBearTrapInstances,
@@ -26,8 +24,8 @@ import {
   type ManagingWorldPlazaBearTrapInstanceStore,
 } from '@/components/world/trap/domains/managingWorldPlazaBearTrapInstanceStore';
 import { resolvingWorldPlazaBearTrapSpriteFrame } from '@/components/world/trap/domains/resolvingWorldPlazaBearTrapSpriteFrame';
-import { useEffect, useState, useSyncExternalStore } from 'react';
-import type { Texture } from 'pixi.js';
+import type { Sprite, Texture } from 'pixi.js';
+import { useRef, useSyncExternalStore } from 'react';
 
 export type RenderingWorldPlazaBearTrapLayerProps = {
   readonly trapStoreRef?: React.RefObject<ManagingWorldPlazaBearTrapInstanceStore>;
@@ -44,18 +42,61 @@ function readingWorldPlazaBearTrapLayerSnapshot(
     .join('|');
 }
 
+function computingWorldPlazaBearTrapSpriteScale(texture: Texture): number {
+  const targetWidth =
+    DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX *
+    DEFINING_WORLD_PLAZA_BEAR_TRAP_DISPLAY_SCALE;
+  return targetWidth / Math.max(texture.width, 1);
+}
+
 function RenderingWorldPlazaBearTrapSprite({
   instance,
-  nowMs,
 }: {
   readonly instance: DefiningWorldPlazaBearTrapInstance;
-  readonly nowMs: number;
 }): React.JSX.Element | null {
-  const frameIndex = resolvingWorldPlazaBearTrapSpriteFrame(instance, nowMs);
-  const texture: Texture | null =
-    peekingWorldPlazaBearTrapSpriteTextureForFrameFromManifest(frameIndex);
+  const spriteRef = useRef<Sprite | null>(null);
+  const instanceRef = useRef(instance);
+  const lastFrameIndexRef = useRef(-1);
 
-  if (!texture) {
+  instanceRef.current = instance;
+
+  const initialFrameIndex = resolvingWorldPlazaBearTrapSpriteFrame(
+    instance,
+    performance.now()
+  );
+  const initialTexture: Texture | null =
+    peekingWorldPlazaBearTrapSpriteTextureForFrameFromManifest(
+      initialFrameIndex
+    );
+
+  usingWorldPlazaSafeTick(() => {
+    const sprite = spriteRef.current;
+    if (!sprite) {
+      return;
+    }
+
+    const liveInstance = instanceRef.current;
+    const frameIndex = resolvingWorldPlazaBearTrapSpriteFrame(
+      liveInstance,
+      performance.now()
+    );
+
+    if (frameIndex === lastFrameIndexRef.current) {
+      return;
+    }
+
+    const texture =
+      peekingWorldPlazaBearTrapSpriteTextureForFrameFromManifest(frameIndex);
+    if (!texture) {
+      return;
+    }
+
+    lastFrameIndexRef.current = frameIndex;
+    sprite.texture = texture;
+    sprite.scale.set(computingWorldPlazaBearTrapSpriteScale(texture));
+  }, 'tick:bear-trap');
+
+  if (!initialTexture) {
     return null;
   }
 
@@ -65,14 +106,13 @@ function RenderingWorldPlazaBearTrapSprite({
   const standingLayer = resolvingWorldPlazaPlayerWorldLayer(instance.position);
   const layerOffsetY =
     computingWorldBuildingWorldLayerScreenOffsetPx(standingLayer);
-  const displayScale = DEFINING_WORLD_PLAZA_BEAR_TRAP_DISPLAY_SCALE;
-  const targetWidth = DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX * displayScale;
-  const textureScale = targetWidth / Math.max(texture.width, 1);
+  const textureScale = computingWorldPlazaBearTrapSpriteScale(initialTexture);
   const sortKey = computingWorldDepthSortKey(instance.position);
 
   return (
     <pixiSprite
-      texture={texture}
+      ref={spriteRef}
+      texture={initialTexture}
       anchor={{ x: 0.5, y: 1 }}
       x={screenPoint.x}
       y={screenPoint.y + layerOffsetY}
@@ -86,6 +126,8 @@ function RenderingWorldPlazaBearTrapSprite({
 
 /**
  * Renders placed bear traps. Gated by the Traps generation feature.
+ *
+ * Snap frames advance on the Pixi tick (no React clock state).
  */
 export function RenderingWorldPlazaBearTrapLayer({
   trapStoreRef,
@@ -101,22 +143,6 @@ export function RenderingWorldPlazaBearTrapLayer({
       ),
     () => ''
   );
-  const [nowMs, setNowMs] = useState(() => performance.now());
-
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
-    let frameId = 0;
-    const ticking = (frameTimeMs: number): void => {
-      setNowMs(frameTimeMs);
-      frameId = requestAnimationFrame(ticking);
-    };
-
-    frameId = requestAnimationFrame(ticking);
-    return () => cancelAnimationFrame(frameId);
-  }, [enabled, storeRevision]);
 
   if (!enabled) {
     return null;
@@ -132,23 +158,12 @@ export function RenderingWorldPlazaBearTrapLayer({
     return null;
   }
 
-  const hasActiveSnap = instances.some(
-    (instance) =>
-      instance.snapStartedAtMs !== null &&
-      nowMs - instance.snapStartedAtMs <
-        DEFINING_WORLD_PLAZA_BEAR_TRAP_SNAP_DURATION_MS
-  );
-
-  // Keep RAF only useful when snap is playing; still render idle frames.
-  void hasActiveSnap;
-
   return (
     <>
       {instances.map((instance) => (
         <RenderingWorldPlazaBearTrapSprite
           key={instance.trapId}
           instance={instance}
-          nowMs={nowMs}
         />
       ))}
     </>

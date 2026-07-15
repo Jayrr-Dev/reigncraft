@@ -45,7 +45,9 @@ export type MappingWorldPlazaEntityBuffHudIconName =
   | 'ph:heart-half'
   | 'ph:person-simple-run'
   | 'solar:fire-bold'
-  | 'solar:heart-pulse-bold';
+  | 'solar:heart-pulse-bold'
+  | 'fluent-emoji-high-contrast:phoenix-bird'
+  | 'pepicons-pop:no-entry-circle-off';
 
 const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   string,
@@ -116,8 +118,8 @@ const MAPPING_WORLD_PLAZA_ENTITY_BUFF_HUD_ICON: Record<
   'cold-immunity-buff': 'mdi:snowflake',
   'poison-immunity-buff': 'mdi:biohazard',
   'bleed-immunity-buff': 'mdi:blood-bag',
-  'fated-immunity-buff': 'game-icons:death-skull',
-  'death-immunity-buff': 'mdi:heart-plus',
+  'fated-immunity-buff': 'pepicons-pop:no-entry-circle-off',
+  'death-immunity-buff': 'fluent-emoji-high-contrast:phoenix-bird',
   'invincibility-buff': 'solar:heart-pulse-bold',
   'food-sickness-debuff': 'mdi:stomach',
   'petal-sickness-debuff': 'mdi:flower',

@@ -14,6 +14,7 @@ import { RenderingWorldPlazaDayNightClock } from '@/components/world/components/
 import { RenderingWorldPlazaDevModeBestiaryUnlockControls } from '@/components/world/components/renderingWorldPlazaDevModeBestiaryUnlockControls';
 import { RenderingWorldPlazaDevModeBiomeTeleportControl } from '@/components/world/components/renderingWorldPlazaDevModeBiomeTeleportControl';
 import { RenderingWorldPlazaDevModeDayNightControls } from '@/components/world/components/renderingWorldPlazaDevModeDayNightControls';
+import { RenderingWorldPlazaDevModePanelInnerTabs } from '@/components/world/components/renderingWorldPlazaDevModePanelInnerTabs';
 import { RenderingWorldPlazaDevModePanelViewSelect } from '@/components/world/components/renderingWorldPlazaDevModePanelViewSelect';
 import { RenderingWorldPlazaDevPanelCloseButton } from '@/components/world/components/renderingWorldPlazaDevPanelCloseButton';
 import { RenderingWorldPlazaFeaturesDebugControls } from '@/components/world/components/renderingWorldPlazaFeaturesDebugControls';
@@ -39,6 +40,14 @@ import {
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TAB_BODY_CLASS_NAME,
   STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TITLE_CLASS_NAME,
 } from '@/components/world/domains/definingWorldPlazaDevModePanelConstants';
+import {
+  DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_PLAYER_CLIMATE_DEFAULT_TAB_ID,
+  DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_PLAYER_CLIMATE_TABS,
+  DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_WORLD_STATUS_TIME_DEFAULT_TAB_ID,
+  DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_WORLD_STATUS_TIME_TABS,
+  type DefiningWorldPlazaDevModePanelPlayerClimateTabId,
+  type DefiningWorldPlazaDevModePanelWorldStatusTimeTabId,
+} from '@/components/world/domains/definingWorldPlazaDevModePanelInnerTabConstants';
 import {
   DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_DEFAULT_VIEW_ID,
   resolvingWorldPlazaDevModePanelView,
@@ -259,8 +268,18 @@ export function RenderingWorldPlazaDevModePanel(
     useState<DefiningWorldPlazaDevModePanelViewId>(
       DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_DEFAULT_VIEW_ID
     );
+  const [worldStatusTimeTabId, setWorldStatusTimeTabId] =
+    useState<DefiningWorldPlazaDevModePanelWorldStatusTimeTabId>(
+      DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_WORLD_STATUS_TIME_DEFAULT_TAB_ID
+    );
+  const [playerClimateTabId, setPlayerClimateTabId] =
+    useState<DefiningWorldPlazaDevModePanelPlayerClimateTabId>(
+      DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_PLAYER_CLIMATE_DEFAULT_TAB_ID
+    );
   const activeView = resolvingWorldPlazaDevModePanelView(activeViewId);
   const hasHealthControls = hasWorldPlazaDevModeHealthControls(props);
+  const playerHealthSubcategoryId =
+    activeViewId === 'player-climate' ? playerClimateTabId : activeView.leafId;
 
   return (
     <>
@@ -331,64 +350,114 @@ export function RenderingWorldPlazaDevModePanel(
             <div
               className={STYLING_WORLD_PLAZA_DEV_MODE_PANEL_TAB_BODY_CLASS_NAME}
             >
-              {activeViewId === 'world-status' ? (
-                <RenderingWorldPlazaClientDebugStatusReadout />
-              ) : null}
-
-              {activeViewId === 'world-travel' ? (
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-col gap-1">
-                    <span
-                      className={
-                        STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
-                      }
-                    >
-                      Time & travel
-                    </span>
-                    <RenderingWorldPlazaDayNightClock layout="embedded" />
-                    <RenderingWorldPlazaPlayerWorldLayerDebugLabel
-                      layout="embedded"
-                      playerPositionRef={playerPositionRef}
-                      playerHeightWorldLayers={playerHeightWorldLayers}
-                      isBuildModeActive={isBlockBuildModeActive}
-                      selectedWorldLayer={selectedWorldLayer}
-                      previewWorldLayer={previewWorldLayer}
-                      hasBuildPreviewTile={hasBuildPreviewTile}
-                      selectedBlockHeight={selectedBlockHeight}
-                      previewBlockHeight={previewBlockHeight}
-                      hasStaminaBar={false}
-                    />
-                  </div>
-                  <RenderingWorldPlazaDevModeDayNightControls />
-                  {onTeleportToBiome ? (
-                    <RenderingWorldPlazaDevModeBiomeTeleportControl
-                      onTeleportToBiome={onTeleportToBiome}
-                    />
+              {activeViewId === 'world-status-time' ? (
+                <div className="flex flex-col gap-2">
+                  <RenderingWorldPlazaDevModePanelInnerTabs
+                    tabs={
+                      DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_WORLD_STATUS_TIME_TABS
+                    }
+                    activeTabId={worldStatusTimeTabId}
+                    onSelectTab={setWorldStatusTimeTabId}
+                    ariaLabel="World status and time tabs"
+                  />
+                  {worldStatusTimeTabId === 'status' ? (
+                    <div className="flex flex-col gap-1">
+                      <span
+                        className={
+                          STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
+                        }
+                      >
+                        Status
+                      </span>
+                      <RenderingWorldPlazaPlayerWorldLayerDebugLabel
+                        layout="embedded"
+                        playerPositionRef={playerPositionRef}
+                        playerHeightWorldLayers={playerHeightWorldLayers}
+                        isBuildModeActive={isBlockBuildModeActive}
+                        selectedWorldLayer={selectedWorldLayer}
+                        previewWorldLayer={previewWorldLayer}
+                        hasBuildPreviewTile={hasBuildPreviewTile}
+                        selectedBlockHeight={selectedBlockHeight}
+                        previewBlockHeight={previewBlockHeight}
+                        hasStaminaBar={false}
+                      />
+                    </div>
+                  ) : null}
+                  {worldStatusTimeTabId === 'time' ? (
+                    <div className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-1">
+                        <span
+                          className={
+                            STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
+                          }
+                        >
+                          Time
+                        </span>
+                        <RenderingWorldPlazaDayNightClock layout="embedded" />
+                      </div>
+                      <RenderingWorldPlazaDevModeDayNightControls />
+                    </div>
+                  ) : null}
+                  {worldStatusTimeTabId === 'client' ? (
+                    <div className="flex flex-col gap-1">
+                      <span
+                        className={
+                          STYLING_WORLD_PLAZA_DEV_MODE_PANEL_SECTION_LABEL_CLASS_NAME
+                        }
+                      >
+                        Client
+                      </span>
+                      <RenderingWorldPlazaClientDebugStatusReadout />
+                    </div>
                   ) : null}
                 </div>
               ) : null}
 
+              {activeViewId === 'world-biome' ? (
+                onTeleportToBiome ? (
+                  <RenderingWorldPlazaDevModeBiomeTeleportControl
+                    onTeleportToBiome={onTeleportToBiome}
+                  />
+                ) : (
+                  <div className="text-[10px] text-white/60">
+                    Biome teleports are not wired in this scene.
+                  </div>
+                )
+              ) : null}
+
               {activeView.groupId === 'player' && hasHealthControls ? (
-                <RenderingWorldPlazaDevModeHealthControls
-                  activeSubcategoryId={activeView.leafId}
-                  hudSnapshot={props.healthHudSnapshot}
-                  onDamage={props.onHealthDamage}
-                  onHeal={props.onHealthHeal}
-                  onApplyPoison={props.onHealthApplyPoison}
-                  onApplyBleed={props.onHealthApplyBleed}
-                  onApplyPotentialDamage={props.onHealthApplyPotentialDamage}
-                  onApplySoulbreak={props.onHealthApplySoulbreak}
-                  onApplyDisease={props.onHealthApplyDisease}
-                  onSetFrostbiteStacks={props.onHealthSetFrostbiteStacks}
-                  onShield={props.onHealthShield}
-                  onToggleInvincible={props.onHealthToggleInvincible}
-                  onToggleTemperatureDisplayUnit={
-                    props.onHealthToggleTemperatureDisplayUnit
-                  }
-                  onKill={props.onHealthKill}
-                  onRevive={props.onHealthRevive}
-                  onToggleBuff={props.onHealthToggleBuff}
-                />
+                <div className="flex flex-col gap-2">
+                  {activeViewId === 'player-climate' ? (
+                    <RenderingWorldPlazaDevModePanelInnerTabs
+                      tabs={
+                        DEFINING_WORLD_PLAZA_DEV_MODE_PANEL_PLAYER_CLIMATE_TABS
+                      }
+                      activeTabId={playerClimateTabId}
+                      onSelectTab={setPlayerClimateTabId}
+                      ariaLabel="Frostbite and climate tabs"
+                    />
+                  ) : null}
+                  <RenderingWorldPlazaDevModeHealthControls
+                    activeSubcategoryId={playerHealthSubcategoryId}
+                    hudSnapshot={props.healthHudSnapshot}
+                    onDamage={props.onHealthDamage}
+                    onHeal={props.onHealthHeal}
+                    onApplyPoison={props.onHealthApplyPoison}
+                    onApplyBleed={props.onHealthApplyBleed}
+                    onApplyPotentialDamage={props.onHealthApplyPotentialDamage}
+                    onApplySoulbreak={props.onHealthApplySoulbreak}
+                    onApplyDisease={props.onHealthApplyDisease}
+                    onSetFrostbiteStacks={props.onHealthSetFrostbiteStacks}
+                    onShield={props.onHealthShield}
+                    onToggleInvincible={props.onHealthToggleInvincible}
+                    onToggleTemperatureDisplayUnit={
+                      props.onHealthToggleTemperatureDisplayUnit
+                    }
+                    onKill={props.onHealthKill}
+                    onRevive={props.onHealthRevive}
+                    onToggleBuff={props.onHealthToggleBuff}
+                  />
+                </div>
               ) : null}
 
               {activeViewId === 'wildlife-spawner' &&

@@ -1045,8 +1045,8 @@ function RenderingWorldPlazaPixiSceneConnected({
   const {
     isMobileDebugActive,
     isMobileDebugHudVisible,
-    frameStats: mobileDebugFrameStats,
-    uptimeSec: mobileDebugUptimeSec,
+    frameStatsRef: mobileDebugFrameStatsRef,
+    uptimeSecRef: mobileDebugUptimeSecRef,
     hidingMobileDebugHud,
     copyingMobileDebugReport,
   } = usingWorldPlazaMobileDebug(performanceProfile);
@@ -9252,8 +9252,8 @@ function RenderingWorldPlazaPixiSceneConnected({
       <RenderingWorldPlazaMobileDebugPanel
         isVisible={isMobileDebugHudVisible}
         performanceProfile={performanceProfile}
-        frameStats={mobileDebugFrameStats}
-        uptimeSec={mobileDebugUptimeSec}
+        frameStatsRef={mobileDebugFrameStatsRef}
+        uptimeSecRef={mobileDebugUptimeSecRef}
         onCopyReport={() => {
           void copyingMobileDebugReport();
         }}

@@ -27,13 +27,14 @@ import {
   updatingWorldPlazaMobileDebugConsoleApiContext,
 } from '@/components/world/domains/registeringWorldPlazaMobileDebugConsoleApi';
 import { listingWildlifeSpeciesTexturesCacheIds } from '@/components/world/wildlife/domains/loadingWildlifeSpeciesTextures';
+import type { RefObject } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type UsingWorldPlazaMobileDebugResult = {
   readonly isMobileDebugActive: boolean;
   readonly isMobileDebugHudVisible: boolean;
-  readonly frameStats: ManagingWorldPlazaMobileDebugFrameStats | null;
-  readonly uptimeSec: number;
+  readonly frameStatsRef: RefObject<ManagingWorldPlazaMobileDebugFrameStats | null>;
+  readonly uptimeSecRef: RefObject<number>;
   readonly hidingMobileDebugHud: () => void;
   readonly copyingMobileDebugReport: () => Promise<string>;
 };
@@ -83,6 +84,8 @@ function publishingWorldPlazaMobileDebugStatusLines(params: {
 
 /**
  * Runs the mobile debug sampler and exposes copy/hide helpers.
+ *
+ * Frame stats stay in refs so the sampler never re-renders the plaza tree.
  */
 export function usingWorldPlazaMobileDebug(
   performanceProfile: DefiningWorldPlazaPerformanceProfile
@@ -93,9 +96,6 @@ export function usingWorldPlazaMobileDebug(
   const [isMobileDebugHudVisible, setIsMobileDebugHudVisible] = useState(
     resolvingWorldPlazaMobileDebugHudInitiallyOpen
   );
-  const [frameStats, setFrameStats] =
-    useState<ManagingWorldPlazaMobileDebugFrameStats | null>(null);
-  const [uptimeSec, setUptimeSec] = useState(0);
   const frameStatsRef = useRef<ManagingWorldPlazaMobileDebugFrameStats | null>(
     null
   );
@@ -174,8 +174,6 @@ export function usingWorldPlazaMobileDebug(
           sampler,
           nowMs
         );
-        setFrameStats(nextFrameStats);
-        setUptimeSec(uptimeSecRef.current);
       }
 
       rafId = requestAnimationFrame(tick);
@@ -190,20 +188,12 @@ export function usingWorldPlazaMobileDebug(
     };
   }, [isMobileDebugActive, isMobileDebugHudVisible, performanceProfile]);
 
-  useEffect(() => {
-    updatingWorldPlazaMobileDebugConsoleApiContext({
-      performanceProfile,
-      frameStats: frameStatsRef.current,
-      uptimeSec: uptimeSecRef.current,
-    });
-  }, [performanceProfile, frameStats, uptimeSec]);
-
   return {
     isMobileDebugActive:
       isMobileDebugActive || checkingWorldPlazaMobileDebugIsActive(),
     isMobileDebugHudVisible,
-    frameStats,
-    uptimeSec,
+    frameStatsRef,
+    uptimeSecRef,
     hidingMobileDebugHud,
     copyingMobileDebugReport,
   };
