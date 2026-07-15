@@ -28,6 +28,8 @@ import {
   type ManagingWorldPlazaEntityDepthSortCache,
 } from '@/components/world/domains/managingWorldPlazaEntityDepthSortCache';
 import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
+import { resolvingWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
+import { peekingWorldPlazaHungerTierSpriteTexture } from '@/components/world/hunger/domains/loadingWorldPlazaHungerTierSpriteTextures';
 import { checkingWildlifeInstanceShowsHungerUi } from '@/components/world/wildlife/domains/checkingWildlifeInstanceIsOwnedPet';
 import { checkingWildlifeSpeciesIsImmortal } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesIsImmortal';
 import { checkingWildlifeSpeciesUsesGlowOrbPresentation } from '@/components/world/wildlife/domains/checkingWildlifeSpeciesUsesGlowOrbPresentation';
@@ -37,8 +39,13 @@ import {
   computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
   computingWildlifeGroundShadowSizeScale,
 } from '@/components/world/wildlife/domains/computingWildlifeGroundShadowLayout';
+import { computingWildlifeHungerCircleLocalLayout } from '@/components/world/wildlife/domains/computingWildlifeHungerCircleLocalLayout';
 import {
-  DEFINING_WILDLIFE_FAIRY_HOVER_LIFT_PX,
+  quantizingWildlifeRenderHungerCircleRatio,
+  quantizingWildlifeRenderVitalsRatio,
+} from '@/components/world/wildlife/domains/computingWildlifeRenderStructuralFingerprint';
+import { DEFINING_WILDLIFE_CYROBORN_SPECIES_ID } from '@/components/world/wildlife/domains/definingWildlifeCyrobornConstants';
+import {
   DEFINING_WILDLIFE_FAIRY_POSITION_SMOOTHING_MAX_STEP_MS,
   DEFINING_WILDLIFE_FAIRY_POSITION_SMOOTHING_MAX_TRAIL_DISTANCE_GRID,
   DEFINING_WILDLIFE_FAIRY_POSITION_SMOOTHING_TAU_MS,
@@ -49,19 +56,16 @@ import {
   DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX,
   DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET,
 } from '@/components/world/wildlife/domains/definingWildlifeVitalsBarConstants';
+import { drawingWildlifeCyrobornGlowOrbOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeCyrobornGlowOrbOnGraphics';
 import { drawingWildlifeFairyGlowOrbOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeFairyGlowOrbOnGraphics';
-import { computingWildlifeHungerCircleLocalLayout } from '@/components/world/wildlife/domains/computingWildlifeHungerCircleLocalLayout';
-import {
-  quantizingWildlifeRenderHungerCircleRatio,
-  quantizingWildlifeRenderVitalsRatio,
-} from '@/components/world/wildlife/domains/computingWildlifeRenderStructuralFingerprint';
 import { drawingWildlifeVitalsOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeVitalsOnGraphics';
-import { resolvingWildlifeFairyHoverOffsetPx } from '@/components/world/wildlife/domains/resolvingWildlifeFairyHoverOffsetPx';
+import {
+  resolvingWildlifeGlowOrbHoverLiftPx,
+  resolvingWildlifeGlowOrbHoverOffsetPx,
+} from '@/components/world/wildlife/domains/resolvingWildlifeGlowOrbHoverOffsetPx';
 import { resolvingWildlifeInstanceMaxStaminaRatio } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
 import { computingWildlifeJumpArcLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeJumpPlan';
 import { resolvingWildlifeSpeciesSpritePresentation } from '@/components/world/wildlife/domains/resolvingWildlifeSpeciesSpritePresentation';
-import { resolvingWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
-import { peekingWorldPlazaHungerTierSpriteTexture } from '@/components/world/hunger/domains/loadingWorldPlazaHungerTierSpriteTextures';
 import type { Graphics, Sprite } from 'pixi.js';
 
 export type SyncingWildlifeInstanceImperativePresentationEntry = {
@@ -348,7 +352,8 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
         if (!areFairyGlowEnabled || !usesGlowOrb) {
           orbGraphics.visible = false;
         } else {
-          const hoverOffset = resolvingWildlifeFairyHoverOffsetPx(
+          const hoverOffset = resolvingWildlifeGlowOrbHoverOffsetPx(
+            entry.speciesId,
             instance.instanceId,
             input.nowMs,
             instance.isDead
@@ -364,11 +369,19 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
             entry.bodyZIndexRef
           );
           orbGraphics.visible = !(instance.isDead && spriteAlpha <= 0);
-          drawingWildlifeFairyGlowOrbOnGraphics(orbGraphics, {
-            nowMs: input.nowMs,
-            alphaScale: spriteAlpha,
-            isDead: instance.isDead,
-          });
+          if (entry.speciesId === DEFINING_WILDLIFE_CYROBORN_SPECIES_ID) {
+            drawingWildlifeCyrobornGlowOrbOnGraphics(orbGraphics, {
+              nowMs: input.nowMs,
+              alphaScale: spriteAlpha,
+              isDead: instance.isDead,
+            });
+          } else {
+            drawingWildlifeFairyGlowOrbOnGraphics(orbGraphics, {
+              nowMs: input.nowMs,
+              alphaScale: spriteAlpha,
+              isDead: instance.isDead,
+            });
+          }
         }
       }
 
@@ -436,11 +449,12 @@ export function syncingWildlifeInstancesImperativePresentation(input: {
         });
         const vitalsLiftPx =
           (usesGlowOrb && !instance.isDead
-            ? DEFINING_WILDLIFE_FAIRY_HOVER_LIFT_PX
+            ? resolvingWildlifeGlowOrbHoverLiftPx(entry.speciesId)
             : 0) +
           DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX * entry.sizeScale;
         const vitalsY = anchoredScreenY - jumpLiftPx - vitalsLiftPx;
-        const vitalsZIndex = sortKey + DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET;
+        const vitalsZIndex =
+          sortKey + DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET;
 
         if (vitalsVisibility.showGraphics) {
           const quantizedHealth =

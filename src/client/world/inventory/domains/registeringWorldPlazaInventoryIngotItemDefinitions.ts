@@ -6,6 +6,7 @@
  * @module components/world/inventory/domains/registeringWorldPlazaInventoryIngotItemDefinitions
  */
 
+import { resolvingWorldPlazaInventoryIngotSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryIngotSpriteSheetConstants';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_COPPER,
@@ -13,9 +14,10 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_LEAD,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_SILVER,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_STEEL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_MERCURY,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
-import { resolvingWorldPlazaInventoryIngotSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryIngotSpriteSheetConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_STEEL_INGOT_SPRITE_SHEET_ICON } from '@/components/world/inventory/domains/definingWorldPlazaInventorySteelIngotSpriteSheetConstants';
 
 type IngotItemSeed = {
   readonly typeId: string;
@@ -62,6 +64,13 @@ const DEFINING_WORLD_PLAZA_INGOT_INVENTORY_ITEM_SEEDS: readonly IngotItemSeed[] 
         'Dull grey weight cast from galena. Soft seals, sinkers, and blunt craft.',
     },
     {
+      typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_STEEL,
+      name: 'Steel ingot',
+      rarity: 'rare',
+      description:
+        'Iron blown clean in a Bessemer forge. Hard enough for steel tools and serious forgework.',
+    },
+    {
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_MERCURY,
       name: 'Mercury',
       rarity: 'rare',
@@ -83,7 +92,9 @@ export function registeringWorldPlazaInventoryIngotItemDefinitions(): readonly D
     isDroppable: true,
     isStackable: true,
     iconSpriteSheet:
-      resolvingWorldPlazaInventoryIngotSpriteSheetIcon(seed.typeId) ??
-      undefined,
+      seed.typeId === DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_STEEL
+        ? DEFINING_WORLD_PLAZA_INVENTORY_STEEL_INGOT_SPRITE_SHEET_ICON
+        : (resolvingWorldPlazaInventoryIngotSpriteSheetIcon(seed.typeId) ??
+          undefined),
   }));
 }

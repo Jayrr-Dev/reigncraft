@@ -19,6 +19,7 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID = {
   CAMPFIRE: 'recipe-campfire',
   ANVIL: 'recipe-anvil',
   BLOOMERY: 'recipe-bloomery',
+  BESSEMER_FORGE: 'recipe-bessemer-forge',
   CLAY_KILN: 'recipe-clay-kiln',
   CLAY_STOVE: 'recipe-clay-stove',
   WET_CLAY_CUP: 'recipe-wet-clay-cup',

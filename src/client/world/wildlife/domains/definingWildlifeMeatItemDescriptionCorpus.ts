@@ -407,6 +407,13 @@ export const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_ENTRIES: readonly DefiningW
       cookedDescription:
         'Warm sparkles that barely fill you. Safe; often grants a short comfort buff.',
     },
+    {
+      speciesId: 'cyroborn',
+      rawDescription:
+        'A sapphire shard that still feels cold in the palm. Nibble raw and the chill crawls into your gut.',
+      cookedDescription:
+        'Tempered crystal that softens enough to swallow. Mild comfort if it sits right.',
+    },
   ];
 
 const DEFINING_WILDLIFE_MEAT_ITEM_DESCRIPTION_BY_SPECIES = Object.fromEntries(

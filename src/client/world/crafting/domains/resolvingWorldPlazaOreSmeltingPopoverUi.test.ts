@@ -1,4 +1,5 @@
 import {
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BESSEMER_FORGE,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE,
@@ -38,5 +39,15 @@ describe('resolvingWorldPlazaOreSmeltingPopoverUi', () => {
 
     expect(ui.inputSlotLabel).toBe('Ore');
     expect(ui.panelClassName).toContain('bg-[#5c3d28]/95');
+  });
+
+  it('labels the Bessemer forge input slot ITEM with a soot panel', () => {
+    const ui = resolvingWorldPlazaOreSmeltingPopoverUi(
+      DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BESSEMER_FORGE
+    );
+
+    expect(ui.inputSlotLabel).toBe('Item');
+    expect(ui.idleHintText).toContain('iron ingots');
+    expect(ui.panelClassName).toContain('bg-[#141210]/95');
   });
 });

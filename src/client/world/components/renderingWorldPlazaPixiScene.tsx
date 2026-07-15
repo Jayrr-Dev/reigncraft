@@ -70,6 +70,7 @@ import type { DefiningWorldBuildingBlockDefinitionId } from '@/components/world/
 import { DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_NATURAL_TREE_OAK,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BESSEMER_FORGE,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
@@ -111,9 +112,11 @@ import { usingWorldPlazaPlotOwnerLimitsQuery } from '@/components/world/building
 import { usingWorldPlazaPlotSubscription } from '@/components/world/building/hooks/usingWorldPlazaPlotSubscription';
 import { usingWorldPlazaSessionBuildingCleanup } from '@/components/world/building/hooks/usingWorldPlazaSessionBuildingCleanup';
 import { usingWorldPlazaTemporaryPlotLifecycle } from '@/components/world/building/hooks/usingWorldPlazaTemporaryPlotLifecycle';
-import { computingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineDerivedStats';
 import { usingWorldPlazaCharacterEngineSkillCooldowns } from '@/components/world/character/hooks/usingWorldPlazaCharacterEngineSkillCooldowns';
-import { usingWorldPlazaSelectedCharacterEngineDefinition } from '@/components/world/character/hooks/usingWorldPlazaSelectedCharacterEngineDefinition';
+import {
+  usingWorldPlazaSelectedCharacterEngineDefinition,
+  usingWorldPlazaSelectedCharacterEngineDerivedStats,
+} from '@/components/world/character/hooks/usingWorldPlazaSelectedCharacterEngineDefinition';
 import { RenderingWorldPlazaChestInteractionLabels } from '@/components/world/chest/components/renderingWorldPlazaChestInteractionLabels';
 import { RenderingWorldPlazaChestLayer } from '@/components/world/chest/components/renderingWorldPlazaChestLayer';
 import {
@@ -170,6 +173,7 @@ import { RenderingWorldPlazaRoomStatusHud } from '@/components/world/components/
 import { RenderingWorldPlazaRoomTypingIndicators } from '@/components/world/components/renderingWorldPlazaRoomTypingIndicators';
 import { RenderingWorldPlazaSavedCoordsDirectionArrowOverlay } from '@/components/world/components/renderingWorldPlazaSavedCoordsDirectionArrowOverlay';
 import { RenderingWorldPlazaSavedCoordsTileStarMarkers } from '@/components/world/components/renderingWorldPlazaSavedCoordsTileStarMarkers';
+import { RenderingWorldPlazaSpritcoreUpgradeOverlay } from '@/components/world/components/renderingWorldPlazaSpritcoreUpgradeOverlay';
 import { RenderingWorldPlazaTerrainCollisionDebugOverlay } from '@/components/world/components/renderingWorldPlazaTerrainCollisionDebugOverlay';
 import { RenderingWorldPlazaTutorialOverlay } from '@/components/world/components/renderingWorldPlazaTutorialOverlay';
 import { RenderingWorldPlazaWorldNotifications } from '@/components/world/components/renderingWorldPlazaWorldNotifications';
@@ -283,6 +287,7 @@ import {
   recordingWorldPlazaBestiarySpeciesStudied,
 } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
 import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import {
   gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
   gettingWorldPlazaHerbariumCloverStudyCountSnapshot,
@@ -539,7 +544,10 @@ import { computingWorldPlazaInventoryItemEnchantmentHarvestSpeedMultiplier } fro
 import { consumingWorldPlazaInventoryItemByType } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemByType';
 import { consumingWorldPlazaInventoryItemFromSlot } from '@/components/world/inventory/domains/consumingWorldPlazaInventoryItemFromSlot';
 import { parsingWorldPlazaFlowerSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaFlowerEatEffectRegistry';
-import { DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
+import {
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WHEAT_SEED,
+} from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeIds';
 import { parsingWorldPlazaOreSpeciesIdFromItemTypeId } from '@/components/world/inventory/domains/definingWorldPlazaInventoryOreSpriteSheetConstants';
 import { disarmingWorldPlazaInventorySlotArmedHarvestEnchantments } from '@/components/world/inventory/domains/disarmingWorldPlazaInventorySlotArmedHarvestEnchantments';
 import { notifyingWorldPlazaInventoryItemAdded } from '@/components/world/inventory/domains/notifyingWorldPlazaInventoryItemAdded';
@@ -600,6 +608,8 @@ import type {
 } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import type { ManagingWorldPlazaProjectileStore } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
 import { usingWorldPlazaProjectileEngine } from '@/components/world/projectile/hooks/usingWorldPlazaProjectileEngine';
+import { initializingWorldPlazaSpritcoreUpgradeStore } from '@/components/world/spritcore/domains/managingWorldPlazaSpritcoreUpgradeStore';
+import { usingWorldPlazaSpritcoreUpgradeBonuses } from '@/components/world/spritcore/hooks/usingWorldPlazaSpritcoreUpgradeBonuses';
 import { RenderingWorldPlazaTeaPotAddWaterInteractionLabels } from '@/components/world/tea-brewing/components/renderingWorldPlazaTeaPotAddWaterInteractionLabels';
 import {
   brewingWorldPlazaTeaPotAtCampfire,
@@ -1696,10 +1706,14 @@ function RenderingWorldPlazaPixiSceneConnected({
 
   const selectedCharacterEngineDefinition =
     usingWorldPlazaSelectedCharacterEngineDefinition();
+  const spritcoreBonuses = usingWorldPlazaSpritcoreUpgradeBonuses();
   const selectedCharacterEngineDerivedStats =
-    computingWorldPlazaCharacterEngineDerivedStats(
-      selectedCharacterEngineDefinition
-    );
+    usingWorldPlazaSelectedCharacterEngineDerivedStats();
+  const nominalAttackSpeed = Math.max(
+    0.25,
+    selectedCharacterEngineDefinition.stats.attackSpeed +
+      spritcoreBonuses.bonusAttackSpeed
+  );
 
   const { jumpRequestedRef } = trackingWorldPlazaJumpInput({
     isEnabled: isLocalGameplayEnabled,
@@ -2945,6 +2959,8 @@ function RenderingWorldPlazaPixiSceneConnected({
         [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE]:
           selectingCampfireForInteractionLabel,
         [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY]:
+          selectingOreSmeltingStationForInteractionLabel,
+        [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BESSEMER_FORGE]:
           selectingOreSmeltingStationForInteractionLabel,
         [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN]:
           selectingOreSmeltingStationForInteractionLabel,
@@ -4365,7 +4381,23 @@ function RenderingWorldPlazaPixiSceneConnected({
     redditUserId: string | null;
     saveSlotIndex: PlazaSaveSlotIndex | null;
     playerPosition: DefiningWorldPlazaWorldPoint;
+    playerTargetId: string;
+    onSpritcoreGrant: (amount: number) => void;
   } | null>(null);
+  const grantingSpritcoreOnWildlifeKillRef = useRef<(amount: number) => void>(
+    () => {}
+  );
+  grantingSpritcoreOnWildlifeKillRef.current = (amount: number): void => {
+    const grantResult = addItemWithStacking({
+      id: crypto.randomUUID(),
+      itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
+      quantity: amount,
+    });
+
+    if (grantResult.quantityAccepted > 0) {
+      showingGameplayHudToast(`+${grantResult.quantityAccepted} Spritcore`);
+    }
+  };
 
   wildlifeMeatDropContextRef.current = playerPositionRef.current
     ? {
@@ -4373,6 +4405,10 @@ function RenderingWorldPlazaPixiSceneConnected({
         redditUserId,
         saveSlotIndex: isSinglePlayerSession ? singlePlayerSaveSlotIndex : null,
         playerPosition: playerPositionRef.current,
+        playerTargetId: localPlayerProjectileTargetId,
+        onSpritcoreGrant: (amount: number) => {
+          grantingSpritcoreOnWildlifeKillRef.current(amount);
+        },
       }
     : null;
 
@@ -4419,6 +4455,9 @@ function RenderingWorldPlazaPixiSceneConnected({
       meatDropContextRef: wildlifeMeatDropContextRef,
       playerTransformWildlifeSpeciesIdRef,
       npcPreyTargetsRef,
+      onWildlifeSpawnProjectile: (request) => {
+        spawnProjectileRef.current?.(request);
+      },
       onPlayerHitByWildlife: (hit) => {
         wildlifeDamagedPlayerAtMsByInstanceIdRef.current.set(
           hit.instanceId,
@@ -6599,6 +6638,9 @@ function RenderingWorldPlazaPixiSceneConnected({
       {
         cloudSaveSlotIndex: discoveryCloudSaveSlotIndex,
       }
+    );
+    initializingWorldPlazaSpritcoreUpgradeStore(
+      onlineUserId ?? localPersistenceOwnerId
     );
     attachingWorldPlazaAllCraftModeRecipesForDevQa();
   }, [discoveryCloudSaveSlotIndex, localPersistenceOwnerId, onlineUserId]);
@@ -9285,6 +9327,24 @@ function RenderingWorldPlazaPixiSceneConnected({
         isOpen={activeCodexSection === 'recipes'}
         onClose={closingCodexSection}
       />
+      {checkingWorldPlazaGenerationFeatureEnabled(
+        DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SPRITCORE_LEVELING
+      ) ? (
+        <RenderingWorldPlazaSpritcoreUpgradeOverlay
+          isOpen={activeCodexSection === 'spritcore'}
+          inventoryState={inventoryState}
+          effectiveMaxHealth={
+            selectedCharacterEngineDerivedStats.effectiveMaxHealth
+          }
+          attackPower={selectedCharacterEngineDerivedStats.attackPower}
+          nominalAttackSpeed={nominalAttackSpeed}
+          onInventoryStateChange={(nextState) => {
+            updatingInventoryState(() => nextState);
+          }}
+          onShowToast={showingGameplayHudToast}
+          onClose={closingCodexSection}
+        />
+      ) : null}
       <RenderingWorldPlazaLoreBookOverlay
         isOpen={activeCodexSection === 'lore'}
         onClose={closingCodexSection}

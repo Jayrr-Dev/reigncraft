@@ -51,6 +51,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE = {
   SWAMP_PONDS: 'swamp-ponds',
   TEA_BREWING: 'tea-brewing',
   DODGE_ZERO_DAMAGE: 'dodge-zero-damage',
+  SPRITCORE_LEVELING: 'spritcore-leveling',
 } as const;
 
 export type DefiningWorldPlazaGenerationFeatureId =
@@ -392,6 +393,13 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_REGISTRY: readonly Defining
       description:
         'Dodged damage rolls apply 0 damage. Off keeps the old low rolled amount.',
     },
+    {
+      featureId: DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SPRITCORE_LEVELING,
+      groupId: 'systems',
+      label: 'Spritcore leveling',
+      description:
+        'Wildlife kills grant Spritcore and the upgrade panel can spend it on stats.',
+    },
   ];
 
 export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS: Readonly<
@@ -441,6 +449,7 @@ export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_DEFAULTS: Readonly<
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SWAMP_PONDS]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TEA_BREWING]: true,
   [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.DODGE_ZERO_DAMAGE]: true,
+  [DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SPRITCORE_LEVELING]: true,
 };
 
 export const DEFINING_WORLD_PLAZA_GENERATION_FEATURE_STORAGE_KEY =

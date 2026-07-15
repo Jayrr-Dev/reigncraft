@@ -1,4 +1,5 @@
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
+import { grantingWorldPlazaSpritcoreOnWildlifeKill } from '@/components/world/spritcore/domains/grantingWorldPlazaSpritcoreOnWildlifeKill';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import { droppingWildlifeMeatGroundItem } from '@/components/world/wildlife/domains/droppingWildlifeMeatGroundItem';
@@ -12,6 +13,8 @@ export type DefiningWildlifeMeatDropContext = {
   readonly redditUserId: string | null;
   readonly saveSlotIndex: PlazaSaveSlotIndex | null;
   readonly playerPosition: DefiningWorldPlazaWorldPoint;
+  readonly playerTargetId: string | null;
+  readonly onSpritcoreGrant?: (amount: number) => void;
 };
 
 export type DefiningWildlifeMeatDropKillContext = {
@@ -52,6 +55,15 @@ export function attemptingWildlifeMeatGroundDropOnDeath(
   };
 
   replacingWildlifeInstance(store, markedInstance);
+
+  if (meatDropContext.onSpritcoreGrant) {
+    grantingWorldPlazaSpritcoreOnWildlifeKill({
+      species,
+      killContext,
+      playerTargetId: meatDropContext.playerTargetId,
+      onGrant: meatDropContext.onSpritcoreGrant,
+    });
+  }
 
   void droppingWildlifeMeatGroundItem({
     localPersistenceOwnerId: meatDropContext.localPersistenceOwnerId,

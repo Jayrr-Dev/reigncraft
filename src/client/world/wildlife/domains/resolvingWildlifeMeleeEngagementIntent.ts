@@ -12,6 +12,11 @@ export type ResolvingWildlifeMeleeEngagementIntentParams = {
   intent: DefiningWildlifeBehaviorIntent;
   position: DefiningWorldPlazaWorldPoint;
   targetPosition: DefiningWorldPlazaWorldPoint | null;
+  /**
+   * Override engagement radius (grid). Used by ranged casters so chase upgrades
+   * to attack at cast range instead of melee range.
+   */
+  engagementRangeGrid?: number;
 };
 
 /**
@@ -24,6 +29,7 @@ export function resolvingWildlifeMeleeEngagementIntent({
   intent,
   position,
   targetPosition,
+  engagementRangeGrid = DEFINING_WILDLIFE_MELEE_RANGE_GRID,
 }: ResolvingWildlifeMeleeEngagementIntentParams): DefiningWildlifeBehaviorIntent {
   if (
     (intent.mode !== 'chase' && intent.mode !== 'attack') ||
@@ -38,7 +44,7 @@ export function resolvingWildlifeMeleeEngagementIntent({
     targetPosition.y - position.y
   );
 
-  if (distance > DEFINING_WILDLIFE_MELEE_RANGE_GRID) {
+  if (distance > engagementRangeGrid) {
     if (intent.mode === 'attack') {
       return {
         mode: 'chase',

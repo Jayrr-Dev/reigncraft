@@ -39,6 +39,7 @@ import {
 } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BESSEMER_FORGE,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CAMPFIRE,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
@@ -64,6 +65,7 @@ import { DEFINING_WORLD_PLAZA_INVENTORY_IRON_TUBE_SPRITE_SHEET_ICON } from '@/co
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_BEAR_TRAP,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_CALTROPS,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_COPPER,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_TUBE,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_CLAY,
@@ -127,6 +129,11 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_CALTROPS_OUTPUT_QUANTITY = 3
 
 /** Iron tube smith recipe ingredient counts (requires nearby anvil). */
 export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_IRON_TUBE_IRON_INGOT_COST = 4;
+
+/** Bessemer forge recipe ingredient counts. */
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BESSEMER_FORGE_IRON_TUBE_COST = 8;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BESSEMER_FORGE_COPPER_INGOT_COST = 20;
+export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BESSEMER_FORGE_IRON_INGOT_COST = 50;
 
 /**
  * All registered craft recipes in cookbook pager order.
@@ -231,6 +238,44 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
     },
   },
   {
+    id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.BESSEMER_FORGE,
+    cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.BLACKSMITH,
+    title: 'Bessemer Forge',
+    description:
+      'A pear-shaped steel converter that blows iron into harder steel. Needs tubes, copper, and a mountain of ingots.',
+    recipeVisual: {
+      visualKind: 'sprite-sheet',
+      spriteSheetIcon: resolvingWorldPlazaBlacksmithUtilitySpriteSheetIcon(
+        DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.BESSEMER_FORGE
+      ),
+    },
+    ingredients: [
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_IRON_TUBE,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BESSEMER_FORGE_IRON_TUBE_COST,
+      },
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_COPPER,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BESSEMER_FORGE_COPPER_INGOT_COST,
+      },
+      {
+        itemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON,
+        quantity:
+          DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_BESSEMER_FORGE_IRON_INGOT_COST,
+      },
+    ],
+    recipeType: 'entity',
+    complexity: 12,
+    outcome: {
+      kind: 'entity',
+      blockDefinitionId:
+        DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BESSEMER_FORGE,
+      blockHeight: DEFINING_WORLD_BUILDING_BLOCK_HEIGHT_BUILD_DEFAULT,
+    },
+  },
+  {
     id: DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.BEAR_TRAP,
     cookbookId: DEFINING_WORLD_PLAZA_CRAFT_MODE_COOKBOOK_ID.BLACKSMITH,
     title: 'Bear Trap',
@@ -312,7 +357,8 @@ export const DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REGISTRY = [
       'Draw four iron ingots into a hollow tube on the anvil. Intermediate stock for later forge recipes.',
     recipeVisual: {
       visualKind: 'sprite-sheet',
-      spriteSheetIcon: DEFINING_WORLD_PLAZA_INVENTORY_IRON_TUBE_SPRITE_SHEET_ICON,
+      spriteSheetIcon:
+        DEFINING_WORLD_PLAZA_INVENTORY_IRON_TUBE_SPRITE_SHEET_ICON,
     },
     ingredients: [
       {

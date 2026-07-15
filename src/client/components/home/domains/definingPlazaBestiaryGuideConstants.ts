@@ -117,6 +117,16 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
         'Fairies float as a gold mote with a warm night light. They follow close after dark, ignore other beasts, and shrug off wounds that end anything else. Strike one and it leaves. Sunrise sends them packing either way. No corpse to study, so sightings are most of what wanderers ever learn.',
     },
     {
+      speciesId: 'cyroborn',
+      icon: 'mdi:snowflake',
+      summary:
+        'Floating sapphire crystal of the Frostsink. Keeps distance and casts ice.',
+      studiedSummary:
+        'Cyroborn drift like living Cryocores. They cycle three ice casts: a fast rooting bolt, sharp straight spheres, and a slow shatter orb that dumps deep cold and fated damage. Close in if you can; they prefer the long fight.',
+      apostleFlavor:
+        'Some say each Cyroborn is a Cryocore that learned hunger. Frostsink does not argue.',
+    },
+    {
       speciesId: 'deer',
       icon: 'mdi:pine-tree',
       summary: 'Skittish browser that bolts at the first wrong step.',
@@ -361,14 +371,16 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
     {
       speciesId: 'tiger',
       icon: 'mdi:paw',
-      summary: 'Jungle stalker. Shadows prey, then rushes when you weaken or it gets hungry.',
+      summary:
+        'Jungle stalker. Shadows prey, then rushes when you weaken or it gets hungry.',
       studiedSummary:
         'Tigers trail through heat and canopy. They wait for a stumble, then close fast.',
     },
     {
       speciesId: 'sunhead',
       icon: 'mdi:fire',
-      summary: 'Firelands apex. Heat-hardened predator that fights alone and hits hard.',
+      summary:
+        'Firelands apex. Heat-hardened predator that fights alone and hits hard.',
       studiedSummary:
         'Sunheads patrol volcanic ground by day. Expect heavy swings, heat weakness on hit, and no pack to distract them.',
       apostleFlavor:
@@ -377,7 +389,8 @@ export const DEFINING_PLAZA_BESTIARY_GUIDE_ENTRIES: readonly DefiningPlazaBestia
     {
       speciesId: 'jaguar',
       icon: 'mdi:paw',
-      summary: 'Night stalker. Shadows you until weakness or hunger opens the rush.',
+      summary:
+        'Night stalker. Shadows you until weakness or hunger opens the rush.',
       studiedSummary:
         'Jaguars stalk from the dark. The jungle pairs them with tigers so nothing feels safe.',
     },

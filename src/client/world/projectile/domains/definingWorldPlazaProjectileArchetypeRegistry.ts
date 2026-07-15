@@ -250,6 +250,135 @@ const GRAVITY_BALL: DefiningWorldPlazaProjectileArchetype = {
   },
 };
 
+/**
+ * Cyroborn type 1: long-range fast homing ice bolt.
+ * Roots the target on hit (immobilize).
+ */
+const CYROBORN_ICE_BOLT: DefiningWorldPlazaProjectileArchetype = {
+  archetypeId: 'cyroborn-ice-bolt',
+  movement: {
+    behaviorId: 'homingDirect',
+    speedGridPerSec: 11,
+    tracksLiveTarget: true,
+  },
+  hitbox: { radiusGrid: 0.14 },
+  altitude: { mode: 'flying', flyingAltitudePx: 30 },
+  dodge: { jumpDodgeable: false },
+  payload: {
+    damageAmount: 10,
+    damageKind: 'physical',
+    statusEffects: [{ kind: 'buff', buffId: 'immobilized-debuff' }],
+  },
+  impact: { behaviorId: 'singleTarget' },
+  lifetimeMs: 7_000,
+  visual: {
+    clipId: 'projectile-magic-orb',
+    scale: 0.85,
+    tint: 0x9fe8ff,
+    renderPlane: 'effects',
+    spriteRadiusPx: 7,
+  },
+};
+
+/**
+ * Cyroborn type 2: sharp straight ice spheres (physical).
+ */
+const CYROBORN_ICE_SPHERE: DefiningWorldPlazaProjectileArchetype = {
+  archetypeId: 'cyroborn-ice-sphere',
+  movement: {
+    behaviorId: 'linear',
+    speedGridPerSec: 8.5,
+  },
+  hitbox: { radiusGrid: 0.16 },
+  altitude: { mode: 'flying', flyingAltitudePx: 22 },
+  dodge: { jumpDodgeable: true },
+  payload: {
+    damageAmount: 16,
+    damageKind: 'physical',
+  },
+  impact: { behaviorId: 'singleTarget' },
+  lifetimeMs: 4_000,
+  visual: {
+    clipId: 'projectile-cluster',
+    scale: 1,
+    tint: 0xb8f0ff,
+    renderPlane: 'effects',
+    spriteRadiusPx: 10,
+  },
+  blocksOnTerrain: true,
+};
+
+/** Tiny shards spawned when a shatter orb expires. */
+const CYROBORN_ICE_SHARD_BURST: DefiningWorldPlazaProjectileArchetype = {
+  archetypeId: 'cyroborn-ice-shard-burst',
+  movement: {
+    behaviorId: 'linear',
+    speedGridPerSec: 5,
+  },
+  hitbox: { radiusGrid: 0.1 },
+  altitude: { mode: 'flying', flyingAltitudePx: 18 },
+  dodge: { jumpDodgeable: true },
+  payload: {
+    damageAmount: 4,
+    damageKind: 'physical',
+  },
+  impact: { behaviorId: 'singleTarget' },
+  lifetimeMs: 900,
+  visual: {
+    clipId: 'projectile-cluster',
+    scale: 0.55,
+    tint: 0x7ec8ff,
+    renderPlane: 'effects',
+    spriteRadiusPx: 5,
+  },
+};
+
+/**
+ * Cyroborn type 3: slow homing orb that shatters after 5s.
+ * On hit: −200°C ice temp impulse + fated (potential) damage.
+ */
+const CYROBORN_SHATTER_ORB: DefiningWorldPlazaProjectileArchetype = {
+  archetypeId: 'cyroborn-shatter-orb',
+  movement: {
+    behaviorId: 'homingSoft',
+    speedGridPerSec: 3.2,
+    maxTurnRateRadiansPerSec: Math.PI * 0.85,
+    homingLeadErrorRadians: 0.35,
+    tracksLiveTarget: true,
+  },
+  hitbox: { radiusGrid: 0.22 },
+  altitude: { mode: 'flying', flyingAltitudePx: 28 },
+  dodge: { jumpDodgeable: false },
+  payload: {
+    damageAmount: 8,
+    damageKind: 'physical',
+    statusEffects: [
+      { kind: 'temperature', deltaCelsius: -200 },
+      {
+        kind: 'potentialDamage',
+        expectedDamage: 24,
+        resolveDelayMs: 2_000,
+      },
+    ],
+  },
+  impact: { behaviorId: 'singleTarget' },
+  split: {
+    afterMs: 5_000,
+    count: 5,
+    childArchetypeId: 'cyroborn-ice-shard-burst',
+    spreadPattern: 'radial',
+    spreadRadians: Math.PI * 2,
+  },
+  lifetimeMs: 5_200,
+  visual: {
+    clipId: 'projectile-gravity-ball',
+    scale: 1.15,
+    tint: 0x5ad1ff,
+    renderPlane: 'effects',
+    spriteRadiusPx: 13,
+  },
+};
+
 export const DEFINING_WORLD_PLAZA_PROJECTILE_ARCHETYPE_REGISTRY: Record<
   string,
   DefiningWorldPlazaProjectileArchetype
@@ -262,6 +391,10 @@ export const DEFINING_WORLD_PLAZA_PROJECTILE_ARCHETYPE_REGISTRY: Record<
   [CLUSTER_SPLIT.archetypeId]: CLUSTER_SPLIT,
   [GRAVITY_WELL_BOLT.archetypeId]: GRAVITY_WELL_BOLT,
   [GRAVITY_BALL.archetypeId]: GRAVITY_BALL,
+  [CYROBORN_ICE_BOLT.archetypeId]: CYROBORN_ICE_BOLT,
+  [CYROBORN_ICE_SPHERE.archetypeId]: CYROBORN_ICE_SPHERE,
+  [CYROBORN_ICE_SHARD_BURST.archetypeId]: CYROBORN_ICE_SHARD_BURST,
+  [CYROBORN_SHATTER_ORB.archetypeId]: CYROBORN_SHATTER_ORB,
 };
 
 export const DEFINING_WORLD_PLAZA_PROJECTILE_ARCHETYPE_IDS = Object.keys(

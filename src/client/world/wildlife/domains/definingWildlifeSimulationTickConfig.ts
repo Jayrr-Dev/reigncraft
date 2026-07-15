@@ -9,7 +9,11 @@ import type { DefiningWorldPlazaAvatarMotionState } from '@/components/world/dom
 import type { DefiningWorldPlazaRunStaminaState } from '@/components/world/domains/definingWorldPlazaRunStaminaConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
-import type { DefiningWorldPlazaProjectileTarget } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
+import type { DefiningNpcPreyTarget } from '@/components/world/npc/domains/definingNpcTypes';
+import type {
+  DefiningWorldPlazaProjectileTarget,
+  SpawningWorldPlazaProjectileRequest,
+} from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import type { DefiningWildlifeMeatDropContext } from '@/components/world/wildlife/domains/attemptingWildlifeMeatGroundDropOnDeath';
 import type { DefiningWildlifeFloatingCombatText } from '@/components/world/wildlife/domains/definingWildlifeFloatingCombatTextTypes';
 import type { DefiningWildlifeForageEatOverlay } from '@/components/world/wildlife/domains/definingWildlifeForageEatOverlayTypes';
@@ -22,7 +26,6 @@ import type {
   DefiningWildlifePlayerMeleeHit,
   DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import type { DefiningNpcPreyTarget } from '@/components/world/npc/domains/definingNpcTypes';
 
 export type DefiningWildlifeSimulationTickConfig = {
   enabled: boolean;
@@ -68,6 +71,10 @@ export type DefiningWildlifeSimulationTickConfig = {
     Map<string, number>
   >;
   onPlayerHitByWildlife?: (hit: DefiningWildlifePlayerMeleeHit) => void;
+  /** Wildlife ranged casters call this to spawn plaza projectiles. */
+  onWildlifeSpawnProjectile?: (
+    request: SpawningWorldPlazaProjectileRequest
+  ) => void;
   onPlayerContactWildlife?: (
     event: DefiningWildlifePlayerContactEvent,
     nowMs: number

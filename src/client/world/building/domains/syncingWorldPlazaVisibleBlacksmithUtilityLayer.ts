@@ -1,10 +1,26 @@
+import { resolvingWorldBuildingPlacedBlockExtrusionBottomLayer } from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
+import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
+import { checkingWorldBuildingPlacedBlockIsPassableTile } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
 import {
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BESSEMER_FORGE,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE,
   resolvingWorldBuildingBlockDefinition,
 } from '@/components/world/building/domains/definingWorldBuildingBlockRegistry';
+import { DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX } from '@/components/world/building/domains/definingWorldBuildingBuildModeConstants';
+import {
+  resolvingWorldBuildingPlacedBlockBlockHeight,
+  resolvingWorldBuildingPlacedBlockWorldLayer,
+  type DefiningWorldBuildingPlacedBlock,
+} from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import {
+  checkingWorldBuildingPlacedBlockIsFootprintSatellite,
+  resolvingWorldBuildingBlockPlacementFootprint,
+  resolvingWorldBuildingPlacedBlockFootprintGroupId,
+} from '@/components/world/building/domains/definingWorldBuildingPlacementFootprint';
+import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
 import {
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_ACTIVE_WORLD_SPRITE_URL,
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_DISPLAY_SCALE,
@@ -14,24 +30,9 @@ import {
   DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL,
   type DefiningWorldPlazaBlacksmithUtilityKind,
 } from '@/components/world/building/domains/definingWorldPlazaBlacksmithUtilitySpriteConstants';
-import { DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX } from '@/components/world/building/domains/definingWorldBuildingBuildModeConstants';
-import { checkingWorldBuildingPlacedBlockIsPassableTile } from '@/components/world/building/domains/definingWorldBuildingBlockHeightConstants';
-import { DEFINING_WORLD_BUILDING_WORLD_LAYER_GROUND } from '@/components/world/building/domains/definingWorldBuildingWorldLayerConstants';
-import { resolvingWorldBuildingPlacedBlockExtrusionBottomLayer } from '@/components/world/building/domains/computingWorldBuildingPlacedBlockOccupiedLayerBand';
-import { computingWorldBuildingWorldLayerScreenOffsetPx } from '@/components/world/building/domains/computingWorldBuildingWorldLayerScreenOffsetPx';
-import {
-  checkingWorldBuildingPlacedBlockIsFootprintSatellite,
-  resolvingWorldBuildingBlockPlacementFootprint,
-  resolvingWorldBuildingPlacedBlockFootprintGroupId,
-} from '@/components/world/building/domains/definingWorldBuildingPlacementFootprint';
-import {
-  resolvingWorldBuildingPlacedBlockBlockHeight,
-  resolvingWorldBuildingPlacedBlockWorldLayer,
-  type DefiningWorldBuildingPlacedBlock,
-} from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import { peekingWorldPlazaBlacksmithUtilitySpriteTextureForUrl } from '@/components/world/building/domains/loadingWorldPlazaBlacksmithUtilitySpriteTextures';
-import { DEFINING_WORLD_DEPTH_BLACKSMITH_UTILITY_ENTITY_DEPTH_BIAS } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
 import { computingWorldDepthSortKey } from '@/components/world/depth/domains/computingWorldDepthSortKey';
+import { DEFINING_WORLD_DEPTH_BLACKSMITH_UTILITY_ENTITY_DEPTH_BIAS } from '@/components/world/depth/domains/definingWorldDepthBiasLadder';
 import { convertingWorldPlazaGridPointToIsometricScreenPoint } from '@/components/world/domains/convertingWorldPlazaGridPointToIsometricScreenPoint';
 import { DEFINING_WORLD_PLAZA_ISOMETRIC_TILE_WIDTH_PX } from '@/components/world/domains/definingWorldPlazaIsometricTileLayoutConstants';
 import type { DefiningWorldPlazaWorldPoint } from '@/components/world/domains/definingWorldPlazaScreenPointToWorldPoint';
@@ -59,6 +60,8 @@ const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND_BY_BLOCK_ID: Record<
     DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.ANVIL,
   [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY]:
     DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.BLOOMERY,
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BESSEMER_FORGE]:
+    DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.BESSEMER_FORGE,
   [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN]:
     DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.CLAY_KILN,
   [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE]:
@@ -68,13 +71,20 @@ const DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND_BY_BLOCK_ID: Record<
 export function resolvingWorldPlazaBlacksmithUtilityKindForBlockDefinitionId(
   definitionId: string
 ): DefiningWorldPlazaBlacksmithUtilityKind | null {
-  return DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND_BY_BLOCK_ID[definitionId] ?? null;
+  return (
+    DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND_BY_BLOCK_ID[definitionId] ??
+    null
+  );
 }
 
 export function checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility(
   definitionId: string
 ): boolean {
-  return resolvingWorldPlazaBlacksmithUtilityKindForBlockDefinitionId(definitionId) !== null;
+  return (
+    resolvingWorldPlazaBlacksmithUtilityKindForBlockDefinitionId(
+      definitionId
+    ) !== null
+  );
 }
 
 /**
@@ -161,9 +171,8 @@ export function applyingWorldPlazaBlacksmithUtilitySpriteAtAnchorTile(input: {
       input.footprintTileWidth,
       input.footprintTileHeight
     );
-  const screenPoint = convertingWorldPlazaGridPointToIsometricScreenPoint(
-    depthSortGridPoint
-  );
+  const screenPoint =
+    convertingWorldPlazaGridPointToIsometricScreenPoint(depthSortGridPoint);
   const layerOffsetY = computingWorldPlazaBlacksmithUtilityFootLayerOffsetPx(
     input.worldLayer,
     input.blockHeight
@@ -260,22 +269,25 @@ export function syncingWorldPlazaVisibleBlacksmithUtilityLayer(input: {
       }
     }
 
-    const utilityKind = resolvingWorldPlazaBlacksmithUtilityKindForBlockDefinitionId(
-      block.definitionId
-    );
+    const utilityKind =
+      resolvingWorldPlazaBlacksmithUtilityKindForBlockDefinitionId(
+        block.definitionId
+      );
 
     if (!utilityKind) {
       continue;
     }
 
     const isPlacementPreview =
-      block.blockId === DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID;
+      block.blockId ===
+      DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID;
     const spriteUrl = input.activeBlockIds?.has(block.blockId)
       ? DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_ACTIVE_WORLD_SPRITE_URL[
           utilityKind
         ]
       : DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_WORLD_SPRITE_URL[utilityKind];
-    const texture = peekingWorldPlazaBlacksmithUtilitySpriteTextureForUrl(spriteUrl);
+    const texture =
+      peekingWorldPlazaBlacksmithUtilitySpriteTextureForUrl(spriteUrl);
 
     if (!texture) {
       continue;
@@ -297,7 +309,8 @@ export function syncingWorldPlazaVisibleBlacksmithUtilityLayer(input: {
           DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_ALPHA)
         : 1;
       if (isPlacementPreview) {
-        existingSprite.zIndex = DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX;
+        existingSprite.zIndex =
+          DEFINING_WORLD_BUILDING_PLACEMENT_PREVIEW_Z_INDEX;
       }
       if (existingSprite.zIndex !== previousZIndex) {
         needsChildSort = true;

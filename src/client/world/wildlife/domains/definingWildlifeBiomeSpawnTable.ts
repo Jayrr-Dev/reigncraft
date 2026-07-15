@@ -252,6 +252,7 @@ export const DEFINING_WILDLIFE_BIOME_SPAWN_TABLE: Partial<
       { speciesId: 'grizzly', weight: 1, packSizeRange: [1, 1] },
       { speciesId: 'mammoth', weight: 1, packSizeRange: [1, 2] },
       { speciesId: 'brown-bear', weight: 1, packSizeRange: [1, 1] },
+      { speciesId: 'cyroborn', weight: 1.2, packSizeRange: [1, 2] },
       {
         speciesId: 'omega-wolf',
         weight: 0.35,

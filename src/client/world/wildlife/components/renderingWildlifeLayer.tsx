@@ -38,6 +38,11 @@ import {
 } from '@/components/world/domains/measuringWorldPlazaPerformanceDiagnostics';
 import { resolvingWorldPlazaDayNightCycleSample } from '@/components/world/domains/resolvingWorldPlazaDayNightCycleSample';
 import { usingWorldPlazaSafeTick } from '@/components/world/hooks/usingWorldPlazaSafeTick';
+import { resolvingWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
+import {
+  ensuringWorldPlazaHungerTierSpriteTexturesLoaded,
+  peekingWorldPlazaHungerTierSpriteTexture,
+} from '@/components/world/hunger/domains/loadingWorldPlazaHungerTierSpriteTextures';
 import {
   clearingWorldPlazaLightSourcesForOwner,
   syncingWorldPlazaLightSourcesForOwner,
@@ -56,15 +61,14 @@ import {
   computingWildlifeGroundShadowFootOffsetBelowGridAnchorPx,
   computingWildlifeGroundShadowSizeScale,
 } from '@/components/world/wildlife/domains/computingWildlifeGroundShadowLayout';
+import { computingWildlifeHungerCircleLocalLayout } from '@/components/world/wildlife/domains/computingWildlifeHungerCircleLocalLayout';
 import {
   computingWildlifeRenderStructuralFingerprint,
   quantizingWildlifeRenderHungerCircleRatio,
   quantizingWildlifeRenderVitalsRatio,
 } from '@/components/world/wildlife/domains/computingWildlifeRenderStructuralFingerprint';
-import {
-  DEFINING_WILDLIFE_FAIRY_HOVER_LIFT_PX,
-  DEFINING_WILDLIFE_FAIRY_LIGHT_OWNER_KEY,
-} from '@/components/world/wildlife/domains/definingWildlifeFairyConstants';
+import { DEFINING_WILDLIFE_CYROBORN_SPECIES_ID } from '@/components/world/wildlife/domains/definingWildlifeCyrobornConstants';
+import { DEFINING_WILDLIFE_FAIRY_LIGHT_OWNER_KEY } from '@/components/world/wildlife/domains/definingWildlifeFairyConstants';
 import { DEFINING_WILDLIFE_NAME_TAG_RECENT_COMBAT_REVEAL_MS } from '@/components/world/wildlife/domains/definingWildlifeNameTagConstants';
 import type { DefiningWildlifeSimulationTickConfig } from '@/components/world/wildlife/domains/definingWildlifeSimulationTickConfig';
 import {
@@ -75,16 +79,11 @@ import { resolvingWildlifeSpeciesDefinition } from '@/components/world/wildlife/
 import type { DefiningWildlifeMotionClipKind } from '@/components/world/wildlife/domains/definingWildlifeSpriteSheetLayout';
 import { DEFINING_WILDLIFE_TEXTURE_EVICTION_CHECK_INTERVAL_MS } from '@/components/world/wildlife/domains/definingWildlifeTextureEvictionConstants';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
-import { resolvingWorldPlazaHungerTier } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
-import {
-  ensuringWorldPlazaHungerTierSpriteTexturesLoaded,
-  peekingWorldPlazaHungerTierSpriteTexture,
-} from '@/components/world/hunger/domains/loadingWorldPlazaHungerTierSpriteTextures';
-import { computingWildlifeHungerCircleLocalLayout } from '@/components/world/wildlife/domains/computingWildlifeHungerCircleLocalLayout';
 import {
   DEFINING_WILDLIFE_VITALS_BAR_LIFT_PX,
   DEFINING_WILDLIFE_VITALS_BAR_Z_INDEX_OFFSET,
 } from '@/components/world/wildlife/domains/definingWildlifeVitalsBarConstants';
+import { drawingWildlifeCyrobornGlowOrbOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeCyrobornGlowOrbOnGraphics';
 import { drawingWildlifeFairyGlowOrbOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeFairyGlowOrbOnGraphics';
 import { drawingWildlifeVitalsOnGraphics } from '@/components/world/wildlife/domains/drawingWildlifeVitalsOnGraphics';
 import { electingWildlifeSimulationLeaderUserId } from '@/components/world/wildlife/domains/electingWildlifeSimulationLeaderUserId';
@@ -98,6 +97,7 @@ import {
   formattingWildlifeAnimationClipId,
 } from '@/components/world/wildlife/domains/registeringWildlifeAnimationClips';
 import { resolvingWildlifeFairyLightSources } from '@/components/world/wildlife/domains/resolvingWildlifeFairyLightSources';
+import { resolvingWildlifeGlowOrbHoverLiftPx } from '@/components/world/wildlife/domains/resolvingWildlifeGlowOrbHoverOffsetPx';
 import {
   resolvingWildlifeInstanceCollisionRadiusGrid,
   resolvingWildlifeInstanceMaxStaminaRatio,
@@ -114,11 +114,11 @@ import {
   unregisteringWildlifeInstanceImperativePresentation,
   type SyncingWildlifeInstancesImperativePresentationRegistry,
 } from '@/components/world/wildlife/domains/syncingWildlifeInstancesImperativePresentation';
+import { updatingWildlifeForageEatOverlaysRef } from '@/components/world/wildlife/domains/updatingWildlifeForageEatOverlaysRef';
 import {
   updatingWildlifeNameTagsOverlayRef,
   type UpdatingWildlifeNameTagLabelCacheEntry,
 } from '@/components/world/wildlife/domains/updatingWildlifeNameTagsOverlayRef';
-import { updatingWildlifeForageEatOverlaysRef } from '@/components/world/wildlife/domains/updatingWildlifeForageEatOverlaysRef';
 import type { Graphics, Sprite } from 'pixi.js';
 import { memo, useEffect, useRef, useState } from 'react';
 
@@ -344,11 +344,20 @@ const RenderingWildlifeInstanceSprite = memo(
             y={
               anchoredScreenY -
               jumpLiftPx -
-              (isDead ? 0 : DEFINING_WILDLIFE_FAIRY_HOVER_LIFT_PX)
+              (isDead ? 0 : resolvingWildlifeGlowOrbHoverLiftPx(speciesId))
             }
             zIndex={sortKey}
             alpha={spriteAlpha}
             draw={(graphics: Graphics) => {
+              if (speciesId === DEFINING_WILDLIFE_CYROBORN_SPECIES_ID) {
+                drawingWildlifeCyrobornGlowOrbOnGraphics(graphics, {
+                  nowMs: performance.now(),
+                  alphaScale: spriteAlpha,
+                  isDead,
+                });
+                return;
+              }
+
               drawingWildlifeFairyGlowOrbOnGraphics(graphics, {
                 nowMs: performance.now(),
                 alphaScale: spriteAlpha,
@@ -599,6 +608,7 @@ export function RenderingWildlifeLayer({
               placedBlocksByTile: placedBlocksScene?.blocksByTile,
               isDaytime: cycleSample.isDaytime,
               onPlayerHitByWildlife: config.onPlayerHitByWildlife,
+              onWildlifeSpawnProjectile: config.onWildlifeSpawnProjectile,
               isLeader,
               remoteSnapshots: config.remoteWildlifeSnapshotsRef?.current ?? [],
               meatDropContext: config.meatDropContextRef?.current

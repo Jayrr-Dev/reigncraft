@@ -220,6 +220,10 @@ export const DEFINING_WILDLIFE_MEAT_INVENTORY_ICONS_BY_RAW_ITEM_TYPE_ID: Record<
     rawIconifyIcon: 'fluent-emoji:sparkles',
     cookedIconifyIcon: 'fluent-emoji:glowing-star',
   },
+  'world-plaza-raw-cyroborn-shard': {
+    rawIconifyIcon: 'mdi:snowflake',
+    cookedIconifyIcon: 'mdi:snowflake-variant',
+  },
   'world-plaza-raw-tiger-meat': {
     rawIconifyIcon: 'fluent-emoji:tiger',
     cookedIconifyIcon: 'fluent-emoji:meat-on-bone',

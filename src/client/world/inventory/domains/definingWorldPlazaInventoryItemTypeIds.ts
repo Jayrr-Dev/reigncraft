@@ -70,6 +70,9 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_GOLD =
   'world-plaza-ingot-gold' as const;
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_LEAD =
   'world-plaza-ingot-lead' as const;
+/** Steel bar refined from iron in a Bessemer forge. */
+export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_STEEL =
+  'world-plaza-ingot-steel' as const;
 /** Quicksilver refined from scarlet (cinnabar) ore. */
 export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_MERCURY =
   'world-plaza-mercury' as const;

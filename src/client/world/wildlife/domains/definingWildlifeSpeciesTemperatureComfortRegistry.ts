@@ -98,6 +98,7 @@ export const DEFINING_WILDLIFE_SPECIES_TEMPERATURE_COMFORT_REGISTRY: Record<
   stag: COLD_ADAPTED,
   pinguin: ARCTIC,
   'polar-bear': ARCTIC,
+  cyroborn: ARCTIC,
   mammoth: ARCTIC,
   ram: COLD_ADAPTED,
   yak: COLD_ADAPTED,

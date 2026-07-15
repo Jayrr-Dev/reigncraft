@@ -11,6 +11,10 @@ import { applyingWorldPlazaDevQaPlayerHealthOverride } from '@/components/world/
 import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import type { DefiningWorldPlazaEntityHealthState } from '@/components/world/health/domains/definingWorldPlazaEntityHealthTypes';
 import { creatingWorldPlazaEntityHealthInitialState } from '@/components/world/health/domains/managingWorldPlazaEntityHealthState';
+import {
+  WORLD_PLAZA_SPRITCORE_UPGRADE_EMPTY_BONUSES,
+  type WorldPlazaSpritcoreUpgradeBonuses,
+} from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
 
 /**
  * Re-applies character immunities and starting status effects after a
@@ -38,10 +42,13 @@ export function reseedingWorldPlazaCharacterEngineHealthBaseline(
  */
 export function creatingWorldPlazaCharacterEngineInitialHealthState(
   definition: DefiningWorldPlazaCharacterEngineDefinition,
-  nowMs = 0
+  nowMs = 0,
+  spritcoreBonuses: WorldPlazaSpritcoreUpgradeBonuses = WORLD_PLAZA_SPRITCORE_UPGRADE_EMPTY_BONUSES
 ): DefiningWorldPlazaEntityHealthState {
-  const derivedStats =
-    computingWorldPlazaCharacterEngineDerivedStats(definition);
+  const derivedStats = computingWorldPlazaCharacterEngineDerivedStats(
+    definition,
+    spritcoreBonuses
+  );
 
   const state: DefiningWorldPlazaEntityHealthState = {
     ...creatingWorldPlazaEntityHealthInitialState(),
@@ -55,10 +62,6 @@ export function creatingWorldPlazaCharacterEngineInitialHealthState(
   };
 
   return applyingWorldPlazaDevQaPlayerHealthOverride(
-    reseedingWorldPlazaCharacterEngineHealthBaseline(
-      state,
-      definition,
-      nowMs
-    )
+    reseedingWorldPlazaCharacterEngineHealthBaseline(state, definition, nowMs)
   );
 }

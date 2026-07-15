@@ -913,6 +913,21 @@ export const DEFINING_WILDLIFE_MEAT_CATALOG: readonly DefiningWildlifeMeatCatalo
       cookedWellFedBuffId: 'well-fed-comfort-buff',
       cookedWellFedChance: 0.55,
     },
+    {
+      speciesId: 'cyroborn',
+      rawItemTypeId: 'world-plaza-raw-cyroborn-shard',
+      cookedItemTypeId: 'world-plaza-cooked-cyroborn-shard',
+      rawDisplayName: 'Raw Cyroborn Shard',
+      cookedDisplayName: 'Tempered Cyroborn Shard',
+      rawHungerRestoreRatio: 0.08,
+      cookedHungerRestoreRatio: 0.2,
+      lootQuantity: 1,
+      cookDurationMs: 3_500,
+      rawDiseaseId: 'salmonellosis',
+      rawDiseaseChance: 0.28,
+      cookedWellFedBuffId: 'well-fed-comfort-buff',
+      cookedWellFedChance: 0.4,
+    },
   ];
 
 const DEFINING_WILDLIFE_MEAT_BY_SPECIES = Object.fromEntries(

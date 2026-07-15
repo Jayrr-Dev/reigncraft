@@ -125,11 +125,16 @@ import {
   DEFINING_WORLD_PLAZA_GIRL_SAMPLE_DAMAGED_DURATION_MS,
 } from '@/components/world/domains/definingWorldPlazaGirlSampleCombatMotionConstants';
 import {
+  gettingWorldPlazaSpritcoreUpgradeSnapshot,
+  subscribingWorldPlazaSpritcoreUpgrade,
+} from '@/components/world/spritcore/domains/managingWorldPlazaSpritcoreUpgradeStore';
+import {
   useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
 } from 'react';
 
 const USING_WORLD_PLAZA_PLAYER_HEALTH_DAMAGE_FLASH_MS = 250;
@@ -436,10 +441,17 @@ export function usingWorldPlazaPlayerHealth({
   rollDodgeProgressRef,
   isRollingRef,
 }: UsingWorldPlazaPlayerHealthParams): UsingWorldPlazaPlayerHealthResult {
+  const spritcoreBonuses = useSyncExternalStore(
+    subscribingWorldPlazaSpritcoreUpgrade,
+    gettingWorldPlazaSpritcoreUpgradeSnapshot,
+    gettingWorldPlazaSpritcoreUpgradeSnapshot
+  );
   const healthStateRef = useRef<DefiningWorldPlazaEntityHealthState>(
     characterEngineDefinition
       ? creatingWorldPlazaCharacterEngineInitialHealthState(
-          characterEngineDefinition
+          characterEngineDefinition,
+          performance.now(),
+          spritcoreBonuses
         )
       : applyingWorldPlazaDevQaPlayerHealthOverride(
           creatingWorldPlazaEntityHealthInitialState()
@@ -480,7 +492,8 @@ export function usingWorldPlazaPlayerHealth({
   if (characterEngineDefinition) {
     characterEngineDefenseRef.current =
       computingWorldPlazaCharacterEngineDerivedStats(
-        characterEngineDefinition
+        characterEngineDefinition,
+        spritcoreBonuses
       ).defense;
   }
 
@@ -882,10 +895,11 @@ export function usingWorldPlazaPlayerHealth({
     healthStateRef.current =
       creatingWorldPlazaCharacterEngineInitialHealthState(
         characterEngineDefinition,
-        performance.now()
+        performance.now(),
+        spritcoreBonuses
       );
     pushingHudSnapshot(performance.now());
-  }, [characterEngineDefinition, pushingHudSnapshot]);
+  }, [characterEngineDefinition, pushingHudSnapshot, spritcoreBonuses]);
 
   const mutatingHealthState = useCallback(
     (
@@ -946,7 +960,8 @@ export function usingWorldPlazaPlayerHealth({
         syncingMovePositionRef: syncingMovePositionRef ?? { current: null },
         playerHeightWorldLayers: characterEngineDefinition
           ? computingWorldPlazaCharacterEngineDerivedStats(
-              characterEngineDefinition
+              characterEngineDefinition,
+              spritcoreBonuses
             ).heightWorldLayers
           : undefined,
       });

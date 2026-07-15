@@ -7,6 +7,7 @@ import type {
 } from '@/components/world/character/domains/definingWorldPlazaCharacterEngineTypes';
 import { resolvingWorldPlazaCharacterEngineDefinitionForSkinId } from '@/components/world/character/domains/registeringWorldPlazaCharacterEngineDefinitions';
 import { usingWorldPlazaSelectedAvatarCharacterDefinition } from '@/components/world/hooks/usingWorldPlazaSelectedAvatarCharacterDefinition';
+import { usingWorldPlazaSpritcoreUpgradeBonuses } from '@/components/world/spritcore/hooks/usingWorldPlazaSpritcoreUpgradeBonuses';
 
 /**
  * Resolves the declarative character engine definition for the local player.
@@ -24,6 +25,10 @@ export function usingWorldPlazaSelectedCharacterEngineDefinition(): DefiningWorl
  */
 export function usingWorldPlazaSelectedCharacterEngineDerivedStats(): ComputingWorldPlazaCharacterEngineDerivedStats {
   const definition = usingWorldPlazaSelectedCharacterEngineDefinition();
+  const spritcoreBonuses = usingWorldPlazaSpritcoreUpgradeBonuses();
 
-  return computingWorldPlazaCharacterEngineDerivedStats(definition);
+  return computingWorldPlazaCharacterEngineDerivedStats(
+    definition,
+    spritcoreBonuses
+  );
 }

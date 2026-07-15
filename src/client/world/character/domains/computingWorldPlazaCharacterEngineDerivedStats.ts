@@ -24,6 +24,11 @@ import {
 import { DEFINING_WORLD_PLAZA_PLAYER_COLLISION_RADIUS_GRID } from '@/components/world/domains/definingWorldPlazaPlayerCollisionConstants';
 import { resolvingWorldPlazaScaledAttackSpeed } from '@/components/world/domains/resolvingWorldPlazaGlobalAttackSpeedScale';
 import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_REGEN_PER_SECOND } from '@/components/world/health/domains/definingWorldPlazaEntityHealthConstants';
+import { computingWorldPlazaSpritcoreDisplayLevel } from '@/components/world/spritcore/domains/computingWorldPlazaSpritcoreDisplayLevel';
+import {
+  WORLD_PLAZA_SPRITCORE_UPGRADE_EMPTY_BONUSES,
+  type WorldPlazaSpritcoreUpgradeBonuses,
+} from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreUpgradeTypes';
 
 function computingWorldPlazaCharacterEngineLevelBonus(
   perLevel: number,
@@ -37,42 +42,53 @@ function computingWorldPlazaCharacterEngineLevelBonus(
  * Returns effective stats for one character definition.
  */
 export function computingWorldPlazaCharacterEngineDerivedStats(
-  definition: DefiningWorldPlazaCharacterEngineDefinition
+  definition: DefiningWorldPlazaCharacterEngineDefinition,
+  spritcoreBonuses: WorldPlazaSpritcoreUpgradeBonuses = WORLD_PLAZA_SPRITCORE_UPGRADE_EMPTY_BONUSES
 ): ComputingWorldPlazaCharacterEngineDerivedStats {
   const { scaling, size, vitals, stats, locomotion, immunities } = definition;
-  const level = Math.max(1, scaling.level);
+  const scalingLevel = Math.max(1, scaling.level);
   const growthLaneLevelOffset = scaling.growthLaneLevelOffset ?? 0;
   const sizeScale = Math.max(0.1, size.sizeScale);
+  const nominalAttackSpeed = Math.max(
+    0.25,
+    stats.attackSpeed + spritcoreBonuses.bonusAttackSpeed
+  );
+  const displayLevel =
+    spritcoreBonuses.totalSpritcoreInvested > 0
+      ? computingWorldPlazaSpritcoreDisplayLevel(
+          spritcoreBonuses.totalSpritcoreInvested
+        )
+      : scalingLevel;
 
   return {
-    level,
+    level: displayLevel,
     effectiveMaxHealth: Math.max(
       DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GROWTH_LANE_MIN_EFFECTIVE_MAX_HEALTH,
       vitals.baseMaxHealth +
         computingWorldPlazaCharacterEngineLevelBonus(
           scaling.healthPerLevel,
-          level,
+          scalingLevel,
           growthLaneLevelOffset
-        )
+        ) +
+        spritcoreBonuses.bonusMaxHealth
     ),
     attackPower: Math.max(
       DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GROWTH_LANE_MIN_ATTACK_POWER,
       stats.attackPower +
         computingWorldPlazaCharacterEngineLevelBonus(
           scaling.attackPerLevel,
-          level,
+          scalingLevel,
           growthLaneLevelOffset
-        )
+        ) +
+        spritcoreBonuses.bonusAttackPower
     ),
-    attackSpeed: resolvingWorldPlazaScaledAttackSpeed(
-      Math.max(0.25, stats.attackSpeed)
-    ),
+    attackSpeed: resolvingWorldPlazaScaledAttackSpeed(nominalAttackSpeed),
     defense: Math.max(
       DEFINING_WORLD_PLAZA_CHARACTER_ENGINE_GROWTH_LANE_MIN_DEFENSE,
       stats.defense +
         computingWorldPlazaCharacterEngineLevelBonus(
           scaling.defensePerLevel,
-          level,
+          scalingLevel,
           growthLaneLevelOffset
         )
     ),

@@ -114,6 +114,7 @@ describe('attemptingWildlifeMeatGroundDropOnDeath', () => {
         redditUserId: null,
         saveSlotIndex: 1,
         playerPosition: { x: 3, y: 3, layer: 1 },
+        playerTargetId: null,
       }
     );
 
@@ -168,6 +169,7 @@ describe('attemptingWildlifeMeatGroundDropOnDeath', () => {
         redditUserId: null,
         saveSlotIndex: 1,
         playerPosition: { x: 3, y: 3, layer: 1 },
+        playerTargetId: null,
       }
     );
 

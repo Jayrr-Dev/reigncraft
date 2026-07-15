@@ -309,6 +309,8 @@ const DEFINING_WILDLIFE_SPECIES_STAMINA: Record<
   // Cold-country giants — polar bears sprint hard then overheat like browns.
   'polar-bear': { drainMultiplier: 1.5, regenMultiplier: 0.88 },
   mammoth: { drainMultiplier: 1.55, regenMultiplier: 0.8 },
+  // Floating frost crystal caster — drifts and keeps cast distance.
+  cyroborn: { drainMultiplier: 0.85, regenMultiplier: 1.15 },
 
   // Desert and highland stock.
   camel: { drainMultiplier: 0.8, regenMultiplier: 1 },
@@ -827,6 +829,11 @@ const DEFINING_WILDLIFE_SPECIES_MOVEMENT: Record<
   mammoth: {
     walkSpeedGridPerSecond: 1.1,
     runSpeedGridPerSecond: 3.2,
+    jump: definingWildlifeGroundedJumpConfig(),
+  },
+  cyroborn: {
+    walkSpeedGridPerSecond: 1.6,
+    runSpeedGridPerSecond: 3.4,
     jump: definingWildlifeGroundedJumpConfig(),
   },
 
@@ -2588,6 +2595,47 @@ const DEFINING_WILDLIFE_SPECIES_REGISTRY_BASE: Record<
       attackPower: 2,
       defense: 0,
       attackIntervalMs: 1_200,
+    },
+  },
+  cyroborn: {
+    speciesId: 'cyroborn',
+    displayName: 'Cyroborn',
+    spriteFolder: 'cyroborn',
+    presentationKind: 'glowOrb',
+    neverSleeps: true,
+    sizeScale: 1.15,
+    collisionRadiusGrid: 0.32,
+    diet: 'carnivore',
+    trophicTier: 2,
+    massKg: 18,
+    temperamentId: 'predator',
+    activityPattern: 'nocturnal',
+    aggressionSpawn: {
+      bellCurveMeanShift: 0.4,
+      alwaysAttacksPlayerOnSight: true,
+    },
+    socialBehavior: {
+      defendsYoung: false,
+      separationAnxiety: false,
+    },
+    aggro: {
+      ...DEFINING_WILDLIFE_DEFAULT_AGGRO,
+      aggroRadiusGrid: 10,
+      packShareRadiusGrid: 0,
+    },
+    hunger: { ...DEFINING_WILDLIFE_DEFAULT_HUNGER, drainPerSecond: 0.004 },
+    stamina: resolvingWildlifeSpeciesStaminaConfig('cyroborn'),
+    hazards: {
+      treatsSwampWaterAsSafe: false,
+      treatsLavaAsLethal: true,
+      isHeatImmune: false,
+      isColdImmune: true,
+    },
+    vitals: {
+      baseMaxHealth: 72,
+      attackPower: 14,
+      defense: 5,
+      attackIntervalMs: 1_800,
     },
   },
 };

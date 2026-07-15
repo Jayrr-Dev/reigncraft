@@ -1,4 +1,5 @@
 import {
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BESSEMER_FORGE,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE,
@@ -12,6 +13,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_LEAD,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_SILVER,
+  DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_STEEL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_MERCURY,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COAL,
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COPPER,
@@ -32,11 +34,17 @@ import {
  */
 export const DEFINING_WORLD_PLAZA_ORE_SMELTING_DURATION_MS = 4_000;
 
-/** Placed utility definitions that accept ore and fuel. */
-export const DEFINING_WORLD_PLAZA_ORE_SMELTING_STATION_BLOCK_DEFINITION_IDS = [
+/** Stations that refine ore and accept generic smelt fuel. */
+export const DEFINING_WORLD_PLAZA_ORE_REFINERY_STATION_BLOCK_DEFINITION_IDS = [
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN,
   DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_STOVE,
+] as const;
+
+/** Placed utility definitions that accept ore, ingots, ware, and fuel. */
+export const DEFINING_WORLD_PLAZA_ORE_SMELTING_STATION_BLOCK_DEFINITION_IDS = [
+  ...DEFINING_WORLD_PLAZA_ORE_REFINERY_STATION_BLOCK_DEFINITION_IDS,
+  DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BESSEMER_FORGE,
 ] as const;
 
 /** Fuel item types accepted by every smelting station. */
@@ -75,7 +83,7 @@ export type DefiningWorldPlazaOreSmeltingRecipe = {
   readonly allowedStationBlockDefinitionIds?: readonly string[];
 };
 
-/** One-to-one ore refinement + kiln-only ceramics firing recipes. */
+/** One-to-one ore refinement + kiln-only ceramics + Bessemer steel. */
 export const DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY = [
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_COPPER,
@@ -83,6 +91,8 @@ export const DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY = [
     outputDisplayName: 'Copper ingot',
     durationMs: 4_000,
     fuelCostMultiplier: 1,
+    allowedStationBlockDefinitionIds:
+      DEFINING_WORLD_PLAZA_ORE_REFINERY_STATION_BLOCK_DEFINITION_IDS,
   },
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_LEAD,
@@ -90,6 +100,8 @@ export const DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY = [
     outputDisplayName: 'Lead ingot',
     durationMs: 4_500,
     fuelCostMultiplier: 1,
+    allowedStationBlockDefinitionIds:
+      DEFINING_WORLD_PLAZA_ORE_REFINERY_STATION_BLOCK_DEFINITION_IDS,
   },
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_IRON,
@@ -97,6 +109,8 @@ export const DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY = [
     outputDisplayName: 'Iron ingot',
     durationMs: 6_000,
     fuelCostMultiplier: 2,
+    allowedStationBlockDefinitionIds:
+      DEFINING_WORLD_PLAZA_ORE_REFINERY_STATION_BLOCK_DEFINITION_IDS,
   },
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_SILVER,
@@ -104,6 +118,8 @@ export const DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY = [
     outputDisplayName: 'Silver ingot',
     durationMs: 7_000,
     fuelCostMultiplier: 2,
+    allowedStationBlockDefinitionIds:
+      DEFINING_WORLD_PLAZA_ORE_REFINERY_STATION_BLOCK_DEFINITION_IDS,
   },
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_GOLD,
@@ -111,6 +127,8 @@ export const DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY = [
     outputDisplayName: 'Gold ingot',
     durationMs: 8_000,
     fuelCostMultiplier: 2,
+    allowedStationBlockDefinitionIds:
+      DEFINING_WORLD_PLAZA_ORE_REFINERY_STATION_BLOCK_DEFINITION_IDS,
   },
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_ORE_SCARLET,
@@ -118,6 +136,18 @@ export const DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY = [
     outputDisplayName: 'Mercury',
     durationMs: 10_000,
     fuelCostMultiplier: 3,
+    allowedStationBlockDefinitionIds:
+      DEFINING_WORLD_PLAZA_ORE_REFINERY_STATION_BLOCK_DEFINITION_IDS,
+  },
+  {
+    inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_IRON,
+    outputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_INGOT_STEEL,
+    outputDisplayName: 'Steel ingot',
+    durationMs: 9_000,
+    fuelCostMultiplier: 3,
+    allowedStationBlockDefinitionIds: [
+      DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BESSEMER_FORGE,
+    ],
   },
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_CUP,
@@ -131,7 +161,8 @@ export const DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY = [
   },
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_TEAPOT,
-    outputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT,
+    outputItemTypeId:
+      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_TEAPOT,
     outputDisplayName: 'Empty Clay Tea Pot',
     durationMs: 7_000,
     fuelCostMultiplier: 2,
@@ -141,7 +172,8 @@ export const DEFINING_WORLD_PLAZA_ORE_SMELTING_RECIPE_REGISTRY = [
   },
   {
     inputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WET_CLAY_BOTTLE,
-    outputItemTypeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOTTLE,
+    outputItemTypeId:
+      DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_EMPTY_CLAY_BOTTLE,
     outputDisplayName: 'Empty Clay Bottle',
     durationMs: 6_000,
     fuelCostMultiplier: 1,

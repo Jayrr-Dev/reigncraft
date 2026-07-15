@@ -126,9 +126,12 @@ export function RenderingWorldPlazaBlacksmithUtilityLayer({
     for (const block of placedBlocksRef.current) {
       if (
         !activeBlockIdsRef.current?.has(block.blockId) ||
-        resolvingWorldPlazaBlacksmithUtilityKindForBlockDefinitionId(
+        (resolvingWorldPlazaBlacksmithUtilityKindForBlockDefinitionId(
           block.definitionId
-        ) !== DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.BLOOMERY
+        ) !== DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.BLOOMERY &&
+          resolvingWorldPlazaBlacksmithUtilityKindForBlockDefinitionId(
+            block.definitionId
+          ) !== DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_KIND.BESSEMER_FORGE)
       ) {
         continue;
       }

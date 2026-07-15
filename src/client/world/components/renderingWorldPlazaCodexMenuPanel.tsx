@@ -34,6 +34,7 @@ import {
   STYLING_WORLD_PLAZA_CODEX_MENU_PANEL_CLASS_NAME,
   type WorldPlazaCodexSectionId,
 } from '@/components/world/domains/definingWorldPlazaCodexConstants';
+import { DEFINING_WORLD_PLAZA_GENERATION_FEATURE } from '@/components/world/domains/definingWorldPlazaGenerationFeatureRegistry';
 import {
   gettingWorldPlazaBestiarySightedSpeciesSnapshot,
   subscribingWorldPlazaBestiaryDiscovery,
@@ -42,6 +43,7 @@ import {
   gettingWorldPlazaExploredBiomesSnapshot,
   subscribingWorldPlazaExploredBiomes,
 } from '@/components/world/domains/managingWorldPlazaExploredBiomesStore';
+import { checkingWorldPlazaGenerationFeatureEnabled } from '@/components/world/domains/managingWorldPlazaGenerationFeatureStore';
 import {
   gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
   gettingWorldPlazaHerbariumFlowerStudyCountsSnapshot,
@@ -163,6 +165,15 @@ export function RenderingWorldPlazaCodexMenuPanel({
     return null;
   }
 
+  const visibleCodexMenuOptions =
+    DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS.filter(
+      (option) =>
+        option.id !== 'spritcore' ||
+        checkingWorldPlazaGenerationFeatureEnabled(
+          DEFINING_WORLD_PLAZA_GENERATION_FEATURE.SPRITCORE_LEVELING
+        )
+    );
+
   const resolvingCodexMenuOptionDescription = (
     optionId: WorldPlazaCodexSectionId,
     description: string
@@ -261,7 +272,7 @@ export function RenderingWorldPlazaCodexMenuPanel({
       role="menu"
       aria-label={LABELING_WORLD_PLAZA_CODEX_MENU}
     >
-      {DEFINING_WORLD_PLAZA_CODEX_MENU_OPTIONS.map((option) => (
+      {visibleCodexMenuOptions.map((option) => (
         <button
           key={option.id}
           type="button"
@@ -274,7 +285,11 @@ export function RenderingWorldPlazaCodexMenuPanel({
             STYLING_WORLD_PLAZA_CODEX_MENU_OPTION_INACTIVE_CLASS_NAME
           )}
         >
-          <Icon icon={option.icon} className="size-3.5 shrink-0 max-md:size-4" aria-hidden />
+          <Icon
+            icon={option.icon}
+            className="size-3.5 shrink-0 max-md:size-4"
+            aria-hidden
+          />
           <span className="min-w-0">
             <span className="block text-xs font-semibold leading-tight max-md:text-sm">
               {option.label}

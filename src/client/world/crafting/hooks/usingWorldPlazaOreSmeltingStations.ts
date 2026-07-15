@@ -2,12 +2,12 @@
 
 import type { DefiningInventoryState } from '@/components/inventory/domains/definingInventoryItem';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import type { DefiningWorldPlazaOreSmeltingStationSlotKind } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingDndIds';
 import {
   checkingWorldPlazaOreSmeltingFuelItemTypeId,
   resolvingWorldPlazaOreSmeltingFuelUnitsCostForRecipe,
   resolvingWorldPlazaOreSmeltingRecipe,
 } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingRegistry';
-import type { DefiningWorldPlazaOreSmeltingStationSlotKind } from '@/components/world/crafting/domains/definingWorldPlazaOreSmeltingDndIds';
 import {
   DEFINING_WORLD_PLAZA_EMPTY_ORE_SMELTING_STATION_STATE,
   checkingWorldPlazaOreSmeltingCanStartUnit,
@@ -80,10 +80,7 @@ export function usingWorldPlazaOreSmeltingStations({
       selectedStationBlock.blockId
     );
 
-    if (
-      !stationState?.outputItemTypeId ||
-      stationState.outputQuantity < 1
-    ) {
+    if (!stationState?.outputItemTypeId || stationState.outputQuantity < 1) {
       return;
     }
 
@@ -125,8 +122,7 @@ export function usingWorldPlazaOreSmeltingStations({
       return nextStates;
     });
 
-    const collectedLabel =
-      stationState.outputDisplayName ?? 'Smelted item';
+    const collectedLabel = stationState.outputDisplayName ?? 'Smelted item';
     showingToast(
       remainingQuantity > 0
         ? `Grabbed ${addResult.quantityAccepted} ${collectedLabel}. Inventory full for the rest.`
@@ -275,15 +271,11 @@ export function usingWorldPlazaOreSmeltingStations({
         if (slottedState.fuelItemTypeId === null) {
           showingToast('Add wood or coal fuel to start.');
         } else {
-          const fuelCost =
-            resolvingWorldPlazaOreSmeltingFuelUnitsCostForRecipe(
-              slottedState.fuelItemTypeId,
-              recipe
-            );
-          if (
-            fuelCost !== null &&
-            slottedState.fuelQuantity < fuelCost
-          ) {
+          const fuelCost = resolvingWorldPlazaOreSmeltingFuelUnitsCostForRecipe(
+            slottedState.fuelItemTypeId,
+            recipe
+          );
+          if (fuelCost !== null && slottedState.fuelQuantity < fuelCost) {
             const fuelLabel =
               slottedState.fuelItemTypeId ===
               DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_WOOD
@@ -303,9 +295,7 @@ export function usingWorldPlazaOreSmeltingStations({
               recipe.outputItemTypeId
             )
           ) {
-            showingToast(
-              'Output chamber is full. Grab before smelting more.'
-            );
+            showingToast('Output chamber is full. Grab before smelting more.');
           }
         }
       }
@@ -354,7 +344,7 @@ export function usingWorldPlazaOreSmeltingStations({
       const targetStation = selectedStationBlock ?? nearbyStation;
 
       if (!targetStation) {
-        showingToast('Stand near a bloomery, kiln, or stove.');
+        showingToast('Stand near a bloomery, Bessemer forge, kiln, or stove.');
         return;
       }
 
@@ -371,11 +361,7 @@ export function usingWorldPlazaOreSmeltingStations({
         slotKind
       );
     },
-    [
-      droppingInventorySlotIntoStationBlock,
-      selectedStationBlock,
-      showingToast,
-    ]
+    [droppingInventorySlotIntoStationBlock, selectedStationBlock, showingToast]
   );
 
   /**
@@ -390,10 +376,7 @@ export function usingWorldPlazaOreSmeltingStations({
       const nextStates = new Map(currentStates);
 
       for (const [blockId, stationState] of currentStates) {
-        if (
-          stationState.endsAtMs === null ||
-          stationState.endsAtMs > nowMs
-        ) {
+        if (stationState.endsAtMs === null || stationState.endsAtMs > nowMs) {
           continue;
         }
 

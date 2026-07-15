@@ -84,6 +84,10 @@ export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_ANVIL =
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BLOOMERY =
   'utility:bloomery' as const;
 
+/** Bessemer forge block id (2x2 footprint). */
+export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BESSEMER_FORGE =
+  'utility:bessemer-forge' as const;
+
 /** Clay kiln block id (2x2 footprint). */
 export const DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN =
   'utility:clay-kiln' as const;
@@ -269,6 +273,21 @@ export const DEFINING_WORLD_BUILDING_BLOCK_DEFINITIONS: Record<
       label: 'Bloomery',
       fillColor: 0xa6875f,
       strokeColor: 0x6c5033,
+    },
+  },
+  [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BESSEMER_FORGE]: {
+    id: DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_BESSEMER_FORGE,
+    name: 'Bessemer forge',
+    category: DEFINING_WORLD_BUILDING_BLOCK_CATEGORY_FUNCTIONAL,
+    isPaletteVisible: false,
+    collisionShape: DEFINING_WORLD_BUILDING_COLLISION_SHAPE_TILE_BLOCK,
+    isInteractive: true,
+    placementFootprintTileWidth: 2,
+    placementFootprintTileHeight: 2,
+    visualConfig: {
+      label: 'Bessemer',
+      fillColor: 0x7a8a9a,
+      strokeColor: 0x3d4854,
     },
   },
   [DEFINING_WORLD_BUILDING_BLOCK_ID_UTILITY_CLAY_KILN]: {

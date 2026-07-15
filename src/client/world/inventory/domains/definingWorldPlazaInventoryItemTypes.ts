@@ -13,8 +13,6 @@ import {
   DEFINING_WORLD_PLAZA_HUNGER_RESTORE_WHEAT,
 } from '@/components/world/hunger/domains/definingWorldPlazaHungerConstants';
 import { resolvingWorldPlazaInventoryCoconutSpriteSheetIcon } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCoconutSpriteSheetConstants';
-import { DEFINING_WORLD_PLAZA_INVENTORY_IRON_TUBE_SPRITE_SHEET_ICON } from '@/components/world/inventory/domains/definingWorldPlazaInventoryIronTubeSpriteSheetConstants';
-import { DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SPRITCORE_SPHERE } from '@/components/world/inventory/domains/definingWorldPlazaInventoryCustomItemIconIds';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_AXE_MAX_DURABILITY,
   DEFINING_WORLD_PLAZA_INVENTORY_BUILD_TOOL_MAX_DURABILITY,
@@ -24,6 +22,7 @@ import {
   DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_STEADY_GRIP,
   DEFINING_WORLD_PLAZA_INVENTORY_ENCHANTMENT_TIMBER_WHISPER,
 } from '@/components/world/inventory/domains/definingWorldPlazaInventoryEnchantmentTypeIds';
+import { DEFINING_WORLD_PLAZA_INVENTORY_IRON_TUBE_SPRITE_SHEET_ICON } from '@/components/world/inventory/domains/definingWorldPlazaInventoryIronTubeSpriteSheetConstants';
 import type { DefiningWorldPlazaInventoryItemTypeDefinition } from '@/components/world/inventory/domains/definingWorldPlazaInventoryItemTypeDefinition';
 import {
   DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_APPLE,
@@ -71,6 +70,7 @@ import {
   DEFINING_WORLD_PLAZA_SPRITCORE_ITEM_NAME,
   DEFINING_WORLD_PLAZA_SPRITCORE_STACK_QUANTITY_DISPLAY,
 } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreConstants';
+import { DEFINING_WORLD_PLAZA_INVENTORY_SPRITCORE_SPRITE_SHEET_ICON } from '@/components/world/spritcore/domains/definingWorldPlazaSpritcoreSpriteSheetConstants';
 import { DEFINING_WORLD_PLAZA_BEAR_TRAP_SPRITE_SHEET_URL } from '@/components/world/trap/domains/definingWorldPlazaBearTrapConstants';
 import { DEFINING_WORLD_PLAZA_CALTROP_SPRITE_SHEET_URL } from '@/components/world/trap/domains/definingWorldPlazaCaltropConstants';
 import { Leaf, Package } from 'lucide-react';
@@ -136,7 +136,8 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       rarity: 'uncommon',
       description:
         'A hollow iron pipe drawn on the anvil. Scaffold for tools, traps, and later forgework.',
-      iconSpriteSheet: DEFINING_WORLD_PLAZA_INVENTORY_IRON_TUBE_SPRITE_SHEET_ICON,
+      iconSpriteSheet:
+        DEFINING_WORLD_PLAZA_INVENTORY_IRON_TUBE_SPRITE_SHEET_ICON,
       maxStack: 99,
       isDroppable: true,
       isStackable: true,
@@ -341,8 +342,8 @@ export const DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_DEFINITIONS: readonly Defi
       typeId: DEFINING_WORLD_PLAZA_INVENTORY_ITEM_TYPE_SPRITCORE,
       name: DEFINING_WORLD_PLAZA_SPRITCORE_ITEM_NAME,
       rarity: 'legendary',
-      customIconId:
-        DEFINING_WORLD_PLAZA_INVENTORY_CUSTOM_ITEM_ICON_SPRITCORE_SPHERE,
+      iconSpriteSheet:
+        DEFINING_WORLD_PLAZA_INVENTORY_SPRITCORE_SPRITE_SHEET_ICON,
       maxStack: DEFINING_INVENTORY_UNLIMITED_STACK_SIZE,
       isDroppable: false,
       isStackable: true,
