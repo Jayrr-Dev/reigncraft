@@ -74,6 +74,7 @@ export function creatingWorldPlazaEntityHealthInitialState(): DefiningWorldPlaza
       ...DEFINING_WORLD_PLAZA_ENTITY_HEALTH_INITIAL_STATE.temperatureResistance,
     },
     timedTemperatureModifiers: [],
+    combatTemperatureOffsetCelsius: 0,
     damageKindImmunities: [],
   };
 }
@@ -814,6 +815,7 @@ export function revivingWorldPlazaEntityHealthToFull(
       ...DEFINING_WORLD_PLAZA_ENTITY_TEMPERATURE_RESISTANCE_DEFAULT,
     },
     timedTemperatureModifiers: [],
+    combatTemperatureOffsetCelsius: 0,
     damageKindImmunities: [],
   };
 

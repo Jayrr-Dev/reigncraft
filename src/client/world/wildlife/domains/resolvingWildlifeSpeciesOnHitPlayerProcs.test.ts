@@ -37,9 +37,35 @@ describe('resolvingWildlifeSpeciesOnHitPlayerProcs', () => {
     ]);
   });
 
-  it('skips effects when rolls fail', () => {
-    expect(
-      resolvingWildlifeSpeciesOnHitPlayerProcs('boar', 120, () => 0.99)
-    ).toEqual([]);
+  it('procs temperature impulse for polar-bear when rolls succeed', () => {
+    let rollIndex = 0;
+    const rolls = [0, 0, 0];
+
+    const procs = resolvingWildlifeSpeciesOnHitPlayerProcs(
+      'polar-bear',
+      200,
+      () => rolls[rollIndex++] ?? 1
+    );
+
+    expect(procs).toContainEqual({
+      kind: 'temperature',
+      deltaCelsius: -18,
+    });
+  });
+
+  it('procs temperature impulse for sunhead when rolls succeed', () => {
+    let rollIndex = 0;
+    const rolls = [0, 0, 0, 0];
+
+    const procs = resolvingWildlifeSpeciesOnHitPlayerProcs(
+      'sunhead',
+      200,
+      () => rolls[rollIndex++] ?? 1
+    );
+
+    expect(procs).toContainEqual({
+      kind: 'temperature',
+      deltaCelsius: 22,
+    });
   });
 });

@@ -24,6 +24,8 @@ export type ApplyingWildlifePlayerMeleeHitSideEffectsHandlers = {
     flatExpectedDamage: number
   ) => void;
   applyBuff: (buffId: string) => void;
+  /** Positive heats; negative cools (°C). */
+  applyTemperature: (deltaCelsius: number) => void;
   applyDisease: (diseaseId: DefiningWorldPlazaEntityDiseaseId) => void;
 };
 
@@ -52,6 +54,11 @@ export function applyingWildlifePlayerMeleeHitSideEffects(
 
         if (proc.kind === 'poison') {
           handlers.applyPoison(proc.potency, proc.flatExpectedDamage);
+          return;
+        }
+
+        if (proc.kind === 'temperature') {
+          handlers.applyTemperature(proc.deltaCelsius);
           return;
         }
 

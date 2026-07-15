@@ -181,6 +181,20 @@ export const DEFINING_WORLD_PLAZA_WATER_MELTING_POINT_CELSIUS = 0;
 export const DEFINING_WORLD_PLAZA_TEMPERATURE_SMOOTHING_RATE_PER_SECOND = 3;
 
 /**
+ * Decay rate (per second) for combat on-hit temperature impulses.
+ *
+ * Positive deltas heat the target; negative deltas cool it. Offset eases back
+ * toward ambient so brief heat/cold shocks do not permanently override climate.
+ */
+export const DEFINING_WORLD_PLAZA_COMBAT_TEMPERATURE_OFFSET_DECAY_RATE_PER_SECOND = 1.25;
+
+/**
+ * Soft cap on stacked combat temperature offset magnitude (°C).
+ * Extra impulse beyond the cap is ignored so spam cannot instantly lava-spike.
+ */
+export const DEFINING_WORLD_PLAZA_COMBAT_TEMPERATURE_OFFSET_MAX_ABS_CELSIUS = 80;
+
+/**
  * Tile radius used when averaging raw local temperature from neighboring tiles.
  *
  * Lava, campfires, and painted heat zones keep their source temperature; other

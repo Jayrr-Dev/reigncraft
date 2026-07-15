@@ -10,6 +10,7 @@ import { usingUserProfileFriendPlazaNotifications } from '@/components/friends/h
 import { usingUserProfileFriendRequestPlazaDialogs } from '@/components/friends/hooks/usingUserProfileFriendRequestPlazaDialogs';
 import { usingUserProfileFriendRequestsPendingCount } from '@/components/friends/hooks/usingUserProfileFriendRequestsPendingCount';
 import { formattingPlazaStudyCompleteToastMessage } from '@/components/home/domains/formattingPlazaStudyCompleteToastMessage';
+import { formattingPlazaBestiaryStudyCountProgress } from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
 import {
   checkingPlazaHerbariumBerryStudyTierUnlocked,
   formattingPlazaHerbariumBerryStudyCountProgress,
@@ -27,7 +28,6 @@ import {
   checkingPlazaLapidaryStudyTierUnlocked,
   formattingPlazaLapidaryStudyCountProgress,
 } from '@/components/home/domains/resolvingPlazaLapidaryStudyTier';
-import { formattingPlazaBestiaryStudyCountProgress } from '@/components/home/domains/resolvingPlazaBestiaryStudyTier';
 import {
   resolvingPlazaBestiarySpeciesStudyDisplayName,
   resolvingPlazaHerbariumBerryStudyDisplayName,
@@ -46,6 +46,7 @@ import {
   creatingSpiritedSpritesBetaSpawnStore,
 } from '@/components/world/beta/spirited/domains/managingSpiritedSpritesBetaSpawnStore';
 import { spawningSpiritedSpritesBetaNearPoint } from '@/components/world/beta/spirited/domains/spawningSpiritedSpritesBetaNearPoint';
+import { RenderingWorldPlazaBlacksmithUtilityLayer } from '@/components/world/building/components/renderingWorldPlazaBlacksmithUtilityLayer';
 import { RenderingWorldPlazaBlockPlacementPreview } from '@/components/world/building/components/renderingWorldPlazaBlockPlacementPreview';
 import { RenderingWorldPlazaBlockRemovalHoverHighlight } from '@/components/world/building/components/renderingWorldPlazaBlockRemovalHoverHighlight';
 import { RenderingWorldPlazaBuildModeDiscardDialog } from '@/components/world/building/components/renderingWorldPlazaBuildModeDiscardDialog';
@@ -55,39 +56,6 @@ import { RenderingWorldPlazaEditModePlotCapacityMetric } from '@/components/worl
 import { RenderingWorldPlazaHudToolbarCraftModePanel } from '@/components/world/building/components/renderingWorldPlazaHudToolbarCraftModePanel';
 import { RenderingWorldPlazaPlacedBlockGroundShadows } from '@/components/world/building/components/renderingWorldPlazaPlacedBlockGroundShadows';
 import { RenderingWorldPlazaPlacedBlocks } from '@/components/world/building/components/renderingWorldPlazaPlacedBlocks';
-import { RenderingWorldPlazaBlacksmithUtilityLayer } from '@/components/world/building/components/renderingWorldPlazaBlacksmithUtilityLayer';
-import { creatingWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
-import {
-  checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility,
-  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID,
-} from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
-import { RenderingWorldPlazaChestInteractionLabels } from '@/components/world/chest/components/renderingWorldPlazaChestInteractionLabels';
-import { RenderingWorldPlazaChestLayer } from '@/components/world/chest/components/renderingWorldPlazaChestLayer';
-import { usingWorldPlazaChestOpenInteraction } from '@/components/world/chest/hooks/usingWorldPlazaChestOpenInteraction';
-import {
-  hydratingWorldPlazaChestInstanceStore,
-  readingWorldPlazaChestInstanceStore,
-} from '@/components/world/chest/domains/managingWorldPlazaChestInstanceStore';
-import { RenderingWorldPlazaBearTrapInteractionLabels } from '@/components/world/trap/components/renderingWorldPlazaBearTrapInteractionLabels';
-import { RenderingWorldPlazaBearTrapLayer } from '@/components/world/trap/components/renderingWorldPlazaBearTrapLayer';
-import { RenderingWorldPlazaCaltropInteractionLabels } from '@/components/world/trap/components/renderingWorldPlazaCaltropInteractionLabels';
-import { RenderingWorldPlazaCaltropLayer } from '@/components/world/trap/components/renderingWorldPlazaCaltropLayer';
-import { usingWorldPlazaBearTrapInteraction } from '@/components/world/trap/hooks/usingWorldPlazaBearTrapInteraction';
-import { usingWorldPlazaBearTrapTriggerTick } from '@/components/world/trap/hooks/usingWorldPlazaBearTrapTriggerTick';
-import { usingWorldPlazaCaltropInteraction } from '@/components/world/trap/hooks/usingWorldPlazaCaltropInteraction';
-import { usingWorldPlazaCaltropTriggerTick } from '@/components/world/trap/hooks/usingWorldPlazaCaltropTriggerTick';
-import {
-  hydratingWorldPlazaLocalBearTraps,
-} from '@/components/world/trap/domains/managingWorldPlazaLocalBearTraps';
-import {
-  hydratingWorldPlazaLocalCaltrops,
-} from '@/components/world/trap/domains/managingWorldPlazaLocalCaltrops';
-import {
-  readingWorldPlazaBearTrapInstanceStore,
-} from '@/components/world/trap/domains/managingWorldPlazaBearTrapInstanceStore';
-import {
-  readingWorldPlazaCaltropInstanceStore,
-} from '@/components/world/trap/domains/managingWorldPlazaCaltropInstanceStore';
 import { RenderingWorldPlazaPlotBoundaries } from '@/components/world/building/components/renderingWorldPlazaPlotBoundaries';
 import {
   countingWorldBuildingOwnerOwnedPlotCount,
@@ -111,6 +79,7 @@ import {
 } from '@/components/world/building/domains/definingWorldBuildingCutFootprintConstants';
 import type { DefiningWorldBuildingEditPaintAction } from '@/components/world/building/domains/definingWorldBuildingEditMode';
 import type { DefiningWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
+import { creatingWorldBuildingPlacedBlock } from '@/components/world/building/domains/definingWorldBuildingPlacedBlock';
 import type { DefiningWorldBuildingPlot } from '@/components/world/building/domains/definingWorldBuildingPlot';
 import type { DefiningWorldBuildingPlotBounds } from '@/components/world/building/domains/definingWorldBuildingPlotBounds';
 import { LABELING_WORLD_BUILDING_SESSION_PLACEMENT_SUCCESS_TOAST } from '@/components/world/building/domains/definingWorldBuildingSessionBlockConstants';
@@ -124,6 +93,10 @@ import type { DefiningWorldPlazaCraftModeCookbookId } from '@/components/world/b
 import { mergingWorldBuildingClaimModeOverlayPlots } from '@/components/world/building/domains/mergingWorldBuildingClaimModeOverlayPlots';
 import { projectingWorldBuildingTilePositionFromViewportPointer } from '@/components/world/building/domains/projectingWorldBuildingTilePositionFromViewportPointerEvent';
 import { findingWorldBuildingPlacedBlockAtTileIndex } from '@/components/world/building/domains/resolvingWorldBuildingCollision';
+import {
+  checkingWorldBuildingBlockDefinitionIdIsBlacksmithUtility,
+  DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID,
+} from '@/components/world/building/domains/syncingWorldPlazaVisibleBlacksmithUtilityLayer';
 import { usingWorldPlazaBuildMode } from '@/components/world/building/hooks/usingWorldPlazaBuildMode';
 import { usingWorldPlazaClaimModePlotRegistryQuery } from '@/components/world/building/hooks/usingWorldPlazaClaimModePlotRegistryQuery';
 import { usingWorldPlazaLocalhostDevEnvironment } from '@/components/world/building/hooks/usingWorldPlazaLocalhostDevEnvironment';
@@ -135,6 +108,13 @@ import { usingWorldPlazaTemporaryPlotLifecycle } from '@/components/world/buildi
 import { computingWorldPlazaCharacterEngineDerivedStats } from '@/components/world/character/domains/computingWorldPlazaCharacterEngineDerivedStats';
 import { usingWorldPlazaCharacterEngineSkillCooldowns } from '@/components/world/character/hooks/usingWorldPlazaCharacterEngineSkillCooldowns';
 import { usingWorldPlazaSelectedCharacterEngineDefinition } from '@/components/world/character/hooks/usingWorldPlazaSelectedCharacterEngineDefinition';
+import { RenderingWorldPlazaChestInteractionLabels } from '@/components/world/chest/components/renderingWorldPlazaChestInteractionLabels';
+import { RenderingWorldPlazaChestLayer } from '@/components/world/chest/components/renderingWorldPlazaChestLayer';
+import {
+  hydratingWorldPlazaChestInstanceStore,
+  readingWorldPlazaChestInstanceStore,
+} from '@/components/world/chest/domains/managingWorldPlazaChestInstanceStore';
+import { usingWorldPlazaChestOpenInteraction } from '@/components/world/chest/hooks/usingWorldPlazaChestOpenInteraction';
 import { MeasuringWorldPlazaPixiRenderDiagnostics } from '@/components/world/components/measuringWorldPlazaPixiRenderDiagnostics';
 import {
   ProvidingWorldPlazaPerformanceProfile,
@@ -192,10 +172,11 @@ import {
   SYNCING_WORLD_PLAZA_PIXI_VIEWPORT_FRAME_CANVAS_CLASS_NAME,
   SyncingWorldPlazaPixiViewportFrameResize,
 } from '@/components/world/components/syncingWorldPlazaPixiViewportFrameResize';
+import { RenderingWorldPlazaCraftModeTimedCraftProgressHud } from '@/components/world/crafting/components/renderingWorldPlazaCraftModeTimedCraftProgressHud';
+import { RenderingWorldPlazaOreSmeltingInteractionLabels } from '@/components/world/crafting/components/renderingWorldPlazaOreSmeltingInteractionLabels';
 import { checkingWorldPlazaCraftRecipeAffordable } from '@/components/world/crafting/domains/checkingWorldPlazaCraftRecipeAffordable';
-import { committingWorldPlazaCraftRecipePlaceablePlacement } from '@/components/world/crafting/domains/committingWorldPlazaCraftRecipePlaceablePlacement';
 import { checkingWorldPlazaCraftRecipeNearbyStationSatisfied } from '@/components/world/crafting/domains/checkingWorldPlazaCraftRecipeNearbyStationSatisfied';
-import { LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_NEARBY_STATION_REQUIRED_TOAST } from '@/components/world/crafting/domains/definingWorldPlazaCraftRecipeNearbyStationConstants';
+import { committingWorldPlazaCraftRecipePlaceablePlacement } from '@/components/world/crafting/domains/committingWorldPlazaCraftRecipePlaceablePlacement';
 import { resolvingWorldPlazaCraftModeRecipeDefinition } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry';
 import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import {
@@ -211,13 +192,15 @@ import {
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_PLACEMENT_SUCCESS_TOAST,
   LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_REFUND_INVENTORY_FULL_TOAST,
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeUiConstants';
+import { LABELING_WORLD_PLAZA_CRAFT_MODE_RECIPE_NEARBY_STATION_REQUIRED_TOAST } from '@/components/world/crafting/domains/definingWorldPlazaCraftRecipeNearbyStationConstants';
 import { executingWorldPlazaCraftRecipeInventoryOutcome } from '@/components/world/crafting/domains/executingWorldPlazaCraftRecipeInventoryOutcome';
+import { updatingWorldPlazaActiveOreSmeltingHeatTilesFromPlacedBlocks } from '@/components/world/crafting/domains/managingWorldPlazaActiveOreSmeltingHeatTilesStore';
 import { refundingWorldPlazaCraftRecipeIngredients } from '@/components/world/crafting/domains/refundingWorldPlazaCraftRecipeIngredients';
+import { resolvingWorldPlazaOreSmeltingStationAnchorBlock } from '@/components/world/crafting/domains/resolvingWorldPlazaOreSmeltingStationAnchorBlock';
 import { showingWorldPlazaCraftRecipeRefundFloatFeedback } from '@/components/world/crafting/domains/showingWorldPlazaCraftRecipeRefundFloatFeedback';
 import { usingWorldPlazaCraftModeTimedCraft } from '@/components/world/crafting/hooks/usingWorldPlazaCraftModeTimedCraft';
-import { usingWorldPlazaOreSmeltingStations } from '@/components/world/crafting/hooks/usingWorldPlazaOreSmeltingStations';
 import { usingWorldPlazaOreSmeltingStationReachability } from '@/components/world/crafting/hooks/usingWorldPlazaOreSmeltingStationReachability';
-import { updatingWorldPlazaActiveOreSmeltingHeatTilesFromPlacedBlocks } from '@/components/world/crafting/domains/managingWorldPlazaActiveOreSmeltingHeatTilesStore';
+import { usingWorldPlazaOreSmeltingStations } from '@/components/world/crafting/hooks/usingWorldPlazaOreSmeltingStations';
 import {
   DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_AVATAR_SUB_LAYER_Z_INDEX,
   DEFINING_WORLD_DEPTH_RENDER_PLANE_ENTITY_CANOPY_SUB_LAYER_Z_INDEX,
@@ -226,6 +209,7 @@ import {
   DEFINING_WORLD_DEPTH_RENDER_PLANE_FLOOR_Z_INDEX,
 } from '@/components/world/depth';
 import { applyingWorldPlazaPlayerTeleportToWorldPoint } from '@/components/world/domains/applyingWorldPlazaPlayerTeleportToWorldPoint';
+import { attachingWorldPlazaAllCraftModeRecipesForDevQa } from '@/components/world/domains/attachingWorldPlazaAllCraftModeRecipesForDevQa';
 import {
   BUILDING_WORLD_PLAZA_PLACED_BLOCKS_SCENE_REF_EMPTY,
   buildingWorldPlazaPlacedBlocksSceneRef,
@@ -292,7 +276,6 @@ import {
   gettingWorldPlazaBestiaryStudyCountsSnapshot,
   recordingWorldPlazaBestiarySpeciesStudied,
 } from '@/components/world/domains/managingWorldPlazaBestiaryDiscoveryStore';
-import { attachingWorldPlazaAllCraftModeRecipesForDevQa } from '@/components/world/domains/attachingWorldPlazaAllCraftModeRecipesForDevQa';
 import { checkingWorldPlazaDevQaLoadEnabled } from '@/components/world/domains/managingWorldPlazaDevQaLoadStore';
 import {
   gettingWorldPlazaHerbariumBerryStudyCountsSnapshot,
@@ -351,9 +334,6 @@ import { usingWorldPlazaFarmingInteraction } from '@/components/world/farming/ho
 import { usingWorldPlazaFarmingProgress } from '@/components/world/farming/hooks/usingWorldPlazaFarmingProgress';
 import { RenderingWorldPlazaCampfireAmbience } from '@/components/world/fire/components/renderingWorldPlazaCampfireAmbience';
 import { RenderingWorldPlazaCampfireInteractionLabels } from '@/components/world/fire/components/renderingWorldPlazaCampfireInteractionLabels';
-import { RenderingWorldPlazaOreSmeltingInteractionLabels } from '@/components/world/crafting/components/renderingWorldPlazaOreSmeltingInteractionLabels';
-import { RenderingWorldPlazaCraftModeTimedCraftProgressHud } from '@/components/world/crafting/components/renderingWorldPlazaCraftModeTimedCraftProgressHud';
-import { resolvingWorldPlazaOreSmeltingStationAnchorBlock } from '@/components/world/crafting/domains/resolvingWorldPlazaOreSmeltingStationAnchorBlock';
 import { RenderingWorldPlazaFireLayer } from '@/components/world/fire/components/renderingWorldPlazaFireLayer';
 import { RenderingWorldPlazaLavaAmbience } from '@/components/world/fire/components/renderingWorldPlazaLavaAmbience';
 import { validatingWorldPlazaCampfireCookStart } from '@/components/world/fire/domains/validatingWorldPlazaCampfireCookStart';
@@ -366,31 +346,17 @@ import { checkingWorldPlazaFishingCastEligibility } from '@/components/world/fis
 import { computingWorldPlazaFishingCastDurationMs } from '@/components/world/fishing/domains/computingWorldPlazaFishingCastDurationMs';
 import { usingWorldPlazaFishingInteraction } from '@/components/world/fishing/hooks/usingWorldPlazaFishingInteraction';
 import { usingWorldPlazaFishingProgress } from '@/components/world/fishing/hooks/usingWorldPlazaFishingProgress';
-import { RenderingWorldPlazaWetClayInteractionLabels } from '@/components/world/wet-clay/components/renderingWorldPlazaWetClayInteractionLabels';
-import { checkingWorldPlazaWetClayEligibility } from '@/components/world/wet-clay/domains/checkingWorldPlazaWetClayEligibility';
-import { checkingWorldPlazaInventoryHasClay } from '@/components/world/wet-clay/domains/wettingWorldPlazaClayInInventory';
-import { usingWorldPlazaWetClayInteraction } from '@/components/world/wet-clay/hooks/usingWorldPlazaWetClayInteraction';
-import { usingWorldPlazaWetClayProgress } from '@/components/world/wet-clay/hooks/usingWorldPlazaWetClayProgress';
-import { RenderingWorldPlazaTeaPotAddWaterInteractionLabels } from '@/components/world/tea-brewing/components/renderingWorldPlazaTeaPotAddWaterInteractionLabels';
-import { checkingWorldPlazaTeaPotAddWaterEligibility } from '@/components/world/tea-brewing/domains/checkingWorldPlazaTeaPotAddWaterEligibility';
-import {
-  brewingWorldPlazaTeaPotAtCampfire,
-  checkingWorldPlazaInventoryHasBrewableTeaPot,
-} from '@/components/world/tea-brewing/domains/brewingWorldPlazaTeaPotAtCampfire';
-import {
-  checkingWorldPlazaInventoryHasEmptyClayTeaPot,
-} from '@/components/world/tea-brewing/domains/fillingWorldPlazaTeaPotWithWater';
-import { pouringWorldPlazaTeaFromBrewedPot } from '@/components/world/tea-brewing/domains/pouringWorldPlazaTeaFromBrewedPot';
-import { usingWorldPlazaTeaPotAddWaterInteraction } from '@/components/world/tea-brewing/hooks/usingWorldPlazaTeaPotAddWaterInteraction';
-import { usingWorldPlazaTeaPotCampfireBrewProgress } from '@/components/world/tea-brewing/hooks/usingWorldPlazaTeaPotCampfireBrewProgress';
 import { RenderingWorldPlazaFlowerInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaFlowerInteractionLabels';
-import { RenderingWorldPlazaMushroomInteractionLabels } from '@/components/world/mushrooms/components/renderingWorldPlazaMushroomInteractionLabels';
 import { RenderingWorldPlazaLongGrassInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaLongGrassInteractionLabels';
-import { RenderingWorldPlazaShrubInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaShrubInteractionLabels';
 import { RenderingWorldPlazaPebbleInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaPebbleInteractionLabels';
 import { RenderingWorldPlazaRockInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaRockInteractionLabels';
+import { RenderingWorldPlazaShrubInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaShrubInteractionLabels';
 import { RenderingWorldPlazaTreeInteractionLabels } from '@/components/world/harvest/components/renderingWorldPlazaTreeInteractionLabels';
 import { RenderingWorldPlazaTreeStumpStudyLabels } from '@/components/world/harvest/components/renderingWorldPlazaTreeStumpStudyLabels';
+import {
+  applyingWorldPlazaPickedFlowerOptimisticCache,
+  revertingWorldPlazaPickedFlowerOptimisticCache,
+} from '@/components/world/harvest/domains/applyingWorldPlazaPickedFlowerOptimisticCache';
 import { DEFINING_WORLD_PLAZA_TREE_STUMP_STUDY_POINTS } from '@/components/world/harvest/domains/definingWorldPlazaTreeStumpStudyConstants';
 import { findingWorldPlazaTreeStumpAtGridPoint } from '@/components/world/harvest/domains/findingWorldPlazaTreeStumpAtGridPoint';
 import type { ListingWorldPlazaTreeStumpsInStudyRangeEntry } from '@/components/world/harvest/domains/listingWorldPlazaTreeStumpsInStudyRange';
@@ -425,11 +391,6 @@ import { usingWorldPlazaChoppedTrees } from '@/components/world/harvest/hooks/us
 import { usingWorldPlazaClearedLongGrass } from '@/components/world/harvest/hooks/usingWorldPlazaClearedLongGrass';
 import { usingWorldPlazaFlowerPickInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaFlowerPickInteraction';
 import { usingWorldPlazaFlowerPickProgress } from '@/components/world/harvest/hooks/usingWorldPlazaFlowerPickProgress';
-import { usingWorldPlazaMushroomPickInteraction } from '@/components/world/mushrooms/hooks/usingWorldPlazaMushroomPickInteraction';
-import { usingWorldPlazaMushroomPickProgress } from '@/components/world/mushrooms/hooks/usingWorldPlazaMushroomPickProgress';
-import { usingWorldPlazaPickedMushrooms } from '@/components/world/mushrooms/hooks/usingWorldPlazaPickedMushrooms';
-import { formattingWorldPlazaPickedMushroomTileKey } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
-import { registeringWorldPlazaPickedMushroomsLookup } from '@/components/world/mushrooms/domains/registeringWorldPlazaPickedMushroomsLookup';
 import {
   DEFINING_WORLD_PLAZA_CLEARED_LONG_GRASS_QUERY_KEY_ROOT,
   usingWorldPlazaLongGrassSearchInteraction,
@@ -438,10 +399,6 @@ import { usingWorldPlazaLongGrassSearchProgress } from '@/components/world/harve
 import { usingWorldPlazaMinedRocks } from '@/components/world/harvest/hooks/usingWorldPlazaMinedRocks';
 import { usingWorldPlazaPebblePickInteraction } from '@/components/world/harvest/hooks/usingWorldPlazaPebblePickInteraction';
 import { usingWorldPlazaPebblePickProgress } from '@/components/world/harvest/hooks/usingWorldPlazaPebblePickProgress';
-import {
-  applyingWorldPlazaPickedFlowerOptimisticCache,
-  revertingWorldPlazaPickedFlowerOptimisticCache,
-} from '@/components/world/harvest/domains/applyingWorldPlazaPickedFlowerOptimisticCache';
 import {
   checkingWorldPlazaPickedFlowersUseLocalPersistence,
   DEFINING_WORLD_PLAZA_PICKED_FLOWERS_QUERY_KEY_ROOT,
@@ -543,18 +500,18 @@ import {
   clearingWorldPlazaInteractableBlockClickSelection,
   selectingWorldPlazaFarmlandTileForClickAction,
   selectingWorldPlazaFishingTileForClickAction,
-  selectingWorldPlazaWetClayTileForClickAction,
-  selectingWorldPlazaTeaPotAddWaterTileForClickAction,
   selectingWorldPlazaInteractableBlockForClickAction,
   selectingWorldPlazaInteractableChestForClickAction,
   selectingWorldPlazaInteractableFlowerForClickAction,
-  selectingWorldPlazaInteractableMushroomForClickAction,
   selectingWorldPlazaInteractableLongGrassForClickAction,
-  selectingWorldPlazaInteractableShrubForClickAction,
+  selectingWorldPlazaInteractableMushroomForClickAction,
   selectingWorldPlazaInteractablePebbleForClickAction,
   selectingWorldPlazaInteractableRockForClickAction,
+  selectingWorldPlazaInteractableShrubForClickAction,
   selectingWorldPlazaInteractableTreeForClickAction,
+  selectingWorldPlazaTeaPotAddWaterTileForClickAction,
   selectingWorldPlazaTreeStumpForClickAction,
+  selectingWorldPlazaWetClayTileForClickAction,
   selectingWorldPlazaWildlifeCorpseForClickAction,
 } from '@/components/world/interaction/domains/managingWorldPlazaInteractableBlockClickSelection';
 import { trackingWorldPlazaInteractableBlockPointerInteraction } from '@/components/world/interaction/hooks/trackingWorldPlazaInteractableBlockPointerInteraction';
@@ -598,6 +555,23 @@ import {
 } from '@/components/world/inventory/hooks/usingWorldPlazaInventorySpecimenStudyProgress';
 import { RenderingWorldPlazaLightingDarknessLayer } from '@/components/world/lighting/components/renderingWorldPlazaLightingDarknessLayer';
 import { RenderingWorldPlazaLightSourcesGroundGlow } from '@/components/world/lighting/components/renderingWorldPlazaLightSourcesGroundGlow';
+import { RenderingWorldPlazaMushroomInteractionLabels } from '@/components/world/mushrooms/components/renderingWorldPlazaMushroomInteractionLabels';
+import { formattingWorldPlazaPickedMushroomTileKey } from '@/components/world/mushrooms/domains/managingWorldPlazaLocalPickedMushrooms';
+import { registeringWorldPlazaPickedMushroomsLookup } from '@/components/world/mushrooms/domains/registeringWorldPlazaPickedMushroomsLookup';
+import { usingWorldPlazaMushroomPickInteraction } from '@/components/world/mushrooms/hooks/usingWorldPlazaMushroomPickInteraction';
+import { usingWorldPlazaMushroomPickProgress } from '@/components/world/mushrooms/hooks/usingWorldPlazaMushroomPickProgress';
+import { usingWorldPlazaPickedMushrooms } from '@/components/world/mushrooms/hooks/usingWorldPlazaPickedMushrooms';
+import {
+  listingNpcPreyTargets,
+  readingNpcInstanceStore,
+  RenderingNpcInteractionLabels,
+  RenderingNpcLayer,
+  RenderingNpcQuestPanel,
+  RenderingNpcShopPanel,
+  RenderingNpcTalkPanel,
+  usingNpcPanelState,
+  usingNpcProximitySelection,
+} from '@/components/world/npc';
 import { RenderingWorldPlotVisitApprovedPlazaModal } from '@/components/world/plotVisit/components/renderingWorldPlotVisitApprovedPlazaModal';
 import { RenderingWorldPlotVisitRequestPlazaModal } from '@/components/world/plotVisit/components/renderingWorldPlotVisitRequestPlazaModal';
 import { WORLD_PLOT_VISIT_REQUESTS_OUTGOING_QUERY_KEY } from '@/components/world/plotVisit/domains/definingWorldPlotVisitRequest';
@@ -615,6 +589,33 @@ import type {
 } from '@/components/world/projectile/domains/definingWorldPlazaProjectileTypes';
 import type { ManagingWorldPlazaProjectileStore } from '@/components/world/projectile/domains/managingWorldPlazaProjectileStore';
 import { usingWorldPlazaProjectileEngine } from '@/components/world/projectile/hooks/usingWorldPlazaProjectileEngine';
+import { RenderingWorldPlazaTeaPotAddWaterInteractionLabels } from '@/components/world/tea-brewing/components/renderingWorldPlazaTeaPotAddWaterInteractionLabels';
+import {
+  brewingWorldPlazaTeaPotAtCampfire,
+  checkingWorldPlazaInventoryHasBrewableTeaPot,
+} from '@/components/world/tea-brewing/domains/brewingWorldPlazaTeaPotAtCampfire';
+import { checkingWorldPlazaTeaPotAddWaterEligibility } from '@/components/world/tea-brewing/domains/checkingWorldPlazaTeaPotAddWaterEligibility';
+import { checkingWorldPlazaInventoryHasEmptyClayTeaPot } from '@/components/world/tea-brewing/domains/fillingWorldPlazaTeaPotWithWater';
+import { pouringWorldPlazaTeaFromBrewedPot } from '@/components/world/tea-brewing/domains/pouringWorldPlazaTeaFromBrewedPot';
+import { usingWorldPlazaTeaPotAddWaterInteraction } from '@/components/world/tea-brewing/hooks/usingWorldPlazaTeaPotAddWaterInteraction';
+import { usingWorldPlazaTeaPotCampfireBrewProgress } from '@/components/world/tea-brewing/hooks/usingWorldPlazaTeaPotCampfireBrewProgress';
+import { RenderingWorldPlazaBearTrapInteractionLabels } from '@/components/world/trap/components/renderingWorldPlazaBearTrapInteractionLabels';
+import { RenderingWorldPlazaBearTrapLayer } from '@/components/world/trap/components/renderingWorldPlazaBearTrapLayer';
+import { RenderingWorldPlazaCaltropInteractionLabels } from '@/components/world/trap/components/renderingWorldPlazaCaltropInteractionLabels';
+import { RenderingWorldPlazaCaltropLayer } from '@/components/world/trap/components/renderingWorldPlazaCaltropLayer';
+import { readingWorldPlazaBearTrapInstanceStore } from '@/components/world/trap/domains/managingWorldPlazaBearTrapInstanceStore';
+import { readingWorldPlazaCaltropInstanceStore } from '@/components/world/trap/domains/managingWorldPlazaCaltropInstanceStore';
+import { hydratingWorldPlazaLocalBearTraps } from '@/components/world/trap/domains/managingWorldPlazaLocalBearTraps';
+import { hydratingWorldPlazaLocalCaltrops } from '@/components/world/trap/domains/managingWorldPlazaLocalCaltrops';
+import { usingWorldPlazaBearTrapInteraction } from '@/components/world/trap/hooks/usingWorldPlazaBearTrapInteraction';
+import { usingWorldPlazaBearTrapTriggerTick } from '@/components/world/trap/hooks/usingWorldPlazaBearTrapTriggerTick';
+import { usingWorldPlazaCaltropInteraction } from '@/components/world/trap/hooks/usingWorldPlazaCaltropInteraction';
+import { usingWorldPlazaCaltropTriggerTick } from '@/components/world/trap/hooks/usingWorldPlazaCaltropTriggerTick';
+import { RenderingWorldPlazaWetClayInteractionLabels } from '@/components/world/wet-clay/components/renderingWorldPlazaWetClayInteractionLabels';
+import { checkingWorldPlazaWetClayEligibility } from '@/components/world/wet-clay/domains/checkingWorldPlazaWetClayEligibility';
+import { checkingWorldPlazaInventoryHasClay } from '@/components/world/wet-clay/domains/wettingWorldPlazaClayInInventory';
+import { usingWorldPlazaWetClayInteraction } from '@/components/world/wet-clay/hooks/usingWorldPlazaWetClayInteraction';
+import { usingWorldPlazaWetClayProgress } from '@/components/world/wet-clay/hooks/usingWorldPlazaWetClayProgress';
 import {
   DEFINING_WILDLIFE_PLAYER_MELEE_REACH_GRID,
   findingWildlifeInstanceAtGridPoint,
@@ -622,17 +623,6 @@ import {
   resolvingWildlifeSpeciesDefinition,
   usingWildlifeSimulation,
 } from '@/components/world/wildlife';
-import {
-  listingNpcPreyTargets,
-  readingNpcInstanceStore,
-  RenderingNpcInteractionLabels,
-  RenderingNpcLayer,
-  RenderingNpcQuestPanel,
-  RenderingNpcShopPanel,
-  RenderingNpcTalkPanel,
-  usingNpcPanelState,
-  usingNpcProximitySelection,
-} from '@/components/world/npc';
 import { RenderingWildlifeDocileBetrayInteractionLabels } from '@/components/world/wildlife/components/renderingWildlifeDocileBetrayInteractionLabels';
 import { RenderingWildlifeFootsteps } from '@/components/world/wildlife/components/renderingWildlifeFootsteps';
 import { RenderingWildlifeOmegaWolfSfx } from '@/components/world/wildlife/components/renderingWildlifeOmegaWolfSfx';
@@ -662,6 +652,7 @@ import type {
   DefiningWildlifeInstance,
   DefiningWildlifeSpeciesId,
 } from '@/components/world/wildlife/domains/definingWildlifeTypes';
+import { enablingWildlifeDevCombatFeatures } from '@/components/world/wildlife/domains/enablingWildlifeDevCombatFeatures';
 import { enqueueingWildlifeCorpseStudyFloatFeedback } from '@/components/world/wildlife/domains/enqueueingWildlifeCorpseStudyFloatFeedback';
 import { enqueueingWildlifeMissFloatFeedback } from '@/components/world/wildlife/domains/enqueueingWildlifeMissFloatFeedback';
 import { findingWildlifeCorpseAtGridPoint } from '@/components/world/wildlife/domains/findingWildlifeCorpseAtGridPoint';
@@ -673,6 +664,7 @@ import {
 } from '@/components/world/wildlife/domains/managingWildlifeDocileAttackConfirmStore';
 import {
   checkingWildlifeGroundFlowerOptimisticIsPicked,
+  clearingWildlifeGroundFlowerOptimisticPicked,
   registeringWildlifeGroundFlowerBridge,
 } from '@/components/world/wildlife/domains/managingWildlifeGroundFlowerBridge';
 import {
@@ -692,7 +684,6 @@ import { playingWildlifeStudySfx } from '@/components/world/wildlife/domains/pla
 import { renamingWildlifeInstanceDisplayName } from '@/components/world/wildlife/domains/renamingWildlifeInstanceDisplayName';
 import { resolvingWildlifeDiseaseTransmissionChance } from '@/components/world/wildlife/domains/resolvingWildlifeDiseaseTransmissionChance';
 import { resolvingWildlifeInstanceCollisionRadiusGrid } from '@/components/world/wildlife/domains/resolvingWildlifeInstanceCombatPresentation';
-import { enablingWildlifeDevCombatFeatures } from '@/components/world/wildlife/domains/enablingWildlifeDevCombatFeatures';
 import { spawningWildlifeDevAggressiveChickensNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevAggressiveChickensNearPoint';
 import { spawningWildlifeDevGreyWolfRandomlyNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevGreyWolfRandomlyNearPoint';
 import { spawningWildlifeDevSpeciesNearPoint } from '@/components/world/wildlife/domains/spawningWildlifeDevSpeciesNearPoint';
@@ -1281,9 +1272,7 @@ function RenderingWorldPlazaPixiSceneConnected({
       DEFINING_WORLD_PLAZA_GENERATION_FEATURE.HUD_WORLD_ANCHORS
     ];
   const isTeaBrewingEnabled =
-    generationFeatureFlags[
-      DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TEA_BREWING
-    ];
+    generationFeatureFlags[DEFINING_WORLD_PLAZA_GENERATION_FEATURE.TEA_BREWING];
 
   useEffect(() => {
     if (!isPerformanceDiagnosticsFeatureAvailable) {
@@ -1394,9 +1383,12 @@ function RenderingWorldPlazaPixiSceneConnected({
   const showingBuildFeedbackToastRef = useRef<(message: string) => void>(
     () => undefined
   );
-  const forwardingBuildFeedbackMessage = useCallback((message: string): void => {
-    showingBuildFeedbackToastRef.current(message);
-  }, []);
+  const forwardingBuildFeedbackMessage = useCallback(
+    (message: string): void => {
+      showingBuildFeedbackToastRef.current(message);
+    },
+    []
+  );
   const pendingCraftRecipeIdRef =
     useRef<DefiningWorldPlazaCraftModeRecipeId | null>(null);
   const [
@@ -1638,13 +1630,16 @@ function RenderingWorldPlazaPixiSceneConnected({
     }
 
     return creatingWorldBuildingPlacedBlock({
-      blockId: DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID,
-      plotId: DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID,
+      blockId:
+        DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID,
+      plotId:
+        DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID,
       definitionId,
       tilePosition: previewTilePosition,
       worldLayer: previewWorldLayer,
       blockHeight: previewBlockHeight,
-      ownerId: DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID,
+      ownerId:
+        DEFINING_WORLD_PLAZA_BLACKSMITH_UTILITY_PLACEMENT_PREVIEW_BLOCK_ID,
       placedAt: '1970-01-01T00:00:00.000Z',
     });
   }, [
@@ -1794,15 +1789,16 @@ function RenderingWorldPlazaPixiSceneConnected({
     );
 
     return () => {
-      updatingWorldPlazaActiveOreSmeltingHeatTilesFromPlacedBlocks([], new Set());
+      updatingWorldPlazaActiveOreSmeltingHeatTilesFromPlacedBlocks(
+        [],
+        new Set()
+      );
     };
   }, [activeScenePlacedBlocks, oreSmeltingStations.activeBlockIds]);
   const selectingOreSmeltingStation = useCallback(
     (block: DefiningWorldBuildingPlacedBlock): void => {
       oreSmeltingStations.selectingStation(block);
-      selectingHudToolbarMode(
-        DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS
-      );
+      selectingHudToolbarMode(DEFINING_WORLD_PLAZA_HUD_TOOLBAR_MODE_ID.ITEMS);
     },
     [oreSmeltingStations.selectingStation, selectingHudToolbarMode]
   );
@@ -1849,8 +1845,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           stationState: oreSmeltingStations.selectedStationState,
           progressRatio: oreSmeltingStations.progressRatio,
           onClose: oreSmeltingStations.closingStation,
-          onCollectOutput:
-            oreSmeltingStations.collectingSelectedStationOutput,
+          onCollectOutput: oreSmeltingStations.collectingSelectedStationOutput,
           onDropInventorySlot:
             oreSmeltingStations.droppingInventorySlotIntoStation,
         }
@@ -2489,19 +2484,15 @@ function RenderingWorldPlazaPixiSceneConnected({
   }, [clearedLongGrassStateByTileKey]);
 
   useEffect(() => {
-    registeringWorldPlazaPickedShrubsLookup(
-      (tileX, tileY) =>
-        Boolean(
-          readingWorldPlazaPickedShrubState(
-            localPersistenceOwnerId,
-            tileX,
-            tileY
-          )?.isPicked ||
-            pickedShrubStateByTileKey.get(
-              formattingWorldPlazaPickedShrubTileKey(tileX, tileY)
-            )?.isPicked ||
-            checkingWildlifeGroundShrubOptimisticIsPicked(tileX, tileY)
-        )
+    registeringWorldPlazaPickedShrubsLookup((tileX, tileY) =>
+      Boolean(
+        readingWorldPlazaPickedShrubState(localPersistenceOwnerId, tileX, tileY)
+          ?.isPicked ||
+        pickedShrubStateByTileKey.get(
+          formattingWorldPlazaPickedShrubTileKey(tileX, tileY)
+        )?.isPicked ||
+        checkingWildlifeGroundShrubOptimisticIsPicked(tileX, tileY)
+      )
     );
 
     return () => {
@@ -2601,6 +2592,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               tileX,
               tileY,
             });
+            clearingWildlifeGroundFlowerOptimisticPicked(tileX, tileY);
           })
           .catch(() => {
             revertingWorldPlazaPickedFlowerOptimisticCache({
@@ -2614,6 +2606,7 @@ function RenderingWorldPlazaPixiSceneConnected({
               tileX,
               tileY,
             });
+            clearingWildlifeGroundFlowerOptimisticPicked(tileX, tileY);
           });
 
         return true;
@@ -2672,12 +2665,15 @@ function RenderingWorldPlazaPixiSceneConnected({
 
     registeringWildlifeGroundShrubBridge({
       consumeGroundShrub: (tileX, tileY, consumerPosition) => {
-        const pickResult = pickingWorldPlazaLocalShrub(localPersistenceOwnerId, {
-          tileX,
-          tileY,
-          playerX: consumerPosition.x,
-          playerY: consumerPosition.y,
-        });
+        const pickResult = pickingWorldPlazaLocalShrub(
+          localPersistenceOwnerId,
+          {
+            tileX,
+            tileY,
+            playerX: consumerPosition.x,
+            playerY: consumerPosition.y,
+          }
+        );
 
         if (pickResult.outcome !== 'picked') {
           return false;
@@ -2923,7 +2919,8 @@ function RenderingWorldPlazaPixiSceneConnected({
         selectingProceduralMushroomForInteractionLabel,
       onProceduralLongGrassPopoverSelect:
         selectingProceduralLongGrassForInteractionLabel,
-      onProceduralShrubPopoverSelect: selectingProceduralShrubForInteractionLabel,
+      onProceduralShrubPopoverSelect:
+        selectingProceduralShrubForInteractionLabel,
       onWorldChestPopoverSelect: isChestGenerationEnabled
         ? selectingWorldChestForInteractionLabel
         : undefined,
@@ -3832,9 +3829,7 @@ function RenderingWorldPlazaPixiSceneConnected({
   completingTeaPotAddWaterRef.current = completingTeaPotAddWater;
 
   const handlingTeaPotAddWaterInteraction = useCallback(
-    (
-      entry: Parameters<typeof validatingTeaPotAddWaterStart>[0]
-    ): void => {
+    (entry: Parameters<typeof validatingTeaPotAddWaterStart>[0]): void => {
       if (isPlayerAsleepRef.current || isPlayerStunnedRef.current) {
         return;
       }
@@ -4087,6 +4082,7 @@ function RenderingWorldPlazaPixiSceneConnected({
     addShieldRef,
     applyPoisonRef,
     applyBleedRef,
+    applyTemperatureImpulseRef,
     applyPotentialDamageRef,
     applyDiseaseRef,
     setFrostbiteStacksRef,
@@ -4229,9 +4225,9 @@ function RenderingWorldPlazaPixiSceneConnected({
   const [wildlifeSpeechBubbles, setWildlifeSpeechBubbles] = useState<
     readonly DefiningWildlifeSpeechBubbleOverlay[]
   >([]);
-  const wildlifeForageEatOverlaysRef = useRef<DefiningWildlifeForageEatOverlay[]>(
-    []
-  );
+  const wildlifeForageEatOverlaysRef = useRef<
+    DefiningWildlifeForageEatOverlay[]
+  >([]);
   const wildlifeForageEatOverlayKeysRef = useRef<readonly string[]>([]);
   const [wildlifeForageEatOverlays, setWildlifeForageEatOverlays] = useState<
     readonly DefiningWildlifeForageEatOverlay[]
@@ -4440,6 +4436,9 @@ function RenderingWorldPlazaPixiSceneConnected({
               toggleBuffRef.current?.(buffId);
             }
           },
+          applyTemperature: (deltaCelsius) => {
+            applyTemperatureImpulseRef.current?.(deltaCelsius);
+          },
           applyDisease: (diseaseId) => {
             applyDiseaseRef.current?.(diseaseId);
           },
@@ -4519,12 +4518,8 @@ function RenderingWorldPlazaPixiSceneConnected({
     closingPetNameDialog,
   } = usingWildlifePetModalState();
 
-  const {
-    activeNpcId,
-    activePanel,
-    openingNpcPanel,
-    closingNpcPanel,
-  } = usingNpcPanelState();
+  const { activeNpcId, activePanel, openingNpcPanel, closingNpcPanel } =
+    usingNpcPanelState();
   const npcProximityPending = usingNpcProximitySelection({
     npcStoreRef,
     playerPositionRef,
@@ -5176,8 +5171,7 @@ function RenderingWorldPlazaPixiSceneConnected({
             entry.variant
           ),
           codexLabel: 'Herbarium',
-          progressLabel:
-            formattingPlazaHerbariumStudyCountProgress(studyCount),
+          progressLabel: formattingPlazaHerbariumStudyCountProgress(studyCount),
         })
       );
       playingWildlifeStudySfx();
@@ -7362,8 +7356,7 @@ function RenderingWorldPlazaPixiSceneConnected({
           (isBlockBuildModeActiveRef.current &&
             selectedBuildPaintActionRef.current === null);
         const shouldInterceptEditPaintPointer =
-          !isEditWalkToolSelected ||
-          isSaveCoordsPlacementActiveRef.current;
+          !isEditWalkToolSelected || isSaveCoordsPlacementActiveRef.current;
 
         if (shouldInterceptEditPaintPointer) {
           if (
@@ -8776,11 +8769,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   isProfileOpen={isProfilePanelOpen}
                   onToggleProfile={togglingProfilePanel}
                   isPetsOpen={isPetRosterPanelOpen}
-                  onTogglePets={
-                    hasAnyPets
-                      ? togglingPetRosterPanel
-                      : undefined
-                  }
+                  onTogglePets={hasAnyPets ? togglingPetRosterPanel : undefined}
                   onSelectCodexSection={selectingCodexSectionFromActionBar}
                   onToggleFullscreen={() => {
                     void togglingViewportFullscreen({
@@ -9007,11 +8996,7 @@ function RenderingWorldPlazaPixiSceneConnected({
                   isProfileOpen={isProfilePanelOpen}
                   onToggleProfile={togglingProfilePanel}
                   isPetsOpen={isPetRosterPanelOpen}
-                  onTogglePets={
-                    hasAnyPets
-                      ? togglingPetRosterPanel
-                      : undefined
-                  }
+                  onTogglePets={hasAnyPets ? togglingPetRosterPanel : undefined}
                   onSelectCodexSection={selectingCodexSectionFromActionBar}
                   onToggleFullscreen={() => {
                     void togglingViewportFullscreen({

@@ -301,6 +301,11 @@ export type DefiningWorldPlazaEntityHealthState = {
   temperatureResistance: DefiningWorldPlazaEntityTemperatureResistance;
   /** Expiring comfort/resist bonuses from herbs and similar. */
   timedTemperatureModifiers: readonly DefiningWorldPlazaEntityHealthTimedTemperatureModifier[];
+  /**
+   * Transient °C offset from combat on-hit heat/cold impulses.
+   * Positive heats; negative cools. Decays toward 0 each health tick.
+   */
+  combatTemperatureOffsetCelsius: number;
   /** Damage kinds fully blocked by character immunities or buffs. */
   damageKindImmunities: readonly DefiningWorldPlazaEntityDamageKind[];
 };

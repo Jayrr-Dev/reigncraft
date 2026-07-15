@@ -30,6 +30,10 @@ export type ResolvingWildlifeSpeciesOnHitPlayerProc =
   | {
       kind: 'buff';
       buffId: string;
+    }
+  | {
+      kind: 'temperature';
+      deltaCelsius: number;
     };
 
 function resolvingWildlifeOnHitFlatExpectedDamage(
@@ -89,6 +93,14 @@ export function resolvingWildlifeSpeciesOnHitPlayerProcs(
           meleeDamage,
           effect
         ),
+      });
+      continue;
+    }
+
+    if (effect.kind === 'temperature') {
+      procs.push({
+        kind: 'temperature',
+        deltaCelsius: effect.deltaCelsius,
       });
       continue;
     }

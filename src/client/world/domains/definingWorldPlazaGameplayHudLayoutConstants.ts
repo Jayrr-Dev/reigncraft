@@ -127,9 +127,9 @@ export const DEFINING_WORLD_PLAZA_GAMEPLAY_HUD_LAYOUT = {
       /** Corner FPS counter (green mono text). Desktop: top-right. Mobile: below action bar, right. */
       performanceFpsReadout: {
         desktopAnchorClassName:
-          'pointer-events-none absolute right-1 top-1 z-30 font-mono text-xs font-semibold tabular-nums text-green-400 drop-shadow-[0_1px_1px_rgba(0,0,0,0.85)]',
+          'pointer-events-none absolute right-1 top-1 z-30 font-mono text-xs font-semibold tabular-nums text-green-400 [text-shadow:0_1px_0_rgba(0,0,0,0.9),0_0_1px_rgba(0,0,0,0.85)]',
         mobileAnchorClassName:
-          'pointer-events-none absolute right-1 z-30 font-mono text-xs font-semibold tabular-nums text-green-400 drop-shadow-[0_1px_1px_rgba(0,0,0,0.85)]',
+          'pointer-events-none absolute right-1 z-30 font-mono text-xs font-semibold tabular-nums text-green-400 [text-shadow:0_1px_0_rgba(0,0,0,0.9),0_0_1px_rgba(0,0,0,0.85)]',
         /** Gap under the action bar shell on mobile so FPS does not sit on the bar. */
         mobileBelowActionBarGapBasePx: 4,
       },

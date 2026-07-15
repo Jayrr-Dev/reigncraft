@@ -8,6 +8,7 @@
 import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/applyingWorldPlazaEntityBuff';
 import { applyingWorldPlazaEntityHealthBleedStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthBleedStack';
 import { applyingWorldPlazaEntityHealthPoisonStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPoisonStack';
+import { applyingWorldPlazaEntityHealthTemperatureImpulse } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthTemperatureImpulse';
 import { invokingWorldPlazaLoopBodySafely } from '@/components/world/domains/loggingWorldPlazaClientErrors';
 import type { DefiningWildlifeInstance } from '@/components/world/wildlife/domains/definingWildlifeTypes';
 import type { DefiningWildlifeSpeciesId } from '@/components/world/wildlife/domains/definingWildlifeTypes';
@@ -67,6 +68,14 @@ export function applyingWildlifeTransformMeleeHitSideEffects({
             proc.potency,
             proc.flatExpectedDamage,
             nowMs
+          );
+          return;
+        }
+
+        if (proc.kind === 'temperature') {
+          healthState = applyingWorldPlazaEntityHealthTemperatureImpulse(
+            healthState,
+            proc.deltaCelsius
           );
           return;
         }

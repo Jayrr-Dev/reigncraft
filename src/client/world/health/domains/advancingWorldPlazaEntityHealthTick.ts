@@ -1,4 +1,5 @@
 import { advancingWorldPlazaEntityHealthDiseaseTick } from '@/components/world/health/domains/applyingWorldPlazaEntityDisease';
+import { advancingWorldPlazaEntityHealthCombatTemperatureOffset } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthTemperatureImpulse';
 import { clampingWorldPlazaEntityHealthCurrentToEffectiveMax } from '@/components/world/health/domains/clampingWorldPlazaEntityHealthCurrentToEffectiveMax';
 import { computingWorldPlazaEntityBleedTickDamage } from '@/components/world/health/domains/computingWorldPlazaEntityBleedTickDamage';
 import { computingWorldPlazaEntityHealthDamageWithSleepWake } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageWithSleepWake';
@@ -35,6 +36,10 @@ export function advancingWorldPlazaEntityHealthTick({
   }
 
   let nextState = expiringWorldPlazaEntityHealthTimedEffects(state, nowMs);
+  nextState = advancingWorldPlazaEntityHealthCombatTemperatureOffset(
+    nextState,
+    deltaMs
+  );
   nextState = advancingWorldPlazaEntityHealthDiseaseTick(
     nextState,
     resolvingWorldPlazaEntityDiseaseWorldEpochMs(),

@@ -18,6 +18,7 @@ import { DEFINING_WORLD_PLAZA_ENTITY_HEALTH_ENVIRONMENTAL_TEMPERATURE_TICK_INTER
 import type { DefiningWorldPlazaEnvironmentalHazard } from '@/components/world/health/domains/definingWorldPlazaEnvironmentalHazardTypes';
 import { advancingWorldPlazaEntityFrostbiteTick } from '@/components/world/health/domains/advancingWorldPlazaEntityFrostbiteTick';
 import { gainingWorldPlazaEntityFrostbiteStacksFromColdTick } from '@/components/world/health/domains/applyingWorldPlazaEntityFrostbiteStack';
+import { resolvingWorldPlazaEntityEffectiveLocalTemperatureCelsius } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthTemperatureImpulse';
 import { pruningWorldPlazaEntityHealthFloatTexts } from '@/components/world/health/domains/managingWorldPlazaEntityHealthFloatTexts';
 import { mappingWorldPlazaEnvironmentalHazardKindToDamageKind } from '@/components/world/health/domains/mappingWorldPlazaEnvironmentalHazardKindToDamageKind';
 import { applyingWorldPlazaEntityTemperatureResistanceToEnvironmentalDamageRates } from '@/components/world/health/domains/resolvingWorldPlazaEntityTemperatureResistanceMultiplier';
@@ -64,15 +65,21 @@ function resolvingWildlifeLocalTemperatureCelsius(
   isDaytime: boolean,
   placedBlocksByTile?: IndexingWorldBuildingPlacedBlocksByTile
 ): number {
-  return resolvingWorldPlazaEnvironmentalTemperatureForPlayerAtWorldPoint({
-    center: instance.position,
-    isDaytime,
-    playerRadiusGrid: resolvingWildlifeInstanceCollisionRadiusGrid(
-      species,
-      instance
-    ),
-    placedBlocksByTile,
-  });
+  const ambientTemperatureCelsius =
+    resolvingWorldPlazaEnvironmentalTemperatureForPlayerAtWorldPoint({
+      center: instance.position,
+      isDaytime,
+      playerRadiusGrid: resolvingWildlifeInstanceCollisionRadiusGrid(
+        species,
+        instance
+      ),
+      placedBlocksByTile,
+    });
+
+  return resolvingWorldPlazaEntityEffectiveLocalTemperatureCelsius(
+    ambientTemperatureCelsius,
+    instance.healthState
+  );
 }
 
 function resolvingWildlifeEnvironmentalHazardAtTemperature(

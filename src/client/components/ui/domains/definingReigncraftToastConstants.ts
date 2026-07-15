@@ -4,8 +4,6 @@
  * @module components/ui/domains/definingReigncraftToastConstants
  */
 
-import { STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_CLASS } from '@/components/world/domains/definingWorldPlazaGameplayHudStyleConstants';
-
 /** Sonner toaster instance ids (multi-toaster routing). */
 export const DEFINING_REIGNCRAFT_TOASTER_ID = {
   /** App-level toasts (home, friends, error boundary). */
@@ -31,9 +29,13 @@ export const DEFINING_REIGNCRAFT_TOAST_GAP_PX = 8;
  */
 export const DEFINING_REIGNCRAFT_TOAST_WIDTH_PX = 220;
 
+/** White lettering with a thin dark outline-style shadow (readable over the world). */
+const DEFINING_REIGNCRAFT_TOAST_LETTERING_CLASS =
+  'text-white [text-shadow:0_1px_1px_rgba(0,0,0,0.95),0_0_2px_rgba(0,0,0,0.75)]';
+
 /**
  * Shared toast chrome class names.
- * Plaza gameplay: plain white fill, black outline, fixed toast column width.
+ * Floating text only: no fill, no border; white letters + thin dark shadow.
  */
 export const DEFINING_REIGNCRAFT_TOAST_STYLE = {
   /** Outer Sonner list host for the plaza (flow layout under the action bar). */
@@ -43,29 +45,41 @@ export const DEFINING_REIGNCRAFT_TOAST_STYLE = {
   globalToasterClassName:
     'plaza-reigncraft-toaster plaza-reigncraft-toaster--global',
   toastClassName: [
-    STYLING_WORLD_PLAZA_GAMEPLAY_HUD_PARCHMENT_CARD_CLASS,
-    'pointer-events-auto !box-border !w-full !max-w-full items-start gap-2 !rounded-md !border-2 !border-black !bg-white !p-2 !shadow-none',
+    'pointer-events-auto !box-border !w-full !max-w-full items-start gap-2 !rounded-none !border-0 !bg-transparent !p-2 !shadow-none',
+    DEFINING_REIGNCRAFT_TOAST_LETTERING_CLASS,
   ].join(' '),
-  titleClassName:
-    'w-full whitespace-normal break-words font-body text-[11px] font-semibold leading-snug text-black',
-  descriptionClassName:
-    'w-full whitespace-normal break-words font-body text-[10px] font-medium leading-snug text-black/80',
-  successClassName: '!border-black',
-  errorClassName: '!border-black',
-  warningClassName: '!border-black',
-  infoClassName: '!border-black',
-  iconClassName: 'mt-0.5 shrink-0 text-black',
-  /** Compact gameplay toast: white + black outline, locked to toast column width. */
+  titleClassName: [
+    'w-full whitespace-normal break-words font-body text-[11px] font-semibold leading-snug',
+    DEFINING_REIGNCRAFT_TOAST_LETTERING_CLASS,
+  ].join(' '),
+  descriptionClassName: [
+    'w-full whitespace-normal break-words font-body text-[10px] font-medium leading-snug',
+    DEFINING_REIGNCRAFT_TOAST_LETTERING_CLASS,
+  ].join(' '),
+  successClassName: '!border-0 !bg-transparent',
+  errorClassName: '!border-0 !bg-transparent',
+  warningClassName: '!border-0 !bg-transparent',
+  infoClassName: '!border-0 !bg-transparent',
+  iconClassName: [
+    'mt-0.5 shrink-0',
+    DEFINING_REIGNCRAFT_TOAST_LETTERING_CLASS,
+  ].join(' '),
+  /** Compact gameplay toast: floating letters, locked to toast column width. */
   gameplayToastClassName: [
-    'pointer-events-auto !box-border !flex !w-[var(--width)] !min-w-[var(--width)] !max-w-[var(--width)] select-none !items-center !rounded-md !border !border-black !bg-white !px-2 !py-1.5 !shadow-none',
-    'font-body text-[11px] font-medium leading-snug text-black',
+    'pointer-events-auto !box-border !flex !w-[var(--width)] !min-w-[var(--width)] !max-w-[var(--width)] select-none !items-center !rounded-none !border-0 !bg-transparent !px-2 !py-1.5 !shadow-none',
+    'font-body text-[11px] font-medium leading-snug',
+    DEFINING_REIGNCRAFT_TOAST_LETTERING_CLASS,
   ].join(' '),
-  gameplayTitleClassName:
-    'w-full whitespace-normal break-words text-left font-body text-[11px] font-medium leading-snug text-black',
+  gameplayTitleClassName: [
+    'w-full whitespace-normal break-words text-left font-body text-[11px] font-medium leading-snug',
+    DEFINING_REIGNCRAFT_TOAST_LETTERING_CLASS,
+  ].join(' '),
   /** Pickup toast body: message left, item glyph far right. */
   gameplayPickupToastRowClassName: 'flex w-full items-center gap-2',
-  gameplayPickupToastMessageClassName:
-    'min-w-0 flex-1 whitespace-normal break-words text-left font-body text-[11px] font-medium leading-snug text-black',
+  gameplayPickupToastMessageClassName: [
+    'min-w-0 flex-1 whitespace-normal break-words text-left font-body text-[11px] font-medium leading-snug',
+    DEFINING_REIGNCRAFT_TOAST_LETTERING_CLASS,
+  ].join(' '),
   gameplayPickupToastIconClassName:
-    'size-4 shrink-0 text-[1rem] leading-none text-black',
+    'size-4 shrink-0 text-[1rem] leading-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.95)]',
 } as const;

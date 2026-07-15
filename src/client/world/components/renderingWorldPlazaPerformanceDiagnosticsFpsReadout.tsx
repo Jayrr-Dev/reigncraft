@@ -6,7 +6,7 @@ import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_SUFFIX,
 } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsUiConstants';
 import { resolvingWorldPlazaPerformanceDiagnosticsFpsReadoutViewportLayout } from '@/components/world/domains/resolvingWorldPlazaPerformanceDiagnosticsFpsReadoutViewportLayout';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 export type RenderingWorldPlazaPerformanceDiagnosticsFpsReadoutProps = {
   /** Live HUD scale from the plaza viewport frame. */
@@ -20,12 +20,15 @@ export type RenderingWorldPlazaPerformanceDiagnosticsFpsReadoutProps = {
  *
  * Desktop: top-right corner. Mobile: bottom-right of the top action bar
  * (just under the shell so it does not overlap the bar).
+ *
+ * Updates the label imperatively (no React state) so the sampler does not
+ * schedule re-renders every refresh tick.
  */
 export function RenderingWorldPlazaPerformanceDiagnosticsFpsReadout({
   viewportHudScale = 1,
   isMobile = false,
 }: RenderingWorldPlazaPerformanceDiagnosticsFpsReadoutProps = {}): React.JSX.Element {
-  const [framesPerSecond, setFramesPerSecond] = useState<number | null>(null);
+  const labelRef = useRef<HTMLDivElement>(null);
 
   const viewportLayout = useMemo(
     () =>
@@ -37,6 +40,11 @@ export function RenderingWorldPlazaPerformanceDiagnosticsFpsReadout({
   );
 
   useEffect(() => {
+    const labelElement = labelRef.current;
+    if (!labelElement) {
+      return;
+    }
+
     let frameCount = 0;
     let rafId = 0;
     let lastSampleAtMs = performance.now();
@@ -49,7 +57,8 @@ export function RenderingWorldPlazaPerformanceDiagnosticsFpsReadout({
         elapsedMs >=
         DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_OVERLAY_REFRESH_MS
       ) {
-        setFramesPerSecond((frameCount * 1000) / elapsedMs);
+        const framesPerSecond = (frameCount * 1000) / elapsedMs;
+        labelElement.textContent = `${framesPerSecond.toFixed(0)}${DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_SUFFIX}`;
         frameCount = 0;
         lastSampleAtMs = nowMs;
       }
@@ -64,19 +73,14 @@ export function RenderingWorldPlazaPerformanceDiagnosticsFpsReadout({
     };
   }, []);
 
-  const fpsLabel =
-    framesPerSecond === null
-      ? DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_PLACEHOLDER
-      : `${framesPerSecond.toFixed(0)}${DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_SUFFIX}`;
-
   return (
     <div
+      ref={labelRef}
       className={viewportLayout.anchorClassName}
       style={viewportLayout.style}
-      aria-live="polite"
-      aria-label={`${fpsLabel} frames per second`}
+      aria-hidden="true"
     >
-      {fpsLabel}
+      {DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FPS_READOUT_PLACEHOLDER}
     </div>
   );
 }

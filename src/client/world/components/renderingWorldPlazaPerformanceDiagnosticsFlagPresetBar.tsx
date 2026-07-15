@@ -4,6 +4,7 @@ import { applyingWorldPlazaPerformanceDiagnosticsFlagPreset } from '@/components
 import { capturingWorldPlazaPerformanceDiagnosticsFlagPresetFromCurrent } from '@/components/world/domains/capturingWorldPlazaPerformanceDiagnosticsFlagPresetFromCurrent';
 import { checkingWorldPlazaPerformanceDiagnosticsFlagPresetMatchesCurrent } from '@/components/world/domains/checkingWorldPlazaPerformanceDiagnosticsFlagPresetMatchesCurrent';
 import { computingWorldPlazaPerformanceDiagnosticsAbDelta } from '@/components/world/domains/computingWorldPlazaPerformanceDiagnosticsAbDelta';
+import { copyingWorldPlazaTextToClipboard } from '@/components/world/domains/copyingWorldPlazaTextToClipboard';
 import { DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE } from '@/components/world/domains/definingWorldPlazaClickMovementConstants';
 import {
   DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_ACTION_CHIP_CLASS_NAME,
@@ -17,12 +18,16 @@ import {
   LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_CAPTURE_B,
   LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_CLEAR_AB,
   LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_COMPARE_SECTION,
+  LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_COPY_FINDINGS,
+  LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_COPY_FINDINGS_FAILURE,
+  LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_COPY_FINDINGS_SUCCESS,
   LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_DELETE,
   LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_SAVE,
   LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_SAVE_PROMPT,
   LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_SECTION,
   LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_SELECT_PLACEHOLDER,
 } from '@/components/world/domains/definingWorldPlazaPerformanceDiagnosticsFlagPresetConstants';
+import { formattingWorldPlazaPerformanceDiagnosticsAbFindings } from '@/components/world/domains/formattingWorldPlazaPerformanceDiagnosticsAbFindings';
 import {
   capturingWorldPlazaPerformanceDiagnosticsAbSlot,
   clearingWorldPlazaPerformanceDiagnosticsAbCaptures,
@@ -35,6 +40,7 @@ import { buildingWorldPlazaPerformanceDiagnosticsSnapshot } from '@/components/w
 import { usingWorldPlazaGenerationFeaturesState } from '@/components/world/hooks/usingWorldPlazaGenerationFeaturesState';
 import { usingWorldPlazaPerformanceDiagnosticsFlagPresets } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsFlagPresets';
 import { usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags } from '@/components/world/hooks/usingWorldPlazaPerformanceDiagnosticsRenderLayerFlags';
+import { showToast } from '@devvit/web/client';
 import { useMemo, useState, useSyncExternalStore } from 'react';
 
 /**
@@ -132,6 +138,23 @@ export function RenderingWorldPlazaPerformanceDiagnosticsFlagPresetBar(): React.
     if (selectedPresetId === selectedPreset.id) {
       setSelectedPresetId('');
     }
+  };
+
+  const copyingAbFindings = (): void => {
+    const report = formattingWorldPlazaPerformanceDiagnosticsAbFindings({
+      captureA,
+      captureB,
+      activePresetName: activePreset?.name ?? null,
+      currentSnapshot: buildingWorldPlazaPerformanceDiagnosticsSnapshot(),
+    });
+
+    void copyingWorldPlazaTextToClipboard(report).then((didCopy) => {
+      showToast(
+        didCopy
+          ? LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_COPY_FINDINGS_SUCCESS
+          : LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_COPY_FINDINGS_FAILURE
+      );
+    });
   };
 
   return (
@@ -237,6 +260,19 @@ export function RenderingWorldPlazaPerformanceDiagnosticsFlagPresetBar(): React.
             }}
           >
             {LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_CAPTURE_B}
+          </button>
+          <button
+            type="button"
+            {...{ [DEFINING_WORLD_PLAZA_UI_DATA_ATTRIBUTE]: true }}
+            className={
+              DEFINING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_ACTION_CHIP_CLASS_NAME
+            }
+            disabled={!captureA && !captureB}
+            onClick={copyingAbFindings}
+          >
+            {
+              LABELING_WORLD_PLAZA_PERFORMANCE_DIAGNOSTICS_FLAG_PRESET_COPY_FINDINGS
+            }
           </button>
           <button
             type="button"

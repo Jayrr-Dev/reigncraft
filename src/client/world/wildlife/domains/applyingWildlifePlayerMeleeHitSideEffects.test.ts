@@ -15,14 +15,19 @@ function buildingTestHit(
   };
 }
 
+function buildingTestHandlers() {
+  return {
+    applyBleed: vi.fn(),
+    applyPoison: vi.fn(),
+    applyBuff: vi.fn(),
+    applyTemperature: vi.fn(),
+    applyDisease: vi.fn(),
+  };
+}
+
 describe('applyingWildlifePlayerMeleeHitSideEffects', () => {
   it('applies disease from a bite when the roll succeeds', () => {
-    const handlers = {
-      applyBleed: vi.fn(),
-      applyPoison: vi.fn(),
-      applyBuff: vi.fn(),
-      applyDisease: vi.fn(),
-    };
+    const handlers = buildingTestHandlers();
 
     const hit = buildingTestHit({
       speciesId: 'grey-wolf',
@@ -35,12 +40,7 @@ describe('applyingWildlifePlayerMeleeHitSideEffects', () => {
   });
 
   it('does not apply disease when the roll fails', () => {
-    const handlers = {
-      applyBleed: vi.fn(),
-      applyPoison: vi.fn(),
-      applyBuff: vi.fn(),
-      applyDisease: vi.fn(),
-    };
+    const handlers = buildingTestHandlers();
 
     const hit = buildingTestHit({
       speciesId: 'grey-wolf',
@@ -53,12 +53,7 @@ describe('applyingWildlifePlayerMeleeHitSideEffects', () => {
   });
 
   it('never applies disease to friendly disposition', () => {
-    const handlers = {
-      applyBleed: vi.fn(),
-      applyPoison: vi.fn(),
-      applyBuff: vi.fn(),
-      applyDisease: vi.fn(),
-    };
+    const handlers = buildingTestHandlers();
 
     const hit = buildingTestHit({
       speciesId: 'chicken',
@@ -71,12 +66,7 @@ describe('applyingWildlifePlayerMeleeHitSideEffects', () => {
   });
 
   it('does nothing for species without a disease transmission profile', () => {
-    const handlers = {
-      applyBleed: vi.fn(),
-      applyPoison: vi.fn(),
-      applyBuff: vi.fn(),
-      applyDisease: vi.fn(),
-    };
+    const handlers = buildingTestHandlers();
 
     const hit = buildingTestHit({
       speciesId: 'deer',
@@ -86,5 +76,20 @@ describe('applyingWildlifePlayerMeleeHitSideEffects', () => {
     applyingWildlifePlayerMeleeHitSideEffects(hit, handlers, () => 0);
 
     expect(handlers.applyDisease).not.toHaveBeenCalled();
+  });
+
+  it('applies temperature impulse when polar-bear procs', () => {
+    const handlers = buildingTestHandlers();
+
+    applyingWildlifePlayerMeleeHitSideEffects(
+      buildingTestHit({
+        speciesId: 'polar-bear',
+        damageAmount: 40,
+      }),
+      handlers,
+      () => 0
+    );
+
+    expect(handlers.applyTemperature).toHaveBeenCalledWith(-18);
   });
 });

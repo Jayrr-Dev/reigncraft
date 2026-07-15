@@ -2,6 +2,7 @@ import { applyingWorldPlazaEntityBuff } from '@/components/world/health/domains/
 import { applyingWorldPlazaEntityHealthBleedStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthBleedStack';
 import { applyingWorldPlazaEntityHealthPoisonStack } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPoisonStack';
 import { applyingWorldPlazaEntityHealthPotentialDamage } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthPotentialDamage';
+import { applyingWorldPlazaEntityHealthTemperatureImpulse } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthTemperatureImpulse';
 import { computingWorldPlazaEntityHealthDamageWithSleepWake } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageWithSleepWake';
 import type {
   DefiningWorldPlazaEntityHealthDamageOptions,
@@ -81,6 +82,11 @@ export function applyingWorldPlazaEntityHealthPayload({
         resolveDelayMs: statusEffect.resolveDelayMs,
         nowMs,
       });
+    } else if (statusEffect.kind === 'temperature') {
+      nextState = applyingWorldPlazaEntityHealthTemperatureImpulse(
+        nextState,
+        statusEffect.deltaCelsius
+      );
     }
   }
 

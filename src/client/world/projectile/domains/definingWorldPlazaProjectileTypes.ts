@@ -88,6 +88,11 @@ export type DefiningWorldPlazaProjectilePayloadStatusEffect =
       readonly kind: 'potentialDamage';
       readonly expectedDamage: number;
       readonly resolveDelayMs: number;
+    }
+  | {
+      /** Positive heats the target; negative cools it (°C impulse). */
+      readonly kind: 'temperature';
+      readonly deltaCelsius: number;
     };
 
 export type DefiningWorldPlazaProjectilePayloadConfig = {

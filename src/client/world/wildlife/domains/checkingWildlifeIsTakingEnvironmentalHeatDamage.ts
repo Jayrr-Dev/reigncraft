@@ -5,6 +5,7 @@
  */
 
 import type { IndexingWorldBuildingPlacedBlocksByTile } from '@/components/world/building/domains/indexingWorldBuildingPlacedBlocksByTile';
+import { resolvingWorldPlazaEntityEffectiveLocalTemperatureCelsius } from '@/components/world/health/domains/applyingWorldPlazaEntityHealthTemperatureImpulse';
 import { buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius } from '@/components/world/health/domains/computingWorldPlazaTemperatureDamagePerSecond';
 import { resolvingWorldPlazaEnvironmentalTemperatureForPlayerAtWorldPoint } from '@/components/world/health/domains/resolvingWorldPlazaEnvironmentalHazardForPlayerAtWorldPoint';
 import type { DefiningWildlifeSpeciesDefinition } from '@/components/world/wildlife/domains/definingWildlifeSpeciesRegistry';
@@ -32,15 +33,18 @@ export function checkingWildlifeIsTakingEnvironmentalHeatDamage({
   }
 
   const localTemperatureCelsius =
-    resolvingWorldPlazaEnvironmentalTemperatureForPlayerAtWorldPoint({
-      center: instance.position,
-      isDaytime,
-      playerRadiusGrid: resolvingWildlifeInstanceCollisionRadiusGrid(
-        species,
-        instance
-      ),
-      placedBlocksByTile,
-    });
+    resolvingWorldPlazaEntityEffectiveLocalTemperatureCelsius(
+      resolvingWorldPlazaEnvironmentalTemperatureForPlayerAtWorldPoint({
+        center: instance.position,
+        isDaytime,
+        playerRadiusGrid: resolvingWildlifeInstanceCollisionRadiusGrid(
+          species,
+          instance
+        ),
+        placedBlocksByTile,
+      }),
+      instance.healthState
+    );
 
   const hazard = buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius(
     localTemperatureCelsius,

@@ -21,6 +21,10 @@ import {
   applyingWorldPlazaEntityFrostbiteStack,
   gainingWorldPlazaEntityFrostbiteStacksFromColdTick,
 } from '@/components/world/health/domains/applyingWorldPlazaEntityFrostbiteStack';
+import {
+  applyingWorldPlazaEntityHealthTemperatureImpulse,
+  resolvingWorldPlazaEntityEffectiveLocalTemperatureCelsius,
+} from '@/components/world/health/domains/applyingWorldPlazaEntityHealthTemperatureImpulse';
 import { computingWorldPlazaEntityBleedPoolTotalDamage } from '@/components/world/health/domains/computingWorldPlazaEntityBleedPoolTotalDamage';
 import { computingWorldPlazaEntityHealthDamageToHeal } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageToHeal';
 import { computingWorldPlazaEntityHealthDamageWithSleepWake } from '@/components/world/health/domains/computingWorldPlazaEntityHealthDamageWithSleepWake';
@@ -261,6 +265,7 @@ export interface UsingWorldPlazaPlayerHealthResult {
       flatExpectedDamage?: number
     ) => void
   >;
+  applyTemperatureImpulseRef: React.RefObject<(deltaCelsius: number) => void>;
   applyPotentialDamageRef: React.RefObject<
     (expectedDamage?: number, resolveDelayMs?: number) => void
   >;
@@ -736,13 +741,21 @@ export function usingWorldPlazaPlayerHealth({
         nowMs
       );
       const isDamageFlashing = nowMs < damageFlashUntilMsRef.current;
+      const ambientTemperatureCelsius = localTemperatureCelsiusRef.current;
+      const effectiveLocalTemperatureCelsius =
+        ambientTemperatureCelsius === null
+          ? null
+          : resolvingWorldPlazaEntityEffectiveLocalTemperatureCelsius(
+              ambientTemperatureCelsius,
+              healthStateRef.current
+            );
       const nextSnapshot = buildingHudSnapshot(
         healthStateRef.current,
         attackerDamageRollModifiersRef.current,
         nowMs,
         isDamageFlashing,
         floatingTextsRef.current,
-        localTemperatureCelsiusRef.current,
+        effectiveLocalTemperatureCelsius,
         temperatureDisplayUnitRef.current,
         {
           isRolling: isRollingRef?.current ?? false,
@@ -1012,6 +1025,9 @@ export function usingWorldPlazaPlayerHealth({
       flatExpectedDamage?: number
     ) => void
   >(() => undefined);
+  const applyTemperatureImpulseRef = useRef<(deltaCelsius: number) => void>(
+    () => undefined
+  );
   const applyPotentialDamageRef = useRef<
     (expectedDamage?: number, resolveDelayMs?: number) => void
   >(() => undefined);
@@ -1301,6 +1317,12 @@ export function usingWorldPlazaPlayerHealth({
       });
     };
 
+    applyTemperatureImpulseRef.current = (deltaCelsius) => {
+      mutatingHealthState((state) =>
+        applyingWorldPlazaEntityHealthTemperatureImpulse(state, deltaCelsius)
+      );
+    };
+
     applyPotentialDamageRef.current = (
       expectedDamage = DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_EXPECTED_DAMAGE,
       resolveDelayMs = DEFINING_WORLD_PLAZA_ENTITY_POTENTIAL_DAMAGE_DEV_RESOLVE_DELAY_MS
@@ -1489,6 +1511,12 @@ export function usingWorldPlazaPlayerHealth({
                 deltaMs,
               });
 
+        const effectiveLocalTemperatureCelsius =
+          resolvingWorldPlazaEntityEffectiveLocalTemperatureCelsius(
+            localTemperatureCelsiusRef.current,
+            healthStateRef.current
+          );
+
         const effectiveTemperatureResistance =
           resolvingWorldPlazaEntityHealthEffectiveTemperatureResistance(
             healthStateRef.current,
@@ -1496,7 +1524,7 @@ export function usingWorldPlazaPlayerHealth({
           );
         const hazard =
           buildingWorldPlazaEnvironmentalHazardFromTemperatureCelsius(
-            localTemperatureCelsiusRef.current,
+            effectiveLocalTemperatureCelsius,
             effectiveTemperatureResistance
           );
         const effectiveMaxHealth = computingWorldPlazaEntityHealthEffectiveMax(
@@ -1549,8 +1577,7 @@ export function usingWorldPlazaPlayerHealth({
                 const deficitCelsius = Math.max(
                   0,
                   comfortBand.comfortLowCelsius -
-                    (localTemperatureCelsiusRef.current ??
-                      comfortBand.comfortLowCelsius)
+                    effectiveLocalTemperatureCelsius
                 );
                 const stacksToAdd =
                   computingWorldPlazaFrostbiteStacksGainedFromColdDeficit(
@@ -1609,11 +1636,18 @@ export function usingWorldPlazaPlayerHealth({
       }
 
       {
+        const ambientTemperatureCelsius = localTemperatureCelsiusRef.current;
         const frostbiteTick = advancingWorldPlazaEntityFrostbiteTick({
           state: healthStateRef.current,
           nowMs: frameTimeMs,
           deltaMs,
-          localTemperatureCelsius: localTemperatureCelsiusRef.current,
+          localTemperatureCelsius:
+            ambientTemperatureCelsius === null
+              ? null
+              : resolvingWorldPlazaEntityEffectiveLocalTemperatureCelsius(
+                  ambientTemperatureCelsius,
+                  healthStateRef.current
+                ),
           attackerDamageRollModifiers: attackerDamageRollModifiersRef.current,
         });
         healthStateRef.current = frostbiteTick.state;
@@ -1733,6 +1767,7 @@ export function usingWorldPlazaPlayerHealth({
     addShieldRef,
     applyPoisonRef,
     applyBleedRef,
+    applyTemperatureImpulseRef,
     applyPotentialDamageRef,
     applyDiseaseRef,
     setFrostbiteStacksRef,

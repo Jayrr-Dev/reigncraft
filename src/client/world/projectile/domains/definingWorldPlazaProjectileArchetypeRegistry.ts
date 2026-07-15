@@ -97,7 +97,10 @@ const FIREBALL_AOE: DefiningWorldPlazaProjectileArchetype = {
   payload: {
     damageAmount: 28,
     damageKind: 'environmental_heat',
-    statusEffects: [{ kind: 'buff', buffId: 'heat-ward' }],
+    statusEffects: [
+      { kind: 'buff', buffId: 'heat-ward' },
+      { kind: 'temperature', deltaCelsius: 28 },
+    ],
   },
   impact: {
     behaviorId: 'aoeExplosion',
