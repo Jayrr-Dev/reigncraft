@@ -1,25 +1,42 @@
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
+import { DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeToolRecipeIds';
 import {
   DEFINING_WORLD_PLAZA_RECIPE_PAGE_LOOT_POOL_RECIPE_IDS,
   DEFINING_WORLD_PLAZA_RECIPE_PAGE_LOOT_SOURCE_CONFIG,
 } from '@/components/world/crafting/domains/definingWorldPlazaRecipePageLootPoolConstants';
 import { resolvingWorldPlazaRecipePageLootDrop } from '@/components/world/crafting/domains/resolvingWorldPlazaRecipePageLootDrop';
+import { DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED } from '@/components/world/farming/domains/definingWorldPlazaFarmingConstants';
 import { describe, expect, it } from 'vitest';
 
 describe('definingWorldPlazaRecipePageLootPoolConstants', () => {
-  it('lists 47 leftover recipes with unique ids', () => {
+  it('lists leftover recipes with unique ids and no unregistered farming pages', () => {
+    const expectedCount = DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED
+      ? 47
+      : 42;
+
     expect(DEFINING_WORLD_PLAZA_RECIPE_PAGE_LOOT_POOL_RECIPE_IDS).toHaveLength(
-      47
+      expectedCount
     );
     expect(
       new Set(DEFINING_WORLD_PLAZA_RECIPE_PAGE_LOOT_POOL_RECIPE_IDS).size
-    ).toBe(47);
+    ).toBe(expectedCount);
     expect(DEFINING_WORLD_PLAZA_RECIPE_PAGE_LOOT_POOL_RECIPE_IDS).toContain(
       DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.WEAPON_CHAOS_DIE
     );
     expect(DEFINING_WORLD_PLAZA_RECIPE_PAGE_LOOT_POOL_RECIPE_IDS).not.toContain(
       DEFINING_WORLD_PLAZA_CRAFT_MODE_RECIPE_ID.LEATHER_PLATE_BREASTPLATE
     );
+
+    if (!DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED) {
+      expect(
+        DEFINING_WORLD_PLAZA_RECIPE_PAGE_LOOT_POOL_RECIPE_IDS
+      ).not.toContain(DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.HOE_STEEL);
+      expect(
+        DEFINING_WORLD_PLAZA_RECIPE_PAGE_LOOT_POOL_RECIPE_IDS
+      ).not.toContain(
+        DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.SCYTHE_IRON
+      );
+    }
   });
 });
 

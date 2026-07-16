@@ -4,6 +4,7 @@
  * @module components/world/crafting/domains/resolvingWorldPlazaRecipePageLootDrop
  */
 
+import { checkingWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeRegistry';
 import type { DefiningWorldPlazaCraftModeRecipeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { resolvingWorldPlazaCraftRecipePageItemTypeId } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import {
@@ -68,11 +69,11 @@ function filteringWorldPlazaRecipePageLootPoolEligible(
   recipeIds: readonly DefiningWorldPlazaCraftModeRecipeId[],
   excludedRecipeIds: ReadonlySet<string>
 ): readonly DefiningWorldPlazaCraftModeRecipeId[] {
-  if (excludedRecipeIds.size === 0) {
-    return recipeIds;
-  }
-
-  return recipeIds.filter((recipeId) => !excludedRecipeIds.has(recipeId));
+  return recipeIds.filter(
+    (recipeId) =>
+      checkingWorldPlazaCraftModeRecipeId(recipeId) &&
+      !excludedRecipeIds.has(recipeId)
+  );
 }
 
 /**

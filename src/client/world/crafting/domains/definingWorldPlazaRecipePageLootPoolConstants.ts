@@ -10,6 +10,7 @@ import {
   type DefiningWorldPlazaCraftModeRecipeId,
 } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeRecipeTypes';
 import { DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID } from '@/components/world/crafting/domains/definingWorldPlazaCraftModeToolRecipeIds';
+import { DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED } from '@/components/world/farming/domains/definingWorldPlazaFarmingConstants';
 
 /** Loot-pool category for leftover recipe pages. */
 export type DefiningWorldPlazaRecipePageLootPoolCategory =
@@ -26,18 +27,28 @@ export type DefiningWorldPlazaRecipePageLootSource =
   | 'wildlifeKill'
   | 'treeChop';
 
+/**
+ * Hoe / scythe leftover pages. Only loot when farming crafts are registered;
+ * otherwise drops become ghost `?` inventory slots.
+ */
+const DEFINING_WORLD_PLAZA_RECIPE_PAGE_LOOT_POOL_TOOLS_FARMING = [
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.HOE_STEEL,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.HOE_GOLD,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.SCYTHE_IRON,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.SCYTHE_STEEL,
+  DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.SCYTHE_GOLD,
+] as const satisfies readonly DefiningWorldPlazaCraftModeRecipeId[];
+
 /** Mid/late tools still missing from Codex / other grants. */
 export const DEFINING_WORLD_PLAZA_RECIPE_PAGE_LOOT_POOL_TOOLS = [
   DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.AXE_GOLD,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.FISHROD_IRON,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.FISHROD_STEEL,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.FISHROD_GOLD,
-  DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.HOE_STEEL,
-  DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.HOE_GOLD,
-  DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.SCYTHE_IRON,
-  DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.SCYTHE_STEEL,
-  DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.SCYTHE_GOLD,
   DEFINING_WORLD_PLAZA_CRAFT_MODE_TOOL_RECIPE_ID.SWORD_GOLD,
+  ...(DEFINING_WORLD_PLAZA_FARMING_FEATURE_ENABLED
+    ? DEFINING_WORLD_PLAZA_RECIPE_PAGE_LOOT_POOL_TOOLS_FARMING
+    : []),
 ] as const satisfies readonly DefiningWorldPlazaCraftModeRecipeId[];
 
 /** Plate pieces not already granted (leather breastplate is on Lapidary Studied). */

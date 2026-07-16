@@ -235,10 +235,20 @@ export function addingInventoryItemWithStacking(
 ): AddingInventoryItemWithStackingResult {
   const typeDef = registry.resolvingItemType(itemInput.itemTypeId);
   const requestedQuantity = Math.max(1, itemInput.quantity ?? 1);
+
+  // Unknown types have no icon / rules; refuse so ghost "?" slots never land.
+  if (!typeDef) {
+    return {
+      state,
+      quantityAccepted: 0,
+      quantityOverflow: requestedQuantity,
+    };
+  }
+
   let remainingQuantity = requestedQuantity;
   let nextState = state;
 
-  if (typeDef?.isStackable && typeDef.maxStack > 1) {
+  if (typeDef.isStackable && typeDef.maxStack > 1) {
     for (
       let slotIndex = 0;
       slotIndex < nextState.capacity && remainingQuantity > 0;
@@ -273,7 +283,7 @@ export function addingInventoryItemWithStacking(
   }
 
   const maxStackPerSlot =
-    typeDef?.isStackable && typeDef.maxStack > 1 ? typeDef.maxStack : 1;
+    typeDef.isStackable && typeDef.maxStack > 1 ? typeDef.maxStack : 1;
 
   while (remainingQuantity > 0) {
     const emptySlotIndex = findingInventoryFirstEmptySlot(nextState);
