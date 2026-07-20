@@ -47,6 +47,12 @@ importers:
       '@iconify-json/boxicons':
         specifier: ^1.2.0
         version: 1.2.0
+      '@iconify-json/fluent-emoji-high-contrast':
+        specifier: ^1.2.5
+        version: 1.2.5
+      '@iconify-json/pepicons-pop':
+        specifier: ^1.2.3
+        version: 1.2.3
       '@iconify/react':
         specifier: ^6.0.2
         version: 6.0.2(react@19.2.7)
@@ -55,7 +61,7 @@ importers:
         version: 2.0.0
       '@pixi/react':
         specifier: ^8.0.5
-        version: 8.0.5(@types/react@19.2.14)(pixi.js@8.19.0)(react@19.2.7)
+        version: 8.0.5(@types/react@19.2.17)(pixi.js@8.19.0)(react@19.2.7)
       '@tanstack/react-query':
         specifier: ^5.101.2
         version: 5.101.2(react@19.2.7)
@@ -112,11 +118,11 @@ importers:
         specifier: ^22.19.19
         version: 22.20.0
       '@types/react':
-        specifier: 19.2.14
-        version: 19.2.14
+        specifier: 19.2.17
+        version: 19.2.17
       '@types/react-dom':
         specifier: 19.2.3
-        version: 19.2.3(@types/react@19.2.14)
+        version: 19.2.3(@types/react@19.2.17)
       '@vitejs/plugin-react':
         specifier: 6.0.3
         version: 6.0.3(vite@8.1.0(@types/node@22.20.0)(esbuild@0.27.0)(jiti@2.7.0))
@@ -791,6 +797,12 @@ packages:
   '@iconify-json/boxicons@1.2.0':
     resolution: {integrity: sha512-yAfCVaiZ5t2bC1xNVEdkWUI94e3u15IrytO2XFh8/7Y45M1i51adQpi42OhH2pUdsYM0/KY4Gklrb+XB+oZS/w==}
 
+  '@iconify-json/fluent-emoji-high-contrast@1.2.5':
+    resolution: {integrity: sha512-z+bl7GZDrJaX/jf9oaJ+eCvP8XaorGJc6aLNY9JibWDQHKSYRcuq+9YRst8usFExw0pEXIMCuoM1iK8TtsSsZQ==}
+
+  '@iconify-json/pepicons-pop@1.2.3':
+    resolution: {integrity: sha512-keopIpR7DYXpwbSHNF/IPdeyRL5JaPk4ZVMpzZT25XtgK6qPz7ne24W8FA7ZKPYZw4l8wZw3Ho/zi859pN+fxg==}
+
   '@iconify/react@6.0.2':
     resolution: {integrity: sha512-SMmC2sactfpJD427WJEDN6PMyznTFMhByK9yLW0gOTtnjzzbsi/Ke/XqsumsavFPwNiXs8jSiYeZTmLCLwO+Fg==}
     peerDependencies:
@@ -1439,8 +1451,8 @@ packages:
     peerDependencies:
       '@types/react': '*'
 
-  '@types/react@19.2.14':
-    resolution: {integrity: sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w==}
+  '@types/react@19.2.17':
+    resolution: {integrity: sha512-MXfmqaVPEVgkBT/aY0aGCkRWWtByiYQXo3xdQ8r5RzuFrPiRn8Gar2tQdXSUQ2GKV3bkXckek89V8wQBY2Q/Aw==}
 
   '@types/ws@8.5.12':
     resolution: {integrity: sha512-3tPRkv1EtkDpzlgyKyI8pGsGZAGPEaXeu0DOj5DI25Ja91bdAYddYHbADRYVrZMRbfW+1l5YwXVDKohDJNQxkQ==}
@@ -4246,6 +4258,14 @@ snapshots:
     dependencies:
       '@iconify/types': 2.0.0
 
+  '@iconify-json/fluent-emoji-high-contrast@1.2.5':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-json/pepicons-pop@1.2.3':
+    dependencies:
+      '@iconify/types': 2.0.0
+
   '@iconify/react@6.0.2(react@19.2.7)':
     dependencies:
       '@iconify/types': 2.0.0
@@ -4500,9 +4520,9 @@ snapshots:
 
   '@pixi/colord@2.9.6': {}
 
-  '@pixi/react@8.0.5(@types/react@19.2.14)(pixi.js@8.19.0)(react@19.2.7)':
+  '@pixi/react@8.0.5(@types/react@19.2.17)(pixi.js@8.19.0)(react@19.2.7)':
     dependencies:
-      its-fine: 2.0.0(@types/react@19.2.14)(react@19.2.7)
+      its-fine: 2.0.0(@types/react@19.2.17)(react@19.2.7)
       pixi.js: 8.19.0
       react: 19.2.7
       react-reconciler: 0.31.0(react@19.2.7)
@@ -4794,15 +4814,15 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
-  '@types/react-dom@19.2.3(@types/react@19.2.14)':
+  '@types/react-dom@19.2.3(@types/react@19.2.17)':
     dependencies:
-      '@types/react': 19.2.14
+      '@types/react': 19.2.17
 
-  '@types/react-reconciler@0.28.9(@types/react@19.2.14)':
+  '@types/react-reconciler@0.28.9(@types/react@19.2.17)':
     dependencies:
-      '@types/react': 19.2.14
+      '@types/react': 19.2.17
 
-  '@types/react@19.2.14':
+  '@types/react@19.2.17':
     dependencies:
       csstype: 3.2.3
 
@@ -5879,9 +5899,9 @@ snapshots:
       sha.js: 2.4.12
       simple-get: 4.0.1
 
-  its-fine@2.0.0(@types/react@19.2.14)(react@19.2.7):
+  its-fine@2.0.0(@types/react@19.2.17)(react@19.2.7):
     dependencies:
-      '@types/react-reconciler': 0.28.9(@types/react@19.2.14)
+      '@types/react-reconciler': 0.28.9(@types/react@19.2.17)
       react: 19.2.7
     transitivePeerDependencies:
       - '@types/react'
